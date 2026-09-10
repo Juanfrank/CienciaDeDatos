@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "data-contracts-server",
+  "projectType": "library",
+  "sourceRoot": "packages/data-contracts/server/src",
+  "tags": [
+    "type:server-data",
+    "scope:server"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint packages/data-contracts/server --max-warnings 0"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --dir packages/data-contracts/server --passWithNoTests"
+      }
+    }
+  }
+}

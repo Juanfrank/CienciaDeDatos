@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["apps/**/*.ts", "packages/**/*.ts", "tools/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".nx",
+    "apps/modules/modulo-ejemplo/src/__boundary-fixture__/**"
+  ]
+}

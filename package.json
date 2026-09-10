@@ -1,0 +1,32 @@
+{
+  "name": "@app/capa-visualizacion",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/shell",
+    "apps/cache-populator",
+    "apps/modules/*",
+    "packages/*",
+    "packages/data-contracts/*"
+  ],
+  "description": "Capa de visualizacion institucional sobre Azure App Service",
+  "license": "UNLICENSED",
+  "scripts": {
+    "lint": "nx run-many -t lint",
+    "test": "nx run-many -t test",
+    "typecheck": "tsc -b --pretty",
+    "verify:boundaries": "bash tools/verify-module-boundaries.sh"
+  },
+  "devDependencies": {
+    "@nx/eslint": "^23.2.1",
+    "@nx/eslint-plugin": "^23.2.1",
+    "@nx/js": "^23.2.1",
+    "@types/node": "^22.20.2",
+    "eslint": "^9.39.5",
+    "jiti": "^2.7.0",
+    "nx": "^23.2.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.0"
+  }
+}

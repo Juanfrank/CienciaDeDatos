@@ -1,0 +1,24 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "shell",
+  "projectType": "application",
+  "sourceRoot": "apps/shell/src",
+  "tags": [
+    "type:app",
+    "scope:shell"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint apps/shell --max-warnings 0 --ignore-pattern '**/__boundary-fixture__/**'"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --dir apps/shell --passWithNoTests"
+      }
+    }
+  }
+}

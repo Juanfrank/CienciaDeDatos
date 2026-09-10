@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "modulo-ejemplo",
+  "projectType": "library",
+  "sourceRoot": "apps/modules/modulo-ejemplo/src",
+  "tags": [
+    "type:module",
+    "scope:module"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint apps/modules/modulo-ejemplo --max-warnings 0 --ignore-pattern '**/__boundary-fixture__/**'"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --dir apps/modules/modulo-ejemplo --passWithNoTests"
+      }
+    }
+  }
+}

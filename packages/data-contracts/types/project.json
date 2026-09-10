@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "data-contracts",
+  "projectType": "library",
+  "sourceRoot": "packages/data-contracts/types/src",
+  "tags": [
+    "type:contract-types",
+    "scope:shared"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint packages/data-contracts/types --max-warnings 0"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --dir packages/data-contracts/types --passWithNoTests"
+      }
+    }
+  }
+}

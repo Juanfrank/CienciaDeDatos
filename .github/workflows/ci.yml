@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Un push nuevo sobre la misma rama cancela la ejecucion anterior.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificacion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # nx affected necesita historia para comparar contra la base.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # En PR solo se construye y prueba lo afectado (seccion 3.1); en main, todo.
+      - name: Lint y pruebas de lo afectado
+        if: github.event_name == 'pull_request'
+        run: npx nx affected -t lint test --base=origin/${{ github.base_ref }}
+
+      - name: Lint y pruebas de todo
+        if: github.event_name != 'pull_request'
+        run: npx nx run-many -t lint test
+
+      # Comprueba que el limite type:module -> type:server-data sigue siendo un error.
+      # Es la garantia del criterio de aceptacion de la seccion 9 sobre el principio 2.
+      - name: Limites de dependencia entre modulos
+        run: npm run verify:boundaries
