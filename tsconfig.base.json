@@ -42,6 +42,9 @@
       ],
       "@app/identity-db": [
         "packages/identity-db/src/index.ts"
+      ],
+      "@app/observability": [
+        "packages/observability/src/index.ts"
       ]
     }
   },

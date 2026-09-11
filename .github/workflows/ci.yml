@@ -59,16 +59,8 @@ jobs:
             https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
           chmod +x /usr/local/bin/bicep
 
-      # --verbose hace que una advertencia rompa el build. Importa: una propiedad mal ubicada
-      # en Bicep no falla el despliegue, se ignora en silencio.
+      # Una advertencia rompe el build: una propiedad mal ubicada en Bicep no falla el
+      # despliegue, se ignora en silencio.
       - name: Compilar plantillas
-        run: |
-          set -e
-          SALIDA=$(bicep build infra/main.bicep --stdout 2>&1 >/dev/null)
-          if [ -n "$SALIDA" ]; then
-            echo "Bicep emitio advertencias:"
-            echo "$SALIDA"
-            exit 1
-          fi
-          echo "Plantillas compiladas sin advertencias."
+        run: npm run verify:infra
 
