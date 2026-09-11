@@ -14,6 +14,7 @@ const nextConfig = {
     '@app/export',
     '@app/identity-db',
     '@app/module-model',
+    '@app/nl-query',
     '@app/observability',
     '@app/ui-components',
   ],

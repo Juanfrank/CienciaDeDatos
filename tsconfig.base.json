@@ -54,6 +54,9 @@
       ],
       "@app/alerts": [
         "packages/alerts/src/index.ts"
+      ],
+      "@app/nl-query": [
+        "packages/nl-query/src/index.ts"
       ]
     }
   },

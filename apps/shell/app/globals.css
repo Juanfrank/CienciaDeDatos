@@ -682,3 +682,19 @@ tr.es-ampliacion { background: #fdf6ec; }
   background: var(--color-surfaceMuted);
   color: var(--color-text);
 }
+
+/* Consulta en lenguaje natural. */
+.preguntar { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-md); }
+.preguntar__campo {
+  font: inherit;
+  font-size: var(--font-size-sm);
+  flex: 1 1 280px;
+  min-width: 0;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.preguntar__respuesta { flex: 1 1 100%; font-size: var(--font-size-sm); }
+.preguntar__respuesta p { margin: 0 0 var(--space-xs); }

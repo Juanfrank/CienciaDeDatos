@@ -6,6 +6,7 @@ import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
 import { CrearAviso, type ObjetoVigilable } from './CrearAviso';
 import { Exportar } from './Exportar';
 import { Incrustar } from './Incrustar';
+import { Preguntar } from './Preguntar';
 import { Marcadores } from './Marcadores';
 import { Rejilla } from './Rejilla';
 import { Segmentador } from './Segmentador';
@@ -67,6 +68,8 @@ export function VistaModulo({
 
   return (
     <>
+      {incrustado ? null : <Preguntar moduleSlug={moduleSlug} />}
+
       <div className="barra-estado">
         <span
           className={`insignia ${provenance.isPersonalized ? 'insignia--personalizada' : 'insignia--oficial'}`}
