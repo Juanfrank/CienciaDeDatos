@@ -1,13 +1,28 @@
 /**
- * Job de poblacion de cache (seccion 6.4).
+ * Job de poblacion de cache — seccion 6.4.
  *
- * MARCADOR DE POSICION. Se implementa en el Entregable B.5.
+ * UNICO proyecto del monorepo autorizado a importar `@app/data-contracts-server`, y por tanto el
+ * unico que invoca IDataConnector.query(). Esa exclusividad la hace cumplir la regla de limites
+ * de dependencia (`type:job`), no una convencion, y se comprueba en cada CI con
+ * `npm run verify:boundaries`.
  *
- * Es el UNICO proyecto del monorepo autorizado a importar `@app/data-contracts-server` y,
- * por tanto, el unico que invoca IDataConnector.query() (principio 2). Cuando se llene:
- *  - Timer Trigger que recorre el registro de datasets, cada uno con su propia recurrencia.
- *  - Queue Trigger para la repoblacion dirigida que origina el webhook de la seccion 4.8.
- *  - Refresco espaciado del SchemaDescriptor cacheado.
- *  - Ante fallo de la fuente, conserva la ultima version valida y registra en App Insights.
+ * Corre desacoplado del ciclo de vida de cualquier solicitud HTTP: la persona usuaria nunca
+ * espera a que esto termine, lee de lo que ya este poblado.
  */
-export const PENDIENTE_DE_IMPLEMENTACION = 'Entregable B.5 — Fase de cimiento' as const;
+export {
+  SCHEMA_CACHE_KEY,
+  populate,
+  refreshSchema,
+  repopulateTargeted,
+  type PopulateOptions,
+  type PopulateResult,
+  type PopulationSecurityContext,
+} from './populate';
+export {
+  CronParseError,
+  isDue,
+  matchesCron,
+  parseCron,
+  type CronFields,
+} from './schedule';
+export { runScheduledCycle, type ScheduledCycleOptions } from './runCycle';

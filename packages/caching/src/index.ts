@@ -21,6 +21,7 @@ export {
   type ReadResult,
   type ReadStatus,
 } from './CachedDatasetReader';
+export { FileCacheStore, type FileCacheStoreOptions } from './FileCacheStore';
 export {
   CacheStoreUnavailableError,
   type CacheEntry,
