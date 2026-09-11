@@ -7,7 +7,15 @@ import {
   type GridItem,
   type ModuleDefinition,
 } from './ModuleDefinition';
-import { GRID_COLUMNS, findFreeSlot, layoutForBreakpoint, validateLayout } from './grid';
+import {
+  GRID_COLUMNS,
+  findFreeSlot,
+  layoutForBreakpoint,
+  layoutsForAllBreakpoints,
+  readingOrder,
+  rowSpanForBreakpoint,
+  validateLayout,
+} from './grid';
 import {
   applyPersonalization,
   assertPersonalizationIsPresentationOnly,
@@ -123,6 +131,35 @@ describe('responsividad: una sola disposicion guardada', () => {
         expect(i.position.x + i.position.w).toBeLessThanOrEqual(columnasBp);
       }
     }
+  });
+});
+
+describe('las tres disposiciones salen de una sola guardada', () => {
+  const items = [
+    { id: 'a', position: { x: 0, y: 0, w: 3, h: 2 } },
+    { id: 'b', position: { x: 3, y: 0, w: 9, h: 2 } },
+    { id: 'c', position: { x: 0, y: 2, w: 12, h: 4 } },
+  ];
+
+  it('layoutsForAllBreakpoints devuelve las tres indexadas por id', () => {
+    const d = layoutsForAllBreakpoints(items);
+    expect(d.escritorio.get('b')).toEqual({ x: 3, y: 0, w: 9, h: 2 });
+    expect(d.movil.get('b')?.w).toBe(1);
+    expect(d.tableta.get('b')?.w).toBeLessThan(6);
+  });
+
+  it('el orden de lectura es el mismo que usa la disposicion estrecha', () => {
+    // De ahi que el DOM se emita en ese orden: es lo que hace que la colocacion automatica de
+    // CSS Grid reproduzca las tres disposiciones desde un mismo DOM.
+    const revueltos = [items[2], items[0], items[1]].filter((i) => i !== undefined);
+    expect(readingOrder(revueltos).map((i) => i.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('en una sola columna el alto lo marca el contenido, no el guardado', () => {
+    // Un alto elegido para equilibrar doce columnas, aplicado a una, deja cajas medio vacias.
+    expect(rowSpanForBreakpoint(4, 'movil')).toBeNull();
+    expect(rowSpanForBreakpoint(4, 'tableta')).toBe(4);
+    expect(rowSpanForBreakpoint(4, 'escritorio')).toBe(4);
   });
 });
 

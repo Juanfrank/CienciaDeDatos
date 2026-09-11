@@ -149,6 +149,43 @@ export function layoutForBreakpoint<T extends { id: string; position: GridPositi
   });
 }
 
+/**
+ * Alto efectivo de un objeto para un tamano de pantalla.
+ *
+ * En una sola columna el alto guardado deja de significar nada: se eligio para equilibrar una
+ * rejilla ancha, y aplicado a un movil deja cajas altas y medio vacias debajo de un grafico de
+ * tres barras. Devuelve `null` —alto marcado por el contenido— en ese caso.
+ */
+export function rowSpanForBreakpoint(h: number, breakpoint: Breakpoint): number | null {
+  return COLUMNS_BY_BREAKPOINT[breakpoint] === 1 ? null : h;
+}
+
+/**
+ * Las tres disposiciones a la vez, indexadas por id.
+ *
+ * Se calculan juntas para que el servidor pueda emitirlas todas y la eleccion la haga una media
+ * query de CSS. La alternativa —medir el ancho de la ventana al montar— pinta primero la
+ * disposicion de escritorio y la reordena despues, que en un movil es un salto visible, y ademas
+ * deja la pagina mal dispuesta si el JavaScript no llega a ejecutarse.
+ */
+export function layoutsForAllBreakpoints<T extends { id: string; position: GridPosition }>(
+  items: T[],
+): Record<Breakpoint, Map<string, GridPosition>> {
+  const porTamano = (breakpoint: Breakpoint) =>
+    new Map(layoutForBreakpoint(items, breakpoint).map((i) => [i.id, i.position]));
+
+  return {
+    movil: porTamano('movil'),
+    tableta: porTamano('tableta'),
+    escritorio: porTamano('escritorio'),
+  };
+}
+
+/** Orden de lectura de la disposicion guardada: arriba a abajo, izquierda a derecha. */
+export function readingOrder<T extends { position: GridPosition }>(items: T[]): T[] {
+  return [...items].sort((a, b) => a.position.y - b.position.y || a.position.x - b.position.x);
+}
+
 /** Primera posicion libre para insertar un objeto nuevo del ancho indicado. */
 export function findFreeSlot(
   items: { position: GridPosition }[],
