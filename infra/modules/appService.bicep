@@ -128,6 +128,12 @@ resource staging 'Microsoft.Web/sites/slots@2023-12-01' = {
 // Autoescalado HORIZONTAL (5.2), disponible desde Standard sin necesidad de Premium.
 // Los umbrales son un punto de partida explicito: la seccion 5.5 exige que la prueba de carga
 // los sustituya por valores medidos antes de produccion.
+// UMBRALES PROVISIONALES, todavia sin validar con una prueba de carga.
+//
+// La seccion 5.5 pide expresamente no dejar estos valores "por defecto sin validar", asi que se
+// marcan como lo que son —un punto de partida razonable, no un resultado— en vez de dejar que
+// parezcan medidos. El procedimiento para fijarlos y la medicion local de referencia estan en
+// docs/operacion/prueba-de-carga.md. Al sustituirlos por los valores medidos, quitar este aviso.
 resource autoscale 'Microsoft.Insights/autoscalesettings@2022-10-01' = if (!reutilizaPlanExistente) {
   name: '${namePrefix}-autoscale'
   location: location

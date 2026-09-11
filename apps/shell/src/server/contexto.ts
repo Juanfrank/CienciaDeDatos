@@ -7,6 +7,7 @@ import {
   resolveEffectiveScope,
 } from '@app/access-control';
 import { CachedDatasetReader } from '@app/caching';
+import { CacheMetrics } from '@app/observability';
 import { ObjectRegistry, catalogoInicial } from '@app/ui-components';
 import { cacheL1, cacheL2 } from './almacenCompartido';
 import { gobierno } from './gobierno';
@@ -38,7 +39,27 @@ export const objectRegistry = new ObjectRegistry(catalogoInicial);
 // aqui creaba un ciclo de importacion con el gobierno.
 export { CACHE_DIR, cacheL2 } from './almacenCompartido';
 
-export const datasetReader = new CachedDatasetReader({ l1: cacheL1, l2: cacheL2 });
+/**
+ * Metricas del camino de lectura (8.3).
+ *
+ * El lector emite un evento por lectura desde B.5; hasta ahora no lo recogia nadie. Se acumulan
+ * por proceso y se exponen en /health: en un App Service con varias instancias, cada una
+ * reporta lo suyo y el agregado lo hace Application Insights.
+ */
+export const metricasDeCache = new CacheMetrics();
+
+export const datasetReader = new CachedDatasetReader({
+  l1: cacheL1,
+  l2: cacheL2,
+  onRead: (evento) =>
+    metricasDeCache.registrar({
+      datasetId: evento.datasetId,
+      status: evento.status,
+      ...(evento.servedFrom ? { servedFrom: evento.servedFrom } : {}),
+      stale: evento.stale,
+      ...(evento.ageMs !== undefined ? { ageMs: evento.ageMs } : {}),
+    }),
+});
 
 /** Organizacion general vigente (4.1.1). */
 export async function getGeneralTree(): Promise<NavNode[]> {

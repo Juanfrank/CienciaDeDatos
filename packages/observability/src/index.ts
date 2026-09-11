@@ -15,6 +15,11 @@ export {
   type GovernedQueryLog,
 } from './auditEvents';
 export {
+  CacheMetrics,
+  type LecturaDeCache,
+  type ResumenDeCache,
+} from './cacheMetrics';
+export {
   buildHealthReport,
   type HealthCheckResult,
   type HealthProbeInput,

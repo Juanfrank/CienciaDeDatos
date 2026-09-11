@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { POPULATOR_HEARTBEAT_KEY, type PopulatorHeartbeat, buildHealthReport } from '@app/observability';
-import { CONNECTOR_KIND, cacheL2 } from '../../src/server/contexto';
+import { CONNECTOR_KIND, cacheL2, metricasDeCache } from '../../src/server/contexto';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,7 +30,18 @@ export async function GET() {
     heartbeat,
   });
 
-  return NextResponse.json(informe, {
-    status: informe.status === 'caido' ? 503 : 200,
-  });
+  return NextResponse.json(
+    {
+      ...informe,
+      /**
+       * Metricas del camino de lectura (8.3), ACUMULADAS POR ESTA INSTANCIA.
+       *
+       * Van aqui y no en un endpoint propio porque es el sitio que ya consulta quien opera, y
+       * porque con varias instancias lo util es precisamente ver la de cada una: una sola
+       * sirviendo degradado se pierde en cualquier agregado.
+       */
+      cache: { instancia: process.pid, ...metricasDeCache.resumen() },
+    },
+    { status: informe.status === 'caido' ? 503 : 200 },
+  );
 }
