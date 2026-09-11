@@ -17,10 +17,10 @@ export async function GET(request: Request) {
   const teamId = url.searchParams.get('teamId');
   const moduleId = url.searchParams.get('moduleId');
 
-  return conAdmin(() => {
+  return conAdmin(async () => {
     if (!userId || !teamId || !moduleId) {
       throw new AdminError('Se requieren userId, teamId y moduleId.', 400);
     }
-    return quienVeQue(userId, teamId, moduleId);
+    return await quienVeQue(userId, teamId, moduleId);
   });
 }

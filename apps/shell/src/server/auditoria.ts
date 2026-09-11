@@ -1,6 +1,7 @@
 import type { ConfigChangeLog } from '@app/observability';
 import { assertConfigChangeIsAuditable } from '@app/observability';
 import type { TreeAuditEvent } from '@app/access-control';
+import { CLAVE_AUDITORIA, escribir, leerLista } from './almacenCompartido';
 
 /**
  * Registro de auditoria de configuracion — secciones 4.10.7 y 7.
@@ -12,8 +13,14 @@ import type { TreeAuditEvent } from '@app/access-control';
  * indistintamente con el resto de cambios. El documento es explicito en que su numero deberia
  * tender a cero y que un numero creciente es señal de gobierno de RLS deteriorandose.
  */
-const eventos: ConfigChangeLog[] = ((globalThis as Record<string, unknown>)['__auditoria'] ??=
-  []) as ConfigChangeLog[];
+/**
+ * Los eventos viven en el almacen COMPARTIDO.
+ *
+ * Un registro de auditoria por instancia no es un registro de auditoria: quien lo consulte vera
+ * los cambios que hizo la instancia que le toco y no los de las demas, y justamente la fila que
+ * mas importa —una ampliacion de ambito— podria ser la que no aparece.
+ */
+const leerEventos = (): Promise<ConfigChangeLog[]> => leerLista<ConfigChangeLog>(CLAVE_AUDITORIA);
 
 export interface RegistrarCambioInput {
   actorId: string;
@@ -33,7 +40,7 @@ export interface RegistrarCambioInput {
  * sin justificacion. Esa funcion existia desde B.6 pero hasta ahora no guardaba nada, porque no
  * habia ninguna superficie desde la que configurar un ambito. Esta es esa superficie.
  */
-export function registrarCambio(input: RegistrarCambioInput): ConfigChangeLog {
+export async function registrarCambio(input: RegistrarCambioInput): Promise<ConfigChangeLog> {
   const evento: ConfigChangeLog = {
     kind: 'config-change',
     timestamp: new Date().toISOString(),
@@ -48,12 +55,12 @@ export function registrarCambio(input: RegistrarCambioInput): ConfigChangeLog {
   };
 
   assertConfigChangeIsAuditable(evento);
-  eventos.push(evento);
+  await escribir(CLAVE_AUDITORIA, [...(await leerEventos()), evento]);
   return evento;
 }
 
 /** Traduce un evento de dominio del arbol al formato del log de configuracion. */
-export function registrarEventoDeArbol(evento: TreeAuditEvent): ConfigChangeLog {
+export async function registrarEventoDeArbol(evento: TreeAuditEvent): Promise<ConfigChangeLog> {
   return registrarCambio({
     actorId: evento.actorId,
     entityType: 'nav-node',
@@ -91,8 +98,8 @@ export interface FiltroAuditoria {
 }
 
 /** Registro filtrable, mas reciente primero. */
-export function listarAuditoria(filtro: FiltroAuditoria = {}): ConfigChangeLog[] {
-  return eventos
+export async function listarAuditoria(filtro: FiltroAuditoria = {}): Promise<ConfigChangeLog[]> {
+  return (await leerEventos())
     .filter((e) => !filtro.entityType || e.entityType === filtro.entityType)
     .filter((e) => !filtro.actorId || e.actorId === filtro.actorId)
     .filter((e) => !filtro.soloAmpliaciones || e.isScopeExpansion)
@@ -107,11 +114,11 @@ export function listarAuditoria(filtro: FiltroAuditoria = {}): ConfigChangeLog[]
  * Metrica de salud de gobierno, no de actividad: deberia tender a cero, y una tendencia
  * creciente indica que el modelo de RLS se esta relajando por acumulacion de excepciones.
  */
-export function contarAmpliaciones(): number {
-  return eventos.filter((e) => e.isScopeExpansion).length;
+export async function contarAmpliaciones(): Promise<number> {
+  return (await leerEventos()).filter((e) => e.isScopeExpansion).length;
 }
 
 /** Solo para pruebas. */
-export function limpiarAuditoria(): void {
-  eventos.length = 0;
+export async function limpiarAuditoria(): Promise<void> {
+  await escribir(CLAVE_AUDITORIA, []);
 }

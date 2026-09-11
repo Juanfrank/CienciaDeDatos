@@ -16,7 +16,7 @@ export async function conAdmin<T>(
 ): Promise<NextResponse> {
   let actor: Actor;
   try {
-    actor = assertAdmin(await obtenerSesion());
+    actor = await assertAdmin(await obtenerSesion());
   } catch (error) {
     if (error instanceof AdminError) {
       return NextResponse.json({ error: error.message, detail: error.detail }, { status: error.status });

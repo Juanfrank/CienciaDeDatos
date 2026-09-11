@@ -48,13 +48,22 @@ export class FileCacheStore implements ICacheStore {
     }
   }
 
+  /** Contador de escrituras del proceso, para que dos simultaneas no compartan temporal. */
+  private static escrituras = 0;
+
   async set<T>(key: string, entry: CacheEntry<T>): Promise<void> {
     const ruta = this.pathFor(key);
     try {
       await mkdir(dirname(ruta), { recursive: true });
       // Escritura atomica: el servidor puede estar leyendo mientras el job escribe, y un JSON
       // a medias se leeria como corrupto.
-      const temporal = `${ruta}.${process.pid}.tmp`;
+      //
+      // El nombre temporal lleva un contador ademas del pid. Con solo el pid, dos escrituras
+      // simultaneas de la MISMA clave dentro del mismo proceso comparten archivo temporal: la
+      // primera lo renombra y la segunda falla con ENOENT. Ocurre en cuanto dos peticiones
+      // concurrentes escriben lo mismo, y se manifiesta como un store "no disponible" que no
+      // tiene nada que ver con el disco.
+      const temporal = `${ruta}.${process.pid}.${++FileCacheStore.escrituras}.tmp`;
       await writeFile(temporal, JSON.stringify(entry), 'utf8');
       const { rename } = await import('node:fs/promises');
       await rename(temporal, ruta);

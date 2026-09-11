@@ -17,11 +17,11 @@ export default async function PaginaAuditoria({
   const soloAmpliaciones = query['soloAmpliaciones'] === '1';
   const soloMovimientos = query['soloMovimientos'] === '1';
 
-  const eventos = listarAuditoria({
+  const eventos = await listarAuditoria({
     ...(soloAmpliaciones ? { soloAmpliaciones: true } : {}),
     ...(soloMovimientos ? { soloMovimientos: true } : {}),
   });
-  const ampliaciones = contarAmpliaciones();
+  const ampliaciones = await contarAmpliaciones();
 
   return (
     <section>

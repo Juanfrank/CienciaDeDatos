@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     return {
-      scope: guardarAmbito({
+      scope: await guardarAmbito({
         actor,
         destino: cuerpo.destino,
         scope: cuerpo.scope,

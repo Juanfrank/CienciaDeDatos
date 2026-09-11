@@ -28,10 +28,10 @@ export default async function PaginaEquipos() {
         y la estructura nunca diverjan.
       </p>
       <EditorDeEquipos
-        equipos={listTeams()}
-        nodos={aplanar(getGeneralTree())}
-        usuarios={listUsers().map((u) => u.userId)}
-        paquetes={gobierno.listPackages().map((p) => ({ id: p.id, name: p.name }))}
+        equipos={await listTeams()}
+        nodos={aplanar(await getGeneralTree())}
+        usuarios={(await listUsers()).map((u) => u.userId)}
+        paquetes={(await gobierno.listPackages()).map((p) => ({ id: p.id, name: p.name }))}
       />
     </section>
   );

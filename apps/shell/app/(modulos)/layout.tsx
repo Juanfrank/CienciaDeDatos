@@ -18,8 +18,8 @@ import { obtenerSesion } from '../../src/server/sesion';
  */
 export default async function ModulosLayout({ children }: { children: React.ReactNode }) {
   const sesion = await obtenerSesion();
-  const equipo = findTeam(sesion.activeTeamId);
-  const navegacion = navigationFor(sesion.activeTeamId);
+  const equipo = await findTeam(sesion.activeTeamId);
+  const navegacion = await navigationFor(sesion.activeTeamId);
 
   return (
     <div className="cuerpo">

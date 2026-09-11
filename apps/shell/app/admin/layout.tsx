@@ -24,7 +24,7 @@ const SECCIONES = [
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const sesion = await obtenerSesion();
 
-  if (!esAdministrador(sesion.userId)) {
+  if (!(await esAdministrador(sesion.userId))) {
     // Sin permiso no se dibuja nada del panel. Se redirige a una ruta FUERA de este layout,
     // porque redirigir a una ruta de dentro entraria en bucle.
     //

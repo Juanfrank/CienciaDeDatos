@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 /** Marcadores visibles: los propios y los compartidos con el equipo activo (4.4). */
 export async function GET() {
   const sesion = await obtenerSesion();
-  return NextResponse.json({ marcadores: listarMarcadores(sesion.userId, sesion.activeTeamId) });
+  return NextResponse.json({ marcadores: await listarMarcadores(sesion.userId, sesion.activeTeamId) });
 }
 
 /**
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Se requieren name y moduleSlug.' }, { status: 400 });
   }
 
-  const marcador = guardarMarcador(
+  const marcador = await guardarMarcador(
     captureBookmark({
       id: crypto.randomUUID(),
       name: cuerpo.name.trim(),
@@ -53,7 +53,7 @@ export async function DELETE(request: Request) {
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Se requiere id.' }, { status: 400 });
 
-  const borrado = borrarMarcador(id, sesion.userId);
+  const borrado = await borrarMarcador(id, sesion.userId);
   return borrado
     ? NextResponse.json({ borrado: id })
     : NextResponse.json({ error: 'No existe o no es suyo.' }, { status: 404 });

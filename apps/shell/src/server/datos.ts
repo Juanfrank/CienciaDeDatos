@@ -68,10 +68,10 @@ export async function cargarModulo(input: {
   //
   // Sin esto, un modulo que existe en la organizacion general pero que el equipo NO tiene entre
   // sus grantedNodes se renderizaria con el ambito por defecto del equipo, que es una fuga.
-  const team = findTeam(teamId);
-  if (!team || !canTeamAccessModule(getGeneralTree(), team, module.moduleId)) return null;
+  const team = await findTeam(teamId);
+  if (!team || !canTeamAccessModule(await getGeneralTree(), team, module.moduleId)) return null;
 
-  const resolucion = scopeFor(userId, teamId, module.moduleId);
+  const resolucion = await scopeFor(userId, teamId, module.moduleId);
   // Sin ambito resoluble, el modulo no existe para esta persona. Resultado vacio y explicito,
   // nunca un error que revele que existe algo fuera de su alcance (4.11).
   const scope: AccessScope = resolucion?.scope ?? { restrictions: [{ dimension: { table: '', field: '' }, allowedValues: [] }] };
@@ -149,7 +149,7 @@ export async function cargarModulo(input: {
 
 /** Diagnosticos del modulo para el editor, con las columnas realmente presentes en el cache. */
 export async function diagnosticarModulo(module: ModuleDefinition, userId: string, teamId: string) {
-  const resolucion = scopeFor(userId, teamId, module.moduleId);
+  const resolucion = await scopeFor(userId, teamId, module.moduleId);
   if (!resolucion) return null;
 
   const columnsByDataset: Record<string, string[]> = {};

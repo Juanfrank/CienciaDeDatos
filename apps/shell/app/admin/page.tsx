@@ -6,10 +6,10 @@ export const dynamic = 'force-dynamic';
 
 /** Resumen del estado de gobierno. */
 export default async function AdminInicio() {
-  const arbol = getManagedTree();
-  const equipos = listTeams();
-  const ampliaciones = contarAmpliaciones();
-  const recientes = listarAuditoria().slice(0, 5);
+  const arbol = await getManagedTree();
+  const equipos = await listTeams();
+  const ampliaciones = await contarAmpliaciones();
+  const recientes = (await listarAuditoria()).slice(0, 5);
 
   const contarNodos = (nodos: typeof arbol.nodes): number =>
     nodos.reduce((n, nodo) => n + 1 + (nodo.type === 'folder' ? contarNodos(nodo.children) : 0), 0);
@@ -20,7 +20,7 @@ export default async function AdminInicio() {
         <Resumen etiqueta="Nodos en la organizacion general" valor={contarNodos(arbol.nodes)} />
         <Resumen etiqueta="En papelera" valor={arbol.trash.length} />
         <Resumen etiqueta="Equipos" valor={equipos.length} />
-        <Resumen etiqueta="Personas" valor={listUsers().length} />
+        <Resumen etiqueta="Personas" valor={(await listUsers()).length} />
         <Resumen
           etiqueta="Ampliaciones de ambito vigentes"
           valor={ampliaciones}

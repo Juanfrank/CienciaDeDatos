@@ -24,6 +24,8 @@ export default defineConfig({
   },
   test: {
     include: ['**/*.spec.ts'],
+    // Aisla el estado compartido de la aplicacion: ver vitest.setup.mts.
+    setupFiles: ['./vitest.setup.mts'],
     // Las pruebas de punta a punta las ejecuta Playwright, no vitest: necesitan un navegador
     // y el servidor levantado. Se excluyen aqui para que `npm test` siga siendo rapido.
     exclude: [

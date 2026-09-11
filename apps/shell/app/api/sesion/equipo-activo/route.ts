@@ -21,20 +21,20 @@ export async function POST(request: Request) {
   let actualizada = sesion;
 
   if (cuerpo.userId) {
-    const cambiada = cambiarUsuario(sesion.sessionId, cuerpo.userId);
+    const cambiada = await cambiarUsuario(sesion.sessionId, cuerpo.userId);
     if (!cambiada) return NextResponse.json({ error: 'Sesion no valida.' }, { status: 401 });
     actualizada = cambiada;
   }
 
   if (cuerpo.teamId) {
-    const permitidos = teamsOf(actualizada.userId).map((t) => t.id);
+    const permitidos = (await teamsOf(actualizada.userId)).map((t) => t.id);
     if (!permitidos.includes(cuerpo.teamId)) {
       return NextResponse.json(
         { error: 'No pertenece a ese equipo.' },
         { status: 403 },
       );
     }
-    const cambiada = cambiarEquipoActivo(actualizada.sessionId, cuerpo.teamId);
+    const cambiada = await cambiarEquipoActivo(actualizada.sessionId, cuerpo.teamId);
     if (!cambiada) return NextResponse.json({ error: 'Sesion no valida.' }, { status: 401 });
     actualizada = cambiada;
   }

@@ -22,9 +22,9 @@ export default async function PaginaQuienVeQue() {
         despues.
       </p>
       <QuienVeQue
-        usuarios={listUsers().map((u) => u.userId)}
-        equipos={listTeams().map((t) => ({ id: t.id, name: t.name }))}
-        modulos={modulosDelArbol(getGeneralTree())}
+        usuarios={(await listUsers()).map((u) => u.userId)}
+        equipos={(await listTeams()).map((t) => ({ id: t.id, name: t.name }))}
+        modulos={modulosDelArbol(await getGeneralTree())}
       />
     </section>
   );

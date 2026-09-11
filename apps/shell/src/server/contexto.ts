@@ -1,4 +1,3 @@
-import { join } from 'node:path';
 import {
   type GovernedUser,
   type ManagedTree,
@@ -7,8 +6,9 @@ import {
   buildNavigationView,
   resolveEffectiveScope,
 } from '@app/access-control';
-import { CachedDatasetReader, FileCacheStore, InMemoryCacheStore } from '@app/caching';
+import { CachedDatasetReader } from '@app/caching';
 import { ObjectRegistry, catalogoInicial } from '@app/ui-components';
+import { cacheL1, cacheL2 } from './almacenCompartido';
 import { gobierno } from './gobierno';
 
 /**
@@ -23,63 +23,56 @@ import { gobierno } from './gobierno';
  * shell no puede instanciar un conector —la regla de limites lo prohibe— porque el camino de
  * lectura de una solicitud de usuario se sirve exclusivamente desde el cache (6.3).
  *
- * Todo lo relativo al gobierno se expone como FUNCION, no como constante: el panel de
+ * Todo lo relativo al gobierno se expone como FUNCION ASINCRONA, no como constante: el panel de
  * administracion escribe, y una constante calculada al cargar el modulo devolveria para siempre
- * la configuracion que habia en ese instante.
+ * la configuracion que habia en ese instante. Asincrona porque el gobierno vive en un almacen
+ * compartido entre instancias —y en produccion, en la base de identidad—, no en este proceso.
  */
-
-/** Directorio del cache L2, compartido con el job de poblacion. */
-export const CACHE_DIR = process.env['CACHE_DIR'] ?? join(process.cwd(), '.cache-datos');
 
 /** Conector configurado como activo. En produccion lo resuelve Azure App Configuration (2.2). */
 export const CONNECTOR_KIND = process.env['DATA_CONNECTOR'] ?? 'mock';
 
 export const objectRegistry = new ObjectRegistry(catalogoInicial);
 
-/**
- * L1 por proceso con TTL corto, L2 en disco.
- *
- * L2 es un archivo y no memoria porque el job de poblacion corre en OTRO proceso: con un L2 en
- * memoria el shell nunca veria lo que el job escribe.
- */
-const l1 = new InMemoryCacheStore({ ttlMs: 5_000 });
-const l2 = new FileCacheStore({ directory: CACHE_DIR });
+// El store y su directorio viven en `almacenCompartido`, que no depende de nadie: ponerlos
+// aqui creaba un ciclo de importacion con el gobierno.
+export { CACHE_DIR, cacheL2 } from './almacenCompartido';
 
-export const cacheL2 = l2;
-export const datasetReader = new CachedDatasetReader({ l1, l2 });
+export const datasetReader = new CachedDatasetReader({ l1: cacheL1, l2: cacheL2 });
 
 /** Organizacion general vigente (4.1.1). */
-export function getGeneralTree(): NavNode[] {
-  return gobierno.getTree().nodes;
+export async function getGeneralTree(): Promise<NavNode[]> {
+  return (await gobierno.getTree()).nodes;
 }
 
-export function getManagedTree(): ManagedTree {
+export async function getManagedTree(): Promise<ManagedTree> {
   return gobierno.getTree();
 }
 
-export function listTeams(): Team[] {
+export async function listTeams(): Promise<Team[]> {
   return gobierno.listTeams();
 }
 
-export function findTeam(teamId: string): Team | undefined {
+export async function findTeam(teamId: string): Promise<Team | undefined> {
   return gobierno.getTeam(teamId);
 }
 
-export function listUsers(): GovernedUser[] {
+export async function listUsers(): Promise<GovernedUser[]> {
   return gobierno.listUsers();
 }
 
-export function findUser(userId: string): GovernedUser | undefined {
+export async function findUser(userId: string): Promise<GovernedUser | undefined> {
   return gobierno.getUser(userId);
 }
 
 /** Equipos a los que pertenece una persona, para el selector de espacio de trabajo (4.10.2). */
-export function teamsOf(userId: string): Team[] {
-  return gobierno.listTeams().filter((t) => t.members.some((m) => m.userId === userId));
+export async function teamsOf(userId: string): Promise<Team[]> {
+  return (await gobierno.listTeams()).filter((t) => t.members.some((m) => m.userId === userId));
 }
 
-export function roleOf(userId: string, teamId: string): string {
-  return gobierno.getTeam(teamId)?.members.find((m) => m.userId === userId)?.role ?? 'visor';
+export async function roleOf(userId: string, teamId: string): Promise<string> {
+  const equipo = await gobierno.getTeam(teamId);
+  return equipo?.members.find((m) => m.userId === userId)?.role ?? 'visor';
 }
 
 /**
@@ -88,22 +81,27 @@ export function roleOf(userId: string, teamId: string): string {
  * Si el equipo tiene paquete asignado, se pasa al constructor: el paquete reagrupa, pero la
  * validacion contra grantedNodes ocurre dentro y lo no concedido no se muestra (4.10.6).
  */
-export function navigationFor(teamId: string) {
-  const team = gobierno.getTeam(teamId);
+export async function navigationFor(teamId: string) {
+  const team = await gobierno.getTeam(teamId);
   if (!team) return { tree: [], fromPackage: false, dangling: [] };
 
-  const pkg = team.assignedPackageId ? gobierno.getPackage(team.assignedPackageId) : undefined;
+  const pkg = team.assignedPackageId ? await gobierno.getPackage(team.assignedPackageId) : undefined;
   return buildNavigationView({
-    generalTree: getGeneralTree(),
+    generalTree: await getGeneralTree(),
     team,
     ...(pkg ? { pkg } : {}),
   });
 }
 
 /** Ambito efectivo para un modulo, con el equipo ACTIVO (nunca la union de todos). */
-export function scopeFor(userId: string, teamId: string, moduleId: string) {
-  const user = gobierno.getUser(userId) ?? { userId };
-  const team = gobierno.getTeam(teamId);
+export async function scopeFor(userId: string, teamId: string, moduleId: string) {
+  const user = (await gobierno.getUser(userId)) ?? { userId };
+  const team = await gobierno.getTeam(teamId);
   if (!team) return null;
-  return resolveEffectiveScope({ user, activeTeam: team, moduleId, generalTree: getGeneralTree() });
+  return resolveEffectiveScope({
+    user,
+    activeTeam: team,
+    moduleId,
+    generalTree: await getGeneralTree(),
+  });
 }

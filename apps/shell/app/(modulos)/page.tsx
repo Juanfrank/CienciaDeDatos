@@ -15,7 +15,7 @@ function primerModulo(nodos: NavNode[]): string | null {
 
 export default async function Inicio() {
   const sesion = await obtenerSesion();
-  const slug = primerModulo(navigationFor(sesion.activeTeamId).tree);
+  const slug = primerModulo((await navigationFor(sesion.activeTeamId)).tree);
 
   if (slug) redirect(`/m/${slug}`);
 

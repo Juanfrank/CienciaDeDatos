@@ -12,7 +12,7 @@ export default async function PaginaArbol() {
         ambito hereda. Mover algo aqui cambia el acceso de lo que se mueve, asi que el editor
         avisa antes de confirmarlo.
       </p>
-      <EditorDeArbol inicial={getManagedTree()} />
+      <EditorDeArbol inicial={await getManagedTree()} />
     </section>
   );
 }

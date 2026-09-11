@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 /** Organizacion general vigente, con su papelera. */
 export async function GET() {
-  return conAdmin(() => getManagedTree());
+  return conAdmin(async () => await getManagedTree());
 }
 
 /**
@@ -26,10 +26,10 @@ export async function POST(request: Request) {
 
   if (url.searchParams.get('previsualizar') === '1') {
     if (cuerpo.type !== 'mover') {
-      return conAdmin(() => ({ cambiaElAmbito: false, moduleIds: [] }));
+      return conAdmin(async () => ({ cambiaElAmbito: false, moduleIds: [] }));
     }
-    return conAdmin(() => previsualizarMovimiento(cuerpo.nodeId, cuerpo.newParentId));
+    return conAdmin(async () => await previsualizarMovimiento(cuerpo.nodeId, cuerpo.newParentId));
   }
 
-  return conAdmin((actor) => ({ arbol: ejecutarOperacionDeArbol(actor, cuerpo) }));
+  return conAdmin(async (actor) => ({ arbol: await ejecutarOperacionDeArbol(actor, cuerpo) }));
 }

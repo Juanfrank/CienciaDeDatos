@@ -15,9 +15,9 @@ export const dynamic = 'force-dynamic';
  * `buildNavigationView` no lo muestra. Esto existe para que el Administrador lo SEPA.
  */
 export default async function PaginaPaquetes() {
-  const paquetes = gobierno.listPackages();
-  const generalTree = getGeneralTree();
-  const equipos = listTeams();
+  const paquetes = await gobierno.listPackages();
+  const generalTree = await getGeneralTree();
+  const equipos = await listTeams();
 
   return (
     <section>

@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  return conAdmin(() => ({ paquetes: gobierno.listPackages() }));
+  return conAdmin(async () => ({ paquetes: await gobierno.listPackages() }));
 }
 
 /**
@@ -24,13 +24,13 @@ export async function GET() {
 export async function POST(request: Request) {
   const cuerpo = (await request.json()) as { paquete?: ModulePackage; borrar?: string };
 
-  return conAdmin((actor) => {
+  return conAdmin(async (actor) => {
     if (cuerpo.borrar) {
-      const borrado = gobierno.deletePackage(cuerpo.borrar);
+      const borrado = await gobierno.deletePackage(cuerpo.borrar);
       if (!borrado) throw new AdminError(`El paquete '${cuerpo.borrar}' no existe.`, 404);
       return { borrado: cuerpo.borrar };
     }
     if (!cuerpo.paquete) throw new AdminError('Falta el paquete.', 400);
-    return guardarPaquete(actor, cuerpo.paquete);
+    return await guardarPaquete(actor, cuerpo.paquete);
   });
 }

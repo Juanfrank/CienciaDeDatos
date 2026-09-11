@@ -1,3 +1,4 @@
+import { CLAVE_GOBIERNO, escribir, leer } from './almacenCompartido';
 import type {
   GovernedUser,
   ManagedTree,
@@ -27,28 +28,37 @@ import {
  * El panel de administracion ESCRIBE configuracion (arbol, equipos, ambitos, paquetes), asi que
  * el gobierno ya no puede ser un puñado de constantes derivadas del seed.
  *
- * Se define como PUERTO. La implementacion en memoria de abajo es la de desarrollo; el adaptador
- * sobre Azure SQL implementa esta misma interfaz y entra sin tocar ni una linea del panel. El
- * esquema Prisma ya esta validado y los mapeadores fila -> dominio ya existen: lo unico que falta
- * cuando haya base es otra implementacion de esto.
+ * Se define como PUERTO, y es ASINCRONO. Lo era todo menos eso hasta ahora, y ese era el error:
+ * un puerto sincrono NO LO PUEDE IMPLEMENTAR una base de datos, asi que el adaptador de Azure SQL
+ * que este archivo prometia era imposible de escribir sin cambiar antes la firma y con ella todos
+ * los sitios que la usan. Hacerlo ahora es pagar esa deuda en el momento en que aparece el
+ * segundo motivo para hacerlo: el estado tiene que dejar de ser del proceso (seccion 9).
  */
 export interface GovernanceStore {
-  getTree(): ManagedTree;
-  setTree(tree: ManagedTree): void;
+  getTree(): Promise<ManagedTree>;
+  setTree(tree: ManagedTree): Promise<void>;
 
-  listTeams(): Team[];
-  getTeam(teamId: string): Team | undefined;
-  upsertTeam(team: Team): void;
-  deleteTeam(teamId: string): boolean;
+  listTeams(): Promise<Team[]>;
+  getTeam(teamId: string): Promise<Team | undefined>;
+  upsertTeam(team: Team): Promise<void>;
+  deleteTeam(teamId: string): Promise<boolean>;
 
-  listPackages(): ModulePackage[];
-  getPackage(packageId: string): ModulePackage | undefined;
-  upsertPackage(pkg: ModulePackage): void;
-  deletePackage(packageId: string): boolean;
+  listPackages(): Promise<ModulePackage[]>;
+  getPackage(packageId: string): Promise<ModulePackage | undefined>;
+  upsertPackage(pkg: ModulePackage): Promise<void>;
+  deletePackage(packageId: string): Promise<boolean>;
 
-  listUsers(): GovernedUser[];
-  getUser(userId: string): GovernedUser | undefined;
-  upsertUser(user: GovernedUser): void;
+  listUsers(): Promise<GovernedUser[]>;
+  getUser(userId: string): Promise<GovernedUser | undefined>;
+  upsertUser(user: GovernedUser): Promise<void>;
+}
+
+/** Instantanea completa del gobierno, tal como viaja al almacen compartido. */
+export interface InstantaneaDeGobierno {
+  tree: ManagedTree;
+  teams: Team[];
+  users: GovernedUser[];
+  packages: ModulePackage[];
 }
 
 /** Estado inicial, reconstruido desde el seed con los mapeadores reales. */
@@ -74,93 +84,117 @@ export function estadoInicial(): {
 /** Copia profunda. Evita que quien lee pueda mutar el estado del almacen por accidente. */
 const clonar = <T>(valor: T): T => JSON.parse(JSON.stringify(valor)) as T;
 
-export class InMemoryGovernanceStore implements GovernanceStore {
-  private tree: ManagedTree;
-  private readonly teams = new Map<string, Team>();
-  private readonly users = new Map<string, GovernedUser>();
-  private readonly packages = new Map<string, ModulePackage>();
-
-  constructor() {
-    const inicial = estadoInicial();
-    this.tree = inicial.tree;
-    for (const t of inicial.teams) this.teams.set(t.id, t);
-    for (const u of inicial.users) this.users.set(u.userId, u);
-    for (const p of inicial.packages) this.packages.set(p.id, p);
+/**
+ * Adaptador sobre el almacen compartido.
+ *
+ * Guarda UNA instantanea completa. Es lo correcto para el tamano real de este dato —un arbol de
+ * carpetas, unos equipos y unos usuarios— y para lo poco que se escribe: solo el Administrador,
+ * y solo cuando cambia la configuracion. Partirlo por entidad complicaria las lecturas, que son
+ * casi todas, para optimizar unas escrituras que casi nunca ocurren.
+ *
+ * Limite conocido: dos escrituras simultaneas del panel pueden pisarse, porque `ICacheStore` no
+ * ofrece lectura-modificacion-escritura atomica. En la base de identidad lo resuelve una
+ * transaccion; aqui se acota a que el panel lo usa un Administrador cada vez, y queda escrito
+ * para que nadie lo confunda con un almacen transaccional.
+ */
+export class StoreGovernanceRepository implements GovernanceStore {
+  private async instantanea(): Promise<InstantaneaDeGobierno> {
+    const guardada = await leer<InstantaneaDeGobierno>(CLAVE_GOBIERNO);
+    // Sin nada guardado todavia se devuelve el estado sembrado SIN persistirlo. Escribir al
+    // leer metia una escritura en el camino de lectura —el mas concurrido— y, con varias
+    // peticiones a la vez, varias escrituras simultaneas de la misma clave. El seed es
+    // determinista, asi que todas las instancias ven lo mismo hasta que alguien escriba.
+    return guardada ?? estadoInicial();
   }
 
-  getTree(): ManagedTree {
-    return clonar(this.tree);
-  }
-  setTree(tree: ManagedTree): void {
-    this.tree = clonar(tree);
+  private async guardar(cambio: (actual: InstantaneaDeGobierno) => InstantaneaDeGobierno): Promise<void> {
+    await escribir(CLAVE_GOBIERNO, cambio(await this.instantanea()));
   }
 
-  listTeams(): Team[] {
-    return [...this.teams.values()].map(clonar);
+  async getTree(): Promise<ManagedTree> {
+    return (await this.instantanea()).tree;
   }
-  getTeam(teamId: string): Team | undefined {
-    const t = this.teams.get(teamId);
-    return t ? clonar(t) : undefined;
-  }
-  upsertTeam(team: Team): void {
-    this.teams.set(team.id, clonar(team));
-  }
-  deleteTeam(teamId: string): boolean {
-    return this.teams.delete(teamId);
+  async setTree(tree: ManagedTree): Promise<void> {
+    await this.guardar((actual) => ({ ...actual, tree: clonar(tree) }));
   }
 
-  listPackages(): ModulePackage[] {
-    return [...this.packages.values()].map(clonar);
+  async listTeams(): Promise<Team[]> {
+    return (await this.instantanea()).teams;
   }
-  getPackage(packageId: string): ModulePackage | undefined {
-    const p = this.packages.get(packageId);
-    return p ? clonar(p) : undefined;
+  async getTeam(teamId: string): Promise<Team | undefined> {
+    return (await this.listTeams()).find((t) => t.id === teamId);
   }
-  upsertPackage(pkg: ModulePackage): void {
-    this.packages.set(pkg.id, clonar(pkg));
+  async upsertTeam(team: Team): Promise<void> {
+    await this.guardar((actual) => ({
+      ...actual,
+      teams: [...actual.teams.filter((t) => t.id !== team.id), clonar(team)],
+    }));
   }
-  deletePackage(packageId: string): boolean {
-    // Un paquete borrado deja a sus equipos sin paquete asignado: vuelven a ver la organizacion
-    // general tal cual, que es el comportamiento por defecto de 4.1.3. No se les quita acceso.
-    for (const equipo of this.teams.values()) {
-      if (equipo.assignedPackageId === packageId) {
+  async deleteTeam(teamId: string): Promise<boolean> {
+    const existe = (await this.getTeam(teamId)) !== undefined;
+    if (existe) {
+      await this.guardar((actual) => ({
+        ...actual,
+        teams: actual.teams.filter((t) => t.id !== teamId),
+      }));
+    }
+    return existe;
+  }
+
+  async listPackages(): Promise<ModulePackage[]> {
+    return (await this.instantanea()).packages;
+  }
+  async getPackage(packageId: string): Promise<ModulePackage | undefined> {
+    return (await this.listPackages()).find((p) => p.id === packageId);
+  }
+  async upsertPackage(pkg: ModulePackage): Promise<void> {
+    await this.guardar((actual) => ({
+      ...actual,
+      packages: [...actual.packages.filter((p) => p.id !== pkg.id), clonar(pkg)],
+    }));
+  }
+  async deletePackage(packageId: string): Promise<boolean> {
+    const existe = (await this.getPackage(packageId)) !== undefined;
+    if (!existe) return false;
+
+    await this.guardar((actual) => ({
+      ...actual,
+      packages: actual.packages.filter((p) => p.id !== packageId),
+      // Un paquete borrado deja a sus equipos sin paquete asignado: vuelven a ver la
+      // organizacion general tal cual (4.1.3). No se les quita acceso.
+      teams: actual.teams.map((equipo) => {
+        if (equipo.assignedPackageId !== packageId) return equipo;
         const sinPaquete = { ...equipo };
         delete sinPaquete.assignedPackageId;
-        this.teams.set(equipo.id, sinPaquete);
-      }
-    }
-    return this.packages.delete(packageId);
+        return sinPaquete;
+      }),
+    }));
+    return true;
   }
 
-  listUsers(): GovernedUser[] {
-    return [...this.users.values()].map(clonar);
+  async listUsers(): Promise<GovernedUser[]> {
+    return (await this.instantanea()).users;
   }
-  getUser(userId: string): GovernedUser | undefined {
-    const u = this.users.get(userId);
-    return u ? clonar(u) : undefined;
+  async getUser(userId: string): Promise<GovernedUser | undefined> {
+    return (await this.listUsers()).find((u) => u.userId === userId);
   }
-  upsertUser(user: GovernedUser): void {
-    this.users.set(user.userId, clonar(user));
+  async upsertUser(user: GovernedUser): Promise<void> {
+    await this.guardar((actual) => ({
+      ...actual,
+      users: [...actual.users.filter((u) => u.userId !== user.userId), clonar(user)],
+    }));
   }
 
   /** Solo para pruebas: devuelve el almacen a su estado sembrado. */
-  reset(): void {
-    const inicial = estadoInicial();
-    this.tree = inicial.tree;
-    this.teams.clear();
-    this.users.clear();
-    this.packages.clear();
-    for (const t of inicial.teams) this.teams.set(t.id, t);
-    for (const u of inicial.users) this.users.set(u.userId, u);
+  async reset(): Promise<void> {
+    await escribir(CLAVE_GOBIERNO, estadoInicial());
   }
 }
 
 /**
- * Instancia del proceso.
+ * Almacen de gobierno en uso.
  *
- * Colgada de globalThis para sobrevivir a la recarga en caliente del servidor de desarrollo: un
- * modulo recargado perderia toda la configuracion que el Administrador acabara de hacer.
+ * Ya no se cuelga de globalThis: el estado vive en el almacen compartido, asi que sobrevive por
+ * si solo a la recarga en caliente Y lo ven todas las instancias.
  */
-export const gobierno: InMemoryGovernanceStore = ((
-  globalThis as Record<string, unknown>
-)['__gobierno'] ??= new InMemoryGovernanceStore()) as InMemoryGovernanceStore;
+export const gobierno = new StoreGovernanceRepository();

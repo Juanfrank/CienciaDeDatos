@@ -21,13 +21,13 @@ function carpetas(nodos: NavNode[], acumulado: DestinoDeAmbito[] = []): DestinoD
 
 export default async function PaginaAmbitos() {
   const destinos: DestinoDeAmbito[] = [
-    ...listTeams().map((t) => ({
+    ...(await listTeams()).map((t) => ({
       tipo: 'equipo' as const,
       id: t.id,
       nombre: t.name,
       scope: t.defaultScope,
     })),
-    ...carpetas(getGeneralTree()),
+    ...carpetas(await getGeneralTree()),
   ];
 
   return (

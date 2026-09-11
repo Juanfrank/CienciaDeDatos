@@ -43,17 +43,19 @@ const variables = toCssVariables(defaultTheme);
  */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const sesion = await obtenerSesion();
-  const equipo = findTeam(sesion.activeTeamId);
+  const equipo = await findTeam(sesion.activeTeamId);
 
   // El enlace solo se dibuja para quien puede usarlo. Ocultarlo no protege nada —eso lo hace el
   // guardian del backend— pero no tiene sentido ofrecer una puerta cerrada.
-  const puedeAdministrar = esAdministrador(sesion.userId);
+  const puedeAdministrar = await esAdministrador(sesion.userId);
 
-  const equipos = teamsOf(sesion.userId).map((t) => ({
-    id: t.id,
-    name: t.name,
-    role: roleOf(sesion.userId, t.id),
-  }));
+  const equipos = await Promise.all(
+    (await teamsOf(sesion.userId)).map(async (t) => ({
+      id: t.id,
+      name: t.name,
+      role: await roleOf(sesion.userId, t.id),
+    })),
+  );
 
   return (
     <html lang="es" className={montserrat.variable}>
@@ -94,7 +96,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <SelectorDeEquipo
               equipos={equipos}
               equipoActivo={sesion.activeTeamId}
-              usuarios={listUsers().map((u) => ({ id: u.userId, name: u.userId }))}
+              usuarios={(await listUsers()).map((u) => ({ id: u.userId, name: u.userId }))}
               usuarioActivo={sesion.userId}
             />
           </div>

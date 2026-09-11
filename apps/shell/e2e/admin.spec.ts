@@ -163,7 +163,16 @@ test.describe('editor de arbol (4.1.2)', () => {
     await expect(page.getByTestId('confirmar-movimiento')).toBeVisible();
     await expect(page.getByTestId('confirmar-movimiento')).toContainText('Distrito Norte');
     await expect(page.getByTestId('confirmar-movimiento')).toContainText('Distrito Este');
-    await page.getByTestId('confirmar-movimiento-si').click();
+
+    // Se espera a que la escritura TERMINE antes de navegar. Antes el almacen era un mapa de
+    // proceso y la escritura acababa dentro del mismo tick; ahora va a disco y compartida, asi
+    // que navegar sin esperar es una carrera — la prueba pasaba por casualidad.
+    await Promise.all([
+      page.waitForResponse(
+        (r) => r.url().endsWith('/api/admin/arbol') && r.request().method() === 'POST',
+      ),
+      page.getByTestId('confirmar-movimiento-si').click(),
+    ]);
 
     // El movimiento queda registrado en la auditoria.
     await page.goto('/admin/auditoria?soloMovimientos=1');

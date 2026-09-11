@@ -16,13 +16,13 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const entityType = url.searchParams.get('entityType');
 
-  return conAdmin(() => ({
-    eventos: listarAuditoria({
+  return conAdmin(async () => ({
+    eventos: await listarAuditoria({
       ...(entityType ? { entityType: entityType as ConfigChangeLog['entityType'] } : {}),
       ...(url.searchParams.get('soloAmpliaciones') === '1' ? { soloAmpliaciones: true } : {}),
       ...(url.searchParams.get('soloMovimientos') === '1' ? { soloMovimientos: true } : {}),
       ...(url.searchParams.get('actorId') ? { actorId: url.searchParams.get('actorId') as string } : {}),
     }),
-    ampliacionesVigentes: contarAmpliaciones(),
+    ampliacionesVigentes: await contarAmpliaciones(),
   }));
 }
