@@ -105,6 +105,17 @@ test.describe('panel de administracion (4.10.8)', () => {
   }
 });
 
+test.describe('personalizacion (4.6)', () => {
+  test('el dialogo de Mi vista es accesible, con sus casillas etiquetadas', async ({ page }) => {
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId('mi-vista').click();
+    await expect(page.getByTestId('dialogo-mi-vista')).toBeVisible();
+
+    expect(await infracciones(page)).toEqual([]);
+  });
+});
+
 test.describe('editor de modulos (4.2)', () => {
   test('la lista y el editor de un modulo no tienen infracciones WCAG 2.1 AA', async ({ page }) => {
     await entrarComo(page, 'u-ana');

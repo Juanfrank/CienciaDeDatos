@@ -179,15 +179,26 @@ test.describe('la procedencia de la vista sobrevive a la exportacion (4.6)', () 
 
   test('una vista personalizada se marca tambien en el nombre del archivo', async ({ page }) => {
     await entrarComo(page, 'u-ana');
-    const estado = await exportar(page, {
-      modulo: 'casos-pendientes',
-      formato: 'csv',
-      personalizada: true,
+
+    // La procedencia ya NO se declara en la peticion: la decide el servidor mirando si esta
+    // persona tiene personalizacion de este modulo. Antes esta prueba enviaba
+    // `personalizada: true` y pasaba sin que hubiera ninguna personalizacion detras, que es
+    // exactamente el agujero que 4.6 deja abierto si la etiqueta la elige el navegador.
+    await page.request.put('/api/modulos/casos-pendientes/vista', {
+      data: { ocultos: ['kpi-ingresados'] },
     });
 
-    expect(archivoDe(estado).nombre).toContain('-vista-personalizada');
-    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
-    expect(csv).toContain('no es la vista institucional oficial');
+    try {
+      const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'csv' });
+
+      expect(archivoDe(estado).nombre).toContain('-vista-personalizada');
+      const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+      expect(csv).toContain('no es la vista institucional oficial');
+      // Y lo que se oculto no aparece en el archivo: se exporta lo que se ve.
+      expect(csv).not.toContain('Ingresados vs resueltos');
+    } finally {
+      await page.request.delete('/api/modulos/casos-pendientes/vista');
+    }
   });
 });
 

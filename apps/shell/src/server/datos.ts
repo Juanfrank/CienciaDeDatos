@@ -1,7 +1,14 @@
 import type { QueryResult, SchemaDescriptor } from '@app/data-contracts';
 import { canTeamAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
 import { SCHEMA_CACHE_KEY, type ReadResult, getDataset } from '@app/caching';
-import { type GridItem, type ModuleDefinition, findPage, validateModule } from '@app/module-model';
+import {
+  type GridItem,
+  type ModuleDefinition,
+  type UserPersonalization,
+  applyPersonalization,
+  findPage,
+  validateModule,
+} from '@app/module-model';
 import { type BindingProblem, fieldKey, validateBinding } from '@app/ui-components';
 import { cacheL2, datasetReader, findTeam, getGeneralTree, objectRegistry, scopeFor } from './contexto';
 
@@ -36,6 +43,14 @@ export interface ModuloCargado {
   generatedAt?: string;
   /** true si algo se sirvio degradado desde L1 porque L2 no respondia (6.9). */
   degraded: boolean;
+  /**
+   * true si lo que se devuelve es la vista PERSONALIZADA de esta persona y no la institucional.
+   *
+   * Viaja con los datos y no se decide en la pantalla porque 4.6 pide esa distincion "incluida
+   * al exportar/compartir": un PDF que circula por correo sin la marca es exactamente el caso
+   * que esa seccion quiere evitar, y la marca tiene que salir del mismo sitio que el contenido.
+   */
+  isPersonalized: boolean;
 }
 
 /** Filtros sin los que corresponden a las dimensiones propias del objeto. */
@@ -54,8 +69,21 @@ export async function cargarModulo(input: {
   teamId: string;
   /** Filtros pedidos por la query string, ya parseados (4.11). */
   requestedFilters: Record<string, string | string[]>;
+  /**
+   * Personalizacion de esta persona para este modulo, si la hay (4.6).
+   *
+   * Se pasa como DATO en vez de leerla aqui, y es deliberado: no todos los caminos deben
+   * aplicarla. Una alerta se evalua sobre la definicion institucional —si no, ocultar un objeto
+   * apagaria en silencio la alerta que vigila su medida—, y el vocabulario de la consulta en
+   * lenguaje natural tampoco debe encogerse porque alguien escondiera un grafico.
+   */
+  personalization?: UserPersonalization | undefined;
 }): Promise<ModuloCargado | null> {
-  const { module, userId, teamId, requestedFilters } = input;
+  const { userId, teamId, requestedFilters } = input;
+
+  // La personalizacion se aplica ANTES de resolver la pagina: puede haber ocultado objetos, y
+  // lo que no esta en la vista no se lee del cache ni viaja al navegador.
+  const { module, isPersonalized } = applyPersonalization(input.module, input.personalization);
 
   const page = findPage(module, input.pageSlug);
   if (!page) return null;
@@ -144,6 +172,7 @@ export async function cargarModulo(input: {
     appliedFilters,
     ...(masAntiguo ? { generatedAt: masAntiguo } : {}),
     degraded,
+    isPersonalized,
   };
 }
 

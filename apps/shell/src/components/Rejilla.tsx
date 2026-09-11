@@ -49,7 +49,15 @@ export function Rejilla({
         }
 
         return (
-          <div key={item.id} className="rejilla__celda" style={variables as React.CSSProperties}>
+          <div
+            key={item.id}
+            className="rejilla__celda"
+            // Identifica la celda por el id del objeto que contiene. Lo necesita cualquier
+            // prueba que hable de UN objeto concreto —que este o que no este—, y sin el habria
+            // que localizarlos por su texto, que cambia en cuanto alguien renombra un titulo.
+            data-testid={`celda-${item.id}`}
+            style={variables as React.CSSProperties}
+          >
             {children(item.id)}
           </div>
         );

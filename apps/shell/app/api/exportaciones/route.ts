@@ -48,7 +48,6 @@ export async function POST(request: Request) {
     userId: sesion.userId,
     teamId: sesion.activeTeamId,
     appliedFilters: filtros,
-    isPersonalized: cuerpo['personalizada'] === true,
   });
 
   if (!job) {

@@ -9,6 +9,7 @@ import { proyectarObjeto } from '@app/ui-components';
 import { cacheL2, objectRegistry } from './contexto';
 import { cargarModulo } from './datos';
 import { moduloVisibleParaUsuario } from './cicloDeVida';
+import { leerPersonalizacion } from './personalizacion';
 
 /**
  * Cableado de la exportacion en el shell (4.9 con la restriccion de 5.3).
@@ -39,6 +40,10 @@ export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) =
   const cargado = await cargarModulo({
     module,
     ...(request.pageSlug ? { pageSlug: request.pageSlug } : {}),
+    // La exportacion sale de lo que la persona VE: si oculto un objeto, no aparece en el
+    // archivo. Es lo que 4.6 quiere decir con que la distincion viaje al exportar — el archivo
+    // refleja la vista personalizada y lo dice en el encabezado.
+    personalization: await leerPersonalizacion(request.requestedBy, module.moduleId),
     userId: request.requestedBy,
     teamId: request.teamId,
     requestedFilters: request.appliedFilters,
@@ -94,7 +99,6 @@ export interface EncolarInput {
   userId: string;
   teamId: string;
   appliedFilters: Record<string, string[]>;
-  isPersonalized: boolean;
 }
 
 export async function encolarExportacion(input: EncolarInput) {
@@ -108,7 +112,13 @@ export async function encolarExportacion(input: EncolarInput) {
     format: input.format,
     requestedBy: input.userId,
     teamId: input.teamId,
-    provenance: describeProvenance(input.isPersonalized),
+    // La procedencia la decide el SERVIDOR, mirando si esta persona tiene personalizacion de
+    // este modulo. Venia en el cuerpo de la peticion, es decir, la elegia el navegador: bastaba
+    // enviar `personalizada: false` para que un archivo salido de una vista personalizada se
+    // presentara como la vista institucional oficial, que es justo lo que 4.6 impide.
+    provenance: describeProvenance(
+      (await leerPersonalizacion(input.userId, module.moduleId)) !== undefined,
+    ),
     appliedFilters: input.appliedFilters,
   };
 

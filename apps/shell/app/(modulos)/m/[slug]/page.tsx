@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { describeProvenance } from '@app/module-model';
+import { leerPersonalizacion } from '../../../../src/server/personalizacion';
 import { cargarModulo } from '../../../../src/server/datos';
 import { actorDe, moduloVisiblePorSlug } from '../../../../src/server/cicloDeVida';
 import { serializarObjeto } from '../../../../src/server/serializar';
@@ -39,6 +40,7 @@ export default async function PaginaModulo({
   if (!module) notFound();
   const cargado = await cargarModulo({
     module,
+    personalization: await leerPersonalizacion(sesion.userId, module.moduleId),
     ...(page?.[0] ? { pageSlug: page[0] } : {}),
     userId: sesion.userId,
     teamId: sesion.activeTeamId,
@@ -90,7 +92,7 @@ export default async function PaginaModulo({
 
       <VistaModulo
         objetos={cargado.objetos.map(serializarObjeto)}
-        provenance={describeProvenance(false)}
+        provenance={describeProvenance(cargado.isPersonalized)}
         moduleSlug={module.slug}
         pageSlug={cargado.pageSlug}
       />

@@ -40,11 +40,9 @@ const TEXTO: Record<Estado['estado'], string> = {
 export function Exportar({
   moduleSlug,
   pageSlug,
-  isPersonalized,
 }: {
   moduleSlug: string;
   pageSlug?: string;
-  isPersonalized: boolean;
 }) {
   const { searchParams } = useFiltrosDeUrl();
   const [formato, setFormato] = useState<string>('xlsx');
@@ -72,7 +70,6 @@ export function Exportar({
         pagina: pageSlug,
         formato,
         filtros,
-        personalizada: isPersonalized,
       }),
     });
 

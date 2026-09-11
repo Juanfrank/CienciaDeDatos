@@ -8,6 +8,7 @@ import { Exportar } from './Exportar';
 import { Incrustar } from './Incrustar';
 import { Preguntar } from './Preguntar';
 import { Marcadores } from './Marcadores';
+import { MiVista } from './MiVista';
 import { Rejilla } from './Rejilla';
 import { Segmentador } from './Segmentador';
 import {
@@ -84,11 +85,11 @@ export function VistaModulo({
         ) : null}
         {incrustado ? null : (
           <>
+            <MiVista moduleSlug={moduleSlug} personalizada={provenance.isPersonalized} />
             <Marcadores moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
             <Exportar
               moduleSlug={moduleSlug}
               {...(pageSlug ? { pageSlug } : {})}
-              isPersonalized={provenance.isPersonalized}
             />
             <CrearAviso
               moduleSlug={moduleSlug}

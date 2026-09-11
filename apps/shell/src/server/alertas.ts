@@ -161,7 +161,6 @@ export async function atenderSuscripciones(ahora = new Date()): Promise<Resultad
       userId: sub.ownerUserId,
       teamId: sub.teamId,
       appliedFilters: sub.filters,
-      isPersonalized: false,
     });
 
     if (!job) {

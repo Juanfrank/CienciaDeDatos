@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cargarModulo } from '../../../../src/server/datos';
 import { actorDe, moduloVisiblePorSlug } from '../../../../src/server/cicloDeVida';
+import { leerPersonalizacion } from '../../../../src/server/personalizacion';
 import { serializarObjeto } from '../../../../src/server/serializar';
 import { sinSesion } from '../../../../src/server/respuestas';
 import { obtenerSesion } from '../../../../src/server/sesion';
@@ -37,6 +38,7 @@ export async function GET(
 
   const cargado = await cargarModulo({
     module,
+    personalization: await leerPersonalizacion(sesion.userId, module.moduleId),
     userId: sesion.userId,
     teamId: sesion.activeTeamId,
     requestedFilters,
