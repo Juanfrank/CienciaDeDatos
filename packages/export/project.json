@@ -1,0 +1,17 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "export",
+  "projectType": "library",
+  "sourceRoot": "packages/export/src",
+  "tags": ["type:server", "scope:server"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "eslint packages/export --max-warnings 0" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run --dir packages/export --passWithNoTests" }
+    }
+  }
+}

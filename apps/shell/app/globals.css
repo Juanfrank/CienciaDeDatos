@@ -446,3 +446,16 @@ tr.es-ampliacion { background: #fffbeb; }
 
 .cabecera__acciones { display: flex; align-items: center; gap: var(--space-lg); flex-wrap: wrap; }
 .cabecera__titulo { text-decoration: none; color: var(--color-text); }
+
+.exportar { display: flex; align-items: center; gap: var(--space-sm); }
+.exportar__etiqueta { font-size: var(--font-size-sm); color: var(--color-textMuted); }
+.exportar__formato {
+  font: inherit;
+  font-size: var(--font-size-sm);
+  padding: 2px var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.exportar__estado { font-size: var(--font-size-sm); color: var(--color-textMuted); }

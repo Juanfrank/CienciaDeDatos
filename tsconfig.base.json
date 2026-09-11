@@ -48,6 +48,9 @@
       ],
       "@app/module-model": [
         "packages/module-model/src/index.ts"
+      ],
+      "@app/export": [
+        "packages/export/src/index.ts"
       ]
     }
   },

@@ -1,0 +1,69 @@
+import { NextResponse } from 'next/server';
+import { FORMATOS, type ExportFormat } from '@app/export';
+import { encolarExportacion } from '../../../src/server/exportaciones';
+import { obtenerSesion } from '../../../src/server/sesion';
+
+export const runtime = 'nodejs';
+
+/**
+ * Encola una exportacion (4.9, encolada por 5.3).
+ *
+ * Devuelve 202 y un identificador, NUNCA el archivo: generar aqui bloquearia la instancia. El
+ * cuerpo no lleva datos, solo que modulo, que pagina y que filtros; quien exporta se toma del
+ * lado servidor, no del cuerpo, para que nadie pueda exportar con la identidad de otro.
+ */
+export async function POST(request: Request) {
+  let cuerpo: Record<string, unknown>;
+  try {
+    cuerpo = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
+  }
+
+  const formato = cuerpo['formato'];
+  if (typeof formato !== 'string' || !FORMATOS.includes(formato as ExportFormat)) {
+    return NextResponse.json(
+      { error: `Formato no admitido. Use uno de: ${FORMATOS.join(', ')}.` },
+      { status: 400 },
+    );
+  }
+
+  const moduleSlug = cuerpo['modulo'];
+  if (typeof moduleSlug !== 'string' || moduleSlug === '') {
+    return NextResponse.json({ error: 'Falta el modulo.' }, { status: 400 });
+  }
+
+  const pageSlug = typeof cuerpo['pagina'] === 'string' ? cuerpo['pagina'] : undefined;
+  const filtros = normalizarFiltros(cuerpo['filtros']);
+
+  const sesion = await obtenerSesion();
+  const job = await encolarExportacion({
+    moduleSlug,
+    ...(pageSlug ? { pageSlug } : {}),
+    format: formato as ExportFormat,
+    userId: sesion.userId,
+    teamId: sesion.activeTeamId,
+    appliedFilters: filtros,
+    isPersonalized: cuerpo['personalizada'] === true,
+  });
+
+  if (!job) {
+    return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
+  }
+
+  return NextResponse.json(
+    { id: job.id, estado: job.status, consultarEn: `/api/exportaciones/${job.id}` },
+    { status: 202 },
+  );
+}
+
+/** Acepta `{campo: "v"}` y `{campo: ["v1","v2"]}`, y descarta cualquier otra cosa. */
+function normalizarFiltros(valor: unknown): Record<string, string[]> {
+  if (typeof valor !== 'object' || valor === null) return {};
+  const salida: Record<string, string[]> = {};
+  for (const [clave, v] of Object.entries(valor as Record<string, unknown>)) {
+    if (typeof v === 'string') salida[clave] = [v];
+    else if (Array.isArray(v)) salida[clave] = v.filter((x): x is string => typeof x === 'string');
+  }
+  return salida;
+}

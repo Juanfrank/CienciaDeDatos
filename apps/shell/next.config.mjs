@@ -10,6 +10,7 @@ const nextConfig = {
     '@app/caching',
     '@app/data-contracts',
     '@app/design-tokens',
+    '@app/export',
     '@app/identity-db',
     '@app/module-model',
     '@app/observability',

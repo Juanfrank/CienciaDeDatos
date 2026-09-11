@@ -3,6 +3,7 @@
 import { fieldKey, toSlicerOptions } from '@app/ui-components';
 import type { QueryResult } from '@app/data-contracts';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
+import { Exportar } from './Exportar';
 import { Marcadores } from './Marcadores';
 import { Rejilla } from './Rejilla';
 import { Segmentador } from './Segmentador';
@@ -57,6 +58,11 @@ export function VistaModulo({
           </button>
         ) : null}
         <Marcadores moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+        <Exportar
+          moduleSlug={moduleSlug}
+          {...(pageSlug ? { pageSlug } : {})}
+          isPersonalized={provenance.isPersonalized}
+        />
       </div>
 
       <Rejilla items={items}>
