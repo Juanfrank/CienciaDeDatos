@@ -1,0 +1,89 @@
+import { contarAmpliaciones, listarAuditoria } from '../../../src/server/auditoria';
+
+export const dynamic = 'force-dynamic';
+
+/**
+ * Registro de auditoria — secciones 4.10.7 y 7.
+ *
+ * Las ampliaciones de ambito se muestran DESTACADAS y en su propia seccion, no mezcladas
+ * indistintamente con el resto de cambios, que es lo que pide el documento.
+ */
+export default async function PaginaAuditoria({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const query = await searchParams;
+  const soloAmpliaciones = query['soloAmpliaciones'] === '1';
+  const soloMovimientos = query['soloMovimientos'] === '1';
+
+  const eventos = listarAuditoria({
+    ...(soloAmpliaciones ? { soloAmpliaciones: true } : {}),
+    ...(soloMovimientos ? { soloMovimientos: true } : {}),
+  });
+  const ampliaciones = contarAmpliaciones();
+
+  return (
+    <section>
+      <h2>Auditoria de configuracion</h2>
+
+      <p
+        className={`aviso ${ampliaciones > 0 ? 'aviso--atencion' : 'aviso--ok'}`}
+        data-testid="resumen-ampliaciones"
+      >
+        <strong>{ampliaciones}</strong> ampliacion(es) de ambito vigentes.{' '}
+        {ampliaciones === 0
+          ? 'Es el valor deseable.'
+          : 'Deberia tender a cero: un numero creciente indica que el modelo de RLS se relaja por acumulacion de excepciones.'}
+      </p>
+
+      <nav className="filtros-auditoria" aria-label="Filtros del registro">
+        <a href="/admin/auditoria" data-testid="filtro-todos">Todos</a>
+        <a href="/admin/auditoria?soloAmpliaciones=1" data-testid="filtro-ampliaciones">
+          Solo ampliaciones
+        </a>
+        <a href="/admin/auditoria?soloMovimientos=1" data-testid="filtro-movimientos">
+          Solo movimientos
+        </a>
+      </nav>
+
+      {eventos.length === 0 ? (
+        <p className="texto-atenuado" data-testid="auditoria-vacia">
+          Sin cambios registrados con este filtro.
+        </p>
+      ) : (
+        <div className="tabla-contenedor">
+          <table className="tabla" data-testid="tabla-auditoria">
+            <thead>
+              <tr>
+                <th>Cuando</th>
+                <th>Quien</th>
+                <th>Que</th>
+                <th>Accion</th>
+                <th>Justificacion</th>
+              </tr>
+            </thead>
+            <tbody>
+              {eventos.map((e, i) => (
+                <tr key={i} className={e.isScopeExpansion ? 'es-ampliacion' : ''}>
+                  <td>{new Date(e.timestamp).toLocaleString('es-DO')}</td>
+                  <td>{e.actorId}</td>
+                  <td>
+                    <code>{e.entityType}</code> {e.entityId}
+                  </td>
+                  <td>
+                    {e.action}
+                    {e.isScopeExpansion ? (
+                      <span className="insignia insignia--error">Ampliacion</span>
+                    ) : null}
+                  </td>
+                  <td>{e.justification ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}

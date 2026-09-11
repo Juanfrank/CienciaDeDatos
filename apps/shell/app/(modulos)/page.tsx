@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { isModule, type NavNode } from '@app/access-control';
-import { navigationFor } from '../src/server/contexto';
-import { obtenerSesion } from '../src/server/sesion';
+import { navigationFor } from '../../src/server/contexto';
+import { obtenerSesion } from '../../src/server/sesion';
 
 /** Primer modulo accesible del arbol visible, o null si el equipo no tiene ninguno. */
 function primerModulo(nodos: NavNode[]): string | null {

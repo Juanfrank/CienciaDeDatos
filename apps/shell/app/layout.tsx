@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { defaultTheme, toCssVariables } from '@app/design-tokens';
-import { findTeam, listUsers, navigationFor, roleOf, teamsOf } from '../src/server/contexto';
+import { esAdministrador } from '../src/server/admin';
+import { findTeam, listUsers, roleOf, teamsOf } from '../src/server/contexto';
 import { obtenerSesion } from '../src/server/sesion';
 import { SelectorDeEquipo } from '../src/components/SelectorDeEquipo';
-import { ArbolNavegacion } from '../src/components/ArbolNavegacion';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -14,10 +15,20 @@ export const metadata: Metadata = {
 /** El tema organizacional (4.3) se inyecta como variables CSS en la raiz del documento. */
 const variables = toCssVariables(defaultTheme);
 
+/**
+ * Cromo comun a toda la aplicacion: documento, tema y cabecera.
+ *
+ * La navegacion de MODULOS no vive aqui, sino en el grupo de rutas (modulos). El panel de
+ * administracion es "una superficie de gestion dedicada, SEPARADA de los modulos de negocio"
+ * (4.10.8), asi que no debe arrastrar el arbol de modulos a un lado mientras se administra.
+ */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const sesion = await obtenerSesion();
   const equipo = findTeam(sesion.activeTeamId);
-  const navegacion = navigationFor(sesion.activeTeamId);
+
+  // El enlace solo se dibuja para quien puede usarlo. Ocultarlo no protege nada —eso lo hace el
+  // guardian del backend— pero no tiene sentido ofrecer una puerta cerrada.
+  const puedeAdministrar = esAdministrador(sesion.userId);
 
   const equipos = teamsOf(sesion.userId).map((t) => ({
     id: t.id,
@@ -28,12 +39,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="es">
       <body style={variables as React.CSSProperties}>
-        <div className="disposicion">
-          <header className="cabecera">
-            <div className="cabecera__marca">
-              <span className="cabecera__titulo">Capa de visualizacion</span>
-              <span className="cabecera__subtitulo">Reporting institucional</span>
-            </div>
+        <header className="cabecera">
+          <div className="cabecera__marca">
+            <Link href="/" className="cabecera__titulo">
+              Capa de visualizacion
+            </Link>
+            <span className="cabecera__subtitulo">
+              Reporting institucional{equipo ? ` · ${equipo.name}` : ''}
+            </span>
+          </div>
+
+          <div className="cabecera__acciones">
+            {puedeAdministrar ? (
+              <Link href="/admin" className="boton-enlace" data-testid="enlace-admin">
+                Administracion
+              </Link>
+            ) : null}
             {/* El equipo activo es visible en todo momento, como exige 4.10.2. */}
             <SelectorDeEquipo
               equipos={equipos}
@@ -41,21 +62,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               usuarios={listUsers().map((u) => ({ id: u.userId, name: u.userId }))}
               usuarioActivo={sesion.userId}
             />
-          </header>
-
-          <div className="cuerpo">
-            <nav className="lateral" aria-label="Navegacion de modulos">
-              <p className="lateral__titulo">
-                {equipo?.name ?? 'Sin equipo'}
-              </p>
-              <ArbolNavegacion nodos={navegacion.tree} />
-              {navegacion.tree.length === 0 ? (
-                <p className="texto-atenuado">Este equipo no tiene modulos concedidos.</p>
-              ) : null}
-            </nav>
-            <main className="principal">{children}</main>
           </div>
-        </div>
+        </header>
+        {children}
       </body>
     </html>
   );

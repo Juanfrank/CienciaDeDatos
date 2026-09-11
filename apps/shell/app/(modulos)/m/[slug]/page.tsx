@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
 import { describeProvenance } from '@app/module-model';
-import { cargarModulo } from '../../../src/server/datos';
-import { findModuleBySlug } from '../../../src/server/modulos';
-import { serializarObjeto } from '../../../src/server/serializar';
-import { obtenerSesion } from '../../../src/server/sesion';
-import { VistaModulo } from '../../../src/components/VistaModulo';
+import { cargarModulo } from '../../../../src/server/datos';
+import { findModuleBySlug } from '../../../../src/server/modulos';
+import { serializarObjeto } from '../../../../src/server/serializar';
+import { obtenerSesion } from '../../../../src/server/sesion';
+import { VistaModulo } from '../../../../src/components/VistaModulo';
 
 /**
  * Pagina de un modulo — ruta /m/{module-slug}[/{page-slug}] (4.11).
