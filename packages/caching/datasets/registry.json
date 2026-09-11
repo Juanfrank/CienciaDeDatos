@@ -1,0 +1,48 @@
+{
+  "$comment": "Registro de datasets cacheables (seccion 6.6). Cada entrada declara su recurrencia por dominio de datos y, de forma obligatoria, cual de las dos estrategias de aislamiento aplica. Nunca dejar securityBinding implicito.",
+  "datasets": [
+    {
+      "datasetId": "casos-por-distrito-trimestre",
+      "description": "Carga de casos por distrito y trimestre, en su forma mas amplia razonable, sin los filtros especificos de ningun modulo.",
+      "query": {
+        "measures": ["CasosIngresados", "CasosResueltos", "CasosPendientes", "DiasPromedioResolucion"],
+        "dimensions": [
+          { "table": "DimTribunal", "field": "Distrito" },
+          { "table": "DimTribunal", "field": "Materia" },
+          { "table": "DimTiempo", "field": "Trimestre" }
+        ]
+      },
+      "recurrence": "0 */4 * * *",
+      "recurrenceRationale": "Carga por lotes de la capa de analisis: horas, no minutos.",
+      "securityBinding": "none",
+      "securityBindingRationale": "El conector activo (mock/sql) no aplica RLS nativo, asi que se cachea el superconjunto y el ambito se aplica al momento de la lectura. Un solo dataset sirve a todos los equipos.",
+      "scopeDimensions": [
+        { "table": "DimTribunal", "field": "Distrito" },
+        { "table": "DimTribunal", "field": "Materia" }
+      ],
+      "consumedByModules": ["casos-pendientes"],
+      "owner": "equipo-analitica",
+      "registeredAt": "2026-09-11"
+    },
+    {
+      "datasetId": "audiencias-por-tribunal",
+      "description": "Audiencias por tribunal y tipo de caso.",
+      "query": {
+        "measures": ["CasosIngresados", "CasosResueltos"],
+        "dimensions": [
+          { "table": "DimTribunal", "field": "Distrito" },
+          { "table": "DimTribunal", "field": "Nombre" },
+          { "table": "DimTipoCaso", "field": "Nombre" }
+        ]
+      },
+      "recurrence": "*/15 * * * *",
+      "recurrenceRationale": "Indicador casi en tiempo real: minutos.",
+      "securityBinding": "none",
+      "securityBindingRationale": "Mismo criterio que el dataset anterior. Se revisa si la capa de analisis entrega un modelo semantico con RLS nativo.",
+      "scopeDimensions": [{ "table": "DimTribunal", "field": "Distrito" }],
+      "consumedByModules": ["casos-pendientes", "audiencias"],
+      "owner": "equipo-analitica",
+      "registeredAt": "2026-09-11"
+    }
+  ]
+}

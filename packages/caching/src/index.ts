@@ -1,10 +1,46 @@
 /**
- * ICacheStore, BlobCacheStore y registro de datasets cacheables.
+ * Cache de la aplicacion — seccion 6 del contrato de ingenieria.
  *
- * MARCADOR DE POSICION. Este paquete existe en el esqueleto de monorepo (seccion 3.2)
- * con sus etiquetas de limites de dependencia ya aplicadas, pero su contenido se
- * implementa en: Entregable B.5 — Fase de cimiento.
+ * El caching aqui no es una optimizacion de rendimiento: es la arquitectura de lectura
+ * completa. Ninguna solicitud de un modulo, disparada por una persona usuaria, invoca
+ * IDataConnector.query(). La persona usuaria siempre lee de un cache ya poblado; la poblacion
+ * de ese cache ocurre en un proceso separado (apps/cache-populator), desacoplado del ciclo de
+ * vida de cualquier solicitud HTTP.
  *
- * Secciones del contrato de ingenieria que lo definen: 6.2 (ICacheStore), 6.3 (L1/L2), 6.4 (poblacion), 6.5 (invalidacion), 6.6 (dataset compartido), 6.8 (clave de cache).
+ * Este paquete esta etiquetado `type:server` y NO puede importar `type:server-data`. La regla
+ * de limites hace imposible, no solo desaconsejable, que el camino de lectura alcance un
+ * conector de datos.
  */
-export const PENDIENTE_DE_IMPLEMENTACION = 'Entregable B.5 — Fase de cimiento' as const;
+export { BlobCacheStore, type BlobCacheStoreOptions } from './BlobCacheStore';
+export {
+  CachedDatasetReader,
+  applyRequestedFilters,
+  type CacheReadEvent,
+  type CachedDatasetReaderOptions,
+  type ReadDatasetInput,
+  type ReadResult,
+  type ReadStatus,
+} from './CachedDatasetReader';
+export {
+  CacheStoreUnavailableError,
+  type CacheEntry,
+  type ICacheStore,
+} from './ICacheStore';
+export { InMemoryCacheStore, type InMemoryCacheStoreOptions } from './InMemoryCacheStore';
+export {
+  buildCacheKey,
+  datasetKeyPrefix,
+  stableHash,
+  type CacheKeyInput,
+  type SecurityBinding,
+} from './cacheKey';
+export {
+  UnknownDatasetError,
+  datasetsForModule,
+  defaultRegistry,
+  getDataset,
+  validateRegistry,
+  type CacheableDataset,
+  type DatasetRegistry,
+  type RegistryProblem,
+} from './datasetRegistry';
