@@ -26,6 +26,18 @@ modulos de negocio:
 | **B.5** | Cache y camino de lectura | [`packages/caching/`](packages/caching/) | L1/L2, clave con aislamiento, registro de datasets |
 | **B.6** | Observabilidad y `/health` | [`docs/observabilidad.md`](docs/observabilidad.md) | Contrato de salud y formas de evento |
 
+**Fase 2** — personalizacion base (seccion 8.2), mas la interactividad de 4.4:
+
+| | Frente | Estado |
+|---|---|---|
+| **F2.1** | Tema organizacional y contraste WCAG | Puerta de publicacion, no advertencia |
+| **F2.2** | Repositorio de objetos versionados (4.5) | Semver, pin de version, deprecacion con aviso activo |
+| **F2.3** | Definicion de modulo, rejilla y validacion | Objetos rotos marcados, no omitidos |
+| **F2.4** | Gestion de modulos y carpetas (4.1) | Papelera, mover como cambio estructural auditado |
+| **F2.5** | Job de poblacion de cache (6.4) | Unica via que invoca al conector |
+| **F2.6** | Shell de Next.js y prueba de 2.4 | **La aplicacion se abre y funciona** |
+| **F2.7** | Interactividad (4.4) | Filtrado cruzado, drill-through, marcadores |
+
 Las decisiones estan en [`docs/adr/`](docs/adr/). La mas significativa, y la que requiere
 aprobacion explicita, es
 [ADR-007: los modulos son librerias, no artefactos de despliegue](docs/adr/ADR-007-modulos-como-librerias-no-como-despliegues.md).
@@ -38,13 +50,30 @@ dependen de lo que entregue la capa de analisis.
 ## Puesta en marcha
 
 ```bash
-npm install                 # npm workspaces: enlaza los 13 proyectos
+npm install                 # npm workspaces: enlaza los 14 proyectos
 npm run typecheck           # tsc sobre todo el repositorio
-npm test                    # vitest: 179 pruebas
+npm test                    # vitest: 344 pruebas
 npm run lint                # eslint + limites de dependencia, por proyecto
 npm run verify:boundaries   # afirma que la regla de limites REALMENTE muerde
 npm run verify:schema       # valida el esquema de la base de identidad
 npm run verify:infra        # compila las plantillas Bicep (advertencia = fallo)
+```
+
+### Ver la aplicacion funcionando
+
+El job de poblacion y el servidor son **procesos distintos**, igual que en produccion: el job
+escribe el cache y el servidor solo lee lo que encuentre ya poblado.
+
+```bash
+npm run poblar              # puebla el cache contra MockDataConnector
+npm run dev                 # http://localhost:4300
+npm run e2e                 # 23 pruebas en Chromium real
+```
+
+Cambiar de conector es **un valor de configuracion**, no un cambio de codigo:
+
+```bash
+npm run poblar -- --connector sql    # falla limpio: Sql se implementa en Fase 4
 ```
 
 ## Estructura

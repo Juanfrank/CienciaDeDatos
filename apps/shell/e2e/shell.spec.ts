@@ -184,6 +184,69 @@ test.describe('filtrado cruzado (4.4)', () => {
   });
 });
 
+test.describe('la interfaz distingue lo elegido de lo impuesto por el ambito', () => {
+  test('sin filtros propios solo se muestra la restriccion de ambito', async ({ page }) => {
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+    // El equipo Norte esta restringido a Penal y Civil: eso es ambito, no una eleccion.
+    await expect(page.getByTestId('ambito-activo')).toContainText('Penal, Civil');
+    await expect(page.getByTestId('filtros-activos')).toHaveCount(0);
+  });
+
+  test('al elegir un filtro, aparece como propio y deja de contarse como ambito', async ({ page }) => {
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId('segmentador-Penal').click();
+    await expect(page.getByTestId('filtros-activos')).toContainText('Penal');
+    await expect(page.getByTestId('ambito-activo')).not.toContainText('Materia');
+  });
+});
+
+test.describe('marcadores (4.4)', () => {
+  test('guardar el estado actual como marcador y volver a el', async ({ page }) => {
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId('segmentador-Penal').click();
+    await expect(page).toHaveURL(/Materia=Penal/);
+
+    await page.getByTestId('abrir-marcadores').click();
+    await page.getByTestId('nombre-marcador').fill('Solo penal');
+    await page.getByTestId('guardar-marcador').click();
+
+    await expect(page.getByTestId('marcador-Solo penal')).toBeVisible();
+
+    // Salir del modulo y volver por el marcador reproduce el estado guardado.
+    await page.goto('/m/casos-pendientes');
+    await expect(page).not.toHaveURL(/Materia=/);
+    await page.getByTestId('abrir-marcadores').click();
+    await page.getByTestId('marcador-Solo penal').click();
+    await expect(page).toHaveURL(/Materia=Penal/);
+  });
+
+  test('un marcador compartido se filtra segun QUIEN LO ABRE, no quien lo creo', async ({ page }) => {
+    // Ana, del equipo Norte, guarda un marcador filtrado a su distrito.
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes?DimTribunal.Distrito=Distrito+Norte');
+    await page.getByTestId('abrir-marcadores').click();
+    await page.getByTestId('nombre-marcador').fill('Mi distrito');
+    await page.getByTestId('guardar-marcador').click();
+    await expect(page.getByTestId('marcador-Mi distrito')).toBeVisible();
+
+    const url = await page.getByTestId('marcador-Mi distrito').getAttribute('href');
+    expect(url).toContain('Distrito+Norte');
+
+    // Beto, del equipo Este, abre exactamente esa URL.
+    await entrarComo(page, 'u-beto');
+    const datos = await page.request
+      .get(`/api/modulos/casos-este?${url?.split('?')[1] ?? ''}`)
+      .then((r) => r.json());
+
+    // El marcador pedia el Norte; el ambito de Beto no lo permite. No ve los datos de Ana.
+    const filas = datos.objetos.find((o: { result?: unknown }) => o.result)?.result.rows ?? [];
+    expect(filas).toHaveLength(0);
+  });
+});
+
 test.describe('principio 1: el navegador solo habla con esta aplicacion', () => {
   test('ninguna peticion sale fuera del origen de la aplicacion', async ({ page }) => {
     const externas: string[] = [];

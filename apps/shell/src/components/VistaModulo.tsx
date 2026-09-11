@@ -3,6 +3,7 @@
 import { fieldKey, toSlicerOptions } from '@app/ui-components';
 import type { QueryResult } from '@app/data-contracts';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
+import { Marcadores } from './Marcadores';
 import { Rejilla } from './Rejilla';
 import { Segmentador } from './Segmentador';
 import {
@@ -26,9 +27,13 @@ import type { ObjetoSerializado } from '../server/serializar';
 export function VistaModulo({
   objetos,
   provenance,
+  moduleSlug,
+  pageSlug,
 }: {
   objetos: ObjetoSerializado[];
   provenance: { isPersonalized: boolean; label: string };
+  moduleSlug: string;
+  pageSlug?: string;
 }) {
   const { alternar, limpiarTodo, searchParams } = useFiltrosDeUrl();
   const hayFiltros = [...searchParams.keys()].length > 0;
@@ -51,6 +56,7 @@ export function VistaModulo({
             Limpiar todos los filtros
           </button>
         ) : null}
+        <Marcadores moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
       </div>
 
       <Rejilla items={items}>

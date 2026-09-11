@@ -33,6 +33,17 @@ export {
   type ViewProvenance,
 } from './personalization';
 export {
+  PATRONES_DE_INTERACCION,
+  bookmarkToUrl,
+  captureBookmark,
+  drillThroughUrl,
+  type Bookmark,
+  type DrillThroughTarget,
+  type InteractionPattern,
+  type InteractionPatternSpec,
+} from './interaccion';
+
+export {
   findPublishBlockers,
   validateModule,
   type ItemDiagnostic,

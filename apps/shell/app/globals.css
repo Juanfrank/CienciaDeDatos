@@ -238,3 +238,52 @@ code {
   .cuerpo { flex-direction: column; }
   .lateral { width: 100%; min-height: 0; border-right: none; border-bottom: 1px solid var(--color-border); }
 }
+
+.marcadores { position: relative; }
+.marcadores__panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  margin-top: var(--space-xs);
+  min-width: 280px;
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+.marcadores__guardar { display: flex; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+.marcadores__guardar input {
+  font: inherit;
+  font-size: var(--font-size-sm);
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.marcadores__guardar button {
+  font: inherit;
+  font-size: var(--font-size-sm);
+  padding: 4px 10px;
+  border: 1px solid var(--color-brand-500);
+  border-radius: var(--radius-sm);
+  background: var(--color-brand-500);
+  color: var(--color-textOnBrand);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.marcadores__lista { list-style: none; margin: 0; padding: 0; font-size: var(--font-size-sm); }
+.marcadores__lista li { padding: 4px 0; }
+.marcadores__lista a { color: var(--color-brand-700); }
+
+.ambito-activo {
+  margin: 0 0 var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surfaceMuted);
+  color: var(--color-textMuted);
+  border-left: 3px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}

@@ -47,7 +47,16 @@ export default async function PaginaModulo({
 
   if (!cargado) notFound();
 
-  const filtrosActivos = Object.entries(cargado.appliedFilters).filter(([, v]) => v.length > 0);
+  // Se distingue lo que la persona ELIGIO de lo que su AMBITO le impone. Mezclarlos en una sola
+  // linea de "filtros aplicados" hace creer que el ambito es algo que uno se puso y se puede
+  // quitar, cuando no lo es.
+  const filtrosElegidos = Object.entries(filtrosDe(query)).map(
+    ([campo, valor]) => [campo, Array.isArray(valor) ? valor : [valor]] as const,
+  );
+  const camposElegidos = new Set(filtrosElegidos.map(([campo]) => campo));
+  const restriccionesDeAmbito = Object.entries(cargado.appliedFilters).filter(
+    ([campo, valores]) => !camposElegidos.has(campo) && valores.length > 0,
+  );
 
   return (
     <article className="modulo">
@@ -63,16 +72,27 @@ export default async function PaginaModulo({
         </div>
       </header>
 
-      {filtrosActivos.length > 0 ? (
+      {filtrosElegidos.length > 0 ? (
         <p className="filtros-activos" data-testid="filtros-activos">
           Filtros aplicados:{' '}
-          {filtrosActivos.map(([campo, valores]) => `${campo} = ${valores.join(', ')}`).join(' · ')}
+          {filtrosElegidos.map(([campo, valores]) => `${campo} = ${valores.join(', ')}`).join(' · ')}
+        </p>
+      ) : null}
+
+      {restriccionesDeAmbito.length > 0 ? (
+        <p className="ambito-activo" data-testid="ambito-activo">
+          Su ambito de acceso limita esta vista a:{' '}
+          {restriccionesDeAmbito
+            .map(([campo, valores]) => `${campo} = ${valores.join(', ')}`)
+            .join(' · ')}
         </p>
       ) : null}
 
       <VistaModulo
         objetos={cargado.objetos.map(serializarObjeto)}
         provenance={describeProvenance(false)}
+        moduleSlug={module.slug}
+        pageSlug={cargado.pageSlug}
       />
     </article>
   );
