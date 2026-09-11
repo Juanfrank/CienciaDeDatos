@@ -54,6 +54,16 @@ export {
 export type { DanglingPackageNode, ModulePackage } from './ModulePackage';
 
 export {
+  PermissionError,
+  assertCan,
+  can,
+  capabilitiesOf,
+  denial,
+  type Capability,
+  type PermissionDenial,
+} from './permissions';
+
+export {
   accessibleModuleIds,
   buildNavigationView,
   canTeamAccessModule,
@@ -62,6 +72,18 @@ export {
   type BuildNavigationViewInput,
   type NavigationView,
 } from './navigation';
+
+export {
+  applyTreeOperation,
+  depthWarning,
+  trashedModules,
+  type Actor,
+  type ManagedTree,
+  type TrashedNode,
+  type TreeAuditEvent,
+  type TreeOperation,
+  type TreeOperationResult,
+} from './treeOperations';
 
 export {
   resolveEffectiveScope,
