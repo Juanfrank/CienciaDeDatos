@@ -42,3 +42,33 @@ jobs:
       # Es la garantia del criterio de aceptacion de la seccion 9 sobre el principio 2.
       - name: Limites de dependencia entre modulos
         run: npm run verify:boundaries
+
+      - name: Esquema de la base de identidad
+        run: npx prisma validate --schema packages/identity-db/prisma/schema.prisma
+        env:
+          IDENTITY_DATABASE_URL: sqlserver://localhost:1433;database=validacion;user=sa;password=noop
+
+  infraestructura:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Bicep
+        run: |
+          curl -sL -o /usr/local/bin/bicep \
+            https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+          chmod +x /usr/local/bin/bicep
+
+      # --verbose hace que una advertencia rompa el build. Importa: una propiedad mal ubicada
+      # en Bicep no falla el despliegue, se ignora en silencio.
+      - name: Compilar plantillas
+        run: |
+          set -e
+          SALIDA=$(bicep build infra/main.bicep --stdout 2>&1 >/dev/null)
+          if [ -n "$SALIDA" ]; then
+            echo "Bicep emitio advertencias:"
+            echo "$SALIDA"
+            exit 1
+          fi
+          echo "Plantillas compiladas sin advertencias."
+
