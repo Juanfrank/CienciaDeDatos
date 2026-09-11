@@ -267,6 +267,42 @@ test.describe('principio 1: el navegador solo habla con esta aplicacion', () => 
   });
 });
 
+test.describe('identidad institucional (4.3)', () => {
+  test('el nombre de la institucion y su emblema estan en TODAS las paginas', async ({ page }) => {
+    await entrarComo(page, 'u-admin');
+
+    // La norma de marca pide el nombre de la institucion en cada pagina. Se comprueba en las
+    // tres superficies distintas —modulo, panel de administracion y avisos— porque cada una
+    // tiene su propia disposicion y es donde se perderia si alguien anadiera una cuarta.
+    for (const ruta of ['/m/casos-pendientes', '/admin', '/avisos']) {
+      await page.goto(ruta);
+      await expect(page.getByTestId('institucion')).toContainText(
+        'Poder Judicial de la República Dominicana',
+      );
+      await expect(page.locator('.cabecera__emblema')).toBeVisible();
+    }
+  });
+
+  test('el emblema se sirve desde el propio origen, no de un CDN externo', async ({ page }) => {
+    // Principio 1: el navegador solo habla con esta aplicacion. Un logotipo traido de fuera es
+    // la forma mas facil de abrir esa puerta sin darse cuenta.
+    const src = await page.goto('/m/casos-pendientes').then(async () => {
+      return page.locator('.cabecera__emblema').getAttribute('src');
+    });
+    expect(src?.startsWith('/')).toBe(true);
+
+    const respuesta = await page.request.get(src ?? '');
+    expect(respuesta.status()).toBe(200);
+    expect(respuesta.headers()['content-type']).toContain('image/png');
+  });
+
+  test('el emblema es decorativo: el nombre lo lleva el texto de al lado', async ({ page }) => {
+    // Con texto alternativo, un lector de pantalla anunciaria dos veces la institucion.
+    await page.goto('/m/casos-pendientes');
+    await expect(page.locator('.cabecera__emblema')).toHaveAttribute('alt', '');
+  });
+});
+
 test.describe('salud (seccion 7)', () => {
   test('/health reporta el conector activo sin instanciar ninguno', async ({ request }) => {
     const informe = await request.get('/health').then((r) => r.json());

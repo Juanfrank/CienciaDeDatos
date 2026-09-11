@@ -17,6 +17,7 @@ export {
   type TextSize,
   type WcagLevel,
 } from './contrast';
+export { defaultIdentity, type InstitutionIdentity } from './identity';
 export {
   OVERRIDABLE_TOKENS,
   defaultTheme,

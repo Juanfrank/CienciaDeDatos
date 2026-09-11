@@ -43,7 +43,13 @@ code {
   flex-wrap: wrap;
 }
 
-.cabecera__marca { display: flex; flex-direction: column; }
+.cabecera__marca { display: flex; align-items: center; gap: var(--space-sm); }
+.cabecera__textos { display: flex; flex-direction: column; min-width: 0; }
+/*
+ * El emblema se dibuja a la mitad de su tamano de archivo: el PNG es 2x para que se vea nitido
+ * en pantallas de densidad doble.
+ */
+.cabecera__emblema { width: auto; height: 40px; flex-shrink: 0; }
 .cabecera__titulo { font-weight: var(--font-weight-bold); font-size: var(--font-size-lg); }
 .cabecera__subtitulo { color: var(--color-textMuted); font-size: var(--font-size-sm); }
 

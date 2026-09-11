@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
 import Link from 'next/link';
-import { defaultTheme, toCssVariables } from '@app/design-tokens';
+import { defaultIdentity, defaultTheme, toCssVariables } from '@app/design-tokens';
 import { esAdministrador } from '../src/server/admin';
 import { findTeam, listUsers, roleOf, teamsOf } from '../src/server/contexto';
 import { obtenerSesion } from '../src/server/sesion';
@@ -11,7 +11,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Capa de visualizacion',
-  description: 'Reporting institucional',
+  description: `Reporting institucional — ${defaultIdentity.name}`,
 };
 
 /**
@@ -60,12 +60,27 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body style={variables as React.CSSProperties}>
         <header className="cabecera">
           <div className="cabecera__marca">
-            <Link href="/" className="cabecera__titulo">
-              Capa de visualizacion
-            </Link>
-            <span className="cabecera__subtitulo">
-              Reporting institucional{equipo ? ` · ${equipo.name}` : ''}
-            </span>
+            {/*
+              El emblema es DECORATIVO y por eso lleva alt vacio: el nombre de la institucion
+              esta justo al lado como texto, y darle tambien un texto alternativo haria que un
+              lector de pantalla anunciara dos veces lo mismo.
+            */}
+            <img
+              className="cabecera__emblema"
+              src={defaultIdentity.emblem.src}
+              width={defaultIdentity.emblem.width}
+              height={defaultIdentity.emblem.height}
+              alt=""
+            />
+            <div className="cabecera__textos">
+              <Link href="/" className="cabecera__titulo">
+                Capa de visualizacion
+              </Link>
+              <span className="cabecera__subtitulo" data-testid="institucion">
+                {defaultIdentity.name}
+                {equipo ? ` · ${equipo.name}` : ''}
+              </span>
+            </div>
           </div>
 
           <div className="cabecera__acciones">
