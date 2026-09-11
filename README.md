@@ -37,6 +37,7 @@ modulos de negocio:
 | **F2.5** | Job de poblacion de cache (6.4) | Unica via que invoca al conector |
 | **F2.6** | Shell de Next.js y prueba de 2.4 | **La aplicacion se abre y funciona** |
 | **F2.7** | Interactividad (4.4) | Filtrado cruzado, drill-through, marcadores |
+| **F2.8** | Panel de administracion (4.10.8) | Las siete superficies, con las dos puertas de seguridad cableadas |
 
 Las decisiones estan en [`docs/adr/`](docs/adr/). La mas significativa, y la que requiere
 aprobacion explicita, es
@@ -52,7 +53,7 @@ dependen de lo que entregue la capa de analisis.
 ```bash
 npm install                 # npm workspaces: enlaza los 14 proyectos
 npm run typecheck           # tsc sobre todo el repositorio
-npm test                    # vitest: 344 pruebas
+npm test                    # vitest: 371 pruebas
 npm run lint                # eslint + limites de dependencia, por proyecto
 npm run verify:boundaries   # afirma que la regla de limites REALMENTE muerde
 npm run verify:schema       # valida el esquema de la base de identidad
@@ -67,7 +68,7 @@ escribe el cache y el servidor solo lee lo que encuentre ya poblado.
 ```bash
 npm run poblar              # puebla el cache contra MockDataConnector
 npm run dev                 # http://localhost:4300
-npm run e2e                 # 23 pruebas en Chromium real
+npm run e2e                 # 40 pruebas en Chromium real
 ```
 
 Cambiar de conector es **un valor de configuracion**, no un cambio de codigo:
@@ -88,7 +89,8 @@ npm run poblar -- --connector sql    # falla limpio: Sql se implementa en Fase 4
   /data-contracts
     /types                   IDataConnector y tipos puros                          [type:contract-types]
     /server                  Implementaciones: Mock, Sql, Xmla                     [type:server-data]
-  /access-control            Arbol de navegacion, equipos, ambitos de acceso       [type:lib]
+  /access-control            Arbol de navegacion, equipos, ambitos, permisos       [type:lib]
+  /module-model              Definicion de modulo, rejilla, interactividad         [type:lib]
   /identity-db               Esquema Prisma y mapeadores de gobierno               [type:server]
   /auth                      Azure AD + credenciales locales, normalizadas         [type:server]
   /caching                   ICacheStore, clave de cache, camino de lectura        [type:server]
