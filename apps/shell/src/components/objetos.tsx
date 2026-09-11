@@ -194,12 +194,14 @@ export function Lineas({ titulo, result, instance }: ObjetoProps) {
 export function Tabla({ titulo, result }: ObjetoProps) {
   return (
     <Marco titulo={titulo}>
-      <div className="tabla-contenedor">
+      <div className="tabla-contenedor" tabIndex={0} role="region" aria-label={titulo}>
         <table className="tabla" data-testid="tabla">
           <thead>
             <tr>
               {result.columns.map((c) => (
-                <th key={c.name}>{c.name}</th>
+                <th key={c.name} scope="col">
+                  {c.name}
+                </th>
               ))}
             </tr>
           </thead>
@@ -226,15 +228,17 @@ export function Matriz({ titulo, result, instance }: ObjetoProps) {
 
   return (
     <Marco titulo={titulo}>
-      <div className="tabla-contenedor">
+      <div className="tabla-contenedor" tabIndex={0} role="region" aria-label={titulo}>
         <table className="tabla" data-testid="matriz">
           <thead>
             <tr>
               <th />
               {vm.columnLabels.map((c) => (
-                <th key={c}>{c}</th>
+                <th key={c} scope="col">
+                  {c}
+                </th>
               ))}
-              <th>Total</th>
+              <th scope="col">Total</th>
             </tr>
           </thead>
           <tbody>

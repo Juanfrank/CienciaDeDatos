@@ -104,6 +104,7 @@ export function EditorDeEquipos({
                 </p>
                 <select
                   value={equipo.assignedPackageId ?? ''}
+                  aria-label={`Paquete visual asignado al equipo ${equipo.name}`}
                   data-testid={`paquete-${equipo.id}`}
                   onChange={(e) => {
                     const siguiente: Team = { ...equipo };
@@ -127,8 +128,12 @@ export function EditorDeEquipos({
                     return (
                       <li key={u}>
                         <span>{u}</span>
+                        {/* El nombre de al lado es texto suelto, no una etiqueta: sin
+                            aria-label, un lector de pantalla anuncia una lista de selectores
+                            sin decir de quien es cada uno. */}
                         <select
                           value={miembro?.role ?? ''}
+                          aria-label={`Rol de ${u} en el equipo ${equipo.name}`}
                           data-testid={`rol-${equipo.id}-${u}`}
                           onChange={(e) =>
                             void enviar({

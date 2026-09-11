@@ -459,3 +459,16 @@ tr.es-ampliacion { background: #fffbeb; }
   color: var(--color-text);
 }
 .exportar__estado { font-size: var(--font-size-sm); color: var(--color-textMuted); }
+
+/*
+ * Indicador de foco propio.
+ *
+ * El del navegador es un contorno fino que se pierde sobre las superficies del tema, y es lo
+ * unico que orienta a quien navega con teclado. Va en :focus-visible y no en :focus para que no
+ * aparezca al pulsar con el raton, que es lo que lleva a la gente a quitarlo.
+ */
+:focus-visible {
+  outline: 2px solid var(--color-brand-700);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
