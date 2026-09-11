@@ -15,8 +15,10 @@ export {
 } from './cola';
 export {
   construirDocumento,
+  paletaDe,
   type DocumentoExportable,
   type HojaExportable,
+  type PaletaDeExportacion,
 } from './documento';
 export { construirEncabezado, type Encabezado } from './encabezado';
 export { aCsv, aSvg, escaparCsv } from './formatos';

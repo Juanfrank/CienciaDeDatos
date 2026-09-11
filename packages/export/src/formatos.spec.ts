@@ -104,7 +104,7 @@ describe('aCsv', () => {
 
 describe('aSvg', () => {
   it('produce un svg con una barra por fila y la procedencia escrita', () => {
-    const svg = aSvg(doc([objeto], peticion({ format: 'svg' })), ['#4f46e5']);
+    const svg = aSvg(doc([objeto], peticion({ format: 'svg' })));
     expect(svg).toMatch(/^<svg /);
     expect(svg.match(/<rect /g)?.length).toBe(1 + objeto.result.rows.length); // fondo + barras
     expect(svg).toContain('Vista institucional oficial');
@@ -115,13 +115,13 @@ describe('aSvg', () => {
       title: 'Casos',
       result: { ...objeto.result, rows: [['<script>', 5]] },
     };
-    const svg = aSvg(doc([conAngulos], peticion({ format: 'svg' })), ['#4f46e5']);
+    const svg = aSvg(doc([conAngulos], peticion({ format: 'svg' })));
     expect(svg).not.toContain('<script>');
     expect(svg).toContain('&lt;script&gt;');
   });
 
   it('lleva rol de imagen y etiqueta accesible (4.9)', () => {
-    const svg = aSvg(doc([objeto], peticion({ format: 'svg' })), ['#4f46e5']);
+    const svg = aSvg(doc([objeto], peticion({ format: 'svg' })));
     expect(svg).toContain('role="img"');
     expect(svg).toContain('aria-label="Casos por materia"');
   });

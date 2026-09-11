@@ -1,3 +1,4 @@
+import { defaultTheme } from '@app/design-tokens';
 import { describe, expect, it } from 'vitest';
 import { construirDocumento } from './documento';
 import { aSvg } from './formatos';
@@ -59,7 +60,7 @@ describe('construirDocumento', () => {
     expect(documento.grafico).toBeUndefined();
 
     // Mejor una imagen pobre que un archivo vacio; el encabezado dice de que objeto sale.
-    expect(aSvg(documento, ['#4f46e5'])).toContain('Casos pendientes');
+    expect(aSvg(documento)).toContain('Casos pendientes');
   });
 
   it('construye el encabezado una sola vez, para los cuatro formatos', () => {
@@ -80,7 +81,7 @@ describe('construirDocumento', () => {
 
 describe('aSvg sobre el documento', () => {
   it('dibuja una barra por fila del grafico elegido, con sus etiquetas reales', () => {
-    const svg = aSvg(construirDocumento([kpi, barras], peticion), ['#4f46e5']);
+    const svg = aSvg(construirDocumento([kpi, barras], peticion));
 
     expect(svg.match(/<rect /g)?.length).toBe(3); // fondo + dos barras
     expect(svg).toContain('>Norte<');
@@ -89,6 +90,32 @@ describe('aSvg sobre el documento', () => {
   });
 
   it('un documento sin ninguna hoja no se dibuja a medias: falla y lo dice', () => {
-    expect(() => aSvg(construirDocumento([], peticion), ['#4f46e5'])).toThrow(/dibujar/i);
+    expect(() => aSvg(construirDocumento([], peticion))).toThrow(/dibujar/i);
+  });
+});
+
+describe('la marca institucional llega al archivo exportado', () => {
+  it('las series del documento son las del tema, no una paleta propia del exportador', () => {
+    // Era el hueco: los cuatro generadores tenian sus colores escritos a mano, asi que un PDF
+    // que circula por correo salia con otra paleta que la pantalla.
+    const documento = construirDocumento([barras], peticion);
+    expect(documento.paleta.series).toEqual(defaultTheme.color.categorical);
+    expect(documento.paleta.series[0]).toBe('#0050dd');
+  });
+
+  it('el SVG se dibuja con el azul institucional', () => {
+    const svg = aSvg(construirDocumento([kpi, barras], peticion));
+    expect(svg).toContain('fill="#0050dd"');
+    expect(svg).toContain(`fill="${defaultTheme.color.surface}"`);
+  });
+
+  it('un tema distinto cambia el archivo sin tocar el generador', () => {
+    // Es la prueba de que el color esta centralizado de verdad: el dia que la institucion
+    // cambie su paleta, no hay que entrar en los generadores.
+    const otro = {
+      ...defaultTheme,
+      color: { ...defaultTheme.color, categorical: ['#123456', '#654321'] },
+    };
+    expect(aSvg(construirDocumento([barras], peticion, otro))).toContain('fill="#123456"');
   });
 });

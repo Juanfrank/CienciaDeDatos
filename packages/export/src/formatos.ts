@@ -53,10 +53,14 @@ const escaparXml = (t: string): string =>
  * Dibuja `documento.grafico`, que es el primer objeto MARCADO como grafico. Si el modulo no
  * tiene ninguno, cae en la primera hoja: es mejor una imagen pobre que un archivo vacio, y el
  * encabezado dice de que objeto sale.
+ *
+ * Los colores salen de `documento.paleta`, que viene del tema institucional. Antes estaban
+ * escritos a mano aqui, y una imagen exportada con otra paleta que la pantalla rompe la marca en
+ * el sitio donde mas circula.
  */
-export function aSvg(documento: DocumentoExportable, colores: string[]): string {
+export function aSvg(documento: DocumentoExportable): string {
   const hoja: HojaExportable | undefined = documento.grafico ?? documento.hojas[0];
-  const { encabezado } = documento;
+  const { encabezado, paleta } = documento;
 
   if (!hoja) throw new Error('No hay ningun objeto con datos que dibujar.');
 
@@ -82,25 +86,28 @@ export function aSvg(documento: DocumentoExportable, colores: string[]): string 
       const altoBarra = (valor / maximo) * altoGrafico;
       const x = margenIzq + i * (anchoBarra + separacion);
       const y = margenSup + altoGrafico - altoBarra;
-      const color = colores[i % colores.length] ?? '#4f46e5';
+      const color = paleta.series[i % paleta.series.length] ?? paleta.texto;
       return [
         `<rect x="${x}" y="${y.toFixed(1)}" width="${anchoBarra}" height="${altoBarra.toFixed(1)}" fill="${color}" />`,
-        `<text x="${x + anchoBarra / 2}" y="${(y - 6).toFixed(1)}" text-anchor="middle" font-size="11" fill="#0f172a">${valor}</text>`,
-        `<text x="${x + anchoBarra / 2}" y="${margenSup + altoGrafico + 16}" text-anchor="middle" font-size="10" fill="#475569">${escaparXml(String(fila[0] ?? ''))}</text>`,
+        `<text x="${x + anchoBarra / 2}" y="${(y - 6).toFixed(1)}" text-anchor="middle" font-size="11" fill="${paleta.texto}">${valor}</text>`,
+        `<text x="${x + anchoBarra / 2}" y="${margenSup + altoGrafico + 16}" text-anchor="middle" font-size="10" fill="${paleta.textoAtenuado}">${escaparXml(String(fila[0] ?? ''))}</text>`,
       ].join('');
     })
     .join('');
 
   const metadatos = encabezado.lineas
-    .map((l, i) => `<text x="16" y="${38 + i * 14}" font-size="10" fill="#475569">${escaparXml(l)}</text>`)
+    .map(
+      (l, i) =>
+        `<text x="16" y="${38 + i * 14}" font-size="10" fill="${paleta.textoAtenuado}">${escaparXml(l)}</text>`,
+    )
     .join('');
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ancho} ${alto}" width="${ancho}" height="${alto}" role="img" aria-label="${escaparXml(hoja.title)}">`,
-    `<rect width="${ancho}" height="${alto}" fill="#ffffff" />`,
-    `<text x="16" y="22" font-size="14" font-weight="bold" fill="#0f172a">${escaparXml(encabezado.titulo)} — ${escaparXml(hoja.title)}</text>`,
+    `<rect width="${ancho}" height="${alto}" fill="${paleta.superficie}" />`,
+    `<text x="16" y="22" font-size="14" font-weight="bold" fill="${paleta.texto}">${escaparXml(encabezado.titulo)} — ${escaparXml(hoja.title)}</text>`,
     metadatos,
-    `<line x1="${margenIzq - 8}" y1="${margenSup + altoGrafico}" x2="${ancho - 20}" y2="${margenSup + altoGrafico}" stroke="#cbd5e1" />`,
+    `<line x1="${margenIzq - 8}" y1="${margenSup + altoGrafico}" x2="${ancho - 20}" y2="${margenSup + altoGrafico}" stroke="${paleta.borde}" />`,
     barras,
     '</svg>',
   ].join('');

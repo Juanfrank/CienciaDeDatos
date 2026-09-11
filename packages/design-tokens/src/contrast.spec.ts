@@ -138,3 +138,65 @@ describe('toCssVariables', () => {
     expect(vars['--color-categorical-7']).toBe(defaultTheme.color.categorical[7]);
   });
 });
+
+describe('marca institucional del Poder Judicial', () => {
+  it('el azul y el rojo son exactamente los de la norma de marca', () => {
+    // Fijados como prueba y no solo como constante: son un dato de la institucion, no una
+    // preferencia de diseno, y un cambio accidental tiene que fallar en CI y no descubrirse en
+    // un informe ya impreso.
+    expect(defaultTheme.color.brand[500]).toBe('#0050dd');
+    expect(defaultTheme.color.accent[500]).toBe('#ef3340');
+  });
+
+  it('la tipografia institucional encabeza la pila, con alternativas detras', () => {
+    const pila = defaultTheme.font.sans;
+    // La variable la rellena `next/font`, que sirve Montserrat desde el propio origen; el nombre
+    // suelto detras cubre el caso de que la fuente este instalada en el sistema.
+    expect(pila.indexOf('Montserrat')).toBeLessThan(pila.indexOf('system-ui'));
+    // Si nada de eso carga, la aplicacion no puede caer en la serif por defecto del navegador.
+    expect(pila).toMatch(/sans-serif$/);
+  });
+
+  it('las series de datos abren con el azul y siguen con el rojo, como fija la marca', () => {
+    expect(defaultTheme.color.categorical[0]).toBe(defaultTheme.color.brand[500]);
+    expect(defaultTheme.color.categorical[1]).toBe(defaultTheme.color.accent[500]);
+  });
+
+  it('el tema institucional completo pasa la puerta de contraste', () => {
+    expect(findContrastFailures(institutionalContrastChecks(defaultTheme))).toEqual([]);
+  });
+});
+
+describe('el rojo institucional no puede llevar texto pequeno', () => {
+  it('queda por debajo de 4.5:1 sobre blanco, en los dos sentidos', () => {
+    // Es el hecho que ordena todo el uso del acento. Si algun dia alguien lo pone de fondo de
+    // un badge con texto blanco, esta prueba explica por que no se puede.
+    const sobreBlanco = contrastRatio(defaultTheme.color.accent[500], '#ffffff') ?? 0;
+    expect(sobreBlanco).toBeGreaterThanOrEqual(3); // si vale como elemento grafico
+    expect(sobreBlanco).toBeLessThan(4.5); // y no vale como texto
+  });
+
+  it('el tono 700 es el hermano con el que si se puede escribir', () => {
+    expect(contrastRatio(defaultTheme.color.accent[700], '#ffffff') ?? 0).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('el color de estado de error NO es el acento, sino el tono que admite texto', () => {
+    // Un badge de error lleva texto blanco encima; con el acento quedaria en 4.02:1.
+    expect(defaultTheme.color.danger).toBe(defaultTheme.color.accent[700]);
+    expect(
+      contrastRatio(defaultTheme.color.textOnBrand, defaultTheme.color.danger) ?? 0,
+    ).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('usar el acento como fondo de texto pequeno hace fallar la puerta', () => {
+    // La puerta tiene que seguir detectandolo: es el error que la norma de marca previene.
+    const fallos = findContrastFailures([
+      {
+        label: 'texto blanco sobre el acento',
+        foreground: defaultTheme.color.textOnBrand,
+        background: defaultTheme.color.accent[500],
+      },
+    ]);
+    expect(fallos).toHaveLength(1);
+  });
+});

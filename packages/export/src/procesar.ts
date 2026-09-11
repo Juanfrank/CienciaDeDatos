@@ -1,3 +1,4 @@
+import type { ThemeTokens } from '@app/design-tokens';
 import { aExcel, aPdf } from './binarios';
 import { construirDocumento } from './documento';
 import { aCsv, aSvg } from './formatos';
@@ -34,13 +35,11 @@ export interface ArtefactoGenerado {
   bytes: number;
 }
 
-/** Paleta para el SVG. La aporta quien cablea, desde los tokens del tema (4.7). */
 export interface GenerarOptions {
-  colores?: string[];
+  /** Tema con el que se dibuja. Por defecto, el institucional (4.3). */
+  theme?: ThemeTokens;
   ahora?: Date;
 }
-
-const COLORES_POR_DEFECTO = ['#4f46e5', '#0891b2', '#059669', '#d97706', '#dc2626', '#7c3aed'];
 
 export async function generarArtefacto(
   request: ExportRequest,
@@ -48,7 +47,6 @@ export async function generarArtefacto(
   options: GenerarOptions = {},
 ): Promise<ArtefactoGenerado> {
   const ahora = options.ahora ?? new Date();
-  const colores = options.colores ?? COLORES_POR_DEFECTO;
 
   if (objetos.length === 0) {
     throw new Error('No hay ningun objeto con datos que exportar.');
@@ -56,7 +54,7 @@ export async function generarArtefacto(
 
   // El documento se construye UNA vez y los cuatro formatos parten de el. Ninguno decide que
   // objetos entran ni cual se dibuja como grafico: eso ya esta resuelto aqui arriba.
-  const documento = construirDocumento(objetos, request);
+  const documento = construirDocumento(objetos, request, options.theme);
 
   let contenido: Buffer;
   switch (request.format) {
@@ -72,7 +70,7 @@ export async function generarArtefacto(
     case 'svg':
       // Un SVG es UNA imagen. `documento.grafico` ya eligio cual: el primer objeto marcado como
       // grafico, no el primero a secas.
-      contenido = Buffer.from(aSvg(documento, colores), 'utf8');
+      contenido = Buffer.from(aSvg(documento), 'utf8');
       break;
   }
 

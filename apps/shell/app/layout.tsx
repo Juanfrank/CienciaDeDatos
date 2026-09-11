@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Montserrat } from 'next/font/google';
 import Link from 'next/link';
 import { defaultTheme, toCssVariables } from '@app/design-tokens';
 import { esAdministrador } from '../src/server/admin';
@@ -12,6 +13,23 @@ export const metadata: Metadata = {
   title: 'Capa de visualizacion',
   description: 'Reporting institucional',
 };
+
+/**
+ * Montserrat, la tipografia institucional.
+ *
+ * Se carga con `next/font`, que la descarga EN TIEMPO DE CONSTRUCCION y la sirve desde el propio
+ * origen. Un `<link>` a fonts.googleapis.com haria que el navegador hablase con un tercero, y
+ * eso incumple el principio 1 —el navegador solo habla con esta aplicacion—; hay una prueba de
+ * navegador que lo comprueba y que ese enlace romperia. De paso evita el parpadeo de la fuente y
+ * una peticion externa en cada carga.
+ */
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  display: 'swap',
+  // La pila de alternativas la fija el tema; aqui solo se declara que variable la lleva.
+  variable: '--font-montserrat',
+});
 
 /** El tema organizacional (4.3) se inyecta como variables CSS en la raiz del documento. */
 const variables = toCssVariables(defaultTheme);
@@ -38,7 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }));
 
   return (
-    <html lang="es">
+    <html lang="es" className={montserrat.variable}>
       <body style={variables as React.CSSProperties}>
         <header className="cabecera">
           <div className="cabecera__marca">

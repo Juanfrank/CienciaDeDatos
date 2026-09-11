@@ -118,7 +118,9 @@ export function institutionalContrastChecks(theme: {
     surface: string;
     background: string;
     categorical: string[];
-    brand: { 500: string };
+    brand: { 500: string; 700: string };
+    accent: { 500: string; 700: string };
+    danger: string;
   };
 }): ContrastCheck[] {
   const { color } = theme;
@@ -126,7 +128,42 @@ export function institutionalContrastChecks(theme: {
     { label: 'texto sobre superficie', foreground: color.text, background: color.surface },
     { label: 'texto sobre fondo', foreground: color.text, background: color.background },
     { label: 'texto atenuado sobre superficie', foreground: color.textMuted, background: color.surface },
+    { label: 'texto atenuado sobre fondo', foreground: color.textMuted, background: color.background },
     { label: 'texto sobre color de marca', foreground: color.textOnBrand, background: color.brand[500] },
+    // Enlaces, botones de texto y el indicador de foco usan el tono 700 sobre las dos
+    // superficies. Es la combinacion mas repetida de toda la interfaz.
+    { label: 'enlace sobre superficie', foreground: color.brand[700], background: color.surface },
+    { label: 'enlace sobre fondo', foreground: color.brand[700], background: color.background },
+    {
+      label: 'texto sobre color de estado de error',
+      foreground: color.textOnBrand,
+      background: color.danger,
+    },
+    /**
+     * El acento se comprueba como ELEMENTO GRAFICO (3:1), no como texto.
+     *
+     * No es una excepcion que se hace para que pase: es lo que el acento es, segun la propia
+     * norma de marca —enfasis y contraste, nunca relleno dominante—. Comprobarlo a 4.5:1 daria
+     * un fallo permanente que alguien acabaria silenciando, y silenciar la puerta de contraste
+     * es peor que no tenerla.
+     */
+    {
+      label: 'acento como elemento grafico sobre superficie',
+      foreground: color.accent[500],
+      background: color.surface,
+      size: 'large' as const,
+    },
+    /**
+     * Y el tono con el que SI se puede escribir en rojo se comprueba como texto.
+     *
+     * Estas dos comprobaciones juntas son la regla: si alguien aclara `accent[700]` buscando
+     * acercarlo al rojo de la marca, esta prueba lo detiene antes de que llegue a un rotulo.
+     */
+    {
+      label: 'texto de acento sobre superficie',
+      foreground: color.accent[700],
+      background: color.surface,
+    },
     ...color.categorical.map((c, i) => ({
       label: `serie ${i + 1} sobre superficie`,
       foreground: c,

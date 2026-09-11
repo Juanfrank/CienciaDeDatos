@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
 import { Workbook } from 'exceljs';
-import type { DocumentoExportable, HojaExportable } from './documento';
+import type { DocumentoExportable, HojaExportable, PaletaDeExportacion } from './documento';
 
 /**
  * Formatos binarios: Excel y PDF.
@@ -21,7 +21,7 @@ function anchoDeColumna(nombre: string, valores: unknown[]): number {
 }
 
 export async function aExcel(documento: DocumentoExportable): Promise<Buffer> {
-  const { encabezado, hojas } = documento;
+  const { encabezado, hojas, paleta } = documento;
   const libro = new Workbook();
   libro.creator = encabezado.autor;
   libro.created = new Date();
@@ -39,7 +39,8 @@ export async function aExcel(documento: DocumentoExportable): Promise<Buffer> {
   if (encabezado.personalizada) {
     portada.addRow([]);
     const aviso = portada.addRow(['VISTA PERSONALIZADA — no es la vista institucional oficial']);
-    aviso.font = { bold: true, color: { argb: 'FFB45309' } };
+    // Excel quiere ARGB de ocho digitos; el tema da un hexadecimal de seis.
+    aviso.font = { bold: true, color: { argb: `FF${paleta.aviso.replace('#', '').toUpperCase()}` } };
   }
   portada.addRow([]);
   for (const linea of encabezado.lineas) portada.addRow([linea]);
@@ -78,7 +79,7 @@ const ANCHO_PAGINA = 595.28; // A4 en puntos
 const MARGEN = 40;
 
 export function aPdf(documento: DocumentoExportable): Promise<Buffer> {
-  const { encabezado, hojas } = documento;
+  const { encabezado, hojas, paleta } = documento;
 
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: MARGEN, bufferPages: true });
@@ -87,26 +88,26 @@ export function aPdf(documento: DocumentoExportable): Promise<Buffer> {
     doc.on('end', () => resolve(Buffer.concat(trozos)));
     doc.on('error', reject);
 
-    doc.font('Helvetica-Bold').fontSize(16).fillColor('#0f172a').text(encabezado.titulo);
+    doc.font('Helvetica-Bold').fontSize(16).fillColor(paleta.texto).text(encabezado.titulo);
     doc.moveDown(0.3);
 
     if (encabezado.personalizada) {
       doc
         .font('Helvetica-Bold')
         .fontSize(9)
-        .fillColor('#b45309')
+        .fillColor(paleta.aviso)
         .text('VISTA PERSONALIZADA — no es la vista institucional oficial');
       doc.moveDown(0.2);
     }
 
-    doc.font('Helvetica').fontSize(8).fillColor('#475569');
+    doc.font('Helvetica').fontSize(8).fillColor(paleta.textoAtenuado);
     for (const linea of encabezado.lineas) doc.text(linea);
     doc.moveDown(0.8);
 
     for (const hoja of hojas) {
-      doc.font('Helvetica-Bold').fontSize(11).fillColor('#0f172a').text(hoja.title);
+      doc.font('Helvetica-Bold').fontSize(11).fillColor(paleta.texto).text(hoja.title);
       doc.moveDown(0.3);
-      dibujarTabla(doc, hoja);
+      dibujarTabla(doc, hoja, paleta);
       doc.moveDown(1);
     }
 
@@ -117,7 +118,7 @@ export function aPdf(documento: DocumentoExportable): Promise<Buffer> {
       doc
         .font('Helvetica')
         .fontSize(7)
-        .fillColor('#94a3b8')
+        .fillColor(paleta.textoAtenuado)
         .text(
           `${encabezado.titulo} — pagina ${i + 1} de ${rango.count}`,
           MARGEN,
@@ -131,7 +132,11 @@ export function aPdf(documento: DocumentoExportable): Promise<Buffer> {
 }
 
 /** Tabla simple con salto de pagina y repeticion de cabecera. */
-function dibujarTabla(doc: PDFKit.PDFDocument, hoja: HojaExportable): void {
+function dibujarTabla(
+  doc: PDFKit.PDFDocument,
+  hoja: HojaExportable,
+  paleta: PaletaDeExportacion,
+): void {
   const columnas = hoja.columns;
   if (columnas.length === 0) return;
 
@@ -142,7 +147,7 @@ function dibujarTabla(doc: PDFKit.PDFDocument, hoja: HojaExportable): void {
 
   const cabecera = (): void => {
     const y = doc.y;
-    doc.font('Helvetica-Bold').fontSize(8).fillColor('#0f172a');
+    doc.font('Helvetica-Bold').fontSize(8).fillColor(paleta.texto);
     columnas.forEach((c, i) => {
       doc.text(c.name, MARGEN + i * anchoColumna, y, {
         width: anchoColumna - 4,
@@ -154,19 +159,19 @@ function dibujarTabla(doc: PDFKit.PDFDocument, hoja: HojaExportable): void {
     doc
       .moveTo(MARGEN, doc.y - 3)
       .lineTo(ANCHO_PAGINA - MARGEN, doc.y - 3)
-      .strokeColor('#cbd5e1')
+      .strokeColor(paleta.borde)
       .lineWidth(0.5)
       .stroke();
   };
 
   cabecera();
 
-  doc.font('Helvetica').fontSize(8).fillColor('#1e293b');
+  doc.font('Helvetica').fontSize(8).fillColor(paleta.texto);
   for (const fila of hoja.rows) {
     if (doc.y + altoFila > limiteInferior) {
       doc.addPage();
       cabecera();
-      doc.font('Helvetica').fontSize(8).fillColor('#1e293b');
+      doc.font('Helvetica').fontSize(8).fillColor(paleta.texto);
     }
     const y = doc.y;
     columnas.forEach((_, i) => {

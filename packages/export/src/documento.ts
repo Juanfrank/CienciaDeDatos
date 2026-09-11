@@ -1,3 +1,4 @@
+import { defaultTheme, type ThemeTokens } from '@app/design-tokens';
 import { construirEncabezado, type Encabezado } from './encabezado';
 import type { ExportRequest, ExportableObject } from './types';
 
@@ -15,6 +16,38 @@ import type { ExportRequest, ExportableObject } from './types';
  * que usa la tabla en pantalla y el complemento de tabla de datos.
  */
 
+/**
+ * Los colores con los que se dibuja un archivo exportado.
+ *
+ * Salen del TEMA, no de constantes de este paquete. Un PDF o una imagen que circulan por correo
+ * llevando otros colores que la pantalla rompen la marca justo donde mas se ve, y era lo que
+ * pasaba: los cuatro generadores tenian su propia paleta escrita a mano.
+ *
+ * Se aplana a una forma pequeña en vez de pasar el tema entero porque un generador de PDF no
+ * tiene por que conocer espaciados ni radios: solo necesita saber con que pinta.
+ */
+export interface PaletaDeExportacion {
+  texto: string;
+  textoAtenuado: string;
+  superficie: string;
+  borde: string;
+  /** Color de la advertencia de vista personalizada (4.6). */
+  aviso: string;
+  /** Series de datos, en el orden que fija la marca. */
+  series: string[];
+}
+
+export function paletaDe(theme: ThemeTokens = defaultTheme): PaletaDeExportacion {
+  return {
+    texto: theme.color.text,
+    textoAtenuado: theme.color.textMuted,
+    superficie: theme.color.surface,
+    borde: theme.color.border,
+    aviso: theme.color.warning,
+    series: theme.color.categorical,
+  };
+}
+
 export interface HojaExportable {
   title: string;
   columns: { name: string; type: string }[];
@@ -24,6 +57,8 @@ export interface HojaExportable {
 export interface DocumentoExportable {
   encabezado: Encabezado;
   hojas: HojaExportable[];
+  /** Paleta institucional con la que dibujan los cuatro formatos. */
+  paleta: PaletaDeExportacion;
   /**
    * La hoja que debe dibujar un formato de una sola imagen.
    *
@@ -37,6 +72,7 @@ export interface DocumentoExportable {
 export function construirDocumento(
   objetos: ExportableObject[],
   request: ExportRequest,
+  theme: ThemeTokens = defaultTheme,
 ): DocumentoExportable {
   const hojas: HojaExportable[] = objetos.map((o) => ({
     title: o.title,
@@ -50,6 +86,7 @@ export function construirDocumento(
   return {
     encabezado: construirEncabezado(request),
     hojas,
+    paleta: paletaDe(theme),
     ...(grafico ? { grafico } : {}),
   };
 }

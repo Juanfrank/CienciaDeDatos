@@ -341,9 +341,9 @@ code {
 }
 .aviso p { margin: 0 0 var(--space-xs); }
 .aviso p:last-child { margin-bottom: 0; }
-.aviso--error { background: #fef2f2; border-left-color: var(--color-danger); color: var(--color-danger); }
-.aviso--atencion { background: #fffbeb; border-left-color: var(--color-warning); color: #78350f; }
-.aviso--ok { background: #f0fdf4; border-left-color: var(--color-success); color: #14532d; }
+.aviso--error { background: var(--color-accent-50); border-left-color: var(--color-danger); color: var(--color-accent-900); }
+.aviso--atencion { background: #fdf6ec; border-left-color: var(--color-warning); color: #6b3608; }
+.aviso--ok { background: #eef8f1; border-left-color: var(--color-success); color: #0e4a25; }
 .aviso__acciones { display: flex; gap: var(--space-sm); align-items: center; margin-top: var(--space-sm); }
 
 .editor-arbol__lista { list-style: none; margin: 0; padding: 0; }
@@ -411,7 +411,7 @@ code {
 
 .filtros-auditoria { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); font-size: var(--font-size-sm); }
 .filtros-auditoria a { color: var(--color-brand-700); }
-tr.es-ampliacion { background: #fffbeb; }
+tr.es-ampliacion { background: #fdf6ec; }
 
 .papelera { margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--color-border); }
 
@@ -507,7 +507,7 @@ tr.es-ampliacion { background: #fffbeb; }
   border-radius: var(--radius-sm);
   font-size: var(--font-size-sm);
   line-height: 1.4;
-  box-shadow: 0 4px 12px rgb(15 23 42 / 25%);
+  box-shadow: 0 4px 12px rgb(26 26 26 / 25%);
 }
 
 .emergente {
@@ -520,7 +520,7 @@ tr.es-ampliacion { background: #fffbeb; }
   background: var(--color-surface);
   color: var(--color-text);
 }
-.emergente::backdrop { background: rgb(15 23 42 / 45%); }
+.emergente::backdrop { background: rgb(26 26 26 / 45%); }
 .emergente__cabecera {
   display: flex;
   align-items: baseline;
