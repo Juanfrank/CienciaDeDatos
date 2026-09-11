@@ -732,6 +732,20 @@ tr.es-ampliacion { background: #fdf6ec; }
 .acceso__separador::after { content: ''; flex: 1; border-top: 1px solid var(--color-border); }
 .acceso__error { min-height: 1.2em; margin: 0 0 var(--space-sm); font-size: var(--font-size-sm); color: var(--color-accent-900); }
 
+/*
+ * Un control deshabilitado tiene que PARECERLO.
+ *
+ * `.boton-enlace` se dibuja como un enlace, y con `disabled` se veia exactamente igual que uno
+ * activo: subrayado, en azul y con el cursor de mano. Quien lo pulsa no entiende por que no
+ * pasa nada, y lo vuelve a pulsar. Lo descubrio una captura del editor, no una prueba: el boton
+ * de "Enviar a aprobacion" de un modulo con problemas se veia pulsable.
+ */
+.boton-enlace:disabled {
+  color: var(--color-textMuted);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
 /* Editor de modulos (4.2) ------------------------------------------------- */
 
 .editor__cuerpo { flex: 1; padding: var(--space-lg); max-width: 1100px; }
@@ -748,6 +762,15 @@ tr.es-ampliacion { background: #fdf6ec; }
   border-radius: var(--radius-md);
   margin-bottom: var(--space-md);
 }
+
+/*
+ * La tabla se desplaza DENTRO de su region, no arrastrando la pagina.
+ *
+ * En un movil de 390 px, la columna de acciones se salia por la derecha y la pagina entera
+ * scrolleaba en horizontal — el sintoma clasico de un ancho olvidado. Es el mismo tratamiento
+ * que ya tenian las tablas de datos de un modulo, que aqui faltaba.
+ */
+.tabla-contenedor-datos { overflow-x: auto; }
 
 .tabla-datos { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
 .tabla-datos th,

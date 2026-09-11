@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import type { PublishBlocker } from '@app/module-model';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import type { PublishBlocker } from "@app/module-model";
 
 /**
  * Lista de modulos del editor — secciones 4.1 y 4.2.
@@ -18,7 +18,7 @@ export interface FilaDeModulo {
   moduleId: string;
   slug: string;
   name: string;
-  status: 'borrador' | 'pendiente-de-aprobacion' | 'publicado';
+  status: "borrador" | "pendiente-de-aprobacion" | "publicado";
   version: number;
   autor: string | null;
   propio: boolean;
@@ -26,10 +26,10 @@ export interface FilaDeModulo {
   bloqueos: PublishBlocker[];
 }
 
-const ETIQUETA: Record<FilaDeModulo['status'], string> = {
-  borrador: 'Borrador',
-  'pendiente-de-aprobacion': 'Pendiente de aprobacion',
-  publicado: 'Publicado',
+const ETIQUETA: Record<FilaDeModulo["status"], string> = {
+  borrador: "Borrador",
+  "pendiente-de-aprobacion": "Pendiente de aprobacion",
+  publicado: "Publicado",
 };
 
 export function ListaDeModulos({
@@ -42,27 +42,35 @@ export function ListaDeModulos({
   usuario: string;
 }) {
   const router = useRouter();
-  const [nombre, setNombre] = useState('');
-  const [slug, setSlug] = useState('');
-  const [error, setError] = useState('');
+  const [nombre, setNombre] = useState("");
+  const [slug, setSlug] = useState("");
+  const [error, setError] = useState("");
   const [trabajando, setTrabajando] = useState(false);
 
-  const esAdmin = rol === 'administrador';
+  const esAdmin = rol === "administrador";
 
   const pedir = async (url: string, init: RequestInit): Promise<boolean> => {
-    setError('');
+    setError("");
     setTrabajando(true);
     try {
       const r = await fetch(url, {
         ...init,
-        headers: { 'content-type': 'application/json', ...(init.headers ?? {}) },
+        headers: {
+          "content-type": "application/json",
+          ...(init.headers ?? {}),
+        },
       });
       if (!r.ok) {
-        const cuerpo = (await r.json()) as { error?: string; detalle?: unknown };
+        const cuerpo = (await r.json()) as {
+          error?: string;
+          detalle?: unknown;
+        };
         const detalle = Array.isArray(cuerpo.detalle)
-          ? ` ${(cuerpo.detalle as PublishBlocker[]).map((b) => b.detail).join(' ')}`
-          : '';
-        setError(`${cuerpo.error ?? 'No se pudo completar la accion.'}${detalle}`);
+          ? ` ${(cuerpo.detalle as PublishBlocker[]).map((b) => b.detail).join(" ")}`
+          : "";
+        setError(
+          `${cuerpo.error ?? "No se pudo completar la accion."}${detalle}`,
+        );
         return false;
       }
       router.refresh();
@@ -73,21 +81,31 @@ export function ListaDeModulos({
   };
 
   const crear = async () => {
-    if (await pedir('/api/modulos', { method: 'POST', body: JSON.stringify({ nombre, slug }) })) {
-      setNombre('');
-      setSlug('');
+    if (
+      await pedir("/api/modulos", {
+        method: "POST",
+        body: JSON.stringify({ nombre, slug }),
+      })
+    ) {
+      setNombre("");
+      setSlug("");
     }
   };
 
-  const transicion = async (fila: FilaDeModulo, cual: 'enviar' | 'publicar' | 'devolver') => {
+  const transicion = async (
+    fila: FilaDeModulo,
+    cual: "enviar" | "publicar" | "devolver",
+  ) => {
     // Se pide en la propia interfaz porque el servidor lo exige: es lo unico que le dice a quien
     // lo propuso que tiene que cambiar.
     const motivo =
-      cual === 'devolver' ? (window.prompt('Motivo de la devolucion (obligatorio):') ?? '') : '';
-    if (cual === 'devolver' && !motivo.trim()) return;
+      cual === "devolver"
+        ? (window.prompt("Motivo de la devolucion (obligatorio):") ?? "")
+        : "";
+    if (cual === "devolver" && !motivo.trim()) return;
 
     await pedir(`/api/modulos/${fila.slug}/estado`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ transicion: cual, ...(motivo ? { motivo } : {}) }),
     });
   };
@@ -116,10 +134,10 @@ export function ListaDeModulos({
               setSlug(
                 e.target.value
                   .toLowerCase()
-                  .normalize('NFD')
-                  .replace(/[̀-ͯ]/g, '')
-                  .replace(/[^a-z0-9]+/g, '-')
-                  .replace(/^-+|-+$/g, ''),
+                  .normalize("NFD")
+                  .replace(/[̀-ͯ]/g, "")
+                  .replace(/[^a-z0-9]+/g, "-")
+                  .replace(/^-+|-+$/g, ""),
               );
             }}
           />
@@ -133,7 +151,12 @@ export function ListaDeModulos({
             onChange={(e) => setSlug(e.target.value)}
           />
         </p>
-        <button type="submit" className="pastilla" data-testid="crear-modulo" disabled={trabajando}>
+        <button
+          type="submit"
+          className="pastilla"
+          data-testid="crear-modulo"
+          disabled={trabajando}
+        >
           Crear borrador
         </button>
       </form>
@@ -147,78 +170,93 @@ export function ListaDeModulos({
           No hay ningun modulo que pueda editar. Cree un borrador para empezar.
         </p>
       ) : (
-        <table className="tabla-datos" data-testid="lista-modulos">
-          <thead>
-            <tr>
-              <th scope="col">Modulo</th>
-              <th scope="col">Estado</th>
-              <th scope="col">Autor</th>
-              <th scope="col">Objetos</th>
-              <th scope="col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {modulos.map((m) => (
-              <tr key={m.moduleId} data-testid={`fila-${m.slug}`}>
-                <th scope="row">
-                  <Link href={`/editor/${m.slug}`}>{m.name}</Link>
-                  <span className="texto-atenuado"> /m/{m.slug} · v{m.version}</span>
-                </th>
-                <td>
-                  <span className="pastilla-estado" data-estado={m.status}>
-                    {ETIQUETA[m.status]}
-                  </span>
-                  {m.bloqueos.length > 0 ? (
-                    <ul className="editor__bloqueos" data-testid={`bloqueos-${m.slug}`}>
-                      {m.bloqueos.map((b, i) => (
-                        <li key={`${b.reason}-${i}`}>{b.detail}</li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </td>
-                <td>{m.autor ?? <span className="texto-atenuado">Institucional</span>}</td>
-                <td>{m.objetos}</td>
-                <td className="editor__acciones">
-                  {m.status === 'borrador' && m.autor === usuario ? (
-                    <button
-                      type="button"
-                      className="boton-enlace"
-                      data-testid={`enviar-${m.slug}`}
-                      disabled={trabajando || m.bloqueos.length > 0}
-                      onClick={() => void transicion(m, 'enviar')}
-                    >
-                      Enviar a aprobacion
-                    </button>
-                  ) : null}
-
-                  {m.status === 'pendiente-de-aprobacion' && esAdmin ? (
-                    <button
-                      type="button"
-                      className="pastilla"
-                      data-testid={`publicar-${m.slug}`}
-                      disabled={trabajando || m.bloqueos.length > 0}
-                      onClick={() => void transicion(m, 'publicar')}
-                    >
-                      Publicar
-                    </button>
-                  ) : null}
-
-                  {m.status !== 'borrador' && (esAdmin || m.autor === usuario) ? (
-                    <button
-                      type="button"
-                      className="boton-enlace"
-                      data-testid={`devolver-${m.slug}`}
-                      disabled={trabajando}
-                      onClick={() => void transicion(m, 'devolver')}
-                    >
-                      {m.status === 'publicado' ? 'Retirar' : 'Devolver a borrador'}
-                    </button>
-                  ) : null}
-                </td>
+        <div className="tabla-contenedor-datos">
+          <table className="tabla-datos" data-testid="lista-modulos">
+            <thead>
+              <tr>
+                <th scope="col">Modulo</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Autor</th>
+                <th scope="col">Objetos</th>
+                <th scope="col">Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {modulos.map((m) => (
+                <tr key={m.moduleId} data-testid={`fila-${m.slug}`}>
+                  <th scope="row">
+                    <Link href={`/editor/${m.slug}`}>{m.name}</Link>
+                    <span className="texto-atenuado">
+                      {" "}
+                      /m/{m.slug} · v{m.version}
+                    </span>
+                  </th>
+                  <td>
+                    <span className="pastilla-estado" data-estado={m.status}>
+                      {ETIQUETA[m.status]}
+                    </span>
+                    {m.bloqueos.length > 0 ? (
+                      <ul
+                        className="editor__bloqueos"
+                        data-testid={`bloqueos-${m.slug}`}
+                      >
+                        {m.bloqueos.map((b, i) => (
+                          <li key={`${b.reason}-${i}`}>{b.detail}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </td>
+                  <td>
+                    {m.autor ?? (
+                      <span className="texto-atenuado">Institucional</span>
+                    )}
+                  </td>
+                  <td>{m.objetos}</td>
+                  <td className="editor__acciones">
+                    {m.status === "borrador" && m.autor === usuario ? (
+                      <button
+                        type="button"
+                        className="boton-enlace"
+                        data-testid={`enviar-${m.slug}`}
+                        disabled={trabajando || m.bloqueos.length > 0}
+                        onClick={() => void transicion(m, "enviar")}
+                      >
+                        Enviar a aprobacion
+                      </button>
+                    ) : null}
+
+                    {m.status === "pendiente-de-aprobacion" && esAdmin ? (
+                      <button
+                        type="button"
+                        className="pastilla"
+                        data-testid={`publicar-${m.slug}`}
+                        disabled={trabajando || m.bloqueos.length > 0}
+                        onClick={() => void transicion(m, "publicar")}
+                      >
+                        Publicar
+                      </button>
+                    ) : null}
+
+                    {m.status !== "borrador" &&
+                    (esAdmin || m.autor === usuario) ? (
+                      <button
+                        type="button"
+                        className="boton-enlace"
+                        data-testid={`devolver-${m.slug}`}
+                        disabled={trabajando}
+                        onClick={() => void transicion(m, "devolver")}
+                      >
+                        {m.status === "publicado"
+                          ? "Retirar"
+                          : "Devolver a borrador"}
+                      </button>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   );

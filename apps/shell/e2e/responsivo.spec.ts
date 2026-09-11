@@ -130,14 +130,20 @@ test.describe('nada se sale de la pantalla', () => {
     test(`en ${nombre} no hay desplazamiento horizontal de pagina`, async ({ page }) => {
       // Una pagina que se desplaza en horizontal en un movil es el sintoma clasico de un ancho
       // fijo olvidado. Las tablas SI se desplazan, pero dentro de su propia region.
+      //
+      // Se recorren TODAS las superficies y no solo un modulo: esta prueba miraba /m y /admin, y
+      // el editor —que llego despues— desbordaba por la columna de acciones de su tabla sin que
+      // nada lo detectara. Una lista es mas facil de ampliar que de recordar.
       await page.setViewportSize(tamano);
       await entrarComo(page, 'u-ana');
-      await page.goto('/m/casos-pendientes');
 
-      const desborda = await page.evaluate(
-        () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
-      );
-      expect(desborda).toBe(false);
+      for (const ruta of ['/m/casos-pendientes', '/editor', '/avisos']) {
+        await page.goto(ruta);
+        const desborda = await page.evaluate(
+          () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+        );
+        expect(desborda, `${ruta} desborda en horizontal`).toBe(false);
+      }
     });
   }
 
@@ -149,6 +155,15 @@ test.describe('nada se sale de la pantalla', () => {
     const contenedor = page.locator('.tabla-contenedor').last();
     const desplazable = await contenedor.evaluate((el) => el.scrollWidth > el.clientWidth);
     expect(desplazable).toBe(true);
+  });
+
+  test('la tabla del editor tambien se desplaza dentro de su region', async ({ page }) => {
+    await page.setViewportSize(MOVIL);
+    await entrarComo(page, 'u-ana');
+    await page.goto('/editor');
+
+    const contenedor = page.locator('.tabla-contenedor-datos').first();
+    expect(await contenedor.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
   });
 
   test('el panel de administracion tampoco desborda en movil', async ({ page }) => {

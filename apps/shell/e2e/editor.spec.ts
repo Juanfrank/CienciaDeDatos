@@ -198,8 +198,15 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
 
     await page.goto('/editor');
     // Y el boton no se ofrece: la pantalla dice por que antes de que nadie lo intente.
-    await expect(page.getByTestId(`enviar-${slug}`)).toBeDisabled();
+    const enviar = page.getByTestId(`enviar-${slug}`);
+    await expect(enviar).toBeDisabled();
     await expect(page.getByTestId(`bloqueos-${slug}`)).toBeVisible();
+
+    // Y ademas SE VE deshabilitado. Sin estilo propio se dibujaba igual que un enlace activo
+    // —subrayado y en azul—, asi que quien lo pulsaba no entendia por que no pasaba nada y lo
+    // volvia a pulsar. Un control inerte que parece pulsable es peor que uno ausente.
+    await expect(enviar).toHaveCSS('cursor', 'not-allowed');
+    await expect(enviar).not.toHaveCSS('text-decoration-line', 'underline');
   });
 
   test('no se puede saltar la aprobacion', async ({ page }) => {

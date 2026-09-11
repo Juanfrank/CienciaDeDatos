@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import type { EstadoDeCuentaLocal } from '../../server/identidad';
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import type { EstadoDeCuentaLocal } from "../../server/identidad";
 
 /**
  * Cuentas locales y sus dos vias de recuperacion — seccion 4.7.2.
@@ -31,7 +31,7 @@ export function CuentasLocales({
   correoDisponible: boolean;
 }) {
   const router = useRouter();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [emitido, setEmitido] = useState<{
     email: string;
     resetId: string;
@@ -40,14 +40,17 @@ export function CuentasLocales({
   } | null>(null);
   const [trabajando, setTrabajando] = useState(false);
 
-  const actuar = async (accion: 'desbloquear' | 'restablecer', email: string) => {
-    setError('');
+  const actuar = async (
+    accion: "desbloquear" | "restablecer",
+    email: string,
+  ) => {
+    setError("");
     setEmitido(null);
     setTrabajando(true);
     try {
-      const r = await fetch('/api/admin/cuentas', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
+      const r = await fetch("/api/admin/cuentas", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({ accion, email }),
       });
       const cuerpo = (await r.json()) as {
@@ -58,15 +61,15 @@ export function CuentasLocales({
       };
 
       if (!r.ok) {
-        setError(cuerpo.error ?? 'No se pudo completar la accion.');
+        setError(cuerpo.error ?? "No se pudo completar la accion.");
         return;
       }
-      if (accion === 'restablecer' && cuerpo.resetId) {
+      if (accion === "restablecer" && cuerpo.resetId) {
         setEmitido({
           email,
           resetId: cuerpo.resetId,
           ...(cuerpo.codigo ? { codigo: cuerpo.codigo } : {}),
-          expiraEn: cuerpo.expiraEn ?? '',
+          expiraEn: cuerpo.expiraEn ?? "",
         });
       }
       router.refresh();
@@ -77,13 +80,18 @@ export function CuentasLocales({
 
   return (
     <>
-      <p className={correoDisponible ? 'aviso aviso--ok' : 'aviso aviso--atencion'} data-testid="canal-restablecimiento">
-        Canal de entrega del token: <strong>{canal}</strong>.{' '}
+      <p
+        className={
+          correoDisponible ? "aviso aviso--ok" : "aviso aviso--atencion"
+        }
+        data-testid="canal-restablecimiento"
+      >
+        Canal de entrega del token: <strong>{canal}</strong>.{" "}
         {correoDisponible
-          ? 'El token se envia al correo verificado de la cuenta.'
-          : 'Sin correo institucional configurado, el restablecimiento es MEDIADO: el codigo se ' +
-            'muestra aqui y usted lo entrega a la persona por una via en la que haya verificado ' +
-            'su identidad. Usted responde de esa verificacion.'}
+          ? "El token se envia al correo verificado de la cuenta."
+          : "Sin correo institucional configurado, el restablecimiento es MEDIADO: el codigo se " +
+            "muestra aqui y usted lo entrega a la persona por una via en la que haya verificado " +
+            "su identidad. Usted responde de esa verificacion."}
       </p>
 
       <p className="acceso__error" role="alert" data-testid="cuentas-error">
@@ -91,10 +99,14 @@ export function CuentasLocales({
       </p>
 
       {emitido ? (
-        <div className="aviso aviso--atencion" data-testid="restablecimiento-emitido">
+        <div
+          className="aviso aviso--atencion"
+          data-testid="restablecimiento-emitido"
+        >
           <p>
-            Restablecimiento para <strong>{emitido.email}</strong>. Caduca el{' '}
-            {new Date(emitido.expiraEn).toLocaleString('es-DO')} y solo se puede usar una vez.
+            Restablecimiento para <strong>{emitido.email}</strong>. Caduca el{" "}
+            {new Date(emitido.expiraEn).toLocaleString("es-DO")} y solo se puede
+            usar una vez.
           </p>
           <p>
             Identificador: <code data-testid="reset-id">{emitido.resetId}</code>
@@ -105,75 +117,86 @@ export function CuentasLocales({
             </p>
           ) : null}
           <p className="texto-atenuado">
-            La persona entra en /restablecer con estos dos datos y elige su contrasena nueva. Al
-            hacerlo se le desbloquea la cuenta y se cierran sus sesiones abiertas.
+            La persona entra en /restablecer con estos dos datos y elige su
+            contrasena nueva. Al hacerlo se le desbloquea la cuenta y se cierran
+            sus sesiones abiertas.
           </p>
         </div>
       ) : null}
 
-      <table className="tabla-datos" data-testid="tabla-cuentas">
-        <caption className="texto-atenuado">
-          {cuentas.length} cuenta{cuentas.length === 1 ? '' : 's'} local
-          {cuentas.length === 1 ? '' : 'es'} en el sistema
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Cuenta</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Segundo factor</th>
-            <th scope="col">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cuentas.map((c) => (
-            <tr key={c.userId} data-testid={`cuenta-${c.userId}`}>
-              <th scope="row">
-                {c.userId}
-                <span className="texto-atenuado"> · {c.email}</span>
-              </th>
-              <td>
-                <span className="pastilla-estado" data-estado={c.bloqueada ? 'bloqueada' : 'activa'}>
-                  {c.bloqueada ? 'Bloqueada' : 'Activa'}
-                </span>
-                {c.intentosFallidos > 0 ? (
-                  <span className="texto-atenuado"> · {c.intentosFallidos} intentos fallidos</span>
-                ) : null}
-              </td>
-              <td>
-                {/*
+      <div className="tabla-contenedor-datos">
+        <table className="tabla-datos" data-testid="tabla-cuentas">
+          <caption className="texto-atenuado">
+            {cuentas.length} cuenta{cuentas.length === 1 ? "" : "s"} local
+            {cuentas.length === 1 ? "" : "es"} en el sistema
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Cuenta</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Segundo factor</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {cuentas.map((c) => (
+              <tr key={c.userId} data-testid={`cuenta-${c.userId}`}>
+                <th scope="row">
+                  {c.userId}
+                  <span className="texto-atenuado"> · {c.email}</span>
+                </th>
+                <td>
+                  <span
+                    className="pastilla-estado"
+                    data-estado={c.bloqueada ? "bloqueada" : "activa"}
+                  >
+                    {c.bloqueada ? "Bloqueada" : "Activa"}
+                  </span>
+                  {c.intentosFallidos > 0 ? (
+                    <span className="texto-atenuado">
+                      {" "}
+                      · {c.intentosFallidos} intentos fallidos
+                    </span>
+                  ) : null}
+                </td>
+                <td>
+                  {/*
                   Una cuenta local sin TOTP es un hueco, no un detalle: 4.7.2 lo trata como
                   obligatorio precisamente porque estas cuentas no heredan el MFA de Azure AD.
                 */}
-                {c.tieneSegundoFactor ? (
-                  'TOTP configurado'
-                ) : (
-                  <strong data-testid={`sin-mfa-${c.userId}`}>Sin segundo factor</strong>
-                )}
-              </td>
-              <td className="editor__acciones">
-                <button
-                  type="button"
-                  className="boton-enlace"
-                  data-testid={`desbloquear-${c.userId}`}
-                  disabled={trabajando || !c.bloqueada}
-                  onClick={() => void actuar('desbloquear', c.email)}
-                >
-                  Desbloquear
-                </button>
-                <button
-                  type="button"
-                  className="boton-enlace"
-                  data-testid={`restablecer-${c.userId}`}
-                  disabled={trabajando}
-                  onClick={() => void actuar('restablecer', c.email)}
-                >
-                  Restablecer contrasena
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  {c.tieneSegundoFactor ? (
+                    "TOTP configurado"
+                  ) : (
+                    <strong data-testid={`sin-mfa-${c.userId}`}>
+                      Sin segundo factor
+                    </strong>
+                  )}
+                </td>
+                <td className="editor__acciones">
+                  <button
+                    type="button"
+                    className="boton-enlace"
+                    data-testid={`desbloquear-${c.userId}`}
+                    disabled={trabajando || !c.bloqueada}
+                    onClick={() => void actuar("desbloquear", c.email)}
+                  >
+                    Desbloquear
+                  </button>
+                  <button
+                    type="button"
+                    className="boton-enlace"
+                    data-testid={`restablecer-${c.userId}`}
+                    disabled={trabajando}
+                    onClick={() => void actuar("restablecer", c.email)}
+                  >
+                    Restablecer contrasena
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
