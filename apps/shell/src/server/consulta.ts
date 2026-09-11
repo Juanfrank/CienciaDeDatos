@@ -1,7 +1,7 @@
 import { ResolvedorLocal, type ConsultaResuelta, type Vocabulario } from '@app/nl-query';
 import { fieldKey } from '@app/ui-components';
 import { cargarModulo } from './datos';
-import { findModuleBySlug } from './modulos';
+import { moduloVisibleParaUsuario } from './cicloDeVida';
 
 /**
  * Cableado de la consulta en lenguaje natural (4.9).
@@ -31,7 +31,7 @@ export async function vocabularioDe(
   userId: string,
   teamId: string,
 ): Promise<Vocabulario | null> {
-  const module = findModuleBySlug(moduleSlug);
+  const module = await moduloVisibleParaUsuario(moduleSlug, userId);
   if (!module) return null;
 
   const cargado = await cargarModulo({ module, userId, teamId, requestedFilters: {} });

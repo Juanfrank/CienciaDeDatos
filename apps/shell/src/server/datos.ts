@@ -1,9 +1,9 @@
-import type { QueryResult } from '@app/data-contracts';
+import type { QueryResult, SchemaDescriptor } from '@app/data-contracts';
 import { canTeamAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
-import type { ReadResult } from '@app/caching';
+import { SCHEMA_CACHE_KEY, type ReadResult, getDataset } from '@app/caching';
 import { type GridItem, type ModuleDefinition, findPage, validateModule } from '@app/module-model';
 import { type BindingProblem, fieldKey, validateBinding } from '@app/ui-components';
-import { datasetReader, findTeam, getGeneralTree, objectRegistry, scopeFor } from './contexto';
+import { cacheL2, datasetReader, findTeam, getGeneralTree, objectRegistry, scopeFor } from './contexto';
 
 /**
  * Carga de un modulo para una persona concreta.
@@ -163,4 +163,85 @@ export async function diagnosticarModulo(module: ModuleDefinition, userId: strin
   }
 
   return validateModule({ module, registry: objectRegistry, columnsByDataset });
+}
+
+/**
+ * Diagnosticos para el EDITOR, sin ambito de por medio.
+ *
+ * El de arriba necesita un `userId` y un `teamId` porque valida contra las columnas que salieron
+ * de una lectura ya filtrada. Un borrador recien creado todavia no cuelga de ninguna carpeta de
+ * la organizacion general, asi que no tiene ambito que resolver y esa version devolveria null: el
+ * editor no podria decir nada sobre el modulo que se esta escribiendo.
+ *
+ * Aqui las columnas disponibles salen de dos sitios que no dependen de quien mira:
+ *
+ *  - el REGISTRO de datasets, que declara que dimensiones y medidas trae cada uno (6.6), y
+ *  - el `SchemaDescriptor` que el job dejo en el cache, que dice cuales siguen existiendo.
+ *
+ * Se INTERSECAN. Solo el registro pasaria por bueno un campo que la fuente ya retiro —que es
+ * justo lo que 4.2 manda marcar roto—, y solo el esquema daria por disponible en un dataset
+ * cualquier campo del modelo, incluidos los que ese dataset no trae.
+ *
+ * Ninguno de los dos invoca al conector: el principio 2 vale tambien dentro del editor, que es
+ * donde seria mas tentador saltarselo para "comprobar de verdad" que un campo existe.
+ */
+export async function diagnosticarDefinicion(module: ModuleDefinition) {
+  const columnsByDataset: Record<string, string[]> = {};
+
+  const datasets = new Set(
+    module.pages.flatMap((p) => p.items.map((i) => i.instance.binding.datasetId)),
+  );
+
+  for (const datasetId of datasets) {
+    columnsByDataset[datasetId] = await columnasDisponiblesDe(datasetId);
+  }
+
+  return validateModule({ module, registry: objectRegistry, columnsByDataset });
+}
+
+/**
+ * Columnas que un dataset ofrece HOY: lo que declara el registro y el esquema sigue reconociendo.
+ *
+ * La interseccion es el punto. Solo el registro daria por bueno un campo que la fuente ya retiro
+ * —lo que 4.2 manda marcar roto—; solo el esquema daria por disponible en un dataset cualquier
+ * campo del modelo, incluidos los que ese dataset no trae.
+ *
+ * Sin esquema en el cache se devuelve lo declarado: es el estado de un despliegue en el que el
+ * job aun no ha corrido, y cortar ahi dejaria el editor inservible hasta la primera poblacion.
+ */
+export async function columnasDisponiblesDe(datasetId: string): Promise<string[]> {
+  let declarado;
+  try {
+    declarado = getDataset(datasetId);
+  } catch {
+    // Dataset fuera del registro: sin columnas, y `validateModule` lo marca roto con su propio
+    // mensaje, que ya explica que todo dataset cacheable se declara en el registro.
+    return [];
+  }
+
+  const dimensiones = (declarado.query.dimensions ?? []).map(fieldKey);
+  const medidas = declarado.query.measures ?? [];
+
+  const schema = await esquemaEnCache();
+  if (!schema) return [...dimensiones, ...medidas];
+
+  return [
+    ...dimensiones.filter((clave) => campoExisteEnEsquema(schema, clave)),
+    ...medidas.filter((medida) => schema.measures.some((m) => m.name === medida)),
+  ];
+}
+
+const esquemaEnCache = async (): Promise<SchemaDescriptor | null> => {
+  try {
+    return (await cacheL2.get<SchemaDescriptor>(SCHEMA_CACHE_KEY))?.value ?? null;
+  } catch {
+    return null;
+  }
+};
+
+function campoExisteEnEsquema(schema: SchemaDescriptor, clave: string): boolean {
+  const [tabla, campo] = clave.split('.');
+  return schema.tables.some(
+    (t) => t.name === tabla && t.fields.some((f) => f.name === campo && !f.isMeasure),
+  );
 }

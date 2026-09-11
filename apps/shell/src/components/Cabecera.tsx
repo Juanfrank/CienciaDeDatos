@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { defaultIdentity } from '@app/design-tokens';
-import { esAdministrador } from '../server/admin';
+import { can } from '@app/access-control';
+import { esAdministrador, rolMasAltoDe } from '../server/admin';
 import { findTeam, roleOf, teamsOf } from '../server/contexto';
 import type { SesionShell } from '../server/sesion';
 import { Campana } from './Campana';
@@ -20,6 +21,7 @@ export async function Cabecera({ sesion }: { sesion: SesionShell }) {
   // El enlace solo se dibuja para quien puede usarlo. Ocultarlo no protege nada —eso lo hace el
   // guardian del backend— pero no tiene sentido ofrecer una puerta cerrada.
   const puedeAdministrar = await esAdministrador(sesion.userId);
+  const puedeEditar = can(await rolMasAltoDe(sesion.userId), 'crear-editar-modulos-borrador');
 
   const equipos = await Promise.all(
     (await teamsOf(sesion.userId)).map(async (t) => ({
@@ -57,6 +59,11 @@ export async function Cabecera({ sesion }: { sesion: SesionShell }) {
 
       <div className="cabecera__acciones">
         <Campana />
+        {puedeEditar ? (
+          <Link href="/editor" className="boton-enlace" data-testid="enlace-editor">
+            Editor
+          </Link>
+        ) : null}
         {puedeAdministrar ? (
           <Link href="/admin" className="boton-enlace" data-testid="enlace-admin">
             Administracion

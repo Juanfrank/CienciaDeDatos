@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { navigationFor } from '../../../src/server/contexto';
+import { navegacionDe } from '../../../src/server/cicloDeVida';
 import { sinSesion } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/sesion';
 
@@ -9,7 +9,7 @@ export const runtime = 'nodejs';
 export async function GET() {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();
-  const vista = await navigationFor(sesion.activeTeamId);
+  const vista = await navegacionDe(sesion);
   return NextResponse.json({
     equipoActivo: sesion.activeTeamId,
     arbol: vista.tree,

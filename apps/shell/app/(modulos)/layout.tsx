@@ -1,6 +1,7 @@
 import { ArbolNavegacion } from '../../src/components/ArbolNavegacion';
 import { NavegacionPlegable } from '../../src/components/NavegacionPlegable';
-import { findTeam, navigationFor } from '../../src/server/contexto';
+import { navegacionDe } from '../../src/server/cicloDeVida';
+import { findTeam } from '../../src/server/contexto';
 import { exigirSesionDePagina } from '../../src/server/sesion';
 
 /**
@@ -19,7 +20,7 @@ import { exigirSesionDePagina } from '../../src/server/sesion';
 export default async function ModulosLayout({ children }: { children: React.ReactNode }) {
   const sesion = await exigirSesionDePagina();
   const equipo = await findTeam(sesion.activeTeamId);
-  const navegacion = await navigationFor(sesion.activeTeamId);
+  const navegacion = await navegacionDe(sesion);
 
   return (
     <div className="cuerpo">

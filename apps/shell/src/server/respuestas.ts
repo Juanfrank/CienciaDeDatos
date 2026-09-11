@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { CicloDeVidaError } from './cicloDeVida';
 
 /**
  * Respuestas compartidas de las rutas de API.
@@ -9,3 +10,21 @@ import { NextResponse } from 'next/server';
  */
 export const sinSesion = (): NextResponse =>
   NextResponse.json({ error: 'Se requiere iniciar sesion.' }, { status: 401 });
+
+/**
+ * Traduce un error del ciclo de vida a HTTP.
+ *
+ * El servicio ya decidio el codigo —403 sin permiso, 409 si la transicion no existe, 422 si hay
+ * bloqueos— y aqui solo se transporta. Lo que no sea un error del dominio se vuelve a lanzar:
+ * convertir cualquier excepcion en un 400 esconde los fallos de programacion detras de un
+ * mensaje que parece una validacion.
+ */
+export function respuestaDeError(error: unknown): NextResponse {
+  if (error instanceof CicloDeVidaError) {
+    return NextResponse.json(
+      { error: error.message, detalle: error.detail },
+      { status: error.status },
+    );
+  }
+  throw error;
+}

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { AlertOperator, AlertRule } from '@app/alerts';
 import { alertStore } from '../../../src/server/alertas';
 import { normalizarFiltros } from '../../../src/server/filtros';
-import { findModuleBySlug } from '../../../src/server/modulos';
+import { actorDe, moduloVisiblePorSlug } from '../../../src/server/cicloDeVida';
 import { sinSesion } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/sesion';
 
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'El umbral debe ser un numero.' }, { status: 400 });
   }
 
-  const module = findModuleBySlug(moduleSlug);
+  const module = await moduloVisiblePorSlug(moduleSlug, await actorDe(sesion));
   if (!module) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
   // El objeto y la medida se validan contra la definicion del modulo, no se aceptan a ciegas:

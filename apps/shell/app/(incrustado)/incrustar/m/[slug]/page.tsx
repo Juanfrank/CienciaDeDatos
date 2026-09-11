@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { describeProvenance } from '@app/module-model';
 import { cargarModulo } from '../../../../../src/server/datos';
-import { findModuleBySlug } from '../../../../../src/server/modulos';
+import { actorDe, moduloVisiblePorSlug } from '../../../../../src/server/cicloDeVida';
 import { serializarObjeto } from '../../../../../src/server/serializar';
 import { obtenerSesion } from '../../../../../src/server/sesion';
 import { VistaModulo } from '../../../../../src/components/VistaModulo';
@@ -28,9 +28,6 @@ export default async function PaginaIncrustada({
   const { slug } = await params;
   const query = await searchParams;
 
-  const module = findModuleBySlug(slug);
-  if (!module) notFound();
-
   const filtros: Record<string, string | string[]> = {};
   for (const [clave, valor] of Object.entries(query)) {
     if (valor !== undefined) filtros[clave] = valor;
@@ -55,6 +52,11 @@ export default async function PaginaIncrustada({
       </div>
     );
   }
+
+  // Se resuelve DESPUES de la sesion, y filtrando por estado: incrustar no puede ser el atajo
+  // que sirva un borrador ajeno.
+  const module = await moduloVisiblePorSlug(slug, await actorDe(sesion));
+  if (!module) notFound();
 
   const cargado = await cargarModulo({
     module,

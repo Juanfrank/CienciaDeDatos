@@ -731,3 +731,125 @@ tr.es-ampliacion { background: #fdf6ec; }
 .acceso__separador::before,
 .acceso__separador::after { content: ''; flex: 1; border-top: 1px solid var(--color-border); }
 .acceso__error { min-height: 1.2em; margin: 0 0 var(--space-sm); font-size: var(--font-size-sm); color: var(--color-accent-900); }
+
+/* Editor de modulos (4.2) ------------------------------------------------- */
+
+.editor__cuerpo { flex: 1; padding: var(--space-lg); max-width: 1100px; }
+.editor__cuerpo h2 { font-size: var(--font-size-lg); margin-bottom: var(--space-md); }
+
+.editor__crear {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+}
+
+.tabla-datos { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
+.tabla-datos th,
+.tabla-datos td {
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+.tabla-datos thead th { font-size: var(--font-size-xs); color: var(--color-textMuted); }
+
+/*
+ * El estado NO se distingue solo por color: lleva su texto siempre. Un distintivo que solo
+ * cambia de color deja fuera a quien no distingue esos colores, y 4.9 no pospone la
+ * accesibilidad. El color acompaña; el texto informa.
+ */
+.pastilla-estado {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--color-border);
+  background: var(--color-surfaceMuted);
+  color: var(--color-text);
+}
+.pastilla-estado[data-estado='publicado'] {
+  background: #eef8f1;
+  border-color: var(--color-success);
+  color: #0e4a25;
+}
+.pastilla-estado[data-estado='pendiente-de-aprobacion'] {
+  background: #fdf6ec;
+  border-color: var(--color-warning);
+  color: #6b3608;
+}
+
+.editor__acciones { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+.editor__bloqueos,
+.editor__problemas {
+  margin: var(--space-xs) 0 0;
+  padding-left: var(--space-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-accent-900);
+}
+
+.editor__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.aviso--problema {
+  background: var(--color-accent-50);
+  border-left-color: var(--color-danger);
+  color: var(--color-accent-900);
+}
+.aviso--problema ul { margin: 0; padding-left: var(--space-md); }
+
+.editor__paleta {
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+}
+.editor__paleta h3 { font-size: var(--font-size-base); margin-bottom: var(--space-xs); }
+.editor__catalogo {
+  list-style: none;
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+}
+
+.editor__objetos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-md); }
+.editor__objeto {
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+/* Un objeto roto se marca visualmente y NO desaparece del editor (4.2). */
+.editor__objeto--roto { border-left: 4px solid var(--color-danger); background: var(--color-accent-50); }
+.editor__objeto h4 { font-size: var(--font-size-base); margin-bottom: var(--space-xs); }
+
+.editor__mapeo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
+  align-items: start;
+  margin-top: var(--space-sm);
+}
+.editor__campos { border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); }
+.editor__campos legend { font-size: var(--font-size-xs); color: var(--color-textMuted); padding: 0 var(--space-xs); }
+.editor__campos label { display: block; font-size: var(--font-size-sm); }
+
+@media (max-width: 700px) {
+  .editor__cuerpo { padding: var(--space-md); }
+  .editor__crear { flex-direction: column; align-items: stretch; }
+}

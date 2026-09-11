@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { describeProvenance } from '@app/module-model';
 import { cargarModulo } from '../../../../src/server/datos';
-import { findModuleBySlug } from '../../../../src/server/modulos';
+import { actorDe, moduloVisiblePorSlug } from '../../../../src/server/cicloDeVida';
 import { serializarObjeto } from '../../../../src/server/serializar';
 import { exigirSesionDePagina } from '../../../../src/server/sesion';
 import { VistaModulo } from '../../../../src/components/VistaModulo';
@@ -33,10 +33,10 @@ export default async function PaginaModulo({
   const { slug, page } = await params;
   const query = await searchParams;
 
-  const module = findModuleBySlug(slug);
-  if (!module) notFound();
-
   const sesion = await exigirSesionDePagina();
+
+  const module = await moduloVisiblePorSlug(slug, await actorDe(sesion));
+  if (!module) notFound();
   const cargado = await cargarModulo({
     module,
     ...(page?.[0] ? { pageSlug: page[0] } : {}),

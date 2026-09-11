@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { FORMATOS, type ExportFormat } from '@app/export';
 import type { Cadence, Subscription } from '@app/alerts';
 import { alertStore } from '../../../src/server/alertas';
-import { findModuleBySlug } from '../../../src/server/modulos';
+import { actorDe, moduloVisiblePorSlug } from '../../../src/server/cicloDeVida';
 import { sinSesion } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/sesion';
 import { normalizarFiltros } from '../../../src/server/filtros';
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'La hora debe estar entre 0 y 23.' }, { status: 400 });
   }
 
-  const module = findModuleBySlug(moduleSlug);
+  const module = await moduloVisiblePorSlug(moduleSlug, await actorDe(sesion));
   if (!module) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
   const suscripcion: Subscription = {

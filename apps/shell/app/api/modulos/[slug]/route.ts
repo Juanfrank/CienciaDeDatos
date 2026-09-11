@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cargarModulo } from '../../../../src/server/datos';
-import { findModuleBySlug } from '../../../../src/server/modulos';
+import { actorDe, moduloVisiblePorSlug } from '../../../../src/server/cicloDeVida';
 import { serializarObjeto } from '../../../../src/server/serializar';
 import { sinSesion } from '../../../../src/server/respuestas';
 import { obtenerSesion } from '../../../../src/server/sesion';
@@ -22,7 +22,8 @@ export async function GET(
   if (!sesion) return sinSesion();
 
   const { slug } = await params;
-  const module = findModuleBySlug(slug);
+  // Por slug pero filtrando por estado: un borrador ajeno no se sirve aunque se pida a mano.
+  const module = await moduloVisiblePorSlug(slug, await actorDe(sesion));
   if (!module) {
     return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
   }

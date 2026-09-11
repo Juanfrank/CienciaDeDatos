@@ -1,4 +1,5 @@
 import type { ModuleDefinition } from '@app/module-model';
+import { modulos } from './almacenModulos';
 
 /**
  * Definiciones de modulo de arranque.
@@ -265,10 +266,20 @@ export const modulosDemo: ModuleDefinition[] = [
   },
 ];
 
-export function findModuleBySlug(slug: string): ModuleDefinition | undefined {
-  return modulosDemo.find((m) => m.slug === slug);
+/**
+ * Busqueda por slug, contra el ALMACEN y no contra la semilla.
+ *
+ * Es asincrona desde que existe el editor: los modulos se escriben, asi que ya no se pueden
+ * resolver leyendo un array del modulo. La semilla sigue siendo el estado inicial.
+ *
+ * OJO: esto NO filtra por estado. Devuelve tambien borradores, porque el editor tiene que poder
+ * abrirlos. Quien sirva un modulo a una persona debe pasar ademas por `puedeVer` del ciclo de
+ * vida; servir un borrador ajeno seria mostrar trabajo en curso de otro como si fuera oficial.
+ */
+export async function findModuleBySlug(slug: string): Promise<ModuleDefinition | undefined> {
+  return modulos.bySlug(slug);
 }
 
-export function findModuleById(moduleId: string): ModuleDefinition | undefined {
-  return modulosDemo.find((m) => m.moduleId === moduleId);
+export async function findModuleById(moduleId: string): Promise<ModuleDefinition | undefined> {
+  return modulos.get(moduleId);
 }

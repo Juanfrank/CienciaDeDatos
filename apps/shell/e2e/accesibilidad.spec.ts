@@ -105,6 +105,36 @@ test.describe('panel de administracion (4.10.8)', () => {
   }
 });
 
+test.describe('editor de modulos (4.2)', () => {
+  test('la lista y el editor de un modulo no tienen infracciones WCAG 2.1 AA', async ({ page }) => {
+    await entrarComo(page, 'u-ana');
+
+    // Con un modulo de verdad dentro: un editor vacio no dibuja ni la paleta ni los campos de
+    // mapeo, que es justo donde estaria el problema de accesibilidad si lo hubiera.
+    const slug = `accesible-${Date.now()}`;
+    const creado = await page.request.post('/api/modulos', {
+      data: { nombre: 'Modulo accesible', slug },
+    });
+    expect(creado.ok(), await creado.text()).toBe(true);
+
+    await page.goto('/editor');
+    await expect(page.getByRole('heading', { name: 'Editor de modulos' })).toBeVisible();
+    expect(await infracciones(page)).toEqual([]);
+
+    await page.goto(`/editor/${slug}`);
+    await page.getByTestId('anadir-barras').click();
+    await expect(page.getByTestId('objetos-del-modulo').locator('li')).toHaveCount(1);
+    expect(await infracciones(page)).toEqual([]);
+  });
+
+  test('la pantalla de sin permiso tampoco', async ({ page }) => {
+    await entrarComo(page, 'u-beto');
+    await page.goto('/editor');
+    await expect(page.getByTestId('sin-permiso-editor')).toBeVisible();
+    expect(await infracciones(page)).toEqual([]);
+  });
+});
+
 test.describe('avisos (4.9)', () => {
   test('la bandeja de avisos no tiene infracciones WCAG 2.1 AA', async ({ page }) => {
     await entrarComo(page, 'u-ana');

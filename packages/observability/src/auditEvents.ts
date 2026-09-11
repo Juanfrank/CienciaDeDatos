@@ -41,9 +41,20 @@ export interface ConfigChangeLog {
   kind: 'config-change';
   timestamp: string;
   actorId: string;
-  entityType: 'team' | 'membership' | 'nav-node' | 'scope' | 'package' | 'role';
+  entityType: 'team' | 'membership' | 'nav-node' | 'scope' | 'package' | 'role' | 'module';
   entityId: string;
-  action: 'create' | 'update' | 'delete' | 'move' | 'scope-expansion';
+  action:
+    | 'create'
+    | 'update'
+    | 'delete'
+    | 'move'
+    | 'scope-expansion'
+    // Transiciones del ciclo de vida de un modulo (4.1). Van como acciones propias y no como
+    // 'update' porque publicar no es editar: cambia QUIEN ve el modulo, y esa es la fila que un
+    // Administrador busca cuando revisa que se publico y quien lo aprobo.
+    | 'submit'
+    | 'publish'
+    | 'withdraw';
   before?: unknown;
   after?: unknown;
   /** Obligatoria cuando isScopeExpansion es true. */
