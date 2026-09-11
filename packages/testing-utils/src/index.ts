@@ -1,10 +1,12 @@
 /**
- * Utilidades compartidas de prueba (fixtures de equipos, ambitos y contextos de seguridad).
+ * Utilidades compartidas de prueba.
  *
- * MARCADOR DE POSICION. Este paquete existe en el esqueleto de monorepo (seccion 3.2)
- * con sus etiquetas de limites de dependencia ya aplicadas, pero su contenido se
- * implementa en: Entregable B.4 — Fase de cimiento.
+ * MARCADOR DE POSICION, reservado para helpers que sean genuinamente transversales
+ * (por ejemplo, un reloj falso o un generador de identidades).
  *
- * Secciones del contrato de ingenieria que lo definen: 9 (criterios de aceptacion automatizables).
+ * Los fixtures del modelo de gobierno NO viven aqui: viven en el propio paquete que define
+ * ese dominio (`@app/access-control`, exportados como `gobiernoFixtures`). Ponerlos aqui
+ * creaba una dependencia circular —access-control probandose a si mismo a traves de un
+ * paquete que depende de el— que el linter de limites rechaza con razon.
  */
-export const PENDIENTE_DE_IMPLEMENTACION = 'Entregable B.4 — Fase de cimiento' as const;
+export const PENDIENTE_DE_IMPLEMENTACION = 'Fase 2' as const;
