@@ -4,6 +4,7 @@ import { defaultTheme, toCssVariables } from '@app/design-tokens';
 import { esAdministrador } from '../src/server/admin';
 import { findTeam, listUsers, roleOf, teamsOf } from '../src/server/contexto';
 import { obtenerSesion } from '../src/server/sesion';
+import { Campana } from '../src/components/Campana';
 import { SelectorDeEquipo } from '../src/components/SelectorDeEquipo';
 import './globals.css';
 
@@ -50,6 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
 
           <div className="cabecera__acciones">
+            <Campana />
             {puedeAdministrar ? (
               <Link href="/admin" className="boton-enlace" data-testid="enlace-admin">
                 Administracion

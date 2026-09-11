@@ -6,6 +6,7 @@ const nextConfig = {
   // `nx affected` y el typecheck vean un solo grafo, sin un paso de build intermedio por paquete.
   transpilePackages: [
     '@app/access-control',
+    '@app/alerts',
     '@app/auth',
     '@app/caching',
     '@app/data-contracts',

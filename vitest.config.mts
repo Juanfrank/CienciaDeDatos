@@ -13,6 +13,7 @@ export default defineConfig({
       '@app/observability': r('./packages/observability/src/index.ts'),
       '@app/module-model': r('./packages/module-model/src/index.ts'),
       '@app/export': r('./packages/export/src/index.ts'),
+      '@app/alerts': r('./packages/alerts/src/index.ts'),
       '@app/ui-components': r('./packages/ui-components/src/index.ts'),
       '@app/auth': r('./packages/auth/src/index.ts'),
       '@app/caching': r('./packages/caching/src/index.ts'),

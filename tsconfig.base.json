@@ -51,6 +51,9 @@
       ],
       "@app/export": [
         "packages/export/src/index.ts"
+      ],
+      "@app/alerts": [
+        "packages/alerts/src/index.ts"
       ]
     }
   },

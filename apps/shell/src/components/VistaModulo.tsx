@@ -3,6 +3,7 @@
 import { fieldKey, toSlicerOptions } from '@app/ui-components';
 import type { QueryResult } from '@app/data-contracts';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
+import { CrearAviso, type ObjetoVigilable } from './CrearAviso';
 import { Exportar } from './Exportar';
 import { Marcadores } from './Marcadores';
 import { Rejilla } from './Rejilla';
@@ -41,6 +42,16 @@ export function VistaModulo({
 
   const items = objetos.map((o) => ({ id: o.itemId, position: o.position }));
 
+  // Solo se puede vigilar lo que tiene una cifra. Un segmentador mapea dimensiones y ninguna
+  // medida: ofrecerlo daria una alerta que no puede dispararse nunca.
+  const vigilables: ObjetoVigilable[] = objetos
+    .filter((o) => o.instance.binding.measures.length > 0 && o.result)
+    .map((o) => ({
+      instanceId: o.instance.instanceId,
+      titulo: o.titulo,
+      measures: o.instance.binding.measures,
+    }));
+
   const porId = new Map(objetos.map((o) => [o.itemId, o]));
 
   return (
@@ -62,6 +73,11 @@ export function VistaModulo({
           moduleSlug={moduleSlug}
           {...(pageSlug ? { pageSlug } : {})}
           isPersonalized={provenance.isPersonalized}
+        />
+        <CrearAviso
+          moduleSlug={moduleSlug}
+          {...(pageSlug ? { pageSlug } : {})}
+          vigilables={vigilables}
         />
       </div>
 

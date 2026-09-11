@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { FORMATOS, type ExportFormat } from '@app/export';
 import { encolarExportacion } from '../../../src/server/exportaciones';
+import { normalizarFiltros } from '../../../src/server/filtros';
 import { obtenerSesion } from '../../../src/server/sesion';
 
 export const runtime = 'nodejs';
@@ -55,15 +56,4 @@ export async function POST(request: Request) {
     { id: job.id, estado: job.status, consultarEn: `/api/exportaciones/${job.id}` },
     { status: 202 },
   );
-}
-
-/** Acepta `{campo: "v"}` y `{campo: ["v1","v2"]}`, y descarta cualquier otra cosa. */
-function normalizarFiltros(valor: unknown): Record<string, string[]> {
-  if (typeof valor !== 'object' || valor === null) return {};
-  const salida: Record<string, string[]> = {};
-  for (const [clave, v] of Object.entries(valor as Record<string, unknown>)) {
-    if (typeof v === 'string') salida[clave] = [v];
-    else if (Array.isArray(v)) salida[clave] = v.filter((x): x is string => typeof x === 'string');
-  }
-  return salida;
 }

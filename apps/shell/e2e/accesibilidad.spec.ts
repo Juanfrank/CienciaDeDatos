@@ -104,6 +104,36 @@ test.describe('panel de administracion (4.10.8)', () => {
   }
 });
 
+test.describe('avisos (4.9)', () => {
+  test('la bandeja de avisos no tiene infracciones WCAG 2.1 AA', async ({ page }) => {
+    await entrarComo(page, 'u-ana');
+    await page.goto('/avisos');
+    await expect(page.getByRole('heading', { name: 'Avisos' })).toBeVisible();
+
+    expect(await infracciones(page)).toEqual([]);
+  });
+
+  test('el dialogo para crear un aviso es accesible, con sus campos etiquetados', async ({
+    page,
+  }) => {
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId('crear-aviso').click();
+    await expect(page.getByTestId('dialogo-aviso')).toBeVisible();
+
+    expect(await infracciones(page)).toEqual([]);
+  });
+
+  test('el contador de la campana se anuncia con texto, no solo con un numero', async ({
+    page,
+  }) => {
+    // "Avisos 3" no dice de que. El numero es para la vista; el texto, para quien no la usa.
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+    await expect(page.getByTestId('campana')).toContainText(/aviso\(s\) sin leer|ningun aviso sin leer/);
+  });
+});
+
 test.describe('paginas de estado', () => {
   test('la pagina de sin permiso es accesible', async ({ page }) => {
     await entrarComo(page, 'u-beto');
