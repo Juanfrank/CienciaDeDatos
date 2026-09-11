@@ -1,10 +1,30 @@
 /**
- * Tema organizacional: colores, tipografia y escalas.
+ * Tema organizacional y accesibilidad — seccion 4.3.
  *
- * MARCADOR DE POSICION. Este paquete existe en el esqueleto de monorepo (seccion 3.2)
- * con sus etiquetas de limites de dependencia ya aplicadas, pero su contenido se
- * implementa en: Fase 2 — personalizacion base.
- *
- * Secciones del contrato de ingenieria que lo definen: 4.3 (theming y validacion de contraste/accesibilidad).
+ * Tema por defecto con un conjunto documentado y limitado de anulaciones por objeto, mas la
+ * validacion de contraste que debe pasar ANTES de publicar un modulo institucional. La
+ * accesibilidad no es opcional ni se pospone (seccion 4.9).
  */
-export const PENDIENTE_DE_IMPLEMENTACION = 'Fase 2 — personalizacion base' as const;
+export {
+  checkContrast,
+  contrastRatio,
+  findContrastFailures,
+  institutionalContrastChecks,
+  parseHex,
+  relativeLuminance,
+  type ContrastCheck,
+  type ContrastResult,
+  type TextSize,
+  type WcagLevel,
+} from './contrast';
+export {
+  OVERRIDABLE_TOKENS,
+  defaultTheme,
+  toCssVariables,
+  validateOverrides,
+  type ColorScale,
+  type OverridableToken,
+  type OverrideProblem,
+  type ThemeOverrides,
+  type ThemeTokens,
+} from './tokens';

@@ -1,10 +1,44 @@
 /**
- * Repositorio de objetos visuales versionados con semver.
+ * Repositorio de objetos visuales versionados — secciones 4.2 y 4.5.
  *
- * MARCADOR DE POSICION. Este paquete existe en el esqueleto de monorepo (seccion 3.2)
- * con sus etiquetas de limites de dependencia ya aplicadas, pero su contenido se
- * implementa en: Fase 2 — personalizacion base.
+ * Cada objeto se publica con version MAYOR.MENOR.PARCHE y cada instancia insertada en un modulo
+ * FIJA la version exacta que usa. Publicar una version nueva no altera instancias ya desplegadas.
  *
- * Secciones del contrato de ingenieria que lo definen: 4.2 (panel de objetos prediseñados), 4.5 (semver, pin de version, changelog, deprecacion).
+ * Los objetos se enlazan UNICAMENTE contra un datasetId del registro: reciben filas ya leidas
+ * del cache y ya filtradas por el ambito de quien mira. Ningun objeto conoce la fuente, la
+ * consulta ni el conector activo.
  */
-export const PENDIENTE_DE_IMPLEMENTACION = 'Fase 2 — personalizacion base' as const;
+export { ObjectRegistry, ObjectRegistryError, type DeprecationWarning, type PublishInput } from './registry/ObjectRegistry';
+export { catalogoInicial } from './registry/catalog';
+export {
+  classifyBump,
+  compareVersions,
+  formatVersion,
+  isValidVersion,
+  maxVersion,
+  parseVersion,
+  type Semver,
+  type VersionBump,
+} from './registry/semver';
+export type {
+  DeprecationNotice,
+  ObjectCategory,
+  ObjectCertification,
+  ObjectDataContract,
+  ObjectInstance,
+  ObjectVersion,
+  VisualObjectDefinition,
+} from './registry/types';
+export {
+  fieldKey,
+  toCategorical,
+  toKpi,
+  toMatrix,
+  toSlicerOptions,
+  validateBinding,
+  type BindingProblem,
+  type CategoricalViewModel,
+  type CategoryPoint,
+  type KpiViewModel,
+  type MatrixViewModel,
+} from './registry/viewModel';

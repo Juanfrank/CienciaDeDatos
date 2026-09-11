@@ -1,7 +1,7 @@
 # ADR-007: Los modulos son librerias del monorepo, no artefactos de despliegue
 
-- **Estado:** aceptada
-- **Fecha:** 2026-09-10
+- **Estado:** aceptada — **aprobada explicitamente por el responsable del proyecto el 2026-09-11**
+- **Fecha:** 2026-09-10 (propuesta) / 2026-09-11 (aprobada)
 - **Contexto del contrato de ingenieria:** Secciones 3.2 (estructura de carpetas obligatoria) y 3.4 (CI/CD por modulo).
 
 ## Contexto
