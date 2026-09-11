@@ -9,6 +9,7 @@ export default defineConfig({
       '@app/data-contracts-server': r('./packages/data-contracts/server/src/index.ts'),
       '@app/data-contracts': r('./packages/data-contracts/types/src/index.ts'),
       '@app/access-control': r('./packages/access-control/src/index.ts'),
+      '@app/identity-db': r('./packages/identity-db/src/index.ts'),
       '@app/ui-components': r('./packages/ui-components/src/index.ts'),
       '@app/auth': r('./packages/auth/src/index.ts'),
       '@app/caching': r('./packages/caching/src/index.ts'),

@@ -1,0 +1,309 @@
+// Almacen de identidad y gobierno — secciones 4.7.2 y 4.10.7.
+//
+// Base dedicada y de alcance minimo, SEPARADA del Data Warehouse y nunca accesible desde
+// SqlDataConnector. El aislamiento no se consigue con disciplina de codigo: la Managed
+// Identity que usa el conector para alcanzar el Data Warehouse no recibe permiso alguno
+// sobre esta base (ver /infra).
+//
+// Cambios a roles, equipos, la organizacion general o los ambitos de acceso son eventos
+// VERSIONADOS (quien, que cambio, cuando, y por que en el caso de una excepcion de
+// ampliacion), no sobrescritura silenciosa de la configuracion anterior.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("IDENTITY_DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identidad
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String  @id @default(uuid())
+  displayName  String
+  /// Identificador normalizado (4.7.3). Para azure-ad, el UPN real; para local, el correo
+  /// verificado. Aguas abajo se usa igual, sea cual sea el proveedor.
+  userPrincipalName String @unique
+  /// Solo para auditoria y para reglas como el MFA obligatorio de cuentas locales.
+  /// NUNCA para dar acceso a datos distintos segun la puerta de entrada.
+  authProvider String
+  disabled     Boolean @default(false)
+  createdAt    DateTime @default(now())
+
+  /// Excepcion documentada de 4.10.2: combinar equipos por union en vez de por seleccion
+  /// activa. Configuracion explicita y visible, nunca el comportamiento por defecto.
+  combineTeamsByUnion Boolean @default(false)
+
+  localCredential LocalCredential?
+  memberships     TeamMembership[]
+  sessions        AppSession[]
+  personalScopes  UserScope[]
+
+  @@index([userPrincipalName])
+}
+
+/// Credenciales locales (4.7.2). Nunca contrasenas en claro ni cifrado reversible.
+model LocalCredential {
+  userId          String   @id
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email           String   @unique
+  emailVerified   Boolean  @default(false)
+  /// Hash Argon2id con sal unica por usuario. El pepper vive en Key Vault, no aqui.
+  passwordHash    String
+  /// Hashes anteriores, para la no reutilizacion de las ultimas N.
+  passwordHistory String   @db.NVarChar(Max)
+  /// Secreto TOTP cifrado en reposo. Segundo factor obligatorio para cuentas locales.
+  totpSecret      String?
+  failedAttempts  Int      @default(0)
+  lockedUntil     DateTime?
+  updatedAt       DateTime @updatedAt
+}
+
+/// Token de un solo uso para recuperacion de contrasena por correo verificado (4.7.2).
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Sesion de aplicacion (5.3 y 6.7). Vive aqui y no en memoria del proceso ni en Redis,
+/// para que la app escale horizontalmente sin perder sesion.
+model AppSession {
+  id                String   @id
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  authProvider      String
+  userPrincipalName String
+  /// Equipo activo por sesion (4.10.2). Cambiarlo no requiere cerrar sesion.
+  activeTeamId      String
+  createdAt         DateTime @default(now())
+  expiresAt         DateTime
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ---------------------------------------------------------------------------
+// Organizacion general (4.1.1)
+// ---------------------------------------------------------------------------
+
+/// Nodo del arbol canonico. Lista de adyacencia: la profundidad no tiene limite
+/// predefinido, asi que no se modela con columnas fijas por nivel.
+model NavNode {
+  id        String  @id @default(uuid())
+  /// "folder" | "module"
+  type      String
+  name      String
+  icon      String?
+  parentId  String?
+  parent    NavNode?  @relation("NavNodeChildren", fields: [parentId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  children  NavNode[] @relation("NavNodeChildren")
+  /// Orden dentro de su carpeta. Reordenar es cambiar esto, no recrear nodos.
+  orderIndex Int      @default(0)
+
+  /// Solo para nodos de tipo "module".
+  moduleId  String?  @unique
+  slug      String?  @unique
+
+  /// Papelera temporal antes del borrado definitivo (4.1). Nunca borrado inmediato.
+  deletedAt DateTime?
+
+  /// Ambito propio de la carpeta (4.10.6), heredado por todo lo que contiene.
+  scopeId   String?
+  scope     AccessScope? @relation(fields: [scopeId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+
+  @@index([parentId])
+  @@index([deletedAt])
+}
+
+// ---------------------------------------------------------------------------
+// Ambitos de acceso (4.10.3)
+// ---------------------------------------------------------------------------
+
+/// Coleccion de restricciones por dimension. No es texto libre ni una consulta: asi es
+/// auditable, validable contra el esquema real y traducible de forma determinista.
+model AccessScope {
+  id           String @id @default(uuid())
+  restrictions ScopeRestriction[]
+
+  /// Presente solo si esta marcado como excepcion de ampliacion (4.10.4). Sin esta marca,
+  /// una capa solo puede restringir.
+  expansionId  String?      @unique
+  expansion    ScopeExpansionException? @relation(fields: [expansionId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+
+  navNodes     NavNode[]
+  teamDefaults Team[]
+  teamOverrides TeamModuleScope[]
+  userScopes   UserScope[]
+}
+
+model ScopeRestriction {
+  id        String @id @default(uuid())
+  scopeId   String
+  scope     AccessScope @relation(fields: [scopeId], references: [id], onDelete: Cascade)
+  /// Debe existir en el esquema real (getSchema()). Nunca texto libre sin validar.
+  dimTable  String
+  dimField  String
+  /// Valores permitidos, serializados. SQL Server no tiene tipo array nativo.
+  allowedValues String @db.NVarChar(Max)
+
+  @@index([scopeId])
+  @@unique([scopeId, dimTable, dimField])
+}
+
+/// Excepcion de ampliacion (4.10.4). Exige justificacion obligatoria y genera una entrada
+/// de auditoria distinta de las restricciones normales. Su numero deberia tender a cero.
+model ScopeExpansionException {
+  id            String   @id @default(uuid())
+  justification String   @db.NVarChar(Max)
+  authorizedBy  String
+  authorizedAt  DateTime @default(now())
+  revokedAt     DateTime?
+
+  scope AccessScope?
+}
+
+// ---------------------------------------------------------------------------
+// Equipos y paquetes visuales (4.10.2, 4.1.3)
+// ---------------------------------------------------------------------------
+
+model Team {
+  id             String @id @default(uuid())
+  name           String @unique
+  defaultScopeId String?
+  defaultScope   AccessScope? @relation(fields: [defaultScopeId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+
+  /// Nodos concedidos del arbol general. Conceder una carpeta concede todo su contenido.
+  grantedNodes   TeamGrantedNode[]
+  members        TeamMembership[]
+  moduleScopes   TeamModuleScope[]
+
+  /// Paquete visual asignado (4.1.3). Si es null, ve la organizacion general tal cual.
+  assignedPackageId String?
+  assignedPackage   ModulePackage? @relation(fields: [assignedPackageId], references: [id])
+}
+
+model TeamGrantedNode {
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  nodeId String
+
+  @@id([teamId, nodeId])
+}
+
+model TeamMembership {
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: NoAction)
+  /// Exactamente tres roles, no configurables (4.10.1).
+  role   String
+
+  @@id([teamId, userId])
+  @@index([userId])
+}
+
+/// Override de ambito para un modulo concreto dentro de un equipo (4.10.3).
+model TeamModuleScope {
+  teamId   String
+  team     Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  moduleId String
+  scopeId  String
+  scope    AccessScope @relation(fields: [scopeId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+
+  @@id([teamId, moduleId])
+}
+
+/// Ambito personal de un usuario, general o por modulo (4.10.3). El caso de uso tipico es
+/// restringir aun mas a una persona puntual, no ampliarla.
+model UserScope {
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// null para el ambito personal general; el moduleId para un override por modulo.
+  moduleId String @default("")
+  scopeId  String
+  scope    AccessScope @relation(fields: [scopeId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+
+  @@id([userId, moduleId])
+}
+
+/// Paquete visual (4.1.3): reorganizacion PURAMENTE presentacional. La resolucion de ambito
+/// efectivo nunca lo consulta, por eso no puede ampliar el acceso de nadie.
+model ModulePackage {
+  id    String @id @default(uuid())
+  name  String @unique
+  nodes PackageNode[]
+  teams Team[]
+}
+
+model PackageNode {
+  id        String @id @default(uuid())
+  packageId String
+  package   ModulePackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  type      String
+  name      String
+  icon      String?
+  parentId  String?
+  parent    PackageNode?  @relation("PackageNodeChildren", fields: [parentId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  children  PackageNode[] @relation("PackageNodeChildren")
+  orderIndex Int @default(0)
+  /// Referencia a un modulo de la organizacion general. Se valida contra grantedNodes al
+  /// construir la vista: si no esta concedido, simplemente no se muestra (4.10.6).
+  moduleId  String?
+
+  @@index([packageId])
+  @@index([parentId])
+}
+
+// ---------------------------------------------------------------------------
+// Auditoria (seccion 7 y 4.10.7)
+// ---------------------------------------------------------------------------
+
+/// Log consolidado de inicios de sesion de AMBOS proveedores, con el mismo formato y nivel
+/// de detalle, aunque Azure AD ya tenga sus logs nativos en Entra ID.
+model LoginAuditEvent {
+  id                 String   @id @default(uuid())
+  timestamp          DateTime @default(now())
+  authProvider       String
+  attemptedPrincipal String
+  outcome            String
+  reason             String?
+  sourceIp           String?
+  userId             String?
+
+  @@index([timestamp])
+  @@index([authProvider, outcome])
+}
+
+/// Cambios de configuracion versionados, no sobrescritura silenciosa (4.10.7).
+/// Incluye todo movimiento de modulos o carpetas en la organizacion general (4.1.2).
+model ConfigAuditEvent {
+  id         String   @id @default(uuid())
+  timestamp  DateTime @default(now())
+  actorId    String
+  /// "team" | "membership" | "nav-node" | "scope" | "package" | "role"
+  entityType String
+  entityId   String
+  /// "create" | "update" | "delete" | "move" | "scope-expansion"
+  action     String
+  /// Estado anterior y nuevo, serializados: la version anterior no se pierde.
+  before     String? @db.NVarChar(Max)
+  after      String? @db.NVarChar(Max)
+  /// Obligatoria en el caso de una excepcion de ampliacion de ambito.
+  justification String? @db.NVarChar(Max)
+  /// Marca las ampliaciones para poder destacarlas, no mezclarlas con el resto (seccion 7).
+  isScopeExpansion Boolean @default(false)
+
+  @@index([timestamp])
+  @@index([entityType, entityId])
+  @@index([isScopeExpansion])
+}

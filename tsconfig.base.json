@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022"],
+    "lib": [
+      "ES2022"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
@@ -14,15 +16,38 @@
     "declaration": true,
     "baseUrl": ".",
     "paths": {
-      "@app/data-contracts": ["packages/data-contracts/types/src/index.ts"],
-      "@app/data-contracts-server": ["packages/data-contracts/server/src/index.ts"],
-      "@app/access-control": ["packages/access-control/src/index.ts"],
-      "@app/ui-components": ["packages/ui-components/src/index.ts"],
-      "@app/auth": ["packages/auth/src/index.ts"],
-      "@app/caching": ["packages/caching/src/index.ts"],
-      "@app/design-tokens": ["packages/design-tokens/src/index.ts"],
-      "@app/testing-utils": ["packages/testing-utils/src/index.ts"]
+      "@app/data-contracts": [
+        "packages/data-contracts/types/src/index.ts"
+      ],
+      "@app/data-contracts-server": [
+        "packages/data-contracts/server/src/index.ts"
+      ],
+      "@app/access-control": [
+        "packages/access-control/src/index.ts"
+      ],
+      "@app/ui-components": [
+        "packages/ui-components/src/index.ts"
+      ],
+      "@app/auth": [
+        "packages/auth/src/index.ts"
+      ],
+      "@app/caching": [
+        "packages/caching/src/index.ts"
+      ],
+      "@app/design-tokens": [
+        "packages/design-tokens/src/index.ts"
+      ],
+      "@app/testing-utils": [
+        "packages/testing-utils/src/index.ts"
+      ],
+      "@app/identity-db": [
+        "packages/identity-db/src/index.ts"
+      ]
     }
   },
-  "exclude": ["node_modules", "dist", ".nx"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".nx"
+  ]
 }

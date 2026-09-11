@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "identity-db",
+  "projectType": "library",
+  "sourceRoot": "packages/identity-db/src",
+  "tags": ["type:server", "scope:server"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "eslint packages/identity-db --max-warnings 0" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run --dir packages/identity-db --passWithNoTests" }
+    },
+    "prisma-validate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma validate --schema packages/identity-db/prisma/schema.prisma"
+      }
+    }
+  }
+}
