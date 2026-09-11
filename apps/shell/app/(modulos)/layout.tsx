@@ -1,7 +1,7 @@
 import { ArbolNavegacion } from '../../src/components/ArbolNavegacion';
 import { NavegacionPlegable } from '../../src/components/NavegacionPlegable';
 import { findTeam, navigationFor } from '../../src/server/contexto';
-import { obtenerSesion } from '../../src/server/sesion';
+import { exigirSesionDePagina } from '../../src/server/sesion';
 
 /**
  * Disposicion de los modulos de negocio.
@@ -17,7 +17,7 @@ import { obtenerSesion } from '../../src/server/sesion';
  * JavaScript para decidir el estado inicial y por que el servidor lo emite abierto.
  */
 export default async function ModulosLayout({ children }: { children: React.ReactNode }) {
-  const sesion = await obtenerSesion();
+  const sesion = await exigirSesionDePagina();
   const equipo = await findTeam(sesion.activeTeamId);
   const navegacion = await navigationFor(sesion.activeTeamId);
 

@@ -71,7 +71,12 @@ export async function rolMasAltoDe(userId: string): Promise<AppRole> {
  * enlace no protege nada: la seccion 9 pide expresamente que la comprobacion resista
  * "manipulacion directa de solicitudes, no solo ocultamiento de UI".
  */
-export async function assertAdmin(sesion: SesionShell): Promise<Actor> {
+export async function assertAdmin(sesion: SesionShell | null): Promise<Actor> {
+  // Sin sesion es 401, no 403: "no se quien eres" y "se quien eres y no puedes" son respuestas
+  // distintas, y devolver 403 a quien no ha entrado le hace buscar un permiso que le falta
+  // cuando lo que le falta es la sesion.
+  if (!sesion) throw new AdminError('Se requiere iniciar sesion.', 401);
+
   const role = await rolMasAltoDe(sesion.userId);
   try {
     assertCan(role, 'ver-panel-auditoria');

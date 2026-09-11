@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { entrarComo } from './sesion';
 
 /**
  * Objetos adjuntados: tooltip explicativo y tabla de datos emergente.
@@ -9,10 +10,10 @@ import { expect, test, type Page } from '@playwright/test';
  * una via para ver filas que la persona no podria ver de otro modo.
  */
 
-async function entrarComo(page: Page, userId: string) {
-  await page.goto('/');
-  await page.request.post('/api/sesion/equipo-activo', { data: { userId } });
-}
+/** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
+test.beforeEach(async ({ page }) => {
+  await entrarComo(page, 'u-ana');
+});
 
 test.describe('tooltip explicativo', () => {
   test('aparece al posar el puntero y explica el objeto entero', async ({ page }) => {

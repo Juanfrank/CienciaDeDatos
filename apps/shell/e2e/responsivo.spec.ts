@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { entrarComo } from './sesion';
 
 /**
  * Diseño responsivo y movil — seccion 4.9.
@@ -13,10 +14,10 @@ const MOVIL = { width: 390, height: 844 };
 const TABLETA = { width: 820, height: 1180 };
 const ESCRITORIO = { width: 1280, height: 900 };
 
-async function entrarComo(page: Page, userId: string) {
-  await page.goto('/');
-  await page.request.post('/api/sesion/equipo-activo', { data: { userId } });
-}
+/** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
+test.beforeEach(async ({ page }) => {
+  await entrarComo(page, 'u-ana');
+});
 
 test.describe('la disposicion se adapta al ancho', () => {
   test('en escritorio los objetos se reparten en la rejilla de doce columnas', async ({ page }) => {
@@ -64,6 +65,8 @@ test.describe('la disposicion se adapta al ancho', () => {
     // medía la ventana al montar y se pintaba primero la disposicion de escritorio.
     const contexto = await browser.newContext({ viewport: MOVIL, javaScriptEnabled: false });
     const pagina = await contexto.newPage();
+    // Contexto nuevo: no hereda la sesion del beforeEach, que va contra otro contexto.
+    await entrarComo(pagina, 'u-ana');
     await pagina.goto('/m/casos-pendientes');
 
     const anchos = await pagina.locator('.rejilla__celda').evaluateAll((celdas) =>

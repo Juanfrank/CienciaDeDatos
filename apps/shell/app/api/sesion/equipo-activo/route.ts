@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { teamsOf } from '../../../../src/server/contexto';
-import { COOKIE_SESION, cambiarEquipoActivo, cambiarUsuario, obtenerSesion } from '../../../../src/server/sesion';
+import { sinSesion } from '../../../../src/server/respuestas';
+import { cambiarEquipoActivo, obtenerSesion } from '../../../../src/server/sesion';
 
 export const runtime = 'nodejs';
 
@@ -13,40 +14,31 @@ export const runtime = 'nodejs';
  * Comprueba que la persona pertenece al equipo. Sin esa comprobacion, cualquiera podria fijar
  * un teamId arbitrario con una peticion a mano y leer los datos de otro equipo — el caso
  * exacto que la seccion 9 pide probar a nivel de backend, no de interfaz.
+ *
+ * Esta ruta aceptaba tambien un `userId` que cambiaba de identidad sin autenticar. Ya no: la
+ * identidad la fija el inicio de sesion y nada mas.
  */
 export async function POST(request: Request) {
   const sesion = await obtenerSesion();
-  const cuerpo = (await request.json()) as { teamId?: string; userId?: string };
+  if (!sesion) return sinSesion();
 
-  let actualizada = sesion;
-
-  if (cuerpo.userId) {
-    const cambiada = await cambiarUsuario(sesion.sessionId, cuerpo.userId);
-    if (!cambiada) return NextResponse.json({ error: 'Sesion no valida.' }, { status: 401 });
-    actualizada = cambiada;
+  const cuerpo = (await request.json()) as { teamId?: string };
+  if (!cuerpo.teamId) {
+    return NextResponse.json({ error: 'Se requiere teamId.' }, { status: 400 });
   }
 
-  if (cuerpo.teamId) {
-    const permitidos = (await teamsOf(actualizada.userId)).map((t) => t.id);
-    if (!permitidos.includes(cuerpo.teamId)) {
-      return NextResponse.json(
-        { error: 'No pertenece a ese equipo.' },
-        { status: 403 },
-      );
-    }
-    const cambiada = await cambiarEquipoActivo(actualizada.sessionId, cuerpo.teamId);
-    if (!cambiada) return NextResponse.json({ error: 'Sesion no valida.' }, { status: 401 });
-    actualizada = cambiada;
+  const permitidos = (await teamsOf(sesion.userId)).map((t) => t.id);
+  if (!permitidos.includes(cuerpo.teamId)) {
+    return NextResponse.json({ error: 'No pertenece a ese equipo.' }, { status: 403 });
   }
 
-  const respuesta = NextResponse.json({
+  const actualizada = await cambiarEquipoActivo(sesion.sessionId, cuerpo.teamId);
+  if (!actualizada) return sinSesion();
+
+  // La cookie no cambia: el identificador de sesion es el mismo y el equipo activo vive del lado
+  // servidor. Reemitirla aqui solo serviria para que pareciera que el cambio es del navegador.
+  return NextResponse.json({
     userId: actualizada.userId,
     equipoActivo: actualizada.activeTeamId,
   });
-  respuesta.cookies.set(COOKIE_SESION, actualizada.sessionId, {
-    httpOnly: true,
-    sameSite: 'lax',
-    path: '/',
-  });
-  return respuesta;
 }

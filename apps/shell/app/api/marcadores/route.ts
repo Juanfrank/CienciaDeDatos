@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { captureBookmark } from '@app/module-model';
 import { borrarMarcador, guardarMarcador, listarMarcadores } from '../../../src/server/marcadores';
+import { sinSesion } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/sesion';
 
 export const runtime = 'nodejs';
@@ -9,6 +10,7 @@ export const dynamic = 'force-dynamic';
 /** Marcadores visibles: los propios y los compartidos con el equipo activo (4.4). */
 export async function GET() {
   const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
   return NextResponse.json({ marcadores: await listarMarcadores(sesion.userId, sesion.activeTeamId) });
 }
 
@@ -20,6 +22,7 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
   const cuerpo = (await request.json()) as {
     name?: string;
     moduleSlug?: string;
@@ -50,6 +53,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Se requiere id.' }, { status: 400 });
 

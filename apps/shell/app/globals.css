@@ -698,3 +698,36 @@ tr.es-ampliacion { background: #fdf6ec; }
 }
 .preguntar__respuesta { flex: 1 1 100%; font-size: var(--font-size-sm); }
 .preguntar__respuesta p { margin: 0 0 var(--space-xs); }
+
+/* Pantalla de acceso (4.7). */
+.acceso { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: var(--space-lg); }
+.acceso__tarjeta {
+  width: min(420px, 100%);
+  padding: var(--space-xl);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+.acceso__tarjeta h1 { font-size: var(--font-size-xl); margin-bottom: var(--space-lg); }
+.acceso__azure {
+  font: inherit;
+  width: 100%;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-brand-500);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-brand-700);
+  cursor: pointer;
+}
+.acceso__separador {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-textMuted);
+}
+.acceso__separador::before,
+.acceso__separador::after { content: ''; flex: 1; border-top: 1px solid var(--color-border); }
+.acceso__error { min-height: 1.2em; margin: 0 0 var(--space-sm); font-size: var(--font-size-sm); color: var(--color-accent-900); }

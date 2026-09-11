@@ -3,7 +3,7 @@ import { describeProvenance } from '@app/module-model';
 import { cargarModulo } from '../../../../src/server/datos';
 import { findModuleBySlug } from '../../../../src/server/modulos';
 import { serializarObjeto } from '../../../../src/server/serializar';
-import { obtenerSesion } from '../../../../src/server/sesion';
+import { exigirSesionDePagina } from '../../../../src/server/sesion';
 import { VistaModulo } from '../../../../src/components/VistaModulo';
 
 /**
@@ -36,7 +36,7 @@ export default async function PaginaModulo({
   const module = findModuleBySlug(slug);
   if (!module) notFound();
 
-  const sesion = await obtenerSesion();
+  const sesion = await exigirSesionDePagina();
   const cargado = await cargarModulo({
     module,
     ...(page?.[0] ? { pageSlug: page[0] } : {}),

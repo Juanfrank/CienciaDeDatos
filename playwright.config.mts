@@ -39,13 +39,19 @@ export default defineConfig({
         // motivo aparente.
         'rm -rf .cache-e2e && ' +
         'npx tsx tools/poblar-cache.mts --connector mock --dir .cache-e2e && ' +
-        'CACHE_DIR=.cache-e2e npx next start apps/shell --port 4310',
+        'CACHE_DIR=.cache-e2e AUTH_PEPPER=pimienta-de-pruebas-e2e ' +
+        'npx next start apps/shell --port 4310',
       url: 'http://localhost:4310/health',
       reuseExistingServer: false,
       timeout: 120_000,
     },
     {
-      command: 'CACHE_DIR=.cache-e2e npx next start apps/shell --port 4311',
+      // La MISMA pimienta que la otra instancia: con dos distintas, los hashes escritos por una
+      // no verificarian en la otra y la sesion se perderia al cambiar de instancia — que es
+      // precisamente lo que las pruebas de multiinstancia comprueban que no pasa.
+      command:
+        'CACHE_DIR=.cache-e2e AUTH_PEPPER=pimienta-de-pruebas-e2e ' +
+        'npx next start apps/shell --port 4311',
       url: 'http://localhost:4311/health',
       reuseExistingServer: false,
       timeout: 120_000,

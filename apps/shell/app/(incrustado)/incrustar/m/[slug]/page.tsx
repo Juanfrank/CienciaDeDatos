@@ -36,7 +36,26 @@ export default async function PaginaIncrustada({
     if (valor !== undefined) filtros[clave] = valor;
   }
 
+  // Sin sesion NO se redirige a la pantalla de acceso. Esta pagina se sirve dentro de un iframe
+  // de otro portal: un formulario de contrasena dibujado ahi dentro es indistinguible de uno
+  // falso incrustado por el anfitrion, y ensena a la gente a escribir su clave dentro de un marco
+  // ajeno. Se dice que hace falta entrar, con un enlace que abre la aplicacion en otra pestana.
   const sesion = await obtenerSesion();
+  if (!sesion) {
+    return (
+      <div className="vacio">
+        <h1>Se requiere iniciar sesion</h1>
+        <p className="texto-atenuado" data-testid="incrustado-sin-sesion">
+          Esta vista muestra datos institucionales y necesita una sesion abierta en la capa de
+          visualizacion.
+        </p>
+        <a href="/acceso" target="_blank" rel="noopener noreferrer" className="boton-enlace">
+          Abrir la aplicacion
+        </a>
+      </div>
+    );
+  }
+
   const cargado = await cargarModulo({
     module,
     ...(typeof query['pagina'] === 'string' ? { pageSlug: query['pagina'] } : {}),

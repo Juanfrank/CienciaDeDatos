@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { isModule, type NavNode } from '@app/access-control';
 import { navigationFor } from '../../src/server/contexto';
-import { obtenerSesion } from '../../src/server/sesion';
+import { exigirSesionDePagina } from '../../src/server/sesion';
 
 /** Primer modulo accesible del arbol visible, o null si el equipo no tiene ninguno. */
 function primerModulo(nodos: NavNode[]): string | null {
@@ -14,7 +14,7 @@ function primerModulo(nodos: NavNode[]): string | null {
 }
 
 export default async function Inicio() {
-  const sesion = await obtenerSesion();
+  const sesion = await exigirSesionDePagina();
   const slug = primerModulo((await navigationFor(sesion.activeTeamId)).tree);
 
   if (slug) redirect(`/m/${slug}`);

@@ -119,6 +119,10 @@ export const seedUsers: UserRow[] = [
   { id: 'u-ana', combineTeamsByUnion: false },
   { id: 'u-beto', combineTeamsByUnion: false },
   { id: 'u-admin', combineTeamsByUnion: false },
+  // Existe en el directorio y no pertenece a NINGUN equipo. Es un caso real —alguien dado de
+  // alta antes de asignarle equipo— y es la cuenta contra la que se prueba el bloqueo por
+  // intentos fallidos sin dejar bloqueada a nadie que las demas pruebas necesiten.
+  { id: 'u-sin-equipo', combineTeamsByUnion: false },
 ];
 
 export const seedMemberships: TeamMembershipRow[] = [

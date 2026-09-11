@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { navigationFor } from '../../../src/server/contexto';
+import { sinSesion } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/sesion';
 
 export const runtime = 'nodejs';
@@ -7,6 +8,7 @@ export const runtime = 'nodejs';
 /** Arbol de navegacion visible para el equipo activo (4.1.1, 4.10.6). */
 export async function GET() {
   const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
   const vista = await navigationFor(sesion.activeTeamId);
   return NextResponse.json({
     equipoActivo: sesion.activeTeamId,

@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { entrarComo } from './sesion';
 
 /**
  * Incorporacion en otros portales — seccion 4.9.
@@ -9,10 +10,10 @@ import { expect, test, type Page } from '@playwright/test';
  * ningun token que salte la autenticacion.
  */
 
-async function entrarComo(page: Page, userId: string) {
-  await page.goto('/');
-  await page.request.post('/api/sesion/equipo-activo', { data: { userId } });
-}
+/** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
+test.beforeEach(async ({ page }) => {
+  await entrarComo(page, 'u-ana');
+});
 
 test.describe('politica de enmarcado', () => {
   test('ninguna pantalla normal se puede enmarcar', async ({ page }) => {

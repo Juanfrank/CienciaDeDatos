@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { esAdministrador } from '../../src/server/admin';
-import { obtenerSesion } from '../../src/server/sesion';
+import { exigirSesionDePagina } from '../../src/server/sesion';
 
 /**
  * Panel de administracion — seccion 4.10.8.
@@ -22,7 +22,7 @@ const SECCIONES = [
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const sesion = await obtenerSesion();
+  const sesion = await exigirSesionDePagina();
 
   if (!(await esAdministrador(sesion.userId))) {
     // Sin permiso no se dibuja nada del panel. Se redirige a una ruta FUERA de este layout,

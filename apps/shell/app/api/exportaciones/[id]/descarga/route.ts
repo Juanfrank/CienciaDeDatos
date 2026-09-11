@@ -1,4 +1,5 @@
 import { colaExportaciones } from '../../../../../src/server/exportaciones';
+import { sinSesion } from '../../../../../src/server/respuestas';
 import { obtenerSesion } from '../../../../../src/server/sesion';
 
 export const runtime = 'nodejs';
@@ -12,9 +13,11 @@ export const runtime = 'nodejs';
  * archivo, que es donde estan los datos.
  */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
+
   const { id } = await params;
   const job = await colaExportaciones.consultar(id);
-  const sesion = await obtenerSesion();
 
   if (!job || job.request.requestedBy !== sesion.userId) {
     return new Response('Exportacion no encontrada.', { status: 404 });

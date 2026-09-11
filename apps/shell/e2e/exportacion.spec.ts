@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { entrarComo } from './sesion';
 
 /**
  * Exportacion — seccion 4.9, encolada como exige 5.3.
@@ -7,11 +8,6 @@ import { expect, test, type Page } from '@playwright/test';
  * identificador, el estado se consulta y la descarga es una peticion aparte. Si alguien
  * convirtiera esto en una generacion sincrona, la primera prueba fallaria.
  */
-
-async function entrarComo(page: Page, userId: string) {
-  await page.goto('/');
-  await page.request.post('/api/sesion/equipo-activo', { data: { userId } });
-}
 
 interface EstadoExportacion {
   id: string;
@@ -39,6 +35,11 @@ function archivoDe(estado: EstadoExportacion): NonNullable<EstadoExportacion['ar
   expect(estado.archivo).toBeDefined();
   return estado.archivo as NonNullable<EstadoExportacion['archivo']>;
 }
+
+/** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
+test.beforeEach(async ({ page }) => {
+  await entrarComo(page, 'u-ana');
+});
 
 test.describe('la exportacion se despacha a una cola (5.3)', () => {
   test('encolar responde 202 con un identificador, no con el archivo', async ({ page }) => {

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { FORMATOS, type ExportFormat } from '@app/export';
 import { encolarExportacion } from '../../../src/server/exportaciones';
 import { normalizarFiltros } from '../../../src/server/filtros';
+import { sinSesion } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/sesion';
 
 export const runtime = 'nodejs';
@@ -14,6 +15,9 @@ export const runtime = 'nodejs';
  * lado servidor, no del cuerpo, para que nadie pueda exportar con la identidad de otro.
  */
 export async function POST(request: Request) {
+  const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
+
   let cuerpo: Record<string, unknown>;
   try {
     cuerpo = (await request.json()) as Record<string, unknown>;
@@ -37,7 +41,6 @@ export async function POST(request: Request) {
   const pageSlug = typeof cuerpo['pagina'] === 'string' ? cuerpo['pagina'] : undefined;
   const filtros = normalizarFiltros(cuerpo['filtros']);
 
-  const sesion = await obtenerSesion();
   const job = await encolarExportacion({
     moduleSlug,
     ...(pageSlug ? { pageSlug } : {}),

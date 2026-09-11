@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { entrarComo } from './sesion';
 
 /**
  * Criterio de la seccion 9: "la aplicacion escala a mas de una instancia sin perdida de sesion
@@ -23,24 +24,27 @@ async function conMismaSesion(page: Page): Promise<Record<string, string>> {
   return { cookie: `sesion=${sesion?.value ?? ''}` };
 }
 
+/** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
+test.beforeEach(async ({ page }) => {
+  await entrarComo(page, 'u-ana');
+});
+
 test.describe('la sesion sobrevive al cambio de instancia', () => {
   test('la segunda instancia reconoce la sesion abierta en la primera', async ({ page }) => {
-    await page.goto('/');
-    await page.request.post('/api/sesion/equipo-activo', { data: { userId: 'u-beto' } });
+    await entrarComo(page, 'u-beto');
 
     const cabeceras = await conMismaSesion(page);
     const respuesta = await page.request.get(`${OTRA}/api/navegacion`, { headers: cabeceras });
 
     expect(respuesta.status()).toBe(200);
     const cuerpo = (await respuesta.json()) as { equipoActivo?: string };
-    // Beto pertenece al equipo Este: si la segunda instancia no viera la sesion, emitiria una
-    // nueva con el usuario por defecto y su equipo.
+    // Beto pertenece al equipo Este: si la segunda instancia no viera la sesion, la peticion
+    // seria de alguien sin autenticar y responderia 401, no un arbol de navegacion.
     expect(cuerpo.equipoActivo).toBe('equipo-este');
   });
 
   test('cambiar de equipo en una instancia se ve en la otra, sin cerrar sesion', async ({ page }) => {
-    await page.goto('/');
-    await page.request.post('/api/sesion/equipo-activo', { data: { userId: 'u-ana' } });
+    await entrarComo(page, 'u-ana');
     const cabeceras = await conMismaSesion(page);
 
     // El cambio se hace contra la SEGUNDA instancia y se comprueba en la primera.
@@ -58,8 +62,7 @@ test.describe('la sesion sobrevive al cambio de instancia', () => {
 
 test.describe('la personalizacion no se queda en una instancia', () => {
   test('un marcador guardado en una instancia se lista desde la otra', async ({ page }) => {
-    await page.goto('/');
-    await page.request.post('/api/sesion/equipo-activo', { data: { userId: 'u-ana' } });
+    await entrarComo(page, 'u-ana');
     const cabeceras = await conMismaSesion(page);
 
     const nombre = `marcador-multiinstancia-${Date.now()}`;
@@ -88,8 +91,7 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
     // Se crea y se borra un equipo DE USAR Y TIRAR en vez de renombrar uno sembrado: el almacen
     // persiste entre pruebas, y tocar el equipo Norte dejaba fallando a las de otros archivos
     // que asertan sobre su nombre. Un estado compartido de verdad obliga a limpiar de verdad.
-    await page.goto('/');
-    await page.request.post('/api/sesion/equipo-activo', { data: { userId: 'u-admin' } });
+    await entrarComo(page, 'u-admin');
     const cabeceras = await conMismaSesion(page);
 
     const id = `equipo-multiinstancia-${Date.now()}`;
@@ -120,8 +122,7 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
 
   test('la auditoria de la otra instancia incluye ese mismo cambio', async ({ page }) => {
     // Un registro de auditoria por instancia no es un registro de auditoria.
-    await page.goto('/');
-    await page.request.post('/api/sesion/equipo-activo', { data: { userId: 'u-admin' } });
+    await entrarComo(page, 'u-admin');
     const cabeceras = await conMismaSesion(page);
 
     const antes = (await (
@@ -157,8 +158,7 @@ test.describe('las dos instancias sirven el mismo dato del cache', () => {
   test('un modulo se ve igual en las dos', async ({ page }) => {
     // Criterio de la seccion 9: dos modulos distintos —aqui, dos instancias— leen de la misma
     // entrada de cache, sin consultas redundantes a la fuente.
-    await page.goto('/');
-    await page.request.post('/api/sesion/equipo-activo', { data: { userId: 'u-ana' } });
+    await entrarComo(page, 'u-ana');
     const cabeceras = await conMismaSesion(page);
 
     const aqui = (await (await page.request.get('/api/modulos/casos-pendientes')).json()) as {

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { entrarComo } from './sesion';
 
 /**
  * Alertas y suscripciones basadas en datos (4.9).
@@ -7,11 +8,6 @@ import { expect, test, type Page } from '@playwright/test';
  * asi que no puede convertirse en un canal por el que salgan cifras que su destinatario no
  * podria ver abriendo el modulo. El principio 5 no tiene una excepcion para las notificaciones.
  */
-
-async function entrarComo(page: Page, userId: string) {
-  await page.goto('/');
-  await page.request.post('/api/sesion/equipo-activo', { data: { userId } });
-}
 
 interface AlertaCreada {
   id: string;
@@ -37,6 +33,11 @@ async function limpiar(page: Page) {
     }
   }
 }
+
+/** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
+test.beforeEach(async ({ page }) => {
+  await entrarComo(page, 'u-ana');
+});
 
 test.describe('reglas de alerta', () => {
   test.afterEach(async ({ page }) => {

@@ -16,6 +16,7 @@ import {
 } from './admin';
 import { contarAmpliaciones, limpiarAuditoria, listarAuditoria } from './auditoria';
 import { gobierno } from './gobierno';
+import type { SesionShell } from './sesion';
 
 const { DIM_DISTRITO, DIM_MATERIA, scope } = gobiernoFixtures;
 
@@ -23,7 +24,12 @@ const admin = { userId: 'u-admin', role: 'administrador' as const };
 const visor = { userId: 'u-beto', role: 'visor' as const };
 const colaborador = { userId: 'u-ana', role: 'colaborador' as const };
 
-const sesion = (userId: string) => ({ sessionId: 's', userId, activeTeamId: 'equipo-norte' });
+const sesion = (userId: string): SesionShell => ({
+  sessionId: 's',
+  userId,
+  activeTeamId: 'equipo-norte',
+  authProvider: 'local',
+});
 
 /** Equipo del almacen, o fallo explicito. Evita aserciones non-null en cada prueba. */
 const equipoDe = async (id: string) => {

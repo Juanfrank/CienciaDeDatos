@@ -3,6 +3,7 @@ import type { AlertOperator, AlertRule } from '@app/alerts';
 import { alertStore } from '../../../src/server/alertas';
 import { normalizarFiltros } from '../../../src/server/filtros';
 import { findModuleBySlug } from '../../../src/server/modulos';
+import { sinSesion } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/sesion';
 
 export const runtime = 'nodejs';
@@ -19,6 +20,7 @@ const OPERADORES: AlertOperator[] = ['mayor-que', 'menor-que', 'cambia-mas-de'];
  */
 export async function GET() {
   const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
   const reglas = await alertStore.listRules();
 
   // Solo las propias. Una regla ajena revelaria que modulo vigila alguien y con que umbral.
@@ -31,6 +33,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
+
   let cuerpo: Record<string, unknown>;
   try {
     cuerpo = (await request.json()) as Record<string, unknown>;
@@ -73,7 +78,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const sesion = await obtenerSesion();
   const regla: AlertRule = {
     id: crypto.randomUUID(),
     name: nombre,
@@ -94,10 +98,12 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
+
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Falta el id.' }, { status: 400 });
 
-  const sesion = await obtenerSesion();
   // La comprobacion de propiedad la hace el almacen. Una regla ajena responde 404 y no 403:
   // decir "prohibido" confirmaria que ese identificador existe.
   const borrada = await alertStore.deleteRule(id, sesion.userId);

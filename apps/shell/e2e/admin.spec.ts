@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { entrarComo } from './sesion';
 
 /**
  * Panel de administracion — verificacion en navegador (4.10.8).
@@ -11,11 +12,6 @@ import { expect, test, type Page } from '@playwright/test';
  * estable (la cadena de carpetas que origina un ambito) y no sobre valores que otra prueba
  * pueda haber cambiado.
  */
-
-async function entrarComo(page: Page, userId: string) {
-  await page.goto('/');
-  await page.request.post('/api/sesion/equipo-activo', { data: { userId } });
-}
 
 test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9)', () => {
   test('un Visor no ve el enlace y la API le responde 403', async ({ page }) => {

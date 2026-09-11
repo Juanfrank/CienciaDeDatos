@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { entrarComo } from './sesion';
 
 /**
  * Verificacion de punta a punta del shell, en un navegador real.
@@ -7,11 +8,14 @@ import { expect, test } from '@playwright/test';
  * comprobar con la aplicacion corriendo.
  */
 
-/** Pone la sesion en una persona y su equipo antes de navegar. */
-async function entrarComo(page: import('@playwright/test').Page, userId: string) {
-  await page.goto('/');
-  await page.request.post('/api/sesion/equipo-activo', { data: { userId } });
-}
+/**
+ * Toda prueba empieza con una sesion de verdad. Antes no hacia falta: la aplicacion emitia una
+ * sola con un usuario de demostracion en cuanto llegaba una peticion sin cookie, que es
+ * exactamente lo que A1 quito.
+ */
+test.beforeEach(async ({ page }) => {
+  await entrarComo(page, 'u-ana');
+});
 
 test.describe('navegacion y ruteo por slug (4.11)', () => {
   test('la raiz redirige al primer modulo accesible', async ({ page }) => {
@@ -85,12 +89,20 @@ test.describe('ambito de acceso por equipo activo (4.10.4)', () => {
     const antes = await page.getByTestId('tabla').innerText();
     expect(antes).toContain('Distrito Norte');
 
-    // La misma sesion: solo cambia el equipo activo.
-    await page.getByTestId('selector-usuario').selectOption('u-beto');
+    const cookieAntes = (await page.context().cookies()).find((c) => c.name === 'sesion')?.value;
+
+    // Ana pertenece a los dos equipos. Cambia el ACTIVO, no la identidad: es el gesto que
+    // describe 4.10.2, y antes esta prueba lo hacia cambiando de persona en un desplegable, que
+    // no probaba nada de lo que dice su titulo.
+    await page.getByTestId('selector-equipo').selectOption('equipo-este');
     await page.waitForLoadState('networkidle');
     await page.goto('/m/casos-este');
 
     await expect(page.getByTestId('titulo-modulo')).toHaveText('Casos pendientes Este');
+
+    // La sesion es la MISMA: cambiar de equipo no reemite credenciales (criterio de seccion 9).
+    const cookieDespues = (await page.context().cookies()).find((c) => c.name === 'sesion')?.value;
+    expect(cookieDespues).toBe(cookieAntes);
   });
 });
 

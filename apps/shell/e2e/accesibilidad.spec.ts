@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { entrarComo } from './sesion';
 
 /**
  * Accesibilidad — seccion 4.9, "no opcional, no se pospone", y criterio de la seccion 9:
@@ -15,11 +16,6 @@ import { expect, test, type Page } from '@playwright/test';
 
 const NIVEL = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
-async function entrarComo(page: Page, userId: string) {
-  await page.goto('/');
-  await page.request.post('/api/sesion/equipo-activo', { data: { userId } });
-}
-
 /** Analiza la pagina actual y devuelve las infracciones, ya legibles en el mensaje de fallo. */
 async function infracciones(page: Page): Promise<string[]> {
   const { violations } = await new AxeBuilder({ page }).withTags(NIVEL).analyze();
@@ -29,6 +25,11 @@ async function infracciones(page: Page): Promise<string[]> {
       v.nodes.map((n) => n.target.join(' ')).join(' | '),
   );
 }
+
+/** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
+test.beforeEach(async ({ page }) => {
+  await entrarComo(page, 'u-ana');
+});
 
 test.describe('paginas de modulo', () => {
   test('un modulo con sus objetos no tiene infracciones WCAG 2.1 AA', async ({ page }) => {

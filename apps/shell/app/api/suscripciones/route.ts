@@ -3,6 +3,7 @@ import { FORMATOS, type ExportFormat } from '@app/export';
 import type { Cadence, Subscription } from '@app/alerts';
 import { alertStore } from '../../../src/server/alertas';
 import { findModuleBySlug } from '../../../src/server/modulos';
+import { sinSesion } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/sesion';
 import { normalizarFiltros } from '../../../src/server/filtros';
 
@@ -19,6 +20,7 @@ const CADENCIAS: Cadence[] = ['diaria', 'semanal', 'mensual'];
  */
 export async function GET() {
   const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
   const todas = await alertStore.listSubscriptions();
   return NextResponse.json({
     suscripciones: todas.filter((s) => s.ownerUserId === sesion.userId),
@@ -26,6 +28,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
+
   let cuerpo: Record<string, unknown>;
   try {
     cuerpo = (await request.json()) as Record<string, unknown>;
@@ -59,7 +64,6 @@ export async function POST(request: Request) {
   const module = findModuleBySlug(moduleSlug);
   if (!module) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
-  const sesion = await obtenerSesion();
   const suscripcion: Subscription = {
     id: crypto.randomUUID(),
     name: nombre,
@@ -81,10 +85,12 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
+
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Falta el id.' }, { status: 400 });
 
-  const sesion = await obtenerSesion();
   const borrada = await alertStore.deleteSubscription(id, sesion.userId);
   if (!borrada) return NextResponse.json({ error: 'Suscripcion no encontrada.' }, { status: 404 });
 

@@ -12,26 +12,27 @@ import { useTransition } from 'react';
  * Cambiarlo es una escritura del lado servidor sobre la sesion: el ambito de datos efectivo
  * cambia de inmediato SIN cerrar sesion (criterio de la seccion 9). Por eso llama a la API y
  * refresca, en vez de guardar nada en el cliente.
+ *
+ * Aqui habia tambien un desplegable de PERSONA que cambiaba de identidad sin autenticar. Era el
+ * andamio con el que se desarrollo el resto y, existiendo, la aplicacion no tenia control de
+ * acceso en absoluto: bastaba elegir a otra persona en un desplegable para ver sus datos. Se
+ * cambia de identidad cerrando sesion y volviendo a entrar.
  */
 export function SelectorDeEquipo({
   equipos,
   equipoActivo,
-  usuarios,
-  usuarioActivo,
 }: {
   equipos: { id: string; name: string; role: string }[];
   equipoActivo: string;
-  usuarios: { id: string; name: string }[];
-  usuarioActivo: string;
 }) {
   const router = useRouter();
   const [pendiente, iniciarTransicion] = useTransition();
 
-  const cambiar = async (cuerpo: Record<string, string>) => {
+  const cambiar = async (teamId: string) => {
     await fetch('/api/sesion/equipo-activo', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(cuerpo),
+      body: JSON.stringify({ teamId }),
     });
     iniciarTransicion(() => router.refresh());
   };
@@ -39,26 +40,11 @@ export function SelectorDeEquipo({
   return (
     <div className="selector-equipo" data-pendiente={pendiente}>
       <label className="selector-equipo__campo">
-        <span className="selector-equipo__etiqueta">Persona</span>
-        <select
-          value={usuarioActivo}
-          data-testid="selector-usuario"
-          onChange={(e) => void cambiar({ userId: e.target.value })}
-        >
-          {usuarios.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label className="selector-equipo__campo">
         <span className="selector-equipo__etiqueta">Equipo activo</span>
         <select
           value={equipoActivo}
           data-testid="selector-equipo"
-          onChange={(e) => void cambiar({ teamId: e.target.value })}
+          onChange={(e) => void cambiar(e.target.value)}
         >
           {equipos.map((t) => (
             <option key={t.id} value={t.id}>

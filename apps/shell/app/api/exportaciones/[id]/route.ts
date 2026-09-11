@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { colaExportaciones } from '../../../../src/server/exportaciones';
+import { sinSesion } from '../../../../src/server/respuestas';
 import { obtenerSesion } from '../../../../src/server/sesion';
 
 export const runtime = 'nodejs';
@@ -11,12 +12,14 @@ export const runtime = 'nodejs';
  * a arrastrar el archivo entero en cada sondeo.
  */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
+
   const { id } = await params;
   const job = await colaExportaciones.consultar(id);
 
   // Un trabajo ajeno se responde como inexistente, no como prohibido: decir "403" confirmaria
   // que ese identificador existe y de quien es.
-  const sesion = await obtenerSesion();
   if (!job || job.request.requestedBy !== sesion.userId) {
     return NextResponse.json({ error: 'Exportacion no encontrada.' }, { status: 404 });
   }

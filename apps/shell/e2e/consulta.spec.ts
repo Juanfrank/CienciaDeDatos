@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { entrarComo } from './sesion';
 
 /**
  * Consulta en lenguaje natural — seccion 4.9.
@@ -8,11 +9,6 @@ import { expect, test, type Page } from '@playwright/test';
  * el vocabulario sale de los datos que quien pregunta ya puede ver, la respuesta es una URL
  * normal, y una pregunta por algo fuera de su ambito no confirma que ese algo exista.
  */
-
-async function entrarComo(page: Page, userId: string) {
-  await page.goto('/');
-  await page.request.post('/api/sesion/equipo-activo', { data: { userId } });
-}
 
 interface RespuestaDeConsulta {
   entendido: string;
@@ -26,6 +22,11 @@ const preguntar = async (page: Page, pregunta: string, modulo = 'casos-pendiente
   const r = await page.request.post('/api/consulta', { data: { pregunta, modulo } });
   return { estado: r.status(), cuerpo: (await r.json()) as Partial<RespuestaDeConsulta> };
 };
+
+/** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
+test.beforeEach(async ({ page }) => {
+  await entrarComo(page, 'u-ana');
+});
 
 test.describe('entiende preguntas sobre lo que el modulo muestra', () => {
   test('reconoce una medida y devuelve la URL del modulo', async ({ page }) => {

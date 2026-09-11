@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { urlDeConsulta } from '@app/nl-query';
 import { resolverPregunta } from '../../../src/server/consulta';
+import { sinSesion } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/sesion';
 
 export const runtime = 'nodejs';
@@ -17,6 +18,9 @@ const MAXIMO = 300;
  * distinta de lectura, y por eso este endpoint no consulta nada.
  */
 export async function POST(request: Request) {
+  const sesion = await obtenerSesion();
+  if (!sesion) return sinSesion();
+
   let cuerpo: Record<string, unknown>;
   try {
     cuerpo = (await request.json()) as Record<string, unknown>;
@@ -32,7 +36,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `La pregunta no puede pasar de ${MAXIMO} caracteres.` }, { status: 400 });
   }
 
-  const sesion = await obtenerSesion();
   const resuelto = await resolverPregunta(pregunta, moduleSlug, sesion.userId, sesion.activeTeamId);
 
   // Modulo inexistente y modulo no concedido se responden igual, sin distinguirlos (4.11).
