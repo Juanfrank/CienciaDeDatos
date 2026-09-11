@@ -21,3 +21,22 @@ export {
   type ScopeLookup,
 } from './mappers';
 export type * from './rows';
+
+/**
+ * Datos de arranque de staging (seccion 8.1).
+ *
+ * Se exportan porque el shell los usa para construir su gobierno en memoria mientras no hay
+ * base de identidad: pasan por los MISMOS mapeadores que usaria la capa de repositorio, asi que
+ * lo que se ejercita en desarrollo es la cadena real fila -> dominio, no una maqueta aparte.
+ */
+export {
+  seedGrantedNodes,
+  seedMemberships,
+  seedModuleScopes,
+  seedNavNodes,
+  seedRestrictions,
+  seedScopes,
+  seedTeams,
+  seedUserScopes,
+  seedUsers,
+} from './seedData';

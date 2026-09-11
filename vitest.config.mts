@@ -21,6 +21,14 @@ export default defineConfig({
   },
   test: {
     include: ['**/*.spec.ts'],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/__boundary-fixture__/**'],
+    // Las pruebas de punta a punta las ejecuta Playwright, no vitest: necesitan un navegador
+    // y el servidor levantado. Se excluyen aqui para que `npm test` siga siendo rapido.
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/__boundary-fixture__/**',
+      '**/e2e/**',
+      '**/.next/**',
+    ],
   },
 });

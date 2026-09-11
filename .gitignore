@@ -8,3 +8,8 @@ coverage/
 .env
 .env.local
 .DS_Store
+.cache-datos/
+apps/shell/.next/
+test-results/
+playwright-report/
+.cache-e2e/
