@@ -31,6 +31,8 @@
   },
   "dependencies": {
     "@azure/identity": "^4.13.2",
-    "@azure/storage-blob": "^12.33.0"
+    "@azure/storage-blob": "^12.33.0",
+    "@node-rs/argon2": "^2.2.1",
+    "otpauth": "^9.5.2"
   }
 }
