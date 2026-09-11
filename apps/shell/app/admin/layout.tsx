@@ -18,6 +18,7 @@ const SECCIONES = [
   { href: '/admin/paquetes', label: 'Paquetes visuales', desc: 'Reagrupacion por audiencia' },
   { href: '/admin/ambitos', label: 'Ambitos de acceso', desc: 'RLS de negocio' },
   { href: '/admin/quien-ve-que', label: 'Quien ve que', desc: 'Auditar antes de publicar' },
+  { href: '/admin/cuentas', label: 'Cuentas locales', desc: 'La excepcion, no la via por defecto' },
   { href: '/admin/auditoria', label: 'Auditoria', desc: 'Cambios y excepciones' },
 ];
 

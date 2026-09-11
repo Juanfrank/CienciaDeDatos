@@ -54,6 +54,14 @@ export interface ISessionStore {
   get(sessionId: string): Promise<AppSession | null>;
   update(session: AppSession): Promise<void>;
   delete(sessionId: string): Promise<void>;
+  /**
+   * Borra TODAS las sesiones de una persona.
+   *
+   * Es obligatorio en el puerto y no opcional: sin esto, cambiar una contraseña comprometida no
+   * echa de dentro a quien ya entro con ella, y el restablecimiento de 4.7.2 seria un gesto sin
+   * efecto. Un almacen de sesiones que no sepa hacer esto no sirve para esta aplicacion.
+   */
+  deleteAllFor(userId: string): Promise<void>;
 }
 
 /**
@@ -106,6 +114,11 @@ export class InMemorySessionStore implements ISessionStore {
   }
   async delete(sessionId: string): Promise<void> {
     this.map.delete(sessionId);
+  }
+  async deleteAllFor(userId: string): Promise<void> {
+    for (const [id, sesion] of this.map) {
+      if (sesion.userId === userId) this.map.delete(id);
+    }
   }
 }
 

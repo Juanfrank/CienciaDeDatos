@@ -48,3 +48,14 @@ export {
   type LocalCredentialRecord,
   type LoginAuditEvent,
 } from './stores';
+export {
+  CorreoInstitucionalNoDisponible,
+  DEFAULT_RESET_TTL_MS,
+  PasswordResetError,
+  PasswordResetService,
+  type IResetChannel,
+  type IResetStore,
+  type IssuedResetToken,
+  type PasswordResetServiceOptions,
+  type ResetRecord,
+} from './passwordReset';

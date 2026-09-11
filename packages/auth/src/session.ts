@@ -79,4 +79,15 @@ export class SessionService {
     // Revocar es borrar una fila, no esperar a que expire un token firmado.
     await this.store.delete(sessionId);
   }
+
+  /**
+   * Revoca todas las sesiones de una persona.
+   *
+   * Se invoca al restablecer una contraseña (4.7.2) y al retirar el acceso a alguien. Cambiar la
+   * credencial sin esto deja dentro a quien ya entro con la anterior, que es precisamente de
+   * quien uno se quiere deshacer al restablecerla.
+   */
+  async revokeAllFor(userId: string): Promise<void> {
+    await this.store.deleteAllFor(userId);
+  }
 }

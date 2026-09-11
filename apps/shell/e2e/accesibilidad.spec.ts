@@ -93,6 +93,7 @@ test.describe('panel de administracion (4.10.8)', () => {
     '/admin/paquetes',
     '/admin/ambitos',
     '/admin/quien-ve-que',
+    '/admin/cuentas',
     '/admin/auditoria',
   ]) {
     test(`${ruta} no tiene infracciones WCAG 2.1 AA`, async ({ page }) => {
@@ -103,6 +104,15 @@ test.describe('panel de administracion (4.10.8)', () => {
       expect(await infracciones(page)).toEqual([]);
     });
   }
+});
+
+test.describe('restablecimiento de contrasena (4.7.2)', () => {
+  test('la pantalla de restablecimiento es accesible, sin sesion', async ({ page }) => {
+    await page.goto('/restablecer');
+    await expect(page.getByTestId('restablecer-enviar')).toBeVisible();
+
+    expect(await infracciones(page)).toEqual([]);
+  });
 });
 
 test.describe('personalizacion (4.6)', () => {

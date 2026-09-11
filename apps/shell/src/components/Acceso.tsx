@@ -132,8 +132,12 @@ export function Acceso({ azureAdDisponible }: { azureAdDisponible: boolean }) {
         </button>
 
         <p className="texto-atenuado">
-          Las cuentas locales exigen un segundo factor (4.7.2). Si olvido su contrasena, un
-          Administrador debe iniciar el restablecimiento.
+          Las cuentas locales exigen un segundo factor. Si olvido su contrasena, un Administrador
+          inicia el restablecimiento y le entrega un codigo de un solo uso; con el, entre en{' '}
+          <a href="/restablecer" data-testid="enlace-restablecer">
+            restablecer contrasena
+          </a>
+          .
         </p>
       </form>
     </main>
