@@ -1,0 +1,17 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "module-model",
+  "projectType": "library",
+  "sourceRoot": "packages/module-model/src",
+  "tags": ["type:lib", "scope:shared"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "eslint packages/module-model --max-warnings 0" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run --dir packages/module-model --passWithNoTests" }
+    }
+  }
+}

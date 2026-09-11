@@ -11,6 +11,7 @@ export default defineConfig({
       '@app/access-control': r('./packages/access-control/src/index.ts'),
       '@app/identity-db': r('./packages/identity-db/src/index.ts'),
       '@app/observability': r('./packages/observability/src/index.ts'),
+      '@app/module-model': r('./packages/module-model/src/index.ts'),
       '@app/ui-components': r('./packages/ui-components/src/index.ts'),
       '@app/auth': r('./packages/auth/src/index.ts'),
       '@app/caching': r('./packages/caching/src/index.ts'),

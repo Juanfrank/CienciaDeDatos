@@ -53,8 +53,13 @@ const depConstraints = [
     onlyDependOnLibsWithTags: ['type:contract-types', 'type:util'],
   },
   {
+    // `type:ui` incluye `ui-components`, que no es solo React: es el REPOSITORIO de objetos
+    // versionados (contratos de datos, semver, politica de deprecacion). La definicion de un
+    // modulo referencia objetos por id y version, asi que esta dependencia es legitima y va en
+    // esa direccion. Lo que sigue prohibido es la inversa: el repositorio de objetos no puede
+    // depender de la definicion de un modulo concreto.
     sourceTag: 'type:lib',
-    onlyDependOnLibsWithTags: ['type:contract-types', 'type:util'],
+    onlyDependOnLibsWithTags: ['type:contract-types', 'type:ui', 'type:util'],
   },
   {
     sourceTag: 'type:util',

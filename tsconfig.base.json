@@ -45,6 +45,9 @@
       ],
       "@app/observability": [
         "packages/observability/src/index.ts"
+      ],
+      "@app/module-model": [
+        "packages/module-model/src/index.ts"
       ]
     }
   },
