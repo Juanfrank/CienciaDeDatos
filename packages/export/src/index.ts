@@ -13,7 +13,13 @@ export {
   type IExportQueue,
   type StoreExportQueueOptions,
 } from './cola';
-export { aCsv, aSvg, construirEncabezado, escaparCsv, type Encabezado } from './formatos';
+export {
+  construirDocumento,
+  type DocumentoExportable,
+  type HojaExportable,
+} from './documento';
+export { construirEncabezado, type Encabezado } from './encabezado';
+export { aCsv, aSvg, escaparCsv } from './formatos';
 export {
   generarArtefacto,
   procesarPendientes,

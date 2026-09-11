@@ -112,6 +112,55 @@ test.describe('el archivo sale filtrado por el ambito de quien exporta (principi
   });
 });
 
+test.describe('cada objeto exporta LO QUE MUESTRA, no el dataset entero', () => {
+  test('la tarjeta KPI exporta una fila y el grafico una por categoria', async ({ page }) => {
+    await entrarComo(page, 'u-ana');
+    const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'csv' });
+    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+
+    const bloques = new Map(
+      csv
+        .split('\r\n\r\n')
+        .slice(1)
+        .map((b) => {
+          const [titulo, ...resto] = b.split('\r\n');
+          return [(titulo ?? '').replace(/^# /, ''), resto];
+        }),
+    );
+
+    // La tarjeta muestra un numero: exporta una cabecera y UNA fila.
+    const tarjeta = bloques.get('Casos pendientes') ?? [];
+    expect(tarjeta[0]).toBe('Indicador,CasosPendientes');
+    expect(tarjeta.filter((l) => l.trim() !== '')).toHaveLength(2);
+
+    // El grafico muestra una barra por distrito: exporta una fila por distrito, ya agregada.
+    const barras = bloques.get('Pendientes por distrito') ?? [];
+    expect(barras[0]).toBe('DimTribunal.Distrito,CasosPendientes');
+    expect(barras.filter((l) => l.trim() !== '')).toHaveLength(2); // cabecera + Distrito Norte
+  });
+
+  test('dos objetos distintos ya no producen la misma tabla repetida', async ({ page }) => {
+    await entrarComo(page, 'u-ana');
+    const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'csv' });
+    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+
+    // Era el defecto: cinco objetos sobre el mismo dataset volcaban cinco veces lo mismo.
+    const cabeceras = csv.split('\r\n').filter((l) => l.startsWith('DimTribunal.Distrito,'));
+    expect(new Set(cabeceras).size).toBe(cabeceras.length);
+  });
+
+  test('la imagen dibuja el primer GRAFICO, no la primera celda del modulo', async ({ page }) => {
+    await entrarComo(page, 'u-ana');
+    const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'svg' });
+    const svg = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+
+    // La primera celda del modulo es una tarjeta KPI. Antes salia un grafico de barras de un
+    // solo numero con la etiqueta repetida; ahora sale el grafico de verdad.
+    expect(svg).toContain('aria-label="Pendientes por distrito"');
+    expect(svg).toContain('>Distrito Norte<');
+  });
+});
+
 test.describe('la procedencia de la vista sobrevive a la exportacion (4.6)', () => {
   test('el CSV lleva la etiqueta de vista institucional y los filtros aplicados', async ({ page }) => {
     await entrarComo(page, 'u-ana');

@@ -104,6 +104,40 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     ],
   },
   {
+    objectId: 'tooltip-explicativo',
+    name: 'Tooltip explicativo',
+    description:
+      'Icono que, al posarse o al enfocarlo, explica que representa el objeto entero. No es el ' +
+      'tooltip de eje ni el de un punto de datos.',
+    category: 'complemento',
+    attachable: true,
+    versions: [
+      v1('Version inicial: icono con explicacion del contenido visual del objeto anfitrion.', {
+        // Un complemento no se enlaza contra el dataset: lee el del objeto al que se adjunta.
+        // Por eso su contrato de datos es vacio, y no "una dimension cualquiera".
+        dimensions: { min: 0, max: 0 },
+        measures: { min: 0, max: 0 },
+        notes: 'No se enlaza contra ningun dataset: acompaña al objeto anfitrion.',
+      }),
+    ],
+  },
+  {
+    objectId: 'tabla-de-datos',
+    name: 'Tabla de datos',
+    description:
+      'Emergente con los datos de origen del objeto. Con alcance de objeto muestra todas sus ' +
+      'filas; con alcance de subobjeto, solo las que hay detras de la categoria elegida.',
+    category: 'complemento',
+    attachable: true,
+    versions: [
+      v1('Version inicial: alcance de objeto y de subobjeto sobre el dataset del anfitrion.', {
+        dimensions: { min: 0, max: 0 },
+        measures: { min: 0, max: 0 },
+        notes: 'Lee el dataset del objeto anfitrion, ya filtrado por el ambito de quien mira.',
+      }),
+    ],
+  },
+  {
     objectId: 'mapa',
     name: 'Mapa',
     description: 'Distribucion geografica de una medida por division territorial.',

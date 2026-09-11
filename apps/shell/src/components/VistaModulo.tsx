@@ -119,6 +119,8 @@ function Objeto({
           titulo={titulo}
           campo={fieldKey(dimension)}
           opciones={toSlicerOptions(result, dimension)}
+          instance={objeto.instance}
+          result={result}
         />
       );
     }

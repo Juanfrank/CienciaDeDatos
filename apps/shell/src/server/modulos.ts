@@ -40,6 +40,24 @@ export const modulosDemo: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Casos pendientes',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosPendientes'] },
+              attachments: [
+                {
+                  instanceId: 'tooltip-kpi-pendientes',
+                  objectId: 'tooltip-explicativo',
+                  version: '1.0.0',
+                  text:
+                    'Suma de casos que siguen abiertos al cierre del trimestre, sobre los ' +
+                    'distritos y materias que su ambito de acceso permite ver.',
+                },
+                // Sin dimensiones mapeadas no hay subobjeto por el que desglosar: el alcance
+                // tiene que ser de objeto, y la validacion lo rechazaria de otro modo.
+                {
+                  instanceId: 'datos-kpi-pendientes',
+                  objectId: 'tabla-de-datos',
+                  version: '1.0.0',
+                  scope: 'objeto',
+                },
+              ],
             },
           },
           {
@@ -77,6 +95,22 @@ export const modulosDemo: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Pendientes por distrito',
               binding: { datasetId: DATASET, dimensions: [DISTRITO], measures: ['CasosPendientes'] },
+              attachments: [
+                {
+                  instanceId: 'tooltip-barras-distrito',
+                  objectId: 'tooltip-explicativo',
+                  version: '1.0.0',
+                  text:
+                    'Cada barra agrega los cuatro trimestres y todas las materias de ese ' +
+                    'distrito. Pulse una barra para filtrar el resto del modulo.',
+                },
+                {
+                  instanceId: 'datos-barras-distrito',
+                  objectId: 'tabla-de-datos',
+                  version: '1.0.0',
+                  scope: 'subobjeto',
+                },
+              ],
             },
           },
           {

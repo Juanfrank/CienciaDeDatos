@@ -212,6 +212,35 @@ describe('puerta de publicacion institucional', () => {
     expect(findPublishBlockers(d)[0]?.reason).toBe('objeto-roto');
   });
 
+  it('un complemento colocado como objeto suelto bloquea la publicacion', () => {
+    // La puerta no basta con existir: tiene que estar INVOCADA desde validateModule, o el
+    // editor guardaria un modulo que no se puede dibujar. Esta prueba es la que lo comprueba.
+    const suelto = item('a', 'tooltip-explicativo');
+    const d = validateModule({
+      module: modulo([suelto]),
+      registry: registro,
+      columnsByDataset: columnas,
+    });
+
+    expect(findPublishBlockers(d)[0]?.reason).toBe('objeto-roto');
+    expect(findPublishBlockers(d)[0]?.detail).toMatch(/no puede colocarse como objeto independiente/);
+  });
+
+  it('un objeto con sus complementos bien configurados no bloquea nada', () => {
+    const anfitrion = item('a', 'barras');
+    anfitrion.instance.attachments = [
+      { instanceId: 'a1', objectId: 'tooltip-explicativo', version: '1.0.0', text: 'Que es esto.' },
+      { instanceId: 'a2', objectId: 'tabla-de-datos', version: '1.0.0', scope: 'subobjeto' },
+    ];
+
+    const d = validateModule({
+      module: modulo([anfitrion]),
+      registry: registro,
+      columnsByDataset: columnas,
+    });
+    expect(findPublishBlockers(d)).toEqual([]);
+  });
+
   it('una instancia en version vencida bloquea la publicacion', () => {
     const d = validateModule({
       module: modulo([item('a', 'barras')]),

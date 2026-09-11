@@ -1,6 +1,9 @@
 'use client';
 
+import type { QueryResult } from '@app/data-contracts';
+import type { ObjectInstance } from '@app/ui-components';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
+import { Complementos } from './Complementos';
 
 /**
  * Segmentador — seccion 4.2, con su seleccion reflejada en la URL (4.11).
@@ -16,10 +19,15 @@ export function Segmentador({
   titulo,
   campo,
   opciones,
+  instance,
+  result,
 }: {
   titulo: string;
   campo: string;
   opciones: string[];
+  /** Se pasan para que un segmentador pueda llevar complementos como cualquier otro objeto. */
+  instance?: ObjectInstance;
+  result?: QueryResult;
 }) {
   const { valoresDe, alternar, limpiarCampo } = useFiltrosDeUrl();
   const seleccionados = valoresDe(campo);
@@ -28,6 +36,9 @@ export function Segmentador({
     <div className="objeto">
       <div className="objeto__cabecera">
         <h3>{titulo}</h3>
+        {instance && result ? (
+          <Complementos instance={instance} result={result} titulo={titulo} />
+        ) : null}
         {seleccionados.length > 0 ? (
           <button type="button" className="boton-enlace" onClick={() => limpiarCampo(campo)}>
             Limpiar

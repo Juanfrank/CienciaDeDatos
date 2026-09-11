@@ -1,6 +1,7 @@
 import {
   type BindingProblem,
   type ObjectRegistry,
+  validateAttachments,
   validateBinding,
 } from '@app/ui-components';
 import type { ModuleDefinition } from './ModuleDefinition';
@@ -87,7 +88,13 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         continue;
       }
 
-      diagnostico.bindingProblems = validateBinding(instance, contrato, columnas);
+      diagnostico.bindingProblems = [
+        ...validateBinding(instance, contrato, columnas),
+        // Los complementos se validan en el MISMO sitio que el mapeo, y no aparte: colocar un
+        // complemento suelto en la rejilla es un error de configuracion como cualquier otro, y
+        // tiene que bloquear la publicacion igual que un campo inexistente.
+        ...validateAttachments(instance, (objectId) => registry.get(objectId)),
+      ];
       diagnostico.broken = diagnostico.bindingProblems.length > 0;
       items.push(diagnostico);
     }

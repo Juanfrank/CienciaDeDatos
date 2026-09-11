@@ -65,10 +65,22 @@ export interface ExportRequest {
   generatedAt?: string;
 }
 
-/** Un objeto del modulo, ya resuelto y filtrado, listo para volcarse. */
+/**
+ * Un objeto del modulo, ya resuelto, filtrado y PROYECTADO, listo para volcarse.
+ *
+ * `result` no es el dataset: es lo que el objeto muestra, proyectado por `proyectarObjeto` en el
+ * repositorio de objetos. Ese detalle es la diferencia entre exportar un modulo y exportar cinco
+ * veces el mismo dataset bajo cinco titulos distintos.
+ */
 export interface ExportableObject {
   title: string;
   result: QueryResult;
+  /**
+   * true si el objeto es un grafico. Lo decide quien cablea, que conoce el catalogo; el paquete
+   * de exportacion no puede depender del repositorio de objetos (regla de limites) y tampoco
+   * deberia: aqui solo hace falta saber cual de las hojas merece dibujarse como imagen.
+   */
+  esGrafico?: boolean;
 }
 
 export interface ExportJob {

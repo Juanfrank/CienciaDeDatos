@@ -1,0 +1,94 @@
+import { describe, expect, it } from 'vitest';
+import { construirDocumento } from './documento';
+import { aSvg } from './formatos';
+import type { ExportRequest, ExportableObject } from './types';
+
+/**
+ * El documento es lo que hace que los cuatro formatos no puedan divergir: QUE se exporta se
+ * decide una sola vez, y cada formato solo decide COMO se dibuja.
+ */
+
+const peticion: ExportRequest = {
+  moduleSlug: 'casos',
+  moduleName: 'Casos pendientes',
+  format: 'svg',
+  requestedBy: 'ana',
+  teamId: 'equipo-norte',
+  provenance: { isPersonalized: false, label: 'Vista institucional oficial' },
+  appliedFilters: {},
+};
+
+const objeto = (title: string, esGrafico: boolean, filas: unknown[][]): ExportableObject => ({
+  title,
+  esGrafico,
+  result: {
+    columns: [
+      { name: 'categoria', type: 'string' },
+      { name: 'valor', type: 'number' },
+    ],
+    rows: filas,
+    source: 'mock',
+    generatedAt: '2026-03-01T10:00:00.000Z',
+  },
+});
+
+const kpi = objeto('Casos pendientes', false, [['Casos pendientes', 65]]);
+const barras = objeto('Pendientes por distrito', true, [
+  ['Norte', 35],
+  ['Sur', 30],
+]);
+
+describe('construirDocumento', () => {
+  it('lleva una hoja por objeto, en el mismo orden', () => {
+    const documento = construirDocumento([kpi, barras], peticion);
+    expect(documento.hojas.map((h) => h.title)).toEqual([
+      'Casos pendientes',
+      'Pendientes por distrito',
+    ]);
+  });
+
+  it('elige como grafico el primer objeto MARCADO como grafico, no el primero a secas', () => {
+    // Este es el arreglo: con la primera celda ocupada por una tarjeta KPI, la imagen exportada
+    // era un grafico de barras de un solo numero, con la etiqueta repetida y sin significado.
+    const documento = construirDocumento([kpi, barras], peticion);
+    expect(documento.grafico?.title).toBe('Pendientes por distrito');
+  });
+
+  it('sin ningun grafico deja el campo vacio y el SVG cae en la primera hoja', () => {
+    const documento = construirDocumento([kpi], peticion);
+    expect(documento.grafico).toBeUndefined();
+
+    // Mejor una imagen pobre que un archivo vacio; el encabezado dice de que objeto sale.
+    expect(aSvg(documento, ['#4f46e5'])).toContain('Casos pendientes');
+  });
+
+  it('construye el encabezado una sola vez, para los cuatro formatos', () => {
+    const documento = construirDocumento([barras], peticion);
+    expect(documento.encabezado.titulo).toBe('Casos pendientes');
+    expect(documento.encabezado.personalizada).toBe(false);
+    expect(documento.encabezado.autor).toBe('ana');
+  });
+
+  it('marca la procedencia como dato, no solo como texto: Excel y PDF la destacan', () => {
+    const documento = construirDocumento(
+      [barras],
+      { ...peticion, provenance: { isPersonalized: true, label: 'Vista personalizada de ana' } },
+    );
+    expect(documento.encabezado.personalizada).toBe(true);
+  });
+});
+
+describe('aSvg sobre el documento', () => {
+  it('dibuja una barra por fila del grafico elegido, con sus etiquetas reales', () => {
+    const svg = aSvg(construirDocumento([kpi, barras], peticion), ['#4f46e5']);
+
+    expect(svg.match(/<rect /g)?.length).toBe(3); // fondo + dos barras
+    expect(svg).toContain('>Norte<');
+    expect(svg).toContain('>Sur<');
+    expect(svg).toContain('aria-label="Pendientes por distrito"');
+  });
+
+  it('un documento sin ninguna hoja no se dibuja a medias: falla y lo dice', () => {
+    expect(() => aSvg(construirDocumento([], peticion), ['#4f46e5'])).toThrow(/dibujar/i);
+  });
+});

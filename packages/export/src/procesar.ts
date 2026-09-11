@@ -1,4 +1,5 @@
 import { aExcel, aPdf } from './binarios';
+import { construirDocumento } from './documento';
 import { aCsv, aSvg } from './formatos';
 import type { IExportQueue } from './cola';
 import { TIPOS_MIME, nombreDeArchivo } from './types';
@@ -53,25 +54,26 @@ export async function generarArtefacto(
     throw new Error('No hay ningun objeto con datos que exportar.');
   }
 
+  // El documento se construye UNA vez y los cuatro formatos parten de el. Ninguno decide que
+  // objetos entran ni cual se dibuja como grafico: eso ya esta resuelto aqui arriba.
+  const documento = construirDocumento(objetos, request);
+
   let contenido: Buffer;
   switch (request.format) {
     case 'csv':
-      contenido = Buffer.from(aCsv(objetos, request), 'utf8');
+      contenido = Buffer.from(aCsv(documento), 'utf8');
       break;
     case 'xlsx':
-      contenido = await aExcel(objetos, request);
+      contenido = await aExcel(documento);
       break;
     case 'pdf':
-      contenido = await aPdf(objetos, request);
+      contenido = await aPdf(documento);
       break;
-    case 'svg': {
-      // Un SVG es UN grafico. Si el modulo tiene varios, se exporta el primero: la alternativa
-      // seria concatenar imagenes en un solo lienzo, que no es lo que nadie espera al pedir SVG.
-      const primero = objetos[0];
-      if (!primero) throw new Error('No hay ningun objeto con datos que exportar.');
-      contenido = Buffer.from(aSvg(primero, request, colores), 'utf8');
+    case 'svg':
+      // Un SVG es UNA imagen. `documento.grafico` ya eligio cual: el primer objeto marcado como
+      // grafico, no el primero a secas.
+      contenido = Buffer.from(aSvg(documento, colores), 'utf8');
       break;
-    }
   }
 
   return {

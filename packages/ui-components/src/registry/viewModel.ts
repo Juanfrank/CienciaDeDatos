@@ -105,43 +105,74 @@ const toNumber = (v: unknown): number => {
 /** Separador interno de claves compuestas. No aparece en ninguna etiqueta visible. */
 const SEP = '||';
 
+/** Una combinacion distinta de dimensiones, con sus medidas ya sumadas. */
+export interface AggregatedRow {
+  /** Un valor por dimension, en el orden del mapeo. Sin componer en una sola cadena. */
+  labels: string[];
+  values: number[];
+}
+
+export interface AggregatedRows {
+  rows: AggregatedRow[];
+  /** true si se sumaron filas: el dataset traia mas granularidad de la que el objeto muestra. */
+  aggregated: boolean;
+}
+
 /**
  * Agrupa las filas por las dimensiones pedidas y suma las medidas.
  *
  * La agregacion ocurre aqui, sobre el dataset ya cacheado, y no generando una consulta nueva:
  * es la aplicacion directa de 6.6 -- "un modulo que necesita una vista mas especifica de un
  * dataset ya cacheado debe resolverla filtrando o agregando sobre el, en el backend".
+ *
+ * Devuelve las etiquetas SEPARADAS, una por dimension. Componerlas en una sola cadena es cosa de
+ * quien dibuja: un grafico quiere "Norte / Penal" en el eje, pero una tabla quiere dos columnas
+ * que se puedan ordenar por separado.
+ */
+export function aggregateBy(
+  result: QueryResult,
+  dimensions: { table: string; field: string }[],
+  measures: string[],
+): AggregatedRows {
+  const indiceDim = dimensions.map((d) => result.columns.findIndex((c) => c.name === fieldKey(d)));
+  const indiceMed = measures.map((m) => result.columns.findIndex((c) => c.name === m));
+
+  const acumulado = new Map<string, AggregatedRow>();
+  let filasAgregadas = 0;
+
+  for (const row of result.rows) {
+    const labels = indiceDim.map((i) => (i >= 0 ? String(row[i]) : '(sin dato)'));
+    const valores = indiceMed.map((i) => (i >= 0 ? toNumber(row[i]) : 0));
+    const clave = labels.join(SEP);
+    const previo = acumulado.get(clave);
+    if (previo) {
+      filasAgregadas++;
+      previo.values = previo.values.map((v, i) => v + (valores[i] ?? 0));
+    } else {
+      acumulado.set(clave, { labels, values: valores });
+    }
+  }
+
+  return { rows: [...acumulado.values()], aggregated: filasAgregadas > 0 };
+}
+
+/**
+ * Vista categorica: lo mismo que `aggregateBy`, con las etiquetas ya compuestas para un eje.
+ *
+ * Delega en `aggregateBy` a proposito. Con dos implementaciones de la agregacion, un grafico y
+ * la exportacion del mismo objeto podrian acabar dando numeros distintos.
  */
 export function toCategorical(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
   measures: string[],
 ): CategoricalViewModel {
-  const indiceDim = dimensions.map((d) => result.columns.findIndex((c) => c.name === fieldKey(d)));
-  const indiceMed = measures.map((m) => result.columns.findIndex((c) => c.name === m));
-
-  const acumulado = new Map<string, number[]>();
-  let filasAgregadas = 0;
-
-  for (const row of result.rows) {
-    const label = indiceDim.map((i) => (i >= 0 ? String(row[i]) : '(sin dato)')).join(' / ');
-    const valores = indiceMed.map((i) => (i >= 0 ? toNumber(row[i]) : 0));
-    const previo = acumulado.get(label);
-    if (previo) {
-      filasAgregadas++;
-      acumulado.set(
-        label,
-        previo.map((v, i) => v + (valores[i] ?? 0)),
-      );
-    } else {
-      acumulado.set(label, valores);
-    }
-  }
+  const { rows, aggregated } = aggregateBy(result, dimensions, measures);
 
   return {
     series: measures,
-    points: [...acumulado.entries()].map(([label, values]) => ({ label, values })),
-    aggregated: filasAgregadas > 0,
+    points: rows.map((f) => ({ label: f.labels.join(' / '), values: f.values })),
+    aggregated,
   };
 }
 

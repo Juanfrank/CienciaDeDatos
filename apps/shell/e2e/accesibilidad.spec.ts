@@ -49,6 +49,31 @@ test.describe('paginas de modulo', () => {
     expect(await infracciones(page)).toEqual([]);
   });
 
+  test('con un tooltip explicativo abierto tampoco hay infracciones', async ({ page }) => {
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId('tooltip-icono-Pendientes por distrito').hover();
+    await expect(page.getByTestId('tooltip-Pendientes por distrito')).toBeVisible();
+
+    expect(await infracciones(page)).toEqual([]);
+  });
+
+  test('el emergente de datos de origen es accesible, con el foco dentro', async ({ page }) => {
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId('tabla-datos-abrir-Pendientes por distrito').click();
+    await expect(page.getByTestId('tabla-datos-Pendientes por distrito')).toBeVisible();
+
+    expect(await infracciones(page)).toEqual([]);
+
+    // El <dialog> nativo lleva el foco dentro por su cuenta. Se comprueba porque es la mitad
+    // del motivo de usarlo en vez de un div con position: fixed.
+    const dentro = await page.evaluate(() =>
+      document.querySelector('dialog[open]')?.contains(document.activeElement),
+    );
+    expect(dentro).toBe(true);
+  });
+
   test('el estado de una exportacion en curso es accesible', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');

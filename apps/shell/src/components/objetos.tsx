@@ -2,12 +2,14 @@ import type { QueryResult } from '@app/data-contracts';
 import {
   type BindingProblem,
   fieldKey,
+  proyectarObjeto,
   toCategorical,
   toKpi,
   toMatrix,
   toSlicerOptions,
 } from '@app/ui-components';
 import type { ObjectInstance } from '@app/ui-components';
+import { Complementos } from './Complementos';
 import { Segmentador } from './Segmentador';
 
 /**
@@ -70,19 +72,33 @@ export function ObjetoGenerandose({ titulo }: { titulo: string }) {
   );
 }
 
+/**
+ * Marco comun de un objeto.
+ *
+ * Dibuja los complementos adjuntados el: asi ningun objeto tiene que acordarse de hacerlo, y uno
+ * nuevo los hereda por existir. Si cada objeto los pintara por su cuenta, el primero que se
+ * anadiera sin ellos los perderia en silencio.
+ */
 function Marco({
   titulo,
   children,
   pie,
+  instance,
+  result,
 }: {
   titulo: string;
   children: React.ReactNode;
   pie?: React.ReactNode;
+  instance?: ObjectInstance;
+  result?: QueryResult;
 }) {
   return (
     <div className="objeto">
       <div className="objeto__cabecera">
         <h3>{titulo}</h3>
+        {instance && result ? (
+          <Complementos instance={instance} result={result} titulo={titulo} />
+        ) : null}
       </div>
       <div className="objeto__cuerpo">{children}</div>
       {pie ? <div className="objeto__pie">{pie}</div> : null}
@@ -95,7 +111,7 @@ export function TarjetaKpi({ titulo, result, instance }: ObjetoProps) {
   const delta = kpi.delta;
 
   return (
-    <Marco titulo={titulo}>
+    <Marco titulo={titulo} instance={instance} result={result}>
       <p className="kpi__valor" data-testid="kpi-valor">
         {formatearNumero(kpi.value)}
       </p>
@@ -118,6 +134,8 @@ export function Barras({ titulo, result, instance, onFiltrar }: ObjetoProps) {
   return (
     <Marco
       titulo={titulo}
+      instance={instance}
+      result={result}
       pie={vm.aggregated ? <span className="texto-atenuado">Agregado sobre el dataset cacheado</span> : null}
     >
       <ul className="barras" data-testid="barras">
@@ -158,7 +176,7 @@ export function Lineas({ titulo, result, instance }: ObjetoProps) {
   const alto = 40;
 
   return (
-    <Marco titulo={titulo}>
+    <Marco titulo={titulo} instance={instance} result={result}>
       <svg viewBox={`0 0 ${ancho} ${alto}`} className="lineas" role="img" aria-label={titulo}>
         {vm.series.map((serie, s) => {
           const puntos = vm.points
@@ -191,14 +209,22 @@ export function Lineas({ titulo, result, instance }: ObjetoProps) {
   );
 }
 
-export function Tabla({ titulo, result }: ObjetoProps) {
+export function Tabla({ titulo, result, instance }: ObjetoProps) {
+  // La tabla dibuja SU proyeccion, no el dataset en crudo.
+  //
+  // Antes pintaba todas las columnas del dataset, incluidas las que su mapeo no declara, y las
+  // filas sin agregar: un mapeo de dos dimensiones sobre un dataset con tres mostraba la tercera
+  // y repetia cada combinacion. Es la misma funcion que usan la exportacion y el complemento de
+  // tabla de datos, asi que lo que se ve y lo que se exporta no pueden separarse.
+  const proyectado = proyectarObjeto(instance, result);
+
   return (
-    <Marco titulo={titulo}>
+    <Marco titulo={titulo} instance={instance} result={result}>
       <div className="tabla-contenedor" tabIndex={0} role="region" aria-label={titulo}>
         <table className="tabla" data-testid="tabla">
           <thead>
             <tr>
-              {result.columns.map((c) => (
+              {proyectado.columns.map((c) => (
                 <th key={c.name} scope="col">
                   {c.name}
                 </th>
@@ -206,7 +232,7 @@ export function Tabla({ titulo, result }: ObjetoProps) {
             </tr>
           </thead>
           <tbody>
-            {result.rows.map((fila, i) => (
+            {proyectado.rows.map((fila, i) => (
               <tr key={i}>
                 {fila.map((celda, j) => (
                   <td key={j} className={typeof celda === 'number' ? 'es-numero' : ''}>
@@ -227,7 +253,7 @@ export function Matriz({ titulo, result, instance }: ObjetoProps) {
   const vm = toMatrix(result, instance.binding.dimensions, medida);
 
   return (
-    <Marco titulo={titulo}>
+    <Marco titulo={titulo} instance={instance} result={result}>
       <div className="tabla-contenedor" tabIndex={0} role="region" aria-label={titulo}>
         <table className="tabla" data-testid="matriz">
           <thead>

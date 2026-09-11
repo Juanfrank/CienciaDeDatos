@@ -5,7 +5,8 @@ import {
   type ResolverObjetos,
 } from '@app/export';
 import { describeProvenance } from '@app/module-model';
-import { cacheL2 } from './contexto';
+import { proyectarObjeto } from '@app/ui-components';
+import { cacheL2, objectRegistry } from './contexto';
 import { cargarModulo } from './datos';
 import { findModuleBySlug } from './modulos';
 
@@ -28,6 +29,9 @@ export const colaExportaciones = new StoreExportQueue({ store: cacheL2 });
 /** Un segmentador es un control de filtrado, no contenido. Exportarlo seria ruido. */
 const ES_CONTROL = new Set(['segmentador']);
 
+/** Categorias del catalogo que merecen dibujarse como imagen al exportar en SVG. */
+const CATEGORIAS_DE_GRAFICO = new Set(['grafico', 'mapa']);
+
 export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) => {
   const module = findModuleBySlug(request.moduleSlug);
   if (!module) throw new Error(`El modulo '${request.moduleSlug}' ya no existe.`);
@@ -46,11 +50,24 @@ export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) =
 
   // Un objeto sin resultado (todavia generandose) o marcado como roto no se exporta: un archivo
   // con una tabla vacia y sin explicacion es peor que un archivo sin esa tabla.
-  const objetos: ExportableObject[] = cargado.objetos.flatMap((o) =>
-    o.result && !ES_CONTROL.has(o.item.instance.objectId) && o.problems.length === 0
-      ? [{ title: o.item.instance.title ?? o.item.instance.objectId, result: o.result }]
-      : [],
-  );
+  //
+  // Lo que se exporta de cada objeto es su PROYECCION, la misma que dibuja en pantalla. Volcar
+  // el dataset en crudo hacia que un modulo con cinco objetos sobre un mismo dataset produjera
+  // cinco veces la misma tabla, y que una tarjeta KPI —que muestra un numero— exportara las
+  // filas completas.
+  const objetos: ExportableObject[] = cargado.objetos.flatMap((o) => {
+    const { instance } = o.item;
+    if (!o.result || ES_CONTROL.has(instance.objectId) || o.problems.length > 0) return [];
+
+    const categoria = objectRegistry.get(instance.objectId)?.category;
+    return [
+      {
+        title: instance.title ?? instance.objectId,
+        result: proyectarObjeto(instance, o.result),
+        esGrafico: categoria !== undefined && CATEGORIAS_DE_GRAFICO.has(categoria),
+      },
+    ];
+  });
 
   // `cargado.appliedFilters` son los pedidos YA intersecados con el ambito. Una dimension que
   // queda en lista vacia es un filtro que se pidio y el ambito descarto entero; se anota, para

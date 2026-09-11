@@ -1,44 +1,11 @@
-import type { ExportRequest, ExportableObject } from './types';
+import type { DocumentoExportable, HojaExportable } from './documento';
 
 /**
- * Encabezado comun a los cuatro formatos.
+ * Formatos de texto: CSV y SVG.
  *
- * Lleva SIEMPRE la procedencia de la vista (4.6), los filtros aplicados y la marca de tiempo del
- * dato (4.8). Un archivo exportado circula por correo, se imprime y se archiva: sin esos tres
- * datos, quien lo reciba no puede saber si esta mirando la vista institucional o la version
- * personalizada de alguien, ni de cuando son las cifras.
+ * Los dos parten del mismo `DocumentoExportable` y no deciden nada sobre su contenido: solo
+ * COMO se dibuja. Van aparte de los binarios porque no necesitan ninguna libreria de Node.
  */
-export interface Encabezado {
-  titulo: string;
-  lineas: string[];
-}
-
-export function construirEncabezado(request: ExportRequest): Encabezado {
-  const lineas: string[] = [request.provenance.label];
-
-  if (request.generatedAt) {
-    lineas.push(`Datos actualizados: ${new Date(request.generatedAt).toLocaleString('es-DO')}`);
-  }
-
-  const filtros = Object.entries(request.appliedFilters).filter(([, v]) => v.length > 0);
-  if (filtros.length > 0) {
-    lineas.push(`Filtros: ${filtros.map(([c, v]) => `${c} = ${v.join(', ')}`).join(' | ')}`);
-  }
-
-  // Se nombra la dimension, nunca el valor pedido: decir "no se aplico Distrito = Este"
-  // confirmaria que ese valor existe, que es justo lo que 4.11 pide no revelar.
-  if (request.outOfScopeFilters && request.outOfScopeFilters.length > 0) {
-    lineas.push(
-      'Filtros no aplicados por quedar fuera de su ambito de acceso: ' +
-        request.outOfScopeFilters.join(', '),
-    );
-  }
-
-  lineas.push(`Exportado por: ${request.requestedBy} (equipo ${request.teamId})`);
-  lineas.push(`Fecha de exportacion: ${new Date().toLocaleString('es-DO')}`);
-
-  return { titulo: request.moduleName, lineas };
-}
 
 /** Escapa un valor para CSV segun RFC 4180. */
 export function escaparCsv(valor: unknown): string {
@@ -53,25 +20,28 @@ export function escaparCsv(valor: unknown): string {
  * incomoda un poco al abrirlo en una hoja de calculo, pero la alternativa —perder la procedencia—
  * incumple 4.6. El BOM va delante para que Excel abra los acentos correctamente.
  */
-export function aCsv(objetos: ExportableObject[], request: ExportRequest): string {
-  const encabezado = construirEncabezado(request);
+export function aCsv(documento: DocumentoExportable): string {
+  const { encabezado, hojas } = documento;
   const lineas: string[] = [
     `# ${encabezado.titulo}`,
     ...encabezado.lineas.map((l) => `# ${l}`),
     '',
   ];
 
-  for (const objeto of objetos) {
-    if (objetos.length > 1) lineas.push(`# ${objeto.title}`);
-    lineas.push(objeto.result.columns.map((c) => escaparCsv(c.name)).join(','));
-    for (const fila of objeto.result.rows) {
+  for (const hoja of hojas) {
+    if (hojas.length > 1) lineas.push(`# ${hoja.title}`);
+    lineas.push(hoja.columns.map((c) => escaparCsv(c.name)).join(','));
+    for (const fila of hoja.rows) {
       lineas.push(fila.map(escaparCsv).join(','));
     }
     lineas.push('');
   }
 
-  return `\ufeff${lineas.join('\r\n')}`;
+  return `\uFEFF${lineas.join('\r\n')}`;
 }
+
+const escaparXml = (t: string): string =>
+  t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /**
  * SVG de un grafico de barras.
@@ -79,16 +49,23 @@ export function aCsv(objetos: ExportableObject[], request: ExportRequest): strin
  * Se exporta VECTOR y no PNG a proposito: rasterizar exigiria un navegador o una libreria de
  * imagen en el servidor, y un SVG se abre en cualquier navegador, se incrusta en un documento y
  * escala sin perder nitidez. Si mas adelante hace falta PNG, se rasteriza desde aqui.
+ *
+ * Dibuja `documento.grafico`, que es el primer objeto MARCADO como grafico. Si el modulo no
+ * tiene ninguno, cae en la primera hoja: es mejor una imagen pobre que un archivo vacio, y el
+ * encabezado dice de que objeto sale.
  */
-export function aSvg(objeto: ExportableObject, request: ExportRequest, colores: string[]): string {
-  const { result } = objeto;
-  const encabezado = construirEncabezado(request);
+export function aSvg(documento: DocumentoExportable, colores: string[]): string {
+  const hoja: HojaExportable | undefined = documento.grafico ?? documento.hojas[0];
+  const { encabezado } = documento;
 
-  const indiceEtiqueta = 0;
-  const indiceValor = result.columns.findIndex((c) => c.type === 'number');
-  const filas = result.rows.slice(0, 20);
+  if (!hoja) throw new Error('No hay ningun objeto con datos que dibujar.');
 
-  const valores = filas.map((f) => Number(f[indiceValor >= 0 ? indiceValor : 1]) || 0);
+  const indiceValor = Math.max(
+    0,
+    hoja.columns.findIndex((c) => c.type === 'number'),
+  );
+  const filas = hoja.rows.slice(0, 20);
+  const valores = filas.map((f) => Number(f[indiceValor]) || 0);
   const maximo = Math.max(1, ...valores);
 
   const anchoBarra = 40;
@@ -98,9 +75,6 @@ export function aSvg(objeto: ExportableObject, request: ExportRequest, colores: 
   const altoGrafico = 220;
   const ancho = Math.max(400, margenIzq + filas.length * (anchoBarra + separacion) + 40);
   const alto = margenSup + altoGrafico + 80;
-
-  const escapar = (t: string) =>
-    t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   const barras = filas
     .map((fila, i) => {
@@ -112,19 +86,19 @@ export function aSvg(objeto: ExportableObject, request: ExportRequest, colores: 
       return [
         `<rect x="${x}" y="${y.toFixed(1)}" width="${anchoBarra}" height="${altoBarra.toFixed(1)}" fill="${color}" />`,
         `<text x="${x + anchoBarra / 2}" y="${(y - 6).toFixed(1)}" text-anchor="middle" font-size="11" fill="#0f172a">${valor}</text>`,
-        `<text x="${x + anchoBarra / 2}" y="${margenSup + altoGrafico + 16}" text-anchor="middle" font-size="10" fill="#475569">${escapar(String(fila[indiceEtiqueta] ?? ''))}</text>`,
+        `<text x="${x + anchoBarra / 2}" y="${margenSup + altoGrafico + 16}" text-anchor="middle" font-size="10" fill="#475569">${escaparXml(String(fila[0] ?? ''))}</text>`,
       ].join('');
     })
     .join('');
 
   const metadatos = encabezado.lineas
-    .map((l, i) => `<text x="16" y="${38 + i * 14}" font-size="10" fill="#475569">${escapar(l)}</text>`)
+    .map((l, i) => `<text x="16" y="${38 + i * 14}" font-size="10" fill="#475569">${escaparXml(l)}</text>`)
     .join('');
 
   return [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ancho} ${alto}" width="${ancho}" height="${alto}" role="img" aria-label="${escapar(objeto.title)}">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ancho} ${alto}" width="${ancho}" height="${alto}" role="img" aria-label="${escaparXml(hoja.title)}">`,
     `<rect width="${ancho}" height="${alto}" fill="#ffffff" />`,
-    `<text x="16" y="22" font-size="14" font-weight="bold" fill="#0f172a">${escapar(encabezado.titulo)} — ${escapar(objeto.title)}</text>`,
+    `<text x="16" y="22" font-size="14" font-weight="bold" fill="#0f172a">${escaparXml(encabezado.titulo)} — ${escaparXml(hoja.title)}</text>`,
     metadatos,
     `<line x1="${margenIzq - 8}" y1="${margenSup + altoGrafico}" x2="${ancho - 20}" y2="${margenSup + altoGrafico}" stroke="#cbd5e1" />`,
     barras,

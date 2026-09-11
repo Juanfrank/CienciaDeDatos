@@ -32,9 +32,31 @@ const instancia = (objectId: string, v: string): ObjectInstance => ({
 describe('catalogo inicial (4.2)', () => {
   it('registra los siete objetos prediseñados que nombra el documento', () => {
     const registro = new ObjectRegistry(catalogoInicial);
-    expect(registro.list().map((o) => o.objectId).sort()).toEqual([
+    // Los siete que 4.2 enumera son los INDEPENDIENTES. Los complementos se cuentan aparte:
+    // no son objetos que se coloquen en la rejilla y el documento no los pide.
+    const independientes = registro.list().filter((o) => !o.attachable);
+    expect(independientes.map((o) => o.objectId).sort()).toEqual([
       'barras', 'lineas', 'mapa', 'matriz', 'segmentador', 'tabla', 'tarjeta-kpi',
     ]);
+  });
+
+  it('los complementos se declaran adjuntables y en la categoria complemento', () => {
+    const registro = new ObjectRegistry(catalogoInicial);
+    const complementos = registro.list().filter((o) => o.attachable);
+
+    expect(complementos.map((o) => o.objectId).sort()).toEqual([
+      'tabla-de-datos',
+      'tooltip-explicativo',
+    ]);
+    // Un complemento lee el dataset de su anfitrion: no puede declarar ranuras propias, o el
+    // editor pediria un mapeo para algo que no se enlaza contra nada.
+    for (const complemento of complementos) {
+      expect(complemento.category).toBe('complemento');
+      for (const v of complemento.versions) {
+        expect(v.dataContract.dimensions).toEqual({ min: 0, max: 0 });
+        expect(v.dataContract.measures).toEqual({ min: 0, max: 0 });
+      }
+    }
   });
 
   it('todas las versiones del catalogo traen changelog y certificacion', () => {

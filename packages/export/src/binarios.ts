@@ -1,7 +1,6 @@
 import PDFDocument from 'pdfkit';
 import { Workbook } from 'exceljs';
-import { construirEncabezado } from './formatos';
-import type { ExportRequest, ExportableObject } from './types';
+import type { DocumentoExportable, HojaExportable } from './documento';
 
 /**
  * Formatos binarios: Excel y PDF.
@@ -10,9 +9,9 @@ import type { ExportRequest, ExportableObject } from './types';
  * CSV y SVG son cadenas de texto y se generan sin dependencias, asi que pueden usarse desde
  * cualquier parte; estos dos solo corren en el proceso de servidor que atiende la cola (5.3).
  *
- * Los dos incrustan el MISMO encabezado que CSV y SVG: procedencia (4.6), filtros aplicados y
- * marca de tiempo del dato (4.8). Es el punto del que depende que 4.6 siga valiendo fuera de la
- * aplicacion.
+ * Como los otros dos, parten del `DocumentoExportable` ya construido y no deciden nada sobre su
+ * contenido. De ahi que los cuatro lleven el mismo encabezado —procedencia (4.6), filtros y
+ * marca de tiempo (4.8)— sin que ninguno tenga que acordarse de ponerlo.
  */
 
 /** Ancho de columna aproximado a partir del contenido, para que no salga todo cortado. */
@@ -21,13 +20,10 @@ function anchoDeColumna(nombre: string, valores: unknown[]): number {
   return Math.min(60, Math.max(12, nombre.length + 2, ...largos.map((l) => l + 2)));
 }
 
-export async function aExcel(
-  objetos: ExportableObject[],
-  request: ExportRequest,
-): Promise<Buffer> {
-  const encabezado = construirEncabezado(request);
+export async function aExcel(documento: DocumentoExportable): Promise<Buffer> {
+  const { encabezado, hojas } = documento;
   const libro = new Workbook();
-  libro.creator = request.requestedBy;
+  libro.creator = encabezado.autor;
   libro.created = new Date();
 
   /**
@@ -40,7 +36,7 @@ export async function aExcel(
   const portada = libro.addWorksheet('Procedencia');
   portada.columns = [{ width: 100 }];
   portada.addRow([encabezado.titulo]).font = { bold: true, size: 14 };
-  if (request.provenance.isPersonalized) {
+  if (encabezado.personalizada) {
     portada.addRow([]);
     const aviso = portada.addRow(['VISTA PERSONALIZADA — no es la vista institucional oficial']);
     aviso.font = { bold: true, color: { argb: 'FFB45309' } };
@@ -48,28 +44,28 @@ export async function aExcel(
   portada.addRow([]);
   for (const linea of encabezado.lineas) portada.addRow([linea]);
 
-  for (const [indice, objeto] of objetos.entries()) {
+  for (const [indice, fuente] of hojas.entries()) {
     // Excel rechaza / \ ? * [ ] : en el nombre de hoja y lo limita a 31 caracteres.
-    const nombre = objeto.title.replace(/[/\\?*[\]:]/g, '-').slice(0, 31) || `Datos ${indice + 1}`;
+    const nombre = fuente.title.replace(/[/\\?*[\]:]/g, '-').slice(0, 31) || `Datos ${indice + 1}`;
     const hoja = libro.addWorksheet(nombre);
 
-    hoja.columns = objeto.result.columns.map((columna, i) => ({
+    hoja.columns = fuente.columns.map((columna, i) => ({
       header: columna.name,
       key: `c${i}`,
       width: anchoDeColumna(
         columna.name,
-        objeto.result.rows.slice(0, 200).map((f) => f[i]),
+        fuente.rows.slice(0, 200).map((f) => f[i]),
       ),
     }));
     hoja.getRow(1).font = { bold: true };
     hoja.views = [{ state: 'frozen', ySplit: 1 }];
 
-    for (const fila of objeto.result.rows) hoja.addRow(fila);
+    for (const fila of fuente.rows) hoja.addRow(fila);
 
-    if (objeto.result.rows.length > 0) {
+    if (fuente.rows.length > 0) {
       hoja.autoFilter = {
         from: { row: 1, column: 1 },
-        to: { row: 1, column: objeto.result.columns.length },
+        to: { row: 1, column: fuente.columns.length },
       };
     }
   }
@@ -81,8 +77,8 @@ export async function aExcel(
 const ANCHO_PAGINA = 595.28; // A4 en puntos
 const MARGEN = 40;
 
-export function aPdf(objetos: ExportableObject[], request: ExportRequest): Promise<Buffer> {
-  const encabezado = construirEncabezado(request);
+export function aPdf(documento: DocumentoExportable): Promise<Buffer> {
+  const { encabezado, hojas } = documento;
 
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: MARGEN, bufferPages: true });
@@ -94,7 +90,7 @@ export function aPdf(objetos: ExportableObject[], request: ExportRequest): Promi
     doc.font('Helvetica-Bold').fontSize(16).fillColor('#0f172a').text(encabezado.titulo);
     doc.moveDown(0.3);
 
-    if (request.provenance.isPersonalized) {
+    if (encabezado.personalizada) {
       doc
         .font('Helvetica-Bold')
         .fontSize(9)
@@ -107,10 +103,10 @@ export function aPdf(objetos: ExportableObject[], request: ExportRequest): Promi
     for (const linea of encabezado.lineas) doc.text(linea);
     doc.moveDown(0.8);
 
-    for (const objeto of objetos) {
-      doc.font('Helvetica-Bold').fontSize(11).fillColor('#0f172a').text(objeto.title);
+    for (const hoja of hojas) {
+      doc.font('Helvetica-Bold').fontSize(11).fillColor('#0f172a').text(hoja.title);
       doc.moveDown(0.3);
-      dibujarTabla(doc, objeto);
+      dibujarTabla(doc, hoja);
       doc.moveDown(1);
     }
 
@@ -123,7 +119,7 @@ export function aPdf(objetos: ExportableObject[], request: ExportRequest): Promi
         .fontSize(7)
         .fillColor('#94a3b8')
         .text(
-          `${request.moduleName} — pagina ${i + 1} de ${rango.count}`,
+          `${encabezado.titulo} — pagina ${i + 1} de ${rango.count}`,
           MARGEN,
           doc.page.height - 28,
           { width: ANCHO_PAGINA - MARGEN * 2, align: 'center' },
@@ -135,8 +131,8 @@ export function aPdf(objetos: ExportableObject[], request: ExportRequest): Promi
 }
 
 /** Tabla simple con salto de pagina y repeticion de cabecera. */
-function dibujarTabla(doc: PDFKit.PDFDocument, objeto: ExportableObject): void {
-  const columnas = objeto.result.columns;
+function dibujarTabla(doc: PDFKit.PDFDocument, hoja: HojaExportable): void {
+  const columnas = hoja.columns;
   if (columnas.length === 0) return;
 
   const anchoUtil = ANCHO_PAGINA - MARGEN * 2;
@@ -166,7 +162,7 @@ function dibujarTabla(doc: PDFKit.PDFDocument, objeto: ExportableObject): void {
   cabecera();
 
   doc.font('Helvetica').fontSize(8).fillColor('#1e293b');
-  for (const fila of objeto.result.rows) {
+  for (const fila of hoja.rows) {
     if (doc.y + altoFila > limiteInferior) {
       doc.addPage();
       cabecera();

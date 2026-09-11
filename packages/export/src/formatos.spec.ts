@@ -1,7 +1,9 @@
 import { inflateSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { aExcel, aPdf } from './binarios';
-import { aCsv, aSvg, construirEncabezado, escaparCsv } from './formatos';
+import { construirDocumento } from './documento';
+import { construirEncabezado } from './encabezado';
+import { aCsv, aSvg, escaparCsv } from './formatos';
 import type { ExportRequest, ExportableObject } from './types';
 
 /**
@@ -22,6 +24,9 @@ const peticion = (parcial: Partial<ExportRequest> = {}): ExportRequest => ({
   generatedAt: '2026-03-01T10:00:00.000Z',
   ...parcial,
 });
+
+const doc = (objetos: ExportableObject[], request: ExportRequest) =>
+  construirDocumento(objetos, request);
 
 const objeto: ExportableObject = {
   title: 'Casos por materia',
@@ -81,23 +86,25 @@ describe('escaparCsv', () => {
 
 describe('aCsv', () => {
   it('empieza con BOM para que Excel abra bien los acentos', () => {
-    expect(aCsv([objeto], peticion())).toMatch(/^\uFEFF/);
+    expect(aCsv(doc([objeto], peticion()))).toMatch(/^\uFEFF/);
   });
 
   it('lleva la procedencia comentada antes de la tabla', () => {
-    const csv = aCsv([objeto], peticion({ provenance: { isPersonalized: true, label: 'Vista personalizada de ana' } }));
+    const csv = aCsv(
+      doc([objeto], peticion({ provenance: { isPersonalized: true, label: 'Vista personalizada de ana' } })),
+    );
     expect(csv).toContain('# Vista personalizada de ana');
     expect(csv.indexOf('# Vista personalizada')).toBeLessThan(csv.indexOf('materia,casos'));
   });
 
   it('escapa los valores de las filas', () => {
-    expect(aCsv([objeto], peticion())).toContain('"Civil, comercial",80');
+    expect(aCsv(doc([objeto], peticion()))).toContain('"Civil, comercial",80');
   });
 });
 
 describe('aSvg', () => {
   it('produce un svg con una barra por fila y la procedencia escrita', () => {
-    const svg = aSvg(objeto, peticion({ format: 'svg' }), ['#4f46e5']);
+    const svg = aSvg(doc([objeto], peticion({ format: 'svg' })), ['#4f46e5']);
     expect(svg).toMatch(/^<svg /);
     expect(svg.match(/<rect /g)?.length).toBe(1 + objeto.result.rows.length); // fondo + barras
     expect(svg).toContain('Vista institucional oficial');
@@ -108,13 +115,13 @@ describe('aSvg', () => {
       title: 'Casos',
       result: { ...objeto.result, rows: [['<script>', 5]] },
     };
-    const svg = aSvg(conAngulos, peticion({ format: 'svg' }), ['#4f46e5']);
+    const svg = aSvg(doc([conAngulos], peticion({ format: 'svg' })), ['#4f46e5']);
     expect(svg).not.toContain('<script>');
     expect(svg).toContain('&lt;script&gt;');
   });
 
   it('lleva rol de imagen y etiqueta accesible (4.9)', () => {
-    const svg = aSvg(objeto, peticion({ format: 'svg' }), ['#4f46e5']);
+    const svg = aSvg(doc([objeto], peticion({ format: 'svg' })), ['#4f46e5']);
     expect(svg).toContain('role="img"');
     expect(svg).toContain('aria-label="Casos por materia"');
   });
@@ -122,7 +129,7 @@ describe('aSvg', () => {
 
 describe('aExcel', () => {
   it('genera un xlsx valido con hoja de procedencia aparte de los datos', async () => {
-    const buffer = await aExcel([objeto], peticion({ format: 'xlsx' }));
+    const buffer = await aExcel(doc([objeto], peticion({ format: 'xlsx' })));
     // Firma de ZIP: un xlsx es un zip. Si esto falla, el archivo no abrira en Excel.
     expect(buffer.subarray(0, 2).toString('latin1')).toBe('PK');
 
@@ -141,8 +148,10 @@ describe('aExcel', () => {
 
   it('avisa en la portada cuando lo exportado es una vista personalizada (4.6)', async () => {
     const buffer = await aExcel(
-      [objeto],
-      peticion({ format: 'xlsx', provenance: { isPersonalized: true, label: 'Vista personalizada de ana' } }),
+      doc(
+        [objeto],
+        peticion({ format: 'xlsx', provenance: { isPersonalized: true, label: 'Vista personalizada de ana' } }),
+      ),
     );
     const libro = await abrirLibro(buffer);
     const texto = (libro.getWorksheet('Procedencia')?.getColumn(1).values ?? []).join('\n');
@@ -154,7 +163,7 @@ describe('aExcel', () => {
       title: 'Un titulo larguisimo que Excel no admite: con dos puntos y barras / tambien',
       result: objeto.result,
     };
-    const buffer = await aExcel([largo], peticion({ format: 'xlsx' }));
+    const buffer = await aExcel(doc([largo], peticion({ format: 'xlsx' })));
     const libro = await abrirLibro(buffer);
     const nombre = libro.worksheets[1]?.name ?? '';
     expect(nombre.length).toBeLessThanOrEqual(31);
@@ -164,15 +173,17 @@ describe('aExcel', () => {
 
 describe('aPdf', () => {
   it('genera un pdf valido', async () => {
-    const buffer = await aPdf([objeto], peticion({ format: 'pdf' }));
+    const buffer = await aPdf(doc([objeto], peticion({ format: 'pdf' })));
     expect(buffer.subarray(0, 5).toString('latin1')).toBe('%PDF-');
     expect(buffer.byteLength).toBeGreaterThan(500);
   });
 
   it('escribe la procedencia dentro del documento', async () => {
     const buffer = await aPdf(
-      [objeto],
-      peticion({ format: 'pdf', provenance: { isPersonalized: true, label: 'Vista personalizada de ana' } }),
+      doc(
+        [objeto],
+        peticion({ format: 'pdf', provenance: { isPersonalized: true, label: 'Vista personalizada de ana' } }),
+      ),
     );
     // pdfkit comprime los flujos de contenido; se descomprimen para leer el texto.
     expect(textoDePdf(buffer)).toContain('VISTA PERSONALIZADA');
@@ -186,7 +197,7 @@ describe('aPdf', () => {
         rows: Array.from({ length: 200 }, (_, i) => [`materia-${i}`, i]),
       },
     };
-    const buffer = await aPdf([muchas], peticion({ format: 'pdf' }));
+    const buffer = await aPdf(doc([muchas], peticion({ format: 'pdf' })));
     expect(paginasDePdf(buffer)).toBeGreaterThan(1);
   });
 });
