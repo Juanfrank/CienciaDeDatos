@@ -61,6 +61,15 @@ export function stableHash(value: unknown): string {
   return createHash('sha256').update(JSON.stringify(canonicalize(value))).digest('hex').slice(0, 16);
 }
 
+/**
+ * Clave del SchemaDescriptor cacheado (6.4).
+ *
+ * Vive aqui y no en el job porque es un CONTRATO entre dos procesos: el job lo escribe y tanto
+ * el camino de lectura como el editor de modulos (4.2) y el editor de ambitos (4.10.8) lo leen.
+ * Un contrato compartido no puede vivir dentro de uno de los dos lados.
+ */
+export const SCHEMA_CACHE_KEY = 'ops:schema:descriptor';
+
 /** Prefijo de un dataset, para invalidacion dirigida con deleteByPrefix (6.5). */
 export function datasetKeyPrefix(datasetId: string): string {
   return `ds:${datasetId}:`;

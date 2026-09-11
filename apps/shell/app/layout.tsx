@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { defaultTheme, toCssVariables } from '@app/design-tokens';
-import { navigationFor, roleOf, teamsOf, findTeam, users } from '../src/server/contexto';
+import { findTeam, listUsers, navigationFor, roleOf, teamsOf } from '../src/server/contexto';
 import { obtenerSesion } from '../src/server/sesion';
 import { SelectorDeEquipo } from '../src/components/SelectorDeEquipo';
 import { ArbolNavegacion } from '../src/components/ArbolNavegacion';
@@ -38,7 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <SelectorDeEquipo
               equipos={equipos}
               equipoActivo={sesion.activeTeamId}
-              usuarios={users.map((u) => ({ id: u.userId, name: u.userId }))}
+              usuarios={listUsers().map((u) => ({ id: u.userId, name: u.userId }))}
               usuarioActivo={sesion.userId}
             />
           </header>

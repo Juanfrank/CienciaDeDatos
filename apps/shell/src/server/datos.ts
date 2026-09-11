@@ -3,7 +3,7 @@ import { canTeamAccessModule, intersectRequestedFilters, type AccessScope } from
 import type { ReadResult } from '@app/caching';
 import { type GridItem, type ModuleDefinition, findPage, validateModule } from '@app/module-model';
 import { type BindingProblem, fieldKey, validateBinding } from '@app/ui-components';
-import { datasetReader, findTeam, generalTree, objectRegistry, scopeFor } from './contexto';
+import { datasetReader, findTeam, getGeneralTree, objectRegistry, scopeFor } from './contexto';
 
 /**
  * Carga de un modulo para una persona concreta.
@@ -69,7 +69,7 @@ export async function cargarModulo(input: {
   // Sin esto, un modulo que existe en la organizacion general pero que el equipo NO tiene entre
   // sus grantedNodes se renderizaria con el ambito por defecto del equipo, que es una fuga.
   const team = findTeam(teamId);
-  if (!team || !canTeamAccessModule(generalTree, team, module.moduleId)) return null;
+  if (!team || !canTeamAccessModule(getGeneralTree(), team, module.moduleId)) return null;
 
   const resolucion = scopeFor(userId, teamId, module.moduleId);
   // Sin ambito resoluble, el modulo no existe para esta persona. Resultado vacio y explicito,

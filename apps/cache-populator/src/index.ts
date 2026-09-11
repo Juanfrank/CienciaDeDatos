@@ -10,7 +10,6 @@
  * espera a que esto termine, lee de lo que ya este poblado.
  */
 export {
-  SCHEMA_CACHE_KEY,
   populate,
   refreshSchema,
   repopulateTargeted,

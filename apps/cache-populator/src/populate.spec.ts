@@ -7,12 +7,13 @@ import {
   CachedDatasetReader,
   FileCacheStore,
   InMemoryCacheStore,
+  SCHEMA_CACHE_KEY,
   type DatasetRegistry,
   buildCacheKey,
 } from '@app/caching';
 import { gobiernoFixtures, resolveEffectiveScope } from '@app/access-control';
 import { POPULATOR_HEARTBEAT_KEY, type GovernedQueryLog, buildHealthReport } from '@app/observability';
-import { SCHEMA_CACHE_KEY, populate, refreshSchema, repopulateTargeted } from './populate';
+import { populate, refreshSchema, repopulateTargeted } from './populate';
 import { runScheduledCycle } from './runCycle';
 
 const { arbolGeneral, equipoEste, equipoNorte, usuarioAna, usuarioBeto } = gobiernoFixtures;

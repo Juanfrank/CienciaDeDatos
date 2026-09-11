@@ -3,6 +3,7 @@ import {
   type CacheableDataset,
   type DatasetRegistry,
   type ICacheStore,
+  SCHEMA_CACHE_KEY,
   buildCacheKey,
   datasetKeyPrefix,
   defaultRegistry,
@@ -27,7 +28,6 @@ import {
  */
 
 /** Clave del esquema cacheado, que consumen el editor (4.2) y la validacion de URL (4.11). */
-export const SCHEMA_CACHE_KEY = 'ops:schema:descriptor';
 
 /**
  * Contexto de seguridad con el que el job consulta.

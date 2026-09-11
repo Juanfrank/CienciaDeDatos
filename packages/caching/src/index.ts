@@ -29,6 +29,7 @@ export {
 } from './ICacheStore';
 export { InMemoryCacheStore, type InMemoryCacheStoreOptions } from './InMemoryCacheStore';
 export {
+  SCHEMA_CACHE_KEY,
   buildCacheKey,
   datasetKeyPrefix,
   stableHash,
