@@ -655,3 +655,30 @@ tr.es-ampliacion { background: #fdf6ec; }
   background: var(--color-surface);
   color: var(--color-text);
 }
+
+/* Vista incrustada en otro portal: cromo minimo, identidad conservada. */
+.incrustado { display: flex; flex-direction: column; min-height: 100vh; }
+.incrustado__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+.incrustado__emblema { width: auto; height: 24px; flex-shrink: 0; }
+.incrustado__institucion { font-size: var(--font-size-xs); color: var(--color-textMuted); }
+.incrustado__cuerpo { flex: 1; padding: var(--space-md); min-width: 0; }
+.incrustado__pie { margin-top: var(--space-md); font-size: var(--font-size-sm); }
+
+.incrustar__codigo {
+  width: 100%;
+  min-height: 120px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surfaceMuted);
+  color: var(--color-text);
+}

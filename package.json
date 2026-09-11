@@ -14,7 +14,7 @@
   "scripts": {
     "lint": "nx run-many -t lint",
     "test": "nx run-many -t test",
-    "typecheck": "tsc -b --pretty",
+    "typecheck": "tsc -b --pretty && tsc -p apps/shell/tsconfig.json --pretty",
     "verify:boundaries": "bash tools/verify-module-boundaries.sh",
     "verify:schema": "prisma validate --schema packages/identity-db/prisma/schema.prisma",
     "verify:infra": "bash tools/verify-infra.sh",

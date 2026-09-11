@@ -5,6 +5,7 @@ import type { QueryResult } from '@app/data-contracts';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
 import { CrearAviso, type ObjetoVigilable } from './CrearAviso';
 import { Exportar } from './Exportar';
+import { Incrustar } from './Incrustar';
 import { Marcadores } from './Marcadores';
 import { Rejilla } from './Rejilla';
 import { Segmentador } from './Segmentador';
@@ -31,11 +32,21 @@ export function VistaModulo({
   provenance,
   moduleSlug,
   pageSlug,
+  incrustado = false,
 }: {
   objetos: ObjetoSerializado[];
   provenance: { isPersonalized: boolean; label: string };
   moduleSlug: string;
   pageSlug?: string;
+  /**
+   * true cuando la vista se dibuja dentro del portal de otra institucion (4.9).
+   *
+   * Oculta los controles que sacan de la vista o escriben —marcadores, exportar, avisarme—:
+   * dentro de un iframe de 640 pixeles no llevan a ningun sitio util. Lo que SI se conserva es
+   * la insignia de procedencia (4.6) y el filtrado cruzado, que se queda dentro del marco
+   * porque vive en la query string.
+   */
+  incrustado?: boolean;
 }) {
   const { alternar, limpiarTodo, searchParams } = useFiltrosDeUrl();
   const hayFiltros = [...searchParams.keys()].length > 0;
@@ -68,17 +79,22 @@ export function VistaModulo({
             Limpiar todos los filtros
           </button>
         ) : null}
-        <Marcadores moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
-        <Exportar
-          moduleSlug={moduleSlug}
-          {...(pageSlug ? { pageSlug } : {})}
-          isPersonalized={provenance.isPersonalized}
-        />
-        <CrearAviso
-          moduleSlug={moduleSlug}
-          {...(pageSlug ? { pageSlug } : {})}
-          vigilables={vigilables}
-        />
+        {incrustado ? null : (
+          <>
+            <Marcadores moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+            <Exportar
+              moduleSlug={moduleSlug}
+              {...(pageSlug ? { pageSlug } : {})}
+              isPersonalized={provenance.isPersonalized}
+            />
+            <CrearAviso
+              moduleSlug={moduleSlug}
+              {...(pageSlug ? { pageSlug } : {})}
+              vigilables={vigilables}
+            />
+            <Incrustar moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+          </>
+        )}
       </div>
 
       <Rejilla items={items}>
