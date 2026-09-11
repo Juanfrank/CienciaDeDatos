@@ -5,11 +5,13 @@ import {
   type Actor,
   type FolderNode,
   type ManagedTree,
+  type LastAdministratorDenial,
   type ModulePackage,
   type NavNode,
   type Team,
   type TreeOperation,
   PermissionError,
+  administratorsOf,
   applyTreeOperation,
   assertCan,
   buildNavigationView,
@@ -20,6 +22,7 @@ import {
   isFolder,
   resolveEffectiveScope,
   wouldExpand,
+  wouldLeaveNoAdministrator,
 } from '@app/access-control';
 import { SCHEMA_CACHE_KEY } from '@app/caching';
 import { cacheL2, getGeneralTree } from './contexto';
@@ -268,7 +271,7 @@ async function aplicarAmbito(destino: GuardarAmbitoInput['destino'], scope: Acce
   if (destino.tipo === 'equipo') {
     const equipo = await gobierno.getTeam(destino.teamId);
     if (!equipo) throw new AdminError(`El equipo '${destino.teamId}' no existe.`, 404);
-    await gobierno.upsertTeam({ ...equipo, defaultScope: scope });
+    await escribirEquipo({ ...equipo, defaultScope: scope });
     return;
   }
 
@@ -328,10 +331,81 @@ export async function validarDimensiones(scope: AccessScope): Promise<string[]> 
 // Equipos, membresia y paquetes (4.10.2, 4.1.3)
 // ---------------------------------------------------------------------------
 
+/**
+ * Error de la comprobacion del ultimo Administrador.
+ *
+ * 409 y no 403: quien lo intenta TIENE permiso para gestionar equipos y roles. Lo que falla no
+ * es su autorizacion, es el estado en que quedaria el sistema. Un 403 le haria buscar un permiso
+ * que ya tiene.
+ */
+export class UltimoAdministradorError extends AdminError {
+  constructor(readonly denegacion: LastAdministratorDenial) {
+    super(denegacion.reason, 409, denegacion);
+    this.name = 'UltimoAdministradorError';
+  }
+}
+
+/**
+ * UNICO camino por el que este servicio escribe equipos.
+ *
+ * Existe para que la comprobacion del ultimo Administrador no haya que acordarse de hacerla en
+ * cada sitio. Hoy solo dos de las escrituras pueden tocar la membresia —guardar un equipo entero
+ * y cambiar un rol—, pero "esta no puede quitar un Administrador" es justo la clase de suposicion
+ * que deja de ser cierta cuando alguien amplia la funcion un ano despues. Sobre un cambio que no
+ * toca la membresia, la comprobacion compara dos listas identicas y no cuesta nada.
+ */
+async function escribirEquipo(equipo: Team): Promise<void> {
+  const antes = await gobierno.listTeams();
+  const despues = [...antes.filter((t) => t.id !== equipo.id), equipo];
+
+  const denegacion = wouldLeaveNoAdministrator(antes, despues);
+  if (denegacion) throw new UltimoAdministradorError(denegacion);
+
+  await gobierno.upsertTeam(equipo);
+}
+
+/**
+ * Borrado de un equipo, con la misma comprobacion.
+ *
+ * Borrar el equipo donde estaba el ultimo Administrador deja a la institucion sin ninguno igual
+ * que retirarle el rol, y por un camino que no menciona la palabra "rol" en ningun sitio.
+ *
+ * Estaba ademas SIN AUDITAR: el handler llamaba directamente al almacen y no emitia ningun
+ * `ConfigChangeLog`, asi que un equipo podia desaparecer sin dejar rastro de quien lo borro. Se
+ * arregla aqui porque es la misma funcion que habia que tocar.
+ */
+export async function borrarEquipo(actor: Actor, teamId: string): Promise<void> {
+  assertCan(actor.role, 'gestionar-equipos');
+
+  const antes = await gobierno.listTeams();
+  const equipo = antes.find((t) => t.id === teamId);
+  if (!equipo) throw new AdminError(`El equipo '${teamId}' no existe.`, 404);
+
+  const denegacion = wouldLeaveNoAdministrator(
+    antes,
+    antes.filter((t) => t.id !== teamId),
+  );
+  if (denegacion) throw new UltimoAdministradorError(denegacion);
+
+  await gobierno.deleteTeam(teamId);
+  await registrarCambio({
+    actorId: actor.userId,
+    entityType: 'team',
+    entityId: teamId,
+    action: 'delete',
+    before: equipo,
+  });
+}
+
+/** Quienes administran ahora mismo. La superficie de equipos lo muestra (4.10.1). */
+export async function administradores(): Promise<string[]> {
+  return administratorsOf(await gobierno.listTeams());
+}
+
 export async function guardarEquipo(actor: Actor, equipo: Team): Promise<Team> {
   assertCan(actor.role, 'gestionar-equipos');
   const anterior = await gobierno.getTeam(equipo.id);
-  await gobierno.upsertTeam(equipo);
+  await escribirEquipo(equipo);
 
   await registrarCambio({
     actorId: actor.userId,
@@ -362,7 +436,7 @@ export async function cambiarMembresia(
     members: role === null ? sinPersona : [...sinPersona, { userId, role }],
   };
 
-  await gobierno.upsertTeam(actualizado);
+  await escribirEquipo(actualizado);
   await registrarCambio({
     actorId: actor.userId,
     entityType: 'membership',

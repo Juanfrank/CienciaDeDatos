@@ -1,6 +1,12 @@
 import type { AppRole, Team } from '@app/access-control';
 import { conAdmin } from '../guardia';
-import { AdminError, cambiarMembresia, guardarEquipo } from '../../../../src/server/admin';
+import {
+  AdminError,
+  administradores,
+  borrarEquipo,
+  cambiarMembresia,
+  guardarEquipo,
+} from '../../../../src/server/admin';
 import { listTeams, listUsers } from '../../../../src/server/contexto';
 import { gobierno } from '../../../../src/server/gobierno';
 
@@ -13,6 +19,9 @@ export async function GET() {
     equipos: await listTeams(),
     usuarios: (await listUsers()).map((u) => u.userId),
     paquetes: (await gobierno.listPackages()).map((p) => ({ id: p.id, name: p.name })),
+    // Quienes administran ahora mismo. La emergencia que describe el procedimiento de acceso de
+    // emergencia ocurre porque habia menos de dos, y eso no se ve en ningun sitio.
+    administradores: await administradores(),
   }));
 }
 
@@ -44,8 +53,9 @@ export async function POST(request: Request) {
       }
       case 'borrar': {
         if (!cuerpo.teamId) throw new AdminError('Falta teamId.', 400);
-        const borrado = await gobierno.deleteTeam(cuerpo.teamId);
-        if (!borrado) throw new AdminError(`El equipo '${cuerpo.teamId}' no existe.`, 404);
+        // Pasa por el servicio y no por el almacen: alli esta la comprobacion del ultimo
+        // Administrador y el registro de auditoria, que este handler se saltaba.
+        await borrarEquipo(actor, cuerpo.teamId);
         return { borrado: cuerpo.teamId };
       }
       default:

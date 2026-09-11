@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { gobiernoFixtures, dimensionKey, resolveEffectiveScope } from '@app/access-control';
+import {
+  PermissionError,
+  dimensionKey,
+  gobiernoFixtures,
+  resolveEffectiveScope,
+} from '@app/access-control';
 import {
   AdminError,
   ExpansionSinJustificarError,
@@ -13,6 +18,9 @@ import {
   previsualizarMovimiento,
   quienVeQue,
   rolMasAltoDe,
+  UltimoAdministradorError,
+  administradores,
+  borrarEquipo,
 } from './admin';
 import { contarAmpliaciones, limpiarAuditoria, listarAuditoria } from './auditoria';
 import { gobierno } from './gobierno';
@@ -344,5 +352,104 @@ describe('quien ve que (4.10.8)', () => {
       justificacion: 'Supervision conjunta Norte-Este durante el trimestre',
     });
     expect((await quienVeQue('u-ana', 'equipo-norte', 'casos-pendientes')).usoAmpliacion).toBe(true);
+  });
+});
+
+describe('la institucion no se puede quedar sin Administrador (4.10.1)', () => {
+  /**
+   * El seed declara un unico Administrador —u-admin, en equipo-norte—, asi que cada una de estas
+   * pruebas parte del caso peor, que es el que importa. `gobierno.reset()` en el beforeEach lo
+   * devuelve a su sitio.
+   */
+  it('un Administrador no puede retirarse el rol a si mismo', async () => {
+    await expect(
+      cambiarMembresia(admin, 'equipo-norte', 'u-admin', null),
+    ).rejects.toBeInstanceOf(UltimoAdministradorError);
+
+    // Y sigue administrando: la escritura no llego a ocurrir.
+    expect(await esAdministrador('u-admin')).toBe(true);
+  });
+
+  it('tampoco degradarse a Colaborador', async () => {
+    await expect(
+      cambiarMembresia(admin, 'equipo-norte', 'u-admin', 'colaborador'),
+    ).rejects.toBeInstanceOf(UltimoAdministradorError);
+  });
+
+  it('el error es 409 y no 403: el permiso lo tiene, el problema es el resultado', async () => {
+    const fallo = await cambiarMembresia(admin, 'equipo-norte', 'u-admin', null).catch(
+      (e: unknown) => e,
+    );
+
+    expect((fallo as UltimoAdministradorError).status).toBe(409);
+    // El mensaje nombra a quien administra, para que se sepa a quien hay que nombrar antes.
+    expect((fallo as UltimoAdministradorError).message).toContain('u-admin');
+  });
+
+  it('guardar el equipo entero con la membresia reescrita tampoco cuela', async () => {
+    const equipo = await equipoDe('equipo-norte');
+
+    // Este es el camino que se salta por completo la palabra "rol": se manda el equipo con una
+    // lista de miembros distinta, y el Administrador simplemente no esta en ella.
+    await expect(
+      guardarEquipo(admin, {
+        ...equipo,
+        members: equipo.members.filter((m) => m.userId !== 'u-admin'),
+      }),
+    ).rejects.toBeInstanceOf(UltimoAdministradorError);
+
+    expect(await esAdministrador('u-admin')).toBe(true);
+  });
+
+  it('borrar el equipo donde estaba el ultimo Administrador tampoco', async () => {
+    await expect(borrarEquipo(admin, 'equipo-norte')).rejects.toBeInstanceOf(
+      UltimoAdministradorError,
+    );
+    expect((await gobierno.getTeam('equipo-norte'))).toBeDefined();
+  });
+
+  it('con otro Administrador nombrado antes, el cambio pasa', async () => {
+    await cambiarMembresia(admin, 'equipo-este', 'u-ana', 'administrador');
+
+    // Ahora si: u-admin puede retirarse, porque Ana administra.
+    await cambiarMembresia(admin, 'equipo-norte', 'u-admin', 'colaborador');
+
+    expect(await esAdministrador('u-admin')).toBe(false);
+    expect(await esAdministrador('u-ana')).toBe(true);
+  });
+
+  it('quienes administran se pueden consultar, para poder verlo antes de tocar nada', async () => {
+    expect(await administradores()).toEqual(['u-admin']);
+    await cambiarMembresia(admin, 'equipo-este', 'u-ana', 'administrador');
+    expect(await administradores()).toEqual(['u-admin', 'u-ana']);
+  });
+});
+
+describe('borrar un equipo deja rastro', () => {
+  it('emite un evento de auditoria, que antes no emitia', async () => {
+    // Se nombra un segundo Administrador para poder borrar el equipo del primero.
+    await cambiarMembresia(admin, 'equipo-este', 'u-ana', 'administrador');
+    await borrarEquipo(admin, 'equipo-norte');
+
+    const evento = (await listarAuditoria()).find(
+      (e) => e.entityType === 'team' && e.entityId === 'equipo-norte' && e.action === 'delete',
+    );
+
+    // El handler llamaba directamente al almacen: un equipo podia desaparecer sin que quedara
+    // constancia de quien lo borro ni de que contenia.
+    expect(evento).toBeDefined();
+    expect(evento?.actorId).toBe('u-admin');
+    expect(evento?.before).toMatchObject({ id: 'equipo-norte' });
+  });
+
+  it('borrar uno que no existe es 404, no un exito silencioso', async () => {
+    const fallo = await borrarEquipo(admin, 'equipo-inventado').catch((e: unknown) => e);
+    expect((fallo as AdminError).status).toBe(404);
+  });
+
+  it('un Visor no puede borrar equipos', async () => {
+    // `PermissionError`, igual que el resto de operaciones de equipo: el envoltorio de los
+    // handlers lo traduce a 403. Es la diferencia con el ultimo Administrador, que es 409.
+    await expect(borrarEquipo(visor, 'equipo-este')).rejects.toBeInstanceOf(PermissionError);
   });
 });

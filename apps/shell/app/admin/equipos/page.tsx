@@ -1,4 +1,5 @@
 import { EditorDeEquipos } from '../../../src/components/admin/EditorDeEquipos';
+import { administradores } from '../../../src/server/admin';
 import { getGeneralTree, listTeams, listUsers } from '../../../src/server/contexto';
 import { gobierno } from '../../../src/server/gobierno';
 import type { NavNode } from '@app/access-control';
@@ -28,6 +29,7 @@ export default async function PaginaEquipos() {
         y la estructura nunca diverjan.
       </p>
       <EditorDeEquipos
+        administradores={await administradores()}
         equipos={await listTeams()}
         nodos={aplanar(await getGeneralTree())}
         usuarios={(await listUsers()).map((u) => u.userId)}

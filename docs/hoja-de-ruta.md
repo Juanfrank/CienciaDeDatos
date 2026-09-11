@@ -77,21 +77,7 @@ cuenta concreta. Vive en Front Door o en App Service, no en el codigo de la apli
 
 Nada las bloquea. Estan aqui porque se identificaron y no se hicieron.
 
-### 2.1 Impedir que la institucion se quede sin ningun Administrador
-
-**El hueco.** `cambiarMembresia` comprueba el permiso de QUIEN hace el cambio, no el estado en
-que queda el sistema. Un Administrador puede retirarse a si mismo el rol, o retirarselo al
-ultimo que quedaba, y entonces nadie puede volver a nombrar a ninguno: el panel exige ser
-Administrador para entrar.
-
-**Donde va.** En el mismo sitio donde vive `wouldExpand`: una comprobacion sobre el resultado
-propuesto, no sobre quien lo propone. `guardarEquipo` y `cambiarMembresia` la invocan antes de
-escribir.
-
-**Mientras tanto**, la red de seguridad es `docs/operacion/acceso-de-emergencia.md`, que explica
-como restituir un Administrador desde el almacen de gobierno.
-
-### 2.2 Arrastrar y soltar en el editor de modulos
+### 2.1 Arrastrar y soltar en el editor de modulos
 
 El editor coloca los objetos apilados y permite quitarlos, pero no reposicionarlos. El arrastre
 lo pide 4.2 para el editor y 4.10.8 para el arbol; en el arbol ya estan los dos gestos —arrastre
@@ -101,29 +87,45 @@ y botones— sobre la misma operacion. Falta el equivalente en la rejilla.
 teclado y con lector de pantalla, y 4.9 dice que la accesibilidad no se pospone. Los dos gestos,
 sobre la misma funcion.
 
-### 2.3 Reposicionamiento en la personalizacion (4.6)
+### 2.2 Reposicionamiento en la personalizacion (4.6)
 
 `UserPersonalization` admite `positionOverrides` y `columnOrder`, y `applyPersonalization` los
 aplica. El dialogo "Mi vista" solo ofrece ocultar y mostrar. El modelo esta; falta el gesto, y
-depende de 2.2 para no hacer dos veces el mismo trabajo.
+depende de 2.1 para no hacer dos veces el mismo trabajo.
 
-### 2.4 El editor reescribe la definicion entera en cada cambio
+### 2.3 El editor reescribe la definicion entera en cada cambio
 
 Cada casilla marcada manda las paginas completas. Funciona y es simple, pero dos personas
 editando el mismo borrador se pisarian —hoy no ocurre porque un borrador es de una sola persona—
 y el dia que haya modulos grandes sera caro. La forma correcta es una operacion por cambio, como
 `applyTreeOperation` en el arbol.
 
-### 2.5 Objetos adjuntables en el editor
+### 2.4 Objetos adjuntables en el editor
 
 `tooltip-explicativo` y `tabla-de-datos` se validan, se dibujan y se exportan, y se pueden
 declarar en la definicion de un modulo. El editor todavia no ofrece adjuntarlos: hay que
 escribirlos en la definicion.
 
-### 2.6 Paginas multiples en el editor
+### 2.5 Paginas multiples en el editor
 
 Un modulo admite varias paginas —el modelo, la validacion y el ruteo `/m/{slug}/{pagina}` estan
 hechos— y el editor solo edita la primera.
+
+---
+
+### 2.6 Comprobar que el ultimo Administrador puede AUTENTICARSE, no solo que existe
+
+`wouldLeaveNoAdministrator` comprueba el gobierno: que alguien conserva el rol. No comprueba que
+esa persona pueda entrar. Una cuenta local bloqueada, o alguien cuya cuenta de Azure AD se
+desactivo, satisface la invariante mientras la institucion sigue de hecho sin acceso.
+
+Hacerlo bien exige que la comprobacion de gobierno consulte el estado de identidad, y son dos
+capas que hoy estan separadas a proposito: `access-control` es `type:lib` y no sabe nada de
+credenciales. Lo razonable es un aviso —no un bloqueo— en `/admin/equipos` y en
+`/admin/cuentas`, cruzando quienes administran con el estado de sus cuentas locales.
+
+Mientras tanto, el aviso de "conviene que haya al menos dos" y el procedimiento de acceso de
+emergencia cubren el caso.
 
 ---
 

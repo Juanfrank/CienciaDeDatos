@@ -99,3 +99,8 @@ export {
  * una dependencia circular. Son datos puros, asi que no lastran el bundle de produccion.
  */
 export * as gobiernoFixtures from './__fixtures__/gobierno';
+export {
+  administratorsOf,
+  wouldLeaveNoAdministrator,
+  type LastAdministratorDenial,
+} from './lastAdministrator';

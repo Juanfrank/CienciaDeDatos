@@ -16,9 +16,10 @@ Ocurre de tres formas realistas:
 1. La unica persona con rol Administrador deja la institucion y su cuenta de Azure AD se
    desactiva antes de nombrar a nadie mas.
 2. Azure AD deja de responder y ninguna de las personas que administran tiene cuenta local.
-3. Un cambio de configuracion retira por error el rol Administrador a todo el mundo. El panel
-   lo permite: la matriz de 4.10.1 comprueba el permiso de quien hace el cambio, no si el
-   resultado deja a alguien dentro.
+3. ~~Un cambio de configuracion retira por error el rol Administrador a todo el mundo.~~
+   **Ya no ocurre**: `wouldLeaveNoAdministrator` rechaza con 409 cualquier cambio que se lleve al
+   ultimo Administrador —retirarle el rol, degradarlo, reescribir la membresia del equipo o
+   borrar el equipo entero—. Quedan los casos 1 y 2, que no dependen del panel.
 
 ## Lo que NO se hace
 
@@ -75,12 +76,22 @@ Requisitos previos: dos personas. Quien ejecuta y quien atestigua. La segunda no
   aparezca escrita como tal en `/admin/cuentas`.
 - Revisar el log consolidado de inicios de sesion (seccion 7) de las horas previas y posteriores.
 
-## Pendiente
+## Lo que el codigo ya impide, y lo que no
 
-El caso 3 —retirar el rol a todo el mundo desde el panel— **es evitable en el codigo** y hoy no
-se evita: `cambiarMembresia` comprueba el permiso de quien hace el cambio, no el estado en que
-queda el sistema. Una comprobacion de "no puedes dejar la institucion sin ningun Administrador"
-pertenece al mismo sitio donde vive `wouldExpand`, y esta anotada en `docs/hoja-de-ruta.md`.
+**Impide** que un cambio de configuracion deje la aplicacion sin ningun Administrador. Lo
+comprueba `wouldLeaveNoAdministrator`, sobre el estado en que QUEDA el sistema y no sobre quien
+propone el cambio, y cubre los cuatro caminos: retirar el rol, degradarlo, reescribir la
+membresia del equipo y borrar el equipo. `/admin/equipos` avisa ademas cuando solo hay uno.
 
-Mientras no exista, este procedimiento es la red de seguridad de ese fallo, y conviene que quien
-administre lo sepa.
+**No impide** que quien administra deje de poder entrar por otro motivo: una cuenta bloqueada,
+una cuenta de Azure AD desactivada, una baja. Esos son los casos 1 y 2, y para ellos existe este
+procedimiento.
+
+Hay una consecuencia que conviene conocer antes de reorganizar roles: **quien suelta el rol de
+Administrador pierde el acceso al panel en el acto**, incluida la ruta que se lo devolveria. Si
+queda otro Administrador, no es una emergencia —se lo restituye el—; si no queda ninguno, la
+comprobacion no habria dejado hacer el cambio. Por eso los relevos se hacen nombrando primero y
+retirando despues.
+
+**Pendiente**: que la comprobacion verifique que el Administrador que queda puede AUTENTICARSE,
+no solo que existe en el gobierno. Anotado en `docs/hoja-de-ruta.md`, apartado 2.6.

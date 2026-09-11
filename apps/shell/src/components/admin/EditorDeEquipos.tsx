@@ -13,11 +13,14 @@ import { APP_ROLES } from '@app/access-control';
  * escriben. Asi el acceso y la estructura nunca divergen.
  */
 export function EditorDeEquipos({
+  administradores,
   equipos,
   nodos,
   usuarios,
   paquetes,
 }: {
+  /** Quienes tienen rol Administrador en cualquier equipo (4.10.1). */
+  administradores: string[];
   equipos: Team[];
   nodos: { id: string; nombre: string; tipo: string }[];
   usuarios: string[];
@@ -44,6 +47,24 @@ export function EditorDeEquipos({
 
   return (
     <div className="editor-equipos">
+      {/*
+        Quien administra, a la vista y antes de tocar nada.
+        
+        El servidor impide dejar la aplicacion sin ningun Administrador, pero eso solo avisa
+        cuando ya se esta intentando. Con uno solo, el sistema esta a un cambio de configuracion
+        —o a una baja— de necesitar el procedimiento de acceso de emergencia, y eso no se ve en
+        ninguna pantalla.
+      */}
+      <p
+        className={administradores.length < 2 ? 'aviso aviso--atencion' : 'aviso'}
+        data-testid="administradores"
+      >
+        {administradores.length === 1
+          ? `Solo ${administradores[0]} administra la aplicacion. Conviene que haya al menos dos: ` +
+            `si esa cuenta se pierde, restituir el acceso exige entrar en la base de gobierno.`
+          : `Administran la aplicacion: ${administradores.join(', ')}.`}
+      </p>
+
       {error ? (
         <p className="aviso aviso--error" role="alert" data-testid="error-equipos">{error}</p>
       ) : null}

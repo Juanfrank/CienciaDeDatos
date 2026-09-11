@@ -310,3 +310,107 @@ test.describe('membresia (4.10.2)', () => {
     expect(este2.members.some((m: { userId: string }) => m.userId === 'u-nuevo')).toBe(false);
   });
 });
+
+test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', () => {
+  /**
+   * El caso que esto impide no es hipotetico: el modelo de permisos es circular, y sin la
+   * comprobacion un Administrador puede retirarse el rol a si mismo y dejar el gobierno
+   * inaccesible para todos, incluido el. Restituirlo exigiria entrar en la base de datos.
+   *
+   * Se comprueba contra la API a mano, no pulsando botones: la seccion 9 pide exactamente eso.
+   */
+  test.beforeEach(async ({ page }) => {
+    await entrarComo(page, 'u-admin');
+  });
+
+  test('retirarse el rol a uno mismo se rechaza con 409', async ({ page }) => {
+    const respuesta = await page.request.post('/api/admin/equipos', {
+      data: { accion: 'membresia', teamId: 'equipo-norte', userId: 'u-admin', role: null },
+    });
+
+    // 409 y no 403: el permiso lo tiene. Lo que falla es el estado en que quedaria el sistema.
+    expect(respuesta.status()).toBe(409);
+    expect((await respuesta.json()).error).toContain('u-admin');
+
+    // Y sigue administrando: el panel se abre igual.
+    await page.goto('/admin');
+    await expect(page.getByTestId('admin-nav-arbol')).toBeVisible();
+  });
+
+  test('degradarse a Colaborador tampoco', async ({ page }) => {
+    const respuesta = await page.request.post('/api/admin/equipos', {
+      data: { accion: 'membresia', teamId: 'equipo-norte', userId: 'u-admin', role: 'colaborador' },
+    });
+    expect(respuesta.status()).toBe(409);
+  });
+
+  test('reescribir la membresia del equipo entero tampoco, que es el camino discreto', async ({
+    page,
+  }) => {
+    const { equipos } = (await (await page.request.get('/api/admin/equipos')).json()) as {
+      equipos: { id: string; members: { userId: string; role: string }[] }[];
+    };
+    const norte = equipos.find((e) => e.id === 'equipo-norte');
+    if (!norte) throw new Error('fixture inesperado');
+
+    // Aqui no se menciona la palabra "rol" en ningun sitio: se manda el equipo con una lista de
+    // miembros distinta, y el Administrador simplemente no esta en ella.
+    const respuesta = await page.request.post('/api/admin/equipos', {
+      data: {
+        accion: 'guardar',
+        equipo: { ...norte, members: norte.members.filter((m) => m.userId !== 'u-admin') },
+      },
+    });
+
+    expect(respuesta.status()).toBe(409);
+  });
+
+  test('borrar el equipo donde estaba el ultimo Administrador tampoco', async ({ page }) => {
+    const respuesta = await page.request.post('/api/admin/equipos', {
+      data: { accion: 'borrar', teamId: 'equipo-norte' },
+    });
+    expect(respuesta.status()).toBe(409);
+  });
+
+  test('con otro Administrador nombrado antes, el relevo pasa', async ({ page }) => {
+    const membresia = (teamId: string, userId: string, role: string | null) =>
+      page.request.post('/api/admin/equipos', {
+        data: { accion: 'membresia', teamId, userId, role },
+      });
+
+    // Se usa u-beto en equipo-este, del que ya es miembro, para no inventar membresias que otras
+    // pruebas puedan asumir. Se deshace al terminar.
+    try {
+      expect((await membresia('equipo-este', 'u-beto', 'administrador')).ok()).toBe(true);
+
+      // Ahora si: u-admin puede soltar el rol, porque Beto administra.
+      const relevo = await membresia('equipo-norte', 'u-admin', 'colaborador');
+      expect(relevo.ok(), await relevo.text()).toBe(true);
+    } finally {
+      /*
+       * La restitucion la hace BETO, no u-admin.
+       *
+       * Es la consecuencia que esta prueba descubrio y que conviene dejar escrita: al soltar el
+       * rol, u-admin pierde el acceso al panel EN EL ACTO, incluida la ruta que se lo devolveria.
+       * Ya no es un bloqueo de la institucion —para eso esta la comprobacion del ultimo
+       * Administrador— pero si de esa persona, y solo otro Administrador puede deshacerlo.
+       */
+      await entrarComo(page, 'u-beto');
+      await membresia('equipo-norte', 'u-admin', 'administrador');
+      await membresia('equipo-este', 'u-beto', 'visor');
+    }
+
+    // Y el estado quedo como estaba, comprobado desde la cuenta restituida.
+    await entrarComo(page, 'u-admin');
+    await page.goto('/admin');
+    await expect(page.getByTestId('admin-nav-arbol')).toBeVisible();
+  });
+
+  test('el panel avisa cuando solo hay un Administrador', async ({ page }) => {
+    await page.goto('/admin/equipos');
+    // El servidor lo impide, pero eso solo avisa cuando ya se esta intentando. Con uno solo, el
+    // sistema esta a una baja de necesitar el procedimiento de acceso de emergencia.
+    await expect(page.getByTestId('administradores')).toContainText('u-admin');
+    await expect(page.getByTestId('administradores')).toContainText('al menos dos');
+  });
+});
