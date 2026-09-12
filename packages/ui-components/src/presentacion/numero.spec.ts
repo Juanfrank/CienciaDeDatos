@@ -32,6 +32,24 @@ describe('los tipos que no hay que escribir', () => {
     expect(f({ tipo: 'entero', millares: false })(1234567)).toBe('1234567');
   });
 
+  it('porcentaje anade el simbolo y NO multiplica', () => {
+    /*
+     * `Intl` con `style: 'percent'` multiplicaria por 100, y ahi esta el problema: unos datasets
+     * traen 18,5 y otros 0,185, y la aplicacion no puede saber cual. Se escribe el simbolo y se
+     * deja la cifra como viene; quien tenga la fraccion usa la cadena personalizada con `%`, que
+     * si multiplica porque ahi se pide explicitamente.
+     */
+    expect(f({ tipo: 'porcentaje' })(18.5)).toBe(`${local(18.5, 1)}%`);
+    expect(f({ tipo: 'porcentaje', decimales: 0 })(18.5)).toBe(`${local(19, 0)}%`);
+  });
+
+  it('moneda antepone el simbolo, y el simbolo se elige', () => {
+    // Texto y no codigo ISO: `Intl` con `currency: 'DOP'` escribe «RD$» o «DOP» segun los datos
+    // que traiga el motor, y un informe institucional no puede depender de eso.
+    expect(f({ tipo: 'moneda' })(1234.5)).toBe(`RD$ ${local(1234.5, 2)}`);
+    expect(f({ tipo: 'moneda', simbolo: 'US$' })(1234.5)).toBe(`US$ ${local(1234.5, 2)}`);
+  });
+
   it('null es «no hay respuesta», nunca cero', () => {
     expect(f({ tipo: 'entero' })(null)).toBe('—');
   });

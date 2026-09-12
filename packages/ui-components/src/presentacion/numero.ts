@@ -38,7 +38,14 @@
  * dibujar, se cae al formato general. Un numero sin formatear se lee; un objeto en blanco, no.
  */
 
-export const TIPOS_DE_FORMATO = ['general', 'entero', 'decimal', 'personalizado'] as const;
+export const TIPOS_DE_FORMATO = [
+  'general',
+  'entero',
+  'decimal',
+  'porcentaje',
+  'moneda',
+  'personalizado',
+] as const;
 export type TipoDeFormato = (typeof TIPOS_DE_FORMATO)[number];
 
 export interface FormatoDeNumero {
@@ -53,6 +60,14 @@ export interface FormatoDeNumero {
   compacto?: boolean;
   /** Solo con `tipo: 'personalizado'`. */
   patron?: string;
+  /**
+   * Simbolo de la moneda. Solo con `tipo: 'moneda'`.
+   *
+   * Es un TEXTO y no un codigo ISO a proposito. `Intl` con `currency: 'DOP'` escribe «RD$» en unas
+   * plataformas y «DOP» en otras segun los datos que traiga el motor, y un informe institucional no
+   * puede depender de eso. Con el simbolo escrito, lo que se ve es lo que se puso.
+   */
+  simbolo?: string;
 }
 
 /**
@@ -292,11 +307,19 @@ export function formateadorDeNumero(formato: FormatoDeNumero | undefined): (n: n
   }
 
   /*
-   * General, entero y decimal van por `Intl`, que resuelve la convencion local sin que nadie
-   * tenga que escribirla. `general` no fija decimales: ensena los que el numero traiga, hasta
-   * tres — es lo que se espera de «general», y lo que evita que un 0,5 salga como 1.
+   * Los tipos sin cadena van por `Intl`, que resuelve la convencion local sin que nadie tenga que
+   * escribirla. `general` no fija decimales: ensena los que el numero traiga, hasta tres — es lo
+   * que se espera de «general», y lo que evita que un 0,5 salga como 1.
+   *
+   * Porcentaje y moneda NO usan `style: 'percent'` ni `style: 'currency'` de `Intl`. El primero
+   * multiplicaria por 100 y ya viene multiplicado en unos datasets y no en otros; el segundo
+   * escribe el simbolo que el motor tenga para el codigo ISO, que varia entre plataformas. Los dos
+   * se resuelven con sufijo y prefijo explicitos: lo que se ve es lo que se configuro.
    */
-  const decimales = tipo === 'entero' ? 0 : (formato?.decimales ?? (tipo === 'decimal' ? 2 : undefined));
+  const decimales =
+    tipo === 'entero'
+      ? 0
+      : (formato?.decimales ?? (tipo === 'decimal' || tipo === 'moneda' ? 2 : tipo === 'porcentaje' ? 1 : undefined));
   const compacto = formato?.compacto === true;
   const intl = new Intl.NumberFormat('es-DO', {
     ...(decimales === undefined
@@ -306,5 +329,7 @@ export function formateadorDeNumero(formato: FormatoDeNumero | undefined): (n: n
     ...(compacto ? { notation: 'compact' as const, compactDisplay: 'short' as const } : {}),
   });
   const unidad = formato?.unidad ? ` ${formato.unidad}` : '';
-  return (n) => (n === null ? '—' : `${intl.format(n)}${unidad}`);
+  const prefijo = tipo === 'moneda' ? `${formato?.simbolo ?? 'RD$'} ` : '';
+  const sufijo = tipo === 'porcentaje' ? '%' : '';
+  return (n) => (n === null ? '—' : `${prefijo}${intl.format(n)}${sufijo}${unidad}`);
 }

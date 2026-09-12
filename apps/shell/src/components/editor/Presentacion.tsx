@@ -648,7 +648,7 @@ function RenglonDeFormato({
           <label className="formulario__campo">
             <span>Decimales</span>
             <select
-              value={String(formato.decimales ?? (tipo === "decimal" ? 2 : 0))}
+              value={String(formato.decimales ?? DECIMALES_POR_DEFECTO[tipo])}
               disabled={guardando || tipo === "entero"}
               data-testid={`${prueba}-decimales`}
               onChange={(e) => cambiar({ decimales: Number(e.target.value) })}
@@ -660,6 +660,25 @@ function RenglonDeFormato({
               ))}
             </select>
           </label>
+
+          {tipo === "moneda" ? (
+            <label className="formulario__campo">
+              <span>Simbolo</span>
+              <input
+                defaultValue={formato.simbolo ?? "RD$"}
+                maxLength={4}
+                disabled={guardando}
+                data-testid={`${prueba}-simbolo`}
+                onBlur={(e) => cambiar({ simbolo: e.target.value || undefined })}
+              />
+              {/*
+                Se escribe y no se elige de una lista: el simbolo de una moneda es una decision de
+                la institucion que publica —«RD$», «DOP», «$»— y una lista cerrada obligaria a
+                tocar codigo cada vez que alguien reporte en otra divisa.
+              */}
+              <span className="campo__pista">Precede a la cifra. Por defecto RD$.</span>
+            </label>
+          ) : null}
 
           <label className="editor__interruptor">
             <input
@@ -699,9 +718,25 @@ function RenglonDeFormato({
   );
 }
 
+/*
+ * Los decimales que aplica el motor cuando nadie los ha tocado. Se repiten aqui porque el
+ * desplegable tiene que ENSENAR el valor vigente: si dijera «0» mientras la moneda sale con dos,
+ * el panel estaria mintiendo sobre lo que se ve en la tarjeta.
+ */
+const DECIMALES_POR_DEFECTO: Record<TipoDeFormato, number> = {
+  general: 0,
+  entero: 0,
+  decimal: 2,
+  porcentaje: 1,
+  moneda: 2,
+  personalizado: 0,
+};
+
 const ETIQUETA_DE_TIPO: Record<TipoDeFormato, string> = {
   general: "General",
   entero: "Entero",
   decimal: "Decimal",
+  porcentaje: "Porcentaje",
+  moneda: "Moneda",
   personalizado: "Personalizado",
 };
