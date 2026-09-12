@@ -1,4 +1,4 @@
-import { defaultTheme } from '@app/design-tokens';
+import { defaultTheme, temaClaro } from '@app/design-tokens';
 import { describe, expect, it } from 'vitest';
 import { construirDocumento } from './documento';
 import { aSvg } from './formatos';
@@ -100,12 +100,14 @@ describe('la marca institucional llega al archivo exportado', () => {
     // que circula por correo salia con otra paleta que la pantalla.
     const documento = construirDocumento([barras], peticion);
     expect(documento.paleta.series).toEqual(defaultTheme.color.categorical);
-    expect(documento.paleta.series[0]).toBe('#0050dd');
+    // Y la primera serie es el PRIMARIO del esquema Material, no un azul suelto: la cadena
+    // completa —color de marca, paleta tonal, rol, tema de exportacion— llega hasta el archivo.
+    expect(documento.paleta.series[0]).toBe(temaClaro.color.primary);
   });
 
   it('el SVG se dibuja con el azul institucional', () => {
     const svg = aSvg(construirDocumento([kpi, barras], peticion));
-    expect(svg).toContain('fill="#0050dd"');
+    expect(svg).toContain(`fill="${temaClaro.color.primary}"`);
     expect(svg).toContain(`fill="${defaultTheme.color.surface}"`);
   });
 

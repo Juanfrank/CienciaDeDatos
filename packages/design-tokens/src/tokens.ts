@@ -7,6 +7,8 @@
  * no podria garantizar nada.
  */
 
+import { comoThemeTokens, temaClaro } from './temaInstitucional';
+
 export interface ColorScale {
   50: string;
   100: string;
@@ -76,87 +78,21 @@ export interface ThemeTokens {
  * el rojo de la marca, y eso no se hace: la marca es un dato de la institucion, no una variable
  * de diseño.
  */
-export const defaultTheme: ThemeTokens = {
-  color: {
-    brand: {
-      // Tinte claro para insignias y fondos de enfasis.
-      50: '#e8f0fe',
-      // Borde institucional, tomado de la papeleria oficial.
-      100: '#c7d6fb',
-      300: '#6e9bf0',
-      // Azul institucional.
-      500: '#0050dd',
-      700: '#003da6',
-      900: '#001e52',
-    },
-    accent: {
-      50: '#fdecee',
-      100: '#fac9ce',
-      300: '#f5838c',
-      // Rojo institucional. Solo enfasis y series de datos: no admite texto pequeño.
-      500: '#ef3340',
-      // El unico rojo de la familia que SI admite texto pequeño (4.84:1 sobre blanco).
-      700: '#d72e3a',
-      900: '#8f1f26',
-    },
-    neutral: {
-      50: '#f7f8fa',
-      100: '#eef1f6',
-      300: '#c7cedb',
-      // Gris institucional de la papeleria oficial.
-      500: '#5b6b87',
-      700: '#3a465c',
-      900: '#1a1a1a',
-    },
-    success: '#15803d',
-    warning: '#b45309',
-    // Rojo de estado: el hermano con texto del acento, no el acento. Un badge de error lleva
-    // texto blanco encima, y con `#ef3340` ese texto quedaria en 4.02:1.
-    danger: '#d72e3a',
-    background: '#f3f5f9',
-    surface: '#ffffff',
-    surfaceMuted: '#eef1f6',
-    text: '#1a1a1a',
-    textMuted: '#5b6b87',
-    textOnBrand: '#ffffff',
-    border: '#c7cedb',
-    /**
-     * Paleta categorica.
-     *
-     * Abre con el azul institucional y sigue con el rojo de acento, que es el orden que fija la
-     * norma de marca para las series de un grafico. De ahi en adelante la norma solo dice
-     * "grises para lo terciario", que sirve en un informe de una o dos series y no en una
-     * aplicacion donde un objeto puede tener ocho: la extension se queda dentro de la familia
-     * institucional, se aleja en tono ademas de en color —para que se distingan tambien en
-     * escala de grises y con daltonismo— y cada valor supera 3:1 sobre la superficie.
-     */
-    categorical: [
-      '#0050dd',
-      '#ef3340',
-      '#0e7490',
-      '#b45309',
-      '#15803d',
-      '#6d28d9',
-      '#5b6b87',
-      '#9d174d',
-    ],
-  },
-  font: {
-    // Montserrat es la tipografia institucional. Las alternativas de detras no son decoracion:
-    // si la fuente no carga —red caida, entorno sin acceso— la aplicacion tiene que seguir
-    // legible en vez de caer en la serif por defecto del navegador.
-    sans: "var(--font-montserrat), Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
-    mono: "ui-monospace, SFMono-Regular, Menlo, monospace",
-    size: { xs: '0.75rem', sm: '0.875rem', base: '1rem', lg: '1.125rem', xl: '1.5rem', xxl: '2rem' },
-    weight: { regular: 400, medium: 500, bold: 700 },
-  },
-  space: { xs: '0.25rem', sm: '0.5rem', md: '1rem', lg: '1.5rem', xl: '2.5rem' },
-  radius: { sm: '4px', md: '8px', lg: '12px' },
-  shadow: {
-    sm: '0 1px 2px rgba(26, 26, 26, 0.08)',
-    md: '0 4px 12px rgba(26, 26, 26, 0.12)',
-  },
-};
+/**
+ * Tema institucional por defecto — DERIVADO del esquema Material Design 3.
+ *
+ * Antes era una lista de valores escritos a mano, con una advertencia de varios parrafos sobre
+ * el rojo institucional y que hermano de la escala usar para texto. Ahora sale de
+ * `temaInstitucional`, que aplica la tabla de tonos de MD3 sobre los dos colores de marca: los
+ * pares de contraste dejan de ser algo que alguien comprobo una vez y pasan a ser una propiedad
+ * de como se construye el tema.
+ *
+ * Sigue existiendo con esta forma porque lo consume el paquete de EXPORTACION, que dibuja PDF,
+ * Excel y SVG fuera del navegador y no tiene variables CSS de las que tirar. Que salga de los
+ * mismos roles es lo que impide que un archivo que circula por correo lleve otra marca que la
+ * pantalla de la que salio.
+ */
+export const defaultTheme: ThemeTokens = comoThemeTokens(temaClaro);
 
 /**
  * Tokens que un objeto PUEDE anular. El resto no es anulable.

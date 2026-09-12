@@ -1,6 +1,12 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
-import { defaultIdentity, defaultTheme, toCssVariables } from '@app/design-tokens';
+import {
+  defaultIdentity,
+  defaultTheme,
+  temaClaro,
+  toCssVariables,
+  variablesMaterial,
+} from '@app/design-tokens';
 import { Cabecera } from '../src/components/Cabecera';
 import { obtenerSesion } from '../src/server/sesion';
 import './globals.css';
@@ -27,8 +33,15 @@ const montserrat = Montserrat({
   variable: '--font-montserrat',
 });
 
-/** El tema organizacional (4.3) se inyecta como variables CSS en la raiz del documento. */
-const variables = toCssVariables(defaultTheme);
+/**
+ * El tema organizacional (4.3) se inyecta como variables CSS en la raiz del documento.
+ *
+ * Se emiten LOS DOS juegos: los roles de Material Design 3 (`--md-sys-*`), que es el sistema
+ * sobre el que esta escrita la interfaz, y los del tema derivado, que todavia usan unas cuantas
+ * hojas de estilo y el paquete de exportacion. Salen del mismo sitio, asi que no pueden
+ * discrepar; los segundos desapareceran cuando no quede nadie leyendolos.
+ */
+const variables = { ...variablesMaterial(temaClaro), ...toCssVariables(defaultTheme) };
 
 /**
  * Cromo comun a toda la aplicacion: documento, tema y cabecera.

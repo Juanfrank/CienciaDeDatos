@@ -6,6 +6,7 @@ import {
   institutionalContrastChecks,
   parseHex,
 } from './contrast';
+import { ORIGEN_INSTITUCIONAL } from './temaInstitucional';
 import { OVERRIDABLE_TOKENS, defaultTheme, toCssVariables, validateOverrides } from './tokens';
 
 describe('contrastRatio (WCAG 2.1)', () => {
@@ -140,12 +141,26 @@ describe('toCssVariables', () => {
 });
 
 describe('marca institucional del Poder Judicial', () => {
-  it('el azul y el rojo son exactamente los de la norma de marca', () => {
+  it('el azul y el rojo de ORIGEN son exactamente los de la norma de marca', () => {
     // Fijados como prueba y no solo como constante: son un dato de la institucion, no una
     // preferencia de diseno, y un cambio accidental tiene que fallar en CI y no descubrirse en
     // un informe ya impreso.
-    expect(defaultTheme.color.brand[500]).toBe('#0050dd');
-    expect(defaultTheme.color.accent[500]).toBe('#ef3340');
+    //
+    // Lo que se fija es el ORIGEN. Desde que el tema se genera con Material Design 3, los roles
+    // son TONOS derivados de esos dos colores, no los colores mismos: `primary` es el tono 40 de
+    // la paleta del azul. Es lo que compra la garantia de contraste, y es donde estaba el apaño
+    // del tema anterior — ver el bloque del acento, mas abajo.
+    expect(ORIGEN_INSTITUCIONAL.primario).toBe('#0050dd');
+    expect(ORIGEN_INSTITUCIONAL.acento).toBe('#ef3340');
+  });
+
+  it('el azul derivado es el mismo azul a ojo: la marca no se altera, se normaliza', () => {
+    // #0050DD esta en el tono 39.5 de su propia paleta, asi que el tono 40 cae practicamente
+    // encima. La diferencia es de medio tono —imperceptible— y a cambio el par con su `onPrimary`
+    // deja de depender de que alguien lo comprobara.
+    const derivado = defaultTheme.color.brand[500];
+    expect(derivado).not.toBe(ORIGEN_INSTITUCIONAL.primario);
+    expect(contrastRatio(derivado, ORIGEN_INSTITUCIONAL.primario) ?? 0).toBeLessThan(1.1);
   });
 
   it('la tipografia institucional encabeza la pila, con alternativas detras', () => {
@@ -159,7 +174,7 @@ describe('marca institucional del Poder Judicial', () => {
 
   it('las series de datos abren con el azul y siguen con el rojo, como fija la marca', () => {
     expect(defaultTheme.color.categorical[0]).toBe(defaultTheme.color.brand[500]);
-    expect(defaultTheme.color.categorical[1]).toBe(defaultTheme.color.accent[500]);
+    expect(defaultTheme.color.categorical[1]).toBe(defaultTheme.color.accent[300]);
   });
 
   it('el tema institucional completo pasa la puerta de contraste', () => {
@@ -168,33 +183,37 @@ describe('marca institucional del Poder Judicial', () => {
 });
 
 describe('el rojo institucional no puede llevar texto pequeno', () => {
-  it('queda por debajo de 4.5:1 sobre blanco, en los dos sentidos', () => {
-    // Es el hecho que ordena todo el uso del acento. Si algun dia alguien lo pone de fondo de
-    // un badge con texto blanco, esta prueba explica por que no se puede.
-    const sobreBlanco = contrastRatio(defaultTheme.color.accent[500], '#ffffff') ?? 0;
-    expect(sobreBlanco).toBeGreaterThanOrEqual(3); // si vale como elemento grafico
-    expect(sobreBlanco).toBeLessThan(4.5); // y no vale como texto
+  it('EL ROJO DE MARCA sigue sin admitir texto encima: el hecho no ha cambiado', () => {
+    // Es el hecho que ordenaba todo el uso del acento en el tema anterior, y sigue siendo cierto
+    // del color de marca: #EF3340 da 4.02:1 sobre blanco.
+    const sobreBlanco = contrastRatio(ORIGEN_INSTITUCIONAL.acento, '#ffffff') ?? 0;
+    expect(sobreBlanco).toBeGreaterThanOrEqual(3); // vale como elemento grafico
+    expect(sobreBlanco).toBeLessThan(4.5); // y no como texto
   });
 
-  it('el tono 700 es el hermano con el que si se puede escribir', () => {
-    expect(contrastRatio(defaultTheme.color.accent[700], '#ffffff') ?? 0).toBeGreaterThanOrEqual(4.5);
+  it('lo que cambia es QUIEN lo resuelve: antes una nota al pie, ahora el sistema', () => {
+    // El tema anterior elegia a mano `accent[700]` para el texto en rojo y dejaba escrita una
+    // advertencia para quien viniera despues. Ahora el rol derivado ya admite texto encima,
+    // porque su tono se calcula para ello y no se escoge.
+    expect(
+      contrastRatio(defaultTheme.color.textOnBrand, defaultTheme.color.accent[500]) ?? 0,
+    ).toBeGreaterThanOrEqual(4.5);
   });
 
-  it('el color de estado de error NO es el acento, sino el tono que admite texto', () => {
-    // Un badge de error lleva texto blanco encima; con el acento quedaria en 4.02:1.
-    expect(defaultTheme.color.danger).toBe(defaultTheme.color.accent[700]);
+  it('el color de error sale del rol `error`, que es donde MD3 lo pone', () => {
     expect(
       contrastRatio(defaultTheme.color.textOnBrand, defaultTheme.color.danger) ?? 0,
     ).toBeGreaterThanOrEqual(4.5);
   });
 
-  it('usar el acento como fondo de texto pequeno hace fallar la puerta', () => {
-    // La puerta tiene que seguir detectandolo: es el error que la norma de marca previene.
+  it('la puerta sigue detectando el uso incorrecto del color de MARCA', () => {
+    // Poner el rojo de marca de fondo con texto blanco encima sigue siendo el error que la
+    // norma previene, y la puerta tiene que seguir viendolo.
     const fallos = findContrastFailures([
       {
-        label: 'texto blanco sobre el acento',
-        foreground: defaultTheme.color.textOnBrand,
-        background: defaultTheme.color.accent[500],
+        label: 'texto blanco sobre el rojo de marca',
+        foreground: '#ffffff',
+        background: ORIGEN_INSTITUCIONAL.acento,
       },
     ]);
     expect(fallos).toHaveLength(1);
