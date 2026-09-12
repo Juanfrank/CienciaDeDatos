@@ -66,7 +66,6 @@ export function Lienzo({
   const rejilla = useRef<HTMLDivElement>(null);
   const { enCurso, alEmpezar, alMover, alSoltar, alCancelar } = useArrastre({
     items,
-    filas,
     rejilla,
     onSoltar: onColocar,
   });

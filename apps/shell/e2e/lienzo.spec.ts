@@ -108,6 +108,53 @@ test.describe('la rejilla es visible y se maneja', () => {
     expect(bordes).toEqual(['dashed', 'dashed', 'dashed', 'dashed']);
   });
 
+  test('un bloque de N filas cubre EXACTAMENTE N celdas de guia', async ({ page }) => {
+    /*
+     * La insignia decia 6x3 y el bloque cubria tres celdas y media largas.
+     *
+     * No era la insignia: eran las guias. La capa iba absoluta sobre la caja entera con filas
+     * `minmax(56px, 1fr)`, o sea el alto TOTAL repartido en partes iguales; las filas de verdad no
+     * lo son, porque las que llevan contenido alto crecen (`auto`) y las libres se quedan en 56px.
+     * Con tres filas de 118px y dos de 56px salian cinco franjas de 93px y el bloque, que ocupa
+     * tres filas de verdad, cubria 3,69 de ellas.
+     *
+     * Importa porque el lienzo se lee mirando. Si el dibujo y el numero discrepan, gana el dibujo,
+     * y entonces la rejilla deja de servir para lo unico que sirve: ver donde empieza y acaba
+     * cada cosa, y donde cabe la siguiente.
+     *
+     * Se comprueba con las coordenadas, no con los estilos: `subgrid` es el como, y un dia puede
+     * ser otro. Lo que no puede cambiar es que el borde de arriba del bloque caiga en el borde de
+     * arriba de su primera fila y el de abajo en el de la ultima.
+     */
+    await nuevoModulo(page, 'lienzo-filas');
+    // Un grafico: alto de sobra para que las filas que ocupa crezcan por encima del minimo, que es
+    // el caso en el que las dos rejillas se separaban.
+    await page.getByTestId('anadir-barras').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    const medida = await page.getByTestId(`bloque-${id}`).evaluate((el) => {
+      const estilo = getComputedStyle(el);
+      const primera = Number(estilo.gridRowStart) - 1;
+      const alto = Number(estilo.gridRowEnd.replace('span ', ''));
+      const celdas = Array.from(document.querySelectorAll('.lienzo__guia')) as HTMLElement[];
+      const columnas = 12;
+      const caja = el.getBoundingClientRect();
+      const enColumna1 = (fila: number) => celdas[fila * columnas]?.getBoundingClientRect();
+      return {
+        alto,
+        arribaBloque: Math.round(caja.top),
+        abajoBloque: Math.round(caja.bottom),
+        arribaGuia: Math.round(enColumna1(primera)?.top ?? NaN),
+        abajoGuia: Math.round(enColumna1(primera + alto - 1)?.bottom ?? NaN),
+      };
+    });
+
+    expect(medida.alto).toBeGreaterThan(1);
+    expect(medida.arribaBloque).toBe(medida.arribaGuia);
+    expect(medida.abajoBloque).toBe(medida.abajoGuia);
+  });
+
   test('ensanchar y mover cambian la posicion, y el lienzo lo refleja', async ({ page }) => {
     await nuevoModulo(page, 'lienzo-mover');
     await page.getByTestId('anadir-tarjeta-kpi').click();

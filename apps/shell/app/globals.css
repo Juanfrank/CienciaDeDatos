@@ -1468,23 +1468,35 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 }
 
 /*
- * Las guias de columna.
+ * Las guias: las MISMAS pistas de la rejilla, no una copia con otras medidas.
  *
- * Una capa absoluta sobre TODA la caja de la rejilla, con las mismas doce columnas y el mismo
- * `gap`. La primera version usaba `grid-area: 1 / 1 / -1 / -1` con `subgrid`, y solo cubria las
- * filas que ya tenian contenido: en cuanto habia un objeto, las guias quedaban justo debajo de el
- * y no se veia ninguna en el espacio libre — que es exactamente donde hacen falta, porque es
- * donde cabe lo siguiente.
+ * `subgrid` en los dos ejes. No es un detalle de implementacion: es lo unico que hace que lo
+ * dibujado sea cierto.
  *
- * Un degradado de fondo habria sido mas corto y no cuadra: no sabe nada del `gap`.
+ * Hubo dos versiones antes, y las dos mentian de una forma distinta:
+ *
+ * 1. Una capa absoluta con `inset: 0` y filas `minmax(56px, 1fr)`. Reparte el alto TOTAL en filas
+ *    iguales, y las filas de verdad no lo son: las que llevan contenido alto crecen (`auto`) y las
+ *    libres se quedan en el minimo. Con un grafico de tres filas medidas a 118px y dos libres a
+ *    56px, las guias dibujaban cinco franjas de 93px: el bloque decia 3 y cubria 3,69 celdas. La
+ *    insignia y el dibujo discrepaban, y ganaba el dibujo, porque es lo que se mira.
+ * 2. `subgrid` cuando las filas aun eran implicitas (`grid-auto-rows`). Entonces `-1` es el final
+ *    de la rejilla EXPLICITA —que no existia—, asi que las guias solo cubrian lo que ya tenia
+ *    contenido y desaparecian justo donde cabe lo siguiente.
+ *
+ * Ahora la rejilla declara sus filas (`grid-template-rows` en linea, contenido + 2 libres), asi
+ * que `1 / -1` las abarca todas y `subgrid` las hereda tal cual: donde empieza una fila de la
+ * guia empieza la fila de verdad. Un degradado de fondo habria sido mas corto y tampoco sirve:
+ * no sabe nada del `gap` ni de que las filas midan distinto.
  */
 .lienzo__guias {
-  position: absolute;
-  inset: 0;
+  grid-area: 1 / 1 / -1 / -1;
   display: grid;
-  grid-template-columns: repeat(var(--rejilla-columnas), minmax(0, 1fr));
-  grid-template-rows: repeat(var(--rejilla-filas), minmax(56px, 1fr));
-  gap: var(--space-md);
+  grid-template-columns: subgrid;
+  grid-template-rows: subgrid;
+  /* El padre alinea a `start`; sin esto la capa se encogeria a su contenido (vacio). */
+  align-self: stretch;
+  justify-self: stretch;
   pointer-events: none;
   z-index: 0;
 }

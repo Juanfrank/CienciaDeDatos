@@ -26,8 +26,14 @@ El editor pasa a ser **un lienzo con el modulo dibujado** y **un panel lateral c
 - Con **datos reales**, leidos del cache. Vuelven en la MISMA respuesta que el guardado, no en una
   peticion aparte: son el resultado de ese cambio, y pedirlos despues abre una ventana en la que
   lo dibujado no corresponde a lo guardado.
-- **La rejilla se ve**: doce guias de columna, y dos filas libres por debajo del contenido para
-  que se vea donde cabe lo siguiente.
+- **La rejilla se ve**: doce guias por fila, y dos filas libres por debajo del contenido para
+  que se vea donde cabe lo siguiente. Las guias son `subgrid` sobre las pistas de la rejilla de
+  verdad, no una capa con sus propias medidas: las filas son `minmax(56px, auto)` y no miden todas
+  igual, asi que cualquier rejilla paralela —una capa absoluta repartida en partes iguales, un
+  degradado— dibuja unas lineas que no coinciden con ninguna. Paso: un bloque rotulado 6x3 cubria
+  3,69 celdas dibujadas. Cuando el dibujo y el numero discrepan gana el dibujo, porque el lienzo
+  se lee mirando. Por el mismo motivo el arrastre no divide por un alto de celda promedio: busca
+  la linea de rejilla mas cercana entre las pistas resueltas.
 - Un bloque **no es un boton**. La vista previa lleva sus propios controles, y un boton no puede
   contenerlos. El contenido va `inert` y encima hay un boton transparente que solo selecciona.
 
