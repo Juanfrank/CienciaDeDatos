@@ -1,4 +1,4 @@
-import type { FieldRef, QueryRequest } from '@app/data-contracts';
+import type { FieldRef, GranoDeDataset, QueryRequest } from '@app/data-contracts';
 import { dimensionKey } from '@app/access-control';
 import type { SecurityBinding } from './cacheKey';
 import registryFile from '../datasets/registry.json' with { type: 'json' };
@@ -19,6 +19,15 @@ export interface CacheableDataset {
   description: string;
   /** La consulta en su forma mas amplia razonable, sin los filtros de un modulo puntual. */
   query: QueryRequest;
+  /**
+   * El grano al que queda el dataset. Se declara con su motivo, igual que `securityBinding` y por
+   * la misma razon: cambia lo que la aplicacion puede calcular despues sobre el cache, asi que no
+   * puede quedar implicito en la forma de la consulta. Ninguno de los dos valores es «el
+   * correcto»: es un intercambio entre tamaño y que se puede preguntar luego. Lo que no vale es
+   * no haberlo decidido, que es como un promedio acaba sumandose.
+   */
+  grain: GranoDeDataset;
+  grainRationale: string;
   /** Recurrencia por dominio de datos (6.4): minutos o horas segun la frescura que exija. */
   recurrence: string;
   recurrenceRationale: string;
@@ -101,6 +110,22 @@ export function validateRegistry(registry: DatasetRegistry = defaultRegistry): R
 
     if (!d.recurrence?.trim()) {
       problemas.push({ datasetId: d.datasetId, problem: 'Falta recurrence: cada dataset declara la suya (6.4).' });
+    }
+
+    if (d.grain !== 'atomico' && d.grain !== 'preagregado') {
+      problemas.push({
+        datasetId: d.datasetId,
+        problem: `grain invalido: '${String(d.grain)}'. Debe ser 'atomico' o 'preagregado'.`,
+      });
+    }
+
+    if (!d.grainRationale?.trim()) {
+      problemas.push({
+        datasetId: d.datasetId,
+        problem:
+          'Falta grainRationale: el grano decide que se puede calcular despues sobre el cache ' +
+          '(un promedio no se recalcula desde filas ya agrupadas), asi que se declara con su motivo.',
+      });
     }
 
     if (d.consumedByModules.length === 0) {

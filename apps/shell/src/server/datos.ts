@@ -1,8 +1,9 @@
-import type { QueryResult, SchemaDescriptor } from '@app/data-contracts';
+import type { Agregacion, GranoDeDataset, QueryResult, SchemaDescriptor } from '@app/data-contracts';
 import { canTeamAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
 import { SCHEMA_CACHE_KEY, type ReadResult, getDataset } from '@app/caching';
 import {
   type ColumnaDisponible,
+  type DatasetInfo,
   type GridItem,
   type ModuleDefinition,
   type UserPersonalization,
@@ -13,8 +14,10 @@ import {
 } from '@app/module-model';
 import {
   type BindingProblem,
+  agregacionesDe,
   fieldKey,
   ranurasDelContrato,
+  validarAgregacion,
   validarRanuras,
   validateBinding,
 } from '@app/ui-components';
@@ -38,6 +41,15 @@ export interface ObjetoCargado {
   stale?: boolean;
   /** Problemas de mapeo. Si hay alguno, el objeto se dibuja MARCADO COMO ROTO (4.2). */
   problems: BindingProblem[];
+  /**
+   * Con que operador se resume cada medida, alineado con `binding.measures`.
+   *
+   * Se resuelve UNA VEZ aqui y viaja con el objeto. Es lo que hace que el grafico en pantalla, el
+   * complemento de datos y los cuatro formatos de exportacion no puedan dar cifras distintas: si
+   * cada consumidor lo dedujera por su cuenta, bastaria con que uno leyera el esquema un instante
+   * antes de un refresco para que lo exportado y lo mostrado dejaran de coincidir.
+   */
+  agregaciones: Agregacion[];
   unresolvedObject?: string;
 }
 
@@ -86,6 +98,7 @@ async function leerObjetos(
   const objetos: ObjetoCargado[] = [];
   let masAntiguo: string | undefined;
   let degraded = false;
+  const declaradas = await agregacionesDeclaradas();
 
   for (const item of items) {
     const { instance } = item;
@@ -98,6 +111,7 @@ async function leerObjetos(
         item,
         readStatus: 'generating',
         problems: [],
+        agregaciones: [],
         unresolvedObject: error instanceof Error ? error.message : String(error),
       });
       continue;
@@ -121,7 +135,7 @@ async function leerObjetos(
     });
 
     if (lectura.status === 'generating' || !lectura.result) {
-      objetos.push({ item, readStatus: 'generating', problems: [] });
+      objetos.push({ item, readStatus: 'generating', problems: [], agregaciones: [] });
       continue;
     }
 
@@ -135,10 +149,34 @@ async function leerObjetos(
      * el editor avisaba de que faltaba el eje — dos respuestas distintas a la misma pregunta en la
      * misma pantalla.
      */
+    const agregaciones = agregacionesDe(
+      instance.binding.measures,
+      declaradas,
+      instance.binding.agregaciones,
+    );
+
     const problems = [
       ...validateBinding(instance, contrato, columnas),
       ...validarRanuras(instance, ranurasDelContrato(contrato)).map((p) => ({
         slot: `ranura.${p.ranura}`,
+        kind: 'contrato-incumplido' as const,
+        problem: p.problema,
+      })),
+      /*
+       * La agregacion se comprueba AQUI, en el camino de lectura, y no solo al guardar.
+       *
+       * El grano de un dataset se declara en el registro y puede cambiar despues de que un modulo
+       * este publicado: lo que era correcto al guardarse deja de serlo sin que nadie toque el
+       * modulo. Es exactamente el caso de 4.2 —el campo que ya no existe— aplicado al operador en
+       * vez de al campo, y la respuesta es la misma: marcarlo, no dibujar un numero plausible.
+       */
+      ...validarAgregacion({
+        measures: instance.binding.measures,
+        agregaciones,
+        colapsa: colapsaElDataset(instance.binding.datasetId, instance.binding.dimensions),
+        grano: granoDe(instance.binding.datasetId),
+      }).map((p) => ({
+        slot: `agregacion.${p.medida}`,
         kind: 'contrato-incumplido' as const,
         problem: p.problema,
       })),
@@ -156,6 +194,7 @@ async function leerObjetos(
       ...(lectura.generatedAt ? { generatedAt: lectura.generatedAt } : {}),
       ...(lectura.stale ? { stale: true } : {}),
       problems,
+      agregaciones,
     });
   }
 
@@ -236,7 +275,13 @@ export async function diagnosticarModulo(module: ModuleDefinition, userId: strin
     if (lectura.result) columnsByDataset[datasetId] = lectura.result.columns;
   }
 
-  return validateModule({ module, registry: objectRegistry, columnsByDataset });
+  return validateModule({
+    module,
+    registry: objectRegistry,
+    columnsByDataset,
+    datasets: infoDeDatasets(datasets),
+    agregacionesDeclaradas: Object.fromEntries(await agregacionesDeclaradas()),
+  });
 }
 
 /**
@@ -270,7 +315,13 @@ export async function diagnosticarDefinicion(module: ModuleDefinition) {
     columnsByDataset[datasetId] = await columnasDisponiblesDe(datasetId);
   }
 
-  return validateModule({ module, registry: objectRegistry, columnsByDataset });
+  return validateModule({
+    module,
+    registry: objectRegistry,
+    columnsByDataset,
+    datasets: infoDeDatasets(datasets),
+    agregacionesDeclaradas: Object.fromEntries(await agregacionesDeclaradas()),
+  });
 }
 
 /**
@@ -312,6 +363,72 @@ export async function columnasDisponiblesDe(datasetId: string): Promise<ColumnaD
       .filter((medida) => schema.measures.some((m) => m.name === medida))
       .map((name) => ({ name, type: 'number' })),
   ];
+}
+
+/**
+ * Grano y dimensiones de cada dataset, del registro, para que la validacion pueda comprobar la
+ * agregacion. Un dataset fuera del registro se omite: el objeto ya se marca roto por su propia
+ * via, y suponerle un grano solo añadiria un segundo mensaje sobre el mismo fallo.
+ */
+function infoDeDatasets(ids: Iterable<string>): Record<string, DatasetInfo> {
+  const info: Record<string, DatasetInfo> = {};
+  for (const datasetId of ids) {
+    try {
+      const d = getDataset(datasetId);
+      info[datasetId] = {
+        grain: d.grain,
+        dimensions: (d.query.dimensions ?? []).map(fieldKey),
+      };
+    } catch {
+      // Fuera del registro: sin info, la comprobacion de agregacion se abstiene.
+    }
+  }
+  return info;
+}
+
+/**
+ * El grano declarado de un dataset, y si el objeto lo colapsa.
+ *
+ * «Colapsa» es la pregunta que decide si el operador importa: un objeto que muestra las MISMAS
+ * dimensiones que trae el dataset dibuja una fila por fila y no combina nada, asi que cualquier
+ * operador da igual. En cuanto muestra menos, varias filas de origen caen en el mismo punto — y
+ * ahi es donde sumar promedios deja de ser inocuo.
+ *
+ * Se compara por conjunto y no por longitud: un objeto puede mapear tres dimensiones que no sean
+ * las tres del dataset, y entonces colapsa aunque cuente igual.
+ */
+function granoDe(datasetId: string): GranoDeDataset {
+  try {
+    return getDataset(datasetId).grain;
+  } catch {
+    // Dataset fuera del registro: el objeto ya se marca roto por su propia via, y suponer el
+    // grano mas permisivo aqui solo añadiria un segundo mensaje sobre el mismo fallo.
+    return 'atomico';
+  }
+}
+
+function colapsaElDataset(datasetId: string, dimensiones: { table: string; field: string }[]): boolean {
+  let declaradas: string[];
+  try {
+    declaradas = (getDataset(datasetId).query.dimensions ?? []).map(fieldKey);
+  } catch {
+    return false;
+  }
+  const mostradas = new Set(dimensiones.map(fieldKey));
+  return declaradas.some((d) => !mostradas.has(d));
+}
+
+/**
+ * Que operador declara el esquema para cada medida.
+ *
+ * Del cache, nunca preguntando a la fuente: el principio 2 vale tambien aqui, y este mapa se
+ * consulta en cada lectura de modulo. Sin esquema todavia en el cache el mapa sale vacio y cada
+ * medida cae en `suma`, que es el comportamiento de siempre — un despliegue en el que el job aun
+ * no ha corrido no puede dejar todos los objetos en blanco.
+ */
+export async function agregacionesDeclaradas(): Promise<Map<string, Agregacion>> {
+  const schema = await esquemaEnCache();
+  return new Map((schema?.measures ?? []).map((m) => [m.name, m.aggregation]));
 }
 
 const esquemaEnCache = async (): Promise<SchemaDescriptor | null> => {

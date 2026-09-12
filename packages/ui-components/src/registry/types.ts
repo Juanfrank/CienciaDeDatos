@@ -1,4 +1,4 @@
-import type { FieldRef } from '@app/data-contracts';
+import type { Agregacion, FieldRef } from '@app/data-contracts';
 import type { ClaveDePresentacion, PresentacionDeObjeto } from '../presentacion/contrato';
 import type { ConfiguracionDePanelDeFiltros } from '../presentacion/panelDeFiltros';
 import type { AsignacionDeRanuras, RanuraDeCampos } from '../presentacion/pozos';
@@ -183,6 +183,13 @@ export interface ObjectInstance {
      * orden, que es exactamente como se guardo.
      */
     ranuras?: AsignacionDeRanuras;
+    /**
+     * Con que operador se resume cada medida, si quien edita eligio uno distinto del que declara
+     * el esquema. Solo las anuladas: lo no dicho se resuelve contra el esquema en cada lectura,
+     * asi que una medida a la que la fuente le cambie la agregacion la sigue sin tener que tocar
+     * ningun modulo.
+     */
+    agregaciones?: Record<string, Agregacion>;
   };
   /**
    * Objetos adjuntados a este.

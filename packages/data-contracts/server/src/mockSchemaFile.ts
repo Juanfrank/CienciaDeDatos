@@ -19,6 +19,18 @@ export interface MockSchemaField {
   sampleValues?: string[];
   /** Rango [min, max] del que se deriva el valor de una medida. */
   range?: [number, number];
+  /**
+   * Identifica la fila: una consulta que la pida devuelve HECHOS, no grupos.
+   *
+   * Es lo que permite que el conector simulado tenga los dos granos de 6.6 y no solo uno. Antes
+   * solo sabia hacer el producto cartesiano de las dimensiones, o sea siempre pre-agrupado, y esa
+   * era la forma que el repositorio le estaba enseñando a la capa de analisis: una tabla de hechos
+   * sin clave, con el promedio ya calculado dentro. Sobre esa forma un promedio no se puede
+   * recalcular, y la aplicacion lo sumaba.
+   */
+  isKey?: boolean;
+  /** Cuantos hechos genera la clave. Solo tiene sentido junto a `isKey`. */
+  cardinality?: number;
 }
 
 export interface MockSchemaTable {
@@ -36,7 +48,12 @@ export function toSchemaDescriptor(file: MockSchemaFile, fetchedAt: string): Sch
   return {
     tables: file.tables.map((t) => ({
       name: t.name,
-      fields: t.fields.map((f) => ({ name: f.name, type: f.type, isMeasure: f.isMeasure })),
+      fields: t.fields.map((f) => ({
+        name: f.name,
+        type: f.type,
+        isMeasure: f.isMeasure,
+        ...(f.isKey ? { isKey: true } : {}),
+      })),
     })),
     measures: file.measures.map((m) => ({ ...m })),
     fetchedAt,

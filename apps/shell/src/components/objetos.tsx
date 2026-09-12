@@ -1,9 +1,10 @@
-import type { QueryResult } from '@app/data-contracts';
+import type { Agregacion, QueryResult } from '@app/data-contracts';
 import {
   type BindingProblem,
   type NombreDeIcono,
   type RanuraDeCampos,
   aFieldRef,
+  agregacionesPara,
   campoDeRanura,
   fieldKey,
   ranurasDe,
@@ -35,7 +36,9 @@ import { Icono } from './iconos/Icono';
  * que la tarjeta, la etiqueta del grafico, la tabla y el archivo exportado no puedan divergir.
  * Este se queda para los rotulos que no pertenecen a ninguna instancia.
  */
-const formatearNumero = (n: number): string => new Intl.NumberFormat('es-DO').format(Math.round(n));
+/** Numero para pantalla. `null` es «no hay respuesta» y se dibuja como raya, no como cero. */
+const formatearNumero = (n: number | null): string =>
+  n === null ? '—' : new Intl.NumberFormat('es-DO').format(Math.round(n));
 
 /**
  * Los campos de un objeto, LEIDOS POR RANURA.
@@ -138,6 +141,7 @@ export function Marco({
   accion,
   instance,
   result,
+  agregaciones,
 }: {
   titulo: string;
   children: React.ReactNode;
@@ -146,6 +150,8 @@ export function Marco({
   accion?: React.ReactNode;
   instance?: ObjectInstance;
   result?: QueryResult;
+  /** Para los complementos: la tabla de datos proyecta con los mismos operadores que el objeto. */
+  agregaciones?: Agregacion[];
 }) {
   /*
    * La presentacion se dibuja AQUI, en el marco comun, y no en cada objeto.
@@ -182,7 +188,12 @@ export function Marco({
           ) : null}
         </div>
         {instance && result ? (
-          <Complementos instance={instance} result={result} titulo={titulo} />
+          <Complementos
+            instance={instance}
+            result={result}
+            titulo={titulo}
+            agregaciones={agregaciones ?? []}
+          />
         ) : null}
         {accion}
       </div>
@@ -192,19 +203,24 @@ export function Marco({
   );
 }
 
-export function TarjetaKpi({ titulo, result, instance, ranuras }: ObjetoProps) {
+export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones }: ObjetoProps) {
   const r = porRanura(instance, ranuras);
   // El valor y la comparacion, en ese orden, salen de sus ranuras: con dos medidas mapeadas al
   // reves la tarjeta mostraba la comparacion como cifra principal.
   const medidas = r
     ? [r.uno('valor'), r.uno('comparacion')].filter((m): m is string => m !== undefined)
     : instance.binding.measures;
-  const kpi = toKpi(result, medidas, titulo);
+  const kpi = toKpi(
+    result,
+    medidas,
+    titulo,
+    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+  );
   const delta = kpi.delta;
   const formatear = formateadorDe(instance.presentacion?.formato);
 
   return (
-    <Marco titulo={titulo} instance={instance} result={result}>
+    <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
       <p className="kpi__valor" data-testid="kpi-valor">
         {formatear(kpi.value)}
       </p>
@@ -219,7 +235,7 @@ export function TarjetaKpi({ titulo, result, instance, ranuras }: ObjetoProps) {
   );
 }
 
-export function Barras({ titulo, result, instance, onFiltrar, ranuras }: ObjetoProps) {
+export function Barras({ titulo, result, instance, onFiltrar, ranuras, agregaciones }: ObjetoProps) {
   /*
    * El eje X sale de SU ranura, no de la primera dimension.
    *
@@ -233,8 +249,18 @@ export function Barras({ titulo, result, instance, onFiltrar, ranuras }: ObjetoP
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
 
   const dimensiones = [ejeX, serie].filter((c): c is string => c !== undefined).map(aFieldRef);
-  const vm = toCategorical(result, dimensiones, medidas);
-  const maximo = Math.max(1, ...vm.points.flatMap((p) => p.values));
+  const vm = toCategorical(
+    result,
+    dimensiones,
+    medidas,
+    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+  );
+  // Los huecos no entran en el maximo: `Math.max` con un null lo convierte en 0, y con todos los
+  // valores en hueco daria 0 y todas las barras a escala completa.
+  const maximo = Math.max(
+    1,
+    ...vm.points.flatMap((p) => p.values.filter((v): v is number => v !== null)),
+  );
   const dimension = ejeX ? aFieldRef(ejeX) : undefined;
 
   return (
@@ -285,16 +311,21 @@ export function Barras({ titulo, result, instance, onFiltrar, ranuras }: ObjetoP
   );
 }
 
-export function Lineas({ titulo, result, instance, ranuras }: ObjetoProps) {
+export function Lineas({ titulo, result, instance, ranuras, agregaciones }: ObjetoProps) {
   const r = porRanura(instance, ranuras);
   const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
 
   const dimension = ejeX ? aFieldRef(ejeX) : undefined;
-  const vm = toCategorical(result, dimension ? [dimension] : [], medidas);
+  const vm = toCategorical(
+    result,
+    dimension ? [dimension] : [],
+    medidas,
+    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+  );
 
   return (
-    <Marco titulo={titulo} instance={instance} result={result}>
+    <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
       <Grafico
         instanceId={instance.instanceId}
         tipo="lineas"
@@ -327,7 +358,7 @@ export function Lineas({ titulo, result, instance, ranuras }: ObjetoProps) {
                   <th scope="row">{punto.label}</th>
                   {vm.series.map((serie, s) => (
                     <td key={serie} className="es-numero">
-                      {formatearNumero(punto.values[s] ?? 0)}
+                      {formatearNumero(punto.values[s] ?? null)}
                     </td>
                   ))}
                 </tr>
@@ -340,17 +371,17 @@ export function Lineas({ titulo, result, instance, ranuras }: ObjetoProps) {
   );
 }
 
-export function Tabla({ titulo, result, instance }: ObjetoProps) {
+export function Tabla({ titulo, result, instance, agregaciones }: ObjetoProps) {
   // La tabla dibuja SU proyeccion, no el dataset en crudo.
   //
   // Antes pintaba todas las columnas del dataset, incluidas las que su mapeo no declara, y las
   // filas sin agregar: un mapeo de dos dimensiones sobre un dataset con tres mostraba la tercera
   // y repetia cada combinacion. Es la misma funcion que usan la exportacion y el complemento de
   // tabla de datos, asi que lo que se ve y lo que se exporta no pueden separarse.
-  const proyectado = proyectarObjeto(instance, result);
+  const proyectado = proyectarObjeto(instance, result, agregaciones);
 
   return (
-    <Marco titulo={titulo} instance={instance} result={result}>
+    <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
       <div className="tabla-contenedor" tabIndex={0} role="region" aria-label={titulo}>
         <table className="tabla" data-testid="tabla">
           <thead>
@@ -379,7 +410,7 @@ export function Tabla({ titulo, result, instance }: ObjetoProps) {
   );
 }
 
-export function Matriz({ titulo, result, instance, ranuras }: ObjetoProps) {
+export function Matriz({ titulo, result, instance, ranuras, agregaciones }: ObjetoProps) {
   const r = porRanura(instance, ranuras);
   const filas = r ? r.uno('filas') : fieldKeyDe(instance.binding.dimensions[0]);
   const columnas = r ? r.uno('columnas') : fieldKeyDe(instance.binding.dimensions[1]);
@@ -389,10 +420,15 @@ export function Matriz({ titulo, result, instance, ranuras }: ObjetoProps) {
   const dimensiones = [filas, columnas]
     .filter((c): c is string => c !== undefined)
     .map(aFieldRef);
-  const vm = toMatrix(result, dimensiones, medida);
+  const vm = toMatrix(
+    result,
+    dimensiones,
+    medida,
+    agregacionesPara([medida], instance.binding.measures, agregaciones)[0] ?? 'suma',
+  );
 
   return (
-    <Marco titulo={titulo} instance={instance} result={result}>
+    <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
       <div className="tabla-contenedor" tabIndex={0} role="region" aria-label={titulo}>
         <table className="tabla" data-testid="matriz">
           <thead>
@@ -415,7 +451,7 @@ export function Matriz({ titulo, result, instance, ranuras }: ObjetoProps) {
                     {celda === null ? '—' : formatearNumero(celda)}
                   </td>
                 ))}
-                <td className="es-numero es-total">{formatearNumero(vm.rowTotals[i] ?? 0)}</td>
+                <td className="es-numero es-total">{formatearNumero(vm.rowTotals[i] ?? null)}</td>
               </tr>
             ))}
             <tr>
@@ -438,6 +474,13 @@ export interface ObjetoProps {
   titulo: string;
   result: QueryResult;
   instance: ObjectInstance;
+  /**
+   * Con que operador se resume cada medida, alineado con `instance.binding.measures`.
+   *
+   * Llega resuelto del servidor, que es quien tiene el esquema. Los objetos consumen sus medidas
+   * por ranura y no por orden, asi que aqui se reordena con `agregacionesPara` en vez de indexar.
+   */
+  agregaciones: Agregacion[];
   /**
    * Las ranuras que declara la version del objeto.
    *

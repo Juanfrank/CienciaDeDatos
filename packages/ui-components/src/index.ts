@@ -68,6 +68,18 @@ export {
   esNombreDeIcono,
   type NombreDeIcono,
 } from './presentacion/iconos';
+export {
+  AGREGACION_POR_DEFECTO,
+  ETIQUETA_DE_AGREGACION,
+  acumular,
+  agregacionesDe,
+  agregacionesPara,
+  cerrar,
+  nuevoAcumulador,
+  validarAgregacion,
+  type Acumulador,
+  type ProblemaDeAgregacion,
+} from './registry/agregacion';
 export { desgloseDe, proyectarObjeto } from './registry/proyeccion';
 export {
   classifyBump,

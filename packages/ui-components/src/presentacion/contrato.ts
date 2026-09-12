@@ -164,7 +164,14 @@ export function validarPresentacion(
  * `Intl.NumberFormat` con sus propias opciones, asi que cambiar el formato en un sitio dejaba los
  * otros tres como estaban.
  */
-export function formateadorDe(formato: FormatoNumerico | undefined): (n: number) => string {
+/**
+ * @returns un formateador que acepta `null` y lo dibuja como raya.
+ *
+ * `null` no es cero: es «no hay respuesta», que es lo que devuelve una medida ya calculada por la
+ * fuente cuando el objeto la colapsa. Formatearla como 0 volveria a poner en pantalla un numero
+ * que nadie calculo. La raya es el mismo signo que la matriz usa para una celda sin filas.
+ */
+export function formateadorDe(formato: FormatoNumerico | undefined): (n: number | null) => string {
   /*
    * En compacto, un decimal por defecto.
    *
@@ -181,5 +188,5 @@ export function formateadorDe(formato: FormatoNumerico | undefined): (n: number)
     ...(compacto ? { notation: 'compact' as const, compactDisplay: 'short' as const } : {}),
   });
   const unidad = formato?.unidad ? ` ${formato.unidad}` : '';
-  return (n: number) => `${intl.format(n)}${unidad}`;
+  return (n: number | null) => (n === null ? '—' : `${intl.format(n)}${unidad}`);
 }

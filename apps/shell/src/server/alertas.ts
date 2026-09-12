@@ -10,7 +10,7 @@ import {
   type Subscription,
 } from '@app/alerts';
 import { POPULATOR_HEARTBEAT_KEY, type PopulatorHeartbeat } from '@app/observability';
-import { aggregateBy } from '@app/ui-components';
+import { aggregateBy, agregacionesPara } from '@app/ui-components';
 import { cacheL2 } from './contexto';
 import { cargarModulo } from './datos';
 import { colaExportaciones, encolarExportacion } from './exportaciones';
@@ -59,16 +59,27 @@ export async function observacionesDe(rule: AlertRule): Promise<Observacion[] | 
   const objeto = cargado.objetos.find((o) => o.item.instance.instanceId === rule.instanceId);
   if (!objeto?.result || objeto.problems.length > 0) return null;
 
-  const { dimensions } = objeto.item.instance.binding;
+  const { dimensions, measures } = objeto.item.instance.binding;
   // Se agrega por las dimensiones del objeto y por la medida vigilada: la regla se definio
-  // sobre las categorias que el objeto MUESTRA, no sobre las filas del dataset.
-  const { rows } = aggregateBy(objeto.result, dimensions, [rule.measure]);
+  // sobre las categorias que el objeto MUESTRA, no sobre las filas del dataset. Y con el MISMO
+  // operador con que el objeto la dibuja: una alerta que sumara lo que la pantalla promedia
+  // dispararia por un umbral que nadie ve.
+  const { rows } = aggregateBy(
+    objeto.result,
+    dimensions,
+    [rule.measure],
+    agregacionesPara([rule.measure], measures, objeto.agregaciones),
+  );
 
-  return rows.map((f) => ({
-    // Un objeto sin dimensiones (una tarjeta KPI) da una sola observacion: su total.
-    label: f.labels.join(' / ') || 'total',
-    value: f.values[0] ?? 0,
-  }));
+  return rows
+    // Una observacion sin respuesta no se compara contra el umbral: no es un cero, es que no hay
+    // cifra. Evaluarla como cero dispararia toda regla de "por debajo de".
+    .filter((f) => f.values[0] !== null && f.values[0] !== undefined)
+    .map((f) => ({
+      // Un objeto sin dimensiones (una tarjeta KPI) da una sola observacion: su total.
+      label: f.labels.join(' / ') || 'total',
+      value: f.values[0] as number,
+    }));
 }
 
 export interface ResultadoDeEvaluacion {

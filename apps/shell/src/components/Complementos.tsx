@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import type { QueryResult } from '@app/data-contracts';
+import type { Agregacion, QueryResult } from '@app/data-contracts';
 import { Icono } from './iconos/Icono';
 import {
   aggregateBy,
@@ -90,11 +90,13 @@ export function TablaDeDatos({
   result,
   titulo,
   scope,
+  agregaciones,
 }: {
   instance: ObjectInstance;
   result: QueryResult;
   titulo: string;
   scope: 'objeto' | 'subobjeto';
+  agregaciones: Agregacion[];
 }) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [abierto, setAbierto] = useState(false);
@@ -115,14 +117,14 @@ export function TablaDeDatos({
   const dimensiones = instance.binding.dimensions;
   const categorias =
     scope === 'subobjeto'
-      ? aggregateBy(result, dimensiones, instance.binding.measures).rows
+      ? aggregateBy(result, dimensiones, instance.binding.measures, agregaciones).rows
       : [];
 
   // Con alcance de objeto se muestran las filas de ORIGEN, sin agregar: lo interesante del
   // emergente es precisamente lo que el objeto no ensena. Con alcance de subobjeto, lo mismo
   // pero acotado a la categoria elegida.
   const filas = seleccion ? desgloseDe(result, seleccion) : result;
-  const proyeccion = proyectarObjeto(instance, result);
+  const proyeccion = proyectarObjeto(instance, result, agregaciones);
 
   const etiquetaSeleccion = seleccion ? Object.values(seleccion).join(' / ') : null;
 
@@ -258,10 +260,12 @@ export function Complementos({
   instance,
   result,
   titulo,
+  agregaciones,
 }: {
   instance: ObjectInstance;
   result: QueryResult;
   titulo: string;
+  agregaciones: Agregacion[];
 }) {
   const tooltip = attachmentOf(instance, 'tooltip-explicativo');
   const tabla = attachmentOf(instance, 'tabla-de-datos');
@@ -272,7 +276,13 @@ export function Complementos({
     <span className="complementos">
       {tooltip ? <TooltipExplicativo texto={tooltip.text} titulo={titulo} /> : null}
       {tabla ? (
-        <TablaDeDatos instance={instance} result={result} titulo={titulo} scope={tabla.scope} />
+        <TablaDeDatos
+          instance={instance}
+          result={result}
+          titulo={titulo}
+          scope={tabla.scope}
+          agregaciones={agregaciones}
+        />
       ) : null}
     </span>
   );

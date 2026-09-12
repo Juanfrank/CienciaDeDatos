@@ -3,24 +3,47 @@
   "datasets": [
     {
       "datasetId": "casos-por-distrito-trimestre",
-      "description": "Carga de casos por distrito y trimestre, en su forma mas amplia razonable, sin los filtros especificos de ningun modulo.",
+      "description": "Carga de casos por distrito, materia y trimestre, en su forma mas amplia razonable, sin los filtros especificos de ningun modulo.",
       "query": {
-        "measures": ["CasosIngresados", "CasosResueltos", "CasosPendientes", "DiasPromedioResolucion"],
+        "measures": [
+          "CasosIngresados",
+          "CasosResueltos",
+          "CasosPendientes"
+        ],
         "dimensions": [
-          { "table": "DimTribunal", "field": "Distrito" },
-          { "table": "DimTribunal", "field": "Materia" },
-          { "table": "DimTiempo", "field": "Trimestre" }
+          {
+            "table": "DimTribunal",
+            "field": "Distrito"
+          },
+          {
+            "table": "DimTribunal",
+            "field": "Materia"
+          },
+          {
+            "table": "DimTiempo",
+            "field": "Trimestre"
+          }
         ]
       },
+      "grain": "preagregado",
+      "grainRationale": "La consulta agrupa: una fila por combinacion de distrito, materia y trimestre. Se elige asi porque las tres medidas que trae son aditivas y a este grano el dataset ocupa decenas de filas en vez de la tabla de hechos entera. El precio esta declarado: desde aqui NO se puede recalcular un promedio ni un recuento distinto, y por eso los dias de resolucion viven en casos-detalle y no aqui.",
       "recurrence": "0 */4 * * *",
       "recurrenceRationale": "Carga por lotes de la capa de analisis: horas, no minutos.",
       "securityBinding": "none",
       "securityBindingRationale": "El conector activo (mock/sql) no aplica RLS nativo, asi que se cachea el superconjunto y el ambito se aplica al momento de la lectura. Un solo dataset sirve a todos los equipos.",
       "scopeDimensions": [
-        { "table": "DimTribunal", "field": "Distrito" },
-        { "table": "DimTribunal", "field": "Materia" }
+        {
+          "table": "DimTribunal",
+          "field": "Distrito"
+        },
+        {
+          "table": "DimTribunal",
+          "field": "Materia"
+        }
       ],
-      "consumedByModules": ["casos-pendientes"],
+      "consumedByModules": [
+        "casos-pendientes"
+      ],
       "owner": "equipo-analitica",
       "registeredAt": "2026-09-11"
     },
@@ -28,21 +51,91 @@
       "datasetId": "audiencias-por-tribunal",
       "description": "Audiencias por tribunal y tipo de caso.",
       "query": {
-        "measures": ["CasosIngresados", "CasosResueltos"],
+        "measures": [
+          "CasosIngresados",
+          "CasosResueltos"
+        ],
         "dimensions": [
-          { "table": "DimTribunal", "field": "Distrito" },
-          { "table": "DimTribunal", "field": "Nombre" },
-          { "table": "DimTipoCaso", "field": "Nombre" }
+          {
+            "table": "DimTribunal",
+            "field": "Distrito"
+          },
+          {
+            "table": "DimTribunal",
+            "field": "Nombre"
+          },
+          {
+            "table": "DimTipoCaso",
+            "field": "Nombre"
+          }
         ]
       },
+      "grain": "preagregado",
+      "grainRationale": "Mismo criterio que el dataset anterior: agrupado, y solo con medidas aditivas.",
       "recurrence": "*/15 * * * *",
       "recurrenceRationale": "Indicador casi en tiempo real: minutos.",
       "securityBinding": "none",
       "securityBindingRationale": "Mismo criterio que el dataset anterior. Se revisa si la capa de analisis entrega un modelo semantico con RLS nativo.",
-      "scopeDimensions": [{ "table": "DimTribunal", "field": "Distrito" }],
-      "consumedByModules": ["casos-pendientes", "audiencias"],
+      "scopeDimensions": [
+        {
+          "table": "DimTribunal",
+          "field": "Distrito"
+        }
+      ],
+      "consumedByModules": [
+        "casos-pendientes",
+        "audiencias"
+      ],
       "owner": "equipo-analitica",
       "registeredAt": "2026-09-11"
+    },
+    {
+      "datasetId": "casos-detalle",
+      "description": "Un caso por fila, con su distrito, su materia, su trimestre y sus dias de resolucion.",
+      "query": {
+        "measures": [
+          "DiasResolucion"
+        ],
+        "dimensions": [
+          {
+            "table": "FactCasos",
+            "field": "CasoId"
+          },
+          {
+            "table": "DimTribunal",
+            "field": "Distrito"
+          },
+          {
+            "table": "DimTribunal",
+            "field": "Materia"
+          },
+          {
+            "table": "DimTiempo",
+            "field": "Trimestre"
+          }
+        ]
+      },
+      "grain": "atomico",
+      "grainRationale": "La consulta trae la clave del hecho (FactCasos.CasoId), asi que cada fila es un caso y no un grupo. Es lo que hace que DiasResolucion se pueda promediar a cualquier grano, con cualquier filtro y despues del recorte del ambito —que quita filas DESPUES del cache—. Sobre un dataset agrupado ese promedio no se podria recalcular: habria que guardar los componentes (dias totales y casos) y dividir al leer. Se paga en tamaño: este dataset pesa lo que pese la tabla de hechos, y por eso no se le añaden las medidas que ya sirve el dataset agrupado.",
+      "recurrence": "0 */4 * * *",
+      "recurrenceRationale": "Carga por lotes de la capa de analisis: horas, no minutos. La misma que su dataset agrupado hermano.",
+      "securityBinding": "none",
+      "securityBindingRationale": "El conector activo no aplica RLS nativo, asi que se cachea el superconjunto y el ambito se aplica al leer. El grano atomico refuerza esta eleccion: al quitar filas de casos, cualquier medida se recalcula bien sobre las que quedan.",
+      "scopeDimensions": [
+        {
+          "table": "DimTribunal",
+          "field": "Distrito"
+        },
+        {
+          "table": "DimTribunal",
+          "field": "Materia"
+        }
+      ],
+      "consumedByModules": [
+        "casos-pendientes"
+      ],
+      "owner": "equipo-analitica",
+      "registeredAt": "2026-09-12"
     }
   ]
 }

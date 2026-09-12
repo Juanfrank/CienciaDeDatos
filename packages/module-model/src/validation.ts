@@ -1,7 +1,12 @@
+import type { Agregacion, GranoDeDataset } from '@app/data-contracts';
 import {
   type BindingProblem,
+  type ObjectInstance,
   type ObjectRegistry,
+  agregacionesDe,
+  fieldKey,
   ranurasDelContrato,
+  validarAgregacion,
   validarPanelDeFiltros,
   validarPresentacion,
   validarRanuras,
@@ -60,6 +65,19 @@ export const TIPO_DESCONOCIDO = 'desconocido';
 export const normalizarColumna = (c: ColumnaDisponible | string): ColumnaDisponible =>
   typeof c === 'string' ? { name: c, type: TIPO_DESCONOCIDO } : c;
 
+/**
+ * Lo que hay que saber de un dataset, ademas de sus columnas, para validar la agregacion.
+ *
+ * Es lo que el registro declara (6.6) y no se deduce de las columnas: un dataset de tres columnas
+ * de dimension puede ser el detalle de la tabla de hechos o el resultado de agrupar por esas tres,
+ * y son cosas distintas — sobre el primero un promedio se calcula, sobre el segundo no.
+ */
+export interface DatasetInfo {
+  grain: GranoDeDataset;
+  /** Las dimensiones que el dataset trae, en clave `Tabla.Campo`. */
+  dimensions: string[];
+}
+
 export interface ValidateModuleInput {
   module: ModuleDefinition;
   registry: ObjectRegistry;
@@ -68,6 +86,46 @@ export interface ValidateModuleInput {
    * Se pasan como dato y no se consultan aqui: la validacion es una funcion pura.
    */
   columnsByDataset: Record<string, (ColumnaDisponible | string)[]>;
+  /**
+   * Grano y dimensiones de cada dataset, del registro.
+   *
+   * Opcional: sin esta informacion la comprobacion de agregacion SE ABSTIENE, en vez de suponer
+   * un grano. Es el mismo criterio que el tipo `desconocido` de las columnas — inventarse el dato
+   * que falta hace que la validacion rechace configuraciones correctas.
+   */
+  datasets?: Record<string, DatasetInfo>;
+  /** Que operador declara el esquema para cada medida. Sin el, cada medida cae en `suma`. */
+  agregacionesDeclaradas?: Record<string, Agregacion>;
+}
+
+function problemasDeAgregacion(
+  instance: ObjectInstance,
+  input: ValidateModuleInput,
+): BindingProblem[] {
+  const info = input.datasets?.[instance.binding.datasetId];
+  if (!info) return [];
+
+  const declaradas = new Map(Object.entries(input.agregacionesDeclaradas ?? {}));
+  const agregaciones = agregacionesDe(
+    instance.binding.measures,
+    declaradas,
+    instance.binding.agregaciones,
+  );
+  // Colapsa si el objeto muestra menos dimensiones de las que el dataset trae. Se compara por
+  // conjunto y no por cantidad: tres dimensiones que no sean las tres del dataset tambien colapsan.
+  const mostradas = new Set(instance.binding.dimensions.map(fieldKey));
+  const colapsa = info.dimensions.some((d) => !mostradas.has(d));
+
+  return validarAgregacion({
+    measures: instance.binding.measures,
+    agregaciones,
+    colapsa,
+    grano: info.grain,
+  }).map((p) => ({
+    slot: `agregacion.${p.medida}`,
+    kind: 'contrato-incumplido' as const,
+    problem: p.problema,
+  }));
 }
 
 export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
@@ -162,6 +220,16 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
               problem: p.problema,
             }))
           : []),
+        /*
+         * Y como se resume cada medida.
+         *
+         * Es lo que impide guardar el numero falso. Antes la agregacion no existia como concepto:
+         * la capa de presentacion sumaba siempre, asi que mapear una columna de promedios en una
+         * tarjeta daba la suma de los promedios sin que nada lo notara. Con el operador declarado
+         * y el grano del dataset declarado, la combinacion imposible se puede rechazar AQUI, antes
+         * de guardar, que es donde 4.2 quiere que se vea.
+         */
+        ...problemasDeAgregacion(instance, input),
       ];
       diagnostico.broken = diagnostico.bindingProblems.length > 0;
       items.push(diagnostico);

@@ -53,6 +53,7 @@ export {
   normalizarColumna,
   validateModule,
   type ColumnaDisponible,
+  type DatasetInfo,
   type ItemDiagnostic,
   type ModuleDiagnostics,
   type PublishBlocker,

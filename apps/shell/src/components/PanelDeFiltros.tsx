@@ -3,7 +3,6 @@
 import { useId, useMemo, useState } from "react";
 import type { QueryResult } from "@app/data-contracts";
 import {
-  fieldKey,
   selectoresEfectivos,
   toSlicerOptions,
   type ObjectInstance,

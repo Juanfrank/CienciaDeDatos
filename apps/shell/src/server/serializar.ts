@@ -1,4 +1,4 @@
-import type { QueryResult } from '@app/data-contracts';
+import type { Agregacion, QueryResult } from '@app/data-contracts';
 import type { GridPosition } from '@app/module-model';
 import type { BindingProblem, ObjectInstance, RanuraDeCampos } from '@app/ui-components';
 import { objectRegistry } from './contexto';
@@ -25,6 +25,14 @@ export interface ObjetoSerializado {
    * volverian a leer por posicion — que es justo lo que este cambio quita.
    */
   ranuras?: RanuraDeCampos[];
+  /**
+   * Con que operador se resume cada medida, alineado con `instance.binding.measures`.
+   *
+   * Resuelto en el servidor contra el esquema del cache, igual que las ranuras: el cliente no
+   * tiene el esquema y no puede deducirlo. Que viaje UNA lista es lo que impide que el grafico en
+   * pantalla y el archivo exportado resuman con operadores distintos.
+   */
+  agregaciones: Agregacion[];
   unresolvedObject?: string;
   generatedAt?: string;
   stale?: boolean;
@@ -40,6 +48,7 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
     ...(objeto.result ? { result: objeto.result } : {}),
     ...(ranurasDelObjeto(item.instance) ? { ranuras: ranurasDelObjeto(item.instance) } : {}),
     problems: objeto.problems,
+    agregaciones: objeto.agregaciones,
     ...(objeto.unresolvedObject ? { unresolvedObject: objeto.unresolvedObject } : {}),
     ...(objeto.generatedAt ? { generatedAt: objeto.generatedAt } : {}),
     ...(objeto.stale ? { stale: true } : {}),

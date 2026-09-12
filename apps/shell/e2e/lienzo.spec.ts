@@ -59,10 +59,22 @@ test.describe('se edita el modulo, no un formulario', () => {
     await page.getByTestId(`pozo-${id}-valor-quitar-CasosIngresados`).click();
     await guardado(page);
     await page.getByTestId(`pozo-${id}-valor-anadir`).click();
-    await page.getByTestId(`pozo-${id}-valor-opcion-DiasPromedioResolucion`).click();
+    await page.getByTestId(`pozo-${id}-valor-opcion-CasosResueltos`).click();
     await guardado(page);
 
+    /*
+     * Antes esto comprobaba SOLO que la cifra cambiara, y con eso no basta.
+     *
+     * La medida que usaba era `DiasPromedioResolucion`, y la tarjeta mostraba su suma: 10 593
+     * dias donde el promedio real eran 165,5. La cifra cambiaba, asi que la prueba pasaba — un
+     * valor inventado la satisface igual de bien que uno correcto. Que el numero sea el que toca
+     * lo fijan ahora las pruebas de agregacion, con cifras exactas; aqui se comprueba lo que esta
+     * prueba si mira —que redibuja sin recargar— y, al menos, que lo dibujado es una cifra real y
+     * no un cero ni un hueco.
+     */
     await expect(valor).not.toHaveText(antes);
+    await expect(valor).not.toHaveText('0');
+    await expect(valor).not.toHaveText('—');
   });
 
   test('un objeto roto se marca EN EL LIENZO y el resto se sigue editando', async ({ page }) => {
@@ -532,10 +544,9 @@ test.describe('arrastrar y redimensionar', () => {
     await guardado(page);
 
     // El primero esta en 1–6 y el segundo en 7–12, en la misma fila.
-    const primero = (await page
-      .locator('[data-testid^="bloque-obj-"]')
-      .first()
-      .getAttribute('data-testid'))!.replace('bloque-', '');
+    const primero = (
+      (await page.locator('[data-testid^="bloque-obj-"]').first().getAttribute('data-testid')) ?? ''
+    ).replace('bloque-', '');
 
     await page.getByTestId(`elegir-${primero}`).click();
     await page.getByTestId('pestana-formato').click();
@@ -635,5 +646,104 @@ test.describe('las ranuras mandan, no el orden', () => {
     await expect(page.getByTestId('kpi-valor').first()).not.toHaveText('0');
     await expect(page.getByTestId('objeto-roto')).toHaveCount(0);
     await expect(page.getByTestId('grafico-barras-flujo')).toHaveAttribute('data-montado', 'si');
+  });
+});
+
+test.describe('como se resume cada medida', () => {
+  test('el chiclet trae el operador que DECLARA el esquema, no siempre suma', async ({ page }) => {
+    /*
+     * El fallo tenia un numero: una tarjeta con los dias de resolucion mostraba 10 593 dias —la
+     * suma de los promedios— donde el promedio real eran 165,5. La capa de presentacion sumaba
+     * siempre porque sumar era lo unico que sabia hacer.
+     */
+    await nuevoModulo(page, 'agr-declarada');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    // La medida que trae por defecto es aditiva, y el esquema la declara suma.
+    await expect(page.getByTestId(`pozo-${id}-valor-agregacion-CasosIngresados`)).toHaveValue(
+      'suma',
+    );
+
+    // La de dias se declara promedio en el esquema: el desplegable parte de ahi, sin tocarlo.
+    await page.getByTestId(`dataset-${id}`).selectOption('casos-detalle');
+    await guardado(page);
+    await page.getByTestId(`pozo-${id}-valor-anadir`).click();
+    await page.getByTestId(`pozo-${id}-valor-opcion-DiasResolucion`).click();
+    await guardado(page);
+
+    await expect(page.getByTestId(`pozo-${id}-valor-agregacion-DiasResolucion`)).toHaveValue(
+      'promedio',
+    );
+  });
+
+  test('cambiar el operador cambia la cifra dibujada, en vivo', async ({ page }) => {
+    await nuevoModulo(page, 'agr-cambia');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    await page.getByTestId(`dataset-${id}`).selectOption('casos-detalle');
+    await guardado(page);
+    await page.getByTestId(`pozo-${id}-valor-anadir`).click();
+    await page.getByTestId(`pozo-${id}-valor-opcion-DiasResolucion`).click();
+    await guardado(page);
+
+    const valor = page.getByTestId(`bloque-${id}`).getByTestId('kpi-valor');
+    const promediado = await valor.innerText();
+
+    await page.getByTestId(`pozo-${id}-valor-agregacion-DiasResolucion`).selectOption('suma');
+    await guardado(page);
+    const sumado = await valor.innerText();
+
+    // No es cosmetico: el mismo mapeo con otro operador es otra cifra. La suma de 1 200 casos es
+    // ordenes de magnitud mayor que su promedio.
+    expect(sumado).not.toBe(promediado);
+    expect(Number(sumado.replace(/[^0-9]/g, ''))).toBeGreaterThan(
+      Number(promediado.replace(/[^0-9]/g, '')),
+    );
+  });
+
+  test('un promedio sobre un dataset YA agrupado se marca roto, no se dibuja', async ({ page }) => {
+    /*
+     * La comprobacion que hace que el numero falso deje de ser alcanzable desde el editor. Sobre
+     * filas ya agrupadas un promedio de promedios solo coincide con el real si todos los grupos
+     * pesan igual — y no hay forma de saber si pesan igual desde el resultado.
+     */
+    await nuevoModulo(page, 'agr-imposible');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    // El dataset por defecto viene agrupado. Pedir un promedio sobre el es lo que se rechaza.
+    await page.getByTestId(`pozo-${id}-valor-agregacion-CasosIngresados`).selectOption('promedio');
+    await guardado(page);
+
+    await expect(page.getByTestId(`bloque-${id}`).getByTestId('objeto-roto')).toBeVisible();
+    await expect(page.getByTestId('editor-bloqueos')).toContainText(/ya agrupado/);
+
+    // Y se puede deshacer sin recargar: volver a una aditiva lo devuelve a la vida.
+    await page.getByTestId(`pozo-${id}-valor-agregacion-CasosIngresados`).selectOption('suma');
+    await guardado(page);
+    await expect(page.getByTestId(`bloque-${id}`).getByTestId('kpi-valor')).toBeVisible();
+  });
+
+  test('el MISMO promedio sobre grano atomico se acepta', async ({ page }) => {
+    // El grano es lo que decide, no la medida: sobre los casos uno a uno no hay ninguna
+    // agregacion previa que arruinar.
+    await nuevoModulo(page, 'agr-atomico');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    await page.getByTestId(`dataset-${id}`).selectOption('casos-detalle');
+    await guardado(page);
+    await page.getByTestId(`pozo-${id}-valor-anadir`).click();
+    await page.getByTestId(`pozo-${id}-valor-opcion-DiasResolucion`).click();
+    await guardado(page);
+
+    await expect(page.getByTestId(`bloque-${id}`).getByTestId('objeto-roto')).toHaveCount(0);
+    await expect(page.getByTestId(`bloque-${id}`).getByTestId('kpi-valor')).toBeVisible();
   });
 });

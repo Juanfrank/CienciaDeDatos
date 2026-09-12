@@ -7,7 +7,7 @@ import type {
   QueryResult,
   SchemaDescriptor,
 } from '@app/data-contracts';
-import { type MockSchemaFile, toSchemaDescriptor } from '../mockSchemaFile';
+import { type MockSchemaField, type MockSchemaFile, toSchemaDescriptor } from '../mockSchemaFile';
 import defaultSchema from '../../schema/mock-schema.json' with { type: 'json' };
 
 export interface MockDataConnectorOptions {
@@ -162,9 +162,32 @@ export class MockDataConnector implements IDataConnector {
     return field?.sampleValues ?? [];
   }
 
-  /** Producto cartesiano de los valores declarados para las dimensiones pedidas. */
+  private fieldFor(ref: FieldRef): MockSchemaField | undefined {
+    return this.schema.tables
+      .find((t) => t.name === ref.table)
+      ?.fields.find((f) => f.name === ref.field);
+  }
+
+  /**
+   * Las filas de las dimensiones pedidas, al grano que esas dimensiones implican.
+   *
+   * DOS granos, porque la seccion 6.6 admite los dos y hasta ahora este conector solo sabia
+   * producir uno:
+   *
+   * - Si entre las dimensiones va una CLAVE, cada fila es un hecho. Se generan `cardinality`
+   *   hechos y a cada uno se le asigna un valor de cada dimension, de forma determinista. Es el
+   *   grano sobre el que cualquier agregacion sale bien, porque no hay ninguna agregacion previa
+   *   que arruinar.
+   *
+   * - Si no, producto cartesiano: una fila por combinacion, o sea pre-agrupado. Es lo que habia,
+   *   y sigue siendo legitimo — para medidas aditivas ocupa una fraccion y da lo mismo.
+   */
   private buildDimensionRows(dimensions: FieldRef[]): unknown[][] {
     if (dimensions.length === 0) return [[]];
+
+    const iClave = dimensions.findIndex((d) => this.fieldFor(d)?.isKey);
+    if (iClave >= 0) return this.buildFactRows(dimensions, iClave);
+
     let rows: unknown[][] = [[]];
     for (const dim of dimensions) {
       const values = this.sampleValuesFor(dim);
@@ -176,6 +199,32 @@ export class MockDataConnector implements IDataConnector {
         }
       }
       rows = next;
+    }
+    return rows;
+  }
+
+  /** Un hecho por fila, con sus dimensiones repartidas de forma determinista a partir de la clave. */
+  private buildFactRows(dimensions: FieldRef[], iClave: number): unknown[][] {
+    const clave = dimensions[iClave];
+    if (!clave) return [];
+    const definicion = this.fieldFor(clave);
+    const total = Math.min(definicion?.cardinality ?? 500, this.maxRows);
+    const prefijo = clave.field.toUpperCase().replace(/ID$/, '');
+
+    const rows: unknown[][] = [];
+    for (let i = 0; i < total; i++) {
+      const id = `${prefijo}-${String(i + 1).padStart(6, '0')}`;
+      rows.push(
+        dimensions.map((dim, j) => {
+          if (j === iClave) return id;
+          const values = this.sampleValuesFor(dim);
+          if (values.length === 0) return '(sin dato)';
+          // Derivado de la semilla, del nombre de la dimension y del id: el mismo hecho cae
+          // siempre en el mismo distrito, en cualquier maquina y en cualquier ejecucion.
+          const r = mulberry32(hashString(`${this.seed}|${fieldKey(dim)}|${id}`))();
+          return values[Math.floor(r * values.length) % values.length];
+        }),
+      );
     }
     return rows;
   }

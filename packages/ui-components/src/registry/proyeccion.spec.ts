@@ -50,6 +50,7 @@ describe('proyectarObjeto', () => {
         binding: { datasetId: 'casos', dimensions: [], measures: ['CasosPendientes'] },
       }),
       datos,
+      ['suma', 'suma'],
     );
 
     expect(proyectado.columns.map((c) => c.name)).toEqual(['Indicador', 'CasosPendientes']);
@@ -64,13 +65,14 @@ describe('proyectarObjeto', () => {
         binding: { datasetId: 'casos', dimensions: [], measures: ['CasosIngresados', 'CasosPendientes'] },
       }),
       datos,
+      ['suma', 'suma'],
     );
 
     expect(proyectado.rows).toEqual([['Ingresados vs pendientes', 650, 65]]);
   });
 
   it('un grafico de barras proyecta una fila por categoria, ya agregada', () => {
-    const proyectado = proyectarObjeto(instancia({ objectId: 'barras' }), datos);
+    const proyectado = proyectarObjeto(instancia({ objectId: 'barras' }), datos, ['suma']);
 
     expect(proyectado.columns.map((c) => c.name)).toEqual([
       'DimTribunal.Distrito',
@@ -94,6 +96,7 @@ describe('proyectarObjeto', () => {
         },
       }),
       datos,
+      ['suma', 'suma'],
     );
 
     expect(proyectado.columns.map((c) => c.name)).toEqual([
@@ -119,6 +122,7 @@ describe('proyectarObjeto', () => {
         },
       }),
       datos,
+      ['suma', 'suma'],
     );
 
     expect(proyectado.columns.map((c) => c.name)).toEqual([
@@ -141,6 +145,7 @@ describe('proyectarObjeto', () => {
         binding: { datasetId: 'casos', dimensions: [MATERIA], measures: [] },
       }),
       datos,
+      ['suma', 'suma'],
     );
 
     expect(proyectado.columns.map((c) => c.name)).toEqual(['DimTribunal.Materia']);
@@ -148,7 +153,7 @@ describe('proyectarObjeto', () => {
   });
 
   it('conserva la procedencia y la marca de tiempo del dato (4.8)', () => {
-    const proyectado = proyectarObjeto(instancia({}), datos);
+    const proyectado = proyectarObjeto(instancia({}), datos, ['suma']);
     expect(proyectado.source).toBe('mock');
     expect(proyectado.generatedAt).toBe('2026-03-01T10:00:00.000Z');
   });
@@ -159,6 +164,7 @@ describe('proyectarObjeto', () => {
     const proyectado = proyectarObjeto(
       instancia({ binding: { datasetId: 'casos', dimensions: [DISTRITO], measures: ['CampoRetirado'] } }),
       datos,
+      ['suma', 'suma'],
     );
     expect(proyectado.rows).toEqual([
       ['Norte', 0],

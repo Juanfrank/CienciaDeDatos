@@ -1,4 +1,4 @@
-import type { QueryResult } from '@app/data-contracts';
+import type { Agregacion, QueryResult } from '@app/data-contracts';
 import type { ObjectInstance } from './types';
 import { aggregateBy, fieldKey, toMatrix, toSlicerOptions } from './viewModel';
 
@@ -32,7 +32,17 @@ function mismaProcedencia(result: QueryResult, columns: QueryResult['columns'], 
   return { columns, rows, source: result.source, generatedAt: result.generatedAt };
 }
 
-export function proyectarObjeto(instance: ObjectInstance, result: QueryResult): QueryResult {
+/**
+ * @param agregaciones Un operador por medida, alineado con `instance.binding.measures`. Viaja
+ * desde el servidor con el objeto: asi la tabla en pantalla, el complemento de datos y los cuatro
+ * formatos de exportacion resumen con el MISMO operador. Resolverlo aqui por segunda vez seria
+ * abrir la puerta a que lo exportado y lo mostrado dieran cifras distintas.
+ */
+export function proyectarObjeto(
+  instance: ObjectInstance,
+  result: QueryResult,
+  agregaciones: Agregacion[],
+): QueryResult {
   const { dimensions, measures } = instance.binding;
 
   switch (instance.objectId) {
@@ -40,10 +50,10 @@ export function proyectarObjeto(instance: ObjectInstance, result: QueryResult): 
       // Una tarjeta muestra un numero (o dos, si hay comparacion). Eso es su proyeccion: una
       // fila. Volcar aqui las filas del dataset seria exportar algo que la tarjeta no muestra.
       //
-      // Agregar sin ninguna dimension colapsa todo el dataset en una sola fila de sumas, que es
-      // exactamente lo que hace la tarjeta al dibujarse.
-      const { rows } = aggregateBy(result, [], measures);
-      const valores = rows[0]?.values ?? measures.map(() => 0);
+      // Agregar sin ninguna dimension colapsa todo el dataset en una sola fila, resumida con el
+      // operador de cada medida — que es exactamente lo que hace la tarjeta al dibujarse.
+      const { rows } = aggregateBy(result, [], measures, agregaciones);
+      const valores = rows[0]?.values ?? measures.map(() => null);
       const columns = [columnaTexto('Indicador'), ...measures.map(columnaNumero)];
       return mismaProcedencia(result, columns, [
         [instance.title ?? instance.objectId, ...valores],
@@ -52,7 +62,7 @@ export function proyectarObjeto(instance: ObjectInstance, result: QueryResult): 
 
     case 'matriz': {
       const medida = measures[0] ?? '';
-      const vm = toMatrix(result, dimensions, medida);
+      const vm = toMatrix(result, dimensions, medida, agregaciones[0] ?? 'suma');
       const columns = [
         columnaTexto(etiquetaDeDimensiones(instance)),
         ...vm.columnLabels.map(columnaNumero),
@@ -61,7 +71,7 @@ export function proyectarObjeto(instance: ObjectInstance, result: QueryResult): 
       const rows: unknown[][] = vm.rowLabels.map((etiqueta, i) => [
         etiqueta,
         ...(vm.cells[i] ?? []),
-        vm.rowTotals[i] ?? 0,
+        vm.rowTotals[i] ?? null,
       ]);
       rows.push(['Total', ...vm.columnTotals, vm.grandTotal]);
       return mismaProcedencia(result, columns, rows);
@@ -81,7 +91,7 @@ export function proyectarObjeto(instance: ObjectInstance, result: QueryResult): 
     case 'tabla': {
       // La tabla conserva una columna por dimension, no la etiqueta compuesta: es lo que
       // muestra, y una sola columna "Distrito / Materia" no se puede ordenar ni filtrar.
-      const { rows } = aggregateBy(result, dimensions, measures);
+      const { rows } = aggregateBy(result, dimensions, measures, agregaciones);
       const columns = [
         ...dimensions.map((d) => columnaTexto(fieldKey(d))),
         ...measures.map(columnaNumero),
@@ -95,7 +105,7 @@ export function proyectarObjeto(instance: ObjectInstance, result: QueryResult): 
 
     default: {
       // Barras, lineas y cualquier objeto categorico futuro: una fila por categoria.
-      const { rows } = aggregateBy(result, dimensions, measures);
+      const { rows } = aggregateBy(result, dimensions, measures, agregaciones);
       const columns = [
         columnaTexto(etiquetaDeDimensiones(instance)),
         ...measures.map(columnaNumero),

@@ -19,6 +19,8 @@ const datasetCasos: CacheableDataset = {
       { table: 'DimTribunal', field: 'Materia' },
     ],
   },
+  grain: 'preagregado',
+  grainRationale: 'fixture: agrupado, con medidas aditivas.',
   recurrence: '0 * * * *',
   recurrenceRationale: 'fixture',
   securityBinding: 'none',

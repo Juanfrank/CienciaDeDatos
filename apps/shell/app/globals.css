@@ -1873,6 +1873,32 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   font-size: var(--md-sys-typescale-body-medium-size);
 }
 .chiclet__nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/*
+ * Como se resume la medida, dentro del propio chiclet.
+ *
+ * Va aqui y no en una seccion aparte porque es una propiedad DEL campo, no del objeto: dos medidas
+ * del mismo pozo pueden resumirse distinto, y una lista suelta de operadores obligaria a leer dos
+ * sitios para saber que hace cada una. Es el desplegable del chiclet de Power BI, por el mismo
+ * motivo por el que alli esta donde esta.
+ *
+ * `flex-shrink: 0` y un ancho maximo: el nombre del campo es lo que se recorta cuando falta sitio,
+ * no el operador — un chiclet que dice «DiasResolucion» sin decir como se resume no informa de lo
+ * que aqui importa.
+ */
+.chiclet__agregacion { display: inline-flex; flex-shrink: 0; }
+.chiclet__agregacion select {
+  max-width: 9rem;
+  padding: 2px var(--space-xs);
+  font: inherit;
+  font-size: var(--md-sys-typescale-label-small-size, 0.6875rem);
+  color: var(--md-sys-color-on-surface-variant);
+  background: var(--md-sys-color-surface-container-highest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  cursor: pointer;
+}
+.chiclet__agregacion select:disabled { cursor: not-allowed; }
 .chiclet__quitar {
   display: inline-flex;
   align-items: center;

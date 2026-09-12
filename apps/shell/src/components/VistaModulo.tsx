@@ -1,7 +1,5 @@
 'use client';
 
-import { fieldKey, toSlicerOptions } from '@app/ui-components';
-import type { QueryResult } from '@app/data-contracts';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
 import { CrearAviso, type ObjetoVigilable } from './CrearAviso';
 import { Exportar } from './Exportar';
@@ -9,21 +7,9 @@ import { Incrustar } from './Incrustar';
 import { InsigniaDeProcedencia } from './InsigniaDeProcedencia';
 import { Preguntar } from './Preguntar';
 import { Marcadores } from './Marcadores';
-import { PanelDeFiltros } from './PanelDeFiltros';
 import { MiVista } from './MiVista';
 import { ObjetoDeModulo } from './ObjetoDeModulo';
 import { Rejilla } from './Rejilla';
-import { Segmentador } from './Segmentador';
-import {
-  Barras,
-  Lineas,
-  Matriz,
-  ObjetoGenerandose,
-  ObjetoNoDisponible,
-  ObjetoRoto,
-  Tabla,
-  TarjetaKpi,
-} from './objetos';
 import type { ObjetoSerializado } from '../server/serializar';
 
 /**

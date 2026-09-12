@@ -68,7 +68,7 @@ export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) =
     return [
       {
         title: instance.title ?? instance.objectId,
-        result: proyectarObjeto(instance, o.result),
+        result: proyectarObjeto(instance, o.result, o.agregaciones),
         esGrafico: categoria !== undefined && CATEGORIAS_DE_GRAFICO.has(categoria),
       },
     ];

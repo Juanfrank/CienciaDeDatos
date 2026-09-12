@@ -1,44 +1,198 @@
 {
-  "$comment": "Definicion de esquema versionada que alimenta MockDataConnector (seccion 2.2). Debe mantenerse con la misma FORMA que la fuente real esperada; los valores son sinteticos. Confirmar las dimensiones reales con el equipo de la capa de analisis antes de la Fase 2.",
+  "$comment": "Definicion de esquema versionada que alimenta MockDataConnector (seccion 2.2). Debe mantenerse con la misma FORMA que la fuente real esperada; los valores son sinteticos. FactCasos lleva CLAVE (CasoId): la tabla de hechos es de grano atomico, una fila por caso, que es la forma sobre la que cualquier agregacion se calcula bien. Antes no la llevaba y tenia una columna 'DiasPromedioResolucion' ya promediada: sobre esa forma el promedio no se puede recalcular, y la aplicacion la sumaba. Confirmar las dimensiones reales con el equipo de la capa de analisis antes de la Fase 4.",
   "tables": [
     {
       "name": "DimTribunal",
       "fields": [
-        { "name": "TribunalId", "type": "string", "isMeasure": false, "sampleValues": ["TRB-001", "TRB-002", "TRB-003", "TRB-004"] },
-        { "name": "Nombre", "type": "string", "isMeasure": false, "sampleValues": ["Camara Penal 1", "Camara Penal 2", "Camara Civil 1", "Camara Civil 2"] },
-        { "name": "Distrito", "type": "string", "isMeasure": false, "sampleValues": ["Distrito Norte", "Distrito Este", "Distrito Sur", "Distrito Nacional"] },
-        { "name": "Materia", "type": "string", "isMeasure": false, "sampleValues": ["Penal", "Civil", "Laboral", "Familia"] }
+        {
+          "name": "TribunalId",
+          "type": "string",
+          "isMeasure": false,
+          "sampleValues": [
+            "TRB-001",
+            "TRB-002",
+            "TRB-003",
+            "TRB-004"
+          ]
+        },
+        {
+          "name": "Nombre",
+          "type": "string",
+          "isMeasure": false,
+          "sampleValues": [
+            "Camara Penal 1",
+            "Camara Penal 2",
+            "Camara Civil 1",
+            "Camara Civil 2"
+          ]
+        },
+        {
+          "name": "Distrito",
+          "type": "string",
+          "isMeasure": false,
+          "sampleValues": [
+            "Distrito Norte",
+            "Distrito Este",
+            "Distrito Sur",
+            "Distrito Nacional"
+          ]
+        },
+        {
+          "name": "Materia",
+          "type": "string",
+          "isMeasure": false,
+          "sampleValues": [
+            "Penal",
+            "Civil",
+            "Laboral",
+            "Familia"
+          ]
+        }
       ]
     },
     {
       "name": "DimTiempo",
       "fields": [
-        { "name": "Anio", "type": "number", "isMeasure": false, "sampleValues": ["2024", "2025", "2026"] },
-        { "name": "Trimestre", "type": "string", "isMeasure": false, "sampleValues": ["Q1", "Q2", "Q3", "Q4"] },
-        { "name": "Mes", "type": "string", "isMeasure": false, "sampleValues": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"] }
+        {
+          "name": "Anio",
+          "type": "number",
+          "isMeasure": false,
+          "sampleValues": [
+            "2024",
+            "2025",
+            "2026"
+          ]
+        },
+        {
+          "name": "Trimestre",
+          "type": "string",
+          "isMeasure": false,
+          "sampleValues": [
+            "Q1",
+            "Q2",
+            "Q3",
+            "Q4"
+          ]
+        },
+        {
+          "name": "Mes",
+          "type": "string",
+          "isMeasure": false,
+          "sampleValues": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12"
+          ]
+        }
       ]
     },
     {
       "name": "DimTipoCaso",
       "fields": [
-        { "name": "TipoCasoId", "type": "string", "isMeasure": false, "sampleValues": ["TC-01", "TC-02", "TC-03"] },
-        { "name": "Nombre", "type": "string", "isMeasure": false, "sampleValues": ["Ordinario", "Sumario", "Especial"] }
+        {
+          "name": "TipoCasoId",
+          "type": "string",
+          "isMeasure": false,
+          "sampleValues": [
+            "TC-01",
+            "TC-02",
+            "TC-03"
+          ]
+        },
+        {
+          "name": "Nombre",
+          "type": "string",
+          "isMeasure": false,
+          "sampleValues": [
+            "Ordinario",
+            "Sumario",
+            "Especial"
+          ]
+        }
       ]
     },
     {
       "name": "FactCasos",
       "fields": [
-        { "name": "CasosIngresados", "type": "number", "isMeasure": true, "range": [50, 900] },
-        { "name": "CasosResueltos", "type": "number", "isMeasure": true, "range": [40, 850] },
-        { "name": "CasosPendientes", "type": "number", "isMeasure": true, "range": [10, 600] },
-        { "name": "DiasPromedioResolucion", "type": "number", "isMeasure": true, "range": [15, 340] }
+        {
+          "name": "CasoId",
+          "type": "string",
+          "isMeasure": false,
+          "isKey": true,
+          "cardinality": 1200
+        },
+        {
+          "name": "CasosIngresados",
+          "type": "number",
+          "isMeasure": true,
+          "range": [
+            50,
+            900
+          ]
+        },
+        {
+          "name": "CasosResueltos",
+          "type": "number",
+          "isMeasure": true,
+          "range": [
+            40,
+            850
+          ]
+        },
+        {
+          "name": "CasosPendientes",
+          "type": "number",
+          "isMeasure": true,
+          "range": [
+            10,
+            600
+          ]
+        },
+        {
+          "name": "DiasResolucion",
+          "type": "number",
+          "isMeasure": true,
+          "range": [
+            15,
+            340
+          ]
+        }
       ]
     }
   ],
   "measures": [
-    { "name": "CasosIngresados", "table": "FactCasos", "description": "Casos ingresados en el periodo" },
-    { "name": "CasosResueltos", "table": "FactCasos", "description": "Casos resueltos en el periodo" },
-    { "name": "CasosPendientes", "table": "FactCasos", "description": "Casos pendientes al cierre del periodo" },
-    { "name": "DiasPromedioResolucion", "table": "FactCasos", "description": "Dias promedio entre ingreso y resolucion" }
+    {
+      "name": "CasosIngresados",
+      "table": "FactCasos",
+      "aggregation": "suma",
+      "description": "Casos ingresados en el periodo"
+    },
+    {
+      "name": "CasosResueltos",
+      "table": "FactCasos",
+      "aggregation": "suma",
+      "description": "Casos resueltos en el periodo"
+    },
+    {
+      "name": "CasosPendientes",
+      "table": "FactCasos",
+      "aggregation": "suma",
+      "description": "Casos pendientes al cierre del periodo"
+    },
+    {
+      "name": "DiasResolucion",
+      "table": "FactCasos",
+      "aggregation": "promedio",
+      "description": "Dias entre ingreso y resolucion DE UN CASO. Se resume promediando: sumar dias de casos distintos no significa nada."
+    }
   ]
 }

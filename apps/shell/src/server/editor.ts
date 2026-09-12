@@ -1,8 +1,9 @@
+import type { Agregacion, GranoDeDataset } from '@app/data-contracts';
 import { defaultRegistry } from '@app/caching';
 import type { ClaveDePresentacion, ObjectCategory, PozoDeCampos } from '@app/ui-components';
 import { fieldKey } from '@app/ui-components';
 import { objectRegistry } from './contexto';
-import { columnasDisponiblesDe } from './datos';
+import { agregacionesDeclaradas, columnasDisponiblesDe } from './datos';
 
 /**
  * Paleta del editor de modulos — seccion 4.2.
@@ -40,6 +41,15 @@ export interface DatasetDePaleta {
   medidas: string[];
   /** Tipo de cada columna. Decide que selectores tienen sentido sobre cada dimension. */
   tipos: Record<string, string>;
+  /**
+   * Como declara el esquema que se resume cada medida, y a que grano quedaron las filas.
+   *
+   * Los dos viajan al panel para que el desplegable del chiclet parta del operador DECLARADO y no
+   * de `suma`, y para que quien edita vea el grano del dataset que esta eligiendo. El editor no
+   * consulta el esquema por su cuenta: llega resuelto, como todo lo demas.
+   */
+  agregaciones: Record<string, Agregacion>;
+  grain: GranoDeDataset;
 }
 
 export interface PaletaDelEditor {
@@ -74,6 +84,7 @@ export async function paletaDelEditor(): Promise<PaletaDelEditor> {
   });
 
   const datasets: DatasetDePaleta[] = [];
+  const declaradas = await agregacionesDeclaradas();
   for (const declarado of defaultRegistry.datasets) {
     /*
      * Un MAPA de nombre a tipo, no un conjunto de nombres.
@@ -91,6 +102,12 @@ export async function paletaDelEditor(): Promise<PaletaDelEditor> {
       dimensiones: (declarado.query.dimensions ?? []).map(fieldKey).filter((c) => disponibles.has(c)),
       medidas: (declarado.query.measures ?? []).filter((m) => disponibles.has(m)),
       tipos: Object.fromEntries(disponibles),
+      agregaciones: Object.fromEntries(
+        (declarado.query.measures ?? [])
+          .map((m) => [m, declaradas.get(m)] as const)
+          .filter((par): par is [string, Agregacion] => par[1] !== undefined),
+      ),
+      grain: declarado.grain,
     });
   }
 

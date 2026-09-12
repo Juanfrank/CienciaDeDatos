@@ -25,6 +25,9 @@ import type { ObjetoSerializado } from '../server/serializar';
  * notarlo seria quien publicara algo que no se parece a lo que vio—.
  */
 
+/** Filtrado cruzado apagado: el objeto recibe siempre la funcion, y esta no hace nada. */
+const SIN_FILTRADO = (): undefined => undefined;
+
 export function ObjetoDeModulo({
   objeto,
   onFiltrar,
@@ -58,11 +61,15 @@ export function ObjetoDeModulo({
     titulo,
     result,
     instance: objeto.instance,
+    // Los operadores de agregacion viajan con el objeto por el mismo motivo que las ranuras: el
+    // cliente no tiene el esquema, y deducirlos aqui abriria la puerta a que lo dibujado y lo
+    // exportado resumieran distinto.
+    agregaciones: objeto.agregaciones,
     // Las ranuras viajan con el objeto: sin ellas los renderizadores volverian a leer por posicion.
     ...(objeto.ranuras ? { ranuras: objeto.ranuras } : {}),
     // Los objetos esperan un `onFiltrar`; sin filtrado cruzado se les pasa uno que no hace nada,
     // y ellos deciden no ofrecer el gesto por su cuenta cuando no hay dimension.
-    onFiltrar: onFiltrar ?? (() => {}),
+    onFiltrar: onFiltrar ?? SIN_FILTRADO,
   };
 
   switch (objeto.instance.objectId) {

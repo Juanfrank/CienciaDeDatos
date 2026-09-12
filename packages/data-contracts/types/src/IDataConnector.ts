@@ -58,6 +58,48 @@ export interface QueryResult {
 }
 
 /**
+ * Como se resume una medida al agrupar — el operador que Power BI llama «agregacion implicita».
+ *
+ * Estaba implicito, y eso era el fallo: la capa de presentacion sumaba SIEMPRE, asi que una
+ * columna de dias promedio se mostraba como la suma de sus promedios (10 593 dias en vez de 165).
+ * El nombre de la columna llevaba la semantica —«DiasPromedio...»— y el nombre de una columna no
+ * es un sitio donde la aplicacion pueda leer nada.
+ *
+ * `ninguna` es el caso del modelo semantico: una medida DAX YA viene calculada por el motor y la
+ * aplicacion no puede volver a agregarla, ni sumandola ni promediandola.
+ */
+export const AGREGACIONES = [
+  'suma',
+  'promedio',
+  'minimo',
+  'maximo',
+  'recuento',
+  'recuento-distinto',
+  'ninguna',
+] as const;
+
+export type Agregacion = (typeof AGREGACIONES)[number];
+
+export function esAgregacion(valor: unknown): valor is Agregacion {
+  return typeof valor === 'string' && (AGREGACIONES as readonly string[]).includes(valor);
+}
+
+/**
+ * Las que se pueden volver a aplicar sobre un resultado YA agrupado sin mentir.
+ *
+ * `suma`, `minimo` y `maximo` son asociativas: sumar sumas da la suma, y el maximo de los maximos
+ * es el maximo. Las demas no. Un promedio de promedios solo coincide con el promedio real si
+ * todos los grupos pesan igual, y un recuento distinto no se combina entre grupos de ninguna
+ * forma. Esta distincion solo importa cuando el dataset viene pre-agrupado: sobre filas atomicas
+ * cualquier operador es correcto, porque no hay una agregacion previa que arruinar.
+ */
+export const AGREGACIONES_ADITIVAS: readonly Agregacion[] = ['suma', 'minimo', 'maximo'];
+
+export function esAditiva(agregacion: Agregacion): boolean {
+  return AGREGACIONES_ADITIVAS.includes(agregacion);
+}
+
+/**
  * Descriptor de esquema de la fuente activa.
  *
  * El documento fuente referencia `SchemaDescriptor` en `IDataConnector.getSchema()`
@@ -66,10 +108,33 @@ export interface QueryResult {
  * en vivo de dimensiones del panel de administracion (4.10.8), siempre leyendolo desde
  * el cache — nunca consultando la fuente en cada validacion (6.4).
  */
+/**
+ * A que grano quedan las filas de un dataset cacheado.
+ *
+ * - `atomico`: la consulta trae la CLAVE del hecho, asi que cada fila es un hecho y no un grupo.
+ *   Cualquier agregacion se calcula sobre los atomos y sale bien a cualquier grano, con cualquier
+ *   filtro y despues del recorte del ambito. Cuesta tamaño: pesa lo que pese la tabla de hechos.
+ *
+ * - `preagregado`: la consulta ya agrupo. Ocupa una fraccion y sirve igual de bien para lo
+ *   aditivo, pero un promedio o un recuento distinto ya no se pueden recalcular desde aqui: lo
+ *   que queda en el cache es un resultado, no los datos con los que se obtuvo.
+ *
+ * Vive en los contratos de datos —y no en el registro de cache, que es quien lo declara— porque
+ * la validacion del editor tiene que consultarlo y no puede importar el paquete de cache.
+ */
+export type GranoDeDataset = 'atomico' | 'preagregado';
+
 export interface SchemaField {
   name: string;
   type: string;
   isMeasure: boolean;
+  /**
+   * Identifica la fila. Es lo que hace que un dataset sea de grano ATOMICO: si la consulta trae
+   * la clave entre sus dimensiones, cada fila es un hecho y no un grupo, y entonces cualquier
+   * agregacion se calcula sobre los atomos y sale bien a cualquier grano y tras cualquier filtro
+   * —incluido el recorte del ambito, que quita filas DESPUES del cache—.
+   */
+  isKey?: boolean;
 }
 
 export interface SchemaTable {
@@ -80,6 +145,12 @@ export interface SchemaTable {
 export interface SchemaMeasure {
   name: string;
   table: string;
+  /**
+   * Como se resume. OBLIGATORIA y explicita, por el mismo motivo que `securityBindingRationale`
+   * del registro de datasets: una decision que cambia el numero que se muestra no puede quedar
+   * implicita en una constante del codigo ni en el nombre de la columna.
+   */
+  aggregation: Agregacion;
   description?: string;
 }
 

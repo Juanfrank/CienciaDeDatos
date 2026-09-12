@@ -87,7 +87,7 @@ describe('validateBinding (4.2)', () => {
 
 describe('toCategorical', () => {
   it('proyecta una serie por medida sobre las categorias de la dimension', () => {
-    const vm = toCategorical(resultado, [DISTRITO], ['CasosPendientes']);
+    const vm = toCategorical(resultado, [DISTRITO], ['CasosPendientes'], ['suma']);
     expect(vm.series).toEqual(['CasosPendientes']);
     expect(vm.points).toEqual([
       { label: 'Norte', values: [30] },
@@ -97,42 +97,42 @@ describe('toCategorical', () => {
 
   it('agrega sobre el dataset ya cacheado cuando trae mas granularidad (6.6)', () => {
     // El dataset tiene distrito x materia; el objeto solo muestra distrito.
-    const vm = toCategorical(resultado, [DISTRITO], ['CasosPendientes']);
+    const vm = toCategorical(resultado, [DISTRITO], ['CasosPendientes'], ['suma']);
     expect(vm.aggregated).toBe(true);
   });
 
   it('no marca agregacion si cada categoria tiene una sola fila', () => {
-    const vm = toCategorical(resultado, [DISTRITO, MATERIA], ['CasosPendientes']);
+    const vm = toCategorical(resultado, [DISTRITO, MATERIA], ['CasosPendientes'], ['suma']);
     expect(vm.aggregated).toBe(false);
     expect(vm.points).toHaveLength(3);
   });
 
   it('compone la etiqueta cuando hay varias dimensiones', () => {
-    const vm = toCategorical(resultado, [DISTRITO, MATERIA], ['CasosPendientes']);
+    const vm = toCategorical(resultado, [DISTRITO, MATERIA], ['CasosPendientes'], ['suma']);
     expect(vm.points[0]?.label).toBe('Norte / Penal');
   });
 
   it('admite varias medidas como series paralelas', () => {
-    const vm = toCategorical(resultado, [DISTRITO], ['CasosPendientes', 'CasosResueltos']);
+    const vm = toCategorical(resultado, [DISTRITO], ['CasosPendientes', 'CasosResueltos'], ['suma', 'suma']);
     expect(vm.points[0]).toEqual({ label: 'Norte', values: [30, 13] });
   });
 
   it('una columna ausente da cero, no rompe el grafico', () => {
-    const vm = toCategorical(resultado, [DISTRITO], ['NoExiste']);
+    const vm = toCategorical(resultado, [DISTRITO], ['NoExiste'], ['suma']);
     expect(vm.points[0]?.values).toEqual([0]);
   });
 });
 
 describe('toKpi', () => {
   it('suma la medida sobre las filas visibles', () => {
-    expect(toKpi(resultado, ['CasosPendientes'], 'Pendientes')).toEqual({
+    expect(toKpi(resultado, ['CasosPendientes'], 'Pendientes', ['suma'])).toEqual({
       value: 60,
       label: 'Pendientes',
     });
   });
 
   it('calcula la variacion contra la medida de comparacion', () => {
-    const kpi = toKpi(resultado, ['CasosPendientes', 'CasosResueltos'], 'Pendientes');
+    const kpi = toKpi(resultado, ['CasosPendientes', 'CasosResueltos'], 'Pendientes', ['suma', 'suma']);
     expect(kpi.delta?.absolute).toBe(35);
     expect(kpi.delta?.relative).toBeCloseTo(35 / 25, 5);
   });
@@ -142,18 +142,18 @@ describe('toKpi', () => {
       ...resultado,
       rows: [['Norte', 'Penal', 10, 0]],
     };
-    const kpi = toKpi(cero, ['CasosPendientes', 'CasosResueltos'], 'x');
+    const kpi = toKpi(cero, ['CasosPendientes', 'CasosResueltos'], 'x', ['suma', 'suma']);
     expect(kpi.delta?.relative).toBeNull();
   });
 
   it('sin filas el valor es cero, no NaN', () => {
-    expect(toKpi({ ...resultado, rows: [] }, ['CasosPendientes'], 'x').value).toBe(0);
+    expect(toKpi({ ...resultado, rows: [] }, ['CasosPendientes'], 'x', ['suma']).value).toBe(0);
   });
 });
 
 describe('toMatrix', () => {
   it('cruza dos dimensiones con totales por fila, columna y general', () => {
-    const m = toMatrix(resultado, [DISTRITO, MATERIA], 'CasosPendientes');
+    const m = toMatrix(resultado, [DISTRITO, MATERIA], 'CasosPendientes', 'suma');
     expect(m.rowLabels).toEqual(['Norte', 'Este']);
     expect(m.columnLabels).toEqual(['Penal', 'Civil']);
     expect(m.cells).toEqual([
@@ -166,7 +166,7 @@ describe('toMatrix', () => {
   });
 
   it('una combinacion sin filas queda nula, distinguible de un cero real', () => {
-    const m = toMatrix(resultado, [DISTRITO, MATERIA], 'CasosPendientes');
+    const m = toMatrix(resultado, [DISTRITO, MATERIA], 'CasosPendientes', 'suma');
     expect(m.cells[1]?.[1]).toBeNull();
   });
 });

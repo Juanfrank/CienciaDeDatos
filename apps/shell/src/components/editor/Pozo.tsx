@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import type { PozoDeCampos } from '@app/ui-components';
+import { AGREGACIONES, type Agregacion } from '@app/data-contracts';
+import { ETIQUETA_DE_AGREGACION, type PozoDeCampos } from '@app/ui-components';
 import { Icono } from '../iconos/Icono';
 
 /**
@@ -27,6 +28,8 @@ export function Pozo({
   lleno: llenoExterno,
   onAnadir,
   onQuitar,
+  agregacionDe,
+  onAgregacion,
   prueba,
 }: {
   pozo: PozoDeCampos;
@@ -42,6 +45,16 @@ export function Pozo({
   lleno?: boolean;
   onAnadir: (campo: string) => void;
   onQuitar: (campo: string) => void;
+  /**
+   * Como se resume cada campo de este pozo, y como cambiarlo.
+   *
+   * Solo tiene sentido en un pozo de MEDIDAS, y solo si quien llama lo ofrece. Es el desplegable
+   * del chiclet de Power BI: el esquema declara el operador por defecto y aqui se puede cambiar
+   * para esta instancia, sin escribir codigo. Elegir el que no toca no dibuja una cifra falsa —la
+   * validacion lo rechaza al guardar y el objeto se marca—, asi que ofrecerlos todos es seguro.
+   */
+  agregacionDe?: (campo: string) => Agregacion;
+  onAgregacion?: (campo: string, agregacion: Agregacion) => void;
   prueba: string;
 }) {
   const [abierto, setAbierto] = useState(false);
@@ -101,6 +114,23 @@ export function Pozo({
           <li key={campo}>
             <span className="chiclet" data-testid={`${prueba}-${campo}`}>
               <span className="chiclet__nombre">{campo}</span>
+              {pozo.tipo === 'medida' && agregacionDe && onAgregacion ? (
+                <label className="chiclet__agregacion">
+                  <span className="visualmente-oculto">Como se resume {campo}</span>
+                  <select
+                    value={agregacionDe(campo)}
+                    disabled={guardando}
+                    data-testid={`${prueba}-agregacion-${campo}`}
+                    onChange={(e) => onAgregacion(campo, e.target.value as Agregacion)}
+                  >
+                    {AGREGACIONES.map((a) => (
+                      <option key={a} value={a}>
+                        {ETIQUETA_DE_AGREGACION[a]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
               <button
                 type="button"
                 className="chiclet__quitar"

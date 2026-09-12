@@ -34,12 +34,14 @@ export const contract: ModuleContract = {
   slug: 'casos-pendientes',
   name: 'Casos pendientes',
   consumes: {
-    measures: ['CasosPendientes', 'DiasPromedioResolucion'],
+    measures: ['CasosPendientes', 'DiasResolucion'],
     dimensions: [
       { table: 'DimTribunal', field: 'Distrito' },
       { table: 'DimTiempo', field: 'Trimestre' },
     ],
-    datasets: ['casos-por-distrito-trimestre'],
+    // Dos datasets y dos granos: los pendientes se suman, asi que salen del agrupado; los dias
+    // de resolucion se promedian, y un promedio solo se calcula bien sobre los casos uno a uno.
+    datasets: ['casos-por-distrito-trimestre', 'casos-detalle'],
   },
   uiComponents: [
     { name: 'TablaBasica', version: '0.1.0' },

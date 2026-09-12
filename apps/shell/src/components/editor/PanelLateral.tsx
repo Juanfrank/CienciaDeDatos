@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { Agregacion } from '@app/data-contracts';
 import { GRID_COLUMNS, type GridItem } from '@app/module-model';
 import {
+  AGREGACION_POR_DEFECTO,
   cabeEnRanura,
   conCampoEnRanura,
   ranurasDe,
@@ -254,6 +256,39 @@ function Datos({
   const quitar = (ranuraId: string, campo: string) =>
     cambiarInstancia((i) => sinCampoEnRanura(i, ranuras, ranuraId, campo));
 
+  /*
+   * Como se resume cada medida.
+   *
+   * Se guarda SOLO lo anulado. Lo que no se toca se resuelve contra el esquema en cada lectura,
+   * asi que si la fuente cambia el operador de una medida, los modulos que no lo habian anulado
+   * lo siguen sin que nadie los edite — que es la diferencia entre declarar el valor y copiarlo.
+   */
+  const agregacionDe = (campo: string): Agregacion =>
+    item.instance.binding.agregaciones?.[campo] ??
+    dataset?.agregaciones[campo] ??
+    AGREGACION_POR_DEFECTO;
+
+  const cambiarAgregacion = (campo: string, agregacion: Agregacion) =>
+    cambiarInstancia((i) => {
+      const resto = { ...(i.binding.agregaciones ?? {}) };
+      // Volver a la del esquema se guarda BORRANDO la anulacion, no copiando el mismo valor: si
+      // se copiara, el modulo dejaria de seguir a la fuente sin que nadie lo hubiera pedido.
+      if (agregacion === (dataset?.agregaciones[campo] ?? AGREGACION_POR_DEFECTO)) {
+        delete resto[campo];
+      } else {
+        resto[campo] = agregacion;
+      }
+      // Se reconstruye el binding SIN la clave, en vez de extenderlo: con un spread, quitar la
+      // ultima anulacion habria dejado la del objeto anterior intacta — el `...i.binding` la
+      // vuelve a traer y el `{ agregaciones }` condicional no llega a pisarla.
+      const { agregaciones: _previas, ...binding } = i.binding;
+      const quedan = Object.keys(resto).length > 0;
+      return {
+        ...i,
+        binding: quedan ? { ...binding, agregaciones: resto } : binding,
+      };
+    });
+
   return (
     <>
       <Seccion titulo="Origen" prueba={`seccion-origen-${item.id}`}>
@@ -322,6 +357,8 @@ function Datos({
               guardando={guardando}
               onAnadir={poner}
               onQuitar={quitar}
+              agregacionDe={agregacionDe}
+              onAgregacion={cambiarAgregacion}
             />
           ))}
         </Seccion>
@@ -350,6 +387,8 @@ function RanuraDeEdicion({
   guardando,
   onAnadir,
   onQuitar,
+  agregacionDe,
+  onAgregacion,
 }: {
   ranura: RanuraDeCampos;
   /**
@@ -366,6 +405,8 @@ function RanuraDeEdicion({
   guardando: boolean;
   onAnadir: (ranuraId: string, campo: string) => void;
   onQuitar: (ranuraId: string, campo: string) => void;
+  agregacionDe?: (campo: string) => Agregacion;
+  onAgregacion?: (campo: string, agregacion: Agregacion) => void;
 }) {
   return (
     <Pozo
@@ -380,6 +421,8 @@ function RanuraDeEdicion({
       lleno={!cabeEnRanura(item.instance, todas, ranura.id)}
       onAnadir={(campo) => onAnadir(ranura.id, campo)}
       onQuitar={(campo) => onQuitar(ranura.id, campo)}
+      {...(agregacionDe ? { agregacionDe } : {})}
+      {...(onAgregacion ? { onAgregacion } : {})}
     />
   );
 }

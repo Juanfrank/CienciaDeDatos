@@ -1,4 +1,5 @@
-import type { QueryResult } from '@app/data-contracts';
+import type { Agregacion, QueryResult } from '@app/data-contracts';
+import { type Acumulador, acumular, cerrar, nuevoAcumulador } from './agregacion';
 import type { ObjectDataContract, ObjectInstance } from './types';
 
 /**
@@ -86,7 +87,8 @@ export function validateBinding(
 export interface CategoryPoint {
   /** Etiqueta de la categoria, ya compuesta si hay mas de una dimension. */
   label: string;
-  values: number[];
+  /** `null` es un hueco: la medida no se puede resumir a este grano. ECharts lo dibuja sin punto. */
+  values: (number | null)[];
 }
 
 export interface CategoricalViewModel {
@@ -97,29 +99,35 @@ export interface CategoricalViewModel {
   aggregated: boolean;
 }
 
-const toNumber = (v: unknown): number => {
-  const n = typeof v === 'number' ? v : Number(v);
-  return Number.isFinite(n) ? n : 0;
-};
-
 /** Separador interno de claves compuestas. No aparece en ninguna etiqueta visible. */
 const SEP = '||';
 
-/** Una combinacion distinta de dimensiones, con sus medidas ya sumadas. */
+/**
+ * Una combinacion distinta de dimensiones, con sus medidas ya resumidas.
+ *
+ * `null` en un valor significa «no hay respuesta», no cero: es lo que devuelve una medida que la
+ * fuente ya calculo (`ninguna`) cuando al grupo llegan varias filas. Sumarlas o quedarse con la
+ * primera seria inventar un numero, y 4.2 manda marcar, no disimular.
+ */
 export interface AggregatedRow {
   /** Un valor por dimension, en el orden del mapeo. Sin componer en una sola cadena. */
   labels: string[];
-  values: number[];
+  values: (number | null)[];
 }
 
 export interface AggregatedRows {
   rows: AggregatedRow[];
-  /** true si se sumaron filas: el dataset traia mas granularidad de la que el objeto muestra. */
+  /** true si se combinaron filas: el dataset traia mas granularidad de la que el objeto muestra. */
   aggregated: boolean;
 }
 
 /**
- * Agrupa las filas por las dimensiones pedidas y suma las medidas.
+ * Agrupa las filas por las dimensiones pedidas y resume las medidas CON SU OPERADOR.
+ *
+ * `agregaciones` va alineada con `measures`, una por medida. Antes no existia y aqui habia un
+ * `+`: sumaba siempre, asi que una columna de promedios se mostraba como la suma de sus
+ * promedios. El operador no se deduce del nombre de la columna ni se adivina — lo declara el
+ * esquema de la fuente y lo puede cambiar quien edita, desde el pozo.
  *
  * La agregacion ocurre aqui, sobre el dataset ya cacheado, y no generando una consulta nueva:
  * es la aplicacion directa de 6.6 -- "un modulo que necesita una vista mas especifica de un
@@ -133,27 +141,50 @@ export function aggregateBy(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
   measures: string[],
+  agregaciones: Agregacion[],
 ): AggregatedRows {
   const indiceDim = dimensions.map((d) => result.columns.findIndex((c) => c.name === fieldKey(d)));
   const indiceMed = measures.map((m) => result.columns.findIndex((c) => c.name === m));
+  const operador = (i: number): Agregacion => agregaciones[i] ?? 'suma';
 
-  const acumulado = new Map<string, AggregatedRow>();
+  const acumulado = new Map<string, { labels: string[]; accs: Acumulador[] }>();
   let filasAgregadas = 0;
+
+  /*
+   * Sin dimensiones hay UN grupo, lo traiga filas o no.
+   *
+   * Es el caso de la tarjeta, que colapsa el dataset entero en un numero. Sin sembrarlo, un
+   * dataset vacio no producia ningun grupo y el resultado era «no hay respuesta» para cualquier
+   * operador — cuando la suma de un conjunto vacio es cero y solo el promedio es indefinido.
+   * Dejando que el acumulador vacio decida, cada operador responde lo suyo.
+   */
+  if (dimensions.length === 0) {
+    acumulado.set('', { labels: [], accs: measures.map((_, i) => nuevoAcumulador(operador(i))) });
+  }
 
   for (const row of result.rows) {
     const labels = indiceDim.map((i) => (i >= 0 ? String(row[i]) : '(sin dato)'));
-    const valores = indiceMed.map((i) => (i >= 0 ? toNumber(row[i]) : 0));
     const clave = labels.join(SEP);
-    const previo = acumulado.get(clave);
-    if (previo) {
+    let grupo = acumulado.get(clave);
+    if (grupo) {
       filasAgregadas++;
-      previo.values = previo.values.map((v, i) => v + (valores[i] ?? 0));
     } else {
-      acumulado.set(clave, { labels, values: valores });
+      grupo = { labels, accs: measures.map((_, i) => nuevoAcumulador(operador(i))) };
+      acumulado.set(clave, grupo);
+    }
+    // Una medida que no esta entre las columnas no se acumula: su acumulador queda vacio y se
+    // cierra a 0 o a null segun el operador, en vez de contar un cero por cada fila leida — que
+    // habria hecho que un promedio sobre una columna ausente devolviera 0 en vez de nada.
+    for (const [i, columna] of indiceMed.entries()) {
+      const acc = grupo.accs[i];
+      if (acc && columna >= 0) acumular(acc, row[columna]);
     }
   }
 
-  return { rows: [...acumulado.values()], aggregated: filasAgregadas > 0 };
+  return {
+    rows: [...acumulado.values()].map((g) => ({ labels: g.labels, values: g.accs.map(cerrar) })),
+    aggregated: filasAgregadas > 0,
+  };
 }
 
 /**
@@ -166,8 +197,9 @@ export function toCategorical(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
   measures: string[],
+  agregaciones: Agregacion[],
 ): CategoricalViewModel {
-  const { rows, aggregated } = aggregateBy(result, dimensions, measures);
+  const { rows, aggregated } = aggregateBy(result, dimensions, measures, agregaciones);
 
   return {
     series: measures,
@@ -177,26 +209,40 @@ export function toCategorical(
 }
 
 export interface KpiViewModel {
-  value: number;
+  /** `null` cuando la medida no se puede resumir al grano que la tarjeta muestra. */
+  value: number | null;
   label: string;
   /** Variacion respecto de la medida de comparacion, si se mapeo una segunda. */
   delta?: { absolute: number; relative: number | null };
 }
 
-/** Suma la medida principal sobre todas las filas visibles. */
-export function toKpi(result: QueryResult, measures: string[], label: string): KpiViewModel {
-  const [principal, comparacion] = measures;
-  const suma = (nombre: string | undefined): number | null => {
+/**
+ * Resume la medida principal sobre todas las filas visibles, con SU operador.
+ *
+ * Una tarjeta colapsa el dataset entero en un numero, asi que es donde mas se notaba el fallo:
+ * `DiasPromedioResolucion` sobre 64 filas daba 10 593 dias (la suma de 64 promedios) en vez de
+ * 165,5. Delega en `aggregateBy` sin dimensiones —que es exactamente «un solo grupo»— para no
+ * tener una segunda implementacion del promedio que pueda separarse de la de los graficos.
+ */
+export function toKpi(
+  result: QueryResult,
+  measures: string[],
+  label: string,
+  agregaciones: Agregacion[],
+): KpiViewModel {
+  const { rows } = aggregateBy(result, [], measures, agregaciones);
+  const valores = rows[0]?.values ?? [];
+
+  const presente = (nombre: string | undefined, i: number): number | null => {
     if (!nombre) return null;
-    const i = result.columns.findIndex((c) => c.name === nombre);
-    if (i < 0) return null;
-    return result.rows.reduce((total, row) => total + toNumber(row[i]), 0);
+    if (result.columns.findIndex((c) => c.name === nombre) < 0) return null;
+    return valores[i] ?? null;
   };
 
-  const valor = suma(principal) ?? 0;
-  const base = suma(comparacion);
+  const valor = presente(measures[0], 0);
+  const base = presente(measures[1], 1);
 
-  if (base === null) return { value: valor, label };
+  if (valor === null || base === null) return { value: valor, label };
 
   return {
     value: valor,
@@ -214,16 +260,26 @@ export interface MatrixViewModel {
   columnLabels: string[];
   /** cells[fila][columna]. Celda nula significa que esa combinacion no tiene filas. */
   cells: (number | null)[][];
-  rowTotals: number[];
-  columnTotals: number[];
-  grandTotal: number;
+  rowTotals: (number | null)[];
+  columnTotals: (number | null)[];
+  grandTotal: number | null;
 }
 
-/** Cruza dos dimensiones con una medida. La primera va en filas; la segunda, en columnas. */
+/**
+ * Cruza dos dimensiones con una medida. La primera va en filas; la segunda, en columnas.
+ *
+ * Los totales se acumulan DESDE LAS FILAS DE ORIGEN, no desde las celdas ya calculadas. Con la
+ * suma daba igual —la suma de las celdas es la suma total—, pero con cualquier otro operador no:
+ * el promedio de una fila es el promedio de sus registros, no el promedio de los promedios de sus
+ * celdas, que solo coincide si todas las celdas pesan lo mismo. Por eso cada fila de origen
+ * alimenta cuatro acumuladores a la vez: su celda, su total de fila, su total de columna y el
+ * total general.
+ */
 export function toMatrix(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
   measure: string,
+  agregacion: Agregacion,
 ): MatrixViewModel {
   const [dimFila, dimColumna] = dimensions;
   const iFila = dimFila ? result.columns.findIndex((c) => c.name === fieldKey(dimFila)) : -1;
@@ -232,30 +288,45 @@ export function toMatrix(
 
   const filas: string[] = [];
   const columnas: string[] = [];
-  const mapa = new Map<string, number>();
+  const celdas = new Map<string, Acumulador>();
+  const totalDeFila = new Map<string, Acumulador>();
+  const totalDeColumna = new Map<string, Acumulador>();
+  const general = nuevoAcumulador(agregacion);
+
+  const enMapa = (mapa: Map<string, Acumulador>, clave: string): Acumulador => {
+    let acc = mapa.get(clave);
+    if (!acc) {
+      acc = nuevoAcumulador(agregacion);
+      mapa.set(clave, acc);
+    }
+    return acc;
+  };
 
   for (const row of result.rows) {
     const f = iFila >= 0 ? String(row[iFila]) : '(sin dato)';
     const c = iCol >= 0 ? String(row[iCol]) : '(sin dato)';
     if (!filas.includes(f)) filas.push(f);
     if (!columnas.includes(c)) columnas.push(c);
-    const clave = `${f}${SEP}${c}`;
-    mapa.set(clave, (mapa.get(clave) ?? 0) + (iMed >= 0 ? toNumber(row[iMed]) : 0));
+    if (iMed < 0) continue;
+    const valor = row[iMed];
+    acumular(enMapa(celdas, `${f}${SEP}${c}`), valor);
+    acumular(enMapa(totalDeFila, f), valor);
+    acumular(enMapa(totalDeColumna, c), valor);
+    acumular(general, valor);
   }
 
-  const cells = filas.map((f) => columnas.map((c) => mapa.get(`${f}${SEP}${c}`) ?? null));
-  const rowTotals = cells.map((fila) => fila.reduce<number>((t, v) => t + (v ?? 0), 0));
-  const columnTotals = columnas.map((_, i) =>
-    cells.reduce<number>((t, fila) => t + (fila[i] ?? 0), 0),
-  );
+  const cerrarDe = (mapa: Map<string, Acumulador>, clave: string): number | null => {
+    const acc = mapa.get(clave);
+    return acc ? cerrar(acc) : null;
+  };
 
   return {
     rowLabels: filas,
     columnLabels: columnas,
-    cells,
-    rowTotals,
-    columnTotals,
-    grandTotal: rowTotals.reduce((t, v) => t + v, 0),
+    cells: filas.map((f) => columnas.map((c) => cerrarDe(celdas, `${f}${SEP}${c}`))),
+    rowTotals: filas.map((f) => cerrarDe(totalDeFila, f)),
+    columnTotals: columnas.map((c) => cerrarDe(totalDeColumna, c)),
+    grandTotal: result.rows.length === 0 || iMed < 0 ? null : cerrar(general),
   };
 }
 
