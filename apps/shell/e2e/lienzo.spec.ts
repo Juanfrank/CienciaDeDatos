@@ -389,3 +389,204 @@ test.describe('secciones, complementos y pestanas', () => {
     await expect(page.getByTestId('pestanas-izquierda')).toBeVisible();
   });
 });
+
+test.describe('arrastrar y redimensionar', () => {
+  /**
+   * Arrastra un asa N celdas. Se mueve en varios pasos porque un unico `mouse.move` salta el
+   * `pointermove` intermedio y el arrastre nunca llega a calcular un destino.
+   */
+  const arrastrar = async (
+    page: Page,
+    prueba: string,
+    celdasX: number,
+    celdasY: number,
+  ) => {
+    const asa = await page.getByTestId(prueba).boundingBox();
+    if (!asa) throw new Error(`Sin asa: ${prueba}`);
+    const rejilla = await page.locator('.lienzo__rejilla').boundingBox();
+    if (!rejilla) throw new Error('Sin rejilla');
+
+    // El ancho de celda se mide de la rejilla real, igual que hace el propio arrastre: es fluida.
+    const anchoDeCelda = (rejilla.width - 16 * 11) / 12 + 16;
+    const altoDeCelda = 56 + 16;
+
+    const desdeX = asa.x + asa.width / 2;
+    const desdeY = asa.y + asa.height / 2;
+    await page.mouse.move(desdeX, desdeY);
+    await page.mouse.down();
+    for (let paso = 1; paso <= 4; paso += 1) {
+      await page.mouse.move(
+        desdeX + (celdasX * anchoDeCelda * paso) / 4,
+        desdeY + (celdasY * altoDeCelda * paso) / 4,
+      );
+    }
+    await page.mouse.up();
+  };
+
+  test('arrastrar el asa mueve el bloque de columna', async ({ page }) => {
+    await nuevoModulo(page, 'arr-mover');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    await page.getByTestId('pestana-formato').click();
+    await expect(page.getByTestId(`posicion-${id}`)).toContainText('Columna 1–6 de 12');
+
+    await arrastrar(page, `asa-mover-${id}`, 3, 0);
+    await guardado(page);
+
+    await expect(page.getByTestId(`posicion-${id}`)).toContainText('Columna 4–9 de 12');
+  });
+
+  test('arrastrar la esquina cambia el ancho', async ({ page }) => {
+    await nuevoModulo(page, 'arr-medir');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+    await page.getByTestId('pestana-formato').click();
+
+    await arrastrar(page, `asa-medir-${id}`, 2, 0);
+    await guardado(page);
+
+    await expect(page.getByTestId(`posicion-${id}`)).toContainText('Columna 1–8 de 12');
+  });
+
+  test('el arrastre pasa por el MISMO camino que los botones', async ({ page }) => {
+    /*
+     * Era la condicion con la que se aplazo el arrastre: un solo sitio donde se decide donde queda
+     * un objeto. Se comprueba mezclando los dos gestos sobre el mismo bloque — si fueran caminos
+     * distintos, el segundo partiria de un estado que el primero no actualizo.
+     */
+    await nuevoModulo(page, 'arr-mismo');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+    await page.getByTestId('pestana-formato').click();
+
+    await arrastrar(page, `asa-mover-${id}`, 2, 0);
+    await guardado(page);
+    await expect(page.getByTestId(`posicion-${id}`)).toContainText('Columna 3–8 de 12');
+
+    await page.getByTestId(`derecha-${id}`).click();
+    await guardado(page);
+    await expect(page.getByTestId(`posicion-${id}`)).toContainText('Columna 4–9 de 12');
+  });
+
+  test('un destino ocupado se marca invalido y al soltar NO pasa nada', async ({ page }) => {
+    /*
+     * Empujar los objetos de alrededor es lo que hacen otros editores y es donde se pierde el
+     * control: se mueve uno y se descolocan tres. Aqui el destino ocupado se rechaza.
+     */
+    await nuevoModulo(page, 'arr-ocupado');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    await page.getByTestId('pestana-visualizaciones').click();
+    await page.getByTestId('anadir-barras').click();
+    await guardado(page);
+
+    // El primero esta en 1–6 y el segundo en 7–12, en la misma fila.
+    const primero = (await page
+      .locator('[data-testid^="bloque-obj-"]')
+      .first()
+      .getAttribute('data-testid'))!.replace('bloque-', '');
+
+    await page.getByTestId(`elegir-${primero}`).click();
+    await page.getByTestId('pestana-formato').click();
+    await expect(page.getByTestId(`posicion-${primero}`)).toContainText('Columna 1–6 de 12');
+
+    await arrastrar(page, `asa-mover-${primero}`, 6, 0);
+    await guardado(page);
+
+    // Sigue donde estaba: el destino se pisaba con el otro bloque.
+    await expect(page.getByTestId(`posicion-${primero}`)).toContainText('Columna 1–6 de 12');
+  });
+
+  test('sin permiso de edicion no hay asas', async ({ page }) => {
+    // Un modulo publicado se mira. Las asas solo aparecen donde el panel tambien aparece.
+    await entrarComo(page, 'u-ana');
+    await page.goto('/editor/casos-pendientes');
+    await expect(page.getByTestId('editor-solo-lectura')).toBeVisible();
+    await expect(page.locator('.lienzo__asa')).toHaveCount(0);
+  });
+});
+
+test.describe('las ranuras mandan, no el orden', () => {
+  test('se puede llenar el Eje Y sin llenar el Eje X', async ({ page }) => {
+    /*
+     * El caso que el reparto posicional no podia expresar: el primer campo caia siempre en la
+     * primera ranura. Aqui la medida va a su sitio y el eje X se queda vacio — y el objeto se
+     * marca roto, que es lo correcto: un grafico de barras sin eje no se puede dibujar.
+     */
+    await nuevoModulo(page, 'ranura-solo-y');
+    await page.getByTestId('anadir-barras').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    await page.getByTestId(`pozo-${id}-eje-x-quitar-DimTribunal.Distrito`).click();
+    await guardado(page);
+
+    await expect(page.getByTestId(`pozo-${id}-eje-x`)).toContainText('0/1');
+    await expect(page.getByTestId(`pozo-${id}-eje-y`)).toContainText('CasosIngresados');
+    await expect(page.getByTestId(`bloque-${id}`).getByTestId('objeto-roto')).toBeVisible();
+  });
+
+  test('se puede llenar SOLO la serie, y el editor dice que falta el eje', async ({ page }) => {
+    await nuevoModulo(page, 'ranura-solo-serie');
+    await page.getByTestId('anadir-barras').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    await page.getByTestId(`pozo-${id}-eje-x-quitar-DimTribunal.Distrito`).click();
+    await guardado(page);
+    await page.getByTestId(`pozo-${id}-serie-anadir`).click();
+    await page.getByTestId(`pozo-${id}-serie-opcion-DimTribunal.Materia`).click();
+    await guardado(page);
+
+    // Una dimension mapeada: el contrato global («entre 1 y 2») se cumple. La ranura no.
+    await expect(page.getByTestId(`pozo-${id}-serie`)).toContainText('DimTribunal.Materia');
+    await expect(page.getByTestId('editor-bloqueos')).toContainText('Eje X');
+
+    /*
+     * Y el bloque se marca ROTO en el lienzo, no se dibuja con la serie haciendo de eje.
+     *
+     * Sin esta comprobacion, el lector daba el objeto por bueno —el contrato global se cumple— y
+     * el editor avisaba de que faltaba el eje: dos respuestas distintas a la misma pregunta en la
+     * misma pantalla.
+     */
+    await expect(page.getByTestId(`bloque-${id}`).getByTestId('objeto-roto')).toBeVisible();
+  });
+
+  test('el campo vuelve a SU ranura, no a la primera libre', async ({ page }) => {
+    await nuevoModulo(page, 'ranura-vuelve');
+    await page.getByTestId('anadir-barras').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    await page.getByTestId(`pozo-${id}-eje-x-quitar-DimTribunal.Distrito`).click();
+    await guardado(page);
+    await page.getByTestId(`pozo-${id}-serie-anadir`).click();
+    await page.getByTestId(`pozo-${id}-serie-opcion-DimTribunal.Materia`).click();
+    await guardado(page);
+    await page.getByTestId(`pozo-${id}-eje-x-anadir`).click();
+    await page.getByTestId(`pozo-${id}-eje-x-opcion-DimTribunal.Distrito`).click();
+    await guardado(page);
+
+    // Cada uno donde se puso, aunque se hayan llenado en orden inverso al declarado.
+    await expect(page.getByTestId(`pozo-${id}-eje-x`)).toContainText('DimTribunal.Distrito');
+    await expect(page.getByTestId(`pozo-${id}-serie`)).toContainText('DimTribunal.Materia');
+    await expect(page.getByTestId('editor-sin-bloqueos')).toBeVisible();
+  });
+
+  test('un modulo guardado ANTES de las ranuras se sigue viendo igual', async ({ page }) => {
+    /*
+     * El seed se escribio con el modelo posicional. Sin la deduccion por orden, cada modulo ya
+     * publicado apareceria con las ranuras vacias y sus campos perdidos de vista.
+     */
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    await expect(page.getByTestId('kpi-valor').first()).not.toHaveText('0');
+    await expect(page.getByTestId('objeto-roto')).toHaveCount(0);
+    await expect(page.getByTestId('grafico-barras-flujo')).toHaveAttribute('data-montado', 'si');
+  });
+});

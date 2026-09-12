@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { GRID_COLUMNS, type GridItem } from '@app/module-model';
 import {
-  fieldKey,
-  indiceDeInsercion,
-  pozosPorDefecto,
-  repartirEnPozos,
+  cabeEnRanura,
+  conCampoEnRanura,
+  ranurasDe,
+  ranurasPorDefecto,
+  sinCampoEnRanura,
   type AttachedObjectInstance,
   type ObjectInstance,
-  type PozoDeCampos,
+  type RanuraDeCampos,
 } from '@app/ui-components';
 import type { DatasetDePaleta, ObjetoDePaleta } from '../../server/editor';
 import { Icono, type NombreDeIcono } from '../iconos/Icono';
@@ -227,51 +228,31 @@ function Datos({
   const cambiarInstancia = (cambio: (i: ObjectInstance) => ObjectInstance) =>
     onCambiar(item.id, (it) => ({ ...it, instance: cambio(it.instance) }));
 
-  const declarados = definicion?.pozos ?? [];
-  const porDefecto = pozosPorDefecto({
-    dimensions: definicion?.dimensiones ?? { min: 0, max: 0 },
-    measures: definicion?.medidas ?? { min: 0, max: 0 },
-  });
-  const pozos =
-    declarados.length > 0 ? declarados : [...porDefecto.dimensiones, ...porDefecto.medidas];
+  const declaradas = definicion?.pozos ?? [];
+  const ranuras =
+    declaradas.length > 0
+      ? declaradas
+      : ranurasPorDefecto({
+          dimensions: definicion?.dimensiones ?? { min: 0, max: 0 },
+          measures: definicion?.medidas ?? { min: 0, max: 0 },
+        });
 
-  const deDimension = pozos.filter((p) => p.tipo === 'dimension');
-  const deMedida = pozos.filter((p) => p.tipo === 'medida');
+  const deDimension = ranuras.filter((r) => r.tipo === 'dimension');
+  const deMedida = ranuras.filter((r) => r.tipo === 'medida');
+  const asignacion = ranurasDe(item.instance, ranuras);
 
-  const claves = item.instance.binding.dimensions.map(fieldKey);
-  const medidas = item.instance.binding.measures;
+  /*
+   * Poner y quitar van POR RANURA, no por indice.
+   *
+   * Es todo el cambio: antes el editor insertaba en una posicion calculada del array y el pozo
+   * era una particion sobre ese orden, asi que no habia forma de llenar el eje Y sin llenar antes
+   * el eje X. Ahora el campo dice a que ranura pertenece y las demas pueden quedarse vacias.
+   */
+  const poner = (ranuraId: string, campo: string) =>
+    cambiarInstancia((i) => conCampoEnRanura(i, ranuras, ranuraId, campo));
 
-  const repartoDim = repartirEnPozos(claves, deDimension);
-  const repartoMed = repartirEnPozos(medidas, deMedida);
-
-  const ponerDimension = (pozo: PozoDeCampos, campo: string) =>
-    cambiarInstancia((i) => {
-      const actuales = i.binding.dimensions;
-      const indice = indiceDeInsercion(actuales.map(fieldKey), deDimension, pozo.id);
-      const siguientes = [...actuales];
-      siguientes.splice(indice, 0, aFieldRef(campo));
-      return { ...i, binding: { ...i.binding, dimensions: siguientes } };
-    });
-
-  const quitarDimension = (campo: string) =>
-    cambiarInstancia((i) => ({
-      ...i,
-      binding: { ...i.binding, dimensions: i.binding.dimensions.filter((d) => fieldKey(d) !== campo) },
-    }));
-
-  const ponerMedida = (pozo: PozoDeCampos, campo: string) =>
-    cambiarInstancia((i) => {
-      const indice = indiceDeInsercion(i.binding.measures, deMedida, pozo.id);
-      const siguientes = [...i.binding.measures];
-      siguientes.splice(indice, 0, campo);
-      return { ...i, binding: { ...i.binding, measures: siguientes } };
-    });
-
-  const quitarMedida = (campo: string) =>
-    cambiarInstancia((i) => ({
-      ...i,
-      binding: { ...i.binding, measures: i.binding.measures.filter((m) => m !== campo) },
-    }));
+  const quitar = (ranuraId: string, campo: string) =>
+    cambiarInstancia((i) => sinCampoEnRanura(i, ranuras, ranuraId, campo));
 
   return (
     <>
@@ -312,48 +293,37 @@ function Datos({
 
       {deDimension.length > 0 ? (
         <Seccion titulo="Campos" prueba={`seccion-campos-${item.id}`}>
-          {deDimension.map((pozo) => (
-            <Pozo
-              key={pozo.id}
-              pozo={pozo}
-              prueba={`pozo-${item.id}-${pozo.id}`}
-              elegidos={repartoDim.porPozo.get(pozo.id) ?? []}
+          {deDimension.map((ranura) => (
+            <RanuraDeEdicion
+              key={ranura.id}
+              ranura={ranura}
+              todas={ranuras}
+              item={item}
+              elegidos={asignacion.get(ranura.id) ?? []}
               disponibles={dataset?.dimensiones ?? []}
-              // Solo `guardando`. Pasar aqui tambien «esta lleno» apagaba los botones de QUITAR
-              // del propio pozo, asi que un pozo completo no se podia vaciar. El pozo ya sabe si
-              // esta lleno —`elegidos.length >= max`— y apaga solo lo que corresponde: el `+`.
               guardando={guardando}
-              onAnadir={(campo) => ponerDimension(pozo, campo)}
-              onQuitar={quitarDimension}
+              onAnadir={poner}
+              onQuitar={quitar}
             />
           ))}
-          {repartoDim.sobrantes.length > 0 ? (
-            <p className="aviso aviso--problema" data-testid={`sobrantes-dim-${item.id}`}>
-              Sin ranura: {repartoDim.sobrantes.join(', ')}. Quite alguno para que quepan.
-            </p>
-          ) : null}
         </Seccion>
       ) : null}
 
       {deMedida.length > 0 ? (
         <Seccion titulo="Cifras" prueba={`seccion-cifras-${item.id}`}>
-          {deMedida.map((pozo) => (
-            <Pozo
-              key={pozo.id}
-              pozo={pozo}
-              prueba={`pozo-${item.id}-${pozo.id}`}
-              elegidos={repartoMed.porPozo.get(pozo.id) ?? []}
+          {deMedida.map((ranura) => (
+            <RanuraDeEdicion
+              key={ranura.id}
+              ranura={ranura}
+              todas={ranuras}
+              item={item}
+              elegidos={asignacion.get(ranura.id) ?? []}
               disponibles={dataset?.medidas ?? []}
               guardando={guardando}
-              onAnadir={(campo) => ponerMedida(pozo, campo)}
-              onQuitar={quitarMedida}
+              onAnadir={poner}
+              onQuitar={quitar}
             />
           ))}
-          {repartoMed.sobrantes.length > 0 ? (
-            <p className="aviso aviso--problema" data-testid={`sobrantes-med-${item.id}`}>
-              Sin ranura: {repartoMed.sobrantes.join(', ')}. Quite alguna para que quepan.
-            </p>
-          ) : null}
         </Seccion>
       ) : null}
 
@@ -367,6 +337,50 @@ function Datos({
         Quitar del modulo
       </button>
     </>
+  );
+}
+
+/** Un `Pozo` atado a su ranura: traduce el callback generico a «esta ranura». */
+function RanuraDeEdicion({
+  ranura,
+  todas,
+  item,
+  elegidos,
+  disponibles,
+  guardando,
+  onAnadir,
+  onQuitar,
+}: {
+  ranura: RanuraDeCampos;
+  /**
+   * TODAS las ranuras del objeto, no solo esta.
+   *
+   * `cabeEnRanura` necesita la lista completa: con una sola, la deduccion por orden —la que hace
+   * que lo guardado antes de las ranuras se siga viendo— le asigna el primer campo del array, que
+   * es el de otra ranura. El sintoma era una ranura vacia que se anunciaba completa.
+   */
+  todas: RanuraDeCampos[];
+  item: GridItem;
+  elegidos: string[];
+  disponibles: string[];
+  guardando: boolean;
+  onAnadir: (ranuraId: string, campo: string) => void;
+  onQuitar: (ranuraId: string, campo: string) => void;
+}) {
+  return (
+    <Pozo
+      pozo={ranura}
+      prueba={`pozo-${item.id}-${ranura.id}`}
+      elegidos={elegidos}
+      disponibles={disponibles}
+      // Solo `guardando`. Pasar aqui tambien «esta llena» apagaba los botones de QUITAR de la
+      // propia ranura, asi que una ranura completa no se podia vaciar. El componente ya sabe si
+      // esta llena y apaga solo lo que corresponde: el `+`.
+      guardando={guardando}
+      lleno={!cabeEnRanura(item.instance, todas, ranura.id)}
+      onAnadir={(campo) => onAnadir(ranura.id, campo)}
+      onQuitar={(campo) => onQuitar(ranura.id, campo)}
+    />
   );
 }
 
@@ -612,8 +626,3 @@ function Paso({
   );
 }
 
-/** 'Tabla.Campo' -> FieldRef. El editor trabaja con la clave, que es lo que se ve en pantalla. */
-function aFieldRef(clave: string): { table: string; field: string } {
-  const [table = '', field = ''] = clave.split('.');
-  return { table, field };
-}

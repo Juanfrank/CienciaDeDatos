@@ -1,8 +1,10 @@
 import {
   type BindingProblem,
   type ObjectRegistry,
+  ranurasDelContrato,
   validarPanelDeFiltros,
   validarPresentacion,
+  validarRanuras,
   validateAttachments,
   validateBinding,
 } from '@app/ui-components';
@@ -129,6 +131,18 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
          * personalizacion seria un tipo de TypeScript: cierto mientras nadie edite el JSON de un
          * modulo a mano, que es exactamente lo que hace el panel de administracion.
          */
+        /*
+         * Las ranuras, ademas del contrato global.
+         *
+         * El contrato dice «entre 1 y 2 dimensiones» y se cumple igual con la dimension en el eje
+         * X que en la serie — y solo el primero es un grafico que se puede dibujar. Solo la ranura
+         * sabe cual de sus campos hace falta.
+         */
+        ...validarRanuras(instance, ranurasDelContrato(contrato)).map((p) => ({
+          slot: `ranura.${p.ranura}`,
+          kind: 'contrato-incumplido' as const,
+          problem: p.problema,
+        })),
         ...validarPresentacion(instance.presentacion, version.presentation).map((p) => ({
           slot: `presentacion.${p.clave}`,
           kind: 'contrato-incumplido' as const,

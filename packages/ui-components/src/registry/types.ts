@@ -1,7 +1,7 @@
 import type { FieldRef } from '@app/data-contracts';
 import type { ClaveDePresentacion, PresentacionDeObjeto } from '../presentacion/contrato';
 import type { ConfiguracionDePanelDeFiltros } from '../presentacion/panelDeFiltros';
-import type { PozoDeCampos } from '../presentacion/pozos';
+import type { AsignacionDeRanuras, RanuraDeCampos } from '../presentacion/pozos';
 
 /**
  * Repositorio de objetos visuales versionados — seccion 4.5.
@@ -42,7 +42,7 @@ export interface ObjectDataContract {
    * prueba del catalogo que lo comprueba: un pozo que prometiera mas de lo que el objeto admite
    * dejaria guardar un mapeo que la validacion rechaza despues.
    */
-  pozos?: PozoDeCampos[];
+  pozos?: RanuraDeCampos[];
 }
 
 export interface ObjectCertification {
@@ -163,8 +163,26 @@ export interface ObjectInstance {
   /** Mapeo de ranuras a campos de la fuente activa. */
   binding: {
     datasetId: string;
+    /**
+     * Las columnas que el objeto necesita, en el orden en que se declaran sus ranuras.
+     *
+     * Se DERIVAN de `ranuras` y se guardan junto a ellas. Siguen aqui porque son lo que leen el
+     * lector del cache, la validacion de esquema, la proyeccion y la exportacion: cambiar eso
+     * habria obligado a tocar todo el camino de lectura para no ganar nada.
+     */
     dimensions: FieldRef[];
     measures: string[];
+    /**
+     * A QUE RANURA pertenece cada campo. Es la fuente de verdad del mapeo.
+     *
+     * Antes el reparto lo decidia el orden del array, y eso impedia llenar una ranura sin llenar
+     * antes las anteriores: en un grafico de barras no habia forma de poner solo la serie, porque
+     * el primer campo caia siempre en el eje X.
+     *
+     * Opcional para que lo guardado antes de esto siga abriendose: sin el mapa se deduce del
+     * orden, que es exactamente como se guardo.
+     */
+    ranuras?: AsignacionDeRanuras;
   };
   /**
    * Objetos adjuntados a este.

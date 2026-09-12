@@ -1517,6 +1517,84 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 }
 
 /*
+ * Las asas de arrastre.
+ *
+ * Aparecen al pasar el raton o con el bloque elegido: siempre visibles serian dos marcas sobre
+ * cada objeto compitiendo con el dato. `z-index: 3` las pone por encima del boton de seleccion,
+ * que cubre el bloque entero.
+ *
+ * `touch-action: none` es obligatorio y no cosmetico: sin el, el navegador se queda el gesto para
+ * desplazar la pagina y el arrastre no llega a empezar en una pantalla tactil.
+ */
+.lienzo__asa {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+  opacity: 0;
+  touch-action: none;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.lienzo__bloque:hover .lienzo__asa,
+.lienzo__bloque[data-elegido='si'] .lienzo__asa { opacity: 1; }
+
+.lienzo__asa--mover {
+  top: 4px;
+  right: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  cursor: grab;
+}
+.lienzo__asa--mover:active { cursor: grabbing; }
+
+/* La esquina inferior derecha, como cualquier control de redimension. */
+.lienzo__asa--medir {
+  right: -2px;
+  bottom: -2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 0 0 var(--md-sys-shape-corner-medium) 0;
+  cursor: nwse-resize;
+}
+
+/* Mientras se arrastra, el bloque se atenua: lo que manda es la sombra del destino. */
+.lienzo__bloque[data-arrastrando='si'] { opacity: 0.45; }
+
+/*
+ * La sombra del destino.
+ *
+ * Ocupa una celda de la rejilla, con el mismo hueco y las mismas lineas que tendra el bloque. Un
+ * rectangulo flotante calculado en pixeles habria quedado a uno o dos de donde acaba el objeto, y
+ * es justo la diferencia que hace dudar de si va a caer donde parece.
+ */
+.lienzo__sombra {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--md-sys-color-primary);
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent);
+  color: var(--md-sys-color-primary);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  pointer-events: none;
+}
+.lienzo__sombra[data-valido='no'] {
+  border-color: var(--md-sys-color-error);
+  background: color-mix(in srgb, var(--md-sys-color-error) 10%, transparent);
+  color: var(--md-sys-color-error);
+}
+
+/* Mientras se arrastra no se selecciona texto por accidente. */
+.lienzo__rejilla[data-arrastrando='si'] { user-select: none; }
+
+/*
  * El boton de seleccion: transparente y del tamano del bloque.
  *
  * Va ENCIMA del contenido, que esta `inert`, asi que recoge la pulsacion sin que el objeto de

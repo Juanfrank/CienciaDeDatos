@@ -214,7 +214,14 @@ export function EditorDeModulo({
           items={items}
           objetos={objetos}
           seleccion={seleccion}
+          editable={editable}
           onSeleccionar={editable ? setSeleccion : () => undefined}
+          // El arrastre entrega una posicion y la aplica el MISMO camino que los botones del
+          // panel. Es la condicion con la que se aplazo: un solo sitio donde se decide donde
+          // queda un objeto, no dos que puedan divergir.
+          onColocar={(itemId, position) =>
+            void cambiar(itemId, (i) => ({ ...i, position }))
+          }
         />
 
         {editable ? (

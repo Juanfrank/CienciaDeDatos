@@ -23,6 +23,7 @@ export {
   layoutsForAllBreakpoints,
   readingOrder,
   rowSpanForBreakpoint,
+  seSolapan,
   validateLayout,
   type Breakpoint,
   type GridPosition,

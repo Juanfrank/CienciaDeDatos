@@ -11,7 +11,13 @@ import {
   findPage,
   validateModule,
 } from '@app/module-model';
-import { type BindingProblem, fieldKey, validateBinding } from '@app/ui-components';
+import {
+  type BindingProblem,
+  fieldKey,
+  ranurasDelContrato,
+  validarRanuras,
+  validateBinding,
+} from '@app/ui-components';
 import { cacheL2, datasetReader, findTeam, getGeneralTree, objectRegistry, scopeFor } from './contexto';
 
 /**
@@ -120,7 +126,23 @@ async function leerObjetos(
     }
 
     const columnas = lectura.result.columns.map((c) => c.name);
-    const problems = validateBinding(instance, contrato, columnas);
+    /*
+     * Las ranuras se comprueban AQUI tambien, no solo en `validateModule`.
+     *
+     * Son dos caminos distintos: `validateModule` alimenta la lista de diagnosticos del editor, y
+     * esto decide si el objeto se DIBUJA o se marca roto. Sin la comprobacion aqui, un grafico con
+     * el eje X vacio y la serie llena se dibujaba tan campante usando la serie como eje, mientras
+     * el editor avisaba de que faltaba el eje — dos respuestas distintas a la misma pregunta en la
+     * misma pantalla.
+     */
+    const problems = [
+      ...validateBinding(instance, contrato, columnas),
+      ...validarRanuras(instance, ranurasDelContrato(contrato)).map((p) => ({
+        slot: `ranura.${p.ranura}`,
+        kind: 'contrato-incumplido' as const,
+        problem: p.problema,
+      })),
+    ];
 
     if (lectura.stale) degraded = true;
     if (lectura.generatedAt && (!masAntiguo || lectura.generatedAt < masAntiguo)) {

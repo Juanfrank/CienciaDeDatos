@@ -2,7 +2,11 @@ import type { QueryResult } from '@app/data-contracts';
 import {
   type BindingProblem,
   type NombreDeIcono,
+  type RanuraDeCampos,
+  aFieldRef,
+  campoDeRanura,
   fieldKey,
+  ranurasDe,
   formateadorDe,
   proyectarObjeto,
   toCategorical,
@@ -32,6 +36,25 @@ import { Icono } from './iconos/Icono';
  * Este se queda para los rotulos que no pertenecen a ninguna instancia.
  */
 const formatearNumero = (n: number): string => new Intl.NumberFormat('es-DO').format(Math.round(n));
+
+/**
+ * Los campos de un objeto, LEIDOS POR RANURA.
+ *
+ * Antes se leia por posicion —`dimensions[0]` era el eje— y eso hacia imposible dejar el eje X
+ * vacio con la serie llena: el unico campo del array habria pasado por eje. Preguntando por la
+ * ranura, un eje vacio es un eje vacio y el objeto se marca roto en vez de dibujar otra cosa.
+ *
+ * Las ranuras llegan como prop desde el registro porque este componente no lo consulta: recibe una
+ * instancia ya resuelta. `undefined` significa «este objeto no declara ranuras», y entonces se cae
+ * al orden de siempre.
+ */
+function porRanura(instance: ObjectInstance, ranuras: RanuraDeCampos[] | undefined) {
+  if (!ranuras || ranuras.length === 0) return null;
+  return {
+    uno: (id: string) => campoDeRanura(instance, ranuras, id),
+    varios: (id: string) => ranurasDe(instance, ranuras).get(id) ?? [],
+  };
+}
 
 /** Icono por defecto de cada tipo, cuando la instancia no elige otro. */
 const ICONO_POR_TIPO: Record<string, NombreDeIcono> = {
@@ -169,8 +192,14 @@ export function Marco({
   );
 }
 
-export function TarjetaKpi({ titulo, result, instance }: ObjetoProps) {
-  const kpi = toKpi(result, instance.binding.measures, titulo);
+export function TarjetaKpi({ titulo, result, instance, ranuras }: ObjetoProps) {
+  const r = porRanura(instance, ranuras);
+  // El valor y la comparacion, en ese orden, salen de sus ranuras: con dos medidas mapeadas al
+  // reves la tarjeta mostraba la comparacion como cifra principal.
+  const medidas = r
+    ? [r.uno('valor'), r.uno('comparacion')].filter((m): m is string => m !== undefined)
+    : instance.binding.measures;
+  const kpi = toKpi(result, medidas, titulo);
   const delta = kpi.delta;
   const formatear = formateadorDe(instance.presentacion?.formato);
 
@@ -190,10 +219,23 @@ export function TarjetaKpi({ titulo, result, instance }: ObjetoProps) {
   );
 }
 
-export function Barras({ titulo, result, instance, onFiltrar }: ObjetoProps) {
-  const vm = toCategorical(result, instance.binding.dimensions, instance.binding.measures);
+export function Barras({ titulo, result, instance, onFiltrar, ranuras }: ObjetoProps) {
+  /*
+   * El eje X sale de SU ranura, no de la primera dimension.
+   *
+   * `toCategorical` sigue recibiendo arrays ordenados —eje primero, serie despues— porque asi es
+   * como agrega. Lo que cambia es quien decide ese orden: la ranura, no el orden en que alguien
+   * mapeo los campos.
+   */
+  const r = porRanura(instance, ranuras);
+  const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
+  const serie = r ? r.uno('serie') : fieldKeyDe(instance.binding.dimensions[1]);
+  const medidas = r ? r.varios('eje-y') : instance.binding.measures;
+
+  const dimensiones = [ejeX, serie].filter((c): c is string => c !== undefined).map(aFieldRef);
+  const vm = toCategorical(result, dimensiones, medidas);
   const maximo = Math.max(1, ...vm.points.flatMap((p) => p.values));
-  const dimension = instance.binding.dimensions[0];
+  const dimension = ejeX ? aFieldRef(ejeX) : undefined;
 
   return (
     <Marco
@@ -243,9 +285,13 @@ export function Barras({ titulo, result, instance, onFiltrar }: ObjetoProps) {
   );
 }
 
-export function Lineas({ titulo, result, instance }: ObjetoProps) {
-  const vm = toCategorical(result, instance.binding.dimensions, instance.binding.measures);
-  const dimension = instance.binding.dimensions[0];
+export function Lineas({ titulo, result, instance, ranuras }: ObjetoProps) {
+  const r = porRanura(instance, ranuras);
+  const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
+  const medidas = r ? r.varios('eje-y') : instance.binding.measures;
+
+  const dimension = ejeX ? aFieldRef(ejeX) : undefined;
+  const vm = toCategorical(result, dimension ? [dimension] : [], medidas);
 
   return (
     <Marco titulo={titulo} instance={instance} result={result}>
@@ -333,9 +379,17 @@ export function Tabla({ titulo, result, instance }: ObjetoProps) {
   );
 }
 
-export function Matriz({ titulo, result, instance }: ObjetoProps) {
-  const medida = instance.binding.measures[0] ?? '';
-  const vm = toMatrix(result, instance.binding.dimensions, medida);
+export function Matriz({ titulo, result, instance, ranuras }: ObjetoProps) {
+  const r = porRanura(instance, ranuras);
+  const filas = r ? r.uno('filas') : fieldKeyDe(instance.binding.dimensions[0]);
+  const columnas = r ? r.uno('columnas') : fieldKeyDe(instance.binding.dimensions[1]);
+  const medida = (r ? r.uno('valores') : instance.binding.measures[0]) ?? '';
+
+  // Filas y columnas por su ranura: intercambiadas, la matriz sigue dibujando pero cruza al reves.
+  const dimensiones = [filas, columnas]
+    .filter((c): c is string => c !== undefined)
+    .map(aFieldRef);
+  const vm = toMatrix(result, dimensiones, medida);
 
   return (
     <Marco titulo={titulo} instance={instance} result={result}>
@@ -384,9 +438,20 @@ export interface ObjetoProps {
   titulo: string;
   result: QueryResult;
   instance: ObjectInstance;
+  /**
+   * Las ranuras que declara la version del objeto.
+   *
+   * Llegan como dato desde el servidor, que es quien tiene el registro. Un objeto que no las
+   * declare recibe `undefined` y se dibuja leyendo por orden, como siempre.
+   */
+  ranuras?: RanuraDeCampos[];
   /** Filtrado cruzado (4.4): anade un filtro a la query string, no a un estado paralelo. */
   onFiltrar?: (campo: string, valor: string) => void;
 }
+
+/** `FieldRef` -> 'Tabla.Campo', tolerando que no haya campo. */
+const fieldKeyDe = (ref: { table: string; field: string } | undefined): string | undefined =>
+  ref ? fieldKey(ref) : undefined;
 
 /** Objeto declarado en el catalogo pero sin render disponible todavia (el mapa). */
 export function ObjetoNoDisponible({ titulo, objectId }: { titulo: string; objectId: string }) {

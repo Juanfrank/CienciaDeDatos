@@ -1,6 +1,7 @@
 import type { QueryResult } from '@app/data-contracts';
 import type { GridPosition } from '@app/module-model';
-import type { BindingProblem, ObjectInstance } from '@app/ui-components';
+import type { BindingProblem, ObjectInstance, RanuraDeCampos } from '@app/ui-components';
+import { objectRegistry } from './contexto';
 import type { ObjetoCargado } from './datos';
 
 /**
@@ -17,6 +18,13 @@ export interface ObjetoSerializado {
   instance: ObjectInstance;
   result?: QueryResult;
   problems: BindingProblem[];
+  /**
+   * Las ranuras que declara la version del objeto.
+   *
+   * Viajan con el objeto porque el cliente no tiene el registro, y sin ellas los renderizadores
+   * volverian a leer por posicion — que es justo lo que este cambio quita.
+   */
+  ranuras?: RanuraDeCampos[];
   unresolvedObject?: string;
   generatedAt?: string;
   stale?: boolean;
@@ -30,9 +38,24 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
     position: item.position,
     instance: item.instance,
     ...(objeto.result ? { result: objeto.result } : {}),
+    ...(ranurasDelObjeto(item.instance) ? { ranuras: ranurasDelObjeto(item.instance) } : {}),
     problems: objeto.problems,
     ...(objeto.unresolvedObject ? { unresolvedObject: objeto.unresolvedObject } : {}),
     ...(objeto.generatedAt ? { generatedAt: objeto.generatedAt } : {}),
     ...(objeto.stale ? { stale: true } : {}),
   };
+}
+
+/**
+ * Las ranuras declaradas por la version que la instancia fija.
+ *
+ * Devuelve `undefined` si el objeto o la version no se resuelven: es el caso del objeto roto, que
+ * se dibuja marcado y sin datos, y ahi las ranuras no aportan nada.
+ */
+function ranurasDelObjeto(instance: ObjectInstance): RanuraDeCampos[] | undefined {
+  try {
+    return objectRegistry.resolve(instance.objectId, instance.version).dataContract.pozos;
+  } catch {
+    return undefined;
+  }
 }

@@ -24,6 +24,7 @@ export function Pozo({
   elegidos,
   disponibles,
   guardando,
+  lleno: llenoExterno,
   onAnadir,
   onQuitar,
   prueba,
@@ -32,6 +33,13 @@ export function Pozo({
   elegidos: string[];
   disponibles: string[];
   guardando: boolean;
+  /**
+   * Si la ranura ya no admite mas.
+   *
+   * Lo decide quien conoce la instancia entera; aqui solo se dibuja. Sin el, se deduce del cupo,
+   * que es lo correcto cuando no hay nadie que lo sepa mejor.
+   */
+  lleno?: boolean;
   onAnadir: (campo: string) => void;
   onQuitar: (campo: string) => void;
   prueba: string;
@@ -42,7 +50,7 @@ export function Pozo({
   const disparador = useRef<HTMLButtonElement>(null);
   const id = useId();
 
-  const lleno = elegidos.length >= pozo.max;
+  const lleno = llenoExterno ?? elegidos.length >= pozo.max;
 
   /*
    * Escape cierra ESTE emergente y no llega a nadie mas.

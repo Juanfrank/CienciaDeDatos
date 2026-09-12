@@ -42,7 +42,14 @@ const ocupa = (p: GridPosition): { x1: number; x2: number; y1: number; y2: numbe
   y2: p.y + p.h,
 });
 
-const seSolapan = (a: GridPosition, b: GridPosition): boolean => {
+/**
+ * Si dos posiciones se pisan.
+ *
+ * Se exporta porque el arrastre del editor la necesita para decidir, MIENTRAS se arrastra, si el
+ * destino esta libre. Sin ella tendria que reimplementar la misma comparacion, y el dia que una
+ * de las dos cambiara el editor aceptaria colocaciones que la validacion rechaza al guardar.
+ */
+export const seSolapan = (a: GridPosition, b: GridPosition): boolean => {
   const ra = ocupa(a);
   const rb = ocupa(b);
   return ra.x1 < rb.x2 && rb.x1 < ra.x2 && ra.y1 < rb.y2 && rb.y1 < ra.y2;

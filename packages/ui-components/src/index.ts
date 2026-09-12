@@ -32,11 +32,20 @@ export {
   type ProblemaDePresentacion,
 } from './presentacion/contrato';
 export {
-  cabeEn,
-  indiceDeInsercion,
-  pozosPorDefecto,
-  repartirEnPozos,
+  aFieldRef,
+  bindingDesdeRanuras,
+  cabeEnRanura,
+  campoDeRanura,
+  conCampoEnRanura,
+  ranurasDe,
+  ranurasDelContrato,
+  ranurasPorDefecto,
+  sinCampoEnRanura,
+  validarRanuras,
+  type AsignacionDeRanuras,
   type PozoDeCampos,
+  type ProblemaDeRanura,
+  type RanuraDeCampos,
 } from './presentacion/pozos';
 export {
   MAX_DIMENSIONES_DEL_PANEL,

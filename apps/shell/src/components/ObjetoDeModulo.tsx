@@ -58,6 +58,8 @@ export function ObjetoDeModulo({
     titulo,
     result,
     instance: objeto.instance,
+    // Las ranuras viajan con el objeto: sin ellas los renderizadores volverian a leer por posicion.
+    ...(objeto.ranuras ? { ranuras: objeto.ranuras } : {}),
     // Los objetos esperan un `onFiltrar`; sin filtrado cruzado se les pasa uno que no hace nada,
     // y ellos deciden no ofrecer el gesto por su cuenta cuando no hay dimension.
     onFiltrar: onFiltrar ?? (() => {}),
