@@ -1,9 +1,23 @@
 /*
- * Estilos del shell.
+ * Estilos del shell, sobre Material Design 3.
  *
- * Todo color, espacio y tipografia sale de las variables CSS que inyecta el tema organizacional
- * (packages/design-tokens). Ningun valor cromatico se escribe aqui a mano: si se escribiera, la
- * validacion de contraste de 4.3 no podria garantizar nada sobre lo que realmente se ve.
+ * Todo sale de las variables `--md-sys-*` que inyecta el tema (packages/design-tokens). Ningun
+ * valor cromatico, tipografico o de forma se escribe aqui a mano, y el motivo no es el orden:
+ * es que la puerta de contraste de 4.3 solo puede garantizar algo sobre lo que se ve si lo que
+ * se ve sale de los roles que ella comprueba.
+ *
+ * Las cuatro ideas de MD3 que ordenan el resto del archivo:
+ *
+ *  1. LOS ROLES, no los colores. Nada es "azul": es `primary`, o `surface-container`, o
+ *     `on-surface-variant`. El par de un color con su texto viene dado — sobre `primary` va
+ *     `on-primary` — y por eso no hay ninguna decision de contraste que tomar aqui.
+ *  2. LAS SUPERFICIES, no las sombras. Los cinco niveles de `surface-container` separan planos
+ *     por tono. La sombra acompana en lo que flota de verdad (dialogos, menus) y en poco mas.
+ *  3. LAS CAPAS DE ESTADO. Un control no cambia de color al pasar el raton: se le superpone una
+ *     capa de SU propio color de contenido al 8%. Por eso un boton relleno y uno de texto
+ *     reaccionan igual sin declarar dos juegos de colores.
+ *  4. LOS ROLES TIPOGRAFICOS. Un texto no es "14 px en gris": es `body-medium` sobre
+ *     `on-surface-variant`. Si un titulo queda grande se baja de rol, no se le cambia el tamano.
  */
 
 *,
@@ -14,327 +28,841 @@
 
 body {
   margin: 0;
-  font-family: var(--font-sans);
-  font-size: var(--font-size-base);
-  color: var(--color-text);
-  background: var(--color-background);
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-body-large-size);
+  line-height: var(--md-sys-typescale-body-large-line-height);
+  letter-spacing: var(--md-sys-typescale-body-large-tracking);
+  color: var(--md-sys-color-on-surface);
+  background: var(--md-sys-color-surface);
+  -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3 { margin: 0; }
+h1, h2, h3, h4 { margin: 0; }
+
+/* ------------------------------------------------------------------ *
+ * Escala tipografica                                                  *
+ * ------------------------------------------------------------------ */
+
+.md-display-small,
+.vacio h1,
+.kpi__valor,
+.tarjeta__valor {
+  font-size: var(--md-sys-typescale-display-small-size);
+  line-height: var(--md-sys-typescale-display-small-line-height);
+  font-weight: var(--md-sys-typescale-display-small-weight);
+  letter-spacing: var(--md-sys-typescale-display-small-tracking);
+}
+
+.md-headline-small,
+.admin__cabecera h1,
+.avisos h1,
+.acceso__tarjeta h1,
+.modulo__cabecera h1 {
+  font-size: var(--md-sys-typescale-headline-small-size);
+  line-height: var(--md-sys-typescale-headline-small-line-height);
+  font-weight: var(--md-sys-typescale-headline-small-weight);
+  letter-spacing: var(--md-sys-typescale-headline-small-tracking);
+}
+
+.md-title-large,
+.cabecera__titulo,
+.avisos h2,
+.editor__cuerpo h2,
+.admin__principal h2,
+.emergente__cabecera h2 {
+  font-size: var(--md-sys-typescale-title-large-size);
+  line-height: var(--md-sys-typescale-title-large-line-height);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+  letter-spacing: var(--md-sys-typescale-title-large-tracking);
+}
+
+.md-title-medium,
+.admin__principal h3,
+.editor__paleta h3,
+.editor__objeto h4,
+.lateral__titulo {
+  font-size: var(--md-sys-typescale-title-medium-size);
+  line-height: var(--md-sys-typescale-title-medium-line-height);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  letter-spacing: var(--md-sys-typescale-title-medium-tracking);
+}
+
+.md-title-small,
+.objeto__cabecera h3,
+.admin__principal h4 {
+  font-size: var(--md-sys-typescale-title-small-size);
+  line-height: var(--md-sys-typescale-title-small-line-height);
+  font-weight: var(--md-sys-typescale-title-small-weight);
+  letter-spacing: var(--md-sys-typescale-title-small-tracking);
+}
+
+.md-body-medium,
+.texto-atenuado,
+.cabecera__subtitulo,
+.admin__nav-label {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+}
+
+.md-body-small,
+.admin__nav-desc,
+.tarjeta__etiqueta,
+.lista-problemas,
+.editor__bloqueos,
+.editor__problemas,
+.incrustado__institucion {
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: var(--md-sys-typescale-body-small-line-height);
+  letter-spacing: var(--md-sys-typescale-body-small-tracking);
+}
+
+.md-label-large {
+  font-size: var(--md-sys-typescale-label-large-size);
+  line-height: var(--md-sys-typescale-label-large-line-height);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+}
+
+.texto-atenuado { color: var(--md-sys-color-on-surface-variant); margin: 0; }
 
 code {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  background: var(--color-surfaceMuted);
-  padding: 0 4px;
-  border-radius: var(--radius-sm);
+  font-family: var(--md-ref-typeface-mono);
+  font-size: var(--md-sys-typescale-body-small-size);
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  padding: 2px 6px;
+  border-radius: var(--md-sys-shape-corner-extra-small);
 }
+
+/* ------------------------------------------------------------------ *
+ * Foco                                                                *
+ * ------------------------------------------------------------------ */
+
+/*
+ * El indicador de foco de MD3: un trazo de 3 px en `secondary` con separacion.
+ *
+ * Va en :focus-visible y no en :focus para que no aparezca al pulsar con el raton, que es lo
+ * que lleva a la gente a quitarlo. Es lo unico que orienta a quien navega con teclado, y hay
+ * una prueba de navegador que comprueba que se VE.
+ */
+:focus-visible {
+  outline: 3px solid var(--md-sys-color-secondary);
+  outline-offset: 2px;
+  border-radius: var(--md-sys-shape-corner-extra-small);
+}
+
+/* ------------------------------------------------------------------ *
+ * Capas de estado                                                     *
+ * ------------------------------------------------------------------ */
+
+/*
+ * `md-estado` marca un elemento como interactivo segun MD3: la capa es un pseudo-elemento del
+ * color del CONTENIDO, y su opacidad es lo unico que cambia entre reposo, hover y pulsado.
+ *
+ * El elemento tiene que ser `position: relative` y llevar `isolation` para que la capa no se
+ * cuele por encima del texto.
+ */
+.md-estado {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.md-estado::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.md-estado:hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); }
+.md-estado:focus-visible:not(:disabled)::before { opacity: var(--md-sys-state-focus-opacity); }
+.md-estado:active:not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
+
+/* ------------------------------------------------------------------ *
+ * Botones                                                             *
+ * ------------------------------------------------------------------ */
+
+/*
+ * Las cuatro variantes de MD3, por orden de enfasis: relleno, tonal, con contorno y de texto.
+ *
+ * Todas con la misma altura (40 px), el mismo radio (`full`) y la misma tipografia
+ * (`label-large`). Lo que cambia es el peso visual, y eso es lo que comunica jerarquia: en una
+ * pantalla con un boton relleno se sabe cual es la accion principal sin leer.
+ */
+.md-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  min-height: 40px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-label-large-size);
+  line-height: var(--md-sys-typescale-label-large-line-height);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.md-boton:disabled {
+  cursor: not-allowed;
+  /* MD3: el deshabilitado es el color de contenido al 38% sobre una superficie al 12%. */
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+  border-color: transparent;
+}
+
+.md-boton--relleno,
+.pastilla {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+.md-boton--tonal {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+.md-boton--contorno,
+.acceso__azure {
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  border: 1px solid var(--md-sys-color-outline);
+}
+.md-boton--texto {
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  padding: 0 12px;
+}
+
+.pastilla,
+.acceso__azure {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  min-height: 40px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.acceso__azure { border: 1px solid var(--md-sys-color-outline); }
+
+.pastilla::before,
+.acceso__azure::before,
+.boton-enlace::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.pastilla:hover:not(:disabled)::before,
+.acceso__azure:hover::before,
+.boton-enlace:hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); }
+.pastilla:active:not(:disabled)::before,
+.acceso__azure:active::before,
+.boton-enlace:active:not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
+
+.pastilla:disabled,
+.acceso__azure:disabled {
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+  border-color: transparent;
+}
+
+/*
+ * Boton de texto de MD3, que en este codigo se llama `boton-enlace`.
+ *
+ * Es un BOTON, no un enlace: no navega, ejecuta una accion. Se dibuja sin relleno porque su
+ * enfasis es el mas bajo de los cuatro, y lleva la misma capa de estado que los demas.
+ */
+.boton-enlace {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/*
+ * Un control deshabilitado tiene que PARECERLO.
+ *
+ * Se veia identico a uno activo, y quien lo pulsaba no entendia por que no pasaba nada. Lo
+ * descubrio una captura del editor, no una prueba; ahora hay prueba.
+ */
+.boton-enlace:disabled {
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------ *
+ * Chips                                                               *
+ * ------------------------------------------------------------------ */
+
+/*
+ * Chip de filtro (MD3): lo que usa el segmentador.
+ *
+ * Alto 32 px, radio `small` —no `full`, que es lo que lo distingue de un boton— y contorno en
+ * reposo. Seleccionado se rellena con `secondary-container`, que es mas tenue que `primary`:
+ * un filtro activo informa, no reclama la atencion como una accion principal.
+ */
+.md-chip,
+.segmentador .md-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 32px;
+  padding: 0 16px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-small);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.md-chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.md-chip:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+.md-chip:active::before { opacity: var(--md-sys-state-pressed-opacity); }
+
+.md-chip--seleccionado,
+.pastilla--activa {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  border-color: transparent;
+}
+
+/*
+ * Chip de asistencia para los estados.
+ *
+ * El estado NO se distingue solo por color: lleva su texto siempre. Un distintivo que solo
+ * cambia de color deja fuera a quien no distingue esos colores, y 4.9 no pospone la
+ * accesibilidad. El color acompana; el texto informa.
+ */
+.pastilla-estado,
+.insignia {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+  letter-spacing: var(--md-sys-typescale-label-small-tracking);
+  white-space: nowrap;
+}
+
+.pastilla-estado[data-estado='publicado'] {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+.pastilla-estado[data-estado='pendiente-de-aprobacion'] {
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+}
+.pastilla-estado[data-estado='bloqueada'] {
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
+
+.insignia--error {
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
+.insignia--oficial {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+.insignia--personalizada {
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+}
+
+/* ------------------------------------------------------------------ *
+ * Campos de texto y selectores                                        *
+ * ------------------------------------------------------------------ */
+
+/*
+ * Campo con contorno de MD3.
+ *
+ * La etiqueta va SIEMPRE visible encima, no flotando dentro: la etiqueta flotante de Material
+ * desaparece cuando el campo tiene contenido, y con ella la unica pista de que dato es. En un
+ * formulario de configuracion eso se paga caro.
+ */
+.md-campo,
+.campo,
+.formulario__campo,
+.selector-equipo__campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+  min-width: 0;
+}
+.campo { max-width: 480px; }
+
+.md-campo > span,
+.md-campo > label,
+.campo > span,
+.formulario__campo label,
+.selector-equipo__etiqueta {
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: var(--md-sys-typescale-body-small-line-height);
+  letter-spacing: var(--md-sys-typescale-body-small-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input:not([type]),
+select,
+textarea {
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-body-large-size);
+  line-height: var(--md-sys-typescale-body-large-line-height);
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  transition: border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+textarea { padding: 12px 16px; min-height: 96px; resize: vertical; }
+
+input:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) { border-color: var(--md-sys-color-on-surface); }
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--md-sys-color-primary);
+  outline: 1px solid var(--md-sys-color-primary);
+  outline-offset: 0;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  min-height: 0;
+  accent-color: var(--md-sys-color-primary);
+  width: 18px;
+  height: 18px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Superficies: tarjetas y contenedores                                *
+ * ------------------------------------------------------------------ */
+
+/*
+ * Tarjeta rellena de MD3: sin borde y sin sombra, separada del fondo por TONO.
+ *
+ * Es el cambio de habito mas visible respecto de Material 2 y de lo que habia aqui antes. Una
+ * pantalla con ocho tarjetas y ocho sombras parece un relieve; con ocho tonos de superficie se
+ * lee como una lista.
+ */
+.md-tarjeta,
+.objeto,
+.tarjeta,
+.equipo,
+.regla,
+.editor__objeto,
+.editor__paleta,
+.editor__crear,
+.acceso__tarjeta,
+.marcadores__panel {
+  background: var(--md-sys-color-surface-container-low);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-medium);
+  box-shadow: var(--md-sys-elevation-0);
+}
+
+.objeto { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.objeto__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-md) 0;
+}
+.objeto__cuerpo { padding: var(--space-md); flex: 1; min-width: 0; }
+.objeto__pie {
+  padding: 0 var(--space-md) var(--space-md);
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Un objeto roto se marca visualmente y NO desaparece (4.2). */
+.objeto--roto {
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
+.objeto--generandose { outline: 1px dashed var(--md-sys-color-outline); outline-offset: -1px; }
+
+.tarjeta { padding: var(--space-md); }
+.tarjeta--alerta { background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); }
+.tarjeta__valor { margin: 0; }
+.tarjeta__etiqueta { margin: 0; color: var(--md-sys-color-on-surface-variant); }
+
+.equipo { margin-bottom: var(--space-sm); }
+.equipo__detalle { padding: 0 var(--space-md) var(--space-md); }
+.equipo__titulo {
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  padding: var(--space-md);
+  background: transparent;
+  border: none;
+  color: var(--md-sys-color-on-surface);
+  cursor: pointer;
+  border-radius: var(--md-sys-shape-corner-medium);
+}
+
+.regla { padding: var(--space-md); margin-bottom: var(--space-sm); }
+
+/* ------------------------------------------------------------------ *
+ * Avisos (banners de MD3)                                             *
+ * ------------------------------------------------------------------ */
+
+.aviso {
+  padding: var(--space-md);
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: var(--space-md);
+}
+.aviso p { margin: 0 0 var(--space-xs); }
+.aviso p:last-child { margin-bottom: 0; }
+.aviso ul { margin: 0; padding-left: var(--space-lg); }
+
+.aviso--error,
+.aviso--problema {
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
+.aviso--atencion {
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+}
+.aviso--ok {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+.aviso__acciones { display: flex; gap: var(--space-sm); align-items: center; margin-top: var(--space-sm); flex-wrap: wrap; }
+
+/* ------------------------------------------------------------------ *
+ * Estructura: cabecera, navegacion, contenido                         *
+ * ------------------------------------------------------------------ */
 
 .disposicion { min-height: 100vh; display: flex; flex-direction: column; }
 
+/* Barra superior de MD3: `surface-container` y sin sombra. */
 .cabecera {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
-  padding: var(--space-md) var(--space-lg);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface);
   flex-wrap: wrap;
 }
-
-.cabecera__marca { display: flex; align-items: center; gap: var(--space-sm); }
+.cabecera__marca { display: flex; align-items: center; gap: var(--space-md); min-width: 0; }
 .cabecera__textos { display: flex; flex-direction: column; min-width: 0; }
-/*
- * El emblema se dibuja a la mitad de su tamano de archivo: el PNG es 2x para que se vea nitido
- * en pantallas de densidad doble.
- */
 .cabecera__emblema { width: auto; height: 40px; flex-shrink: 0; }
-.cabecera__titulo { font-weight: var(--font-weight-bold); font-size: var(--font-size-lg); }
-.cabecera__subtitulo { color: var(--color-textMuted); font-size: var(--font-size-sm); }
+.cabecera__titulo { text-decoration: none; color: var(--md-sys-color-on-surface); }
+.cabecera__subtitulo { color: var(--md-sys-color-on-surface-variant); }
+.cabecera__acciones { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
 
 .selector-equipo { display: flex; gap: var(--space-md); flex-wrap: wrap; }
-.selector-equipo__campo { display: flex; flex-direction: column; gap: 2px; }
-.selector-equipo__etiqueta { font-size: var(--font-size-xs); color: var(--color-textMuted); }
-.selector-equipo select {
-  font: inherit;
-  font-size: var(--font-size-sm);
-  padding: 6px 8px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-}
+.selector-equipo__campo { margin-bottom: 0; }
+.selector-equipo select { min-height: 40px; }
 
-.cuerpo { display: flex; flex: 1; align-items: flex-start; }
+.cuerpo { display: flex; flex: 1; align-items: flex-start; min-width: 0; }
 
+/* Carril de navegacion de MD3. */
 .lateral {
-  width: 260px;
+  width: 280px;
   flex-shrink: 0;
   padding: var(--space-md);
-  border-right: 1px solid var(--color-border);
-  background: var(--color-surface);
-  min-height: calc(100vh - 73px);
+  background: var(--md-sys-color-surface);
 }
-/*
- * El resumen del plegado solo existe en pantalla estrecha: en ancha no hay nada que plegar y
- * `NavegacionPlegable` mantiene el <details> abierto.
- */
 .lateral__resumen { display: none; }
-.lateral__titulo {
-  margin: 0 0 var(--space-sm);
-  font-size: var(--font-size-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-textMuted);
-}
+.lateral__titulo { margin: 0 0 var(--space-sm); padding: 0 var(--space-md); color: var(--md-sys-color-on-surface-variant); }
 
 .arbol { list-style: none; margin: 0; padding: 0; }
-.arbol[data-nivel="0"] > li { margin-bottom: var(--space-xs); }
-.arbol:not([data-nivel="0"]) { padding-left: var(--space-md); }
+.arbol[data-nivel='0'] > li { margin-bottom: 2px; }
+.arbol:not([data-nivel='0']) { padding-left: var(--space-md); }
 .arbol__nombre-carpeta {
   display: block;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-textMuted);
-  padding: 4px 0;
+  padding: var(--space-sm) var(--space-md);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
 }
+
+/*
+ * Elemento del carril: pastilla completa, como MD3.
+ *
+ * El activo se rellena con `secondary-container`, no con `primary`: marcar donde uno esta no
+ * necesita el mismo enfasis que una accion, y con `primary` el arbol entero compite con el
+ * contenido.
+ */
 .arbol__enlace {
   display: block;
-  padding: 6px 8px;
-  border-radius: var(--radius-sm);
-  color: var(--color-text);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--md-sys-shape-corner-full);
   text-decoration: none;
-  font-size: var(--font-size-sm);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
 }
-.arbol__enlace:hover { background: var(--color-surfaceMuted); }
+.arbol__enlace::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.arbol__enlace:hover::before { opacity: var(--md-sys-state-hover-opacity); }
 .arbol__enlace.es-activo {
-  background: var(--color-brand-50);
-  color: var(--color-brand-700);
-  font-weight: var(--font-weight-medium);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 .principal { flex: 1; padding: var(--space-lg); min-width: 0; }
-
 .modulo__cabecera { margin-bottom: var(--space-md); }
-.modulo__cabecera h1 { font-size: var(--font-size-xl); }
 
 .barra-estado {
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  margin-bottom: var(--space-md);
   flex-wrap: wrap;
+  margin-bottom: var(--space-md);
 }
-
 .filtros-activos {
-  margin: 0 0 var(--space-md);
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.ambito-activo {
+  margin: var(--space-sm) 0 0;
   padding: var(--space-sm) var(--space-md);
-  background: var(--color-brand-50);
-  color: var(--color-brand-700);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-small);
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
 }
 
-/*
- * Rejilla: las tres disposiciones vienen del servidor como variables y aqui solo se elige cual
- * aplica. Asi el primer pintado ya es el correcto y no hace falta medir la ventana.
- */
+.vacio { padding: var(--space-xl); }
+.vacio h1 { margin-bottom: var(--space-sm); }
+
+/* ------------------------------------------------------------------ *
+ * Rejilla de objetos                                                  *
+ * ------------------------------------------------------------------ */
+
 .rejilla {
   display: grid;
+  grid-template-columns: repeat(var(--rejilla-columnas), minmax(0, 1fr));
   gap: var(--space-md);
-  grid-auto-rows: minmax(48px, auto);
-  grid-template-columns: repeat(var(--rejilla-columnas, 12), minmax(0, 1fr));
+  align-items: start;
 }
 .rejilla__celda { min-width: 0; grid-column: var(--col-escritorio); grid-row: var(--fila-escritorio); }
 
 @media (max-width: 1023px) {
-  .rejilla { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .rejilla__celda { grid-column: var(--col-tableta); grid-row: var(--fila-tableta); }
 }
-
 @media (max-width: 639px) {
-  .rejilla { grid-template-columns: 1fr; grid-auto-rows: auto; }
   .rejilla__celda { grid-column: var(--col-movil); grid-row: var(--fila-movil); }
 }
 
-.objeto {
-  height: 100%;
+/* ------------------------------------------------------------------ *
+ * Objetos de datos                                                    *
+ * ------------------------------------------------------------------ */
+
+.kpi__valor { margin: 0; color: var(--md-sys-color-on-surface); }
+.kpi__delta { margin: var(--space-xs) 0 0; font-size: var(--md-sys-typescale-body-medium-size); }
+.kpi__delta.es-positivo { color: var(--md-sys-color-secondary); }
+.kpi__delta.es-negativo { color: var(--md-sys-color-error); }
+
+.leyenda {
+  list-style: none;
   display: flex;
-  flex-direction: column;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
 }
-.objeto__cabecera {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md);
-  border-bottom: 1px solid var(--color-border);
-}
-.objeto__cabecera h3 { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); }
-.objeto__cuerpo { padding: var(--space-md); flex: 1; min-width: 0; }
-.objeto__pie {
-  padding: var(--space-xs) var(--space-md);
-  border-top: 1px solid var(--color-border);
-  font-size: var(--font-size-xs);
-}
-.objeto--roto { border-color: var(--color-danger); }
-.objeto--generandose { border-style: dashed; }
+.leyenda li { display: flex; align-items: center; gap: var(--space-xs); }
+.leyenda__marca { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 
-.insignia {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: var(--font-size-xs);
-  background: var(--color-surfaceMuted);
-  color: var(--color-textMuted);
-}
-.insignia--error { background: var(--color-danger); color: var(--color-textOnBrand); }
-.insignia--oficial { background: var(--color-brand-50); color: var(--color-brand-700); }
-.insignia--personalizada { background: var(--color-warning); color: var(--color-textOnBrand); }
+.lista-problemas { margin: var(--space-sm) 0 0; padding-left: var(--space-lg); }
+.lista-problemas li { margin-bottom: var(--space-xs); }
 
-.texto-atenuado { color: var(--color-textMuted); font-size: var(--font-size-sm); margin: 0; }
-.lista-problemas { margin: var(--space-sm) 0 0; padding-left: var(--space-md); font-size: var(--font-size-xs); }
-.lista-problemas li { margin-bottom: 4px; }
-
-.kpi__valor { margin: 0; font-size: var(--font-size-xxl); font-weight: var(--font-weight-bold); }
-.kpi__delta { margin: 4px 0 0; font-size: var(--font-size-sm); }
-.kpi__delta.es-positivo { color: var(--color-success); }
-.kpi__delta.es-negativo { color: var(--color-danger); }
-
+/*
+ * Grafico de barras en HTML.
+ *
+ * Es el respaldo: lo que se ve antes de que ECharts monte, y lo unico que se ve si el
+ * JavaScript no llega a ejecutarse. Por eso son elementos reales —la etiqueta es un boton que
+ * filtra— y no un dibujo: funciona con teclado y lo lee un lector de pantalla.
+ */
 .barras { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-sm); }
-.barras__fila { display: grid; grid-template-columns: minmax(80px, 1fr) 2fr auto; align-items: center; gap: var(--space-sm); }
+.barras__fila {
+  display: grid;
+  grid-template-columns: minmax(88px, 1fr) 2fr auto;
+  align-items: center;
+  gap: var(--space-sm);
+}
 .barras__etiqueta {
   font: inherit;
-  font-size: var(--font-size-sm);
+  font-size: var(--md-sys-typescale-body-medium-size);
   text-align: left;
-  background: none;
+  background: transparent;
   border: none;
-  padding: 0;
-  color: var(--color-text);
+  padding: var(--space-xs) var(--space-sm);
+  min-height: 32px;
+  border-radius: var(--md-sys-shape-corner-small);
+  color: var(--md-sys-color-on-surface);
   cursor: pointer;
-  text-decoration: underline dotted;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
 }
-.barras__etiqueta:hover { color: var(--color-brand-700); }
-.barras__pista { height: 12px; background: var(--color-surfaceMuted); border-radius: 999px; overflow: hidden; }
-.barras__relleno { display: block; height: 100%; background: var(--color-categorical-0); }
-.barras__valor { font-size: var(--font-size-sm); font-variant-numeric: tabular-nums; }
-
-.lineas { width: 100%; height: 140px; }
-.leyenda { list-style: none; display: flex; gap: var(--space-md); margin: var(--space-sm) 0 0; padding: 0; font-size: var(--font-size-xs); }
-.leyenda li { display: flex; align-items: center; gap: 4px; }
-.leyenda__marca { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
-
-.tabla-contenedor { overflow-x: auto; }
-.tabla { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
-.tabla th, .tabla td { padding: 6px 10px; border-bottom: 1px solid var(--color-border); text-align: left; }
-.tabla th { font-weight: var(--font-weight-medium); color: var(--color-textMuted); font-size: var(--font-size-xs); }
-.tabla .es-numero { text-align: right; font-variant-numeric: tabular-nums; }
-.tabla .es-total { font-weight: var(--font-weight-medium); }
-
-.segmentador { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-xs); margin: 0; padding: 0; }
-.pastilla {
-  font: inherit;
-  font-size: var(--font-size-sm);
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text);
-  cursor: pointer;
-}
-.pastilla--activa { background: var(--color-brand-500); border-color: var(--color-brand-500); color: var(--color-textOnBrand); }
-
-.boton-enlace {
-  font: inherit;
-  font-size: var(--font-size-sm);
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--color-brand-700);
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.vacio { padding: var(--space-xl); }
-.vacio h1 { font-size: var(--font-size-xl); margin-bottom: var(--space-sm); }
-
-@media (max-width: 640px) {
-  .cuerpo { flex-direction: column; }
-  .lateral {
-    width: 100%;
-    min-height: 0;
-    padding: var(--space-sm) var(--space-md);
-    border-right: none;
-    border-bottom: 1px solid var(--color-border);
-  }
-  .lateral__resumen {
-    display: block;
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-brand-700);
-    padding: var(--space-xs) 0;
-  }
-  /* El plegado en si lo hace el navegador con el estado del <details>. */
-  .lateral__titulo { display: none; }
-}
-
-.marcadores { position: relative; }
-.marcadores__panel {
+.barras__etiqueta::before {
+  content: '';
   position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 10;
-  margin-top: var(--space-xs);
-  min-width: 280px;
-  padding: var(--space-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
 }
-.marcadores__guardar { display: flex; gap: var(--space-xs); margin-bottom: var(--space-sm); }
-.marcadores__guardar input {
-  font: inherit;
-  font-size: var(--font-size-sm);
-  flex: 1;
-  min-width: 0;
-  padding: 4px 8px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+.barras__etiqueta:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+.barras__pista {
+  height: 16px;
+  background: var(--md-sys-color-surface-container-highest);
+  border-radius: var(--md-sys-shape-corner-full);
+  overflow: hidden;
 }
-.marcadores__guardar button {
-  font: inherit;
-  font-size: var(--font-size-sm);
-  padding: 4px 10px;
-  border: 1px solid var(--color-brand-500);
-  border-radius: var(--radius-sm);
-  background: var(--color-brand-500);
-  color: var(--color-textOnBrand);
-  cursor: pointer;
-  white-space: nowrap;
+.barras__relleno {
+  display: block;
+  height: 100%;
+  background: var(--md-sys-color-categorical-0);
+  border-radius: var(--md-sys-shape-corner-full);
 }
-.marcadores__lista { list-style: none; margin: 0; padding: 0; font-size: var(--font-size-sm); }
-.marcadores__lista li { padding: 4px 0; }
-.marcadores__lista a { color: var(--color-brand-700); }
+.barras__valor {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-variant-numeric: tabular-nums;
+  color: var(--md-sys-color-on-surface);
+}
 
-.ambito-activo {
-  margin: 0 0 var(--space-md);
+.lineas { width: 100%; height: 160px; }
+
+/* ------------------------------------------------------------------ *
+ * Tablas                                                              *
+ * ------------------------------------------------------------------ */
+
+.tabla-contenedor,
+.tabla-contenedor-datos { overflow-x: auto; }
+
+.tabla,
+.tabla-datos {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+.tabla th,
+.tabla td,
+.tabla-datos th,
+.tabla-datos td {
   padding: var(--space-sm) var(--space-md);
-  background: var(--color-surfaceMuted);
-  color: var(--color-textMuted);
-  border-left: 3px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  text-align: left;
+  vertical-align: top;
 }
+.tabla thead th,
+.tabla-datos thead th {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.tabla .es-numero { text-align: right; font-variant-numeric: tabular-nums; }
+.tabla .es-total { font-weight: 500; }
 
-/* --- Panel de administracion (4.10.8) ------------------------------------- */
+/* ------------------------------------------------------------------ *
+ * Segmentador                                                         *
+ * ------------------------------------------------------------------ */
+
+.segmentador { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-sm); margin: 0; padding: 0; }
+
+/* ------------------------------------------------------------------ *
+ * Panel de administracion y editor                                    *
+ * ------------------------------------------------------------------ */
 
 .admin { min-height: 100vh; display: flex; flex-direction: column; }
 .admin__cabecera {
@@ -343,54 +871,106 @@ code {
   justify-content: space-between;
   gap: var(--space-md);
   padding: var(--space-md) var(--space-lg);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--md-sys-color-surface-container);
+  flex-wrap: wrap;
 }
-.admin__cabecera h1 { font-size: var(--font-size-xl); }
-.admin__cuerpo { display: flex; flex: 1; align-items: flex-start; }
-.admin__nav { width: 260px; flex-shrink: 0; padding: var(--space-md); border-right: 1px solid var(--color-border); background: var(--color-surface); }
+.admin__cuerpo { display: flex; flex: 1; align-items: flex-start; min-width: 0; }
+.admin__nav { width: 280px; flex-shrink: 0; padding: var(--space-md); }
 .admin__nav ul { list-style: none; margin: 0; padding: 0; }
 .admin__nav a {
   display: block;
-  padding: var(--space-sm);
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  color: var(--color-text);
-}
-.admin__nav a:hover { background: var(--color-surfaceMuted); }
-.admin__nav-label { display: block; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); }
-.admin__nav-desc { display: block; font-size: var(--font-size-xs); color: var(--color-textMuted); }
-.admin__principal { flex: 1; padding: var(--space-lg); min-width: 0; }
-.admin__principal h2 { font-size: var(--font-size-lg); margin-bottom: var(--space-xs); }
-.admin__principal h3 { font-size: var(--font-size-base); margin: var(--space-md) 0 var(--space-xs); }
-.admin__principal h4 { font-size: var(--font-size-sm); margin: var(--space-md) 0 var(--space-xs); }
-.admin__principal section { margin-bottom: var(--space-lg); }
-
-.tarjetas { display: flex; flex-wrap: wrap; gap: var(--space-md); margin-bottom: var(--space-lg); }
-.tarjeta {
-  flex: 1 1 160px;
-  padding: var(--space-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-}
-.tarjeta--alerta { border-color: var(--color-warning); }
-.tarjeta__valor { margin: 0; font-size: var(--font-size-xxl); font-weight: var(--font-weight-bold); }
-.tarjeta__etiqueta { margin: 0; font-size: var(--font-size-xs); color: var(--color-textMuted); }
-
-.aviso {
   padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-sm);
-  border-left: 3px solid var(--color-border);
-  margin: var(--space-sm) 0;
-  font-size: var(--font-size-sm);
+  border-radius: var(--md-sys-shape-corner-full);
+  text-decoration: none;
+  color: var(--md-sys-color-on-surface-variant);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-bottom: 2px;
 }
-.aviso p { margin: 0 0 var(--space-xs); }
-.aviso p:last-child { margin-bottom: 0; }
-.aviso--error { background: var(--color-accent-50); border-left-color: var(--color-danger); color: var(--color-accent-900); }
-.aviso--atencion { background: #fdf6ec; border-left-color: var(--color-warning); color: #6b3608; }
-.aviso--ok { background: #eef8f1; border-left-color: var(--color-success); color: #0e4a25; }
-.aviso__acciones { display: flex; gap: var(--space-sm); align-items: center; margin-top: var(--space-sm); }
+.admin__nav a::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.admin__nav a:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+.admin__nav-label { display: block; color: var(--md-sys-color-on-surface); }
+.admin__nav-desc { display: block; color: var(--md-sys-color-on-surface-variant); }
+.admin__principal { flex: 1; padding: var(--space-lg); min-width: 0; }
+.admin__principal h2 { margin-bottom: var(--space-xs); }
+.admin__principal h3 { margin: var(--space-lg) 0 var(--space-xs); }
+.admin__principal h4 { margin: var(--space-md) 0 var(--space-xs); }
+
+.editor__cuerpo { flex: 1; padding: var(--space-lg); max-width: 1100px; min-width: 0; }
+.editor__cuerpo h2 { margin-bottom: var(--space-md); }
+.editor__crear {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.editor__crear .formulario__campo { margin-bottom: 0; }
+.editor__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.editor__acciones { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; }
+.editor__bloqueos,
+.editor__problemas { margin: var(--space-xs) 0 0; padding-left: var(--space-lg); }
+.editor__paleta { padding: var(--space-md); margin-bottom: var(--space-md); }
+.editor__paleta h3 { margin-bottom: var(--space-xs); }
+.editor__catalogo {
+  list-style: none;
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-xs);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+.editor__objetos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-md); }
+.editor__objeto { padding: var(--space-md); }
+.editor__objeto--roto { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
+.editor__objeto h4 { margin-bottom: var(--space-xs); }
+.editor__mapeo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-md);
+  align-items: start;
+  margin-top: var(--space-sm);
+}
+.editor__campos,
+.mi-vista__objetos {
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+  padding: var(--space-sm) var(--space-md);
+}
+.editor__campos legend,
+.mi-vista__objetos legend {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+  padding: 0 var(--space-xs);
+}
+.editor__campos label,
+.mi-vista__objetos label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) 0;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  cursor: pointer;
+}
 
 .editor-arbol__lista { list-style: none; margin: 0; padding: 0; }
 .editor-arbol__lista[data-nivel]:not([data-nivel='0']) { padding-left: var(--space-lg); }
@@ -399,81 +979,256 @@ code {
   align-items: center;
   gap: var(--space-sm);
   flex-wrap: wrap;
-  padding: 4px;
-  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--md-sys-shape-corner-small);
 }
-.editor-arbol__nodo:hover { background: var(--color-surfaceMuted); }
-.editor-arbol__nodo.es-activo { background: var(--color-brand-50); }
+.editor-arbol__nodo:hover { background: var(--md-sys-color-surface-container); }
+.editor-arbol__nodo.es-activo { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
 .editor-arbol__nombre {
   font: inherit;
-  font-size: var(--font-size-sm);
-  background: none;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  background: transparent;
   border: none;
+  min-height: 0;
+  padding: 0;
+  color: inherit;
   cursor: pointer;
-  color: var(--color-text);
   text-align: left;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 .editor-arbol__acciones { display: flex; gap: var(--space-sm); align-items: center; flex-wrap: wrap; }
 
-.campo { display: flex; flex-direction: column; gap: 2px; margin-bottom: var(--space-sm); max-width: 480px; }
-.campo > span { font-size: var(--font-size-xs); color: var(--color-textMuted); }
-.campo select, .campo input, .campo textarea {
-  font: inherit;
-  font-size: var(--font-size-sm);
-  padding: 6px 8px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-}
-
-.lista-simple { list-style: none; margin: 0 0 var(--space-sm); padding: 0; font-size: var(--font-size-sm); }
-.lista-simple li { display: flex; align-items: center; gap: var(--space-sm); padding: 4px 0; flex-wrap: wrap; }
-.lista-casillas { list-style: none; margin: 0; padding: 0; font-size: var(--font-size-sm); }
-.lista-casillas label { display: flex; align-items: center; gap: 6px; padding: 2px 0; cursor: pointer; }
-
-.equipo { border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: var(--space-sm); background: var(--color-surface); }
-.equipo__titulo {
-  font: inherit;
-  width: 100%;
-  text-align: left;
-  padding: var(--space-sm) var(--space-md);
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text);
-}
-.equipo__detalle { padding: 0 var(--space-md) var(--space-md); }
+.lista-simple { list-style: none; margin: 0 0 var(--space-sm); padding: 0; font-size: var(--md-sys-typescale-body-medium-size); }
+.lista-simple li { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-xs) 0; flex-wrap: wrap; }
+.lista-casillas { list-style: none; margin: 0; padding: 0; font-size: var(--md-sys-typescale-body-medium-size); }
+.lista-casillas label { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-xs) 0; cursor: pointer; }
 
 .quien-ve-que__filtros { display: flex; gap: var(--space-md); align-items: flex-end; flex-wrap: wrap; margin-bottom: var(--space-md); }
-.quien-ve-que__pasos { font-size: var(--font-size-sm); padding-left: var(--space-lg); }
+.quien-ve-que__pasos { font-size: var(--md-sys-typescale-body-medium-size); padding-left: var(--space-lg); }
 .quien-ve-que__pasos li { margin-bottom: var(--space-sm); }
-.quien-ve-que__pasos li.es-ampliacion { color: var(--color-danger); }
-.quien-ve-que__origen { color: var(--color-brand-700); font-weight: var(--font-weight-medium); }
+.quien-ve-que__pasos li.es-ampliacion { color: var(--md-sys-color-error); }
+.quien-ve-que__origen { color: var(--md-sys-color-primary); font-weight: 500; }
 
-.filtros-auditoria { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); font-size: var(--font-size-sm); }
-.filtros-auditoria a { color: var(--color-brand-700); }
-tr.es-ampliacion { background: #fdf6ec; }
+.filtros-auditoria { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); font-size: var(--md-sys-typescale-body-medium-size); flex-wrap: wrap; }
+.papelera { margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--md-sys-color-outline-variant); }
 
-.papelera { margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--color-border); }
+/* ------------------------------------------------------------------ *
+ * Dialogos, menus y emergentes                                        *
+ * ------------------------------------------------------------------ */
 
-.admin button:not(.boton-enlace):not(.editor-arbol__nombre):not(.equipo__titulo) {
+/*
+ * Dialogo de MD3: radio `extra-large`, `surface-container-high` y elevacion 3.
+ *
+ * Aqui SI hay sombra, y es coherente con la regla: un dialogo flota de verdad por encima del
+ * contenido, a diferencia de una tarjeta, que solo esta al lado de otras.
+ */
+.emergente {
+  border: none;
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  box-shadow: var(--md-sys-elevation-3);
+  padding: var(--space-lg);
+  max-width: min(560px, 92vw);
+  width: 100%;
+}
+.emergente::backdrop { background: color-mix(in srgb, var(--md-sys-color-scrim) 40%, transparent); }
+.emergente__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.emergente__acciones { display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: center; margin-top: var(--space-md); }
+
+/* Menu de MD3: `surface-container` y elevacion 2. */
+.marcadores { position: relative; }
+.marcadores__panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-xs));
+  z-index: 20;
+  width: min(320px, 90vw);
+  padding: var(--space-md);
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-medium);
+  box-shadow: var(--md-sys-elevation-2);
+}
+.marcadores__guardar { display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+.marcadores__guardar input { flex: 1; min-width: 0; min-height: 40px; }
+.marcadores__lista { list-style: none; margin: 0; padding: 0; font-size: var(--md-sys-typescale-body-medium-size); }
+.marcadores__lista li { padding: var(--space-xs) 0; }
+.marcadores__lista a { color: var(--md-sys-color-primary); }
+
+/* ------------------------------------------------------------------ *
+ * Complementos, campana, exportar, preguntar                          *
+ * ------------------------------------------------------------------ */
+
+.complementos { display: inline-flex; gap: var(--space-xs); margin-left: auto; }
+.complemento { position: relative; display: inline-flex; }
+.complemento__icono {
   font: inherit;
-  font-size: var(--font-size-sm);
-  padding: 6px 12px;
-  border: 1px solid var(--color-brand-500);
-  border-radius: var(--radius-sm);
-  background: var(--color-brand-500);
-  color: var(--color-textOnBrand);
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
   cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.complemento__icono::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.complemento__icono:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+
+/* Tooltip enriquecido de MD3. */
+.complemento__tooltip {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  right: 0;
+  z-index: 30;
+  width: max(220px, 20ch);
+  max-width: 60vw;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+  box-shadow: var(--md-sys-elevation-2);
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: var(--md-sys-typescale-body-small-line-height);
 }
 
-/* Visible para lectores de pantalla, oculto visualmente. */
-.visually-hidden {
+.campana {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--md-sys-shape-corner-full);
+  text-decoration: none;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.campana::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.campana:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+
+/* Insignia de MD3: numero pequeno sobre el color de error. */
+.campana__contador {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-error);
+  color: var(--md-sys-color-on-error);
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+}
+
+.exportar { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
+.exportar__etiqueta { font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface-variant); }
+.exportar__formato { min-height: 40px; }
+.exportar__estado { font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface-variant); }
+
+.preguntar { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-md); }
+.preguntar__campo { flex: 1 1 320px; min-width: 0; }
+.preguntar__respuesta { flex: 1 1 100%; font-size: var(--md-sys-typescale-body-medium-size); }
+.preguntar__respuesta p { margin: 0 0 var(--space-xs); }
+
+/* ------------------------------------------------------------------ *
+ * Avisos, acceso e incrustacion                                       *
+ * ------------------------------------------------------------------ */
+
+.avisos { padding: var(--space-lg); max-width: 900px; }
+.avisos h1 { margin-bottom: var(--space-md); }
+.avisos h2 { margin: var(--space-lg) 0 var(--space-sm); }
+.aviso--sin-leer { border-left: 4px solid var(--md-sys-color-primary); }
+.aviso__cuerpo { flex: 1; min-width: 0; }
+.aviso__asunto { font-weight: 500; }
+.aviso__meta { font-size: var(--md-sys-typescale-body-small-size); color: var(--md-sys-color-on-surface-variant); }
+
+.acceso { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: var(--space-lg); }
+.acceso__tarjeta {
+  width: min(420px, 100%);
+  padding: var(--space-xl);
+  background: var(--md-sys-color-surface-container-low);
+  border-radius: var(--md-sys-shape-corner-extra-large);
+}
+.acceso__tarjeta h1 { margin-bottom: var(--space-lg); }
+.acceso__azure { width: 100%; }
+.acceso__separador {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: var(--space-lg) 0;
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.acceso__separador::before,
+.acceso__separador::after { content: ''; flex: 1; border-top: 1px solid var(--md-sys-color-outline-variant); }
+.acceso__error {
+  min-height: 1.25rem;
+  margin: 0 0 var(--space-sm);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-error);
+}
+.acceso .pastilla { width: 100%; }
+
+.incrustado { display: flex; flex-direction: column; min-height: 100vh; }
+.incrustado__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--md-sys-color-surface-container);
+}
+.incrustado__emblema { width: auto; height: 24px; flex-shrink: 0; }
+.incrustado__institucion { color: var(--md-sys-color-on-surface-variant); }
+.incrustado__cuerpo { flex: 1; padding: var(--space-md); min-width: 0; }
+.incrustado__pie { margin-top: var(--space-md); font-size: var(--md-sys-typescale-body-medium-size); }
+.incrustar__codigo {
+  width: 100%;
+  min-height: 120px;
+  font-family: var(--md-ref-typeface-mono);
+  font-size: var(--md-sys-typescale-body-small-size);
+}
+
+/* ------------------------------------------------------------------ *
+ * Utilidades                                                          *
+ * ------------------------------------------------------------------ */
+
+.visually-hidden,
+.visualmente-oculto {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -485,407 +1240,59 @@ tr.es-ampliacion { background: #fdf6ec; }
   border: 0;
 }
 
+/* Espaciado, heredado del tema. MD3 no fija una escala de espacio; esta ya era de 4 en 4. */
+:root {
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * Adaptacion a pantallas estrechas (4.9)                              *
+ * ------------------------------------------------------------------ */
+
 @media (max-width: 640px) {
+  .cabecera { padding: var(--space-sm) var(--space-md); }
+  .principal,
+  .admin__principal,
+  .editor__cuerpo { padding: var(--space-md); }
+
+  .cuerpo,
   .admin__cuerpo { flex-direction: column; }
-  .admin__nav { width: 100%; border-right: none; border-bottom: 1px solid var(--color-border); }
-}
+  .lateral,
+  .admin__nav { width: 100%; }
 
-.cabecera__acciones { display: flex; align-items: center; gap: var(--space-lg); flex-wrap: wrap; }
-.cabecera__titulo { text-decoration: none; color: var(--color-text); }
+  .lateral__resumen {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-height: 48px;
+    padding: 0 var(--space-md);
+    cursor: pointer;
+    border-radius: var(--md-sys-shape-corner-full);
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: var(--md-sys-typescale-label-large-size);
+    font-weight: var(--md-sys-typescale-label-large-weight);
+    list-style: none;
+  }
+  .lateral__resumen::-webkit-details-marker { display: none; }
 
-.exportar { display: flex; align-items: center; gap: var(--space-sm); }
-.exportar__etiqueta { font-size: var(--font-size-sm); color: var(--color-textMuted); }
-.exportar__formato {
-  font: inherit;
-  font-size: var(--font-size-sm);
-  padding: 2px var(--space-xs);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
+  .editor__crear { flex-direction: column; align-items: stretch; }
+  .emergente { max-width: 96vw; }
 }
-.exportar__estado { font-size: var(--font-size-sm); color: var(--color-textMuted); }
-
-/*
- * Indicador de foco propio.
- *
- * El del navegador es un contorno fino que se pierde sobre las superficies del tema, y es lo
- * unico que orienta a quien navega con teclado. Va en :focus-visible y no en :focus para que no
- * aparezca al pulsar con el raton, que es lo que lleva a la gente a quitarlo.
- */
-:focus-visible {
-  outline: 2px solid var(--color-brand-700);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
-
-/* Objetos adjuntados (complementos): iconos en la cabecera del objeto anfitrion. */
-.complementos { display: inline-flex; gap: var(--space-xs); margin-left: auto; }
-.complemento { position: relative; display: inline-flex; }
-
-.complemento__icono {
-  font: inherit;
-  font-size: var(--font-size-xs);
-  line-height: 1;
-  width: 22px;
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-border);
-  border-radius: 50%;
-  background: var(--color-surface);
-  color: var(--color-brand-700);
-  cursor: pointer;
-}
-.complemento__icono:hover { background: var(--color-brand-50); }
-
-.complemento__tooltip {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 20;
-  width: max-content;
-  max-width: 280px;
-  padding: var(--space-sm) var(--space-md);
-  background: var(--color-text);
-  color: var(--color-surface);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-  line-height: 1.4;
-  box-shadow: 0 4px 12px rgb(26 26 26 / 25%);
-}
-
-.emergente {
-  width: min(900px, 92vw);
-  max-height: 85vh;
-  overflow: auto;
-  padding: var(--space-lg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-}
-.emergente::backdrop { background: rgb(26 26 26 / 45%); }
-.emergente__cabecera {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-md);
-  margin-bottom: var(--space-sm);
-}
-.emergente__cabecera h2 { font-size: var(--font-size-lg); }
-
-/* Avisos: campana de la cabecera y bandeja. */
-.campana {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  font-size: var(--font-size-sm);
-  color: var(--color-brand-700);
-  text-decoration: none;
-}
-.campana:hover .campana__texto { text-decoration: underline; }
-.campana__contador {
-  min-width: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
-  background: var(--color-danger);
-  color: var(--color-textOnBrand);
-  font-size: var(--font-size-xs);
-  text-align: center;
-  line-height: 18px;
-}
-
-/*
- * Texto solo para lectores de pantalla.
- *
- * Con `display: none` el contenido desaparece tambien del arbol de accesibilidad, que es justo
- * lo contrario de lo que se busca: hay que sacarlo de la vista sin sacarlo del documento.
- */
-.visualmente-oculto {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
-
-.avisos { padding: var(--space-lg); max-width: 900px; }
-.avisos h1 { font-size: var(--font-size-xl); margin-bottom: var(--space-md); }
-.avisos h2 { font-size: var(--font-size-lg); margin: var(--space-lg) 0 var(--space-sm); }
-
-.aviso {
-  display: flex;
-  gap: var(--space-md);
-  padding: var(--space-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-sm);
-  background: var(--color-surface);
-}
-.aviso--sin-leer { border-left: 4px solid var(--color-brand-500); }
-.aviso__cuerpo { flex: 1; min-width: 0; }
-.aviso__asunto { font-weight: var(--font-weight-bold); }
-.aviso__meta { font-size: var(--font-size-sm); color: var(--color-textMuted); }
-
-.regla {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-md);
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-xs);
-}
-
-.formulario__campo { display: flex; flex-direction: column; gap: 2px; margin-bottom: var(--space-sm); }
-.formulario__campo label { font-size: var(--font-size-sm); color: var(--color-textMuted); }
-.formulario__campo input,
-.formulario__campo select {
-  font: inherit;
-  padding: var(--space-xs) var(--space-sm);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-}
-
-/* Vista incrustada en otro portal: cromo minimo, identidad conservada. */
-.incrustado { display: flex; flex-direction: column; min-height: 100vh; }
-.incrustado__cabecera {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md);
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
-}
-.incrustado__emblema { width: auto; height: 24px; flex-shrink: 0; }
-.incrustado__institucion { font-size: var(--font-size-xs); color: var(--color-textMuted); }
-.incrustado__cuerpo { flex: 1; padding: var(--space-md); min-width: 0; }
-.incrustado__pie { margin-top: var(--space-md); font-size: var(--font-size-sm); }
-
-.incrustar__codigo {
-  width: 100%;
-  min-height: 120px;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  padding: var(--space-sm);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surfaceMuted);
-  color: var(--color-text);
-}
-
-/* Consulta en lenguaje natural. */
-.preguntar { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-md); }
-.preguntar__campo {
-  font: inherit;
-  font-size: var(--font-size-sm);
-  flex: 1 1 280px;
-  min-width: 0;
-  padding: var(--space-xs) var(--space-sm);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-}
-.preguntar__respuesta { flex: 1 1 100%; font-size: var(--font-size-sm); }
-.preguntar__respuesta p { margin: 0 0 var(--space-xs); }
-
-/* Pantalla de acceso (4.7). */
-.acceso { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: var(--space-lg); }
-.acceso__tarjeta {
-  width: min(420px, 100%);
-  padding: var(--space-xl);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-}
-.acceso__tarjeta h1 { font-size: var(--font-size-xl); margin-bottom: var(--space-lg); }
-.acceso__azure {
-  font: inherit;
-  width: 100%;
-  padding: var(--space-sm);
-  border: 1px solid var(--color-brand-500);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-brand-700);
-  cursor: pointer;
-}
-.acceso__separador {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  margin: var(--space-md) 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-textMuted);
-}
-.acceso__separador::before,
-.acceso__separador::after { content: ''; flex: 1; border-top: 1px solid var(--color-border); }
-.acceso__error { min-height: 1.2em; margin: 0 0 var(--space-sm); font-size: var(--font-size-sm); color: var(--color-accent-900); }
-
-/*
- * Un control deshabilitado tiene que PARECERLO.
- *
- * `.boton-enlace` se dibuja como un enlace, y con `disabled` se veia exactamente igual que uno
- * activo: subrayado, en azul y con el cursor de mano. Quien lo pulsa no entiende por que no
- * pasa nada, y lo vuelve a pulsar. Lo descubrio una captura del editor, no una prueba: el boton
- * de "Enviar a aprobacion" de un modulo con problemas se veia pulsable.
- */
-.boton-enlace:disabled {
-  color: var(--color-textMuted);
-  text-decoration: none;
-  cursor: not-allowed;
-}
-
-/* Editor de modulos (4.2) ------------------------------------------------- */
-
-.editor__cuerpo { flex: 1; padding: var(--space-lg); max-width: 1100px; }
-.editor__cuerpo h2 { font-size: var(--font-size-lg); margin-bottom: var(--space-md); }
-
-.editor__crear {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-md);
-  padding: var(--space-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-md);
-}
-
-/*
- * La tabla se desplaza DENTRO de su region, no arrastrando la pagina.
- *
- * En un movil de 390 px, la columna de acciones se salia por la derecha y la pagina entera
- * scrolleaba en horizontal — el sintoma clasico de un ancho olvidado. Es el mismo tratamiento
- * que ya tenian las tablas de datos de un modulo, que aqui faltaba.
- */
-.tabla-contenedor-datos { overflow-x: auto; }
-
-.tabla-datos { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
-.tabla-datos th,
-.tabla-datos td {
-  padding: var(--space-sm);
-  border-bottom: 1px solid var(--color-border);
-  text-align: left;
-  vertical-align: top;
-}
-.tabla-datos thead th { font-size: var(--font-size-xs); color: var(--color-textMuted); }
-
-/*
- * El estado NO se distingue solo por color: lleva su texto siempre. Un distintivo que solo
- * cambia de color deja fuera a quien no distingue esos colores, y 4.9 no pospone la
- * accesibilidad. El color acompaña; el texto informa.
- */
-.pastilla-estado {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: var(--font-size-xs);
-  border: 1px solid var(--color-border);
-  background: var(--color-surfaceMuted);
-  color: var(--color-text);
-}
-.pastilla-estado[data-estado='publicado'] {
-  background: #eef8f1;
-  border-color: var(--color-success);
-  color: #0e4a25;
-}
-.pastilla-estado[data-estado='pendiente-de-aprobacion'] {
-  background: #fdf6ec;
-  border-color: var(--color-warning);
-  color: #6b3608;
-}
-
-.editor__acciones { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
-.editor__bloqueos,
-.editor__problemas {
-  margin: var(--space-xs) 0 0;
-  padding-left: var(--space-md);
-  font-size: var(--font-size-xs);
-  color: var(--color-accent-900);
-}
-
-.editor__cabecera {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
-}
-
-.aviso--problema {
-  background: var(--color-accent-50);
-  border-left-color: var(--color-danger);
-  color: var(--color-accent-900);
-}
-.aviso--problema ul { margin: 0; padding-left: var(--space-md); }
-
-.editor__paleta {
-  padding: var(--space-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-md);
-}
-.editor__paleta h3 { font-size: var(--font-size-base); margin-bottom: var(--space-xs); }
-.editor__catalogo {
-  list-style: none;
-  margin: var(--space-sm) 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: var(--space-xs);
-  font-size: var(--font-size-sm);
-}
-
-.editor__objetos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-md); }
-.editor__objeto {
-  padding: var(--space-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-}
-/* Un objeto roto se marca visualmente y NO desaparece del editor (4.2). */
-.editor__objeto--roto { border-left: 4px solid var(--color-danger); background: var(--color-accent-50); }
-.editor__objeto h4 { font-size: var(--font-size-base); margin-bottom: var(--space-xs); }
-
-.editor__mapeo {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-md);
-  align-items: start;
-  margin-top: var(--space-sm);
-}
-.editor__campos { border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); }
-.editor__campos legend { font-size: var(--font-size-xs); color: var(--color-textMuted); padding: 0 var(--space-xs); }
-.editor__campos label { display: block; font-size: var(--font-size-sm); }
 
 @media (max-width: 700px) {
-  .editor__cuerpo { padding: var(--space-md); }
-  .editor__crear { flex-direction: column; align-items: stretch; }
+  .editor__mapeo { grid-template-columns: 1fr; }
 }
 
-/* Mi vista — personalizacion por usuario (4.6) ---------------------------- */
-
-.mi-vista__objetos {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-sm);
-  margin: var(--space-sm) 0;
+/* Quien pida menos movimiento no lo recibe. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
-.mi-vista__objetos legend { font-size: var(--font-size-xs); color: var(--color-textMuted); padding: 0 var(--space-xs); }
-.mi-vista__objetos label { display: block; font-size: var(--font-size-sm); padding: 2px 0; }
-
-.emergente__acciones { display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: center; }

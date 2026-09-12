@@ -53,7 +53,7 @@ export function Segmentador({
               <li key={opcion}>
                 <button
                   type="button"
-                  className={`pastilla ${activo ? 'pastilla--activa' : ''}`}
+                  className={`md-chip ${activo ? 'md-chip--seleccionado' : ''}`}
                   aria-pressed={activo}
                   data-testid={`segmentador-${opcion}`}
                   onClick={() => alternar(campo, opcion)}

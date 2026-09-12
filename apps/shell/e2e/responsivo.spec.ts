@@ -49,13 +49,43 @@ test.describe('la disposicion se adapta al ancho', () => {
   test('en movil el alto lo marca el contenido, no el alto guardado', async ({ page }) => {
     // El grafico se guardo con alto 4 para equilibrar la rejilla ancha. Aplicado a una sola
     // columna dejaba una caja alta y medio vacia debajo de tres barras.
-    await page.setViewportSize(MOVIL);
+    //
+    // Se comprueba el MECANISMO y no una cifra. Antes era `alto < 280 px`, y ese numero
+    // dependia del tamano de la tipografia: al adoptar Material Design 3, con su escala y su
+    // espaciado mayores, el mismo objeto —igual de lleno— paso a medir 317 y la prueba fallo
+    // sin que nada se hubiera roto. Un umbral absoluto sobre una medida de pantalla envejece
+    // con el primer cambio de diseno.
     await entrarComo(page, 'u-ana');
+
+    const celda = () =>
+      page.locator('.rejilla__celda').filter({ hasText: 'Pendientes por distrito' });
+
+    await page.setViewportSize(ESCRITORIO);
+    await page.goto('/m/casos-pendientes');
+    // En escritorio SI manda el alto guardado: son cuatro filas de rejilla.
+    expect(
+      await celda().evaluate((el) => getComputedStyle(el).gridRow),
+      'en escritorio la celda ocupa las filas que se guardaron',
+    ).toContain('span');
+
+    await page.setViewportSize(MOVIL);
     await page.goto('/m/casos-pendientes');
 
-    const grafico = page.locator('.rejilla__celda').filter({ hasText: 'Pendientes por distrito' });
-    const alto = (await grafico.boundingBox())?.height ?? 0;
-    expect(alto).toBeLessThan(280);
+    // En una sola columna la celda pasa a `auto`: la altura la pone lo que hay dentro.
+    expect(await celda().evaluate((el) => getComputedStyle(el).gridRow)).toBe('auto');
+
+    // Y lo que hay dentro la llena. NO se compara con el alto de escritorio: en una columna
+    // estrecha las etiquetas se parten y el contenido ocupa MAS, legitimamente. Lo que la caja
+    // no puede tener es hueco sobrante, que era el defecto original.
+    const sobrante = await celda().evaluate((el) => {
+      const alto = el.getBoundingClientRect().height;
+      const contenido = [...el.children].reduce((total, hijo) => {
+        const caja = hijo.getBoundingClientRect();
+        return total + caja.height;
+      }, 0);
+      return alto - contenido;
+    });
+    expect(sobrante).toBeLessThan(8);
   });
 
   test('la disposicion correcta esta en el PRIMER pintado, sin esperar al JavaScript', async ({
