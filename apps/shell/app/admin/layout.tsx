@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { ID_LATERAL } from '../../src/components/NavegacionPlegable';
 import { EnlaceDeSeccion } from '../../src/components/admin/EnlaceDeSeccion';
 import { esAdministrador } from '../../src/server/admin';
 import { exigirSesionDePagina } from '../../src/server/sesion';
@@ -50,7 +51,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </header>
 
       <div className="admin__cuerpo">
-        <nav className="admin__nav" aria-label="Secciones de administracion">
+        <nav
+          className="admin__nav"
+          id={ID_LATERAL}
+          aria-label="Secciones de administracion"
+        >
           <ul>
             {SECCIONES.map((s) => (
               <li key={s.href}>

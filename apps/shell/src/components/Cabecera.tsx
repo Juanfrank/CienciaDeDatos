@@ -2,11 +2,11 @@ import Link from 'next/link';
 import { defaultIdentity } from '@app/design-tokens';
 import { can } from '@app/access-control';
 import { esAdministrador, rolMasAltoDe } from '../server/admin';
-import { findTeam, roleOf, teamsOf } from '../server/contexto';
+import { findTeam } from '../server/contexto';
 import type { SesionShell } from '../server/sesion';
+import { AlternarLateral } from './AlternarLateral';
 import { Campana } from './Campana';
 import { CerrarSesion } from './CerrarSesion';
-import { SelectorDeEquipo } from './SelectorDeEquipo';
 
 /**
  * Cromo de cabecera de la aplicacion.
@@ -23,17 +23,10 @@ export async function Cabecera({ sesion }: { sesion: SesionShell }) {
   const puedeAdministrar = await esAdministrador(sesion.userId);
   const puedeEditar = can(await rolMasAltoDe(sesion.userId), 'crear-editar-modulos-borrador');
 
-  const equipos = await Promise.all(
-    (await teamsOf(sesion.userId)).map(async (t) => ({
-      id: t.id,
-      name: t.name,
-      role: await roleOf(sesion.userId, t.id),
-    })),
-  );
-
   return (
     <header className="cabecera">
       <div className="cabecera__marca">
+        <AlternarLateral />
         {/*
           El emblema es DECORATIVO y por eso lleva alt vacio: el nombre de la institucion esta
           justo al lado como texto, y darle tambien un texto alternativo haria que un lector de
@@ -69,8 +62,6 @@ export async function Cabecera({ sesion }: { sesion: SesionShell }) {
             Administracion
           </Link>
         ) : null}
-        {/* El equipo activo es visible en todo momento, como exige 4.10.2. */}
-        <SelectorDeEquipo equipos={equipos} equipoActivo={sesion.activeTeamId} />
         <CerrarSesion usuario={sesion.userId} />
       </div>
     </header>

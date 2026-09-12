@@ -1,61 +1,49 @@
-'use client';
-
-import { useEffect, useRef } from 'react';
+import { SelectorDeEquipo } from './SelectorDeEquipo';
 
 /**
- * Arbol de navegacion plegable en pantalla estrecha — seccion 4.9.
+ * El panel lateral de los modulos.
  *
- * El elemento es un `<details>` y no un boton con estado propio: el navegador ya trae el gesto,
- * el manejo de teclado y el anuncio de plegado/desplegado a un lector de pantalla. Lo unico que
- * decide este componente es el estado INICIAL, que depende del ancho y por tanto no se puede
- * saber en el servidor.
+ * Ya no lleva logica: es un `<aside>` que el servidor emite VISIBLE y que el boton de la
+ * cabecera pliega escribiendo `data-lateral` en `<body>`. Antes era un `<details>` con su propio
+ * estado, y con el boton fuera del panel habia dos fuentes de verdad para lo mismo — el
+ * `open` del elemento y lo que el boton creyera—, que es como se acaba con un boton que dice
+ * "cerrado" sobre un panel abierto. El estado vive en un solo sitio, y ese sitio es el boton.
  *
- * El servidor lo emite ABIERTO a proposito. Si el JavaScript no llega a ejecutarse, el arbol
- * queda visible: es el comportamiento que habia antes de plegarlo —imperfecto en un movil, pero
- * utilizable— y nunca una navegacion que no se puede abrir. La degradacion cae del lado seguro.
+ * Emitirlo visible es lo que hace que degrade del lado seguro: sin JavaScript el panel se queda
+ * desplegado —imperfecto en un movil, pero utilizable— y nunca una navegacion que no se puede
+ * abrir.
  *
- * Se intento primero sin JavaScript, plegando con CSS. No funciona: los navegadores actuales
- * ocultan el contenido de un `<details>` cerrado a traves del pseudoelemento `::details-content`,
- * y la regla que lo anula en escritorio la borra el minificador por considerarla redundante —
- * `visible` es el valor inicial de la propiedad, aunque aqui no lo sea. Queda escrito para que
- * nadie lo vuelva a intentar por el mismo camino.
+ * El `id` es el que apunta `aria-controls` del boton. El panel de administracion usa el MISMO,
+ * porque nunca coexisten en una pagina y asi el boton sirve para los dos sin saber en cual esta.
  */
 
-/** El mismo ancho que la media query del CSS. Si uno cambia, el otro tambien. */
-export const CONSULTA_MOVIL = '(max-width: 640px)';
+export const ID_LATERAL = 'navegacion-lateral';
 
 export function NavegacionPlegable({
-  resumen,
+  equipos,
+  equipoActivo,
   children,
 }: {
-  resumen: string;
+  equipos: { id: string; name: string; role: string }[];
+  equipoActivo: string;
   children: React.ReactNode;
 }) {
-  const detalle = useRef<HTMLDetailsElement>(null);
-
-  useEffect(() => {
-    const consulta = window.matchMedia(CONSULTA_MOVIL);
-
-    const aplicar = (estrecha: boolean) => {
-      const el = detalle.current;
-      if (!el) return;
-      // Solo se toca el estado al CAMBIAR de tamano. Forzarlo en cada render cerraria el arbol
-      // que la persona acaba de abrir.
-      el.open = !estrecha;
-    };
-
-    aplicar(consulta.matches);
-    const alCambiar = (e: MediaQueryListEvent) => aplicar(e.matches);
-    consulta.addEventListener('change', alCambiar);
-    return () => consulta.removeEventListener('change', alCambiar);
-  }, []);
-
   return (
-    <details className="lateral" ref={detalle} open>
-      <summary className="lateral__resumen" data-testid="abrir-navegacion">
-        {resumen}
-      </summary>
+    <aside className="lateral" id={ID_LATERAL}>
       <div className="lateral__contenido">{children}</div>
-    </details>
+
+      {/*
+        El equipo activo, al pie.
+
+        Estaba en la cabecera, que es donde primero se mira y donde menos falta hace: no se cambia
+        de equipo varias veces por sesion, y ocupaba el ancho de un desplegable entero junto a
+        cosas que se pulsan a diario. Al pie del panel esta donde esta lo que define el contexto
+        —el arbol de arriba es SU arbol—, y sigue a la vista en todo momento, que es lo que pide
+        4.10.2.
+      */}
+      <div className="lateral__pie">
+        <SelectorDeEquipo equipos={equipos} equipoActivo={equipoActivo} />
+      </div>
+    </aside>
   );
 }

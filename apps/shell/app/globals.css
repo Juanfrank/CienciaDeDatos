@@ -689,6 +689,78 @@ input[type='radio'] {
   background: var(--md-sys-color-surface-container);
   align-self: stretch;
 }
+
+/*
+ * El plegado.
+ *
+ * Lo decide `data-lateral` en `<body>`, que escribe el boton de la cabecera. Se oculta con
+ * `display: none` y no moviendolo fuera de la pantalla a proposito: un panel escondido con
+ * `transform` sigue estando en el orden de tabulacion, asi que al plegarlo el foco se iria a una
+ * lista de enlaces invisibles.
+ *
+ * Sin el atributo —es decir, sin JavaScript— el panel se queda visible a cualquier ancho.
+ */
+body[data-lateral='oculto'] .lateral,
+body[data-lateral='oculto'] .admin__nav { display: none; }
+
+/* El arbol arriba y el equipo abajo, con el hueco entre medias. */
+.lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.lateral__contenido { flex: 1; min-height: 0; }
+.lateral__pie {
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+.lateral__pie .selector-equipo__campo { width: 100%; }
+.lateral__pie select { width: 100%; }
+.selector-equipo__rol {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/*
+ * El sandwich.
+ *
+ * Vive en la cabecera, sobre `primary`, asi que hereda `on-primary` como cualquier otro hijo y
+ * no declara color propio. El area de pulsacion son 48 px aunque el dibujo tenga 22: es el
+ * minimo de 2.5.5 de WCAG, y un icono de 22 px es exactamente el control que se falla al
+ * pulsarlo con el pulgar.
+ */
+.cabecera__sandwich {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  margin-right: var(--space-xs);
+  padding: 0;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.cabecera__sandwich::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.cabecera__sandwich:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+.cabecera__sandwich:active::before { opacity: var(--md-sys-state-pressed-opacity); }
+
 .lateral__resumen { display: none; }
 .lateral__titulo { margin: 0 0 var(--space-sm); padding: 0 var(--space-md); color: var(--md-sys-color-on-surface-variant); }
 
@@ -747,6 +819,114 @@ input[type='radio'] {
   gap: var(--space-md);
   flex-wrap: wrap;
   margin-bottom: var(--space-md);
+}
+
+/*
+ * La barra de acciones del modulo.
+ *
+ * Cinco iconos agrupados y separados del resto por una linea: se leen como un bloque de
+ * herramientas y no como cinco enlaces sueltos entre el titulo y los datos.
+ */
+.barra-acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+.barra-acciones__limpiar { margin-left: auto; }
+
+/*
+ * Boton de icono de MD3: 40 px de caja, 48 de area tactil, pastilla al pasar el raton.
+ *
+ * El `::after` estira el area pulsable por encima del dibujo sin agrandar el boton: con 40 px de
+ * caja el control cumple de sobra en un raton y se queda corto para un pulgar, y 2.5.5 mide el
+ * area, no lo que se ve.
+ */
+.boton-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+}
+.boton-icono::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.boton-icono::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+.boton-icono:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+.boton-icono:active::before { opacity: var(--md-sys-state-pressed-opacity); }
+
+/* Pulsado = la accion esta abierta o activa. Es el estado seleccionado de MD3. */
+.boton-icono[aria-pressed='true'] {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+.boton-icono__contador {
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+  font-variant-numeric: tabular-nums;
+}
+.icono { flex-shrink: 0; }
+
+/*
+ * El ambito, como insignia con detalle al pasar el raton.
+ *
+ * `position: relative` en el envoltorio es lo que ancla el globo; sin el se posicionaria contra
+ * la pagina y aparecería en una esquina.
+ */
+.modulo__procedencia {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin: var(--space-sm) 0 0;
+}
+.ambito { position: relative; display: inline-flex; }
+.insignia--ambito {
+  border: none;
+  cursor: help;
+  font-family: inherit;
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+}
+.ambito__detalle {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  z-index: 30;
+  width: max(260px, 28ch);
+  max-width: 70vw;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+  box-shadow: var(--md-sys-elevation-2);
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: var(--md-sys-typescale-body-small-line-height);
 }
 .filtros-activos {
   display: flex;
@@ -1249,7 +1429,20 @@ input[type='radio'] {
   font-weight: var(--md-sys-typescale-label-small-weight);
 }
 
-.exportar { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
+.exportar { display: inline-flex; align-items: center; gap: var(--space-sm); position: relative; }
+.exportar__panel {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--md-sys-color-surface-container-high);
+  border-radius: var(--md-sys-shape-corner-medium);
+  box-shadow: var(--md-sys-elevation-2);
+}
 .exportar__etiqueta { font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface-variant); }
 .exportar__formato { min-height: 40px; }
 .exportar__estado { font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface-variant); }
@@ -1378,21 +1571,6 @@ input[type='radio'] {
   .admin__cuerpo { flex-direction: column; }
   .lateral,
   .admin__nav { width: 100%; }
-
-  .lateral__resumen {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    min-height: 48px;
-    padding: 0 var(--space-md);
-    cursor: pointer;
-    border-radius: var(--md-sys-shape-corner-full);
-    color: var(--md-sys-color-on-surface-variant);
-    font-size: var(--md-sys-typescale-label-large-size);
-    font-weight: var(--md-sys-typescale-label-large-weight);
-    list-style: none;
-  }
-  .lateral__resumen::-webkit-details-marker { display: none; }
 
   .editor__crear { flex-direction: column; align-items: stretch; }
   .emergente { max-width: 96vw; }

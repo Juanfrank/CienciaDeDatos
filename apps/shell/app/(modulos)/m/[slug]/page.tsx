@@ -6,6 +6,8 @@ import { actorDe, moduloVisiblePorSlug } from '../../../../src/server/cicloDeVid
 import { serializarObjeto } from '../../../../src/server/serializar';
 import { exigirSesionDePagina } from '../../../../src/server/sesion';
 import { VistaModulo } from '../../../../src/components/VistaModulo';
+import { InsigniaDeAmbito } from '../../../../src/components/InsigniaDeAmbito';
+import { InsigniaDeProcedencia } from '../../../../src/components/InsigniaDeProcedencia';
 
 /**
  * Pagina de un modulo — ruta /m/{module-slug}[/{page-slug}] (4.11).
@@ -63,30 +65,31 @@ export default async function PaginaModulo({
   return (
     <article className="modulo">
       <header className="modulo__cabecera">
-        <div>
-          <h1 data-testid="titulo-modulo">{module.name}</h1>
-          <p className="texto-atenuado" data-testid="frescura">
-            {cargado.generatedAt
-              ? `Datos actualizados el ${new Date(cargado.generatedAt).toLocaleString('es-DO')}`
-              : 'Sin datos poblados todavia'}
-            {cargado.degraded ? ' — sirviendo el ultimo dato valido conocido' : ''}
-          </p>
-        </div>
+        <h1 data-testid="titulo-modulo">{module.name}</h1>
+        <p className="texto-atenuado" data-testid="frescura">
+          {cargado.generatedAt
+            ? `Datos actualizados el ${new Date(cargado.generatedAt).toLocaleString('es-DO')}`
+            : 'Sin datos poblados todavia'}
+          {cargado.degraded ? ' — sirviendo el ultimo dato valido conocido' : ''}
+        </p>
+
+        {/*
+          De que vista se trata y si esta recortada, juntas y pegadas a la fecha.
+
+          Las tres cosas responden a la misma pregunta —«de donde sale lo que estoy viendo»— y
+          antes estaban repartidas entre la cabecera y la barra de acciones, con la procedencia
+          junto a botones que no tienen nada que ver con ella.
+        */}
+        <p className="modulo__procedencia">
+          <InsigniaDeProcedencia provenance={describeProvenance(cargado.isPersonalized)} />
+          <InsigniaDeAmbito restricciones={restriccionesDeAmbito} />
+        </p>
       </header>
 
       {filtrosElegidos.length > 0 ? (
         <p className="filtros-activos" data-testid="filtros-activos">
           Filtros aplicados:{' '}
           {filtrosElegidos.map(([campo, valores]) => `${campo} = ${valores.join(', ')}`).join(' · ')}
-        </p>
-      ) : null}
-
-      {restriccionesDeAmbito.length > 0 ? (
-        <p className="ambito-activo" data-testid="ambito-activo">
-          Su ambito de acceso limita esta vista a:{' '}
-          {restriccionesDeAmbito
-            .map(([campo, valores]) => `${campo} = ${valores.join(', ')}`)
-            .join(' · ')}
         </p>
       ) : null}
 

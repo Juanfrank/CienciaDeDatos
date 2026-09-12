@@ -245,7 +245,8 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByLabel('Exportar').selectOption('csv');
+    await page.getByTestId('abrir-exportar').click();
+    await page.getByLabel('Formato').selectOption('csv');
     await page.getByTestId('exportar').click();
 
     // El estado es una region viva: cambia sin recargar y se anuncia a un lector de pantalla.
@@ -256,13 +257,29 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
     await expect(enlace).toContainText('casos-pendientes');
   });
 
+  test('cerrar el panel no se lleva por delante el estado ni la descarga', async ({ page }) => {
+    // Una exportacion tarda, y lo normal es cerrar el panel mientras tanto. Si la region viva
+    // viviera dentro, el anuncio de «lista» se perderia justo para quien depende de el.
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    await page.getByTestId('abrir-exportar').click();
+    await page.getByTestId('exportar').click();
+    await page.getByTestId('abrir-exportar').click();
+    await expect(page.getByTestId('panel-exportar')).toHaveCount(0);
+
+    await expect(page.getByTestId('estado-exportacion')).toHaveText(/Lista/, { timeout: 15_000 });
+    await expect(page.getByTestId('descargar-exportacion')).toBeVisible();
+  });
+
   test('exporta lo que se ve: el filtro elegido viaja al archivo', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('segmentador-Penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
 
-    await page.getByLabel('Exportar').selectOption('csv');
+    await page.getByTestId('abrir-exportar').click();
+    await page.getByLabel('Formato').selectOption('csv');
     await page.getByTestId('exportar').click();
     await expect(page.getByTestId('estado-exportacion')).toHaveText(/Lista/, { timeout: 15_000 });
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
+import { BotonDeIcono } from './iconos/BotonDeIcono';
 
 /**
  * Exportar — seccion 4.9, encolado como exige 5.3.
@@ -46,6 +47,7 @@ export function Exportar({
 }) {
   const { searchParams } = useFiltrosDeUrl();
   const [formato, setFormato] = useState<string>('xlsx');
+  const [abierto, setAbierto] = useState(false);
   const [trabajo, setTrabajo] = useState<Estado | null>(null);
   const sondeo = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -96,29 +98,53 @@ export function Exportar({
     }, 600);
   };
 
+  /*
+   * El formato se elige DENTRO del panel, no al lado del icono.
+   *
+   * Exportar es la unica de las cinco acciones que necesita una decision antes de dispararse, y
+   * por eso es la unica cuyo icono abre algo en vez de actuar. Dejar el selector suelto en la
+   * barra obligaba a que la barra mezclara controles de dos tamanos y dos naturalezas.
+   */
   return (
     <div className="exportar">
-      <label className="exportar__etiqueta" htmlFor="formato-exportacion">
-        Exportar
-      </label>
-      <select
-        id="formato-exportacion"
-        className="exportar__formato"
-        value={formato}
-        onChange={(e) => setFormato(e.target.value)}
-      >
-        {FORMATOS.map((f) => (
-          <option key={f.valor} value={f.valor}>
-            {f.etiqueta}
-          </option>
-        ))}
-      </select>
-      <button type="button" className="boton-enlace" data-testid="exportar" onClick={exportar}>
-        Generar
-      </button>
+      <BotonDeIcono
+        icono="exportar"
+        etiqueta="Exportar"
+        presionado={abierto}
+        data-testid="abrir-exportar"
+        onClick={() => setAbierto((v) => !v)}
+      />
 
-      {/* Region viva: quien use lector de pantalla se entera de que la exportacion termino
-          sin tener que ir a buscar el cambio por la pagina (4.9). */}
+      {abierto ? (
+        <div className="exportar__panel" data-testid="panel-exportar">
+          <label className="exportar__etiqueta" htmlFor="formato-exportacion">
+            Formato
+          </label>
+          <select
+            id="formato-exportacion"
+            className="exportar__formato"
+            value={formato}
+            onChange={(e) => setFormato(e.target.value)}
+          >
+            {FORMATOS.map((f) => (
+              <option key={f.valor} value={f.valor}>
+                {f.etiqueta}
+              </option>
+            ))}
+          </select>
+          <button type="button" className="pastilla" data-testid="exportar" onClick={exportar}>
+            Generar
+          </button>
+        </div>
+      ) : null}
+
+      {/*
+        La region viva vive FUERA del panel.
+
+        Si estuviera dentro, cerrar el panel la desmontaria y el anuncio de "lista" se perderia
+        justo para quien depende de el. Una exportacion tarda, y lo normal es cerrar el panel
+        mientras tanto.
+      */}
       <span className="exportar__estado" role="status" aria-live="polite" data-testid="estado-exportacion">
         {trabajo ? TEXTO[trabajo.estado] : ''}
         {trabajo?.error ? ` — ${trabajo.error}` : ''}

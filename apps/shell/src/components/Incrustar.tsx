@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
+import { BotonDeIcono } from './iconos/BotonDeIcono';
 
 /**
  * Codigo para incrustar esta vista en otro portal — seccion 4.9.
@@ -56,9 +57,7 @@ export function Incrustar({ moduleSlug, pageSlug }: { moduleSlug: string; pageSl
 
   return (
     <>
-      <button type="button" className="boton-enlace" data-testid="incrustar" onClick={abrir}>
-        Incrustar
-      </button>
+      <BotonDeIcono icono="incrustar" etiqueta="Incrustar" data-testid="incrustar" onClick={abrir} />
 
       <dialog ref={dialogo} className="emergente" aria-label="Codigo de incrustacion" data-testid="dialogo-incrustar">
         <div className="emergente__cabecera">

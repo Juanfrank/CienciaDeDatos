@@ -37,6 +37,17 @@ export function SelectorDeEquipo({
     iniciarTransicion(() => router.refresh());
   };
 
+  /*
+   * El rol va DEBAJO, no dentro de la opcion.
+   *
+   * Estaba como «Equipo Distrito Norte (colaborador)» en el texto de cada `<option>`. Un
+   * `<select>` no deja dar estilo a sus opciones ni ponerlas en dos lineas, asi que en el ancho
+   * del panel el nombre se cortaba justo donde empezaba lo que lo distingue: «Equipo Distrito
+   * Norte (cola». Fuera del desplegable el rol cabe entero y ademas se puede atenuar, que es lo
+   * que merece: es contexto, no la eleccion.
+   */
+  const rolActivo = equipos.find((t) => t.id === equipoActivo)?.role;
+
   return (
     <div className="selector-equipo" data-pendiente={pendiente}>
       <label className="selector-equipo__campo">
@@ -48,11 +59,16 @@ export function SelectorDeEquipo({
         >
           {equipos.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.name} ({t.role})
+              {t.name}
             </option>
           ))}
         </select>
       </label>
+      {rolActivo ? (
+        <p className="selector-equipo__rol" data-testid="rol-en-equipo">
+          Su rol aqui: {rolActivo}
+        </p>
+      ) : null}
     </div>
   );
 }

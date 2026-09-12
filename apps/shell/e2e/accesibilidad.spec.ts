@@ -78,6 +78,7 @@ test.describe('paginas de modulo', () => {
   test('el estado de una exportacion en curso es accesible', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
+    await page.getByTestId('abrir-exportar').click();
     await page.getByTestId('exportar').click();
     await expect(page.getByTestId('estado-exportacion')).toHaveText(/Lista/, { timeout: 15_000 });
 
@@ -218,7 +219,9 @@ test.describe('navegacion solo con teclado', () => {
 
     expect(alcanzados).toContain('nav-casos-pendientes');
     expect(alcanzados).toContain('segmentador-Penal');
-    expect(alcanzados).toContain('exportar');
+    // Es el icono lo que esta en el orden de tabulacion; el boton de generar vive dentro del
+    // panel que abre, y llegar al panel es llegar a exportar.
+    expect(alcanzados).toContain('abrir-exportar');
   });
 
   test('el foco se VE: un control alcanzable sin indicador es inservible de hecho', async ({

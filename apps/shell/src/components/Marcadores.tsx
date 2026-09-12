@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { type Bookmark, bookmarkToUrl } from '@app/module-model';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
+import { BotonDeIcono } from './iconos/BotonDeIcono';
 
 /**
  * Marcadores — seccion 4.4.
@@ -58,14 +59,14 @@ export function Marcadores({
 
   return (
     <div className="marcadores">
-      <button
-        type="button"
-        className="boton-enlace"
+      <BotonDeIcono
+        icono="marcador"
+        etiqueta="Marcadores"
+        contador={deEsteModulo.length}
+        presionado={abierto}
         data-testid="abrir-marcadores"
         onClick={() => setAbierto((v) => !v)}
-      >
-        Marcadores ({deEsteModulo.length})
-      </button>
+      />
 
       {abierto ? (
         <div className="marcadores__panel" data-testid="panel-marcadores">

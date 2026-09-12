@@ -200,9 +200,30 @@ test.describe('la interfaz distingue lo elegido de lo impuesto por el ambito', (
   test('sin filtros propios solo se muestra la restriccion de ambito', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
+
+    // Que la vista esta recortada se ve SIEMPRE; el detalle de por donde, solo si se pide. El
+    // enunciado completo ocupaba una linea entera encima del modulo y crece con el ambito.
+    const insignia = page.getByTestId('ambito-activo');
+    await expect(insignia).toBeVisible();
+    await expect(page.getByTestId('ambito-detalle')).toHaveCount(0);
+
     // El equipo Norte esta restringido a Penal y Civil: eso es ambito, no una eleccion.
-    await expect(page.getByTestId('ambito-activo')).toContainText('Penal, Civil');
+    await insignia.hover();
+    await expect(page.getByTestId('ambito-detalle')).toContainText('Penal, Civil');
     await expect(page.getByTestId('filtros-activos')).toHaveCount(0);
+  });
+
+  test('el detalle del ambito tambien se alcanza con el teclado (1.4.13)', async ({ page }) => {
+    // Un detalle que solo aparece al pasar el raton no existe para quien no lo usa, y el ambito
+    // es justo lo que explica por que las cifras salen como salen.
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    await page.getByTestId('ambito-activo').focus();
+    await expect(page.getByTestId('ambito-detalle')).toContainText('Penal, Civil');
+
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('ambito-detalle')).toHaveCount(0);
   });
 
   test('al elegir un filtro, aparece como propio y deja de contarse como ambito', async ({ page }) => {
@@ -210,7 +231,9 @@ test.describe('la interfaz distingue lo elegido de lo impuesto por el ambito', (
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('segmentador-Penal').click();
     await expect(page.getByTestId('filtros-activos')).toContainText('Penal');
-    await expect(page.getByTestId('ambito-activo')).not.toContainText('Materia');
+
+    await page.getByTestId('ambito-activo').hover();
+    await expect(page.getByTestId('ambito-detalle')).not.toContainText('Materia');
   });
 });
 

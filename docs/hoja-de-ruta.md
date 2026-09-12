@@ -149,6 +149,28 @@ credenciales. Lo razonable es un aviso —no un bloqueo— en `/admin/equipos` y
 Mientras tanto, el aviso de "conviene que haya al menos dos" y el procedimiento de acceso de
 emergencia cubren el caso.
 
+### 2.9 La consulta en lenguaje natural, retirada de la interfaz
+
+El campo «Pregunte:» esta **oculto**: `CONSULTA_VISIBLE` en
+`apps/shell/src/components/VistaModulo.tsx` es `false`. La ruta `/api/consulta` sigue viva y sus
+pruebas tambien; lo que se salta es el bloque de pruebas de la interfaz, marcado con la misma
+razon.
+
+El motivo no es que falle, es que responde poco: reconoce medidas y valores del vocabulario del
+modulo y devuelve una URL con filtros. Eso es util como cimiento y no es lo que alguien espera al
+ver un campo de busqueda encima de sus datos. Un campo visible es una promesa, y quien lo ve
+escribe en el.
+
+Para devolverlo hace falta, por este orden:
+
+1. Que entienda comparaciones y periodos («mas que el trimestre pasado»), no solo igualdades.
+2. Que conteste sobre la cifra, no solo que filtre la vista.
+3. Volver a mirar ADR-011: lo que NO puede hacer es traducir a SQL libre, que 4.2 prohibe. El
+   vocabulario tiene que seguir saliendo de lo que quien pregunta ya puede ver, porque ahi esta
+   lo que impide que la pregunta se convierta en una puerta trasera al ambito.
+
+Encenderlo es cambiar la constante y quitar el `.skip` del bloque de pruebas.
+
 ---
 
 ## 3. Revisado y descartado

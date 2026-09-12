@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import type { AlertOperator, Cadence } from '@app/alerts';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
+import { BotonDeIcono } from './iconos/BotonDeIcono';
 
 /**
  * Crear una alerta o una suscripcion desde el modulo que se esta viendo.
@@ -106,9 +107,7 @@ export function CrearAviso({
 
   return (
     <>
-      <button type="button" className="boton-enlace" data-testid="crear-aviso" onClick={abrir}>
-        Avisarme
-      </button>
+      <BotonDeIcono icono="aviso" etiqueta="Avisarme" data-testid="crear-aviso" onClick={abrir} />
 
       <dialog ref={dialogo} className="emergente" aria-label="Crear un aviso" data-testid="dialogo-aviso">
         <div className="emergente__cabecera">

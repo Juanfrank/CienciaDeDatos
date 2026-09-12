@@ -6,6 +6,7 @@ import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
 import { CrearAviso, type ObjetoVigilable } from './CrearAviso';
 import { Exportar } from './Exportar';
 import { Incrustar } from './Incrustar';
+import { InsigniaDeProcedencia } from './InsigniaDeProcedencia';
 import { Preguntar } from './Preguntar';
 import { Marcadores } from './Marcadores';
 import { MiVista } from './MiVista';
@@ -22,6 +23,14 @@ import {
   TarjetaKpi,
 } from './objetos';
 import type { ObjetoSerializado } from '../server/serializar';
+
+/**
+ * Interruptor de la consulta en lenguaje natural (4.9).
+ *
+ * Una constante y no una variable de entorno a proposito: no es algo que se configure por
+ * despliegue, es una funcionalidad a medio hacer. Cuando responda, esto pasa a `true` y se borra.
+ */
+const CONSULTA_VISIBLE = false;
 
 /**
  * Vista de un modulo.
@@ -69,37 +78,59 @@ export function VistaModulo({
 
   return (
     <>
-      {incrustado ? null : <Preguntar moduleSlug={moduleSlug} />}
+      {/*
+        La consulta en lenguaje natural queda FUERA de la vista mientras no responda de verdad.
 
-      <div className="barra-estado">
-        <span
-          className={`insignia ${provenance.isPersonalized ? 'insignia--personalizada' : 'insignia--oficial'}`}
-          data-testid="procedencia"
-        >
-          {provenance.label}
-        </span>
-        {hayFiltros ? (
-          <button type="button" className="boton-enlace" data-testid="limpiar-filtros" onClick={limpiarTodo}>
-            Limpiar todos los filtros
-          </button>
-        ) : null}
-        {incrustado ? null : (
-          <>
-            <MiVista moduleSlug={moduleSlug} personalizada={provenance.isPersonalized} />
-            <Marcadores moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
-            <Exportar
-              moduleSlug={moduleSlug}
-              {...(pageSlug ? { pageSlug } : {})}
-            />
-            <CrearAviso
-              moduleSlug={moduleSlug}
-              {...(pageSlug ? { pageSlug } : {})}
-              vigilables={vigilables}
-            />
-            <Incrustar moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
-          </>
-        )}
-      </div>
+        El campo esta construido y su ruta funciona, pero lo que devuelve todavia no es una
+        respuesta util, y un campo de busqueda visible es una promesa: quien lo ve escribe en el.
+        Se retira de la pagina, no del repositorio — `CONSULTA_VISIBLE` es lo unico que hay que
+        cambiar cuando la funcionalidad este.
+      */}
+      {CONSULTA_VISIBLE && !incrustado ? <Preguntar moduleSlug={moduleSlug} /> : null}
+
+      {/*
+        Las acciones del modulo, como iconos.
+
+        `role="toolbar"` no es decorativo: agrupa los controles bajo un solo nombre y hace que un
+        lector de pantalla los anuncie como "barra de herramientas, 5 elementos" en vez de como
+        cinco botones sueltos entre el titulo y los datos. Cada icono conserva su nombre en
+        `aria-label`, asi que lo que se anuncia es exactamente lo que antes decia el texto.
+      */}
+      {incrustado ? null : (
+        <div className="barra-acciones" role="toolbar" aria-label="Acciones del modulo">
+          <MiVista moduleSlug={moduleSlug} personalizada={provenance.isPersonalized} />
+          <Marcadores moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+          <Exportar moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+          <CrearAviso
+            moduleSlug={moduleSlug}
+            {...(pageSlug ? { pageSlug } : {})}
+            vigilables={vigilables}
+          />
+          <Incrustar moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+
+          {hayFiltros ? (
+            <button
+              type="button"
+              className="boton-enlace barra-acciones__limpiar"
+              data-testid="limpiar-filtros"
+              onClick={limpiarTodo}
+            >
+              Limpiar todos los filtros
+            </button>
+          ) : null}
+        </div>
+      )}
+
+      {/*
+        Dentro de un portal ajeno no hay cabecera de modulo donde ponerla, asi que la procedencia
+        se dibuja aqui. Es lo unico de esta barra que sobrevive a la incrustacion: 4.6 pide que se
+        sepa siempre si lo que se ve es la vista institucional.
+      */}
+      {incrustado ? (
+        <div className="barra-estado">
+          <InsigniaDeProcedencia provenance={provenance} />
+        </div>
+      ) : null}
 
       <Rejilla items={items}>
         {(id) => {

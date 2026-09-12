@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
+import { BotonDeIcono } from './iconos/BotonDeIcono';
 
 /**
  * Personalizacion de la vista — seccion 4.6.
@@ -78,9 +79,13 @@ export function MiVista({
 
   return (
     <>
-      <button type="button" className="boton-enlace" data-testid="mi-vista" onClick={() => void abrir()}>
-        Mi vista
-      </button>
+      <BotonDeIcono
+        icono="vista"
+        etiqueta="Mi vista"
+        presionado={personalizada}
+        data-testid="mi-vista"
+        onClick={() => void abrir()}
+      />
 
       <dialog ref={dialogo} className="emergente" aria-label="Mi vista" data-testid="dialogo-mi-vista">
         <div className="emergente__cabecera">

@@ -100,7 +100,17 @@ test.describe('una pregunta no revela lo que hay fuera del ambito (4.11)', () =>
   });
 });
 
-test.describe('la interfaz enseña lo que entendio antes de aplicarlo', () => {
+/*
+ * La INTERFAZ de la consulta esta retirada de la pagina mientras lo que devuelve no sea una
+ * respuesta util (`CONSULTA_VISIBLE` en VistaModulo). El componente y su ruta siguen ahi y las
+ * pruebas tambien: saltarlas deja constancia de que existen y las devuelve al servicio cambiando
+ * una sola constante, mientras que borrarlas obligaria a reescribirlas cuando el campo vuelva.
+ *
+ * Lo que NO se salta es nada de arriba: la ruta /api/consulta se sigue probando entera, incluido
+ * que no filtre vocabulario fuera del ambito de quien pregunta. Es la parte con consecuencias de
+ * seguridad, y esa no depende de que el campo se dibuje.
+ */
+test.describe.skip('la interfaz enseña lo que entendio antes de aplicarlo', () => {
   test('muestra la interpretacion y navega a la vista al confirmar', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');

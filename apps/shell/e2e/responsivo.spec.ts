@@ -133,15 +133,36 @@ test.describe('la navegacion no se interpone en un movil', () => {
     await expect(page.getByTestId('titulo-modulo')).toHaveText('Audiencias');
   });
 
-  test('en escritorio no hay nada que plegar: el arbol esta siempre visible', async ({ page }) => {
-    // El plegado se apaga con una media query, no con JavaScript. Esta prueba es la que
-    // comprueba que esa anulacion funciona de verdad en un navegador.
+  test('en escritorio el arbol viene desplegado, y el boton lo pliega', async ({ page }) => {
+    // El ancho ya no decide si SE PUEDE plegar, solo como empieza. El boton esta a cualquier
+    // ancho, porque en una pantalla ancha tambien hay motivos para querer el modulo entero.
     await page.setViewportSize(ESCRITORIO);
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await expect(page.getByTestId('abrir-navegacion')).not.toBeVisible();
+    const boton = page.getByTestId('abrir-navegacion');
+    await expect(boton).toHaveAttribute('aria-expanded', 'true');
     await expect(page.getByTestId('nav-audiencias')).toBeVisible();
+
+    await boton.click();
+    await expect(boton).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.getByTestId('nav-audiencias')).not.toBeVisible();
+  });
+
+  test('lo que se pliega a mano NO lo vuelve a abrir un cambio de tamano', async ({ page }) => {
+    // Cualquier `change` de la media query reabria el panel recien cerrado, y no hace falta
+    // cruzar el umbral para que llegue uno. Se veia como un boton que no funciona, porque el
+    // panel volvia solo unas decimas despues.
+    await page.setViewportSize(ESCRITORIO);
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    await page.getByTestId('abrir-navegacion').click();
+    await expect(page.getByTestId('nav-audiencias')).not.toBeVisible();
+
+    await page.setViewportSize(TABLETA);
+    await expect(page.getByTestId('nav-audiencias')).not.toBeVisible();
+    await expect(page.getByTestId('abrir-navegacion')).toHaveAttribute('aria-expanded', 'false');
   });
 
   test('en tableta tambien se mantiene visible', async ({ page }) => {
@@ -227,12 +248,17 @@ test.describe('accesibilidad en movil (4.9)', () => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    const resumen = page.getByTestId('abrir-navegacion');
-    await resumen.focus();
+    const boton = page.getByTestId('abrir-navegacion');
+    await expect(boton).toHaveAttribute('aria-expanded', 'false');
+
+    await boton.focus();
     await page.keyboard.press('Enter');
     await expect(page.getByTestId('nav-audiencias')).toBeVisible();
 
-    // `<details>` expone el estado por si mismo; es la razon de usarlo en vez de un div y estado.
-    expect(await resumen.evaluate((el) => el.parentElement?.hasAttribute('open'))).toBe(true);
+    // El estado se anuncia con `aria-expanded` sobre el boton, y `aria-controls` dice QUE panel
+    // abre. Los dos tienen que moverse juntos: un boton que dice «desplegado» sobre un panel
+    // oculto es peor que ninguno.
+    await expect(boton).toHaveAttribute('aria-expanded', 'true');
+    await expect(boton).toHaveAttribute('aria-controls', 'navegacion-lateral');
   });
 });
