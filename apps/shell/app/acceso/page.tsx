@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { defaultIdentity } from '@app/design-tokens';
 import { Acceso } from '../../src/components/Acceso';
 import { AZURE_AD_DISPONIBLE } from '../../src/server/identidad';
 import { obtenerSesion } from '../../src/server/sesion';
@@ -15,5 +16,5 @@ export default async function PaginaAcceso() {
   // Con sesion valida no se muestra la pantalla: se vuelve a la aplicacion.
   if (await obtenerSesion()) redirect('/');
 
-  return <Acceso azureAdDisponible={AZURE_AD_DISPONIBLE} />;
+  return <Acceso azureAdDisponible={AZURE_AD_DISPONIBLE} identidad={defaultIdentity} />;
 }

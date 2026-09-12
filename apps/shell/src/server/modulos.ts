@@ -129,9 +129,35 @@ export const modulosDemo: ModuleDefinition[] = [
               },
             },
           },
+          /*
+           * El unico objeto del seed con MAS DE UNA medida mapeada, y esta aqui a proposito.
+           *
+           * Toda la galeria mapeaba una sola medida, asi que ningun grafico llegaba a usar la
+           * paleta categorica ni la leyenda: el codigo que reparte ocho colores entre series
+           * nunca se ejecutaba contra datos reales, y un fallo ahi no se habria visto. Ademas es
+           * la comparacion que el modulo pedia —lo que entra frente a lo que sale— y estaba solo
+           * en la tabla del final.
+           */
+          {
+            id: 'barras-flujo',
+            position: { x: 0, y: 6, w: 12, h: 4 },
+            instance: {
+              instanceId: 'barras-flujo',
+              objectId: 'barras',
+              // La unica instancia del seed fijada a una version distinta de 1.0.0, y sirve de
+              // prueba viva de 4.5: las demas siguen en 1.0.0 y no se enteran de que existe.
+              version: '1.1.0',
+              title: 'Ingresados y resueltos por materia',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [MATERIA],
+                measures: ['CasosIngresados', 'CasosResueltos'],
+              },
+            },
+          },
           {
             id: 'tabla-detalle',
-            position: { x: 0, y: 6, w: 12, h: 4 },
+            position: { x: 0, y: 10, w: 12, h: 4 },
             instance: {
               instanceId: 'tabla-detalle',
               objectId: 'tabla',

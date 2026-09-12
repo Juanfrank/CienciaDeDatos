@@ -38,12 +38,18 @@ export interface OpcionesDeGrafico {
  * cumple el criterio de WCAG 1.4.1: el color no puede ser el unico medio de transmitir
  * informacion, y con ocho series eso deja de ser una formalidad — al imprimir en gris, o para
  * quien no distingue rojo y verde, el patron es lo unico que separa una serie de otra.
+ *
+ * Pero SOLO con mas de una serie. Con una sola no hay nada que distinguir del color: el trazado
+ * no transmite ninguna informacion y la unica consecuencia es una barra rayada que se lee como
+ * ruido. 1.4.1 pide que el color no sea el UNICO medio de distinguir cosas; donde no hay cosas
+ * que distinguir, no hay nada que cumplir.
  */
 function base(o: OpcionesDeGrafico) {
+  const variasSeries = o.vm.series.length > 1;
   return {
     aria: {
       enabled: true,
-      decal: { show: true },
+      decal: { show: variasSeries },
       label: {
         enabled: true,
         general: {
@@ -57,7 +63,14 @@ function base(o: OpcionesDeGrafico) {
     backgroundColor: 'transparent',
     animation: false,
     textStyle: { color: o.paleta.texto },
-    grid: { left: 8, right: 16, top: 24, bottom: 8, containLabel: true },
+    /*
+     * El margen inferior reserva sitio para la leyenda cuando la hay.
+     *
+     * `containLabel` cuenta los rotulos del eje, pero NO la leyenda, que se posiciona sobre el
+     * contenedor entero. Con el margen fijo, la leyenda se dibujaba encima de los nombres de las
+     * categorias y ambos quedaban ilegibles.
+     */
+    grid: { left: 8, right: 16, top: 24, bottom: variasSeries ? 32 : 8, containLabel: true },
     tooltip: {
       trigger: 'axis' as const,
       backgroundColor: o.paleta.superficieElevada,
@@ -65,10 +78,9 @@ function base(o: OpcionesDeGrafico) {
       textStyle: { color: o.paleta.texto },
       extraCssText: 'box-shadow: none;',
     },
-    legend:
-      o.vm.series.length > 1
-        ? { bottom: 0, textStyle: { color: o.paleta.textoAtenuado }, icon: 'roundRect' }
-        : { show: false },
+    legend: variasSeries
+      ? { bottom: 0, textStyle: { color: o.paleta.textoAtenuado }, icon: 'roundRect' }
+      : { show: false },
   };
 }
 

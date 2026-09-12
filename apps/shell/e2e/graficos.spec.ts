@@ -36,9 +36,12 @@ test.describe('el grafico monta sobre el respaldo, no en su lugar', () => {
     await pagina.goto('/m/casos-pendientes');
 
     // Sin JavaScript ECharts no monta, y la pagina sigue sirviendo: el objeto no queda en blanco.
-    await expect(pagina.getByTestId('barras')).toBeVisible();
-    await expect(pagina.getByTestId('barras')).toContainText('Distrito Norte');
-    await expect(pagina.locator('.grafico').first()).toHaveAttribute('data-montado', 'no');
+    // Se localiza POR INSTANCIA: el modulo lleva mas de un grafico y `barras` es el respaldo de
+    // cada uno, asi que sin acotar el localizador la comprobacion es ambigua.
+    const porDistrito = pagina.getByTestId('grafico-barras-distrito');
+    await expect(porDistrito.getByTestId('barras')).toBeVisible();
+    await expect(porDistrito.getByTestId('barras')).toContainText('Distrito Norte');
+    await expect(porDistrito).toHaveAttribute('data-montado', 'no');
 
     await contexto.close();
   });
@@ -79,15 +82,28 @@ test.describe('interaccion', () => {
 
 test.describe('el color no es el unico medio de distinguir (WCAG 1.4.1)', () => {
   test('ECharts dibuja un patron distinto sobre cada serie', async ({ page }) => {
-    // `aria.decal.show` en las opciones. Con ocho series, el patron es lo unico que separa una
+    // `aria.decal.show` en las opciones. Con varias series, el patron es lo unico que separa una
     // de otra al imprimir en gris o para quien no distingue ciertos colores.
     await page.goto('/m/casos-pendientes');
-    await expect(page.locator('.grafico').first()).toHaveAttribute('data-montado', 'si');
+    const conVariasSeries = page.getByTestId('grafico-barras-flujo');
+    await expect(conVariasSeries).toHaveAttribute('data-montado', 'si');
 
     // Con pocos elementos el renderizador es SVG, y los patrones son <pattern> de verdad.
     await expect
-      .poll(() => page.locator('.grafico__lienzo pattern').count())
+      .poll(() => conVariasSeries.locator('.grafico__lienzo pattern').count())
       .toBeGreaterThan(0);
+  });
+
+  test('y con una sola serie no dibuja ninguno', async ({ page }) => {
+    // La otra mitad de la regla, y la que se olvida: 1.4.1 pide que el color no sea el UNICO
+    // medio de distinguir cosas. Con una serie no hay nada que distinguir —la categoria la dice
+    // el eje—, asi que el trazado no transmite nada y solo raya la barra. Sin esta prueba, la
+    // condicion se podria quitar sin que fallara nada.
+    await page.goto('/m/casos-pendientes');
+    const unaSerie = page.getByTestId('grafico-barras-distrito');
+    await expect(unaSerie).toHaveAttribute('data-montado', 'si');
+
+    expect(await unaSerie.locator('.grafico__lienzo pattern').count()).toBe(0);
   });
 
   test('y las series usan la paleta institucional, no la de la libreria', async ({ page }) => {

@@ -33,6 +33,13 @@ body {
   line-height: var(--md-sys-typescale-body-large-line-height);
   letter-spacing: var(--md-sys-typescale-body-large-tracking);
   color: var(--md-sys-color-on-surface);
+  /*
+   * El lienzo va un punto MAS tenido que las tarjetas, no al reves.
+   *
+   * Con el lienzo blanco y las tarjetas blancas, lo unico que las separaba era su contorno de un
+   * pixel. Invirtiendo la relacion —fondo `surface`, tarjeta `surface-container-lowest`— la
+   * tarjeta flota sin necesidad de sombra, que es como MD3 quiere que se separen los planos.
+   */
   background: var(--md-sys-color-surface);
   -webkit-font-smoothing: antialiased;
 }
@@ -511,6 +518,14 @@ input[type='radio'] {
  * pantalla con ocho tarjetas y ocho sombras parece un relieve; con ocho tonos de superficie se
  * lee como una lista.
  */
+/*
+ * Tarjeta CON CONTORNO de MD3, no rellena.
+ *
+ * Con relleno, ocho tarjetas seguidas producian ocho rectangulos grises y la pantalla entera se
+ * leia del mismo color. El contorno separa igual de bien, deja la superficie casi blanca —que es
+ * el fondo de un documento institucional— y hace que el color que SI hay (el azul de la
+ * cabecera, el de un KPI, el de una serie) se vea.
+ */
 .md-tarjeta,
 .objeto,
 .tarjeta,
@@ -521,8 +536,8 @@ input[type='radio'] {
 .editor__crear,
 .acceso__tarjeta,
 .marcadores__panel {
-  background: var(--md-sys-color-surface-container-low);
-  border: none;
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-medium);
   box-shadow: var(--md-sys-elevation-0);
 }
@@ -607,16 +622,44 @@ input[type='radio'] {
 
 .disposicion { min-height: 100vh; display: flex; flex-direction: column; }
 
-/* Barra superior de MD3: `surface-container` y sin sombra. */
+/*
+ * Barra superior EN AZUL INSTITUCIONAL.
+ *
+ * MD3 suele poner la barra sobre `surface`, y con los neutros de esta aplicacion eso dejaba la
+ * cabecera gris: la marca no aparecia por ningun lado salvo en el emblema. La norma de marca
+ * usa el azul para encabezar —es el color del titulo en la portada de un informe— asi que aqui
+ * hace lo mismo. Todo lo que va dentro pasa a `on-primary`, que es blanco por construccion.
+ */
 .cabecera {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
   padding: var(--space-sm) var(--space-lg);
-  background: var(--md-sys-color-surface-container);
-  color: var(--md-sys-color-on-surface);
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   flex-wrap: wrap;
+}
+.cabecera .cabecera__titulo,
+.cabecera .cabecera__subtitulo,
+.cabecera .boton-enlace,
+.cabecera .campana,
+.cabecera .selector-equipo__etiqueta { color: var(--md-sys-color-on-primary); }
+.cabecera select {
+  background: color-mix(in srgb, var(--md-sys-color-on-primary) 14%, transparent);
+  border-color: color-mix(in srgb, var(--md-sys-color-on-primary) 45%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+.cabecera select:hover:not(:disabled) { border-color: var(--md-sys-color-on-primary); }
+/* Las opciones del desplegable las dibuja el sistema: ahi manda la superficie, no el azul. */
+.cabecera select option { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+.cabecera :focus-visible { outline-color: var(--md-sys-color-on-primary); }
+
+/* El emblema lleva su propio disco blanco: el escudo es azul y rojo, y sobre azul se perderia. */
+.cabecera__emblema {
+  background: var(--md-sys-color-on-primary);
+  border-radius: var(--md-sys-shape-corner-full);
+  padding: 4px 6px;
 }
 .cabecera__marca { display: flex; align-items: center; gap: var(--space-md); min-width: 0; }
 .cabecera__textos { display: flex; flex-direction: column; min-width: 0; }
@@ -629,14 +672,22 @@ input[type='radio'] {
 .selector-equipo__campo { margin-bottom: 0; }
 .selector-equipo select { min-height: 40px; }
 
-.cuerpo { display: flex; flex: 1; align-items: flex-start; min-width: 0; }
+.cuerpo { display: flex; flex: 1; min-width: 0; }
 
-/* Carril de navegacion de MD3. */
-.lateral {
+/*
+ * Carril de navegacion de MD3, CON superficie propia.
+ *
+ * Sin ella el arbol flotaba sobre el fondo de la pagina y se leia como texto suelto en el
+ * margen, no como una region. `surface-container` lo separa del lienzo sin necesidad de una
+ * linea divisoria.
+ */
+.lateral,
+.admin__nav {
   width: 280px;
   flex-shrink: 0;
-  padding: var(--space-md);
-  background: var(--md-sys-color-surface);
+  padding: var(--space-md) var(--space-sm);
+  background: var(--md-sys-color-surface-container);
+  align-self: stretch;
 }
 .lateral__resumen { display: none; }
 .lateral__titulo { margin: 0 0 var(--space-sm); padding: 0 var(--space-md); color: var(--md-sys-color-on-surface-variant); }
@@ -706,13 +757,22 @@ input[type='radio'] {
   font-size: var(--md-sys-typescale-body-small-size);
   color: var(--md-sys-color-on-surface-variant);
 }
+/*
+ * El ambito efectivo que recorta la vista.
+ *
+ * No es decoracion: es la frase que explica por que las cifras de esta pantalla no cuadran con
+ * las de la persona de al lado. Pintado como una superficie neutra mas, se perdia entre el resto.
+ * Con `secondary-container` y una barra del mismo `secondary` se lee como una nota del sistema,
+ * que es lo que es.
+ */
 .ambito-activo {
   margin: var(--space-sm) 0 0;
   padding: var(--space-sm) var(--space-md);
-  background: var(--md-sys-color-surface-container);
+  border-left: 4px solid var(--md-sys-color-secondary);
+  background: var(--md-sys-color-secondary-container);
   border-radius: var(--md-sys-shape-corner-small);
   font-size: var(--md-sys-typescale-body-small-size);
-  color: var(--md-sys-color-on-surface-variant);
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 .vacio { padding: var(--space-xl); }
@@ -741,7 +801,14 @@ input[type='radio'] {
  * Objetos de datos                                                    *
  * ------------------------------------------------------------------ */
 
-.kpi__valor { margin: 0; color: var(--md-sys-color-on-surface); }
+ /*
+ * La cifra del KPI en AZUL.
+ *
+ * Es el dato que la pantalla existe para dar, y en negro sobre gris no se distinguia del resto
+ * del texto. El azul es el color del titulo en la portada de un informe institucional: aqui
+ * hace el mismo trabajo, jerarquizar.
+ */
+.kpi__valor { margin: 0; color: var(--md-sys-color-primary); }
 .kpi__delta { margin: var(--space-xs) 0 0; font-size: var(--md-sys-typescale-body-medium-size); }
 .kpi__delta.es-positivo { color: var(--md-sys-color-secondary); }
 .kpi__delta.es-negativo { color: var(--md-sys-color-error); }
@@ -874,8 +941,7 @@ input[type='radio'] {
   background: var(--md-sys-color-surface-container);
   flex-wrap: wrap;
 }
-.admin__cuerpo { display: flex; flex: 1; align-items: flex-start; min-width: 0; }
-.admin__nav { width: 280px; flex-shrink: 0; padding: var(--space-md); }
+.admin__cuerpo { display: flex; flex: 1; min-width: 0; }
 .admin__nav ul { list-style: none; margin: 0; padding: 0; }
 .admin__nav a {
   display: block;
@@ -901,6 +967,25 @@ input[type='radio'] {
 .admin__nav a:hover::before { opacity: var(--md-sys-state-hover-opacity); }
 .admin__nav-label { display: block; color: var(--md-sys-color-on-surface); }
 .admin__nav-desc { display: block; color: var(--md-sys-color-on-surface-variant); }
+
+/*
+ * Seccion actual del carril.
+ *
+ * Se engancha a `aria-current="page"`, el mismo atributo que anuncia el lector de pantalla, para
+ * que no pueda darse el caso de que se vea marcada una y se anuncie otra. El relleno es
+ * `secondary-container`, como en el arbol de modulos: sin el, el panel no decia en absoluto donde
+ * estaba uno.
+ */
+.admin__nav a[aria-current='page'] {
+  background: var(--md-sys-color-secondary-container);
+}
+.admin__nav a[aria-current='page'] .admin__nav-label {
+  color: var(--md-sys-color-on-secondary-container);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+}
+.admin__nav a[aria-current='page'] .admin__nav-desc {
+  color: var(--md-sys-color-on-secondary-container);
+}
 .admin__principal { flex: 1; padding: var(--space-lg); min-width: 0; }
 .admin__principal h2 { margin-bottom: var(--space-xs); }
 .admin__principal h3 { margin: var(--space-lg) 0 var(--space-xs); }
@@ -925,7 +1010,16 @@ input[type='radio'] {
   gap: var(--space-md);
   margin-bottom: var(--space-md);
 }
+/*
+ * Acciones de una fila.
+ *
+ * El flex va en un envoltorio DENTRO de la celda, no en la celda. `display: flex` sobre un `td`
+ * lo saca del algoritmo de tabla: deja de ser una celda, no participa en la altura de la fila y
+ * su borde inferior se dibuja a una altura distinta del resto. Se veia como lineas sueltas
+ * flotando en la ultima columna.
+ */
 .editor__acciones { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; }
+.editor__sin-acciones { color: var(--md-sys-color-outline); }
 .editor__bloqueos,
 .editor__problemas { margin: var(--space-xs) 0 0; padding-left: var(--space-lg); }
 .editor__paleta { padding: var(--space-md); margin-bottom: var(--space-md); }
@@ -1177,7 +1271,28 @@ input[type='radio'] {
 .aviso__asunto { font-weight: 500; }
 .aviso__meta { font-size: var(--md-sys-typescale-body-small-size); color: var(--md-sys-color-on-surface-variant); }
 
-.acceso { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: var(--space-lg); }
+/*
+ * La pantalla de acceso lleva la marca.
+ *
+ * Es la primera pantalla que ve cualquiera y la unica que se ve sin sesion; que apareciera sin
+ * emblema ni nombre de la institucion la dejaba indistinguible de un formulario cualquiera —y
+ * ese es justo el aspecto que tiene una pagina de robo de credenciales.
+ */
+.acceso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  min-height: 100vh;
+  padding: var(--space-lg);
+  background: var(--md-sys-color-surface);
+}
+.acceso__marca { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); text-align: center; }
+.acceso__marca img { height: 72px; width: auto; }
+.acceso__institucion { color: var(--md-sys-color-on-surface-variant); margin: 0; }
+.acceso .pastilla { margin-top: var(--space-sm); }
+.acceso__tarjeta > .texto-atenuado:last-child { margin-top: var(--space-md); }
 .acceso__tarjeta {
   width: min(420px, 100%);
   padding: var(--space-xl);

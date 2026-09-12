@@ -55,7 +55,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   {
     objectId: 'barras',
     name: 'Grafico de barras',
-    description: 'Comparacion de una medida entre las categorias de una dimension.',
+    description: 'Comparacion de una o varias medidas entre las categorias de una dimension.',
     category: 'grafico',
     versions: [
       v1('Version inicial: barras verticales, una serie.', {
@@ -63,6 +63,33 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         measures: { min: 1, max: 1 },
         notes: 'La segunda dimension, si existe, agrupa las barras por serie.',
       }),
+      /*
+       * 1.1.0 — varias medidas, como ya admitia `lineas`.
+       *
+       * El constructor de opciones recorria `vm.series` desde el primer dia, y la leyenda y la
+       * paleta de ocho colores estaban escritas y probadas; lo que no existia era un objeto que
+       * pudiera declarar dos medidas, asi que ese camino no se ejecutaba nunca contra datos
+       * reales. Comparar lo que entra con lo que sale es la pregunta basica del dominio y solo se
+       * podia responder con una tabla.
+       *
+       * Va como version NUEVA y no como correccion de 1.0.0 porque 4.5 no admite otra cosa: un
+       * objeto compartido publicado no se modifica. Las instancias fijadas a 1.0.0 siguen viendo
+       * el contrato de 1.0.0 — ampliar el maximo no las romperia, pero la regla no es "cambia
+       * solo si rompe", es que la version es lo que hace reproducible un modulo ya desplegado.
+       */
+      {
+        version: '1.1.0',
+        publishedAt: '2026-09-12',
+        changelog:
+          'Admite hasta cuatro medidas: una serie por medida, con leyenda y un patron por serie.',
+        certification: certificacionInicial,
+        dataContract: {
+          dimensions: { min: 1, max: 2 },
+          measures: { min: 1, max: 4 },
+          notes:
+            'Cada medida es una serie. La segunda dimension, si existe, agrupa las barras por serie.',
+        },
+      },
     ],
   },
   {

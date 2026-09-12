@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { EnlaceDeSeccion } from '../../src/components/admin/EnlaceDeSeccion';
 import { esAdministrador } from '../../src/server/admin';
 import { exigirSesionDePagina } from '../../src/server/sesion';
 
@@ -53,10 +54,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <ul>
             {SECCIONES.map((s) => (
               <li key={s.href}>
-                <Link href={s.href} data-testid={`admin-nav-${s.href.split('/').pop()}`}>
-                  <span className="admin__nav-label">{s.label}</span>
-                  <span className="admin__nav-desc">{s.desc}</span>
-                </Link>
+                <EnlaceDeSeccion href={s.href} label={s.label} desc={s.desc} />
               </li>
             ))}
           </ul>

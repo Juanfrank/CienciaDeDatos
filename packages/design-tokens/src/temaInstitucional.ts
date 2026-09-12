@@ -22,6 +22,8 @@ import { type TemaMaterial, temaMaterial } from './material3Tokens';
 export const ORIGEN_INSTITUCIONAL: OrigenDelTema = {
   primario: '#0050dd',
   acento: '#ef3340',
+  // El gris de la norma de marca, el mismo que rotula la institucion en la portada de un informe.
+  neutro: '#5b6b87',
 };
 
 /**

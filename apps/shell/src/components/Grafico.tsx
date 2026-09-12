@@ -28,6 +28,7 @@ const Lienzo = dynamic(() => import('./Lienzo'), {
 });
 
 export function Grafico({
+  instanceId,
   tipo,
   vm,
   titulo,
@@ -35,6 +36,8 @@ export function Grafico({
   onSeleccionar,
   children,
 }: {
+  /** Identifica ESTE grafico en la pagina. Un modulo lleva varios. */
+  instanceId: string;
   tipo: TipoDeGrafico;
   vm: CategoricalViewModel;
   titulo: string;
@@ -77,7 +80,11 @@ export function Grafico({
   const alMontar = useCallback(() => setMontado(true), []);
 
   return (
-    <figure className="grafico" data-montado={montado ? 'si' : 'no'}>
+    <figure
+      className="grafico"
+      data-testid={`grafico-${instanceId}`}
+      data-montado={montado ? 'si' : 'no'}
+    >
       {paleta ? (
         <Lienzo
           tipo={tipo}

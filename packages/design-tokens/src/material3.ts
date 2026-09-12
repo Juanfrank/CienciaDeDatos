@@ -35,6 +35,19 @@ export interface OrigenDelTema {
   /** Color institucional principal. De el salen primary, secondary y los neutros. */
   primario: string;
   /**
+   * Gris institucional. De el salen las superficies y los bordes.
+   *
+   * Es la correccion que mas se nota. MD3 deriva los neutros del PRIMARIO, y `#0050DD` esta en
+   * el matiz HCT 273 —azul-violeta—, asi que las superficies salian lavanda: el "blanco" era
+   * #FBF8FD, un blanco rosado, y toda la interfaz se leia como gris sucio.
+   *
+   * La norma de marca ya tiene su propio gris, `#5B6B87`, y no esta en 273 sino en 261, con
+   * croma 22. O sea: la institucion usa grises CLARAMENTE azulados, no los casi-acromaticos que
+   * MD3 produce por defecto con croma 4. Tomarlo como origen de los neutros no es inventar un
+   * color, es dejar de ignorar uno que la norma ya fijaba.
+   */
+  neutro: string;
+  /**
    * Segundo color de marca. Ocupa el rol `tertiary` Y el rol `error`.
    *
    * Es una decision, no un descuido. La institucion tiene UN rojo y significa "atencion": sirve
@@ -47,24 +60,32 @@ export interface OrigenDelTema {
 }
 
 /**
- * Croma de las paletas derivadas, segun MD3.
+ * Croma de las paletas derivadas.
  *
- * `secondary` es el primario desaturado: acompana sin competir. `neutralVariant` lleva una
- * pizca del matiz de marca para que los bordes y las superficies no se vean grises muertos al
- * lado del color principal.
+ * `secondary` es el primario desaturado: acompana sin competir.
+ *
+ * Los NEUTROS no llevan el croma 4 que MD3 usa por defecto. Con 4, y sobre el matiz del azul,
+ * las superficies quedaban casi acromaticas y con un resto lavanda: gris sucio. La norma de
+ * marca no usa esos grises —`#5B6B87` tiene croma 22— asi que se sube hasta que las superficies
+ * lean como azul muy claro, que es lo que la institucion usa en sus documentos.
+ *
+ * `neutralVariant` va mas alto todavia porque de el salen los BORDES y las superficies
+ * variantes: son las piezas donde un tinte se percibe sin que el fondo se coloree de mas.
  */
-const CROMA = { secondary: 16, neutral: 4, neutralVariant: 8 } as const;
+const CROMA = { secondary: 18, neutral: 8, neutralVariant: 16 } as const;
 
 export function paletasDe(origen: OrigenDelTema): PaletasTonales {
   const primario = Hct.fromInt(argbFromHex(origen.primario));
   const acento = Hct.fromInt(argbFromHex(origen.acento));
+  // El matiz de los neutros sale del GRIS de la norma, no del primario. Ver `neutro`.
+  const neutro = Hct.fromInt(argbFromHex(origen.neutro));
 
   return {
     primary: TonalPalette.fromInt(argbFromHex(origen.primario)),
     secondary: TonalPalette.fromHueAndChroma(primario.hue, CROMA.secondary),
     tertiary: TonalPalette.fromInt(argbFromHex(origen.acento)),
-    neutral: TonalPalette.fromHueAndChroma(primario.hue, CROMA.neutral),
-    neutralVariant: TonalPalette.fromHueAndChroma(primario.hue, CROMA.neutralVariant),
+    neutral: TonalPalette.fromHueAndChroma(neutro.hue, CROMA.neutral),
+    neutralVariant: TonalPalette.fromHueAndChroma(neutro.hue, CROMA.neutralVariant),
     // El rojo institucional tambien para el error. Ver la nota de `acento`.
     error: TonalPalette.fromHueAndChroma(acento.hue, Math.max(acento.chroma, 48)),
   };

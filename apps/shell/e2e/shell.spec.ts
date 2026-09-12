@@ -42,7 +42,7 @@ test.describe('los objetos se dibujan con datos leidos del cache', () => {
   test('un modulo muestra KPI, barras, matriz y tabla con datos reales', async ({ page }) => {
     await page.goto('/m/casos-pendientes');
     await expect(page.getByTestId('kpi-valor').first()).not.toHaveText('0');
-    await expect(page.getByTestId('barras')).toBeVisible();
+    await expect(page.getByTestId('grafico-barras-distrito').getByTestId('barras')).toBeVisible();
     await expect(page.getByTestId('matriz')).toBeVisible();
     await expect(page.getByTestId('tabla')).toBeVisible();
   });

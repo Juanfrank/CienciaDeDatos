@@ -182,78 +182,101 @@ export function ListaDeModulos({
               </tr>
             </thead>
             <tbody>
-              {modulos.map((m) => (
-                <tr key={m.moduleId} data-testid={`fila-${m.slug}`}>
-                  <th scope="row">
-                    <Link href={`/editor/${m.slug}`}>{m.name}</Link>
-                    <span className="texto-atenuado">
-                      {" "}
-                      /m/{m.slug} · v{m.version}
-                    </span>
-                  </th>
-                  <td>
-                    <span className="pastilla-estado" data-estado={m.status}>
-                      {ETIQUETA[m.status]}
-                    </span>
-                    {m.bloqueos.length > 0 ? (
-                      <ul
-                        className="editor__bloqueos"
-                        data-testid={`bloqueos-${m.slug}`}
-                      >
-                        {m.bloqueos.map((b, i) => (
-                          <li key={`${b.reason}-${i}`}>{b.detail}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </td>
-                  <td>
-                    {m.autor ?? (
-                      <span className="texto-atenuado">Institucional</span>
-                    )}
-                  </td>
-                  <td>{m.objetos}</td>
-                  <td className="editor__acciones">
-                    {m.status === "borrador" && m.autor === usuario ? (
-                      <button
-                        type="button"
-                        className="boton-enlace"
-                        data-testid={`enviar-${m.slug}`}
-                        disabled={trabajando || m.bloqueos.length > 0}
-                        onClick={() => void transicion(m, "enviar")}
-                      >
-                        Enviar a aprobacion
-                      </button>
-                    ) : null}
+              {modulos.map((m) => {
+                // Las mismas tres condiciones que deciden cada boton, reunidas: una celda sin
+                // ninguna accion muestra una raya, no un hueco. Un hueco en la ultima columna se
+                // lee como algo que falta por cargar.
+                const puedeEnviar =
+                  m.status === "borrador" && m.autor === usuario;
+                const puedePublicar =
+                  m.status === "pendiente-de-aprobacion" && esAdmin;
+                const puedeDevolver =
+                  m.status !== "borrador" && (esAdmin || m.autor === usuario);
+                const sinAcciones =
+                  !puedeEnviar && !puedePublicar && !puedeDevolver;
+                return (
+                  <tr key={m.moduleId} data-testid={`fila-${m.slug}`}>
+                    <th scope="row">
+                      <Link href={`/editor/${m.slug}`}>{m.name}</Link>
+                      <span className="texto-atenuado">
+                        {" "}
+                        /m/{m.slug} · v{m.version}
+                      </span>
+                    </th>
+                    <td>
+                      <span className="pastilla-estado" data-estado={m.status}>
+                        {ETIQUETA[m.status]}
+                      </span>
+                      {m.bloqueos.length > 0 ? (
+                        <ul
+                          className="editor__bloqueos"
+                          data-testid={`bloqueos-${m.slug}`}
+                        >
+                          {m.bloqueos.map((b, i) => (
+                            <li key={`${b.reason}-${i}`}>{b.detail}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </td>
+                    <td>
+                      {m.autor ?? (
+                        <span className="texto-atenuado">Institucional</span>
+                      )}
+                    </td>
+                    <td>{m.objetos}</td>
+                    <td>
+                      <div className="editor__acciones">
+                        {puedeEnviar ? (
+                          <button
+                            type="button"
+                            className="boton-enlace"
+                            data-testid={`enviar-${m.slug}`}
+                            disabled={trabajando || m.bloqueos.length > 0}
+                            onClick={() => void transicion(m, "enviar")}
+                          >
+                            Enviar a aprobacion
+                          </button>
+                        ) : null}
 
-                    {m.status === "pendiente-de-aprobacion" && esAdmin ? (
-                      <button
-                        type="button"
-                        className="pastilla"
-                        data-testid={`publicar-${m.slug}`}
-                        disabled={trabajando || m.bloqueos.length > 0}
-                        onClick={() => void transicion(m, "publicar")}
-                      >
-                        Publicar
-                      </button>
-                    ) : null}
+                        {puedePublicar ? (
+                          <button
+                            type="button"
+                            className="pastilla"
+                            data-testid={`publicar-${m.slug}`}
+                            disabled={trabajando || m.bloqueos.length > 0}
+                            onClick={() => void transicion(m, "publicar")}
+                          >
+                            Publicar
+                          </button>
+                        ) : null}
 
-                    {m.status !== "borrador" &&
-                    (esAdmin || m.autor === usuario) ? (
-                      <button
-                        type="button"
-                        className="boton-enlace"
-                        data-testid={`devolver-${m.slug}`}
-                        disabled={trabajando}
-                        onClick={() => void transicion(m, "devolver")}
-                      >
-                        {m.status === "publicado"
-                          ? "Retirar"
-                          : "Devolver a borrador"}
-                      </button>
-                    ) : null}
-                  </td>
-                </tr>
-              ))}
+                        {puedeDevolver ? (
+                          <button
+                            type="button"
+                            className="boton-enlace"
+                            data-testid={`devolver-${m.slug}`}
+                            disabled={trabajando}
+                            onClick={() => void transicion(m, "devolver")}
+                          >
+                            {m.status === "publicado"
+                              ? "Retirar"
+                              : "Devolver a borrador"}
+                          </button>
+                        ) : null}
+
+                        {sinAcciones ? (
+                          <span
+                            className="editor__sin-acciones"
+                            aria-label="Sin acciones disponibles"
+                          >
+                            &mdash;
+                          </span>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

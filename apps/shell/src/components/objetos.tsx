@@ -140,6 +140,7 @@ export function Barras({ titulo, result, instance, onFiltrar }: ObjetoProps) {
       pie={vm.aggregated ? <span className="texto-atenuado">Agregado sobre el dataset cacheado</span> : null}
     >
       <Grafico
+        instanceId={instance.instanceId}
         tipo="barras"
         vm={vm}
         titulo={titulo}
@@ -186,6 +187,7 @@ export function Lineas({ titulo, result, instance }: ObjetoProps) {
   return (
     <Marco titulo={titulo} instance={instance} result={result}>
       <Grafico
+        instanceId={instance.instanceId}
         tipo="lineas"
         vm={vm}
         titulo={titulo}

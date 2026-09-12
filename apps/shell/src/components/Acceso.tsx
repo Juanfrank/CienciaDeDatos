@@ -14,7 +14,13 @@ import { useState } from 'react';
  * El campo del segundo factor solo aparece cuando el servidor lo pide (428). Pedirlo de entrada
  * obligaria a sacar el telefono antes de saber si la contrasena era correcta.
  */
-export function Acceso({ azureAdDisponible }: { azureAdDisponible: boolean }) {
+export function Acceso({
+  azureAdDisponible,
+  identidad,
+}: {
+  azureAdDisponible: boolean;
+  identidad: { name: string; emblem: { src: string; width: number; height: number } };
+}) {
   const router = useRouter();
   const [correo, setCorreo] = useState('');
   const [clave, setClave] = useState('');
@@ -61,6 +67,14 @@ export function Acceso({ azureAdDisponible }: { azureAdDisponible: boolean }) {
 
   return (
     <main className="acceso">
+      <div className="acceso__marca">
+        {/* Decorativo: el nombre va como texto justo debajo, y duplicarlo lo anunciaria dos veces. */}
+        <img src={identidad.emblem.src} alt="" width={identidad.emblem.width} height={identidad.emblem.height} />
+        <p className="acceso__institucion md-title-medium" data-testid="acceso-institucion">
+          {identidad.name}
+        </p>
+      </div>
+
       <form
         className="acceso__tarjeta"
         onSubmit={(e) => {
