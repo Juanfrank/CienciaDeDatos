@@ -63,8 +63,7 @@ h1, h2, h3, h4 { margin: 0; }
 .md-headline-small,
 .admin__cabecera h1,
 .avisos h1,
-.acceso__tarjeta h1,
-.modulo__cabecera h1 {
+.acceso__tarjeta h1 {
   font-size: var(--md-sys-typescale-headline-small-size);
   line-height: var(--md-sys-typescale-headline-small-line-height);
   font-weight: var(--md-sys-typescale-headline-small-weight);
@@ -527,6 +526,18 @@ input[type='radio'] {
  * cabecera, el de un KPI, el de una serie) se vea.
  */
 .md-tarjeta,
+/*
+ * La tarjeta: superficie clara, contorno fino y UNA sombra.
+ *
+ * MD3 separa planos por tono y reserva la sombra para lo que flota de verdad, y esa lectura
+ * estricta dejaba las tarjetas planas como recortes de papel pegados al fondo. La elevacion 1 de
+ * la propia escala —dos pesos, 2 px y 3 px, con opacidades bajas— basta para que se despeguen
+ * sin que nada parezca un dialogo: es la elevacion que MD3 asigna justamente a `Elevated card`.
+ *
+ * El contorno se queda ademas de la sombra, no en su lugar. La sombra depende de que el fondo
+ * sea claro; en tema oscuro casi no se ve, y entonces lo unico que delimita la tarjeta es la
+ * linea.
+ */
 .objeto,
 .tarjeta,
 .equipo,
@@ -539,16 +550,106 @@ input[type='radio'] {
   background: var(--md-sys-color-surface-container-lowest);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-medium);
-  box-shadow: var(--md-sys-elevation-0);
+  box-shadow: var(--md-sys-elevation-1);
 }
 
+/*
+ * Al pasar el raton por un objeto, sube un escalon.
+ *
+ * Solo los objetos de la rejilla, que son los que se pueden pulsar y explorar. Es la
+ * retroalimentacion que MD3 pide de una tarjeta interactiva, y aqui ademas dice cual de los
+ * objetos va a recibir el gesto cuando hay ocho en pantalla.
+ */
+.objeto {
+  transition: box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.objeto:hover { box-shadow: var(--md-sys-elevation-2); }
+
 .objeto { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+/*
+ * La cabecera: icono, titulos, complementos.
+ *
+ * `align-items: start` y no `center`: con subtitulo, el bloque de titulos crece hacia abajo y
+ * centrar dejaba el icono flotando a media altura de dos lineas de texto. Los complementos se
+ * anclan arriba por lo mismo.
+ */
 .objeto__cabecera {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-sm);
   padding: var(--space-md) var(--space-md) 0;
 }
+.objeto__titulos { flex: 1; min-width: 0; }
+.objeto__subtitulo {
+  margin: 2px 0 0;
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: var(--md-sys-typescale-body-small-line-height);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/*
+ * El acento de un objeto es un ROL del tema, no un color.
+ *
+ * `--objeto-acento` se resuelve aqui a partir de `data-acento`, y a partir de ahi el icono y la
+ * linea de resaltado lo consumen sin saber cual es. Es lo que impide que personalizar un objeto
+ * se convierta en elegir un hexadecimal que la puerta de contraste de 4.3 no ha comprobado
+ * nunca: solo hay cuatro valores posibles y los cuatro salen de pares ya verificados.
+ */
+.objeto[data-acento='primario'] {
+  --objeto-acento: var(--md-sys-color-primary);
+  --objeto-acento-fondo: var(--md-sys-color-primary-container);
+  --objeto-acento-texto: var(--md-sys-color-on-primary-container);
+}
+.objeto[data-acento='secundario'] {
+  --objeto-acento: var(--md-sys-color-secondary);
+  --objeto-acento-fondo: var(--md-sys-color-secondary-container);
+  --objeto-acento-texto: var(--md-sys-color-on-secondary-container);
+}
+.objeto[data-acento='terciario'] {
+  --objeto-acento: var(--md-sys-color-tertiary);
+  --objeto-acento-fondo: var(--md-sys-color-tertiary-container);
+  --objeto-acento-texto: var(--md-sys-color-on-tertiary-container);
+}
+.objeto[data-acento='neutro'] {
+  --objeto-acento: var(--md-sys-color-outline);
+  --objeto-acento-fondo: var(--md-sys-color-surface-container-high);
+  --objeto-acento-texto: var(--md-sys-color-on-surface-variant);
+}
+
+.objeto__cabecera .complemento,
+.objeto__cabecera .complementos { flex-shrink: 0; }
+
+.objeto__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--objeto-acento-fondo);
+  color: var(--objeto-acento-texto);
+}
+
+/*
+ * La linea de resaltado.
+ *
+ * Va como pseudo-elemento y no como `border-top` porque la tarjeta ya tiene borde en los cuatro
+ * lados: cambiarle el grosor a uno solo descuadra el radio de las esquinas. Asi la linea se
+ * apoya DENTRO del borde y las esquinas siguen siendo las mismas.
+ */
+.objeto[data-resaltado='si'] { position: relative; }
+.objeto[data-resaltado='si']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--objeto-acento);
+  border-radius: var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 0 0;
+}
+.objeto[data-resaltado='si'] .objeto__cabecera { padding-top: calc(var(--space-md) + 4px); }
 .objeto__cuerpo { padding: var(--space-md); flex: 1; min-width: 0; }
 .objeto__pie {
   padding: 0 var(--space-md) var(--space-md);
@@ -811,7 +912,31 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 }
 
 .principal { flex: 1; padding: var(--space-lg); min-width: 0; }
-.modulo__cabecera { margin-bottom: var(--space-md); }
+
+/*
+ * El nombre del modulo.
+ *
+ * MD3 no trae un adorno para un titulo de pagina: lo que da es la escala tipografica, y su
+ * respuesta a «distinguelo mas» es subirlo de rol y bajar lo que lo rodea. Eso es lo que se hace
+ * —`headline-medium` sobre una fecha en `body-medium`—, y es la parte que si es del sistema.
+ *
+ * La barra de `primary` a la izquierda NO lo es: es una decision de casa, y se anota como tal
+ * para que nadie la defienda citando MD3. Se justifica porque el titulo compartia peso visual con
+ * los titulos de las ocho tarjetas de debajo, y en una pantalla llena de cifras hacia falta un
+ * ancla que dijera en que modulo se esta sin tener que leer.
+ */
+.modulo__cabecera {
+  margin-bottom: var(--space-md);
+  padding-left: var(--space-md);
+  border-left: 4px solid var(--md-sys-color-primary);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+}
+.modulo__cabecera h1 {
+  font-size: var(--md-sys-typescale-headline-medium-size);
+  line-height: var(--md-sys-typescale-headline-medium-line-height);
+  font-weight: var(--md-sys-typescale-headline-medium-weight);
+  letter-spacing: var(--md-sys-typescale-headline-medium-tracking);
+}
 
 .barra-estado {
   display: flex;
@@ -822,21 +947,30 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 }
 
 /*
- * La barra de acciones del modulo.
+ * La cabecera de los datos: insignias e iconos en la misma fila, con la divisoria debajo.
  *
- * Cinco iconos agrupados y separados del resto por una linea: se leen como un bloque de
- * herramientas y no como cinco enlaces sueltos entre el titulo y los datos.
+ * El separador vertical entre unas y otros los distingue sin meter una segunda linea: a la
+ * izquierda lo que DICE de donde salen los datos, a la derecha lo que se puede HACER con ellos.
  */
-.barra-acciones {
+.barra-modulo {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
   flex-wrap: wrap;
   margin-bottom: var(--space-md);
   padding-bottom: var(--space-sm);
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
-.barra-acciones__limpiar { margin-left: auto; }
+.barra-modulo__acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  margin-left: var(--space-sm);
+  padding-left: var(--space-sm);
+  border-left: 1px solid var(--md-sys-color-outline-variant);
+}
+.barra-modulo__limpiar { margin-left: auto; }
 
 /*
  * Boton de icono de MD3: 40 px de caja, 48 de area tactil, pastilla al pasar el raton.
@@ -1102,10 +1236,88 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 .tabla .es-total { font-weight: 500; }
 
 /* ------------------------------------------------------------------ *
- * Segmentador                                                         *
+ * Segmentador y panel de filtros                                      *
  * ------------------------------------------------------------------ */
 
 .segmentador { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-sm); margin: 0; padding: 0; }
+
+/*
+ * El panel: una rejilla que se reparte entre los selectores que haya.
+ *
+ * `auto-fit` con un minimo de 200 px, y no columnas fijas: un panel de dos dimensiones ocupa dos
+ * columnas y uno de diez se reparte en las que quepan, sin que nadie tenga que declarar cuantas.
+ * Es el mismo objeto con una dimension o con diez.
+ */
+.panel-filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+  align-items: start;
+}
+.panel-filtros__campo {
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+.panel-filtros__etiqueta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0;
+  margin-bottom: var(--space-xs);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.panel-filtros__limpiar { font-size: var(--md-sys-typescale-label-small-size); }
+.panel-filtros__campo select,
+.panel-filtros__buscar { width: 100%; min-height: 40px; }
+.panel-filtros__buscar {
+  padding: 0 var(--space-md);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
+  font: inherit;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  margin-bottom: var(--space-xs);
+}
+
+/*
+ * La lista tiene tope de alto y se desplaza DENTRO.
+ *
+ * Con decenas de valores, una lista sin tope estira la celda de la rejilla y empuja hacia abajo
+ * todo lo que el modulo tiene debajo. El filtro dejaria de ser un control lateral para convertirse
+ * en el contenido de la pagina.
+ */
+.panel-filtros__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 160px;
+  overflow-y: auto;
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+.panel-filtros__lista label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 4px 0;
+  cursor: pointer;
+}
+.panel-filtros__rango {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--space-xs) var(--space-sm);
+}
+.panel-filtros__rango label {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.panel-filtros__rango input { min-height: 40px; width: 100%; }
 
 /* ------------------------------------------------------------------ *
  * Panel de administracion y editor                                    *
@@ -1203,6 +1415,67 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 .editor__bloqueos,
 .editor__problemas { margin: var(--space-xs) 0 0; padding-left: var(--space-lg); }
 .editor__paleta { padding: var(--space-md); margin-bottom: var(--space-md); }
+
+/*
+ * La presentacion, dentro de la ficha del objeto.
+ *
+ * Fondo un punto mas tenido y contorno: se lee como un bloque aparte del mapeo sin irse a otra
+ * pantalla. La rejilla reparte los controles en columnas de 180 px, asi que un objeto que admite
+ * cuatro claves ocupa una fila y uno que admite siete ocupa dos, sin declarar nada.
+ */
+/*
+ * Ocupa la fila entera de la rejilla del mapeo.
+ *
+ * Sin esto caia en una columna de 240 px y sus propios controles se apilaban en vertical: seis
+ * desplegables en una tira de mas de cuatrocientos pixeles de alto, junto a un hueco vacio a la
+ * derecha. `grid-column: 1 / -1` lo saca de esa columna y le deja repartir sus controles.
+ */
+.editor__estado {
+  margin: 0;
+  min-height: 1.25rem;
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.editor__presentacion {
+  grid-column: 1 / -1;
+  margin: var(--space-md) 0 0;
+  padding: var(--space-md);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-surface-container-low);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-sm) var(--space-md);
+  align-items: end;
+}
+.editor__presentacion legend {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  padding: 0 var(--space-xs);
+}
+.editor__interruptor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  min-height: 40px;
+}
+.editor__icono-elegido { display: flex; align-items: center; gap: var(--space-sm); }
+.editor__icono-elegido select { flex: 1; min-width: 0; }
+
+/* Los selectores del panel ocupan la fila entera: son una lista, no un control mas. */
+.editor__selectores {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-sm) var(--space-md);
+  align-items: end;
+}
+.editor__selectores > p { grid-column: 1 / -1; margin: 0; }
+.editor__mapeo > [data-testid^='quitar-'] { grid-column: 1 / -1; justify-self: start; }
 .editor__paleta h3 { margin-bottom: var(--space-xs); }
 .editor__catalogo {
   list-style: none;
@@ -1340,10 +1613,15 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 
 .complementos { display: inline-flex; gap: var(--space-xs); margin-left: auto; }
 .complemento { position: relative; display: inline-flex; }
+/*
+ * El icono de un complemento, dentro de un circulo.
+ *
+ * Suelto sobre la cabecera de la tarjeta, una «i» de 12 px y un simbolo de rejilla no se leian
+ * como controles: parecian dos caracteres perdidos junto al titulo, y nadie pulsa lo que no
+ * parece un boton. El circulo de `surface-container-high` los declara pulsables antes de
+ * tocarlos, que es lo que MD3 llama un boton de icono con contenedor.
+ */
 .complemento__icono {
-  font: inherit;
-  font-size: var(--md-sys-typescale-body-small-size);
-  line-height: 1;
   width: 32px;
   height: 32px;
   display: inline-flex;
@@ -1351,12 +1629,17 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   justify-content: center;
   border: none;
   border-radius: var(--md-sys-shape-corner-full);
-  background: transparent;
+  background: var(--md-sys-color-surface-container-high);
   color: var(--md-sys-color-on-surface-variant);
   cursor: pointer;
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.complemento__icono:hover {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
 }
 .complemento__icono::before {
   content: '';

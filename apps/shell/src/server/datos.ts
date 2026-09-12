@@ -2,9 +2,11 @@ import type { QueryResult, SchemaDescriptor } from '@app/data-contracts';
 import { canTeamAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
 import { SCHEMA_CACHE_KEY, type ReadResult, getDataset } from '@app/caching';
 import {
+  type ColumnaDisponible,
   type GridItem,
   type ModuleDefinition,
   type UserPersonalization,
+  TIPO_DESCONOCIDO,
   applyPersonalization,
   findPage,
   validateModule,
@@ -181,14 +183,16 @@ export async function diagnosticarModulo(module: ModuleDefinition, userId: strin
   const resolucion = await scopeFor(userId, teamId, module.moduleId);
   if (!resolucion) return null;
 
-  const columnsByDataset: Record<string, string[]> = {};
+  const columnsByDataset: Record<string, ColumnaDisponible[]> = {};
   const datasets = new Set(
     module.pages.flatMap((p) => p.items.map((i) => i.instance.binding.datasetId)),
   );
 
   for (const datasetId of datasets) {
     const lectura = await datasetReader.read({ datasetId, scope: resolucion.scope });
-    if (lectura.result) columnsByDataset[datasetId] = lectura.result.columns.map((c) => c.name);
+    // El TIPO viaja entero, no solo el nombre: el panel de filtros valida por tipo, y hasta
+    // ahora se descartaba aqui mismo.
+    if (lectura.result) columnsByDataset[datasetId] = lectura.result.columns;
   }
 
   return validateModule({ module, registry: objectRegistry, columnsByDataset });
@@ -215,7 +219,7 @@ export async function diagnosticarModulo(module: ModuleDefinition, userId: strin
  * donde seria mas tentador saltarselo para "comprobar de verdad" que un campo existe.
  */
 export async function diagnosticarDefinicion(module: ModuleDefinition) {
-  const columnsByDataset: Record<string, string[]> = {};
+  const columnsByDataset: Record<string, ColumnaDisponible[]> = {};
 
   const datasets = new Set(
     module.pages.flatMap((p) => p.items.map((i) => i.instance.binding.datasetId)),
@@ -238,7 +242,7 @@ export async function diagnosticarDefinicion(module: ModuleDefinition) {
  * Sin esquema en el cache se devuelve lo declarado: es el estado de un despliegue en el que el
  * job aun no ha corrido, y cortar ahi dejaria el editor inservible hasta la primera poblacion.
  */
-export async function columnasDisponiblesDe(datasetId: string): Promise<string[]> {
+export async function columnasDisponiblesDe(datasetId: string): Promise<ColumnaDisponible[]> {
   let declarado;
   try {
     declarado = getDataset(datasetId);
@@ -252,11 +256,20 @@ export async function columnasDisponiblesDe(datasetId: string): Promise<string[]
   const medidas = declarado.query.measures ?? [];
 
   const schema = await esquemaEnCache();
-  if (!schema) return [...dimensiones, ...medidas];
+
+  // Sin esquema en el cache no se conoce el tipo de nada. Se dice, en vez de suponer: una
+  // validacion por tipo sobre un tipo inventado rechaza configuraciones correctas.
+  if (!schema) {
+    return [...dimensiones, ...medidas].map((name) => ({ name, type: TIPO_DESCONOCIDO }));
+  }
 
   return [
-    ...dimensiones.filter((clave) => campoExisteEnEsquema(schema, clave)),
-    ...medidas.filter((medida) => schema.measures.some((m) => m.name === medida)),
+    ...dimensiones
+      .filter((clave) => campoExisteEnEsquema(schema, clave))
+      .map((name) => ({ name, type: tipoEnEsquema(schema, name) })),
+    ...medidas
+      .filter((medida) => schema.measures.some((m) => m.name === medida))
+      .map((name) => ({ name, type: 'number' })),
   ];
 }
 
@@ -267,6 +280,14 @@ const esquemaEnCache = async (): Promise<SchemaDescriptor | null> => {
     return null;
   }
 };
+
+function tipoEnEsquema(schema: SchemaDescriptor, clave: string): string {
+  const [tabla, campo] = clave.split('.');
+  const encontrado = schema.tables
+    .find((t) => t.name === tabla)
+    ?.fields.find((f) => f.name === campo);
+  return encontrado?.type ?? TIPO_DESCONOCIDO;
+}
 
 function campoExisteEnEsquema(schema: SchemaDescriptor, clave: string): boolean {
   const [tabla, campo] = clave.split('.');

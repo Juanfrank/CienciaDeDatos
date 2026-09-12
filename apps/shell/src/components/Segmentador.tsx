@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import type { QueryResult } from '@app/data-contracts';
-import type { ObjectInstance } from '@app/ui-components';
-import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
-import { Complementos } from './Complementos';
+import type { QueryResult } from "@app/data-contracts";
+import type { ObjectInstance } from "@app/ui-components";
+import { useFiltrosDeUrl } from "../hooks/useFiltrosDeUrl";
+import { Marco } from "./objetos";
 
 /**
  * Segmentador — seccion 4.2, con su seleccion reflejada en la URL (4.11).
@@ -33,38 +33,40 @@ export function Segmentador({
   const seleccionados = valoresDe(campo);
 
   return (
-    <div className="objeto">
-      <div className="objeto__cabecera">
-        <h3>{titulo}</h3>
-        {instance && result ? (
-          <Complementos instance={instance} result={result} titulo={titulo} />
-        ) : null}
-        {seleccionados.length > 0 ? (
-          <button type="button" className="boton-enlace" onClick={() => limpiarCampo(campo)}>
+    <Marco
+      titulo={titulo}
+      {...(instance ? { instance } : {})}
+      {...(result ? { result } : {})}
+      accion={
+        seleccionados.length > 0 ? (
+          <button
+            type="button"
+            className="boton-enlace"
+            onClick={() => limpiarCampo(campo)}
+          >
             Limpiar
           </button>
-        ) : null}
-      </div>
-      <div className="objeto__cuerpo">
-        <ul className="segmentador" data-testid="segmentador">
-          {opciones.map((opcion) => {
-            const activo = seleccionados.includes(opcion);
-            return (
-              <li key={opcion}>
-                <button
-                  type="button"
-                  className={`md-chip ${activo ? 'md-chip--seleccionado' : ''}`}
-                  aria-pressed={activo}
-                  data-testid={`segmentador-${opcion}`}
-                  onClick={() => alternar(campo, opcion)}
-                >
-                  {opcion}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </div>
+        ) : null
+      }
+    >
+      <ul className="segmentador" data-testid="segmentador">
+        {opciones.map((opcion) => {
+          const activo = seleccionados.includes(opcion);
+          return (
+            <li key={opcion}>
+              <button
+                type="button"
+                className={`md-chip ${activo ? "md-chip--seleccionado" : ""}`}
+                aria-pressed={activo}
+                data-testid={`segmentador-${opcion}`}
+                onClick={() => alternar(campo, opcion)}
+              >
+                {opcion}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </Marco>
   );
 }

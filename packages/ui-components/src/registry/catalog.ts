@@ -1,3 +1,4 @@
+import { PRESENTACION_MINIMA, type ClaveDePresentacion } from '../presentacion/contrato';
 import type { ObjectCertification, VisualObjectDefinition } from './types';
 
 /**
@@ -18,12 +19,29 @@ const certificacionInicial: ObjectCertification = {
   reviewedAt: '2026-09-11',
 };
 
-const v1 = (changelog: string, dataContract: VisualObjectDefinition['versions'][number]['dataContract']) => ({
+/**
+ * Lo que admite cualquier objeto, mas lo que anada el suyo.
+ *
+ * Se compone asi y no se escribe a mano en cada entrada para que el minimo no se pueda olvidar
+ * por descuido al anadir un objeto: para dejarlo fuera hay que quitarlo explicitamente, y
+ * entonces la prueba del catalogo falla y dice por que.
+ */
+const presenta = (...propias: ClaveDePresentacion[]): ClaveDePresentacion[] => [
+  ...PRESENTACION_MINIMA,
+  ...propias,
+];
+
+const v1 = (
+  changelog: string,
+  dataContract: VisualObjectDefinition['versions'][number]['dataContract'],
+  presentation: ClaveDePresentacion[] = PRESENTACION_MINIMA,
+) => ({
   version: '1.0.0',
   publishedAt: '2026-09-11',
   changelog,
   certification: certificacionInicial,
   dataContract,
+  presentation,
 });
 
 export const catalogoInicial: VisualObjectDefinition[] = [
@@ -33,11 +51,18 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     description: 'Un unico valor destacado, con su etiqueta y una variacion opcional.',
     category: 'indicador',
     versions: [
-      v1('Version inicial: valor agregado, etiqueta y variacion respecto del periodo anterior.', {
-        dimensions: { min: 0, max: 1 },
-        measures: { min: 1, max: 2 },
-        notes: 'La primera medida es el valor; la segunda, opcional, es la comparacion.',
-      }),
+      v1(
+        'Version inicial: valor agregado, etiqueta y variacion respecto del periodo anterior.',
+        {
+          dimensions: { min: 0, max: 1 },
+          measures: { min: 1, max: 2 },
+          notes: 'La primera medida es el valor; la segunda, opcional, es la comparacion.',
+        },
+        // Una tarjeta es una cifra: el formato es lo que mas cambia de una a otra —casos enteros,
+        // porcentajes con un decimal, importes compactos—. No tiene leyenda ni etiquetas de dato,
+        // porque no tiene series ni puntos.
+        presenta('formato'),
+      ),
     ],
   },
   {
@@ -46,10 +71,11 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     description: 'Filas y columnas con las dimensiones y medidas mapeadas.',
     category: 'tabla',
     versions: [
-      v1('Version inicial: columnas ordenables y formato numerico por medida.', {
-        dimensions: { min: 0, max: 6 },
-        measures: { min: 0, max: 10 },
-      }),
+      v1(
+        'Version inicial: columnas ordenables y formato numerico por medida.',
+        { dimensions: { min: 0, max: 6 }, measures: { min: 0, max: 10 } },
+        presenta('formato'),
+      ),
     ],
   },
   {
@@ -58,11 +84,15 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     description: 'Comparacion de una o varias medidas entre las categorias de una dimension.',
     category: 'grafico',
     versions: [
-      v1('Version inicial: barras verticales, una serie.', {
-        dimensions: { min: 1, max: 2 },
-        measures: { min: 1, max: 1 },
-        notes: 'La segunda dimension, si existe, agrupa las barras por serie.',
-      }),
+      v1(
+        'Version inicial: barras verticales, una serie.',
+        {
+          dimensions: { min: 1, max: 2 },
+          measures: { min: 1, max: 1 },
+          notes: 'La segunda dimension, si existe, agrupa las barras por serie.',
+        },
+        presenta('formato', 'leyenda', 'etiquetasDeDato'),
+      ),
       /*
        * 1.1.0 — varias medidas, como ya admitia `lineas`.
        *
@@ -89,6 +119,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           notes:
             'Cada medida es una serie. La segunda dimension, si existe, agrupa las barras por serie.',
         },
+        presentation: presenta('formato', 'leyenda', 'etiquetasDeDato'),
       },
     ],
   },
@@ -98,10 +129,11 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     description: 'Evolucion de una o varias medidas a lo largo de una dimension ordenada.',
     category: 'grafico',
     versions: [
-      v1('Version inicial: una linea por medida sobre el eje de la primera dimension.', {
-        dimensions: { min: 1, max: 1 },
-        measures: { min: 1, max: 4 },
-      }),
+      v1(
+        'Version inicial: una linea por medida sobre el eje de la primera dimension.',
+        { dimensions: { min: 1, max: 1 }, measures: { min: 1, max: 4 } },
+        presenta('formato', 'leyenda', 'etiquetasDeDato'),
+      ),
     ],
   },
   {
@@ -110,11 +142,35 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     description: 'Cruce de dos dimensiones con una medida en las celdas.',
     category: 'tabla',
     versions: [
-      v1('Version inicial: dimension de filas por dimension de columnas, con totales.', {
-        dimensions: { min: 2, max: 2 },
-        measures: { min: 1, max: 1 },
-        notes: 'La primera dimension va en filas; la segunda, en columnas.',
-      }),
+      v1(
+        'Version inicial: dimension de filas por dimension de columnas, con totales.',
+        {
+          dimensions: { min: 2, max: 2 },
+          measures: { min: 1, max: 1 },
+          notes: 'La primera dimension va en filas; la segunda, en columnas.',
+        },
+        presenta('formato'),
+      ),
+    ],
+  },
+  {
+    objectId: 'panel-de-filtros',
+    name: 'Panel de filtros',
+    description:
+      'Agrupa de 1 a 10 dimensiones en un solo objeto, cada una con su propio tipo de selector. ' +
+      'Las dimensiones de fecha admiten calendario o rango desde/hasta.',
+    category: 'filtro',
+    versions: [
+      v1(
+        'Version inicial: pastillas, lista, desplegable, busqueda, calendario y rango de fechas.',
+        {
+          dimensions: { min: 1, max: 10 },
+          measures: { min: 0, max: 0 },
+          notes:
+            'Cada dimension lleva un selector. Sin configurar, se usa el que corresponde a su ' +
+            'tipo. La seleccion vive en la query string (4.11), no en estado local.',
+        },
+      ),
     ],
   },
   {

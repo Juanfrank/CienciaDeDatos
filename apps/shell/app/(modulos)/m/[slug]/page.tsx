@@ -73,17 +73,6 @@ export default async function PaginaModulo({
           {cargado.degraded ? ' — sirviendo el ultimo dato valido conocido' : ''}
         </p>
 
-        {/*
-          De que vista se trata y si esta recortada, juntas y pegadas a la fecha.
-
-          Las tres cosas responden a la misma pregunta —«de donde sale lo que estoy viendo»— y
-          antes estaban repartidas entre la cabecera y la barra de acciones, con la procedencia
-          junto a botones que no tienen nada que ver con ella.
-        */}
-        <p className="modulo__procedencia">
-          <InsigniaDeProcedencia provenance={describeProvenance(cargado.isPersonalized)} />
-          <InsigniaDeAmbito restricciones={restriccionesDeAmbito} />
-        </p>
       </header>
 
       {filtrosElegidos.length > 0 ? (
@@ -96,6 +85,12 @@ export default async function PaginaModulo({
       <VistaModulo
         objetos={cargado.objetos.map(serializarObjeto)}
         provenance={describeProvenance(cargado.isPersonalized)}
+        insignias={
+          <>
+            <InsigniaDeProcedencia provenance={describeProvenance(cargado.isPersonalized)} />
+            <InsigniaDeAmbito restricciones={restriccionesDeAmbito} />
+          </>
+        }
         moduleSlug={module.slug}
         pageSlug={cargado.pageSlug}
       />

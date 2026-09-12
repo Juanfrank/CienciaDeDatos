@@ -1,4 +1,6 @@
 import type { FieldRef } from '@app/data-contracts';
+import type { ClaveDePresentacion, PresentacionDeObjeto } from '../presentacion/contrato';
+import type { ConfiguracionDePanelDeFiltros } from '../presentacion/panelDeFiltros';
 
 /**
  * Repositorio de objetos visuales versionados — seccion 4.5.
@@ -58,6 +60,18 @@ export interface ObjectVersion {
   changelog: string;
   certification: ObjectCertification;
   dataContract: ObjectDataContract;
+  /**
+   * Que claves de presentacion admite esta version.
+   *
+   * Se declara como dato, igual que el contrato de datos y por el mismo motivo: el editor tiene
+   * que poder ofrecer SOLO lo que el objeto entiende, y la validacion rechazar lo demas antes de
+   * guardar. Una tabla que aceptara `leyenda` porque nadie lo comprueba guardaria una opcion que
+   * no hace nada, y esa es la clase de configuracion que luego nadie se atreve a borrar.
+   *
+   * Tiene que incluir `PRESENTACION_MINIMA` entera. Hay una prueba que lo comprueba sobre todo el
+   * catalogo, asi que un objeto nuevo no se puede publicar sin las cuatro basicas.
+   */
+  presentation: ClaveDePresentacion[];
   deprecation?: DeprecationNotice;
 }
 
@@ -149,4 +163,29 @@ export interface ObjectInstance {
   attachments?: AttachedObjectInstance[];
   /** Anulaciones de tema, limitadas al conjunto documentado de 4.3. */
   themeOverrides?: Record<string, string | string[]>;
+  /**
+   * Como se presenta este objeto: icono, acento, resaltado, subtitulo, formato.
+   *
+   * Es configuracion de la INSTANCIA y no del objeto: dos tarjetas KPI del mismo tipo pueden
+   * llevar iconos y acentos distintos sin publicar dos objetos. Eso es justo lo que permite armar
+   * visuales parecidas desde el editor sin escribir codigo.
+   */
+  presentacion?: PresentacionDeObjeto;
+  /**
+   * Configuracion PROPIA del tipo de objeto.
+   *
+   * Union discriminada por `objectId`, igual que los complementos y por el mismo motivo: cada
+   * tipo tiene su configuracion obligatoria y con una bolsa generica el error solo aparece al
+   * dibujar. 4.2 pide justo lo contrario — validar antes de guardar.
+   *
+   * `presentacion` es como SE VE un objeto y esto es que HACE. Un icono es presentacion; que la
+   * dimension de fecha se filtre con un calendario o con un rango no lo es: cambia lo que el
+   * objeto ofrece hacer.
+   */
+  configuracion?: ConfiguracionDeObjeto;
 }
+
+/** Configuracion especifica de un tipo de objeto. Anadir un tipo anade un miembro aqui. */
+export type ConfiguracionDeObjeto = {
+  objectId: 'panel-de-filtros';
+} & ConfiguracionDePanelDeFiltros;

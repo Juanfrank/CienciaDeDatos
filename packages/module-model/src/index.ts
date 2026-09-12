@@ -47,8 +47,11 @@ export {
 } from './interaccion';
 
 export {
+  TIPO_DESCONOCIDO,
   findPublishBlockers,
+  normalizarColumna,
   validateModule,
+  type ColumnaDisponible,
   type ItemDiagnostic,
   type ModuleDiagnostics,
   type PublishBlocker,

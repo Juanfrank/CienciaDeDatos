@@ -1,7 +1,9 @@
 import type { QueryResult } from '@app/data-contracts';
 import {
   type BindingProblem,
+  type NombreDeIcono,
   fieldKey,
+  formateadorDe,
   proyectarObjeto,
   toCategorical,
   toKpi,
@@ -12,6 +14,7 @@ import type { ObjectInstance } from '@app/ui-components';
 import { Complementos } from './Complementos';
 import { Grafico } from './Grafico';
 import { Segmentador } from './Segmentador';
+import { Icono } from './iconos/Icono';
 
 /**
  * Objetos prediseñados — seccion 4.2.
@@ -21,7 +24,25 @@ import { Segmentador } from './Segmentador';
  * la fuente, la consulta ni el conector activo.
  */
 
+/**
+ * El formato por defecto, para lo que no es una cifra de la instancia.
+ *
+ * Las cifras que el objeto MUESTRA salen de `formateadorDe(instance.presentacion?.formato)`, para
+ * que la tarjeta, la etiqueta del grafico, la tabla y el archivo exportado no puedan divergir.
+ * Este se queda para los rotulos que no pertenecen a ninguna instancia.
+ */
 const formatearNumero = (n: number): string => new Intl.NumberFormat('es-DO').format(Math.round(n));
+
+/** Icono por defecto de cada tipo, cuando la instancia no elige otro. */
+const ICONO_POR_TIPO: Record<string, NombreDeIcono> = {
+  'tarjeta-kpi': 'indicador',
+  barras: 'barras',
+  lineas: 'lineas',
+  tabla: 'tabla',
+  matriz: 'tabla',
+  segmentador: 'filtro',
+  'panel-de-filtros': 'filtro',
+};
 
 /** Un objeto cuyo mapeo ya no se puede resolver se dibuja MARCADO, nunca omitido (4.2). */
 export function ObjetoRoto({
@@ -80,26 +101,67 @@ export function ObjetoGenerandose({ titulo }: { titulo: string }) {
  * nuevo los hereda por existir. Si cada objeto los pintara por su cuenta, el primero que se
  * anadiera sin ellos los perderia en silencio.
  */
-function Marco({
+/*
+ * Se EXPORTA.
+ *
+ * El segmentador y el panel de filtros se dibujaban su propia cabecera a mano, asi que quedaban
+ * fuera de todo lo que el marco hace: sin icono, sin acento, sin resaltado y sin subtitulo. El
+ * estandar minimo solo es cierto si no hay forma de dibujar un objeto sin pasar por aqui.
+ */
+export function Marco({
   titulo,
   children,
   pie,
+  accion,
   instance,
   result,
 }: {
   titulo: string;
   children: React.ReactNode;
   pie?: React.ReactNode;
+  /** Un control propio del objeto, junto a los complementos. Por ejemplo «Limpiar». */
+  accion?: React.ReactNode;
   instance?: ObjectInstance;
   result?: QueryResult;
 }) {
+  /*
+   * La presentacion se dibuja AQUI, en el marco comun, y no en cada objeto.
+   *
+   * Es el mismo motivo por el que los complementos viven aqui: asi un objeto nuevo hereda icono,
+   * acento, resaltado y subtitulo por el hecho de existir, y no hay forma de anadir uno que se
+   * los deje sin querer. Es lo que hace que el minimo del contrato sea cierto en pantalla y no
+   * solo en el tipo.
+   */
+  const presentacion = instance?.presentacion;
+  const icono = presentacion?.icono ?? (instance ? ICONO_POR_TIPO[instance.objectId] : undefined);
+  const acento = presentacion?.acento ?? 'primario';
+
   return (
-    <div className="objeto">
+    <div
+      className="objeto"
+      data-acento={acento}
+      data-resaltado={presentacion?.resaltado ? 'si' : undefined}
+    >
       <div className="objeto__cabecera">
-        <h3>{titulo}</h3>
+        {icono ? (
+          // Decorativo: el nombre del objeto esta a su lado como texto. Darle tambien nombre
+          // accesible haria que un lector leyera dos veces lo mismo.
+          <span className="objeto__icono" aria-hidden="true">
+            <Icono nombre={icono} tamano={18} />
+          </span>
+        ) : null}
+        <div className="objeto__titulos">
+          <h3>{titulo}</h3>
+          {presentacion?.subtitulo ? (
+            <p className="objeto__subtitulo" data-testid="objeto-subtitulo">
+              {presentacion.subtitulo}
+            </p>
+          ) : null}
+        </div>
         {instance && result ? (
           <Complementos instance={instance} result={result} titulo={titulo} />
         ) : null}
+        {accion}
       </div>
       <div className="objeto__cuerpo">{children}</div>
       {pie ? <div className="objeto__pie">{pie}</div> : null}
@@ -110,16 +172,17 @@ function Marco({
 export function TarjetaKpi({ titulo, result, instance }: ObjetoProps) {
   const kpi = toKpi(result, instance.binding.measures, titulo);
   const delta = kpi.delta;
+  const formatear = formateadorDe(instance.presentacion?.formato);
 
   return (
     <Marco titulo={titulo} instance={instance} result={result}>
       <p className="kpi__valor" data-testid="kpi-valor">
-        {formatearNumero(kpi.value)}
+        {formatear(kpi.value)}
       </p>
       {delta ? (
         <p className={`kpi__delta ${delta.absolute >= 0 ? 'es-positivo' : 'es-negativo'}`}>
           {delta.absolute >= 0 ? '+' : ''}
-          {formatearNumero(delta.absolute)}
+          {formatear(delta.absolute)}
           {delta.relative === null ? '' : ` (${(delta.relative * 100).toFixed(1)}%)`}
         </p>
       ) : null}

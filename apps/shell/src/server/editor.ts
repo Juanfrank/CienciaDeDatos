@@ -1,5 +1,5 @@
 import { defaultRegistry } from '@app/caching';
-import type { ObjectCategory } from '@app/ui-components';
+import type { ClaveDePresentacion, ObjectCategory } from '@app/ui-components';
 import { fieldKey } from '@app/ui-components';
 import { objectRegistry } from './contexto';
 import { columnasDisponiblesDe } from './datos';
@@ -25,6 +25,8 @@ export interface ObjetoDePaleta {
   attachable: boolean;
   dimensiones: { min: number; max: number };
   medidas: { min: number; max: number };
+  /** Claves de presentacion que ESTA version admite. El editor solo ofrece estas. */
+  presentacion: ClaveDePresentacion[];
   notas?: string;
 }
 
@@ -34,6 +36,8 @@ export interface DatasetDePaleta {
   /** Claves 'Tabla.Campo' que este dataset trae y el esquema sigue reconociendo. */
   dimensiones: string[];
   medidas: string[];
+  /** Tipo de cada columna. Decide que selectores tienen sentido sobre cada dimension. */
+  tipos: Record<string, string>;
 }
 
 export interface PaletaDelEditor {
@@ -61,18 +65,29 @@ export async function paletaDelEditor(): Promise<PaletaDelEditor> {
       attachable: definicion.attachable ?? false,
       dimensiones: version.dataContract.dimensions,
       medidas: version.dataContract.measures,
+      presentacion: version.presentation,
       ...(version.dataContract.notes ? { notas: version.dataContract.notes } : {}),
     };
   });
 
   const datasets: DatasetDePaleta[] = [];
   for (const declarado of defaultRegistry.datasets) {
-    const disponibles = new Set(await columnasDisponiblesDe(declarado.datasetId));
+    /*
+     * Un MAPA de nombre a tipo, no un conjunto de nombres.
+     *
+     * El tipo hace falta aqui para que el editor pueda ofrecer el selector que corresponde a cada
+     * dimension del panel de filtros: un calendario sobre una fecha, pastillas sobre un texto.
+     * Preguntarlo al dibujar seria tarde, porque para entonces ya se eligio.
+     */
+    const disponibles = new Map(
+      (await columnasDisponiblesDe(declarado.datasetId)).map((c) => [c.name, c.type]),
+    );
     datasets.push({
       datasetId: declarado.datasetId,
       description: declarado.description,
       dimensiones: (declarado.query.dimensions ?? []).map(fieldKey).filter((c) => disponibles.has(c)),
       medidas: (declarado.query.measures ?? []).filter((m) => disponibles.has(m)),
+      tipos: Object.fromEntries(disponibles),
     });
   }
 

@@ -1,6 +1,8 @@
 import {
   type BindingProblem,
   type ObjectRegistry,
+  validarPanelDeFiltros,
+  validarPresentacion,
   validateAttachments,
   validateBinding,
 } from '@app/ui-components';
@@ -35,6 +37,27 @@ export interface ModuleDiagnostics {
   hasBrokenItems: boolean;
 }
 
+/**
+ * Una columna disponible: su nombre Y SU TIPO.
+ *
+ * El tipo viajaba y se tiraba —`columns.map(c => c.name)`— porque hasta ahora ninguna validacion
+ * lo necesitaba. El panel de filtros si: un selector de calendario sobre una columna de texto es
+ * un error de configuracion, y sin el tipo no hay forma de distinguirlo de uno correcto.
+ *
+ * Se acepta tambien la forma antigua, una cadena suelta, y entonces el tipo queda «desconocido».
+ * Es lo honesto para un dataset que el job aun no ha poblado: sin esquema no se sabe el tipo, y
+ * inventarse uno haria que la validacion rechazara configuraciones correctas.
+ */
+export interface ColumnaDisponible {
+  name: string;
+  type: string;
+}
+
+export const TIPO_DESCONOCIDO = 'desconocido';
+
+export const normalizarColumna = (c: ColumnaDisponible | string): ColumnaDisponible =>
+  typeof c === 'string' ? { name: c, type: TIPO_DESCONOCIDO } : c;
+
 export interface ValidateModuleInput {
   module: ModuleDefinition;
   registry: ObjectRegistry;
@@ -42,7 +65,7 @@ export interface ValidateModuleInput {
    * Columnas disponibles por dataset, tal como el job de poblacion las dejo en el cache.
    * Se pasan como dato y no se consultan aqui: la validacion es una funcion pura.
    */
-  columnsByDataset: Record<string, string[]>;
+  columnsByDataset: Record<string, (ColumnaDisponible | string)[]>;
 }
 
 export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
@@ -63,9 +86,9 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         broken: false,
       };
 
-      let contrato;
+      let version;
       try {
-        contrato = registry.resolve(instance.objectId, instance.version).dataContract;
+        version = registry.resolve(instance.objectId, instance.version);
       } catch (error) {
         // Un objeto o una version que ya no existe no tumba el editor: se marca roto.
         diagnostico.unresolvedObject = error instanceof Error ? error.message : String(error);
@@ -73,9 +96,10 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         items.push(diagnostico);
         continue;
       }
+      const contrato = version.dataContract;
 
-      const columnas = columnsByDataset[instance.binding.datasetId];
-      if (!columnas) {
+      const columnasCrudas = columnsByDataset[instance.binding.datasetId];
+      if (!columnasCrudas) {
         diagnostico.bindingProblems.push({
           slot: instance.binding.datasetId,
           kind: 'campo-inexistente',
@@ -87,13 +111,43 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         items.push(diagnostico);
         continue;
       }
+      const columnas = columnasCrudas.map(normalizarColumna);
+      const tiposPorCampo = Object.fromEntries(columnas.map((c) => [c.name, c.type]));
 
       diagnostico.bindingProblems = [
-        ...validateBinding(instance, contrato, columnas),
+        ...validateBinding(instance, contrato, columnas.map((c) => c.name)),
         // Los complementos se validan en el MISMO sitio que el mapeo, y no aparte: colocar un
         // complemento suelto en la rejilla es un error de configuracion como cualquier otro, y
         // tiene que bloquear la publicacion igual que un campo inexistente.
         ...validateAttachments(instance, (objectId) => registry.get(objectId)),
+        /*
+         * Y la presentacion, por el mismo motivo.
+         *
+         * Un icono que no existe o un acento que no es un rol del tema son errores de
+         * configuracion igual que un campo inexistente, y tienen que salir AQUI —donde el editor
+         * los puede senalar antes de guardar— y no al dibujar. Sin esto, el estandar de
+         * personalizacion seria un tipo de TypeScript: cierto mientras nadie edite el JSON de un
+         * modulo a mano, que es exactamente lo que hace el panel de administracion.
+         */
+        ...validarPresentacion(instance.presentacion, version.presentation).map((p) => ({
+          slot: `presentacion.${p.clave}`,
+          kind: 'contrato-incumplido' as const,
+          problem: p.problema,
+        })),
+        /*
+         * Y la configuracion propia del tipo.
+         *
+         * Un calendario sobre una columna de texto no se puede dibujar de ninguna forma sensata, y
+         * descubrirlo al renderizar significa un objeto roto en produccion. Aqui el editor lo ve
+         * antes de guardar, que es donde 4.2 quiere que se vea.
+         */
+        ...(instance.configuracion?.objectId === 'panel-de-filtros'
+          ? validarPanelDeFiltros(instance, instance.configuracion, tiposPorCampo).map((p) => ({
+              slot: `filtros.${p.campo}`,
+              kind: 'contrato-incumplido' as const,
+              problem: p.problema,
+            }))
+          : []),
       ];
       diagnostico.broken = diagnostico.bindingProblems.length > 0;
       items.push(diagnostico);

@@ -9,6 +9,7 @@ import { Incrustar } from './Incrustar';
 import { InsigniaDeProcedencia } from './InsigniaDeProcedencia';
 import { Preguntar } from './Preguntar';
 import { Marcadores } from './Marcadores';
+import { PanelDeFiltros } from './PanelDeFiltros';
 import { MiVista } from './MiVista';
 import { Rejilla } from './Rejilla';
 import { Segmentador } from './Segmentador';
@@ -41,12 +42,22 @@ const CONSULTA_VISIBLE = false;
 export function VistaModulo({
   objetos,
   provenance,
+  insignias,
   moduleSlug,
   pageSlug,
   incrustado = false,
 }: {
   objetos: ObjetoSerializado[];
   provenance: { isPersonalized: boolean; label: string };
+  /**
+   * Las insignias de procedencia y ambito, ya renderizadas en el servidor.
+   *
+   * Llegan como prop y no se construyen aqui porque salen de datos que solo tiene la pagina —el
+   * ambito efectivo con el que se cargo el modulo—, y porque asi comparten fila con los iconos
+   * sin que este componente tenga que saber calcularlas. Next permite pasar JSX del servidor a un
+   * componente de cliente: lo que viaja es el arbol ya pintado, no el codigo que lo pinta.
+   */
+  insignias?: React.ReactNode;
   moduleSlug: string;
   pageSlug?: string;
   /**
@@ -89,29 +100,37 @@ export function VistaModulo({
       {CONSULTA_VISIBLE && !incrustado ? <Preguntar moduleSlug={moduleSlug} /> : null}
 
       {/*
-        Las acciones del modulo, como iconos.
+        Una sola fila: de donde salen los datos, y que se puede hacer con ellos.
 
-        `role="toolbar"` no es decorativo: agrupa los controles bajo un solo nombre y hace que un
-        lector de pantalla los anuncie como "barra de herramientas, 5 elementos" en vez de como
-        cinco botones sueltos entre el titulo y los datos. Cada icono conserva su nombre en
-        `aria-label`, asi que lo que se anuncia es exactamente lo que antes decia el texto.
+        Las insignias dicen que se esta viendo y los iconos que se puede hacer con ello. Estaban
+        en dos lineas seguidas, cada una con su propio ritmo vertical, para tres elementos y cinco
+        botones; en una sola fila con la divisoria debajo se lee como lo que es, la cabecera de
+        los datos.
+
+        `role="toolbar"` envuelve SOLO los botones, no las insignias: una barra de herramientas se
+        anuncia por su numero de elementos, y meter dentro dos etiquetas que no se pulsan la
+        convierte en un grupo de siete cosas de las que dos no hacen nada.
       */}
       {incrustado ? null : (
-        <div className="barra-acciones" role="toolbar" aria-label="Acciones del modulo">
-          <MiVista moduleSlug={moduleSlug} personalizada={provenance.isPersonalized} />
-          <Marcadores moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
-          <Exportar moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
-          <CrearAviso
-            moduleSlug={moduleSlug}
-            {...(pageSlug ? { pageSlug } : {})}
-            vigilables={vigilables}
-          />
-          <Incrustar moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+        <div className="barra-modulo">
+          {insignias}
+
+          <div className="barra-modulo__acciones" role="toolbar" aria-label="Acciones del modulo">
+            <MiVista moduleSlug={moduleSlug} personalizada={provenance.isPersonalized} />
+            <Marcadores moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+            <Exportar moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+            <CrearAviso
+              moduleSlug={moduleSlug}
+              {...(pageSlug ? { pageSlug } : {})}
+              vigilables={vigilables}
+            />
+            <Incrustar moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+          </div>
 
           {hayFiltros ? (
             <button
               type="button"
-              className="boton-enlace barra-acciones__limpiar"
+              className="boton-enlace barra-modulo__limpiar"
               data-testid="limpiar-filtros"
               onClick={limpiarTodo}
             >
@@ -178,6 +197,8 @@ function Objeto({
       return <Tabla {...props} />;
     case 'matriz':
       return <Matriz {...props} />;
+    case 'panel-de-filtros':
+      return <PanelDeFiltros titulo={titulo} instance={objeto.instance} result={result} />;
     case 'segmentador': {
       const dimension = objeto.instance.binding.dimensions[0];
       if (!dimension) return <ObjetoRoto titulo={titulo} problems={[]} />;

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { PRESENTACION_MINIMA } from '../presentacion/contrato';
 import { ObjectRegistry, ObjectRegistryError } from './ObjectRegistry';
 import { catalogoInicial } from './catalog';
 import type { ObjectInstance, ObjectVersion, VisualObjectDefinition } from './types';
@@ -11,6 +12,7 @@ const version = (v: string, overrides: Partial<ObjectVersion> = {}): ObjectVersi
   changelog: `Cambios de ${v}.`,
   certification: certificado,
   dataContract: { dimensions: { min: 1, max: 1 }, measures: { min: 1, max: 1 } },
+  presentation: PRESENTACION_MINIMA,
   ...overrides,
 });
 
@@ -35,9 +37,24 @@ describe('catalogo inicial (4.2)', () => {
     // Los siete que 4.2 enumera son los INDEPENDIENTES. Los complementos se cuentan aparte:
     // no son objetos que se coloquen en la rejilla y el documento no los pide.
     const independientes = registro.list().filter((o) => !o.attachable);
-    expect(independientes.map((o) => o.objectId).sort()).toEqual([
+
+    // 4.2 enumera un MINIMO, no una lista cerrada: dice que el panel ofrezca esos siete, no que
+    // no pueda ofrecer mas. Por eso la comprobacion es de inclusion — el panel de filtros es un
+    // objeto anadido despues— y sigue fallando si alguno de los siete desaparece.
+    for (const exigido of [
       'barras', 'lineas', 'mapa', 'matriz', 'segmentador', 'tabla', 'tarjeta-kpi',
-    ]);
+    ]) {
+      expect(independientes.map((o) => o.objectId)).toContain(exigido);
+    }
+  });
+
+  it('el panel de filtros agrupa hasta diez dimensiones y no mapea medidas', () => {
+    const registro = new ObjectRegistry(catalogoInicial);
+    const version = registro.latest('panel-de-filtros');
+    expect(version?.dataContract.dimensions).toEqual({ min: 1, max: 10 });
+    // Un filtro que mapeara una medida pediria agregar algo para filtrar por ello, que es otra
+    // cosa y no la que este objeto hace.
+    expect(version?.dataContract.measures).toEqual({ min: 0, max: 0 });
   });
 
   it('los complementos se declaran adjuntables y en la categoria complemento', () => {

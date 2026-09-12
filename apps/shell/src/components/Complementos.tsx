@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import type { QueryResult } from '@app/data-contracts';
+import { Icono } from './iconos/Icono';
 import {
   aggregateBy,
   attachmentOf,
@@ -63,7 +64,7 @@ export function TooltipExplicativo({ texto, titulo }: { texto: string; titulo: s
         // El icono es decorativo: el nombre accesible lo da aria-label, asi que se oculta del
         // arbol para que un lector de pantalla no lea "i" antes de la etiqueta.
       >
-        <span aria-hidden="true">i</span>
+        <Icono nombre="informacion" tamano={18} />
       </button>
       {visible ? (
         <span role="tooltip" id={id} className="complemento__tooltip" data-testid={`tooltip-${titulo}`}>
@@ -134,7 +135,7 @@ export function TablaDeDatos({
         data-testid={`tabla-datos-abrir-${titulo}`}
         onClick={() => setAbierto(true)}
       >
-        <span aria-hidden="true">▤</span>
+        <Icono nombre="datos" tamano={18} />
       </button>
 
       <dialog

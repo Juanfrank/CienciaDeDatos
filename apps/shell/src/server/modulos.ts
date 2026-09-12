@@ -41,6 +41,20 @@ export const modulosDemo: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Casos pendientes',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosPendientes'] },
+              /*
+               * La primera instancia del seed que configura su presentacion.
+               *
+               * Sirve de ejemplo vivo de lo que se puede hacer desde el editor sin tocar codigo:
+               * el mismo objeto `tarjeta-kpi` con otro icono, otro acento y otro rotulo es otra
+               * tarjeta, sin publicar ningun objeto nuevo.
+               */
+              presentacion: {
+                icono: 'expediente',
+                acento: 'primario',
+                resaltado: true,
+                subtitulo: 'Al cierre del trimestre',
+                formato: { unidad: 'casos' },
+              },
               attachments: [
                 {
                   instanceId: 'tooltip-kpi-pendientes',
@@ -74,17 +88,40 @@ export const modulosDemo: ModuleDefinition[] = [
                 dimensions: [],
                 measures: ['CasosIngresados', 'CasosResueltos'],
               },
+              presentacion: {
+                icono: 'balanza',
+                acento: 'terciario',
+                resaltado: true,
+                subtitulo: 'Frente al periodo anterior',
+              },
             },
           },
+          /*
+           * Panel de filtros en vez de dos segmentadores.
+           *
+           * Antes esta celda era un segmentador de una sola dimension, y filtrar tambien por
+           * distrito habria pedido otra celda con otro objeto identico salvo por el campo. El
+           * panel agrupa las dos y deja elegir COMO se filtra cada una: materia tiene dos valores
+           * y cabe en pastillas; distrito crece con el ambito de quien mira y se lleva mejor con
+           * un desplegable.
+           */
           {
-            id: 'segmentador-materia',
+            id: 'filtros',
             position: { x: 6, y: 0, w: 6, h: 2 },
             instance: {
-              instanceId: 'segmentador-materia',
-              objectId: 'segmentador',
+              instanceId: 'filtros',
+              objectId: 'panel-de-filtros',
               version: '1.0.0',
-              title: 'Materia',
-              binding: { datasetId: DATASET, dimensions: [MATERIA], measures: [] },
+              title: 'Filtros',
+              binding: { datasetId: DATASET, dimensions: [MATERIA, DISTRITO], measures: [] },
+              presentacion: { icono: 'filtro', acento: 'secundario' },
+              configuracion: {
+                objectId: 'panel-de-filtros',
+                selectores: [
+                  { campo: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Materia' },
+                  { campo: 'DimTribunal.Distrito', tipo: 'desplegable', etiqueta: 'Distrito' },
+                ],
+              },
             },
           },
           {
@@ -138,9 +175,30 @@ export const modulosDemo: ModuleDefinition[] = [
            * la comparacion que el modulo pedia —lo que entra frente a lo que sale— y estaba solo
            * en la tabla del final.
            */
+          /*
+           * El segmentador se queda, al lado del panel, y sobre la MISMA dimension.
+           *
+           * No es un resto del pasado: los dos escriben el mismo parametro de la URL, asi que
+           * elegir «Penal» en cualquiera de ellos mueve al otro sin que ninguno sepa que el otro
+           * existe. Es la demostracion de que 4.11 no es una formalidad —el estado vive en la
+           * direccion, no en los componentes—, y el sitio donde se notaria si algun dia alguien
+           * mete estado local en un filtro.
+           */
+          {
+            id: 'segmentador-materia',
+            position: { x: 0, y: 6, w: 4, h: 2 },
+            instance: {
+              instanceId: 'segmentador-materia',
+              objectId: 'segmentador',
+              version: '1.0.0',
+              title: 'Materia',
+              binding: { datasetId: DATASET, dimensions: [MATERIA], measures: [] },
+              presentacion: { icono: 'filtro', acento: 'neutro' },
+            },
+          },
           {
             id: 'barras-flujo',
-            position: { x: 0, y: 6, w: 12, h: 4 },
+            position: { x: 0, y: 8, w: 12, h: 4 },
             instance: {
               instanceId: 'barras-flujo',
               objectId: 'barras',
@@ -157,7 +215,7 @@ export const modulosDemo: ModuleDefinition[] = [
           },
           {
             id: 'tabla-detalle',
-            position: { x: 0, y: 10, w: 12, h: 4 },
+            position: { x: 0, y: 12, w: 12, h: 4 },
             instance: {
               instanceId: 'tabla-detalle',
               objectId: 'tabla',

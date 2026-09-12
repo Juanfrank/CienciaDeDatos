@@ -15,6 +15,43 @@ export {
   type BuscarDefinicion,
 } from './registry/attachments';
 export { catalogoInicial } from './registry/catalog';
+export {
+  ACENTOS,
+  MAX_DECIMALES,
+  MAX_SUBTITULO,
+  MAX_UNIDAD,
+  MODOS_DE_LEYENDA,
+  PRESENTACION_MINIMA,
+  formateadorDe,
+  validarPresentacion,
+  type AcentoDeObjeto,
+  type ClaveDePresentacion,
+  type FormatoNumerico,
+  type ModoDeLeyenda,
+  type PresentacionDeObjeto,
+  type ProblemaDePresentacion,
+} from './presentacion/contrato';
+export {
+  MAX_DIMENSIONES_DEL_PANEL,
+  SELECTORES_DE_FECHA,
+  TIPOS_DE_SELECTOR,
+  esTipoDeFecha,
+  selectorPorDefecto,
+  selectoresEfectivos,
+  validarPanelDeFiltros,
+  type ConfiguracionDePanelDeFiltros,
+  type ProblemaDeSelector,
+  type SelectorDeDimension,
+  type SelectorEfectivo,
+  type TipoDeSelector,
+} from './presentacion/panelDeFiltros';
+export {
+  ICONOS_DE_OBJETO,
+  NOMBRES_DE_ICONO,
+  TRAZOS_DE_ICONO,
+  esNombreDeIcono,
+  type NombreDeIcono,
+} from './presentacion/iconos';
 export { desgloseDe, proyectarObjeto } from './registry/proyeccion';
 export {
   classifyBump,
@@ -30,6 +67,7 @@ export type {
   AttachedObjectInstance,
   AttachmentScope,
   DeprecationNotice,
+  ConfiguracionDeObjeto,
   ObjectCategory,
   ObjectCertification,
   ObjectDataContract,

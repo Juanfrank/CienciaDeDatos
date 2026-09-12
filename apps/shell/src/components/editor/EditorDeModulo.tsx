@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { GridItem, ModuleDefinition, ModuleDiagnostics, PublishBlocker } from '@app/module-model';
 import type { PaletaDelEditor } from '../../server/editor';
+import { Presentacion } from './Presentacion';
 
 /**
  * Editor de un modulo — seccion 4.2.
@@ -120,7 +121,17 @@ export function EditorDeModulo({
   };
 
   return (
-    <section className="editor">
+    /*
+     * `data-guardando` no es solo para las pruebas.
+     *
+     * Cada cambio guarda el modulo entero contra el servidor y mientras tanto todos los controles
+     * se deshabilitan. Sin decirlo, el editor se queda muerto durante unas decimas sin motivo
+     * aparente, y quien esta cambiando varias cosas seguidas cree que la interfaz ha fallado.
+     */
+    <section className="editor" data-guardando={guardando ? 'si' : 'no'}>
+      <p className="editor__estado" role="status" aria-live="polite" data-testid="editor-estado">
+        {guardando ? 'Guardando…' : ''}
+      </p>
       <header className="editor__cabecera">
         <div>
           <h2>{modulo.name}</h2>
@@ -327,6 +338,23 @@ export function EditorDeModulo({
                       </label>
                     ))}
                   </fieldset>
+
+                  {/*
+                    La presentacion, junto al mapeo y no en otra pantalla.
+
+                    Es la diferencia entre «este objeto muestra estos datos» y «este objeto se ve
+                    asi», y las dos se deciden a la vez: quien elige medir casos pendientes elige
+                    en el mismo momento que la tarjeta lleve un expediente y salga en azul.
+                  */}
+                  <Presentacion
+                    instance={item.instance}
+                    admitidas={definicion?.presentacion ?? []}
+                    tipos={dataset?.tipos ?? {}}
+                    guardando={guardando}
+                    onCambiar={(cambio) =>
+                      void cambiar(item.id, (i) => ({ ...i, instance: cambio(i.instance) }))
+                    }
+                  />
 
                   <button
                     type="button"
