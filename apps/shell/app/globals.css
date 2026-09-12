@@ -1065,10 +1065,17 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   width: max(260px, 28ch);
   max-width: 70vw;
   padding: var(--space-sm) var(--space-md);
-  background: var(--md-sys-color-surface-container-highest);
-  color: var(--md-sys-color-on-surface-variant);
+  /*
+   * Superficie INVERSA, como el globo de ayuda del editor.
+   *
+   * En `surface-container-highest` el globo se parecia demasiado a una tarjeta mas y, cayendo
+   * sobre la de al lado, costaba saber donde acababa una y empezaba el otro. Invertido no hay
+   * duda de que es una capa que esta de paso.
+   */
+  background: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
   border-radius: var(--md-sys-shape-corner-small);
-  box-shadow: var(--md-sys-elevation-2);
+  box-shadow: var(--md-sys-elevation-3);
   font-size: var(--md-sys-typescale-body-small-size);
   line-height: var(--md-sys-typescale-body-small-line-height);
 }
@@ -1790,7 +1797,32 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * pierde legibilidad ni contraste. Y se aprieta solo aqui dentro; el resto de la aplicacion
  * conserva sus 48 px.
  */
-.panel-editor__cuerpo { gap: var(--space-sm); }
+/*
+ * La barra de desplazamiento, a la vista.
+ *
+ * El panel se desplazaba desde el primer dia y no habia forma de saberlo: en macOS y en los
+ * moviles la barra es un adorno que solo aparece MIENTRAS se arrastra, asi que un panel con
+ * contenido debajo se ve exactamente igual que uno que acaba ahi. El desplazamiento existe, pero
+ * nadie lo descubre — que a efectos practicos es no tenerlo.
+ *
+ * Se fuerza a permanente, con CANAL y pulgar de colores del tema. La primera version la puso
+ * `thin` y con el canal transparente: se dibujaba —10 px medidos— y seguia sin verse, porque un
+ * pulgar fino y suelto contra el fondo del panel se lee como el borde del panel. Un canal con
+ * contraste propio es lo que hace que se reconozca como una barra y no como una linea.
+ *
+ * `scrollbar-gutter: stable` reserva su sitio siempre: sin el, abrir una seccion hace aparecer la
+ * barra y el contenido entero salta 10 px a la izquierda.
+ *
+ * Se estiliza con las propiedades ESTANDAR y no con `::-webkit-scrollbar`: en cuanto se declara
+ * `scrollbar-color`, los motores basados en Chromium ignoran los pseudoelementos, asi que tener
+ * las dos cosas solo deja codigo muerto que aparenta hacer algo.
+ */
+.panel-editor__cuerpo {
+  gap: var(--space-sm);
+  scrollbar-width: auto;
+  scrollbar-color: var(--md-sys-color-outline) var(--md-sys-color-surface-container-high);
+  scrollbar-gutter: stable;
+}
 
 .panel-editor input[type='text'],
 .panel-editor input[type='search'],
@@ -1813,8 +1845,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   padding: 0 var(--space-sm) var(--space-sm);
   gap: var(--space-sm);
 }
-.panel-editor .pozo__etiqueta,
-.panel-editor .pozo__ayuda { margin-bottom: 2px; }
+.panel-editor .pozo__etiqueta { margin-bottom: 2px; }
 
 /*
  * Con el dedo, no.
@@ -1903,10 +1934,64 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * haya comprobado. Si algo tiene que pesar menos, se baja de rol tipografico, no se difumina.
  */
 .pozo__cupo { font-variant-numeric: tabular-nums; }
-.pozo__ayuda {
-  margin: 0 0 var(--space-xs);
-  font-size: var(--md-sys-typescale-body-small-size);
+.pozo__nombre { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+
+/*
+ * El asterisco de obligatorio.
+ *
+ * En `error`, que es el unico rol del tema que es rojo — no un `#c00` suelto, para que siga al
+ * tema y a la comprobacion de contraste de 4.3 como todo lo demas. Y NUNCA solo: al lado va
+ * «(obligatorio)» para lectores de pantalla, porque un asterisco leido en voz alta no informa de
+ * nada, y el color por si solo tampoco (1.4.1).
+ */
+.pozo__obligatorio {
+  color: var(--md-sys-color-error);
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ---- Ayuda contextual ---- */
+.ayuda { position: relative; display: inline-flex; }
+.ayuda__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--md-sys-color-surface-container-highest);
   color: var(--md-sys-color-on-surface-variant);
+  cursor: help;
+}
+.ayuda__icono:hover { background: var(--md-sys-color-secondary-container); }
+.ayuda__icono:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 1px;
+}
+/*
+ * El globo, por encima de todo y ANCLADO al icono.
+ *
+ * `z-index` alto porque cae sobre las secciones de al lado, y ancho fijo porque el panel mide
+ * 340 px: sin el, una ayuda larga estiraria la fila entera.
+ */
+.ayuda__globo {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: -6px;
+  z-index: 30;
+  width: max-content;
+  max-width: 240px;
+  padding: var(--space-sm);
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
+  box-shadow: var(--md-sys-elevation-2);
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: var(--md-sys-typescale-body-small-line-height);
+  font-weight: 400;
+  white-space: normal;
 }
 .pozo__chiclets {
   list-style: none;
@@ -1925,11 +2010,17 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * la fila se desbordaria. En vertical cada uno se lee entero, y el orden de arriba abajo es el
  * mismo que el objeto consume.
  */
+/*
+ * Nombre a la izquierda, y los dos controles JUNTOS a la derecha.
+ *
+ * Con `space-between` y tres hijos, el hueco se reparte entre todos y el chevron acababa flotando
+ * en mitad del chiclet, sin pertenecer visualmente a nada. Los dos controles son del mismo campo
+ * y hacen cosas sobre el: van pegados, como en cualquier barra de acciones.
+ */
 .chiclet {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xs);
+  gap: 2px;
   min-height: 32px;
   padding: 0 4px 0 10px;
   border: 1px solid var(--md-sys-color-outline-variant);
@@ -1938,7 +2029,13 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   color: var(--md-sys-color-on-secondary-container);
   font-size: var(--md-sys-typescale-body-medium-size);
 }
-.chiclet__nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chiclet__nombre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /*
  * Como se resume la medida, dentro del propio chiclet.
@@ -2358,18 +2455,27 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 .complemento__icono:hover::before { opacity: var(--md-sys-state-hover-opacity); }
 
 /* Tooltip enriquecido de MD3. */
+/*
+ * `fixed` y no `absolute`: el globo tiene que salir de la caja de la tarjeta, que es justo lo que
+ * `absolute` impide. Las coordenadas las pone el componente, medidas del icono y de la tarjeta.
+ */
 .complemento__tooltip {
-  position: absolute;
-  top: calc(100% + var(--space-xs));
-  right: 0;
+  position: fixed;
   z-index: 30;
-  width: max(220px, 20ch);
-  max-width: 60vw;
+  width: 260px;
+  max-width: calc(100vw - 24px);
   padding: var(--space-sm) var(--space-md);
-  background: var(--md-sys-color-surface-container-highest);
-  color: var(--md-sys-color-on-surface-variant);
+  /*
+   * Superficie INVERSA, como el globo de ayuda del editor.
+   *
+   * En `surface-container-highest` el globo se parecia demasiado a una tarjeta mas y, cayendo
+   * sobre la de al lado, costaba saber donde acababa una y empezaba el otro. Invertido no hay
+   * duda de que es una capa que esta de paso.
+   */
+  background: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
   border-radius: var(--md-sys-shape-corner-small);
-  box-shadow: var(--md-sys-elevation-2);
+  box-shadow: var(--md-sys-elevation-3);
   font-size: var(--md-sys-typescale-body-small-size);
   line-height: var(--md-sys-typescale-body-small-line-height);
 }

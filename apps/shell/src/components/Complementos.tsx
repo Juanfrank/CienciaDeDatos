@@ -37,6 +37,8 @@ const formatearCelda = (celda: unknown): string =>
 export function TooltipExplicativo({ texto, titulo }: { texto: string; titulo: string }) {
   const id = useId();
   const [visible, setVisible] = useState(false);
+  const boton = useRef<HTMLButtonElement>(null);
+  const [sitio, setSitio] = useState<{ top: number; left: number } | null>(null);
 
   useEffect(() => {
     if (!visible) return;
@@ -47,6 +49,76 @@ export function TooltipExplicativo({ texto, titulo }: { texto: string; titulo: s
     return () => document.removeEventListener('keydown', alPulsar);
   }, [visible]);
 
+  /*
+   * El globo se coloca FUERA de la tarjeta que explica.
+   *
+   * Antes caia hacia abajo desde el icono, o sea justo encima del contenido: para leer que
+   * significa la cifra habia que tapar la cifra. Es el peor sitio posible para una explicacion,
+   * porque lo que se explica y la explicacion no se pueden mirar a la vez.
+   *
+   * Ahora se ancla al icono —de ahi nace, y ahi vuelve el foco— pero se situa al lado de la
+   * tarjeta: a la derecha si cabe, a la izquierda si no, y solo debajo del TODO cuando no hay
+   * hueco a ningun lado, que es el caso del movil. Nunca sobre el contenido.
+   *
+   * `position: fixed` y coordenadas medidas, no CSS a secas: `absolute` lo confina a la caja de la
+   * tarjeta, que es exactamente de donde hay que salir. Se recalcula al desplazar y al redimensionar
+   * porque una posicion fija que no sigue a su ancla se queda flotando en mitad de la pantalla.
+   */
+  useEffect(() => {
+    if (!visible) return;
+
+    const colocar = () => {
+      const el = boton.current;
+      const tarjeta = el?.closest('.objeto');
+      if (!el || !tarjeta) return;
+
+      const icono = el.getBoundingClientRect();
+      const caja = tarjeta.getBoundingClientRect();
+      const ancho = 260;
+      const hueco = 12;
+
+      /*
+       * Se prefiere el lado que NO cae sobre otra tarjeta.
+       *
+       * En una rejilla densa casi siempre hay algo al lado, y entonces el globo se superpone a la
+       * vecina — transitoriamente, mientras dura el puntero. Lo que no puede pasar nunca es que
+       * tape la tarjeta que explica: mirar la cifra y leer que significa tienen que poder hacerse
+       * a la vez. Entre dos lados igual de validos gana el que deje libre otra tarjeta.
+       */
+      const otras = Array.from(document.querySelectorAll('.objeto')).filter((o) => o !== tarjeta);
+      const tapa = (izquierda: number) =>
+        otras.filter((o) => {
+          const r = o.getBoundingClientRect();
+          return !(izquierda + ancho <= r.left || izquierda >= r.right);
+        }).length;
+
+      const derecha = caja.right + hueco;
+      const izquierda = caja.left - hueco - ancho;
+      const cabeDerecha = derecha + ancho <= window.innerWidth;
+      const cabeIzquierda = izquierda >= 0;
+
+      if (cabeDerecha && cabeIzquierda) {
+        const elegida = tapa(derecha) <= tapa(izquierda) ? derecha : izquierda;
+        setSitio({ top: icono.top, left: elegida });
+      } else if (cabeDerecha) {
+        setSitio({ top: icono.top, left: derecha });
+      } else if (cabeIzquierda) {
+        setSitio({ top: icono.top, left: izquierda });
+      } else {
+        // Sin sitio a los lados: debajo de la tarjeta entera, no encima de su contenido.
+        setSitio({ top: caja.bottom + hueco, left: Math.max(hueco, caja.left) });
+      }
+    };
+
+    colocar();
+    window.addEventListener('scroll', colocar, true);
+    window.addEventListener('resize', colocar);
+    return () => {
+      window.removeEventListener('scroll', colocar, true);
+      window.removeEventListener('resize', colocar);
+    };
+  }, [visible]);
+
   return (
     <span
       className="complemento"
@@ -55,19 +127,26 @@ export function TooltipExplicativo({ texto, titulo }: { texto: string; titulo: s
     >
       <button
         type="button"
+        ref={boton}
         className="complemento__icono"
         aria-describedby={visible ? id : undefined}
         aria-label={`Que muestra «${titulo}»`}
         data-testid={`tooltip-icono-${titulo}`}
         onFocus={() => setVisible(true)}
         onBlur={() => setVisible(false)}
-        // El icono es decorativo: el nombre accesible lo da aria-label, asi que se oculta del
-        // arbol para que un lector de pantalla no lea "i" antes de la etiqueta.
+        // Con el dedo no hay «pasar por encima»: el toque lo abre y lo vuelve a cerrar.
+        onClick={() => setVisible((v) => !v)}
       >
         <Icono nombre="informacion" tamano={18} />
       </button>
       {visible ? (
-        <span role="tooltip" id={id} className="complemento__tooltip" data-testid={`tooltip-${titulo}`}>
+        <span
+          role="tooltip"
+          id={id}
+          className="complemento__tooltip"
+          data-testid={`tooltip-${titulo}`}
+          style={sitio ? { top: `${sitio.top}px`, left: `${sitio.left}px` } : { visibility: 'hidden' }}
+        >
           {texto}
         </span>
       ) : null}

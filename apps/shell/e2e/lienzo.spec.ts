@@ -650,6 +650,89 @@ test.describe('las ranuras mandan, no el orden', () => {
   });
 });
 
+test.describe('el panel se lee de un vistazo', () => {
+  test('la ayuda vive en un icono, no en un parrafo bajo cada rotulo', async ({ page }) => {
+    await nuevoModulo(page, 'panel-ayuda');
+    await page.getByTestId('anadir-barras').click();
+    await guardado(page);
+
+    // El texto no esta a la vista...
+    await expect(page.getByText('La dimension que reparte las barras.')).toHaveCount(0);
+
+    // ...y aparece al posarse sobre el icono, con el papel que le corresponde.
+    await page.locator('.ayuda__icono').first().hover();
+    const globo = page.getByRole('tooltip');
+    await expect(globo).toBeVisible();
+    await expect(globo).toHaveText('La dimension que reparte las barras.');
+
+    // 1.4.13: se descarta con Escape, sin mover el puntero.
+    await page.keyboard.press('Escape');
+    await expect(globo).toHaveCount(0);
+  });
+
+  test('Escape sobre una ayuda NO deselecciona el objeto', async ({ page }) => {
+    // Mismo choque que tenia el buscador de campos: dos Escape escuchando en `document`.
+    await nuevoModulo(page, 'panel-escape');
+    await page.getByTestId('anadir-barras').click();
+    await guardado(page);
+
+    await page.locator('.ayuda__icono').first().hover();
+    await expect(page.getByRole('tooltip')).toBeVisible();
+    await page.keyboard.press('Escape');
+
+    await expect(page.getByTestId('pestana-datos')).toBeEnabled();
+  });
+
+  test('lo obligatorio lleva asterisco, y lo dice tambien con palabras', async ({ page }) => {
+    await nuevoModulo(page, 'panel-obligatorio');
+    await page.getByTestId('anadir-barras').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    // El eje X hace falta para dibujar; la serie no.
+    const ejeX = page.locator(`[data-testid="pozo-${id}-eje-x"] .pozo__obligatorio`);
+    await expect(ejeX).toHaveCount(1);
+    await expect(page.locator(`[data-testid="pozo-${id}-serie"] .pozo__obligatorio`)).toHaveCount(0);
+
+    // El color no puede ser el unico portador de la informacion (1.4.1).
+    await expect(page.locator(`[data-testid="pozo-${id}-eje-x"]`)).toContainText('(obligatorio)');
+  });
+
+  test('el panel se desplaza, y la barra ocupa sitio de verdad', async ({ page }) => {
+    /*
+     * El desplazamiento existia y no se veia: la barra iba `thin` con el canal transparente, que
+     * contra el fondo del panel se lee como el borde del panel. Se comprueba por medida y no por
+     * captura, porque el navegador de las pruebas se lanza con `--hide-scrollbars`.
+     */
+    await page.setViewportSize({ width: 1500, height: 620 });
+    await nuevoModulo(page, 'panel-scroll');
+    await page.getByTestId('anadir-barras').click();
+    await guardado(page);
+    await page.getByTestId('pestana-formato').click();
+
+    const total = await page.locator('.panel-editor details').count();
+    for (let i = 0; i < total; i += 1) {
+      const d = page.locator('.panel-editor details').nth(i);
+      if ((await d.getAttribute('open')) === null) await d.locator('> summary').click();
+    }
+
+    const medida = await page
+      .locator('.panel-editor__cuerpo')
+      .evaluate((el: HTMLElement) => ({
+        desborda: el.scrollHeight > el.clientHeight,
+        anchoDeBarra: el.offsetWidth - el.clientWidth,
+      }));
+    expect(medida.desborda).toBe(true);
+    expect(medida.anchoDeBarra).toBeGreaterThan(0);
+
+    await page.locator('.panel-editor__cuerpo').evaluate((el) => el.scrollTo(0, 9999));
+    const abajo = await page
+      .locator('.panel-editor__cuerpo')
+      .evaluate((el) => el.scrollTop > 0);
+    expect(abajo).toBe(true);
+  });
+});
+
 test.describe('como se resume cada medida', () => {
   test('el chiclet trae el operador que DECLARA el esquema, no siempre suma', async ({ page }) => {
     /*

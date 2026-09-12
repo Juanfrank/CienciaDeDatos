@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { AGREGACIONES, type Agregacion } from '@app/data-contracts';
 import { ETIQUETA_DE_AGREGACION, type PozoDeCampos } from '@app/ui-components';
 import { Icono } from '../iconos/Icono';
+import { Ayuda } from './Ayuda';
 
 /**
  * Un pozo de campos, al estilo de Power BI.
@@ -73,6 +74,7 @@ export function Pozo({
   const id = useId();
 
   const lleno = llenoExterno ?? elegidos.length >= pozo.max;
+  const obligatorio = (pozo.min ?? 0) > 0;
 
   /*
    * Escape cierra ESTE emergente y no llega a nadie mas.
@@ -111,12 +113,29 @@ export function Pozo({
   return (
     <div className="pozo" ref={contenedor} data-testid={prueba}>
       <p className="pozo__etiqueta" id={`${id}-etiqueta`}>
-        {pozo.etiqueta}
+        <span className="pozo__nombre">
+          {pozo.etiqueta}
+          {/*
+            El asterisco rojo, y NADA MAS.
+            Antes lo obligatorio se decia en la ayuda («Opcional. Agrupa las barras…») y habia que
+            leerla entera para enterarse, y solo en las ranuras que la traian. El asterisco es la
+            convencion de cualquier formulario: se reconoce sin leer. Va con `aria-hidden` y la
+            palabra completa al lado, porque «asterisco» no significa nada dicho en voz alta.
+          */}
+          {obligatorio ? (
+            <>
+              <span className="pozo__obligatorio" aria-hidden="true">
+                *
+              </span>
+              <span className="visualmente-oculto">(obligatorio)</span>
+            </>
+          ) : null}
+          {pozo.ayuda ? <Ayuda texto={pozo.ayuda} de={pozo.etiqueta} /> : null}
+        </span>
         <span className="pozo__cupo" aria-hidden="true">
           {elegidos.length}/{pozo.max}
         </span>
       </p>
-      {pozo.ayuda ? <p className="pozo__ayuda">{pozo.ayuda}</p> : null}
 
       <ul className="pozo__chiclets" aria-labelledby={`${id}-etiqueta`}>
         {elegidos.map((campo) => (

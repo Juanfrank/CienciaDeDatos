@@ -144,3 +144,40 @@ test.describe('un complemento no amplia lo que se puede ver (principio 5)', () =
     await expect(filas).not.toContainText('Distrito Este');
   });
 });
+
+test.describe('donde se coloca el tooltip', () => {
+  test('NUNCA tapa la tarjeta que explica', async ({ page }) => {
+    /*
+     * Caia hacia abajo desde el icono, o sea justo sobre el contenido: para leer que significa la
+     * cifra habia que tapar la cifra. Es el peor sitio posible para una explicacion, porque lo
+     * explicado y la explicacion no se pueden mirar a la vez.
+     *
+     * Se comprueba con coordenadas y no con estilos: el como —`fixed` y unas medidas— puede
+     * cambiar; lo que no puede es que las dos cajas se crucen.
+     */
+    await page.goto('/m/casos-pendientes');
+    await page.locator('.complemento__icono').first().hover();
+    await expect(page.getByRole('tooltip').first()).toBeVisible();
+
+    const cruza = await page.evaluate(() => {
+      const globo = document.querySelector('[role="tooltip"]')?.getBoundingClientRect();
+      const tarjeta = document.querySelector('.objeto')?.getBoundingClientRect();
+      if (!globo || !tarjeta) return null;
+      return !(
+        globo.right <= tarjeta.left ||
+        globo.left >= tarjeta.right ||
+        globo.bottom <= tarjeta.top ||
+        globo.top >= tarjeta.bottom
+      );
+    });
+    expect(cruza).toBe(false);
+  });
+
+  test('se descarta con Escape, sin mover el puntero (1.4.13)', async ({ page }) => {
+    await page.goto('/m/casos-pendientes');
+    await page.locator('.complemento__icono').first().hover();
+    await expect(page.getByRole('tooltip').first()).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('tooltip')).toHaveCount(0);
+  });
+});
