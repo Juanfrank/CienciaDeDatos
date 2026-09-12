@@ -64,54 +64,24 @@ function sinFiltroPropio(
   return Object.fromEntries(Object.entries(filtros).filter(([clave]) => !claves.has(clave)));
 }
 
-export async function cargarModulo(input: {
-  module: ModuleDefinition;
-  pageSlug?: string;
-  userId: string;
-  teamId: string;
-  /** Filtros pedidos por la query string, ya parseados (4.11). */
-  requestedFilters: Record<string, string | string[]>;
-  /**
-   * Personalizacion de esta persona para este modulo, si la hay (4.6).
-   *
-   * Se pasa como DATO en vez de leerla aqui, y es deliberado: no todos los caminos deben
-   * aplicarla. Una alerta se evalua sobre la definicion institucional —si no, ocultar un objeto
-   * apagaria en silencio la alerta que vigila su medida—, y el vocabulario de la consulta en
-   * lenguaje natural tampoco debe encogerse porque alguien escondiera un grafico.
-   */
-  personalization?: UserPersonalization | undefined;
-}): Promise<ModuloCargado | null> {
-  const { userId, teamId, requestedFilters } = input;
-
-  // La personalizacion se aplica ANTES de resolver la pagina: puede haber ocultado objetos, y
-  // lo que no esta en la vista no se lee del cache ni viaja al navegador.
-  const { module, isPersonalized } = applyPersonalization(input.module, input.personalization);
-
-  const page = findPage(module, input.pageSlug);
-  if (!page) return null;
-
-  // Comprobacion de ACCESO, distinta de la de ambito.
-  //
-  // El arbol de navegacion ya oculta lo no concedido, pero ocultar no es proteger: una URL
-  // escrita a mano llega igual aqui. La seccion 9 lo dice literalmente — la comprobacion tiene
-  // que estar en el backend, "no solo ocultamiento de UI".
-  //
-  // Sin esto, un modulo que existe en la organizacion general pero que el equipo NO tiene entre
-  // sus grantedNodes se renderizaria con el ambito por defecto del equipo, que es una fuga.
-  const team = await findTeam(teamId);
-  if (!team || !canTeamAccessModule(await getGeneralTree(), team, module.moduleId)) return null;
-
-  const resolucion = await scopeFor(userId, teamId, module.moduleId);
-  // Sin ambito resoluble, el modulo no existe para esta persona. Resultado vacio y explicito,
-  // nunca un error que revele que existe algo fuera de su alcance (4.11).
-  const scope: AccessScope = resolucion?.scope ?? { restrictions: [{ dimension: { table: '', field: '' }, allowedValues: [] }] };
-
-  const appliedFilters = intersectRequestedFilters(scope, requestedFilters);
+/**
+ * Lee los datos de una lista de objetos bajo UN ambito.
+ *
+ * Se extrae de `cargarModulo` para que la vista previa del editor use exactamente este codigo y
+ * no una copia. Es lo que garantiza que la vista previa este recortada por el ambito de quien
+ * edita: si fuera un camino aparte, el editor seria una forma de ver datos fuera del alcance
+ * propio sin mas que crear un borrador, y ninguna prueba de la vista normal lo detectaria.
+ */
+async function leerObjetos(
+  items: GridItem[],
+  scope: AccessScope,
+  requestedFilters: Record<string, string | string[]>,
+): Promise<{ objetos: ObjetoCargado[]; masAntiguo?: string; degraded: boolean }> {
   const objetos: ObjetoCargado[] = [];
   let masAntiguo: string | undefined;
   let degraded = false;
 
-  for (const item of page.items) {
+  for (const item of items) {
     const { instance } = item;
 
     let contrato;
@@ -166,6 +136,55 @@ export async function cargarModulo(input: {
       problems,
     });
   }
+
+
+  return { objetos, ...(masAntiguo ? { masAntiguo } : {}), degraded };
+}
+
+export async function cargarModulo(input: {
+  module: ModuleDefinition;
+  pageSlug?: string;
+  userId: string;
+  teamId: string;
+  /** Filtros pedidos por la query string, ya parseados (4.11). */
+  requestedFilters: Record<string, string | string[]>;
+  /**
+   * Personalizacion de esta persona para este modulo, si la hay (4.6).
+   *
+   * Se pasa como DATO en vez de leerla aqui, y es deliberado: no todos los caminos deben
+   * aplicarla. Una alerta se evalua sobre la definicion institucional —si no, ocultar un objeto
+   * apagaria en silencio la alerta que vigila su medida—, y el vocabulario de la consulta en
+   * lenguaje natural tampoco debe encogerse porque alguien escondiera un grafico.
+   */
+  personalization?: UserPersonalization | undefined;
+}): Promise<ModuloCargado | null> {
+  const { userId, teamId, requestedFilters } = input;
+
+  // La personalizacion se aplica ANTES de resolver la pagina: puede haber ocultado objetos, y
+  // lo que no esta en la vista no se lee del cache ni viaja al navegador.
+  const { module, isPersonalized } = applyPersonalization(input.module, input.personalization);
+
+  const page = findPage(module, input.pageSlug);
+  if (!page) return null;
+
+  // Comprobacion de ACCESO, distinta de la de ambito.
+  //
+  // El arbol de navegacion ya oculta lo no concedido, pero ocultar no es proteger: una URL
+  // escrita a mano llega igual aqui. La seccion 9 lo dice literalmente — la comprobacion tiene
+  // que estar en el backend, "no solo ocultamiento de UI".
+  //
+  // Sin esto, un modulo que existe en la organizacion general pero que el equipo NO tiene entre
+  // sus grantedNodes se renderizaria con el ambito por defecto del equipo, que es una fuga.
+  const team = await findTeam(teamId);
+  if (!team || !canTeamAccessModule(await getGeneralTree(), team, module.moduleId)) return null;
+
+  const resolucion = await scopeFor(userId, teamId, module.moduleId);
+  // Sin ambito resoluble, el modulo no existe para esta persona. Resultado vacio y explicito,
+  // nunca un error que revele que existe algo fuera de su alcance (4.11).
+  const scope: AccessScope = resolucion?.scope ?? { restrictions: [{ dimension: { table: '', field: '' }, allowedValues: [] }] };
+
+  const appliedFilters = intersectRequestedFilters(scope, requestedFilters);
+  const { objetos, masAntiguo, degraded } = await leerObjetos(page.items, scope, requestedFilters);
 
   return {
     module,
@@ -294,4 +313,55 @@ function campoExisteEnEsquema(schema: SchemaDescriptor, clave: string): boolean 
   return schema.tables.some(
     (t) => t.name === tabla && t.fields.some((f) => f.name === campo && !f.isMeasure),
   );
+}
+
+/**
+ * Vista previa de un BORRADOR, para el editor.
+ *
+ * Se separa de `cargarModulo` por una razon concreta: aquella comprueba que el EQUIPO tenga
+ * concedido el modulo en el arbol, y un borrador no esta en el arbol —todavia no se ha publicado
+ * ni concedido a nadie—. Con esa comprobacion, el editor no podria dibujar nunca lo que se esta
+ * construyendo.
+ *
+ * Lo que NO se relaja es el ambito. La autorizacion para ver un borrador es «es tuyo», y la
+ * comprueba `moduloVisiblePorSlug` antes de llegar aqui; el ambito de DATOS se sigue resolviendo
+ * y aplicando igual, con el mismo `leerObjetos` que usa la vista real. Si se saltara, crear un
+ * borrador seria la forma mas facil de ver datos fuera del alcance propio, y ninguna prueba de la
+ * vista normal lo detectaria.
+ *
+ * `scopeFor` se resuelve contra el modulo por su id aunque no este en el arbol: sin carpeta que
+ * lo contenga, lo que queda es el ambito general del equipo, que es el mas restrictivo aplicable.
+ */
+export async function vistaPreviaDelBorrador(input: {
+  module: ModuleDefinition;
+  pageSlug?: string;
+  userId: string;
+  teamId: string;
+}): Promise<{ objetos: ObjetoCargado[]; pageSlug: string } | null> {
+  const page = findPage(input.module, input.pageSlug);
+  if (!page) return null;
+
+  const resolucion = await scopeFor(input.userId, input.teamId, input.module.moduleId);
+  if (!resolucion) return null;
+
+  /*
+   * Un borrador NO esta en el arbol general, asi que `resolveEffectiveScope` devuelve su ambito
+   * centinela de «no permite nada»: una restriccion sobre una dimension vacia. Ese centinela es
+   * un MARCADOR, no un filtro — el lector no sabe filtrar por una columna que no existe y lanza—,
+   * y en la vista normal nunca llega tan lejos porque la comprobacion de acceso corta antes.
+   *
+   * Lo que corresponde aqui es la primera capa de la resolucion: el ambito general del equipo
+   * activo. No es una ampliacion —es el ambito propio del equipo de quien edita, el que se aplica
+   * a todo lo que ese equipo ve—, y publicar el modulo en cualquier carpeta solo puede
+   * restringirlo mas. Asi que la vista previa muestra COMO MUCHO lo que se vera publicado.
+   */
+  const general = resolucion.steps[0]?.result;
+  const scope: AccessScope = resolucion.moduleExistsInGeneralTree
+    ? resolucion.scope
+    : (general ?? resolucion.scope);
+
+  // Sin filtros: el editor construye la vista institucional, no una consulta concreta. Los
+  // filtros son de quien mira el modulo publicado, no de quien lo disena.
+  const { objetos } = await leerObjetos(page.items, scope, {});
+  return { objetos, pageSlug: page.slug };
 }

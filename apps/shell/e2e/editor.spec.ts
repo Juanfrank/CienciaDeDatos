@@ -97,7 +97,7 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
     await expect(page.getByTestId(`fila-${slug}`)).toBeVisible();
 
     await page.goto(`/editor/${slug}`);
-    await expect(page.getByTestId('modulo-vacio')).toBeVisible();
+    await expect(page.getByTestId('lienzo-vacio')).toBeVisible();
 
     // El catalogo ofrece objetos, no una caja donde escribir SQL. Comprobar que NO hay donde
     // escribir una consulta es la mitad del criterio de 4.2 que importa.
@@ -106,7 +106,12 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
     await expect(page.locator('textarea')).toHaveCount(0);
 
     await page.getByTestId('anadir-tarjeta-kpi').click();
-    await expect(page.getByTestId('objetos-del-modulo').locator('li')).toHaveCount(1);
+
+    // El objeto aparece EN EL LIENZO, dibujado, y queda elegido: el panel salta a «Datos», que es
+    // lo que se va a configurar a continuacion.
+    await expect(page.locator('[data-testid^="bloque-obj-"]')).toHaveCount(1);
+    await expect(page.getByTestId('lienzo-vacio')).toHaveCount(0);
+    await expect(page.getByTestId('pestana-datos')).toHaveAttribute('aria-selected', 'true');
   });
 
   test('los complementos no se pueden colocar sueltos en la rejilla', async ({ page }) => {
@@ -137,11 +142,12 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
 
     await page.goto(`/editor/${slug}`);
 
-    const objeto = page.getByTestId('objeto-kpi');
-    await expect(objeto).toHaveAttribute('data-roto', 'si');
+    // El bloque se dibuja MARCADO ROTO en el lienzo, con su problema, y el modulo se sigue
+    // editando alrededor. Es literalmente lo que pide 4.2: no fallar en silencio.
+    const bloque = page.getByTestId('bloque-kpi');
+    await expect(bloque).toBeVisible();
+    await expect(bloque.getByTestId('objeto-roto')).toBeVisible();
     await expect(page.getByTestId('problemas-kpi')).toContainText('MedidaRetirada');
-    // No falla en silencio ni deja la pantalla en blanco: el objeto sigue ahi, marcado.
-    await expect(objeto).toBeVisible();
     await expect(page.getByTestId('editor-bloqueos')).toBeVisible();
   });
 });

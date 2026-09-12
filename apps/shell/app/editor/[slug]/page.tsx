@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { actorDe, bloqueosDePublicacion, moduloVisiblePorSlug } from '../../../src/server/cicloDeVida';
-import { diagnosticarDefinicion } from '../../../src/server/datos';
+import { diagnosticarDefinicion, vistaPreviaDelBorrador } from '../../../src/server/datos';
+import { serializarObjeto } from '../../../src/server/serializar';
 import { paletaDelEditor } from '../../../src/server/editor';
 import { exigirSesionDePagina } from '../../../src/server/sesion';
 import { EditorDeModulo } from '../../../src/components/editor/EditorDeModulo';
@@ -26,9 +27,18 @@ export default async function PaginaEditorDeModulo({
   const modulo = await moduloVisiblePorSlug(slug, await actorDe(sesion));
   if (!modulo) notFound();
 
+  // La vista previa se calcula en el servidor, como el resto: el primer pintado del lienzo ya
+  // lleva los datos, sin un salto entre «esqueleto» y «modulo».
+  const previa = await vistaPreviaDelBorrador({
+    module: modulo,
+    userId: sesion.userId,
+    teamId: sesion.activeTeamId,
+  });
+
   return (
     <EditorDeModulo
       inicial={modulo}
+      objetosIniciales={(previa?.objetos ?? []).map(serializarObjeto)}
       diagnosticos={await diagnosticarDefinicion(modulo)}
       bloqueos={await bloqueosDePublicacion(modulo)}
       paleta={await paletaDelEditor()}

@@ -21,6 +21,17 @@ const guardado = async (page: Pagina) => {
   await expect(page.locator('.editor')).toHaveAttribute('data-guardando', 'no');
 };
 
+/**
+ * El id del objeto recien colocado, leido del BLOQUE del lienzo.
+ *
+ * El editor genera el id, asi que la prueba lo descubre de donde se ve: el lienzo. Antes se leia
+ * de la ficha de una lista que ya no existe.
+ */
+const idDelPrimerBloque = async (page: Pagina): Promise<string> => {
+  const testid = await page.locator('[data-testid^="bloque-obj-"]').first().getAttribute('data-testid');
+  return (testid ?? '').replace('bloque-', '');
+};
+
 const crearModulo = async (page: Pagina, slug: string) => {
   await page.goto('/editor');
   await page.getByTestId('nuevo-modulo-nombre').fill(slug);
@@ -37,8 +48,8 @@ test.describe('el editor configura como se ve un objeto', () => {
 
     await page.getByTestId('anadir-tarjeta-kpi').click();
     await guardado(page);
-    const item = page.locator('[data-testid^="objeto-obj-"]').first();
-    const id = (await item.getAttribute('data-testid'))!.replace('objeto-', '');
+    const id = await idDelPrimerBloque(page);
+    await page.getByTestId('pestana-formato').click();
 
     await page.getByTestId(`pres-${id}-icono`).selectOption('balanza');
     await guardado(page);
@@ -59,6 +70,8 @@ test.describe('el editor configura como se ve un objeto', () => {
 
     // Se recarga: lo elegido tiene que venir del servidor, no del estado del componente.
     await page.reload();
+    await page.getByTestId(`elegir-${id}`).click();
+    await page.getByTestId('pestana-formato').click();
     await expect(page.getByTestId(`pres-${id}-icono`)).toHaveValue('balanza');
     await expect(page.getByTestId(`pres-${id}-acento`)).toHaveValue('terciario');
     await expect(page.getByTestId(`pres-${id}-resaltado`)).toBeChecked();
@@ -97,10 +110,8 @@ test.describe('el editor configura como se ve un objeto', () => {
 
     await page.getByTestId('anadir-tabla').click();
     await guardado(page);
-    const id = (await page
-      .locator('[data-testid^="objeto-obj-"]')
-      .first()
-      .getAttribute('data-testid'))!.replace('objeto-', '');
+    const id = await idDelPrimerBloque(page);
+    await page.getByTestId('pestana-formato').click();
 
     await expect(page.getByTestId(`pres-${id}-icono`)).toBeVisible();
     await expect(page.getByTestId(`pres-${id}-decimales`)).toBeVisible();
@@ -121,11 +132,8 @@ test.describe('el editor configura como se ve un objeto', () => {
     await crearModulo(page, 'pers-cerrado');
     await page.getByTestId('anadir-tarjeta-kpi').click();
     await guardado(page);
-
-    const id = (await page
-      .locator('[data-testid^="objeto-obj-"]')
-      .first()
-      .getAttribute('data-testid'))!.replace('objeto-', '');
+    const id = await idDelPrimerBloque(page);
+    await page.getByTestId('pestana-formato').click();
 
     for (const control of ['icono', 'acento']) {
       const nombre = await page
@@ -141,15 +149,14 @@ test.describe('el editor configura como se ve un objeto', () => {
 
     await page.getByTestId('anadir-panel-de-filtros').click();
     await guardado(page);
-    const id = (await page
-      .locator('[data-testid^="objeto-obj-"]')
-      .first()
-      .getAttribute('data-testid'))!.replace('objeto-', '');
+    const id = await idDelPrimerBloque(page);
 
     // Se anade una segunda dimension: tiene que aparecer su fila de selector sola.
     await page.getByTestId(`dim-${id}-DimTribunal.Materia`).click();
     await guardado(page);
     await expect(page.getByTestId(`dim-${id}-DimTribunal.Materia`)).toBeChecked();
+
+    await page.getByTestId('pestana-formato').click();
     await expect(page.getByTestId(`selectores-${id}-DimTribunal.Materia`)).toBeVisible();
 
     await page.getByTestId(`selectores-${id}-DimTribunal.Materia`).selectOption('desplegable');
@@ -157,9 +164,12 @@ test.describe('el editor configura como se ve un objeto', () => {
     await expect(page.getByTestId('editor-sin-bloqueos')).toBeVisible();
 
     // El borrador no se abre en /m/ —no esta publicado ni concedido—, asi que lo que se
-    // comprueba aqui es que la eleccion sobrevive al servidor. Que el desplegable se DIBUJE lo
+    // comprueba aqui es que la eleccion sobrevive al servidor.
+    // Tras recargar no hay nada elegido, asi que hay que volver a elegir el bloque. Que el desplegable se DIBUJE lo
     // cubre `filtros.spec.ts` sobre el panel del modulo publicado.
     await page.reload();
+    await page.getByTestId(`elegir-${id}`).click();
+    await page.getByTestId('pestana-formato').click();
     await expect(page.getByTestId(`selectores-${id}-DimTribunal.Materia`)).toHaveValue(
       'desplegable',
     );
@@ -177,11 +187,8 @@ test.describe('el editor configura como se ve un objeto', () => {
     await crearModulo(page, 'pers-fecha');
     await page.getByTestId('anadir-panel-de-filtros').click();
     await guardado(page);
-
-    const id = (await page
-      .locator('[data-testid^="objeto-obj-"]')
-      .first()
-      .getAttribute('data-testid'))!.replace('objeto-', '');
+    const id = await idDelPrimerBloque(page);
+    await page.getByTestId('pestana-formato').click();
 
     const opcion = page
       .getByTestId(`selectores-${id}-DimTribunal.Distrito`)

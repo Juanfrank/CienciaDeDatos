@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import type { ModulePage } from '@app/module-model';
+import type { ModuleDefinition, ModulePage } from '@app/module-model';
 import {
   actorDe,
   bloqueosDePublicacion,
@@ -7,7 +7,8 @@ import {
   guardarBorrador,
   moduloVisiblePorSlug,
 } from '../../../../../src/server/cicloDeVida';
-import { diagnosticarDefinicion } from '../../../../../src/server/datos';
+import { diagnosticarDefinicion, vistaPreviaDelBorrador } from '../../../../../src/server/datos';
+import { serializarObjeto } from '../../../../../src/server/serializar';
 import { respuestaDeError, sinSesion } from '../../../../../src/server/respuestas';
 import { obtenerSesion } from '../../../../../src/server/sesion';
 
@@ -36,6 +37,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
     modulo,
     diagnosticos: await diagnosticarDefinicion(modulo),
     bloqueos: await bloqueosDePublicacion(modulo),
+    objetos: await previsualizar(modulo, sesion.userId, sesion.activeTeamId),
   });
 }
 
@@ -67,12 +69,23 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
       },
     });
 
-    // Se devuelven los diagnosticos con el guardado: el editor tiene que marcar lo roto en el
-    // momento, no en la siguiente carga (4.2 pide validar el esquema en CADA carga del editor).
+    /*
+     * Con el guardado vuelven los diagnosticos Y LOS DATOS.
+     *
+     * Los diagnosticos, porque 4.2 pide validar el esquema en cada carga del editor y lo roto
+     * tiene que marcarse en el momento, no en la siguiente. Los datos, porque el editor dibuja el
+     * modulo de verdad: mapear una medida y ver aparecer la cifra es la diferencia entre editar
+     * una configuracion y editar lo que se va a publicar.
+     *
+     * Van en la MISMA respuesta que el guardado y no en una peticion aparte: son el resultado de
+     * este cambio, y pedirlos despues abre una ventana en la que lo dibujado no corresponde a lo
+     * guardado.
+     */
     return NextResponse.json({
       modulo,
       diagnosticos: await diagnosticarDefinicion(modulo),
       bloqueos: await bloqueosDePublicacion(modulo),
+      objetos: await previsualizar(modulo, sesion.userId, sesion.activeTeamId),
     });
   } catch (error) {
     return respuestaDeError(error);
@@ -94,4 +107,15 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   } catch (error) {
     return respuestaDeError(error);
   }
+}
+
+/**
+ * Los objetos del borrador, ya leidos y recortados por el ambito de quien edita.
+ *
+ * Devuelve una lista vacia si el modulo no tiene paginas: una vista previa vacia es un estado
+ * legitimo —un borrador recien creado no tiene nada— y no un error que deba tumbar el guardado.
+ */
+async function previsualizar(modulo: ModuleDefinition, userId: string, teamId: string) {
+  const previa = await vistaPreviaDelBorrador({ module: modulo, userId, teamId });
+  return (previa?.objetos ?? []).map(serializarObjeto);
 }

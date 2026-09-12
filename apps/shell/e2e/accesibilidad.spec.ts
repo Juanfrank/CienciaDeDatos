@@ -145,7 +145,10 @@ test.describe('editor de modulos (4.2)', () => {
 
     await page.goto(`/editor/${slug}`);
     await page.getByTestId('anadir-barras').click();
-    await expect(page.getByTestId('objetos-del-modulo').locator('li')).toHaveCount(1);
+    // Con el objeto YA DIBUJADO en el lienzo y su panel abierto: es donde estarian los problemas
+    // si los hubiera —un bloque que anida controles, unas pestanas que no se anuncian como tales,
+    // un `<select>` sin nombre—.
+    await expect(page.locator('[data-testid^="bloque-obj-"]')).toHaveCount(1);
     expect(await infracciones(page)).toEqual([]);
   });
 

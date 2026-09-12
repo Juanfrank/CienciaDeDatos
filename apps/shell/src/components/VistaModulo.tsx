@@ -11,6 +11,7 @@ import { Preguntar } from './Preguntar';
 import { Marcadores } from './Marcadores';
 import { PanelDeFiltros } from './PanelDeFiltros';
 import { MiVista } from './MiVista';
+import { ObjetoDeModulo } from './ObjetoDeModulo';
 import { Rejilla } from './Rejilla';
 import { Segmentador } from './Segmentador';
 import {
@@ -155,64 +156,9 @@ export function VistaModulo({
         {(id) => {
           const objeto = porId.get(id);
           if (!objeto) return null;
-          return <Objeto objeto={objeto} onFiltrar={alternar} />;
+          return <ObjetoDeModulo objeto={objeto} onFiltrar={alternar} />;
         }}
       </Rejilla>
     </>
   );
-}
-
-function Objeto({
-  objeto,
-  onFiltrar,
-}: {
-  objeto: ObjetoSerializado;
-  onFiltrar: (campo: string, valor: string) => void;
-}) {
-  const titulo = objeto.titulo;
-
-  if (objeto.unresolvedObject || objeto.problems.length > 0) {
-    return (
-      <ObjetoRoto
-        titulo={titulo}
-        problems={objeto.problems}
-        {...(objeto.unresolvedObject ? { unresolvedObject: objeto.unresolvedObject } : {})}
-      />
-    );
-  }
-
-  if (!objeto.result) return <ObjetoGenerandose titulo={titulo} />;
-
-  const result = objeto.result as QueryResult;
-  const props = { titulo, result, instance: objeto.instance, onFiltrar };
-
-  switch (objeto.instance.objectId) {
-    case 'tarjeta-kpi':
-      return <TarjetaKpi {...props} />;
-    case 'barras':
-      return <Barras {...props} />;
-    case 'lineas':
-      return <Lineas {...props} />;
-    case 'tabla':
-      return <Tabla {...props} />;
-    case 'matriz':
-      return <Matriz {...props} />;
-    case 'panel-de-filtros':
-      return <PanelDeFiltros titulo={titulo} instance={objeto.instance} result={result} />;
-    case 'segmentador': {
-      const dimension = objeto.instance.binding.dimensions[0];
-      if (!dimension) return <ObjetoRoto titulo={titulo} problems={[]} />;
-      return (
-        <Segmentador
-          titulo={titulo}
-          campo={fieldKey(dimension)}
-          opciones={toSlicerOptions(result, dimension)}
-          instance={objeto.instance}
-          result={result}
-        />
-      );
-    }
-    default:
-      return <ObjetoNoDisponible titulo={titulo} objectId={objeto.instance.objectId} />;
-  }
 }

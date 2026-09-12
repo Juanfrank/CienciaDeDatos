@@ -1414,6 +1414,239 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 .editor__sin-acciones { color: var(--md-sys-color-outline); }
 .editor__bloqueos,
 .editor__problemas { margin: var(--space-xs) 0 0; padding-left: var(--space-lg); }
+/* ------------------------------------------------------------------ *
+ * Editor: lienzo y panel                                              *
+ * ------------------------------------------------------------------ */
+
+/*
+ * Lienzo a la izquierda, panel fijo a la derecha.
+ *
+ * El panel no se encoge —`flex-shrink: 0`— porque es donde esta todo lo que se configura: si
+ * compitiera por el ancho con el lienzo, los controles se estrecharian justo cuando el modulo
+ * crece, que es cuando mas falta hacen.
+ */
+.editor__banco {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.lienzo {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-md);
+  background: var(--md-sys-color-surface-container-low);
+  border-radius: var(--md-sys-shape-corner-medium);
+  min-height: 420px;
+}
+
+.lienzo__rejilla {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--rejilla-columnas), minmax(0, 1fr));
+  grid-auto-rows: minmax(56px, auto);
+  gap: var(--space-md);
+  /*
+   * `start`, como la rejilla del modulo publicado.
+   *
+   * Con `stretch` una tarjeta KPI de tres filas se estiraba hasta igualar al grafico de al lado y
+   * no se parecia a lo que se va a publicar — que es justo lo que el lienzo promete. El alto
+   * reservado se dice de otra forma: en la insignia del bloque y en el panel.
+   */
+  align-items: start;
+}
+
+/*
+ * Las guias de columna.
+ *
+ * Una capa absoluta sobre TODA la caja de la rejilla, con las mismas doce columnas y el mismo
+ * `gap`. La primera version usaba `grid-area: 1 / 1 / -1 / -1` con `subgrid`, y solo cubria las
+ * filas que ya tenian contenido: en cuanto habia un objeto, las guias quedaban justo debajo de el
+ * y no se veia ninguna en el espacio libre — que es exactamente donde hacen falta, porque es
+ * donde cabe lo siguiente.
+ *
+ * Un degradado de fondo habria sido mas corto y no cuadra: no sabe nada del `gap`.
+ */
+.lienzo__guias {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--rejilla-columnas), minmax(0, 1fr));
+  gap: var(--space-md);
+  pointer-events: none;
+  z-index: 0;
+}
+.lienzo__guia {
+  border-left: 1px dashed var(--md-sys-color-outline-variant);
+  border-right: 1px dashed var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+}
+
+.lienzo__bloque {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  border: 2px solid transparent;
+  border-radius: var(--md-sys-shape-corner-medium);
+}
+.lienzo__bloque:hover { border-color: var(--md-sys-color-outline); }
+.lienzo__bloque[data-elegido='si'] {
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-sys-color-primary) 18%, transparent);
+}
+
+/*
+ * El boton de seleccion: transparente y del tamano del bloque.
+ *
+ * Va ENCIMA del contenido, que esta `inert`, asi que recoge la pulsacion sin que el objeto de
+ * debajo tenga que dejar de ser lo que es. El foco se dibuja sobre el bloque entero porque es lo
+ * que se selecciona, no un rectangulo suelto en una esquina.
+ */
+.lienzo__seleccionar {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.lienzo__seleccionar:focus-visible {
+  outline: 3px solid var(--md-sys-color-secondary);
+  outline-offset: 2px;
+}
+
+/* El tamano en celdas, visible sobre el bloque elegido. Lo mismo que dice el panel con palabras. */
+.lienzo__medida {
+  position: absolute;
+  top: -10px;
+  left: var(--space-sm);
+  z-index: 2;
+  padding: 0 6px;
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.lienzo__bloque[data-elegido='si'] .lienzo__medida,
+.lienzo__bloque:hover .lienzo__medida { opacity: 1; }
+
+.lienzo__contenido { height: 100%; }
+.lienzo__contenido > .objeto { height: 100%; }
+.lienzo__vacio {
+  margin: 0;
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* El panel: pestanas arriba, cuerpo desplazable debajo. */
+.panel-editor {
+  width: 340px;
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  box-shadow: var(--md-sys-elevation-1);
+  overflow: hidden;
+}
+.panel-editor__pestanas {
+  display: flex;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+/*
+ * Pestana de MD3: indicador abajo, no un fondo.
+ *
+ * Un fondo relleno la confundiria con un boton pulsado, y aqui hay botones pulsables justo
+ * debajo. El indicador de 3 px es lo que MD3 usa para «esta es la vista actual».
+ */
+.panel-editor__pestana {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-sm) var(--space-xs);
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  cursor: pointer;
+}
+.panel-editor__pestana[aria-selected='true'] {
+  color: var(--md-sys-color-primary);
+  border-bottom-color: var(--md-sys-color-primary);
+}
+.panel-editor__pestana:disabled {
+  opacity: var(--md-sys-state-disabled-opacity);
+  cursor: not-allowed;
+}
+.panel-editor__cuerpo {
+  padding: var(--space-md);
+  overflow-y: auto;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.panel-editor__nota { font-size: var(--md-sys-typescale-body-small-size); }
+.panel-editor__pasos { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.panel-editor__pasos .md-chip { font-size: var(--md-sys-typescale-label-medium-size); padding: 0 10px; }
+
+/* La tienda: dos columnas de fichas con icono, como el panel de visualizaciones de Power BI. */
+.tienda {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-sm);
+}
+.tienda__objeto {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--space-sm);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tienda__objeto:hover:not(:disabled) {
+  border-color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+.tienda__objeto:disabled { opacity: var(--md-sys-state-disabled-opacity); cursor: not-allowed; }
+.tienda__nombre {
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+}
+.tienda__contrato {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.tienda__objeto:hover:not(:disabled) .tienda__contrato { color: inherit; }
+
+.editor__cabecera-acciones { display: flex; align-items: center; gap: var(--space-md); }
+
 .editor__paleta { padding: var(--space-md); margin-bottom: var(--space-md); }
 
 /*
@@ -1856,6 +2089,15 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   .admin__nav { width: 100%; }
 
   .editor__crear { flex-direction: column; align-items: stretch; }
+  /*
+   * En movil el panel va DEBAJO, no al lado.
+   *
+   * 340 px de panel sobre una pantalla de 360 no dejan lienzo. Apilados, el modulo se ve entero y
+   * el panel queda a un desplazamiento de distancia, que es lo que se puede ofrecer a ese ancho.
+   */
+  .editor__banco { flex-direction: column; }
+  .panel-editor { width: 100%; }
+  .panel-editor__cuerpo { max-height: none; }
   .emergente { max-width: 96vw; }
 }
 
