@@ -5,7 +5,9 @@ import type { Agregacion } from '@app/data-contracts';
 import { GRID_COLUMNS, type GridItem } from '@app/module-model';
 import {
   AGREGACION_POR_DEFECTO,
+  agregacionesPosibles,
   cabeEnRanura,
+  fieldKey,
   conCampoEnRanura,
   ranurasDe,
   ranurasPorDefecto,
@@ -268,6 +270,20 @@ function Datos({
     dataset?.agregaciones[campo] ??
     AGREGACION_POR_DEFECTO;
 
+  /*
+   * Los operadores que el desplegable puede ofrecer, de la MISMA regla que valida al guardar.
+   *
+   * `colapsa` se calcula igual aqui que en el servidor: el objeto muestra menos dimensiones de
+   * las que trae el dataset. Se compara por conjunto y no por cantidad, porque tres dimensiones
+   * que no sean las tres del dataset tambien colapsan.
+   */
+  const posibles = agregacionesPosibles({
+    colapsa: (dataset?.dimensiones ?? []).some(
+      (d) => !item.instance.binding.dimensions.map(fieldKey).includes(d),
+    ),
+    grano: dataset?.grain ?? 'atomico',
+  });
+
   const cambiarAgregacion = (campo: string, agregacion: Agregacion) =>
     cambiarInstancia((i) => {
       const resto = { ...(i.binding.agregaciones ?? {}) };
@@ -359,6 +375,7 @@ function Datos({
               onQuitar={quitar}
               agregacionDe={agregacionDe}
               onAgregacion={cambiarAgregacion}
+              posibles={posibles}
             />
           ))}
         </Seccion>
@@ -389,6 +406,7 @@ function RanuraDeEdicion({
   onQuitar,
   agregacionDe,
   onAgregacion,
+  posibles,
 }: {
   ranura: RanuraDeCampos;
   /**
@@ -407,6 +425,7 @@ function RanuraDeEdicion({
   onQuitar: (ranuraId: string, campo: string) => void;
   agregacionDe?: (campo: string) => Agregacion;
   onAgregacion?: (campo: string, agregacion: Agregacion) => void;
+  posibles?: Agregacion[];
 }) {
   return (
     <Pozo
@@ -423,6 +442,7 @@ function RanuraDeEdicion({
       onQuitar={(campo) => onQuitar(ranura.id, campo)}
       {...(agregacionDe ? { agregacionDe } : {})}
       {...(onAgregacion ? { onAgregacion } : {})}
+      {...(posibles ? { posibles } : {})}
     />
   );
 }

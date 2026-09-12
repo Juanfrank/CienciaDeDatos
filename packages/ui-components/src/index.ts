@@ -74,10 +74,12 @@ export {
   acumular,
   agregacionesDe,
   agregacionesPara,
+  agregacionesPosibles,
   cerrar,
   nuevoAcumulador,
   validarAgregacion,
   type Acumulador,
+  type ContextoDeAgregacion,
   type ProblemaDeAgregacion,
 } from './registry/agregacion';
 export { desgloseDe, proyectarObjeto } from './registry/proyeccion';

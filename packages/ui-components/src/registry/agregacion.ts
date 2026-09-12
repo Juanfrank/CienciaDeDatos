@@ -1,4 +1,4 @@
-import { type Agregacion, type GranoDeDataset, esAditiva } from '@app/data-contracts';
+import { AGREGACIONES, type Agregacion, type GranoDeDataset, esAditiva } from '@app/data-contracts';
 
 /**
  * Como se resume una columna. UN solo acumulador para toda la aplicacion.
@@ -181,43 +181,84 @@ export interface ProblemaDeAgregacion {
  * modulo se haya publicado: lo que era correcto al guardarlo deja de serlo sin que nadie toque
  * el modulo.
  */
-export function validarAgregacion(input: {
-  measures: string[];
-  agregaciones: Agregacion[];
+export interface ContextoDeAgregacion {
   /** true si el objeto muestra menos dimensiones de las que trae el dataset. */
   colapsa: boolean;
   grano: GranoDeDataset;
-}): ProblemaDeAgregacion[] {
-  if (!input.colapsa) return [];
+}
 
+/**
+ * Que operadores se pueden aplicar AQUI. Es la unica regla, y de ella sale todo lo demas.
+ *
+ * Un objeto COLAPSA cuando muestra menos dimensiones de las que trae el dataset: varias filas de
+ * origen caen en el mismo punto del grafico, en la misma celda o —en una tarjeta— todas en una.
+ * Solo entonces importa el operador, y el grano decide cual se puede usar:
+ *
+ * - Sin colapso, cualquiera: el objeto dibuja una fila por fila y no combina nada.
+ * - Sobre grano ATOMICO, cualquiera salvo `ninguna`. Cada fila es un hecho, asi que no hay
+ *   ninguna agregacion previa que arruinar; lo unico imposible es no agregar, porque «esto ya
+ *   viene calculado de la fuente» y el objeto necesita combinar varias filas.
+ * - Sobre grano PREAGREGADO, solo las aditivas. Un promedio de promedios coincide con el real
+ *   unicamente si todos los grupos pesan igual, y un recuento distinto no se combina entre grupos
+ *   de ninguna forma.
+ *
+ * La lista que ofrece el editor y la validacion que rechaza al guardar salen las dos de aqui. Con
+ * dos implementaciones de la misma regla, el desplegable acabaria ofreciendo algo que la
+ * validacion rechaza —o peor, al reves.
+ */
+export function agregacionesPosibles(ctx: ContextoDeAgregacion): Agregacion[] {
+  if (!ctx.colapsa) return [...AGREGACIONES];
+  if (ctx.grano === 'atomico') return AGREGACIONES.filter((a) => a !== 'ninguna');
+  return AGREGACIONES.filter(esAditiva);
+}
+
+/**
+ * Por que NO se puede aplicar este operador aqui. `null` si si se puede.
+ *
+ * El editor ya no ofrece los imposibles, asi que esto solo se dispara en el caso que el
+ * desplegable no cubre: un modulo guardado cuando la combinacion era valida y que dejo de serlo
+ * despues —el grano de un dataset se declara en el registro y puede cambiar con el modulo ya
+ * publicado—. Es el caso de 4.2, el campo que ya no existe, aplicado al operador en vez de al
+ * campo, y la respuesta es la misma: marcarlo, no dibujar un numero plausible.
+ */
+function porQueNoSePuede(
+  medida: string,
+  agregacion: Agregacion,
+  ctx: ContextoDeAgregacion,
+): string | null {
+  if (agregacionesPosibles(ctx).includes(agregacion)) return null;
+
+  if (agregacion === 'ninguna') {
+    return (
+      `'${medida}' viene ya calculada de la fuente, asi que no se puede volver a resumir. ` +
+      `Este objeto agrupa varias filas en una, y no hay forma de combinar un valor que la ` +
+      `fuente dio por cerrado: anada las dimensiones que faltan, o elija otra medida.`
+    );
+  }
+
+  return (
+    `'${medida}' se resume con '${agregacion}', y el dataset viene ya agrupado. Sobre filas ` +
+    `agrupadas solo se pueden volver a aplicar suma, minimo y maximo: un ${agregacion} de ` +
+    `valores que ya son un ${agregacion} solo coincide con el real si todos los grupos pesan ` +
+    `igual. Use un dataset de grano atomico, o muestre el objeto al grano del dataset.`
+  );
+}
+
+/**
+ * Los operadores de un mapeo que no se pueden aplicar.
+ *
+ * Devuelve problemas en vez de lanzar, como `validateBinding`: el editor tiene que poder dibujar
+ * el objeto marcado y decir que pasa, no quedarse en blanco (4.2). Se comprueba en los dos
+ * caminos —al guardar y al leer— por el motivo que explica `porQueNoSePuede`.
+ */
+export function validarAgregacion(
+  input: ContextoDeAgregacion & { measures: string[]; agregaciones: Agregacion[] },
+): ProblemaDeAgregacion[] {
   const problemas: ProblemaDeAgregacion[] = [];
   input.measures.forEach((medida, i) => {
     const agregacion = input.agregaciones[i] ?? AGREGACION_POR_DEFECTO;
-
-    if (agregacion === 'ninguna') {
-      problemas.push({
-        medida,
-        agregacion,
-        problema:
-          `'${medida}' viene ya calculada de la fuente, asi que no se puede volver a resumir. ` +
-          `Este objeto agrupa varias filas en una, y no hay forma de combinar un valor que la ` +
-          `fuente dio por cerrado: anada las dimensiones que faltan, o elija otra medida.`,
-      });
-      return;
-    }
-
-    if (input.grano === 'preagregado' && !esAditiva(agregacion)) {
-      problemas.push({
-        medida,
-        agregacion,
-        problema:
-          `'${medida}' se resume con '${agregacion}', y el dataset viene ya agrupado. Sobre filas ` +
-          `agrupadas solo se pueden volver a aplicar suma, minimo y maximo: un ${agregacion} de ` +
-          `valores que ya son un ${agregacion} solo coincide con el real si todos los grupos pesan ` +
-          `igual. Use un dataset de grano atomico, o muestre el objeto al grano del dataset.`,
-      });
-    }
+    const problema = porQueNoSePuede(medida, agregacion, input);
+    if (problema) problemas.push({ medida, agregacion, problema });
   });
-
   return problemas;
 }

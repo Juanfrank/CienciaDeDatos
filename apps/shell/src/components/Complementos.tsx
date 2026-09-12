@@ -142,7 +142,7 @@ export function TablaDeDatos({
 
       <dialog
         ref={dialogo}
-        className="emergente"
+        className="emergente emergente--ancho"
         data-testid={`tabla-datos-${titulo}`}
         aria-label={`Datos de origen de ${titulo}`}
         // Escape y el clic en el fondo cierran el dialogo nativo por su cuenta; sin esto el

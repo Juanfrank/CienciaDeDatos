@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import type { QueryResult } from '@app/data-contracts';
-import { agregacionesDe, agregacionesPara, validarAgregacion } from './agregacion';
+import { AGREGACIONES, type QueryResult } from '@app/data-contracts';
+import {
+  agregacionesDe,
+  agregacionesPara,
+  agregacionesPosibles,
+  validarAgregacion,
+} from './agregacion';
 import { aggregateBy, toKpi, toMatrix } from './viewModel';
 
 /**
@@ -186,5 +191,49 @@ describe('validarAgregacion: lo que no se puede guardar', () => {
         grano: 'preagregado',
       }),
     ).toEqual([]);
+  });
+});
+
+describe('agregacionesPosibles: lo que el editor puede OFRECER', () => {
+  /*
+   * La lista del desplegable y la validacion que rechaza al guardar salen de la misma funcion.
+   * Con dos implementaciones, el editor acabaria ofreciendo algo que la validacion rechaza — o
+   * peor, al reves: prohibiendo en el desplegable algo que si se puede.
+   */
+  it('sobre grano preagregado solo ofrece las aditivas', () => {
+    expect(agregacionesPosibles({ colapsa: true, grano: 'preagregado' })).toEqual([
+      'suma',
+      'minimo',
+      'maximo',
+    ]);
+  });
+
+  it('sobre grano atomico ofrece todas menos «sin resumir»', () => {
+    const posibles = agregacionesPosibles({ colapsa: true, grano: 'atomico' });
+    expect(posibles).toContain('promedio');
+    expect(posibles).toContain('recuento-distinto');
+    expect(posibles).not.toContain('ninguna');
+  });
+
+  it('sin colapso las ofrece todas: el objeto no combina nada', () => {
+    expect(agregacionesPosibles({ colapsa: false, grano: 'preagregado' })).toHaveLength(7);
+  });
+
+  it('lo que NO se ofrece es exactamente lo que la validacion rechaza', () => {
+    // La invariante que impide que las dos reglas se separen.
+    for (const grano of ['atomico', 'preagregado'] as const) {
+      for (const colapsa of [true, false]) {
+        const posibles = agregacionesPosibles({ colapsa, grano });
+        for (const agregacion of AGREGACIONES) {
+          const problemas = validarAgregacion({
+            measures: ['m'],
+            agregaciones: [agregacion],
+            colapsa,
+            grano,
+          });
+          expect(problemas.length === 0).toBe(posibles.includes(agregacion));
+        }
+      }
+    }
   });
 });

@@ -456,9 +456,19 @@ code {
 }
 .campo { max-width: 480px; }
 
+/*
+ * El rotulo de un campo: pequeño y en el rol variante, como manda MD3.
+ *
+ * `.formulario__campo > span` faltaba, y el marcado real es justo ese: `<label
+ * class="formulario__campo"><span>Icono</span><select>`. La regla decia `.formulario__campo label`
+ * —un `label` DENTRO del campo—, que no existe en ninguna parte, asi que esos rotulos nunca
+ * recibieron su estilo y caian en el tamaño heredado, `body-large`. Se notaba sobre todo en el
+ * panel del editor, donde cada rotulo pesaba visualmente mas que el control que rotula.
+ */
 .md-campo > span,
 .md-campo > label,
 .campo > span,
+.formulario__campo > span,
 .formulario__campo label,
 .selector-equipo__etiqueta {
   font-size: var(--md-sys-typescale-body-small-size);
@@ -1766,6 +1776,62 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   flex-direction: column;
   gap: var(--space-md);
 }
+/*
+ * ---- Densidad del panel ----
+ *
+ * El panel es una superficie de HERRAMIENTA, no un formulario que se rellena una vez.
+ *
+ * Heredaba las medidas de los formularios de la aplicacion —48 px de alto de control, `--space-md`
+ * entre todo— y en 340 px de ancho eso significa que configurar una tarjeta no cabe en la
+ * pantalla: cuatro campos y hay que desplazarse. Material Design lo contempla: la escala de
+ * densidad existe justo para superficies asi, donde se mira mucho y se escribe poco.
+ *
+ * Lo que se aprieta es el ESPACIO, no el texto: los tamanos tipograficos no bajan, asi que no se
+ * pierde legibilidad ni contraste. Y se aprieta solo aqui dentro; el resto de la aplicacion
+ * conserva sus 48 px.
+ */
+.panel-editor__cuerpo { gap: var(--space-sm); }
+
+.panel-editor input[type='text'],
+.panel-editor input[type='search'],
+.panel-editor input:not([type]),
+.panel-editor select,
+.panel-editor textarea {
+  min-height: 36px;
+  padding: 0 10px;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+}
+.panel-editor textarea { padding: 6px 10px; min-height: 64px; }
+
+.panel-editor .formulario__campo { gap: 2px; margin-bottom: var(--space-sm); }
+/* El ultimo campo de una seccion no necesita margen: el `padding` de la seccion ya lo pone. */
+.panel-editor .formulario__campo:last-child { margin-bottom: 0; }
+
+.panel-editor .seccion__titulo { padding: var(--space-xs) var(--space-sm); }
+.panel-editor .seccion__cuerpo {
+  padding: 0 var(--space-sm) var(--space-sm);
+  gap: var(--space-sm);
+}
+.panel-editor .pozo__etiqueta,
+.panel-editor .pozo__ayuda { margin-bottom: 2px; }
+
+/*
+ * Con el dedo, no.
+ *
+ * 36 px es comodo con raton y demasiado poco para tocar. En un puntero grueso el panel recupera
+ * las medidas de siempre — que es justo el ancho en el que pasa a ocupar la pantalla entera y ya
+ * no hay motivo para apretarlo. 4.9 no admite que la densidad se pague con accesibilidad.
+ */
+@media (pointer: coarse) {
+  .panel-editor input[type='text'],
+  .panel-editor input[type='search'],
+  .panel-editor input:not([type]),
+  .panel-editor select,
+  .panel-editor textarea { min-height: 48px; padding: 0 16px; }
+  .panel-editor .seccion__titulo { padding: var(--space-sm) var(--space-md); }
+}
+
 .panel-editor__nota { font-size: var(--md-sys-typescale-body-small-size); }
 .panel-editor__adjuntos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-sm); }
 
@@ -1886,19 +1952,51 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * no el operador — un chiclet que dice «DiasResolucion» sin decir como se resume no informa de lo
  * que aqui importa.
  */
-.chiclet__agregacion { display: inline-flex; flex-shrink: 0; }
-.chiclet__agregacion select {
-  max-width: 9rem;
-  padding: 2px var(--space-xs);
-  font: inherit;
-  font-size: var(--md-sys-typescale-label-small-size, 0.6875rem);
-  color: var(--md-sys-color-on-surface-variant);
-  background: var(--md-sys-color-surface-container-highest);
-  border: 1px solid var(--md-sys-color-outline-variant);
+/*
+ * Solo el chevron: el operador activo se ve AL ABRIR el menu.
+ *
+ * El `select` sigue ahi entero —teclado, lector de pantalla, marca de la opcion activa al
+ * desplegarse— pero su caja cerrada se estira por encima del chevron y no pinta texto. Es lo
+ * contrario de reconstruir un menu propio: se oculta la presentacion, no el control.
+ *
+ * `color: transparent` es lo que borra el texto de la caja cerrada; las `option` recuperan color
+ * explicitamente, porque en varios motores heredan el del `select` y el menu desplegado saldria
+ * en blanco sobre blanco.
+ */
+.chiclet__agregacion {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
   border-radius: var(--md-sys-shape-corner-extra-small);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.chiclet__agregacion:hover { background: var(--md-sys-color-surface-container-highest); }
+.chiclet__agregacion select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: none;
+  color: transparent;
   cursor: pointer;
 }
+.chiclet__agregacion select option { color: var(--md-sys-color-on-surface); }
 .chiclet__agregacion select:disabled { cursor: not-allowed; }
+/* El foco se dibuja en el envoltorio: el `select` no tiene caja visible donde ponerlo. */
+.chiclet__agregacion:focus-within {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 1px;
+}
+.chiclet__agregacion svg { pointer-events: none; }
 .chiclet__quitar {
   display: inline-flex;
   align-items: center;
@@ -2159,6 +2257,18 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * Aqui SI hay sombra, y es coherente con la regla: un dialogo flota de verdad por encima del
  * contenido, a diferencia de una tarjeta, que solo esta al lado de otras.
  */
+/*
+ * El emergente de datos de origen es ANCHO, y el de confirmar algo no.
+ *
+ * 560 px sirven para un dialogo de texto y se quedan cortos para una tabla: el complemento de
+ * datos abria las filas de origen con 512 px utiles para una tabla de 926, asi que las tres
+ * columnas de cifras —lo unico que se va a mirar ahi— quedaban fuera de vista, detras de un
+ * desplazamiento horizontal que nada anunciaba. Se veian las dimensiones y ninguna medida: una
+ * tabla que responde «de que filas sale este numero» sin ensenar ningun numero.
+ *
+ * La barra horizontal se conserva para las tablas de verdad anchas; lo que cambia es que deje de
+ * hacer falta en el caso normal.
+ */
 .emergente {
   border: none;
   border-radius: var(--md-sys-shape-corner-extra-large);
@@ -2169,6 +2279,9 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   max-width: min(560px, 92vw);
   width: 100%;
 }
+/* Detras de `.emergente` a proposito: misma especificidad, asi que manda el que va despues. */
+.emergente--ancho { max-width: min(1100px, 94vw); }
+
 .emergente::backdrop { background: color-mix(in srgb, var(--md-sys-color-scrim) 40%, transparent); }
 .emergente__cabecera {
   display: flex;

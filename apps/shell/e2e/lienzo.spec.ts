@@ -337,8 +337,9 @@ test.describe('los pozos de campos', () => {
 
     await page.getByTestId(`pozo-${id}-serie-opcion-DimTribunal.Materia`).click();
     await guardado(page);
-    // Cupo 1/1: el `+` se apaga, pero el chiclet se sigue pudiendo quitar.
-    await expect(page.getByTestId(`pozo-${id}-serie-anadir`)).toBeDisabled();
+    // Cupo 1/1: el `+` DESAPARECE —antes se apagaba, y un boton apagado no explica por que—,
+    // pero el chiclet se sigue pudiendo quitar.
+    await expect(page.getByTestId(`pozo-${id}-serie-anadir`)).toHaveCount(0);
     await expect(
       page.getByTestId(`pozo-${id}-serie-quitar-DimTribunal.Materia`),
     ).toBeEnabled();
@@ -705,6 +706,61 @@ test.describe('como se resume cada medida', () => {
     );
   });
 
+  test('el desplegable NO ofrece lo que el grano no admite', async ({ page }) => {
+    /*
+     * Ofrecer los siete y rechazar cuatro al guardar obliga a descubrir el limite probando,
+     * cuando el editor ya lo sabe. Es el mismo criterio por el que los botones de borde del
+     * lienzo se apagan en el borde en vez de guardar algo invalido y avisar despues.
+     */
+    await nuevoModulo(page, 'agr-opciones');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    const opciones = () =>
+      page
+        .getByTestId(`pozo-${id}-valor-agregacion-CasosIngresados`)
+        .locator('option')
+        .allTextContents();
+
+    // Dataset agrupado: solo las aditivas, porque un promedio de promedios no se puede recalcular.
+    expect(await opciones()).toEqual(['Suma', 'Minimo', 'Maximo']);
+
+    // Grano atomico: todas menos «Sin resumir», que es de la fuente y no de quien edita.
+    await page.getByTestId(`dataset-${id}`).selectOption('casos-detalle');
+    await guardado(page);
+    await page.getByTestId(`pozo-${id}-valor-anadir`).click();
+    await page.getByTestId(`pozo-${id}-valor-opcion-DiasResolucion`).click();
+    await guardado(page);
+
+    const deAtomico = await page
+      .getByTestId(`pozo-${id}-valor-agregacion-DiasResolucion`)
+      .locator('option')
+      .allTextContents();
+    expect(deAtomico).toContain('Promedio');
+    expect(deAtomico).toContain('Recuento distinto');
+    expect(deAtomico).not.toContain('Sin resumir');
+  });
+
+  test('un pozo lleno no ensena el boton de anadir', async ({ page }) => {
+    // Un boton apagado es una promesa que no se cumple: ocupa sitio, invita a pulsarlo y no
+    // explica que hay que quitar algo antes. El hueco desaparece y vuelve al quitar un campo.
+    await nuevoModulo(page, 'pozo-lleno');
+    await page.getByTestId('anadir-barras').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+
+    // El eje X admite uno y ya lo trae: no hay `+`.
+    await expect(page.getByTestId(`pozo-${id}-eje-x-anadir`)).toHaveCount(0);
+    // La serie esta vacia y admite uno: ahi si.
+    await expect(page.getByTestId(`pozo-${id}-serie-anadir`)).toBeVisible();
+
+    // Al vaciar el eje X, el `+` vuelve.
+    await page.getByTestId(`pozo-${id}-eje-x-quitar-DimTribunal.Distrito`).click();
+    await guardado(page);
+    await expect(page.getByTestId(`pozo-${id}-eje-x-anadir`)).toBeVisible();
+  });
+
   test('un promedio sobre un dataset YA agrupado se marca roto, no se dibuja', async ({ page }) => {
     /*
      * La comprobacion que hace que el numero falso deje de ser alcanzable desde el editor. Sobre
@@ -716,14 +772,35 @@ test.describe('como se resume cada medida', () => {
     await guardado(page);
     const id = await idDelBloque(page);
 
-    // El dataset por defecto viene agrupado. Pedir un promedio sobre el es lo que se rechaza.
-    await page.getByTestId(`pozo-${id}-valor-agregacion-CasosIngresados`).selectOption('promedio');
+    /*
+     * El desplegable ya no ofrece 'promedio' aqui, asi que la combinacion se fuerza por la API —
+     * que es exactamente el caso que queda: un modulo guardado cuando era valida, con el grano del
+     * dataset cambiado despues. El mensaje tiene que seguir estando para ese caso.
+     */
+    await page.evaluate(async (itemId) => {
+      const url = location.pathname.replace('/editor/', '/api/modulos/') + '/edicion';
+      const { modulo } = await (await fetch(url)).json();
+      for (const pagina of modulo.pages) {
+        for (const it of pagina.items) {
+          if (it.id === itemId) it.instance.binding.agregaciones = { CasosIngresados: 'promedio' };
+        }
+      }
+      await fetch(url, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ paginas: modulo.pages }),
+      });
+    }, id);
+    await page.reload();
     await guardado(page);
 
     await expect(page.getByTestId(`bloque-${id}`).getByTestId('objeto-roto')).toBeVisible();
     await expect(page.getByTestId('editor-bloqueos')).toContainText(/ya agrupado/);
 
-    // Y se puede deshacer sin recargar: volver a una aditiva lo devuelve a la vida.
+    // Y se puede deshacer desde el propio desplegable: el operador guardado aparece marcado como
+    // no aplicable, y volver a una aditiva devuelve el objeto a la vida.
+    await page.getByTestId(`elegir-${id}`).click();
+    await page.getByTestId('pestana-datos').click();
     await page.getByTestId(`pozo-${id}-valor-agregacion-CasosIngresados`).selectOption('suma');
     await guardado(page);
     await expect(page.getByTestId(`bloque-${id}`).getByTestId('kpi-valor')).toBeVisible();
