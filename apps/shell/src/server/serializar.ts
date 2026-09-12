@@ -36,6 +36,20 @@ export interface ObjetoSerializado {
   unresolvedObject?: string;
   generatedAt?: string;
   stale?: boolean;
+  /**
+   * El contenido de un contenedor, ya serializado.
+   *
+   * Va anidado y no como una lista plana con un puntero al padre por el mismo motivo que los
+   * complementos: un objeto dentro de un contenedor no existe fuera de el, y con una lista plana
+   * habria que acordarse de borrarlo cuando se borra el contenedor.
+   */
+  paneles?: PanelSerializado[];
+}
+
+export interface PanelSerializado {
+  panelId: string;
+  nombre: string;
+  objetos: ObjetoSerializado[];
 }
 
 export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
@@ -52,6 +66,15 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
     ...(objeto.unresolvedObject ? { unresolvedObject: objeto.unresolvedObject } : {}),
     ...(objeto.generatedAt ? { generatedAt: objeto.generatedAt } : {}),
     ...(objeto.stale ? { stale: true } : {}),
+    ...(objeto.paneles
+      ? {
+          paneles: objeto.paneles.map((panel) => ({
+            panelId: panel.panelId,
+            nombre: panel.nombre,
+            objetos: panel.objetos.map(serializarObjeto),
+          })),
+        }
+      : {}),
   };
 }
 

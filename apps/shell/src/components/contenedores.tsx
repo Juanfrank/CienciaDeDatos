@@ -1,0 +1,329 @@
+'use client';
+
+import { useId, useState } from 'react';
+import {
+  type ConfiguracionDeContenedor,
+  type Eje,
+  type Lado,
+  COLUMNAS_INTERNAS_POR_DEFECTO,
+  columnasDe,
+} from '@app/ui-components';
+import { Icono } from './iconos/Icono';
+import { Marco } from './objetos';
+import type { ObjetoSerializado, PanelSerializado } from '../server/serializar';
+
+/**
+ * Los contenedores: objetos que llevan otros objetos dentro.
+ *
+ * Los cinco comparten `Marco`, que es lo que les da titulo, subtitulo, icono, acento y los
+ * interruptores de mostrar u ocultar cada cosa. No es reutilizacion por ahorrar lineas: si un
+ * contenedor tuviera su propia cabecera «parecida», personalizar un objeto dependeria de que clase
+ * de objeto se selecciono, que es justo lo que el estandar minimo cerro.
+ *
+ * Y los cinco respetan la regla que no se negocia: el alto lo manda la rejilla, nunca el contenido.
+ * Un contenedor que creciera con lo que lleva dentro seria la forma mas facil de romperla, porque
+ * lo que lleva dentro cambia con cada filtro.
+ */
+
+/** La rejilla interna. La misma para los cinco: un contenedor es una rejilla con una cabecera. */
+function RejillaInterna({
+  panel,
+  columnas,
+  dibujar,
+}: {
+  panel: PanelSerializado | undefined;
+  columnas: number;
+  dibujar: (objeto: ObjetoSerializado) => React.ReactNode;
+}) {
+  const items = panel?.objetos ?? [];
+
+  if (items.length === 0) {
+    return (
+      <p className="contenedor__vacio" data-testid="contenedor-vacio">
+        Sin contenido. Arrastre objetos aqui desde el panel.
+      </p>
+    );
+  }
+
+  return (
+    <div
+      className="contenedor__rejilla"
+      style={{ gridTemplateColumns: `repeat(${columnas}, minmax(0, 1fr))` }}
+    >
+      {items.map((objeto) => (
+        <div
+          key={objeto.itemId}
+          className="contenedor__celda"
+          style={{
+            gridColumn: `${objeto.position.x + 1} / span ${objeto.position.w}`,
+            gridRow: `${objeto.position.y + 1} / span ${objeto.position.h}`,
+          }}
+        >
+          {dibujar(objeto)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface PropsDeContenedor {
+  objeto: ObjetoSerializado;
+  titulo: string;
+  config: ConfiguracionDeContenedor | undefined;
+  dibujar: (hijo: ObjetoSerializado) => React.ReactNode;
+}
+
+/* ── Simple ────────────────────────────────────────────────────────────────────────────────── */
+
+export function ContenedorSimple({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
+  return (
+    <Marco titulo={titulo} instance={objeto.instance}>
+      <div className="contenedor" data-testid="contenedor-simple">
+        <RejillaInterna
+          panel={objeto.paneles?.[0]}
+          columnas={columnasDe('contenedor-simple', config)}
+          dibujar={dibujar}
+        />
+      </div>
+    </Marco>
+  );
+}
+
+/* ── Desplazable ───────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Se desplaza por UN eje.
+ *
+ * El otro se bloquea con `overflow: hidden`, no se deja en `auto` confiando en que el contenido
+ * quepa: en cuanto un filtro alargue una tabla de dentro, «auto» pondria la segunda barra sin que
+ * nadie lo decidiera, y la regla dejaria de cumplirse justo cuando mas contenido hay.
+ */
+export function ContenedorDesplazable({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
+  const eje: Eje = config?.desplazable?.eje === 'x' ? 'x' : 'y';
+  const columnas = columnasDe('contenedor-desplazable', config);
+
+  return (
+    <Marco titulo={titulo} instance={objeto.instance}>
+      <div
+        className="contenedor contenedor--desplazable"
+        data-testid="contenedor-desplazable"
+        data-eje={eje}
+        // Una region desplazable tiene que alcanzarse con el teclado (2.1.1). Aqui SIEMPRE lo es
+        // —para eso se eligio este contenedor—, asi que la parada de tabulacion no se mide: se pone.
+        tabIndex={0}
+        role="region"
+        aria-label={titulo}
+      >
+        <div
+          className="contenedor__pista"
+          // En el eje X la pista mide lo que pidan sus columnas y no se comprime: si se repartiera
+          // el ancho visible, no habria nada que desplazar y el contenedor no haria nada.
+          style={eje === 'x' ? { minWidth: `${columnas * 180}px` } : undefined}
+        >
+          <RejillaInterna panel={objeto.paneles?.[0]} columnas={columnas} dibujar={dibujar} />
+        </div>
+      </div>
+    </Marco>
+  );
+}
+
+/* ── Lateral ───────────────────────────────────────────────────────────────────────────────── */
+
+const ICONO_DE_LADO: Record<Lado, 'chevron-abajo'> = {
+  arriba: 'chevron-abajo',
+  abajo: 'chevron-abajo',
+  izquierda: 'chevron-abajo',
+  derecha: 'chevron-abajo',
+};
+
+/**
+ * Un panel anclado a un borde del modulo, que puede salirse de la rejilla.
+ *
+ * Plegado por defecto: un panel abierto al entrar tapa lo que la persona venia a ver. La rotacion
+ * del icono dice hacia donde se abre, y el `aria-expanded` dice si lo esta — el icono solo no
+ * puede ser el unico portador del estado (1.4.1).
+ */
+export function ContenedorLateral({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
+  const lado: Lado = config?.lateral?.lado ?? 'derecha';
+  const [abierto, setAbierto] = useState(config?.lateral?.inicialmenteAbierto === true);
+  const tamano = Math.max(120, config?.lateral?.tamano ?? 280);
+  const id = useId();
+  const horizontal = lado === 'izquierda' || lado === 'derecha';
+
+  return (
+    <div className="lateral" data-testid="contenedor-lateral" data-lado={lado} data-abierto={abierto ? 'si' : 'no'}>
+      <button
+        type="button"
+        className="lateral__tirador"
+        aria-expanded={abierto}
+        aria-controls={id}
+        data-testid="lateral-tirador"
+        onClick={() => setAbierto((a) => !a)}
+      >
+        <Icono nombre={ICONO_DE_LADO[lado]} tamano={14} />
+        <span>{titulo}</span>
+      </button>
+
+      <div
+        id={id}
+        className="lateral__panel"
+        // `hidden` y no `display: none` por CSS: asi el contenido plegado tampoco esta en el orden
+        // de tabulacion ni lo lee un lector de pantalla, que es lo que «plegado» significa.
+        hidden={!abierto}
+        style={horizontal ? { width: tamano } : { height: tamano }}
+      >
+        <div className="contenedor contenedor--lateral">
+          <RejillaInterna
+            panel={objeto.paneles?.[0]}
+            columnas={columnasDe('contenedor-lateral', config)}
+            dibujar={dibujar}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Ampliable ─────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Ensena parte de su contenido y se amplia a una ventana con SU PROPIA rejilla.
+ *
+ * La ventana no reutiliza la rejilla de la tarjeta: en la tarjeta caben dos cosas estrechas y en la
+ * ventana caben diez repartidas de otra forma, y eso es lo que hace util ampliar. El cierre es
+ * EXPLICITO —un boton, y Escape— porque una capa que solo se cierra pulsando fuera deja a quien
+ * navega con teclado encerrado dentro.
+ */
+export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
+  const [ampliado, setAmpliado] = useState(false);
+  const columnas = columnasDe('contenedor-ampliable', config);
+  const columnasAmpliado = Math.max(1, config?.ampliable?.columnasAmpliado ?? COLUMNAS_INTERNAS_POR_DEFECTO * 2);
+
+  return (
+    <>
+      <Marco
+        titulo={titulo}
+        instance={objeto.instance}
+        accion={
+          <button
+            type="button"
+            className="objeto__complemento"
+            aria-label={`Ampliar ${titulo}`}
+            title={config?.ampliable?.textoDeAmpliar ?? 'Ampliar'}
+            data-testid="ampliar"
+            onClick={() => setAmpliado(true)}
+          >
+            <Icono nombre="expandir" tamano={16} />
+          </button>
+        }
+      >
+        <div className="contenedor" data-testid="contenedor-ampliable">
+          <RejillaInterna panel={objeto.paneles?.[0]} columnas={columnas} dibujar={dibujar} />
+        </div>
+      </Marco>
+
+      {ampliado ? (
+        <div
+          className="ampliado"
+          role="dialog"
+          aria-modal="true"
+          aria-label={titulo}
+          data-testid="ampliado"
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setAmpliado(false);
+          }}
+        >
+          <div className="ampliado__caja">
+            <div className="ampliado__cabecera">
+              <h2>{titulo}</h2>
+              <button
+                type="button"
+                className="boton-contorno"
+                data-testid="cerrar-ampliado"
+                autoFocus
+                onClick={() => setAmpliado(false)}
+              >
+                Cerrar
+              </button>
+            </div>
+            <div className="contenedor contenedor--ampliado">
+              <RejillaInterna
+                panel={objeto.paneles?.[0]}
+                columnas={columnasAmpliado}
+                dibujar={dibujar}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+/* ── Con pestanas ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Varias pestanas, cada una con su contenido y su disposicion.
+ *
+ * Cambiar de pestana NO cambia la posicion, las dimensiones ni el espacio que ocupa el contenedor.
+ * Se consigue con la misma regla de siempre —el alto lo manda la rejilla— y con los paneles
+ * inactivos ocultos en lugar de desmontados: el contenedor mide lo que mide, y la pestana con mas
+ * contenido se desplaza dentro de su sitio en vez de estirarlo.
+ */
+export function ContenedorConPestanas({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
+  const paneles = objeto.paneles ?? [];
+  const inicial = config?.pestanas?.pestanaInicial;
+  const [activa, setActiva] = useState(
+    paneles.some((p) => p.panelId === inicial) ? (inicial as string) : (paneles[0]?.panelId ?? ''),
+  );
+  const columnas = columnasDe('contenedor-con-pestanas', config);
+  const id = useId();
+
+  return (
+    <Marco titulo={titulo} instance={objeto.instance}>
+      <div className="contenedor contenedor--pestanas" data-testid="contenedor-con-pestanas">
+        <div className="contenedor__pestanas" role="tablist" aria-label={titulo}>
+          {paneles.map((panel) => (
+            <button
+              key={panel.panelId}
+              type="button"
+              role="tab"
+              id={`${id}-${panel.panelId}`}
+              aria-selected={activa === panel.panelId}
+              aria-controls={`${id}-panel-${panel.panelId}`}
+              // Solo la pestana activa esta en el orden de tabulacion: dentro de un `tablist` se
+              // cambia con las flechas, no tabulando una por una.
+              tabIndex={activa === panel.panelId ? 0 : -1}
+              className="contenedor__pestana"
+              data-testid={`pestana-${panel.panelId}`}
+              onClick={() => setActiva(panel.panelId)}
+              onKeyDown={(e) => {
+                const i = paneles.findIndex((p) => p.panelId === activa);
+                const salto = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+                if (salto === 0) return;
+                e.preventDefault();
+                const destino = paneles[(i + salto + paneles.length) % paneles.length];
+                if (destino) setActiva(destino.panelId);
+              }}
+            >
+              {panel.nombre}
+            </button>
+          ))}
+        </div>
+
+        {paneles.map((panel) => (
+          <div
+            key={panel.panelId}
+            id={`${id}-panel-${panel.panelId}`}
+            role="tabpanel"
+            aria-labelledby={`${id}-${panel.panelId}`}
+            className="contenedor__panel"
+            hidden={activa !== panel.panelId}
+          >
+            <RejillaInterna panel={panel} columnas={columnas} dibujar={dibujar} />
+          </div>
+        ))}
+      </div>
+    </Marco>
+  );
+}

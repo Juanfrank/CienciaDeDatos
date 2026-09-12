@@ -32,6 +32,21 @@ const presenta = (...propias: ClaveDePresentacion[]): ClaveDePresentacion[] => [
   ...propias,
 ];
 
+/**
+ * El contrato de un objeto que NO consume datos.
+ *
+ * Cero dimensiones y cero medidas no es una limitacion que estos objetos tengan: es lo que los
+ * DEFINE. Todo el camino de lectura —la validacion de esquema, la lista de datasets del modulo, la
+ * consulta al cache— deduce de ahi que no hay nada que leer, en vez de mirar un interruptor aparte
+ * que alguien pueda dejar en desacuerdo con el contrato.
+ */
+const SIN_DATOS = (notes: string): VisualObjectDefinition['versions'][number]['dataContract'] => ({
+  dimensions: { min: 0, max: 0 },
+  measures: { min: 0, max: 0 },
+  notes,
+  pozos: [],
+});
+
 const v1 = (
   changelog: string,
   dataContract: VisualObjectDefinition['versions'][number]['dataContract'],
@@ -410,6 +425,121 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         measures: { min: 1, max: 1 },
         notes: 'La dimension debe ser una division territorial reconocida por la cartografia.',
       }),
+    ],
+  },
+  /* ── Elementos: no se enlazan a ningun dataset ───────────────────────────────────────── */
+
+  {
+    objectId: 'cuadro-de-texto',
+    name: 'Cuadro de texto',
+    description: 'Texto con formato: notas, aclaraciones, contexto. No consume datos.',
+    category: 'elemento',
+    versions: [
+      v1(
+        'Version inicial: parrafos con negrita, cursiva, subrayado, alineacion y color.',
+        SIN_DATOS('Escribe texto. El enlace a un dataset llegara como intercalado de medidas.'),
+      ),
+    ],
+  },
+  {
+    objectId: 'titulo-de-seccion',
+    name: 'Titulo de seccion',
+    description: 'Encabeza un grupo de objetos, con lineas que se adaptan al ancho disponible.',
+    category: 'elemento',
+    versions: [
+      v1(
+        'Version inicial: lineas configurables a izquierda, derecha, ambos lados, arriba o abajo.',
+        SIN_DATOS('Ocupa el ancho que se le de. Las lineas se reparten lo que sobra del texto.'),
+      ),
+    ],
+  },
+  {
+    objectId: 'linea-divisoria',
+    name: 'Linea divisoria',
+    description: 'Una linea horizontal o vertical, para separar bloques.',
+    category: 'elemento',
+    versions: [
+      v1(
+        'Version inicial: horizontal o vertical, con estilo, grosor y color.',
+        SIN_DATOS('Va en el hueco entre celdas: una fila de alto uno, o una columna de ancho uno.'),
+      ),
+    ],
+  },
+  {
+    objectId: 'forma',
+    name: 'Forma',
+    description: 'Rectangulo, cuadrado, triangulo, circulo, rombo o flecha.',
+    category: 'elemento',
+    versions: [
+      v1(
+        'Version inicial: seis formas con relleno, trazo, opacidad, radio y texto interior.',
+        SIN_DATOS('El relleno y el trazo son roles del tema, no colores sueltos (4.3).'),
+      ),
+    ],
+  },
+  {
+    objectId: 'conexion',
+    name: 'Conexion',
+    description: 'Conector tipo diagrama de flujo entre dos objetos del modulo.',
+    category: 'elemento',
+    versions: [
+      v1(
+        'Version inicial: recto, en angulo o curvo, con extremos y rotulo.',
+        SIN_DATOS('Guarda los ids de los dos objetos, no coordenadas: sigue pegado al moverlos.'),
+      ),
+    ],
+  },
+
+  /* ── Contenedores: agrupan otros objetos ─────────────────────────────────────────────── */
+
+  {
+    objectId: 'contenedor-simple',
+    name: 'Contenedor simple',
+    description: 'Agrupa elementos y visualizaciones en su propia rejilla.',
+    category: 'contenedor',
+    versions: [
+      v1('Version inicial: rejilla interna propia, con titulo, subtitulo e icono opcionales.',
+        SIN_DATOS('Los hijos se posicionan contra la rejilla del contenedor, no la del modulo.')),
+    ],
+  },
+  {
+    objectId: 'contenedor-desplazable',
+    name: 'Contenedor desplazable',
+    description: 'Como el simple, pero su contenido se desplaza por UN eje: X o Y, nunca los dos.',
+    category: 'contenedor',
+    versions: [
+      v1('Version inicial: desplazamiento por un solo eje, configurable.',
+        SIN_DATOS('Dos barras a la vez convierten buscar contenido en un plano en vez de una linea.')),
+    ],
+  },
+  {
+    objectId: 'contenedor-lateral',
+    name: 'Contenedor lateral',
+    description: 'Panel desplegable anclado a un borde del modulo. Como mucho uno por lado.',
+    category: 'contenedor',
+    versions: [
+      v1('Version inicial: anclaje arriba, abajo, izquierda o derecha, plegable.',
+        SIN_DATOS('Puede salirse de la rejilla principal; por eso solo cabe uno en cada borde.')),
+    ],
+  },
+  {
+    objectId: 'contenedor-ampliable',
+    name: 'Contenedor ampliable',
+    description: 'Ensena parte de su contenido y se amplia a una ventana con su propia rejilla.',
+    category: 'contenedor',
+    versions: [
+      v1('Version inicial: vista reducida en la rejilla y ventana ampliada independiente.',
+        SIN_DATOS('La rejilla de la ventana no es la de la tarjeta: caben otras cosas y de otra forma.')),
+    ],
+  },
+  {
+    objectId: 'contenedor-con-pestanas',
+    name: 'Contenedor con pestanas',
+    description: 'Varias pestanas, cada una con su propio contenido y su propia disposicion.',
+    category: 'contenedor',
+    versions: [
+      v1('Version inicial: pestanas con disposicion independiente y tamano fijo del contenedor.',
+        SIN_DATOS('Cambiar de pestana no altera la posicion, las dimensiones ni el espacio ocupado.')),
     ],
   },
 ];

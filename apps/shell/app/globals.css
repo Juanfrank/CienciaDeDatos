@@ -1286,6 +1286,15 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   grid-auto-rows: var(--alto-de-fila);
   gap: var(--space-md);
   align-items: stretch;
+  /*
+   * Ancla de los conectores.
+   *
+   * Un conector se dibuja con `position: absolute` sobre la rejilla entera, y sin esto el ancla
+   * era el viewport: la flecha aparecia sobre la barra lateral en vez de entre los dos objetos.
+   * Las celdas siguen SIN posicionar a proposito — son ellas las que tienen que dejar pasar el
+   * ancla hasta aqui.
+   */
+  position: relative;
 }
 .rejilla__celda {
   min-width: 0;
@@ -3158,3 +3167,261 @@ th[aria-sort='descending'] .tabla__flecha {
     white-space: normal !important;
   }
 }
+
+/* ══ Elementos ═══════════════════════════════════════════════════════════════════════════════
+ *
+ * Todos comparten una regla: no crecen. El alto lo manda la rejilla, tambien aqui — un titulo de
+ * seccion que estirara su fila al escribir una linea mas rompe el esquema igual que lo romperia
+ * una tarjeta.
+ */
+
+.cuadro-texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.cuadro-texto p { margin: 0; }
+.cuadro-texto__titulo { margin: 0; font: var(--md-sys-typescale-title-small); }
+.cuadro-texto__lista { margin: 0; padding-left: 1.25rem; }
+
+/* El titulo de seccion ocupa el ancho que le den y reparte lo que sobra entre sus lineas. */
+.titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  height: 100%;
+  min-width: 0;
+}
+.titulo-seccion__texto {
+  margin: 0;
+  font: var(--md-sys-typescale-title-medium);
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+  /*
+   * El texto puede encogerse hasta recortarse; las lineas, no.
+   * Al reves —lineas fijas y texto flexible— el titulo se partiria en dos renglones en cuanto la
+   * columna se estrechara, y entonces si cambiaria el alto con el contenido.
+   */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.titulo-seccion__linea { flex: 1 1 0; min-width: 8px; }
+.titulo-seccion[data-posicion='centro'] { justify-content: center; }
+.titulo-seccion[data-posicion='derecha'] { justify-content: flex-end; }
+
+.linea-divisoria {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+.linea-divisoria[data-orientacion='horizontal'] > span { width: 100%; }
+.linea-divisoria[data-orientacion='vertical'] > span { height: 100%; }
+
+.forma {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  /* Para que `cqw`/`cqh` midan ESTA caja: sin `size`, las unidades de contenedor no existen. */
+  container-type: size;
+}
+.forma__cuerpo { width: 100%; height: 100%; }
+/*
+ * Un cuadrado y un circulo se dibujan con lado igual al menor de los dos ejes.
+ * Los dos lados salen del MISMO `min()`, asi que no hay forma de que uno se recorte y el otro no
+ * — que es lo que convertia el circulo en elipse al estrechar la celda.
+ */
+.forma__cuerpo[data-regular='si'] {
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+}
+.forma__texto {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm);
+  text-align: center;
+  color: var(--md-sys-color-on-surface);
+}
+
+/*
+ * El conector se dibuja sobre la rejilla entera y NO recibe eventos: es una anotacion, y si
+ * capturara el raton taparia los objetos por los que pasa.
+ */
+.conexion-ancla { width: 100%; height: 100%; }
+.conexion {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
+}
+.conexion__texto { font: var(--md-sys-typescale-label-small); }
+.conexion__sin-extremos {
+  margin: 0;
+  padding: var(--space-sm);
+  font: var(--md-sys-typescale-body-small);
+  color: var(--md-sys-color-on-surface-variant);
+  border: 1px dashed var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-small);
+}
+
+/* ══ Contenedores ════════════════════════════════════════════════════════════════════════════ */
+
+.contenedor {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+/*
+ * La rejilla interna. Filas de alto fijo, igual que la de fuera y por el mismo motivo: lo que no
+ * cabe se desplaza, no estira.
+ */
+.contenedor__rejilla {
+  display: grid;
+  grid-auto-rows: 56px;
+  gap: var(--space-sm);
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+}
+.contenedor__celda { min-width: 0; min-height: 0; }
+
+.contenedor__vacio {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: var(--space-md);
+  border: 1px dashed var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  color: var(--md-sys-color-on-surface-variant);
+  font: var(--md-sys-typescale-body-small);
+}
+
+/*
+ * Un eje, nunca dos.
+ *
+ * El eje que no se eligio queda en `hidden` explicito y no en `auto`: con `auto`, la segunda barra
+ * apareceria sola en cuanto un filtro alargara una tabla de dentro, y la regla se incumpliria justo
+ * cuando mas contenido hay que recorrer.
+ */
+.contenedor--desplazable { scrollbar-width: thin; scrollbar-color: var(--md-sys-color-outline) var(--md-sys-color-surface-container-high); }
+.contenedor--desplazable[data-eje='y'] { overflow-y: auto; overflow-x: hidden; }
+.contenedor--desplazable[data-eje='x'] { overflow-x: auto; overflow-y: hidden; }
+.contenedor--desplazable[data-eje='x'] .contenedor__rejilla { grid-auto-flow: column; }
+.contenedor__pista { display: flex; min-height: 0; }
+.contenedor__pista > .contenedor__rejilla { flex: 1; }
+
+/* El lateral sale de la rejilla: por eso solo cabe uno en cada borde. */
+.lateral {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  gap: var(--space-sm);
+  background: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--space-sm);
+}
+.lateral[data-lado='arriba'],
+.lateral[data-lado='abajo'] { flex-direction: column; }
+/* El tirador mide lo que mide su texto. Estirado de arriba abajo parecia una barra de color. */
+.lateral > * { align-self: flex-start; }
+.lateral[data-lado='arriba'] > *,
+.lateral[data-lado='abajo'] > * { align-self: stretch; }
+.lateral[data-lado='abajo'],
+.lateral[data-lado='derecha'] { flex-direction: row-reverse; }
+.lateral[data-lado='abajo'] { flex-direction: column-reverse; }
+.lateral__tirador {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  font: var(--md-sys-typescale-label-large);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.lateral__tirador svg { transition: transform 120ms ease; }
+.lateral[data-abierto='si'] .lateral__tirador svg { transform: rotate(180deg); }
+.lateral__panel { min-width: 0; min-height: 0; overflow: auto; display: flex; align-self: stretch; }
+/*
+ * `display: flex` gana al `display: none` que el navegador aplica a `[hidden]`, asi que sin esto
+ * el panel plegado se seguia viendo — y, peor, seguia en el orden de tabulacion.
+ */
+.lateral__panel[hidden] { display: none; }
+
+/* La ventana ampliada: rejilla propia, y cierre explicito. */
+.ampliado {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  background: rgb(0 0 0 / 45%);
+}
+.ampliado__caja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: min(1100px, 96vw);
+  height: min(720px, 90vh);
+  padding: var(--space-lg);
+  background: var(--md-sys-color-surface-container-high);
+  border-radius: var(--md-sys-shape-corner-large);
+  box-shadow: var(--md-sys-elevation-3);
+}
+.ampliado__cabecera { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+.ampliado__cabecera h2 { margin: 0; font: var(--md-sys-typescale-title-large); }
+.contenedor--ampliado { overflow: auto; }
+
+/*
+ * Pestanas: cambiar de pestana no cambia nada del contenedor.
+ *
+ * La barra mide lo que mide y el panel ocupa el resto; los paneles inactivos se ocultan en lugar
+ * de desmontarse, asi que el contenedor no reflow­ea al cambiar y conserva posicion, dimensiones y
+ * espacio ocupado.
+ */
+.contenedor__pestanas {
+  display: flex;
+  gap: var(--space-xs);
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  margin-bottom: var(--space-sm);
+  overflow-x: auto;
+}
+.contenedor__pestana {
+  padding: var(--space-xs) var(--space-sm);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font: var(--md-sys-typescale-label-large);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.contenedor__pestana[aria-selected='true'] {
+  color: var(--md-sys-color-primary);
+  border-bottom-color: var(--md-sys-color-primary);
+}
+.contenedor__panel { flex: 1; min-height: 0; display: flex; overflow: auto; }
+.contenedor__panel[hidden] { display: none; }
+.contenedor__panel > .contenedor__rejilla { flex: 1; }

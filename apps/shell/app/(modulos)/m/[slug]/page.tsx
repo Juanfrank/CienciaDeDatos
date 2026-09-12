@@ -30,7 +30,15 @@ export default async function PaginaModulo({
   params,
   searchParams,
 }: {
-  params: Promise<{ slug: string; page?: string[] }>;
+  /*
+   * `page` es UNA cadena, no un array.
+   *
+   * La ruta es `[page]`, un segmento dinamico simple; solo un comodin `[...page]` entrega array.
+   * Estaba tipado como `string[]` y leido como `page?.[0]`, o sea el PRIMER CARACTER del slug:
+   * `/m/x/general` buscaba la pagina «g», no la encontraba y devolvia 404. Nunca se noto porque
+   * hasta ahora ningun modulo tenia mas de una pagina y nadie escribia la segunda parte de la URL.
+   */
+  params: Promise<{ slug: string; page?: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug, page } = await params;
@@ -43,7 +51,7 @@ export default async function PaginaModulo({
   const cargado = await cargarModulo({
     module,
     personalization: await leerPersonalizacion(sesion.userId, module.moduleId),
-    ...(page?.[0] ? { pageSlug: page[0] } : {}),
+    ...(page ? { pageSlug: page } : {}),
     userId: sesion.userId,
     teamId: sesion.activeTeamId,
     requestedFilters: filtrosDe(query),

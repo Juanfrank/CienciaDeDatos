@@ -16,8 +16,10 @@ import {
   type ObjectInstance,
   type RanuraDeCampos,
 } from '@app/ui-components';
+import { type ObjectCategory, esContenedor, esElemento } from '@app/ui-components';
 import type { DatasetDePaleta, ObjetoDePaleta } from '../../server/editor';
 import { Icono, type NombreDeIcono } from '../iconos/Icono';
+import { ConfiguracionDeObjetoEditor } from './ConfiguracionDeObjetoEditor';
 import { Pestanas, type DefinicionDePestana } from './Pestanas';
 import { Pozo } from './Pozo';
 import { Presentacion } from './Presentacion';
@@ -40,7 +42,7 @@ import { Seccion } from './Seccion';
  * cada cosa.
  */
 
-type Pestana = 'visualizaciones' | 'datos' | 'formato' | 'complementos';
+type Pestana = 'objetos' | 'datos' | 'formato' | 'complementos';
 
 /** Icono con el que cada tipo se ofrece en la tienda. */
 const ICONO_DE_TIPO: Record<string, NombreDeIcono> = {
@@ -54,6 +56,16 @@ const ICONO_DE_TIPO: Record<string, NombreDeIcono> = {
   mapa: 'lugar',
   'tooltip-explicativo': 'informacion',
   'tabla-de-datos': 'datos',
+  'cuadro-de-texto': 'texto',
+  'titulo-de-seccion': 'titulo',
+  'linea-divisoria': 'linea',
+  forma: 'forma',
+  conexion: 'conexion',
+  'contenedor-simple': 'contenedor',
+  'contenedor-desplazable': 'contenedor',
+  'contenedor-lateral': 'contenedor',
+  'contenedor-ampliable': 'expandir',
+  'contenedor-con-pestanas': 'pestanas',
 };
 
 export function PanelLateral({
@@ -73,7 +85,7 @@ export function PanelLateral({
   onCambiar: (itemId: string, cambio: (item: GridItem) => GridItem) => void;
   onQuitar: (itemId: string) => void;
 }) {
-  const [pestana, setPestana] = useState<Pestana>('visualizaciones');
+  const [pestana, setPestana] = useState<Pestana>('objetos');
 
   /*
    * Al elegir un objeto, el panel salta a «Datos».
@@ -83,9 +95,17 @@ export function PanelLateral({
    * las otras pestanas ya no tienen contenido.
    */
   const idSeleccionado = seleccionado?.id ?? null;
+  const objetoSeleccionado = seleccionado?.instance.objectId ?? null;
   useEffect(() => {
-    setPestana(idSeleccionado ? 'datos' : 'visualizaciones');
-  }, [idSeleccionado]);
+    if (!idSeleccionado) {
+      setPestana('objetos');
+      return;
+    }
+    // Lo que no lee datos salta a «Formato»: es su primera pestana util, y mandarlo a una
+    // deshabilitada dejaria el panel en blanco justo despues de colocar algo.
+    const sinDatos = objetoSeleccionado !== null && (esElemento(objetoSeleccionado) || esContenedor(objetoSeleccionado));
+    setPestana(sinDatos ? 'formato' : 'datos');
+  }, [idSeleccionado, objetoSeleccionado]);
 
   const hayObjeto = seleccionado !== null;
   const definicion = seleccionado
@@ -95,9 +115,17 @@ export function PanelLateral({
     ? datasets.find((d) => d.datasetId === seleccionado.instance.binding.datasetId)
     : undefined;
 
+  /*
+   * «Datos» se deshabilita para lo que no consume datos.
+   *
+   * Un cuadro de texto o un contenedor abriria la pestana con un desplegable de datasets y cero
+   * pozos: una pantalla en la que no hay nada que hacer, y que sugiere que falta configurar algo.
+   */
+  const consumeDatos = (definicion?.dimensiones.max ?? 0) > 0 || (definicion?.medidas.max ?? 0) > 0;
+
   const PESTANAS: DefinicionDePestana<Pestana>[] = [
-    { id: 'visualizaciones', etiqueta: 'Visualizaciones', icono: 'barras', habilitada: true },
-    { id: 'datos', etiqueta: 'Datos', icono: 'tabla', habilitada: hayObjeto },
+    { id: 'objetos', etiqueta: 'Objetos', icono: 'barras', habilitada: true },
+    { id: 'datos', etiqueta: 'Datos', icono: 'tabla', habilitada: hayObjeto && consumeDatos },
     { id: 'formato', etiqueta: 'Formato', icono: 'indicador', habilitada: hayObjeto },
     { id: 'complementos', etiqueta: 'Complementos', icono: 'informacion', habilitada: hayObjeto },
   ];
@@ -113,7 +141,7 @@ export function PanelLateral({
         aria-labelledby={`pestana-${pestana}`}
         tabIndex={0}
       >
-        {pestana === 'visualizaciones' ? (
+        {pestana === 'objetos' ? (
           <Tienda objetos={objetos} guardando={guardando} onAnadir={onAnadir} />
         ) : null}
 
@@ -132,6 +160,14 @@ export function PanelLateral({
           <>
             {/* `Presentacion` ya trae sus propias subsecciones: envolverlo en otra repetiria el
                 rotulo «Presentacion» dos veces seguidas. */}
+            <ConfiguracionDeObjetoEditor
+              instance={seleccionado.instance}
+              guardando={guardando}
+              onCambiar={(cambio) =>
+                onCambiar(seleccionado.id, (i) => ({ ...i, instance: cambio(i.instance) }))
+              }
+            />
+
             <Presentacion
               instance={seleccionado.instance}
               admitidas={definicion?.presentacion ?? []}
@@ -169,7 +205,16 @@ export function PanelLateral({
   );
 }
 
-/** La tienda: la unica puerta por la que entra un objeto al modulo. */
+/**
+ * La tienda: la unica puerta por la que entra un objeto al modulo.
+ *
+ * Tres familias, cada una en su subseccion, y las visualizaciones primero porque son lo que se
+ * viene a poner. Las tres arrancan abiertas: plegarlas de inicio ahorraria un poco de barra a
+ * cambio de esconder dos tercios del catalogo a quien no sepa todavia que existe.
+ *
+ * El corte lo da la CATEGORIA que cada objeto ya declara, no una lista de ids escrita aqui: con
+ * una lista, publicar un elemento nuevo lo dejaria fuera de la tienda sin que nada fallara.
+ */
 function Tienda({
   objetos,
   guardando,
@@ -182,33 +227,93 @@ function Tienda({
   // Los complementos se adjuntan a otro objeto, no se colocan en la rejilla. La validacion lo
   // rechaza, asi que tampoco se ofrecen aqui: tienen su propia pestana.
   const colocables = objetos.filter((o) => !o.attachable);
+  const de = (...categorias: ObjectCategory[]) =>
+    colocables.filter((o) => categorias.includes(o.category));
 
   return (
     <>
-      <p className="texto-atenuado panel-editor__nota">
-        Se enlazan a un dataset certificado del registro. Un modulo no construye consultas (4.2).
-      </p>
-      <ul className="tienda" data-testid="tienda">
-        {colocables.map((o) => (
-          <li key={o.objectId}>
-            <button
-              type="button"
-              className="tienda__objeto"
-              data-testid={`anadir-${o.objectId}`}
-              disabled={guardando}
-              title={o.description}
-              onClick={() => onAnadir(o.objectId)}
-            >
-              <Icono nombre={ICONO_DE_TIPO[o.objectId] ?? 'barras'} tamano={22} />
-              <span className="tienda__nombre">{o.name}</span>
+      <Seccion titulo="Visualizaciones" prueba="seccion-visualizaciones">
+        <p className="texto-atenuado panel-editor__nota">
+          Se enlazan a un dataset certificado del registro. Un modulo no construye consultas (4.2).
+        </p>
+        <ListaDeObjetos
+          objetos={de('grafico', 'tabla', 'indicador', 'filtro', 'mapa')}
+          prueba="tienda"
+          conContrato
+          guardando={guardando}
+          onAnadir={onAnadir}
+        />
+      </Seccion>
+
+      <Seccion titulo="Elementos" prueba="seccion-elementos">
+        <p className="texto-atenuado panel-editor__nota">
+          No se enlazan a datos: componen la pagina. Texto, titulos, lineas, formas y conexiones.
+        </p>
+        <ListaDeObjetos
+          objetos={de('elemento')}
+          prueba="tienda-elementos"
+          guardando={guardando}
+          onAnadir={onAnadir}
+        />
+      </Seccion>
+
+      <Seccion titulo="Contenedores" prueba="seccion-contenedores">
+        <p className="texto-atenuado panel-editor__nota">
+          Agrupan elementos y visualizaciones en su propia rejilla.
+        </p>
+        <ListaDeObjetos
+          objetos={de('contenedor')}
+          prueba="tienda-contenedores"
+          guardando={guardando}
+          onAnadir={onAnadir}
+        />
+      </Seccion>
+    </>
+  );
+}
+
+function ListaDeObjetos({
+  objetos,
+  prueba,
+  conContrato = false,
+  guardando,
+  onAnadir,
+}: {
+  objetos: ObjetoDePaleta[];
+  prueba: string;
+  /*
+   * El contrato solo se ensena donde significa algo.
+   *
+   * «0–0 dim · 0–0 med» debajo de «Cuadro de texto» no informa de nada: repite en cifras lo que la
+   * nota de la seccion ya dijo en palabras, y ocupa la linea que podria decir para que sirve.
+   */
+  conContrato?: boolean;
+  guardando: boolean;
+  onAnadir: (objectId: string) => void;
+}) {
+  return (
+    <ul className="tienda" data-testid={prueba}>
+      {objetos.map((o) => (
+        <li key={o.objectId}>
+          <button
+            type="button"
+            className="tienda__objeto"
+            data-testid={`anadir-${o.objectId}`}
+            disabled={guardando}
+            title={o.description}
+            onClick={() => onAnadir(o.objectId)}
+          >
+            <Icono nombre={ICONO_DE_TIPO[o.objectId] ?? 'barras'} tamano={22} />
+            <span className="tienda__nombre">{o.name}</span>
+            {conContrato ? (
               <span className="tienda__contrato">
                 {o.dimensiones.min}–{o.dimensiones.max} dim · {o.medidas.min}–{o.medidas.max} med
               </span>
-            </button>
-          </li>
-        ))}
-      </ul>
-    </>
+            ) : null}
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 

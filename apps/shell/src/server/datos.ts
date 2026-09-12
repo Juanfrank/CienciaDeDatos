@@ -9,12 +9,18 @@ import {
   type UserPersonalization,
   TIPO_DESCONOCIDO,
   applyPersonalization,
+  datasetsConsumedBy,
   findPage,
   validateModule,
 } from '@app/module-model';
 import {
   type BindingProblem,
+  type ConfiguracionDeContenedor,
   agregacionesDe,
+  esContenedor,
+  noConsumeDatos,
+  panelesDe,
+  validarContenedor,
   fieldKey,
   ranurasDelContrato,
   validarAgregacion,
@@ -51,6 +57,15 @@ export interface ObjetoCargado {
    */
   agregaciones: Agregacion[];
   unresolvedObject?: string;
+  /** Lo que hay dentro de un contenedor, ya cargado por el mismo camino que lo de fuera. */
+  paneles?: PanelCargado[];
+}
+
+/** Un panel de contenedor con sus objetos ya cargados. Un contenedor sin pestanas tiene uno. */
+export interface PanelCargado {
+  panelId: string;
+  nombre: string;
+  objetos: ObjetoCargado[];
 }
 
 export interface ModuloCargado {
@@ -113,6 +128,60 @@ async function leerObjetos(
         problems: [],
         agregaciones: [],
         unresolvedObject: error instanceof Error ? error.message : String(error),
+      });
+      continue;
+    }
+
+    /*
+     * Un objeto que no consume datos no consulta el cache.
+     *
+     * Sin esta salida, un cuadro de texto pediria un dataset vacio, el lector devolveria
+     * «generandose» y el elemento se quedaria para siempre en el marcador de carga — esperando un
+     * job que nunca va a poblar algo que no pidio.
+     *
+     * Los HIJOS de un contenedor si consumen: se cargan por el mismo camino, recursivamente, para
+     * que un grafico dentro de un contenedor sea exactamente el mismo grafico que fuera. Si el
+     * contenedor tuviera su propia carga, el ambito, los filtros y la agregacion tendrian dos
+     * implementaciones, y solo una se acordaria de actualizarse.
+     */
+    if (noConsumeDatos(contrato)) {
+      const config = instance.configuracion;
+      let paneles: PanelCargado[] | undefined;
+
+      if (esContenedor(instance.objectId)) {
+        paneles = [];
+        for (const panel of panelesDe(config as ConfiguracionDeContenedor | undefined)) {
+          const dentro = await leerObjetos(
+            panel.items.map((i) => ({ id: i.id, instance: i.instance, position: i.position })),
+            scope,
+            requestedFilters,
+          );
+          /*
+           * La frescura y la degradacion de lo de DENTRO cuentan como las de fuera.
+           *
+           * Sin esto, un modulo cuyos datos viven todos dentro de contenedores decia «sin datos
+           * poblados todavia» en su cabecera mientras dibujaba las cifras debajo — y una lectura
+           * degradada de un grafico anidado no levantaba el aviso de que se estaba sirviendo el
+           * ultimo dato valido conocido.
+           */
+          if (dentro.degraded) degraded = true;
+          if (dentro.masAntiguo && (!masAntiguo || dentro.masAntiguo < masAntiguo)) {
+            masAntiguo = dentro.masAntiguo;
+          }
+          paneles.push({ panelId: panel.panelId, nombre: panel.nombre, objetos: dentro.objetos });
+        }
+      }
+
+      objetos.push({
+        item,
+        readStatus: 'ok',
+        problems: validarContenedor(item.id, instance).map((p) => ({
+          slot: p.slot,
+          kind: 'contrato-incumplido' as const,
+          problem: p.problema,
+        })),
+        agregaciones: [],
+        ...(paneles ? { paneles } : {}),
       });
       continue;
     }
@@ -264,9 +333,7 @@ export async function diagnosticarModulo(module: ModuleDefinition, userId: strin
   if (!resolucion) return null;
 
   const columnsByDataset: Record<string, ColumnaDisponible[]> = {};
-  const datasets = new Set(
-    module.pages.flatMap((p) => p.items.map((i) => i.instance.binding.datasetId)),
-  );
+  const datasets = new Set(datasetsConsumedBy(module));
 
   for (const datasetId of datasets) {
     const lectura = await datasetReader.read({ datasetId, scope: resolucion.scope });
@@ -307,9 +374,7 @@ export async function diagnosticarModulo(module: ModuleDefinition, userId: strin
 export async function diagnosticarDefinicion(module: ModuleDefinition) {
   const columnsByDataset: Record<string, ColumnaDisponible[]> = {};
 
-  const datasets = new Set(
-    module.pages.flatMap((p) => p.items.map((i) => i.instance.binding.datasetId)),
-  );
+  const datasets = new Set(datasetsConsumedBy(module));
 
   for (const datasetId of datasets) {
     columnsByDataset[datasetId] = await columnasDisponiblesDe(datasetId);

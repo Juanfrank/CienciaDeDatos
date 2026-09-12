@@ -217,7 +217,7 @@ test.describe('la rejilla es visible y se maneja', () => {
     await nuevoModulo(page, 'lienzo-hueco');
     await page.getByTestId('anadir-tarjeta-kpi').click();
     await guardado(page);
-    await page.getByTestId('pestana-visualizaciones').click();
+    await page.getByTestId('pestana-objetos').click();
     await page.getByTestId('anadir-barras').click();
     await guardado(page);
 
@@ -233,7 +233,7 @@ test.describe('el panel es la unica tienda, y sus pestanas', () => {
     // Deshabilitadas y no ocultas: una barra que cambia de numero de pestanas obliga a volver a
     // buscar donde estaba cada cosa.
     await nuevoModulo(page, 'panel-vacio');
-    await expect(page.getByTestId('pestana-visualizaciones')).toHaveAttribute(
+    await expect(page.getByTestId('pestana-objetos')).toHaveAttribute(
       'aria-selected',
       'true',
     );
@@ -540,7 +540,7 @@ test.describe('arrastrar y redimensionar', () => {
     await nuevoModulo(page, 'arr-ocupado');
     await page.getByTestId('anadir-tarjeta-kpi').click();
     await guardado(page);
-    await page.getByTestId('pestana-visualizaciones').click();
+    await page.getByTestId('pestana-objetos').click();
     await page.getByTestId('anadir-barras').click();
     await guardado(page);
 

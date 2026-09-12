@@ -1,4 +1,9 @@
-import type { ObjectInstance } from '@app/ui-components';
+import {
+  type ConfiguracionDeContenedor,
+  type ObjectInstance,
+  esContenedor,
+  instanciasAnidadas,
+} from '@app/ui-components';
 import type { GridPosition } from './grid';
 
 /**
@@ -54,16 +59,36 @@ export interface ModuleDefinition {
 export const moduleUrl = (module: Pick<ModuleDefinition, 'slug'>, page?: Pick<ModulePage, 'slug'>): string =>
   page ? `/m/${module.slug}/${page.slug}` : `/m/${module.slug}`;
 
-/** Todos los datasetId que un modulo consume, para declararlos en su module.contract.ts (3.3). */
+/**
+ * Todos los datasetId que un modulo consume, para declararlos en su module.contract.ts (3.3).
+ *
+ * Se filtra el vacio: un elemento o un contenedor no se enlaza a nada, y su `datasetId` es la
+ * cadena vacia. Pedirla al cache devolveria «no esta poblado» para un dataset que no existe, y el
+ * modulo entero apareceria degradado por culpa de un cuadro de texto.
+ */
 export function datasetsConsumedBy(module: ModuleDefinition): string[] {
   return [
-    ...new Set(module.pages.flatMap((p) => p.items.map((i) => i.instance.binding.datasetId))),
+    ...new Set(instancesOf(module).map((i) => i.binding.datasetId).filter((id) => id !== '')),
   ].sort();
 }
 
-/** Todas las instancias del modulo, para comprobar avisos de deprecacion (4.5). */
+/**
+ * Todas las instancias del modulo, para comprobar avisos de deprecacion (4.5).
+ *
+ * Incluye las ANIDADAS dentro de un contenedor. Un grafico no deja de estar desplegado por vivir
+ * dentro de una pestana, y si se omitiera aqui, deprecar su version no avisaria a los modulos que
+ * lo usan — que es exactamente lo que la politica de 4.5 existe para evitar.
+ */
 export function instancesOf(module: ModuleDefinition): ObjectInstance[] {
-  return module.pages.flatMap((p) => p.items.map((i) => i.instance));
+  const recorrer = (instance: ObjectInstance): ObjectInstance[] => [
+    instance,
+    ...instanciasAnidadas(
+      esContenedor(instance.objectId)
+        ? (instance.configuracion as ConfiguracionDeContenedor | undefined)
+        : undefined,
+    ).flatMap(recorrer),
+  ];
+  return module.pages.flatMap((p) => p.items.flatMap((i) => recorrer(i.instance)));
 }
 
 export function findPage(module: ModuleDefinition, pageSlug?: string): ModulePage | undefined {

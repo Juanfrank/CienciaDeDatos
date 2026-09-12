@@ -26,12 +26,22 @@ export const TRAZOS_DE_ICONO = {
   // Complementos.
   informacion: 'M12 11v5M12 7.6v.4',
   datos: 'M4.5 5.5h15v13h-15zM4.5 10h15M4.5 14.5h15M10 5.5v13',
+  // Contenedores y ampliacion.
+  expandir: 'M4 9V4h5M20 15v5h-5M4 4l6 6M20 20l-6-6',
   // Tipos de objeto. Sirven de icono por defecto de cada uno.
   indicador: 'M4 18V9M10 18V5M16 18v-6M20 18H4',
   barras: 'M5 19V10M11 19V5M17 19v-7M3 21h18',
   lineas: 'M4 16l4-5 4 3 5-7M4 20h16',
   tabla: 'M4 5h16v14H4zM4 10h16M4 15h16M10 5v14',
   filtro: 'M4 5h16l-6 7v6l-4 2v-8z',
+  // Elementos: no miden nada, componen.
+  texto: 'M5 6V4h14v2M12 4v16M9 20h6',
+  titulo: 'M4 7h16M4 12h9M4 17h13',
+  linea: 'M4 12h16',
+  forma: 'M5 5h14v14H5z',
+  conexion: 'M4 7h6v10h10M20 17l-3-3M20 17l-3 3',
+  contenedor: 'M4 5h16v14H4zM4 9h16M9 9v10',
+  pestanas: 'M4 8h6V5h10v14H4zM4 8v11',
   calendario:
     'M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM4 10h16M8 4v4M16 4v4',
   // Vocabulario de dominio, para rotular una tarjeta por lo que mide.

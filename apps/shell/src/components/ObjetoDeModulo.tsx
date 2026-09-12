@@ -1,7 +1,21 @@
 'use client';
 
 import type { QueryResult } from '@app/data-contracts';
-import { fieldKey, toSlicerOptions } from '@app/ui-components';
+import {
+  type ConfiguracionDeContenedor,
+  type ConfiguracionDeElemento,
+  fieldKey,
+  toSlicerOptions,
+} from '@app/ui-components';
+import {
+  ContenedorAmpliable,
+  ContenedorConPestanas,
+  ContenedorDesplazable,
+  ContenedorLateral,
+  ContenedorSimple,
+} from './contenedores';
+import { CuadroDeTexto, FormaBasica, LineaDivisoria, TituloDeSeccion } from './elementos';
+import { ConexionEnRejilla } from './ConexionEnRejilla';
 import { PanelDeFiltros } from './PanelDeFiltros';
 import { Segmentador } from './Segmentador';
 import {
@@ -11,6 +25,7 @@ import {
   ObjetoGenerandose,
   ObjetoNoDisponible,
   ObjetoRoto,
+  Marco,
   Tabla,
   TarjetaKpi,
 } from './objetos';
@@ -44,6 +59,15 @@ export function ObjetoDeModulo({
 }) {
   const titulo = objeto.titulo;
 
+  /*
+   * Los elementos y los contenedores se resuelven ANTES de exigir `result`.
+   *
+   * Mas abajo, un objeto sin `result` se dibuja como «generandose» — que es correcto para todo lo
+   * que lee del cache, y absurdo para un cuadro de texto: se quedaria esperando un job que nunca
+   * va a poblar algo que no pidio.
+   */
+  const conf = objeto.instance.configuracion;
+
   if (objeto.unresolvedObject || objeto.problems.length > 0) {
     return (
       <ObjetoRoto
@@ -52,6 +76,50 @@ export function ObjetoDeModulo({
         {...(objeto.unresolvedObject ? { unresolvedObject: objeto.unresolvedObject } : {})}
       />
     );
+  }
+
+  const elemento = conf as (ConfiguracionDeElemento & { objectId: string }) | undefined;
+  switch (objeto.instance.objectId) {
+    case 'cuadro-de-texto':
+      return (
+        <Marco titulo={titulo} instance={objeto.instance}>
+          <CuadroDeTexto config={elemento?.cuadroDeTexto} />
+        </Marco>
+      );
+    // Los cuatro siguientes van SIN marco: una linea, un conector, un titulo de seccion y una
+    // forma son trazos. Metidos en una tarjeta con borde y sombra dejan de separar, conectar,
+    // encabezar o senalar, y pasan a ser un bloque mas.
+    case 'titulo-de-seccion':
+      return <TituloDeSeccion config={elemento?.tituloDeSeccion} />;
+    case 'linea-divisoria':
+      return <LineaDivisoria config={elemento?.lineaDivisoria} />;
+    case 'forma':
+      return <FormaBasica config={elemento?.forma} />;
+    case 'conexion':
+      return <ConexionEnRejilla config={elemento?.conexion} />;
+    default:
+      break;
+  }
+
+  const contenedor = conf as (ConfiguracionDeContenedor & { objectId: string }) | undefined;
+  const dibujarHijo = (hijo: ObjetoSerializado) => (
+    <ObjetoDeModulo objeto={hijo} {...(onFiltrar ? { onFiltrar } : {})} />
+  );
+  const propsDeContenedor = { objeto, titulo, config: contenedor, dibujar: dibujarHijo };
+
+  switch (objeto.instance.objectId) {
+    case 'contenedor-simple':
+      return <ContenedorSimple {...propsDeContenedor} />;
+    case 'contenedor-desplazable':
+      return <ContenedorDesplazable {...propsDeContenedor} />;
+    case 'contenedor-lateral':
+      return <ContenedorLateral {...propsDeContenedor} />;
+    case 'contenedor-ampliable':
+      return <ContenedorAmpliable {...propsDeContenedor} />;
+    case 'contenedor-con-pestanas':
+      return <ContenedorConPestanas {...propsDeContenedor} />;
+    default:
+      break;
   }
 
   if (!objeto.result) return <ObjetoGenerandose titulo={titulo} />;

@@ -18,6 +18,15 @@ const MATERIA = { table: 'DimTribunal', field: 'Materia' };
 const TRIMESTRE = { table: 'DimTiempo', field: 'Trimestre' };
 const DATASET = 'casos-por-distrito-trimestre';
 
+/**
+ * El enlace de un objeto que no lee datos.
+ *
+ * El `datasetId` vacio no es un hueco por rellenar: es la declaracion de que este objeto no pide
+ * nada al cache. `datasetsConsumedBy` lo filtra, y por eso un modulo lleno de elementos no aparece
+ * degradado por un dataset inexistente.
+ */
+const SIN_DATOS = { datasetId: '', dimensions: [], measures: [] };
+
 export const modulosDemo: ModuleDefinition[] = [
   {
     moduleId: 'casos-pendientes',
@@ -365,6 +374,493 @@ export const modulosDemo: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Total nacional',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosPendientes'] },
+            },
+          },
+        ],
+      },
+    ],
+  },
+  /*
+   * Modulo de muestra de los objetos que no leen datos.
+   *
+   * Existe para que cada elemento y cada contenedor tenga un sitio donde verse funcionando, y no
+   * solo un tipo de TypeScript y una prueba. Es tambien lo que hace que una regresion en ellos se
+   * note: las pruebas de navegador abren este modulo, asi que un contenedor que deje de dibujarse
+   * rompe la suite en vez de descubrirse el dia que alguien lo use.
+   */
+  {
+    moduleId: 'composicion',
+    slug: 'composicion',
+    name: 'Composicion',
+    status: 'publicado',
+    version: 1,
+    createdAt: '2026-09-12T08:00:00.000Z',
+    updatedAt: '2026-09-12T08:00:00.000Z',
+    pages: [
+      {
+        pageId: 'p-elementos',
+        slug: 'elementos',
+        name: 'Elementos',
+        items: [
+          {
+            id: 'el-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'el-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo de seccion',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'titulo-de-seccion',
+                tituloDeSeccion: {
+                  texto: 'Texto, formas y separadores',
+                  posicionDelTexto: 'izquierda',
+                  linea: 'derecha',
+                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'el-texto',
+            position: { x: 0, y: 1, w: 5, h: 3 },
+            instance: {
+              instanceId: 'el-texto',
+              objectId: 'cuadro-de-texto',
+              version: '1.0.0',
+              title: 'Nota metodologica',
+              binding: SIN_DATOS,
+              presentacion: { icono: 'texto', acento: 'terciario' },
+              configuracion: {
+                objectId: 'cuadro-de-texto',
+                cuadroDeTexto: {
+                  parrafos: [
+                    { texto: 'Como leer este modulo', nivel: 1 },
+                    {
+                      texto:
+                        'Las cifras salen del dataset cacheado y estan filtradas por el ambito de quien mira.',
+                    },
+                    { texto: 'Los elementos de esta pagina no leen datos: componen.', vineta: true },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            id: 'el-forma-rect',
+            position: { x: 5, y: 1, w: 3, h: 3 },
+            instance: {
+              instanceId: 'el-forma-rect',
+              objectId: 'forma',
+              version: '1.0.0',
+              title: 'Rectangulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'forma',
+                forma: {
+                  forma: 'rectangulo',
+                  relleno: 'primario',
+                  opacidad: 12,
+                  radio: 12,
+                  texto: 'Rectangulo',
+                },
+              },
+            },
+          },
+          {
+            id: 'el-forma-circulo',
+            position: { x: 8, y: 1, w: 2, h: 3 },
+            instance: {
+              instanceId: 'el-forma-circulo',
+              objectId: 'forma',
+              version: '1.0.0',
+              title: 'Circulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'forma',
+                forma: { forma: 'circulo', relleno: 'secundario', opacidad: 25 },
+              },
+            },
+          },
+          {
+            id: 'el-forma-triangulo',
+            position: { x: 10, y: 1, w: 2, h: 3 },
+            instance: {
+              instanceId: 'el-forma-triangulo',
+              objectId: 'forma',
+              version: '1.0.0',
+              title: 'Triangulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'forma',
+                forma: { forma: 'triangulo', relleno: 'terciario', opacidad: 50 },
+              },
+            },
+          },
+          {
+            id: 'el-linea',
+            position: { x: 0, y: 4, w: 12, h: 1 },
+            instance: {
+              instanceId: 'el-linea',
+              objectId: 'linea-divisoria',
+              version: '1.0.0',
+              title: 'Separador',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'linea-divisoria',
+                lineaDivisoria: { orientacion: 'horizontal', estilo: 'discontinua', grosor: 2, color: 'atenuado' },
+              },
+            },
+          },
+          {
+            id: 'el-titulo-flujo',
+            position: { x: 0, y: 5, w: 12, h: 1 },
+            instance: {
+              instanceId: 'el-titulo-flujo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo centrado',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'titulo-de-seccion',
+                tituloDeSeccion: {
+                  texto: 'Conexiones',
+                  posicionDelTexto: 'centro',
+                  linea: 'ambos',
+                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'atenuado' },
+                },
+              },
+            },
+          },
+          {
+            id: 'flujo-origen',
+            position: { x: 0, y: 6, w: 3, h: 2 },
+            instance: {
+              instanceId: 'flujo-origen',
+              objectId: 'tarjeta-kpi',
+              version: '1.0.0',
+              title: 'Ingresados',
+              binding: { datasetId: DATASET, dimensions: [], measures: ['CasosIngresados'] },
+              presentacion: { icono: 'expediente', etiqueta: { texto: 'en el periodo', posicion: 'debajo' } },
+            },
+          },
+          {
+            /*
+             * El conector ocupa la celda ENTRE los dos, pero no se dibuja dentro de ella: se mide
+             * contra la rejilla y se traza de borde a borde. La celda solo dice donde vive el
+             * objeto en la disposicion guardada.
+             */
+            id: 'flujo-conexion',
+            position: { x: 3, y: 6, w: 3, h: 2 },
+            instance: {
+              instanceId: 'flujo-conexion',
+              objectId: 'conexion',
+              version: '1.0.0',
+              title: 'Conexion',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'conexion',
+                conexion: {
+                  desde: 'flujo-origen',
+                  hasta: 'flujo-destino',
+                  trazado: 'angulo',
+                  extremoFinal: 'flecha',
+                  texto: 'se resuelven',
+                  estiloDeLinea: { estilo: 'solida', grosor: 2, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'flujo-destino',
+            position: { x: 6, y: 6, w: 3, h: 2 },
+            instance: {
+              instanceId: 'flujo-destino',
+              objectId: 'tarjeta-kpi',
+              version: '1.0.0',
+              title: 'Resueltos',
+              binding: { datasetId: DATASET, dimensions: [], measures: ['CasosResueltos'] },
+              presentacion: { icono: 'balanza', acento: 'secundario', etiqueta: { texto: 'en el periodo', posicion: 'debajo' } },
+            },
+          },
+          {
+            id: 'el-linea-vertical',
+            position: { x: 9, y: 6, w: 1, h: 2 },
+            instance: {
+              instanceId: 'el-linea-vertical',
+              objectId: 'linea-divisoria',
+              version: '1.0.0',
+              title: 'Separador vertical',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'linea-divisoria',
+                lineaDivisoria: { orientacion: 'vertical', estilo: 'solida', grosor: 2, color: 'primario' },
+              },
+            },
+          },
+          {
+            id: 'el-forma-flecha',
+            position: { x: 10, y: 6, w: 2, h: 2 },
+            instance: {
+              instanceId: 'el-forma-flecha',
+              objectId: 'forma',
+              version: '1.0.0',
+              title: 'Flecha',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'forma',
+                forma: { forma: 'flecha', relleno: 'primario', opacidad: 75 },
+              },
+            },
+          },
+        ],
+      },
+      {
+        pageId: 'p-contenedores',
+        slug: 'contenedores',
+        name: 'Contenedores',
+        items: [
+          {
+            id: 'cont-simple',
+            position: { x: 0, y: 0, w: 6, h: 4 },
+            instance: {
+              instanceId: 'cont-simple',
+              objectId: 'contenedor-simple',
+              version: '1.0.0',
+              title: 'Contenedor simple',
+              binding: SIN_DATOS,
+              presentacion: { icono: 'contenedor', subtitulo: 'Rejilla propia de seis columnas' },
+              configuracion: {
+                objectId: 'contenedor-simple',
+                simple: { columnas: 6 },
+                paneles: [
+                  {
+                    panelId: 'p1',
+                    nombre: 'Contenido',
+                    items: [
+                      {
+                        id: 'cs-kpi',
+                        position: { x: 0, y: 0, w: 3, h: 2 },
+                        instance: {
+                          instanceId: 'cs-kpi',
+                          objectId: 'tarjeta-kpi',
+                          version: '1.0.0',
+                          title: 'Pendientes',
+                          binding: { datasetId: DATASET, dimensions: [], measures: ['CasosPendientes'] },
+                        },
+                      },
+                      {
+                        id: 'cs-texto',
+                        position: { x: 3, y: 0, w: 3, h: 2 },
+                        instance: {
+                          instanceId: 'cs-texto',
+                          objectId: 'cuadro-de-texto',
+                          version: '1.0.0',
+                          title: 'Nota',
+                          binding: SIN_DATOS,
+                          configuracion: {
+                            objectId: 'cuadro-de-texto',
+                            cuadroDeTexto: { parrafos: [{ texto: 'Un elemento y una visual, juntos.' }] },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          {
+            id: 'cont-desplazable',
+            position: { x: 6, y: 0, w: 6, h: 4 },
+            instance: {
+              instanceId: 'cont-desplazable',
+              objectId: 'contenedor-desplazable',
+              version: '1.0.0',
+              title: 'Contenedor desplazable',
+              binding: SIN_DATOS,
+              presentacion: { icono: 'contenedor', subtitulo: 'Se desplaza solo en vertical' },
+              configuracion: {
+                objectId: 'contenedor-desplazable',
+                desplazable: { eje: 'y', columnas: 4 },
+                paneles: [
+                  {
+                    panelId: 'p1',
+                    nombre: 'Contenido',
+                    items: [
+                      {
+                        id: 'cd-tabla',
+                        position: { x: 0, y: 0, w: 4, h: 6 },
+                        instance: {
+                          instanceId: 'cd-tabla',
+                          objectId: 'tabla',
+                          version: '1.1.0',
+                          title: 'Detalle',
+                          binding: {
+                            datasetId: DATASET,
+                            dimensions: [DISTRITO, MATERIA],
+                            measures: ['CasosPendientes'],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          {
+            id: 'cont-pestanas',
+            position: { x: 0, y: 4, w: 8, h: 5 },
+            instance: {
+              instanceId: 'cont-pestanas',
+              objectId: 'contenedor-con-pestanas',
+              version: '1.0.0',
+              title: 'Contenedor con pestanas',
+              binding: SIN_DATOS,
+              presentacion: { icono: 'pestanas', subtitulo: 'Cada pestana con su propia disposicion' },
+              configuracion: {
+                objectId: 'contenedor-con-pestanas',
+                pestanas: { columnas: 6, pestanaInicial: 'p1' },
+                paneles: [
+                  {
+                    panelId: 'p1',
+                    nombre: 'Por distrito',
+                    items: [
+                      {
+                        id: 'cp-barras',
+                        position: { x: 0, y: 0, w: 6, h: 4 },
+                        instance: {
+                          instanceId: 'cp-barras',
+                          objectId: 'barras',
+                          version: '1.1.0',
+                          title: 'Pendientes por distrito',
+                          binding: {
+                            datasetId: DATASET,
+                            dimensions: [DISTRITO],
+                            measures: ['CasosPendientes'],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    panelId: 'p2',
+                    nombre: 'Por materia',
+                    items: [
+                      {
+                        id: 'cp-kpi',
+                        position: { x: 0, y: 0, w: 2, h: 2 },
+                        instance: {
+                          instanceId: 'cp-kpi',
+                          objectId: 'tarjeta-kpi',
+                          version: '1.0.0',
+                          title: 'Resueltos',
+                          binding: { datasetId: DATASET, dimensions: [], measures: ['CasosResueltos'] },
+                        },
+                      },
+                      {
+                        id: 'cp-matriz',
+                        position: { x: 2, y: 0, w: 4, h: 4 },
+                        instance: {
+                          instanceId: 'cp-matriz',
+                          objectId: 'matriz',
+                          version: '1.1.0',
+                          title: 'Materia por trimestre',
+                          binding: {
+                            datasetId: DATASET,
+                            dimensions: [MATERIA, TRIMESTRE],
+                            measures: ['CasosPendientes'],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          {
+            id: 'cont-lateral',
+            position: { x: 8, y: 4, w: 4, h: 5 },
+            instance: {
+              instanceId: 'cont-lateral',
+              objectId: 'contenedor-lateral',
+              version: '1.0.0',
+              title: 'Panel lateral',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'contenedor-lateral',
+                lateral: { lado: 'derecha', tamano: 260, columnas: 2, inicialmenteAbierto: true },
+                paneles: [
+                  {
+                    panelId: 'p1',
+                    nombre: 'Contexto',
+                    items: [
+                      {
+                        id: 'cl-texto',
+                        position: { x: 0, y: 0, w: 2, h: 3 },
+                        instance: {
+                          instanceId: 'cl-texto',
+                          objectId: 'cuadro-de-texto',
+                          version: '1.0.0',
+                          title: 'Contexto',
+                          binding: SIN_DATOS,
+                          configuracion: {
+                            objectId: 'cuadro-de-texto',
+                            cuadroDeTexto: {
+                              parrafos: [
+                                { texto: 'Se ancla a un borde y puede salirse de la rejilla.' },
+                                { texto: 'Como mucho uno por lado y modulo.', vineta: true },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          {
+            id: 'cont-ampliable',
+            position: { x: 0, y: 9, w: 12, h: 4 },
+            instance: {
+              instanceId: 'cont-ampliable',
+              objectId: 'contenedor-ampliable',
+              version: '1.0.0',
+              title: 'Contenedor ampliable',
+              binding: SIN_DATOS,
+              presentacion: { icono: 'expandir', subtitulo: 'La ventana tiene su propia rejilla' },
+              configuracion: {
+                objectId: 'contenedor-ampliable',
+                ampliable: { columnas: 6, columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' },
+                paneles: [
+                  {
+                    panelId: 'p1',
+                    nombre: 'Contenido',
+                    items: [
+                      {
+                        id: 'ca-lineas',
+                        position: { x: 0, y: 0, w: 6, h: 3 },
+                        instance: {
+                          instanceId: 'ca-lineas',
+                          objectId: 'lineas',
+                          version: '1.0.0',
+                          title: 'Pendientes por trimestre',
+                          binding: {
+                            datasetId: DATASET,
+                            dimensions: [TRIMESTRE],
+                            measures: ['CasosPendientes'],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
             },
           },
         ],

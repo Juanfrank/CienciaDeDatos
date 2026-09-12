@@ -12,6 +12,8 @@ import {
   validarRanuras,
   validateAttachments,
   validateBinding,
+  noConsumeDatos,
+  validarContenedor,
 } from '@app/ui-components';
 import type { ModuleDefinition } from './ModuleDefinition';
 import { type GridProblem, validateLayout } from './grid';
@@ -157,6 +159,35 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         continue;
       }
       const contrato = version.dataContract;
+
+      /*
+       * Un objeto que no consume datos no tiene dataset que comprobar.
+       *
+       * Sin esta salida, un cuadro de texto o un contenedor se marcaria roto por no encontrar en
+       * el cache un dataset que nunca pidio — y el modulo entero apareceria con avisos por los
+       * objetos que precisamente no dependen de que el job haya corrido.
+       */
+      if (noConsumeDatos(contrato)) {
+        // Se comprueba lo que SI tiene sentido sin dataset: los complementos y la presentacion.
+        // Saltarselo todo dejaria a estos objetos como los unicos donde un icono inexistente o un
+        // acento que no es rol del tema se descubre al dibujar.
+        diagnostico.bindingProblems = [
+          ...validateAttachments(instance, (objectId) => registry.get(objectId)),
+          ...validarPresentacion(instance.presentacion, version.presentation).map((p) => ({
+            slot: `presentacion.${p.clave}`,
+            kind: 'contrato-incumplido' as const,
+            problem: p.problema,
+          })),
+          ...validarContenedor(item.id, instance).map((p) => ({
+            slot: p.slot,
+            kind: 'contrato-incumplido' as const,
+            problem: p.problema,
+          })),
+        ];
+        diagnostico.broken = diagnostico.bindingProblems.length > 0;
+        items.push(diagnostico);
+        continue;
+      }
 
       const columnasCrudas = columnsByDataset[instance.binding.datasetId];
       if (!columnasCrudas) {

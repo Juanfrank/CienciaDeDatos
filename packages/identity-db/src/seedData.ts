@@ -96,6 +96,10 @@ export const seedNavNodes: NavNodeRow[] = [
   carpeta('nodo-este', 'Distrito Este', 'nodo-regional', 1, 'sc-este'),
   modulo('nodo-m-casos-norte', 'Casos pendientes', 'casos-pendientes', 'casos-pendientes', 'nodo-norte', 0),
   modulo('nodo-m-audiencias', 'Audiencias', 'audiencias', 'audiencias', 'nodo-norte', 1),
+  // Modulo de muestra de los objetos que no leen datos. Vive dentro de lo concedido al equipo
+  // Norte para que se pueda abrir sin tocar permisos: ensenar un catalogo al que nadie llega es
+  // la forma mas facil de que nadie sepa que existe.
+  modulo('nodo-m-composicion', 'Composicion', 'composicion', 'composicion', 'nodo-norte', 2),
   modulo('nodo-m-casos-este', 'Casos pendientes Este', 'casos-este', 'casos-este', 'nodo-este', 0),
   modulo('nodo-m-nacional', 'Estadisticas nacionales', 'estadisticas', 'estadisticas', 'nodo-institucional', 1),
 ];

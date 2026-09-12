@@ -1,5 +1,7 @@
 import type { Agregacion, FieldRef } from '@app/data-contracts';
 import type { ClaveDePresentacion, PresentacionDeObjeto } from '../presentacion/contrato';
+import type { ConfiguracionDeContenedor, IdDeContenedor } from '../presentacion/contenedores';
+import type { ConfiguracionDeElemento, IdDeElemento } from '../presentacion/elementos';
 import type { ConfiguracionDePanelDeFiltros } from '../presentacion/panelDeFiltros';
 import type { AsignacionDeRanuras, RanuraDeCampos } from '../presentacion/pozos';
 
@@ -17,7 +19,15 @@ import type { AsignacionDeRanuras, RanuraDeCampos } from '../presentacion/pozos'
  * adjuntan a otro objeto y complementan lo que ese objeto muestra. Un complemento suelto no
  * significa nada, y por eso el registro rechaza colocarlo como objeto independiente.
  */
-export type ObjectCategory = 'grafico' | 'tabla' | 'indicador' | 'filtro' | 'mapa' | 'complemento';
+export type ObjectCategory =
+  | 'grafico'
+  | 'tabla'
+  | 'indicador'
+  | 'filtro'
+  | 'mapa'
+  | 'complemento'
+  | 'elemento'
+  | 'contenedor';
 
 /**
  * Que necesita un objeto de un dataset para poder dibujarse.
@@ -224,6 +234,21 @@ export interface ObjectInstance {
 }
 
 /** Configuracion especifica de un tipo de objeto. Anadir un tipo anade un miembro aqui. */
-export type ConfiguracionDeObjeto = {
-  objectId: 'panel-de-filtros';
-} & ConfiguracionDePanelDeFiltros;
+export type ConfiguracionDeObjeto =
+  | ({ objectId: 'panel-de-filtros' } & ConfiguracionDePanelDeFiltros)
+  | ({ objectId: IdDeElemento } & ConfiguracionDeElemento)
+  | ({ objectId: IdDeContenedor } & ConfiguracionDeContenedor);
+
+/**
+ * Si un objeto no necesita ningun dataset.
+ *
+ * Se DEDUCE del contrato —cero dimensiones y cero medidas— y no de un campo aparte. Un
+ * interruptor `sinDatos` seria una segunda fuente de verdad sobre lo mismo, y el dia que discrepara
+ * del contrato la validacion pediria un dataset a un objeto que no tiene donde ponerlo, o al
+ * reves: dejaria pasar un grafico sin cache poblada.
+ *
+ * Lo consultan la validacion de modulo, la lista de datasets consumidos y el lector del cache, que
+ * son los tres sitios donde antes se daba por hecho que todo objeto se enlaza a algo.
+ */
+export const noConsumeDatos = (contrato: ObjectDataContract): boolean =>
+  contrato.dimensions.max === 0 && contrato.measures.max === 0;

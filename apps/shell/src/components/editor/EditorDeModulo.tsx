@@ -10,6 +10,7 @@ import type {
   PublishBlocker,
 } from '@app/module-model';
 import { findFreeSlot } from '@app/module-model';
+import { configuracionInicial } from '@app/ui-components';
 import type { PaletaDelEditor } from '../../server/editor';
 import type { ObjetoSerializado } from '../../server/serializar';
 import { Lienzo } from './Lienzo';
@@ -120,8 +121,18 @@ export function EditorDeModulo({
 
   const anadir = async (objectId: string) => {
     const definicion = paleta.objetos.find((o) => o.objectId === objectId);
+    if (!definicion) return;
+    /*
+     * Un elemento o un contenedor no necesita dataset, y por eso no se exige uno.
+     *
+     * Antes la funcion salia si `paleta.datasets[0]` no existia. Eso era correcto cuando todo lo
+     * que se podia colocar leia datos; hoy significaria que en un espacio sin datasets poblados no
+     * se puede ni poner un cuadro de texto, que es justo lo que uno pone mientras espera.
+     */
+    const config = configuracionInicial(objectId);
+    const sinDatos = definicion.dimensiones.max === 0 && definicion.medidas.max === 0;
     const dataset = paleta.datasets[0];
-    if (!definicion || !dataset) return;
+    if (!sinDatos && !dataset) return;
 
     const id = `obj-${crypto.randomUUID().slice(0, 8)}`;
     // `findFreeSlot` busca el primer hueco de la rejilla en vez de apilar al final. Existia desde
@@ -138,12 +149,15 @@ export function EditorDeModulo({
         version: definicion.version,
         title: definicion.name,
         binding: {
-          datasetId: dataset.datasetId,
+          // Cadena vacia cuando no consume datos: es lo que lee `datasetsConsumedBy` para no
+          // pedirle al cache un dataset que este objeto nunca declaro.
+          datasetId: sinDatos ? '' : (dataset?.datasetId ?? ''),
           // Se mapea el minimo que exige el contrato: asi el objeto nace valido y dibujando algo,
           // no bloqueando y en blanco.
-          dimensions: dataset.dimensiones.slice(0, definicion.dimensiones.min).map(aFieldRef),
-          measures: dataset.medidas.slice(0, definicion.medidas.min),
+          dimensions: (dataset?.dimensiones ?? []).slice(0, definicion.dimensiones.min).map(aFieldRef),
+          measures: (dataset?.medidas ?? []).slice(0, definicion.medidas.min),
         },
+        ...(config ? { configuracion: config } : {}),
       },
     };
 
