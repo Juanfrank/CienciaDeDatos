@@ -1383,7 +1383,17 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 .admin__principal h3 { margin: var(--space-lg) 0 var(--space-xs); }
 .admin__principal h4 { margin: var(--space-md) 0 var(--space-xs); }
 
-.editor__cuerpo { flex: 1; padding: var(--space-lg); max-width: 1100px; min-width: 0; }
+/*
+ * El cuerpo del editor ocupa el ancho disponible.
+ *
+ * Tenia un tope de 1100 px pensado para la LISTA de modulos, que es una tabla y se lee peor cuanto
+ * mas larga es la linea. Al convertirse el editor en un lienzo, ese mismo tope dejaba cuatrocientos
+ * pixeles en blanco a la derecha del panel en una pantalla normal: espacio que el modulo que se
+ * esta construyendo podria estar usando. El tope se conserva donde tenia sentido —la lista— con
+ * `.editor__lista`.
+ */
+.editor__cuerpo { flex: 1; padding: var(--space-lg); min-width: 0; }
+.editor__lista { max-width: 1100px; }
 .editor__cuerpo h2 { margin-bottom: var(--space-md); }
 .editor__crear {
   display: flex;
@@ -1473,13 +1483,23 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   inset: 0;
   display: grid;
   grid-template-columns: repeat(var(--rejilla-columnas), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rejilla-filas), minmax(56px, 1fr));
   gap: var(--space-md);
   pointer-events: none;
   z-index: 0;
 }
+
+/*
+ * Una celda por cruce de columna y fila, con borde en los cuatro lados.
+ *
+ * La primera version dibujaba una franja por columna, con borde solo a izquierda y derecha: se
+ * veian las lineas verticales y ninguna horizontal, asi que la rejilla parecia de doce columnas y
+ * altura libre. No lo es — la posicion guardada lleva `y` y `h`, y el alto se mide en filas—, y
+ * sin las horizontales no habia forma de ver cuantas filas ocupa un bloque ni donde empieza el
+ * siguiente.
+ */
 .lienzo__guia {
-  border-left: 1px dashed var(--md-sys-color-outline-variant);
-  border-right: 1px dashed var(--md-sys-color-outline-variant);
+  border: 1px dashed var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-extra-small);
 }
 
@@ -1558,10 +1578,40 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   box-shadow: var(--md-sys-elevation-1);
   overflow: hidden;
 }
-.panel-editor__pestanas {
+.panel-editor__barra {
   display: flex;
+  align-items: stretch;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
+
+/*
+ * El carril de pestanas se desplaza; no se encoge.
+ *
+ * `flex: 1` con `overflow-x: auto` y `scrollbar-width: none`: las pestanas conservan su ancho y lo
+ * que no cabe se alcanza con los chevrones o con las flechas del teclado. Encogerlas hasta que
+ * quepan habria cortado los rotulos y convertido la barra en iconos sin nombre.
+ */
+.panel-editor__pestanas {
+  flex: 1;
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+.panel-editor__pestanas::-webkit-scrollbar { display: none; }
+
+/* Estrecho, como pide un control que solo desplaza: no compite con las pestanas. */
+.panel-editor__chevron {
+  flex-shrink: 0;
+  width: 20px;
+  border: none;
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.panel-editor__chevron:hover { background: var(--md-sys-color-surface-container); }
 
 /*
  * Pestana de MD3: indicador abajo, no un fondo.
@@ -1569,13 +1619,21 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * Un fondo relleno la confundiria con un boton pulsado, y aqui hay botones pulsables justo
  * debajo. El indicador de 3 px es lo que MD3 usa para «esta es la vista actual».
  */
+/*
+ * Cada pestana mide lo que su texto.
+ *
+ * Con un ancho minimo fijo, «Complementos» se cortaba a media palabra dentro de su boton — y una
+ * pestana cuyo rotulo no se lee entero no cumple su unica funcion. Al vivir en un carril que se
+ * desplaza, pueden ocupar lo que necesiten: lo que sobra se alcanza con los chevrones.
+ */
 .panel-editor__pestana {
-  flex: 1;
+  flex: 0 0 auto;
+  white-space: nowrap;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: var(--space-sm) var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
   border: none;
   border-bottom: 3px solid transparent;
   background: transparent;
@@ -1593,15 +1651,205 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   opacity: var(--md-sys-state-disabled-opacity);
   cursor: not-allowed;
 }
+/*
+ * El cuerpo se desplaza DENTRO del panel, y el panel se queda pegado arriba.
+ *
+ * Con cuatro pestanas y secciones desplegadas, el contenido pasa de largo la altura de la
+ * pantalla. Sin tope, el panel estiraba la pagina y las pestanas se quedaban arriba del todo:
+ * para cambiar de pestana habia que subir. Con `sticky` y un alto acotado a la ventana, las
+ * pestanas estan siempre donde se las dejo y lo que se desplaza es lo de dentro.
+ *
+ * `calc(100vh - 7rem)` reserva lo que ocupan las dos cabeceras; no es exacto ni falta que lo sea:
+ * es el alto por debajo del cual empieza a desplazarse.
+ */
+.panel-editor {
+  position: sticky;
+  top: var(--space-md);
+  max-height: calc(100vh - 7rem);
+}
 .panel-editor__cuerpo {
+  flex: 1;
+  min-height: 0;
   padding: var(--space-md);
   overflow-y: auto;
-  max-height: 70vh;
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
 .panel-editor__nota { font-size: var(--md-sys-typescale-body-small-size); }
+.panel-editor__adjuntos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-sm); }
+
+/* ---- Secciones colapsables ---- */
+
+.seccion {
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-surface-container-low);
+}
+.seccion[data-nivel='2'] { background: var(--md-sys-color-surface-container-lowest); }
+
+/*
+ * El triangulo nativo se sustituye por uno propio para poder colocarlo a la izquierda y girarlo.
+ * `list-style: none` mas la regla `::-webkit-details-marker` cubren los dos motores.
+ */
+.seccion__titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  list-style: none;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  color: var(--md-sys-color-on-surface);
+}
+.seccion__titulo::-webkit-details-marker { display: none; }
+.seccion__titulo::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.seccion[open] > .seccion__titulo::before { transform: rotate(90deg); }
+.seccion[data-nivel='2'] > .seccion__titulo {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.seccion__cuerpo {
+  padding: 0 var(--space-md) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ---- Pozos de campos ---- */
+
+.pozo { position: relative; }
+.pozo__etiqueta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-xs);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  color: var(--md-sys-color-on-surface-variant);
+}
+/*
+ * Sin `opacity`.
+ *
+ * Llevaba `opacity: 0.7` para que el contador pesara menos que el rotulo, y eso bajaba el par de
+ * `on-surface-variant` de 4.66:1 a 3.85:1. Es el fallo que la puerta de contraste de 4.3 NO puede
+ * atrapar: comprueba los pares de roles, y una opacidad encima altera el color despues de que los
+ * haya comprobado. Si algo tiene que pesar menos, se baja de rol tipografico, no se difumina.
+ */
+.pozo__cupo { font-variant-numeric: tabular-nums; }
+.pozo__ayuda {
+  margin: 0 0 var(--space-xs);
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.pozo__chiclets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  align-items: stretch;
+}
+
+/*
+ * Apilados en vertical, no en fila.
+ *
+ * Un nombre de campo es `Tabla.Campo` y no cabe dos veces en 300 px: en horizontal se cortarian o
+ * la fila se desbordaria. En vertical cada uno se lee entero, y el orden de arriba abajo es el
+ * mismo que el objeto consume.
+ */
+.chiclet {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  min-height: 32px;
+  padding: 0 4px 0 10px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+.chiclet__nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chiclet__quitar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.chiclet__quitar:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
+
+.chiclet--anadir {
+  justify-content: center;
+  padding: 0;
+  border-style: dashed;
+  border-color: var(--md-sys-color-outline);
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  font-size: 1.125rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+}
+.chiclet--anadir:hover:not(:disabled) { background: var(--md-sys-color-primary-container); }
+.chiclet--anadir:disabled { opacity: var(--md-sys-state-disabled-opacity); cursor: not-allowed; }
+
+.pozo__emergente {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  margin-top: var(--space-xs);
+  padding: var(--space-sm);
+  background: var(--md-sys-color-surface-container-high);
+  border-radius: var(--md-sys-shape-corner-medium);
+  box-shadow: var(--md-sys-elevation-2);
+}
+.pozo__buscar {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 var(--space-sm);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
+  font: inherit;
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+.pozo__candidatos {
+  list-style: none;
+  margin: var(--space-xs) 0 0;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+.pozo__candidatos label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 4px 2px;
+  cursor: pointer;
+}
 .panel-editor__pasos { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
 .panel-editor__pasos .md-chip { font-size: var(--md-sys-typescale-label-medium-size); padding: 0 10px; }
 
@@ -1670,24 +1918,18 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   color: var(--md-sys-color-on-surface-variant);
 }
 
+/*
+ * La presentacion es una pila de subsecciones, no una rejilla.
+ *
+ * Era una rejilla de columnas de 180 px pensada para la ficha ancha del editor anterior. En un
+ * panel de 300 px esa rejilla se resuelve siempre en una columna, asi que lo unico que aportaba
+ * era complejidad; y los siete controles apilados sin agrupar obligaban a recorrerlos todos para
+ * encontrar uno.
+ */
 .editor__presentacion {
-  grid-column: 1 / -1;
-  margin: var(--space-md) 0 0;
-  padding: var(--space-md);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--md-sys-shape-corner-small);
-  background: var(--md-sys-color-surface-container-low);
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-sm) var(--space-md);
-  align-items: end;
-}
-.editor__presentacion legend {
-  font-size: var(--md-sys-typescale-label-medium-size);
-  font-weight: var(--md-sys-typescale-label-medium-weight);
-  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
-  color: var(--md-sys-color-on-surface-variant);
-  padding: 0 var(--space-xs);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 .editor__interruptor {
   display: flex;
@@ -2096,8 +2338,9 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
    * el panel queda a un desplazamiento de distancia, que es lo que se puede ofrecer a ese ancho.
    */
   .editor__banco { flex-direction: column; }
-  .panel-editor { width: 100%; }
-  .panel-editor__cuerpo { max-height: none; }
+  /* Apilado, un panel pegado taparia el lienzo: en movil vuelve a fluir con la pagina. */
+  .panel-editor { width: 100%; position: static; max-height: none; }
+  .panel-editor__cuerpo { overflow-y: visible; }
   .emergente { max-width: 96vw; }
 }
 

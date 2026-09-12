@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   ACENTOS,
@@ -13,8 +13,9 @@ import {
   type NombreDeIcono,
   type PresentacionDeObjeto,
   type TipoDeSelector,
-} from '@app/ui-components';
-import { Icono } from '../iconos/Icono';
+} from "@app/ui-components";
+import { Icono } from "../iconos/Icono";
+import { Seccion } from "./Seccion";
 
 /**
  * Personalizacion de un objeto DESDE el editor — secciones 4.2 y 4.3.
@@ -52,84 +53,111 @@ export function Presentacion({
   const prueba = `pres-${instance.instanceId}`;
 
   const poner = (parcial: Partial<PresentacionDeObjeto>) =>
-    onCambiar((i) => ({ ...i, presentacion: { ...i.presentacion, ...parcial } }));
+    onCambiar((i) => ({
+      ...i,
+      presentacion: { ...i.presentacion, ...parcial },
+    }));
+
+  /*
+   * Subsecciones, no una tira de veinte controles.
+   *
+   * En un panel de 300 px la rejilla se resuelve en una columna, asi que los siete controles se
+   * apilan: quien busca «decimales» recorre todo lo demas primero. Agrupados por lo que hacen
+   * —como se rotula, como se formatea la cifra, que muestra el grafico— cada grupo se pliega y lo
+   * que no interesa deja de ocupar sitio.
+   *
+   * Los grupos que un objeto no admite no se dibujan: una tabla no tiene «Grafico».
+   */
+  const hayCifra = admite("formato");
+  const hayGrafico = admite("leyenda") || admite("etiquetasDeDato");
 
   return (
-    <fieldset className="editor__presentacion" data-testid={prueba}>
-      <legend>Presentacion</legend>
+    <div className="editor__presentacion" data-testid={prueba}>
+      <Seccion titulo="Rotulo" nivel={2} prueba={`${prueba}-rotulo`}>
+        {admite("icono") ? (
+          <label className="formulario__campo">
+            <span>Icono</span>
+            <span className="editor__icono-elegido">
+              {p.icono ? <Icono nombre={p.icono} tamano={18} /> : null}
+              <select
+                value={p.icono ?? ""}
+                disabled={guardando}
+                data-testid={`${prueba}-icono`}
+                onChange={(e) =>
+                  poner({
+                    icono: (e.target.value || undefined) as
+                      | NombreDeIcono
+                      | undefined,
+                  })
+                }
+              >
+                <option value="">(el de su tipo)</option>
+                {ICONOS_DE_OBJETO.map((nombre) => (
+                  <option key={nombre} value={nombre}>
+                    {nombre}
+                  </option>
+                ))}
+              </select>
+            </span>
+          </label>
+        ) : null}
 
-      {admite('icono') ? (
-        <label className="formulario__campo">
-          <span>Icono</span>
-          <span className="editor__icono-elegido">
-            {p.icono ? <Icono nombre={p.icono} tamano={18} /> : null}
+        {admite("acento") ? (
+          <label className="formulario__campo">
+            <span>Acento</span>
             <select
-              value={p.icono ?? ''}
+              value={p.acento ?? "primario"}
               disabled={guardando}
-              data-testid={`${prueba}-icono`}
+              data-testid={`${prueba}-acento`}
               onChange={(e) =>
-                poner({ icono: (e.target.value || undefined) as NombreDeIcono | undefined })
+                poner({ acento: e.target.value as AcentoDeObjeto })
               }
             >
-              <option value="">(el de su tipo)</option>
-              {ICONOS_DE_OBJETO.map((nombre) => (
-                <option key={nombre} value={nombre}>
-                  {nombre}
+              {ACENTOS.map((a) => (
+                <option key={a} value={a}>
+                  {a}
                 </option>
               ))}
             </select>
-          </span>
-        </label>
-      ) : null}
+          </label>
+        ) : null}
 
-      {admite('acento') ? (
-        <label className="formulario__campo">
-          <span>Acento</span>
-          <select
-            value={p.acento ?? 'primario'}
-            disabled={guardando}
-            data-testid={`${prueba}-acento`}
-            onChange={(e) => poner({ acento: e.target.value as AcentoDeObjeto })}
-          >
-            {ACENTOS.map((a) => (
-              <option key={a} value={a}>
-                {a}
-              </option>
-            ))}
-          </select>
-        </label>
-      ) : null}
+        {admite("resaltado") ? (
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.resaltado === true}
+              disabled={guardando}
+              data-testid={`${prueba}-resaltado`}
+              onChange={(e) => poner({ resaltado: e.target.checked })}
+            />{" "}
+            Linea de resaltado
+          </label>
+        ) : null}
 
-      {admite('resaltado') ? (
-        <label className="editor__interruptor">
-          <input
-            type="checkbox"
-            checked={p.resaltado === true}
-            disabled={guardando}
-            data-testid={`${prueba}-resaltado`}
-            onChange={(e) => poner({ resaltado: e.target.checked })}
-          />{' '}
-          Linea de resaltado
-        </label>
-      ) : null}
+        {admite("subtitulo") ? (
+          <label className="formulario__campo">
+            <span>Subtitulo</span>
+            <input
+              defaultValue={p.subtitulo ?? ""}
+              maxLength={80}
+              disabled={guardando}
+              data-testid={`${prueba}-subtitulo`}
+              // `onBlur` y no `onChange`: cada cambio guarda el modulo entero contra el servidor, y
+              // con `onChange` eso serian tantas escrituras como letras se teclean.
+              onBlur={(e) => poner({ subtitulo: e.target.value || undefined })}
+            />
+          </label>
+        ) : null}
+      </Seccion>
 
-      {admite('subtitulo') ? (
-        <label className="formulario__campo">
-          <span>Subtitulo</span>
-          <input
-            defaultValue={p.subtitulo ?? ''}
-            maxLength={80}
-            disabled={guardando}
-            data-testid={`${prueba}-subtitulo`}
-            // `onBlur` y no `onChange`: cada cambio guarda el modulo entero contra el servidor, y
-            // con `onChange` eso serian tantas escrituras como letras se teclean.
-            onBlur={(e) => poner({ subtitulo: e.target.value || undefined })}
-          />
-        </label>
-      ) : null}
-
-      {admite('formato') ? (
-        <>
+      {hayCifra ? (
+        <Seccion
+          titulo="Cifra"
+          nivel={2}
+          abierta={false}
+          prueba={`${prueba}-cifra`}
+        >
           <label className="formulario__campo">
             <span>Decimales</span>
             <select
@@ -137,7 +165,9 @@ export function Presentacion({
               disabled={guardando}
               data-testid={`${prueba}-decimales`}
               onChange={(e) =>
-                poner({ formato: { ...p.formato, decimales: Number(e.target.value) } })
+                poner({
+                  formato: { ...p.formato, decimales: Number(e.target.value) },
+                })
               }
             >
               {[0, 1, 2, 3, 4].map((d) => (
@@ -150,11 +180,18 @@ export function Presentacion({
           <label className="formulario__campo">
             <span>Unidad</span>
             <input
-              defaultValue={p.formato?.unidad ?? ''}
+              defaultValue={p.formato?.unidad ?? ""}
               maxLength={8}
               disabled={guardando}
               data-testid={`${prueba}-unidad`}
-              onBlur={(e) => poner({ formato: { ...p.formato, unidad: e.target.value || undefined } })}
+              onBlur={(e) =>
+                poner({
+                  formato: {
+                    ...p.formato,
+                    unidad: e.target.value || undefined,
+                  },
+                })
+              }
             />
           </label>
           <label className="editor__interruptor">
@@ -163,53 +200,68 @@ export function Presentacion({
               checked={p.formato?.compacto === true}
               disabled={guardando}
               data-testid={`${prueba}-compacto`}
-              onChange={(e) => poner({ formato: { ...p.formato, compacto: e.target.checked } })}
-            />{' '}
+              onChange={(e) =>
+                poner({ formato: { ...p.formato, compacto: e.target.checked } })
+              }
+            />{" "}
             Compacto (12.5 k)
           </label>
-        </>
+        </Seccion>
       ) : null}
 
-      {admite('leyenda') ? (
-        <label className="formulario__campo">
-          <span>Leyenda</span>
-          <select
-            value={p.leyenda ?? 'auto'}
-            disabled={guardando}
-            data-testid={`${prueba}-leyenda`}
-            onChange={(e) => poner({ leyenda: e.target.value as ModoDeLeyenda })}
-          >
-            {MODOS_DE_LEYENDA.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-        </label>
+      {hayGrafico ? (
+        <Seccion
+          titulo="Grafico"
+          nivel={2}
+          abierta={false}
+          prueba={`${prueba}-grafico`}
+        >
+          {admite("leyenda") ? (
+            <label className="formulario__campo">
+              <span>Leyenda</span>
+              <select
+                value={p.leyenda ?? "auto"}
+                disabled={guardando}
+                data-testid={`${prueba}-leyenda`}
+                onChange={(e) =>
+                  poner({ leyenda: e.target.value as ModoDeLeyenda })
+                }
+              >
+                {MODOS_DE_LEYENDA.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+
+          {admite("etiquetasDeDato") ? (
+            <label className="editor__interruptor">
+              <input
+                type="checkbox"
+                checked={p.etiquetasDeDato === true}
+                disabled={guardando}
+                data-testid={`${prueba}-etiquetas`}
+                onChange={(e) => poner({ etiquetasDeDato: e.target.checked })}
+              />{" "}
+              Cifra sobre cada barra
+            </label>
+          ) : null}
+        </Seccion>
       ) : null}
 
-      {admite('etiquetasDeDato') ? (
-        <label className="editor__interruptor">
-          <input
-            type="checkbox"
-            checked={p.etiquetasDeDato === true}
-            disabled={guardando}
-            data-testid={`${prueba}-etiquetas`}
-            onChange={(e) => poner({ etiquetasDeDato: e.target.checked })}
-          />{' '}
-          Cifra sobre cada barra
-        </label>
-      ) : null}
-
-      {instance.objectId === 'panel-de-filtros' ? (
-        <SelectoresDelPanel
+      {instance.objectId === "panel-de-filtros" ? (
+        <Seccion titulo="Selectores" nivel={2} prueba={`${prueba}-selectores`}>
+          <SelectoresDelPanel
           instance={instance}
           tipos={tipos}
           guardando={guardando}
-          onCambiar={onCambiar}
-        />
+            onCambiar={onCambiar}
+          />
+        </Seccion>
       ) : null}
-    </fieldset>
+    </div>
   );
 }
 
@@ -232,24 +284,31 @@ function SelectoresDelPanel({
   onCambiar: (cambio: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
   const configuracion =
-    instance.configuracion?.objectId === 'panel-de-filtros' ? instance.configuracion : undefined;
+    instance.configuracion?.objectId === "panel-de-filtros"
+      ? instance.configuracion
+      : undefined;
   const efectivos = selectoresEfectivos(instance, configuracion, tipos);
   const prueba = `selectores-${instance.instanceId}`;
 
   const ponerTipo = (campo: string, tipo: TipoDeSelector) =>
     onCambiar((i) => {
-      const previos = (i.configuracion?.objectId === 'panel-de-filtros'
-        ? i.configuracion.selectores
-        : []
+      const previos = (
+        i.configuracion?.objectId === "panel-de-filtros"
+          ? i.configuracion.selectores
+          : []
       ).filter((s) => s.campo !== campo);
       const anterior = efectivos.find((s) => s.campo === campo);
       return {
         ...i,
         configuracion: {
-          objectId: 'panel-de-filtros',
+          objectId: "panel-de-filtros",
           selectores: [
             ...previos,
-            { campo, tipo, ...(anterior?.etiqueta ? { etiqueta: anterior.etiqueta } : {}) },
+            {
+              campo,
+              tipo,
+              ...(anterior?.etiqueta ? { etiqueta: anterior.etiqueta } : {}),
+            },
           ],
         },
       };
@@ -267,7 +326,7 @@ function SelectoresDelPanel({
     <div className="editor__selectores" data-testid={prueba}>
       <p className="texto-atenuado">Como se filtra cada dimension</p>
       {efectivos.map((s) => {
-        const tipoDeColumna = tipos[s.campo] ?? '';
+        const tipoDeColumna = tipos[s.campo] ?? "";
         return (
           <label key={s.campo} className="formulario__campo">
             <span>{s.campo}</span>
@@ -275,12 +334,14 @@ function SelectoresDelPanel({
               value={s.tipo}
               disabled={guardando}
               data-testid={`${prueba}-${s.campo}`}
-              onChange={(e) => ponerTipo(s.campo, e.target.value as TipoDeSelector)}
+              onChange={(e) =>
+                ponerTipo(s.campo, e.target.value as TipoDeSelector)
+              }
             >
               {TIPOS_DE_SELECTOR.map((t) => (
                 <option key={t} value={t} disabled={!aplicaA(t, tipoDeColumna)}>
                   {t}
-                  {aplicaA(t, tipoDeColumna) ? '' : ' — necesita una fecha'}
+                  {aplicaA(t, tipoDeColumna) ? "" : " — necesita una fecha"}
                 </option>
               ))}
             </select>
@@ -299,6 +360,8 @@ function SelectoresDelPanel({
  * validacion del servidor lo rechazaria igual, asi que nada depende de este control.
  */
 function aplicaA(tipo: TipoDeSelector, tipoDeColumna: string): boolean {
-  if (tipo !== 'calendario' && tipo !== 'rango-de-fechas') return true;
-  return ['date', 'datetime', 'timestamp', 'fecha'].includes(tipoDeColumna.toLowerCase());
+  if (tipo !== "calendario" && tipo !== "rango-de-fechas") return true;
+  return ["date", "datetime", "timestamp", "fecha"].includes(
+    tipoDeColumna.toLowerCase(),
+  );
 }

@@ -69,17 +69,18 @@ export function Lienzo({
         style={
           {
             '--rejilla-columnas': GRID_COLUMNS,
+            '--rejilla-filas': filas,
             gridTemplateRows: `repeat(${filas}, minmax(56px, auto))`,
           } as React.CSSProperties
         }
       >
         {/*
-          Las guias de columna. Decorativas: `aria-hidden`, porque para quien no ve la pantalla la
+          Las guias de la rejilla: una celda por cruce de columna y fila. Decorativas: `aria-hidden`, porque para quien no ve la pantalla la
           rejilla no aporta nada y anunciar doce celdas vacias antes de cada objeto seria ruido.
           La posicion de cada bloque se dice con palabras en el panel.
         */}
         <div className="lienzo__guias" aria-hidden="true">
-          {Array.from({ length: GRID_COLUMNS }, (_, i) => (
+          {Array.from({ length: GRID_COLUMNS * filas }, (_, i) => (
             <span key={i} className="lienzo__guia" />
           ))}
         </div>

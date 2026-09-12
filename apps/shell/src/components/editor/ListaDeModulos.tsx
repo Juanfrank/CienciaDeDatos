@@ -111,7 +111,9 @@ export function ListaDeModulos({
   };
 
   return (
-    <section>
+    // La lista si tiene tope de ancho: es una tabla, y una linea de tabla muy larga se sigue con
+    // el dedo. El lienzo no lo tiene, porque ahi el ancho es sitio para el modulo.
+    <section className="editor__lista">
       <h2>Modulos</h2>
 
       <form

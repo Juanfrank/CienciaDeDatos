@@ -1,6 +1,7 @@
 import type { FieldRef } from '@app/data-contracts';
 import type { ClaveDePresentacion, PresentacionDeObjeto } from '../presentacion/contrato';
 import type { ConfiguracionDePanelDeFiltros } from '../presentacion/panelDeFiltros';
+import type { PozoDeCampos } from '../presentacion/pozos';
 
 /**
  * Repositorio de objetos visuales versionados — seccion 4.5.
@@ -30,6 +31,18 @@ export interface ObjectDataContract {
   measures: { min: number; max: number };
   /** Descripcion legible de que representa cada ranura, para la interfaz del editor. */
   notes?: string;
+  /**
+   * Las ranuras CON NOMBRE, en el orden en que el objeto consume sus campos.
+   *
+   * Opcional: un objeto que no las declare se edita con los rotulos genericos de siempre
+   * (`pozosPorDefecto`). Declararlas no cambia el modelo de datos —siguen siendo los mismos dos
+   * arrays ordenados—, solo hace que el editor diga «Eje X» donde antes decia «dimension 1».
+   *
+   * La suma de los `max` de cada tipo tiene que cuadrar con el maximo del contrato, y hay una
+   * prueba del catalogo que lo comprueba: un pozo que prometiera mas de lo que el objeto admite
+   * dejaria guardar un mapeo que la validacion rechaza despues.
+   */
+  pozos?: PozoDeCampos[];
 }
 
 export interface ObjectCertification {

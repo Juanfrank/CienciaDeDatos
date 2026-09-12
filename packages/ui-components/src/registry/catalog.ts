@@ -1,4 +1,5 @@
 import { PRESENTACION_MINIMA, type ClaveDePresentacion } from '../presentacion/contrato';
+import type { PozoDeCampos } from '../presentacion/pozos';
 import type { ObjectCertification, VisualObjectDefinition } from './types';
 
 /**
@@ -44,6 +45,36 @@ const v1 = (
   presentation,
 });
 
+/**
+ * Los pozos de un grafico de barras, parametrizados por cuantas medidas admite la version.
+ *
+ * Se factoriza porque 1.0.0 y 1.1.0 comparten las dimensiones y solo cambian en el cupo del eje
+ * Y: escribirlos dos veces invita a que alguien arregle uno y se olvide del otro.
+ */
+const POZOS_DE_BARRAS = (medidas: number): PozoDeCampos[] => [
+  {
+    id: 'eje-x',
+    etiqueta: 'Eje X',
+    tipo: 'dimension',
+    max: 1,
+    ayuda: 'La dimension que reparte las barras.',
+  },
+  {
+    id: 'serie',
+    etiqueta: 'Serie',
+    tipo: 'dimension',
+    max: 1,
+    ayuda: 'Opcional. Agrupa las barras de cada categoria.',
+  },
+  {
+    id: 'eje-y',
+    etiqueta: 'Eje Y',
+    tipo: 'medida',
+    max: medidas,
+    ayuda: medidas > 1 ? 'Una serie por medida.' : 'La cifra que mide el alto de la barra.',
+  },
+];
+
 export const catalogoInicial: VisualObjectDefinition[] = [
   {
     objectId: 'tarjeta-kpi',
@@ -57,6 +88,29 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 0, max: 1 },
           measures: { min: 1, max: 2 },
           notes: 'La primera medida es el valor; la segunda, opcional, es la comparacion.',
+          pozos: [
+            {
+              id: 'valor',
+              etiqueta: 'Valor',
+              tipo: 'medida',
+              max: 1,
+              ayuda: 'La cifra grande de la tarjeta.',
+            },
+            {
+              id: 'comparacion',
+              etiqueta: 'Comparacion',
+              tipo: 'medida',
+              max: 1,
+              ayuda: 'Opcional. La variacion se calcula contra esta.',
+            },
+            {
+              id: 'detalle',
+              etiqueta: 'Detalle',
+              tipo: 'dimension',
+              max: 1,
+              ayuda: 'Opcional. Desglosa la cifra en la tabla de datos adjunta.',
+            },
+          ],
         },
         // Una tarjeta es una cifra: el formato es lo que mas cambia de una a otra —casos enteros,
         // porcentajes con un decimal, importes compactos—. No tiene leyenda ni etiquetas de dato,
@@ -73,7 +127,14 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: columnas ordenables y formato numerico por medida.',
-        { dimensions: { min: 0, max: 6 }, measures: { min: 0, max: 10 } },
+        {
+          dimensions: { min: 0, max: 6 },
+          measures: { min: 0, max: 10 },
+          pozos: [
+            { id: 'columnas-dim', etiqueta: 'Columnas de detalle', tipo: 'dimension', max: 6 },
+            { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 10 },
+          ],
+        },
         presenta('formato'),
       ),
     ],
@@ -90,6 +151,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 1, max: 2 },
           measures: { min: 1, max: 1 },
           notes: 'La segunda dimension, si existe, agrupa las barras por serie.',
+          pozos: POZOS_DE_BARRAS(1),
         },
         presenta('formato', 'leyenda', 'etiquetasDeDato'),
       ),
@@ -118,6 +180,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           measures: { min: 1, max: 4 },
           notes:
             'Cada medida es una serie. La segunda dimension, si existe, agrupa las barras por serie.',
+          pozos: POZOS_DE_BARRAS(4),
         },
         presentation: presenta('formato', 'leyenda', 'etiquetasDeDato'),
       },
@@ -131,7 +194,26 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: una linea por medida sobre el eje de la primera dimension.',
-        { dimensions: { min: 1, max: 1 }, measures: { min: 1, max: 4 } },
+        {
+          dimensions: { min: 1, max: 1 },
+          measures: { min: 1, max: 4 },
+          pozos: [
+            {
+              id: 'eje-x',
+              etiqueta: 'Eje X',
+              tipo: 'dimension',
+              max: 1,
+              ayuda: 'La dimension ordenada sobre la que avanza la linea.',
+            },
+            {
+              id: 'eje-y',
+              etiqueta: 'Eje Y',
+              tipo: 'medida',
+              max: 4,
+              ayuda: 'Una linea por medida.',
+            },
+          ],
+        },
         presenta('formato', 'leyenda', 'etiquetasDeDato'),
       ),
     ],
@@ -148,6 +230,11 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 2, max: 2 },
           measures: { min: 1, max: 1 },
           notes: 'La primera dimension va en filas; la segunda, en columnas.',
+          pozos: [
+            { id: 'filas', etiqueta: 'Filas', tipo: 'dimension', max: 1 },
+            { id: 'columnas', etiqueta: 'Columnas', tipo: 'dimension', max: 1 },
+            { id: 'valores', etiqueta: 'Valores', tipo: 'medida', max: 1 },
+          ],
         },
         presenta('formato'),
       ),
@@ -169,6 +256,15 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           notes:
             'Cada dimension lleva un selector. Sin configurar, se usa el que corresponde a su ' +
             'tipo. La seleccion vive en la query string (4.11), no en estado local.',
+          pozos: [
+            {
+              id: 'filtros',
+              etiqueta: 'Campos a filtrar',
+              tipo: 'dimension',
+              max: 10,
+              ayuda: 'El tipo de selector de cada uno se elige en Formato.',
+            },
+          ],
         },
       ),
     ],
@@ -183,6 +279,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         dimensions: { min: 1, max: 1 },
         measures: { min: 0, max: 0 },
         notes: 'Su seleccion se refleja en la query string (4.11), no en estado local.',
+        pozos: [{ id: 'campo', etiqueta: 'Campo', tipo: 'dimension', max: 1 }],
       }),
     ],
   },

@@ -1,5 +1,5 @@
 import { defaultRegistry } from '@app/caching';
-import type { ClaveDePresentacion, ObjectCategory } from '@app/ui-components';
+import type { ClaveDePresentacion, ObjectCategory, PozoDeCampos } from '@app/ui-components';
 import { fieldKey } from '@app/ui-components';
 import { objectRegistry } from './contexto';
 import { columnasDisponiblesDe } from './datos';
@@ -27,6 +27,8 @@ export interface ObjetoDePaleta {
   medidas: { min: number; max: number };
   /** Claves de presentacion que ESTA version admite. El editor solo ofrece estas. */
   presentacion: ClaveDePresentacion[];
+  /** Ranuras con nombre. Vacio si el objeto no las declara: el editor usa las genericas. */
+  pozos: PozoDeCampos[];
   notas?: string;
 }
 
@@ -66,6 +68,7 @@ export async function paletaDelEditor(): Promise<PaletaDelEditor> {
       dimensiones: version.dataContract.dimensions,
       medidas: version.dataContract.measures,
       presentacion: version.presentation,
+      pozos: version.dataContract.pozos ?? [],
       ...(version.dataContract.notes ? { notas: version.dataContract.notes } : {}),
     };
   });

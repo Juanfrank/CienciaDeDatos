@@ -48,13 +48,34 @@ restringirlo mas. La vista previa muestra, como mucho, lo que se vera publicado.
 
 ### El panel
 
-Tres pestanas, y el corte responde a tres preguntas distintas:
+Cuatro pestanas, y el corte responde a cuatro preguntas distintas:
 
 | Pestana | Pregunta |
 |---|---|
 | Visualizaciones | Que quiero poner. **La unica puerta** por la que entra un objeto. |
-| Datos | Que mide: dataset, dimensiones, medidas, tamano y posicion. |
-| Formato | Como se ve: el contrato de presentacion, filtrado por lo que ese objeto admite. |
+| Datos | Que mide: dataset y los pozos de campos. |
+| Formato | Como se ve: presentacion, y el tamano y la posicion —cuanto ocupa un objeto en la rejilla no cambia lo que mide—. |
+| Complementos | Que lo acompana: los objetos adjuntables, que no ocupan celda. |
+
+La lista **crece**: cada tipo nuevo de interaccion anade una. Por eso la barra se desplaza y saca
+chevrones estrechos en los extremos solo cuando hay algo fuera de la vista. Encogerlas hasta que
+quepan habria cortado los rotulos y dejado una fila de iconos sin nombre.
+
+#### Pozos de campos
+
+«Dimensiones» y «medidas» como dos listas planas no dicen nada de un grafico de barras: la primera
+dimension reparte las barras y la segunda las agrupa en series. Cada version de objeto declara sus
+ranuras CON NOMBRE —eje X, serie, eje Y; valor, comparacion, detalle— y el editor las pide asi.
+
+Un pozo **no cambia el modelo de datos**: `binding.dimensions` y `binding.measures` siguen siendo
+dos arrays ordenados, y un pozo es una particion con nombre sobre uno de ellos. Cambiar el modelo
+habria obligado a migrar cada modulo guardado, cada validacion y cada proyeccion para no ganar
+nada que el orden no diera ya. La consecuencia a saber: quitar un campo corre los del pozo
+siguiente, y por eso los pozos se declaran en el mismo orden en que el objeto consume sus campos.
+
+Los campos ya puestos se ven como chiclets apilados; para anadir hay un `+` que abre un buscador.
+La lista de casillas con todos los campos del dataset se lee con cuatro y es inservible con
+cuarenta: lo que importa —que hay puesto aqui— quedaba disuelto entre lo que no esta puesto.
 
 Sin nada elegido, Datos y Formato se **deshabilitan en vez de desaparecer**: una barra que cambia
 de numero de pestanas obliga a volver a buscar donde estaba cada cosa. Al elegir un bloque, el

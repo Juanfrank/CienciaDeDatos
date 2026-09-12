@@ -32,6 +32,13 @@ export {
   type ProblemaDePresentacion,
 } from './presentacion/contrato';
 export {
+  cabeEn,
+  indiceDeInsercion,
+  pozosPorDefecto,
+  repartirEnPozos,
+  type PozoDeCampos,
+} from './presentacion/pozos';
+export {
   MAX_DIMENSIONES_DEL_PANEL,
   SELECTORES_DE_FECHA,
   TIPOS_DE_SELECTOR,

@@ -32,6 +32,20 @@ const idDelPrimerBloque = async (page: Pagina): Promise<string> => {
   return (testid ?? '').replace('bloque-', '');
 };
 
+/**
+ * Abre una subseccion del panel por su testid.
+ *
+ * Las subsecciones de «Formato» vienen plegadas salvo la primera: en un panel de 300 px, siete
+ * controles apilados obligan a recorrerlos todos para encontrar uno. Las pruebas abren la que
+ * necesitan, igual que haria quien edita.
+ */
+const abrir = async (page: Pagina, prueba: string) => {
+  const seccion = page.getByTestId(prueba);
+  if (await seccion.evaluate((el) => !(el as HTMLDetailsElement).open)) {
+    await seccion.locator('summary').click();
+  }
+};
+
 const crearModulo = async (page: Pagina, slug: string) => {
   await page.goto('/editor');
   await page.getByTestId('nuevo-modulo-nombre').fill(slug);
@@ -63,6 +77,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await page.getByTestId(`pres-${id}-subtitulo`).fill('Al cierre');
     await page.getByTestId(`pres-${id}-subtitulo`).blur();
     await guardado(page);
+    await abrir(page, `pres-${id}-cifra`);
     await page.getByTestId(`pres-${id}-unidad`).fill('casos');
     await page.getByTestId(`pres-${id}-unidad`).blur();
     await guardado(page);
@@ -76,6 +91,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await expect(page.getByTestId(`pres-${id}-acento`)).toHaveValue('terciario');
     await expect(page.getByTestId(`pres-${id}-resaltado`)).toBeChecked();
     await expect(page.getByTestId(`pres-${id}-subtitulo`)).toHaveValue('Al cierre');
+    await abrir(page, `pres-${id}-cifra`);
     await expect(page.getByTestId(`pres-${id}-unidad`)).toHaveValue('casos');
   });
 
@@ -114,7 +130,10 @@ test.describe('el editor configura como se ve un objeto', () => {
     await page.getByTestId('pestana-formato').click();
 
     await expect(page.getByTestId(`pres-${id}-icono`)).toBeVisible();
-    await expect(page.getByTestId(`pres-${id}-decimales`)).toBeVisible();
+    // Una tabla tiene formato de cifra pero no leyenda: la subseccion «Grafico» ni siquiera se
+    // dibuja, que es mas claro que dibujarla vacia.
+    await expect(page.getByTestId(`pres-${id}-cifra`)).toHaveCount(1);
+    await expect(page.getByTestId(`pres-${id}-grafico`)).toHaveCount(0);
     await expect(page.getByTestId(`pres-${id}-leyenda`)).toHaveCount(0);
     await expect(page.getByTestId(`pres-${id}-etiquetas`)).toHaveCount(0);
   });
@@ -151,12 +170,14 @@ test.describe('el editor configura como se ve un objeto', () => {
     await guardado(page);
     const id = await idDelPrimerBloque(page);
 
-    // Se anade una segunda dimension: tiene que aparecer su fila de selector sola.
-    await page.getByTestId(`dim-${id}-DimTribunal.Materia`).click();
+    // Se anade una segunda dimension desde su pozo: tiene que aparecer su fila de selector sola.
+    await page.getByTestId(`pozo-${id}-filtros-anadir`).click();
+    await page.getByTestId(`pozo-${id}-filtros-opcion-DimTribunal.Materia`).click();
     await guardado(page);
-    await expect(page.getByTestId(`dim-${id}-DimTribunal.Materia`)).toBeChecked();
+    await expect(page.getByTestId(`pozo-${id}-filtros`)).toContainText('DimTribunal.Materia');
 
     await page.getByTestId('pestana-formato').click();
+    await abrir(page, `pres-${id}-selectores`);
     await expect(page.getByTestId(`selectores-${id}-DimTribunal.Materia`)).toBeVisible();
 
     await page.getByTestId(`selectores-${id}-DimTribunal.Materia`).selectOption('desplegable');
@@ -170,6 +191,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await page.reload();
     await page.getByTestId(`elegir-${id}`).click();
     await page.getByTestId('pestana-formato').click();
+    await abrir(page, `pres-${id}-selectores`);
     await expect(page.getByTestId(`selectores-${id}-DimTribunal.Materia`)).toHaveValue(
       'desplegable',
     );
@@ -189,6 +211,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await guardado(page);
     const id = await idDelPrimerBloque(page);
     await page.getByTestId('pestana-formato').click();
+    await abrir(page, `pres-${id}-selectores`);
 
     const opcion = page
       .getByTestId(`selectores-${id}-DimTribunal.Distrito`)

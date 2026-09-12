@@ -1,39 +1,41 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GRID_COLUMNS, type GridItem } from '@app/module-model';
-import type { ObjectInstance } from '@app/ui-components';
+import {
+  fieldKey,
+  indiceDeInsercion,
+  pozosPorDefecto,
+  repartirEnPozos,
+  type AttachedObjectInstance,
+  type ObjectInstance,
+  type PozoDeCampos,
+} from '@app/ui-components';
 import type { DatasetDePaleta, ObjetoDePaleta } from '../../server/editor';
 import { Icono, type NombreDeIcono } from '../iconos/Icono';
+import { Pestanas, type DefinicionDePestana } from './Pestanas';
+import { Pozo } from './Pozo';
 import { Presentacion } from './Presentacion';
+import { Seccion } from './Seccion';
 
 /**
  * El panel del editor: la tienda y el banco de trabajo, en uno.
  *
- * Tres pestanas, y el corte entre ellas responde a tres preguntas distintas:
+ * Cuatro pestanas, y el corte responde a cuatro preguntas distintas:
  *
- *   - **Visualizaciones** — «que quiero poner». Es la unica puerta por la que entra un objeto al
- *     modulo, y por eso es tambien donde se ve que existe un catalogo cerrado: no hay ninguna
- *     otra forma de anadir algo, igual que no hay ninguna caja donde escribir una consulta.
- *   - **Datos** — «que mide». Dataset, dimensiones y medidas del objeto elegido.
- *   - **Formato** — «como se ve». El contrato de presentacion, filtrado por lo que ese objeto
- *     admite.
+ *   - **Visualizaciones** — «que quiero poner». La unica puerta por la que entra un objeto al
+ *     modulo, y por eso tambien donde se ve que el catalogo es cerrado.
+ *   - **Datos** — «que mide». Los pozos con nombre del objeto elegido.
+ *   - **Formato** — «como se ve». Presentacion, y el tamano y la posicion, que tambien son como se
+ *     ve: cuanto ocupa un objeto en la rejilla no cambia lo que mide.
+ *   - **Complementos** — «que lo acompana». Los objetos adjuntables, que no van en la rejilla.
  *
- * Sin nada elegido solo tiene sentido la primera, asi que las otras dos se deshabilitan en vez de
- * desaparecer: una barra de pestanas que cambia de numero segun lo que este seleccionado obliga a
- * volver a buscar donde estaba cada cosa.
- *
- * Las pestanas son `role="tablist"` de verdad, con flechas: es el patron que un lector de
- * pantalla anuncia como pestanas, y sin el serian tres botones que casualmente se parecen.
+ * Sin nada elegido solo tiene sentido la primera, asi que las otras se deshabilitan en vez de
+ * desaparecer: una barra que cambia de numero de pestanas obliga a volver a buscar donde estaba
+ * cada cosa.
  */
 
-type Pestana = 'visualizaciones' | 'datos' | 'formato';
-
-const PESTANAS: { id: Pestana; etiqueta: string; icono: NombreDeIcono }[] = [
-  { id: 'visualizaciones', etiqueta: 'Visualizaciones', icono: 'barras' },
-  { id: 'datos', etiqueta: 'Datos', icono: 'tabla' },
-  { id: 'formato', etiqueta: 'Formato', icono: 'indicador' },
-];
+type Pestana = 'visualizaciones' | 'datos' | 'formato' | 'complementos';
 
 /** Icono con el que cada tipo se ofrece en la tienda. */
 const ICONO_DE_TIPO: Record<string, NombreDeIcono> = {
@@ -45,6 +47,8 @@ const ICONO_DE_TIPO: Record<string, NombreDeIcono> = {
   segmentador: 'filtro',
   'panel-de-filtros': 'filtro',
   mapa: 'lugar',
+  'tooltip-explicativo': 'informacion',
+  'tabla-de-datos': 'datos',
 };
 
 export function PanelLateral({
@@ -65,14 +69,13 @@ export function PanelLateral({
   onQuitar: (itemId: string) => void;
 }) {
   const [pestana, setPestana] = useState<Pestana>('visualizaciones');
-  const listaDePestanas = useRef<HTMLDivElement>(null);
 
   /*
    * Al elegir un objeto, el panel salta a «Datos».
    *
    * Es lo que se quiere hacer justo despues de colocar algo, y dejarlo en «Visualizaciones»
    * obligaria a un clic mas en el 100 % de los casos. Al deseleccionar vuelve a la tienda, porque
-   * las otras dos pestanas ya no tienen contenido.
+   * las otras pestanas ya no tienen contenido.
    */
   const idSeleccionado = seleccionado?.id ?? null;
   useEffect(() => {
@@ -87,54 +90,16 @@ export function PanelLateral({
     ? datasets.find((d) => d.datasetId === seleccionado.instance.binding.datasetId)
     : undefined;
 
-  const habilitada = (id: Pestana) => id === 'visualizaciones' || hayObjeto;
-
-  // Flechas entre pestanas, como pide el patron de `tablist`. Solo salta a las habilitadas.
-  const alPulsarTecla = (e: React.KeyboardEvent) => {
-    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-    e.preventDefault();
-    const posibles = PESTANAS.filter((p) => habilitada(p.id));
-    const actual = posibles.findIndex((p) => p.id === pestana);
-    const paso = e.key === 'ArrowRight' ? 1 : -1;
-    const siguiente = posibles[(actual + paso + posibles.length) % posibles.length];
-    if (!siguiente) return;
-    setPestana(siguiente.id);
-    listaDePestanas.current
-      ?.querySelector<HTMLButtonElement>(`[data-pestana='${siguiente.id}']`)
-      ?.focus();
-  };
+  const PESTANAS: DefinicionDePestana<Pestana>[] = [
+    { id: 'visualizaciones', etiqueta: 'Visualizaciones', icono: 'barras', habilitada: true },
+    { id: 'datos', etiqueta: 'Datos', icono: 'tabla', habilitada: hayObjeto },
+    { id: 'formato', etiqueta: 'Formato', icono: 'indicador', habilitada: hayObjeto },
+    { id: 'complementos', etiqueta: 'Complementos', icono: 'informacion', habilitada: hayObjeto },
+  ];
 
   return (
     <aside className="panel-editor" data-testid="panel-editor">
-      <div
-        className="panel-editor__pestanas"
-        role="tablist"
-        aria-label="Herramientas del editor"
-        ref={listaDePestanas}
-        onKeyDown={alPulsarTecla}
-      >
-        {PESTANAS.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            role="tab"
-            id={`pestana-${p.id}`}
-            data-pestana={p.id}
-            aria-selected={pestana === p.id}
-            aria-controls={`panel-${p.id}`}
-            // Solo la pestana activa esta en el orden de tabulacion; dentro del grupo se navega
-            // con flechas. Es lo que distingue una barra de pestanas de tres botones sueltos.
-            tabIndex={pestana === p.id ? 0 : -1}
-            disabled={!habilitada(p.id)}
-            className="panel-editor__pestana"
-            data-testid={`pestana-${p.id}`}
-            onClick={() => setPestana(p.id)}
-          >
-            <Icono nombre={p.icono} tamano={18} />
-            <span>{p.etiqueta}</span>
-          </button>
-        ))}
-      </div>
+      <Pestanas pestanas={PESTANAS} activa={pestana} onElegir={setPestana} />
 
       <div
         className="panel-editor__cuerpo"
@@ -159,14 +124,39 @@ export function PanelLateral({
         ) : null}
 
         {pestana === 'formato' && seleccionado ? (
-          <Presentacion
-            instance={seleccionado.instance}
-            admitidas={definicion?.presentacion ?? []}
-            tipos={dataset?.tipos ?? {}}
+          <>
+            {/* `Presentacion` ya trae sus propias subsecciones: envolverlo en otra repetiria el
+                rotulo «Presentacion» dos veces seguidas. */}
+            <Presentacion
+              instance={seleccionado.instance}
+              admitidas={definicion?.presentacion ?? []}
+              tipos={dataset?.tipos ?? {}}
+              guardando={guardando}
+              onCambiar={(cambio) =>
+                onCambiar(seleccionado.id, (i) => ({ ...i, instance: cambio(i.instance) }))
+              }
+            />
+
+            {/*
+              El tamano y la posicion viven aqui, no en «Datos».
+              Cuanto ocupa un objeto en la rejilla no cambia lo que mide: es como se ve.
+            */}
+            {/*
+              Abierta por defecto: redimensionar es lo que mas se hace en esta pestana, y llegar a
+              ella para encontrarse un titulo plegado anade un clic a cada ajuste.
+            */}
+            <Seccion titulo="Tamano y posicion" prueba={`seccion-tamano-${seleccionado.id}`}>
+              <Tamano item={seleccionado} guardando={guardando} onCambiar={onCambiar} />
+            </Seccion>
+          </>
+        ) : null}
+
+        {pestana === 'complementos' && seleccionado ? (
+          <Complementos
+            item={seleccionado}
+            objetos={objetos}
             guardando={guardando}
-            onCambiar={(cambio) =>
-              onCambiar(seleccionado.id, (i) => ({ ...i, instance: cambio(i.instance) }))
-            }
+            onCambiar={onCambiar}
           />
         ) : null}
       </div>
@@ -185,7 +175,7 @@ function Tienda({
   onAnadir: (objectId: string) => void;
 }) {
   // Los complementos se adjuntan a otro objeto, no se colocan en la rejilla. La validacion lo
-  // rechaza, asi que tampoco se ofrecen.
+  // rechaza, asi que tampoco se ofrecen aqui: tienen su propia pestana.
   const colocables = objetos.filter((o) => !o.attachable);
 
   return (
@@ -217,7 +207,7 @@ function Tienda({
   );
 }
 
-/** Dataset, campos y tamano del objeto elegido. */
+/** Dataset y pozos de campos del objeto elegido. */
 function Datos({
   item,
   definicion,
@@ -237,100 +227,135 @@ function Datos({
   const cambiarInstancia = (cambio: (i: ObjectInstance) => ObjectInstance) =>
     onCambiar(item.id, (it) => ({ ...it, instance: cambio(it.instance) }));
 
+  const declarados = definicion?.pozos ?? [];
+  const porDefecto = pozosPorDefecto({
+    dimensions: definicion?.dimensiones ?? { min: 0, max: 0 },
+    measures: definicion?.medidas ?? { min: 0, max: 0 },
+  });
+  const pozos =
+    declarados.length > 0 ? declarados : [...porDefecto.dimensiones, ...porDefecto.medidas];
+
+  const deDimension = pozos.filter((p) => p.tipo === 'dimension');
+  const deMedida = pozos.filter((p) => p.tipo === 'medida');
+
+  const claves = item.instance.binding.dimensions.map(fieldKey);
+  const medidas = item.instance.binding.measures;
+
+  const repartoDim = repartirEnPozos(claves, deDimension);
+  const repartoMed = repartirEnPozos(medidas, deMedida);
+
+  const ponerDimension = (pozo: PozoDeCampos, campo: string) =>
+    cambiarInstancia((i) => {
+      const actuales = i.binding.dimensions;
+      const indice = indiceDeInsercion(actuales.map(fieldKey), deDimension, pozo.id);
+      const siguientes = [...actuales];
+      siguientes.splice(indice, 0, aFieldRef(campo));
+      return { ...i, binding: { ...i.binding, dimensions: siguientes } };
+    });
+
+  const quitarDimension = (campo: string) =>
+    cambiarInstancia((i) => ({
+      ...i,
+      binding: { ...i.binding, dimensions: i.binding.dimensions.filter((d) => fieldKey(d) !== campo) },
+    }));
+
+  const ponerMedida = (pozo: PozoDeCampos, campo: string) =>
+    cambiarInstancia((i) => {
+      const indice = indiceDeInsercion(i.binding.measures, deMedida, pozo.id);
+      const siguientes = [...i.binding.measures];
+      siguientes.splice(indice, 0, campo);
+      return { ...i, binding: { ...i.binding, measures: siguientes } };
+    });
+
+  const quitarMedida = (campo: string) =>
+    cambiarInstancia((i) => ({
+      ...i,
+      binding: { ...i.binding, measures: i.binding.measures.filter((m) => m !== campo) },
+    }));
+
   return (
     <>
-      <label className="formulario__campo">
-        <span>Titulo</span>
-        <input
-          defaultValue={item.instance.title}
-          disabled={guardando}
-          data-testid={`titulo-${item.id}`}
-          onBlur={(e) => cambiarInstancia((i) => ({ ...i, title: e.target.value }))}
-        />
-      </label>
+      <Seccion titulo="Origen" prueba={`seccion-origen-${item.id}`}>
+        <label className="formulario__campo">
+          <span>Titulo</span>
+          <input
+            defaultValue={item.instance.title}
+            disabled={guardando}
+            data-testid={`titulo-${item.id}`}
+            onBlur={(e) => cambiarInstancia((i) => ({ ...i, title: e.target.value }))}
+          />
+        </label>
 
-      <label className="formulario__campo">
-        <span>Dataset</span>
-        <select
-          value={item.instance.binding.datasetId}
-          disabled={guardando}
-          data-testid={`dataset-${item.id}`}
-          onChange={(e) =>
-            cambiarInstancia((i) => ({
-              ...i,
-              // Al cambiar de dataset se limpia el mapeo: los campos del anterior no existen en
-              // el nuevo, y conservarlos dejaria el objeto roto sin que nadie hiciera nada mal.
-              binding: { datasetId: e.target.value, dimensions: [], measures: [] },
-            }))
-          }
-        >
-          {datasets.map((d) => (
-            <option key={d.datasetId} value={d.datasetId}>
-              {d.datasetId}
-            </option>
+        <label className="formulario__campo">
+          <span>Dataset</span>
+          <select
+            value={item.instance.binding.datasetId}
+            disabled={guardando}
+            data-testid={`dataset-${item.id}`}
+            onChange={(e) =>
+              cambiarInstancia((i) => ({
+                ...i,
+                // Al cambiar de dataset se limpia el mapeo: los campos del anterior no existen en
+                // el nuevo, y conservarlos dejaria el objeto roto sin que nadie hiciera nada mal.
+                binding: { datasetId: e.target.value, dimensions: [], measures: [] },
+              }))
+            }
+          >
+            {datasets.map((d) => (
+              <option key={d.datasetId} value={d.datasetId}>
+                {d.datasetId}
+              </option>
+            ))}
+          </select>
+        </label>
+      </Seccion>
+
+      {deDimension.length > 0 ? (
+        <Seccion titulo="Campos" prueba={`seccion-campos-${item.id}`}>
+          {deDimension.map((pozo) => (
+            <Pozo
+              key={pozo.id}
+              pozo={pozo}
+              prueba={`pozo-${item.id}-${pozo.id}`}
+              elegidos={repartoDim.porPozo.get(pozo.id) ?? []}
+              disponibles={dataset?.dimensiones ?? []}
+              // Solo `guardando`. Pasar aqui tambien «esta lleno» apagaba los botones de QUITAR
+              // del propio pozo, asi que un pozo completo no se podia vaciar. El pozo ya sabe si
+              // esta lleno —`elegidos.length >= max`— y apaga solo lo que corresponde: el `+`.
+              guardando={guardando}
+              onAnadir={(campo) => ponerDimension(pozo, campo)}
+              onQuitar={quitarDimension}
+            />
           ))}
-        </select>
-      </label>
+          {repartoDim.sobrantes.length > 0 ? (
+            <p className="aviso aviso--problema" data-testid={`sobrantes-dim-${item.id}`}>
+              Sin ranura: {repartoDim.sobrantes.join(', ')}. Quite alguno para que quepan.
+            </p>
+          ) : null}
+        </Seccion>
+      ) : null}
 
-      <fieldset className="editor__campos">
-        <legend>
-          Dimensiones ({definicion?.dimensiones.min}–{definicion?.dimensiones.max})
-        </legend>
-        {(dataset?.dimensiones ?? []).map((clave) => (
-          <label key={clave}>
-            <input
-              type="checkbox"
-              disabled={guardando}
-              data-testid={`dim-${item.id}-${clave}`}
-              checked={item.instance.binding.dimensions.some(
-                (d) => `${d.table}.${d.field}` === clave,
-              )}
-              onChange={(e) =>
-                cambiarInstancia((i) => ({
-                  ...i,
-                  binding: {
-                    ...i.binding,
-                    dimensions: e.target.checked
-                      ? [...i.binding.dimensions, aFieldRef(clave)]
-                      : i.binding.dimensions.filter((d) => `${d.table}.${d.field}` !== clave),
-                  },
-                }))
-              }
-            />{' '}
-            {clave}
-          </label>
-        ))}
-      </fieldset>
-
-      <fieldset className="editor__campos">
-        <legend>
-          Medidas ({definicion?.medidas.min}–{definicion?.medidas.max})
-        </legend>
-        {(dataset?.medidas ?? []).map((medida) => (
-          <label key={medida}>
-            <input
-              type="checkbox"
-              disabled={guardando}
-              data-testid={`med-${item.id}-${medida}`}
-              checked={item.instance.binding.measures.includes(medida)}
-              onChange={(e) =>
-                cambiarInstancia((i) => ({
-                  ...i,
-                  binding: {
-                    ...i.binding,
-                    measures: e.target.checked
-                      ? [...i.binding.measures, medida]
-                      : i.binding.measures.filter((m) => m !== medida),
-                  },
-                }))
-              }
-            />{' '}
-            {medida}
-          </label>
-        ))}
-      </fieldset>
-
-      <Tamano item={item} guardando={guardando} onCambiar={onCambiar} />
+      {deMedida.length > 0 ? (
+        <Seccion titulo="Cifras" prueba={`seccion-cifras-${item.id}`}>
+          {deMedida.map((pozo) => (
+            <Pozo
+              key={pozo.id}
+              pozo={pozo}
+              prueba={`pozo-${item.id}-${pozo.id}`}
+              elegidos={repartoMed.porPozo.get(pozo.id) ?? []}
+              disponibles={dataset?.medidas ?? []}
+              guardando={guardando}
+              onAnadir={(campo) => ponerMedida(pozo, campo)}
+              onQuitar={quitarMedida}
+            />
+          ))}
+          {repartoMed.sobrantes.length > 0 ? (
+            <p className="aviso aviso--problema" data-testid={`sobrantes-med-${item.id}`}>
+              Sin ranura: {repartoMed.sobrantes.join(', ')}. Quite alguna para que quepan.
+            </p>
+          ) : null}
+        </Seccion>
+      ) : null}
 
       <button
         type="button"
@@ -346,11 +371,175 @@ function Datos({
 }
 
 /**
+ * Los objetos ADJUNTABLES del objeto elegido.
+ *
+ * Estaban en el catalogo y en el modelo desde F3.4, con su validacion y sus pruebas, y no habia
+ * forma de anadir uno desde el editor: los del seed se escribieron a mano. Octavo caso de codigo
+ * construido al que no llamaba nada.
+ *
+ * Tienen pestana propia y no se mezclan con la tienda porque no son lo mismo: un complemento no
+ * ocupa celda en la rejilla, acompana a otro objeto, y la validacion rechaza colocarlo suelto.
+ */
+function Complementos({
+  item,
+  objetos,
+  guardando,
+  onCambiar,
+}: {
+  item: GridItem;
+  objetos: ObjetoDePaleta[];
+  guardando: boolean;
+  onCambiar: (itemId: string, cambio: (item: GridItem) => GridItem) => void;
+}) {
+  const adjuntables = objetos.filter((o) => o.attachable);
+  const puestos = item.instance.attachments ?? [];
+
+  const conAdjuntos = (siguientes: AttachedObjectInstance[]) =>
+    onCambiar(item.id, (it) => ({
+      ...it,
+      instance: { ...it.instance, attachments: siguientes },
+    }));
+
+  const anadir = (objectId: string, version: string) => {
+    const instanceId = `${objectId}-${item.id}`;
+    if (objectId === 'tooltip-explicativo') {
+      conAdjuntos([
+        ...puestos,
+        {
+          instanceId,
+          objectId: 'tooltip-explicativo',
+          version,
+          // Un tooltip sin texto no es nada, y la validacion lo rechaza. Se crea con un texto de
+          // partida en vez de vacio para que el objeto nazca valido y se pueda ver dibujado.
+          text: `Que muestra «${item.instance.title ?? item.instance.objectId}».`,
+        },
+      ]);
+      return;
+    }
+    conAdjuntos([
+      ...puestos,
+      // Alcance de objeto por defecto: es el unico que vale para cualquier anfitrion. El de
+      // subobjeto necesita una dimension mapeada, y la validacion lo rechaza sin ella.
+      { instanceId, objectId: 'tabla-de-datos', version, scope: 'objeto' },
+    ]);
+  };
+
+  const quitar = (instanceId: string) =>
+    conAdjuntos(puestos.filter((a) => a.instanceId !== instanceId));
+
+  return (
+    <>
+      <p className="texto-atenuado panel-editor__nota">
+        Acompanan a este objeto y no ocupan celda en la rejilla. Se dibujan como iconos en su
+        cabecera.
+      </p>
+
+      <Seccion titulo="Puestos" prueba={`seccion-complementos-${item.id}`}>
+        {puestos.length === 0 ? (
+          <p className="texto-atenuado" data-testid={`sin-complementos-${item.id}`}>
+            Este objeto no lleva ninguno.
+          </p>
+        ) : (
+          <ul className="panel-editor__adjuntos">
+            {puestos.map((a) => (
+              <li key={a.instanceId}>
+                <Seccion
+                  titulo={objetos.find((o) => o.objectId === a.objectId)?.name ?? a.objectId}
+                  nivel={2}
+                  prueba={`adjunto-${item.id}-${a.objectId}`}
+                >
+                  {a.objectId === 'tooltip-explicativo' ? (
+                    <label className="formulario__campo">
+                      <span>Texto</span>
+                      <textarea
+                        rows={3}
+                        defaultValue={a.text}
+                        disabled={guardando}
+                        data-testid={`texto-${item.id}`}
+                        onBlur={(e) =>
+                          conAdjuntos(
+                            puestos.map((x) =>
+                              x.instanceId === a.instanceId && x.objectId === 'tooltip-explicativo'
+                                ? { ...x, text: e.target.value }
+                                : x,
+                            ),
+                          )
+                        }
+                      />
+                    </label>
+                  ) : (
+                    <label className="formulario__campo">
+                      <span>Alcance</span>
+                      <select
+                        value={a.objectId === 'tabla-de-datos' ? a.scope : 'objeto'}
+                        disabled={guardando}
+                        data-testid={`alcance-${item.id}`}
+                        onChange={(e) =>
+                          conAdjuntos(
+                            puestos.map((x) =>
+                              x.instanceId === a.instanceId && x.objectId === 'tabla-de-datos'
+                                ? { ...x, scope: e.target.value as 'objeto' | 'subobjeto' }
+                                : x,
+                            ),
+                          )
+                        }
+                      >
+                        <option value="objeto">Todo el objeto</option>
+                        <option value="subobjeto">La categoria elegida</option>
+                      </select>
+                    </label>
+                  )}
+
+                  <button
+                    type="button"
+                    className="boton-enlace"
+                    disabled={guardando}
+                    data-testid={`quitar-adjunto-${item.id}-${a.objectId}`}
+                    onClick={() => quitar(a.instanceId)}
+                  >
+                    Quitar
+                  </button>
+                </Seccion>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Seccion>
+
+      <Seccion titulo="Anadir" prueba={`seccion-anadir-complemento-${item.id}`}>
+        <ul className="tienda">
+          {adjuntables.map((o) => {
+            const yaPuesto = puestos.some((a) => a.objectId === o.objectId);
+            return (
+              <li key={o.objectId}>
+                <button
+                  type="button"
+                  className="tienda__objeto"
+                  // Uno de cada tipo: dos tooltips sobre el mismo objeto se dibujarian uno encima
+                  // del otro y no habria forma de saber cual se esta leyendo.
+                  disabled={guardando || yaPuesto}
+                  title={o.description}
+                  data-testid={`adjuntar-${o.objectId}-${item.id}`}
+                  onClick={() => anadir(o.objectId, o.version)}
+                >
+                  <Icono nombre={ICONO_DE_TIPO[o.objectId] ?? 'informacion'} tamano={22} />
+                  <span className="tienda__nombre">{o.name}</span>
+                  <span className="tienda__contrato">{yaPuesto ? 'ya puesto' : 'anadir'}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </Seccion>
+    </>
+  );
+}
+
+/**
  * Tamano y posicion, con numeros y con botones.
  *
  * Arrastrar seria mas directo con un raton y deja fuera a quien no lo usa: 4.9 dice que la
- * accesibilidad no se pospone, y un lienzo que solo se ordena arrastrando es un lienzo que solo
- * ordena parte de la gente. Los botones mueven de columna en columna y son el camino que
+ * accesibilidad no se pospone. Los botones mueven de columna en columna y son el camino que
  * cualquiera puede recorrer; el arrastre puede venir despues SOBRE ESTAS MISMAS operaciones, no
  * como un segundo camino que pueda divergir.
  */
@@ -365,9 +554,9 @@ function Tamano({
 }) {
   const mover = (dx: number, dw: number) =>
     onCambiar(item.id, (it) => {
-      // Se recorta contra los bordes aqui y no se deja que lo rechace la validacion: un boton
-      // que guarda algo invalido y luego muestra un error hace trabajar a quien edita para
-      // descubrir un limite que el editor ya conoce.
+      // Se recorta contra los bordes aqui y no se deja que lo rechace la validacion: un boton que
+      // guarda algo invalido y luego muestra un error hace trabajar a quien edita para descubrir
+      // un limite que el editor ya conoce.
       const w = Math.min(GRID_COLUMNS, Math.max(1, it.position.w + dw));
       const x = Math.min(GRID_COLUMNS - w, Math.max(0, it.position.x + dx));
       return { ...it, position: { ...it.position, x, w } };
@@ -382,8 +571,7 @@ function Tamano({
   const enElBorde = item.position.x + item.position.w >= GRID_COLUMNS;
 
   return (
-    <fieldset className="editor__campos">
-      <legend>Tamano y posicion</legend>
+    <>
       <p className="texto-atenuado panel-editor__nota" data-testid={`posicion-${item.id}`}>
         Columna {item.position.x + 1}–{item.position.x + item.position.w} de {GRID_COLUMNS} ·{' '}
         {item.position.h} {item.position.h === 1 ? 'fila' : 'filas'}
@@ -396,7 +584,7 @@ function Tamano({
         <Paso etiqueta="Menos alto" prueba={`bajar-${item.id}`} desactivado={guardando || item.position.h <= 1} onPulsar={() => alto(-1)} />
         <Paso etiqueta="Mas alto" prueba={`subir-${item.id}`} desactivado={guardando} onPulsar={() => alto(1)} />
       </div>
-    </fieldset>
+    </>
   );
 }
 
