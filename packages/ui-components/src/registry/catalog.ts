@@ -121,7 +121,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         // Una tarjeta es una cifra: el formato es lo que mas cambia de una a otra —casos enteros,
         // porcentajes con un decimal, importes compactos—. No tiene leyenda ni etiquetas de dato,
         // porque no tiene series ni puntos.
-        presenta('formato'),
+        presenta('formato', 'formatos'),
       ),
     ],
   },
@@ -141,7 +141,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
             { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 10 },
           ],
         },
-        presenta('formato'),
+        presenta('formato', 'formatos'),
       ),
       /*
        * 1.1.0 — orden por encabezado, mas columnas, y estilo de texto.
@@ -171,7 +171,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
             { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 12 },
           ],
         },
-        presentation: presenta('formato'),
+        presentation: presenta('formato', 'formatos'),
       },
     ],
   },
@@ -189,7 +189,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           notes: 'La segunda dimension, si existe, agrupa las barras por serie.',
           pozos: POZOS_DE_BARRAS(1),
         },
-        presenta('formato', 'leyenda', 'etiquetasDeDato'),
+        presenta('formato', 'formatos', 'leyenda', 'etiquetasDeDato'),
       ),
       /*
        * 1.1.0 — varias medidas, como ya admitia `lineas`.
@@ -218,7 +218,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
             'Cada medida es una serie. La segunda dimension, si existe, agrupa las barras por serie.',
           pozos: POZOS_DE_BARRAS(4),
         },
-        presentation: presenta('formato', 'leyenda', 'etiquetasDeDato'),
+        presentation: presenta('formato', 'formatos', 'leyenda', 'etiquetasDeDato'),
       },
     ],
   },
@@ -252,7 +252,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
             },
           ],
         },
-        presenta('formato', 'leyenda', 'etiquetasDeDato'),
+        presenta('formato', 'formatos', 'leyenda', 'etiquetasDeDato'),
       ),
     ],
   },
@@ -274,7 +274,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
             { id: 'valores', etiqueta: 'Valores', tipo: 'medida', max: 1, min: 1 },
           ],
         },
-        presenta('formato'),
+        presenta('formato', 'formatos'),
       ),
       /*
        * 1.1.0 — jerarquia.
@@ -313,7 +313,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
             { id: 'valores', etiqueta: 'Valores', tipo: 'medida', max: 4, min: 1 },
           ],
         },
-        presentation: presenta('formato'),
+        presentation: presenta('formato', 'formatos'),
       },
     ],
   },

@@ -87,7 +87,14 @@ export function Lienzo({
           {
             '--rejilla-columnas': GRID_COLUMNS,
             '--rejilla-filas': filas,
-            gridTemplateRows: `repeat(${filas}, minmax(56px, auto))`,
+            /*
+             * Filas de alto FIJO, las mismas que el modulo publicado.
+             *
+             * Iban `minmax(56px, auto)`: una tarjeta con el subtitulo mas largo estiraba su fila y
+             * dos bloques declarados 3x2 salian con alturas distintas. El editor tiene que mostrar
+             * lo que se va a publicar, y lo que se publica mide lo que dice su `h`.
+             */
+            gridTemplateRows: `repeat(${filas}, var(--alto-de-fila))`,
           } as React.CSSProperties
         }
       >

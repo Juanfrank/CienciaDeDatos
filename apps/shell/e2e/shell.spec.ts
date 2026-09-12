@@ -347,3 +347,79 @@ test.describe('salud (seccion 7)', () => {
     expect(conector.detail).toContain("'mock'");
   });
 });
+
+test.describe('el alto de un objeto no depende de su contenido', () => {
+  /*
+   * La disposicion se guarda en `{x, y, w, h}` y `h` es un numero de FILAS. Si la fila se estira
+   * con el contenido, `h` deja de significar un alto y pasa a significar «al menos esto»: dos
+   * tarjetas declaradas iguales salen con alturas distintas porque una tiene el subtitulo mas
+   * largo, la fila entera crece para acomodar a la mas alta, y lo que alguien compuso cuadrado se
+   * publica descuadrado. Se nota poco en el editor y mucho en pantalla.
+   *
+   * Lo que no cabe se DESPLAZA dentro del objeto. Nunca se resuelve creciendo.
+   */
+  test('dos objetos de la misma fila miden exactamente lo mismo', async ({ page }) => {
+    await entrarComo(page, 'u-admin');
+    await page.goto('/m/casos-pendientes');
+    await expect(page.locator('.rejilla__celda').first()).toBeVisible();
+
+    const celdas = await page.locator('.rejilla__celda').evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { top: Math.round(r.top), alto: Math.round(r.height) };
+      }),
+    );
+    expect(celdas.length).toBeGreaterThan(3);
+
+    const porFila = new Map<number, number[]>();
+    for (const c of celdas) porFila.set(c.top, [...(porFila.get(c.top) ?? []), c.alto]);
+
+    // Al menos una fila con varios objetos, o la prueba no comprueba nada.
+    expect([...porFila.values()].some((altos) => altos.length > 1)).toBe(true);
+    for (const altos of porFila.values()) expect(new Set(altos).size).toBe(1);
+  });
+
+  test('el alto es multiplo exacto de las filas declaradas, no del contenido', async ({ page }) => {
+    await entrarComo(page, 'u-admin');
+    await page.goto('/m/casos-pendientes');
+    await expect(page.locator('.rejilla__celda').first()).toBeVisible();
+
+    const { unidad, hueco, altos } = await page.evaluate(() => {
+      const rejilla = document.querySelector('.rejilla') as HTMLElement;
+      const e = getComputedStyle(rejilla);
+      return {
+        unidad: parseFloat(e.gridAutoRows),
+        hueco: parseFloat(e.rowGap),
+        altos: Array.from(document.querySelectorAll('.rejilla__celda')).map((el) =>
+          Math.round(el.getBoundingClientRect().height),
+        ),
+      };
+    });
+
+    // alto = n*unidad + (n-1)*hueco para algun n entero. Si el contenido mandara, no cuadraria.
+    for (const alto of altos) {
+      const n = (alto + hueco) / (unidad + hueco);
+      expect(Math.abs(n - Math.round(n))).toBeLessThan(0.01);
+    }
+  });
+
+  test('una tabla que no cabe se desplaza DENTRO de su tarjeta', async ({ page }) => {
+    await entrarComo(page, 'u-admin');
+    await page.goto('/m/casos-pendientes');
+    const contenedor = page.getByTestId('tabla').first().locator('..');
+
+    const medida = await contenedor.evaluate((el: HTMLElement) => ({
+      desborda: el.scrollHeight > el.clientHeight,
+      overflowY: getComputedStyle(el).overflowY,
+    }));
+    expect(medida.overflowY).toBe('auto');
+    expect(medida.desborda).toBe(true);
+
+    // Y se desplaza de verdad, sin que la tarjeta crezca.
+    const antes = await page.getByTestId('tabla').first().locator('../..').boundingBox();
+    await contenedor.evaluate((el) => el.scrollTo(0, 9999));
+    const despues = await page.getByTestId('tabla').first().locator('../..').boundingBox();
+    expect(Math.round(despues?.height ?? 0)).toBe(Math.round(antes?.height ?? 0));
+    expect(await contenedor.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  });
+});

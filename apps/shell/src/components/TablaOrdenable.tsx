@@ -32,13 +32,20 @@ const comparar = (a: unknown, b: unknown, direccion: Direccion): number => {
 export function TablaOrdenable({
   proyectado,
   titulo,
-  formatear,
+  formatearColumna,
 }: {
   proyectado: QueryResult;
   titulo: string;
-  formatear: (n: number | null) => string;
+  /** Un formateador POR COLUMNA: cada medida puede tener el suyo. */
+  formatearColumna: (nombre: string) => (n: number | null) => string;
 }) {
   const [orden, setOrden] = useState<{ columna: number; direccion: Direccion } | null>(null);
+
+  // Se resuelve una vez por columna y no por celda: en una tabla larga son miles de llamadas.
+  const formateadores = useMemo(
+    () => proyectado.columns.map((c) => formatearColumna(c.name)),
+    [proyectado.columns, formatearColumna],
+  );
 
   const filas = useMemo(() => {
     if (!orden) return proyectado.rows;
@@ -91,7 +98,9 @@ export function TablaOrdenable({
             <tr key={i}>
               {fila.map((celda, j) => (
                 <td key={j} className={typeof celda === 'number' ? 'es-numero' : ''}>
-                  {typeof celda === 'number' ? formatear(celda) : String(celda ?? '')}
+                  {typeof celda === 'number'
+                    ? (formateadores[j] ?? String)(celda)
+                    : String(celda ?? '')}
                 </td>
               ))}
             </tr>

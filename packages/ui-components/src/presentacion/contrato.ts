@@ -1,4 +1,12 @@
 import { esNombreDeIcono, type NombreDeIcono } from './iconos';
+import {
+  TIPOS_DE_FORMATO,
+  type FormatoDeNumero,
+  type FormatosDelObjeto,
+  formatoDeMedida,
+  formateadorDeNumero,
+  problemaDelPatron,
+} from './numero';
 
 /**
  * El minimo de personalizacion que TODO objeto visual admite — seccion 4.2 y 4.3.
@@ -32,6 +40,12 @@ export type AcentoDeObjeto = (typeof ACENTOS)[number];
 export const MODOS_DE_LEYENDA = ['auto', 'siempre', 'nunca'] as const;
 export type ModoDeLeyenda = (typeof MODOS_DE_LEYENDA)[number];
 
+/**
+ * Compatibilidad: la forma anterior del formato, que era del OBJETO y no de la medida.
+ *
+ * Se conserva porque los modulos guardados antes la llevan y tienen que seguir abriendose. Al
+ * leer, se interpreta como el renglon general — que es exactamente lo que era.
+ */
 export interface FormatoNumerico {
   /** 0 a 4. Mas alla, la cifra deja de leerse y empieza a ser ruido de precision. */
   decimales?: number;
@@ -86,7 +100,7 @@ export interface EstiloDeTexto {
  * y dos objetos acabarian llamando de forma distinta a lo mismo. Con tres destinos fijos, lo que
  * se configura en una tarjeta significa lo mismo en un grafico.
  */
-export const DESTINOS_DE_TEXTO = ['titulo', 'subtitulo', 'cifra'] as const;
+export const DESTINOS_DE_TEXTO = ['titulo', 'subtitulo', 'valor', 'etiqueta'] as const;
 export type DestinoDeTexto = (typeof DESTINOS_DE_TEXTO)[number];
 
 export type TextosDeObjeto = Partial<Record<DestinoDeTexto, EstiloDeTexto>>;
@@ -136,6 +150,23 @@ export function estiloDeTexto(estilo: EstiloDeTexto | undefined): Record<string,
   return css;
 }
 
+/** Donde va la etiqueta respecto del valor en una tarjeta. */
+export const POSICIONES_DE_ETIQUETA = ['encima', 'debajo'] as const;
+export type PosicionDeEtiqueta = (typeof POSICIONES_DE_ETIQUETA)[number];
+
+/**
+ * La etiqueta que acompana al valor en una tarjeta.
+ *
+ * Era el titulo del objeto, reutilizado como rotulo de la cifra, y eso confunde dos cosas: el
+ * titulo dice QUE objeto es —y va en la cabecera, con el icono y los complementos— y la etiqueta
+ * dice que mide la cifra. Con uno solo no se puede tener una tarjeta titulada «Casos pendientes»
+ * cuya cifra se rotule «al cierre del trimestre».
+ */
+export interface EtiquetaDeValor {
+  texto?: string;
+  posicion?: PosicionDeEtiqueta;
+}
+
 export interface PresentacionDeObjeto {
   /** Icono del catalogo, en la cabecera. Sin el, el objeto usa el de su tipo. */
   icono?: NombreDeIcono;
@@ -143,15 +174,60 @@ export interface PresentacionDeObjeto {
   acento?: AcentoDeObjeto;
   /** Linea de color en el borde superior de la tarjeta. */
   resaltado?: boolean;
+  /**
+   * Color de la linea de resaltado, si debe ser otro que el acento.
+   *
+   * Va aparte de `acento` porque son dos cosas: el acento tine el icono y da el tono general del
+   * objeto, y el resaltado es una marca de estado —«esto pide atencion»— que a veces tiene que
+   * decir algo distinto. Sigue siendo un ROL, por lo mismo que todo lo demas.
+   */
+  colorDeResaltado?: ColorDeTexto;
+  /** Mostrar la cabecera con el titulo. Por defecto si. */
+  mostrarTitulo?: boolean;
+  /** Mostrar el icono junto al titulo. Por defecto si. */
+  mostrarIcono?: boolean;
+  /** El rotulo que acompana a la cifra en una tarjeta. */
+  etiqueta?: EtiquetaDeValor;
   /** Una linea bajo el titulo. Para la unidad, el periodo o la salvedad. */
   subtitulo?: string;
   formato?: FormatoNumerico;
+  /**
+   * Formato de numero POR MEDIDA, con un renglon general de respaldo.
+   *
+   * Convive con `formato`, que es la forma anterior —del objeto entero— y sigue valiendo para lo
+   * ya guardado. Cuando los dos estan, manda `formatos`: es el mas especifico.
+   */
+  formatos?: FormatosDelObjeto;
   leyenda?: ModoDeLeyenda;
   /** La cifra encima de cada barra o punto. */
   etiquetasDeDato?: boolean;
   /** Peso, estilo, alineacion y color de los textos del objeto. */
   textos?: TextosDeObjeto;
 }
+
+/**
+ * TODAS las claves de presentacion, como dato.
+ *
+ * El tipo `keyof PresentacionDeObjeto` no existe en tiempo de ejecucion, asi que la prueba que
+ * comprueba «ningun objeto declara una clave inventada» mantenia su propia lista a mano — y se
+ * quedo obsoleta en cuanto se anadio una clave nueva. Declarandola aqui, la lista y el tipo se
+ * comprueban entre si: si falta una, `satisfies` no compila.
+ */
+export const CLAVES_DE_PRESENTACION = [
+  'icono',
+  'acento',
+  'resaltado',
+  'colorDeResaltado',
+  'mostrarTitulo',
+  'mostrarIcono',
+  'subtitulo',
+  'etiqueta',
+  'textos',
+  'formato',
+  'formatos',
+  'leyenda',
+  'etiquetasDeDato',
+] as const satisfies readonly (keyof PresentacionDeObjeto)[];
 
 export type ClaveDePresentacion = keyof PresentacionDeObjeto;
 
@@ -171,6 +247,9 @@ export const PRESENTACION_MINIMA: ClaveDePresentacion[] = [
   'icono',
   'acento',
   'resaltado',
+  'colorDeResaltado',
+  'mostrarTitulo',
+  'mostrarIcono',
   'subtitulo',
   'textos',
 ];
@@ -266,6 +345,44 @@ export function validarPresentacion(
     }
   }
 
+  /*
+   * El formato de numero, renglon a renglon.
+   *
+   * Una cadena personalizada que no se entiende NO rompe el objeto —al dibujar se cae al formato
+   * general— pero si se avisa aqui: el editor lo senala antes de guardar, que es donde 4.2 quiere
+   * que se vea, en vez de dejar que alguien publique un formato que no hace lo que cree.
+   */
+  const renglones: [string, FormatoDeNumero | undefined][] = [
+    ['general', presentacion.formatos?.general],
+    ...Object.entries(presentacion.formatos?.porMedida ?? {}),
+  ];
+  for (const [nombre, formato] of renglones) {
+    if (!formato) continue;
+    if (formato.tipo !== undefined && !(TIPOS_DE_FORMATO as readonly string[]).includes(formato.tipo)) {
+      problemas.push({
+        clave: `formatos.${nombre}.tipo`,
+        problema: `'${String(formato.tipo)}' no es un tipo de formato. Use: ${TIPOS_DE_FORMATO.join(', ')}.`,
+      });
+    }
+    if (formato.tipo === 'personalizado') {
+      const problema = formato.patron === undefined ? 'falta la cadena.' : problemaDelPatron(formato.patron);
+      if (problema) {
+        problemas.push({
+          clave: `formatos.${nombre}.patron`,
+          problema: `El formato personalizado de '${nombre}' ${problema}`,
+        });
+      }
+    }
+    if (formato.decimales !== undefined && (formato.decimales < 0 || formato.decimales > 6)) {
+      problemas.push({
+        clave: `formatos.${nombre}.decimales`,
+        problema:
+          `${formato.decimales} decimales no se pueden mostrar. Entre 0 y 6: mas alla, la cifra ` +
+          `deja de leerse y empieza a ser ruido de precision.`,
+      });
+    }
+  }
+
   if (presentacion.subtitulo !== undefined && presentacion.subtitulo.length > MAX_SUBTITULO) {
     problemas.push({
       clave: 'subtitulo',
@@ -315,22 +432,44 @@ export function validarPresentacion(
  * fuente cuando el objeto la colapsa. Formatearla como 0 volveria a poner en pantalla un numero
  * que nadie calculo. La raya es el mismo signo que la matriz usa para una celda sin filas.
  */
+/**
+ * Traduce la forma ANTERIOR del formato a la nueva.
+ *
+ * Un modulo guardado antes de que el formato fuera por medida lleva `{decimales, unidad,
+ * compacto}` en el objeto. Eso es, exactamente, el renglon general del nuevo modelo: se lee asi y
+ * no hace falta migrar nada ni mantener dos caminos de formateo.
+ */
+export const comoFormatoDeNumero = (formato: FormatoNumerico | undefined): FormatoDeNumero =>
+  formato
+    ? {
+        tipo: formato.decimales === undefined ? 'general' : 'decimal',
+        ...(formato.decimales === undefined ? {} : { decimales: formato.decimales }),
+        ...(formato.unidad === undefined ? {} : { unidad: formato.unidad }),
+        ...(formato.compacto === undefined ? {} : { compacto: formato.compacto }),
+      }
+    : {};
+
+/**
+ * El formateador de UNA medida del objeto.
+ *
+ * Es el unico punto por el que pasan todas las cifras que se dibujan. Resuelve las tres capas en
+ * orden —lo de la medida, el renglon general, y la forma anterior del formato— y devuelve una
+ * funcion, no un texto: el patron se analiza una vez y se aplica a cada celda, que en una tabla
+ * larga son miles.
+ */
+export function formateadorDeMedida(
+  presentacion: PresentacionDeObjeto | undefined,
+  medida?: string,
+): (n: number | null) => string {
+  const porMedida = presentacion?.formatos
+    ? formatoDeMedida(presentacion.formatos, medida)
+    : undefined;
+  // `formatos` manda sobre `formato` por ser lo mas especifico; `formato` es la forma anterior y
+  // se interpreta como el renglon general, que es justo lo que era.
+  return formateadorDeNumero(porMedida ?? comoFormatoDeNumero(presentacion?.formato));
+}
+
+/** Compatibilidad: el formateador de la forma anterior, del objeto entero. */
 export function formateadorDe(formato: FormatoNumerico | undefined): (n: number | null) => string {
-  /*
-   * En compacto, un decimal por defecto.
-   *
-   * Con la regla general —cero decimales salvo que se pidan— 12.500 salia como «13 k»: la
-   * notacion compacta redondea sobre la cifra YA reducida, asi que cero decimales se come el
-   * 40 % del rango entre un escalon y el siguiente. «12,5 k» es lo que hace util el compacto, y
-   * es lo que se lee en cualquier tablero. Si alguien pide decimales explicitos, manda lo pedido.
-   */
-  const compacto = formato?.compacto === true;
-  const decimales = formato?.decimales ?? (compacto ? 1 : 0);
-  const intl = new Intl.NumberFormat('es-DO', {
-    minimumFractionDigits: compacto && formato?.decimales === undefined ? 0 : decimales,
-    maximumFractionDigits: decimales,
-    ...(compacto ? { notation: 'compact' as const, compactDisplay: 'short' as const } : {}),
-  });
-  const unidad = formato?.unidad ? ` ${formato.unidad}` : '';
-  return (n: number | null) => (n === null ? '—' : `${intl.format(n)}${unidad}`);
+  return formateadorDeNumero(comoFormatoDeNumero(formato));
 }

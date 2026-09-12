@@ -658,7 +658,15 @@ input[type='radio'] {
 }
 .objeto:hover { box-shadow: var(--md-sys-elevation-2); }
 
-.objeto { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.objeto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* Llena su celda y no la estira: el alto lo manda la rejilla, no el contenido. */
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
 /*
  * La cabecera: icono, titulos, complementos.
  *
@@ -739,11 +747,56 @@ input[type='radio'] {
   left: 0;
   right: 0;
   height: 4px;
-  background: var(--objeto-acento);
+  /* El color propio si se eligio uno; si no, el acento del objeto. */
+  background: var(--color-de-resaltado, var(--objeto-acento));
   border-radius: var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 0 0;
 }
 .objeto[data-resaltado='si'] .objeto__cabecera { padding-top: calc(var(--space-md) + 4px); }
-.objeto__cuerpo { padding: var(--space-md); flex: 1; min-width: 0; }
+/* Sin cabecera que empujar, el hueco de la linea lo deja el cuerpo. */
+.objeto[data-resaltado='si'] > .objeto__cuerpo:first-child { padding-top: calc(var(--space-md) + 4px); }
+
+/* La tarjeta: valor y etiqueta como un bloque, para poder alinearlo en vertical. */
+.kpi { display: flex; flex-direction: column; min-height: 0; }
+.kpi__etiqueta {
+  margin: 0;
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: var(--md-sys-typescale-body-small-line-height);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* La pista y el error de un campo, debajo del control. */
+.campo__pista,
+.campo__error {
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: var(--md-sys-typescale-body-small-line-height);
+}
+.campo__pista { color: var(--md-sys-color-on-surface-variant); }
+.campo__pista code {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--md-sys-color-surface-container-high);
+  font-family: ui-monospace, monospace;
+}
+.campo__error { color: var(--md-sys-color-error); font-weight: 500; }
+/*
+ * El cuerpo es lo que SE DESPLAZA cuando no cabe.
+ *
+ * `min-height: 0` no es un detalle: sin el, un hijo flex se niega a encogerse por debajo de su
+ * contenido y el desbordamiento se escapa de la tarjeta en vez de producir una barra. Es el
+ * motivo habitual de que un `overflow: auto` dentro de un flex «no haga nada».
+ *
+ * La barra lleva los colores del tema y se ve, por lo mismo que la del panel: un contenido que
+ * sigue mas abajo y no lo anuncia es un contenido que nadie descubre.
+ */
+.objeto__cuerpo {
+  padding: var(--space-md);
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--md-sys-color-outline) var(--md-sys-color-surface-container-high);
+}
 .objeto__pie {
   padding: 0 var(--space-md) var(--space-md);
   font-size: var(--md-sys-typescale-body-small-size);
@@ -1217,10 +1270,23 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 .rejilla {
   display: grid;
   grid-template-columns: repeat(var(--rejilla-columnas), minmax(0, 1fr));
+  /*
+   * Filas de alto FIJO, y celdas que lo llenan.
+   *
+   * Iban implicitas —o sea `auto`— con `align-items: start`, asi que cada objeto estiraba su fila
+   * hasta donde le pidiera el contenido. Lo que no cabe NO se resuelve creciendo: se desplaza
+   * dentro del objeto. Crecer rompe el esquema que alguien compuso, y lo rompe en silencio.
+   */
+  grid-auto-rows: var(--alto-de-fila);
   gap: var(--space-md);
-  align-items: start;
+  align-items: stretch;
 }
-.rejilla__celda { min-width: 0; grid-column: var(--col-escritorio); grid-row: var(--fila-escritorio); }
+.rejilla__celda {
+  min-width: 0;
+  min-height: 0;
+  grid-column: var(--col-escritorio);
+  grid-row: var(--fila-escritorio);
+}
 
 @media (max-width: 1023px) {
   .rejilla__celda { grid-column: var(--col-tableta); grid-row: var(--fila-tableta); }
@@ -1325,8 +1391,23 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * Tablas                                                              *
  * ------------------------------------------------------------------ */
 
+/*
+ * Las tablas se desplazan en los dos ejes, dentro de su tarjeta.
+ *
+ * `max-height: 100%` mas `min-height: 0` es lo que hace que la tabla se quede DENTRO: sin ellos,
+ * una tabla de treinta filas empujaba la tarjeta hacia abajo y —con filas de rejilla elasticas—
+ * estiraba la fila entera. Ahora la tarjeta mide lo que dice su `h` y la tabla se recorre.
+ */
 .tabla-contenedor,
-.tabla-contenedor-datos { overflow-x: auto; }
+.tabla-contenedor-datos {
+  overflow: auto;
+  max-height: 100%;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--md-sys-color-outline) var(--md-sys-color-surface-container-high);
+}
+/* En el emergente de datos manda el alto del dialogo, no el de una celda de rejilla. */
+.emergente .tabla-contenedor { max-height: 60vh; }
 
 .tabla,
 .tabla-datos {
@@ -1680,16 +1761,17 @@ th[aria-sort='descending'] .tabla__flecha {
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--rejilla-columnas), minmax(0, 1fr));
-  grid-auto-rows: minmax(56px, auto);
+  grid-auto-rows: var(--alto-de-fila);
   gap: var(--space-md);
   /*
-   * `start`, como la rejilla del modulo publicado.
+   * `stretch`, como la rejilla del modulo publicado.
    *
-   * Con `stretch` una tarjeta KPI de tres filas se estiraba hasta igualar al grafico de al lado y
-   * no se parecia a lo que se va a publicar — que es justo lo que el lienzo promete. El alto
-   * reservado se dice de otra forma: en la insignia del bloque y en el panel.
+   * Llevaba `start` para que una tarjeta no se estirara hasta igualar al grafico de al lado. Con
+   * las filas de alto fijo eso ya no pasa —nadie estira a nadie, porque la fila no cede— y
+   * `stretch` pasa a ser lo correcto: el bloque llena exactamente las filas que declara, que es
+   * lo que se va a publicar.
    */
-  align-items: start;
+  align-items: stretch;
 }
 
 /*
@@ -1744,6 +1826,9 @@ th[aria-sort='descending'] .tabla__flecha {
   position: relative;
   z-index: 1;
   min-width: 0;
+  min-height: 0;
+  /* Lo que no cabe se desplaza DENTRO del objeto; nunca se sale del bloque. */
+  overflow: hidden;
   border: 2px solid transparent;
   border-radius: var(--md-sys-shape-corner-medium);
 }
@@ -1871,8 +1956,8 @@ th[aria-sort='descending'] .tabla__flecha {
 .lienzo__bloque[data-elegido='si'] .lienzo__medida,
 .lienzo__bloque:hover .lienzo__medida { opacity: 1; }
 
-.lienzo__contenido { height: 100%; }
-.lienzo__contenido > .objeto { height: 100%; }
+.lienzo__contenido { height: 100%; min-height: 0; display: flex; }
+.lienzo__contenido > .objeto { flex: 1; min-height: 0; }
 .lienzo__vacio {
   margin: 0;
   padding: var(--space-xl) var(--space-md);
@@ -2929,6 +3014,18 @@ th[aria-sort='descending'] .tabla__flecha {
   --space-sm: 0.5rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
+  /*
+   * El alto de UNA fila de la rejilla. Fijo, y esa es toda la idea.
+   *
+   * La disposicion se guarda en `{x, y, w, h}` y `h` es un numero de filas. Si la fila se estira
+   * con el contenido, `h` deja de significar un alto y pasa a significar «al menos esto»: dos
+   * tarjetas declaradas 3x2 salen con alturas distintas porque una tiene el subtitulo mas largo,
+   * la fila entera crece para acomodar a la mas alta, y lo que alguien coloco cuadrado se publica
+   * descuadrado. Se nota poco en el editor y mucho en pantalla.
+   *
+   * 72 px es lo que deja la galeria sembrada practicamente igual que antes del cambio.
+   */
+  --alto-de-fila: 72px;
   --space-xl: 2.5rem;
 }
 

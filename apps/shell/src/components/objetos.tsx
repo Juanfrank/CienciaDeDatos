@@ -1,3 +1,5 @@
+'use client';
+
 import type { Agregacion, QueryResult } from '@app/data-contracts';
 import {
   type BindingProblem,
@@ -9,7 +11,7 @@ import {
   estiloDeTexto,
   fieldKey,
   ranurasDe,
-  formateadorDe,
+  formateadorDeMedida,
   proyectarObjeto,
   construirMatriz,
   toCategorical,
@@ -17,6 +19,7 @@ import {
   toSlicerOptions,
 } from '@app/ui-components';
 import type { ObjectInstance } from '@app/ui-components';
+import { useDesborda } from '../hooks/useDesborda';
 import { Complementos } from './Complementos';
 import { TablaDeMatriz } from './TablaDeMatriz';
 import { TablaOrdenable } from './TablaOrdenable';
@@ -61,6 +64,15 @@ function porRanura(instance: ObjectInstance, ranuras: RanuraDeCampos[] | undefin
     varios: (id: string) => ranurasDe(instance, ranuras).get(id) ?? [],
   };
 }
+
+/** La variable del tema de cada rol, para la linea de resaltado. */
+const VARIABLE_DE_RESALTADO: Record<string, string> = {
+  primario: 'var(--md-sys-color-primary)',
+  secundario: 'var(--md-sys-color-secondary)',
+  terciario: 'var(--md-sys-color-tertiary)',
+  error: 'var(--md-sys-color-error)',
+  atenuado: 'var(--md-sys-color-on-surface-variant)',
+};
 
 /** Icono por defecto de cada tipo, cuando la instancia no elige otro. */
 const ICONO_POR_TIPO: Record<string, NombreDeIcono> = {
@@ -167,15 +179,32 @@ export function Marco({
   const presentacion = instance?.presentacion;
   const icono = presentacion?.icono ?? (instance ? ICONO_POR_TIPO[instance.objectId] : undefined);
   const acento = presentacion?.acento ?? 'primario';
+  /*
+   * La cabecera entera se puede ocultar.
+   *
+   * No es solo el texto: sin titulo no hay fila de cabecera que ocupe sitio, y en una tarjeta de
+   * dos filas eso es la mitad del alto. Los complementos se van con ella —viven ahi— y por eso
+   * ocultarla es una decision y no un ajuste cosmetico.
+   */
+  const conCabecera = presentacion?.mostrarTitulo !== false;
+  const cuerpo = useDesborda<HTMLDivElement>();
 
   return (
     <div
       className="objeto"
       data-acento={acento}
       data-resaltado={presentacion?.resaltado ? 'si' : undefined}
+      // El color del resaltado, cuando debe decir algo distinto del acento. Es una variable y no
+      // una clase porque el valor sale de un rol del tema, no de un conjunto de estados.
+      style={
+        presentacion?.colorDeResaltado
+          ? ({ '--color-de-resaltado': VARIABLE_DE_RESALTADO[presentacion.colorDeResaltado] } as React.CSSProperties)
+          : undefined
+      }
     >
+      {conCabecera ? (
       <div className="objeto__cabecera">
-        {icono ? (
+        {icono && presentacion?.mostrarIcono !== false ? (
           // Decorativo: el nombre del objeto esta a su lado como texto. Darle tambien nombre
           // accesible haria que un lector leyera dos veces lo mismo.
           <span className="objeto__icono" aria-hidden="true">
@@ -211,7 +240,21 @@ export function Marco({
         ) : null}
         {accion}
       </div>
-      <div className="objeto__cuerpo">{children}</div>
+      ) : null}
+      {/*
+        El cuerpo recibe parada de tabulacion SOLO si de verdad desborda.
+        Una region desplazable tiene que alcanzarse con el teclado (2.1.1); ponerla en todas las
+        tarjetas por si acaso sumaria una parada por objeto que no lleva a ninguna parte.
+      */}
+      <div
+        className="objeto__cuerpo"
+        ref={cuerpo.ref}
+        {...(cuerpo.desborda
+          ? { tabIndex: 0, role: 'region', 'aria-label': `Contenido de ${titulo}` }
+          : {})}
+      >
+        {children}
+      </div>
       {pie ? <div className="objeto__pie">{pie}</div> : null}
     </div>
   );
@@ -231,17 +274,41 @@ export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones }: 
     agregacionesPara(medidas, instance.binding.measures, agregaciones),
   );
   const delta = kpi.delta;
-  const formatear = formateadorDe(instance.presentacion?.formato);
+  const formatear = formateadorDeMedida(instance.presentacion, medidas[0]);
+  const etiqueta = instance.presentacion?.etiqueta?.texto;
+  const posicionDeEtiqueta = instance.presentacion?.etiqueta?.posicion ?? 'debajo';
 
   return (
     <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
-      <p
-        className="kpi__valor"
-        data-testid="kpi-valor"
-        style={estiloDeTexto(instance.presentacion?.textos?.cifra)}
-      >
-        {formatear(kpi.value)}
-      </p>
+      {/*
+        El valor y su ETIQUETA, que es un texto propio y no el titulo reutilizado.
+        El titulo dice que objeto es —y va en la cabecera, con el icono y los complementos—; la
+        etiqueta dice que mide la cifra. Con uno solo no se puede tener una tarjeta titulada
+        «Casos pendientes» cuya cifra se rotule «al cierre del trimestre».
+      */}
+      <div className="kpi" style={estiloDeTexto(instance.presentacion?.textos?.valor)}>
+        {etiqueta && posicionDeEtiqueta === 'encima' ? (
+          <p
+            className="kpi__etiqueta"
+            data-testid="kpi-etiqueta"
+            style={estiloDeTexto(instance.presentacion?.textos?.etiqueta)}
+          >
+            {etiqueta}
+          </p>
+        ) : null}
+        <p className="kpi__valor" data-testid="kpi-valor">
+          {formatear(kpi.value)}
+        </p>
+        {etiqueta && posicionDeEtiqueta === 'debajo' ? (
+          <p
+            className="kpi__etiqueta"
+            data-testid="kpi-etiqueta"
+            style={estiloDeTexto(instance.presentacion?.textos?.etiqueta)}
+          >
+            {etiqueta}
+          </p>
+        ) : null}
+      </div>
       {delta ? (
         <p className={`kpi__delta ${delta.absolute >= 0 ? 'es-positivo' : 'es-negativo'}`}>
           {delta.absolute >= 0 ? '+' : ''}
@@ -400,10 +467,15 @@ export function Tabla({ titulo, result, instance, agregaciones }: ObjetoProps) {
 
   return (
     <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
+      {/*
+        Una tabla tiene varias medidas y cada una con su formato: el formateador se elige POR
+        COLUMNA, no uno para toda la tabla. Es el caso que la forma anterior del formato no podia
+        cubrir — casos y dias de resolucion salian iguales porque el formato era del objeto.
+      */}
       <TablaOrdenable
         proyectado={proyectado}
         titulo={titulo}
-        formatear={formateadorDe(instance.presentacion?.formato)}
+        formatearColumna={(nombre) => formateadorDeMedida(instance.presentacion, nombre)}
       />
     </Marco>
   );

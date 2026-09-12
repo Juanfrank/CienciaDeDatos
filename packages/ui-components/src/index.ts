@@ -106,6 +106,23 @@ export {
   type EstiloDeTexto,
   type TextosDeObjeto,
 } from './presentacion/contrato';
+export {
+  TIPOS_DE_FORMATO,
+  formatoDeMedida,
+  formateadorDeNumero,
+  problemaDelPatron,
+  type FormatoDeNumero,
+  type FormatosDelObjeto,
+  type TipoDeFormato,
+} from './presentacion/numero';
+export {
+  CLAVES_DE_PRESENTACION,
+  POSICIONES_DE_ETIQUETA,
+  comoFormatoDeNumero,
+  formateadorDeMedida,
+  type EtiquetaDeValor,
+  type PosicionDeEtiqueta,
+} from './presentacion/contrato';
 export { desgloseDe, proyectarObjeto } from './registry/proyeccion';
 export {
   classifyBump,

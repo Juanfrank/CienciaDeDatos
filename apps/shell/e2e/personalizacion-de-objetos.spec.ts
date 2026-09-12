@@ -42,7 +42,9 @@ const idDelPrimerBloque = async (page: Pagina): Promise<string> => {
 const abrir = async (page: Pagina, prueba: string) => {
   const seccion = page.getByTestId(prueba);
   if (await seccion.evaluate((el) => !(el as HTMLDetailsElement).open)) {
-    await seccion.locator('summary').click();
+    // `> summary` y no `summary`: «Medida» contiene subsecciones —Valor, Etiqueta, el formato de
+    // cada medida— y cada una trae el suyo. Sin el hijo directo, el selector encuentra cuatro.
+    await seccion.locator('> summary').click();
   }
 };
 
@@ -67,6 +69,9 @@ test.describe('el editor configura como se ve un objeto', () => {
 
     await page.getByTestId(`pres-${id}-icono`).selectOption('balanza');
     await guardado(page);
+    // El acento y el resaltado viven ahora en «Borde», que es lo que dibuja el limite de la
+    // tarjeta. Antes estaban mezclados con el rotulo, que es otra cosa.
+    await abrir(page, `pres-${id}-borde`);
     await page.getByTestId(`pres-${id}-acento`).selectOption('terciario');
     await guardado(page);
     // `.click()` y no `.check()`: el editor no es optimista — la casilla no cambia hasta que el
@@ -77,9 +82,10 @@ test.describe('el editor configura como se ve un objeto', () => {
     await page.getByTestId(`pres-${id}-subtitulo`).fill('Al cierre');
     await page.getByTestId(`pres-${id}-subtitulo`).blur();
     await guardado(page);
-    await abrir(page, `pres-${id}-cifra`);
-    await page.getByTestId(`pres-${id}-unidad`).fill('casos');
-    await page.getByTestId(`pres-${id}-unidad`).blur();
+    // La unidad esta en el renglon GENERAL del formato, dentro de «Medida».
+    await abrir(page, `pres-${id}-medida`);
+    await page.getByTestId(`pres-${id}-formato-general-unidad`).fill('casos');
+    await page.getByTestId(`pres-${id}-formato-general-unidad`).blur();
     await guardado(page);
     await expect(page.getByTestId('editor-sin-bloqueos')).toBeVisible();
 
@@ -88,11 +94,12 @@ test.describe('el editor configura como se ve un objeto', () => {
     await page.getByTestId(`elegir-${id}`).click();
     await page.getByTestId('pestana-formato').click();
     await expect(page.getByTestId(`pres-${id}-icono`)).toHaveValue('balanza');
+    await expect(page.getByTestId(`pres-${id}-subtitulo`)).toHaveValue('Al cierre');
+    await abrir(page, `pres-${id}-borde`);
     await expect(page.getByTestId(`pres-${id}-acento`)).toHaveValue('terciario');
     await expect(page.getByTestId(`pres-${id}-resaltado`)).toBeChecked();
-    await expect(page.getByTestId(`pres-${id}-subtitulo`)).toHaveValue('Al cierre');
-    await abrir(page, `pres-${id}-cifra`);
-    await expect(page.getByTestId(`pres-${id}-unidad`)).toHaveValue('casos');
+    await abrir(page, `pres-${id}-medida`);
+    await expect(page.getByTestId(`pres-${id}-formato-general-unidad`)).toHaveValue('casos');
   });
 
   test('y lo configurado se DIBUJA en la pantalla del modulo', async ({ page }) => {
@@ -132,7 +139,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await expect(page.getByTestId(`pres-${id}-icono`)).toBeVisible();
     // Una tabla tiene formato de cifra pero no leyenda: la subseccion «Grafico» ni siquiera se
     // dibuja, que es mas claro que dibujarla vacia.
-    await expect(page.getByTestId(`pres-${id}-cifra`)).toHaveCount(1);
+    await expect(page.getByTestId(`pres-${id}-medida`)).toHaveCount(1);
     await expect(page.getByTestId(`pres-${id}-grafico`)).toHaveCount(0);
     await expect(page.getByTestId(`pres-${id}-leyenda`)).toHaveCount(0);
     await expect(page.getByTestId(`pres-${id}-etiquetas`)).toHaveCount(0);

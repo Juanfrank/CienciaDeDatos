@@ -8,7 +8,7 @@ import {
   type ObjectInstance,
   compararValores,
   filasVisibles,
-  formateadorDe,
+  formateadorDeMedida,
   hojas,
   ordenarNodos,
   rutaClave,
@@ -54,7 +54,11 @@ export function TablaDeMatriz({
     direccion: 'asc',
   });
 
-  const formatear = formateadorDe(instance.presentacion?.formato);
+  // Un formateador por medida: la matriz puede llevar hasta cuatro, cada una con su formato.
+  const formatear = useMemo(
+    () => vm.medidas.map((m) => formateadorDeMedida(instance.presentacion, m)),
+    [vm.medidas, instance.presentacion],
+  );
   const columnas = useMemo(() => hojas(vm.columnas, plegadasColumna), [vm, plegadasColumna]);
 
   /*
@@ -169,13 +173,13 @@ export function TablaDeMatriz({
             {columnas.map((columna) =>
               vm.medidas.map((medida, i) => (
                 <td key={`${rutaClave(columna.ruta)}-${medida}`} className="es-numero es-total">
-                  {formatear(vm.valor([], columna.ruta, i))}
+                  {(formatear[i] ?? String)(vm.valor([], columna.ruta, i))}
                 </td>
               )),
             )}
             {vm.medidas.map((medida, i) => (
               <td key={`gt-${medida}`} className="es-numero es-total">
-                {formatear(vm.valor([], [], i))}
+                {(formatear[i] ?? String)(vm.valor([], [], i))}
               </td>
             ))}
           </tr>
@@ -197,7 +201,7 @@ function FilaDeMatriz({
   vm: MatrizJerarquica;
   columnas: NodoDeMatriz[];
   plegada: boolean;
-  formatear: (n: number | null) => string;
+  formatear: ((n: number | null) => string)[];
   onPlegar: () => void;
 }) {
   const tieneHijos = nodo.hijos.length > 0;
@@ -229,13 +233,13 @@ function FilaDeMatriz({
       {columnas.map((columna) =>
         vm.medidas.map((medida, i) => (
           <td key={`${rutaClave(columna.ruta)}-${medida}`} className="es-numero">
-            {formatear(vm.valor(nodo.ruta, columna.ruta, i))}
+            {(formatear[i] ?? String)(vm.valor(nodo.ruta, columna.ruta, i))}
           </td>
         )),
       )}
       {vm.medidas.map((medida, i) => (
         <td key={`t-${medida}`} className="es-numero es-total">
-          {formatear(vm.valor(nodo.ruta, [], i))}
+          {(formatear[i] ?? String)(vm.valor(nodo.ruta, [], i))}
         </td>
       ))}
     </tr>

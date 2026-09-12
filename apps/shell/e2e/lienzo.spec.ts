@@ -781,12 +781,18 @@ test.describe('como se resume cada medida', () => {
     await guardado(page);
     const sumado = await valor.innerText();
 
-    // No es cosmetico: el mismo mapeo con otro operador es otra cifra. La suma de 1 200 casos es
-    // ordenes de magnitud mayor que su promedio.
+    /*
+     * No es cosmetico: el mismo mapeo con otro operador es otra cifra. La suma de 1 200 casos es
+     * ordenes de magnitud mayor que su promedio.
+     *
+     * Se analiza el numero DE VERDAD, no sus digitos. Quitar todo lo que no sea digito funcionaba
+     * mientras las cifras salian sin decimales; en cuanto el formato general empezo a mostrarlos,
+     * «179,591» y «107,216» comparaban 179591 contra 107216 — o sea al reves.
+     */
+    const aNumero = (texto: string) =>
+      Number(texto.replace(/[^0-9.,]/g, '').replace(/,/g, ''));
     expect(sumado).not.toBe(promediado);
-    expect(Number(sumado.replace(/[^0-9]/g, ''))).toBeGreaterThan(
-      Number(promediado.replace(/[^0-9]/g, '')),
-    );
+    expect(aNumero(sumado)).toBeGreaterThan(aNumero(promediado));
   });
 
   test('el desplegable NO ofrece lo que el grano no admite', async ({ page }) => {
@@ -917,7 +923,6 @@ test.describe('estilo de texto y paleta', () => {
     const pres = `pres-obj-${id.replace('obj-', '')}`;
 
     await page.getByTestId('pestana-formato').click();
-    await page.getByTestId(`${pres}-texto`).locator('> summary').click();
 
     await page.getByTestId(`${pres}-texto-titulo-negrita`).click();
     await guardado(page);
@@ -949,20 +954,16 @@ test.describe('estilo de texto y paleta', () => {
     await nuevoModulo(page, 'estilo-paleta');
     await page.getByTestId('anadir-tarjeta-kpi').click();
     await guardado(page);
-    const id = await idDelBloque(page);
-    const pres = `pres-obj-${id.replace('obj-', '')}`;
-
     await page.getByTestId('pestana-formato').click();
-    await page.getByTestId(`${pres}-texto`).locator('> summary').click();
 
-    const paleta = page.getByRole('radiogroup', { name: /Color de Titulo/ });
+    const paleta = page.getByRole('radiogroup', { name: /Color de Estilo del titulo/ });
     await expect(paleta).toBeVisible();
     await expect(paleta.getByRole('radio')).toHaveCount(6);
     // Nada de `input[type=color]`: ahi es donde entraria el color suelto.
     await expect(page.locator('input[type="color"]')).toHaveCount(0);
   });
 
-  test('configurar la cifra no borra lo puesto en el titulo', async ({ page }) => {
+  test('configurar el valor no borra lo puesto en el titulo', async ({ page }) => {
     // Sin fundir con lo que ya hubiera, el ultimo destino tocado reemplazaria a los demas.
     await nuevoModulo(page, 'estilo-fusion');
     await page.getByTestId('anadir-tarjeta-kpi').click();
@@ -971,17 +972,20 @@ test.describe('estilo de texto y paleta', () => {
     const pres = `pres-obj-${id.replace('obj-', '')}`;
 
     await page.getByTestId('pestana-formato').click();
-    await page.getByTestId(`${pres}-texto`).locator('> summary').click();
     await page.getByTestId(`${pres}-texto-titulo-negrita`).click();
     await guardado(page);
-    await page.getByTestId(`${pres}-texto-cifra-cursiva`).click();
+
+    // El estilo del valor vive en «Medida > Valor»: la cifra y su rotulo son cosas distintas.
+    await page.getByTestId(`${pres}-medida`).locator('> summary').click();
+    await page.getByTestId(`${pres}-valor`).locator('> summary').click();
+    await page.getByTestId(`${pres}-texto-valor-cursiva`).click();
     await guardado(page);
 
     await expect(page.getByTestId(`${pres}-texto-titulo-negrita`)).toHaveAttribute(
       'aria-pressed',
       'true',
     );
-    await expect(page.getByTestId(`${pres}-texto-cifra-cursiva`)).toHaveAttribute(
+    await expect(page.getByTestId(`${pres}-texto-valor-cursiva`)).toHaveAttribute(
       'aria-pressed',
       'true',
     );

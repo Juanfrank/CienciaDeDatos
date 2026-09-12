@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { catalogoInicial } from '../registry/catalog';
 import { ICONOS_DE_OBJETO, NOMBRES_DE_ICONO, TRAZOS_DE_ICONO } from './iconos';
 import {
+  CLAVES_DE_PRESENTACION,
   PRESENTACION_MINIMA,
   formateadorDe,
   validarPresentacion,
@@ -30,12 +31,10 @@ describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
   );
 
   it('ningun objeto declara una clave que no existe en el contrato', () => {
-    const validas = new Set<string>([
-      ...PRESENTACION_MINIMA,
-      'formato',
-      'leyenda',
-      'etiquetasDeDato',
-    ]);
+    // La lista sale de `CLAVES_DE_PRESENTACION`, no de una copia aqui: una copia se queda
+    // obsoleta en cuanto se anade una clave, y entonces la prueba falla por estar desactualizada
+    // en vez de por haber encontrado algo.
+    const validas = new Set<string>(CLAVES_DE_PRESENTACION);
     for (const { objectId, version } of versiones) {
       for (const clave of version.presentation) {
         expect(validas, `${objectId} declara '${clave}'`).toContain(clave);
