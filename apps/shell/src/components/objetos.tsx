@@ -6,17 +6,20 @@ import {
   aFieldRef,
   agregacionesPara,
   campoDeRanura,
+  estiloDeTexto,
   fieldKey,
   ranurasDe,
   formateadorDe,
   proyectarObjeto,
+  construirMatriz,
   toCategorical,
   toKpi,
-  toMatrix,
   toSlicerOptions,
 } from '@app/ui-components';
 import type { ObjectInstance } from '@app/ui-components';
 import { Complementos } from './Complementos';
+import { TablaDeMatriz } from './TablaDeMatriz';
+import { TablaOrdenable } from './TablaOrdenable';
 import { Grafico } from './Grafico';
 import { Segmentador } from './Segmentador';
 import { Icono } from './iconos/Icono';
@@ -180,9 +183,20 @@ export function Marco({
           </span>
         ) : null}
         <div className="objeto__titulos">
-          <h3>{titulo}</h3>
+          {/*
+            El estilo sale de `estiloDeTexto`, la MISMA funcion para todos los objetos. Con cada
+            uno traduciendo por su cuenta, «negrita» en una tarjeta y «negrita» en una tabla
+            acabarian siendo pesos distintos.
+          */}
+          <h3 style={estiloDeTexto(presentacion?.textos?.titulo)} data-testid="objeto-titulo">
+            {titulo}
+          </h3>
           {presentacion?.subtitulo ? (
-            <p className="objeto__subtitulo" data-testid="objeto-subtitulo">
+            <p
+              className="objeto__subtitulo"
+              data-testid="objeto-subtitulo"
+              style={estiloDeTexto(presentacion.textos?.subtitulo)}
+            >
               {presentacion.subtitulo}
             </p>
           ) : null}
@@ -221,7 +235,11 @@ export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones }: 
 
   return (
     <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
-      <p className="kpi__valor" data-testid="kpi-valor">
+      <p
+        className="kpi__valor"
+        data-testid="kpi-valor"
+        style={estiloDeTexto(instance.presentacion?.textos?.cifra)}
+      >
         {formatear(kpi.value)}
       </p>
       {delta ? (
@@ -382,90 +400,36 @@ export function Tabla({ titulo, result, instance, agregaciones }: ObjetoProps) {
 
   return (
     <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
-      <div className="tabla-contenedor" tabIndex={0} role="region" aria-label={titulo}>
-        <table className="tabla" data-testid="tabla">
-          <thead>
-            <tr>
-              {proyectado.columns.map((c) => (
-                <th key={c.name} scope="col">
-                  {c.name}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {proyectado.rows.map((fila, i) => (
-              <tr key={i}>
-                {fila.map((celda, j) => (
-                  <td key={j} className={typeof celda === 'number' ? 'es-numero' : ''}>
-                    {typeof celda === 'number' ? formatearNumero(celda) : String(celda)}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <TablaOrdenable
+        proyectado={proyectado}
+        titulo={titulo}
+        formatear={formateadorDe(instance.presentacion?.formato)}
+      />
     </Marco>
   );
 }
 
 export function Matriz({ titulo, result, instance, ranuras, agregaciones }: ObjetoProps) {
   const r = porRanura(instance, ranuras);
-  const filas = r ? r.uno('filas') : fieldKeyDe(instance.binding.dimensions[0]);
-  const columnas = r ? r.uno('columnas') : fieldKeyDe(instance.binding.dimensions[1]);
-  const medida = (r ? r.uno('valores') : instance.binding.measures[0]) ?? '';
-
-  // Filas y columnas por su ranura: intercambiadas, la matriz sigue dibujando pero cruza al reves.
-  const dimensiones = [filas, columnas]
-    .filter((c): c is string => c !== undefined)
+  // Varios niveles por pozo: es lo que convierte el cruce plano en una jerarquia.
+  const dimsFila = (r ? r.varios('filas') : instance.binding.dimensions.slice(0, 1).map(fieldKey))
     .map(aFieldRef);
-  const vm = toMatrix(
+  const dimsColumna = (
+    r ? r.varios('columnas') : instance.binding.dimensions.slice(1, 2).map(fieldKey)
+  ).map(aFieldRef);
+  const medidas = r ? r.varios('valores') : instance.binding.measures;
+
+  const vm = construirMatriz(
     result,
-    dimensiones,
-    medida,
-    agregacionesPara([medida], instance.binding.measures, agregaciones)[0] ?? 'suma',
+    dimsFila,
+    dimsColumna,
+    medidas,
+    agregacionesPara(medidas, instance.binding.measures, agregaciones),
   );
 
   return (
     <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
-      <div className="tabla-contenedor" tabIndex={0} role="region" aria-label={titulo}>
-        <table className="tabla" data-testid="matriz">
-          <thead>
-            <tr>
-              <th />
-              {vm.columnLabels.map((c) => (
-                <th key={c} scope="col">
-                  {c}
-                </th>
-              ))}
-              <th scope="col">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {vm.rowLabels.map((fila, i) => (
-              <tr key={fila}>
-                <th scope="row">{fila}</th>
-                {vm.cells[i]?.map((celda, j) => (
-                  <td key={j} className="es-numero">
-                    {celda === null ? '—' : formatearNumero(celda)}
-                  </td>
-                ))}
-                <td className="es-numero es-total">{formatearNumero(vm.rowTotals[i] ?? null)}</td>
-              </tr>
-            ))}
-            <tr>
-              <th scope="row">Total</th>
-              {vm.columnTotals.map((t, j) => (
-                <td key={j} className="es-numero es-total">
-                  {formatearNumero(t)}
-                </td>
-              ))}
-              <td className="es-numero es-total">{formatearNumero(vm.grandTotal)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <TablaDeMatriz vm={vm} titulo={titulo} instance={instance} />
     </Marco>
   );
 }

@@ -45,7 +45,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             Superficie de gestion, separada de los modulos de negocio
           </p>
         </div>
-        <Link href="/" className="boton-enlace" data-testid="volver-a-modulos">
+        <Link href="/" className="boton-contorno" data-testid="volver-a-modulos">
           Volver a los modulos
         </Link>
       </header>

@@ -10,7 +10,7 @@ export default function SinPermisoEditor() {
         Crear y editar modulos esta reservado a los roles Colaborador y Administrador (4.10.1). Su
         rol permite ver los modulos de sus equipos y personalizar su vista.
       </p>
-      <Link href="/" className="boton-enlace">
+      <Link href="/" className="boton-contorno">
         Volver a los modulos
       </Link>
     </div>

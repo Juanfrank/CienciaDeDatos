@@ -1,6 +1,8 @@
 import type { Agregacion, QueryResult } from '@app/data-contracts';
 import type { ObjectInstance } from './types';
-import { aggregateBy, fieldKey, toMatrix, toSlicerOptions } from './viewModel';
+import { construirMatriz, filasVisibles, hojas } from './matriz';
+import { aFieldRef } from '../presentacion/pozos';
+import { aggregateBy, fieldKey, toSlicerOptions } from './viewModel';
 
 /**
  * Proyeccion tabular de un objeto — la forma de tabla de LO QUE EL OBJETO MUESTRA.
@@ -61,19 +63,48 @@ export function proyectarObjeto(
     }
 
     case 'matriz': {
-      const medida = measures[0] ?? '';
-      const vm = toMatrix(result, dimensions, medida, agregaciones[0] ?? 'suma');
+      /*
+       * La misma matriz JERARQUICA que se dibuja, aplanada.
+       *
+       * Se construye con `construirMatriz` y no con un calculo propio porque si no, lo exportado y
+       * lo mostrado serian dos cosas distintas: la pantalla con sus niveles y subtotales, y el
+       * archivo con un cruce plano. Es la razon de que esta funcion exista.
+       *
+       * Se exporta TODO desplegado, a proposito: plegar un grupo es un gesto de lectura y no una
+       * propiedad del objeto, y un archivo al que le faltan filas porque alguien las tenia
+       * cerradas al pulsar «exportar» es un archivo que miente sobre lo que contiene.
+       */
+      const nada = new Set<string>();
+      const deRanura = (id: string): string[] | undefined => instance.binding.ranuras?.[id];
+      const dimsFila = (deRanura('filas') ?? dimensions.slice(0, 1).map(fieldKey)).map(aFieldRef);
+      const dimsColumna = (deRanura('columnas') ?? dimensions.slice(1, 2).map(fieldKey)).map(
+        aFieldRef,
+      );
+      const medidas = deRanura('valores') ?? measures;
+
+      const vm = construirMatriz(result, dimsFila, dimsColumna, medidas, agregaciones);
+      const columnasHoja = hojas(vm.columnas, nada);
+
       const columns = [
-        columnaTexto(etiquetaDeDimensiones(instance)),
-        ...vm.columnLabels.map(columnaNumero),
-        columnaNumero('Total'),
+        columnaTexto(vm.nivelesDeFila.join(' / ') || etiquetaDeDimensiones(instance)),
+        ...columnasHoja.flatMap((c) =>
+          medidas.map((m) => columnaNumero(medidas.length > 1 ? `${c.etiqueta} · ${m}` : c.etiqueta)),
+        ),
+        ...medidas.map((m) => columnaNumero(medidas.length > 1 ? `Total · ${m}` : 'Total')),
       ];
-      const rows: unknown[][] = vm.rowLabels.map((etiqueta, i) => [
-        etiqueta,
-        ...(vm.cells[i] ?? []),
-        vm.rowTotals[i] ?? null,
+
+      const celdasDe = (ruta: readonly string[]) => [
+        ...columnasHoja.flatMap((c) => medidas.map((_, i) => vm.valor(ruta, c.ruta, i))),
+        ...medidas.map((_, i) => vm.valor(ruta, [], i)),
+      ];
+
+      const rows: unknown[][] = filasVisibles(vm.filas, nada).map((nodo) => [
+        // La sangria del nivel viaja como texto: un CSV no tiene jerarquia, y sin ella las filas
+        // de subtotal y las de detalle se leerian como si estuvieran al mismo nivel.
+        `${'  '.repeat(nodo.nivel)}${nodo.etiqueta}`,
+        ...celdasDe(nodo.ruta),
       ]);
-      rows.push(['Total', ...vm.columnTotals, vm.grandTotal]);
+      rows.push(['Total', ...celdasDe([])]);
       return mismaProcedencia(result, columns, rows);
     }
 

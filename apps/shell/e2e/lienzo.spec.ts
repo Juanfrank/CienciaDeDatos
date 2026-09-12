@@ -907,3 +907,83 @@ test.describe('como se resume cada medida', () => {
     await expect(page.getByTestId(`bloque-${id}`).getByTestId('kpi-valor')).toBeVisible();
   });
 });
+
+test.describe('estilo de texto y paleta', () => {
+  test('negrita, cursiva y color se aplican al titulo, en vivo', async ({ page }) => {
+    await nuevoModulo(page, 'estilo-texto');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+    const pres = `pres-obj-${id.replace('obj-', '')}`;
+
+    await page.getByTestId('pestana-formato').click();
+    await page.getByTestId(`${pres}-texto`).locator('> summary').click();
+
+    await page.getByTestId(`${pres}-texto-titulo-negrita`).click();
+    await guardado(page);
+    await page.getByTestId(`${pres}-texto-titulo-cursiva`).click();
+    await guardado(page);
+    await page.getByTestId(`${pres}-texto-titulo-color-terciario`).click();
+    await guardado(page);
+
+    const estilo = await page
+      .getByTestId(`bloque-${id}`)
+      .getByTestId('objeto-titulo')
+      .evaluate((el) => {
+        const e = getComputedStyle(el);
+        return { peso: e.fontWeight, estilo: e.fontStyle, color: e.color };
+      });
+    expect(estilo.peso).toBe('700');
+    expect(estilo.estilo).toBe('italic');
+    // El color sale del ROL del tema, no de un hex escrito a mano: se comprueba que cambio, no
+    // cual es, porque el valor exacto es del tema y el tema puede cambiar.
+    expect(estilo.color).not.toBe('rgb(0, 0, 0)');
+  });
+
+  test('la paleta ofrece ROLES del tema, no un color libre', async ({ page }) => {
+    /*
+     * Es la decision que sostiene 4.3. Un selector de color libre es lo que pide cualquiera y es
+     * justo lo que romperia la garantia: un color elegido a mano no tiene par de contraste
+     * comprobado contra la superficie donde acabe, y no sigue al tema oscuro.
+     */
+    await nuevoModulo(page, 'estilo-paleta');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+    const pres = `pres-obj-${id.replace('obj-', '')}`;
+
+    await page.getByTestId('pestana-formato').click();
+    await page.getByTestId(`${pres}-texto`).locator('> summary').click();
+
+    const paleta = page.getByRole('radiogroup', { name: /Color de Titulo/ });
+    await expect(paleta).toBeVisible();
+    await expect(paleta.getByRole('radio')).toHaveCount(6);
+    // Nada de `input[type=color]`: ahi es donde entraria el color suelto.
+    await expect(page.locator('input[type="color"]')).toHaveCount(0);
+  });
+
+  test('configurar la cifra no borra lo puesto en el titulo', async ({ page }) => {
+    // Sin fundir con lo que ya hubiera, el ultimo destino tocado reemplazaria a los demas.
+    await nuevoModulo(page, 'estilo-fusion');
+    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await guardado(page);
+    const id = await idDelBloque(page);
+    const pres = `pres-obj-${id.replace('obj-', '')}`;
+
+    await page.getByTestId('pestana-formato').click();
+    await page.getByTestId(`${pres}-texto`).locator('> summary').click();
+    await page.getByTestId(`${pres}-texto-titulo-negrita`).click();
+    await guardado(page);
+    await page.getByTestId(`${pres}-texto-cifra-cursiva`).click();
+    await guardado(page);
+
+    await expect(page.getByTestId(`${pres}-texto-titulo-negrita`)).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await expect(page.getByTestId(`${pres}-texto-cifra-cursiva`)).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+});

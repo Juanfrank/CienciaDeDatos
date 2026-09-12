@@ -125,8 +125,10 @@ describe('proyectarObjeto', () => {
       ['suma', 'suma'],
     );
 
+    // La esquina nombra SOLO el eje de filas. Antes decia «Distrito / Materia» —los dos ejes en
+    // el rotulo de uno—, que es exactamente lo que una matriz no es.
     expect(proyectado.columns.map((c) => c.name)).toEqual([
-      'DimTribunal.Distrito / DimTribunal.Materia',
+      'DimTribunal.Distrito',
       'Penal',
       'Civil',
       'Total',

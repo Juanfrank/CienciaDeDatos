@@ -300,6 +300,89 @@ code {
  * Es un BOTON, no un enlace: no navega, ejecuta una accion. Se dibuja sin relleno porque su
  * enfasis es el mas bajo de los cuatro, y lleva la misma capa de estado que los demas.
  */
+/*
+ * ---- Tres pesos de boton, y cuando usar cada uno ----
+ *
+ * `.boton-enlace` es el boton de TEXTO de Material: sin borde y sin relleno. Es correcto para la
+ * accion secundaria de un dialogo, donde el contexto ya dice que es pulsable, y no lo es para una
+ * accion suelta en una barra: «Volver a la lista» junto a un titulo parece parte del titulo, y la
+ * unica forma de descubrir que se puede pulsar es pasarle el raton por encima. Un control que hay
+ * que descubrir probando no esta senalizado.
+ *
+ * `.boton-contorno` es el boton CONTORNEADO: mismo peso visual bajo, pero con un limite dibujado,
+ * asi que se ve que es un control aunque nadie lo toque. Es el que corresponde a «volver».
+ *
+ * `.boton-peligro` es el contenedor de error: para lo que borra algo. Rojo del tema, no un rojo
+ * suelto, para que siga a la comprobacion de contraste de 4.3 como todo lo demas.
+ */
+.boton-contorno {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.boton-contorno::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.boton-contorno:hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); }
+.boton-contorno:active:not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
+.boton-contorno:disabled { opacity: 0.38; cursor: not-allowed; }
+
+.boton-peligro {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--md-sys-color-error);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.boton-peligro::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.boton-peligro:hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); }
+.boton-peligro:active:not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
+.boton-peligro:disabled { opacity: 0.38; cursor: not-allowed; }
+
 .boton-enlace {
   display: inline-flex;
   align-items: center;
@@ -764,6 +847,24 @@ input[type='radio'] {
 .cabecera select:hover:not(:disabled) { border-color: var(--md-sys-color-on-primary); }
 /* Las opciones del desplegable las dibuja el sistema: ahi manda la superficie, no el azul. */
 .cabecera select option { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+/*
+ * Los controles de la cabecera, con limite propio.
+ *
+ * Sobre el azul institucional, «Editor» y «Administracion» en blanco eran indistinguibles del
+ * subtitulo que tienen al lado: mismo color, mismo peso, y ninguna pista de que uno lleva a otra
+ * pantalla y el otro no. Un contorno translucido basta — no compite con la marca y dice lo unico
+ * que hacia falta decir: esto se pulsa.
+ */
+.cabecera .boton-enlace,
+.cabecera .campana {
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-on-primary) 45%, transparent);
+  background: color-mix(in srgb, var(--md-sys-color-on-primary) 10%, transparent);
+}
+.cabecera .boton-enlace:hover,
+.cabecera .campana:hover {
+  border-color: var(--md-sys-color-on-primary);
+  background: color-mix(in srgb, var(--md-sys-color-on-primary) 20%, transparent);
+}
 .cabecera :focus-visible { outline-color: var(--md-sys-color-on-primary); }
 
 /* El emblema lleva su propio disco blanco: el escudo es azul y rojo, y sobre azul se perderia. */
@@ -1251,6 +1352,113 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 }
 .tabla .es-numero { text-align: right; font-variant-numeric: tabular-nums; }
 .tabla .es-total { font-weight: 500; }
+
+/*
+ * ---- Legibilidad de una tabla larga ----
+ *
+ * Tres cosas, y ninguna es decoracion: en una tabla de veinte filas y ocho columnas, seguir una
+ * fila con la vista de un extremo al otro es donde se cometen los errores de lectura.
+ *
+ * 1. **Filas alternas.** La franja da un asidero horizontal. Es un fondo de contenedor y no un
+ *    gris inventado, asi que sigue al tema y al modo oscuro; y es una diferencia de fondo, no de
+ *    texto, asi que ningun par de contraste cambia.
+ * 2. **La cabecera de fila con su propio fondo.** La primera columna es el rotulo de la fila, no
+ *    un dato: si se ve igual que las cifras, la tabla parece una rejilla sin eje.
+ * 3. **Encabezados fijos al desplazar.** Una tabla dentro de una tarjeta se desplaza en su caja,
+ *    y sin esto los titulos de columna se van arriba a las tres filas.
+ */
+.tabla tbody tr:nth-child(even) > td,
+.tabla tbody tr:nth-child(even) > th { background: var(--md-sys-color-surface-container-low); }
+.tabla tbody tr:hover > td,
+.tabla tbody tr:hover > th { background: var(--md-sys-color-surface-container); }
+
+.tabla tbody th[scope='row'] {
+  background: var(--md-sys-color-surface-container);
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.tabla thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--md-sys-color-surface-container-high);
+}
+/* La esquina se cruza con las dos bandas fijas: por encima de ambas o se solapan al desplazar. */
+.tabla thead th.tabla__esquina { left: 0; z-index: 3; }
+
+/* La fila de total cierra la tabla: se separa con una linea, no solo con negrita. */
+.tabla__fila-total > th,
+.tabla__fila-total > td {
+  border-top: 2px solid var(--md-sys-color-outline);
+  background: var(--md-sys-color-surface-container-high);
+}
+
+/*
+ * El encabezado ES el boton de ordenar.
+ *
+ * Un icono aparte obligaria a apuntar a un blanco de 16 px; asi el area pulsable es el rotulo
+ * entero, que es lo que la gente intenta pulsar de todas formas. La flecha doble en reposo dice
+ * que se puede ordenar sin decir que ya lo esta.
+ */
+.tabla__ordenar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+.tabla__ordenar:hover { color: var(--md-sys-color-primary); }
+.tabla .es-numero .tabla__ordenar,
+.tabla thead th.es-numero .tabla__ordenar { justify-content: flex-end; }
+.tabla__flecha { font-size: 0.7em; opacity: 0.55; }
+.tabla__ordenar:hover .tabla__flecha { opacity: 1; }
+th[aria-sort='ascending'] .tabla__flecha,
+th[aria-sort='descending'] .tabla__flecha {
+  opacity: 1;
+  color: var(--md-sys-color-primary);
+}
+
+/* ---- Jerarquia de la matriz ---- */
+.tabla__encabezado { display: inline-flex; align-items: center; gap: var(--space-xs); min-width: 0; }
+.tabla__plegar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  background: none;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+}
+.tabla__plegar:hover { background: var(--md-sys-color-surface-container-highest); }
+/* Un hueco del mismo tamano donde no hay nada que plegar: sin el, las hojas no alinean con sus hermanos. */
+.tabla__plegar--vacio { cursor: default; }
+/* Plegado apunta a la derecha; desplegado, abajo. El giro es la unica pista de estado que hace falta. */
+.tabla__plegar[aria-expanded='false'] svg { transform: rotate(-90deg); }
+.tabla__plegar svg {
+  transition: transform var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+/* Cada nivel pesa un poco menos que el de encima: es la jerarquia dicha con tipografia. */
+.tabla--matriz tbody tr[data-nivel='0'] > th { font-weight: 600; }
+.tabla--matriz tbody tr[data-nivel='1'] > th { font-weight: 500; }
+.tabla--matriz tbody tr[data-nivel='2'] > th {
+  font-weight: 400;
+  color: var(--md-sys-color-on-surface-variant);
+}
 
 /* ------------------------------------------------------------------ *
  * Segmentador y panel de filtros                                      *
@@ -1864,6 +2072,80 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
 }
 
 .panel-editor__nota { font-size: var(--md-sys-typescale-body-small-size); }
+/* Separado del ultimo pozo y a lo ancho: no es una opcion mas de la lista, es el final. */
+.panel-editor__quitar { align-self: stretch; margin-top: var(--space-xs); }
+
+/* ---- Estilo de texto y paleta ---- */
+.estilo-texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+}
+.estilo-texto__rotulo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.estilo-texto__fila { display: flex; gap: var(--space-xs); }
+/*
+ * B, I, U: cuadrados, iguales y contiguos, como en cualquier editor de texto.
+ *
+ * `aria-pressed` es lo que dice si estan activos, y el relleno lo acompana — el estado no se fia
+ * solo del color, que es lo que 1.4.1 pide para un control que solo tiene dos posiciones.
+ */
+.estilo-texto__boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  cursor: pointer;
+}
+.estilo-texto__boton:hover:not(:disabled) { background: var(--md-sys-color-surface-container-high); }
+.estilo-texto__boton[aria-pressed='true'] {
+  background: var(--md-sys-color-secondary-container);
+  border-color: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary-container);
+}
+.estilo-texto__boton:disabled { opacity: 0.38; cursor: not-allowed; }
+
+/*
+ * La paleta: seis muestras, una por ROL del tema.
+ *
+ * Cada muestra se pinta con la variable del rol, no con un hex copiado, asi que la paleta cambia
+ * sola cuando cambia el tema. La elegida se marca con un anillo y no solo con un color distinto:
+ * un borde sobre una muestra de color es lo unico que se distingue sin depender del color mismo.
+ */
+.paleta { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.paleta__muestra {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.paleta__muestra[aria-checked='true'] {
+  outline: 2px solid var(--md-sys-color-on-surface);
+  outline-offset: 2px;
+}
+.paleta__muestra:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
 .panel-editor__adjuntos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-sm); }
 
 /* ---- Secciones colapsables ---- */

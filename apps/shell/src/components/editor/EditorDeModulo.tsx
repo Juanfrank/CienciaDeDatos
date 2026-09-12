@@ -177,7 +177,7 @@ export function EditorDeModulo({
           <p className="editor__estado" role="status" aria-live="polite" data-testid="editor-estado">
             {guardando ? 'Guardando…' : ''}
           </p>
-          <Link href="/editor" className="boton-enlace">
+          <Link href="/editor" className="boton-contorno">
             Volver a la lista
           </Link>
         </div>

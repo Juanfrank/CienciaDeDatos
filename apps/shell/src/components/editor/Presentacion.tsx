@@ -8,6 +8,8 @@ import {
   selectoresEfectivos,
   type AcentoDeObjeto,
   type ClaveDePresentacion,
+  type DestinoDeTexto,
+  type EstiloDeTexto,
   type ModoDeLeyenda,
   type ObjectInstance,
   type NombreDeIcono,
@@ -15,6 +17,7 @@ import {
   type TipoDeSelector,
 } from "@app/ui-components";
 import { Icono } from "../iconos/Icono";
+import { EstiloDeTextoEditor } from "./EstiloDeTextoEditor";
 import { Seccion } from "./Seccion";
 
 /**
@@ -56,6 +59,21 @@ export function Presentacion({
     onCambiar((i) => ({
       ...i,
       presentacion: { ...i.presentacion, ...parcial },
+    }));
+
+  /*
+   * El estilo de un texto se funde con lo que ya hubiera de los OTROS textos.
+   *
+   * Sin el `...i.presentacion?.textos`, configurar la cifra borraria lo que se hubiera puesto en
+   * el titulo: el objeto entero se reemplazaria por el del ultimo destino tocado.
+   */
+  const ponerTexto = (destino: DestinoDeTexto, estilo: EstiloDeTexto) =>
+    onCambiar((i) => ({
+      ...i,
+      presentacion: {
+        ...i.presentacion,
+        textos: { ...i.presentacion?.textos, [destino]: estilo },
+      },
     }));
 
   /*
@@ -150,6 +168,38 @@ export function Presentacion({
           </label>
         ) : null}
       </Seccion>
+
+      {admite("textos") ? (
+        <Seccion titulo="Texto" nivel={2} abierta={false} prueba={`${prueba}-texto`}>
+          <EstiloDeTextoEditor
+            titulo="Titulo"
+            estilo={p.textos?.titulo ?? {}}
+            prueba={`${prueba}-texto-titulo`}
+            guardando={guardando}
+            onCambiar={(estilo) => ponerTexto("titulo", estilo)}
+          />
+          <EstiloDeTextoEditor
+            titulo="Subtitulo"
+            estilo={p.textos?.subtitulo ?? {}}
+            prueba={`${prueba}-texto-subtitulo`}
+            guardando={guardando}
+            onCambiar={(estilo) => ponerTexto("subtitulo", estilo)}
+          />
+          {hayCifra ? (
+            <EstiloDeTextoEditor
+              titulo="Cifra"
+              // La cifra es lo unico con alto propio dentro de la tarjeta, asi que es el unico
+              // sitio donde alinear en vertical significa algo.
+              conVertical
+              ayuda="La cifra grande. La alineacion vertical la coloca dentro del alto de la tarjeta."
+              estilo={p.textos?.cifra ?? {}}
+              prueba={`${prueba}-texto-cifra`}
+              guardando={guardando}
+              onCambiar={(estilo) => ponerTexto("cifra", estilo)}
+            />
+          ) : null}
+        </Seccion>
+      ) : null}
 
       {hayCifra ? (
         <Seccion

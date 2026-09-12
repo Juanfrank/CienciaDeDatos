@@ -134,11 +134,11 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       v1(
         'Version inicial: columnas ordenables y formato numerico por medida.',
         {
-          dimensions: { min: 0, max: 6 },
-          measures: { min: 0, max: 10 },
+          dimensions: { min: 0, max: 8 },
+          measures: { min: 0, max: 12 },
           pozos: [
-            { id: 'columnas-dim', etiqueta: 'Columnas de detalle', tipo: 'dimension', max: 6 },
-            { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 10 },
+            { id: 'columnas-dim', etiqueta: 'Columnas de detalle', tipo: 'dimension', max: 8 },
+            { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 12 },
           ],
         },
         presenta('formato'),
@@ -229,7 +229,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   {
     objectId: 'matriz',
     name: 'Matriz',
-    description: 'Cruce de dos dimensiones con una medida en las celdas.',
+    description: 'Cruce jerarquico de dimensiones, con subtotales por nivel.',
     category: 'tabla',
     versions: [
       v1(
@@ -246,6 +246,45 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         },
         presenta('formato'),
       ),
+      /*
+       * 1.1.0 — jerarquia.
+       *
+       * 1.0.0 cruzaba UNA dimension con UNA dimension, y sobre un cruce plano no hay nada que
+       * expandir: no tiene niveles. Pero la matriz es justo el objeto donde la jerarquia importa
+       * —distrito y dentro materia, ano y dentro trimestre—, asi que el limite de uno no
+       * simplificaba nada: impedia usarla para lo que sirve.
+       *
+       * Version nueva y no correccion de 1.0.0, como manda 4.5: las instancias fijadas a 1.0.0
+       * siguen viendo su contrato. Ampliar un maximo no las romperia, pero la regla no es «cambia
+       * solo si rompe»; es que la version es lo que hace reproducible un modulo ya desplegado.
+       */
+      {
+        version: '1.1.0',
+        publishedAt: '2026-09-12',
+        changelog:
+          'Jerarquia en filas y columnas (hasta tres y dos niveles), varias medidas, subtotales ' +
+          'por nivel, colapsar y expandir, y orden por cualquier encabezado.',
+        certification: certificacionInicial,
+        dataContract: {
+          dimensions: { min: 1, max: 5 },
+          measures: { min: 1, max: 4 },
+          notes:
+            'Las dimensiones de fila anidan en el orden en que se mapean, y las de columna igual. ' +
+            'Cada nivel trae su subtotal, calculado sobre las filas de origen.',
+          pozos: [
+            { id: 'filas', etiqueta: 'Filas', tipo: 'dimension', max: 3, min: 1 },
+            {
+              id: 'columnas',
+              etiqueta: 'Columnas',
+              tipo: 'dimension',
+              max: 2,
+              ayuda: 'Opcional. Sin ninguna, la matriz es una tabla agrupada por sus filas.',
+            },
+            { id: 'valores', etiqueta: 'Valores', tipo: 'medida', max: 4, min: 1 },
+          ],
+        },
+        presentation: presenta('formato'),
+      },
     ],
   },
   {

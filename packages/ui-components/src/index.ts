@@ -82,6 +82,30 @@ export {
   type ContextoDeAgregacion,
   type ProblemaDeAgregacion,
 } from './registry/agregacion';
+export {
+  compararValores,
+  construirMatriz,
+  filasVisibles,
+  hojas,
+  ordenarNodos,
+  rutaClave,
+  type Direccion,
+  type MatrizJerarquica,
+  type NodoDeMatriz,
+} from './registry/matriz';
+export {
+  ALINEACIONES,
+  ALINEACIONES_VERTICALES,
+  COLORES_DE_TEXTO,
+  DESTINOS_DE_TEXTO,
+  estiloDeTexto,
+  type Alineacion,
+  type AlineacionVertical,
+  type ColorDeTexto,
+  type DestinoDeTexto,
+  type EstiloDeTexto,
+  type TextosDeObjeto,
+} from './presentacion/contrato';
 export { desgloseDe, proyectarObjeto } from './registry/proyeccion';
 export {
   classifyBump,

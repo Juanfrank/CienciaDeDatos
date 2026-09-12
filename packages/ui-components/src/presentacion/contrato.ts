@@ -41,6 +41,101 @@ export interface FormatoNumerico {
   compacto?: boolean;
 }
 
+/**
+ * ---- Texto: peso, estilo, alineacion y color ----
+ *
+ * El color es un ROL del tema, igual que el acento y por el mismo motivo. Es tentador ofrecer un
+ * selector de color libre —es lo que pide cualquiera— y es justo lo que romperia 4.3: un color
+ * elegido a mano no tiene par de contraste comprobado contra la superficie donde acabe, no sigue
+ * al tema oscuro, y la puerta de contraste deja de garantizar nada sobre lo que se ve. Con roles
+ * hay paleta de verdad —seis opciones con su muestra— y la garantia se conserva.
+ *
+ * `atenuado` no es «gris claro»: es `on-surface-variant`, que es el rol para el texto secundario y
+ * viene con su propio par comprobado. La diferencia importa cuando alguien cambia el tema.
+ */
+export const COLORES_DE_TEXTO = [
+  'predeterminado',
+  'primario',
+  'secundario',
+  'terciario',
+  'error',
+  'atenuado',
+] as const;
+export type ColorDeTexto = (typeof COLORES_DE_TEXTO)[number];
+
+export const ALINEACIONES = ['izquierda', 'centro', 'derecha'] as const;
+export type Alineacion = (typeof ALINEACIONES)[number];
+
+/** Solo donde hay alto que repartir: una celda de tabla o el cuerpo de una tarjeta. */
+export const ALINEACIONES_VERTICALES = ['arriba', 'medio', 'abajo'] as const;
+export type AlineacionVertical = (typeof ALINEACIONES_VERTICALES)[number];
+
+export interface EstiloDeTexto {
+  negrita?: boolean;
+  cursiva?: boolean;
+  subrayado?: boolean;
+  alineacion?: Alineacion;
+  alineacionVertical?: AlineacionVertical;
+  color?: ColorDeTexto;
+}
+
+/**
+ * A QUE textos se les puede poner estilo. Conjunto cerrado, como todo lo demas.
+ *
+ * Abierto —«cualquier texto del objeto»— obligaria a cada objeto a inventarse sus propias claves,
+ * y dos objetos acabarian llamando de forma distinta a lo mismo. Con tres destinos fijos, lo que
+ * se configura en una tarjeta significa lo mismo en un grafico.
+ */
+export const DESTINOS_DE_TEXTO = ['titulo', 'subtitulo', 'cifra'] as const;
+export type DestinoDeTexto = (typeof DESTINOS_DE_TEXTO)[number];
+
+export type TextosDeObjeto = Partial<Record<DestinoDeTexto, EstiloDeTexto>>;
+
+/** Variable CSS del rol, o nada para el color que ya tuviera el texto. */
+const VARIABLE_DE_COLOR: Record<ColorDeTexto, string | null> = {
+  predeterminado: null,
+  primario: 'var(--md-sys-color-primary)',
+  secundario: 'var(--md-sys-color-secondary)',
+  terciario: 'var(--md-sys-color-tertiary)',
+  error: 'var(--md-sys-color-error)',
+  atenuado: 'var(--md-sys-color-on-surface-variant)',
+};
+
+const ALINEACION_CSS: Record<Alineacion, string> = {
+  izquierda: 'left',
+  centro: 'center',
+  derecha: 'right',
+};
+
+const VERTICAL_CSS: Record<AlineacionVertical, string> = {
+  arriba: 'flex-start',
+  medio: 'center',
+  abajo: 'flex-end',
+};
+
+/**
+ * El METODO COMUN: un estilo de texto a propiedades CSS.
+ *
+ * Una sola funcion para todos los objetos. Con cada uno traduciendo por su cuenta, «negrita» en
+ * una tarjeta y «negrita» en una tabla acabarian siendo pesos distintos, que es exactamente el
+ * tipo de deriva que el estandar minimo de personalizacion vino a cerrar.
+ *
+ * Devuelve un objeto de estilo y no clases porque las combinaciones son 2x2x2x3x3x6: como clases
+ * serian cientos de reglas muertas para las que nadie usa.
+ */
+export function estiloDeTexto(estilo: EstiloDeTexto | undefined): Record<string, string> {
+  if (!estilo) return {};
+  const css: Record<string, string> = {};
+  if (estilo.negrita) css['fontWeight'] = '700';
+  if (estilo.cursiva) css['fontStyle'] = 'italic';
+  if (estilo.subrayado) css['textDecoration'] = 'underline';
+  if (estilo.alineacion) css['textAlign'] = ALINEACION_CSS[estilo.alineacion];
+  if (estilo.alineacionVertical) css['justifyContent'] = VERTICAL_CSS[estilo.alineacionVertical];
+  const color = estilo.color ? VARIABLE_DE_COLOR[estilo.color] : null;
+  if (color) css['color'] = color;
+  return css;
+}
+
 export interface PresentacionDeObjeto {
   /** Icono del catalogo, en la cabecera. Sin el, el objeto usa el de su tipo. */
   icono?: NombreDeIcono;
@@ -54,23 +149,30 @@ export interface PresentacionDeObjeto {
   leyenda?: ModoDeLeyenda;
   /** La cifra encima de cada barra o punto. */
   etiquetasDeDato?: boolean;
+  /** Peso, estilo, alineacion y color de los textos del objeto. */
+  textos?: TextosDeObjeto;
 }
 
 export type ClaveDePresentacion = keyof PresentacionDeObjeto;
 
 /**
- * Las cuatro que no son negociables.
+ * Las cinco que no son negociables.
  *
  * Son las que no dependen de lo que el objeto dibuje: cualquier cosa que ocupe una celda tiene
- * cabecera, y por tanto puede llevar icono, acento, resaltado y subtitulo. `formato`, `leyenda` y
- * `etiquetasDeDato` sí dependen —una tabla no tiene leyenda— y por eso cada objeto declara si
- * las admite.
+ * cabecera, y por tanto puede llevar icono, acento, resaltado, subtitulo y estilo de texto.
+ * `formato`, `leyenda` y `etiquetasDeDato` sí dependen —una tabla no tiene leyenda— y por eso
+ * cada objeto declara si las admite.
+ *
+ * `textos` entra en el minimo, no en lo opcional: si cada objeto decidiera por su cuenta si deja
+ * poner su titulo en negrita, la personalizacion volveria a depender de lo que el autor de cada
+ * uno tuvo en mente el dia que lo escribio — que es exactamente lo que este estandar cerro.
  */
 export const PRESENTACION_MINIMA: ClaveDePresentacion[] = [
   'icono',
   'acento',
   'resaltado',
   'subtitulo',
+  'textos',
 ];
 
 export interface ProblemaDePresentacion {
@@ -120,6 +222,48 @@ export function validarPresentacion(
       clave: 'acento',
       problema: `'${String(presentacion.acento)}' no es un acento. Use: ${ACENTOS.join(', ')}.`,
     });
+  }
+
+  /*
+   * Los estilos de texto, destino a destino.
+   *
+   * Se valida el vocabulario, no la combinacion: negrita y cursiva a la vez es feo y es una
+   * decision de quien edita, no un error de configuracion. Lo que si es un error es un color que
+   * no es un rol del tema, porque eso si rompe una garantia.
+   */
+  for (const [destino, estilo] of Object.entries(presentacion.textos ?? {})) {
+    if (!(DESTINOS_DE_TEXTO as readonly string[]).includes(destino)) {
+      problemas.push({
+        clave: `textos.${destino}`,
+        problema: `'${destino}' no es un texto configurable. Use: ${DESTINOS_DE_TEXTO.join(', ')}.`,
+      });
+      continue;
+    }
+    if (estilo.color !== undefined && !(COLORES_DE_TEXTO as readonly string[]).includes(estilo.color)) {
+      problemas.push({
+        clave: `textos.${destino}.color`,
+        problema:
+          `'${String(estilo.color)}' no es un color del tema. Use: ${COLORES_DE_TEXTO.join(', ')}. ` +
+          `Un color suelto no tiene par de contraste comprobado y no sigue al tema oscuro (4.3).`,
+      });
+    }
+    if (estilo.alineacion !== undefined && !(ALINEACIONES as readonly string[]).includes(estilo.alineacion)) {
+      problemas.push({
+        clave: `textos.${destino}.alineacion`,
+        problema: `'${String(estilo.alineacion)}' no es una alineacion. Use: ${ALINEACIONES.join(', ')}.`,
+      });
+    }
+    if (
+      estilo.alineacionVertical !== undefined &&
+      !(ALINEACIONES_VERTICALES as readonly string[]).includes(estilo.alineacionVertical)
+    ) {
+      problemas.push({
+        clave: `textos.${destino}.alineacionVertical`,
+        problema:
+          `'${String(estilo.alineacionVertical)}' no es una alineacion vertical. ` +
+          `Use: ${ALINEACIONES_VERTICALES.join(', ')}.`,
+      });
+    }
   }
 
   if (presentacion.subtitulo !== undefined && presentacion.subtitulo.length > MAX_SUBTITULO) {

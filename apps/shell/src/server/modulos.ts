@@ -15,6 +15,7 @@ import { modulos } from './almacenModulos';
 
 const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };
 const MATERIA = { table: 'DimTribunal', field: 'Materia' };
+const TRIMESTRE = { table: 'DimTiempo', field: 'Trimestre' };
 const DATASET = 'casos-por-distrito-trimestre';
 
 export const modulosDemo: ModuleDefinition[] = [
@@ -157,12 +158,22 @@ export const modulosDemo: ModuleDefinition[] = [
             instance: {
               instanceId: 'matriz-distrito-materia',
               objectId: 'matriz',
-              version: '1.0.0',
+              // 1.1.0: distrito y, dentro, materia — cruzados por trimestre.
+              //
+              // El unico objeto del seed con jerarquia, y esta aqui por el mismo motivo por el que
+              // el grafico de barras lleva dos medidas: los niveles, los subtotales y el plegado
+              // estaban escritos y no habia ningun objeto que los ejerciera contra datos reales.
+              version: '1.1.0',
               title: 'Distrito por materia',
               binding: {
                 datasetId: DATASET,
-                dimensions: [DISTRITO, MATERIA],
+                dimensions: [DISTRITO, MATERIA, TRIMESTRE],
                 measures: ['CasosPendientes'],
+                ranuras: {
+                  filas: ['DimTribunal.Distrito', 'DimTribunal.Materia'],
+                  columnas: ['DimTiempo.Trimestre'],
+                  valores: ['CasosPendientes'],
+                },
               },
             },
           },

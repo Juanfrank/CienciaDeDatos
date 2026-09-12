@@ -32,7 +32,7 @@ export default async function EditorLayout({ children }: { children: React.React
             mano
           </p>
         </div>
-        <Link href="/" className="boton-enlace" data-testid="volver-a-modulos">
+        <Link href="/" className="boton-contorno" data-testid="volver-a-modulos">
           Volver a los modulos
         </Link>
       </header>

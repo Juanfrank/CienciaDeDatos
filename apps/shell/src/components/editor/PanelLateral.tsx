@@ -381,13 +381,20 @@ function Datos({
         </Seccion>
       ) : null}
 
+      {/*
+        Quitar es DESTRUCTIVO, y lo parecia menos que cualquier otra cosa del panel.
+        Era un texto azul suelto al final de la columna, indistinguible de un rotulo. Lo que borra
+        el trabajo de alguien tiene que verse como un boton y llevar el color de la advertencia,
+        no esconderse en el peso visual mas bajo de la interfaz.
+      */}
       <button
         type="button"
-        className="boton-enlace"
+        className="boton-peligro panel-editor__quitar"
         data-testid={`quitar-${item.id}`}
         disabled={guardando}
         onClick={() => onQuitar(item.id)}
       >
+        <Icono nombre="cerrar" tamano={14} />
         Quitar del modulo
       </button>
     </>
