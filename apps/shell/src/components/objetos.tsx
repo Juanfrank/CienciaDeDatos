@@ -10,6 +10,7 @@ import {
 } from '@app/ui-components';
 import type { ObjectInstance } from '@app/ui-components';
 import { Complementos } from './Complementos';
+import { Grafico } from './Grafico';
 import { Segmentador } from './Segmentador';
 
 /**
@@ -138,6 +139,15 @@ export function Barras({ titulo, result, instance, onFiltrar }: ObjetoProps) {
       result={result}
       pie={vm.aggregated ? <span className="texto-atenuado">Agregado sobre el dataset cacheado</span> : null}
     >
+      <Grafico
+        tipo="barras"
+        vm={vm}
+        titulo={titulo}
+        {...(dimension ? { dimension: fieldKey(dimension) } : {})}
+        {...(dimension && onFiltrar
+          ? { onSeleccionar: (categoria: string) => onFiltrar(fieldKey(dimension), categoria) }
+          : {})}
+      >
       <ul className="barras" data-testid="barras">
         {vm.points.map((punto) => {
           const valor = punto.values[0] ?? 0;
@@ -164,47 +174,57 @@ export function Barras({ titulo, result, instance, onFiltrar }: ObjetoProps) {
           );
         })}
       </ul>
+      </Grafico>
     </Marco>
   );
 }
 
 export function Lineas({ titulo, result, instance }: ObjetoProps) {
   const vm = toCategorical(result, instance.binding.dimensions, instance.binding.measures);
-  const todos = vm.points.flatMap((p) => p.values);
-  const maximo = Math.max(1, ...todos);
-  const ancho = 100;
-  const alto = 40;
+  const dimension = instance.binding.dimensions[0];
 
   return (
     <Marco titulo={titulo} instance={instance} result={result}>
-      <svg viewBox={`0 0 ${ancho} ${alto}`} className="lineas" role="img" aria-label={titulo}>
-        {vm.series.map((serie, s) => {
-          const puntos = vm.points
-            .map((p, i) => {
-              const x = (i / Math.max(1, vm.points.length - 1)) * ancho;
-              const y = alto - ((p.values[s] ?? 0) / maximo) * alto;
-              return `${x.toFixed(2)},${y.toFixed(2)}`;
-            })
-            .join(' ');
-          return (
-            <polyline
-              key={serie}
-              points={puntos}
-              fill="none"
-              strokeWidth={1.5}
-              stroke={`var(--color-categorical-${s % 8})`}
-            />
-          );
-        })}
-      </svg>
-      <ul className="leyenda">
-        {vm.series.map((serie, s) => (
-          <li key={serie}>
-            <span className="leyenda__marca" style={{ background: `var(--color-categorical-${s % 8})` }} />
-            {serie}
-          </li>
-        ))}
-      </ul>
+      <Grafico
+        tipo="lineas"
+        vm={vm}
+        titulo={titulo}
+        {...(dimension ? { dimension: fieldKey(dimension) } : {})}
+      >
+        {/*
+          El respaldo de una linea es una TABLA, no un dibujo.
+          
+          Una serie temporal tiene un valor por punto y por serie; en cuanto no se puede ver la
+          forma de la curva, lo util son las cifras. Dibujar unas barras aqui seria inventar una
+          lectura que el objeto no propone.
+        */}
+        <div className="tabla-contenedor">
+          <table className="tabla" data-testid="lineas">
+            <thead>
+              <tr>
+                <th scope="col">{dimension ? fieldKey(dimension) : 'Categoria'}</th>
+                {vm.series.map((serie) => (
+                  <th key={serie} scope="col" className="es-numero">
+                    {serie}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {vm.points.map((punto) => (
+                <tr key={punto.label}>
+                  <th scope="row">{punto.label}</th>
+                  {vm.series.map((serie, s) => (
+                    <td key={serie} className="es-numero">
+                      {formatearNumero(punto.values[s] ?? 0)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Grafico>
     </Marco>
   );
 }

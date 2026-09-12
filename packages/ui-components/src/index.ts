@@ -55,3 +55,13 @@ export {
   type KpiViewModel,
   type MatrixViewModel,
 } from './registry/viewModel';
+export {
+  UMBRAL_DE_ELEMENTOS,
+  elementosDe,
+  opcionesDe,
+  opcionesDeBarras,
+  opcionesDeLineas,
+  type OpcionesDeGrafico,
+  type PaletaDeGrafico,
+  type TipoDeGrafico,
+} from './graficos/opciones';

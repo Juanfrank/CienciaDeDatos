@@ -113,7 +113,29 @@ hechos— y el editor solo edita la primera.
 
 ---
 
-### 2.6 Comprobar que el ultimo Administrador puede AUTENTICARSE, no solo que existe
+### 2.6 Encender el tema oscuro
+
+Los tokens del esquema oscuro de Material Design 3 **existen y estan verificados**: se generan
+igual que los del claro y la prueba de contraste recorre los dos modos entero, los 54 pares de
+rol. Lo que no esta hecho es aplicarlos.
+
+Encenderlos es una media query —`prefers-color-scheme: dark` redefiniendo las variables— mas una
+pasada de revision de cada pantalla en ese modo. Se deja pendiente a proposito: las pruebas de
+accesibilidad que hoy pasan lo hacen sobre el claro, y un tema oscuro a medias es peor que no
+tenerlo.
+
+### 2.7 Mas tipos de visualizacion sobre ECharts
+
+`barras` y `lineas` estan sobre ECharts. `mapa` sigue sin implementar —necesita la geometria de
+los distritos judiciales, que no esta en el repositorio— y la arquitectura para anadir tipos ya
+esta: una funcion pura que construye las opciones, un `tipo` mas en el despachador, y el
+respaldo en DOM que corresponda a esa lectura.
+
+Al anadir uno, la pregunta que hay que contestar es **cual es su respaldo accesible**: para las
+barras son botones, para las lineas una tabla. No es un detalle de implementacion, es parte de
+decidir que significa el objeto.
+
+### 2.8 Comprobar que el ultimo Administrador puede AUTENTICARSE, no solo que existe
 
 `wouldLeaveNoAdministrator` comprueba el gobierno: que alguien conserva el rol. No comprueba que
 esa persona pueda entrar. Una cuenta local bloqueada, o alguien cuya cuenta de Azure AD se
