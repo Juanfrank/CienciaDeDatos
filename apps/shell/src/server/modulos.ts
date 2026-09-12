@@ -164,14 +164,23 @@ export const modulosDemo: ModuleDefinition[] = [
               // el grafico de barras lleva dos medidas: los niveles, los subtotales y el plegado
               // estaban escritos y no habia ningun objeto que los ejerciera contra datos reales.
               version: '1.1.0',
-              title: 'Distrito por materia',
+              title: 'Materia por trimestre',
               binding: {
                 datasetId: DATASET,
-                dimensions: [DISTRITO, MATERIA, TRIMESTRE],
+                dimensions: [MATERIA, TRIMESTRE, DISTRITO],
                 measures: ['CasosPendientes'],
+                /*
+                 * Materia y, dentro, trimestre. Cruzado por distrito.
+                 *
+                 * La primera version anidaba distrito y dentro materia, y se veia un solo padre:
+                 * el ambito de este modulo restringe a un distrito, asi que la jerarquia quedaba
+                 * demostrada sobre un arbol de una rama. Materia tiene varias dentro del mismo
+                 * ambito, asi que los niveles y los subtotales se ven de verdad — y el eje de
+                 * columnas ensena de paso el efecto del RLS: una sola columna.
+                 */
                 ranuras: {
-                  filas: ['DimTribunal.Distrito', 'DimTribunal.Materia'],
-                  columnas: ['DimTiempo.Trimestre'],
+                  filas: ['DimTribunal.Materia', 'DimTiempo.Trimestre'],
+                  columnas: ['DimTribunal.Distrito'],
                   valores: ['CasosPendientes'],
                 },
               },
@@ -230,11 +239,14 @@ export const modulosDemo: ModuleDefinition[] = [
             instance: {
               instanceId: 'tabla-detalle',
               objectId: 'tabla',
-              version: '1.0.0',
+              // 1.1.0: ordenable por encabezado. La galeria del seed usa la ultima version de
+              // cada objeto a proposito — es lo que hace que las capacidades nuevas se ejerzan
+              // contra datos reales en vez de quedarse escritas y sin llamar.
+              version: '1.1.0',
               title: 'Detalle',
               binding: {
                 datasetId: DATASET,
-                dimensions: [DISTRITO, MATERIA],
+                dimensions: [DISTRITO, MATERIA, TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
             },

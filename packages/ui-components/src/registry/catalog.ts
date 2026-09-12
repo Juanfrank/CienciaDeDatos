@@ -132,8 +132,38 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     category: 'tabla',
     versions: [
       v1(
-        'Version inicial: columnas ordenables y formato numerico por medida.',
+        'Version inicial: formato numerico por medida.',
         {
+          dimensions: { min: 0, max: 6 },
+          measures: { min: 0, max: 10 },
+          pozos: [
+            { id: 'columnas-dim', etiqueta: 'Columnas de detalle', tipo: 'dimension', max: 6 },
+            { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 10 },
+          ],
+        },
+        presenta('formato'),
+      ),
+      /*
+       * 1.1.0 — orden por encabezado, mas columnas, y estilo de texto.
+       *
+       * El changelog de 1.0.0 decia «columnas ordenables» y la capacidad no existia: un encabezado
+       * que no responde ensena que la tabla no se ordena, y quien lo prueba una vez no lo vuelve a
+       * intentar. Se corrige el changelog de 1.0.0 —describia algo que no hacia— y la capacidad
+       * llega aqui, con su version.
+       *
+       * Version nueva y no un retoque de 1.0.0, aunque ampliar un maximo no rompa a nadie. La
+       * regla de 4.5 no es «cambia solo si rompe»: es que la version es lo que hace reproducible
+       * un modulo ya desplegado. La primera vez que escribi esto subi los limites dentro de 1.0.0,
+       * que es exactamente lo que 4.5 prohibe.
+       */
+      {
+        version: '1.1.0',
+        publishedAt: '2026-09-12',
+        changelog:
+          'Orden ascendente y descendente pulsando el encabezado, filas alternas, y hasta ocho ' +
+          'dimensiones y doce medidas.',
+        certification: certificacionInicial,
+        dataContract: {
           dimensions: { min: 0, max: 8 },
           measures: { min: 0, max: 12 },
           pozos: [
@@ -141,8 +171,8 @@ export const catalogoInicial: VisualObjectDefinition[] = [
             { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 12 },
           ],
         },
-        presenta('formato'),
-      ),
+        presentation: presenta('formato'),
+      },
     ],
   },
   {

@@ -168,48 +168,49 @@ test.describe('la matriz, con jerarquia', () => {
     await page.goto('/m/casos-pendientes');
   });
 
-  test('anida las materias dentro de su distrito, con subtotal', async ({ page }) => {
-    const matriz = page.getByTestId('matriz');
-    await expect(matriz).toBeVisible();
+  /*
+   * Nada se busca por su etiqueta.
+   *
+   * Las etiquetas dependen del seed y del ambito efectivo de quien mira, y una version anterior de
+   * estas pruebas nombraba «Distrito Norte» y sus dos materias: fallaba en cuanto cambiaba la
+   * jerarquia del modulo, y tambien en la suite completa, donde otra prueba deja la sesion con
+   * otro equipo activo. Lo que se comprueba es la ESTRUCTURA —un padre, sus hijos, su subtotal—,
+   * que es lo que no puede cambiar.
+   */
+  const rutaDelPrimerPadre = async (page: import('@playwright/test').Page): Promise<string> => {
+    const boton = page.locator('[data-testid^="matriz-plegar-"]').first();
+    const id = (await boton.getAttribute('data-testid')) ?? '';
+    return id.replace('matriz-plegar-', '');
+  };
 
-    // El padre y sus dos hijos. Nada se identifica por la etiqueta: «Penal» puede colgar de mas
-    // de un distrito, asi que la ruta completa es lo unico unico.
-    await expect(page.getByTestId('matriz-fila-Distrito Norte')).toBeVisible();
-    await expect(page.getByTestId('matriz-fila-Distrito Norte||Penal')).toBeVisible();
-    await expect(page.getByTestId('matriz-fila-Distrito Norte||Civil')).toBeVisible();
+  const n = (s: string) => Number(s.replace(/[^0-9]/g, ''));
+  const totalDe = async (fila: import('@playwright/test').Locator) =>
+    n(await fila.locator('td.es-total').last().innerText());
 
-    /*
-     * El subtotal del padre es la suma de TODOS sus hijos, sean los que sean.
-     *
-     * Se cuentan por prefijo de ruta y no por nombre: el ambito efectivo de quien mira decide
-     * cuantas materias hay, y una version anterior de esta prueba nombraba dos —las del seed— y
-     * fallaba en cuanto otra prueba dejaba la sesion con otro equipo activo. Lo que se comprueba
-     * es la relacion, que es lo que no puede cambiar.
-     */
-    const n = (s: string) => Number(s.replace(/[^0-9]/g, ''));
-    const totalDe = async (fila: import('@playwright/test').Locator) =>
-      n(await fila.locator('td.es-total').last().innerText());
+  test('el subtotal de un padre es la suma de sus hijos', async ({ page }) => {
+    await expect(page.getByTestId('matriz')).toBeVisible();
+    const padre = await rutaDelPrimerPadre(page);
 
-    const padre = await totalDe(page.getByTestId('matriz-fila-Distrito Norte'));
-    const hijos = await page.locator('[data-testid^="matriz-fila-Distrito Norte||"]').all();
+    const hijos = await page.locator(`[data-testid^="matriz-fila-${padre}||"]`).all();
     expect(hijos.length).toBeGreaterThan(1);
 
     let suma = 0;
     for (const hijo of hijos) suma += await totalDe(hijo);
-    expect(padre).toBe(suma);
+    expect(await totalDe(page.getByTestId(`matriz-fila-${padre}`))).toBe(suma);
   });
 
-  test('plegar un distrito esconde sus materias y deja su subtotal', async ({ page }) => {
+  test('plegar esconde los hijos y deja el subtotal del padre', async ({ page }) => {
+    const padre = await rutaDelPrimerPadre(page);
     const antes = await page.locator('[data-testid^="matriz-fila-"]').count();
-    await page.getByTestId('matriz-plegar-Distrito Norte').click();
 
-    await expect(page.getByTestId('matriz-fila-Distrito Norte||Penal')).toHaveCount(0);
-    await expect(page.getByTestId('matriz-fila-Distrito Norte')).toBeVisible();
+    await page.getByTestId(`matriz-plegar-${padre}`).click();
+    await expect(page.locator(`[data-testid^="matriz-fila-${padre}||"]`)).toHaveCount(0);
+    await expect(page.getByTestId(`matriz-fila-${padre}`)).toBeVisible();
     expect(await page.locator('[data-testid^="matriz-fila-"]').count()).toBeLessThan(antes);
 
     // Y vuelve: plegar es un gesto de lectura, no un cambio.
-    await page.getByTestId('matriz-plegar-Distrito Norte').click();
-    await expect(page.getByTestId('matriz-fila-Distrito Norte||Penal')).toBeVisible();
+    await page.getByTestId(`matriz-plegar-${padre}`).click();
+    expect(await page.locator('[data-testid^="matriz-fila-"]').count()).toBe(antes);
   });
 
   test('pulsar un encabezado ordena, y lo anuncia en aria-sort', async ({ page }) => {
@@ -220,6 +221,17 @@ test.describe('la matriz, con jerarquia', () => {
     await expect(encabezado).toHaveAttribute('aria-sort', 'ascending');
     await page.getByTestId('matriz-ordenar-total-0').click();
     await expect(encabezado).toHaveAttribute('aria-sort', 'descending');
+  });
+
+  test('ordenar no rompe la jerarquia: los hijos siguen bajo su padre', async ({ page }) => {
+    // Ordenar la tabla entera por una columna repartiria los hijos de un grupo entre otros grupos.
+    // Se ordena cada nivel por separado, asi que el padre sigue trayendo a los suyos detras.
+    const padre = await rutaDelPrimerPadre(page);
+    const hijos = await page.locator(`[data-testid^="matriz-fila-${padre}||"]`).count();
+
+    await page.getByTestId('matriz-ordenar-total-0').click();
+    await expect(page.locator(`[data-testid^="matriz-fila-${padre}||"]`)).toHaveCount(hijos);
+    expect(await totalDe(page.getByTestId(`matriz-fila-${padre}`))).toBeGreaterThan(0);
   });
 });
 

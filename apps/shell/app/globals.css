@@ -1368,7 +1368,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  *    y sin esto los titulos de columna se van arriba a las tres filas.
  */
 .tabla tbody tr:nth-child(even) > td,
-.tabla tbody tr:nth-child(even) > th { background: var(--md-sys-color-surface-container-low); }
+.tabla tbody tr:nth-child(even) > th { background: var(--md-sys-color-surface-container); }
 .tabla tbody tr:hover > td,
 .tabla tbody tr:hover > th { background: var(--md-sys-color-surface-container); }
 
