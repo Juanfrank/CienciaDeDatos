@@ -949,6 +949,127 @@ export const modulosDemo: ModuleDefinition[] = [
         ],
       },
       {
+        pageId: 'p-relacion',
+        slug: 'relacion',
+        name: 'Dos medidas a la vez',
+        items: [
+          {
+            id: 'rel-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'rel-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'titulo-de-seccion',
+                tituloDeSeccion: {
+                  texto: 'Cuando una escala no alcanza',
+                  posicionDelTexto: 'izquierda',
+                  linea: 'derecha',
+                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'rel-combinado',
+            position: { x: 0, y: 1, w: 6, h: 4 },
+            instance: {
+              instanceId: 'rel-combinado',
+              objectId: 'combinado',
+              version: '1.0.0',
+              title: 'Ingresados y resueltos, con pendientes',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
+                // Las ranuras se declaran: es lo que guarda el editor al arrastrar cada medida a
+                // su pozo. Sin ellas el reparto por omision es correcto pero no es EL que este
+                // ejemplo quiere ensenar.
+                ranuras: {
+                  'eje-x': ['DimTiempo.Trimestre'],
+                  columnas: ['CasosIngresados', 'CasosResueltos'],
+                  lineas: ['CasosPendientes'],
+                },
+              },
+              presentacion: {
+                subtitulo: 'Una sola escala: la comparacion es directa',
+                leyenda: 'abajo',
+                ejes: { tituloY: 'Casos' },
+              },
+            },
+          },
+          {
+            id: 'rel-combinado-2ejes',
+            position: { x: 6, y: 1, w: 6, h: 4 },
+            instance: {
+              instanceId: 'rel-combinado-2ejes',
+              objectId: 'combinado',
+              version: '1.0.0',
+              title: 'Lo mismo, con eje secundario',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
+                ranuras: {
+                  'eje-x': ['DimTiempo.Trimestre'],
+                  columnas: ['CasosIngresados', 'CasosResueltos'],
+                  lineas: ['CasosPendientes'],
+                },
+              },
+              presentacion: {
+                subtitulo: 'La linea se mide en la escala de la derecha',
+                leyenda: 'abajo',
+                combinado: { ejeSecundario: true },
+                ejes: { tituloY: 'Casos', tituloY2: 'Pendientes', desdeCero: false },
+              },
+            },
+          },
+          {
+            id: 'rel-dispersion',
+            position: { x: 0, y: 5, w: 6, h: 4 },
+            instance: {
+              instanceId: 'rel-dispersion',
+              objectId: 'dispersion',
+              version: '1.0.0',
+              title: 'Ingresados frente a resueltos',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos'],
+              },
+              presentacion: {
+                subtitulo: 'Un punto por trimestre',
+                etiquetasDeDato: true,
+                ejes: { tituloX: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
+              },
+            },
+          },
+          {
+            id: 'rel-burbujas',
+            position: { x: 6, y: 5, w: 6, h: 4 },
+            instance: {
+              instanceId: 'rel-burbujas',
+              objectId: 'dispersion',
+              version: '1.0.0',
+              title: 'Y con los pendientes como tamano',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
+              },
+              presentacion: {
+                subtitulo: 'Una tercera medida sin un tercer eje',
+                etiquetasDeDato: true,
+                ejes: { tituloX: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
+              },
+            },
+          },
+        ],
+      },
+      {
         pageId: 'p-contenedores',
         slug: 'contenedores',
         name: 'Contenedores',

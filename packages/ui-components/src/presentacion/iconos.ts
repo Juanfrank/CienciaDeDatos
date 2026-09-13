@@ -43,6 +43,8 @@ export const TRAZOS_DE_ICONO = {
   pastel: 'M12 21a9 9 0 1 0-9-9h9zM12 12V3a9 9 0 0 1 9 9z',
   dona: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zM12 3v4.5',
   medidor: 'M3.5 18a8.5 8.5 0 1 1 17 0M12 18l4.5-5.5M12 18h.01',
+  combinado: 'M3 21h18M6 19v-6M11 19V9M16 19v-8M5 9l5-4 6 3 3-4',
+  dispersion: 'M4 20V4M4 20h16M8 15.5h.01M12 10h.01M15 16h.01M18 7h.01M10 6h.01',
   tabla: 'M4 5h16v14H4zM4 10h16M4 15h16M10 5v14',
   filtro: 'M4 5h16l-6 7v6l-4 2v-8z',
   // Elementos: no miden nada, componen.
@@ -88,6 +90,8 @@ export const ICONOS_DE_OBJETO: NombreDeIcono[] = [
   'pastel',
   'dona',
   'medidor',
+  'combinado',
+  'dispersion',
   'tabla',
   'filtro',
   'calendario',

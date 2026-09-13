@@ -85,8 +85,25 @@ export function ranurasDe(
     dimension: instance.binding.dimensions.map(fieldKey),
     medida: [...instance.binding.measures],
   };
+
+  /*
+   * DOS pasadas: primero los minimos de cada ranura, y solo despues el resto hasta el maximo.
+   *
+   * En una sola pasada, la primera ranura se llevaba todo lo que cabia en ella y la siguiente se
+   * quedaba vacia. Con un solo pozo por tipo eso no se notaba nunca; con dos —«Columnas» y
+   * «Lineas» del combinado, los dos obligatorios— un objeto sin asignacion guardada salia SIEMPRE
+   * roto, aunque el mapeo trajera medidas de sobra: las tres se iban a Columnas y Lineas pedia
+   * una que ya no quedaba.
+   *
+   * Repartir los minimos primero es lo que hace que el reparto por omision cumpla el contrato
+   * siempre que haya campos suficientes, que es justo lo que se espera de un valor por omision.
+   */
   for (const ranura of ranuras) {
-    declaradas.set(ranura.id, claves[ranura.tipo].splice(0, ranura.max));
+    declaradas.set(ranura.id, claves[ranura.tipo].splice(0, ranura.min ?? 0));
+  }
+  for (const ranura of ranuras) {
+    const puestos = declaradas.get(ranura.id) ?? [];
+    puestos.push(...claves[ranura.tipo].splice(0, ranura.max - puestos.length));
   }
   return declaradas;
 }

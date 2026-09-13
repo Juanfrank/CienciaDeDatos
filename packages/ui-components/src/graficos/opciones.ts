@@ -1,6 +1,7 @@
 import {
   MAX_RADIO_INTERIOR,
   type ConfiguracionCircular,
+  type ConfiguracionDeCombinado,
   type ConfiguracionDeEjes,
   type ConfiguracionDeMedidor,
   type EtiquetaCircular,
@@ -52,7 +53,15 @@ export interface OpcionesDeGrafico {
   formatear?: (valor: number, serie: number) => string;
   apilado?: ModoDeApilado;
   circular?: ConfiguracionCircular;
+  combinado?: ConfiguracionDeCombinado;
   medidor?: ConfiguracionDeMedidor;
+  /**
+   * Cuantas series iniciales son columnas, en un combinado.
+   *
+   * Sale del MAPEO —de cuantos campos hay en el pozo «Columnas»— y no de la presentacion: cual
+   * es columna y cual es linea es una propiedad de los datos, no de como se ven.
+   */
+  seriesDeColumna?: number;
 }
 
 /* ── Apilado ──────────────────────────────────────────────────────────────────────────────── */
@@ -772,12 +781,204 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
   };
 }
 
+/* ── Combinado de columnas y lineas ────────────────────────────────────────────────────────── */
+
+/**
+ * El eje de la derecha: la MISMA escala de valores, con dos diferencias.
+ *
+ * No repite la cuadricula —dos rejillas superpuestas a distinta altura convierten el fondo en
+ * ruido— y su titulo sale de `tituloY2`. Todo lo demas se hereda para que los dos ejes se lean
+ * igual: si uno empieza en cero y el otro no, la comparacion entre las dos series es un truco.
+ */
+const ejeValorSecundario = (o: OpcionesDeGrafico) => ({
+  ...ejeValor(o),
+  position: 'right' as const,
+  splitLine: { show: false },
+  ...(o.ejes?.tituloY2
+    ? {
+        name: o.ejes.tituloY2,
+        nameLocation: 'middle' as const,
+        nameRotate: 90,
+        nameGap: 44,
+        nameTextStyle: { color: o.paleta.textoAtenuado },
+      }
+    : { name: undefined }),
+});
+
+/**
+ * Combinado: unas medidas como columnas y otras como linea.
+ *
+ * Cuales van de cada forma NO se decide aqui ni por una opcion del panel: lo dice el MAPEO, con
+ * un pozo para cada una. Es lo que evita la pregunta imposible de «cual de las cuatro medidas es
+ * la linea», y lo que hace que cambiar una medida de forma sea arrastrarla de un pozo al otro.
+ *
+ * `seriesDeColumna` es cuantas series iniciales son columnas; el resto son lineas. El render
+ * garantiza ese orden al construir la lista de medidas, y por eso aqui basta un numero.
+ */
+export function opcionesDeCombinado(o: OpcionesDeGrafico): Record<string, unknown> {
+  const columnas = Math.min(Math.max(o.seriesDeColumna ?? 1, 0), o.vm.series.length);
+  const dos = o.combinado?.ejeSecundario === true;
+
+  return {
+    ...base(o),
+    xAxis: ejeCategoria(o),
+    yAxis: dos ? [ejeValor(o), ejeValorSecundario(o)] : ejeValor(o),
+    series: o.vm.series.map((nombre, s) => {
+      const esColumna = s < columnas;
+      return {
+        name: nombre,
+        type: esColumna ? 'bar' : 'line',
+        data: o.vm.points.map((p) => p.values[s] ?? null),
+        // Solo las lineas se van al segundo eje: las columnas son la referencia y se quedan en el
+        // de la izquierda. Al reves, la magnitud principal cambiaria de escala sin avisar.
+        ...(dos && !esColumna ? { yAxisIndex: 1 } : {}),
+        ...(esColumna
+          ? { barMaxWidth: 48, itemStyle: { borderRadius: [4, 4, 0, 0] } }
+          : {
+              smooth: false,
+              symbol: 'circle' as const,
+              symbolSize: 7,
+              lineStyle: { width: 2.5 },
+              /*
+               * La linea se dibuja POR ENCIMA de las columnas.
+               *
+               * Por omision ECharts apila las series en el orden en que llegan, y la linea
+               * quedaba tapada por las columnas justo en los puntos que importan.
+               */
+              z: 3,
+            }),
+        label: etiquetaDeSerie(o, s, esColumna ? 'top' : 'top'),
+        emphasis: { focus: 'series' },
+      };
+    }),
+  };
+}
+
+/* ── Dispersion ────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Dispersion: dos medidas, una contra la otra.
+ *
+ * Es el unico objeto donde la dimension NO reparte el eje: cada categoria es UN punto, y los dos
+ * ejes son medidas. Responde a «se relacionan estas dos cifras», que ningun grafico de barras
+ * puede contestar porque en todos ellos una de las dos es la escala.
+ *
+ * La tercera medida, si la hay, es el TAMANO del punto. Se reparte entre un minimo y un maximo
+ * en vez de usar el valor crudo como radio: el area de un circulo crece con el cuadrado del
+ * radio, asi que un valor cuatro veces mayor se veria dieciseis veces mas grande.
+ */
+export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unknown> {
+  const conTamano = o.vm.series.length > 2;
+  const tamanos = conTamano
+    ? o.vm.points.map((p) => p.values[2]).filter((v): v is number => v !== null)
+    : [];
+  const maxTamano = Math.max(1, ...tamanos);
+
+  const { legend, margen } = leyendaDe(o, false);
+  const formatear = (n: number, s: number) => o.formatear?.(n, s) ?? String(n);
+
+  /*
+   * Se reserva alto por el RADIO del punto mas grande.
+   *
+   * `scale` ajusta el eje a los valores, pero el eje no sabe nada del tamano del simbolo: una
+   * burbuja en el valor maximo se dibujaba medio cortada por el borde de arriba, con su etiqueta
+   * fuera de la tarjeta. Los puntos son circulos, no marcas de un pixel, y el margen tiene que
+   * contar con eso.
+   */
+  const holgura = (conTamano ? TAMANO_MAXIMO : 12) / 2 + (o.etiquetasDeDato ? 14 : 0);
+
+  return {
+    ...nucleo(o, false),
+    legend,
+    grid: { ...margenDe(o, { ...margen, top: margen.top + holgura }), containLabel: true },
+    tooltip: {
+      trigger: 'item' as const,
+      backgroundColor: o.paleta.superficieElevada,
+      borderWidth: 0,
+      textStyle: { color: o.paleta.texto },
+      extraCssText: 'box-shadow: none;',
+      /*
+       * El tooltip nombra las MEDIDAS, no «x» e «y».
+       *
+       * Es lo unico que ata cada numero a lo que mide: en una dispersion no hay rotulo de
+       * categoria en el eje que lo diga, como si lo hay en unas barras.
+       */
+      formatter: (p: { data: (number | string)[] }) => {
+        const [x, y, , etiqueta] = p.data;
+        const filas = [
+          `${o.vm.series[0] ?? 'X'}: ${formatear(Number(x), 0)}`,
+          `${o.vm.series[1] ?? 'Y'}: ${formatear(Number(y), 1)}`,
+        ];
+        return [String(etiqueta), ...filas].join('<br/>');
+      },
+    },
+    xAxis: {
+      ...ejeValor(o),
+      // Los dos ejes llevan cuadricula: sin las verticales, situar un punto en el eje horizontal
+      // obliga a seguirlo con el dedo hasta abajo.
+      splitLine: {
+        show: o.ejes?.cuadricula !== false,
+        lineStyle: { color: o.paleta.linea, type: 'dashed' as const },
+      },
+      show: o.ejes?.mostrarX !== false,
+      /*
+       * El titulo del eje horizontal va HORIZONTAL y debajo.
+       *
+       * `ejeValor` lo escribe rotado 90 grados porque en los demas graficos ese eje es el
+       * vertical. Aqui los dos ejes son medidas, y heredar la rotacion dejaba «Ingresados» de
+       * canto bajo el grafico, recortado a una letra suelta.
+       */
+      ...(o.ejes?.tituloX
+        ? {
+            name: o.ejes.tituloX,
+            nameLocation: 'middle' as const,
+            nameRotate: 0,
+            nameGap: 28,
+            nameTextStyle: { color: o.paleta.textoAtenuado },
+          }
+        : { name: undefined }),
+    },
+    yAxis: ejeValor(o),
+    series: [
+      {
+        type: 'scatter',
+        name: o.titulo,
+        // El cuarto elemento es la etiqueta del punto: viaja con el dato para que el tooltip y la
+        // etiqueta la tengan sin volver a buscarla por indice.
+        data: o.vm.points.map((p) => [p.values[0], p.values[1], p.values[2] ?? null, p.label]),
+        symbolSize: conTamano
+          ? (valores: (number | string)[]) =>
+              TAMANO_MINIMO +
+              (Number(valores[2] ?? 0) / maxTamano) * (TAMANO_MAXIMO - TAMANO_MINIMO)
+          : 12,
+        itemStyle: { opacity: 0.8 },
+        label: o.etiquetasDeDato
+          ? {
+              show: true,
+              position: 'top' as const,
+              color: o.paleta.texto,
+              fontSize: 11,
+              formatter: (p: { data: (number | string)[] }) => String(p.data[3]),
+            }
+          : { show: false },
+        emphasis: { focus: 'self' },
+      },
+    ],
+  };
+}
+
+/** El punto mas pequeno sigue siendo visible, y el mas grande no tapa a sus vecinos. */
+const TAMANO_MINIMO = 8;
+const TAMANO_MAXIMO = 42;
+
 export type TipoDeGrafico =
   | 'barras'
   | 'lineas'
   | 'barras-horizontales'
   | 'area'
   | 'circular'
+  | 'combinado'
+  | 'dispersion'
   | 'medidor';
 
 const CONSTRUCTORES: Record<TipoDeGrafico, (o: OpcionesDeGrafico) => Record<string, unknown>> = {
@@ -786,6 +987,8 @@ const CONSTRUCTORES: Record<TipoDeGrafico, (o: OpcionesDeGrafico) => Record<stri
   lineas: opcionesDeLineas,
   area: opcionesDeArea,
   circular: opcionesDeCircular,
+  combinado: opcionesDeCombinado,
+  dispersion: opcionesDeDispersion,
   medidor: opcionesDeMedidor,
 };
 

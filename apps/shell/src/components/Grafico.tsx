@@ -40,6 +40,7 @@ export function Grafico({
   dimension,
   presentacion,
   formatear,
+  seriesDeColumna,
   onSeleccionar,
   children,
 }: {
@@ -53,6 +54,13 @@ export function Grafico({
   presentacion?: PresentacionDeObjeto;
   /** Formatea una cifra de la serie `s` con el formato de SU medida. */
   formatear?: (valor: number, serie: number) => string;
+  /**
+   * Solo el combinado: cuantas series iniciales son columnas.
+   *
+   * Viene del mapeo —de cuantos campos hay en el pozo «Columnas»— y no de la presentacion, porque
+   * que una medida sea columna o linea es una propiedad de los datos y no de como se ven.
+   */
+  seriesDeColumna?: number;
   onSeleccionar?: (categoria: string) => void;
   /** El respaldo: las barras en HTML, con sus botones. */
   children: React.ReactNode;
@@ -105,6 +113,7 @@ export function Grafico({
           {...(dimension ? { dimension } : {})}
           {...(presentacion ? { presentacion } : {})}
           {...(formatear ? { formatear } : {})}
+          {...(seriesDeColumna === undefined ? {} : { seriesDeColumna })}
           {...(onSeleccionar ? { onSeleccionar } : {})}
           onMontado={alMontar}
         />

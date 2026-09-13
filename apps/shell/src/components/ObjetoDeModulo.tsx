@@ -22,6 +22,8 @@ import {
   Barras,
   BarrasHorizontales,
   Circular,
+  Combinado,
+  Dispersion,
   Dona,
   Lineas,
   Medidor,
@@ -159,6 +161,10 @@ export function ObjetoDeModulo({
       return <Area {...props} />;
     case 'lineas':
       return <Lineas {...props} />;
+    case 'combinado':
+      return <Combinado {...props} />;
+    case 'dispersion':
+      return <Dispersion {...props} />;
     case 'pastel':
       return <Circular {...props} />;
     case 'dona':

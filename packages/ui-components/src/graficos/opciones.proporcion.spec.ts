@@ -137,3 +137,89 @@ describe('medidor', () => {
     expect(medidor().series[0].splitLine.show).toBe(false);
   });
 });
+
+/* eslint-disable @typescript-eslint/no-explicit-any -- se comprueba la forma que consume ECharts */
+const combinado = (
+  extra: Record<string, unknown> = {},
+  v = vm(['Ingresados', 'Resueltos', 'Pendientes'], [['Q1', 10, 8, 900]]),
+) => opcionesDe('combinado', { vm: v, paleta, titulo: 'T', seriesDeColumna: 2, ...extra }) as any;
+
+const dispersion = (
+  extra: Record<string, unknown> = {},
+  v = vm(['X', 'Y', 'Tamano'], [['Q1', 10, 8, 4], ['Q2', 20, 16, 8]]),
+) => opcionesDe('dispersion', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+
+describe('combinado de columnas y lineas', () => {
+  it('el mapeo decide la forma: las primeras son barras y el resto linea', () => {
+    const tipos = combinado().series.map((s: { type: string }) => s.type);
+    expect(tipos).toEqual(['bar', 'bar', 'line']);
+  });
+
+  it('sin eje secundario hay UN eje de valores y ninguna serie se va a otro', () => {
+    const o = combinado();
+    expect(Array.isArray(o.yAxis)).toBe(false);
+    expect(o.series[2].yAxisIndex).toBeUndefined();
+  });
+
+  it('con eje secundario solo las LINEAS cambian de escala', () => {
+    // Al reves, la magnitud principal cambiaria de escala sin avisar.
+    const o = combinado({ combinado: { ejeSecundario: true } });
+    expect(o.yAxis).toHaveLength(2);
+    expect(o.yAxis[1].position).toBe('right');
+    expect(o.series[0].yAxisIndex).toBeUndefined();
+    expect(o.series[2].yAxisIndex).toBe(1);
+  });
+
+  it('el segundo eje no repite la cuadricula', () => {
+    // Dos rejillas superpuestas a distinta altura convierten el fondo en ruido.
+    const o = combinado({ combinado: { ejeSecundario: true } });
+    expect(o.yAxis[1].splitLine.show).toBe(false);
+  });
+
+  it('la linea se dibuja por encima de las columnas', () => {
+    expect(combinado().series[2].z).toBeGreaterThan(0);
+  });
+
+  it('mas columnas que series no desborda', () => {
+    const o = combinado({ seriesDeColumna: 99 });
+    expect(o.series.every((s: { type: string }) => s.type === 'bar')).toBe(true);
+  });
+});
+
+describe('dispersion', () => {
+  it('cada categoria es un punto, y los dos ejes son medidas', () => {
+    const o = dispersion();
+    expect(o.xAxis.type).toBe('value');
+    expect(o.yAxis.type).toBe('value');
+    expect(o.series[0].data).toHaveLength(2);
+    // La etiqueta viaja CON el dato: el tooltip la tiene sin volver a buscarla por indice.
+    expect(o.series[0].data[0]).toEqual([10, 8, 4, 'Q1']);
+  });
+
+  it('la tercera medida reparte el diametro entre un minimo y un maximo', () => {
+    /*
+     * Y no se usa como radio en crudo: el area de un circulo crece con el cuadrado del radio, asi
+     * que un valor cuatro veces mayor se veria dieciseis veces mas grande.
+     */
+    const tamano = dispersion().series[0].symbolSize;
+    expect(typeof tamano).toBe('function');
+    const pequeno = tamano([10, 8, 4]);
+    const grande = tamano([20, 16, 8]);
+    expect(grande).toBeGreaterThan(pequeno);
+    expect(pequeno).toBeGreaterThanOrEqual(8);
+    expect(grande).toBeLessThanOrEqual(42);
+  });
+
+  it('sin tercera medida, todos los puntos miden lo mismo', () => {
+    const o = dispersion({}, vm(['X', 'Y'], [['Q1', 10, 8]]));
+    expect(typeof o.series[0].symbolSize).toBe('number');
+  });
+
+  it('el tooltip nombra las medidas, no «x» e «y»', () => {
+    // En una dispersion no hay rotulo de categoria en el eje que lo diga, como si lo hay en barras.
+    const texto = dispersion().tooltip.formatter({ data: [10, 8, 4, 'Q1'] });
+    expect(texto).toContain('Q1');
+    expect(texto).toContain('X: 10');
+    expect(texto).toContain('Y: 8');
+  });
+});

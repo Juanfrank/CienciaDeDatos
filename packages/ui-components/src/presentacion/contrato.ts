@@ -62,6 +62,14 @@ export interface ConfiguracionDeEjes {
   mostrarY?: boolean;
   tituloX?: string;
   tituloY?: string;
+  /**
+   * El titulo del eje de la derecha, cuando hay dos.
+   *
+   * Con dos escalas en el mismo grafico, saber cual mide cada serie deja de ser evidente: la
+   * linea puede estar por encima de las columnas y valer la mitad. Rotular los dos ejes es lo
+   * que hace que el combinado se pueda leer sin adivinar.
+   */
+  tituloY2?: string;
   /** Las lineas horizontales de fondo. Con pocas barras estorban mas que ayudan. */
   cuadricula?: boolean;
   /**
@@ -135,6 +143,22 @@ export interface ConfiguracionCircular {
  * dos sitios distintos y la comparacion entre dos capturas deja de valer. Por eso, cuando no se
  * fijan, se deducen del objetivo y del valor de forma estable y se ROTULAN en los extremos.
  */
+/**
+ * ---- Combinado de columnas y lineas ----
+ *
+ * El eje secundario es la razon de ser del objeto. Con una escala unica, una medida de miles y
+ * otra de decenas dejan a la segunda pegada al suelo, sin forma. Es la misma pregunta —«que pasa
+ * con las dos a la vez»— que hoy obliga a poner dos objetos uno al lado del otro y a que quien
+ * mira cruce los ejes de cabeza.
+ *
+ * Que sea una DECISION y no el comportamiento por omision tambien importa: dos escalas se pueden
+ * elegir para que dos series se crucen donde a uno le convenga, y eso es un grafico enganoso. Con
+ * una sola escala, la comparacion es directa y honesta; con dos, hace falta que alguien la pida.
+ */
+export interface ConfiguracionDeCombinado {
+  ejeSecundario?: boolean;
+}
+
 export interface ConfiguracionDeMedidor {
   minimo?: number;
   maximo?: number;
@@ -324,6 +348,7 @@ export interface PresentacionDeObjeto {
   orden?: OrdenDeCategorias;
   apilado?: ModoDeApilado;
   circular?: ConfiguracionCircular;
+  combinado?: ConfiguracionDeCombinado;
   medidor?: ConfiguracionDeMedidor;
   /** Peso, estilo, alineacion y color de los textos del objeto. */
   textos?: TextosDeObjeto;
@@ -355,6 +380,7 @@ export const CLAVES_DE_PRESENTACION = [
   'orden',
   'apilado',
   'circular',
+  'combinado',
   'medidor',
 ] as const satisfies readonly (keyof PresentacionDeObjeto)[];
 

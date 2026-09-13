@@ -128,6 +128,34 @@ describe('compatibilidad con lo guardado antes', () => {
     const i = instancia({ ranuras: { 'eje-x': ['A', 'B'] } });
     expect(ranurasDe(i, RANURAS).get('eje-x')).toEqual(['A']);
   });
+
+  it('con DOS ranuras obligatorias del mismo tipo, el reparto respeta los minimos', () => {
+    /*
+     * En una sola pasada, «Columnas» se llevaba las tres medidas y «Lineas» se quedaba vacia: un
+     * combinado sin asignacion guardada salia SIEMPRE roto, aunque el mapeo trajera medidas de
+     * sobra. El valor por omision tiene que cumplir el contrato cuando hay campos suficientes.
+     */
+    const dosPozos: RanuraDeCampos[] = [
+      { id: 'columnas', etiqueta: 'Columnas', tipo: 'medida', max: 3, min: 1 },
+      { id: 'lineas', etiqueta: 'Lineas', tipo: 'medida', max: 3, min: 1 },
+    ];
+    const i = instancia({ measures: ['A', 'B', 'C'] });
+    const reparto = ranurasDe(i, dosPozos);
+
+    expect(reparto.get('columnas')).toEqual(['A', 'C']);
+    expect(reparto.get('lineas')).toEqual(['B']);
+    expect(validarRanuras(i, dosPozos)).toEqual([]);
+  });
+
+  it('y con campos justos para los minimos, los reparte uno a cada una', () => {
+    const dosPozos: RanuraDeCampos[] = [
+      { id: 'columnas', etiqueta: 'Columnas', tipo: 'medida', max: 3, min: 1 },
+      { id: 'lineas', etiqueta: 'Lineas', tipo: 'medida', max: 3, min: 1 },
+    ];
+    const reparto = ranurasDe(instancia({ measures: ['A', 'B'] }), dosPozos);
+    expect(reparto.get('columnas')).toEqual(['A']);
+    expect(reparto.get('lineas')).toEqual(['B']);
+  });
 });
 
 describe('validarRanuras', () => {

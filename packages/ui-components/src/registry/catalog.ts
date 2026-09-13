@@ -456,6 +456,117 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     ],
   },
   {
+    /*
+     * Combinado — la pregunta que hoy obliga a poner dos objetos juntos.
+     *
+     * Que medida va como columna y cual como linea lo dice el MAPEO, con un pozo para cada una.
+     * Una opcion del panel obligaria a preguntar «cual de las cuatro medidas es la linea», que no
+     * tiene una respuesta corta; arrastrar un campo de un pozo al otro si.
+     */
+    objectId: 'combinado',
+    icono: 'combinado',
+    name: 'Grafico combinado de columnas y lineas',
+    description: 'Dos grupos de medidas en el mismo eje, con eje secundario opcional.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: columnas y lineas por pozo, con eje secundario opcional.',
+        {
+          dimensions: { min: 1, max: 1 },
+          measures: { min: 2, max: 6 },
+          notes:
+            'Las medidas del pozo Columnas se dibujan como barras; las del pozo Lineas, como ' +
+            'linea. Con eje secundario, la linea se mide en la escala de la derecha.',
+          pozos: [
+            {
+              id: 'eje-x',
+              etiqueta: 'Eje X',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              ayuda: 'La dimension que reparte las columnas.',
+            },
+            {
+              id: 'columnas',
+              etiqueta: 'Columnas',
+              tipo: 'medida',
+              max: 3,
+              min: 1,
+              ayuda: 'Las medidas que se dibujan como barras.',
+            },
+            {
+              id: 'lineas',
+              etiqueta: 'Lineas',
+              tipo: 'medida',
+              max: 3,
+              min: 1,
+              ayuda: 'Las medidas que se dibujan como linea.',
+            },
+          ],
+        },
+        presenta('formato', 'formatos', 'leyenda', 'etiquetasDeDato', 'ejes', 'orden', 'combinado'),
+      ),
+    ],
+  },
+  {
+    /*
+     * Dispersion — el unico objeto donde la dimension NO reparte el eje.
+     *
+     * Cada categoria es un punto y los dos ejes son medidas. Es la unica forma de responder «se
+     * relacionan estas dos cifras»: en cualquier grafico de barras una de las dos ES la escala,
+     * asi que la pregunta no se puede ni plantear.
+     */
+    objectId: 'dispersion',
+    icono: 'dispersion',
+    name: 'Grafico de dispersion',
+    description: 'Dos medidas enfrentadas, un punto por categoria. La tercera da el tamano.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: eje X y eje Y como medidas, con tamano opcional.',
+        {
+          dimensions: { min: 1, max: 1 },
+          measures: { min: 2, max: 3 },
+          notes: 'Cada valor de la dimension es un punto. La tercera medida, si esta, es el tamano.',
+          pozos: [
+            {
+              id: 'punto',
+              etiqueta: 'Punto',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              ayuda: 'Cada valor de esta dimension es un punto del grafico.',
+            },
+            {
+              id: 'eje-x',
+              etiqueta: 'Eje X',
+              tipo: 'medida',
+              max: 1,
+              min: 1,
+              ayuda: 'La medida horizontal.',
+            },
+            {
+              id: 'eje-y',
+              etiqueta: 'Eje Y',
+              tipo: 'medida',
+              max: 1,
+              min: 1,
+              ayuda: 'La medida vertical.',
+            },
+            {
+              id: 'tamano',
+              etiqueta: 'Tamano',
+              tipo: 'medida',
+              max: 1,
+              ayuda: 'Opcional. Reparte el diametro del punto entre un minimo y un maximo.',
+            },
+          ],
+        },
+        presenta('formato', 'formatos', 'etiquetasDeDato', 'ejes'),
+      ),
+    ],
+  },
+  {
     objectId: 'area',
     icono: 'area',
     name: 'Grafico de area',

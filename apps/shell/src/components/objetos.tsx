@@ -528,6 +528,192 @@ export function Lineas({
 }
 
 /**
+ * Combinado de columnas y lineas.
+ *
+ * El orden de las medidas NO es el del mapeo: primero las del pozo «Columnas» y despues las del
+ * pozo «Lineas». Es lo que permite que el constructor de opciones solo necesite saber CUANTAS son
+ * columnas, en vez de arrastrar un mapa de medida a forma hasta ECharts.
+ */
+export function Combinado({
+  titulo,
+  result,
+  instance,
+  ranuras,
+  agregaciones,
+  onFiltrar,
+  iconoDelObjeto,
+}: ObjetoProps) {
+  const r = porRanura(instance, ranuras);
+  const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
+  const deColumnas = r ? r.varios('columnas') : instance.binding.measures.slice(0, 1);
+  const deLineas = r ? r.varios('lineas') : instance.binding.measures.slice(1);
+  const medidas = [...deColumnas, ...deLineas];
+
+  const dimension = ejeX ? aFieldRef(ejeX) : undefined;
+  const vm = ordenarCategorias(
+    toCategorical(
+      result,
+      dimension ? [dimension] : [],
+      medidas,
+      agregacionesPara(medidas, instance.binding.measures, agregaciones),
+    ),
+    instance.presentacion?.orden,
+  );
+
+  return (
+    <Marco
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      agregaciones={agregaciones}
+      iconoDelObjeto={iconoDelObjeto}
+    >
+      <Grafico
+        instanceId={instance.instanceId}
+        tipo="combinado"
+        vm={vm}
+        titulo={titulo}
+        presentacion={instance.presentacion}
+        seriesDeColumna={deColumnas.length}
+        formatear={(valor, serie) =>
+          formateadorDeMedida(instance.presentacion, medidas[serie] ?? '')(valor)
+        }
+        {...(dimension ? { dimension: fieldKey(dimension) } : {})}
+        {...(dimension && onFiltrar
+          ? { onSeleccionar: (c: string) => onFiltrar(fieldKey(dimension), c) }
+          : {})}
+      >
+        {/*
+          El respaldo marca QUE FORMA tiene cada medida.
+          
+          Sin eso, la tabla del camino accesible seria indistinguible de la de un grafico de
+          lineas normal, y justo lo que este objeto anade —que unas medidas son columnas y otras
+          linea— desapareceria para quien no ve el dibujo.
+        */}
+        <div className="tabla-contenedor">
+          <table className="tabla" data-testid="combinado">
+            <thead>
+              <tr>
+                <th scope="col">{dimension ? fieldKey(dimension) : 'Categoria'}</th>
+                {vm.series.map((serie, s) => (
+                  <th key={serie} scope="col" className="es-numero">
+                    {serie} ({s < deColumnas.length ? 'columna' : 'linea'})
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {vm.points.map((punto) => (
+                <tr key={punto.label}>
+                  <th scope="row">{punto.label}</th>
+                  {vm.series.map((serie, s) => (
+                    <td key={serie} className="es-numero">
+                      {formateadorDeMedida(instance.presentacion, serie)(punto.values[s] ?? null)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Grafico>
+    </Marco>
+  );
+}
+
+/**
+ * Dispersion — dos medidas enfrentadas, un punto por categoria.
+ *
+ * La dimension no reparte ningun eje: cada uno de sus valores ES un punto. Por eso el modelo de
+ * vista se construye igual que en los demas —una fila por categoria— pero se lee al reves: las
+ * «series» son las tres medidas y los «puntos» son las categorias.
+ */
+export function Dispersion({
+  titulo,
+  result,
+  instance,
+  ranuras,
+  agregaciones,
+  onFiltrar,
+  iconoDelObjeto,
+}: ObjetoProps) {
+  const r = porRanura(instance, ranuras);
+  const punto = r ? r.uno('punto') : fieldKeyDe(instance.binding.dimensions[0]);
+  const medidas = r
+    ? [r.uno('eje-x'), r.uno('eje-y'), r.uno('tamano')].filter((m): m is string => m !== undefined)
+    : instance.binding.measures;
+
+  const dimension = punto ? aFieldRef(punto) : undefined;
+  const vm = toCategorical(
+    result,
+    dimension ? [dimension] : [],
+    medidas,
+    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+  );
+
+  return (
+    <Marco
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      agregaciones={agregaciones}
+      iconoDelObjeto={iconoDelObjeto}
+    >
+      <Grafico
+        instanceId={instance.instanceId}
+        tipo="dispersion"
+        vm={vm}
+        titulo={titulo}
+        presentacion={instance.presentacion}
+        formatear={(valor, serie) =>
+          formateadorDeMedida(instance.presentacion, medidas[serie] ?? '')(valor)
+        }
+        {...(dimension ? { dimension: fieldKey(dimension) } : {})}
+      >
+        <div className="tabla-contenedor">
+          <table className="tabla" data-testid="dispersion">
+            <thead>
+              <tr>
+                <th scope="col">{dimension ? fieldKey(dimension) : 'Punto'}</th>
+                {vm.series.map((serie) => (
+                  <th key={serie} scope="col" className="es-numero">
+                    {serie}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {vm.points.map((p) => (
+                <tr key={p.label}>
+                  <th scope="row">
+                    {dimension && onFiltrar ? (
+                      <button
+                        type="button"
+                        className="boton-enlace"
+                        onClick={() => onFiltrar(fieldKey(dimension), p.label)}
+                      >
+                        {p.label}
+                      </button>
+                    ) : (
+                      p.label
+                    )}
+                  </th>
+                  {vm.series.map((serie, s) => (
+                    <td key={serie} className="es-numero">
+                      {formateadorDeMedida(instance.presentacion, serie)(p.values[s] ?? null)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Grafico>
+    </Marco>
+  );
+}
+
+/**
  * Circular — pastel y dona.
  *
  * El MISMO componente para los dos objetos del catalogo. Lo unico que los separa es el hueco del

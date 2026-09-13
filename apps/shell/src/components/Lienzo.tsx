@@ -41,6 +41,8 @@ export interface LienzoProps {
   dimension?: string;
   presentacion?: PresentacionDeObjeto;
   formatear?: (valor: number, serie: number) => string;
+  /** Solo el combinado: cuantas series iniciales son columnas. Sale del mapeo, no del formato. */
+  seriesDeColumna?: number;
   /** Se invoca al pulsar una categoria, para el filtrado cruzado (4.4). */
   onSeleccionar?: (categoria: string) => void;
   /** Se avisa cuando el grafico esta montado, para ocultar el respaldo visual. */
@@ -55,6 +57,7 @@ export default function Lienzo({
   dimension,
   presentacion,
   formatear,
+  seriesDeColumna,
   onSeleccionar,
   onMontado,
 }: LienzoProps) {
@@ -93,11 +96,13 @@ export default function Lienzo({
         ...(presentacion?.apilado ? { apilado: presentacion.apilado } : {}),
         ...(presentacion?.circular ? { circular: presentacion.circular } : {}),
         ...(presentacion?.medidor ? { medidor: presentacion.medidor } : {}),
+        ...(presentacion?.combinado ? { combinado: presentacion.combinado } : {}),
+        ...(seriesDeColumna === undefined ? {} : { seriesDeColumna }),
         ...(formatear ? { formatear } : {}),
       }),
     // `formatear` se redefine en cada render del padre, asi que NO entra en las dependencias: lo
     // que de verdad decide como se formatea es la presentacion, y esa si esta.
-    [tipo, vm, paleta, titulo, dimension, presentacion],
+    [tipo, vm, paleta, titulo, dimension, presentacion, seriesDeColumna],
   );
   const clave = useMemo(() => JSON.stringify(opciones), [opciones]);
   const porDefecto: 'canvas' | 'svg' = elementosDe(vm) >= UMBRAL_DE_ELEMENTOS ? 'canvas' : 'svg';

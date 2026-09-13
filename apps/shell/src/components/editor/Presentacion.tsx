@@ -601,6 +601,31 @@ export function Presentacion({
         </Seccion>
       ) : null}
 
+      {admite("combinado") ? (
+        <Seccion titulo="Ejes de valor" nivel={2} prueba={`${prueba}-combinado`}>
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.combinado?.ejeSecundario === true}
+              disabled={guardando}
+              data-testid={`${prueba}-eje-secundario`}
+              onChange={(e) => poner({ combinado: { ejeSecundario: e.target.checked } })}
+            />{" "}
+            Medir las lineas en un eje aparte, a la derecha
+          </label>
+          {/*
+            La advertencia va aqui y no en la ayuda del campo, a proposito.
+            Dos escalas se pueden elegir para que dos series se crucen donde a uno le convenga, y
+            eso es un grafico enganoso. No se impide —hay casos legitimos, y son la razon de ser
+            del objeto— pero quien lo enciende tiene que leer que lo esta haciendo.
+          */}
+          <span className="campo__pista">
+            Con dos escalas, una linea por encima de las columnas puede valer la mitad. Rotule los
+            dos ejes en la seccion «Ejes» para que se pueda leer sin adivinar.
+          </span>
+        </Seccion>
+      ) : null}
+
       {admite("ejes") ? (
         <Seccion titulo="Ejes" nivel={2} abierta={false} prueba={`${prueba}-ejes`}>
           <label className="editor__interruptor">
@@ -628,6 +653,19 @@ export function Presentacion({
             */}
             <span className="campo__pista">Vacio = sin titulo.</span>
           </label>
+
+          {p.combinado?.ejeSecundario ? (
+            <label className="formulario__campo">
+              <span>Titulo del eje de la derecha</span>
+              <input
+                defaultValue={p.ejes?.tituloY2 ?? ""}
+                disabled={guardando}
+                data-testid={`${prueba}-titulo-y2`}
+                onBlur={(e) => poner({ ejes: { ...p.ejes, tituloY2: e.target.value || undefined } })}
+              />
+              <span className="campo__pista">El que mide las lineas.</span>
+            </label>
+          ) : null}
 
           <label className="editor__interruptor">
             <input
