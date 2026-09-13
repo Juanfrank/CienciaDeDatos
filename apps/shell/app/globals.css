@@ -907,15 +907,15 @@ input[type='radio'] {
 /*
  * Una familia de la paleta: el grupo de objetos que responden a la misma pregunta.
  *
- * El rotulo es la pregunta y la linea de debajo la explica. Ocupa dos lineas por grupo y ahorra
- * leer quince nombres para encontrar el que sirve.
+ * El rotulo es la pregunta y la linea de debajo la explica: ahorra leer quince nombres para
+ * encontrar el que sirve.
+ *
+ * El titulo de la familia ya no se dibuja aqui: lo lleva el `<summary>` de su seccion.
+ *
+ * `.tienda__familia` y `.tienda__familia-titulo` se van con el. Dejar las reglas «por si acaso»
+ * es como se acumulan hojas de estilo en las que nadie se atreve a borrar nada: si alguien
+ * vuelve a necesitar el titulo suelto, lo escribe entonces y sabra para que es.
  */
-.tienda__familia { margin-bottom: 14px; }
-.tienda__familia-titulo {
-  margin: 0;
-  font-size: var(--md-sys-typescale-label-large-size);
-  font-weight: 600;
-}
 .tienda__familia-que {
   margin: 0 0 6px;
   font-size: var(--md-sys-typescale-body-small-size);
@@ -2956,29 +2956,50 @@ th[aria-sort='descending'] .tabla__flecha {
 .panel-editor__pasos { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
 .panel-editor__pasos .md-chip { font-size: var(--md-sys-typescale-label-medium-size); padding: 0 10px; }
 
-/* La tienda: dos columnas de fichas con icono, como el panel de visualizaciones de Power BI. */
+/*
+ * La tienda: DOS columnas de fichas con icono, como el panel de visualizaciones de Power BI.
+ *
+ * Dos exactas, no `auto-fill`. El comentario decia «dos columnas» y la regla pedia columnas de
+ * 140 px como minimo: en un carril de 340 px, descontados el relleno del cuerpo y el de la
+ * seccion, quedan unos 284 px y dos columnas de 140 mas la separacion son 288. Por cuatro pixeles
+ * `auto-fill` caia a UNA columna, asi que la tienda llevaba siempre los objetos en fila india —
+ * con la mitad del carril en blanco al lado de cada ficha— y el comentario describia algo que no
+ * pasaba. `minmax(0, 1fr)` en vez de `1fr` porque el minimo de una pista de rejilla es `auto`, y
+ * un nombre largo sin partir ensancharia su columna a costa de la otra.
+ */
 .tienda {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--space-sm);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
 }
 .tienda__objeto {
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: var(--space-sm);
+  /*
+   * Centrada, que es lo que cambia al pasar de una columna a dos.
+   *
+   * A lo ancho del carril una ficha alineada a la izquierda se lee como una fila de lista. A 136
+   * px es una BALDOSA, y en una baldosa el icono manda: se reconoce antes que el nombre, y quien
+   * ya sabe cual busca no llega a leerlo.
+   */
+  align-items: center;
+  text-align: center;
+  gap: 3px;
+  padding: 10px 6px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-small);
   background: var(--md-sys-color-surface-container-lowest);
   color: var(--md-sys-color-on-surface);
   font-family: inherit;
-  text-align: left;
   cursor: pointer;
+  /* «Grafico combinado de columnas y lineas» no cabe en una linea de 124 px: parte por donde pueda
+     antes que desbordar la baldosa. */
+  overflow-wrap: anywhere;
 }
 .tienda__objeto:hover:not(:disabled) {
   border-color: var(--md-sys-color-primary);
@@ -2987,12 +3008,18 @@ th[aria-sort='descending'] .tabla__flecha {
 }
 .tienda__objeto:disabled { opacity: var(--md-sys-state-disabled-opacity); cursor: not-allowed; }
 .tienda__nombre {
-  font-size: var(--md-sys-typescale-label-large-size);
+  font-size: var(--md-sys-typescale-label-medium-size);
   font-weight: var(--md-sys-typescale-label-large-weight);
+  /* Interlineado corto: un nombre de tres lineas no puede estirar la fila entera de baldosas. */
+  line-height: 1.25;
 }
 .tienda__contrato {
-  font-size: var(--md-sys-typescale-body-small-size);
+  font-size: var(--md-sys-typescale-label-small-size);
   color: var(--md-sys-color-on-surface-variant);
+  /* Empujado al fondo de la baldosa: asi el contrato de las dos de una fila queda a la misma
+     altura aunque uno de los nombres ocupe una linea mas. */
+  margin-top: auto;
+  white-space: nowrap;
 }
 .tienda__objeto:hover:not(:disabled) .tienda__contrato { color: inherit; }
 

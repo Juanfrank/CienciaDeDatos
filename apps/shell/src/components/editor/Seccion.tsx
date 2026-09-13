@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect, useRef } from 'react';
 
 /**
  * Seccion colapsable del panel.
@@ -59,6 +59,25 @@ export function Seccion({
   children: React.ReactNode;
 }) {
   const filtro = normalizar(useContext(FiltroDeSecciones).trim());
+
+  /*
+   * Buscando, la seccion se abre POR EL DOM y no solo por la propiedad `open`.
+   *
+   * `<details>` es un control no controlado: al pulsar el `<summary>`, el navegador cambia `open`
+   * sin pasar por React, y React sigue creyendo el valor que dibujo la ultima vez. Si ese valor ya
+   * era `true` —una seccion abierta por defecto que alguien plego a mano— volver a pedir `true` no
+   * es un cambio para React y no escribe nada: la seccion se queda plegada justo cuando el
+   * buscador acaba de encontrar algo dentro.
+   *
+   * No se vio antes porque en la pestana de Formato casi todas las secciones nacen PLEGADAS, y
+   * ahi el camino es `false` -> `true`, que si es un cambio. Las familias de la paleta nacen
+   * abiertas, y con ellas el fallo aparece a la primera.
+   */
+  const detalle = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    if (filtro !== '' && detalle.current) detalle.current.open = true;
+  }, [filtro]);
+
   const coincide =
     filtro === '' ||
     normalizar(titulo).includes(filtro) ||
@@ -68,6 +87,7 @@ export function Seccion({
 
   return (
     <details
+      ref={detalle}
       className="seccion"
       data-nivel={nivel}
       // Buscando, las secciones que quedan se abren: si siguieran plegadas, encontrar una

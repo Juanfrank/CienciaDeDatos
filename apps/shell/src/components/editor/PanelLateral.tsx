@@ -360,23 +360,49 @@ function Tienda({
             nombre: «Grafico de columnas» y «Grafico de barras» solo se distinguen por el icono.
             Por pregunta se elige por lo que se quiere contar, que es como llega la necesidad.
           */}
-          {FAMILIAS.map(({ familia, titulo, que }) => {
-            const dela = conDatos.filter((o) => o.familia === familia);
-            if (dela.length === 0) return null;
-            return (
-              <div key={familia} className="tienda__familia" data-testid={`familia-${familia}`}>
-                <h4 className="tienda__familia-titulo">{titulo}</h4>
-                <p className="tienda__familia-que">{que}</p>
-                <ListaDeObjetos
-                  objetos={dela}
-                  prueba={`tienda-${familia}`}
-                  conContrato
-                  guardando={guardando}
-                  onAnadir={onAnadir}
-                />
-              </div>
-            );
-          })}
+          {/*
+            Cada familia es una seccion COLAPSABLE, el mismo `<details>` del resto del panel.
+            Ocho familias abiertas son una lista larga en un carril de 340 px; plegar las que no
+            interesan deja a la vista las que si, sin que nada desaparezca por defecto — que el
+            catalogo sea cerrado es justo el motivo por el que hay que poder verlo entero.
+
+            El filtro del buscador se les pasa por el MISMO contexto que usa la pestana de
+            Formato, y va aqui dentro y no envolviendo la tienda entera: fuera, «Visualizaciones»
+            y «Elementos» desapareceran al buscar «barras», porque sus titulos no coinciden.
+          */}
+          <ProveedorDeFiltro filtro={busqueda}>
+            {FAMILIAS.map(({ familia, titulo, que }) => {
+              const dela = conDatos.filter((o) => o.familia === familia);
+              if (dela.length === 0) return null;
+              return (
+                <Seccion
+                  key={familia}
+                  titulo={titulo}
+                  nivel={2}
+                  prueba={`familia-${familia}`}
+                  /*
+                   * Las claves son los objetos que la familia contiene EN ESTA busqueda.
+                   *
+                   * Sin ellas, buscar «barras» plegaria la familia que contiene las barras: el
+                   * titulo de la familia es la pregunta —«Comparar entre categorias»— y no
+                   * coincide con lo que se escribe. Como `dela` ya viene filtrada, que tenga algo
+                   * dentro implica que alguno de estos nombres casa con el filtro, asi que la
+                   * seccion sale y ademas se abre sola.
+                   */
+                  claves={dela.flatMap((o) => [o.name, o.description])}
+                >
+                  <p className="tienda__familia-que">{que}</p>
+                  <ListaDeObjetos
+                    objetos={dela}
+                    prueba={`tienda-${familia}`}
+                    conContrato
+                    guardando={guardando}
+                    onAnadir={onAnadir}
+                  />
+                </Seccion>
+              );
+            })}
+          </ProveedorDeFiltro>
         </Seccion>
       ) : null}
 

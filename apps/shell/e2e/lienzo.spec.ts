@@ -1104,4 +1104,75 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
     await page.getByTestId('limpiar-busqueda-objeto').click();
     await expect(page.getByTestId('anadir-barras')).toBeVisible();
   });
+
+  test('las fichas van en DOS columnas, no en fila india', async ({ page }) => {
+    /*
+     * Se MIDEN las cajas, no se comprueba la regla de CSS.
+     *
+     * La hoja de estilo decia `auto-fill` con columnas de 140 px de minimo y el comentario de al
+     * lado decia «dos columnas». En un carril de 340 px, descontados los rellenos, no caben dos
+     * de 140: la tienda llevaba los objetos en una sola columna con medio carril en blanco al
+     * lado de cada ficha. Una prueba que leyera la regla habria dado por buena la intencion; solo
+     * mirar donde caen las fichas distingue lo que se quiso de lo que se ve.
+     */
+    await nuevoModulo(page, 'paleta-columnas');
+
+    const fichas = page.getByTestId('tienda-proporcion').locator('.tienda__objeto');
+    expect(await fichas.count()).toBeGreaterThanOrEqual(4);
+
+    const cajas = await fichas.evaluateAll((nodos) =>
+      nodos.map((n) => {
+        const { x, y } = n.getBoundingClientRect();
+        return { x: Math.round(x), y: Math.round(y) };
+      }),
+    );
+
+    const primera = cajas[0];
+    const segunda = cajas[1];
+    const tercera = cajas[2];
+    if (!primera || !segunda || !tercera) throw new Error('faltan fichas que medir');
+
+    // Las dos primeras comparten fila y la segunda esta a la derecha.
+    expect(segunda.y).toBe(primera.y);
+    expect(segunda.x).toBeGreaterThan(primera.x);
+    // Y la tercera baja de fila, alineada con la primera: eso es una rejilla de DOS columnas y no
+    // de tres, que con cinco objetos tambien daria dos en la primera fila.
+    expect(tercera.y).toBeGreaterThan(primera.y);
+    expect(tercera.x).toBe(primera.x);
+  });
+
+  test('una familia se pliega y se despliega, y las demas no se mueven', async ({ page }) => {
+    // Ocho familias abiertas son una lista larga en un carril estrecho. Plegar las que no
+    // interesan es lo que deja a la vista las que si.
+    await nuevoModulo(page, 'paleta-plegar');
+
+    const familia = page.getByTestId('familia-proporcion');
+    const objeto = page.getByTestId('anadir-embudo');
+    await expect(objeto).toBeVisible();
+
+    await familia.locator('summary').click();
+    await expect(objeto).not.toBeVisible();
+    // Plegar una no toca a las demas: son secciones independientes, no un acordeon.
+    await expect(page.getByTestId('anadir-barras')).toBeVisible();
+
+    await familia.locator('summary').click();
+    await expect(objeto).toBeVisible();
+  });
+
+  test('buscar ABRE la familia que contiene el resultado, aunque estuviera plegada', async ({
+    page,
+  }) => {
+    /*
+     * Es la trampa de hacer plegables unos grupos que ademas se filtran: el titulo de una familia
+     * es la PREGUNTA —«Repartir un total»— y nunca coincide con lo que se escribe en el buscador,
+     * asi que la seccion se quedaria plegada justo cuando acaba de encontrar lo que se buscaba.
+     */
+    await nuevoModulo(page, 'paleta-buscar-plegada');
+
+    await page.getByTestId('familia-proporcion').locator('summary').click();
+    await expect(page.getByTestId('anadir-embudo')).not.toBeVisible();
+
+    await page.getByTestId('buscar-objeto').fill('etapas');
+    await expect(page.getByTestId('anadir-embudo')).toBeVisible();
+  });
 });
