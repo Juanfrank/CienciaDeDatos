@@ -9,14 +9,14 @@ const SEP = '||';
 /** Separa la ruta de fila de la de columna dentro de la misma clave. */
 const CRUCE = '<>';
 
-export const rutaClave = (ruta: readonly string[]): string => ruta.join(SEP);
+export const rutaClave = (path: readonly string[]): string => path.join(SEP);
 
 const claveDeCelda = (fila: readonly string[], columna: readonly string[]): string =>
   `${rutaClave(fila)}${CRUCE}${rutaClave(columna)}`;
 
 export interface NodoDeMatriz {
   /** Etiquetas desde la raiz hasta este nodo, incluida la suya. */
-  ruta: string[];
+  path: string[];
   etiqueta: string;
   /** 0 para el primer nivel. */
   nivel: number;
@@ -39,15 +39,15 @@ export interface MatrizJerarquica {
 
 function insertar(raiz: NodoDeMatriz[], labels: string[]): void {
   let nivel = raiz;
-  const ruta: string[] = [];
+  const path: string[] = [];
   for (const [i, etiqueta] of labels.entries()) {
-    ruta.push(etiqueta);
-    let nodo = nivel.find((n) => n.etiqueta === etiqueta);
-    if (!nodo) {
-      nodo = { ruta: [...ruta], etiqueta, nivel: i, hijos: [] };
-      nivel.push(nodo);
+    path.push(etiqueta);
+    let node = nivel.find((n) => n.etiqueta === etiqueta);
+    if (!node) {
+      node = { path: [...path], etiqueta, nivel: i, hijos: [] };
+      nivel.push(node);
     }
-    nivel = nodo.hijos;
+    nivel = node.hijos;
   }
 }
 
@@ -118,9 +118,9 @@ export function filasVisibles(
 ): NodoDeMatriz[] {
   const salida: NodoDeMatriz[] = [];
   const recorrer = (lista: NodoDeMatriz[]) => {
-    for (const nodo of lista) {
-      salida.push(nodo);
-      if (nodo.hijos.length > 0 && !colapsados.has(rutaClave(nodo.ruta))) recorrer(nodo.hijos);
+    for (const node of lista) {
+      salida.push(node);
+      if (node.hijos.length > 0 && !colapsados.has(rutaClave(node.path))) recorrer(node.hijos);
     }
   };
   recorrer(nodos);
@@ -131,9 +131,9 @@ export function filasVisibles(
 export function hojas(nodos: NodoDeMatriz[], colapsados: ReadonlySet<string>): NodoDeMatriz[] {
   const salida: NodoDeMatriz[] = [];
   const recorrer = (lista: NodoDeMatriz[]) => {
-    for (const nodo of lista) {
-      if (nodo.hijos.length === 0 || colapsados.has(rutaClave(nodo.ruta))) salida.push(nodo);
-      else recorrer(nodo.hijos);
+    for (const node of lista) {
+      if (node.hijos.length === 0 || colapsados.has(rutaClave(node.path))) salida.push(node);
+      else recorrer(node.hijos);
     }
   };
   recorrer(nodos);

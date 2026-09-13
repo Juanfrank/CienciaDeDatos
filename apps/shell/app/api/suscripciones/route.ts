@@ -25,18 +25,18 @@ export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();
 
-  let cuerpo: Record<string, unknown>;
+  let body: Record<string, unknown>;
   try {
-    cuerpo = (await request.json()) as Record<string, unknown>;
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
 
-  const nombre = typeof cuerpo['nombre'] === 'string' ? cuerpo['nombre'].trim() : '';
-  const moduleSlug = typeof cuerpo['modulo'] === 'string' ? cuerpo['modulo'] : '';
-  const formato = cuerpo['formato'] as ExportFormat;
-  const cadencia = cuerpo['cadencia'] as Cadence;
-  const hora = Number(cuerpo['hora'] ?? 8);
+  const nombre = typeof body['nombre'] === 'string' ? body['nombre'].trim() : '';
+  const moduleSlug = typeof body['modulo'] === 'string' ? body['modulo'] : '';
+  const formato = body['formato'] as ExportFormat;
+  const cadencia = body['cadencia'] as Cadence;
+  const hora = Number(body['hora'] ?? 8);
 
   if (!nombre) return NextResponse.json({ error: 'Falta el nombre.' }, { status: 400 });
   if (!FORMATOS.includes(formato)) {
@@ -64,13 +64,13 @@ export async function POST(request: Request) {
     ownerUserId: sesion.userId,
     teamId: sesion.activeTeamId,
     moduleSlug: module.slug,
-    ...(typeof cuerpo['pagina'] === 'string' ? { pageSlug: cuerpo['pagina'] } : {}),
-    filters: normalizarFiltros(cuerpo['filtros']),
+    ...(typeof body['pagina'] === 'string' ? { pageSlug: body['pagina'] } : {}),
+    filters: normalizarFiltros(body['filtros']),
     format: formato,
     cadence: cadencia,
     hour: hora,
-    ...(cadencia === 'semanal' ? { weekday: Number(cuerpo['diaSemana'] ?? 1) } : {}),
-    ...(cadencia === 'mensual' ? { monthday: Number(cuerpo['diaMes'] ?? 1) } : {}),
+    ...(cadencia === 'semanal' ? { weekday: Number(body['diaSemana'] ?? 1) } : {}),
+    ...(cadencia === 'mensual' ? { monthday: Number(body['diaMes'] ?? 1) } : {}),
     enabled: true,
   };
 

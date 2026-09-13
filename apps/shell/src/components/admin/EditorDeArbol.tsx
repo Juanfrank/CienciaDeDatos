@@ -32,12 +32,12 @@ export function EditorDeArbol({ inicial }: { inicial: ManagedTree }) {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(op),
     });
-    const cuerpo = await r.json();
+    const body = await r.json();
     if (!r.ok) {
-      setError(cuerpo.error ?? 'No se pudo aplicar la operacion.');
+      setError(body.error ?? 'No se pudo aplicar la operacion.');
       return false;
     }
-    setArbol(cuerpo.arbol as ManagedTree);
+    setArbol(body.arbol as ManagedTree);
     return true;
   }, []);
 
@@ -139,10 +139,10 @@ export function EditorDeArbol({ inicial }: { inicial: ManagedTree }) {
 }
 
 function recogerCarpetas(nodos: NavNode[], acumulado: { id: string; name: string }[] = []) {
-  for (const nodo of nodos) {
-    if (nodo.type === 'folder') {
-      acumulado.push({ id: nodo.id, name: nodo.name });
-      recogerCarpetas(nodo.children, acumulado);
+  for (const node of nodos) {
+    if (node.type === 'folder') {
+      acumulado.push({ id: node.id, name: node.name });
+      recogerCarpetas(node.children, acumulado);
     }
   }
   return acumulado;
@@ -167,18 +167,18 @@ function Nodos({
 }) {
   return (
     <ul className="editor-arbol__lista" data-nivel={nivel}>
-      {nodos.map((nodo) => {
-        const nombre = nodo.type === 'folder' ? nodo.name : nodo.moduleRef.name;
-        const esCarpeta = nodo.type === 'folder';
-        const activo = seleccionado === nodo.id;
+      {nodos.map((node) => {
+        const nombre = node.type === 'folder' ? node.name : node.moduleRef.name;
+        const esCarpeta = node.type === 'folder';
+        const activo = seleccionado === node.id;
 
         return (
-          <li key={nodo.id}>
+          <li key={node.id}>
             <div
               className={`editor-arbol__nodo ${activo ? 'es-activo' : ''}`}
               draggable
               onDragStart={(e) => {
-                e.dataTransfer.setData('text/plain', nodo.id);
+                e.dataTransfer.setData('text/plain', node.id);
                 e.stopPropagation();
               }}
               onDragOver={(e) => {
@@ -189,18 +189,18 @@ function Nodos({
                 e.preventDefault();
                 e.stopPropagation();
                 const source = e.dataTransfer.getData('text/plain');
-                if (source && source !== nodo.id) onMover(source, nodo.id);
+                if (source && source !== node.id) onMover(source, node.id);
               }}
             >
               <button
                 type="button"
                 className="editor-arbol__nombre"
-                data-testid={`nodo-${nodo.id}`}
+                data-testid={`nodo-${node.id}`}
                 aria-pressed={activo}
-                onClick={() => onSeleccionar(nodo.id)}
+                onClick={() => onSeleccionar(node.id)}
               >
                 {esCarpeta ? '📁' : '📄'} {nombre}
-                {esCarpeta && nodo.scope ? (
+                {esCarpeta && node.scope ? (
                   <span className="insignia" title="Esta carpeta tiene ambito propio">
                     ambito
                   </span>
@@ -213,18 +213,18 @@ function Nodos({
                   <label>
                     <span className="visually-hidden">Mover a</span>
                     <select
-                      data-testid={`mover-${nodo.id}`}
+                      data-testid={`mover-${node.id}`}
                       defaultValue=""
                       onChange={(e) => {
                         if (!e.target.value) return;
-                        onMover(nodo.id, e.target.value === '__raiz__' ? null : e.target.value);
+                        onMover(node.id, e.target.value === '__raiz__' ? null : e.target.value);
                         e.target.value = '';
                       }}
                     >
                       <option value="">Mover a…</option>
                       <option value="__raiz__">(raiz)</option>
                       {carpetas
-                        .filter((c) => c.id !== nodo.id)
+                        .filter((c) => c.id !== node.id)
                         .map((c) => (
                           <option key={c.id} value={c.id}>
                             {c.name}
@@ -236,11 +236,11 @@ function Nodos({
                   <button
                     type="button"
                     className="boton-enlace"
-                    data-testid={`renombrar-${nodo.id}`}
+                    data-testid={`renombrar-${node.id}`}
                     onClick={() => {
                       const nuevo = window.prompt('Nuevo nombre', nombre);
                       if (nuevo?.trim()) {
-                        void onOperacion({ type: 'renombrar', nodeId: nodo.id, name: nuevo.trim() });
+                        void onOperacion({ type: 'renombrar', nodeId: node.id, name: nuevo.trim() });
                       }
                     }}
                   >
@@ -250,8 +250,8 @@ function Nodos({
                   <button
                     type="button"
                     className="boton-enlace"
-                    data-testid={`papelera-${nodo.id}`}
-                    onClick={() => void onOperacion({ type: 'enviar-a-papelera', nodeId: nodo.id })}
+                    data-testid={`papelera-${node.id}`}
+                    onClick={() => void onOperacion({ type: 'enviar-a-papelera', nodeId: node.id })}
                   >
                     A la papelera
                   </button>
@@ -261,7 +261,7 @@ function Nodos({
 
             {esCarpeta ? (
               <Nodos
-                nodos={nodo.children}
+                nodos={node.children}
                 seleccionado={seleccionado}
                 onSeleccionar={onSeleccionar}
                 onMover={onMover}

@@ -17,7 +17,7 @@ export default async function AdminInicio() {
   ]);
 
   const contarNodos = (nodos: typeof arbol.nodes): number =>
-    nodos.reduce((n, nodo) => n + 1 + (nodo.type === 'folder' ? contarNodos(nodo.children) : 0), 0);
+    nodos.reduce((n, node) => n + 1 + (node.type === 'folder' ? contarNodos(node.children) : 0), 0);
 
   return (
     <div className="admin-inicio">

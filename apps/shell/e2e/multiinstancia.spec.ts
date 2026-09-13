@@ -29,10 +29,10 @@ test.describe('la sesion sobrevive al cambio de instancia', () => {
     const respuesta = await page.request.get(`${OTRA}/api/navegacion`, { headers: cabeceras });
 
     expect(respuesta.status()).toBe(200);
-    const cuerpo = (await respuesta.json()) as { equipoActivo?: string };
+    const body = (await respuesta.json()) as { equipoActivo?: string };
     // Beto pertenece al equipo Este: si la segunda instancia no viera la sesion, la peticion
     // seria de alguien sin autenticar y responderia 401, no un arbol de navegacion.
-    expect(cuerpo.equipoActivo).toBe('equipo-este');
+    expect(body.equipoActivo).toBe('equipo-este');
   });
 
   test('cambiar de equipo en una instancia se ve en la otra, sin cerrar sesion', async ({ page }) => {
@@ -117,7 +117,7 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
     await entrarComo(page, 'u-admin');
     const cabeceras = await conMismaSesion(page);
 
-    const antes = (await (
+    const before = (await (
       await page.request.get(`${OTRA}/api/admin/auditoria`, { headers: cabeceras })
     ).json()) as { eventos: unknown[] };
 
@@ -137,11 +137,11 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
       },
     });
 
-    const despues = (await (
+    const after = (await (
       await page.request.get(`${OTRA}/api/admin/auditoria`, { headers: cabeceras })
     ).json()) as { eventos: unknown[] };
 
-    expect(despues.eventos.length).toBeGreaterThan(antes.eventos.length);
+    expect(after.eventos.length).toBeGreaterThan(before.eventos.length);
     await page.request.post('/api/admin/equipos', { data: { accion: 'borrar', teamId: id } });
   });
 });

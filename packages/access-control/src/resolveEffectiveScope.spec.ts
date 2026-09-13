@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DIM_DISTRITO,
   DIM_MATERIA,
-  arbolGeneral,
+  generalTree,
   equipoEste,
   equipoNorte,
   expandingScope,
@@ -25,7 +25,7 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         user: usuarioAna,
         activeTeam: equipoNorte,
         moduleId: 'casos-pendientes-norte',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
 
       // Regional permite Norte/Este/Sur; Distrito Norte lo restringe a Norte.
@@ -40,7 +40,7 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         user: usuarioAna,
         activeTeam: equipoNorte,
         moduleId: 'casos-pendientes-este',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
       expect(valoresDe(r, DIM_DISTRITO)).toEqual(['Distrito Este']);
       expect(r.usedAuthorizedExpansion).toBe(false);
@@ -51,7 +51,7 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         user: usuarioAna,
         activeTeam: equipoNorte,
         moduleId: 'estadisticas-nacionales',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
       expect(valoresDe(r, DIM_DISTRITO)).toBeUndefined();
       expect(valoresDe(r, DIM_MATERIA)).toEqual(['Penal', 'Civil']);
@@ -62,7 +62,7 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         user: usuarioAna,
         activeTeam: equipoNorte,
         moduleId: 'casos-pendientes-norte',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
       expect(r.steps.map((s) => [s.layer, s.source])).toEqual([
         ['ambito-general-del-equipo', 'Equipo Distrito Norte'],
@@ -82,7 +82,7 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         user: usuarioAna,
         activeTeam: equipo,
         moduleId: 'casos-pendientes-norte',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
       expect(valoresDe(r, DIM_MATERIA)).toEqual(['Penal']);
     });
@@ -99,7 +99,7 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         user: usuarioAna,
         activeTeam: equipo,
         moduleId: 'casos-pendientes-norte',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
       expect(valoresDe(r, DIM_DISTRITO)).toEqual(['Distrito Norte']);
     });
@@ -109,7 +109,7 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         user: { userId: 'ana', personalScope: scope(DIM_MATERIA, 'Civil') },
         activeTeam: equipoNorte,
         moduleId: 'casos-pendientes-norte',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
       expect(valoresDe(r, DIM_MATERIA)).toEqual(['Civil']);
     });
@@ -123,7 +123,7 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         },
         activeTeam: equipoNorte,
         moduleId: 'casos-pendientes-norte',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
       expect(valoresDe(r, DIM_MATERIA)).toEqual(['Penal']);
       expect(r.steps.at(-1)?.layer).toBe('ambito-personal-por-modulo');
@@ -142,7 +142,7 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         user: { userId: 'ana', personalScope: scope(DIM_DISTRITO, 'Distrito Nacional') },
         activeTeam: equipo,
         moduleId: 'casos-pendientes-norte',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
       // Todas piden distritos que la carpeta no permite: el resultado es acceso a nada,
       // no a lo que cada capa pedia por su cuenta.
@@ -167,7 +167,7 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         user: usuarioAna,
         activeTeam: equipo,
         moduleId: 'casos-pendientes-norte',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
       expect(valoresDe(r, DIM_DISTRITO)).toEqual(['Distrito Norte', 'Distrito Este']);
       expect(r.usedAuthorizedExpansion).toBe(true);
@@ -181,13 +181,13 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         user: usuarioAna,
         activeTeam: equipoNorte,
         moduleId: 'casos-pendientes-este',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
       const este = resolveEffectiveScope({
         user: usuarioBeto,
         activeTeam: equipoEste,
         moduleId: 'casos-pendientes-este',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
 
       // Ambos ven el Distrito Este por la carpeta, pero solo el equipo Norte arrastra
@@ -202,16 +202,16 @@ describe('resolveEffectiveScope (4.10.4)', () => {
 
   describe('mover un modulo cambia su ambito de inmediato (4.1.2)', () => {
     it('el mismo modulo en otra carpeta resuelve otro ambito', () => {
-      const antes = resolveEffectiveScope({
+      const before = resolveEffectiveScope({
         user: usuarioAna,
         activeTeam: equipoNorte,
         moduleId: 'audiencias-norte',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
-      expect(valoresDe(antes, DIM_DISTRITO)).toEqual(['Distrito Norte']);
+      expect(valoresDe(before, DIM_DISTRITO)).toEqual(['Distrito Norte']);
 
       // Se mueve 'audiencias-norte' de la carpeta Norte a la carpeta Este.
-      const movido: NavNode[] = JSON.parse(JSON.stringify(arbolGeneral));
+      const movido: NavNode[] = JSON.parse(JSON.stringify(generalTree));
       const institucional = movido[0];
       if (institucional?.type !== 'folder') throw new Error('fixture inesperado');
       const regional = institucional.children[0];
@@ -225,13 +225,13 @@ describe('resolveEffectiveScope (4.10.4)', () => {
       norte.children = norte.children.filter((n) => n !== audiencias);
       este.children = [...este.children, audiencias];
 
-      const despues = resolveEffectiveScope({
+      const after = resolveEffectiveScope({
         user: usuarioAna,
         activeTeam: equipoNorte,
         moduleId: 'audiencias-norte',
         generalTree: movido,
       });
-      expect(valoresDe(despues, DIM_DISTRITO)).toEqual(['Distrito Este']);
+      expect(valoresDe(after, DIM_DISTRITO)).toEqual(['Distrito Este']);
     });
   });
 
@@ -241,7 +241,7 @@ describe('resolveEffectiveScope (4.10.4)', () => {
         user: usuarioAna,
         activeTeam: equipoNorte,
         moduleId: 'modulo-que-no-existe',
-        generalTree: arbolGeneral,
+        generalTree: generalTree,
       });
       expect(r.moduleExistsInGeneralTree).toBe(false);
       expect(r.deniesEverything).toBe(true);
@@ -249,15 +249,15 @@ describe('resolveEffectiveScope (4.10.4)', () => {
   });
 
   it('es una funcion pura: no muta el arbol, el equipo ni el usuario', () => {
-    const arbolAntes = JSON.stringify(arbolGeneral);
+    const arbolAntes = JSON.stringify(generalTree);
     const equipoAntes = JSON.stringify(equipoNorte);
     resolveEffectiveScope({
       user: usuarioAna,
       activeTeam: equipoNorte,
       moduleId: 'casos-pendientes-norte',
-      generalTree: arbolGeneral,
+      generalTree: generalTree,
     });
-    expect(JSON.stringify(arbolGeneral)).toBe(arbolAntes);
+    expect(JSON.stringify(generalTree)).toBe(arbolAntes);
     expect(JSON.stringify(equipoNorte)).toBe(equipoAntes);
   });
 });

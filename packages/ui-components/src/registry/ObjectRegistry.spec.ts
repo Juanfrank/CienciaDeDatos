@@ -100,9 +100,9 @@ describe('fijacion de version (criterio de aceptacion de la seccion 9)', () => {
     });
 
     // La instancia sigue resolviendo exactamente lo que fijo.
-    const despues = registro.resolve('barras', '1.0.0');
-    expect(despues.version).toBe('1.0.0');
-    expect(despues.changelog).toBe(changelogOriginal);
+    const after = registro.resolve('barras', '1.0.0');
+    expect(after.version).toBe('1.0.0');
+    expect(after.changelog).toBe(changelogOriginal);
     // Y la ultima ya es otra, sin que eso afecte a lo anterior.
     expect(registro.latest('barras')?.version).toBe('2.0.0');
   });

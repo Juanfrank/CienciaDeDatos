@@ -12,14 +12,14 @@ export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();
 
-  let cuerpo: Record<string, unknown>;
+  let body: Record<string, unknown>;
   try {
-    cuerpo = (await request.json()) as Record<string, unknown>;
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
 
-  const formato = cuerpo['formato'];
+  const formato = body['formato'];
   if (typeof formato !== 'string' || !FORMATOS.includes(formato as ExportFormat)) {
     return NextResponse.json(
       { error: `Formato no admitido. Use uno de: ${FORMATOS.join(', ')}.` },
@@ -27,13 +27,13 @@ export async function POST(request: Request) {
     );
   }
 
-  const moduleSlug = cuerpo['modulo'];
+  const moduleSlug = body['modulo'];
   if (typeof moduleSlug !== 'string' || moduleSlug === '') {
     return NextResponse.json({ error: 'Falta el modulo.' }, { status: 400 });
   }
 
-  const pageSlug = typeof cuerpo['pagina'] === 'string' ? cuerpo['pagina'] : undefined;
-  const filtros = normalizarFiltros(cuerpo['filtros']);
+  const pageSlug = typeof body['pagina'] === 'string' ? body['pagina'] : undefined;
+  const filtros = normalizarFiltros(body['filtros']);
 
   const job = await encolarExportacion({
     moduleSlug,

@@ -77,21 +77,21 @@ test.describe('restablecimiento con token de un solo uso', () => {
   test('el flujo completo: tramitar, canjear, y entrar con la contrasena nueva', async ({ page }) => {
     await entrarComo(page, 'u-admin');
 
-    const primera = claveNueva();
+    const first = claveNueva();
     const uno = await tramitar(page);
     // El canal automatico no entrego nada y lo dice; por eso el codigo viaja al Administrador.
     expect(uno.entregado).toBe(false);
     expect(uno.resetId).toBeTruthy();
 
     const canjeado = await page.request.post('/api/restablecer', {
-      data: { resetId: uno.resetId, codigo: uno.codigo, clave: primera },
+      data: { resetId: uno.resetId, codigo: uno.codigo, clave: first },
     });
     expect(canjeado.ok(), await canjeado.text()).toBe(true);
 
     // Sirve: 403 por no pertenecer a ningun equipo, NO 401 por credenciales. La cuenta esta
     // reservada justo por eso, y esa distincion es lo que prueba que la contrasena es correcta.
     const conLaPrimera = await page.request.post('/api/acceso', {
-      data: { correo: CORREO, clave: primera, codigo: codigoTotpDe(SECRETO_TOTP_DEMO) },
+      data: { correo: CORREO, clave: first, codigo: codigoTotpDe(SECRETO_TOTP_DEMO) },
     });
     expect(conLaPrimera.status()).toBe(403);
 
@@ -105,7 +105,7 @@ test.describe('restablecimiento con token de un solo uso', () => {
     expect(
       (
         await page.request.post('/api/acceso', {
-          data: { correo: CORREO, clave: primera, codigo: codigoTotpDe(SECRETO_TOTP_DEMO) },
+          data: { correo: CORREO, clave: first, codigo: codigoTotpDe(SECRETO_TOTP_DEMO) },
         })
       ).status(),
     ).toBe(401);
@@ -127,9 +127,9 @@ test.describe('restablecimiento con token de un solo uso', () => {
       data: { resetId: primero.resetId, codigo: primero.codigo, clave },
     });
 
-    const segundo = await tramitar(page);
+    const second = await tramitar(page);
     const repetida = await page.request.post('/api/restablecer', {
-      data: { resetId: segundo.resetId, codigo: segundo.codigo, clave },
+      data: { resetId: second.resetId, codigo: second.codigo, clave },
     });
 
     expect(repetida.status()).toBe(422);
@@ -145,12 +145,12 @@ test.describe('restablecimiento con token de un solo uso', () => {
     });
     expect(primero.ok(), await primero.text()).toBe(true);
 
-    const segundo = await page.request.post('/api/restablecer', {
+    const second = await page.request.post('/api/restablecer', {
       data: { resetId, codigo, clave: claveNueva() },
     });
 
-    expect(segundo.status()).toBe(400);
-    expect((await segundo.json()).motivo).toBe('token-ya-usado');
+    expect(second.status()).toBe(400);
+    expect((await second.json()).motivo).toBe('token-ya-usado');
   });
 
   test('un codigo inventado no sirve, y no hay forma de comprobarlo sin canjearlo', async ({

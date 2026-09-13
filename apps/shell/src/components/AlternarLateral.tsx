@@ -11,7 +11,7 @@ import { Icono } from './iconos/Icono';
 export const CONSULTA_MOVIL = '(max-width: 640px)';
 
 export function AlternarLateral() {
-  const ruta = usePathname();
+  const path = usePathname();
   const [hayPanel, setHayPanel] = useState(false);
   const [abierto, setAbierto] = useState(true);
   /*
@@ -21,7 +21,7 @@ export function AlternarLateral() {
 
   useEffect(() => {
     setHayPanel(document.getElementById(ID_LATERAL) !== null);
-  }, [ruta]);
+  }, [path]);
 
   useEffect(() => {
     const consulta = window.matchMedia(CONSULTA_MOVIL);

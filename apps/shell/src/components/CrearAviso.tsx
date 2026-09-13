@@ -72,7 +72,7 @@ export function CrearAviso({
       filtros: filtrosActuales(),
     };
 
-    const cuerpo =
+    const body =
       pestana === 'alerta'
         ? { ...comun, objeto, medida, operador, umbral: Number(umbral) }
         : { ...comun, formato, cadencia, hora: Number(hora) };
@@ -80,7 +80,7 @@ export function CrearAviso({
     const respuesta = await fetch(pestana === 'alerta' ? '/api/alertas' : '/api/suscripciones', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(cuerpo),
+      body: JSON.stringify(body),
     });
 
     if (!respuesta.ok) {

@@ -412,19 +412,19 @@ export async function podarPorEstado(nodos: NavNode[], actor: ActorDeModulo): Pr
   const apagados = new Set(await slugsApagados());
 
   const podar = (lista: NavNode[]): NavNode[] =>
-    lista.flatMap((nodo): NavNode[] => {
-      if (isModule(nodo)) {
-        const definicion = definiciones.get(nodo.moduleRef.moduleId);
+    lista.flatMap((node): NavNode[] => {
+      if (isModule(node)) {
+        const definicion = definiciones.get(node.moduleRef.moduleId);
         // Un nodo sin definicion se deja pasar: es el caso del arbol que referencia un modulo
         // que aun no existe, y de eso ya avisa `dangling` al Administrador con su propio
         // mensaje. Ocultarlo aqui haria desaparecer el sintoma sin arreglar la causa.
-        if (!definicion) return [nodo];
+        if (!definicion) return [node];
         if (apagados.has(definicion.slug)) return [];
-        return puedeVer(definicion, actor) ? [nodo] : [];
+        return puedeVer(definicion, actor) ? [node] : [];
       }
 
-      const hijos = podar(nodo.children);
-      return hijos.length > 0 ? [{ ...nodo, children: hijos }] : [];
+      const hijos = podar(node.children);
+      return hijos.length > 0 ? [{ ...node, children: hijos }] : [];
     });
 
   return podar(nodos);

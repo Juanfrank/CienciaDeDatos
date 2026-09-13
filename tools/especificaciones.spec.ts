@@ -31,14 +31,14 @@ const CARPETAS = [
 describe('cada carpeta declara sus reglas', () => {
   for (const carpeta of CARPETAS) {
     it(`${carpeta}/AGENTS.md existe y dice que NO hacer`, () => {
-      const ruta = join(raiz, carpeta, 'AGENTS.md');
-      expect(existsSync(ruta), ruta).toBe(true);
+      const path = join(raiz, carpeta, 'AGENTS.md');
+      expect(existsSync(path), path).toBe(true);
 
-      const texto = readFileSync(ruta, 'utf8');
-      expect(texto.length, ruta).toBeGreaterThan(400);
+      const texto = readFileSync(path, 'utf8');
+      expect(texto.length, path).toBeGreaterThan(400);
       // La mitad util de una especificacion es la lista de lo prohibido: sin ella se lee como
       // una descripcion y no como un contrato.
-      expect(texto, ruta).toMatch(/Que NO hacer/);
+      expect(texto, path).toMatch(/Que NO hacer/);
     });
   }
 

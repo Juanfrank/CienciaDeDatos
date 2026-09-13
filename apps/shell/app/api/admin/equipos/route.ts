@@ -35,28 +35,28 @@ interface CuerpoEquipo {
 }
 
 export async function POST(request: Request) {
-  const cuerpo = (await request.json()) as CuerpoEquipo;
+  const body = (await request.json()) as CuerpoEquipo;
 
   return conAdmin(async (actor) => {
-    switch (cuerpo.accion) {
+    switch (body.accion) {
       case 'guardar': {
-        if (!cuerpo.equipo) throw new AdminError('Falta el equipo.', 400);
-        return { equipo: await guardarEquipo(actor, cuerpo.equipo) };
+        if (!body.equipo) throw new AdminError('Falta el equipo.', 400);
+        return { equipo: await guardarEquipo(actor, body.equipo) };
       }
       case 'membresia': {
-        if (!cuerpo.teamId || !cuerpo.userId) {
+        if (!body.teamId || !body.userId) {
           throw new AdminError('Faltan teamId y userId.', 400);
         }
         return {
-          equipo: await cambiarMembresia(actor, cuerpo.teamId, cuerpo.userId, cuerpo.role ?? null),
+          equipo: await cambiarMembresia(actor, body.teamId, body.userId, body.role ?? null),
         };
       }
       case 'borrar': {
-        if (!cuerpo.teamId) throw new AdminError('Falta teamId.', 400);
+        if (!body.teamId) throw new AdminError('Falta teamId.', 400);
         // Pasa por el servicio y no por el almacen: alli esta la comprobacion del ultimo
         // Administrador y el registro de auditoria, que este handler se saltaba.
-        await borrarEquipo(actor, cuerpo.teamId);
-        return { borrado: cuerpo.teamId };
+        await borrarEquipo(actor, body.teamId);
+        return { borrado: body.teamId };
       }
       default:
         throw new AdminError('Accion desconocida.', 400);

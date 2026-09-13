@@ -29,19 +29,19 @@ export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();
 
-  let cuerpo: Record<string, unknown>;
+  let body: Record<string, unknown>;
   try {
-    cuerpo = (await request.json()) as Record<string, unknown>;
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
 
-  const nombre = typeof cuerpo['nombre'] === 'string' ? cuerpo['nombre'].trim() : '';
-  const moduleSlug = typeof cuerpo['modulo'] === 'string' ? cuerpo['modulo'] : '';
-  const instanceId = typeof cuerpo['objeto'] === 'string' ? cuerpo['objeto'] : '';
-  const measure = typeof cuerpo['medida'] === 'string' ? cuerpo['medida'] : '';
-  const operator = cuerpo['operador'] as AlertOperator;
-  const threshold = Number(cuerpo['umbral']);
+  const nombre = typeof body['nombre'] === 'string' ? body['nombre'].trim() : '';
+  const moduleSlug = typeof body['modulo'] === 'string' ? body['modulo'] : '';
+  const instanceId = typeof body['objeto'] === 'string' ? body['objeto'] : '';
+  const measure = typeof body['medida'] === 'string' ? body['medida'] : '';
+  const operator = body['operador'] as AlertOperator;
+  const threshold = Number(body['umbral']);
 
   if (!nombre) return NextResponse.json({ error: 'Falta el nombre.' }, { status: 400 });
   if (!OPERADORES.includes(operator)) {
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     instanceId,
     measure,
     condition: { operator, threshold },
-    filters: normalizarFiltros(cuerpo['filtros']),
+    filters: normalizarFiltros(body['filtros']),
     enabled: true,
     createdAt: new Date().toISOString(),
   };

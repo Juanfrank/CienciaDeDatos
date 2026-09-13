@@ -138,9 +138,9 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
 
     // El bloque se dibuja MARCADO ROTO en el lienzo, con su problema, y el modulo se sigue
     // editando alrededor. Es literalmente lo que pide 4.2: no fallar en silencio.
-    const bloque = page.getByTestId('bloque-kpi');
-    await expect(bloque).toBeVisible();
-    await expect(bloque.getByTestId('objeto-roto')).toBeVisible();
+    const block = page.getByTestId('bloque-kpi');
+    await expect(block).toBeVisible();
+    await expect(block.getByTestId('objeto-roto')).toBeVisible();
     await expect(page.getByTestId('problemas-kpi')).toContainText('MedidaRetirada');
     await expect(page.getByTestId('editor-bloqueos')).toBeVisible();
   });
@@ -356,8 +356,8 @@ test.describe('cada transicion queda registrada (4.10.7)', () => {
     });
     expect(publicado.ok()).toBe(true);
 
-    const auditoria = await (await page.request.get('/api/admin/auditoria')).json();
-    const filas = (auditoria.eventos as { entityType: string; action: string; actorId: string }[])
+    const audit = await (await page.request.get('/api/admin/auditoria')).json();
+    const filas = (audit.eventos as { entityType: string; action: string; actorId: string }[])
       .filter((e) => e.entityType === 'module');
 
     expect(filas.some((f) => f.action === 'publish' && f.actorId === 'u-admin')).toBe(true);

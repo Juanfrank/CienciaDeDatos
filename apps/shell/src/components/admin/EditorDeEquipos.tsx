@@ -24,12 +24,12 @@ export function EditorDeEquipos({
   const [abierto, setAbierto] = useState<string | null>(equipos[0]?.id ?? null);
   const [error, setError] = useState<string | null>(null);
 
-  const enviar = async (cuerpo: Record<string, unknown>) => {
+  const enviar = async (body: Record<string, unknown>) => {
     setError(null);
     const r = await fetch('/api/admin/equipos', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(cuerpo),
+      body: JSON.stringify(body),
     });
     if (!r.ok) {
       const c = await r.json();

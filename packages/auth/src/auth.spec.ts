@@ -141,10 +141,10 @@ describe('LocalIdentityProvider (4.7.2)', () => {
 
     it('al cambiar la contraseña desplaza el historial y desbloquea la cuenta', async () => {
       const record = await crearCuenta({ failedAttempts: 4, lockedUntil: ahora + 1000 });
-      const nueva = await provider.setPassword(record, 'Audiencia#2027$Este');
-      expect(nueva.passwordHistory).toContain(record.passwordHash);
-      expect(nueva.failedAttempts).toBe(0);
-      expect(nueva.lockedUntil).toBeUndefined();
+      const new = await provider.setPassword(record, 'Audiencia#2027$Este');
+      expect(new.passwordHistory).toContain(record.passwordHash);
+      expect(new.failedAttempts).toBe(0);
+      expect(new.lockedUntil).toBeUndefined();
     });
   });
 
@@ -263,7 +263,7 @@ describe('AzureAdIdentityProvider (4.7.1)', () => {
     },
   };
 
-  const construir = () => {
+  const build = () => {
     const directory = new DirectorioDePrueba();
     directory.add('ana@institucion.gob', entradaDirectorio);
     const auditLog = new InMemoryAuditLog();
@@ -275,14 +275,14 @@ describe('AzureAdIdentityProvider (4.7.1)', () => {
   };
 
   it('valida el token en el backend, no confia solo en el perimetro', async () => {
-    const { provider } = construir();
+    const { provider } = build();
     await expect(provider.authenticate({ token: 'falsificado' })).rejects.toMatchObject({
       reason: 'token-invalido',
     });
   });
 
   it('produce un principal con la identidad normalizada', async () => {
-    const { provider } = construir();
+    const { provider } = build();
     const principal = await provider.authenticate({ token: 'token-valido' });
     expect(principal).toEqual({
       userId: 'u-ana',
@@ -295,7 +295,7 @@ describe('AzureAdIdentityProvider (4.7.1)', () => {
   });
 
   it('registra el login en el mismo log consolidado que las cuentas locales', async () => {
-    const { provider, auditLog } = construir();
+    const { provider, auditLog } = build();
     await provider.authenticate({ token: 'token-valido', sourceIp: '10.0.0.9' });
     expect(auditLog.events[0]).toMatchObject({
       authProvider: 'azure-ad',

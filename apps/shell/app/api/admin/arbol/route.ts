@@ -17,14 +17,14 @@ export async function GET() {
 /** Aplica una operacion sobre el arbol (4.1, 4.1.2). */
 export async function POST(request: Request) {
   const url = new URL(request.url);
-  const cuerpo = (await request.json()) as TreeOperation;
+  const body = (await request.json()) as TreeOperation;
 
   if (url.searchParams.get('previsualizar') === '1') {
-    if (cuerpo.type !== 'mover') {
+    if (body.type !== 'mover') {
       return conAdmin(async () => ({ cambiaElAmbito: false, moduleIds: [] }));
     }
-    return conAdmin(async () => await previsualizarMovimiento(cuerpo.nodeId, cuerpo.newParentId));
+    return conAdmin(async () => await previsualizarMovimiento(body.nodeId, body.newParentId));
   }
 
-  return conAdmin(async (actor) => ({ arbol: await ejecutarOperacionDeArbol(actor, cuerpo) }));
+  return conAdmin(async (actor) => ({ arbol: await ejecutarOperacionDeArbol(actor, body) }));
 }

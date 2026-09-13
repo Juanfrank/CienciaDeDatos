@@ -81,8 +81,8 @@ test.describe('ambito de acceso por equipo activo (4.10.4)', () => {
 
   test('cambiar el equipo activo cambia los datos SIN cerrar sesion', async ({ page }) => {
     await page.goto('/m/casos-pendientes');
-    const antes = await page.getByTestId('tabla').innerText();
-    expect(antes).toContain('Distrito Norte');
+    const before = await page.getByTestId('tabla').innerText();
+    expect(before).toContain('Distrito Norte');
 
     const cookieAntes = (await page.context().cookies()).find((c) => c.name === 'sesion')?.value;
 
@@ -304,8 +304,8 @@ test.describe('identidad institucional (4.3)', () => {
     // La norma de marca pide el nombre de la institucion en cada pagina. Se comprueba en las
     // tres superficies distintas —modulo, panel de administracion y avisos— porque cada una
     // tiene su propia disposicion y es donde se perderia si alguien anadiera una cuarta.
-    for (const ruta of ['/m/casos-pendientes', '/admin', '/avisos']) {
-      await page.goto(ruta);
+    for (const path of ['/m/casos-pendientes', '/admin', '/avisos']) {
+      await page.goto(path);
       await expect(page.getByTestId('institucion')).toContainText(
         'Poder Judicial de la República Dominicana',
       );
@@ -409,10 +409,10 @@ test.describe('el alto de un objeto no depende de su contenido', () => {
     expect(medida.desborda).toBe(true);
 
     // Y se desplaza de verdad, sin que la tarjeta crezca.
-    const antes = await page.getByTestId('tabla').first().locator('../..').boundingBox();
+    const before = await page.getByTestId('tabla').first().locator('../..').boundingBox();
     await contenedor.evaluate((el) => el.scrollTo(0, 9999));
-    const despues = await page.getByTestId('tabla').first().locator('../..').boundingBox();
-    expect(Math.round(despues?.height ?? 0)).toBe(Math.round(antes?.height ?? 0));
+    const after = await page.getByTestId('tabla').first().locator('../..').boundingBox();
+    expect(Math.round(after?.height ?? 0)).toBe(Math.round(before?.height ?? 0));
     expect(await contenedor.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
   });
 });

@@ -110,8 +110,8 @@ export async function previsualizarMovimiento(
   newParentId: string | null,
 ): Promise<PrevisualizacionDeMovimiento> {
   const arbol = await gobierno.getTree();
-  const nodo = findNode(arbol.nodes, nodeId);
-  if (!nodo) throw new AdminError(`El nodo '${nodeId}' no existe.`, 404);
+  const node = findNode(arbol.nodes, nodeId);
+  if (!node) throw new AdminError(`El nodo '${nodeId}' no existe.`, 404);
 
   const padreActual = encontrarPadre(arbol.nodes, nodeId);
   const destino = newParentId === null ? null : findNode(arbol.nodes, newParentId);
@@ -123,7 +123,7 @@ export async function previsualizarMovimiento(
   const scopeDespues = destino && isFolder(destino) ? destino.scope : undefined;
 
   return {
-    moduleIds: collectModuleIds(nodo),
+    moduleIds: collectModuleIds(node),
     ...(scopeAntes ? { scopeAntes } : {}),
     ...(scopeDespues ? { scopeDespues } : {}),
     cambiaElAmbito: JSON.stringify(scopeAntes ?? null) !== JSON.stringify(scopeDespues ?? null),
@@ -132,10 +132,10 @@ export async function previsualizarMovimiento(
 
 /** Carpeta que contiene directamente a un nodo, o undefined si esta en la raiz. */
 function encontrarPadre(nodes: NavNode[], nodeId: string): FolderNode | undefined {
-  for (const nodo of nodes) {
-    if (!isFolder(nodo)) continue;
-    if (nodo.children.some((h) => h.id === nodeId)) return nodo;
-    const dentro = encontrarPadre(nodo.children, nodeId);
+  for (const node of nodes) {
+    if (!isFolder(node)) continue;
+    if (node.children.some((h) => h.id === nodeId)) return node;
+    const dentro = encontrarPadre(node.children, nodeId);
     if (dentro) return dentro;
   }
   return undefined;
@@ -227,9 +227,9 @@ async function ambitoActual(destino: GuardarAmbitoInput['destino']): Promise<Acc
   if (destino.tipo === 'equipo') {
     return (await gobierno.getTeam(destino.teamId))?.defaultScope ?? { restrictions: [] };
   }
-  const nodo = findNode((await gobierno.getTree()).nodes, destino.nodeId);
-  if (!nodo || !isFolder(nodo)) throw new AdminError(`La carpeta '${destino.nodeId}' no existe.`, 404);
-  return nodo.scope ?? { restrictions: [] };
+  const node = findNode((await gobierno.getTree()).nodes, destino.nodeId);
+  if (!node || !isFolder(node)) throw new AdminError(`La carpeta '${destino.nodeId}' no existe.`, 404);
+  return node.scope ?? { restrictions: [] };
 }
 
 async function aplicarAmbito(destino: GuardarAmbitoInput['destino'], scope: AccessScope): Promise<void> {
@@ -241,9 +241,9 @@ async function aplicarAmbito(destino: GuardarAmbitoInput['destino'], scope: Acce
   }
 
   const arbol = await gobierno.getTree();
-  const nodo = findNode(arbol.nodes, destino.nodeId);
-  if (!nodo || !isFolder(nodo)) throw new AdminError(`La carpeta '${destino.nodeId}' no existe.`, 404);
-  nodo.scope = scope;
+  const node = findNode(arbol.nodes, destino.nodeId);
+  if (!node || !isFolder(node)) throw new AdminError(`La carpeta '${destino.nodeId}' no existe.`, 404);
+  node.scope = scope;
   await gobierno.setTree(arbol);
 }
 
@@ -300,10 +300,10 @@ export class UltimoAdministradorError extends AdminError {
 
 /** UNICO camino por el que este servicio escribe equipos. */
 async function escribirEquipo(equipo: Team): Promise<void> {
-  const antes = await gobierno.listTeams();
-  const despues = [...antes.filter((t) => t.id !== equipo.id), equipo];
+  const before = await gobierno.listTeams();
+  const after = [...before.filter((t) => t.id !== equipo.id), equipo];
 
-  const denegacion = wouldLeaveNoAdministrator(antes, despues);
+  const denegacion = wouldLeaveNoAdministrator(before, after);
   if (denegacion) throw new UltimoAdministradorError(denegacion);
 
   await gobierno.upsertTeam(equipo);
@@ -313,13 +313,13 @@ async function escribirEquipo(equipo: Team): Promise<void> {
 export async function borrarEquipo(actor: Actor, teamId: string): Promise<void> {
   assertCan(actor.role, 'gestionar-equipos');
 
-  const antes = await gobierno.listTeams();
-  const equipo = antes.find((t) => t.id === teamId);
+  const before = await gobierno.listTeams();
+  const equipo = before.find((t) => t.id === teamId);
   if (!equipo) throw new AdminError(`El equipo '${teamId}' no existe.`, 404);
 
   const denegacion = wouldLeaveNoAdministrator(
-    antes,
-    antes.filter((t) => t.id !== teamId),
+    before,
+    before.filter((t) => t.id !== teamId),
   );
   if (denegacion) throw new UltimoAdministradorError(denegacion);
 
@@ -365,7 +365,7 @@ export async function cambiarMembresia(
   const equipo = await gobierno.getTeam(teamId);
   if (!equipo) throw new AdminError(`El equipo '${teamId}' no existe.`, 404);
 
-  const antes = { ...equipo };
+  const before = { ...equipo };
   const sinPersona = equipo.members.filter((m) => m.userId !== userId);
   const actualizado: Team = {
     ...equipo,
@@ -378,7 +378,7 @@ export async function cambiarMembresia(
     entityType: 'membership',
     entityId: `${teamId}/${userId}`,
     action: role === null ? 'delete' : 'update',
-    before: antes.members,
+    before: before.members,
     after: actualizado.members,
   });
 
@@ -447,10 +447,10 @@ export async function quienVeQue(userId: string, teamId: string, moduleId: strin
   const equipo = await gobierno.getTeam(teamId);
   if (!equipo) throw new AdminError(`El equipo '${teamId}' no existe.`, 404);
 
-  const usuario = await gobierno.getUser(userId) ?? { userId };
+  const user = await gobierno.getUser(userId) ?? { userId };
   const generalTree = await getGeneralTree();
   const resolucion = resolveEffectiveScope({
-    user: usuario,
+    user: user,
     activeTeam: equipo,
     moduleId,
     generalTree,

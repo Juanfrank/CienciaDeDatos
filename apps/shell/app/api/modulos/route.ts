@@ -43,9 +43,9 @@ export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();
 
-  let cuerpo: Record<string, unknown>;
+  let body: Record<string, unknown>;
   try {
-    cuerpo = (await request.json()) as Record<string, unknown>;
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
@@ -53,8 +53,8 @@ export async function POST(request: Request) {
   try {
     const modulo = await crearBorrador({
       actor: await actorDe(sesion),
-      name: typeof cuerpo['nombre'] === 'string' ? cuerpo['nombre'] : '',
-      slug: typeof cuerpo['slug'] === 'string' ? cuerpo['slug'] : '',
+      name: typeof body['nombre'] === 'string' ? body['nombre'] : '',
+      slug: typeof body['slug'] === 'string' ? body['slug'] : '',
     });
     return NextResponse.json({ modulo }, { status: 201 });
   } catch (error) {

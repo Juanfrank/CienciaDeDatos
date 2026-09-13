@@ -190,12 +190,12 @@ test.describe('nada se sale de la pantalla', () => {
       await page.setViewportSize(tamano);
       await entrarComo(page, 'u-ana');
 
-      for (const ruta of ['/m/casos-pendientes', '/editor', '/avisos']) {
-        await page.goto(ruta);
+      for (const path of ['/m/casos-pendientes', '/editor', '/avisos']) {
+        await page.goto(path);
         const desborda = await page.evaluate(
           () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
         );
-        expect(desborda, `${ruta} desborda en horizontal`).toBe(false);
+        expect(desborda, `${path} desborda en horizontal`).toBe(false);
       }
     });
   }

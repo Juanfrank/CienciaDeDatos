@@ -80,7 +80,7 @@ test.describe('paginas de modulo', () => {
 });
 
 test.describe('panel de administracion (4.10.8)', () => {
-  for (const ruta of [
+  for (const path of [
     '/admin',
     '/admin/arbol',
     '/admin/equipos',
@@ -90,9 +90,9 @@ test.describe('panel de administracion (4.10.8)', () => {
     '/admin/cuentas',
     '/admin/auditoria',
   ]) {
-    test(`${ruta} no tiene infracciones WCAG 2.1 AA`, async ({ page }) => {
+    test(`${path} no tiene infracciones WCAG 2.1 AA`, async ({ page }) => {
       await entrarComo(page, 'u-admin');
-      await page.goto(ruta);
+      await page.goto(path);
       await expect(page.locator('h1')).toBeVisible();
 
       expect(await infracciones(page)).toEqual([]);

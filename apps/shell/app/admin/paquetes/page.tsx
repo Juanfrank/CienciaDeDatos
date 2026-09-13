@@ -44,7 +44,7 @@ export default async function PaginaPaquetes() {
                 {problems.length > 0 ? (
                   <div className="aviso aviso--atencion" data-testid={`paquete-problemas-${pkg.id}`}>
                     <p>
-                      <strong>{problems.length} nodo(s) no se muestran</strong> porque la
+                      <strong>{problems.length} node(s) no se muestran</strong> porque la
                       audiencia no los tiene concedidos:
                     </p>
                     <ul>

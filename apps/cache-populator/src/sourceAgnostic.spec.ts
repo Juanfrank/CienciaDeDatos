@@ -78,9 +78,9 @@ describe('2.4 — ni apps/* ni ui-components conocen la fuente', () => {
   const recorrer = (dir: string, acumulado: string[] = []): string[] => {
     for (const entrada of readdirSync(dir, { withFileTypes: true })) {
       if (['node_modules', '.next', 'dist', '.nx', 'e2e'].includes(entrada.name)) continue;
-      const ruta = join(dir, entrada.name);
-      if (entrada.isDirectory()) recorrer(ruta, acumulado);
-      else if (/\.(ts|tsx)$/.test(entrada.name)) acumulado.push(ruta);
+      const path = join(dir, entrada.name);
+      if (entrada.isDirectory()) recorrer(path, acumulado);
+      else if (/\.(ts|tsx)$/.test(entrada.name)) acumulado.push(path);
     }
     return acumulado;
   };

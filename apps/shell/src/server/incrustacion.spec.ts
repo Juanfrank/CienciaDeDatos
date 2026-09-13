@@ -51,8 +51,8 @@ describe('politicaDeEnmarcado', () => {
   const origenes = ['https://portal.ejemplo.do'];
 
   it('deniega el enmarcado en cualquier ruta que no sea de incrustacion', () => {
-    for (const ruta of ['/', '/m/casos', '/admin', '/admin/equipos', '/avisos', '/api/alertas']) {
-      expect(politicaDeEnmarcado(ruta, origenes)).toBe(SIN_ENMARCADO);
+    for (const path of ['/', '/m/casos', '/admin', '/admin/equipos', '/avisos', '/api/alertas']) {
+      expect(politicaDeEnmarcado(path, origenes)).toBe(SIN_ENMARCADO);
     }
   });
 

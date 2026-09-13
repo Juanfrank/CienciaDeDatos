@@ -10,8 +10,8 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
     await expect(page.getByTestId('enlace-admin')).toHaveCount(0);
 
     // Lo que importa no es el enlace ausente, sino que llamar a la API a mano no sirva.
-    for (const ruta of ['/api/admin/arbol', '/api/admin/equipos', '/api/admin/auditoria']) {
-      expect((await page.request.get(ruta)).status()).toBe(403);
+    for (const path of ['/api/admin/arbol', '/api/admin/equipos', '/api/admin/auditoria']) {
+      expect((await page.request.get(path)).status()).toBe(403);
     }
   });
 
@@ -67,8 +67,8 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
     });
 
     expect(respuesta.status()).toBe(422);
-    const cuerpo = await respuesta.json();
-    expect(cuerpo.detail.dimensiones.join(' ')).toContain('Laboral');
+    const body = await respuesta.json();
+    expect(body.detail.dimensiones.join(' ')).toContain('Laboral');
   });
 
   test('con justificacion se guarda y queda DESTACADA en auditoria', async ({ page }) => {
@@ -133,9 +133,9 @@ test.describe('editor de arbol (4.1.2)', () => {
     const previo = await page.request.post('/api/admin/arbol?previsualizar=1', {
       data: { type: 'mover', nodeId: 'nodo-m-audiencias', newParentId: 'nodo-este' },
     });
-    const cuerpo = await previo.json();
-    expect(cuerpo.cambiaElAmbito).toBe(true);
-    expect(cuerpo.moduleIds).toContain('audiencias');
+    const body = await previo.json();
+    expect(body.cambiaElAmbito).toBe(true);
+    expect(body.moduleIds).toContain('audiencias');
   });
 
   test('el arbol se reorganiza SOLO CON TECLADO, sin arrastrar', async ({ page }) => {
@@ -170,8 +170,8 @@ test.describe('editor de arbol (4.1.2)', () => {
     const r = await page.request.get(
       '/api/admin/quien-ve-que?userId=u-ana&teamId=equipo-norte&moduleId=audiencias',
     );
-    const cuerpo = await r.json();
-    const origenes = (cuerpo.pasos as { source: string }[]).map((p) => p.source);
+    const body = await r.json();
+    const origenes = (body.pasos as { source: string }[]).map((p) => p.source);
     expect(origenes).toContain('Distrito Este');
     expect(origenes).not.toContain('Distrito Norte');
   });
@@ -213,9 +213,9 @@ test.describe('quien ve que (4.10.8)', () => {
     const r = await page.request.get(
       '/api/admin/quien-ve-que?userId=u-ana&teamId=equipo-norte&moduleId=estadisticas',
     );
-    const cuerpo = await r.json();
-    expect(cuerpo.existeEnElArbol).toBe(true);
-    expect(cuerpo.tieneAcceso).toBe(false);
+    const body = await r.json();
+    expect(body.existeEnElArbol).toBe(true);
+    expect(body.tieneAcceso).toBe(false);
   });
 });
 
@@ -295,8 +295,8 @@ test.describe('membresia (4.10.2)', () => {
     await page.request.post('/api/admin/equipos', {
       data: { accion: 'membresia', teamId: 'equipo-este', userId: 'u-nuevo', role: null },
     });
-    const despues = await page.request.get('/api/admin/equipos').then((r) => r.json());
-    const este2 = despues.equipos.find((t: { id: string }) => t.id === 'equipo-este');
+    const after = await page.request.get('/api/admin/equipos').then((r) => r.json());
+    const este2 = after.equipos.find((t: { id: string }) => t.id === 'equipo-este');
     expect(este2.members.some((m: { userId: string }) => m.userId === 'u-nuevo')).toBe(false);
   });
 });

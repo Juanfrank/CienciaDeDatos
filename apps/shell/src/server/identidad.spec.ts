@@ -32,10 +32,10 @@ describe('revocar todas las sesiones de una persona', () => {
   });
 
   it('revocar una sola no deja rastro en el indice de la persona', async () => {
-    const primera = await sesiones.issue(principal('u-indice'), 'equipo-norte');
+    const first = await sesiones.issue(principal('u-indice'), 'equipo-norte');
     const segunda = await sesiones.issue(principal('u-indice'), 'equipo-norte');
 
-    await sesiones.revoke(primera.sessionId);
+    await sesiones.revoke(first.sessionId);
     await sesiones.revokeAllFor('u-indice');
 
     // Si el indice conservara la primera, `deleteAllFor` intentaria borrar una clave que ya no
@@ -58,15 +58,15 @@ describe('desbloquear una cuenta', () => {
   });
 
   it('pone el contador a cero y quita el bloqueo, SIN tocar la contrasena', async () => {
-    const antes = await almacenDeCredenciales.findByEmail('u-bloqueado@poderjudicial.gob.do');
+    const before = await almacenDeCredenciales.findByEmail('u-bloqueado@poderjudicial.gob.do');
 
     expect(await desbloquearCuenta('u-bloqueado@poderjudicial.gob.do')).toBe(true);
 
-    const despues = await almacenDeCredenciales.findByEmail('u-bloqueado@poderjudicial.gob.do');
-    expect(despues?.lockedUntil).toBeUndefined();
-    expect(despues?.failedAttempts).toBe(0);
+    const after = await almacenDeCredenciales.findByEmail('u-bloqueado@poderjudicial.gob.do');
+    expect(after?.lockedUntil).toBeUndefined();
+    expect(after?.failedAttempts).toBe(0);
     // Quien se equivoco de dedos y ya recuerda su contrasena no necesita una nueva.
-    expect(despues?.passwordHash).toBe(antes?.passwordHash);
+    expect(after?.passwordHash).toBe(before?.passwordHash);
   });
 
   it('una cuenta que no existe devuelve false, no lanza', async () => {

@@ -94,15 +94,15 @@ export const GRUPOS: GrupoDeAdmin[] = [
 export const SECCIONES: SeccionDeAdmin[] = [RESUMEN, ...GRUPOS.flatMap((g) => g.secciones)];
 
 /** La seccion a la que pertenece una ruta. */
-export function seccionDe(ruta: string): SeccionDeAdmin | undefined {
+export function seccionDe(path: string): SeccionDeAdmin | undefined {
   return [...SECCIONES]
     .sort((a, b) => b.href.length - a.href.length)
-    .find((s) => ruta === s.href || ruta.startsWith(`${s.href}/`));
+    .find((s) => path === s.href || path.startsWith(`${s.href}/`));
 }
 
 /** La seccion que se marca en el carril. */
-export function seccionActivaEn(ruta: string): SeccionDeAdmin | undefined {
-  return ruta === RESUMEN.href ? RESUMEN : GRUPOS.flatMap((g) => g.secciones).find(
-    (s) => ruta === s.href || ruta.startsWith(`${s.href}/`),
+export function seccionActivaEn(path: string): SeccionDeAdmin | undefined {
+  return path === RESUMEN.href ? RESUMEN : GRUPOS.flatMap((g) => g.secciones).find(
+    (s) => path === s.href || path.startsWith(`${s.href}/`),
   );
 }

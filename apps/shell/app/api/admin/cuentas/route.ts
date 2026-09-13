@@ -27,39 +27,39 @@ interface CuerpoDeCuenta {
 }
 
 export async function POST(request: Request) {
-  const cuerpo = (await request.json()) as CuerpoDeCuenta;
+  const body = (await request.json()) as CuerpoDeCuenta;
 
   return conAdmin(async (actor) => {
-    if (!cuerpo.email) throw new AdminError('Falta el correo de la cuenta.', 400);
+    if (!body.email) throw new AdminError('Falta el correo de la cuenta.', 400);
 
-    if (cuerpo.accion === 'desbloquear') {
-      const desbloqueada = await desbloquearCuenta(cuerpo.email);
+    if (body.accion === 'desbloquear') {
+      const desbloqueada = await desbloquearCuenta(body.email);
       if (!desbloqueada) throw new AdminError('No hay ninguna cuenta local con ese correo.', 404);
 
       await registrarCambio({
         actorId: actor.userId,
         entityType: 'role',
-        entityId: cuerpo.email,
+        entityId: body.email,
         action: 'update',
         after: { desbloqueada: true },
       });
 
-      return { desbloqueada: cuerpo.email };
+      return { desbloqueada: body.email };
     }
 
-    if (cuerpo.accion === 'restablecer') {
-      const emitido = await restablecimientos.issue(cuerpo.email, actor.userId);
+    if (body.accion === 'restablecer') {
+      const emitido = await restablecimientos.issue(body.email, actor.userId);
       if (!emitido) throw new AdminError('No hay ninguna cuenta local con ese correo.', 404);
 
       const entregado = await canalDeRestablecimiento.deliver({
-        email: cuerpo.email,
+        email: body.email,
         issued: emitido,
       });
 
       await registrarCambio({
         actorId: actor.userId,
         entityType: 'role',
-        entityId: cuerpo.email,
+        entityId: body.email,
         action: 'update',
         after: { restablecimiento: emitido.resetId, canal: canalDeRestablecimiento.name, entregado },
       });

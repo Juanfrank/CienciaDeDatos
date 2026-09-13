@@ -100,19 +100,19 @@ describe('resolutor: degradacion', () => {
     const memoria = new InMemoryCacheStore({ ttlMs: 60_000 });
     const apagado = foto({ [banderaDeModulo('malo')]: false });
 
-    const antes = new ResolutorDeConfiguracion({ fuente: fuenteQue([async () => apagado]), memoria });
-    await antes.instantanea();
+    const before = new ResolutorDeConfiguracion({ fuente: fuenteQue([async () => apagado]), memoria });
+    await before.instantanea();
     // Se guarda fuera del camino de lectura; se espera un tick para que la escritura cuaje.
     await new Promise((r) => setTimeout(r, 0));
     expect((await memoria.get(CLAVE_ULTIMA_INSTANTANEA))?.value).toBeDefined();
 
     // Proceso nuevo, mismo almacen compartido, y la fuente sigue caida. Sin memoria persistida
     // esta instancia reencenderia lo apagado — y un reinicio es justo lo que pasa en una caida.
-    const despues = new ResolutorDeConfiguracion({
+    const after = new ResolutorDeConfiguracion({
       fuente: fuenteQue([async () => Promise.reject(new Error('caida'))]),
       memoria,
     });
-    expect(moduloHabilitado(await despues.instantanea(), 'malo')).toBe(false);
+    expect(moduloHabilitado(await after.instantanea(), 'malo')).toBe(false);
   });
 
   it('sin ninguna foto, ni fresca ni guardada, SE ABRE', async () => {
@@ -151,8 +151,8 @@ describe('fuente de entorno', () => {
 });
 
 describe('fuente de App Configuration', () => {
-  const respuesta = (cuerpo: unknown, ok = true) =>
-    ({ ok, status: 200, statusText: 'OK', json: async () => cuerpo }) as Response;
+  const respuesta = (body: unknown, ok = true) =>
+    ({ ok, status: 200, statusText: 'OK', json: async () => body }) as Response;
 
   it('separa banderas de valores y lee enabled', async () => {
     const buscar = vi.fn(async () =>

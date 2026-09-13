@@ -11,8 +11,8 @@ interface EstadoExportacion {
 }
 
 /** Encola y espera a que el trabajador termine. Devuelve el estado final. */
-async function exportar(page: Page, cuerpo: Record<string, unknown>): Promise<EstadoExportacion> {
-  const encolada = await page.request.post('/api/exportaciones', { data: cuerpo });
+async function exportar(page: Page, body: Record<string, unknown>): Promise<EstadoExportacion> {
+  const encolada = await page.request.post('/api/exportaciones', { data: body });
   expect(encolada.status()).toBe(202);
   const { id } = (await encolada.json()) as { id: string };
 
@@ -43,12 +43,12 @@ test.describe('la exportacion se despacha a una cola (5.3)', () => {
     });
 
     expect(respuesta.status()).toBe(202);
-    const cuerpo = (await respuesta.json()) as Record<string, unknown>;
-    expect(cuerpo['id']).toBeTruthy();
-    expect(cuerpo['estado']).toBe('encolada');
+    const body = (await respuesta.json()) as Record<string, unknown>;
+    expect(body['id']).toBeTruthy();
+    expect(body['estado']).toBe('encolada');
     // La respuesta de encolado no lleva datos: el archivo todavia no existe.
     expect(respuesta.headers()['content-type']).toContain('application/json');
-    expect(JSON.stringify(cuerpo)).not.toContain('Distrito');
+    expect(JSON.stringify(body)).not.toContain('Distrito');
   });
 
   test('el estado avanza hasta lista y entonces aparece la descarga', async ({ page }) => {
@@ -213,8 +213,8 @@ test.describe('los cuatro formatos salen con contenido valido', () => {
       // Los datos exportados no se guardan en ningun intermediario.
       expect(descarga.headers()['cache-control']).toContain('no-store');
 
-      const cuerpo = await descarga.body();
-      expect(cuerpo.subarray(0, firma.length).toString('latin1')).toBe(firma);
+      const body = await descarga.body();
+      expect(body.subarray(0, firma.length).toString('latin1')).toBe(firma);
     });
   }
 });

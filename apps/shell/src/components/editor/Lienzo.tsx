@@ -24,7 +24,7 @@ export function Lienzo({
   onSeleccionar: (itemId: string | null) => void;
   onColocar: (itemId: string, position: GridPosition) => void;
 }) {
-  const porId = new Map(objetos.map((o) => [o.itemId, o]));
+  const id = new Map(objetos.map((o) => [o.itemId, o]));
 
   /*
    * Dos filas de mas, siempre.
@@ -100,7 +100,7 @@ export function Lienzo({
         ) : null}
 
         {items.map((item) => {
-          const objeto = porId.get(item.id);
+          const objeto = id.get(item.id);
           const elegido = seleccion === item.id;
           const arrastrando = enCurso?.itemId === item.id;
           return (

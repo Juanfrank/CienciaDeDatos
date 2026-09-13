@@ -103,9 +103,9 @@ function analizar(texto: string): Seccion {
     }
     if (c === ',') {
       // Solo cuenta como separador de millares entre marcadores de digito. Suelto, es un literal.
-      const antes = texto[i - 1];
-      const despues = texto[i + 1];
-      if ((antes === '0' || antes === '#') && (despues === '0' || despues === '#')) {
+      const before = texto[i - 1];
+      const after = texto[i + 1];
+      if ((before === '0' || before === '#') && (after === '0' || after === '#')) {
         seccion.millares = true;
       } else {
         seccion.patron += ',';

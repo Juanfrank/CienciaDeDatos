@@ -29,8 +29,8 @@ export function ConexionEnRejilla({ config }: { config: ConfiguracionDeConexion 
         return;
       }
       const base = rejilla.getBoundingClientRect();
-      const caja = (nodo: Element) => {
-        const r = nodo.getBoundingClientRect();
+      const caja = (node: Element) => {
+        const r = node.getBoundingClientRect();
         return { x: r.left - base.left, y: r.top - base.top, w: r.width, h: r.height };
       };
       setPuntos(trazar(caja(a), caja(b)).puntos);

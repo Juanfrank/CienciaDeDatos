@@ -7,13 +7,13 @@ import type { NavNode } from '@app/access-control';
 export const dynamic = 'force-dynamic';
 
 function aplanar(nodos: NavNode[], acumulado: { id: string; nombre: string; tipo: string }[] = [], nivel = 0) {
-  for (const nodo of nodos) {
+  for (const node of nodos) {
     const sangria = '\u00a0\u00a0'.repeat(nivel);
-    if (nodo.type === 'folder') {
-      acumulado.push({ id: nodo.id, nombre: `${sangria}${nodo.name}`, tipo: 'folder' });
-      aplanar(nodo.children, acumulado, nivel + 1);
+    if (node.type === 'folder') {
+      acumulado.push({ id: node.id, nombre: `${sangria}${node.name}`, tipo: 'folder' });
+      aplanar(node.children, acumulado, nivel + 1);
     } else {
-      acumulado.push({ id: nodo.id, nombre: `${sangria}${nodo.moduleRef.name}`, tipo: 'module' });
+      acumulado.push({ id: node.id, nombre: `${sangria}${node.moduleRef.name}`, tipo: 'module' });
     }
   }
   return acumulado;

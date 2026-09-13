@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 /** Cierre de sesion (4.7). */
-export function CerrarSesion({ usuario }: { usuario: string }) {
+export function CerrarSesion({ user }: { user: string }) {
   const router = useRouter();
   const [saliendo, setSaliendo] = useState(false);
 
@@ -24,7 +24,7 @@ export function CerrarSesion({ usuario }: { usuario: string }) {
       disabled={saliendo}
       onClick={() => void salir()}
     >
-      Salir · {usuario}
+      Salir · {user}
     </button>
   );
 }

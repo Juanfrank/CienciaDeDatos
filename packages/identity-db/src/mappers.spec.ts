@@ -13,7 +13,7 @@ import {
 } from './mappers';
 import type { NavNodeRow, ScopeExpansionRow } from './rows';
 
-const escala = buildScopeLookup(
+const scale = buildScopeLookup(
   [
     { id: 'sc-regional', expansionId: null },
     { id: 'sc-norte', expansionId: null },
@@ -52,7 +52,7 @@ const filas: NavNodeRow[] = [
 
 describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
   it('reconstruye la jerarquia completa a cualquier profundidad', () => {
-    const arbol = buildNavTree(filas, escala);
+    const arbol = buildNavTree(filas, scale);
     const raiz = arbol[0];
     if (raiz?.type !== 'folder') throw new Error('se esperaba carpeta');
     const regional = raiz.children[0];
@@ -62,7 +62,7 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
   });
 
   it('respeta orderIndex entre hermanos, no el orden de las filas', () => {
-    const arbol = buildNavTree(filas, escala);
+    const arbol = buildNavTree(filas, scale);
     const raiz = arbol[0];
     if (raiz?.type !== 'folder') throw new Error('se esperaba carpeta');
     const regional = raiz.children[0];
@@ -72,7 +72,7 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
   });
 
   it('adjunta el ambito de la carpeta desde el indice de ambitos', () => {
-    const arbol = buildNavTree(filas, escala);
+    const arbol = buildNavTree(filas, scale);
     const raiz = arbol[0];
     if (raiz?.type !== 'folder') throw new Error('se esperaba carpeta');
     const regional = raiz.children[0];
@@ -81,7 +81,7 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
   });
 
   it('mapea las hojas de modulo con su slug e icono', () => {
-    const arbol = buildNavTree(filas, escala);
+    const arbol = buildNavTree(filas, scale);
     const raiz = arbol[0];
     if (raiz?.type !== 'folder') throw new Error('se esperaba carpeta');
     const regional = raiz.children[0];
@@ -99,7 +99,7 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
     const conPapelera = filas.map((f) =>
       f.id === 'm-casos' ? { ...f, deletedAt: new Date('2026-09-01') } : f,
     );
-    const arbol = buildNavTree(conPapelera, escala);
+    const arbol = buildNavTree(conPapelera, scale);
     expect(JSON.stringify(arbol)).not.toContain('m-casos');
   });
 
@@ -108,18 +108,18 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
     const conPapelera = filas.map((f) =>
       f.id === 'norte' ? { ...f, deletedAt: new Date('2026-09-01') } : f,
     );
-    const arbol = buildNavTree(conPapelera, escala);
+    const arbol = buildNavTree(conPapelera, scale);
     expect(JSON.stringify(arbol)).not.toContain('m-casos');
   });
 
   it('el arbol reconstruido resuelve el mismo ambito que el dominio espera', () => {
-    const arbol = buildNavTree(filas, escala);
+    const arbol = buildNavTree(filas, scale);
     const equipo = toTeam(
       { id: 't1', name: 'Equipo', defaultScopeId: 'sc-materia', assignedPackageId: null },
       [{ teamId: 't1', nodeId: 'regional' }],
       [{ teamId: 't1', userId: 'u1', role: 'colaborador' }],
       [],
-      escala,
+      scale,
     );
 
     const r = resolveEffectiveScope({
@@ -129,12 +129,12 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
       generalTree: arbol,
     });
 
-    const porDimension = Object.fromEntries(
+    const dimension = Object.fromEntries(
       r.scope.restrictions.map((x) => [dimensionKey(x.dimension), x.allowedValues]),
     );
     // Regional permite Norte y Este; la carpeta Norte lo restringe a Norte.
-    expect(porDimension['DimTribunal.Distrito']).toEqual(['Distrito Norte']);
-    expect(porDimension['DimTribunal.Materia']).toEqual(['Penal']);
+    expect(dimension['DimTribunal.Distrito']).toEqual(['Distrito Norte']);
+    expect(dimension['DimTribunal.Materia']).toEqual(['Penal']);
   });
 });
 
@@ -204,7 +204,7 @@ describe('toGovernedUser', () => {
         { userId: 'u1', moduleId: '', scopeId: 'sc-materia' },
         { userId: 'u1', moduleId: 'casos', scopeId: 'sc-norte' },
       ],
-      escala,
+      scale,
     );
     expect(user.personalScope?.restrictions[0]?.dimension.field).toBe('Materia');
     expect(user.personalModuleScopeOverrides?.['casos']?.restrictions[0]?.allowedValues).toEqual([
@@ -213,9 +213,9 @@ describe('toGovernedUser', () => {
   });
 
   it('la combinacion por union solo aparece si esta explicitamente activada', () => {
-    expect(toGovernedUser({ id: 'u1', combineTeamsByUnion: false }, [], escala).combineTeamsByUnion)
+    expect(toGovernedUser({ id: 'u1', combineTeamsByUnion: false }, [], scale).combineTeamsByUnion)
       .toBeUndefined();
-    expect(toGovernedUser({ id: 'u1', combineTeamsByUnion: true }, [], escala).combineTeamsByUnion)
+    expect(toGovernedUser({ id: 'u1', combineTeamsByUnion: true }, [], scale).combineTeamsByUnion)
       .toBe(true);
   });
 });
@@ -266,9 +266,9 @@ describe('coherencia entre schema.prisma y las formas de fila', () => {
   });
 
   it('los campos de NavNodeRow existen en el modelo NavNode', () => {
-    const bloque = schema.split('model NavNode {')[1]?.split('}')[0] ?? '';
+    const block = schema.split('model NavNode {')[1]?.split('}')[0] ?? '';
     for (const campo of ['type', 'name', 'icon', 'parentId', 'orderIndex', 'moduleId', 'slug', 'deletedAt', 'scopeId']) {
-      expect(bloque).toContain(campo);
+      expect(block).toContain(campo);
     }
   });
 

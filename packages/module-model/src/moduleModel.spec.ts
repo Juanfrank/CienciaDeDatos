@@ -189,9 +189,9 @@ describe('validateModule (4.2): marcar roto, no fallar en silencio', () => {
 
   it('marca roto un objeto cuya version ya no existe, sin tumbar el editor', () => {
     const roto = modulo([item('a', 'barras')]);
-    const primera = roto.pages[0]?.items[0];
-    if (!primera) throw new Error('fixture inesperado');
-    primera.instance = { ...primera.instance, version: '9.9.9' };
+    const first = roto.pages[0]?.items[0];
+    if (!first) throw new Error('fixture inesperado');
+    first.instance = { ...first.instance, version: '9.9.9' };
 
     const d = validateModule({ module: roto, registry: registro, columnsByDataset: columnas });
     expect(d.items[0]?.broken).toBe(true);

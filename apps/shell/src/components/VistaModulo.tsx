@@ -48,7 +48,7 @@ export function VistaModulo({
       measures: o.instance.binding.measures,
     }));
 
-  const porId = new Map(objetos.map((o) => [o.itemId, o]));
+  const id = new Map(objetos.map((o) => [o.itemId, o]));
 
   return (
     <>
@@ -116,7 +116,7 @@ export function VistaModulo({
 
       <Rejilla items={items}>
         {(id) => {
-          const objeto = porId.get(id);
+          const objeto = id.get(id);
           if (!objeto) return null;
           return <ObjetoDeModulo objeto={objeto} onFiltrar={alternar} />;
         }}

@@ -57,9 +57,9 @@ export class BlobCacheStore implements ICacheStore {
 
   async set<T>(key: string, entry: CacheEntry<T>): Promise<void> {
     const blob = this.container.getBlockBlobClient(this.blobName(key));
-    const cuerpo = JSON.stringify(entry);
+    const body = JSON.stringify(entry);
     try {
-      await blob.upload(cuerpo, Buffer.byteLength(cuerpo), {
+      await blob.upload(body, Buffer.byteLength(body), {
         blobHTTPHeaders: { blobContentType: 'application/json' },
         metadata: {
           generatedAt: entry.generatedAt,

@@ -27,16 +27,16 @@ export function origenesDescartados(valor: string | undefined): string[] {
 }
 
 /** Politica de enmarcado para una ruta. */
-export function politicaDeEnmarcado(ruta: string, origenes: string[]): string {
-  if (!esRutaIncrustable(ruta)) return SIN_ENMARCADO;
+export function politicaDeEnmarcado(path: string, origenes: string[]): string {
+  if (!esRutaIncrustable(path)) return SIN_ENMARCADO;
   if (origenes.length === 0) return SIN_ENMARCADO;
   return `frame-ancestors ${origenes.join(' ')}`;
 }
 
 export const PREFIJO_INCRUSTACION = '/incrustar';
 
-export function esRutaIncrustable(ruta: string): boolean {
-  return ruta === PREFIJO_INCRUSTACION || ruta.startsWith(`${PREFIJO_INCRUSTACION}/`);
+export function esRutaIncrustable(path: string): boolean {
+  return path === PREFIJO_INCRUSTACION || path.startsWith(`${PREFIJO_INCRUSTACION}/`);
 }
 
 export interface CabecerasDeEnmarcado {
@@ -45,16 +45,16 @@ export interface CabecerasDeEnmarcado {
   'x-frame-options'?: string;
 }
 
-export function cabecerasDeEnmarcado(ruta: string, origenes: string[]): CabecerasDeEnmarcado {
-  const politica = politicaDeEnmarcado(ruta, origenes);
+export function cabecerasDeEnmarcado(path: string, origenes: string[]): CabecerasDeEnmarcado {
+  const politica = politicaDeEnmarcado(path, origenes);
   return politica === SIN_ENMARCADO
     ? { 'content-security-policy': politica, 'x-frame-options': 'DENY' }
     : { 'content-security-policy': politica };
 }
 
 /** Codigo que el portal anfitrion pega en su pagina. */
-export function codigoDeIncrustacion(urlBase: string, ruta: string, titulo: string): string {
-  const url = `${urlBase.replace(/\/$/, '')}${ruta}`;
+export function codigoDeIncrustacion(urlBase: string, path: string, titulo: string): string {
+  const url = `${urlBase.replace(/\/$/, '')}${path}`;
   return [
     `<iframe src="${url}"`,
     `        title="${titulo.replace(/"/g, '&quot;')}"`,

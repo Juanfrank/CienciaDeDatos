@@ -97,8 +97,8 @@ export default function Lienzo({
 
   // Creacion y destruccion: una sola vez mientras el tipo de renderizador no cambie.
   useEffect(() => {
-    const nodo = contenedor.current;
-    if (!nodo) return;
+    const node = contenedor.current;
+    if (!node) return;
 
     let cancelado = false;
     let observador: ResizeObserver | null = null;
@@ -111,7 +111,7 @@ export default function Lienzo({
 
       const montar = (renderer: 'canvas' | 'svg') => {
         grafico.current?.dispose();
-        const instancia = echarts.init(nodo, null, { renderer });
+        const instancia = echarts.init(node, null, { renderer });
         instancia.setOption(opcionesVigentes.current);
         instancia.on('click', (evento: { name?: string }) => {
           if (evento.name) seleccionar.current?.(evento.name);
@@ -123,7 +123,7 @@ export default function Lienzo({
       montado.current?.();
 
       observador = new ResizeObserver(() => grafico.current?.resize());
-      observador.observe(nodo);
+      observador.observe(node);
 
       // Al imprimir se rehace en SVG, y se vuelve al de pantalla al terminar.
       paraImprimir = window.matchMedia('print');

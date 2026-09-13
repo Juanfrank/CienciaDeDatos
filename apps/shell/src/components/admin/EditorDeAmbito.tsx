@@ -44,7 +44,7 @@ export function EditorDeAmbito({ destinos }: { destinos: DestinoDeAmbito[] }) {
     if (!destino) return;
     setMensaje(null);
 
-    const cuerpo = {
+    const body = {
       destino:
         destino.tipo === 'carpeta'
           ? { tipo: 'carpeta' as const, nodeId: destino.id }
@@ -56,7 +56,7 @@ export function EditorDeAmbito({ destinos }: { destinos: DestinoDeAmbito[] }) {
     const r = await fetch('/api/admin/ambitos', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(cuerpo),
+      body: JSON.stringify(body),
     });
     const respuesta = await r.json();
 
@@ -155,7 +155,7 @@ export function EditorDeAmbito({ destinos }: { destinos: DestinoDeAmbito[] }) {
             <strong>Esto AMPLIA el acceso</strong> en: <code>{ampliacion.join(', ')}</code>
           </p>
           <p className="texto-atenuado">
-            Una ampliacion exige justificacion y queda registrada aparte en el panel de auditoria.
+            Una ampliacion exige justificacion y queda registrada aparte en el panel de audit.
           </p>
           <label className="campo">
             <span>Justificacion</span>

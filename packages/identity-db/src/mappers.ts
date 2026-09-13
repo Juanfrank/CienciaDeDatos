@@ -71,12 +71,12 @@ export interface ScopeLookup {
 /** Reconstruye la organizacion general desde la lista de adyacencia. */
 export function buildNavTree(rows: NavNodeRow[], scopes: ScopeLookup): NavNode[] {
   const vigentes = rows.filter((r) => r.deletedAt === null);
-  const porId = new Map(vigentes.map((r) => [r.id, r]));
+  const id = new Map(vigentes.map((r) => [r.id, r]));
   const hijosDe = new Map<string | null, NavNodeRow[]>();
 
   for (const row of vigentes) {
     // Si el padre declarado no esta vigente, el nodo es huerfano: se descarta del arbol.
-    const padreVigente = row.parentId === null || porId.has(row.parentId);
+    const padreVigente = row.parentId === null || id.has(row.parentId);
     if (!padreVigente) continue;
     const clave = row.parentId;
     const lista = hijosDe.get(clave) ?? [];
@@ -87,7 +87,7 @@ export function buildNavTree(rows: NavNodeRow[], scopes: ScopeLookup): NavNode[]
   const ordenar = (lista: NavNodeRow[]): NavNodeRow[] =>
     [...lista].sort((a, b) => a.orderIndex - b.orderIndex || a.name.localeCompare(b.name));
 
-  const construir = (parentId: string | null): NavNode[] =>
+  const build = (parentId: string | null): NavNode[] =>
     ordenar(hijosDe.get(parentId) ?? []).map((row): NavNode => {
       if (row.type === 'module') {
         return {
@@ -107,12 +107,12 @@ export function buildNavTree(rows: NavNodeRow[], scopes: ScopeLookup): NavNode[]
         type: 'folder',
         name: row.name,
         ...(row.icon ? { icon: row.icon } : {}),
-        children: construir(row.id),
+        children: build(row.id),
         ...(scope ? { scope } : {}),
       };
     });
 
-  return construir(null);
+  return build(null);
 }
 
 /** Un rol desconocido en la base no se degrada a colaborador: se trata como el minimo (4.10.1). */
@@ -151,10 +151,10 @@ export function toTeam(
 export function toGovernedUser(row: UserRow, userScopes: UserScopeRow[], scopes: ScopeLookup): GovernedUser {
   const mios = userScopes.filter((s) => s.userId === row.id);
   const general = mios.find((s) => s.moduleId === '');
-  const porModulo: Record<string, AccessScope> = {};
+  const module: Record<string, AccessScope> = {};
   for (const s of mios.filter((x) => x.moduleId !== '')) {
     const scope = scopes.get(s.scopeId);
-    if (scope) porModulo[s.moduleId] = scope;
+    if (scope) module[s.moduleId] = scope;
   }
 
   const personalScope = general ? scopes.get(general.scopeId) : undefined;
@@ -162,7 +162,7 @@ export function toGovernedUser(row: UserRow, userScopes: UserScopeRow[], scopes:
   return {
     userId: row.id,
     ...(personalScope ? { personalScope } : {}),
-    ...(Object.keys(porModulo).length > 0 ? { personalModuleScopeOverrides: porModulo } : {}),
+    ...(Object.keys(module).length > 0 ? { personalModuleScopeOverrides: module } : {}),
     ...(row.combineTeamsByUnion ? { combineTeamsByUnion: true } : {}),
   };
 }
@@ -177,7 +177,7 @@ export function buildPackageTree(pkg: ModulePackageRow, rows: PackageNodeRow[]):
     hijosDe.set(row.parentId, lista);
   }
 
-  const construir = (parentId: string | null): NavNode[] =>
+  const build = (parentId: string | null): NavNode[] =>
     [...(hijosDe.get(parentId) ?? [])]
       .sort((a, b) => a.orderIndex - b.orderIndex || a.name.localeCompare(b.name))
       .map((row): NavNode =>
@@ -197,11 +197,11 @@ export function buildPackageTree(pkg: ModulePackageRow, rows: PackageNodeRow[]):
               type: 'folder',
               name: row.name,
               ...(row.icon ? { icon: row.icon } : {}),
-              children: construir(row.id),
+              children: build(row.id),
             },
       );
 
-  return { id: pkg.id, name: pkg.name, visualTree: construir(null) };
+  return { id: pkg.id, name: pkg.name, visualTree: build(null) };
 }
 
 /** Indice de ambitos, para que los mapeadores no hagan consultas por su cuenta. */

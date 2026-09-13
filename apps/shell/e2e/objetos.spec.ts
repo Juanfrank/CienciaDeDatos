@@ -66,18 +66,18 @@ test.describe('elementos (no leen datos)', () => {
       });
     };
 
-    const antes = await medir();
-    expect(antes).not.toBeNull();
-    expect(Math.abs((antes?.inicio[0] ?? 0) - (antes?.derechaDeA ?? 0))).toBeLessThan(2);
-    expect(Math.abs((antes?.fin[0] ?? 0) - (antes?.izquierdaDeB ?? 0))).toBeLessThan(2);
+    const before = await medir();
+    expect(before).not.toBeNull();
+    expect(Math.abs((before?.inicio[0] ?? 0) - (before?.derechaDeA ?? 0))).toBeLessThan(2);
+    expect(Math.abs((before?.fin[0] ?? 0) - (before?.izquierdaDeB ?? 0))).toBeLessThan(2);
 
     // Y sigue pegado tras redimensionar: es la propiedad que distingue un conector de una raya
     // dibujada encima, y la unica forma de comprobarla es cambiando la geometria de verdad.
     await page.setViewportSize({ width: 1100, height: 900 });
     await page.waitForTimeout(400);
-    const despues = await medir();
-    expect(Math.abs((despues?.inicio[0] ?? 0) - (despues?.derechaDeA ?? 0))).toBeLessThan(2);
-    expect(despues?.fin[0]).not.toBe(antes?.fin[0]);
+    const after = await medir();
+    expect(Math.abs((after?.inicio[0] ?? 0) - (after?.derechaDeA ?? 0))).toBeLessThan(2);
+    expect(after?.fin[0]).not.toBe(before?.fin[0]);
   });
 });
 
@@ -108,18 +108,18 @@ test.describe('contenedores', () => {
   test('cambiar de pestana no mueve el contenedor ni cambia lo que ocupa', async ({ page }) => {
     await page.goto('/m/composicion/contenedores');
     const contenedor = page.getByTestId('celda-cont-pestanas');
-    const antes = await contenedor.boundingBox();
+    const before = await contenedor.boundingBox();
 
     await page.getByTestId('pestana-p2').click();
     await expect(page.getByTestId('contenedor-con-pestanas').getByTestId('matriz')).toBeVisible();
 
-    const despues = await contenedor.boundingBox();
+    const after = await contenedor.boundingBox();
     // Es la regla que el contenido de la segunda pestana —una matriz de varias filas— romperia si
     // el alto lo mandara lo que hay dentro en vez de la rejilla.
-    expect(despues?.x).toBe(antes?.x);
-    expect(despues?.y).toBe(antes?.y);
-    expect(despues?.width).toBe(antes?.width);
-    expect(despues?.height).toBe(antes?.height);
+    expect(after?.x).toBe(before?.x);
+    expect(after?.y).toBe(before?.y);
+    expect(after?.width).toBe(before?.width);
+    expect(after?.height).toBe(before?.height);
   });
 
   test('cada pestana tiene su propia disposicion, no la misma con otros datos', async ({ page }) => {
@@ -262,13 +262,13 @@ test.describe('los dos carriles de pantalla', () => {
     await expect(page.getByTestId(`fila-${slug}`)).toBeVisible();
     await page.goto(`/editor/${slug}`);
 
-    const antes = await medir(page, '.panel-editor');
+    const before = await medir(page, '.panel-editor');
     await page.locator('.taller__obra').evaluate((el) => el.scrollBy(0, 400));
     await page.waitForTimeout(200);
-    const despues = await medir(page, '.panel-editor');
+    const after = await medir(page, '.panel-editor');
     // Es la razon de que el carril sea hermano de la columna que se desplaza y no viva dentro de
     // ella: con `sticky` dentro, bajar por el lienzo lo arrastraba unos pixeles antes de fijarlo.
-    expect(despues?.arriba).toBe(antes?.arriba);
-    expect(despues?.abajo).toBe(antes?.abajo);
+    expect(after?.arriba).toBe(before?.arriba);
+    expect(after?.abajo).toBe(before?.abajo);
   });
 });

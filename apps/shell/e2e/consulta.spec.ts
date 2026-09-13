@@ -14,7 +14,7 @@ interface RespuestaDeConsulta {
 
 const preguntar = async (page: Page, pregunta: string, modulo = 'casos-pendientes') => {
   const r = await page.request.post('/api/consulta', { data: { pregunta, modulo } });
-  return { estado: r.status(), cuerpo: (await r.json()) as Partial<RespuestaDeConsulta> };
+  return { estado: r.status(), body: (await r.json()) as Partial<RespuestaDeConsulta> };
 };
 
 /** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
@@ -25,18 +25,18 @@ test.beforeEach(async ({ page }) => {
 test.describe('entiende preguntas sobre lo que el modulo muestra', () => {
   test('reconoce una medida y devuelve la URL del modulo', async ({ page }) => {
     await entrarComo(page, 'u-ana');
-    const { cuerpo } = await preguntar(page, 'cuantos casos pendientes hay');
+    const { body } = await preguntar(page, 'cuantos casos pendientes hay');
 
-    expect(cuerpo.resoluble).toBe(true);
-    expect(cuerpo.url).toBe('/m/casos-pendientes');
+    expect(body.resoluble).toBe(true);
+    expect(body.url).toBe('/m/casos-pendientes');
   });
 
   test('reconoce un valor y lo convierte en filtro de la URL', async ({ page }) => {
     await entrarComo(page, 'u-ana');
-    const { cuerpo } = await preguntar(page, 'casos pendientes en Penal');
+    const { body } = await preguntar(page, 'casos pendientes en Penal');
 
-    expect(cuerpo.filtros).toEqual({ 'DimTribunal.Materia': ['Penal'] });
-    expect(cuerpo.url).toContain('DimTribunal.Materia=Penal');
+    expect(body.filtros).toEqual({ 'DimTribunal.Materia': ['Penal'] });
+    expect(body.url).toContain('DimTribunal.Materia=Penal');
   });
 
   test('la respuesta es una URL, no datos: el endpoint no devuelve ninguna cifra', async ({
@@ -45,9 +45,9 @@ test.describe('entiende preguntas sobre lo que el modulo muestra', () => {
     // Es lo que mantiene la funcion dentro del contrato: quien pregunta navega a una URL normal
     // y el camino de lectura de siempre le aplica su ambito.
     await entrarComo(page, 'u-ana');
-    const { cuerpo } = await preguntar(page, 'casos pendientes en Penal');
+    const { body } = await preguntar(page, 'casos pendientes en Penal');
 
-    expect(Object.keys(cuerpo).sort()).toEqual([
+    expect(Object.keys(body).sort()).toEqual([
       'entendido',
       'filtros',
       'noEntendido',
@@ -60,12 +60,12 @@ test.describe('entiende preguntas sobre lo que el modulo muestra', () => {
 test.describe('una pregunta no revela lo que hay fuera del ambito (4.11)', () => {
   test('un valor fuera de alcance no se reconoce ni se nombra en la respuesta', async ({ page }) => {
     await entrarComo(page, 'u-ana');
-    const { cuerpo } = await preguntar(page, 'casos pendientes en Distrito Este');
+    const { body } = await preguntar(page, 'casos pendientes en Distrito Este');
 
     // Ni se filtra por el, ni se confirma que exista.
-    expect(cuerpo.filtros?.['DimTribunal.Distrito']).toBeUndefined();
-    expect(cuerpo.entendido).not.toContain('Este');
-    expect(cuerpo.noEntendido).toContain('este');
+    expect(body.filtros?.['DimTribunal.Distrito']).toBeUndefined();
+    expect(body.entendido).not.toContain('Este');
+    expect(body.noEntendido).toContain('este');
   });
 
   test('la misma pregunta se entiende distinto segun quien la haga', async ({ page }) => {
@@ -77,8 +77,8 @@ test.describe('una pregunta no revela lo que hay fuera del ambito (4.11)', () =>
     await entrarComo(page, 'u-beto');
     const este = await preguntar(page, pregunta, 'casos-este');
 
-    expect(norte.cuerpo.filtros?.['DimTribunal.Distrito']).toBeUndefined();
-    expect(este.cuerpo.filtros?.['DimTribunal.Distrito']).toEqual(['Distrito Este']);
+    expect(norte.body.filtros?.['DimTribunal.Distrito']).toBeUndefined();
+    expect(este.body.filtros?.['DimTribunal.Distrito']).toEqual(['Distrito Este']);
   });
 
   test('preguntar sobre un modulo no concedido responde como si no existiera', async ({ page }) => {

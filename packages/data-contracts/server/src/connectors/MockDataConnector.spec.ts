@@ -74,8 +74,8 @@ describe('MockDataConnector', () => {
       ctx(),
     );
     expect(res.rows).toHaveLength(2);
-    const [primera, segunda] = res.rows as [unknown[], unknown[]];
-    expect(Number(primera[1])).toBeGreaterThanOrEqual(Number(segunda[1]));
+    const [first, segunda] = res.rows as [unknown[], unknown[]];
+    expect(Number(first[1])).toBeGreaterThanOrEqual(Number(segunda[1]));
   });
 
   it('rechaza dimensiones que no existen en el esquema activo, en vez de fallar en silencio', async () => {

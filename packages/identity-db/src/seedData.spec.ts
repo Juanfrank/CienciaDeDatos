@@ -26,7 +26,7 @@ const equipo = (id: string) => {
   return toTeam(row, seedGrantedNodes, seedMemberships, seedModuleScopes, lookup);
 };
 
-const usuario = (id: string) => {
+const user = (id: string) => {
   const row = seedUsers.find((u) => u.id === id);
   if (!row) throw new Error(`usuario ${id} ausente del seed`);
   return toGovernedUser(row, seedUserScopes, lookup);
@@ -51,13 +51,13 @@ describe('datos de arranque: dos equipos con ambitos distintos (8.1)', () => {
 
   it('los dos equipos resuelven ambitos DISTINTOS para el mismo modulo', () => {
     const norte = resolveEffectiveScope({
-      user: usuario('u-ana'),
+      user: user('u-ana'),
       activeTeam: equipo('equipo-norte'),
       moduleId: 'casos-este',
       generalTree: arbol,
     });
     const este = resolveEffectiveScope({
-      user: usuario('u-beto'),
+      user: user('u-beto'),
       activeTeam: equipo('equipo-este'),
       moduleId: 'casos-este',
       generalTree: arbol,
@@ -72,7 +72,7 @@ describe('datos de arranque: dos equipos con ambitos distintos (8.1)', () => {
 
   it('la herencia atraviesa los tres niveles: Regional restringe y Norte restringe mas', () => {
     const r = resolveEffectiveScope({
-      user: usuario('u-ana'),
+      user: user('u-ana'),
       activeTeam: equipo('equipo-norte'),
       moduleId: 'casos-pendientes',
       generalTree: arbol,

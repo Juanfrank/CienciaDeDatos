@@ -31,10 +31,10 @@ describe('catalogo de patrones de interaccion (4.4)', () => {
   });
 
   it('los ajustes incrementales usan replaceState y la navegacion pushState', () => {
-    const porId = new Map(PATRONES_DE_INTERACCION.map((p) => [p.id, p]));
-    expect(porId.get('segmentador')?.historyBehavior).toBe('replaceState');
-    expect(porId.get('filtrado-cruzado')?.historyBehavior).toBe('replaceState');
-    expect(porId.get('drill-through')?.historyBehavior).toBe('pushState');
+    const id = new Map(PATRONES_DE_INTERACCION.map((p) => [p.id, p]));
+    expect(id.get('segmentador')?.historyBehavior).toBe('replaceState');
+    expect(id.get('filtrado-cruzado')?.historyBehavior).toBe('replaceState');
+    expect(id.get('drill-through')?.historyBehavior).toBe('pushState');
   });
 });
 

@@ -79,13 +79,13 @@ describe('buildCacheKey — aislamiento por contexto de seguridad (6.8)', () => 
   });
 
   it('los filtros de la URL entran en la clave como cualquier otro filtro (4.11)', () => {
-    const sinFiltro = buildCacheKey({ datasetId: 'd1', securityBinding: 'none' });
-    const conFiltroDeUrl = buildCacheKey({
+    const withoutFilter = buildCacheKey({ datasetId: 'd1', securityBinding: 'none' });
+    const urlFilter = buildCacheKey({
       datasetId: 'd1',
       filters: { 'DimTribunal.Distrito': ['Norte'] },
       securityBinding: 'none',
     });
-    expect(sinFiltro).not.toBe(conFiltroDeUrl);
+    expect(withoutFilter).not.toBe(urlFilter);
   });
 
   it('toda clave empieza por el prefijo del dataset, para la invalidacion dirigida (6.5)', () => {

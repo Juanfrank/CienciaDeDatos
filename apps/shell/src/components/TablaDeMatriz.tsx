@@ -53,8 +53,8 @@ function CeldaDeCifra({
 }
 
 /** Identifica una columna ordenable: la ruta de la hoja mas el indice de medida. */
-const claveDeOrden = (ruta: readonly string[], medida: number): string =>
-  `${rutaClave(ruta)}#${medida}`;
+const claveDeOrden = (path: readonly string[], medida: number): string =>
+  `${rutaClave(path)}#${medida}`;
 
 export function TablaDeMatriz({
   vm,
@@ -86,10 +86,10 @@ export function TablaDeMatriz({
   const arbol = useMemo(() => {
     if (orden.por === null) return vm.filas;
     const [rutaColumna = '', medida = '0'] = orden.por.split('#');
-    const ruta = rutaColumna === '' ? [] : rutaColumna.split('||');
+    const path = rutaColumna === '' ? [] : rutaColumna.split('||');
     const i = Number(medida);
     return ordenarNodos(vm.filas, (a, b) =>
-      compararValores(vm.valor(a.ruta, ruta, i), vm.valor(b.ruta, ruta, i), orden.direccion),
+      compararValores(vm.valor(a.path, path, i), vm.valor(b.path, path, i), orden.direccion),
     );
   }, [vm, orden]);
 
@@ -135,7 +135,7 @@ export function TablaDeMatriz({
             </th>
             {columnas.map((columna) =>
               vm.medidas.map((medida, i) => {
-                const clave = claveDeOrden(columna.ruta, i);
+                const clave = claveDeOrden(columna.path, i);
                 const plegable = columna.hijos.length > 0;
                 return (
                   <th key={clave} scope="col" aria-sort={direccionAria(clave)}>
@@ -144,11 +144,11 @@ export function TablaDeMatriz({
                         <button
                           type="button"
                           className="tabla__plegar"
-                          aria-expanded={!plegadasColumna.has(rutaClave(columna.ruta))}
+                          aria-expanded={!plegadasColumna.has(rutaClave(columna.path))}
                           aria-label={`Desplegar ${columna.etiqueta}`}
-                          data-testid={`matriz-plegar-col-${rutaClave(columna.ruta)}`}
+                          data-testid={`matriz-plegar-col-${rutaClave(columna.path)}`}
                           onClick={() =>
-                            setPlegadasColumna((c) => alternar(c, rutaClave(columna.ruta)))
+                            setPlegadasColumna((c) => alternar(c, rutaClave(columna.path)))
                           }
                         >
                           <Icono nombre="chevron-abajo" tamano={12} />
@@ -157,7 +157,7 @@ export function TablaDeMatriz({
                       {encabezado(
                         clave,
                         conMedida(columna.etiqueta || 'Total', medida),
-                        `matriz-ordenar-${rutaClave(columna.ruta)}-${i}`,
+                        `matriz-ordenar-${rutaClave(columna.path)}-${i}`,
                       )}
                     </span>
                   </th>
@@ -172,16 +172,16 @@ export function TablaDeMatriz({
           </tr>
         </thead>
         <tbody>
-          {filas.map((nodo) => (
+          {filas.map((node) => (
             <FilaDeMatriz
-              key={rutaClave(nodo.ruta)}
-              nodo={nodo}
+              key={rutaClave(node.path)}
+              node={node}
               vm={vm}
               columnas={columnas}
-              plegada={plegadas.has(rutaClave(nodo.ruta))}
+              plegada={plegadas.has(rutaClave(node.path))}
               formatear={formatear}
               {...(condicional ? { condicional } : {})}
-              onPlegar={() => setPlegadas((p) => alternar(p, rutaClave(nodo.ruta)))}
+              onPlegar={() => setPlegadas((p) => alternar(p, rutaClave(node.path)))}
             />
           ))}
           <tr className="tabla__fila-total">
@@ -189,8 +189,8 @@ export function TablaDeMatriz({
             {columnas.map((columna) =>
               vm.medidas.map((medida, i) => (
                 <CeldaDeCifra
-                  key={`${rutaClave(columna.ruta)}-${medida}`}
-                  valor={vm.valor([], columna.ruta, i)}
+                  key={`${rutaClave(columna.path)}-${medida}`}
+                  valor={vm.valor([], columna.path, i)}
                   medida={medida}
                   formatear={formatear[i] ?? String}
                   {...(condicional ? { condicional } : {})}
@@ -216,7 +216,7 @@ export function TablaDeMatriz({
 }
 
 function FilaDeMatriz({
-  nodo,
+  node,
   vm,
   columnas,
   plegada,
@@ -224,7 +224,7 @@ function FilaDeMatriz({
   condicional,
   onPlegar,
 }: {
-  nodo: NodoDeMatriz;
+  node: NodoDeMatriz;
   vm: MatrizJerarquica;
   columnas: NodoDeMatriz[];
   plegada: boolean;
@@ -232,22 +232,22 @@ function FilaDeMatriz({
   condicional?: FormatoCondicional;
   onPlegar: () => void;
 }) {
-  const tieneHijos = nodo.hijos.length > 0;
+  const tieneHijos = node.hijos.length > 0;
   return (
-    <tr data-nivel={nodo.nivel} data-testid={`matriz-fila-${rutaClave(nodo.ruta)}`}>
+    <tr data-nivel={node.nivel} data-testid={`matriz-fila-${rutaClave(node.path)}`}>
       {/*
         La sangria va en el `padding` y no con espacios: un lector de pantalla no los pronuncia, y
         el nivel viaja ademas en `data-nivel` y en `aria-expanded`, que es donde si se anuncia.
       */}
-      <th scope="row" style={{ paddingLeft: `${8 + nodo.nivel * 16}px` }}>
+      <th scope="row" style={{ paddingLeft: `${8 + node.nivel * 16}px` }}>
         <span className="tabla__encabezado">
           {tieneHijos ? (
             <button
               type="button"
               className="tabla__plegar"
               aria-expanded={!plegada}
-              aria-label={`${plegada ? 'Desplegar' : 'Plegar'} ${nodo.etiqueta}`}
-              data-testid={`matriz-plegar-${rutaClave(nodo.ruta)}`}
+              aria-label={`${plegada ? 'Desplegar' : 'Plegar'} ${node.etiqueta}`}
+              data-testid={`matriz-plegar-${rutaClave(node.path)}`}
               onClick={onPlegar}
             >
               <Icono nombre="chevron-abajo" tamano={12} />
@@ -255,14 +255,14 @@ function FilaDeMatriz({
           ) : (
             <span className="tabla__plegar tabla__plegar--vacio" aria-hidden="true" />
           )}
-          {nodo.etiqueta}
+          {node.etiqueta}
         </span>
       </th>
       {columnas.map((columna) =>
         vm.medidas.map((medida, i) => (
           <CeldaDeCifra
-            key={`${rutaClave(columna.ruta)}-${medida}`}
-            valor={vm.valor(nodo.ruta, columna.ruta, i)}
+            key={`${rutaClave(columna.path)}-${medida}`}
+            valor={vm.valor(node.path, columna.path, i)}
             medida={medida}
             formatear={formatear[i] ?? String}
             {...(condicional ? { condicional } : {})}
@@ -272,7 +272,7 @@ function FilaDeMatriz({
       {vm.medidas.map((medida, i) => (
         <CeldaDeCifra
           key={`t-${medida}`}
-          valor={vm.valor(nodo.ruta, [], i)}
+          valor={vm.valor(node.path, [], i)}
           medida={medida}
           formatear={formatear[i] ?? String}
           {...(condicional ? { condicional } : {})}

@@ -11,8 +11,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No autorizado.' }, { status: 401 });
   }
 
-  const cuerpo = (await request.json()) as { datasetIds?: string[] };
-  const datasetIds = cuerpo.datasetIds ?? [];
+  const body = (await request.json()) as { datasetIds?: string[] };
+  const datasetIds = body.datasetIds ?? [];
 
   if (datasetIds.length === 0) {
     return NextResponse.json({ error: 'Se requiere datasetIds.' }, { status: 400 });

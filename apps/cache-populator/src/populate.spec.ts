@@ -16,7 +16,7 @@ import { POPULATOR_HEARTBEAT_KEY, type GovernedQueryLog, buildHealthReport } fro
 import { populate, refreshSchema, repopulateTargeted } from './populate';
 import { runScheduledCycle } from './runCycle';
 
-const { arbolGeneral, equipoEste, equipoNorte, usuarioAna, usuarioBeto } = gobiernoFixtures;
+const { generalTree, equipoEste, equipoNorte, usuarioAna, usuarioBeto } = gobiernoFixtures;
 
 const registry: DatasetRegistry = {
   datasets: [
@@ -226,13 +226,13 @@ describe('runScheduledCycle', () => {
   it('no refresca el esquema si no ha pasado su intervalo', async () => {
     const cacheStore = new InMemoryCacheStore({ ttlMs: 60_000 });
     await runScheduledCycle({ connector: new MockDataConnector(), cacheStore, registry, connectorKind: 'mock' });
-    const segundo = await runScheduledCycle({
+    const second = await runScheduledCycle({
       connector: new MockDataConnector(),
       cacheStore,
       registry,
       connectorKind: 'mock',
     });
-    expect(segundo.schemaRefreshed).toBe(false);
+    expect(second.schemaRefreshed).toBe(false);
   });
 });
 
@@ -255,7 +255,7 @@ describe('de punta a punta: poblar, leer y filtrar por ambito', () => {
       l2,
       registry,
     });
-    const { scope } = resolveEffectiveScope({ user, activeTeam: team, moduleId, generalTree: arbolGeneral });
+    const { scope } = resolveEffectiveScope({ user, activeTeam: team, moduleId, generalTree: generalTree });
     return reader.read({ datasetId: 'casos', scope });
   };
 

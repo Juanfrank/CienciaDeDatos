@@ -21,14 +21,14 @@ const MENSAJES: Record<string, string> = {
 };
 
 export async function POST(request: Request) {
-  let cuerpo: Record<string, unknown>;
+  let body: Record<string, unknown>;
   try {
-    cuerpo = (await request.json()) as Record<string, unknown>;
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
 
-  const proveedor = typeof cuerpo['proveedor'] === 'string' ? cuerpo['proveedor'] : 'local';
+  const proveedor = typeof body['proveedor'] === 'string' ? body['proveedor'] : 'local';
 
   if (proveedor === 'azure-ad') {
     // Declarado y no disponible, como los conectores de datos pendientes: se dice, no se simula
@@ -43,9 +43,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const correo = typeof cuerpo['correo'] === 'string' ? cuerpo['correo'].trim() : '';
-  const clave = typeof cuerpo['clave'] === 'string' ? cuerpo['clave'] : '';
-  const codigo = typeof cuerpo['codigo'] === 'string' ? cuerpo['codigo'].trim() : undefined;
+  const correo = typeof body['correo'] === 'string' ? body['correo'].trim() : '';
+  const clave = typeof body['clave'] === 'string' ? body['clave'] : '';
+  const codigo = typeof body['codigo'] === 'string' ? body['codigo'].trim() : undefined;
 
   if (!correo || !clave) {
     return NextResponse.json({ error: 'Faltan el correo o la contrasena.' }, { status: 400 });

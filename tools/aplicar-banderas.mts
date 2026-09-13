@@ -35,9 +35,9 @@ for (const modulo of informe.modulos) {
 
   const actual = await fetch(url, { headers: { Authorization: cabeceras.Authorization } });
   if (actual.ok) {
-    const cuerpo = (await actual.json()) as { value?: string };
+    const body = (await actual.json()) as { value?: string };
     try {
-      const vigente = JSON.parse(cuerpo.value ?? '{}') as { enabled?: boolean };
+      const vigente = JSON.parse(body.value ?? '{}') as { enabled?: boolean };
       // Sin cambio no se escribe: cada escritura es una revision en el historial de App
       // Configuration, y un despliegue que reescribe diez banderas identicas convierte ese
       // historial —que es donde se mira quien apago que y cuando— en ruido.

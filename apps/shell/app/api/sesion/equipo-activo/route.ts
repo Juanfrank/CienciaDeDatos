@@ -10,17 +10,17 @@ export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();
 
-  const cuerpo = (await request.json()) as { teamId?: string };
-  if (!cuerpo.teamId) {
+  const body = (await request.json()) as { teamId?: string };
+  if (!body.teamId) {
     return NextResponse.json({ error: 'Se requiere teamId.' }, { status: 400 });
   }
 
   const permitidos = (await teamsOf(sesion.userId)).map((t) => t.id);
-  if (!permitidos.includes(cuerpo.teamId)) {
+  if (!permitidos.includes(body.teamId)) {
     return NextResponse.json({ error: 'No pertenece a ese equipo.' }, { status: 403 });
   }
 
-  const actualizada = await cambiarEquipoActivo(sesion.sessionId, cuerpo.teamId);
+  const actualizada = await cambiarEquipoActivo(sesion.sessionId, body.teamId);
   if (!actualizada) return sinSesion();
 
   // La cookie no cambia: el identificador de sesion es el mismo y el equipo activo vive del lado

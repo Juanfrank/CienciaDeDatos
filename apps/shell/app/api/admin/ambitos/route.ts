@@ -13,10 +13,10 @@ interface CuerpoAmbito {
 
 /** Guarda un ambito de acceso (4.10.3). */
 export async function POST(request: Request) {
-  const cuerpo = (await request.json()) as CuerpoAmbito;
+  const body = (await request.json()) as CuerpoAmbito;
 
   return conAdmin(async (actor) => {
-    const desconocidas = await validarDimensiones(cuerpo.scope);
+    const desconocidas = await validarDimensiones(body.scope);
     if (desconocidas.length > 0) {
       throw new AdminError(
         `Dimensiones que no existen en el esquema activo: ${desconocidas.join(', ')}. ` +
@@ -29,9 +29,9 @@ export async function POST(request: Request) {
     return {
       scope: await guardarAmbito({
         actor,
-        destino: cuerpo.destino,
-        scope: cuerpo.scope,
-        ...(cuerpo.justificacion ? { justificacion: cuerpo.justificacion } : {}),
+        destino: body.destino,
+        scope: body.scope,
+        ...(body.justificacion ? { justificacion: body.justificacion } : {}),
       }),
     };
   });

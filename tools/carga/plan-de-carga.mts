@@ -2,21 +2,21 @@
 
 interface Escenario {
   nombre: string;
-  ruta: string;
+  path: string;
   /** Peso relativo: cuantas veces aparece por vuelta. */
   peso: number;
 }
 
 /** Perfil de uso. */
 export const ESCENARIOS: Escenario[] = [
-  { nombre: 'modulo completo', ruta: '/api/modulos/casos-pendientes', peso: 4 },
+  { nombre: 'modulo completo', path: '/api/modulos/casos-pendientes', peso: 4 },
   {
     nombre: 'modulo filtrado',
-    ruta: '/api/modulos/casos-pendientes?DimTribunal.Materia=Penal',
+    path: '/api/modulos/casos-pendientes?DimTribunal.Materia=Penal',
     peso: 6,
   },
-  { nombre: 'navegacion', ruta: '/api/navegacion', peso: 2 },
-  { nombre: 'salud', ruta: '/health', peso: 1 },
+  { nombre: 'navegacion', path: '/api/navegacion', peso: 2 },
+  { nombre: 'salud', path: '/health', peso: 1 },
 ];
 
 interface Medicion {
@@ -32,13 +32,13 @@ const percentil = (valores: number[], p: number): number => {
 };
 
 async function trabajador(base: string, hasta: number, cookie: string, medicion: Medicion) {
-  const rutas = ESCENARIOS.flatMap((e) => Array.from({ length: e.peso }, () => e.ruta));
+  const rutas = ESCENARIOS.flatMap((e) => Array.from({ length: e.peso }, () => e.path));
 
   while (Date.now() < hasta) {
-    const ruta = rutas[Math.floor(Math.random() * rutas.length)] ?? rutas[0] ?? '/health';
+    const path = rutas[Math.floor(Math.random() * rutas.length)] ?? rutas[0] ?? '/health';
     const inicio = performance.now();
     try {
-      const r = await fetch(`${base}${ruta}`, { headers: { cookie } });
+      const r = await fetch(`${base}${path}`, { headers: { cookie } });
       medicion.latenciasMs.push(performance.now() - inicio);
       if (r.ok) medicion.ok += 1;
       else medicion.fallos += 1;
@@ -69,7 +69,7 @@ async function principal(): Promise<void> {
   });
   const cookie = (alta.headers.get('set-cookie') ?? '').split(';')[0] ?? '';
 
-  const antes = await (await fetch(`${base}/health`, { headers: { cookie } })).json();
+  const before = await (await fetch(`${base}/health`, { headers: { cookie } })).json();
 
   const medicion: Medicion = { ok: 0, fallos: 0, latenciasMs: [] };
   const hasta = Date.now() + segundos * 1000;
@@ -77,7 +77,7 @@ async function principal(): Promise<void> {
     Array.from({ length: concurrencia }, () => trabajador(base, hasta, cookie, medicion)),
   );
 
-  const despues = await (await fetch(`${base}/health`, { headers: { cookie } })).json();
+  const after = await (await fetch(`${base}/health`, { headers: { cookie } })).json();
   const total = medicion.ok + medicion.fallos;
 
   console.log('');
@@ -90,11 +90,11 @@ async function principal(): Promise<void> {
   console.log(`Latencia p99:    ${percentil(medicion.latenciasMs, 99).toFixed(0)} ms`);
   console.log('');
   console.log('Cache durante la prueba (8.3):');
-  console.log(`  lecturas:      ${despues.cache.total - antes.cache.total}`);
-  console.log(`  desde L1:      ${despues.cache.desdeL1 - antes.cache.desdeL1}`);
-  console.log(`  desde L2:      ${despues.cache.desdeL2 - antes.cache.desdeL2}`);
-  console.log(`  sin poblar:    ${despues.cache.generandose - antes.cache.generandose}`);
-  console.log(`  degradadas:    ${despues.cache.degradados - antes.cache.degradados}`);
+  console.log(`  lecturas:      ${after.cache.total - before.cache.total}`);
+  console.log(`  desde L1:      ${after.cache.desdeL1 - before.cache.desdeL1}`);
+  console.log(`  desde L2:      ${after.cache.desdeL2 - before.cache.desdeL2}`);
+  console.log(`  sin poblar:    ${after.cache.generandose - before.cache.generandose}`);
+  console.log(`  degradadas:    ${after.cache.degradados - before.cache.degradados}`);
   console.log('');
   console.log('Recordatorio: estos numeros NO fijan umbrales de autoscale. Ver');
   console.log('docs/operacion/prueba-de-carga.md.');

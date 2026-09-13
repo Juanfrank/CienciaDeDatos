@@ -12,8 +12,8 @@ import { InMemoryAuditLog, InMemoryLocalIdentityStore } from './stores';
 /** Restablecimiento de contraseña — seccion 4.7.2. */
 
 const PIMIENTA = 'pimienta-de-prueba';
-const CLAVE_ANTERIOR = 'Anterior-2026!';
-const CLAVE_NUEVA = 'Nueva-Clave-2026!';
+const PREVIOUS_KEY = 'Anterior-2026!';
+const NEW_KEY = 'Nueva-Clave-2026!';
 
 class AlmacenDeRestablecimientos implements IResetStore {
   readonly registros = new Map<string, ResetRecord>();
@@ -31,7 +31,7 @@ class AlmacenDeRestablecimientos implements IResetStore {
 
 let almacen: AlmacenDeRestablecimientos;
 let identidades: InMemoryLocalIdentityStore;
-let auditoria: InMemoryAuditLog;
+let audit: InMemoryAuditLog;
 let revocadas: string[];
 let ahora: number;
 let servicio: PasswordResetService;
@@ -39,14 +39,14 @@ let servicio: PasswordResetService;
 beforeEach(async () => {
   almacen = new AlmacenDeRestablecimientos();
   identidades = new InMemoryLocalIdentityStore();
-  auditoria = new InMemoryAuditLog();
+  audit = new InMemoryAuditLog();
   revocadas = [];
   ahora = Date.parse('2026-09-11T10:00:00.000Z');
 
   await identidades.save({
     userId: 'u-externo',
     email: 'externo@ejemplo.do',
-    passwordHash: await hash(`${CLAVE_ANTERIOR}${PIMIENTA}`, {
+    passwordHash: await hash(`${PREVIOUS_KEY}${PIMIENTA}`, {
       algorithm: Algorithm.Argon2id,
       memoryCost: 19456,
       timeCost: 2,
@@ -62,7 +62,7 @@ beforeEach(async () => {
   servicio = new PasswordResetService({
     store: almacen,
     identities: identidades,
-    auditLog: auditoria,
+    auditLog: audit,
     pepper: PIMIENTA,
     now: () => ahora,
     revokeSessions: async (userId) => {
@@ -89,18 +89,18 @@ describe('emision del token', () => {
 
   it('emitir uno nuevo invalida el anterior', async () => {
     const primero = await servicio.issue('externo@ejemplo.do', 'u-admin');
-    const segundo = await servicio.issue('externo@ejemplo.do', 'u-admin');
-    if (!primero || !segundo) throw new Error('deberia emitir');
+    const second = await servicio.issue('externo@ejemplo.do', 'u-admin');
+    if (!primero || !second) throw new Error('deberia emitir');
 
     await expect(
-      servicio.redeem({ resetId: primero.resetId, token: primero.token, newPassword: CLAVE_NUEVA }),
+      servicio.redeem({ resetId: primero.resetId, token: primero.token, newPassword: NEW_KEY }),
     ).rejects.toMatchObject({ reason: 'token-ya-usado' });
 
     // El segundo si sirve: invalidar el anterior no deja la cuenta sin via de recuperacion.
     await servicio.redeem({
-      resetId: segundo.resetId,
-      token: segundo.token,
-      newPassword: CLAVE_NUEVA,
+      resetId: second.resetId,
+      token: second.token,
+      newPassword: NEW_KEY,
     });
   });
 
@@ -119,7 +119,7 @@ describe('canje del token', () => {
     await servicio.redeem({
       resetId: emitido.resetId,
       token: emitido.token,
-      newPassword: CLAVE_NUEVA,
+      newPassword: NEW_KEY,
     });
 
     await expect(
@@ -138,7 +138,7 @@ describe('canje del token', () => {
     ahora += 16 * 60_000;
 
     await expect(
-      servicio.redeem({ resetId: emitido.resetId, token: emitido.token, newPassword: CLAVE_NUEVA }),
+      servicio.redeem({ resetId: emitido.resetId, token: emitido.token, newPassword: NEW_KEY }),
     ).rejects.toMatchObject({ reason: 'token-caducado' });
   });
 
@@ -150,7 +150,7 @@ describe('canje del token', () => {
       servicio.redeem({
         resetId: emitido.resetId,
         token: 'inventado',
-        newPassword: CLAVE_NUEVA,
+        newPassword: NEW_KEY,
       }),
     ).rejects.toMatchObject({ reason: 'token-invalido' });
   });
@@ -172,7 +172,7 @@ describe('canje del token', () => {
       servicio.redeem({
         resetId: emitido.resetId,
         token: emitido.token,
-        newPassword: CLAVE_ANTERIOR,
+        newPassword: PREVIOUS_KEY,
       }),
     ).rejects.toMatchObject({ reason: 'reutiliza-contrasena' });
   });
@@ -184,7 +184,7 @@ describe('canje del token', () => {
     await servicio.redeem({
       resetId: emitido.resetId,
       token: emitido.token,
-      newPassword: CLAVE_NUEVA,
+      newPassword: NEW_KEY,
     });
 
     const cuenta = await identidades.findByEmail('externo@ejemplo.do');
@@ -199,7 +199,7 @@ describe('canje del token', () => {
     await servicio.redeem({
       resetId: emitido.resetId,
       token: emitido.token,
-      newPassword: CLAVE_NUEVA,
+      newPassword: NEW_KEY,
     });
 
     // Si alguien entro con la contraseña robada, cambiarla sin revocar no lo echa de dentro.
@@ -209,18 +209,18 @@ describe('canje del token', () => {
   it('la contraseña nueva se guarda hasheada y la anterior pasa al historial', async () => {
     const emitido = await servicio.issue('externo@ejemplo.do', 'u-admin');
     if (!emitido) throw new Error('deberia emitir');
-    const antes = await identidades.findByEmail('externo@ejemplo.do');
+    const before = await identidades.findByEmail('externo@ejemplo.do');
 
     await servicio.redeem({
       resetId: emitido.resetId,
       token: emitido.token,
-      newPassword: CLAVE_NUEVA,
+      newPassword: NEW_KEY,
     });
 
-    const despues = await identidades.findByEmail('externo@ejemplo.do');
-    expect(despues?.passwordHash).not.toBe(antes?.passwordHash);
-    expect(JSON.stringify(despues)).not.toContain(CLAVE_NUEVA);
-    expect(despues?.passwordHistory).toContain(antes?.passwordHash);
+    const after = await identidades.findByEmail('externo@ejemplo.do');
+    expect(after?.passwordHash).not.toBe(before?.passwordHash);
+    expect(JSON.stringify(after)).not.toContain(NEW_KEY);
+    expect(after?.passwordHistory).toContain(before?.passwordHash);
   });
 });
 
@@ -230,17 +230,17 @@ describe('auditoria (seccion 7)', () => {
     if (!emitido) throw new Error('deberia emitir');
 
     await servicio
-      .redeem({ resetId: emitido.resetId, token: 'mal', newPassword: CLAVE_NUEVA })
+      .redeem({ resetId: emitido.resetId, token: 'mal', newPassword: NEW_KEY })
       .catch(() => undefined);
     await servicio.redeem({
       resetId: emitido.resetId,
       token: emitido.token,
-      newPassword: CLAVE_NUEVA,
+      newPassword: NEW_KEY,
       sourceIp: '10.0.0.7',
     });
 
-    expect(auditoria.events.map((e) => e.outcome)).toEqual(['fallo', 'exito']);
-    expect(auditoria.events[1]).toMatchObject({
+    expect(audit.events.map((e) => e.outcome)).toEqual(['fallo', 'exito']);
+    expect(audit.events[1]).toMatchObject({
       reason: 'restablecimiento',
       sourceIp: '10.0.0.7',
       userId: 'u-externo',
@@ -261,7 +261,7 @@ describe('el canal de correo se declara y no se finge', () => {
 describe('PasswordResetError lleva el motivo, no solo un mensaje', () => {
   it('para que quien llama pueda decidir el codigo HTTP sin leer el texto', async () => {
     const fallo = await servicio
-      .redeem({ resetId: 'no-existe', token: 'x', newPassword: CLAVE_NUEVA })
+      .redeem({ resetId: 'no-existe', token: 'x', newPassword: NEW_KEY })
       .catch((e: unknown) => e);
     expect(fallo).toBeInstanceOf(PasswordResetError);
     expect((fallo as PasswordResetError).reason).toBe('token-invalido');

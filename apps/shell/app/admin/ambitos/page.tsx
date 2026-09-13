@@ -6,15 +6,15 @@ export const dynamic = 'force-dynamic';
 
 /** Carpetas del arbol, que son las que pueden llevar ambito propio (4.10.6). */
 function carpetas(nodos: NavNode[], acumulado: DestinoDeAmbito[] = []): DestinoDeAmbito[] {
-  for (const nodo of nodos) {
-    if (nodo.type !== 'folder') continue;
+  for (const node of nodos) {
+    if (node.type !== 'folder') continue;
     acumulado.push({
       tipo: 'carpeta',
-      id: nodo.id,
-      nombre: nodo.name,
-      scope: nodo.scope ?? { restrictions: [] },
+      id: node.id,
+      nombre: node.name,
+      scope: node.scope ?? { restrictions: [] },
     });
-    carpetas(nodo.children, acumulado);
+    carpetas(node.children, acumulado);
   }
   return acumulado;
 }

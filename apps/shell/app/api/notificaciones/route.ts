@@ -18,15 +18,15 @@ export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();
 
-  let cuerpo: { ids?: unknown };
+  let body: { ids?: unknown };
   try {
-    cuerpo = (await request.json()) as { ids?: unknown };
+    body = (await request.json()) as { ids?: unknown };
   } catch {
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
 
-  const ids = Array.isArray(cuerpo.ids)
-    ? cuerpo.ids.filter((x): x is string => typeof x === 'string')
+  const ids = Array.isArray(body.ids)
+    ? body.ids.filter((x): x is string => typeof x === 'string')
     : [];
 
   await notificaciones.markRead(sesion.userId, ids);

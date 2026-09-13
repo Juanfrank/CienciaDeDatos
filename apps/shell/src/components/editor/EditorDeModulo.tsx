@@ -70,20 +70,20 @@ export function EditorDeModulo({
           /*
            * El cuerpo de un error puede no ser JSON.
            */
-          const cuerpo = await r.json().catch(() => ({}) as { error?: string });
-          setError(cuerpo.error ?? `No se pudo guardar (${r.status}).`);
+          const body = await r.json().catch(() => ({}) as { error?: string });
+          setError(body.error ?? `No se pudo guardar (${r.status}).`);
           return;
         }
-        const cuerpo = (await r.json()) as {
+        const body = (await r.json()) as {
           modulo: ModuleDefinition;
           diagnosticos: ModuleDiagnostics;
           bloqueos: PublishBlocker[];
           objetos: ObjetoSerializado[];
         };
-        setModulo(cuerpo.modulo);
-        setDiag(cuerpo.diagnosticos);
-        setBloq(cuerpo.bloqueos);
-        setObjetos(cuerpo.objetos);
+        setModulo(body.modulo);
+        setDiag(body.diagnosticos);
+        setBloq(body.bloqueos);
+        setObjetos(body.objetos);
         router.refresh();
       } finally {
         setGuardando(false);
@@ -179,7 +179,7 @@ export function EditorDeModulo({
       {!editable ? (
         <p className="aviso" data-testid="editor-solo-lectura">
           Este modulo no se puede editar aqui: solo se editan los borradores propios. Un modulo
-          publicado se retira antes de cambiarlo, para que el cambio pase por aprobacion.
+          publicado se retira before de cambiarlo, para que el cambio pase por aprobacion.
         </p>
       ) : null}
 

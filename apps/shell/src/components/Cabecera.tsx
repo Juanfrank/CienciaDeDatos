@@ -56,7 +56,7 @@ export async function Cabecera({ sesion }: { sesion: SesionShell }) {
             Administracion
           </Link>
         ) : null}
-        <CerrarSesion usuario={sesion.userId} />
+        <CerrarSesion user={sesion.userId} />
       </div>
     </header>
   );

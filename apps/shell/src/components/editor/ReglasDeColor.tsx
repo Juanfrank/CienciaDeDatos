@@ -180,7 +180,7 @@ export function ReglasDeColor({
         </button>
       ) : (
         <p className="campo__pista">
-          Cinco es el maximo: mas reglas dejan de ser excepciones y pasan a ser una escala, que es
+          Cinco es el maximo: mas reglas dejan de ser excepciones y pasan a ser una scale, que es
           otra herramienta.
         </p>
       )}

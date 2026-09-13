@@ -10,20 +10,20 @@ export function ArbolNavegacion({ nodos, nivel = 0 }: { nodos: NavNode[]; nivel?
 
   return (
     <ul className="arbol" data-nivel={nivel}>
-      {nodos.map((nodo) =>
-        nodo.type === 'folder' ? (
-          <li key={nodo.id} className="arbol__carpeta">
-            <span className="arbol__nombre-carpeta">{nodo.name}</span>
-            <ArbolNavegacion nodos={nodo.children} nivel={nivel + 1} />
+      {nodos.map((node) =>
+        node.type === 'folder' ? (
+          <li key={node.id} className="arbol__carpeta">
+            <span className="arbol__nombre-carpeta">{node.name}</span>
+            <ArbolNavegacion nodos={node.children} nivel={nivel + 1} />
           </li>
         ) : (
-          <li key={nodo.id}>
+          <li key={node.id}>
             <Link
-              href={`/m/${nodo.moduleRef.slug}`}
-              className={`arbol__enlace ${pathname.startsWith(`/m/${nodo.moduleRef.slug}`) ? 'es-activo' : ''}`}
-              data-testid={`nav-${nodo.moduleRef.slug}`}
+              href={`/m/${node.moduleRef.slug}`}
+              className={`arbol__enlace ${pathname.startsWith(`/m/${node.moduleRef.slug}`) ? 'es-activo' : ''}`}
+              data-testid={`nav-${node.moduleRef.slug}`}
             >
-              {nodo.moduleRef.name}
+              {node.moduleRef.name}
             </Link>
           </li>
         ),

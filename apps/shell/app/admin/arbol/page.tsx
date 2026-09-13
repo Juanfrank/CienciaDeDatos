@@ -10,7 +10,7 @@ export default async function PaginaArbol() {
       <p className="texto-atenuado">
         Es la estructura canonica y la unica fuente de verdad sobre donde vive cada modulo y que
         ambito hereda. Mover algo aqui cambia el acceso de lo que se mueve, asi que el editor
-        avisa antes de confirmarlo.
+        avisa before de confirmarlo.
       </p>
       <EditorDeArbol inicial={await getManagedTree()} />
     </section>

@@ -11,7 +11,7 @@ export default async function PaginaCuentas() {
       <p className="texto-atenuado">
         Son la EXCEPCION, no la via por defecto: cualquier persona con identidad institucional en
         Azure AD debe entrar por ahi, porque asi hereda el SSO, el MFA y el acceso condicional que
-        la institucion ya gestiona. Estas cuentas no heredan nada de eso, y por eso llevan segundo
+        la institucion ya gestiona. Estas cuentas no heredan nada de eso, y por eso llevan second
         factor obligatorio y se auditan aparte.
       </p>
 

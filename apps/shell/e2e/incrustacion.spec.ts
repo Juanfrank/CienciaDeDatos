@@ -13,8 +13,8 @@ test.describe('politica de enmarcado', () => {
   test('ninguna pantalla normal se puede enmarcar', async ({ page }) => {
     // Denegar por defecto cierra el clickjacking en toda la aplicacion —incluido el panel de
     // administracion— sin que haya que acordarse de ninguna pantalla.
-    for (const ruta of ['/m/casos-pendientes', '/admin', '/avisos']) {
-      const respuesta = await page.request.get(ruta);
+    for (const path of ['/m/casos-pendientes', '/admin', '/avisos']) {
+      const respuesta = await page.request.get(path);
       expect(respuesta.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
       expect(respuesta.headers()['x-frame-options']).toBe('DENY');
     }

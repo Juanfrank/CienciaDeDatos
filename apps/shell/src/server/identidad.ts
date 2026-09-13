@@ -116,20 +116,20 @@ export const listarAuditoriaDeLogin = (): Promise<LoginAuditEvent[]> =>
 /** Directorio institucional. */
 class DirectorioDeGobierno implements IPrincipalDirectory {
   async lookup(userPrincipalName: string): Promise<DirectoryEntry | null> {
-    const usuario = correoAUsuario(userPrincipalName);
-    const existe = await gobierno.getUser(usuario);
+    const user = correoAUsuario(userPrincipalName);
+    const existe = await gobierno.getUser(user);
     if (!existe) return null;
 
     const equipos = await gobierno.listTeams();
     const roles = [
       ...new Set(
         equipos.flatMap((t) =>
-          t.members.filter((m) => m.userId === usuario).map((m) => m.role),
+          t.members.filter((m) => m.userId === user).map((m) => m.role),
         ),
       ),
     ];
 
-    return { userId: usuario, displayName: usuario, roles, securityContext: {} };
+    return { userId: user, displayName: user, roles, securityContext: {} };
   }
 }
 
@@ -156,12 +156,12 @@ export async function asegurarCredenciales(): Promise<void> {
   if (await leer<boolean>(CLAVE_SEMBRADO)) return;
 
   const usuarios = await gobierno.listUsers();
-  for (const usuario of usuarios) {
-    const email = usuarioACorreo(usuario.userId);
+  for (const user of usuarios) {
+    const email = usuarioACorreo(user.userId);
     if (await almacenDeCredenciales.findByEmail(email)) continue;
 
     await almacenDeCredenciales.save({
-      userId: usuario.userId,
+      userId: user.userId,
       email,
       passwordHash: await hash(`${CLAVE_DEMO}${pimienta()}`, {
         algorithm: Algorithm.Argon2id,
@@ -255,8 +255,8 @@ export async function cuentasLocales(): Promise<EstadoDeCuentaLocal[]> {
   const usuarios = await gobierno.listUsers();
   const cuentas: EstadoDeCuentaLocal[] = [];
 
-  for (const usuario of usuarios) {
-    const registro = await almacenDeCredenciales.findByEmail(usuarioACorreo(usuario.userId));
+  for (const user of usuarios) {
+    const registro = await almacenDeCredenciales.findByEmail(usuarioACorreo(user.userId));
     if (!registro) continue;
 
     cuentas.push({

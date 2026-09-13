@@ -5,9 +5,9 @@ import { exigirSesionDePagina } from '../../src/server/sesion';
 
 /** Primer modulo accesible del arbol visible, o null si el equipo no tiene ninguno. */
 function primerModulo(nodos: NavNode[]): string | null {
-  for (const nodo of nodos) {
-    if (isModule(nodo)) return nodo.moduleRef.slug;
-    const dentro = primerModulo(nodo.children);
+  for (const node of nodos) {
+    if (isModule(node)) return node.moduleRef.slug;
+    const dentro = primerModulo(node.children);
     if (dentro) return dentro;
   }
   return null;

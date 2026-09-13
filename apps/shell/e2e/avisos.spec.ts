@@ -14,16 +14,16 @@ async function crearAlerta(page: Page, datos: Record<string, unknown>) {
   const r = await page.request.post('/api/alertas', { data: datos });
   return {
     estado: r.status(),
-    cuerpo: (await r.json()) as { alerta?: AlertaCreada; error?: string },
+    body: (await r.json()) as { alerta?: AlertaCreada; error?: string },
   };
 }
 
 /** Borra lo creado por la prueba: el almacen persiste entre pruebas del mismo servidor. */
 async function limpiar(page: Page) {
-  for (const ruta of ['/api/alertas', '/api/suscripciones']) {
-    const cuerpo = (await (await page.request.get(ruta)).json()) as Record<string, { id: string }[]>;
-    for (const item of Object.values(cuerpo)[0] ?? []) {
-      await page.request.delete(`${ruta}?id=${encodeURIComponent(item.id)}`);
+  for (const path of ['/api/alertas', '/api/suscripciones']) {
+    const body = (await (await page.request.get(path)).json()) as Record<string, { id: string }[]>;
+    for (const item of Object.values(body)[0] ?? []) {
+      await page.request.delete(`${path}?id=${encodeURIComponent(item.id)}`);
     }
   }
 }
@@ -40,7 +40,7 @@ test.describe('reglas de alerta', () => {
 
   test('se crea sobre un objeto y una medida del modulo', async ({ page }) => {
     await entrarComo(page, 'u-ana');
-    const { estado, cuerpo } = await crearAlerta(page, {
+    const { estado, body } = await crearAlerta(page, {
       nombre: 'Pendientes altos',
       modulo: 'casos-pendientes',
       objeto: 'barras-distrito',
@@ -52,8 +52,8 @@ test.describe('reglas de alerta', () => {
     expect(estado).toBe(201);
     // El equipo NO viaja en el cuerpo: lo pone el servidor desde la sesion, porque es el que
     // decide con que ambito se evalua la regla.
-    expect(cuerpo.alerta?.teamId).toBe('equipo-norte');
-    expect(cuerpo.alerta?.ownerUserId).toBe('u-ana');
+    expect(body.alerta?.teamId).toBe('equipo-norte');
+    expect(body.alerta?.ownerUserId).toBe('u-ana');
   });
 
   test('rechaza una medida que el objeto no mapea', async ({ page }) => {
@@ -100,7 +100,7 @@ test.describe('reglas de alerta', () => {
 test.describe('una regla es privada de quien la creo', () => {
   test('no aparece en la lista de otra persona ni se puede borrar', async ({ page }) => {
     await entrarComo(page, 'u-ana');
-    const { cuerpo } = await crearAlerta(page, {
+    const { body } = await crearAlerta(page, {
       nombre: 'Solo de Ana',
       modulo: 'casos-pendientes',
       objeto: 'barras-distrito',
@@ -108,7 +108,7 @@ test.describe('una regla es privada de quien la creo', () => {
       operador: 'mayor-que',
       umbral: 999999,
     });
-    const id = cuerpo.alerta?.id ?? '';
+    const id = body.alerta?.id ?? '';
 
     await entrarComo(page, 'u-beto');
     const lista = (await (await page.request.get('/api/alertas')).json()) as {

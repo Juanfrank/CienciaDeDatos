@@ -13,8 +13,8 @@ export interface Indicadores {
 }
 
 export function CarrilDeAdmin({ indicadores, id }: { indicadores: Indicadores; id: string }) {
-  const ruta = usePathname();
-  const actual = seccionActivaEn(ruta);
+  const path = usePathname();
+  const actual = seccionActivaEn(path);
 
   return (
     <nav className="admin__nav" id={id} aria-label="Secciones de administracion">

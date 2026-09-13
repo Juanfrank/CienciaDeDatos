@@ -33,7 +33,7 @@ describe('la jerarquia', () => {
     const m = matriz('suma');
     expect(m.filas.map((f) => f.etiqueta)).toEqual(['Norte', 'Sur']);
     expect(m.filas[0]?.hijos.map((h) => h.etiqueta)).toEqual(['Penal', 'Civil']);
-    expect(m.filas[0]?.hijos[0]?.ruta).toEqual(['Norte', 'Penal']);
+    expect(m.filas[0]?.hijos[0]?.path).toEqual(['Norte', 'Penal']);
   });
 
   it('las columnas tambien forman arbol, y sus hojas son las que llevan cifras', () => {
@@ -76,7 +76,7 @@ describe('plegar', () => {
     // «Penal» aparece dos veces y son nodos DISTINTOS: uno cuelga de Norte y otro de Sur. Por eso
     // nada puede identificarse por su etiqueta —ni una clave de React ni un `data-testid`—: la
     // ruta completa es lo unico unico.
-    expect(filasVisibles(m.filas, new Set()).map((f) => rutaClave(f.ruta))).toEqual([
+    expect(filasVisibles(m.filas, new Set()).map((f) => rutaClave(f.path))).toEqual([
       'Norte',
       'Norte||Penal',
       'Norte||Civil',
@@ -84,7 +84,7 @@ describe('plegar', () => {
       'Sur||Penal',
     ]);
     const plegado = new Set([rutaClave(['Norte'])]);
-    expect(filasVisibles(m.filas, plegado).map((f) => rutaClave(f.ruta))).toEqual([
+    expect(filasVisibles(m.filas, plegado).map((f) => rutaClave(f.path))).toEqual([
       'Norte',
       'Sur',
       'Sur||Penal',
@@ -93,12 +93,12 @@ describe('plegar', () => {
 
   it('una columna plegada pasa a ser hoja: ensena su subtotal en vez de su detalle', () => {
     const m = construirMatriz(datos, [DISTRITO], [MATERIA, TRIMESTRE], ['Dias'], ['suma']);
-    expect(hojas(m.columnas, new Set()).map((c) => rutaClave(c.ruta))).toEqual([
+    expect(hojas(m.columnas, new Set()).map((c) => rutaClave(c.path))).toEqual([
       'Penal||Q1',
       'Penal||Q2',
       'Civil||Q1',
     ]);
     const plegada = new Set(['Penal']);
-    expect(hojas(m.columnas, plegada).map((c) => rutaClave(c.ruta))).toEqual(['Penal', 'Civil||Q1']);
+    expect(hojas(m.columnas, plegada).map((c) => rutaClave(c.path))).toEqual(['Penal', 'Civil||Q1']);
   });
 });

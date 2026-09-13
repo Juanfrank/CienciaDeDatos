@@ -371,15 +371,15 @@ describe('banderas por modulo (3.4)', () => {
    * hace Azure en produccion: poner la bandera en false.
    */
   const conApagados = async (apagados: string, prueba: () => Promise<void>) => {
-    const antes = process.env['MODULOS_APAGADOS'];
+    const before = process.env['MODULOS_APAGADOS'];
     process.env['MODULOS_APAGADOS'] = apagados;
     // El resolutor cachea 30 s: sin reiniciarlo, la prueba leeria la foto de la prueba anterior.
     reiniciarConfiguracion();
     try {
       await prueba();
     } finally {
-      if (antes === undefined) delete process.env['MODULOS_APAGADOS'];
-      else process.env['MODULOS_APAGADOS'] = antes;
+      if (before === undefined) delete process.env['MODULOS_APAGADOS'];
+      else process.env['MODULOS_APAGADOS'] = before;
       reiniciarConfiguracion();
     }
   };

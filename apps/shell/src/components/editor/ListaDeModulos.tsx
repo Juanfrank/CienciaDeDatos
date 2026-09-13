@@ -28,11 +28,11 @@ const ETIQUETA: Record<FilaDeModulo["status"], string> = {
 export function ListaDeModulos({
   modulos,
   role,
-  usuario,
+  user,
 }: {
   modulos: FilaDeModulo[];
   role: string;
-  usuario: string;
+  user: string;
 }) {
   const router = useRouter();
   const [nombre, setNombre] = useState("");
@@ -54,15 +54,15 @@ export function ListaDeModulos({
         },
       });
       if (!r.ok) {
-        const cuerpo = (await r.json()) as {
+        const body = (await r.json()) as {
           error?: string;
           detalle?: unknown;
         };
-        const detalle = Array.isArray(cuerpo.detalle)
-          ? ` ${(cuerpo.detalle as PublishBlocker[]).map((b) => b.detail).join(" ")}`
+        const detalle = Array.isArray(body.detalle)
+          ? ` ${(body.detalle as PublishBlocker[]).map((b) => b.detail).join(" ")}`
           : "";
         setError(
-          `${cuerpo.error ?? "No se pudo completar la accion."}${detalle}`,
+          `${body.error ?? "No se pudo completar la accion."}${detalle}`,
         );
         return false;
       }
@@ -182,11 +182,11 @@ export function ListaDeModulos({
                 // ninguna accion muestra una raya, no un hueco. Un hueco en la ultima columna se
                 // lee como algo que falta por cargar.
                 const puedeEnviar =
-                  m.status === "borrador" && m.autor === usuario;
+                  m.status === "borrador" && m.autor === user;
                 const puedePublicar =
                   m.status === "pendiente-de-aprobacion" && esAdmin;
                 const puedeDevolver =
-                  m.status !== "borrador" && (esAdmin || m.autor === usuario);
+                  m.status !== "borrador" && (esAdmin || m.autor === user);
                 const sinAcciones =
                   !puedeEnviar && !puedePublicar && !puedeDevolver;
                 return (

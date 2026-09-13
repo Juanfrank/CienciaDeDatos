@@ -37,7 +37,7 @@ export function CuentasLocales({
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ accion, email }),
       });
-      const cuerpo = (await r.json()) as {
+      const body = (await r.json()) as {
         error?: string;
         resetId?: string;
         codigo?: string;
@@ -45,15 +45,15 @@ export function CuentasLocales({
       };
 
       if (!r.ok) {
-        setError(cuerpo.error ?? "No se pudo completar la accion.");
+        setError(body.error ?? "No se pudo completar la accion.");
         return;
       }
-      if (accion === "restablecer" && cuerpo.resetId) {
+      if (accion === "restablecer" && body.resetId) {
         setEmitido({
           email,
-          resetId: cuerpo.resetId,
-          ...(cuerpo.codigo ? { codigo: cuerpo.codigo } : {}),
-          expiraEn: cuerpo.expiraEn ?? "",
+          resetId: body.resetId,
+          ...(body.codigo ? { codigo: body.codigo } : {}),
+          expiraEn: body.expiraEn ?? "",
         });
       }
       router.refresh();
@@ -102,7 +102,7 @@ export function CuentasLocales({
           ) : null}
           <p className="texto-atenuado">
             La persona entra en /restablecer con estos dos datos y elige su
-            contrasena nueva. Al hacerlo se le desbloquea la cuenta y se cierran
+            contrasena new. Al hacerlo se le desbloquea la cuenta y se cierran
             sus sesiones abiertas.
           </p>
         </div>
@@ -152,7 +152,7 @@ export function CuentasLocales({
                     "TOTP configurado"
                   ) : (
                     <strong data-testid={`sin-mfa-${c.userId}`}>
-                      Sin segundo factor
+                      Sin second factor
                     </strong>
                   )}
                 </td>

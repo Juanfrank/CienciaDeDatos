@@ -58,7 +58,7 @@ export function decidirNotificacion(
   estadoPrevio: AlertState | undefined,
   ahora: Date,
 ): Transicion {
-  const antes = estadoPrevio?.triggered ?? false;
+  const before = estadoPrevio?.triggered ?? false;
   const ahoraDispara = evaluacion.triggered;
 
   const estado: AlertState = {
@@ -69,7 +69,7 @@ export function decidirNotificacion(
     ...(estadoPrevio?.lastNotifiedAt ? { lastNotifiedAt: estadoPrevio.lastNotifiedAt } : {}),
   };
 
-  if (antes === ahoraDispara) return { estado };
+  if (before === ahoraDispara) return { estado };
 
   estado.lastNotifiedAt = ahora.toISOString();
 

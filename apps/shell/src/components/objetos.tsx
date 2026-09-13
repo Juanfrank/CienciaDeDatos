@@ -150,7 +150,7 @@ export function Marco({
    * La cabecera entera se puede ocultar.
    */
   const conCabecera = presentacion?.mostrarTitulo !== false;
-  const cuerpo = useDesborda<HTMLDivElement>();
+  const body = useDesborda<HTMLDivElement>();
 
   return (
     <div
@@ -211,8 +211,8 @@ export function Marco({
       */}
       <div
         className="objeto__cuerpo"
-        ref={cuerpo.ref}
-        {...(cuerpo.desborda
+        ref={body.ref}
+        {...(body.desborda
           ? { tabIndex: 0, role: 'region', 'aria-label': `Contenido de ${titulo}` }
           : {})}
       >
@@ -1055,9 +1055,9 @@ export function MapaDeArbol({
   /*
    * El nombre que ECharts entrega al pulsar, convertido en un valor de la PRIMERA dimension.
    */
-  const grupoDe = (nodo: string): string => {
-    const conEseNombre = vm.points.find((p) => p.label === nodo || p.label.endsWith(` / ${nodo}`));
-    return conEseNombre?.label.split(' / ')[0] ?? nodo;
+  const grupoDe = (node: string): string => {
+    const conEseNombre = vm.points.find((p) => p.label === node || p.label.endsWith(` / ${node}`));
+    return conEseNombre?.label.split(' / ')[0] ?? node;
   };
 
   return (
@@ -1077,7 +1077,7 @@ export function MapaDeArbol({
         formatear={(valor) => formatear(valor)}
         {...(principal ? { dimension: fieldKey(principal) } : {})}
         {...(principal && onFiltrar
-          ? { onSeleccionar: (nodo: string) => onFiltrar(fieldKey(principal), grupoDe(nodo)) }
+          ? { onSeleccionar: (node: string) => onFiltrar(fieldKey(principal), grupoDe(node)) }
           : {})}
       >
         <TablaDeRespaldo nombre={titulo}>
@@ -1246,7 +1246,7 @@ export function Medidor({
   const punto = vm.points[0];
   const valor = punto?.values[0] ?? null;
   const objetivo = punto?.values[1] ?? instance.presentacion?.medidor?.objetivo ?? null;
-  const escala = escalaDelMedidor(instance.presentacion?.medidor, valor, objetivo);
+  const scale = escalaDelMedidor(instance.presentacion?.medidor, valor, objetivo);
 
   return (
     <Marco
@@ -1285,7 +1285,7 @@ export function Medidor({
           <div>
             <dt>Escala</dt>
             <dd>
-              {formatear(escala.minimo)} – {formatear(escala.maximo)}
+              {formatear(scale.minimo)} – {formatear(scale.maximo)}
             </dd>
           </div>
           {objetivo === null ? null : (

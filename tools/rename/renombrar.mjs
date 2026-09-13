@@ -225,17 +225,32 @@ function proponer(raiz) {
    * el literal es un valor de negocio —el texto que se compara en una consulta— compila y falla
    * al ejecutar.
    *
-   * Se apartan y se deciden a mano: o van tambien en `valores`, que renombra las dos zonas, o se
-   * quedan como estan.
+   * Se mira solo donde el literal SIGNIFICA algo: uniones de tipos, listas `as const` y el
+   * vocabulario de `nl-query`. Un mismo texto dentro de un testid o de una clase CSS no es un
+   * conflicto —se renombra en las dos zonas y sigue casando—, y tratarlo como tal dejaria en
+   * espanol la mitad del repositorio.
    */
   const literales = new Set();
   for (const ruta of rutasDe("'*.ts' '*.tsx' '*.mts'")) {
     if (ruta.startsWith('tools/rename/')) continue;
-    for (const trozo of segmentar(readFileSync(ruta, 'utf8'))) {
-      if (trozo.tipo !== 'cadena') continue;
-      for (const m of trozo.texto.matchAll(/['"`]([A-Za-z_$][\w$-]*)['"`]/g)) literales.add(m[1]);
+    const fuente = readFileSync(ruta, 'utf8');
+
+    // Miembros de una union de literales: `type X = 'a' | 'b'` y `['a', 'b'] as const`.
+    for (const m of fuente.matchAll(/'([A-Za-z_$][\w$-]*)'\s*(?=\|)|\|\s*'([A-Za-z_$][\w$-]*)'/g)) {
+      literales.add(m[1] ?? m[2]);
+    }
+    for (const m of fuente.matchAll(/\[([^\]]*)\]\s*as\s+const/g)) {
+      for (const l of (m[1] ?? '').matchAll(/'([A-Za-z_$][\w$-]*)'/g)) literales.add(l[1]);
+    }
+    // El vocabulario con el que se interpreta una pregunta escrita es dato, no codigo.
+    if (ruta.startsWith('packages/nl-query/')) {
+      for (const trozo of segmentar(fuente)) {
+        if (trozo.tipo !== 'cadena') continue;
+        for (const l of trozo.texto.matchAll(/([A-Za-z_$][\w$-]*)/g)) literales.add(l[1]);
+      }
     }
   }
+
   const ambiguos = {};
   for (const viejo of Object.keys(identificadores)) {
     if (literales.has(viejo)) {

@@ -130,8 +130,8 @@ export class CachedDatasetReader {
     assertScopeIsEnforceable(entry.value, input.scope);
 
     const appliedFilters = intersectRequestedFilters(input.scope, input.requestedFilters ?? {});
-    const porAmbito = filterResultByScope(entry.value, input.scope);
-    const result = applyRequestedFilters(porAmbito, appliedFilters);
+    const byScope = filterResultByScope(entry.value, input.scope);
+    const result = applyRequestedFilters(byScope, appliedFilters);
 
     const ageMs = Date.now() - new Date(entry.generatedAt).getTime();
     const status: ReadStatus = stale ? 'degraded' : 'ok';

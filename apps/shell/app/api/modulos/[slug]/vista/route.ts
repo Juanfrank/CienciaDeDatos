@@ -42,15 +42,15 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
   const modulo = await moduloServiblePorSlug(slug, await actorDe(sesion));
   if (!modulo) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
-  let cuerpo: Record<string, unknown>;
+  let body: Record<string, unknown>;
   try {
-    cuerpo = (await request.json()) as Record<string, unknown>;
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
 
-  const ocultos = Array.isArray(cuerpo['ocultos'])
-    ? (cuerpo['ocultos'] as unknown[]).filter((v): v is string => typeof v === 'string')
+  const ocultos = Array.isArray(body['ocultos'])
+    ? (body['ocultos'] as unknown[]).filter((v): v is string => typeof v === 'string')
     : [];
 
   try {
@@ -58,7 +58,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
       userId: sesion.userId,
       module: modulo,
       hiddenItemIds: ocultos,
-      crudo: cuerpo,
+      crudo: body,
     });
     return NextResponse.json({ personalizada: true, ocultos: personalizacion.hiddenItemIds });
   } catch (error) {

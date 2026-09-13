@@ -41,9 +41,9 @@ export class FileCacheStore implements ICacheStore {
   private static escrituras = 0;
 
   async set<T>(key: string, entry: CacheEntry<T>): Promise<void> {
-    const ruta = this.pathFor(key);
+    const path = this.pathFor(key);
     try {
-      await mkdir(dirname(ruta), { recursive: true });
+      await mkdir(dirname(path), { recursive: true });
       // Escritura atomica: el servidor puede estar leyendo mientras el job escribe, y un JSON
       // a medias se leeria como corrupto.
       //
@@ -52,10 +52,10 @@ export class FileCacheStore implements ICacheStore {
       // primera lo renombra y la segunda falla con ENOENT. Ocurre en cuanto dos peticiones
       // concurrentes escriben lo mismo, y se manifiesta como un store "no disponible" que no
       // tiene nada que ver con el disco.
-      const temporal = `${ruta}.${process.pid}.${++FileCacheStore.escrituras}.tmp`;
+      const temporal = `${path}.${process.pid}.${++FileCacheStore.escrituras}.tmp`;
       await writeFile(temporal, JSON.stringify(entry), 'utf8');
       const { rename } = await import('node:fs/promises');
-      await rename(temporal, ruta);
+      await rename(temporal, path);
     } catch (error) {
       throw new CacheStoreUnavailableError('FileCacheStore', error);
     }

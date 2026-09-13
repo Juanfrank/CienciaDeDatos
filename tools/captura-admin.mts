@@ -23,13 +23,13 @@ await pagina.request.post(`${base}/api/admin/ambitos`, {
   },
 });
 
-for (const [ruta, nombre] of [
+for (const [path, nombre] of [
   ['/admin', 'inicio'],
   ['/admin/arbol', 'arbol'],
   ['/admin/ambitos', 'ambitos'],
   ['/admin/auditoria', 'auditoria'],
 ] as const) {
-  await pagina.goto(`${base}${ruta}`);
+  await pagina.goto(`${base}${path}`);
   await pagina.waitForLoadState('networkidle');
   await pagina.screenshot({ path: `${salida}-${nombre}.png`, fullPage: true });
 }

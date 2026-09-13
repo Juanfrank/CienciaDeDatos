@@ -12,15 +12,15 @@ export async function GET() {
 
 /** Guarda un paquete visual (4.1.3) y lo valida automaticamente (4.10.6). */
 export async function POST(request: Request) {
-  const cuerpo = (await request.json()) as { paquete?: ModulePackage; borrar?: string };
+  const body = (await request.json()) as { paquete?: ModulePackage; borrar?: string };
 
   return conAdmin(async (actor) => {
-    if (cuerpo.borrar) {
-      const borrado = await gobierno.deletePackage(cuerpo.borrar);
-      if (!borrado) throw new AdminError(`El paquete '${cuerpo.borrar}' no existe.`, 404);
-      return { borrado: cuerpo.borrar };
+    if (body.borrar) {
+      const borrado = await gobierno.deletePackage(body.borrar);
+      if (!borrado) throw new AdminError(`El paquete '${body.borrar}' no existe.`, 404);
+      return { borrado: body.borrar };
     }
-    if (!cuerpo.paquete) throw new AdminError('Falta el paquete.', 400);
-    return await guardarPaquete(actor, cuerpo.paquete);
+    if (!body.paquete) throw new AdminError('Falta el paquete.', 400);
+    return await guardarPaquete(actor, body.paquete);
   });
 }

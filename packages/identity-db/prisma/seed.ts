@@ -34,11 +34,11 @@ async function main(): Promise<void> {
     const porProfundidad = [...seedNavNodes].sort(
       (a, b) => (a.parentId === null ? 0 : 1) - (b.parentId === null ? 0 : 1),
     );
-    for (const nodo of porProfundidad) {
+    for (const node of porProfundidad) {
       await prisma.navNode.upsert({
-        where: { id: nodo.id },
-        update: { name: nodo.name, orderIndex: nodo.orderIndex, scopeId: nodo.scopeId },
-        create: nodo,
+        where: { id: node.id },
+        update: { name: node.name, orderIndex: node.orderIndex, scopeId: node.scopeId },
+        create: node,
       });
     }
 

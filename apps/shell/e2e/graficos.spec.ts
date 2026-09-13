@@ -188,16 +188,16 @@ test.describe('la matriz, con jerarquia', () => {
 
   test('plegar esconde los hijos y deja el subtotal del padre', async ({ page }) => {
     const padre = await rutaDelPrimerPadre(page);
-    const antes = await page.locator('[data-testid^="matriz-fila-"]').count();
+    const before = await page.locator('[data-testid^="matriz-fila-"]').count();
 
     await page.getByTestId(`matriz-plegar-${padre}`).click();
     await expect(page.locator(`[data-testid^="matriz-fila-${padre}||"]`)).toHaveCount(0);
     await expect(page.getByTestId(`matriz-fila-${padre}`)).toBeVisible();
-    expect(await page.locator('[data-testid^="matriz-fila-"]').count()).toBeLessThan(antes);
+    expect(await page.locator('[data-testid^="matriz-fila-"]').count()).toBeLessThan(before);
 
     // Y vuelve: plegar es un gesto de lectura, no un cambio.
     await page.getByTestId(`matriz-plegar-${padre}`).click();
-    expect(await page.locator('[data-testid^="matriz-fila-"]').count()).toBe(antes);
+    expect(await page.locator('[data-testid^="matriz-fila-"]').count()).toBe(before);
   });
 
   test('pulsar un encabezado ordena, y lo anuncia en aria-sort', async ({ page }) => {

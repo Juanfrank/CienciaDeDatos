@@ -46,8 +46,8 @@ describe('el cambio que se lleva al ultimo Administrador', () => {
   ];
 
   it('retirarle el rol al unico que hay se deniega', () => {
-    const despues = [equipo('norte', [{ userId: 'u-ana', role: 'colaborador' }])];
-    const denegacion = wouldLeaveNoAdministrator(conUno, despues);
+    const after = [equipo('norte', [{ userId: 'u-ana', role: 'colaborador' }])];
+    const denegacion = wouldLeaveNoAdministrator(conUno, after);
 
     expect(denegacion).not.toBeNull();
     // El mensaje NOMBRA a quien administra: sin eso, quien lo lea no sabe a quien nombrar antes.
@@ -56,13 +56,13 @@ describe('el cambio que se lleva al ultimo Administrador', () => {
   });
 
   it('degradarlo a Colaborador tambien: no hace falta quitarlo del equipo', () => {
-    const despues = [
+    const after = [
       equipo('norte', [
         { userId: 'u-admin', role: 'colaborador' },
         { userId: 'u-ana', role: 'colaborador' },
       ]),
     ];
-    expect(wouldLeaveNoAdministrator(conUno, despues)).not.toBeNull();
+    expect(wouldLeaveNoAdministrator(conUno, after)).not.toBeNull();
   });
 
   it('borrar el equipo donde estaba tambien, por un camino que no menciona la palabra rol', () => {
@@ -70,49 +70,49 @@ describe('el cambio que se lleva al ultimo Administrador', () => {
   });
 
   it('si queda otro, se permite', () => {
-    const antes = [
+    const before = [
       equipo('norte', [{ userId: 'u-admin', role: 'administrador' }]),
       equipo('este', [{ userId: 'u-otra', role: 'administrador' }]),
     ];
-    const despues = [
+    const after = [
       equipo('norte', [{ userId: 'u-admin', role: 'colaborador' }]),
       equipo('este', [{ userId: 'u-otra', role: 'administrador' }]),
     ];
-    expect(wouldLeaveNoAdministrator(antes, despues)).toBeNull();
+    expect(wouldLeaveNoAdministrator(before, after)).toBeNull();
   });
 
   it('un cambio que no toca la membresia no se estorba', () => {
     const norte = conUno[0];
     if (!norte) throw new Error('fixture inesperado');
-    const despues = [{ ...norte, name: 'Renombrado', grantedNodes: ['nodo-x'] }];
-    expect(wouldLeaveNoAdministrator(conUno, despues)).toBeNull();
+    const after = [{ ...norte, name: 'Renombrado', grantedNodes: ['nodo-x'] }];
+    expect(wouldLeaveNoAdministrator(conUno, after)).toBeNull();
   });
 
   it('nombrar a otro Administrador se permite, obviamente', () => {
-    const despues = [
+    const after = [
       equipo('norte', [
         { userId: 'u-admin', role: 'administrador' },
         { userId: 'u-ana', role: 'administrador' },
       ]),
     ];
-    expect(wouldLeaveNoAdministrator(conUno, despues)).toBeNull();
+    expect(wouldLeaveNoAdministrator(conUno, after)).toBeNull();
   });
 });
 
 describe('el sistema que YA esta sin Administradores', () => {
   it('no se bloquea: si no habia ninguno, ningun cambio se lleva al ultimo', () => {
-    const antes = [equipo('norte', [{ userId: 'u-ana', role: 'colaborador' }])];
+    const before = [equipo('norte', [{ userId: 'u-ana', role: 'colaborador' }])];
 
     // Denegar aqui dejaria el gobierno bloqueado para siempre, incluido el cambio que lo
     // arregla. La comprobacion no es "el resultado tiene Administradores" sino "este cambio se
     // lleva al ultimo".
-    expect(wouldLeaveNoAdministrator(antes, [])).toBeNull();
-    expect(wouldLeaveNoAdministrator(antes, antes)).toBeNull();
+    expect(wouldLeaveNoAdministrator(before, [])).toBeNull();
+    expect(wouldLeaveNoAdministrator(before, before)).toBeNull();
   });
 
   it('y el cambio que restituye a uno pasa sin problema', () => {
-    const antes = [equipo('norte', [{ userId: 'u-ana', role: 'colaborador' }])];
-    const despues = [equipo('norte', [{ userId: 'u-ana', role: 'administrador' }])];
-    expect(wouldLeaveNoAdministrator(antes, despues)).toBeNull();
+    const before = [equipo('norte', [{ userId: 'u-ana', role: 'colaborador' }])];
+    const after = [equipo('norte', [{ userId: 'u-ana', role: 'administrador' }])];
+    expect(wouldLeaveNoAdministrator(before, after)).toBeNull();
   });
 });

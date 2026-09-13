@@ -24,7 +24,7 @@ test.describe('sin sesion no se entra (criterio de la seccion 9)', () => {
   });
 
   test('las rutas de API responden 401, no datos ni una redireccion silenciosa', async ({ page }) => {
-    for (const ruta of [
+    for (const path of [
       '/api/navegacion',
       '/api/modulos/casos-pendientes',
       '/api/marcadores',
@@ -32,8 +32,8 @@ test.describe('sin sesion no se entra (criterio de la seccion 9)', () => {
       '/api/suscripciones',
       '/api/notificaciones',
     ]) {
-      const respuesta = await page.request.get(ruta, { maxRedirects: 0 });
-      expect(respuesta.status(), `${ruta} deberia exigir sesion`).toBe(401);
+      const respuesta = await page.request.get(path, { maxRedirects: 0 });
+      expect(respuesta.status(), `${path} deberia exigir sesion`).toBe(401);
     }
   });
 

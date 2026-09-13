@@ -77,14 +77,14 @@ export function useFiltrosDeUrl() {
 
   /** Drill-through (4.4): navegacion DELIBERADA a otro modulo llevando el contexto de filtros. */
   const navegarA = useCallback(
-    (ruta: string, filtros?: Record<string, string[]>) => {
+    (path: string, filtros?: Record<string, string[]>) => {
       const params = new URLSearchParams();
       for (const [campo, valores] of Object.entries(filtros ?? {})) {
         for (const v of valores) params.append(campo, v);
       }
       const cadena = params.toString();
       // push, no replace: esto si es navegacion y debe poder deshacerse con "atras".
-      router.push(cadena ? `${ruta}?${cadena}` : ruta);
+      router.push(cadena ? `${path}?${cadena}` : path);
     },
     [router],
   );

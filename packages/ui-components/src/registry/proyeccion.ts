@@ -70,16 +70,16 @@ export function proyectarObjeto(
         ...medidas.map((m) => columnaNumero(medidas.length > 1 ? `Total · ${m}` : 'Total')),
       ];
 
-      const celdasDe = (ruta: readonly string[]) => [
-        ...columnasHoja.flatMap((c) => medidas.map((_, i) => vm.valor(ruta, c.ruta, i))),
-        ...medidas.map((_, i) => vm.valor(ruta, [], i)),
+      const celdasDe = (path: readonly string[]) => [
+        ...columnasHoja.flatMap((c) => medidas.map((_, i) => vm.valor(path, c.path, i))),
+        ...medidas.map((_, i) => vm.valor(path, [], i)),
       ];
 
-      const rows: unknown[][] = filasVisibles(vm.filas, nada).map((nodo) => [
+      const rows: unknown[][] = filasVisibles(vm.filas, nada).map((node) => [
         // La sangria del nivel viaja como texto: un CSV no tiene jerarquia, y sin ella las filas
         // de subtotal y las de detalle se leerian como si estuvieran al mismo nivel.
-        `${'  '.repeat(nodo.nivel)}${nodo.etiqueta}`,
-        ...celdasDe(nodo.ruta),
+        `${'  '.repeat(node.nivel)}${node.etiqueta}`,
+        ...celdasDe(node.path),
       ]);
       rows.push(['Total', ...celdasDe([])]);
       return mismaProcedencia(result, columns, rows);

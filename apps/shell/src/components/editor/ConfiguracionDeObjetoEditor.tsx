@@ -245,7 +245,7 @@ export function ConfiguracionDeObjetoEditor({
               </option>
             ))}
           </select>
-          <span className="campo__pista">Se reparten el ancho que sobre despues del texto.</span>
+          <span className="campo__pista">Se reparten el ancho que sobre after del texto.</span>
         </label>
 
         <LineaEditor
@@ -433,13 +433,13 @@ export function ConfiguracionDeObjetoEditor({
   const ponerColumnas = (n: number) => {
     // Las columnas viven en el bloque del tipo, asi que cada uno pone las suyas. Se resuelve con
     // un mapa y no con cinco ifs sueltos para que anadir un contenedor no tenga que acordarse.
-    const bloque: Record<string, keyof ConfiguracionDeContenedor> = {
+    const block: Record<string, keyof ConfiguracionDeContenedor> = {
       'contenedor-simple': 'simple',
       'contenedor-desplazable': 'desplazable',
       'contenedor-ampliable': 'ampliable',
       'contenedor-con-pestanas': 'pestanas',
     };
-    const clave = bloque[objectId] ?? 'simple';
+    const clave = block[objectId] ?? 'simple';
     poner({ [clave]: { ...(conf[clave] as object), columnas: n } } as ConfiguracionDeContenedor);
   };
 

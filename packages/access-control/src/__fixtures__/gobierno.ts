@@ -33,7 +33,7 @@ const modulo = (moduleId: string, slug: string, name: string): NavNode => ({
 });
 
 /** Organizacion general de prueba, con tres niveles de anidamiento: */
-export const arbolGeneral: NavNode[] = [
+export const generalTree: NavNode[] = [
   {
     id: 'carpeta-institucional',
     type: 'folder',

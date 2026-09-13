@@ -37,11 +37,11 @@ export function Restablecer() {
         return;
       }
 
-      const cuerpo = (await r.json()) as { error?: string; detalle?: { message: string }[] };
-      const detalle = Array.isArray(cuerpo.detalle)
-        ? ` ${cuerpo.detalle.map((d) => d.message).join(' ')}`
+      const body = (await r.json()) as { error?: string; detalle?: { message: string }[] };
+      const detalle = Array.isArray(body.detalle)
+        ? ` ${body.detalle.map((d) => d.message).join(' ')}`
         : '';
-      setError(`${cuerpo.error ?? 'No se pudo restablecer la contrasena.'}${detalle}`);
+      setError(`${body.error ?? 'No se pudo restablecer la contrasena.'}${detalle}`);
     } finally {
       setEnviando(false);
     }
@@ -53,7 +53,7 @@ export function Restablecer() {
         <div className="acceso__tarjeta">
           <h1>Contrasena restablecida</h1>
           <p className="texto-atenuado">
-            Ya puede iniciar sesion con la contrasena nueva y su codigo de verificacion. Las
+            Ya puede iniciar sesion con la contrasena new y su codigo de verificacion. Las
             sesiones que estuvieran abiertas con la anterior se han cerrado.
           </p>
           <button
@@ -105,7 +105,7 @@ export function Restablecer() {
         </p>
 
         <p className="formulario__campo">
-          <label htmlFor="reset-clave">Contrasena nueva</label>
+          <label htmlFor="reset-clave">Contrasena new</label>
           <input
             id="reset-clave"
             type="password"
@@ -122,7 +122,7 @@ export function Restablecer() {
         </p>
 
         <p className="formulario__campo">
-          <label htmlFor="reset-repetida">Repita la contrasena nueva</label>
+          <label htmlFor="reset-repetida">Repita la contrasena new</label>
           <input
             id="reset-repetida"
             type="password"

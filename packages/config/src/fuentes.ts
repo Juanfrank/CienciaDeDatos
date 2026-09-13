@@ -77,9 +77,9 @@ export class AppConfiguration implements FuenteDeConfiguracion {
       if (!respuesta.ok) {
         throw new Error(`App Configuration respondio ${respuesta.status} ${respuesta.statusText}`);
       }
-      const cuerpo = (await respuesta.json()) as { items?: ParDeClaveValor[]; '@nextLink'?: string };
+      const body = (await respuesta.json()) as { items?: ParDeClaveValor[]; '@nextLink'?: string };
 
-      for (const par of cuerpo.items ?? []) {
+      for (const par of body.items ?? []) {
         if (par.key.startsWith(PREFIJO_BANDERA)) {
           const nombre = par.key.slice(PREFIJO_BANDERA.length);
           banderas[nombre] = leerBandera(par.value);
@@ -88,7 +88,7 @@ export class AppConfiguration implements FuenteDeConfiguracion {
         }
       }
 
-      url = cuerpo['@nextLink'] ? `${base}${cuerpo['@nextLink']}` : null;
+      url = body['@nextLink'] ? `${base}${body['@nextLink']}` : null;
     }
 
     return { banderas, valores, leidaEn: new Date().toISOString() };

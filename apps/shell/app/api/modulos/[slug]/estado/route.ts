@@ -24,14 +24,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   const existente = await moduloVisiblePorSlug(slug, actor);
   if (!existente) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
-  let cuerpo: Record<string, unknown>;
+  let body: Record<string, unknown>;
   try {
-    cuerpo = (await request.json()) as Record<string, unknown>;
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
 
-  const transicion = cuerpo['transicion'];
+  const transicion = body['transicion'];
   if (typeof transicion !== 'string' || !TRANSICIONES.includes(transicion as Transicion)) {
     return NextResponse.json(
       { error: `Transicion no admitida. Use una de: ${TRANSICIONES.join(', ')}.` },
@@ -42,7 +42,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   const entrada = {
     actor,
     moduleId: existente.moduleId,
-    ...(typeof cuerpo['motivo'] === 'string' ? { motivo: cuerpo['motivo'] } : {}),
+    ...(typeof body['motivo'] === 'string' ? { motivo: body['motivo'] } : {}),
   };
 
   try {

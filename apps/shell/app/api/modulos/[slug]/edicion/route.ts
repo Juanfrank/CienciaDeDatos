@@ -43,9 +43,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
   const existente = await moduloVisiblePorSlug(slug, actor);
   if (!existente) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
-  let cuerpo: Record<string, unknown>;
+  let body: Record<string, unknown>;
   try {
-    cuerpo = (await request.json()) as Record<string, unknown>;
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
@@ -55,9 +55,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
       actor,
       moduleId: existente.moduleId,
       cambios: {
-        ...(typeof cuerpo['nombre'] === 'string' ? { name: cuerpo['nombre'] } : {}),
-        ...(Array.isArray(cuerpo['paginas'])
-          ? { pages: cuerpo['paginas'] as ModulePage[] }
+        ...(typeof body['nombre'] === 'string' ? { name: body['nombre'] } : {}),
+        ...(Array.isArray(body['paginas'])
+          ? { pages: body['paginas'] as ModulePage[] }
           : {}),
       },
     });

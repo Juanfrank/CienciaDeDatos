@@ -24,19 +24,19 @@ export function wouldLeaveNoAdministrator(
   before: Team[],
   after: Team[],
 ): LastAdministratorDenial | null {
-  const antes = administratorsOf(before);
-  if (antes.length === 0) return null;
+  const before = administratorsOf(before);
+  if (before.length === 0) return null;
 
-  const despues = administratorsOf(after);
-  if (despues.length > 0) return null;
+  const after = administratorsOf(after);
+  if (after.length > 0) return null;
 
   return {
-    before: antes,
+    before: before,
     reason:
       `El cambio dejaria la aplicacion sin ningun Administrador. Administrar el gobierno exige ` +
       `ese rol y el rol se concede desde el gobierno, asi que nadie podria volver a nombrar a ` +
       `uno: haria falta restituirlo desde la base de datos (ver el procedimiento de acceso de ` +
       `emergencia). Nombre antes a otro Administrador. ` +
-      `Ahora mismo administra${antes.length === 1 ? '' : 'n'}: ${antes.join(', ')}.`,
+      `Ahora mismo administra${before.length === 1 ? '' : 'n'}: ${before.join(', ')}.`,
   };
 }

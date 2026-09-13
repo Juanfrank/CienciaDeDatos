@@ -455,7 +455,7 @@ export function Presentacion({
                 >
                   <option value="ninguno">El orden del dataset</option>
                   <option value="categoria">Nombre de la categoria</option>
-                  <option value="valor">Valor de la primera medida</option>
+                  <option value="valor">Valor de la first medida</option>
                 </select>
               </label>
 
@@ -529,7 +529,7 @@ export function Presentacion({
                 poner({ multiplos: { ...p.multiplos, mismaEscala: e.target.checked } })
               }
             />{" "}
-            Misma escala en todos los paneles
+            Misma scale en todos los paneles
           </label>
           <span className="campo__pista">
             Apagarla solo tiene sentido cuando lo que se compara es la SHAPE de cada serie y no su
@@ -761,7 +761,7 @@ export function Presentacion({
             </label>
           </div>
           <span className="campo__pista">
-            Vacio = se deduce de los datos, redondeando a una escala estable. Fijarla es lo que
+            Vacio = se deduce de los datos, redondeando a una scale estable. Fijarla es lo que
             permite comparar dos capturas del mismo medidor.
           </span>
 

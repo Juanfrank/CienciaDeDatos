@@ -14,15 +14,15 @@ export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();
 
-  let cuerpo: Record<string, unknown>;
+  let body: Record<string, unknown>;
   try {
-    cuerpo = (await request.json()) as Record<string, unknown>;
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
 
-  const pregunta = typeof cuerpo['pregunta'] === 'string' ? cuerpo['pregunta'].trim() : '';
-  const moduleSlug = typeof cuerpo['modulo'] === 'string' ? cuerpo['modulo'] : '';
+  const pregunta = typeof body['pregunta'] === 'string' ? body['pregunta'].trim() : '';
+  const moduleSlug = typeof body['modulo'] === 'string' ? body['modulo'] : '';
 
   if (!pregunta) return NextResponse.json({ error: 'Falta la pregunta.' }, { status: 400 });
   if (pregunta.length > MAXIMO) {

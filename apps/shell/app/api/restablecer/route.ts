@@ -6,16 +6,16 @@ export const runtime = 'nodejs';
 
 /** Canje de un token de restablecimiento — seccion 4.7.2. */
 export async function POST(request: Request) {
-  let cuerpo: Record<string, unknown>;
+  let body: Record<string, unknown>;
   try {
-    cuerpo = (await request.json()) as Record<string, unknown>;
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
 
-  const resetId = typeof cuerpo['resetId'] === 'string' ? cuerpo['resetId'].trim() : '';
-  const codigo = typeof cuerpo['codigo'] === 'string' ? cuerpo['codigo'].trim() : '';
-  const clave = typeof cuerpo['clave'] === 'string' ? cuerpo['clave'] : '';
+  const resetId = typeof body['resetId'] === 'string' ? body['resetId'].trim() : '';
+  const codigo = typeof body['codigo'] === 'string' ? body['codigo'].trim() : '';
+  const clave = typeof body['clave'] === 'string' ? body['clave'] : '';
 
   if (!resetId || !codigo || !clave) {
     return NextResponse.json(

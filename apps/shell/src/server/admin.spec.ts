@@ -149,7 +149,7 @@ describe('la puerta de ampliacion de ambito (4.10.4)', () => {
   });
 
   it('un rechazo NO deja rastro en el almacen ni en la auditoria', async () => {
-    const antes = JSON.stringify(ambitoDelEquipo());
+    const before = JSON.stringify(ambitoDelEquipo());
     await expect(
       guardarAmbito({
         actor: admin,
@@ -157,7 +157,7 @@ describe('la puerta de ampliacion de ambito (4.10.4)', () => {
         scope: scope(DIM_MATERIA, 'Penal', 'Civil', 'Laboral'),
       }),
     ).rejects.toThrow();
-    expect(JSON.stringify(ambitoDelEquipo())).toBe(antes);
+    expect(JSON.stringify(ambitoDelEquipo())).toBe(before);
     expect(await listarAuditoria()).toHaveLength(0);
   });
 
@@ -231,13 +231,13 @@ describe('la puerta de auditoria (seccion 7)', () => {
 
 describe('editar el ambito de una carpeta cambia lo que contiene', () => {
   it('el ambito efectivo de un modulo cambia de inmediato', async () => {
-    const antes = resolveEffectiveScope({
+    const before = resolveEffectiveScope({
       user: { userId: 'u-ana' },
       activeTeam: await equipoDe('equipo-norte'),
       moduleId: 'casos-pendientes',
       generalTree: (await gobierno.getTree()).nodes,
     });
-    const distritoAntes = antes.scope.restrictions.find(
+    const distritoAntes = before.scope.restrictions.find(
       (r) => dimensionKey(r.dimension) === dimensionKey(DIM_DISTRITO),
     );
     expect(distritoAntes?.allowedValues).toEqual(['Distrito Norte']);
@@ -249,13 +249,13 @@ describe('editar el ambito de una carpeta cambia lo que contiene', () => {
       scope: scope(DIM_DISTRITO),
     });
 
-    const despues = resolveEffectiveScope({
+    const after = resolveEffectiveScope({
       user: { userId: 'u-ana' },
       activeTeam: await equipoDe('equipo-norte'),
       moduleId: 'casos-pendientes',
       generalTree: (await gobierno.getTree()).nodes,
     });
-    expect(despues.deniesEverything).toBe(true);
+    expect(after.deniesEverything).toBe(true);
   });
 });
 

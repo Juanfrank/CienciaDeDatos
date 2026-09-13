@@ -47,7 +47,7 @@ test.describe('se edita el modulo, no un formulario', () => {
     const id = await idDelBloque(page);
 
     const valor = page.getByTestId(`bloque-${id}`).getByTestId('kpi-valor');
-    const antes = await valor.innerText();
+    const before = await valor.innerText();
 
     // Se cambia la medida desde su pozo: otra medida, otra cifra, en el mismo gesto.
     await page.getByTestId(`pozo-${id}-valor-quitar-CasosIngresados`).click();
@@ -59,7 +59,7 @@ test.describe('se edita el modulo, no un formulario', () => {
     /*
      * Antes esto comprobaba SOLO que la cifra cambiara, y con eso no basta.
      */
-    await expect(valor).not.toHaveText(antes);
+    await expect(valor).not.toHaveText(before);
     await expect(valor).not.toHaveText('0');
     await expect(valor).not.toHaveText('—');
   });
@@ -120,7 +120,7 @@ test.describe('la rejilla es visible y se maneja', () => {
 
     const medida = await page.getByTestId(`bloque-${id}`).evaluate((el) => {
       const estilo = getComputedStyle(el);
-      const primera = Number(estilo.gridRowStart) - 1;
+      const first = Number(estilo.gridRowStart) - 1;
       const alto = Number(estilo.gridRowEnd.replace('span ', ''));
       const celdas = Array.from(document.querySelectorAll('.lienzo__guia')) as HTMLElement[];
       const columnas = 12;
@@ -130,8 +130,8 @@ test.describe('la rejilla es visible y se maneja', () => {
         alto,
         arribaBloque: Math.round(caja.top),
         abajoBloque: Math.round(caja.bottom),
-        arribaGuia: Math.round(enColumna1(primera)?.top ?? NaN),
-        abajoGuia: Math.round(enColumna1(primera + alto - 1)?.bottom ?? NaN),
+        arribaGuia: Math.round(enColumna1(first)?.top ?? NaN),
+        abajoGuia: Math.round(enColumna1(first + alto - 1)?.bottom ?? NaN),
       };
     });
 
@@ -987,8 +987,8 @@ test.describe('el panel de formato se busca, no se recorre', () => {
      */
     await conUnGrafico(page, 'panel-buscar');
 
-    const antes = await panelDe(page).locator('details.seccion').count();
-    expect(antes).toBeGreaterThan(5);
+    const before = await panelDe(page).locator('details.seccion').count();
+    expect(before).toBeGreaterThan(5);
 
     // «Meta» no es el titulo de ninguna seccion: es como se llama de verdad una linea de
     // referencia. Un buscador que solo mirara el titulo obligaria a saber ya como se llama.
@@ -1086,18 +1086,18 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
       }),
     );
 
-    const primera = cajas[0];
+    const first = cajas[0];
     const segunda = cajas[1];
     const tercera = cajas[2];
-    if (!primera || !segunda || !tercera) throw new Error('faltan fichas que medir');
+    if (!first || !segunda || !tercera) throw new Error('faltan fichas que medir');
 
     // Las dos primeras comparten fila y la segunda esta a la derecha.
-    expect(segunda.y).toBe(primera.y);
-    expect(segunda.x).toBeGreaterThan(primera.x);
+    expect(segunda.y).toBe(first.y);
+    expect(segunda.x).toBeGreaterThan(first.x);
     // Y la tercera baja de fila, alineada con la primera: eso es una rejilla de DOS columnas y no
     // de tres, que con cinco objetos tambien daria dos en la primera fila.
-    expect(tercera.y).toBeGreaterThan(primera.y);
-    expect(tercera.x).toBe(primera.x);
+    expect(tercera.y).toBeGreaterThan(first.y);
+    expect(tercera.x).toBe(first.x);
   });
 
   test('una familia se pliega y se despliega, y las demas no se mueven', async ({ page }) => {

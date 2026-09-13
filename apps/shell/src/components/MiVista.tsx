@@ -23,12 +23,12 @@ export function MiVista({
     setError('');
     const r = await fetch(`/api/modulos/${moduleSlug}/vista`);
     if (!r.ok) return;
-    const cuerpo = (await r.json()) as {
+    const body = (await r.json()) as {
       ocultos: string[];
       objetos: { id: string; titulo: string }[];
     };
-    setObjetos(cuerpo.objetos);
-    setOcultos(cuerpo.ocultos);
+    setObjetos(body.objetos);
+    setOcultos(body.ocultos);
     dialogo.current?.showModal();
   };
 

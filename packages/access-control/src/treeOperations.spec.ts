@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { dimensionKey } from './AccessScope';
-import { DIM_DISTRITO, DIM_MATERIA, arbolGeneral, equipoNorte, scope, usuarioAna } from './__fixtures__/gobierno';
+import { DIM_DISTRITO, DIM_MATERIA, generalTree, equipoNorte, scope, usuarioAna } from './__fixtures__/gobierno';
 import { findNode, isFolder, type NavNode } from './NavigationTree';
 import { resolveEffectiveScope } from './resolveEffectiveScope';
 import {
@@ -14,7 +14,7 @@ const admin: Actor = { userId: 'admin-1', role: 'administrador' };
 const colaborador: Actor = { userId: 'ana', role: 'colaborador' };
 const visor: Actor = { userId: 'beto', role: 'visor' };
 
-const arbol = (): ManagedTree => ({ nodes: JSON.parse(JSON.stringify(arbolGeneral)) as NavNode[], trash: [] });
+const arbol = (): ManagedTree => ({ nodes: JSON.parse(JSON.stringify(generalTree)) as NavNode[], trash: [] });
 
 const esperarOk = (r: ReturnType<typeof applyTreeOperation>) => {
   if (!r.ok) throw new Error(`se esperaba ok: ${JSON.stringify(r)}`);
@@ -64,11 +64,11 @@ describe('permisos sobre el arbol: la comprobacion ocurre antes que nada', () =>
 
 describe('mover es estructural, no cosmetico (4.1.2)', () => {
   it('mover un modulo entre carpetas con ambitos distintos cambia su ambito DE INMEDIATO', () => {
-    const antes = arbol();
-    expect(valoresDe(antes, 'audiencias-norte', DIM_DISTRITO)).toEqual(['Distrito Norte']);
+    const before = arbol();
+    expect(valoresDe(before, 'audiencias-norte', DIM_DISTRITO)).toEqual(['Distrito Norte']);
 
     const r = esperarOk(
-      applyTreeOperation(antes, { type: 'mover', nodeId: 'nodo-audiencias-norte', newParentId: 'carpeta-este' }, admin),
+      applyTreeOperation(before, { type: 'mover', nodeId: 'nodo-audiencias-norte', newParentId: 'carpeta-este' }, admin),
     );
 
     expect(valoresDe(r.tree, 'audiencias-norte', DIM_DISTRITO)).toEqual(['Distrito Este']);
@@ -192,18 +192,18 @@ describe('crear, renombrar y reordenar', () => {
 
   it('renombra una carpeta y lo registra', () => {
     const r = esperarOk(applyTreeOperation(arbol(), { type: 'renombrar', nodeId: 'carpeta-norte', name: 'Norte (nuevo)' }, admin));
-    const nodo = findNode(r.tree.nodes, 'carpeta-norte');
-    expect(nodo && isFolder(nodo) ? nodo.name : null).toBe('Norte (nuevo)');
+    const node = findNode(r.tree.nodes, 'carpeta-norte');
+    expect(node && isFolder(node) ? node.name : null).toBe('Norte (nuevo)');
     expect(r.audit[0]?.detail).toMatch(/de 'Distrito Norte' a 'Norte \(nuevo\)'/);
   });
 
   it('reordena dentro de la misma carpeta sin cambiar el ambito', () => {
-    const antes = valoresDe(arbol(), 'audiencias-norte', DIM_MATERIA);
+    const before = valoresDe(arbol(), 'audiencias-norte', DIM_MATERIA);
     const r = esperarOk(applyTreeOperation(arbol(), { type: 'reordenar', nodeId: 'nodo-audiencias-norte', index: 0 }, admin));
     const carpeta = findNode(r.tree.nodes, 'carpeta-norte');
     if (!carpeta || !isFolder(carpeta)) throw new Error('se esperaba carpeta');
     expect(carpeta.children[0]?.id).toBe('nodo-audiencias-norte');
-    expect(valoresDe(r.tree, 'audiencias-norte', DIM_MATERIA)).toEqual(antes);
+    expect(valoresDe(r.tree, 'audiencias-norte', DIM_MATERIA)).toEqual(before);
   });
 });
 

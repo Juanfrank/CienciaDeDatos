@@ -18,7 +18,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();
-  const cuerpo = (await request.json()) as {
+  const body = (await request.json()) as {
     name?: string;
     moduleSlug?: string;
     pageSlug?: string;
@@ -26,20 +26,20 @@ export async function POST(request: Request) {
     compartir?: boolean;
   };
 
-  if (!cuerpo.name?.trim() || !cuerpo.moduleSlug) {
+  if (!body.name?.trim() || !body.moduleSlug) {
     return NextResponse.json({ error: 'Se requieren name y moduleSlug.' }, { status: 400 });
   }
 
   const marcador = await guardarMarcador(
     captureBookmark({
       id: crypto.randomUUID(),
-      name: cuerpo.name.trim(),
+      name: body.name.trim(),
       ownerUserId: sesion.userId,
-      moduleSlug: cuerpo.moduleSlug,
-      ...(cuerpo.pageSlug ? { pageSlug: cuerpo.pageSlug } : {}),
-      searchParams: new URLSearchParams(cuerpo.query ?? ''),
+      moduleSlug: body.moduleSlug,
+      ...(body.pageSlug ? { pageSlug: body.pageSlug } : {}),
+      searchParams: new URLSearchParams(body.query ?? ''),
       createdAt: new Date().toISOString(),
-      ...(cuerpo.compartir ? { sharedWithTeamId: sesion.activeTeamId } : {}),
+      ...(body.compartir ? { sharedWithTeamId: sesion.activeTeamId } : {}),
     }),
   );
 
