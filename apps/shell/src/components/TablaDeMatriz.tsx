@@ -7,10 +7,10 @@ import {
   type MatrixNode,
   type ObjectInstance,
   compareValues,
-  colorCondicional,
+  conditionalColor,
   estiloDeTexto,
   visibleRows,
-  formateadorDeMedida,
+  measureFormatter,
   leaves,
   sortNodes,
   pathKey,
@@ -41,7 +41,7 @@ function CeldaDeCifra({
   condicional?: ConditionalFormat;
   total?: boolean;
 }) {
-  const color = valor === null ? undefined : colorCondicional(condicional, valor, medida);
+  const color = valor === null ? undefined : conditionalColor(condicional, valor, medida);
   return (
     <td
       className={total ? 'es-numero es-total' : 'es-numero'}
@@ -74,7 +74,7 @@ export function TablaDeMatriz({
 
   // Un formateador por medida: la matriz puede llevar hasta cuatro, cada una con su formato.
   const formatear = useMemo(
-    () => vm.medidas.map((m) => formateadorDeMedida(instance.presentacion, m)),
+    () => vm.medidas.map((m) => measureFormatter(instance.presentacion, m)),
     [vm.medidas, instance.presentacion],
   );
   const gridColumns = useMemo(() => leaves(vm.gridColumns, plegadasColumna), [vm, plegadasColumna]);

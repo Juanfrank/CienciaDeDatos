@@ -1,7 +1,7 @@
-import { TRAZOS_DE_ICONO, type NombreDeIcono } from '@app/ui-components';
+import { TRAZOS_DE_ICONO, type IconName } from '@app/ui-components';
 
 /** Los iconos de la interfaz. */
-export function Icono({ nombre, tamano = 20 }: { nombre: NombreDeIcono; tamano?: number }) {
+export function Icono({ nombre, tamano = 20 }: { nombre: IconName; tamano?: number }) {
   return (
     <svg
       className="icono"
@@ -21,4 +21,4 @@ export function Icono({ nombre, tamano = 20 }: { nombre: NombreDeIcono; tamano?:
   );
 }
 
-export type { NombreDeIcono };
+export type { IconName };

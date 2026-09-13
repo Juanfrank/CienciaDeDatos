@@ -18,11 +18,11 @@ const idDelPrimerBloque = async (page: Pagina): Promise<string> => {
 
 /** Abre una subseccion del panel por su testid. */
 const abrir = async (page: Pagina, prueba: string) => {
-  const seccion = page.getByTestId(prueba);
-  if (await seccion.evaluate((el) => !(el as HTMLDetailsElement).open)) {
+  const section = page.getByTestId(prueba);
+  if (await section.evaluate((el) => !(el as HTMLDetailsElement).open)) {
     // `> summary` y no `summary`: «Medida» contiene subsecciones —Valor, Etiqueta, el formato de
     // cada medida— y cada una trae el suyo. Sin el hijo directo, el selector encuentra cuatro.
-    await seccion.locator('> summary').click();
+    await section.locator('> summary').click();
   }
 };
 

@@ -79,7 +79,7 @@ describe('ejes', () => {
   });
 
   it('se pueden ocultar y titular', () => {
-    const o = opciones({ ejes: { mostrarY: false, tituloX: 'Distrito', cuadricula: false } });
+    const o = opciones({ ejes: { mostrarY: false, tituloX: 'Distrito', gridlines: false } });
     expect(o.yAxis.show).toBe(false);
     expect(o.xAxis.name).toBe('Distrito');
     expect(o.yAxis.splitLine.show).toBe(false);
@@ -257,14 +257,14 @@ describe('etiquetas de dato: las tres opciones, no dos', () => {
   });
 
   it('solo los extremos rotula el maximo y el minimo, y calla el resto', () => {
-    const etiqueta = withLabels({ soloExtremos: true }).series[0].label.formatter;
+    const etiqueta = withLabels({ onlyEnds: true }).series[0].label.formatter;
     expect(etiqueta({ value: 50, dataIndex: 1 })).toBe('50 c');
     expect(etiqueta({ value: 10, dataIndex: 0 })).toBe('10 c');
     expect(etiqueta({ value: 30, dataIndex: 2 })).toBe('');
   });
 
   it('un nulo no compite por ser el minimo: no es un numero', () => {
-    const o = withLabels({ soloExtremos: true }, vm(['A'], [['x', 10], ['y', null], ['z', 30]]));
+    const o = withLabels({ onlyEnds: true }, vm(['A'], [['x', 10], ['y', null], ['z', 30]]));
     const etiqueta = o.series[0].label.formatter;
     expect(etiqueta({ value: 10, dataIndex: 0 })).toBe('10 c');
     expect(etiqueta({ value: 30, dataIndex: 2 })).toBe('30 c');
@@ -308,7 +308,7 @@ describe('tooltip', () => {
   });
 
   it('ordenar pone la serie mayor arriba', () => {
-    const o = opciones({ tooltip: { ordenarPorValor: true } }, dos);
+    const o = opciones({ tooltip: { sortValue: true } }, dos);
     const content: string = o.tooltip.formatter(params);
     expect(content.indexOf('B:')).toBeLessThan(content.indexOf('A:'));
   });

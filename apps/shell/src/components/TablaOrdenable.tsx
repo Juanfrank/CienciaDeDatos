@@ -5,7 +5,7 @@ import type { QueryResult } from '@app/data-contracts';
 import {
   type Direction,
   type ConditionalFormat,
-  colorCondicional,
+  conditionalColor,
   compareValues,
   estiloDeTexto,
 } from '@app/ui-components';
@@ -103,7 +103,7 @@ export function TablaOrdenable({
                  * por columna — en una tabla larga eso son miles de llamadas.
                  */
                 const color = esCifra
-                  ? colorCondicional(condicional, celda, projected.columns[j]?.name)
+                  ? conditionalColor(condicional, celda, projected.columns[j]?.name)
                   : undefined;
                 return (
                   <td

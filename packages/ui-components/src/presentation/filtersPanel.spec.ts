@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { ObjectInstance } from '../registry/types';
 import {
-  esTipoDeFecha,
-  selectorPorDefecto,
+  dateKindIs,
+  defaultPicker,
   selectoresEfectivos,
-  validarPanelDeFiltros,
-} from './panelDeFiltros';
+  validatePanelFilters,
+} from './filtersPanel';
 
 const objectInstance = (dimensiones: string[]): ObjectInstance => ({
   instanceId: 'f1',
@@ -21,48 +21,48 @@ const objectInstance = (dimensiones: string[]): ObjectInstance => ({
   },
 });
 
-const TIPOS = {
+const KINDS = {
   'DimTribunal.Materia': 'string',
   'DimTribunal.Distrito': 'string',
   'DimTiempo.Fecha': 'date',
 };
 
-describe('validarPanelDeFiltros', () => {
+describe('validatePanelFilters', () => {
   it('acepta un selector por cada dimension mapeada', () => {
     expect(
-      validarPanelDeFiltros(
+      validatePanelFilters(
         objectInstance(['DimTribunal.Materia', 'DimTiempo.Fecha']),
         {
-          selectores: [
+          pickers: [
             { fieldName: 'DimTribunal.Materia', tipo: 'pastillas' },
             { fieldName: 'DimTiempo.Fecha', tipo: 'rango-de-fechas' },
           ],
         },
-        TIPOS,
+        KINDS,
       ),
     ).toEqual([]);
   });
 
   it('rechaza un selector sobre un campo que no esta mapeado', () => {
-    const [issue] = validarPanelDeFiltros(
+    const [issue] = validatePanelFilters(
       objectInstance(['DimTribunal.Materia']),
-      { selectores: [{ fieldName: 'DimTribunal.Distrito', tipo: 'pastillas' }] },
-      TIPOS,
+      { pickers: [{ fieldName: 'DimTribunal.Distrito', tipo: 'pastillas' }] },
+      KINDS,
     );
     expect(issue?.fieldName).toBe('DimTribunal.Distrito');
     expect(issue?.issue).toContain('DimTribunal.Materia');
   });
 
   it('rechaza dos selectores para la misma dimension', () => {
-    const problems = validarPanelDeFiltros(
+    const problems = validatePanelFilters(
       objectInstance(['DimTribunal.Materia']),
       {
-        selectores: [
+        pickers: [
           { fieldName: 'DimTribunal.Materia', tipo: 'pastillas' },
           { fieldName: 'DimTribunal.Materia', tipo: 'lista' },
         ],
       },
-      TIPOS,
+      KINDS,
     );
     expect(problems).toHaveLength(1);
     expect(problems[0]?.issue).toContain('mas de un selector');
@@ -71,10 +71,10 @@ describe('validarPanelDeFiltros', () => {
   it('rechaza un calendario sobre una dimension que no es fecha', () => {
     // Es el motivo por el que el TIPO de columna viaja hasta la validacion: sin el, esto se
     // descubriria al dibujar, con un selector de fecha sobre valores «Penal» y «Civil».
-    const [issue] = validarPanelDeFiltros(
+    const [issue] = validatePanelFilters(
       objectInstance(['DimTribunal.Materia']),
-      { selectores: [{ fieldName: 'DimTribunal.Materia', tipo: 'calendario' }] },
-      TIPOS,
+      { pickers: [{ fieldName: 'DimTribunal.Materia', tipo: 'calendario' }] },
+      KINDS,
     );
     expect(issue?.issue).toContain('necesita una dimension de fecha');
   });
@@ -83,25 +83,25 @@ describe('validarPanelDeFiltros', () => {
     // Un dataset que el job aun no ha poblado no tiene esquema, y entonces no se sabe el tipo de
     // nada. Rechazar ahi bloquearia configuraciones correctas en un despliegue recien hecho.
     expect(
-      validarPanelDeFiltros(
+      validatePanelFilters(
         objectInstance(['DimTiempo.Fecha']),
-        { selectores: [{ fieldName: 'DimTiempo.Fecha', tipo: 'calendario' }] },
+        { pickers: [{ fieldName: 'DimTiempo.Fecha', tipo: 'calendario' }] },
         {},
       ),
     ).toEqual([]);
   });
 
   it('rechaza un tipo de selector inventado', () => {
-    const [issue] = validarPanelDeFiltros(
+    const [issue] = validatePanelFilters(
       objectInstance(['DimTribunal.Materia']),
-      { selectores: [{ fieldName: 'DimTribunal.Materia', tipo: 'rueda' as never }] },
-      TIPOS,
+      { pickers: [{ fieldName: 'DimTribunal.Materia', tipo: 'rueda' as never }] },
+      KINDS,
     );
     expect(issue?.issue).toContain('no es un tipo de selector');
   });
 
   it('un panel sin configurar no tiene problemas', () => {
-    expect(validarPanelDeFiltros(objectInstance(['DimTribunal.Materia']), undefined, TIPOS)).toEqual([]);
+    expect(validatePanelFilters(objectInstance(['DimTribunal.Materia']), undefined, KINDS)).toEqual([]);
   });
 });
 
@@ -111,8 +111,8 @@ describe('selectoresEfectivos', () => {
     // invisible, que es el peor fallo de un filtro — quien mira cree estar viendo el total.
     const efectivos = selectoresEfectivos(
       objectInstance(['DimTribunal.Materia', 'DimTiempo.Fecha']),
-      { selectores: [{ fieldName: 'DimTribunal.Materia', tipo: 'desplegable' }] },
-      TIPOS,
+      { pickers: [{ fieldName: 'DimTribunal.Materia', tipo: 'desplegable' }] },
+      KINDS,
     );
     expect(efectivos.map((s) => [s.fieldName, s.tipo])).toEqual([
       ['DimTribunal.Materia', 'desplegable'],
@@ -121,15 +121,15 @@ describe('selectoresEfectivos', () => {
   });
 
   it('la etiqueta por defecto es el campo sin la tabla', () => {
-    const [uno] = selectoresEfectivos(objectInstance(['DimTribunal.Materia']), undefined, TIPOS);
+    const [uno] = selectoresEfectivos(objectInstance(['DimTribunal.Materia']), undefined, KINDS);
     expect(uno?.etiqueta).toBe('Materia');
   });
 
   it('respeta la etiqueta configurada', () => {
     const [uno] = selectoresEfectivos(
       objectInstance(['DimTribunal.Materia']),
-      { selectores: [{ fieldName: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Area' }] },
-      TIPOS,
+      { pickers: [{ fieldName: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Area' }] },
+      KINDS,
     );
     expect(uno?.etiqueta).toBe('Area');
   });
@@ -140,12 +140,12 @@ describe('selectoresEfectivos', () => {
     const efectivos = selectoresEfectivos(
       objectInstance(['DimTribunal.Materia', 'DimTribunal.Distrito']),
       {
-        selectores: [
+        pickers: [
           { fieldName: 'DimTribunal.Distrito', tipo: 'lista' },
           { fieldName: 'DimTribunal.Materia', tipo: 'pastillas' },
         ],
       },
-      TIPOS,
+      KINDS,
     );
     expect(efectivos.map((s) => s.fieldName)).toEqual([
       'DimTribunal.Materia',
@@ -154,16 +154,16 @@ describe('selectoresEfectivos', () => {
   });
 });
 
-describe('selectorPorDefecto', () => {
+describe('defaultPicker', () => {
   it('una fecha se filtra por rango; lo demas, por pastillas', () => {
-    expect(selectorPorDefecto('date')).toBe('rango-de-fechas');
-    expect(selectorPorDefecto('string')).toBe('pastillas');
+    expect(defaultPicker('date')).toBe('rango-de-fechas');
+    expect(defaultPicker('string')).toBe('pastillas');
   });
 
   it('reconoce como fecha los nombres que usa cada conector', () => {
     for (const tipo of ['date', 'DATETIME', 'timestamp', 'Fecha']) {
-      expect(esTipoDeFecha(tipo), tipo).toBe(true);
+      expect(dateKindIs(tipo), tipo).toBe(true);
     }
-    expect(esTipoDeFecha('desconocido')).toBe(false);
+    expect(dateKindIs('desconocido')).toBe(false);
   });
 });

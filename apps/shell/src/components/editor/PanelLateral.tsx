@@ -8,19 +8,19 @@ import {
   agregacionesPosibles,
   cabeEnRanura,
   fieldKey,
-  conCampoEnRanura,
-  ranurasDe,
-  ranurasPorDefecto,
-  sinCampoEnRanura,
+  withSlotField,
+  slotsOf,
+  defaultSlots,
+  slotFieldWithout,
   type AttachedObjectInstance,
   type ObjectInstance,
-  type RanuraDeCampos,
+  type FieldSlot,
 } from '@app/ui-components';
 import {
   type ObjectFamily,
   type ObjectCategory,
-  esContenedor,
-  esElemento,
+  isContainer,
+  isElement,
 } from '@app/ui-components';
 import type { DatasetDePaleta, ObjetoDePaleta } from '../../server/editor';
 import { Icono } from '../iconos/Icono';
@@ -30,7 +30,7 @@ import { Pozo } from './Pozo';
 import { Presentacion } from './Presentacion';
 import type { MessageKey } from '@app/i18n';
 import { useTraductor } from '../Idioma';
-import { ProveedorDeFiltro, Seccion } from './Seccion';
+import { ProveedorDeFiltro, Section } from './Seccion';
 
 /** El panel del editor: la tienda y el banco de trabajo, en uno. */
 
@@ -69,7 +69,7 @@ export function PanelLateral({
     }
     // Lo que no lee datos salta a «Formato»: es su primera pestana util, y mandarlo a una
     // deshabilitada dejaria el panel en blanco justo despues de colocar algo.
-    const sinDatos = objetoSeleccionado !== null && (esElemento(objetoSeleccionado) || esContenedor(objetoSeleccionado));
+    const sinDatos = objetoSeleccionado !== null && (isElement(objetoSeleccionado) || isContainer(objetoSeleccionado));
     setPestana(sinDatos ? 'formato' : 'datos');
   }, [idSeleccionado, objetoSeleccionado]);
 
@@ -105,7 +105,7 @@ export function PanelLateral({
 
   return (
     <aside className="panel-editor" data-testid="panel-editor">
-      <Pestanas pestanas={PESTANAS} activa={pestana} onElegir={setPestana} />
+      <Pestanas tabs={PESTANAS} activa={pestana} onElegir={setPestana} />
 
       <div
         className="panel-editor__cuerpo"
@@ -184,13 +184,13 @@ export function PanelLateral({
               Abierta por defecto: redimensionar es lo que mas se hace en esta pestana, y llegar a
               ella para encontrarse un titulo plegado anade un clic a cada ajuste.
             */}
-            <Seccion
+            <Section
               titulo="Tamano y posicion"
               keys={['ancho', 'alto', 'columnas', 'filas', 'mover', 'rejilla', 'redimensionar']}
               prueba={`seccion-tamano-${seleccionado.id}`}
             >
               <Tamano item={seleccionado} guardando={guardando} onCambiar={onCambiar} />
-            </Seccion>
+            </Section>
             </ProveedorDeFiltro>
 
             {/*
@@ -313,7 +313,7 @@ function Tienda({
       ) : null}
 
       {withData.length > 0 ? (
-        <Seccion titulo="Visualizaciones" prueba="seccion-visualizaciones">
+        <Section titulo="Visualizaciones" prueba="seccion-visualizaciones">
           <p className="texto-atenuado panel-editor__nota">
             Se enlazan a un dataset certificado del registro. Un modulo no construye consultas (4.2).
           </p>
@@ -339,7 +339,7 @@ function Tienda({
               const dela = withData.filter((o) => o.family === family);
               if (dela.length === 0) return null;
               return (
-                <Seccion
+                <Section
                   key={family}
                   titulo={t(`familia.${family}` as MessageKey)}
                   nivel={2}
@@ -357,15 +357,15 @@ function Tienda({
                     guardando={guardando}
                     onAnadir={onAnadir}
                   />
-                </Seccion>
+                </Section>
               );
             })}
           </ProveedorDeFiltro>
-        </Seccion>
+        </Section>
       ) : null}
 
       {de('elemento').length > 0 ? (
-        <Seccion titulo="Elementos" prueba="seccion-elementos">
+        <Section titulo="Elementos" prueba="seccion-elementos">
           <p className="texto-atenuado panel-editor__nota">
             No se enlazan a datos: componen la pagina. Texto, titulos, lineas, formas y conexiones.
           </p>
@@ -375,11 +375,11 @@ function Tienda({
             guardando={guardando}
             onAnadir={onAnadir}
           />
-        </Seccion>
+        </Section>
       ) : null}
 
       {de('contenedor').length > 0 ? (
-        <Seccion titulo="Contenedores" prueba="seccion-contenedores">
+        <Section titulo="Contenedores" prueba="seccion-contenedores">
           <p className="texto-atenuado panel-editor__nota">
             Agrupan elementos y visualizaciones en su propia rejilla.
           </p>
@@ -389,7 +389,7 @@ function Tienda({
             guardando={guardando}
             onAnadir={onAnadir}
           />
-        </Seccion>
+        </Section>
       ) : null}
     </>
   );
@@ -463,23 +463,23 @@ function Datos({
   const slots =
     declaradas.length > 0
       ? declaradas
-      : ranurasPorDefecto({
+      : defaultSlots({
           dimensions: definicion?.dimensiones ?? { min: 0, max: 0 },
           measures: definicion?.medidas ?? { min: 0, max: 0 },
         });
 
   const deDimension = slots.filter((r) => r.tipo === 'dimension');
   const deMedida = slots.filter((r) => r.tipo === 'medida');
-  const asignacion = ranurasDe(item.instance, slots);
+  const asignacion = slotsOf(item.instance, slots);
 
   /*
    * Poner y quitar van POR RANURA, no por indice.
    */
-  const poner = (ranuraId: string, fieldName: string) =>
-    cambiarInstancia((i) => conCampoEnRanura(i, slots, ranuraId, fieldName));
+  const poner = (slotId: string, fieldName: string) =>
+    cambiarInstancia((i) => withSlotField(i, slots, slotId, fieldName));
 
-  const quitar = (ranuraId: string, fieldName: string) =>
-    cambiarInstancia((i) => sinCampoEnRanura(i, slots, ranuraId, fieldName));
+  const quitar = (slotId: string, fieldName: string) =>
+    cambiarInstancia((i) => slotFieldWithout(i, slots, slotId, fieldName));
 
   /*
    * Como se resume cada medida.
@@ -522,7 +522,7 @@ function Datos({
 
   return (
     <>
-      <Seccion titulo="Origen" prueba={`seccion-origen-${item.id}`}>
+      <Section titulo="Origen" prueba={`seccion-origen-${item.id}`}>
         <label className="formulario__campo">
           <span>Titulo</span>
           <input
@@ -555,10 +555,10 @@ function Datos({
             ))}
           </select>
         </label>
-      </Seccion>
+      </Section>
 
       {deDimension.length > 0 ? (
-        <Seccion titulo="Campos" prueba={`seccion-campos-${item.id}`}>
+        <Section titulo="Campos" prueba={`seccion-campos-${item.id}`}>
           {deDimension.map((ranura) => (
             <RanuraDeEdicion
               key={ranura.id}
@@ -572,11 +572,11 @@ function Datos({
               onQuitar={quitar}
             />
           ))}
-        </Seccion>
+        </Section>
       ) : null}
 
       {deMedida.length > 0 ? (
-        <Seccion titulo="Cifras" prueba={`seccion-cifras-${item.id}`}>
+        <Section titulo="Cifras" prueba={`seccion-cifras-${item.id}`}>
           {deMedida.map((ranura) => (
             <RanuraDeEdicion
               key={ranura.id}
@@ -593,7 +593,7 @@ function Datos({
               posibles={posibles}
             />
           ))}
-        </Seccion>
+        </Section>
       ) : null}
 
       {/*
@@ -609,7 +609,7 @@ function Datos({
         disabled={guardando}
         onClick={() => onQuitar(item.id)}
       >
-        <Icono nombre="cerrar" tamano={14} />
+        <Icono nombre="close" tamano={14} />
         Quitar del modulo
       </button>
     </>
@@ -630,15 +630,15 @@ function RanuraDeEdicion({
   onAgregacion,
   posibles,
 }: {
-  ranura: RanuraDeCampos;
+  ranura: FieldSlot;
   /** TODAS las ranuras del objeto, no solo esta. */
-  todas: RanuraDeCampos[];
+  todas: FieldSlot[];
   item: GridItem;
   elegidos: string[];
   disponibles: string[];
   guardando: boolean;
-  onAnadir: (ranuraId: string, fieldName: string) => void;
-  onQuitar: (ranuraId: string, fieldName: string) => void;
+  onAnadir: (slotId: string, fieldName: string) => void;
+  onQuitar: (slotId: string, fieldName: string) => void;
   agregacionDe?: (fieldName: string) => Aggregation;
   onAgregacion?: (fieldName: string, aggregation: Aggregation) => void;
   posibles?: Aggregation[];
@@ -718,7 +718,7 @@ function Complementos({
         pageHeader.
       </p>
 
-      <Seccion titulo="Puestos" prueba={`seccion-complementos-${item.id}`}>
+      <Section titulo="Puestos" prueba={`seccion-complementos-${item.id}`}>
         {puestos.length === 0 ? (
           <p className="texto-atenuado" data-testid={`sin-complementos-${item.id}`}>
             Este objeto no lleva ninguno.
@@ -727,7 +727,7 @@ function Complementos({
           <ul className="panel-editor__adjuntos">
             {puestos.map((a) => (
               <li key={a.instanceId}>
-                <Seccion
+                <Section
                   titulo={objetos.find((o) => o.objectId === a.objectId)?.name ?? a.objectId}
                   nivel={2}
                   prueba={`adjunto-${item.id}-${a.objectId}`}
@@ -783,14 +783,14 @@ function Complementos({
                   >
                     Quitar
                   </button>
-                </Seccion>
+                </Section>
               </li>
             ))}
           </ul>
         )}
-      </Seccion>
+      </Section>
 
-      <Seccion titulo="Anadir" prueba={`seccion-anadir-complemento-${item.id}`}>
+      <Section titulo="Anadir" prueba={`seccion-anadir-complemento-${item.id}`}>
         <ul className="tienda">
           {adjuntables.map((o) => {
             const yaPuesto = puestos.some((a) => a.objectId === o.objectId);
@@ -814,7 +814,7 @@ function Complementos({
             );
           })}
         </ul>
-      </Seccion>
+      </Section>
     </>
   );
 }

@@ -3,9 +3,9 @@
 import { useId, useState } from 'react';
 import {
   type ContainerSettings,
-  type Eje,
+  type Axis,
   COLUMNAS_INTERNAS_POR_DEFECTO,
-  columnasDe,
+  columnsOf,
 } from '@app/ui-components';
 import { Icono } from './iconos/Icono';
 import { Marco } from './objetos';
@@ -69,7 +69,7 @@ export function ContenedorSimple({ objeto, titulo, config, dibujar }: PropsDeCon
       <div className="contenedor" data-testid="contenedor-simple">
         <RejillaInterna
           panel={objeto.panels?.[0]}
-          gridColumns={columnasDe('contenedor-simple', config)}
+          gridColumns={columnsOf('contenedor-simple', config)}
           dibujar={dibujar}
         />
       </div>
@@ -81,15 +81,15 @@ export function ContenedorSimple({ objeto, titulo, config, dibujar }: PropsDeCon
 
 /** Se desplaza por UN eje. */
 export function ContenedorDesplazable({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
-  const eje: Eje = config?.desplazable?.eje === 'x' ? 'x' : 'y';
-  const gridColumns = columnasDe('contenedor-desplazable', config);
+  const axis: Axis = config?.scrollable?.axis === 'x' ? 'x' : 'y';
+  const gridColumns = columnsOf('contenedor-desplazable', config);
 
   return (
     <Marco titulo={titulo} instance={objeto.instance}>
       <div
         className="contenedor contenedor--desplazable"
         data-testid="contenedor-desplazable"
-        data-eje={eje}
+        data-axis={axis}
         // Una region desplazable tiene que alcanzarse con el teclado (2.1.1). Aqui SIEMPRE lo es
         // —para eso se eligio este contenedor—, asi que la parada de tabulacion no se mide: se pone.
         tabIndex={0}
@@ -100,7 +100,7 @@ export function ContenedorDesplazable({ objeto, titulo, config, dibujar }: Props
           className="contenedor__pista"
           // En el eje X la pista mide lo que pidan sus columnas y no se comprime: si se repartiera
           // el ancho visible, no habria nada que desplazar y el contenedor no haria nada.
-          style={eje === 'x' ? { minWidth: `${gridColumns * 180}px` } : undefined}
+          style={axis === 'x' ? { minWidth: `${gridColumns * 180}px` } : undefined}
         >
           <RejillaInterna panel={objeto.panels?.[0]} gridColumns={gridColumns} dibujar={dibujar} />
         </div>
@@ -114,8 +114,8 @@ export function ContenedorDesplazable({ objeto, titulo, config, dibujar }: Props
 /** Ensena parte de su contenido y se amplia a una ventana con SU PROPIA rejilla. */
 export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
   const [ampliado, setAmpliado] = useState(false);
-  const gridColumns = columnasDe('contenedor-ampliable', config);
-  const columnasAmpliado = Math.max(1, config?.ampliable?.columnasAmpliado ?? COLUMNAS_INTERNAS_POR_DEFECTO * 2);
+  const gridColumns = columnsOf('contenedor-ampliable', config);
+  const columnasAmpliado = Math.max(1, config?.expandable?.columnasAmpliado ?? COLUMNAS_INTERNAS_POR_DEFECTO * 2);
 
   return (
     <>
@@ -127,7 +127,7 @@ export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDe
             type="button"
             className="objeto__complemento"
             aria-label={`Ampliar ${titulo}`}
-            title={config?.ampliable?.textoDeAmpliar ?? 'Ampliar'}
+            title={config?.expandable?.textoDeAmpliar ?? 'Ampliar'}
             data-testid="ampliar"
             onClick={() => setAmpliado(true)}
           >
@@ -183,11 +183,11 @@ export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDe
 /** Varias pestanas, cada una con su contenido y su disposicion. */
 export function ContenedorConPestanas({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
   const panels = objeto.panels ?? [];
-  const inicial = config?.pestanas?.pestanaInicial;
+  const inicial = config?.tabs?.initialTab;
   const [activa, setActiva] = useState(
     panels.some((p) => p.panelId === inicial) ? (inicial as string) : (panels[0]?.panelId ?? ''),
   );
-  const gridColumns = columnasDe('contenedor-con-pestanas', config);
+  const gridColumns = columnsOf('contenedor-con-pestanas', config);
   const id = useId();
 
   return (

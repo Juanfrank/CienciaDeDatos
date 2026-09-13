@@ -65,10 +65,10 @@ const acotar = (valor: number, minimo: number, maximo: number) =>
 /** La rejilla, medida de la rejilla real. */
 function medirRejilla(rejilla: HTMLElement): { ancho: number; hole: number; pistas: Pistas } {
   const caja = rejilla.getBoundingClientRect();
-  const estilo = getComputedStyle(rejilla);
-  const huecoX = parseFloat(estilo.columnGap || '0') || 0;
-  const huecoY = parseFloat(estilo.rowGap || '0') || 0;
-  const altos = estilo.gridTemplateRows
+  const style = getComputedStyle(rejilla);
+  const huecoX = parseFloat(style.columnGap || '0') || 0;
+  const huecoY = parseFloat(style.rowGap || '0') || 0;
+  const altos = style.gridTemplateRows
     .split(' ')
     .map((v) => parseFloat(v))
     .filter((v) => Number.isFinite(v) && v > 0);

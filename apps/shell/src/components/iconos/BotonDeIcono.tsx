@@ -1,13 +1,13 @@
 'use client';
 
 import { forwardRef } from 'react';
-import { Icono, type NombreDeIcono } from './Icono';
+import { Icono, type IconName } from './Icono';
 
 /** Boton que solo muestra un icono. */
 export const BotonDeIcono = forwardRef<
   HTMLButtonElement,
   {
-    icono: NombreDeIcono;
+    icono: IconName;
     etiqueta: string;
     contador?: number;
     presionado?: boolean;

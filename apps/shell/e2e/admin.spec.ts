@@ -116,9 +116,9 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
 
   test('el editor solo ofrece dimensiones del esquema, no un campo de texto libre', async ({ page }) => {
     await page.goto('/admin/ambitos');
-    const selector = page.getByTestId('anadir-dimension');
-    await expect(selector).toBeVisible();
-    const opciones = await selector.locator('option').allTextContents();
+    const picker = page.getByTestId('anadir-dimension');
+    await expect(picker).toBeVisible();
+    const opciones = await picker.locator('option').allTextContents();
     expect(opciones.join(' ')).toContain('DimTribunal.Distrito');
     expect(opciones.join(' ')).not.toContain('DimInventada');
   });

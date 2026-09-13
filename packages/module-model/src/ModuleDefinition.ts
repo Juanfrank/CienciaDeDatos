@@ -1,8 +1,8 @@
 import {
   type ContainerSettings,
   type ObjectInstance,
-  esContenedor,
-  instanciasAnidadas,
+  isContainer,
+  nestedInstances,
 } from '@app/ui-components';
 import type { GridPosition } from './grid';
 
@@ -64,8 +64,8 @@ export function datasetsConsumedBy(module: ModuleDefinition): string[] {
 export function instancesOf(module: ModuleDefinition): ObjectInstance[] {
   const recorrer = (instance: ObjectInstance): ObjectInstance[] => [
     instance,
-    ...instanciasAnidadas(
-      esContenedor(instance.objectId)
+    ...nestedInstances(
+      isContainer(instance.objectId)
         ? (instance.settings as ContainerSettings | undefined)
         : undefined,
     ).flatMap(recorrer),

@@ -1,6 +1,6 @@
 import {
   MAX_RADIO_INTERIOR,
-  MAX_REFERENCIAS,
+  MAX_REFERENCES,
   etiquetasNormalizadas,
   type PieSettings,
   type FunnelComparison,
@@ -17,8 +17,8 @@ import {
   type ReferenceLine,
   type StackingMode,
   type LegendMode,
-} from '../presentacion/contrato';
-import { colorCondicional, type ConditionalFormat } from '../presentacion/condicional';
+} from '../presentation/contract';
+import { conditionalColor, type ConditionalFormat } from '../presentation/conditional';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
 /**
@@ -101,7 +101,7 @@ function tooltipOf(o: ChartOptions) {
 
   const porcentaje = o.apilado === 'porcentaje';
   const withTotal = o.tooltip?.total === true;
-  const ordenar = o.tooltip?.ordenarPorValor === true;
+  const ordenar = o.tooltip?.sortValue === true;
   // Sin nada que anadir, se deja el tooltip de ECharts: formatea igual y no cuesta nada.
   if (!porcentaje && !withTotal && !ordenar) return common;
 
@@ -243,7 +243,7 @@ const REFERENCE_STROKE: Record<ReferenceStyle, 'solid' | 'dashed' | 'dotted'> = 
  * `silent: true` por lo mismo. El eje al que se anclan lo decide `horizontal`.
  */
 function referencesOf(o: ChartOptions, horizontal = false) {
-  const lineas = (o.referencias ?? []).slice(0, MAX_REFERENCIAS);
+  const lineas = (o.referencias ?? []).slice(0, MAX_REFERENCES);
   if (lineas.length === 0) return {};
 
   return {
@@ -256,7 +256,7 @@ function referencesOf(o: ChartOptions, horizontal = false) {
         [horizontal ? 'xAxis' : 'yAxis']: line.valor,
         lineStyle: {
           color: roleColor(o, line.color),
-          type: REFERENCE_STROKE[line.estilo ?? 'discontinua'],
+          type: REFERENCE_STROKE[line.style ?? 'discontinua'],
           width: 2,
         },
         label: {
@@ -370,7 +370,7 @@ const seriesLabel = (o: ChartOptions, s: number, cellPosition: string) => {
   if (config.mostrar !== true) return { show: false };
 
   const elegida = POSICION_ECHARTS[config.cellPosition ?? 'auto'] ?? cellPosition;
-  const ends = config.soloExtremos ? endsOf(o, s) : undefined;
+  const ends = config.onlyEnds ? endsOf(o, s) : undefined;
 
   return {
     show: true,
@@ -438,7 +438,7 @@ const ejeValor = (o: ChartOptions) => ({
     ...(o.apilado === 'porcentaje' ? { formatter: '{value} %' } : {}),
   },
   splitLine: {
-    show: o.ejes?.cuadricula !== false,
+    show: o.ejes?.gridlines !== false,
     lineStyle: { color: o.palette.line, type: 'dashed' as const },
   },
   /*
@@ -478,7 +478,7 @@ function colorBars(o: ChartOptions, datos: (number | null)[], s: number) {
   let alguna = false;
   const withColor = datos.map((valor, i) => {
     const original = o.vm.points[i]?.values[s] ?? null;
-    const color = colorCondicional(o.condicional, original, medida);
+    const color = conditionalColor(o.condicional, original, medida);
     if (color === undefined) return valor;
     alguna = true;
     return { value: valor, itemStyle: { color: roleColor(o, color) } };
@@ -827,7 +827,7 @@ export function gaugeOptions(o: ChartOptions): Record<string, unknown> {
          * La cifra, debajo de la aguja: un angulo no es un numero.
          */
         detail:
-          m.mostrarValor === false
+          m.showValue === false
             ? { show: false }
             : {
                 valueAnimation: false,
@@ -904,7 +904,7 @@ const axisValueSecondary = (o: ChartOptions) => ({
  */
 export function comboOptions(o: ChartOptions): Record<string, unknown> {
   const gridColumns = Math.min(Math.max(o.columnSeries ?? 1, 0), o.vm.series.length);
-  const dos = o.combinado?.ejeSecundario === true;
+  const dos = o.combinado?.axisSecondary === true;
 
   return {
     ...base(o),
@@ -993,7 +993,7 @@ export function scatterOptions(o: ChartOptions): Record<string, unknown> {
       // Los dos ejes llevan cuadricula: sin las verticales, situar un punto en el eje horizontal
       // obliga a seguirlo con el dedo hasta abajo.
       splitLine: {
-        show: o.ejes?.cuadricula !== false,
+        show: o.ejes?.gridlines !== false,
         lineStyle: { color: o.palette.line, type: 'dashed' as const },
       },
       show: o.ejes?.mostrarX !== false,
@@ -1154,7 +1154,7 @@ export function funnelOptions(o: ChartOptions): Record<string, unknown> {
  */
 export function waterfallOptions(o: ChartOptions): Record<string, unknown> {
   const puntos = o.vm.points.map((p) => ({ label: p.label, valor: p.values[0] ?? 0 }));
-  const withTotal = o.cascada?.mostrarTotal !== false;
+  const withTotal = o.cascada?.showTotal !== false;
   const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
 
   /*

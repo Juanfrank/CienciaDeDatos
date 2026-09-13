@@ -3,7 +3,7 @@
 import type { QueryResult } from '@app/data-contracts';
 import {
   type ContainerSettings,
-  type ConfiguracionDeElemento,
+  type ElementSettings,
   fieldKey,
   toSlicerOptions,
 } from '@app/ui-components';
@@ -70,7 +70,7 @@ export function ObjetoDeModulo({
     );
   }
 
-  const elemento = conf as (ConfiguracionDeElemento & { objectId: string }) | undefined;
+  const elemento = conf as (ElementSettings & { objectId: string }) | undefined;
   switch (objeto.instance.objectId) {
     case 'cuadro-de-texto':
       return (
@@ -79,16 +79,16 @@ export function ObjetoDeModulo({
           instance={objeto.instance}
           {...(objeto.icono ? { iconoDelObjeto: objeto.icono } : {})}
         >
-          <CuadroDeTexto config={elemento?.cuadroDeTexto} />
+          <CuadroDeTexto config={elemento?.textBox} />
         </Marco>
       );
     // Los cuatro siguientes van SIN marco: una linea, un conector, un titulo de seccion y una
     // forma son trazos. Metidos en una tarjeta con borde y sombra dejan de separar, conectar,
     // encabezar o senalar, y pasan a ser un bloque mas.
     case 'titulo-de-seccion':
-      return <TituloDeSeccion config={elemento?.tituloDeSeccion} />;
+      return <TituloDeSeccion config={elemento?.sectionTitle} />;
     case 'linea-divisoria':
-      return <LineaDivisoria config={elemento?.lineaDivisoria} />;
+      return <LineaDivisoria config={elemento?.lineDivider} />;
     case 'forma':
       return <FormaBasica config={elemento?.forma} />;
     case 'conexion':

@@ -3,16 +3,16 @@
 import type { Aggregation, QueryResult } from '@app/data-contracts';
 import {
   type BindingProblem,
-  type NombreDeIcono,
+  type IconName,
   type MultiplePanel,
-  type PresentacionDeObjeto,
-  type RanuraDeCampos,
+  type ObjectPresentation,
+  type FieldSlot,
   type ChartKind,
   aFieldRef,
   aggregationsFor,
   gaugeScale,
-  campoDeRanura,
-  colorCondicional,
+  slotField,
+  conditionalColor,
   columnsFor,
   niceScale,
   maxCommon,
@@ -20,8 +20,8 @@ import {
   estiloDeTexto,
   fieldKey,
   sortCategories,
-  ranurasDe,
-  formateadorDeMedida,
+  slotsOf,
+  measureFormatter,
   projectObject,
   buildMatrix,
   toCategorical,
@@ -45,11 +45,11 @@ const formatearNumero = (n: number | null): string =>
   n === null ? '—' : new Intl.NumberFormat('es-DO').format(Math.round(n));
 
 /** Los campos de un objeto, LEIDOS POR RANURA. */
-function porRanura(instance: ObjectInstance, slots: RanuraDeCampos[] | undefined) {
+function porRanura(instance: ObjectInstance, slots: FieldSlot[] | undefined) {
   if (!slots || slots.length === 0) return null;
   return {
-    uno: (id: string) => campoDeRanura(instance, slots, id),
-    varios: (id: string) => ranurasDe(instance, slots).get(id) ?? [],
+    uno: (id: string) => slotField(instance, slots, id),
+    varios: (id: string) => slotsOf(instance, slots).get(id) ?? [],
   };
 }
 
@@ -137,7 +137,7 @@ export function Marco({
   /** Para los complementos: la tabla de datos proyecta con los mismos operadores que el objeto. */
   aggregations?: Aggregation[];
   /** El que declara la version del objeto. La presentacion de la instancia lo anula. */
-  iconoDelObjeto?: NombreDeIcono;
+  iconoDelObjeto?: IconName;
 }) {
   /*
    * La presentacion se dibuja AQUI, en el marco comun, y no en cada objeto.
@@ -237,8 +237,8 @@ export function TarjetaKpi({ titulo, result, instance, slots, aggregations, icon
     aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
   const delta = kpi.delta;
-  const formatear = formateadorDeMedida(instance.presentacion, medidas[0]);
-  const colorDelValor = colorCondicional(
+  const formatear = measureFormatter(instance.presentacion, medidas[0]);
+  const colorDelValor = conditionalColor(
     instance.presentacion?.condicional,
     kpi.value,
     medidas[0],
@@ -364,7 +364,7 @@ export function Barras({
   );
   const dimension = ejeX ? aFieldRef(ejeX) : undefined;
   const formatear = (valor: number, s: number) =>
-    formateadorDeMedida(instance.presentacion, medidas[s] ?? '')(valor);
+    measureFormatter(instance.presentacion, medidas[s] ?? '')(valor);
 
   const particion = multiplo ? splitMultiples(vm) : undefined;
 
@@ -399,7 +399,7 @@ export function Barras({
         // Un formateador POR MEDIDA, el mismo que usa la tabla de datos adjunta: sin esto, la
         // cifra sobre la barra y la de la tabla dirian el mismo numero de dos formas distintas.
         formatear={(valor, serie) =>
-          formateadorDeMedida(instance.presentacion, medidas[serie] ?? '')(valor)
+          measureFormatter(instance.presentacion, medidas[serie] ?? '')(valor)
         }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
         {...(dimension && onFiltrar
@@ -469,7 +469,7 @@ export function Lineas({
     instance.presentacion?.orden,
   );
   const formatear = (valor: number, s: number) =>
-    formateadorDeMedida(instance.presentacion, medidas[s] ?? '')(valor);
+    measureFormatter(instance.presentacion, medidas[s] ?? '')(valor);
   const particion = multiplo ? splitMultiples(vm) : undefined;
 
   return (
@@ -504,7 +504,7 @@ export function Lineas({
         titulo={titulo}
         presentacion={instance.presentacion}
         formatear={(valor, serie) =>
-          formateadorDeMedida(instance.presentacion, medidas[serie] ?? '')(valor)
+          measureFormatter(instance.presentacion, medidas[serie] ?? '')(valor)
         }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
         {...(dimension && onFiltrar
@@ -572,7 +572,7 @@ function Multiplos({
   /** Cuantos valores de la dimension no caben en el limite. Se dicen; no se ocultan. */
   omitted: number;
   instance: ObjectInstance;
-  presentacion: PresentacionDeObjeto | undefined;
+  presentacion: ObjectPresentation | undefined;
   tipo: ChartKind;
   titulo: string;
   formatear: (valor: number, serie: number) => string;
@@ -672,10 +672,10 @@ function Multiplos({
 
 /** La presentacion con la que se dibuja CADA panel. */
 function presentacionDePanel(
-  presentacion: PresentacionDeObjeto | undefined,
+  presentacion: ObjectPresentation | undefined,
   panels: MultiplePanel[],
-): PresentacionDeObjeto | undefined {
-  if (presentacion?.multiplos?.mismaEscala === false) return presentacion;
+): ObjectPresentation | undefined {
+  if (presentacion?.multiplos?.sameScale === false) return presentacion;
   const maximo = maxCommon(panels);
   if (maximo === undefined || presentacion?.ejes?.maximoY !== undefined) return presentacion;
   /*
@@ -767,7 +767,7 @@ export function Combinado({
         presentacion={instance.presentacion}
         columnSeries={deColumnas.length}
         formatear={(valor, serie) =>
-          formateadorDeMedida(instance.presentacion, medidas[serie] ?? '')(valor)
+          measureFormatter(instance.presentacion, medidas[serie] ?? '')(valor)
         }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
         {...(dimension && onFiltrar
@@ -803,7 +803,7 @@ export function Combinado({
                   />
                   {vm.series.map((serie, s) => (
                     <td key={serie} className="es-numero">
-                      {formateadorDeMedida(instance.presentacion, serie)(punto.values[s] ?? null)}
+                      {measureFormatter(instance.presentacion, serie)(punto.values[s] ?? null)}
                     </td>
                   ))}
                 </tr>
@@ -855,7 +855,7 @@ export function Dispersion({
         titulo={titulo}
         presentacion={instance.presentacion}
         formatear={(valor, serie) =>
-          formateadorDeMedida(instance.presentacion, medidas[serie] ?? '')(valor)
+          measureFormatter(instance.presentacion, medidas[serie] ?? '')(valor)
         }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
         {...(dimension && onFiltrar
@@ -884,7 +884,7 @@ export function Dispersion({
                   />
                   {vm.series.map((serie, s) => (
                     <td key={serie} className="es-numero">
-                      {formateadorDeMedida(instance.presentacion, serie)(p.values[s] ?? null)}
+                      {measureFormatter(instance.presentacion, serie)(p.values[s] ?? null)}
                     </td>
                   ))}
                 </tr>
@@ -930,7 +930,7 @@ function UnaDimensionUnaMedida({
     // del dataset, que es el del proceso. La cascada si lo admite.
     instance.presentacion?.orden,
   );
-  const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
+  const formatear = measureFormatter(instance.presentacion, medidas[0] ?? '');
   const valores = vm.points.map((p) => p.values[0] ?? 0);
 
   return (
@@ -1049,7 +1049,7 @@ export function MapaDeArbol({
     medidas,
     aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
-  const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
+  const formatear = measureFormatter(instance.presentacion, medidas[0] ?? '');
   const principal = dimensiones[0];
 
   /*
@@ -1137,7 +1137,7 @@ export function Circular({
     medidas,
     aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
-  const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
+  const formatear = measureFormatter(instance.presentacion, medidas[0] ?? '');
 
   /*
    * El hueco por defecto del objeto, que la presentacion anula.
@@ -1242,7 +1242,7 @@ export function Medidor({
     medidas,
     aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
-  const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
+  const formatear = measureFormatter(instance.presentacion, medidas[0] ?? '');
   const punto = vm.points[0];
   const valor = punto?.values[0] ?? null;
   const objetivo = punto?.values[1] ?? instance.presentacion?.medidor?.objetivo ?? null;
@@ -1331,7 +1331,7 @@ export function Tabla({ titulo, result, instance, aggregations, iconoDelObjeto }
       <TablaOrdenable
         projected={projected}
         titulo={titulo}
-        formatearColumna={(nombre) => formateadorDeMedida(instance.presentacion, nombre)}
+        formatearColumna={(nombre) => measureFormatter(instance.presentacion, nombre)}
         {...(instance.presentacion?.condicional
           ? { condicional: instance.presentacion.condicional }
           : {})}
@@ -1378,11 +1378,11 @@ export interface ObjetoProps {
   /** Con que operador se resume cada medida, alineado con `instance.binding.measures`. */
   aggregations: Aggregation[];
   /** Las ranuras que declara la version del objeto. */
-  slots?: RanuraDeCampos[];
+  slots?: FieldSlot[];
   /** Filtrado cruzado (4.4): anade un filtro a la query string, no a un estado paralelo. */
   onFiltrar?: (fieldName: string, valor: string) => void;
   /** El icono que declara la version del objeto en el catalogo. */
-  iconoDelObjeto?: NombreDeIcono;
+  iconoDelObjeto?: IconName;
 }
 
 /** `FieldRef` -> 'Tabla.Campo', tolerando que no haya campo. */

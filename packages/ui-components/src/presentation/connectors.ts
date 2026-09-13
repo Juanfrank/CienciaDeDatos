@@ -1,6 +1,6 @@
 /** La geometria de un conector. */
 
-export interface CajaDeObjeto {
+export interface ObjectBox {
   x: number;
   y: number;
   w: number;
@@ -8,7 +8,7 @@ export interface CajaDeObjeto {
 }
 
 /** El trazado de un conector entre dos cajas, en coordenadas de rejilla. */
-export function trazar(desde: CajaDeObjeto, hasta: CajaDeObjeto): { puntos: [number, number][] } {
+export function trazar(desde: ObjectBox, hasta: ObjectBox): { puntos: [number, number][] } {
   const ca = { x: desde.x + desde.w / 2, y: desde.y + desde.h / 2 };
   const cb = { x: hasta.x + hasta.w / 2, y: hasta.y + hasta.h / 2 };
   const dx = cb.x - ca.x;

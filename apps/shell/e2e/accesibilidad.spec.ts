@@ -232,11 +232,11 @@ test.describe('navegacion solo con teclado', () => {
     const contorno = await page.evaluate(() => {
       const activo = document.activeElement;
       if (!activo) return null;
-      const estilo = getComputedStyle(activo);
-      return { ancho: estilo.outlineWidth, estilo: estilo.outlineStyle };
+      const style = getComputedStyle(activo);
+      return { ancho: style.outlineWidth, style: style.outlineStyle };
     });
 
-    expect(contorno?.estilo).not.toBe('none');
+    expect(contorno?.style).not.toBe('none');
     expect(Number.parseFloat(contorno?.ancho ?? '0')).toBeGreaterThanOrEqual(2);
   });
 

@@ -546,5 +546,6 @@
   "traductor": "translator",
   "locales": "locales",
   "crear": "create",
-  "proporcion": "proportion"
+  "proporcion": "proportion",
+  "data": "data"
 }

@@ -5,15 +5,15 @@ import {
   type ObjectRegistry,
   aggregationsOf,
   fieldKey,
-  ranurasDelContrato,
+  contractSlots,
   validateAggregation,
-  validarPanelDeFiltros,
-  validarPresentacion,
-  validarRanuras,
+  validatePanelFilters,
+  validatePresentation,
+  validateSlots,
   validateAttachments,
   validateBinding,
   noConsumeDatos,
-  validarContenedor,
+  validateContainer,
 } from '@app/ui-components';
 import type { ModuleDefinition } from './ModuleDefinition';
 import { type GridProblem, validateLayout } from './grid';
@@ -141,12 +141,12 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         // acento que no es rol del tema se descubre al dibujar.
         diagnostico.bindingProblems = [
           ...validateAttachments(instance, (objectId) => registry.get(objectId)),
-          ...validarPresentacion(instance.presentacion, version.presentation).map((p) => ({
+          ...validatePresentation(instance.presentacion, version.presentation).map((p) => ({
             slot: `presentacion.${p.clave}`,
             kind: 'contrato-incumplido' as const,
             problem: p.issue,
           })),
-          ...validarContenedor(item.id, instance).map((p) => ({
+          ...validateContainer(item.id, instance).map((p) => ({
             slot: p.slot,
             kind: 'contrato-incumplido' as const,
             problem: p.issue,
@@ -185,12 +185,12 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         /*
          * Las ranuras, ademas del contrato global.
          */
-        ...validarRanuras(instance, ranurasDelContrato(contrato)).map((p) => ({
+        ...validateSlots(instance, contractSlots(contrato)).map((p) => ({
           slot: `ranura.${p.ranura}`,
           kind: 'contrato-incumplido' as const,
           problem: p.issue,
         })),
-        ...validarPresentacion(instance.presentacion, version.presentation).map((p) => ({
+        ...validatePresentation(instance.presentacion, version.presentation).map((p) => ({
           slot: `presentacion.${p.clave}`,
           kind: 'contrato-incumplido' as const,
           problem: p.issue,
@@ -199,7 +199,7 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
          * Y la configuracion propia del tipo.
          */
         ...(instance.settings?.objectId === 'panel-de-filtros'
-          ? validarPanelDeFiltros(instance, instance.settings, fieldKinds).map((p) => ({
+          ? validatePanelFilters(instance, instance.settings, fieldKinds).map((p) => ({
               slot: `filtros.${p.fieldName}`,
               kind: 'contrato-incumplido' as const,
               problem: p.issue,

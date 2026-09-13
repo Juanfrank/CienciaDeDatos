@@ -1,24 +1,24 @@
 'use client';
 
 import {
-  type ConfiguracionDeConexion,
-  type ConfiguracionDeCuadroDeTexto,
-  type ConfiguracionDeForma,
-  type ConfiguracionDeLinea,
-  type ConfiguracionDeLineaDivisoria,
-  type ConfiguracionDeTituloDeSeccion,
-  type ColorDeTexto,
-  type Forma,
+  type ConnectionSettings,
+  type TextBoxSettings,
+  type ShapeSettings,
+  type LineSettings,
+  type DividerLineSettings,
+  type SectionTitleSettings,
+  type TextColor,
+  type Shape,
   estiloDeTexto,
   grosorValido,
-  trazoDeLinea,
+  lineStroke,
 } from '@app/ui-components';
 
-export { trazar, type CajaDeObjeto } from '@app/ui-components';
+export { trazar, type ObjectBox } from '@app/ui-components';
 
 /** Los elementos: lo que se coloca en un modulo sin enlazarlo a datos. */
 
-const VARIABLE: Record<ColorDeTexto, string> = {
+const VARIABLE: Record<TextColor, string> = {
   predeterminado: 'var(--md-sys-color-on-surface)',
   primario: 'var(--md-sys-color-primary)',
   secundario: 'var(--md-sys-color-secondary)',
@@ -27,25 +27,25 @@ const VARIABLE: Record<ColorDeTexto, string> = {
   atenuado: 'var(--md-sys-color-outline)',
 };
 
-const colorOf = (color: ColorDeTexto | undefined): string => VARIABLE[color ?? 'atenuado'];
+const colorOf = (color: TextColor | undefined): string => VARIABLE[color ?? 'atenuado'];
 
 /** El borde CSS de una linea, en un solo sitio: las cuatro que hay deben verse iguales. */
-const bordeDe = (line: ConfiguracionDeLinea | undefined): string =>
-  `${grosorValido(line?.grosor)}px ${trazoDeLinea(line?.estilo)} ${colorOf(line?.color)}`;
+const bordeDe = (line: LineSettings | undefined): string =>
+  `${grosorValido(line?.thickness)}px ${lineStroke(line?.style)} ${colorOf(line?.color)}`;
 
 /* ── Cuadro de texto ───────────────────────────────────────────────────────────────────────── */
 
-export function CuadroDeTexto({ config }: { config: ConfiguracionDeCuadroDeTexto | undefined }) {
+export function CuadroDeTexto({ config }: { config: TextBoxSettings | undefined }) {
   const parrafos = config?.parrafos ?? [];
 
   return (
     <div className="cuadro-texto" data-testid="cuadro-de-texto">
       {parrafos.map((p, i) => {
-        const estilo = estiloDeTexto(p.estilo);
+        const style = estiloDeTexto(p.style);
         if (p.vineta) {
           return (
             <ul key={i} className="cuadro-texto__lista">
-              <li style={estilo}>{p.content}</li>
+              <li style={style}>{p.content}</li>
             </ul>
           );
         }
@@ -55,13 +55,13 @@ export function CuadroDeTexto({ config }: { config: ConfiguracionDeCuadroDeTexto
         if (p.nivel) {
           const Etiqueta = (['h4', 'h5', 'h6'] as const)[p.nivel - 1] ?? 'h4';
           return (
-            <Etiqueta key={i} className="cuadro-texto__titulo" style={estilo}>
+            <Etiqueta key={i} className="cuadro-texto__titulo" style={style}>
               {p.content}
             </Etiqueta>
           );
         }
         return (
-          <p key={i} style={estilo}>
+          <p key={i} style={style}>
             {p.content}
           </p>
         );
@@ -73,7 +73,7 @@ export function CuadroDeTexto({ config }: { config: ConfiguracionDeCuadroDeTexto
 /* ── Titulo de seccion ─────────────────────────────────────────────────────────────────────── */
 
 /** Un titulo que encabeza un grupo, con lineas que se reparten lo que sobra. */
-export function TituloDeSeccion({ config }: { config: ConfiguracionDeTituloDeSeccion | undefined }) {
+export function TituloDeSeccion({ config }: { config: SectionTitleSettings | undefined }) {
   const line = config?.line ?? 'ninguna';
   const borde = bordeDe(config?.estiloDeLinea);
   const raya = <span className="titulo-seccion__linea" style={{ borderTopWidth: 0, borderTop: borde }} />;
@@ -84,7 +84,7 @@ export function TituloDeSeccion({ config }: { config: ConfiguracionDeTituloDeSec
     <div
       className="titulo-seccion"
       data-testid="titulo-de-seccion"
-      data-cellPosition={config?.posicionDelTexto ?? 'izquierda'}
+      data-text-position={config?.textPosition ?? 'izquierda'}
       style={{
         ...(line === 'arriba' ? { borderTop: borde, paddingTop: 'var(--space-sm)' } : {}),
         ...(line === 'abajo' ? { borderBottom: borde, paddingBottom: 'var(--space-sm)' } : {}),
@@ -99,8 +99,8 @@ export function TituloDeSeccion({ config }: { config: ConfiguracionDeTituloDeSec
 
 /* ── Linea divisoria ───────────────────────────────────────────────────────────────────────── */
 
-export function LineaDivisoria({ config }: { config: ConfiguracionDeLineaDivisoria | undefined }) {
-  const vertical = config?.orientacion === 'vertical';
+export function LineaDivisoria({ config }: { config: DividerLineSettings | undefined }) {
+  const vertical = config?.orientation === 'vertical';
   return (
     // `separator` con orientacion: es lo que hace que un lector de pantalla la anuncie como
     // separacion en vez de callarsela por ser un `div` vacio.
@@ -109,7 +109,7 @@ export function LineaDivisoria({ config }: { config: ConfiguracionDeLineaDivisor
       data-testid="linea-divisoria"
       role="separator"
       aria-orientation={vertical ? 'vertical' : 'horizontal'}
-      data-orientacion={vertical ? 'vertical' : 'horizontal'}
+      data-orientation={vertical ? 'vertical' : 'horizontal'}
     >
       <span
         style={vertical ? { borderLeft: bordeDe(config) } : { borderTop: bordeDe(config) }}
@@ -121,13 +121,13 @@ export function LineaDivisoria({ config }: { config: ConfiguracionDeLineaDivisor
 /* ── Formas ────────────────────────────────────────────────────────────────────────────────── */
 
 /** El recorte de cada forma. */
-const RECORTE: Partial<Record<Forma, string>> = {
+const RECORTE: Partial<Record<Shape, string>> = {
   triangulo: 'polygon(50% 0%, 100% 100%, 0% 100%)',
   rombo: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
   flecha: 'polygon(0% 30%, 60% 30%, 60% 0%, 100% 50%, 60% 100%, 60% 70%, 0% 70%)',
 };
 
-export function FormaBasica({ config }: { config: ConfiguracionDeForma | undefined }) {
+export function FormaBasica({ config }: { config: ShapeSettings | undefined }) {
   const forma = config?.forma ?? 'rectangulo';
   // Un cuadrado y un circulo se dibujan con lado igual al MENOR de los dos ejes, no estirados a la
   // celda: estirarlos los convierte en un rectangulo y una elipse, que son otra cosa.
@@ -142,7 +142,7 @@ export function FormaBasica({ config }: { config: ConfiguracionDeForma | undefin
         style={{
           background: colorOf(config?.relleno ?? 'primario'),
           opacity: Math.min(100, Math.max(0, config?.opacidad ?? 100)) / 100,
-          ...(config?.trazo ? { border: `${grosorValido(config.grosorDeTrazo)}px solid ${colorOf(config.trazo)}` } : {}),
+          ...(config?.stroke ? { border: `${grosorValido(config.strokeThickness)}px solid ${colorOf(config.stroke)}` } : {}),
           ...(forma === 'circulo' ? { borderRadius: '50%' } : { borderRadius: `${config?.radio ?? 0}px` }),
           ...(recorte ? { clipPath: recorte } : {}),
           /*
@@ -166,7 +166,7 @@ export function Conexion({
   config,
   puntos,
 }: {
-  config: ConfiguracionDeConexion | undefined;
+  config: ConnectionSettings | undefined;
   puntos: [number, number][];
 }) {
   if (puntos.length < 2) {
@@ -177,16 +177,16 @@ export function Conexion({
     );
   }
 
-  const trazado = config?.trazado ?? 'angulo';
+  const dash = config?.dash ?? 'angulo';
   const d =
-    trazado === 'recto'
+    dash === 'recto'
       ? `M ${puntos[0]?.[0]} ${puntos[0]?.[1]} L ${puntos[puntos.length - 1]?.[0]} ${puntos[puntos.length - 1]?.[1]}`
-      : trazado === 'curva'
+      : dash === 'curva'
         ? curva(puntos)
         : puntos.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
 
   const color = colorOf(config?.estiloDeLinea?.color ?? 'primario');
-  const grosor = grosorValido(config?.estiloDeLinea?.grosor ?? 2);
+  const thickness = grosorValido(config?.estiloDeLinea?.thickness ?? 2);
   const id = `punta-${config?.desde ?? 'a'}-${config?.hasta ?? 'b'}`;
 
   return (
@@ -200,16 +200,16 @@ export function Conexion({
         d={d}
         fill="none"
         stroke={color}
-        strokeWidth={grosor}
+        strokeWidth={thickness}
         strokeDasharray={
-          config?.estiloDeLinea?.estilo === 'discontinua'
+          config?.estiloDeLinea?.style === 'discontinua'
             ? '8 6'
-            : config?.estiloDeLinea?.estilo === 'punteada'
+            : config?.estiloDeLinea?.style === 'punteada'
               ? '2 5'
               : undefined
         }
         {...(config?.extremoFinal === 'flecha' ? { markerEnd: `url(#${id})` } : {})}
-        {...(config?.extremoInicial === 'flecha' ? { markerStart: `url(#${id})` } : {})}
+        {...(config?.initialEnd === 'flecha' ? { markerStart: `url(#${id})` } : {})}
       />
       {config?.content ? (
         <text

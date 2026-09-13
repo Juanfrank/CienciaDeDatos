@@ -213,8 +213,17 @@ function interfazEn(fuente, esCss) {
   const nombres = new Set();
   if (esCss) {
     for (const m of fuente.matchAll(/\.([a-z][a-z0-9_-]*)/g)) nombres.add(m[1]);
+    /*
+     * `[data-eje='y']` es la otra mitad de un `data-eje=` que escribe un componente.
+     *
+     * El atributo lo pone el TSX y lo lee el CSS, y nada los ata: renombrar uno de los dos no
+     * rompe la compilacion ni una prueba de unidad, la regla deja de aplicarse y el estilo
+     * desaparece en silencio. Entra en el mapa de interfaz, que se sustituye en las dos zonas.
+     */
+    for (const m of fuente.matchAll(/\[(data-[a-z][\w-]*)/g)) nombres.add(m[1]);
     return nombres;
   }
+  for (const m of fuente.matchAll(/\b(data-[a-z][\w-]*)\s*=/g)) nombres.add(m[1]);
   for (const m of fuente.matchAll(/className="([^"]+)"/g)) {
     m[1].split(/\s+/).forEach((c) => c && nombres.add(c));
   }
@@ -382,6 +391,29 @@ function expresionDe(claves) {
   return new RegExp(`(?<![A-Za-z0-9_$])(${alternativas})(?![A-Za-z0-9_$])`, 'g');
 }
 
+const dirDe = (ruta) => ruta.split('/').slice(0, -1).join('/');
+
+/*
+ * Un especificador solo se reescribe si HOY no resuelve y con el nombre nuevo si.
+ *
+ * El mapa de movimientos va por nombre base, y aplicado a cualquier parte de la ruta reescribe
+ * lo que no debe: mover `presentacion/iconos.ts` a `presentacion/icons.ts` convirtio
+ * `../iconos/Icono` —otra carpeta, en otro paquete, que da la casualidad de llamarse igual— en
+ * `../icons/Icono`, que no existe. Comprobar contra el disco quita la ambiguedad entera: si el
+ * destino actual sigue ahi, no hay nada que reescribir.
+ */
+function rutaArreglada(texto, dir, rutas) {
+  const m = texto.match(/^(['"`])(\.{1,2}\/(?:.*\/)?)([^/'"`]+)\1$/);
+  if (!m) return texto;
+  const [, comilla, carpeta, base] = m;
+  const destino = rutas[base];
+  if (destino === undefined) return texto;
+
+  const resuelve = (b) => SUFIJOS.some((suf) => existsSync(resolve(dir, carpeta + b + suf)));
+  if (resuelve(base) || !resuelve(destino)) return texto;
+  return `${comilla}${carpeta}${destino}${comilla}`;
+}
+
 function aplicar(plan) {
   const { identificadores = {}, interfaz = {}, valores = {}, archivos = {} } = plan;
 
@@ -410,11 +442,17 @@ function aplicar(plan) {
   const enCadena = { ...interfaz, ...compuestos, ...valores };
   const enMarcado = { ...interfaz, ...compuestos, ...valores };
 
-  const codigoCompleto = { ...identificadores, ...valores };
+  /*
+   * Los nombres de interfaz entran TAMBIEN en la zona de codigo.
+   *
+   * `data-eje=` en un TSX es codigo, no cadena, y `[data-eje=` en el CSS es marcado. Los dos
+   * llevan el mismo nombre y tienen que moverse juntos. Meterlos aqui no arriesga nada: un
+   * nombre con guion no puede ser un identificador de JavaScript, asi que solo casa donde debe.
+   */
+  const codigoCompleto = { ...identificadores, ...valores, ...interfaz };
   const reCodigo = expresionDe(Object.keys(codigoCompleto));
   const reComentario = expresionDe(Object.keys(compuestos));
   const reCadena = expresionDe(Object.keys(enCadena));
-  const reRutas = expresionDe(Object.keys(rutas));
   const reMarcado = expresionDe(Object.keys(enMarcado));
 
   let tocados = 0;
@@ -442,21 +480,15 @@ function aplicar(plan) {
            * en `queue` dentro del catalogo de mensajes en espanol: «La exportacion esta en
            * queue». Una ruta solo es una ruta si empieza por `./` o `../`.
            */
-          const esRuta = s.tipo === 'cadena' && /^['"`]\.{1,2}\//.test(s.texto);
-          const re = esRuta
-            ? reRutas
-            : s.tipo === 'codigo'
-              ? reCodigo
-              : s.tipo === 'cadena'
-                ? reCadena
-                : reComentario;
-          const mapa = esRuta
-            ? rutas
-            : s.tipo === 'codigo'
-              ? codigoCompleto
-              : s.tipo === 'cadena'
-                ? enCadena
-                : compuestos;
+          if (s.tipo === 'cadena' && /^['"`]\.{1,2}\//.test(s.texto)) {
+            const arreglada = rutaArreglada(s.texto, dirDe(ruta), rutas);
+            if (arreglada !== s.texto) sustituciones++;
+            return { ...s, texto: arreglada };
+          }
+          const re =
+            s.tipo === 'codigo' ? reCodigo : s.tipo === 'cadena' ? reCadena : reComentario;
+          const mapa =
+            s.tipo === 'codigo' ? codigoCompleto : s.tipo === 'cadena' ? enCadena : compuestos;
           if (!re) return s;
           return {
             ...s,
@@ -548,8 +580,15 @@ if (orden === '--proponer') {
   console.log(JSON.stringify(proponer(argumento), null, 2));
 } else if (orden === '--aplicar') {
   const plan = JSON.parse(readFileSync(argumento, 'utf8'));
-  const { tocados, sustituciones } = aplicar(plan);
+  /*
+   * Primero se MUEVE y despues se sustituye.
+   *
+   * `rutaArreglada` decide mirando el disco: solo reescribe el especificador que hoy no resuelve.
+   * Sustituyendo antes de mover, el archivo viejo sigue ahi, el especificador resuelve, no se
+   * toca, y el movimiento lo rompe justo despues.
+   */
   const movidos = moverArchivos(plan.archivos ?? {});
+  const { tocados, sustituciones } = aplicar(plan);
   console.log(`${sustituciones} sustituciones en ${tocados} archivos; ${movidos} archivos movidos`);
 
   /*

@@ -1,16 +1,16 @@
 "use client";
 
 import {
-  COMPARADORES,
-  MAX_REGLAS,
-  type Comparador,
-  type ReglaDeColor,
+  COMPARATORS,
+  MAX_RULES,
+  type Comparator,
+  type ColorRule,
 } from "@app/ui-components";
 import { PaletaDeColores } from "./EstiloDeTextoEditor";
 
 /** Editor de formato condicional — que el color dependa del DATO. */
 
-const ETIQUETA_DE_COMPARADOR: Record<Comparador, string> = {
+const ETIQUETA_DE_COMPARADOR: Record<Comparator, string> = {
   mayor: "Mayor que",
   "mayor-o-igual": "Mayor o igual que",
   menor: "Menor que",
@@ -26,17 +26,17 @@ export function ReglasDeColor({
   prueba,
   onCambiar,
 }: {
-  rules: ReglaDeColor[];
+  rules: ColorRule[];
   /** Las medidas mapeadas, para poder acotar una regla a una sola. */
   medidas: string[];
   guardando: boolean;
   prueba: string;
-  onCambiar: (rules: ReglaDeColor[] | undefined) => void;
+  onCambiar: (rules: ColorRule[] | undefined) => void;
 }) {
-  const cambiar = (siguiente: ReglaDeColor[]) =>
+  const cambiar = (siguiente: ColorRule[]) =>
     onCambiar(siguiente.length === 0 ? undefined : siguiente);
 
-  const editar = (i: number, cambio: Partial<ReglaDeColor>) =>
+  const editar = (i: number, cambio: Partial<ColorRule>) =>
     cambiar(rules.map((colorRule, j) => (i === j ? { ...colorRule, ...cambio } : colorRule)));
 
   const mover = (i: number, delta: number) => {
@@ -85,12 +85,12 @@ export function ReglasDeColor({
             <label className="formulario__campo">
               <span>Cuando el valor es</span>
               <select
-                value={colorRule.comparador}
+                value={colorRule.comparator}
                 disabled={guardando}
                 data-testid={`${prueba}-comparador-${i}`}
-                onChange={(e) => editar(i, { comparador: e.target.value as Comparador })}
+                onChange={(e) => editar(i, { comparator: e.target.value as Comparator })}
               >
-                {COMPARADORES.map((c) => (
+                {COMPARATORS.map((c) => (
                   <option key={c} value={c}>
                     {ETIQUETA_DE_COMPARADOR[c]}
                   </option>
@@ -98,7 +98,7 @@ export function ReglasDeColor({
               </select>
             </label>
             <label className="formulario__campo">
-              <span>{colorRule.comparador === "entre" ? "Desde" : "Valor"}</span>
+              <span>{colorRule.comparator === "entre" ? "Desde" : "Valor"}</span>
               <input
                 type="number"
                 defaultValue={colorRule.valor}
@@ -109,7 +109,7 @@ export function ReglasDeColor({
             </label>
           </div>
 
-          {colorRule.comparador === "entre" ? (
+          {colorRule.comparator === "entre" ? (
             <label className="formulario__campo">
               <span>Hasta</span>
               <input
@@ -168,13 +168,13 @@ export function ReglasDeColor({
         </fieldset>
       ))}
 
-      {rules.length < MAX_REGLAS ? (
+      {rules.length < MAX_RULES ? (
         <button
           type="button"
           className="md-boton md-boton--contorno"
           disabled={guardando}
           data-testid={`${prueba}-anadir`}
-          onClick={() => cambiar([...rules, { comparador: "mayor", valor: 0, color: "error" }])}
+          onClick={() => cambiar([...rules, { comparator: "mayor", valor: 0, color: "error" }])}
         >
           Anadir colorRule de color
         </button>

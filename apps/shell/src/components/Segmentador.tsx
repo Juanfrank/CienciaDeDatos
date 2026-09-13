@@ -1,7 +1,7 @@
 "use client";
 
 import type { QueryResult } from "@app/data-contracts";
-import type { NombreDeIcono, ObjectInstance } from "@app/ui-components";
+import type { IconName, ObjectInstance } from "@app/ui-components";
 import { useFiltrosDeUrl } from "../hooks/useFiltrosDeUrl";
 import { Marco } from "./objetos";
 
@@ -21,7 +21,7 @@ export function Segmentador({
   instance?: ObjectInstance;
   result?: QueryResult;
   /** El icono que declara la version del objeto en el catalogo. */
-  iconoDelObjeto?: NombreDeIcono;
+  iconoDelObjeto?: IconName;
 }) {
   const { valoresDe, alternar, limpiarCampo } = useFiltrosDeUrl();
   const seleccionados = valoresDe(fieldName);

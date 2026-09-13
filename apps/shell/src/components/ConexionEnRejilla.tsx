@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { ConfiguracionDeConexion } from '@app/ui-components';
+import type { ConnectionSettings } from '@app/ui-components';
 import { Conexion, trazar } from './elementos';
 
 /** El conector, medido contra la rejilla de verdad. */
-export function ConexionEnRejilla({ config }: { config: ConfiguracionDeConexion | undefined }) {
+export function ConexionEnRejilla({ config }: { config: ConnectionSettings | undefined }) {
   const ancla = useRef<HTMLDivElement>(null);
   const [puntos, setPuntos] = useState<[number, number][]>([]);
 

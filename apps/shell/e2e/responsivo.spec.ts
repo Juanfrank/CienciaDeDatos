@@ -206,8 +206,8 @@ test.describe('nada se sale de la pantalla', () => {
     await page.goto('/m/casos-pendientes');
 
     const contenedor = page.locator('.tabla-contenedor').last();
-    const desplazable = await contenedor.evaluate((el) => el.scrollWidth > el.clientWidth);
-    expect(desplazable).toBe(true);
+    const scrollable = await contenedor.evaluate((el) => el.scrollWidth > el.clientWidth);
+    expect(scrollable).toBe(true);
   });
 
   test('la tabla del editor tambien se desplaza dentro de su region', async ({ page }) => {

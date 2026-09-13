@@ -7,7 +7,7 @@ import {
   elementsOf,
   optionsOf,
   type ChartPalette,
-  type PresentacionDeObjeto,
+  type ObjectPresentation,
   type ChartKind,
 } from '@app/ui-components';
 
@@ -19,7 +19,7 @@ export interface LienzoProps {
   palette: ChartPalette;
   titulo: string;
   dimension?: string;
-  presentacion?: PresentacionDeObjeto;
+  presentacion?: ObjectPresentation;
   formatear?: (valor: number, serie: number) => string;
   /** Solo el combinado: cuantas series iniciales son columnas. Sale del mapeo, no del formato. */
   columnSeries?: number;

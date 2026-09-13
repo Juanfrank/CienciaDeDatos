@@ -1,7 +1,7 @@
 import type { Aggregation, QueryResult } from '@app/data-contracts';
 import type { ObjectInstance } from './types';
 import { buildMatrix, visibleRows, leaves } from './matrix';
-import { aFieldRef } from '../presentacion/pozos';
+import { aFieldRef } from '../presentation/wells';
 import { aggregateBy, fieldKey, toSlicerOptions } from './viewModel';
 
 /** Proyeccion tabular de un objeto — la forma de tabla de LO QUE EL OBJETO MUESTRA. */

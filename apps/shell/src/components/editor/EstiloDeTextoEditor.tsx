@@ -1,19 +1,19 @@
 'use client';
 
 import {
-  ALINEACIONES,
-  ALINEACIONES_VERTICALES,
-  COLORES_DE_TEXTO,
-  type Alineacion,
-  type AlineacionVertical,
-  type ColorDeTexto,
-  type EstiloDeTexto,
+  ALIGNMENTS,
+  VERTICAL_ALIGNMENTS,
+  TEXT_COLORS,
+  type Alignment,
+  type VerticalAlignment,
+  type TextColor,
+  type TextStyle,
 } from '@app/ui-components';
 import { Ayuda } from './Ayuda';
 
 /** Peso, estilo, alineacion y color de un texto — el mismo control para los tres destinos. */
 
-const ETIQUETA_DE_COLOR: Record<ColorDeTexto, string> = {
+const ETIQUETA_DE_COLOR: Record<TextColor, string> = {
   predeterminado: 'Predeterminado',
   primario: 'Primario',
   secundario: 'Secundario',
@@ -23,7 +23,7 @@ const ETIQUETA_DE_COLOR: Record<ColorDeTexto, string> = {
 };
 
 /** La muestra de cada rol. Se lee del tema, no de una lista de hex duplicada aqui. */
-const VARIABLE: Record<ColorDeTexto, string> = {
+const VARIABLE: Record<TextColor, string> = {
   predeterminado: 'var(--md-sys-color-on-surface)',
   primario: 'var(--md-sys-color-primary)',
   secundario: 'var(--md-sys-color-secondary)',
@@ -32,13 +32,13 @@ const VARIABLE: Record<ColorDeTexto, string> = {
   atenuado: 'var(--md-sys-color-on-surface-variant)',
 };
 
-const ETIQUETA_DE_ALINEACION: Record<Alineacion, string> = {
+const ETIQUETA_DE_ALINEACION: Record<Alignment, string> = {
   izquierda: 'Izquierda',
   centro: 'Centro',
   derecha: 'Derecha',
 };
 
-const ETIQUETA_VERTICAL: Record<AlineacionVertical, string> = {
+const ETIQUETA_VERTICAL: Record<VerticalAlignment, string> = {
   arriba: 'Arriba',
   medio: 'Medio',
   abajo: 'Abajo',
@@ -51,10 +51,10 @@ export function PaletaDeColores({
   prueba,
   onCambiar,
 }: {
-  valor: ColorDeTexto;
+  valor: TextColor;
   nombre: string;
   prueba: string;
-  onCambiar: (color: ColorDeTexto) => void;
+  onCambiar: (color: TextColor) => void;
 }) {
   return (
     /*
@@ -70,7 +70,7 @@ export function PaletaDeColores({
       aria-label={`Color de ${nombre}`}
       data-testid={prueba}
     >
-      {COLORES_DE_TEXTO.map((color) => (
+      {TEXT_COLORS.map((color) => (
         <button
           key={color}
           type="button"
@@ -93,7 +93,7 @@ export function PaletaDeColores({
 export function EstiloDeTextoEditor({
   titulo,
   help,
-  estilo,
+  style,
   conVertical = false,
   prueba,
   guardando,
@@ -101,14 +101,14 @@ export function EstiloDeTextoEditor({
 }: {
   titulo: string;
   help?: string;
-  estilo: EstiloDeTexto;
+  style: TextStyle;
   /** Solo donde hay alto que repartir. */
   conVertical?: boolean;
   prueba: string;
   guardando: boolean;
-  onCambiar: (estilo: EstiloDeTexto) => void;
+  onCambiar: (style: TextStyle) => void;
 }) {
-  const cambiar = (parcial: Partial<EstiloDeTexto>) => onCambiar({ ...estilo, ...parcial });
+  const cambiar = (parcial: Partial<TextStyle>) => onCambiar({ ...style, ...parcial });
 
   const interruptor = (
     clave: 'negrita' | 'cursiva' | 'subrayado',
@@ -118,12 +118,12 @@ export function EstiloDeTextoEditor({
     <button
       type="button"
       className="estilo-texto__boton"
-      aria-pressed={estilo[clave] === true}
+      aria-pressed={style[clave] === true}
       aria-label={etiqueta}
       title={etiqueta}
       disabled={guardando}
       data-testid={`${prueba}-${clave}`}
-      onClick={() => cambiar({ [clave]: !estilo[clave] })}
+      onClick={() => cambiar({ [clave]: !style[clave] })}
     >
       <span
         aria-hidden="true"
@@ -154,14 +154,14 @@ export function EstiloDeTextoEditor({
       </div>
 
       <label className="formulario__campo">
-        <span>Alineacion</span>
+        <span>Alignment</span>
         <select
-          value={estilo.alineacion ?? 'izquierda'}
+          value={style.alignment ?? 'izquierda'}
           disabled={guardando}
           data-testid={`${prueba}-alineacion`}
-          onChange={(e) => cambiar({ alineacion: e.target.value as Alineacion })}
+          onChange={(e) => cambiar({ alignment: e.target.value as Alignment })}
         >
-          {ALINEACIONES.map((a) => (
+          {ALIGNMENTS.map((a) => (
             <option key={a} value={a}>
               {ETIQUETA_DE_ALINEACION[a]}
             </option>
@@ -171,14 +171,14 @@ export function EstiloDeTextoEditor({
 
       {conVertical ? (
         <label className="formulario__campo">
-          <span>Alineacion vertical</span>
+          <span>Alignment vertical</span>
           <select
-            value={estilo.alineacionVertical ?? 'arriba'}
+            value={style.verticalAlignment ?? 'arriba'}
             disabled={guardando}
             data-testid={`${prueba}-vertical`}
-            onChange={(e) => cambiar({ alineacionVertical: e.target.value as AlineacionVertical })}
+            onChange={(e) => cambiar({ verticalAlignment: e.target.value as VerticalAlignment })}
           >
-            {ALINEACIONES_VERTICALES.map((a) => (
+            {VERTICAL_ALIGNMENTS.map((a) => (
               <option key={a} value={a}>
                 {ETIQUETA_VERTICAL[a]}
               </option>
@@ -190,7 +190,7 @@ export function EstiloDeTextoEditor({
       <div className="formulario__campo">
         <span>Color</span>
         <PaletaDeColores
-          valor={estilo.color ?? 'predeterminado'}
+          valor={style.color ?? 'predeterminado'}
           nombre={titulo}
           prueba={`${prueba}-color`}
           onCambiar={(color) => cambiar({ color })}

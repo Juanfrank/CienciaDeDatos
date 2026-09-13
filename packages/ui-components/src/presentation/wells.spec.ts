@@ -3,17 +3,17 @@ import { initialCatalog } from '../registry/catalog';
 import type { ObjectInstance } from '../registry/types';
 import {
   cabeEnRanura,
-  campoDeRanura,
-  conCampoEnRanura,
-  ranurasDe,
-  ranurasDelContrato,
-  ranurasPorDefecto,
-  sinCampoEnRanura,
-  validarRanuras,
-  type RanuraDeCampos,
-} from './pozos';
+  slotField,
+  withSlotField,
+  slotsOf,
+  contractSlots,
+  defaultSlots,
+  slotFieldWithout,
+  validateSlots,
+  type FieldSlot,
+} from './wells';
 
-const RANURAS: RanuraDeCampos[] = [
+const SLOTS: FieldSlot[] = [
   { id: 'eje-x', etiqueta: 'Eje X', tipo: 'dimension', max: 1, min: 1 },
   { id: 'serie', etiqueta: 'Serie', tipo: 'dimension', max: 1 },
   { id: 'eje-y', etiqueta: 'Eje Y', tipo: 'medida', max: 4, min: 1 },
@@ -32,19 +32,19 @@ describe('la ranura manda, no el orden', () => {
      * Es el caso que el reparto posicional no podia expresar: el primer campo caia siempre en la
      * primera ranura. Aqui el eje X se queda vacio y la medida va a su sitio.
      */
-    const puesta = conCampoEnRanura(objectInstance(), RANURAS, 'eje-y', 'CasosPendientes');
+    const puesta = withSlotField(objectInstance(), SLOTS, 'eje-y', 'CasosPendientes');
 
-    expect(campoDeRanura(puesta, RANURAS, 'eje-x')).toBeUndefined();
-    expect(campoDeRanura(puesta, RANURAS, 'eje-y')).toBe('CasosPendientes');
+    expect(slotField(puesta, SLOTS, 'eje-x')).toBeUndefined();
+    expect(slotField(puesta, SLOTS, 'eje-y')).toBe('CasosPendientes');
     expect(puesta.binding.measures).toEqual(['CasosPendientes']);
     expect(puesta.binding.dimensions).toEqual([]);
   });
 
   it('SE PUEDE llenar solo la serie, con el eje X vacio', () => {
-    const puesta = conCampoEnRanura(objectInstance(), RANURAS, 'serie', 'DimTribunal.Materia');
+    const puesta = withSlotField(objectInstance(), SLOTS, 'serie', 'DimTribunal.Materia');
 
-    expect(campoDeRanura(puesta, RANURAS, 'eje-x')).toBeUndefined();
-    expect(campoDeRanura(puesta, RANURAS, 'serie')).toBe('DimTribunal.Materia');
+    expect(slotField(puesta, SLOTS, 'eje-x')).toBeUndefined();
+    expect(slotField(puesta, SLOTS, 'serie')).toBe('DimTribunal.Materia');
     // Y el array derivado lleva UN campo: quien lo lea por posicion lo tomaria por el eje, que es
     // exactamente el motivo por el que los renderizadores preguntan por la ranura.
     expect(puesta.binding.dimensions).toHaveLength(1);
@@ -54,8 +54,8 @@ describe('la ranura manda, no el orden', () => {
     // Es lo que hace que dos modulos con los mismos campos en las mismas ranuras produzcan la
     // misma consulta, y por tanto la misma clave de cache.
     let i = objectInstance();
-    i = conCampoEnRanura(i, RANURAS, 'serie', 'DimTribunal.Materia');
-    i = conCampoEnRanura(i, RANURAS, 'eje-x', 'DimTribunal.Distrito');
+    i = withSlotField(i, SLOTS, 'serie', 'DimTribunal.Materia');
+    i = withSlotField(i, SLOTS, 'eje-x', 'DimTribunal.Distrito');
 
     expect(i.binding.dimensions.map((d) => `${d.table}.${d.field}`)).toEqual([
       'DimTribunal.Distrito',
@@ -64,29 +64,29 @@ describe('la ranura manda, no el orden', () => {
   });
 
   it('no admite mas de lo que la ranura declara, ni el mismo campo dos veces', () => {
-    let i = conCampoEnRanura(objectInstance(), RANURAS, 'eje-x', 'A');
-    i = conCampoEnRanura(i, RANURAS, 'eje-x', 'B');
-    expect(ranurasDe(i, RANURAS).get('eje-x')).toEqual(['A']);
+    let i = withSlotField(objectInstance(), SLOTS, 'eje-x', 'A');
+    i = withSlotField(i, SLOTS, 'eje-x', 'B');
+    expect(slotsOf(i, SLOTS).get('eje-x')).toEqual(['A']);
 
-    const repetida = conCampoEnRanura(i, RANURAS, 'eje-x', 'A');
-    expect(ranurasDe(repetida, RANURAS).get('eje-x')).toEqual(['A']);
+    const repetida = withSlotField(i, SLOTS, 'eje-x', 'A');
+    expect(slotsOf(repetida, SLOTS).get('eje-x')).toEqual(['A']);
   });
 
   it('quitar afecta a UNA ranura, no a todas', () => {
     // El mismo campo puede estar en dos ranuras; quitarlo de una no debe vaciar la otra.
-    let i = conCampoEnRanura(objectInstance(), RANURAS, 'eje-x', 'DimTiempo.Fecha');
-    i = conCampoEnRanura(i, RANURAS, 'serie', 'DimTiempo.Fecha');
+    let i = withSlotField(objectInstance(), SLOTS, 'eje-x', 'DimTiempo.Fecha');
+    i = withSlotField(i, SLOTS, 'serie', 'DimTiempo.Fecha');
 
-    const sin = sinCampoEnRanura(i, RANURAS, 'eje-x', 'DimTiempo.Fecha');
-    expect(campoDeRanura(sin, RANURAS, 'eje-x')).toBeUndefined();
-    expect(campoDeRanura(sin, RANURAS, 'serie')).toBe('DimTiempo.Fecha');
+    const sin = slotFieldWithout(i, SLOTS, 'eje-x', 'DimTiempo.Fecha');
+    expect(slotField(sin, SLOTS, 'eje-x')).toBeUndefined();
+    expect(slotField(sin, SLOTS, 'serie')).toBe('DimTiempo.Fecha');
   });
 
   it('cabeEnRanura respeta el cupo de cada una', () => {
-    const i = conCampoEnRanura(objectInstance(), RANURAS, 'eje-x', 'A');
-    expect(cabeEnRanura(i, RANURAS, 'eje-x')).toBe(false);
-    expect(cabeEnRanura(i, RANURAS, 'eje-y')).toBe(true);
-    expect(cabeEnRanura(i, RANURAS, 'inventada')).toBe(false);
+    const i = withSlotField(objectInstance(), SLOTS, 'eje-x', 'A');
+    expect(cabeEnRanura(i, SLOTS, 'eje-x')).toBe(false);
+    expect(cabeEnRanura(i, SLOTS, 'eje-y')).toBe(true);
+    expect(cabeEnRanura(i, SLOTS, 'inventada')).toBe(false);
   });
 });
 
@@ -104,9 +104,9 @@ describe('compatibilidad con lo guardado antes', () => {
       measures: ['CasosPendientes'],
     });
 
-    expect(campoDeRanura(antigua, RANURAS, 'eje-x')).toBe('DimTribunal.Distrito');
-    expect(campoDeRanura(antigua, RANURAS, 'serie')).toBe('DimTribunal.Materia');
-    expect(ranurasDe(antigua, RANURAS).get('eje-y')).toEqual(['CasosPendientes']);
+    expect(slotField(antigua, SLOTS, 'eje-x')).toBe('DimTribunal.Distrito');
+    expect(slotField(antigua, SLOTS, 'serie')).toBe('DimTribunal.Materia');
+    expect(slotsOf(antigua, SLOTS).get('eje-y')).toEqual(['CasosPendientes']);
   });
 
   it('el primer cambio sobre una instancia antigua la deja ya con mapa', () => {
@@ -114,7 +114,7 @@ describe('compatibilidad con lo guardado antes', () => {
       dimensions: [{ table: 'DimTribunal', field: 'Distrito' }],
       measures: [],
     });
-    const puesta = conCampoEnRanura(antigua, RANURAS, 'eje-y', 'CasosPendientes');
+    const puesta = withSlotField(antigua, SLOTS, 'eje-y', 'CasosPendientes');
 
     expect(puesta.binding.slots).toEqual({
       'eje-x': ['DimTribunal.Distrito'],
@@ -126,7 +126,7 @@ describe('compatibilidad con lo guardado antes', () => {
   it('una asignacion guardada con mas campos de los que caben se recorta, no desborda', () => {
     // Pasa al bajar el cupo de una ranura entre versiones del objeto.
     const i = objectInstance({ slots: { 'eje-x': ['A', 'B'] } });
-    expect(ranurasDe(i, RANURAS).get('eje-x')).toEqual(['A']);
+    expect(slotsOf(i, SLOTS).get('eje-x')).toEqual(['A']);
   });
 
   it('con DOS ranuras obligatorias del mismo tipo, el reparto respeta los minimos', () => {
@@ -135,34 +135,34 @@ describe('compatibilidad con lo guardado antes', () => {
      * combinado sin asignacion guardada salia SIEMPRE roto, aunque el mapeo trajera medidas de
      * sobra. El valor por omision tiene que cumplir el contrato cuando hay campos suficientes.
      */
-    const dosPozos: RanuraDeCampos[] = [
+    const dosPozos: FieldSlot[] = [
       { id: 'columnas', etiqueta: 'Columnas', tipo: 'medida', max: 3, min: 1 },
       { id: 'lineas', etiqueta: 'Lineas', tipo: 'medida', max: 3, min: 1 },
     ];
     const i = objectInstance({ measures: ['A', 'B', 'C'] });
-    const reparto = ranurasDe(i, dosPozos);
+    const reparto = slotsOf(i, dosPozos);
 
     expect(reparto.get('columnas')).toEqual(['A', 'C']);
     expect(reparto.get('lineas')).toEqual(['B']);
-    expect(validarRanuras(i, dosPozos)).toEqual([]);
+    expect(validateSlots(i, dosPozos)).toEqual([]);
   });
 
   it('y con campos justos para los minimos, los reparte uno a cada una', () => {
-    const dosPozos: RanuraDeCampos[] = [
+    const dosPozos: FieldSlot[] = [
       { id: 'columnas', etiqueta: 'Columnas', tipo: 'medida', max: 3, min: 1 },
       { id: 'lineas', etiqueta: 'Lineas', tipo: 'medida', max: 3, min: 1 },
     ];
-    const reparto = ranurasDe(objectInstance({ measures: ['A', 'B'] }), dosPozos);
+    const reparto = slotsOf(objectInstance({ measures: ['A', 'B'] }), dosPozos);
     expect(reparto.get('columnas')).toEqual(['A']);
     expect(reparto.get('lineas')).toEqual(['B']);
   });
 });
 
-describe('validarRanuras', () => {
+describe('validateSlots', () => {
   it('acepta una asignacion completa', () => {
-    let i = conCampoEnRanura(objectInstance(), RANURAS, 'eje-x', 'D');
-    i = conCampoEnRanura(i, RANURAS, 'eje-y', 'M');
-    expect(validarRanuras(i, RANURAS)).toEqual([]);
+    let i = withSlotField(objectInstance(), SLOTS, 'eje-x', 'D');
+    i = withSlotField(i, SLOTS, 'eje-y', 'M');
+    expect(validateSlots(i, SLOTS)).toEqual([]);
   });
 
   it('rechaza un eje X vacio aunque el contrato global se cumpla', () => {
@@ -170,10 +170,10 @@ describe('validarRanuras', () => {
      * El punto de todo esto. «Entre 1 y 2 dimensiones» se cumple igual con la dimension en la
      * serie, y ese grafico no se puede dibujar. Solo la ranura sabe cual de sus campos hace falta.
      */
-    let i = conCampoEnRanura(objectInstance(), RANURAS, 'serie', 'DimTribunal.Materia');
-    i = conCampoEnRanura(i, RANURAS, 'eje-y', 'M');
+    let i = withSlotField(objectInstance(), SLOTS, 'serie', 'DimTribunal.Materia');
+    i = withSlotField(i, SLOTS, 'eje-y', 'M');
 
-    const problems = validarRanuras(i, RANURAS);
+    const problems = validateSlots(i, SLOTS);
     expect(problems.map((p) => p.ranura)).toEqual(['eje-x']);
     expect(problems[0]?.issue).toContain('Eje X');
   });
@@ -184,18 +184,18 @@ describe('validarRanuras', () => {
     const i = objectInstance({
       slots: { 'eje-x': ['D'], 'eje-y': ['M'], 'ranura-vieja': ['Z'] },
     });
-    const problems = validarRanuras(i, RANURAS);
+    const problems = validateSlots(i, SLOTS);
     expect(problems.map((p) => p.ranura)).toContain('ranura-vieja');
   });
 
   it('sin ranuras declaradas no se valida nada', () => {
-    expect(validarRanuras(objectInstance(), [])).toEqual([]);
+    expect(validateSlots(objectInstance(), [])).toEqual([]);
   });
 });
 
-describe('ranurasPorDefecto', () => {
+describe('defaultSlots', () => {
   it('una por tipo, con el cupo del contrato', () => {
-    const slots = ranurasPorDefecto({
+    const slots = defaultSlots({
       dimensions: { min: 1, max: 2 },
       measures: { min: 1, max: 4 },
     });
@@ -208,7 +208,7 @@ describe('ranurasPorDefecto', () => {
   it('sin ranuras de un tipo, no hay ranura de ese tipo', () => {
     // Un segmentador no mapea medidas: ofrecerle una ranura de medidas vacia invita a preguntarse
     // que se pone ahi.
-    const slots = ranurasPorDefecto({
+    const slots = defaultSlots({
       dimensions: { min: 1, max: 1 },
       measures: { min: 0, max: 0 },
     });
@@ -265,9 +265,9 @@ describe('las ranuras que declara el catalogo cuadran con su contrato', () => {
     }
   });
 
-  it('ranurasDelContrato cae a las genericas si el objeto no declara', () => {
+  it('contractSlots cae a las genericas si el objeto no declara', () => {
     expect(
-      ranurasDelContrato({ dimensions: { min: 1, max: 1 }, measures: { min: 0, max: 0 } }).map(
+      contractSlots({ dimensions: { min: 1, max: 1 }, measures: { min: 0, max: 0 } }).map(
         (r) => r.id,
       ),
     ).toEqual(['dimensiones']);

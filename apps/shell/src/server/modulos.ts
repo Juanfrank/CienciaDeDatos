@@ -43,7 +43,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 acento: 'primario',
                 resaltado: true,
                 subtitulo: 'Al cierre del trimestre',
-                formato: { unidad: 'casos' },
+                formato: { unit: 'casos' },
               },
               attachments: [
                 {
@@ -101,7 +101,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: { icono: 'filtro', acento: 'secundario' },
               settings: {
                 objectId: 'panel-de-filtros',
-                selectores: [
+                pickers: [
                   { fieldName: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Materia' },
                   { fieldName: 'DimTribunal.Distrito', tipo: 'desplegable', etiqueta: 'Distrito' },
                 ],
@@ -364,11 +364,11 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'titulo-de-seccion',
-                tituloDeSeccion: {
+                sectionTitle: {
                   content: 'Texto, formas y separadores',
-                  posicionDelTexto: 'izquierda',
+                  textPosition: 'izquierda',
                   line: 'derecha',
-                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
                 },
               },
             },
@@ -385,7 +385,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: { icono: 'content', acento: 'terciario' },
               settings: {
                 objectId: 'cuadro-de-texto',
-                cuadroDeTexto: {
+                textBox: {
                   parrafos: [
                     { content: 'Como leer este modulo', nivel: 1 },
                     {
@@ -460,7 +460,7 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'linea-divisoria',
-                lineaDivisoria: { orientacion: 'horizontal', estilo: 'discontinua', grosor: 2, color: 'atenuado' },
+                lineDivider: { orientation: 'horizontal', style: 'discontinua', thickness: 2, color: 'atenuado' },
               },
             },
           },
@@ -475,11 +475,11 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'titulo-de-seccion',
-                tituloDeSeccion: {
+                sectionTitle: {
                   content: 'Conexiones',
-                  posicionDelTexto: 'centro',
+                  textPosition: 'centro',
                   line: 'ambos',
-                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'atenuado' },
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'atenuado' },
                 },
               },
             },
@@ -515,10 +515,10 @@ export const modulosDemo: ModuleDefinition[] = [
                 conexion: {
                   desde: 'flujo-origen',
                   hasta: 'flujo-destino',
-                  trazado: 'angulo',
+                  dash: 'angulo',
                   extremoFinal: 'flecha',
                   content: 'se resuelven',
-                  estiloDeLinea: { estilo: 'solida', grosor: 2, color: 'primario' },
+                  estiloDeLinea: { style: 'solida', thickness: 2, color: 'primario' },
                 },
               },
             },
@@ -546,7 +546,7 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'linea-divisoria',
-                lineaDivisoria: { orientacion: 'vertical', estilo: 'solida', grosor: 2, color: 'primario' },
+                lineDivider: { orientation: 'vertical', style: 'solida', thickness: 2, color: 'primario' },
               },
             },
           },
@@ -583,11 +583,11 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'titulo-de-seccion',
-                tituloDeSeccion: {
+                sectionTitle: {
                   content: 'Lo mismo, sin personalizar y personalizado',
-                  posicionDelTexto: 'izquierda',
+                  textPosition: 'izquierda',
                   line: 'derecha',
-                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
                 },
               },
             },
@@ -630,7 +630,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 subtitulo: 'Leyenda a la derecha, cifras, sin cuadricula, ordenado por valor',
                 leyenda: 'derecha',
                 etiquetasDeDato: true,
-                ejes: { cuadricula: false, tituloY: 'Casos' },
+                ejes: { gridlines: false, tituloY: 'Casos' },
                 orden: { por: 'valor', direction: 'desc' },
               },
             },
@@ -674,11 +674,11 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'titulo-de-seccion',
-                tituloDeSeccion: {
+                sectionTitle: {
                   content: 'La misma medida en seis formas',
-                  posicionDelTexto: 'izquierda',
+                  textPosition: 'izquierda',
                   line: 'derecha',
-                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
                 },
               },
             },
@@ -797,11 +797,11 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'titulo-de-seccion',
-                tituloDeSeccion: {
+                sectionTitle: {
                   content: 'La parte y la meta',
-                  posicionDelTexto: 'izquierda',
+                  textPosition: 'izquierda',
                   line: 'derecha',
-                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
                 },
               },
             },
@@ -915,11 +915,11 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'titulo-de-seccion',
-                tituloDeSeccion: {
+                sectionTitle: {
                   content: 'Cuando una escala no alcanza',
-                  posicionDelTexto: 'izquierda',
+                  textPosition: 'izquierda',
                   line: 'derecha',
-                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
                 },
               },
             },
@@ -973,7 +973,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'La linea se mide en la escala de la derecha',
                 leyenda: 'abajo',
-                combinado: { ejeSecundario: true },
+                combinado: { axisSecondary: true },
                 ejes: { tituloY: 'Casos', tituloY2: 'Pendientes', desdeCero: false },
               },
             },
@@ -1036,11 +1036,11 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'titulo-de-seccion',
-                tituloDeSeccion: {
+                sectionTitle: {
                   content: 'De donde sale y en que se reparte',
-                  posicionDelTexto: 'izquierda',
+                  textPosition: 'izquierda',
                   line: 'derecha',
-                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
                 },
               },
             },
@@ -1144,11 +1144,11 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'titulo-de-seccion',
-                tituloDeSeccion: {
+                sectionTitle: {
                   content: 'Una cifra contra algo',
-                  posicionDelTexto: 'izquierda',
+                  textPosition: 'izquierda',
                   line: 'derecha',
-                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
                 },
               },
             },
@@ -1168,7 +1168,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 etiquetasDeDato: true,
                 ejes: { tituloY: 'Casos' },
                 referencias: [
-                  { valor: 900, etiqueta: 'Meta trimestral', color: 'error', estilo: 'discontinua' },
+                  { valor: 900, etiqueta: 'Meta trimestral', color: 'error', style: 'discontinua' },
                 ],
               },
             },
@@ -1193,9 +1193,9 @@ export const modulosDemo: ModuleDefinition[] = [
                 // escalas distintas se leen como si dijeran cosas distintas.
                 ejes: { tituloY: 'Casos', minimoY: 0, maximoY: 2400 },
                 referencias: [
-                  { valor: 600, etiqueta: 'Minimo', color: 'atenuado', estilo: 'punteada' },
+                  { valor: 600, etiqueta: 'Minimo', color: 'atenuado', style: 'punteada' },
                   { valor: 1200, etiqueta: 'Meta', color: 'error' },
-                  { valor: 1800, etiqueta: 'Tope', color: 'primario', estilo: 'solida' },
+                  { valor: 1800, etiqueta: 'Tope', color: 'primario', style: 'solida' },
                 ],
               },
             },
@@ -1256,11 +1256,11 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'titulo-de-seccion',
-                tituloDeSeccion: {
+                sectionTitle: {
                   content: 'Que se rotula y que se lee al senalar',
-                  posicionDelTexto: 'izquierda',
+                  textPosition: 'izquierda',
                   line: 'derecha',
-                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
                 },
               },
             },
@@ -1281,7 +1281,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'La tercera opcion entre «todas» y «ninguna»',
                 leyenda: 'abajo',
-                etiquetasDeDato: { mostrar: true, soloExtremos: true },
+                etiquetasDeDato: { mostrar: true, onlyEnds: true },
                 ejes: { tituloY: 'Casos' },
               },
             },
@@ -1344,7 +1344,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 subtitulo: 'Senale una columna: la suma ya no hay que hacerla de cabeza',
                 leyenda: 'abajo',
                 apilado: 'apilado',
-                tooltip: { total: true, ordenarPorValor: true },
+                tooltip: { total: true, sortValue: true },
                 ejes: { tituloY: 'Casos' },
               },
             },
@@ -1367,11 +1367,11 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'titulo-de-seccion',
-                tituloDeSeccion: {
+                sectionTitle: {
                   content: 'El mismo grafico, una vez por cada valor',
-                  posicionDelTexto: 'izquierda',
+                  textPosition: 'izquierda',
                   line: 'derecha',
-                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
                 },
               },
             },
@@ -1398,7 +1398,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'Misma escala: los paneles se pueden comparar',
                 leyenda: 'oculta',
-                ejes: { cuadricula: true },
+                ejes: { gridlines: true },
               },
             },
           },
@@ -1445,11 +1445,11 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'titulo-de-seccion',
-                tituloDeSeccion: {
+                sectionTitle: {
                   content: 'Cuando el color lo decide el dato',
-                  posicionDelTexto: 'izquierda',
+                  textPosition: 'izquierda',
                   line: 'derecha',
-                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
                 },
               },
             },
@@ -1466,7 +1466,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'Roja por encima de 2.000',
                 etiqueta: { content: 'Al cierre del trimestre', cellPosition: 'debajo' },
-                condicional: { rules: [{ comparador: 'mayor', valor: 2000, color: 'error' }] },
+                condicional: { rules: [{ comparator: 'mayor', valor: 2000, color: 'error' }] },
               },
             },
           },
@@ -1482,7 +1482,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'La misma regla, y esta no salta',
                 etiqueta: { content: 'Al cierre del trimestre', cellPosition: 'debajo' },
-                condicional: { rules: [{ comparador: 'menor', valor: 1000, color: 'error' }] },
+                condicional: { rules: [{ comparator: 'menor', valor: 1000, color: 'error' }] },
               },
             },
           },
@@ -1503,9 +1503,9 @@ export const modulosDemo: ModuleDefinition[] = [
                 subtitulo: 'Tres reglas, evaluadas en orden',
                 condicional: {
                   rules: [
-                    { medida: 'CasosPendientes', comparador: 'mayor', valor: 600, color: 'error' },
-                    { medida: 'CasosPendientes', comparador: 'menor', valor: 400, color: 'terciario' },
-                    { medida: 'CasosResueltos', comparador: 'mayor', valor: 900, color: 'primario' },
+                    { medida: 'CasosPendientes', comparator: 'mayor', valor: 600, color: 'error' },
+                    { medida: 'CasosPendientes', comparator: 'menor', valor: 400, color: 'terciario' },
+                    { medida: 'CasosResueltos', comparator: 'mayor', valor: 900, color: 'primario' },
                   ],
                 },
               },
@@ -1526,7 +1526,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 etiquetasDeDato: { mostrar: true },
                 ejes: { tituloY: 'Casos' },
                 referencias: [{ valor: 600, etiqueta: 'Umbral', color: 'error' }],
-                condicional: { rules: [{ comparador: 'mayor', valor: 600, color: 'error' }] },
+                condicional: { rules: [{ comparator: 'mayor', valor: 600, color: 'error' }] },
               },
             },
           },
@@ -1546,7 +1546,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 subtitulo: 'La misma regla, en horizontal',
                 leyenda: 'oculta',
                 etiquetasDeDato: { mostrar: true },
-                condicional: { rules: [{ comparador: 'mayor', valor: 600, color: 'error' }] },
+                condicional: { rules: [{ comparator: 'mayor', valor: 600, color: 'error' }] },
               },
             },
           },
@@ -1573,7 +1573,7 @@ export const modulosDemo: ModuleDefinition[] = [
               },
               presentacion: {
                 subtitulo: 'El color tambien llega a los subtotales',
-                condicional: { rules: [{ comparador: 'mayor', valor: 300, color: 'error' }] },
+                condicional: { rules: [{ comparator: 'mayor', valor: 300, color: 'error' }] },
               },
             },
           },
@@ -1624,7 +1624,7 @@ export const modulosDemo: ModuleDefinition[] = [
                           binding: WITHOUT_DATA,
                           settings: {
                             objectId: 'cuadro-de-texto',
-                            cuadroDeTexto: { parrafos: [{ content: 'Un elemento y una visual, juntos.' }] },
+                            textBox: { parrafos: [{ content: 'Un elemento y una visual, juntos.' }] },
                           },
                         },
                       },
@@ -1646,7 +1646,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: { icono: 'contenedor', subtitulo: 'Se desplaza solo en vertical' },
               settings: {
                 objectId: 'contenedor-desplazable',
-                desplazable: { eje: 'y', gridColumns: 4 },
+                scrollable: { axis: 'y', gridColumns: 4 },
                 panels: [
                   {
                     panelId: 'p1',
@@ -1682,10 +1682,10 @@ export const modulosDemo: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Contenedor con pestanas',
               binding: WITHOUT_DATA,
-              presentacion: { icono: 'pestanas', subtitulo: 'Cada pestana con su propia disposicion' },
+              presentacion: { icono: 'tabs', subtitulo: 'Cada pestana con su propia disposicion' },
               settings: {
                 objectId: 'contenedor-con-pestanas',
-                pestanas: { gridColumns: 8, pestanaInicial: 'p1' },
+                tabs: { gridColumns: 8, initialTab: 'p1' },
                 panels: [
                   {
                     panelId: 'p1',
@@ -1756,7 +1756,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: { icono: 'expandir', subtitulo: 'La ventana tiene su propia rejilla' },
               settings: {
                 objectId: 'contenedor-ampliable',
-                ampliable: { gridColumns: 6, columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' },
+                expandable: { gridColumns: 6, columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' },
                 panels: [
                   {
                     panelId: 'p1',

@@ -1,23 +1,23 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Icono, type NombreDeIcono } from '../iconos/Icono';
+import { Icono, type IconName } from '../iconos/Icono';
 
 /** La barra de pestanas del panel, con paginado. */
 
 export interface DefinicionDePestana<T extends string> {
   id: T;
   etiqueta: string;
-  icono: NombreDeIcono;
+  icono: IconName;
   habilitada: boolean;
 }
 
 export function Pestanas<T extends string>({
-  pestanas,
+  tabs,
   activa,
   onElegir,
 }: {
-  pestanas: DefinicionDePestana<T>[];
+  tabs: DefinicionDePestana<T>[];
   activa: T;
   onElegir: (id: T) => void;
 }) {
@@ -41,7 +41,7 @@ export function Pestanas<T extends string>({
     const observador = new ResizeObserver(medir);
     observador.observe(el);
     return () => observador.disconnect();
-  }, [medir, pestanas.length]);
+  }, [medir, tabs.length]);
 
   const desplazar = (signo: 1 | -1) => {
     const el = carril.current;
@@ -52,7 +52,7 @@ export function Pestanas<T extends string>({
   const alPulsarTecla = (e: React.KeyboardEvent) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     e.preventDefault();
-    const posibles = pestanas.filter((p) => p.habilitada);
+    const posibles = tabs.filter((p) => p.habilitada);
     const actual = posibles.findIndex((p) => p.id === activa);
     const paso = e.key === 'ArrowRight' ? 1 : -1;
     const siguiente = posibles[(actual + paso + posibles.length) % posibles.length];
@@ -80,7 +80,7 @@ export function Pestanas<T extends string>({
         onScroll={medir}
         onKeyDown={alPulsarTecla}
       >
-        {pestanas.map((p) => (
+        {tabs.map((p) => (
           <button
             key={p.id}
             type="button"

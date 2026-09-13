@@ -47,7 +47,7 @@ export const TRAZOS_DE_ICONO = {
   forma: 'M5 5h14v14H5z',
   conexion: 'M4 7h6v10h10M20 17l-3-3M20 17l-3 3',
   contenedor: 'M4 5h16v14H4zM4 9h16M9 9v10',
-  pestanas: 'M4 8h6V5h10v14H4zM4 8v11',
+  tabs: 'M4 8h6V5h10v14H4zM4 8v11',
   calendario:
     'M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM4 10h16M8 4v4M16 4v4',
   // Vocabulario de dominio, para rotular una tarjeta por lo que mide.
@@ -62,15 +62,15 @@ export const TRAZOS_DE_ICONO = {
   lugar: 'M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
 } as const;
 
-export type NombreDeIcono = keyof typeof TRAZOS_DE_ICONO;
+export type IconName = keyof typeof TRAZOS_DE_ICONO;
 
-export const NOMBRES_DE_ICONO = Object.keys(TRAZOS_DE_ICONO) as NombreDeIcono[];
+export const ICON_NAMES = Object.keys(TRAZOS_DE_ICONO) as IconName[];
 
-export const esNombreDeIcono = (valor: unknown): valor is NombreDeIcono =>
+export const iconNameIs = (valor: unknown): valor is IconName =>
   typeof valor === 'string' && valor in TRAZOS_DE_ICONO;
 
 /** Los iconos que se ofrecen para rotular un objeto. */
-export const ICONOS_DE_OBJETO: NombreDeIcono[] = [
+export const OBJECT_ICONS: IconName[] = [
   'indicador',
   'barras',
   'lineas',

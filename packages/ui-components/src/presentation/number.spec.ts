@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { formatoDeMedida, formateadorDeNumero, problemaDelPatron } from './numero';
+import { measureFormat, numberFormatter, problemaDelPatron } from './number';
 
-const f = (formato: Parameters<typeof formateadorDeNumero>[0]) => formateadorDeNumero(formato);
-const p = (patron: string) => formateadorDeNumero({ tipo: 'personalizado', patron });
+const f = (formato: Parameters<typeof numberFormatter>[0]) => numberFormatter(formato);
+const p = (patron: string) => numberFormatter({ tipo: 'personalizado', patron });
 
 /*
  * Los separadores son los de `es-DO` —coma para millares, punto para decimales— y se comprueban
@@ -118,18 +118,18 @@ describe('el formato es POR MEDIDA, con un general de respaldo', () => {
   };
 
   it('una medida con formato propio usa el suyo', () => {
-    expect(formatoDeMedida(formatos, 'DiasResolucion').tipo).toBe('decimal');
+    expect(measureFormat(formatos, 'DiasResolucion').tipo).toBe('decimal');
   });
 
   it('una medida sin formato propio cae en el general', () => {
-    expect(formatoDeMedida(formatos, 'CasosIngresados').tipo).toBe('entero');
+    expect(measureFormat(formatos, 'CasosIngresados').tipo).toBe('entero');
   });
 
   it('el general es una REGLA que se consulta, no una copia', () => {
     // Cambiarlo cambia todas las que no se hayan tocado. Es lo que uno espera de «general», y no
     // pasaria si al crear cada medida se le hubiera copiado el valor.
     const other = { ...formatos, general: { tipo: 'decimal' as const } };
-    expect(formatoDeMedida(other, 'CasosIngresados').tipo).toBe('decimal');
-    expect(formatoDeMedida(other, 'DiasResolucion').decimales).toBe(1);
+    expect(measureFormat(other, 'CasosIngresados').tipo).toBe('decimal');
+    expect(measureFormat(other, 'DiasResolucion').decimales).toBe(1);
   });
 });

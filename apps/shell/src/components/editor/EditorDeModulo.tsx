@@ -10,7 +10,7 @@ import type {
   PublishBlocker,
 } from '@app/module-model';
 import { findFreeSlot } from '@app/module-model';
-import { configuracionInicial } from '@app/ui-components';
+import { initialSettings } from '@app/ui-components';
 import type { PaletaDelEditor } from '../../server/editor';
 import type { ObjetoSerializado } from '../../server/serializar';
 import { CabeceraDeEditor } from './CabeceraDeEditor';
@@ -101,7 +101,7 @@ export function EditorDeModulo({
     /*
      * Un elemento o un contenedor no necesita dataset, y por eso no se exige uno.
      */
-    const config = configuracionInicial(objectId);
+    const config = initialSettings(objectId);
     const sinDatos = definicion.dimensiones.max === 0 && definicion.medidas.max === 0;
     const dataset = palette.datasets[0];
     if (!sinDatos && !dataset) return;

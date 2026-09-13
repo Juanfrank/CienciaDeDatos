@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { optionsOf, type ChartOptions, type ChartKind } from '../charts/options';
 import type { CategoricalViewModel } from './viewModel';
 import { initialCatalog } from './catalog';
-import { CLAVES_DE_PRESENTACION, type PresentationKey } from '../presentacion/contrato';
+import { PRESENTATION_KEYS, type PresentationKey } from '../presentation/contract';
 
 /**
  * Lo que un objeto DECLARA admitir y lo que su dibujo HONRA tienen que ser lo mismo — 4.2 y 4.5.
@@ -34,32 +34,32 @@ const VALUES: Partial<Record<PresentationKey, unknown[]>> = {
   leyenda: ['oculta', 'derecha'],
   etiquetasDeDato: [
     { mostrar: true, cellPosition: 'dentro' },
-    { mostrar: true, soloExtremos: true },
+    { mostrar: true, onlyEnds: true },
   ],
-  tooltip: [{ total: true }, { ordenarPorValor: true }],
+  tooltip: [{ total: true }, { sortValue: true }],
   ejes: [
     { tituloX: 'X', tituloY: 'Y' },
-    { cuadricula: false, mostrarX: false },
+    { gridlines: false, mostrarX: false },
   ],
   apilado: ['apilado', 'porcentaje'],
   circular: [{ radioInterior: 40 }, { labels: 'categoria', totalEnElCentro: true }],
   medidor: [{ minimo: 0, maximo: 100 }, { maximo: 7 }],
-  combinado: [{ ejeSecundario: true }, { ejeSecundario: false }],
+  combinado: [{ axisSecondary: true }, { axisSecondary: false }],
   embudo: [{ compare: 'anterior' }, { compare: 'ninguna' }],
-  cascada: [{ mostrarTotal: false }, { mostrarTotal: true }],
-  referencias: [[{ valor: 15, etiqueta: 'meta', estilo: 'discontinua', color: 'primario' }], [{ valor: 5 }]],
+  cascada: [{ showTotal: false }, { showTotal: true }],
+  referencias: [[{ valor: 15, etiqueta: 'meta', style: 'discontinua', color: 'primario' }], [{ valor: 5 }]],
   coloresDeSerie: [
     [3, 5],
     [7, 0],
   ],
   condicional: [
-    { rules: [{ medida: 'Casos', comparador: 'mayor', valor: 15, color: 'exito' }] },
-    { rules: [{ medida: 'Dias', comparador: 'menor', valor: 5, color: 'peligro' }] },
+    { rules: [{ medida: 'Casos', comparator: 'mayor', valor: 15, color: 'exito' }] },
+    { rules: [{ medida: 'Dias', comparator: 'menor', valor: 5, color: 'peligro' }] },
   ],
 };
 
 /** Claves que NO decide el constructor de opciones, y que por tanto esta sonda no puede ver. */
-const FUERA_DEL_DIBUJO: PresentationKey[] = CLAVES_DE_PRESENTACION.filter(
+const FUERA_DEL_DIBUJO: PresentationKey[] = PRESENTATION_KEYS.filter(
   (c) => !(c in VALUES),
 );
 
@@ -193,7 +193,7 @@ describe('las excepciones estan justificadas, no silenciadas', () => {
   it('cada excepcion nombra un objeto y una clave que existen', () => {
     for (const e of EXCEPCIONES) {
       expect(OBJECT_KIND[e.objeto], e.objeto).toBeDefined();
-      expect(CLAVES_DE_PRESENTACION).toContain(e.clave);
+      expect(PRESENTATION_KEYS).toContain(e.clave);
     }
   });
 

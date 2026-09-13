@@ -4,7 +4,7 @@ import { fieldKey } from '../registry/viewModel';
 
 /** Ranuras con nombre — seccion 4.2. */
 
-export interface RanuraDeCampos {
+export interface FieldSlot {
   id: string;
   /** Como se llama en el editor: «Eje X», «Valor», «Detalle». */
   etiqueta: string;
@@ -18,7 +18,7 @@ export interface RanuraDeCampos {
 }
 
 /** Compatibilidad: el nombre anterior del mismo concepto. */
-export type PozoDeCampos = RanuraDeCampos;
+export type FieldWell = FieldSlot;
 
 /** Asignacion de campos a ranuras. La clave es el id de la ranura. */
 export type AsignacionDeRanuras = Record<string, string[]>;
@@ -29,9 +29,9 @@ export const aFieldRef = (clave: string): FieldRef => {
 };
 
 /** Las ranuras de una instancia, con sus campos. */
-export function ranurasDe(
+export function slotsOf(
   instance: ObjectInstance,
-  slots: RanuraDeCampos[],
+  slots: FieldSlot[],
 ): Map<string, string[]> {
   const declaradas = new Map<string, string[]>(slots.map((r) => [r.id, []]));
   const guardadas = instance.binding.slots;
@@ -66,7 +66,7 @@ export function ranurasDe(
 /** Los arrays que consumen el lector, la validacion y la proyeccion. */
 export function bindingDesdeRanuras(
   asignacion: Map<string, string[]>,
-  slots: RanuraDeCampos[],
+  slots: FieldSlot[],
 ): { dimensions: FieldRef[]; measures: string[]; slots: AsignacionDeRanuras } {
   const dimensions: FieldRef[] = [];
   const measures: string[] = [];
@@ -83,68 +83,68 @@ export function bindingDesdeRanuras(
 }
 
 /** Pone un campo en una ranura concreta. Devuelve la instancia nueva. */
-export function conCampoEnRanura(
+export function withSlotField(
   instance: ObjectInstance,
-  slots: RanuraDeCampos[],
-  ranuraId: string,
+  slots: FieldSlot[],
+  slotId: string,
   fieldName: string,
 ): ObjectInstance {
-  const ranura = slots.find((r) => r.id === ranuraId);
+  const ranura = slots.find((r) => r.id === slotId);
   if (!ranura) return instance;
 
-  const asignacion = ranurasDe(instance, slots);
-  const actuales = asignacion.get(ranuraId) ?? [];
+  const asignacion = slotsOf(instance, slots);
+  const actuales = asignacion.get(slotId) ?? [];
   if (actuales.length >= ranura.max || actuales.includes(fieldName)) return instance;
 
-  asignacion.set(ranuraId, [...actuales, fieldName]);
+  asignacion.set(slotId, [...actuales, fieldName]);
   return { ...instance, binding: { ...instance.binding, ...bindingDesdeRanuras(asignacion, slots) } };
 }
 
 /** Quita un campo de UNA ranura, no de todas. */
-export function sinCampoEnRanura(
+export function slotFieldWithout(
   instance: ObjectInstance,
-  slots: RanuraDeCampos[],
-  ranuraId: string,
+  slots: FieldSlot[],
+  slotId: string,
   fieldName: string,
 ): ObjectInstance {
-  const asignacion = ranurasDe(instance, slots);
-  asignacion.set(ranuraId, (asignacion.get(ranuraId) ?? []).filter((c) => c !== fieldName));
+  const asignacion = slotsOf(instance, slots);
+  asignacion.set(slotId, (asignacion.get(slotId) ?? []).filter((c) => c !== fieldName));
   return { ...instance, binding: { ...instance.binding, ...bindingDesdeRanuras(asignacion, slots) } };
 }
 
 /** Si cabe otro campo en esa ranura. */
 export function cabeEnRanura(
   instance: ObjectInstance,
-  slots: RanuraDeCampos[],
-  ranuraId: string,
+  slots: FieldSlot[],
+  slotId: string,
 ): boolean {
-  const ranura = slots.find((r) => r.id === ranuraId);
+  const ranura = slots.find((r) => r.id === slotId);
   if (!ranura) return false;
-  return (ranurasDe(instance, slots).get(ranuraId) ?? []).length < ranura.max;
+  return (slotsOf(instance, slots).get(slotId) ?? []).length < ranura.max;
 }
 
 /** El primer campo de una ranura, que es lo que piden las ranuras de cupo uno. */
-export function campoDeRanura(
+export function slotField(
   instance: ObjectInstance,
-  slots: RanuraDeCampos[],
-  ranuraId: string,
+  slots: FieldSlot[],
+  slotId: string,
 ): string | undefined {
-  return ranurasDe(instance, slots).get(ranuraId)?.[0];
+  return slotsOf(instance, slots).get(slotId)?.[0];
 }
 
-export interface ProblemaDeRanura {
+export interface SlotProblem {
   ranura: string;
   issue: string;
 }
 
 /** Valida la asignacion contra lo que las ranuras declaran. */
-export function validarRanuras(
+export function validateSlots(
   instance: ObjectInstance,
-  slots: RanuraDeCampos[],
-): ProblemaDeRanura[] {
+  slots: FieldSlot[],
+): SlotProblem[] {
   if (slots.length === 0) return [];
-  const problems: ProblemaDeRanura[] = [];
-  const asignacion = ranurasDe(instance, slots);
+  const problems: SlotProblem[] = [];
+  const asignacion = slotsOf(instance, slots);
 
   for (const ranura of slots) {
     const campos = asignacion.get(ranura.id) ?? [];
@@ -186,8 +186,8 @@ export function validarRanuras(
 }
 
 /** Las ranuras por defecto cuando un objeto no las declara. */
-export function ranurasPorDefecto(contrato: ObjectDataContract): RanuraDeCampos[] {
-  const slots: RanuraDeCampos[] = [];
+export function defaultSlots(contrato: ObjectDataContract): FieldSlot[] {
+  const slots: FieldSlot[] = [];
   if (contrato.dimensions.max > 0) {
     slots.push({
       id: 'dimensiones',
@@ -210,8 +210,8 @@ export function ranurasPorDefecto(contrato: ObjectDataContract): RanuraDeCampos[
 }
 
 /** Las ranuras efectivas de una version: las declaradas, o las genericas. */
-export function ranurasDelContrato(contrato: ObjectDataContract): RanuraDeCampos[] {
+export function contractSlots(contrato: ObjectDataContract): FieldSlot[] {
   return contrato.wells && contrato.wells.length > 0
     ? contrato.wells
-    : ranurasPorDefecto(contrato);
+    : defaultSlots(contrato);
 }

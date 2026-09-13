@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { trazar } from './conectores';
+import { trazar } from './connectors';
 
 /** El trazado de un conector. */
 describe('trazar', () => {

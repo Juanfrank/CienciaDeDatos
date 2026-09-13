@@ -1,10 +1,10 @@
-import type { OrdenDeCategorias } from '../presentacion/contrato';
+import type { CategorySort } from '../presentation/contract';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
 /** Ordena las categorias del eje. */
 export function sortCategories(
   vm: CategoricalViewModel,
-  orden: OrdenDeCategorias | undefined,
+  orden: CategorySort | undefined,
 ): CategoricalViewModel {
   if (!orden?.por) return vm;
 

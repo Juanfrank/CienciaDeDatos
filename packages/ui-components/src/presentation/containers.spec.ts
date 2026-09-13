@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
-  columnasDe,
-  configuracionInicial,
-  instanciasAnidadas,
-  panelesDe,
+  columnsOf,
+  initialSettings,
+  nestedInstances,
+  panelsOf,
   seSolapanEnRejilla,
-  validarContenedor,
-} from './contenedores';
-import type { ContainerSettings, ItemAnidado } from './contenedores';
+  validateContainer,
+} from './containers';
+import type { ContainerSettings, ItemAnidado } from './containers';
 
 const item = (id: string, x: number, y: number, w = 2, h = 2): ItemAnidado => ({
   id,
@@ -21,12 +21,12 @@ const item = (id: string, x: number, y: number, w = 2, h = 2): ItemAnidado => ({
 });
 
 const con = (config: ContainerSettings, objectId = 'contenedor-simple') =>
-  validarContenedor('c1', { objectId, settings: config });
+  validateContainer('c1', { objectId, settings: config });
 
 describe('paneles', () => {
   it('siempre hay al menos uno: un contenedor sin panel no tiene donde poner nada', () => {
-    expect(panelesDe(undefined)).toHaveLength(1);
-    expect(panelesDe({ panels: [] })).toHaveLength(1);
+    expect(panelsOf(undefined)).toHaveLength(1);
+    expect(panelsOf({ panels: [] })).toHaveLength(1);
   });
 
   it('recoge las instancias de TODOS los paneles, no solo la visible', () => {
@@ -38,13 +38,13 @@ describe('paneles', () => {
     };
     // Importa para los avisos de deprecacion: un objeto en la segunda pestana esta desplegado
     // igual, y omitirlo dejaria sin avisar a los modulos que lo usan.
-    expect(instanciasAnidadas(config).map((i) => i.instanceId)).toEqual(['a', 'b']);
+    expect(nestedInstances(config).map((i) => i.instanceId)).toEqual(['a', 'b']);
   });
 });
 
-describe('validarContenedor', () => {
+describe('validateContainer', () => {
   it('no dice nada de un objeto que no es contenedor', () => {
-    expect(validarContenedor('x', { objectId: 'barras' })).toEqual([]);
+    expect(validateContainer('x', { objectId: 'barras' })).toEqual([]);
   });
 
   it('rechaza dos hijos superpuestos', () => {
@@ -70,7 +70,7 @@ describe('validarContenedor', () => {
   });
 
   it('rechaza un contenedor con pestanas que solo tiene una', () => {
-    const problems = validarContenedor('c1', {
+    const problems = validateContainer('c1', {
       objectId: 'contenedor-con-pestanas',
       settings: { panels: [{ panelId: 'p1', nombre: 'Sola', items: [] }] },
     });
@@ -78,7 +78,7 @@ describe('validarContenedor', () => {
   });
 
   it('rechaza dos paneles con el mismo id', () => {
-    const problems = validarContenedor('c1', {
+    const problems = validateContainer('c1', {
       objectId: 'contenedor-con-pestanas',
       settings: {
         panels: [
@@ -91,10 +91,10 @@ describe('validarContenedor', () => {
   });
 
   it('rechaza un eje que no es X ni Y', () => {
-    const problems = validarContenedor('c1', {
+    const problems = validateContainer('c1', {
       objectId: 'contenedor-desplazable',
       // Lo que este caso protege: que «ambos» no entre por la puerta de atras editando el JSON.
-      settings: { desplazable: { eje: 'ambos' as unknown as 'x' } },
+      settings: { scrollable: { axis: 'ambos' as unknown as 'x' } },
     });
     expect(problems[0]?.issue).toContain('nunca por los dos');
   });
@@ -102,30 +102,30 @@ describe('validarContenedor', () => {
 
 describe('configuracion inicial', () => {
   it('el de pestanas nace con dos: con una nacería marcado como roto', () => {
-    const config = configuracionInicial('contenedor-con-pestanas');
+    const config = initialSettings('contenedor-con-pestanas');
     expect(config && 'panels' in config ? config.panels : []).toHaveLength(2);
-    expect(validarContenedor('c1', { objectId: 'contenedor-con-pestanas', settings: config })).toEqual([]);
+    expect(validateContainer('c1', { objectId: 'contenedor-con-pestanas', settings: config })).toEqual([]);
   });
 
   it('cada elemento nace con su configuracion, no vacio', () => {
-    expect(configuracionInicial('cuadro-de-texto')).toHaveProperty('cuadroDeTexto');
-    expect(configuracionInicial('forma')).toHaveProperty('forma');
-    expect(configuracionInicial('conexion')).toHaveProperty('conexion');
+    expect(initialSettings('cuadro-de-texto')).toHaveProperty('textBox');
+    expect(initialSettings('forma')).toHaveProperty('forma');
+    expect(initialSettings('conexion')).toHaveProperty('conexion');
   });
 
   it('un objeto que no es ni elemento ni contenedor no lleva configuracion', () => {
-    expect(configuracionInicial('barras')).toBeUndefined();
+    expect(initialSettings('barras')).toBeUndefined();
   });
 });
 
-describe('columnasDe', () => {
+describe('columnsOf', () => {
   it('lee las columnas del bloque del tipo que sea', () => {
-    expect(columnasDe('contenedor-desplazable', { desplazable: { gridColumns: 4 } })).toBe(4);
-    expect(columnasDe('contenedor-simple', undefined)).toBe(6);
+    expect(columnsOf('contenedor-desplazable', { scrollable: { gridColumns: 4 } })).toBe(4);
+    expect(columnsOf('contenedor-simple', undefined)).toBe(6);
   });
 
   it('nunca devuelve cero: una rejilla de cero columnas no coloca nada', () => {
-    expect(columnasDe('contenedor-simple', { simple: { gridColumns: 0 } })).toBe(1);
+    expect(columnsOf('contenedor-simple', { simple: { gridColumns: 0 } })).toBe(1);
   });
 });
 

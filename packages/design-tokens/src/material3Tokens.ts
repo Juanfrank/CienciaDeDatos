@@ -143,16 +143,16 @@ export function materialVariables(theme: MaterialTheme): Record<string, string> 
     vars[`--md-sys-color-categorical-${i}`] = color;
   });
 
-  for (const [role, estilo] of Object.entries(theme.typography)) {
-    vars[`--md-sys-typescale-${role}-size`] = estilo.size;
-    vars[`--md-sys-typescale-${role}-line-height`] = estilo.lineHeight;
-    vars[`--md-sys-typescale-${role}-weight`] = String(estilo.weight);
-    vars[`--md-sys-typescale-${role}-tracking`] = estilo.tracking;
+  for (const [role, style] of Object.entries(theme.typography)) {
+    vars[`--md-sys-typescale-${role}-size`] = style.size;
+    vars[`--md-sys-typescale-${role}-line-height`] = style.lineHeight;
+    vars[`--md-sys-typescale-${role}-weight`] = String(style.weight);
+    vars[`--md-sys-typescale-${role}-tracking`] = style.tracking;
     /*
      * Y el rol COMPLETO, valido como abreviatura `font:`.
      */
     vars[`--md-sys-typescale-${role}`] =
-      `${estilo.weight} ${estilo.size}/${estilo.lineHeight} ${theme.font.sans}`;
+      `${style.weight} ${style.size}/${style.lineHeight} ${theme.font.sans}`;
   }
 
   for (const [nombre, valor] of Object.entries(theme.shape)) {

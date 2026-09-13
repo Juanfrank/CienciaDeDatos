@@ -1,45 +1,45 @@
 "use client";
 
 import {
-  ACENTOS,
-  COMPARACIONES_DE_EMBUDO,
+  ACCENTS,
+  FUNNEL_COMPARISONS,
   ETIQUETAS_CIRCULARES,
-  ICONOS_DE_OBJETO,
+  OBJECT_ICONS,
   MAX_RADIO_INTERIOR,
-  MODOS_DE_APILADO,
-  MODOS_DE_LEYENDA,
-  type CriterioDeOrden,
+  STACKING_MODES,
+  LEGEND_MODES,
+  type SortCriterion,
   type FunnelComparison,
   type PieLabel,
   type StackingMode,
-  POSICIONES_DE_DATO,
-  POSICIONES_DE_ETIQUETA,
+  DATUM_POSITIONS,
+  LABEL_POSITIONS,
   etiquetasNormalizadas,
-  TIPOS_DE_FORMATO,
-  TIPOS_DE_SELECTOR,
+  FORMAT_KINDS,
+  PICKER_KINDS,
   problemaDelPatron,
   selectoresEfectivos,
-  type AcentoDeObjeto,
+  type ObjectAccent,
   type PresentationKey,
   type DestinoDeTexto,
-  type EstiloDeTexto,
-  type FormatoDeNumero,
-  type FormatosDelObjeto,
+  type TextStyle,
+  type NumberFormat,
+  type ObjectFormats,
   type LegendMode,
-  type PosicionDeDato,
-  type PosicionDeEtiqueta,
-  type TipoDeFormato,
+  type DatumPosition,
+  type LabelPosition,
+  type FormatKind,
   type ObjectInstance,
-  type NombreDeIcono,
-  type PresentacionDeObjeto,
-  type TipoDeSelector,
+  type IconName,
+  type ObjectPresentation,
+  type PickerKind,
 } from "@app/ui-components";
 import { Icono } from "../iconos/Icono";
 import { Ayuda } from "./Ayuda";
 import { EstiloDeTextoEditor, PaletaDeColores } from "./EstiloDeTextoEditor";
 import { LineasDeReferencia } from "./LineasDeReferencia";
 import { ReglasDeColor } from "./ReglasDeColor";
-import { Seccion } from "./Seccion";
+import { Section } from "./Seccion";
 
 /** Personalizacion de un objeto DESDE el editor — secciones 4.2 y 4.3. */
 export function Presentacion({
@@ -60,7 +60,7 @@ export function Presentacion({
   const admite = (clave: PresentationKey) => admitidas.includes(clave);
   const prueba = `pres-${instance.instanceId}`;
 
-  const poner = (parcial: Partial<PresentacionDeObjeto>) =>
+  const poner = (parcial: Partial<ObjectPresentation>) =>
     onCambiar((i) => ({
       ...i,
       presentacion: { ...i.presentacion, ...parcial },
@@ -69,12 +69,12 @@ export function Presentacion({
   /*
    * El estilo de un texto se funde con lo que ya hubiera de los OTROS textos.
    */
-  const ponerTexto = (destino: DestinoDeTexto, estilo: EstiloDeTexto) =>
+  const ponerTexto = (destino: DestinoDeTexto, style: TextStyle) =>
     onCambiar((i) => ({
       ...i,
       presentacion: {
         ...i.presentacion,
-        textos: { ...i.presentacion?.textos, [destino]: estilo },
+        textos: { ...i.presentacion?.textos, [destino]: style },
       },
     }));
 
@@ -92,7 +92,7 @@ export function Presentacion({
 
   return (
     <div className="editor__presentacion" data-testid={prueba}>
-      <Seccion
+      <Section
           keys={['titulo', 'subtitulo', 'icono', 'cabecera', 'nombre', 'texto']}
           titulo="Rotulo" nivel={2} prueba={`${prueba}-rotulo`}>
         <label className="editor__interruptor">
@@ -125,10 +125,10 @@ export function Presentacion({
         {admite("textos") ? (
           <EstiloDeTextoEditor
             titulo="Estilo del titulo"
-            estilo={p.textos?.titulo ?? {}}
+            style={p.textos?.titulo ?? {}}
             prueba={`${prueba}-texto-titulo`}
             guardando={guardando || !mostrarTitulo}
-            onCambiar={(estilo) => ponerTexto("titulo", estilo)}
+            onCambiar={(style) => ponerTexto("titulo", style)}
           />
         ) : null}
 
@@ -148,10 +148,10 @@ export function Presentacion({
         {admite("textos") ? (
           <EstiloDeTextoEditor
             titulo="Estilo del subtitulo"
-            estilo={p.textos?.subtitulo ?? {}}
+            style={p.textos?.subtitulo ?? {}}
             prueba={`${prueba}-texto-subtitulo`}
             guardando={guardando}
-            onCambiar={(estilo) => ponerTexto("subtitulo", estilo)}
+            onCambiar={(style) => ponerTexto("subtitulo", style)}
           />
         ) : null}
 
@@ -178,11 +178,11 @@ export function Presentacion({
                 disabled={guardando || p.mostrarIcono === false}
                 data-testid={`${prueba}-icono`}
                 onChange={(e) =>
-                  poner({ icono: (e.target.value || undefined) as NombreDeIcono | undefined })
+                  poner({ icono: (e.target.value || undefined) as IconName | undefined })
                 }
               >
                 <option value="">(el de su tipo)</option>
-                {ICONOS_DE_OBJETO.map((nombre) => (
+                {OBJECT_ICONS.map((nombre) => (
                   <option key={nombre} value={nombre}>
                     {nombre}
                   </option>
@@ -191,10 +191,10 @@ export function Presentacion({
             </span>
           </label>
         ) : null}
-      </Seccion>
+      </Section>
 
       {admite("resaltado") || admite("acento") ? (
-        <Seccion
+        <Section
           keys={['resaltado', 'acento', 'color', 'linea', 'marco']}
           titulo="Borde" nivel={2} abierta={false} prueba={`${prueba}-borde`}>
           {admite("acento") ? (
@@ -204,9 +204,9 @@ export function Presentacion({
                 value={p.acento ?? "primario"}
                 disabled={guardando}
                 data-testid={`${prueba}-acento`}
-                onChange={(e) => poner({ acento: e.target.value as AcentoDeObjeto })}
+                onChange={(e) => poner({ acento: e.target.value as ObjectAccent })}
               >
-                {ACENTOS.map((a) => (
+                {ACCENTS.map((a) => (
                   <option key={a} value={a}>
                     {a}
                   </option>
@@ -247,11 +247,11 @@ export function Presentacion({
               ) : null}
             </>
           ) : null}
-        </Seccion>
+        </Section>
       ) : null}
 
       {hayMedida ? (
-        <Seccion
+        <Section
           keys={['formato', 'decimales', 'moneda', 'porcentaje', 'unidad', 'miles', 'cifra', 'numero', 'valor', 'etiqueta']}
           titulo="Medida" nivel={2} abierta={false} prueba={`${prueba}-medida`}>
           <FormatoDeMedidas
@@ -261,7 +261,7 @@ export function Presentacion({
             onCambiar={onCambiar}
           />
 
-          <Seccion titulo="Valor" nivel={2} abierta={false} prueba={`${prueba}-valor`}>
+          <Section titulo="Valor" nivel={2} abierta={false} prueba={`${prueba}-valor`}>
             {admite("textos") ? (
               <EstiloDeTextoEditor
                 titulo="Estilo del valor"
@@ -271,16 +271,16 @@ export function Presentacion({
                     ? "La cifra grande. La alineacion vertical la coloca dentro del alto de la tarjeta."
                     : undefined
                 }
-                estilo={p.textos?.valor ?? {}}
+                style={p.textos?.valor ?? {}}
                 prueba={`${prueba}-texto-valor`}
                 guardando={guardando}
-                onCambiar={(estilo) => ponerTexto("valor", estilo)}
+                onCambiar={(style) => ponerTexto("valor", style)}
               />
             ) : null}
-          </Seccion>
+          </Section>
 
           {esTarjeta ? (
-            <Seccion titulo="Etiqueta" nivel={2} abierta={false} prueba={`${prueba}-etiqueta`}>
+            <Section titulo="Etiqueta" nivel={2} abierta={false} prueba={`${prueba}-etiqueta`}>
               <label className="formulario__campo">
                 <span>Texto</span>
                 <input
@@ -303,12 +303,12 @@ export function Presentacion({
                     poner({
                       etiqueta: {
                         ...p.etiqueta,
-                        cellPosition: e.target.value as PosicionDeEtiqueta,
+                        cellPosition: e.target.value as LabelPosition,
                       },
                     })
                   }
                 >
-                  {POSICIONES_DE_ETIQUETA.map((pos) => (
+                  {LABEL_POSITIONS.map((pos) => (
                     <option key={pos} value={pos}>
                       {pos === "encima" ? "Encima del valor" : "Debajo del valor"}
                     </option>
@@ -318,19 +318,19 @@ export function Presentacion({
               {admite("textos") ? (
                 <EstiloDeTextoEditor
                   titulo="Estilo de la etiqueta"
-                  estilo={p.textos?.etiqueta ?? {}}
+                  style={p.textos?.etiqueta ?? {}}
                   prueba={`${prueba}-texto-etiqueta`}
                   guardando={guardando}
-                  onCambiar={(estilo) => ponerTexto("etiqueta", estilo)}
+                  onCambiar={(style) => ponerTexto("etiqueta", style)}
                 />
               ) : null}
-            </Seccion>
+            </Section>
           ) : null}
-        </Seccion>
+        </Section>
       ) : null}
 
       {hayGrafico ? (
-        <Seccion
+        <Section
           keys={['leyenda', 'etiquetas de dato', 'apilado', '100 %', 'orden', 'ordenar', 'cifra sobre la barra']}
           titulo="Grafico" nivel={2} abierta={false} prueba={`${prueba}-grafico`}>
           {admite("leyenda") ? (
@@ -342,7 +342,7 @@ export function Presentacion({
                 data-testid={`${prueba}-leyenda`}
                 onChange={(e) => poner({ leyenda: e.target.value as LegendMode })}
               >
-                {MODOS_DE_LEYENDA.map((m) => (
+                {LEGEND_MODES.map((m) => (
                   <option key={m} value={m}>
                     {ETIQUETA_DE_LEYENDA[m]}
                   </option>
@@ -378,12 +378,12 @@ export function Presentacion({
                         poner({
                           etiquetasDeDato: {
                             ...labels,
-                            cellPosition: e.target.value as PosicionDeDato,
+                            cellPosition: e.target.value as DatumPosition,
                           },
                         })
                       }
                     >
-                      {POSICIONES_DE_DATO.map((pos) => (
+                      {DATUM_POSITIONS.map((pos) => (
                         <option key={pos} value={pos}>
                           {ETIQUETA_DE_POSICION[pos]}
                         </option>
@@ -399,12 +399,12 @@ export function Presentacion({
                   <label className="editor__interruptor">
                     <input
                       type="checkbox"
-                      checked={labels.soloExtremos === true}
+                      checked={labels.onlyEnds === true}
                       disabled={guardando}
                       data-testid={`${prueba}-solo-extremos`}
                       onChange={(e) =>
                         poner({
-                          etiquetasDeDato: { ...labels, soloExtremos: e.target.checked },
+                          etiquetasDeDato: { ...labels, onlyEnds: e.target.checked },
                         })
                       }
                     />{" "}
@@ -424,7 +424,7 @@ export function Presentacion({
                 data-testid={`${prueba}-apilado`}
                 onChange={(e) => poner({ apilado: e.target.value as StackingMode })}
               >
-                {MODOS_DE_APILADO.map((m) => (
+                {STACKING_MODES.map((m) => (
                   <option key={m} value={m}>
                     {ETIQUETA_DE_APILADO[m]}
                   </option>
@@ -439,7 +439,7 @@ export function Presentacion({
           {admite("orden") ? (
             <>
               <label className="formulario__campo">
-                <span>Ordenar el eje por</span>
+                <span>Ordenar el axis por</span>
                 <select
                   value={p.orden?.por ?? "ninguno"}
                   disabled={guardando}
@@ -449,7 +449,7 @@ export function Presentacion({
                       orden:
                         e.target.value === "ninguno"
                           ? undefined
-                          : { ...p.orden, por: e.target.value as CriterioDeOrden },
+                          : { ...p.orden, por: e.target.value as SortCriterion },
                     })
                   }
                 >
@@ -479,11 +479,11 @@ export function Presentacion({
               ) : null}
             </>
           ) : null}
-        </Seccion>
+        </Section>
       ) : null}
 
       {admite("multiplos") ? (
-        <Seccion
+        <Section
           keys={['paneles', 'repetir', 'por cada', 'escala comun', 'columnas']}
           titulo="Multiplos" nivel={2} abierta={false} prueba={`${prueba}-multiplos`}>
           <p className="campo__pista">
@@ -522,11 +522,11 @@ export function Presentacion({
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.multiplos?.mismaEscala !== false}
+              checked={p.multiplos?.sameScale !== false}
               disabled={guardando}
               data-testid={`${prueba}-misma-escala`}
               onChange={(e) =>
-                poner({ multiplos: { ...p.multiplos, mismaEscala: e.target.checked } })
+                poner({ multiplos: { ...p.multiplos, sameScale: e.target.checked } })
               }
             />{" "}
             Misma scale en all los panels
@@ -535,11 +535,11 @@ export function Presentacion({
             Apagarla solo tiene sentido cuando lo que se compara es la SHAPE de cada serie y no su
             magnitud.
           </span>
-        </Seccion>
+        </Section>
       ) : null}
 
       {admite("tooltip") ? (
-        <Seccion
+        <Section
           keys={['total', 'al senalar', 'globo', 'emergente']}
           titulo="Tooltip" nivel={2} abierta={false} prueba={`${prueba}-tooltip`}>
           <label className="editor__interruptor">
@@ -559,20 +559,20 @@ export function Presentacion({
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.tooltip?.ordenarPorValor === true}
+              checked={p.tooltip?.sortValue === true}
               disabled={guardando}
               data-testid={`${prueba}-tooltip-orden`}
               onChange={(e) =>
-                poner({ tooltip: { ...p.tooltip, ordenarPorValor: e.target.checked } })
+                poner({ tooltip: { ...p.tooltip, sortValue: e.target.checked } })
               }
             />{" "}
             Ordenar las dataRows de mayor a menor
           </label>
-        </Seccion>
+        </Section>
       ) : null}
 
       {admite("condicional") ? (
-        <Seccion
+        <Section
           keys={['condicional', 'regla', 'umbral', 'semaforo', 'alerta', 'rojo']}
           titulo="Color por valor" nivel={2} abierta={false} prueba={`${prueba}-condicional`}>
           <ReglasDeColor
@@ -582,11 +582,11 @@ export function Presentacion({
             prueba={`${prueba}-cond`}
             onCambiar={(rules) => poner({ condicional: rules ? { rules } : undefined })}
           />
-        </Seccion>
+        </Section>
       ) : null}
 
       {admite("referencias") ? (
-        <Seccion
+        <Section
           keys={['meta', 'umbral', 'objetivo', 'promedio', 'raya', 'constante']}
           titulo="Lineas de referencia" nivel={2} abierta={false} prueba={`${prueba}-referencias`}>
           <LineasDeReferencia
@@ -595,11 +595,11 @@ export function Presentacion({
             prueba={`${prueba}-ref`}
             onCambiar={(referencias) => poner({ referencias })}
           />
-        </Seccion>
+        </Section>
       ) : null}
 
       {admite("coloresDeSerie") ? (
-        <Seccion
+        <Section
           keys={['paleta', 'color de serie', 'tema']}
           titulo="Colores de las series" nivel={2} abierta={false} prueba={`${prueba}-colores`}>
           {/*
@@ -636,11 +636,11 @@ export function Presentacion({
               </label>
             ))
           )}
-        </Seccion>
+        </Section>
       ) : null}
 
       {admite("circular") ? (
-        <Seccion
+        <Section
           keys={['pastel', 'dona', 'hueco', 'anillo', 'circular', 'porcentaje', 'total en el centro']}
           titulo="Porciones" nivel={2} prueba={`${prueba}-circular`}>
           {/*
@@ -712,11 +712,11 @@ export function Presentacion({
           {(p.circular?.radioInterior ?? 0) === 0 ? (
             <p className="campo__pista">Sin hole no hay centro donde escribir el total.</p>
           ) : null}
-        </Seccion>
+        </Section>
       ) : null}
 
       {admite("medidor") ? (
-        <Seccion
+        <Section
           keys={['medidor', 'tacometro', 'aguja', 'minimo', 'maximo', 'objetivo']}
           titulo="Escala" nivel={2} prueba={`${prueba}-medidor`}>
           {/*
@@ -790,18 +790,18 @@ export function Presentacion({
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.medidor?.mostrarValor !== false}
+              checked={p.medidor?.showValue !== false}
               disabled={guardando}
               data-testid={`${prueba}-mostrar-valor`}
-              onChange={(e) => poner({ medidor: { ...p.medidor, mostrarValor: e.target.checked } })}
+              onChange={(e) => poner({ medidor: { ...p.medidor, showValue: e.target.checked } })}
             />{" "}
             Mostrar la figure bajo la aguja
           </label>
-        </Seccion>
+        </Section>
       ) : null}
 
       {admite("embudo") ? (
-        <Seccion
+        <Section
           keys={['embudo', 'etapa', 'conversion', 'proceso']}
           titulo="Caida" nivel={2} prueba={`${prueba}-embudo`}>
           <label className="formulario__campo">
@@ -812,7 +812,7 @@ export function Presentacion({
               data-testid={`${prueba}-comparar`}
               onChange={(e) => poner({ embudo: { compare: e.target.value as FunnelComparison } })}
             >
-              {COMPARACIONES_DE_EMBUDO.map((c) => (
+              {FUNNEL_COMPARISONS.map((c) => (
                 <option key={c} value={c}>
                   {ETIQUETA_DE_COMPARACION[c]}
                 </option>
@@ -827,20 +827,20 @@ export function Presentacion({
               Las etapas nunca se reordenan: su orden es el del proceso.
             </span>
           </label>
-        </Seccion>
+        </Section>
       ) : null}
 
       {admite("cascada") ? (
-        <Seccion
+        <Section
           keys={['contribucion', 'total', 'waterfall', 'signo']}
           titulo="Cascada" nivel={2} prueba={`${prueba}-cascada`}>
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.cascada?.mostrarTotal !== false}
+              checked={p.cascada?.showTotal !== false}
               disabled={guardando}
               data-testid={`${prueba}-mostrar-total`}
-              onChange={(e) => poner({ cascada: { mostrarTotal: e.target.checked } })}
+              onChange={(e) => poner({ cascada: { showTotal: e.target.checked } })}
             />{" "}
             Barra final con el total
           </label>
@@ -848,22 +848,22 @@ export function Presentacion({
             El signo va SIEMPRE en la etiqueta: el color distingue subida de bajada, pero no puede
             ser el unico medio de decirlo.
           </span>
-        </Seccion>
+        </Section>
       ) : null}
 
       {admite("combinado") ? (
-        <Seccion
+        <Section
           keys={['eje secundario', 'combinado', 'derecha', 'dos escalas']}
           titulo="Eje secundario" nivel={2} prueba={`${prueba}-combinado`}>
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.combinado?.ejeSecundario === true}
+              checked={p.combinado?.axisSecondary === true}
               disabled={guardando}
               data-testid={`${prueba}-eje-secundario`}
-              onChange={(e) => poner({ combinado: { ejeSecundario: e.target.checked } })}
+              onChange={(e) => poner({ combinado: { axisSecondary: e.target.checked } })}
             />{" "}
-            Medir las lineas en un eje aparte, a la derecha
+            Medir las lineas en un axis aparte, a la derecha
           </label>
           {/*
             La advertencia va aqui y no en la ayuda del campo, a proposito.
@@ -873,13 +873,13 @@ export function Presentacion({
           */}
           <span className="campo__pista">
             Con dos escalas, una line por encima de las gridColumns puede valer la mitad. Rotule los
-            dos ejes en la seccion «Ejes» para que se pueda leer sin adivinar.
+            dos ejes en la section «Ejes» para que se pueda leer sin adivinar.
           </span>
-        </Seccion>
+        </Section>
       ) : null}
 
       {admite("ejes") ? (
-        <Seccion
+        <Section
           keys={['eje', 'cuadricula', 'titulo del eje', 'empezar en cero', 'minimo', 'maximo', 'girar', 'rotar']}
           titulo="Ejes" nivel={2} abierta={false} prueba={`${prueba}-ejes`}>
           <label className="editor__interruptor">
@@ -890,11 +890,11 @@ export function Presentacion({
               data-testid={`${prueba}-eje-x`}
               onChange={(e) => poner({ ejes: { ...p.ejes, mostrarX: e.target.checked } })}
             />{" "}
-            Mostrar el eje de categorias
+            Mostrar el axis de categorias
           </label>
 
           <label className="formulario__campo">
-            <span>Titulo del eje de categorias</span>
+            <span>Titulo del axis de categorias</span>
             <input
               defaultValue={p.ejes?.tituloX ?? ""}
               disabled={guardando}
@@ -908,9 +908,9 @@ export function Presentacion({
             <span className="campo__pista">Vacio = sin titulo.</span>
           </label>
 
-          {p.combinado?.ejeSecundario ? (
+          {p.combinado?.axisSecondary ? (
             <label className="formulario__campo">
-              <span>Titulo del eje de la derecha</span>
+              <span>Titulo del axis de la derecha</span>
               <input
                 defaultValue={p.ejes?.tituloY2 ?? ""}
                 disabled={guardando}
@@ -929,11 +929,11 @@ export function Presentacion({
               data-testid={`${prueba}-eje-y`}
               onChange={(e) => poner({ ejes: { ...p.ejes, mostrarY: e.target.checked } })}
             />{" "}
-            Mostrar el eje de valores
+            Mostrar el axis de valores
           </label>
 
           <label className="formulario__campo">
-            <span>Titulo del eje de valores</span>
+            <span>Titulo del axis de valores</span>
             <input
               defaultValue={p.ejes?.tituloY ?? ""}
               disabled={guardando}
@@ -945,12 +945,12 @@ export function Presentacion({
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.ejes?.cuadricula !== false}
+              checked={p.ejes?.gridlines !== false}
               disabled={guardando}
               data-testid={`${prueba}-cuadricula`}
-              onChange={(e) => poner({ ejes: { ...p.ejes, cuadricula: e.target.checked } })}
+              onChange={(e) => poner({ ejes: { ...p.ejes, gridlines: e.target.checked } })}
             />{" "}
-            Lineas de cuadricula
+            Lineas de gridlines
           </label>
 
           <label className="editor__interruptor">
@@ -964,7 +964,7 @@ export function Presentacion({
             Empezar en cero
           </label>
           <p className="campo__pista">
-            Un eje que no empieza en cero hace que una diferencia del 2 % parezca el triple.
+            Un axis que no empieza en cero hace que una diferencia del 2 % parezca el triple.
             Apagarlo deberia ser una decision, no el comportamiento por omision.
           </p>
 
@@ -975,7 +975,7 @@ export function Presentacion({
           */}
           <div className="formulario__pareja">
             <label className="formulario__campo">
-              <span>Minimo del eje</span>
+              <span>Minimo del axis</span>
               <input
                 type="number"
                 defaultValue={p.ejes?.minimoY ?? ""}
@@ -992,7 +992,7 @@ export function Presentacion({
               />
             </label>
             <label className="formulario__campo">
-              <span>Maximo del eje</span>
+              <span>Maximo del axis</span>
               <input
                 type="number"
                 defaultValue={p.ejes?.maximoY ?? ""}
@@ -1015,7 +1015,7 @@ export function Presentacion({
           </span>
 
           <label className="formulario__campo">
-            <span>Girar los rotulos del eje de categorias</span>
+            <span>Girar los rotulos del axis de categorias</span>
             <select
               value={String(p.ejes?.rotarX ?? 0)}
               disabled={guardando}
@@ -1042,11 +1042,11 @@ export function Presentacion({
               Con names largos, en horizontal el grafico esconde los que no caben.
             </span>
           </label>
-        </Seccion>
+        </Section>
       ) : null}
 
       {instance.objectId === "panel-de-filtros" ? (
-        <Seccion
+        <Section
           keys={['filtro', 'panel de filtros', 'desplegable', 'fecha']}
           titulo="Selectores" nivel={2} prueba={`${prueba}-selectores`}>
           <SelectoresDelPanel
@@ -1055,7 +1055,7 @@ export function Presentacion({
             guardando={guardando}
             onCambiar={onCambiar}
           />
-        </Seccion>
+        </Section>
       ) : null}
 
     </div>
@@ -1081,11 +1081,11 @@ function SelectoresDelPanel({
   const efectivos = selectoresEfectivos(instance, settings, kinds);
   const prueba = `selectores-${instance.instanceId}`;
 
-  const ponerTipo = (fieldName: string, tipo: TipoDeSelector) =>
+  const ponerTipo = (fieldName: string, tipo: PickerKind) =>
     onCambiar((i) => {
       const previos = (
         i.settings?.objectId === "panel-de-filtros"
-          ? i.settings.selectores
+          ? i.settings.pickers
           : []
       ).filter((s) => s.fieldName !== fieldName);
       const anterior = efectivos.find((s) => s.fieldName === fieldName);
@@ -1093,7 +1093,7 @@ function SelectoresDelPanel({
         ...i,
         settings: {
           objectId: "panel-de-filtros",
-          selectores: [
+          pickers: [
             ...previos,
             {
               fieldName,
@@ -1108,7 +1108,7 @@ function SelectoresDelPanel({
   if (efectivos.length === 0) {
     return (
       <p className="texto-atenuado" data-testid={`${prueba}-vacio`}>
-        Marque al menos una dimension arriba para configurar sus selectores.
+        Marque al menos una dimension arriba para configurar sus pickers.
       </p>
     );
   }
@@ -1117,7 +1117,7 @@ function SelectoresDelPanel({
     <div className="editor__selectores" data-testid={prueba}>
       <p className="texto-atenuado">Como se filtra cada dimension</p>
       {efectivos.map((s) => {
-        const tipoDeColumna = kinds[s.fieldName] ?? "";
+        const columnKind = kinds[s.fieldName] ?? "";
         return (
           <label key={s.fieldName} className="formulario__campo">
             <span>{s.fieldName}</span>
@@ -1126,13 +1126,13 @@ function SelectoresDelPanel({
               disabled={guardando}
               data-testid={`${prueba}-${s.fieldName}`}
               onChange={(e) =>
-                ponerTipo(s.fieldName, e.target.value as TipoDeSelector)
+                ponerTipo(s.fieldName, e.target.value as PickerKind)
               }
             >
-              {TIPOS_DE_SELECTOR.map((t) => (
-                <option key={t} value={t} disabled={!aplicaA(t, tipoDeColumna)}>
+              {PICKER_KINDS.map((t) => (
+                <option key={t} value={t} disabled={!aplicaA(t, columnKind)}>
                   {t}
-                  {aplicaA(t, tipoDeColumna) ? "" : " — necesita una fecha"}
+                  {aplicaA(t, columnKind) ? "" : " — necesita una fecha"}
                 </option>
               ))}
             </select>
@@ -1144,10 +1144,10 @@ function SelectoresDelPanel({
 }
 
 /** Un selector de fecha sobre una columna que no lo es se ofrece DESHABILITADO, no se esconde. */
-function aplicaA(tipo: TipoDeSelector, tipoDeColumna: string): boolean {
+function aplicaA(tipo: PickerKind, columnKind: string): boolean {
   if (tipo !== "calendario" && tipo !== "rango-de-fechas") return true;
   return ["date", "datetime", "timestamp", "fecha"].includes(
-    tipoDeColumna.toLowerCase(),
+    columnKind.toLowerCase(),
   );
 }
 
@@ -1166,13 +1166,13 @@ function FormatoDeMedidas({
   const formatos = instance.presentacion?.formatos;
   const medidas = instance.binding.measures;
 
-  const ponerFormatos = (siguiente: FormatosDelObjeto) =>
+  const ponerFormatos = (siguiente: ObjectFormats) =>
     onCambiar((i) => ({ ...i, presentacion: { ...i.presentacion, formatos: siguiente } }));
 
-  const ponerGeneral = (formato: FormatoDeNumero) =>
+  const ponerGeneral = (formato: NumberFormat) =>
     ponerFormatos({ ...formatos, general: formato });
 
-  const ponerMedida = (medida: string, formato: FormatoDeNumero | undefined) => {
+  const ponerMedida = (medida: string, formato: NumberFormat | undefined) => {
     const porMedida = { ...(formatos?.porMedida ?? {}) };
     // Quitar la excepcion se guarda BORRANDO la clave, no copiando el general: si se copiara, la
     // medida dejaria de seguir al general sin que nadie lo hubiera pedido.
@@ -1195,7 +1195,7 @@ function FormatoDeMedidas({
       {medidas.map((medida) => {
         const propio = formatos?.porMedida?.[medida];
         return (
-          <Seccion
+          <Section
             key={medida}
             titulo={medida}
             nivel={2}
@@ -1221,7 +1221,7 @@ function FormatoDeMedidas({
                 onCambiar={(formato) => ponerMedida(medida, formato)}
               />
             ) : null}
-          </Seccion>
+          </Section>
         );
       })}
     </>
@@ -1239,13 +1239,13 @@ function RenglonDeFormato({
 }: {
   titulo: string;
   help?: string;
-  formato: FormatoDeNumero;
+  formato: NumberFormat;
   prueba: string;
   guardando: boolean;
-  onCambiar: (formato: FormatoDeNumero) => void;
+  onCambiar: (formato: NumberFormat) => void;
 }) {
   const tipo = formato.tipo ?? "general";
-  const cambiar = (parcial: Partial<FormatoDeNumero>) => onCambiar({ ...formato, ...parcial });
+  const cambiar = (parcial: Partial<NumberFormat>) => onCambiar({ ...formato, ...parcial });
   const issue = tipo === "personalizado" ? problemaDelPatron(formato.patron ?? "") : null;
 
   return (
@@ -1263,9 +1263,9 @@ function RenglonDeFormato({
           value={tipo}
           disabled={guardando}
           data-testid={`${prueba}-tipo`}
-          onChange={(e) => cambiar({ tipo: e.target.value as TipoDeFormato })}
+          onChange={(e) => cambiar({ tipo: e.target.value as FormatKind })}
         >
-          {TIPOS_DE_FORMATO.map((t) => (
+          {FORMAT_KINDS.map((t) => (
             <option key={t} value={t}>
               {ETIQUETA_DE_TIPO[t]}
             </option>
@@ -1352,11 +1352,11 @@ function RenglonDeFormato({
           <label className="formulario__campo">
             <span>Unidad</span>
             <input
-              defaultValue={formato.unidad ?? ""}
+              defaultValue={formato.unit ?? ""}
               maxLength={8}
               disabled={guardando}
               data-testid={`${prueba}-unidad`}
-              onBlur={(e) => cambiar({ unidad: e.target.value || undefined })}
+              onBlur={(e) => cambiar({ unit: e.target.value || undefined })}
             />
           </label>
 
@@ -1381,7 +1381,7 @@ function RenglonDeFormato({
  * desplegable tiene que ENSENAR el valor vigente: si dijera «0» mientras la moneda sale con dos,
  * el panel estaria mintiendo sobre lo que se ve en la tarjeta.
  */
-const DECIMALES_POR_DEFECTO: Record<TipoDeFormato, number> = {
+const DECIMALES_POR_DEFECTO: Record<FormatKind, number> = {
   general: 0,
   entero: 0,
   decimal: 2,
@@ -1399,7 +1399,7 @@ const ETIQUETA_DE_APILADO: Record<StackingMode, string> = {
 /** Los ocho colores de serie del tema, por indice. El tema los da; aqui solo se eligen. */
 const COLORES_DE_PALETA = [0, 1, 2, 3, 4, 5, 6, 7];
 
-const ETIQUETA_DE_POSICION: Record<PosicionDeDato, string> = {
+const ETIQUETA_DE_POSICION: Record<DatumPosition, string> = {
   auto: "Automatica (segun el tipo de grafico)",
   encima: "Encima",
   debajo: "Debajo",
@@ -1429,7 +1429,7 @@ const ETIQUETA_DE_LEYENDA: Record<LegendMode, string> = {
   derecha: "A la derecha",
 };
 
-const ETIQUETA_DE_TIPO: Record<TipoDeFormato, string> = {
+const ETIQUETA_DE_TIPO: Record<FormatKind, string> = {
   general: "General",
   entero: "Entero",
   decimal: "Decimal",

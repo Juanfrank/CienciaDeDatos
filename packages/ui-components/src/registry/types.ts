@@ -1,10 +1,10 @@
 import type { Aggregation, FieldRef } from '@app/data-contracts';
-import type { PresentationKey, PresentacionDeObjeto } from '../presentacion/contrato';
-import type { NombreDeIcono } from '../presentacion/iconos';
-import type { ContainerSettings, IdDeContenedor } from '../presentacion/contenedores';
-import type { ConfiguracionDeElemento, IdDeElemento } from '../presentacion/elementos';
-import type { ConfiguracionDePanelDeFiltros } from '../presentacion/panelDeFiltros';
-import type { AsignacionDeRanuras, RanuraDeCampos } from '../presentacion/pozos';
+import type { PresentationKey, ObjectPresentation } from '../presentation/contract';
+import type { IconName } from '../presentation/icons';
+import type { ContainerSettings, ContainerId } from '../presentation/containers';
+import type { ElementSettings, ElementId } from '../presentation/elements';
+import type { FiltersPanelSettings } from '../presentation/filtersPanel';
+import type { AsignacionDeRanuras, FieldSlot } from '../presentation/wells';
 
 /**
  * Repositorio de objetos visuales versionados (4.5).
@@ -58,7 +58,7 @@ export interface ObjectDataContract {
    * Opcional: sin ellas el editor usa los rotulos genericos de `pozosPorDefecto`. La suma de
    * los `max` de cada tipo debe cuadrar con el maximo del contrato; el catalogo lo comprueba.
    */
-  wells?: RanuraDeCampos[];
+  wells?: FieldSlot[];
 }
 
 export interface ObjectCertification {
@@ -105,7 +105,7 @@ export interface VisualObjectDefinition {
   description: string;
   category: ObjectCategory;
   /** Icono con el que se reconoce el objeto. Lo declara el objeto, no sus consumidores. */
-  icono: NombreDeIcono;
+  icono: IconName;
   /**
    * A que pregunta responde. Obligatoria salvo en elementos, contenedores y complementos, que
    * no consumen datos; lo comprueba una prueba del catalogo.
@@ -201,7 +201,7 @@ export interface ObjectInstance {
    * De la instancia y no del objeto, para que dos tarjetas del mismo tipo puedan verse distinto
    * sin publicar dos objetos.
    */
-  presentacion?: PresentacionDeObjeto;
+  presentacion?: ObjectPresentation;
   /**
    * Configuracion propia del tipo de objeto, discriminada por `objectId`.
    *
@@ -213,9 +213,9 @@ export interface ObjectInstance {
 
 /** Configuracion especifica de un tipo de objeto. Anadir un tipo anade un miembro aqui. */
 export type ObjectSettings =
-  | ({ objectId: 'panel-de-filtros' } & ConfiguracionDePanelDeFiltros)
-  | ({ objectId: IdDeElemento } & ConfiguracionDeElemento)
-  | ({ objectId: IdDeContenedor } & ContainerSettings);
+  | ({ objectId: 'panel-de-filtros' } & FiltersPanelSettings)
+  | ({ objectId: ElementId } & ElementSettings)
+  | ({ objectId: ContainerId } & ContainerSettings);
 
 /**
  * Si un objeto no necesita ningun dataset.

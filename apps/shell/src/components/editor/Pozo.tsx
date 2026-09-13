@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { AGGREGATIONS, type Aggregation } from '@app/data-contracts';
-import { AGGREGATION_LABEL, type PozoDeCampos } from '@app/ui-components';
+import { AGGREGATION_LABEL, type FieldWell } from '@app/ui-components';
 import { Icono } from '../iconos/Icono';
 import { Ayuda } from './Ayuda';
 
@@ -20,7 +20,7 @@ export function Pozo({
   posibles,
   prueba,
 }: {
-  pozo: PozoDeCampos;
+  pozo: FieldWell;
   elegidos: string[];
   disponibles: string[];
   guardando: boolean;
@@ -147,7 +147,7 @@ export function Pozo({
                 data-testid={`${prueba}-quitar-${fieldName}`}
                 onClick={() => onQuitar(fieldName)}
               >
-                <Icono nombre="cerrar" tamano={14} />
+                <Icono nombre="close" tamano={14} />
               </button>
             </span>
           </li>

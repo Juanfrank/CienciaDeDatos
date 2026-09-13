@@ -1,6 +1,6 @@
 /** Formato de numero — declarado, y por medida. */
 
-export const TIPOS_DE_FORMATO = [
+export const FORMAT_KINDS = [
   'general',
   'entero',
   'decimal',
@@ -8,16 +8,16 @@ export const TIPOS_DE_FORMATO = [
   'moneda',
   'personalizado',
 ] as const;
-export type TipoDeFormato = (typeof TIPOS_DE_FORMATO)[number];
+export type FormatKind = (typeof FORMAT_KINDS)[number];
 
-export interface FormatoDeNumero {
-  tipo?: TipoDeFormato;
+export interface NumberFormat {
+  tipo?: FormatKind;
   /** Cuantos decimales, para los tipos que no son personalizados. */
   decimales?: number;
   /** Separador de millares. Por defecto si. */
   millares?: boolean;
   /** Sufijo corto: «casos», «%», «dias». */
-  unidad?: string;
+  unit?: string;
   /** 12.500 pasa a «12,5 mil». Util en una tarjeta, molesto en una tabla. */
   compacto?: boolean;
   /** Solo con `tipo: 'personalizado'`. */
@@ -27,28 +27,28 @@ export interface FormatoDeNumero {
 }
 
 /** Formato por medida, con un renglon GENERAL que vale para las que no tengan el suyo. */
-export interface FormatosDelObjeto {
-  general?: FormatoDeNumero;
-  porMedida?: Record<string, FormatoDeNumero>;
+export interface ObjectFormats {
+  general?: NumberFormat;
+  porMedida?: Record<string, NumberFormat>;
 }
 
-export function formatoDeMedida(
-  formatos: FormatosDelObjeto | undefined,
+export function measureFormat(
+  formatos: ObjectFormats | undefined,
   medida: string | undefined,
-): FormatoDeNumero {
+): NumberFormat {
   if (!formatos) return {};
   const propio = medida ? formatos.porMedida?.[medida] : undefined;
   return propio ?? formatos.general ?? {};
 }
 
 /** Una seccion ya analizada: el esqueleto literal y cuanto relleno pide la cifra. */
-interface Seccion {
+interface Section {
   /** Los literales, con UN solo `#` marcando donde va la cifra entera. */
   patron: string;
   /** Cuantos `0` lleva la parte entera: es el relleno minimo por la izquierda. */
   enterosMin: number;
-  decimalesMin: number;
-  decimalesMax: number;
+  decimalsMin: number;
+  decimalsMax: number;
   millares: boolean;
   porcentaje: boolean;
 }
@@ -63,12 +63,12 @@ const SEP_DECIMAL = partesDeEjemplo.find((x) => x.type === 'decimal')?.value ?? 
 const RESERVADOS = new Set(['0', '#', '.', ',', '%', '\\', '"', ';']);
 
 /** Analiza UNA seccion del patron. */
-function analizar(content: string): Seccion {
-  const seccion: Seccion = {
+function analizar(content: string): Section {
+  const section: Section = {
     patron: '',
     enterosMin: 0,
-    decimalesMin: 0,
-    decimalesMax: 0,
+    decimalsMin: 0,
+    decimalsMax: 0,
     millares: false,
     porcentaje: false,
   };
@@ -81,14 +81,14 @@ function analizar(content: string): Seccion {
       // El siguiente va literal aunque sea reservado. Es como se escribe un «%» que no multiplica.
       const siguiente = content[i + 1];
       if (siguiente !== undefined) {
-        seccion.patron += siguiente;
+        section.patron += siguiente;
         i += 1;
       }
       continue;
     }
     if (c === '"') {
       const fin = content.indexOf('"', i + 1);
-      seccion.patron += fin === -1 ? content.slice(i + 1) : content.slice(i + 1, fin);
+      section.patron += fin === -1 ? content.slice(i + 1) : content.slice(i + 1, fin);
       i = fin === -1 ? content.length : fin;
       continue;
     }
@@ -97,8 +97,8 @@ function analizar(content: string): Seccion {
       continue;
     }
     if (c === '%') {
-      seccion.porcentaje = true;
-      seccion.patron += '%';
+      section.porcentaje = true;
+      section.patron += '%';
       continue;
     }
     if (c === ',') {
@@ -106,35 +106,35 @@ function analizar(content: string): Seccion {
       const before = content[i - 1];
       const after = content[i + 1];
       if ((before === '0' || before === '#') && (after === '0' || after === '#')) {
-        seccion.millares = true;
+        section.millares = true;
       } else {
-        seccion.patron += ',';
+        section.patron += ',';
       }
       continue;
     }
     if (c === '0' || c === '#') {
       if (enDecimales) {
-        seccion.decimalesMax += 1;
-        if (c === '0') seccion.decimalesMin = seccion.decimalesMax;
+        section.decimalsMax += 1;
+        if (c === '0') section.decimalsMin = section.decimalsMax;
       } else {
-        if (c === '0') seccion.enterosMin += 1;
+        if (c === '0') section.enterosMin += 1;
         // UN solo marcador para toda la cifra. Uno por digito dejaba `####` en el esqueleto y
         // `aplicar` solo sustituia el primero: `0000` sobre 42 salia «42###».
         if (!cifraPuesta) {
-          seccion.patron += '\u0000';
+          section.patron += '\u0000';
           cifraPuesta = true;
         }
       }
       continue;
     }
-    if (!RESERVADOS.has(c)) seccion.patron += c;
+    if (!RESERVADOS.has(c)) section.patron += c;
   }
 
-  return seccion;
+  return section;
 }
 
 /** Divide por `;` respetando lo escapado y lo entrecomillado. */
-function secciones(patron: string): string[] {
+function sections(patron: string): string[] {
   const partes: string[] = [];
   let actual = '';
   let enComillas = false;
@@ -161,18 +161,18 @@ const agrupar = (entero: string): string =>
   entero.replace(/\B(?=(\d{3})+(?!\d))/g, SEP_MILLARES);
 
 /** Aplica una seccion analizada a un numero ya en positivo. */
-function aplicar(seccion: Seccion, valor: number): string {
-  const n = seccion.porcentaje ? valor * 100 : valor;
-  const fijado = n.toFixed(seccion.decimalesMax);
+function aplicar(section: Section, valor: number): string {
+  const n = section.porcentaje ? valor * 100 : valor;
+  const fijado = n.toFixed(section.decimalsMax);
   const [crudo = '0', decimalesCrudos = ''] = fijado.split('.');
 
   // `0000` sobre 42 da «0042»: los ceros del patron rellenan por la izquierda.
-  const enteroCrudo = crudo.padStart(seccion.enterosMin, '0');
-  const entero = seccion.millares ? agrupar(enteroCrudo) : enteroCrudo;
+  const enteroCrudo = crudo.padStart(section.enterosMin, '0');
+  const entero = section.millares ? agrupar(enteroCrudo) : enteroCrudo;
 
   // Los decimales de mas alla del minimo se quitan si son ceros: es lo que distingue `#` de `0`.
   let decimales = decimalesCrudos;
-  while (decimales.length > seccion.decimalesMin && decimales.endsWith('0')) {
+  while (decimales.length > section.decimalsMin && decimales.endsWith('0')) {
     decimales = decimales.slice(0, -1);
   }
 
@@ -180,12 +180,12 @@ function aplicar(seccion: Seccion, valor: number): string {
   /*
    * Una seccion SIN marcador de digito es puro literal, y ahi no va ninguna cifra.
    */
-  if (!seccion.patron.includes('\u0000')) {
-    return seccion.decimalesMax === 0 && seccion.enterosMin === 0
-      ? seccion.patron
-      : figure + seccion.patron;
+  if (!section.patron.includes('\u0000')) {
+    return section.decimalsMax === 0 && section.enterosMin === 0
+      ? section.patron
+      : figure + section.patron;
   }
-  return seccion.patron.replace('\u0000', figure);
+  return section.patron.replace('\u0000', figure);
 }
 
 export class PatronInvalidoError extends Error {
@@ -198,14 +198,14 @@ export class PatronInvalidoError extends Error {
 /** Por que un patron no vale. `null` si vale. */
 export function problemaDelPatron(patron: string): string | null {
   if (!patron.trim()) return 'esta vacio.';
-  if (secciones(patron).length > 3) {
+  if (sections(patron).length > 3) {
     return 'tiene mas de tres secciones. Son, como mucho: positivo ; negativo ; cero.';
   }
-  const sinMarcador = secciones(patron).every((s) => {
+  const withoutBookmark = sections(patron).every((s) => {
     const a = analizar(s);
-    return !a.patron.includes('\u0000') && a.decimalesMax === 0;
+    return !a.patron.includes('\u0000') && a.decimalsMax === 0;
   });
-  if (sinMarcador) {
+  if (withoutBookmark) {
     return "no tiene ningun marcador de digito. Use '0' o '#' donde deba salir la cifra.";
   }
   return null;
@@ -215,11 +215,11 @@ export function problemaDelPatron(patron: string): string | null {
  * El formateador. Devuelve una funcion, no un texto: se analiza el patron UNA vez y se aplica a
  * cada celda, que en una tabla larga son miles.
  */
-export function formateadorDeNumero(formato: FormatoDeNumero | undefined): (n: number | null) => string {
+export function numberFormatter(formato: NumberFormat | undefined): (n: number | null) => string {
   const tipo = formato?.tipo ?? 'general';
 
   if (tipo === 'personalizado' && formato?.patron && !problemaDelPatron(formato.patron)) {
-    const [positivo, negativo, cero] = secciones(formato.patron).map(analizar);
+    const [positivo, negativo, cero] = sections(formato.patron).map(analizar);
     // `secciones` siempre devuelve al menos una, pero el tipo no lo sabe: sin la guarda, el
     // formateador dependeria de un `!` que nadie vuelve a comprobar.
     if (positivo) {
@@ -250,8 +250,8 @@ export function formateadorDeNumero(formato: FormatoDeNumero | undefined): (n: n
     useGrouping: formato?.millares !== false,
     ...(compacto ? { notation: 'compact' as const, compactDisplay: 'short' as const } : {}),
   });
-  const unidad = formato?.unidad ? ` ${formato.unidad}` : '';
+  const unit = formato?.unit ? ` ${formato.unit}` : '';
   const prefijo = tipo === 'moneda' ? `${formato?.simbolo ?? 'RD$'} ` : '';
   const sufijo = tipo === 'porcentaje' ? '%' : '';
-  return (n) => (n === null ? '—' : `${prefijo}${intl.format(n)}${sufijo}${unidad}`);
+  return (n) => (n === null ? '—' : `${prefijo}${intl.format(n)}${sufijo}${unit}`);
 }

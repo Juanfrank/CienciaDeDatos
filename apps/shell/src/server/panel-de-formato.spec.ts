@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { CLAVES_DE_PRESENTACION, initialCatalog, type PresentationKey } from '@app/ui-components';
+import { PRESENTATION_KEYS, initialCatalog, type PresentationKey } from '@app/ui-components';
 import { CONTROL_DE_CLAVE } from '../components/editor/controles';
 
 /** Toda clave de presentacion que un objeto DECLARA tiene un control en el panel — 4.2. */
@@ -15,10 +15,10 @@ describe('el panel de Formato ofrece todo lo que el catalogo declara', () => {
   it('la tabla de controles cubre TODAS las claves, sin sobrar ninguna', () => {
     // Si manana se anade una clave de presentacion y nadie la mapea, esta prueba lo dice antes de
     // que el control «se quede para luego» y nadie vuelva a acordarse.
-    expect(Object.keys(CONTROL_DE_CLAVE).sort()).toEqual([...CLAVES_DE_PRESENTACION].sort());
+    expect(Object.keys(CONTROL_DE_CLAVE).sort()).toEqual([...PRESENTATION_KEYS].sort());
   });
 
-  for (const clave of CLAVES_DE_PRESENTACION) {
+  for (const clave of PRESENTATION_KEYS) {
     it(`${clave}: tiene un control con su identificador de prueba`, () => {
       expect(PANEL, `falta el testid de ${clave}`).toContain(
         `${CONTROL_DE_CLAVE[clave]}\`}`,
@@ -34,7 +34,7 @@ describe('el panel de Formato ofrece todo lo que el catalogo declara', () => {
      * validacion rechaza al guardar—.
      */
     const SIEMPRE: PresentationKey[] = ['mostrarTitulo', 'colorDeResaltado', 'etiqueta'];
-    const sinGuarda = CLAVES_DE_PRESENTACION.filter(
+    const sinGuarda = PRESENTATION_KEYS.filter(
       (c) => !SIEMPRE.includes(c) && !PANEL.includes(`admite("${c}")`),
     );
 

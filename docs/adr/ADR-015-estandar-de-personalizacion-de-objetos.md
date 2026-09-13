@@ -47,7 +47,7 @@ que hace el panel de administracion—.
 - El marco comun (`Marco`) dibuja la presentacion, no cada objeto. El segmentador se pintaba su
   propia cabecera a mano y quedaba fuera; se migro. Un objeto nuevo la hereda por existir, y no
   hay forma de dibujar uno sin pasar por ahi.
-- `formateadorDe` es el unico sitio donde se formatea una cifra de instancia, asi que la tarjeta,
+- `formatterOf` es el unico sitio donde se formatea una cifra de instancia, asi que la tarjeta,
   la etiqueta del grafico, la tabla y el archivo exportado no pueden divergir.
 - **No se puede elegir un color.** Es el limite, y es deliberado. Quien necesite un color que no
   esta en los cuatro roles necesita cambiar el TEMA, que pasa por la puerta de contraste, y no

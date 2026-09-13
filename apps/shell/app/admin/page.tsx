@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { contarAmpliaciones, listarAuditoria } from '../../src/server/auditoria';
 import { getManagedTree, listTeams, listUsers } from '../../src/server/contexto';
 import { EventoDeAuditoria } from '../../src/components/admin/EventoDeAuditoria';
-import { Icono, type NombreDeIcono } from '../../src/components/iconos/Icono';
+import { Icono, type IconName } from '../../src/components/iconos/Icono';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,7 +78,7 @@ function Resumen({
   etiqueta: string;
   valor: number;
   href: string;
-  icono: NombreDeIcono;
+  icono: IconName;
   nota?: string;
   alerta?: boolean;
   testId?: string;

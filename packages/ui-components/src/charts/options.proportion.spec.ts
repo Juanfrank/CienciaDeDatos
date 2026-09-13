@@ -163,7 +163,7 @@ describe('combinado de columnas y lineas', () => {
 
   it('con eje secundario solo las LINEAS cambian de escala', () => {
     // Al reves, la magnitud principal cambiaria de escala sin avisar.
-    const o = combinado({ combinado: { ejeSecundario: true } });
+    const o = combinado({ combinado: { axisSecondary: true } });
     expect(o.yAxis).toHaveLength(2);
     expect(o.yAxis[1].position).toBe('right');
     expect(o.series[0].yAxisIndex).toBeUndefined();
@@ -172,7 +172,7 @@ describe('combinado de columnas y lineas', () => {
 
   it('el segundo eje no repite la cuadricula', () => {
     // Dos rejillas superpuestas a distinta altura convierten el fondo en ruido.
-    const o = combinado({ combinado: { ejeSecundario: true } });
+    const o = combinado({ combinado: { axisSecondary: true } });
     expect(o.yAxis[1].splitLine.show).toBe(false);
   });
 
@@ -297,7 +297,7 @@ describe('cascada', () => {
   });
 
   it('sin la barra de total, la cascada acaba en la ultima contribucion', () => {
-    const o = cascada({ cascada: { mostrarTotal: false } });
+    const o = cascada({ cascada: { showTotal: false } });
     expect(o.series[1].data).toHaveLength(3);
     expect(o.xAxis.data).toEqual(['A', 'B', 'C']);
   });

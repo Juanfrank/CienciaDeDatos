@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { initialCatalog } from '../registry/catalog';
 import { OBJECT_FAMILIES } from '../registry/types';
-import { ICONOS_DE_OBJETO, NOMBRES_DE_ICONO, TRAZOS_DE_ICONO } from './iconos';
+import { OBJECT_ICONS, ICON_NAMES, TRAZOS_DE_ICONO } from './icons';
 import {
-  CLAVES_DE_PRESENTACION,
+  PRESENTATION_KEYS,
   PRESENTACION_MINIMA,
-  formateadorDe,
-  validarPresentacion,
+  formatterOf,
+  validatePresentation,
   type PresentationKey,
-} from './contrato';
+} from './contract';
 
 /** El estandar minimo, como prueba. */
 describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
@@ -26,10 +26,10 @@ describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
   );
 
   it('ningun objeto declara una clave que no existe en el contrato', () => {
-    // La lista sale de `CLAVES_DE_PRESENTACION`, no de una copia aqui: una copia se queda
+    // La lista sale de `PRESENTATION_KEYS`, no de una copia aqui: una copia se queda
     // obsoleta en cuanto se anade una clave, y entonces la prueba falla por estar desactualizada
     // en vez de por haber encontrado algo.
-    const validas = new Set<string>(CLAVES_DE_PRESENTACION);
+    const validas = new Set<string>(PRESENTATION_KEYS);
     for (const { objectId, version } of versiones) {
       for (const clave of version.presentation) {
         expect(validas, `${objectId} declara '${clave}'`).toContain(clave);
@@ -41,17 +41,17 @@ describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
     // Una tabla con `leyenda` guardaria una opcion que no dibuja nada, y esa es la clase de
     // configuracion muerta que luego nadie se atreve a quitar por si acaso hace algo.
     for (const { categoria, version, objectId } of versiones) {
-      const deGrafico = version.presentation.filter((c) =>
+      const chart = version.presentation.filter((c) =>
         (['leyenda', 'etiquetasDeDato'] as PresentationKey[]).includes(c),
       );
       if (categoria !== 'grafico') {
-        expect(deGrafico, `${objectId} no es un grafico`).toEqual([]);
+        expect(chart, `${objectId} no es un grafico`).toEqual([]);
       }
     }
   });
 });
 
-describe('validarPresentacion', () => {
+describe('validatePresentation', () => {
   const todas: PresentationKey[] = [
     ...PRESENTACION_MINIMA,
     'formato',
@@ -61,13 +61,13 @@ describe('validarPresentacion', () => {
 
   it('acepta una presentacion completa y valida', () => {
     expect(
-      validarPresentacion(
+      validatePresentation(
         {
           icono: 'balanza',
           acento: 'terciario',
           resaltado: true,
           subtitulo: 'Cierre del trimestre',
-          formato: { decimales: 1, unidad: '%' },
+          formato: { decimales: 1, unit: '%' },
           leyenda: 'oculta',
           etiquetasDeDato: true,
         },
@@ -77,13 +77,13 @@ describe('validarPresentacion', () => {
   });
 
   it('rechaza una clave que el objeto no admite, y dice cuales admite', () => {
-    const [issue] = validarPresentacion({ leyenda: 'abajo' }, PRESENTACION_MINIMA);
+    const [issue] = validatePresentation({ leyenda: 'abajo' }, PRESENTACION_MINIMA);
     expect(issue?.clave).toBe('leyenda');
     expect(issue?.issue).toContain('icono');
   });
 
   it('rechaza un icono que no esta en el catalogo', () => {
-    const problems = validarPresentacion(
+    const problems = validatePresentation(
       { icono: 'unicornio' as never },
       PRESENTACION_MINIMA,
     );
@@ -93,69 +93,69 @@ describe('validarPresentacion', () => {
   it('rechaza un color en vez de un rol de acento', () => {
     // El punto de 4.3: si aqui entrara '#ff0000', la puerta de contraste dejaria de garantizar
     // nada sobre lo que se ve, porque ese color no sale de ningun par comprobado.
-    const problems = validarPresentacion({ acento: '#ff0000' as never }, PRESENTACION_MINIMA);
+    const problems = validatePresentation({ acento: '#ff0000' as never }, PRESENTACION_MINIMA);
     expect(problems.map((p) => p.clave)).toEqual(['acento']);
   });
 
   it('rechaza un subtitulo que es un parrafo', () => {
-    const problems = validarPresentacion({ subtitulo: 'x'.repeat(81) }, PRESENTACION_MINIMA);
+    const problems = validatePresentation({ subtitulo: 'x'.repeat(81) }, PRESENTACION_MINIMA);
     expect(problems.map((p) => p.clave)).toEqual(['subtitulo']);
   });
 
   it('rechaza decimales fuera de rango y unidades que son frases', () => {
-    const problems = validarPresentacion(
-      { formato: { decimales: 9, unidad: 'casos pendientes' } },
+    const problems = validatePresentation(
+      { formato: { decimales: 9, unit: 'casos pendientes' } },
       todas,
     );
     expect(problems.map((p) => p.clave).sort()).toEqual(['formato.decimales', 'formato.unidad']);
   });
 
   it('no se queja de una instancia sin presentacion', () => {
-    expect(validarPresentacion(undefined, PRESENTACION_MINIMA)).toEqual([]);
+    expect(validatePresentation(undefined, PRESENTACION_MINIMA)).toEqual([]);
   });
 });
 
-describe('formateadorDe', () => {
+describe('formatterOf', () => {
   // `Intl` separa la cifra de su sufijo compacto con un espacio DURO, que es lo tipograficamente
   // correcto —no se parte de linea entre «12,5» y «k»— y no se ve en el codigo fuente. Se
   // normaliza para que una prueba que falla no muestre dos cadenas identicas.
   const sinDuros = (s: string) => s.replace(/\u00a0/g, ' ');
 
   it('sin formato, entero con separador de miles', () => {
-    expect(formateadorDe(undefined)(12500)).toBe('12,500');
+    expect(formatterOf(undefined)(12500)).toBe('12,500');
   });
 
   it('respeta los decimales pedidos', () => {
-    expect(formateadorDe({ decimales: 2 })(12.5)).toBe('12.50');
+    expect(formatterOf({ decimales: 2 })(12.5)).toBe('12.50');
   });
 
   it('anade la unidad separada del numero', () => {
-    expect(formateadorDe({ unidad: '%' })(18)).toBe('18 %');
+    expect(formatterOf({ unit: '%' })(18)).toBe('18 %');
   });
 
   it('compacta cuando se le pide, sin comerse la precision', () => {
     // Con cero decimales, 12.500 salia «13 k»: el compacto redondea sobre la cifra ya reducida.
-    expect(sinDuros(formateadorDe({ compacto: true })(12500))).toBe('12.5 k');
-    expect(sinDuros(formateadorDe({ compacto: true })(12000))).toBe('12 k');
+    expect(sinDuros(formatterOf({ compacto: true })(12500))).toBe('12.5 k');
+    expect(sinDuros(formatterOf({ compacto: true })(12000))).toBe('12 k');
     // Y si alguien pide decimales explicitos, mandan los pedidos.
-    expect(sinDuros(formateadorDe({ compacto: true, decimales: 0 })(12500))).toBe('13 k');
+    expect(sinDuros(formatterOf({ compacto: true, decimales: 0 })(12500))).toBe('13 k');
   });
 });
 
 describe('circular y medidor: lo que se rechaza al guardar', () => {
-  const conCircular: PresentationKey[] = [...PRESENTACION_MINIMA, 'circular'];
-  const conMedidor: PresentationKey[] = [...PRESENTACION_MINIMA, 'medidor'];
+  const withPie: PresentationKey[] = [...PRESENTACION_MINIMA, 'circular'];
+  const withGauge: PresentationKey[] = [...PRESENTACION_MINIMA, 'medidor'];
 
   it('un hueco fuera de rango no llega a guardarse', () => {
     // Por encima del limite no queda anillo: el grafico dejaria de decir nada sobre proporciones.
-    expect(validarPresentacion({ circular: { radioInterior: 95 } }, conCircular)).toHaveLength(1);
-    expect(validarPresentacion({ circular: { radioInterior: 55 } }, conCircular)).toEqual([]);
+    expect(validatePresentation({ circular: { radioInterior: 95 } }, withPie)).toHaveLength(1);
+    expect(validatePresentation({ circular: { radioInterior: 55 } }, withPie)).toEqual([]);
   });
 
   it('un modo de etiqueta inventado se rechaza', () => {
-    const problems = validarPresentacion(
+    const problems = validatePresentation(
       { circular: { labels: 'ambos' as never } },
-      conCircular,
+      withPie,
     );
     expect(problems[0]?.clave).toBe('circular.etiquetas');
   });
@@ -165,15 +165,15 @@ describe('circular y medidor: lo que se rechaza al guardar', () => {
      * Intercambiarlos al dibujar dejaria pasar el error y pintaria una aguja que nadie pidio.
      * 4.2 manda marcar el mapeo que no cuadra, no arreglarlo por dentro.
      */
-    const problems = validarPresentacion({ medidor: { minimo: 100, maximo: 10 } }, conMedidor);
+    const problems = validatePresentation({ medidor: { minimo: 100, maximo: 10 } }, withGauge);
     expect(problems[0]?.clave).toBe('medidor.maximo');
-    expect(validarPresentacion({ medidor: { minimo: 0, maximo: 3000 } }, conMedidor)).toEqual([]);
+    expect(validatePresentation({ medidor: { minimo: 0, maximo: 3000 } }, withGauge)).toEqual([]);
   });
 
   it('un objeto que no las admite las rechaza', () => {
     // Una tabla no tiene porciones ni aguja: la clave sobra y el editor tiene que decirlo.
-    expect(validarPresentacion({ circular: { radioInterior: 10 } }, PRESENTACION_MINIMA)).toHaveLength(1);
-    expect(validarPresentacion({ medidor: { maximo: 10 } }, PRESENTACION_MINIMA)).toHaveLength(1);
+    expect(validatePresentation({ circular: { radioInterior: 10 } }, PRESENTACION_MINIMA)).toHaveLength(1);
+    expect(validatePresentation({ medidor: { maximo: 10 } }, PRESENTACION_MINIMA)).toHaveLength(1);
   });
 });
 
@@ -208,11 +208,11 @@ describe('la familia de cada objeto', () => {
    * propia pestana. Agruparlos por pregunta no significa nada, porque la pregunta la hace el
    * objeto al que acompanan.
    */
-  const SIN_FAMILIA = new Set(['elemento', 'contenedor', 'complemento']);
+  const WITHOUT_FAMILY = new Set(['elemento', 'contenedor', 'complemento']);
 
   it('todo objeto que consume datos declara a que pregunta responde', () => {
     for (const objeto of initialCatalog) {
-      if (SIN_FAMILIA.has(objeto.category)) continue;
+      if (WITHOUT_FAMILY.has(objeto.category)) continue;
       expect(objeto.family, `${objeto.objectId} no declara familia`).toBeDefined();
     }
   });
@@ -221,7 +221,7 @@ describe('la familia de cada objeto', () => {
     // Un cuadro de texto no responde a ninguna pregunta sobre los datos: ponerle «comparacion»
     // seria rellenar un campo para que no estuviera vacio.
     for (const objeto of initialCatalog) {
-      if (!SIN_FAMILIA.has(objeto.category)) continue;
+      if (!WITHOUT_FAMILY.has(objeto.category)) continue;
       expect(objeto.family, `${objeto.objectId} no deberia declarar familia`).toBeUndefined();
     }
   });
@@ -236,19 +236,19 @@ describe('la familia de cada objeto', () => {
 
 describe('el catalogo de iconos', () => {
   it('todos los ofrecidos para un objeto existen', () => {
-    for (const nombre of ICONOS_DE_OBJETO) expect(NOMBRES_DE_ICONO).toContain(nombre);
+    for (const nombre of OBJECT_ICONS) expect(ICON_NAMES).toContain(nombre);
   });
 
   it('ningun trazo esta vacio', () => {
-    for (const [nombre, trazo] of Object.entries(TRAZOS_DE_ICONO)) {
-      expect(trazo.length, nombre).toBeGreaterThan(4);
+    for (const [nombre, stroke] of Object.entries(TRAZOS_DE_ICONO)) {
+      expect(stroke.length, nombre).toBeGreaterThan(4);
     }
   });
 
   it('el cromo de la aplicacion NO se ofrece para rotular un dato', () => {
     // Un aspa de cerrar encima de una cifra no significa nada, y el editor no deberia poder
     // ofrecerlo solo porque el icono exista.
-    expect(ICONOS_DE_OBJETO).not.toContain('cerrar');
-    expect(ICONOS_DE_OBJETO).not.toContain('sandwich');
+    expect(OBJECT_ICONS).not.toContain('close');
+    expect(OBJECT_ICONS).not.toContain('sandwich');
   });
 });

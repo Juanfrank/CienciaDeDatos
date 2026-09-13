@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  ESTILOS_DE_REFERENCIA,
-  MAX_REFERENCIAS,
+  REFERENCE_STYLES,
+  MAX_REFERENCES,
   type ReferenceStyle,
   type ReferenceLine,
 } from "@app/ui-components";
@@ -71,14 +71,14 @@ export function LineasDeReferencia({
           <label className="formulario__campo">
             <span>Trazo</span>
             <select
-              value={line.estilo ?? "discontinua"}
+              value={line.style ?? "discontinua"}
               disabled={guardando}
               data-testid={`${prueba}-estilo-${i}`}
-              onChange={(e) => editar(i, { estilo: e.target.value as ReferenceStyle })}
+              onChange={(e) => editar(i, { style: e.target.value as ReferenceStyle })}
             >
-              {ESTILOS_DE_REFERENCIA.map((estilo) => (
-                <option key={estilo} value={estilo}>
-                  {ETIQUETA_DE_ESTILO[estilo]}
+              {REFERENCE_STYLES.map((style) => (
+                <option key={style} value={style}>
+                  {ETIQUETA_DE_ESTILO[style]}
                 </option>
               ))}
             </select>
@@ -108,13 +108,13 @@ export function LineasDeReferencia({
         </fieldset>
       ))}
 
-      {lineas.length < MAX_REFERENCIAS ? (
+      {lineas.length < MAX_REFERENCES ? (
         <button
           type="button"
           className="md-boton md-boton--contorno"
           disabled={guardando}
           data-testid={`${prueba}-anadir`}
-          onClick={() => cambiar([...lineas, { valor: 0, estilo: "discontinua" }])}
+          onClick={() => cambiar([...lineas, { valor: 0, style: "discontinua" }])}
         >
           Anadir line de referencia
         </button>

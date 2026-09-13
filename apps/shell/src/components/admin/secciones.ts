@@ -1,4 +1,4 @@
-import type { NombreDeIcono } from '../iconos/Icono';
+import type { IconName } from '../iconos/Icono';
 
 /** Las siete superficies de administracion (4.10.8), agrupadas por lo que se va a hacer. */
 
@@ -7,7 +7,7 @@ export interface SeccionDeAdmin {
   label: string;
   /** Que se hace aqui. Va en el DESTINO, no en el carril: ahi se lee una vez y estorba siempre. */
   desc: string;
-  icono: NombreDeIcono;
+  icono: IconName;
   /** De donde sale el numero del indicador, si lo tiene. */
   indicador?: 'ampliaciones' | 'papelera';
 }
@@ -15,7 +15,7 @@ export interface SeccionDeAdmin {
 export interface GrupoDeAdmin {
   id: string;
   titulo: string;
-  secciones: SeccionDeAdmin[];
+  sections: SeccionDeAdmin[];
 }
 
 /** El resumen, fuera de los grupos. */
@@ -30,7 +30,7 @@ export const GRUPOS: GrupoDeAdmin[] = [
   {
     id: 'estructura',
     titulo: 'Estructura',
-    secciones: [
+    sections: [
       {
         href: '/admin/arbol',
         label: 'Organizacion general',
@@ -49,7 +49,7 @@ export const GRUPOS: GrupoDeAdmin[] = [
   {
     id: 'acceso',
     titulo: 'Acceso',
-    secciones: [
+    sections: [
       {
         href: '/admin/equipos',
         label: 'Equipos y membresia',
@@ -73,7 +73,7 @@ export const GRUPOS: GrupoDeAdmin[] = [
   {
     id: 'supervision',
     titulo: 'Supervision',
-    secciones: [
+    sections: [
       {
         href: '/admin/quien-ve-que',
         label: 'Quien ve que',
@@ -91,7 +91,7 @@ export const GRUPOS: GrupoDeAdmin[] = [
   },
 ];
 
-export const SECCIONES: SeccionDeAdmin[] = [RESUMEN, ...GRUPOS.flatMap((g) => g.secciones)];
+export const SECCIONES: SeccionDeAdmin[] = [RESUMEN, ...GRUPOS.flatMap((g) => g.sections)];
 
 /** La seccion a la que pertenece una ruta. */
 export function seccionDe(path: string): SeccionDeAdmin | undefined {
@@ -102,7 +102,7 @@ export function seccionDe(path: string): SeccionDeAdmin | undefined {
 
 /** La seccion que se marca en el carril. */
 export function seccionActivaEn(path: string): SeccionDeAdmin | undefined {
-  return path === RESUMEN.href ? RESUMEN : GRUPOS.flatMap((g) => g.secciones).find(
+  return path === RESUMEN.href ? RESUMEN : GRUPOS.flatMap((g) => g.sections).find(
     (s) => path === s.href || path.startsWith(`${s.href}/`),
   );
 }

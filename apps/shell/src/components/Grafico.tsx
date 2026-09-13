@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type {
   CategoricalViewModel,
   ChartPalette,
-  PresentacionDeObjeto,
+  ObjectPresentation,
   ChartKind,
 } from '@app/ui-components';
 
@@ -36,7 +36,7 @@ export function Grafico({
   titulo: string;
   dimension?: string;
   /** Leyenda, etiquetas de dato, ejes y orden — lo que el editor configura. */
-  presentacion?: PresentacionDeObjeto;
+  presentacion?: ObjectPresentation;
   /** Formatea una cifra de la serie `s` con el formato de SU medida. */
   formatear?: (valor: number, serie: number) => string;
   /** Solo el combinado: cuantas series iniciales son columnas. */
@@ -55,8 +55,8 @@ export function Grafico({
     /*
      * Se lee de `body`, que es donde el layout inyecta el tema — NO de `documentElement`.
      */
-    const estilo = getComputedStyle(document.body);
-    const v = (nombre: string) => estilo.getPropertyValue(nombre).trim();
+    const style = getComputedStyle(document.body);
+    const v = (nombre: string) => style.getPropertyValue(nombre).trim();
 
     setPaleta({
       series: Array.from({ length: 8 }, (_, i) => v(`--md-sys-color-categorical-${i}`)),

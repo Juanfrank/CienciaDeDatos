@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PRESENTACION_MINIMA } from '../presentacion/contrato';
+import { PRESENTACION_MINIMA } from '../presentation/contract';
 import { ObjectRegistry, ObjectRegistryError } from './ObjectRegistry';
 import { initialCatalog } from './catalog';
 import type { ObjectInstance, ObjectVersion, VisualObjectDefinition } from './types';

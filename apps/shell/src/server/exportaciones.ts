@@ -8,7 +8,7 @@ import {
 import { describeProvenance } from '@app/module-model';
 import {
   describirRegla,
-  formateadorDeMedida,
+  measureFormatter,
   projectObject,
   type ObjectInstance,
 } from '@app/ui-components';
@@ -127,7 +127,7 @@ export async function encolarExportacion(input: EncolarInput) {
 function textosDe(instance: ObjectInstance, projected: QueryResult): string[][] {
   // Un formateador POR COLUMNA y no por celda: en una tabla larga son miles de llamadas, y el
   // formato depende de la medida, que es la columna.
-  const porColumna = projected.columns.map((c) => formateadorDeMedida(instance.presentacion, c.name));
+  const porColumna = projected.columns.map((c) => measureFormatter(instance.presentacion, c.name));
   return projected.rows.map((fila) =>
     fila.map((celda, i) =>
       typeof celda === 'number' ? (porColumna[i] ?? String)(celda) : String(celda ?? ''),

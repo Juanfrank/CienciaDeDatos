@@ -1,5 +1,5 @@
-import { PRESENTACION_MINIMA, type PresentationKey } from '../presentacion/contrato';
-import type { RanuraDeCampos } from '../presentacion/pozos';
+import { PRESENTACION_MINIMA, type PresentationKey } from '../presentation/contract';
+import type { FieldSlot } from '../presentation/wells';
 import type { ObjectCertification, VisualObjectDefinition } from './types';
 
 /** Catalogo de objetos prediseñados — seccion 4.2. */
@@ -38,7 +38,7 @@ const v1 = (
 });
 
 /** Los pozos de un grafico de barras, parametrizados por cuantas medidas admite la version. */
-const BAR_WELLS = (medidas: number): RanuraDeCampos[] => [
+const BAR_WELLS = (medidas: number): FieldSlot[] => [
   {
     id: 'eje-x',
     etiqueta: 'Eje X',
@@ -97,7 +97,7 @@ const KPI_CONTRACT: VisualObjectDefinition['versions'][number]['dataContract'] =
 /*
  * Lo que un grafico deja personalizar, en un solo sitio.
  */
-const LINE_WELLS: RanuraDeCampos[] = [
+const LINE_WELLS: FieldSlot[] = [
   {
     id: 'eje-x',
     etiqueta: 'Eje X',
@@ -110,7 +110,7 @@ const LINE_WELLS: RanuraDeCampos[] = [
 ];
 
 /** El pozo que reparte los pequenos multiplos. */
-const MULTIPLE_WELL: RanuraDeCampos = {
+const MULTIPLE_WELL: FieldSlot = {
   id: 'multiplo',
   etiqueta: 'Multiplos',
   tipo: 'dimension',
@@ -1142,7 +1142,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     objectId: 'contenedor-con-pestanas',
-    icono: 'pestanas',
+    icono: 'tabs',
     name: 'Contenedor con pestanas',
     description: 'Varias pestanas, cada una con su propio contenido y su propia disposicion.',
     category: 'contenedor',

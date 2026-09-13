@@ -18,7 +18,7 @@ const normalizar = (content: string): string =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 
-export function Seccion({
+export function Section({
   titulo,
   abierta = true,
   nivel = 1,

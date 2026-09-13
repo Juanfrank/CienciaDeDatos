@@ -17,14 +17,14 @@ import {
   type BindingProblem,
   type ContainerSettings,
   aggregationsOf,
-  esContenedor,
+  isContainer,
   noConsumeDatos,
-  panelesDe,
-  validarContenedor,
+  panelsOf,
+  validateContainer,
   fieldKey,
-  ranurasDelContrato,
+  contractSlots,
   validateAggregation,
-  validarRanuras,
+  validateSlots,
   validateBinding,
 } from '@app/ui-components';
 import { cacheL2, datasetReader, findTeam, getGeneralTree, objectRegistry, scopeFor } from './contexto';
@@ -113,9 +113,9 @@ async function leerObjetos(
       const config = instance.settings;
       let panels: PanelCargado[] | undefined;
 
-      if (esContenedor(instance.objectId)) {
+      if (isContainer(instance.objectId)) {
         panels = [];
-        for (const panel of panelesDe(config as ContainerSettings | undefined)) {
+        for (const panel of panelsOf(config as ContainerSettings | undefined)) {
           const dentro = await leerObjetos(
             panel.items.map((i) => ({ id: i.id, instance: i.instance, position: i.position })),
             scope,
@@ -135,7 +135,7 @@ async function leerObjetos(
       objetos.push({
         item,
         readStatus: 'ok',
-        problems: validarContenedor(item.id, instance).map((p) => ({
+        problems: validateContainer(item.id, instance).map((p) => ({
           slot: p.slot,
           kind: 'contrato-incumplido' as const,
           problem: p.issue,
@@ -180,7 +180,7 @@ async function leerObjetos(
 
     const problems = [
       ...validateBinding(instance, contrato, gridColumns),
-      ...validarRanuras(instance, ranurasDelContrato(contrato)).map((p) => ({
+      ...validateSlots(instance, contractSlots(contrato)).map((p) => ({
         slot: `ranura.${p.ranura}`,
         kind: 'contrato-incumplido' as const,
         problem: p.issue,

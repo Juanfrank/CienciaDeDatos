@@ -66,7 +66,7 @@ mover un extremo deja la flecha apuntando al aire. Asi sigue pegado por construc
 ## Consecuencias
 
 - Anadir un elemento o un contenedor nuevo es una entrada de catalogo, un caso en
-  `configuracionInicial` y una rama de render. La tienda del editor lo recoge sola, porque agrupa
+  `initialSettings` y una rama de render. La tienda del editor lo recoge sola, porque agrupa
   por la categoria que el objeto ya declara.
 - La geometria del conector vive en el paquete y no junto al componente: es una funcion pura de
   dos cajas, y se prueba sin navegador.

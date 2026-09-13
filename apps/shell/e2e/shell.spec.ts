@@ -377,11 +377,11 @@ test.describe('el alto de un objeto no depende de su contenido', () => {
     await page.goto('/m/casos-pendientes');
     await expect(page.locator('.rejilla__celda').first()).toBeVisible();
 
-    const { unidad, hole, altos } = await page.evaluate(() => {
+    const { unit, hole, altos } = await page.evaluate(() => {
       const rejilla = document.querySelector('.rejilla') as HTMLElement;
       const e = getComputedStyle(rejilla);
       return {
-        unidad: parseFloat(e.gridAutoRows),
+        unit: parseFloat(e.gridAutoRows),
         hole: parseFloat(e.rowGap),
         altos: Array.from(document.querySelectorAll('.rejilla__celda')).map((el) =>
           Math.round(el.getBoundingClientRect().height),
@@ -391,7 +391,7 @@ test.describe('el alto de un objeto no depende de su contenido', () => {
 
     // alto = n*unidad + (n-1)*hueco para algun n entero. Si el contenido mandara, no cuadraria.
     for (const alto of altos) {
-      const n = (alto + hole) / (unidad + hole);
+      const n = (alto + hole) / (unit + hole);
       expect(Math.abs(n - Math.round(n))).toBeLessThan(0.01);
     }
   });

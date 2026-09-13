@@ -5,7 +5,7 @@ import type { QueryResult } from "@app/data-contracts";
 import {
   selectoresEfectivos,
   toSlicerOptions,
-  type NombreDeIcono,
+  type IconName,
   type ObjectInstance,
   type SelectorEfectivo,
 } from "@app/ui-components";
@@ -27,7 +27,7 @@ export function PanelDeFiltros({
   instance: ObjectInstance;
   result: QueryResult;
   /** El icono que declara la version del objeto en el catalogo. */
-  iconoDelObjeto?: NombreDeIcono;
+  iconoDelObjeto?: IconName;
 }) {
   const { valoresDe, alternar, limpiarCampo, fijar, searchParams } =
     useFiltrosDeUrl();
@@ -39,7 +39,7 @@ export function PanelDeFiltros({
     [result.columns],
   );
 
-  const selectores = useMemo(
+  const pickers = useMemo(
     () =>
       selectoresEfectivos(
         instance,
@@ -51,7 +51,7 @@ export function PanelDeFiltros({
     [instance, fieldKinds],
   );
 
-  const puestos = selectores.filter((s) =>
+  const puestos = pickers.filter((s) =>
     s.tipo === "calendario" || s.tipo === "rango-de-fechas"
       ? searchParams.has(DESDE(s.fieldName)) ||
         searchParams.has(HASTA(s.fieldName)) ||
@@ -71,7 +71,7 @@ export function PanelDeFiltros({
             className="texto-atenuado"
             data-testid={`panel-filtros-puestos-${instance.instanceId}`}
           >
-            {puestos} de {selectores.length} filtros puestos
+            {puestos} de {pickers.length} filtros puestos
           </span>
         ) : null
       }
@@ -80,28 +80,28 @@ export function PanelDeFiltros({
         className="panel-filtros"
         data-testid={`panel-filtros-${instance.instanceId}`}
       >
-        {selectores.map((selector) => (
+        {pickers.map((picker) => (
           <SelectorDeCampo
-            key={selector.fieldName}
-            selector={selector}
-            opciones={optionsOf(result, selector.fieldName)}
-            valores={valoresDe(selector.fieldName)}
-            desde={searchParams.get(DESDE(selector.fieldName)) ?? ""}
-            hasta={searchParams.get(HASTA(selector.fieldName)) ?? ""}
-            onAlternar={(valor) => alternar(selector.fieldName, valor)}
-            onFijar={(valor) => fijar(selector.fieldName, valor)}
+            key={picker.fieldName}
+            picker={picker}
+            opciones={optionsOf(result, picker.fieldName)}
+            valores={valoresDe(picker.fieldName)}
+            desde={searchParams.get(DESDE(picker.fieldName)) ?? ""}
+            hasta={searchParams.get(HASTA(picker.fieldName)) ?? ""}
+            onAlternar={(valor) => alternar(picker.fieldName, valor)}
+            onFijar={(valor) => fijar(picker.fieldName, valor)}
             onFijarFecha={(cual, valor) =>
               fijar(
                 cual === "desde"
-                  ? DESDE(selector.fieldName)
-                  : HASTA(selector.fieldName),
+                  ? DESDE(picker.fieldName)
+                  : HASTA(picker.fieldName),
                 valor,
               )
             }
             onLimpiar={() => {
-              limpiarCampo(selector.fieldName);
-              limpiarCampo(DESDE(selector.fieldName));
-              limpiarCampo(HASTA(selector.fieldName));
+              limpiarCampo(picker.fieldName);
+              limpiarCampo(DESDE(picker.fieldName));
+              limpiarCampo(HASTA(picker.fieldName));
             }}
           />
         ))}
@@ -120,7 +120,7 @@ function optionsOf(result: QueryResult, fieldName: string): string[] {
 }
 
 function SelectorDeCampo({
-  selector,
+  picker,
   opciones,
   valores,
   desde,
@@ -130,7 +130,7 @@ function SelectorDeCampo({
   onFijarFecha,
   onLimpiar,
 }: {
-  selector: SelectorEfectivo;
+  picker: SelectorEfectivo;
   opciones: string[];
   valores: string[];
   desde: string;
@@ -142,7 +142,7 @@ function SelectorDeCampo({
 }) {
   const id = useId();
   const [busqueda, setBusqueda] = useState("");
-  const prueba = `filtro-${selector.fieldName}`;
+  const prueba = `filtro-${picker.fieldName}`;
 
   const filtradas = busqueda
     ? opciones.filter((o) => o.toLowerCase().includes(busqueda.toLowerCase()))
@@ -153,11 +153,11 @@ function SelectorDeCampo({
   return (
     <fieldset
       className="panel-filtros__campo"
-      data-tipo={selector.tipo}
+      data-tipo={picker.tipo}
       data-testid={prueba}
     >
       <legend className="panel-filtros__etiqueta">
-        {selector.etiqueta}
+        {picker.etiqueta}
         {hayAlgo ? (
           <button
             type="button"
@@ -170,7 +170,7 @@ function SelectorDeCampo({
         ) : null}
       </legend>
 
-      {selector.tipo === "pastillas" ? (
+      {picker.tipo === "pastillas" ? (
         <ul className="segmentador">
           {opciones.map((opcion) => (
             <li key={opcion}>
@@ -188,16 +188,16 @@ function SelectorDeCampo({
         </ul>
       ) : null}
 
-      {selector.tipo === "lista" || selector.tipo === "busqueda" ? (
+      {picker.tipo === "lista" || picker.tipo === "busqueda" ? (
         <>
-          {selector.tipo === "busqueda" ? (
+          {picker.tipo === "busqueda" ? (
             <input
               type="search"
               className="panel-filtros__buscar"
               // El campo BUSCA entre los valores; no es un filtro por si mismo. Sin esta
               // etiqueta, un lector de pantalla anuncia dos controles seguidos sin decir cual
               // reduce la lista y cual elige.
-              aria-label={`Buscar en ${selector.etiqueta}`}
+              aria-label={`Buscar en ${picker.etiqueta}`}
               placeholder="Buscar…"
               value={busqueda}
               data-testid={`${prueba}-buscar`}
@@ -225,13 +225,13 @@ function SelectorDeCampo({
         </>
       ) : null}
 
-      {selector.tipo === "desplegable" ? (
+      {picker.tipo === "desplegable" ? (
         <select
           value={valores[0] ?? ""}
           // El `<legend>` nombra al `fieldset`, no a los controles de dentro. Axe lo pide en el
           // propio `<select>` y tiene razon: quien navega saltando de control en control llega
           // aqui sin haber pasado por la leyenda, y oye «lista, Penal» sin saber de que.
-          aria-label={selector.etiqueta}
+          aria-label={picker.etiqueta}
           data-testid={`${prueba}-desplegable`}
           onChange={(e) => onFijar(e.target.value)}
         >
@@ -244,17 +244,17 @@ function SelectorDeCampo({
         </select>
       ) : null}
 
-      {selector.tipo === "calendario" ? (
+      {picker.tipo === "calendario" ? (
         <input
           type="date"
           value={valores[0] ?? ""}
-          aria-label={selector.etiqueta}
+          aria-label={picker.etiqueta}
           data-testid={`${prueba}-fecha`}
           onChange={(e) => onFijar(e.target.value)}
         />
       ) : null}
 
-      {selector.tipo === "rango-de-fechas" ? (
+      {picker.tipo === "rango-de-fechas" ? (
         <div className="panel-filtros__rango">
           <label htmlFor={`${id}-desde`}>Desde</label>
           <input

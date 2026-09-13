@@ -1,29 +1,29 @@
-import type { ColorDeTexto } from './contrato';
+import type { TextColor } from './contract';
 
 /** Formato condicional — que el color dependa del DATO, no solo del mapeo. */
 
-export const COMPARADORES = ['mayor', 'mayor-o-igual', 'menor', 'menor-o-igual', 'igual', 'entre'] as const;
-export type Comparador = (typeof COMPARADORES)[number];
+export const COMPARATORS = ['mayor', 'mayor-o-igual', 'menor', 'menor-o-igual', 'igual', 'entre'] as const;
+export type Comparator = (typeof COMPARATORS)[number];
 
-export interface ReglaDeColor {
+export interface ColorRule {
   /** A que medida se aplica. Sin ella, a todas. */
   medida?: string;
-  comparador: Comparador;
+  comparator: Comparator;
   valor: number;
   /** Solo para `entre`: el otro extremo, incluido. */
   hasta?: number;
-  color: ColorDeTexto;
+  color: TextColor;
 }
 
 export interface ConditionalFormat {
-  rules: ReglaDeColor[];
+  rules: ColorRule[];
 }
 
 /** Mas de cinco reglas sobre un objeto dejan de ser excepciones y pasan a ser una escala. */
-export const MAX_REGLAS = 5;
+export const MAX_RULES = 5;
 
-function cumple(colorRule: ReglaDeColor, valor: number): boolean {
-  switch (colorRule.comparador) {
+function cumple(colorRule: ColorRule, valor: number): boolean {
+  switch (colorRule.comparator) {
     case 'mayor':
       return valor > colorRule.valor;
     case 'mayor-o-igual':
@@ -48,14 +48,14 @@ function cumple(colorRule: ReglaDeColor, valor: number): boolean {
 }
 
 /** El color que le toca a un valor, o nada. */
-export function colorCondicional(
+export function conditionalColor(
   condicional: ConditionalFormat | undefined,
   valor: number | null | undefined,
   medida?: string,
-): ColorDeTexto | undefined {
+): TextColor | undefined {
   if (!condicional || valor === null || valor === undefined) return undefined;
 
-  for (const colorRule of condicional.rules.slice(0, MAX_REGLAS)) {
+  for (const colorRule of condicional.rules.slice(0, MAX_RULES)) {
     if (colorRule.medida !== undefined && colorRule.medida !== medida) continue;
     if (cumple(colorRule, valor)) return colorRule.color;
   }
@@ -63,8 +63,8 @@ export function colorCondicional(
 }
 
 /** Texto legible de una regla, para el panel y para el respaldo accesible. */
-export function describirRegla(colorRule: ReglaDeColor): string {
-  const nombre: Record<Comparador, string> = {
+export function describirRegla(colorRule: ColorRule): string {
+  const nombre: Record<Comparator, string> = {
     mayor: 'mayor que',
     'mayor-o-igual': 'mayor o igual que',
     menor: 'menor que',
@@ -73,6 +73,6 @@ export function describirRegla(colorRule: ReglaDeColor): string {
     entre: 'entre',
   };
   const rango =
-    colorRule.comparador === 'entre' ? `${colorRule.valor} y ${colorRule.hasta ?? colorRule.valor}` : String(colorRule.valor);
-  return `${nombre[colorRule.comparador]} ${rango}`;
+    colorRule.comparator === 'entre' ? `${colorRule.valor} y ${colorRule.hasta ?? colorRule.valor}` : String(colorRule.valor);
+  return `${nombre[colorRule.comparator]} ${rango}`;
 }

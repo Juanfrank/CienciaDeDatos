@@ -3,9 +3,9 @@ import { defaultRegistry } from '@app/caching';
 import type {
   PresentationKey,
   ObjectFamily,
-  NombreDeIcono,
+  IconName,
   ObjectCategory,
-  PozoDeCampos,
+  FieldWell,
 } from '@app/ui-components';
 import { fieldKey } from '@app/ui-components';
 import { objectRegistry } from './contexto';
@@ -19,7 +19,7 @@ export interface ObjetoDePaleta {
   description: string;
   category: ObjectCategory;
   /** Lo declara el objeto: la tienda y la tarjeta leen del mismo sitio. */
-  icono: NombreDeIcono;
+  icono: IconName;
   /** A que pregunta responde. La paleta agrupa por esto; los elementos no la traen. */
   family?: ObjectFamily;
   version: string;
@@ -29,7 +29,7 @@ export interface ObjetoDePaleta {
   /** Claves de presentacion que ESTA version admite. El editor solo ofrece estas. */
   presentacion: PresentationKey[];
   /** Ranuras con nombre. Vacio si el objeto no las declara: el editor usa las genericas. */
-  wells: PozoDeCampos[];
+  wells: FieldWell[];
   notas?: string;
 }
 

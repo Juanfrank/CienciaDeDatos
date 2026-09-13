@@ -119,9 +119,9 @@ test.describe('la rejilla es visible y se maneja', () => {
     const id = await idDelBloque(page);
 
     const medida = await page.getByTestId(`bloque-${id}`).evaluate((el) => {
-      const estilo = getComputedStyle(el);
-      const first = Number(estilo.gridRowStart) - 1;
-      const alto = Number(estilo.gridRowEnd.replace('span ', ''));
+      const style = getComputedStyle(el);
+      const first = Number(style.gridRowStart) - 1;
+      const alto = Number(style.gridRowEnd.replace('span ', ''));
       const celdas = Array.from(document.querySelectorAll('.lienzo__guia')) as HTMLElement[];
       const gridColumns = 12;
       const caja = el.getBoundingClientRect();
@@ -898,18 +898,18 @@ test.describe('estilo de texto y paleta', () => {
     await page.getByTestId(`${pres}-texto-titulo-color-terciario`).click();
     await guardado(page);
 
-    const estilo = await page
+    const style = await page
       .getByTestId(`bloque-${id}`)
       .getByTestId('objeto-titulo')
       .evaluate((el) => {
         const e = getComputedStyle(el);
-        return { peso: e.fontWeight, estilo: e.fontStyle, color: e.color };
+        return { peso: e.fontWeight, style: e.fontStyle, color: e.color };
       });
-    expect(estilo.peso).toBe('700');
-    expect(estilo.estilo).toBe('italic');
+    expect(style.peso).toBe('700');
+    expect(style.style).toBe('italic');
     // El color sale del ROL del tema, no de un hex escrito a mano: se comprueba que cambio, no
     // cual es, porque el valor exacto es del tema y el tema puede cambiar.
-    expect(estilo.color).not.toBe('rgb(0, 0, 0)');
+    expect(style.color).not.toBe('rgb(0, 0, 0)');
   });
 
   test('la paleta ofrece ROLES del tema, no un color libre', async ({ page }) => {

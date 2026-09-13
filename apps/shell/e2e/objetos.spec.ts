@@ -205,7 +205,7 @@ test.describe('la seccion Objetos del editor', () => {
 
 test.describe('los dos carriles de pantalla', () => {
   /** La caja de un elemento frente al banner y a la ventana. */
-  const medir = (page: import('@playwright/test').Page, selector: string) =>
+  const medir = (page: import('@playwright/test').Page, picker: string) =>
     page.evaluate((sel) => {
       const banner = document.querySelector('.cabecera');
       const carril = document.querySelector(sel);
@@ -221,7 +221,7 @@ test.describe('los dos carriles de pantalla', () => {
         ventanaAlto: window.innerHeight,
         ventanaAncho: window.innerWidth,
       };
-    }, selector);
+    }, picker);
 
   test('el arbol de navegacion ocupa todo el lado izquierdo bajo el banner', async ({ page }) => {
     await page.setViewportSize({ width: 1400, height: 900 });

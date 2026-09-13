@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ranurasDelContrato, validarRanuras } from '@app/ui-components';
+import { contractSlots, validatePresentation, validateSlots } from '@app/ui-components';
 import { objectRegistry } from './contexto';
 import { modulosDemo } from './modulos';
 
@@ -26,14 +26,24 @@ describe('ranuras de los modulos de demostracion', () => {
   for (const { modulo, item, instance } of instancias) {
     it(`${modulo}/${item}: cada ranura asignada existe en el contrato`, () => {
       const contrato = objectRegistry.resolve(instance.objectId, instance.version).dataContract;
-      const declaradas = ranurasDelContrato(contrato).map((r) => r.id);
+      const declaradas = contractSlots(contrato).map((r) => r.id);
       const usadas = Object.keys(instance.binding.slots ?? {});
       expect(usadas.filter((r) => !declaradas.includes(r))).toEqual([]);
     });
 
     it(`${modulo}/${item}: las ranuras cumplen minimos y maximos`, () => {
       const contrato = objectRegistry.resolve(instance.objectId, instance.version).dataContract;
-      expect(validarRanuras(instance, ranurasDelContrato(contrato))).toEqual([]);
+      expect(validateSlots(instance, contractSlots(contrato))).toEqual([]);
+    });
+
+    /*
+     * La presentacion cae en lo mismo. `icono: 'tabs'` es una cadena suelta contra las claves de
+     * `TRAZOS_DE_ICONO`, y aqui el campo no esta tipado, asi que el compilador no relaciona una
+     * con otra: un icono que dejo de existir se dibuja vacio y nadie se entera.
+     */
+    it(`${modulo}/${item}: la presentacion usa claves e iconos que existen`, () => {
+      const version = objectRegistry.resolve(instance.objectId, instance.version);
+      expect(validatePresentation(instance.presentacion, version.presentation)).toEqual([]);
     });
   }
 });

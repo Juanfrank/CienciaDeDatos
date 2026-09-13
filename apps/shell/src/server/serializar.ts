@@ -2,9 +2,9 @@ import type { Aggregation, QueryResult } from '@app/data-contracts';
 import type { GridPosition } from '@app/module-model';
 import type {
   BindingProblem,
-  NombreDeIcono,
+  IconName,
   ObjectInstance,
-  RanuraDeCampos,
+  FieldSlot,
 } from '@app/ui-components';
 import { objectRegistry } from './contexto';
 import type { ObjetoCargado } from './datos';
@@ -18,9 +18,9 @@ export interface ObjetoSerializado {
   result?: QueryResult;
   problems: BindingProblem[];
   /** Las ranuras que declara la version del objeto. */
-  slots?: RanuraDeCampos[];
+  slots?: FieldSlot[];
   /** El icono que declara la VERSION del objeto. */
-  icono?: NombreDeIcono;
+  icono?: IconName;
   /** Con que operador se resume cada medida, alineado con `instance.binding.measures`. */
   aggregations: Aggregation[];
   unresolvedObject?: string;
@@ -64,7 +64,7 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
 }
 
 /** Las ranuras declaradas por la version que la instancia fija. */
-function ranurasDelObjeto(instance: ObjectInstance): RanuraDeCampos[] | undefined {
+function ranurasDelObjeto(instance: ObjectInstance): FieldSlot[] | undefined {
   try {
     return objectRegistry.resolve(instance.objectId, instance.version).dataContract.wells;
   } catch {
@@ -73,7 +73,7 @@ function ranurasDelObjeto(instance: ObjectInstance): RanuraDeCampos[] | undefine
 }
 
 /** El icono que declara el objeto. `undefined` si no se resuelve: el objeto roto no lo necesita. */
-function iconoDelObjeto(instance: ObjectInstance): NombreDeIcono | undefined {
+function iconoDelObjeto(instance: ObjectInstance): IconName | undefined {
   try {
     return objectRegistry.get(instance.objectId)?.icono;
   } catch {
