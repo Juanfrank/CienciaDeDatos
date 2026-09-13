@@ -254,6 +254,7 @@ const CONTRATO_CIRCULAR: VisualObjectDefinition['versions'][number]['dataContrac
 export const catalogoInicial: VisualObjectDefinition[] = [
   {
     objectId: 'tarjeta-kpi',
+    familia: 'valor',
     icono: 'indicador',
     name: 'Tarjeta KPI',
     description: 'Un unico valor destacado, con su etiqueta y una variacion opcional.',
@@ -304,6 +305,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'tabla',
+    familia: 'detalle',
     icono: 'tabla',
     name: 'Tabla',
     description: 'Filas y columnas con las dimensiones y medidas mapeadas.',
@@ -371,9 +373,15 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'barras',
+    familia: 'comparacion',
     icono: 'barras',
-    name: 'Grafico de barras',
-    description: 'Comparacion de una o varias medidas entre las categorias de una dimension.',
+    /*
+     * «Columnas», no «barras». El identificador se queda en `barras` porque ES el contrato (4.5):
+     * las instancias lo fijan, y renombrarlo romperia todo modulo publicado. El nombre visible no
+     * forma parte de ese contrato y por eso si se corrige.
+     */
+    name: 'Grafico de columnas',
+    description: 'Columnas verticales. Compara una o varias medidas entre las categorias de una dimension.',
     category: 'grafico',
     versions: [
       v1(
@@ -494,6 +502,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
      * eso, y una opcion escondida en el panel de formato no se encuentra.
      */
     objectId: 'barras-horizontales',
+    familia: 'comparacion',
     icono: 'barras-horizontales',
     name: 'Grafico de barras',
     description: 'Barras horizontales. Para categorias con nombres largos o muchas categorias.',
@@ -522,6 +531,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
      * que esta ahi.
      */
     objectId: 'pastel',
+    familia: 'proporcion',
     icono: 'pastel',
     name: 'Grafico circular (pastel)',
     description: 'La parte que representa cada categoria sobre el total.',
@@ -536,6 +546,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'dona',
+    familia: 'proporcion',
     icono: 'dona',
     name: 'Grafico de anillos (dona)',
     description: 'Lo mismo que el circular, con el total en el centro.',
@@ -550,6 +561,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'medidor',
+    familia: 'valor',
     icono: 'medidor',
     name: 'Medidor (tacometro)',
     description: 'Una cifra contra su meta, sobre una escala fija.',
@@ -594,6 +606,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
      * tiene una respuesta corta; arrastrar un campo de un pozo al otro si.
      */
     objectId: 'combinado',
+    familia: 'relacion',
     icono: 'combinado',
     name: 'Grafico combinado de columnas y lineas',
     description: 'Dos grupos de medidas en el mismo eje, con eje secundario opcional.',
@@ -658,6 +671,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
      * asi que la pregunta no se puede ni plantear.
      */
     objectId: 'dispersion',
+    familia: 'relacion',
     icono: 'dispersion',
     name: 'Grafico de dispersion',
     description: 'Dos medidas enfrentadas, un punto por categoria. La tercera da el tamano.',
@@ -716,6 +730,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
      * mayor que la primera es una anomalia que hay que poder ver.
      */
     objectId: 'embudo',
+    familia: 'proporcion',
     icono: 'embudo',
     name: 'Grafico de embudo',
     description: 'La caida entre etapas de un proceso, en el orden en que ocurren.',
@@ -759,6 +774,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
      * poner al lado una tabla de diferencias.
      */
     objectId: 'cascada',
+    familia: 'proporcion',
     icono: 'cascada',
     name: 'Grafico de cascada',
     description: 'Como cada categoria suma o resta hasta el total.',
@@ -801,6 +817,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
      * para su nombre. Un rectangulo sigue teniendo dos dimensiones donde escribir.
      */
     objectId: 'mapa-de-arbol',
+    familia: 'proporcion',
     icono: 'arbol',
     name: 'Mapa de arbol',
     description: 'Composicion con muchas categorias, y con jerarquia si hay dos dimensiones.',
@@ -844,6 +861,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'area',
+    familia: 'evolucion',
     icono: 'area',
     name: 'Grafico de area',
     description: 'Una linea con el volumen debajo. Apilada, ensena de que se compone un total.',
@@ -863,6 +881,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'lineas',
+    familia: 'evolucion',
     icono: 'lineas',
     name: 'Grafico de lineas',
     description: 'Evolucion de una o varias medidas a lo largo de una dimension ordenada.',
@@ -909,6 +928,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'matriz',
+    familia: 'detalle',
     icono: 'tabla',
     name: 'Matriz',
     description: 'Cruce jerarquico de dimensiones, con subtotales por nivel.',
@@ -971,6 +991,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'panel-de-filtros',
+    familia: 'control',
     icono: 'filtro',
     name: 'Panel de filtros',
     description:
@@ -1002,6 +1023,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'segmentador',
+    familia: 'control',
     icono: 'filtro',
     name: 'Segmentador',
     description: 'Filtro interactivo sobre los valores de una dimension.',
@@ -1053,6 +1075,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'mapa',
+    familia: 'ubicacion',
     icono: 'lugar',
     name: 'Mapa',
     description: 'Distribucion geografica de una medida por division territorial.',

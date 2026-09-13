@@ -876,6 +876,34 @@ input[type='radio'] {
  * en JavaScript obligaria a repetir ahi la lista de que secciones admite cada objeto.
  */
 .editor__vacio { display: none; }
+/* La paleta si sabe cuando no hay resultados —filtra una lista, no un arbol de secciones— y por
+   eso puede decirlo sin `:has()`. */
+.editor__vacio--visible {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 16px 0;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/*
+ * Una familia de la paleta: el grupo de objetos que responden a la misma pregunta.
+ *
+ * El rotulo es la pregunta y la linea de debajo la explica. Ocupa dos lineas por grupo y ahorra
+ * leer quince nombres para encontrar el que sirve.
+ */
+.tienda__familia { margin-bottom: 14px; }
+.tienda__familia-titulo {
+  margin: 0;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: 600;
+}
+.tienda__familia-que {
+  margin: 0 0 6px;
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
 .editor__formato:not(:has(details.seccion)) .editor__vacio {
   display: flex;
   flex-direction: column;

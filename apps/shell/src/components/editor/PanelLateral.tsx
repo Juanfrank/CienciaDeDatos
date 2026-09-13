@@ -16,7 +16,12 @@ import {
   type ObjectInstance,
   type RanuraDeCampos,
 } from '@app/ui-components';
-import { type ObjectCategory, esContenedor, esElemento } from '@app/ui-components';
+import {
+  type FamiliaDeObjeto,
+  type ObjectCategory,
+  esContenedor,
+  esElemento,
+} from '@app/ui-components';
 import type { DatasetDePaleta, ObjetoDePaleta } from '../../server/editor';
 import { Icono } from '../iconos/Icono';
 import { ConfiguracionDeObjetoEditor } from './ConfiguracionDeObjetoEditor';
@@ -243,6 +248,47 @@ export function PanelLateral({
  * El corte lo da la CATEGORIA que cada objeto ya declara, no una lista de ids escrita aqui: con
  * una lista, publicar un elemento nuevo lo dejaria fuera de la tienda sin que nada fallara.
  */
+/**
+ * Que pregunta responde cada familia, dicho en una linea.
+ *
+ * El rotulo es la pregunta y no el nombre tecnico —«Comparar entre categorias», no
+ * «Comparacion»— porque asi es como llega la necesidad: alguien quiere comparar dos distritos,
+ * no quiere «un objeto de la familia comparacion».
+ */
+const FAMILIAS: { familia: FamiliaDeObjeto; titulo: string; que: string }[] = [
+  { familia: 'valor', titulo: 'Una sola cifra', que: 'El dato que hay que ver de un vistazo.' },
+  {
+    familia: 'comparacion',
+    titulo: 'Comparar entre categorias',
+    que: 'Cuanto mide cada distrito, cada materia, cada tribunal.',
+  },
+  {
+    familia: 'evolucion',
+    titulo: 'Ver como cambia en el tiempo',
+    que: 'La trayectoria de una medida a lo largo de una dimension ordenada.',
+  },
+  {
+    familia: 'proporcion',
+    titulo: 'Repartir un total',
+    que: 'Que parte aporta cada categoria, y donde se pierde.',
+  },
+  {
+    familia: 'relacion',
+    titulo: 'Dos medidas a la vez',
+    que: 'Si dos cifras se mueven juntas, o cada una en su escala.',
+  },
+  { familia: 'detalle', titulo: 'El dato, fila a fila', que: 'Cuando hace falta la cifra exacta.' },
+  { familia: 'ubicacion', titulo: 'Donde', que: 'La dimension geografica.' },
+  { familia: 'control', titulo: 'Filtrar', que: 'No dibujan datos: eligen cuales se ven.' },
+];
+
+/** Sin acentos y en minusculas, como el buscador del panel de formato y por lo mismo. */
+const normalizar = (texto: string): string =>
+  texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
 function Tienda({
   objetos,
   guardando,
@@ -255,47 +301,112 @@ function Tienda({
   // Los complementos se adjuntan a otro objeto, no se colocan en la rejilla. La validacion lo
   // rechaza, asi que tampoco se ofrecen aqui: tienen su propia pestana.
   const colocables = objetos.filter((o) => !o.attachable);
+  const [busqueda, setBusqueda] = useState('');
+
+  /*
+   * Se busca por nombre Y por descripcion.
+   *
+   * La descripcion es donde estan las palabras con las que alguien busca: «meta», «umbral»,
+   * «etapas», «jerarquia». Buscando solo por el nombre habria que saber ya como se llama el
+   * objeto, que es justo lo que no se sabe cuando se busca.
+   */
+  const filtro = normalizar(busqueda.trim());
+  const coincide = (o: ObjetoDePaleta) =>
+    filtro === '' ||
+    normalizar(o.name).includes(filtro) ||
+    normalizar(o.description).includes(filtro);
+
+  const visibles = colocables.filter(coincide);
   const de = (...categorias: ObjectCategory[]) =>
-    colocables.filter((o) => categorias.includes(o.category));
+    visibles.filter((o) => categorias.includes(o.category));
+  const conDatos = de('grafico', 'tabla', 'indicador', 'filtro', 'mapa');
 
   return (
     <>
-      <Seccion titulo="Visualizaciones" prueba="seccion-visualizaciones">
-        <p className="texto-atenuado panel-editor__nota">
-          Se enlazan a un dataset certificado del registro. Un modulo no construye consultas (4.2).
-        </p>
-        <ListaDeObjetos
-          objetos={de('grafico', 'tabla', 'indicador', 'filtro', 'mapa')}
-          prueba="tienda"
-          conContrato
-          guardando={guardando}
-          onAnadir={onAnadir}
+      <label className="editor__buscador">
+        <span className="editor__buscador-rotulo">Buscar un objeto</span>
+        <input
+          type="search"
+          value={busqueda}
+          placeholder="barras, meta, etapas…"
+          data-testid="buscar-objeto"
+          onChange={(e) => setBusqueda(e.target.value)}
         />
-      </Seccion>
+      </label>
 
-      <Seccion titulo="Elementos" prueba="seccion-elementos">
-        <p className="texto-atenuado panel-editor__nota">
-          No se enlazan a datos: componen la pagina. Texto, titulos, lineas, formas y conexiones.
-        </p>
-        <ListaDeObjetos
-          objetos={de('elemento')}
-          prueba="tienda-elementos"
-          guardando={guardando}
-          onAnadir={onAnadir}
-        />
-      </Seccion>
+      {visibles.length === 0 ? (
+        <div className="editor__vacio editor__vacio--visible" data-testid="sin-objetos">
+          <p>Ningun objeto coincide con «{busqueda.trim()}».</p>
+          <button
+            type="button"
+            className="md-boton md-boton--texto"
+            data-testid="limpiar-busqueda-objeto"
+            onClick={() => setBusqueda('')}
+          >
+            Ver todos los objetos
+          </button>
+        </div>
+      ) : null}
 
-      <Seccion titulo="Contenedores" prueba="seccion-contenedores">
-        <p className="texto-atenuado panel-editor__nota">
-          Agrupan elementos y visualizaciones en su propia rejilla.
-        </p>
-        <ListaDeObjetos
-          objetos={de('contenedor')}
-          prueba="tienda-contenedores"
-          guardando={guardando}
-          onAnadir={onAnadir}
-        />
-      </Seccion>
+      {conDatos.length > 0 ? (
+        <Seccion titulo="Visualizaciones" prueba="seccion-visualizaciones">
+          <p className="texto-atenuado panel-editor__nota">
+            Se enlazan a un dataset certificado del registro. Un modulo no construye consultas (4.2).
+          </p>
+
+          {/*
+            Agrupadas por la PREGUNTA que responden, no por tipo.
+            Quince visualizaciones en una lista plana convierten elegir un objeto en recordar su
+            nombre: «Grafico de columnas» y «Grafico de barras» solo se distinguen por el icono.
+            Por pregunta se elige por lo que se quiere contar, que es como llega la necesidad.
+          */}
+          {FAMILIAS.map(({ familia, titulo, que }) => {
+            const dela = conDatos.filter((o) => o.familia === familia);
+            if (dela.length === 0) return null;
+            return (
+              <div key={familia} className="tienda__familia" data-testid={`familia-${familia}`}>
+                <h4 className="tienda__familia-titulo">{titulo}</h4>
+                <p className="tienda__familia-que">{que}</p>
+                <ListaDeObjetos
+                  objetos={dela}
+                  prueba={`tienda-${familia}`}
+                  conContrato
+                  guardando={guardando}
+                  onAnadir={onAnadir}
+                />
+              </div>
+            );
+          })}
+        </Seccion>
+      ) : null}
+
+      {de('elemento').length > 0 ? (
+        <Seccion titulo="Elementos" prueba="seccion-elementos">
+          <p className="texto-atenuado panel-editor__nota">
+            No se enlazan a datos: componen la pagina. Texto, titulos, lineas, formas y conexiones.
+          </p>
+          <ListaDeObjetos
+            objetos={de('elemento')}
+            prueba="tienda-elementos"
+            guardando={guardando}
+            onAnadir={onAnadir}
+          />
+        </Seccion>
+      ) : null}
+
+      {de('contenedor').length > 0 ? (
+        <Seccion titulo="Contenedores" prueba="seccion-contenedores">
+          <p className="texto-atenuado panel-editor__nota">
+            Agrupan elementos y visualizaciones en su propia rejilla.
+          </p>
+          <ListaDeObjetos
+            objetos={de('contenedor')}
+            prueba="tienda-contenedores"
+            guardando={guardando}
+            onAnadir={onAnadir}
+          />
+        </Seccion>
+      ) : null}
     </>
   );
 }

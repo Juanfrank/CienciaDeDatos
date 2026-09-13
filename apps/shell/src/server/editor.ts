@@ -2,6 +2,7 @@ import type { Agregacion, GranoDeDataset } from '@app/data-contracts';
 import { defaultRegistry } from '@app/caching';
 import type {
   ClaveDePresentacion,
+  FamiliaDeObjeto,
   NombreDeIcono,
   ObjectCategory,
   PozoDeCampos,
@@ -29,6 +30,8 @@ export interface ObjetoDePaleta {
   category: ObjectCategory;
   /** Lo declara el objeto: la tienda y la tarjeta leen del mismo sitio. */
   icono: NombreDeIcono;
+  /** A que pregunta responde. La paleta agrupa por esto; los elementos no la traen. */
+  familia?: FamiliaDeObjeto;
   version: string;
   attachable: boolean;
   dimensiones: { min: number; max: number };
@@ -78,6 +81,7 @@ export async function paletaDelEditor(): Promise<PaletaDelEditor> {
     return {
       objectId: definicion.objectId,
       icono: definicion.icono,
+      ...(definicion.familia ? { familia: definicion.familia } : {}),
       name: definicion.name,
       description: definicion.description,
       category: definicion.category,

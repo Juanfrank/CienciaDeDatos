@@ -275,7 +275,9 @@ test.describe('el panel es la unica tienda, y sus pestanas', () => {
     // La otra mitad del criterio de 4.2 que importa: el catalogo ofrece objetos, no SQL.
     await nuevoModulo(page, 'panel-sin-sql');
     await expect(page.locator('textarea')).toHaveCount(0);
-    await expect(page.getByTestId('tienda')).toBeVisible();
+    // Se comprueba la SECCION y no una lista concreta: las listas se agrupan por familia y sus
+    // identificadores cambian con esa agrupacion, pero que exista una tienda de objetos no.
+    await expect(page.getByTestId('seccion-visualizaciones')).toBeVisible();
   });
 
   test('el editor no tiene infracciones WCAG 2.1 AA', async ({ page }) => {
@@ -1053,5 +1055,53 @@ test.describe('el panel de formato se busca, no se recorre', () => {
     // Un panel vacio se lee como «este objeto no tiene ajustes», que es falso, y ademas no da la
     // salida.
     await expect(panelDe(page).getByTestId('sin-resultados')).toBeVisible();
+  });
+});
+
+test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
+  /*
+   * Quince visualizaciones en una lista plana convierten elegir un objeto en recordar su nombre:
+   * «Grafico de columnas» y «Grafico de barras» solo se distinguen por el icono. Agrupadas por lo
+   * que responden se elige por lo que se quiere contar, que es como llega la necesidad.
+   */
+  test('las visualizaciones se agrupan por lo que responden', async ({ page }) => {
+    await nuevoModulo(page, 'paleta-familias');
+
+    await expect(page.getByTestId('familia-comparacion')).toBeVisible();
+    await expect(page.getByTestId('familia-evolucion')).toBeVisible();
+    await expect(page.getByTestId('familia-proporcion')).toBeVisible();
+
+    // El rotulo es la PREGUNTA, no el nombre tecnico de la familia.
+    await expect(page.getByTestId('familia-comparacion')).toContainText('Comparar entre categorias');
+  });
+
+  test('el buscador encuentra por la descripcion, no solo por el nombre', async ({ page }) => {
+    /*
+     * La descripcion es donde estan las palabras con las que alguien busca. Buscando solo por
+     * nombre habria que saber ya como se llama el objeto, que es lo que no se sabe al buscar.
+     */
+    await nuevoModulo(page, 'paleta-buscar');
+
+    await page.getByTestId('buscar-objeto').fill('etapas');
+    await expect(page.getByTestId('anadir-embudo')).toBeVisible();
+    await expect(page.getByTestId('anadir-barras')).toHaveCount(0);
+  });
+
+  test('una familia sin resultados no deja su rotulo colgando', async ({ page }) => {
+    // Un encabezado «Comparar entre categorias» sobre una lista vacia se lee como un error.
+    await nuevoModulo(page, 'paleta-vacia');
+
+    await page.getByTestId('buscar-objeto').fill('etapas');
+    await expect(page.getByTestId('familia-comparacion')).toHaveCount(0);
+    await expect(page.getByTestId('familia-proporcion')).toBeVisible();
+  });
+
+  test('y sin ningun resultado lo dice, con la salida', async ({ page }) => {
+    await nuevoModulo(page, 'paleta-nada');
+
+    await page.getByTestId('buscar-objeto').fill('zzzzz');
+    await expect(page.getByTestId('sin-objetos')).toBeVisible();
+    await page.getByTestId('limpiar-busqueda-objeto').click();
+    await expect(page.getByTestId('anadir-barras')).toBeVisible();
   });
 });

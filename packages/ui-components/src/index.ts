@@ -170,11 +170,13 @@ export {
   type Semver,
   type VersionBump,
 } from './registry/semver';
+export { FAMILIAS_DE_OBJETO } from './registry/types';
 export type {
   AttachedObjectInstance,
   AttachmentScope,
   DeprecationNotice,
   ConfiguracionDeObjeto,
+  FamiliaDeObjeto,
   ObjectCategory,
   ObjectCertification,
   ObjectDataContract,

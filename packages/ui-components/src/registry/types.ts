@@ -31,6 +31,31 @@ export type ObjectCategory =
   | 'contenedor';
 
 /**
+ * A que PREGUNTA responde un objeto.
+ *
+ * Es distinto de la categoria, que dice de que TIPO es. La paleta llego a quince visualizaciones
+ * en una lista plana donde «Grafico de columnas» y «Grafico de barras» se distinguen por el
+ * icono, y eso convierte elegir un objeto en recordar su nombre. Agrupadas por la pregunta
+ * —«comparar», «ver la evolucion», «repartir un total»— se elige por lo que se quiere contar, que
+ * es como llega la necesidad.
+ *
+ * No se deduce de `category`: ahi todos los graficos son `grafico`, que es justo lo que no
+ * distingue. Y no se deduce con un mapa en el editor, porque un mapa aparte es una segunda fuente
+ * de verdad — la misma que dejo sin icono a dos objetos nuevos hasta que se vio en una captura.
+ */
+export const FAMILIAS_DE_OBJETO = [
+  'comparacion',
+  'evolucion',
+  'proporcion',
+  'relacion',
+  'valor',
+  'detalle',
+  'ubicacion',
+  'control',
+] as const;
+export type FamiliaDeObjeto = (typeof FAMILIAS_DE_OBJETO)[number];
+
+/**
  * Que necesita un objeto de un dataset para poder dibujarse.
  *
  * Se declara como dato para que el editor de modulos (4.2) pueda validar un mapeo ANTES de
@@ -114,6 +139,15 @@ export interface VisualObjectDefinition {
    * compilacion y no un hallazgo de captura de pantalla.
    */
   icono: NombreDeIcono;
+  /**
+   * A que pregunta responde. Solo los objetos que consumen datos la declaran.
+   *
+   * Los elementos y los contenedores no responden a ninguna: componen la pagina, y su seccion de
+   * la paleta ya lo dice. Que sea opcional en el tipo y OBLIGATORIA para los demas lo comprueba
+   * una prueba del catalogo, igual que el estandar minimo de personalizacion: el tipo no puede
+   * expresar «obligatoria salvo en dos categorias» sin partir la definicion en dos.
+   */
+  familia?: FamiliaDeObjeto;
   /**
    * true si el objeto se adjunta a otro en vez de ocupar una celda de la rejilla.
    *

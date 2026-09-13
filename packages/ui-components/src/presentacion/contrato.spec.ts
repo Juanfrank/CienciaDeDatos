@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { catalogoInicial } from '../registry/catalog';
+import { FAMILIAS_DE_OBJETO } from '../registry/types';
 import { ICONOS_DE_OBJETO, NOMBRES_DE_ICONO, TRAZOS_DE_ICONO } from './iconos';
 import {
   CLAVES_DE_PRESENTACION,
@@ -179,6 +180,63 @@ describe('circular y medidor: lo que se rechaza al guardar', () => {
     // Una tabla no tiene porciones ni aguja: la clave sobra y el editor tiene que decirlo.
     expect(validarPresentacion({ circular: { radioInterior: 10 } }, PRESENTACION_MINIMA)).toHaveLength(1);
     expect(validarPresentacion({ medidor: { maximo: 10 } }, PRESENTACION_MINIMA)).toHaveLength(1);
+  });
+});
+
+describe('los nombres del catalogo', () => {
+  it('no hay dos objetos que se llamen igual', () => {
+    /*
+     * Esta prueba existe porque `barras` y `barras-horizontales` se llamaron los dos «Grafico de
+     * barras» durante trece lotes. En la paleta salian dos entradas identicas que solo el icono
+     * distinguia, y elegir entre ellas era adivinar. Nada fallaba: un nombre repetido no rompe
+     * nada, solo hace imposible elegir.
+     */
+    const nombres = catalogoInicial.map((o) => o.name);
+    const repetidos = nombres.filter((n, i) => nombres.indexOf(n) !== i);
+    expect(repetidos).toEqual([]);
+  });
+
+  it('ni dos con el mismo identificador, que si es el contrato (4.5)', () => {
+    const ids = catalogoInicial.map((o) => o.objectId);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('la familia de cada objeto', () => {
+  /*
+   * El tipo no puede expresar «obligatoria salvo en dos categorias» sin partir la definicion en
+   * dos, asi que la exigencia vive aqui. Sin esta prueba, un objeto nuevo que consuma datos y
+   * olvide su familia no falla: aparece en la paleta bajo un grupo vacio o fuera de todos, y solo
+   * se nota mirando.
+   */
+  /*
+   * Los complementos tampoco: no se colocan en la rejilla, se adjuntan a otro objeto y tienen su
+   * propia pestana. Agruparlos por pregunta no significa nada, porque la pregunta la hace el
+   * objeto al que acompanan.
+   */
+  const SIN_FAMILIA = new Set(['elemento', 'contenedor', 'complemento']);
+
+  it('todo objeto que consume datos declara a que pregunta responde', () => {
+    for (const objeto of catalogoInicial) {
+      if (SIN_FAMILIA.has(objeto.category)) continue;
+      expect(objeto.familia, `${objeto.objectId} no declara familia`).toBeDefined();
+    }
+  });
+
+  it('y los que solo componen la pagina NO la declaran', () => {
+    // Un cuadro de texto no responde a ninguna pregunta sobre los datos: ponerle «comparacion»
+    // seria rellenar un campo para que no estuviera vacio.
+    for (const objeto of catalogoInicial) {
+      if (!SIN_FAMILIA.has(objeto.category)) continue;
+      expect(objeto.familia, `${objeto.objectId} no deberia declarar familia`).toBeUndefined();
+    }
+  });
+
+  it('todas las familias declaradas existen', () => {
+    for (const objeto of catalogoInicial) {
+      if (objeto.familia === undefined) continue;
+      expect(FAMILIAS_DE_OBJETO).toContain(objeto.familia);
+    }
   });
 });
 
