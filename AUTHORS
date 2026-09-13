@@ -1,0 +1,25 @@
+# Autoria
+
+## Titular de los derechos
+
+Juan Frank — titular del copyright y autor de la obra.
+
+## Herramientas
+
+Parte del codigo se produjo con asistencia de Claude Code (Anthropic), bajo
+direccion, revision y decision del titular. La asistencia de una herramienta no
+altera la titularidad de la obra ni la autoria declarada arriba.
+
+## Aviso sobre el historial de git
+
+Los commits anteriores a la incorporacion de este archivo figuran con el autor
+`Claude <noreply@anthropic.com>`, que era la configuracion de la herramienta y
+no un reconocimiento de autoria. Este archivo y el aviso de copyright de LICENSE
+son la declaracion de autoria que prevalece.
+
+Para que los commits futuros queden correctamente atribuidos:
+
+```bash
+git config user.name "Juan Frank"
+git config user.email "<correo que se quiera dejar en el historial publico>"
+```

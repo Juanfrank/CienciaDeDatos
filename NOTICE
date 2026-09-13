@@ -1,0 +1,31 @@
+# Componentes de terceros
+
+Este producto incorpora software de terceros bajo licencias permisivas. Las
+obligaciones de atribucion de Apache-2.0 exigen conservar este archivo en toda
+copia del producto.
+
+## Apache License 2.0
+
+- **Apache ECharts** — Copyright The Apache Software Foundation.
+  https://echarts.apache.org — https://www.apache.org/licenses/LICENSE-2.0
+- **Material Color Utilities** — Copyright Google LLC.
+  https://github.com/material-foundation/material-color-utilities
+
+## MIT License
+
+- **Next.js** — Copyright Vercel, Inc.
+- **React** y **React DOM** — Copyright Meta Platforms, Inc. y colaboradores
+- **PDFKit** — Copyright Devon Govett
+- **ExcelJS** — Copyright Guyon Roche
+- **OTPAuth** — Copyright Hector Molinero Fernandez
+- **@node-rs/argon2** — Copyright LongYinan
+- **@azure/identity**, **@azure/storage-blob** — Copyright Microsoft Corporation
+
+El listado completo y sus textos de licencia se obtienen con:
+
+```bash
+npx license-checker --production --summary
+```
+
+Este archivo se revisa cada vez que se anade o se retira una dependencia de
+produccion.

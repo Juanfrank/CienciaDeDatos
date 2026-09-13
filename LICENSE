@@ -1,0 +1,109 @@
+Copyright (c) 2026 Juan Frank. Todos los derechos reservados.
+All rights reserved.
+
+================================================================================
+LICENCIA DE USO INTERNO — SIN REDISTRIBUCION
+INTERNAL USE LICENSE — NO REDISTRIBUTION
+================================================================================
+
+AVISO: este archivo describe los terminos bajo los que se pone el software a
+disposicion de una institucion. No sustituye al acuerdo firmado entre las
+partes ni a la revision de un abogado. El titular debe confirmar, antes de
+entregar nada, que ostenta los derechos patrimoniales sobre esta obra.
+
+--------------------------------------------------------------------------------
+1. DEFINICIONES
+--------------------------------------------------------------------------------
+
+"Software"    El codigo fuente, la documentacion y los archivos de este
+              repositorio, y cualquier version posterior que el Titular
+              entregue expresamente bajo esta licencia.
+"Titular"     La persona indicada en el aviso de copyright de mas arriba.
+"Licenciataria" La entidad a la que el Titular entrega el Software por escrito.
+"Uso interno" El uso por la Licenciataria, y por su personal y contratistas
+              actuando por cuenta de ella, para los fines propios de la
+              Licenciataria.
+
+--------------------------------------------------------------------------------
+2. CONCESION
+--------------------------------------------------------------------------------
+
+El Titular concede a la Licenciataria una licencia NO EXCLUSIVA, intransferible,
+mundial, perpetua e irrevocable para:
+
+  a) instalar, ejecutar y utilizar el Software con fines de Uso interno;
+  b) reproducirlo en la medida necesaria para ese uso, incluidas copias de
+     respaldo y entornos de prueba;
+  c) modificarlo y crear obras derivadas para su propio Uso interno.
+
+--------------------------------------------------------------------------------
+3. PROHIBICIONES
+--------------------------------------------------------------------------------
+
+Salvo autorizacion previa y por escrito del Titular, la Licenciataria NO podra:
+
+  a) distribuir, publicar, vender, alquilar, ceder, prestar ni poner de
+     cualquier otro modo el Software a disposicion de terceros, ni en codigo
+     fuente ni en forma ejecutable, ni en su version original ni modificada;
+  b) sublicenciar los derechos concedidos, ni transferirlos a un tercero,
+     tampoco en el marco de una fusion, escision o reorganizacion;
+  c) ofrecer el Software como servicio a terceros, ni alojarlo para que
+     terceros lo usen;
+  d) retirar o alterar los avisos de autoria, copyright o licencia.
+
+--------------------------------------------------------------------------------
+4. NO EXCLUSIVIDAD
+--------------------------------------------------------------------------------
+
+Esta licencia NO es exclusiva. El Titular conserva la titularidad integra del
+Software y todos los derechos no concedidos expresamente, incluido el derecho a
+usar, licenciar, comercializar y explotar el Software y cualquier obra derivada
+propia, frente a cualquier tercero y sin limitacion alguna, sin necesidad de
+aviso ni compensacion a la Licenciataria.
+
+--------------------------------------------------------------------------------
+5. MODIFICACIONES DE LA LICENCIATARIA
+--------------------------------------------------------------------------------
+
+Las modificaciones que la Licenciataria realice sobre el Software le pertenecen
+en cuanto a la aportacion original que contengan, y quedan sujetas a las
+prohibiciones de la seccion 3 en tanto incorporen el Software. La Licenciataria
+no adquiere por ello derecho alguno sobre el Software ni sobre las versiones
+del Titular.
+
+--------------------------------------------------------------------------------
+6. SIN GARANTIA Y SIN SOPORTE
+--------------------------------------------------------------------------------
+
+EL SOFTWARE SE ENTREGA "TAL CUAL", SIN GARANTIA DE NINGUN TIPO, EXPRESA O
+IMPLICITA, INCLUIDAS SIN LIMITACION LAS GARANTIAS DE COMERCIABILIDAD, IDONEIDAD
+PARA UN FIN DETERMINADO Y NO INFRACCION. EL TITULAR NO RESPONDERA DE NINGUN
+DANO DIRECTO, INDIRECTO, INCIDENTAL O CONSECUENTE DERIVADO DEL USO DEL
+SOFTWARE.
+
+Esta licencia no obliga al Titular a prestar soporte, mantenimiento,
+actualizaciones ni correcciones. Cualquiera de esos servicios se pacta aparte.
+
+--------------------------------------------------------------------------------
+7. COMPONENTES DE TERCEROS
+--------------------------------------------------------------------------------
+
+El Software incorpora componentes de terceros bajo licencias permisivas (MIT y
+Apache-2.0). Esta licencia no altera los terminos de esos componentes, que se
+enumeran en NOTICE. Las obligaciones de atribucion de Apache-2.0 deben
+conservarse en toda copia.
+
+--------------------------------------------------------------------------------
+8. TERMINACION
+--------------------------------------------------------------------------------
+
+El incumplimiento de la seccion 3 extingue automaticamente los derechos
+concedidos. La Licenciataria debera cesar el uso y destruir las copias en un
+plazo de treinta dias desde la notificacion del incumplimiento.
+
+--------------------------------------------------------------------------------
+9. LEY APLICABLE
+--------------------------------------------------------------------------------
+
+Esta licencia se rige por las leyes de la Republica Dominicana, en particular
+la Ley 65-00 sobre Derecho de Autor y sus normas de desarrollo.
