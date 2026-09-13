@@ -21,13 +21,13 @@ export function PanelDeFiltros({
   titulo,
   instance,
   result,
-  iconoDelObjeto,
+  objectIcon,
 }: {
   titulo: string;
   instance: ObjectInstance;
   result: QueryResult;
   /** El icono que declara la version del objeto en el catalogo. */
-  iconoDelObjeto?: IconName;
+  objectIcon?: IconName;
 }) {
   const { valoresDe, alternar, limpiarCampo, fijar, searchParams } =
     useFiltrosDeUrl();
@@ -64,7 +64,7 @@ export function PanelDeFiltros({
       titulo={titulo}
       instance={instance}
       result={result}
-      {...(iconoDelObjeto ? { iconoDelObjeto } : {})}
+      {...(objectIcon ? { objectIcon } : {})}
       pie={
         puestos > 0 ? (
           <span

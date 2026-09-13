@@ -1,14 +1,14 @@
 import { ArbolNavegacion } from '../../src/components/ArbolNavegacion';
 import { NavegacionPlegable } from '../../src/components/NavegacionPlegable';
-import { navegacionDe } from '../../src/server/cicloDeVida';
-import { findTeam, roleOf, teamsOf } from '../../src/server/contexto';
-import { exigirSesionDePagina } from '../../src/server/sesion';
+import { navigationOf } from '../../src/server/cicloDeVida';
+import { findTeam, roleOf, teamsOf } from '../../src/server/context';
+import { exigirSesionDePagina } from '../../src/server/session';
 
 /** Disposicion de los modulos de negocio. */
 export default async function ModulosLayout({ children }: { children: React.ReactNode }) {
   const sesion = await exigirSesionDePagina();
   const equipo = await findTeam(sesion.activeTeamId);
-  const navegacion = await navegacionDe(sesion);
+  const navegacion = await navigationOf(sesion);
 
   const equipos = await Promise.all(
     (await teamsOf(sesion.userId)).map(async (t) => ({

@@ -1,11 +1,11 @@
 import type { ConfigChangeLog } from '@app/observability';
 import { assertConfigChangeIsAuditable } from '@app/observability';
 import type { TreeAuditEvent } from '@app/access-control';
-import { CLAVE_AUDITORIA, escribir, leerLista } from './almacenCompartido';
+import { KEY_AUDIT, escribir, readList } from './almacenCompartido';
 
 /** Registro de auditoria de configuracion — secciones 4.10.7 y 7. */
 /** Los eventos viven en el almacen COMPARTIDO. */
-const leerEventos = (): Promise<ConfigChangeLog[]> => leerLista<ConfigChangeLog>(CLAVE_AUDITORIA);
+const leerEventos = (): Promise<ConfigChangeLog[]> => readList<ConfigChangeLog>(KEY_AUDIT);
 
 export interface RegistrarCambioInput {
   actorId: string;
@@ -34,7 +34,7 @@ export async function registrarCambio(input: RegistrarCambioInput): Promise<Conf
   };
 
   assertConfigChangeIsAuditable(evento);
-  await escribir(CLAVE_AUDITORIA, [...(await leerEventos()), evento]);
+  await escribir(KEY_AUDIT, [...(await leerEventos()), evento]);
   return evento;
 }
 
@@ -67,7 +67,7 @@ function mapearAccion(accion: TreeAuditEvent['action']): ConfigChangeLog['action
   }
 }
 
-export interface FiltroAuditoria {
+export interface FilterAudit {
   entityType?: ConfigChangeLog['entityType'];
   actorId?: string;
   /** Solo ampliaciones de ambito. Es la vista que el documento pide destacar (seccion 7). */
@@ -77,7 +77,7 @@ export interface FiltroAuditoria {
 }
 
 /** Registro filtrable, mas reciente primero. */
-export async function listarAuditoria(filtro: FiltroAuditoria = {}): Promise<ConfigChangeLog[]> {
+export async function listarAuditoria(filtro: FilterAudit = {}): Promise<ConfigChangeLog[]> {
   return (await leerEventos())
     .filter((e) => !filtro.entityType || e.entityType === filtro.entityType)
     .filter((e) => !filtro.actorId || e.actorId === filtro.actorId)
@@ -94,5 +94,5 @@ export async function contarAmpliaciones(): Promise<number> {
 
 /** Solo para pruebas. */
 export async function limpiarAuditoria(): Promise<void> {
-  await escribir(CLAVE_AUDITORIA, []);
+  await escribir(KEY_AUDIT, []);
 }

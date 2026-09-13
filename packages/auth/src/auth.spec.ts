@@ -85,7 +85,7 @@ describe('LocalIdentityProvider (4.7.2)', () => {
       ).toThrow(/requiere un pepper/);
     });
 
-    it('nunca guarda la contraseña en light ni de forma reversible', async () => {
+    it('nunca guarda la contrasena en claro ni de forma reversible', async () => {
       const record = await crearCuenta();
       expect(record.passwordHash).toMatch(/^\$argon2id\$/);
       expect(record.passwordHash).not.toContain(CLAVE_BUENA);

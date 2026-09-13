@@ -77,7 +77,7 @@ export function ObjetoDeModulo({
         <Marco
           titulo={titulo}
           instance={objeto.instance}
-          {...(objeto.icono ? { iconoDelObjeto: objeto.icono } : {})}
+          {...(objeto.icono ? { objectIcon: objeto.icono } : {})}
         >
           <CuadroDeTexto config={elemento?.textBox} />
         </Marco>
@@ -130,7 +130,7 @@ export function ObjetoDeModulo({
     // Las ranuras viajan con el objeto: sin ellas los renderizadores volverian a leer por posicion.
     ...(objeto.slots ? { slots: objeto.slots } : {}),
     // Y el icono, por lo mismo: el cliente no tiene el registro.
-    ...(objeto.icono ? { iconoDelObjeto: objeto.icono } : {}),
+    ...(objeto.icono ? { objectIcon: objeto.icono } : {}),
     // Los objetos esperan un `onFiltrar`; sin filtrado cruzado se les pasa uno que no hace nada,
     // y ellos deciden no ofrecer el gesto por su cuenta cuando no hay dimension.
     onFiltrar: onFiltrar ?? SIN_FILTRADO,
@@ -173,7 +173,7 @@ export function ObjetoDeModulo({
           titulo={titulo}
           instance={objeto.instance}
           result={result}
-          {...(objeto.icono ? { iconoDelObjeto: objeto.icono } : {})}
+          {...(objeto.icono ? { objectIcon: objeto.icono } : {})}
         />
       );
     case 'segmentador': {
@@ -186,7 +186,7 @@ export function ObjetoDeModulo({
           opciones={toSlicerOptions(result, dimension)}
           instance={objeto.instance}
           result={result}
-          {...(objeto.icono ? { iconoDelObjeto: objeto.icono } : {})}
+          {...(objeto.icono ? { objectIcon: objeto.icono } : {})}
         />
       );
     }

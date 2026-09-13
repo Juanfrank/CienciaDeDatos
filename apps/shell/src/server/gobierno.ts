@@ -51,7 +51,7 @@ export interface InstantaneaDeGobierno {
 }
 
 /** Estado inicial, reconstruido desde el seed con los mapeadores reales. */
-export function estadoInicial(): {
+export function initialStatus(): {
   tree: ManagedTree;
   teams: Team[];
   users: GovernedUser[];
@@ -81,7 +81,7 @@ export class StoreGovernanceRepository implements GovernanceStore {
     // leer metia una escritura en el camino de lectura —el mas concurrido— y, con varias
     // peticiones a la vez, varias escrituras simultaneas de la misma clave. El seed es
     // determinista, asi que todas las instancias ven lo mismo hasta que alguien escriba.
-    return guardada ?? estadoInicial();
+    return guardada ?? initialStatus();
   }
 
   private async guardar(cambio: (actual: InstantaneaDeGobierno) => InstantaneaDeGobierno): Promise<void> {
@@ -164,7 +164,7 @@ export class StoreGovernanceRepository implements GovernanceStore {
 
   /** Solo para pruebas: devuelve el almacen a su estado sembrado. */
   async reset(): Promise<void> {
-    await escribir(CLAVE_GOBIERNO, estadoInicial());
+    await escribir(CLAVE_GOBIERNO, initialStatus());
   }
 }
 

@@ -12,20 +12,20 @@ import {
   projectObject,
   type ObjectInstance,
 } from '@app/ui-components';
-import { cacheL2, objectRegistry } from './contexto';
-import { cargarModulo } from './datos';
+import { cacheL2, objectRegistry } from './context';
+import { cargarModulo } from './data';
 import { moduloServibleParaUsuario } from './cicloDeVida';
-import { leerPersonalizacion } from './personalizacion';
+import { readPersonalization } from './personalization';
 
 /** Cableado de la exportacion en el shell (4.9 con la restriccion de 5.3). */
 
-export const colaExportaciones = new StoreExportQueue({ store: cacheL2 });
+export const queueExports = new StoreExportQueue({ store: cacheL2 });
 
 /** Un segmentador es un control de filtrado, no contenido. Exportarlo seria ruido. */
 const ES_CONTROL = new Set(['segmentador']);
 
 /** Categorias del catalogo que merecen dibujarse como imagen al exportar en SVG. */
-const CATEGORIAS_DE_GRAFICO = new Set(['grafico', 'mapa']);
+const CHART_CATEGORIES = new Set(['grafico', 'mapa']);
 
 export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) => {
   const module = await moduloServibleParaUsuario(request.moduleSlug, request.requestedBy);
@@ -37,7 +37,7 @@ export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) =
     // La exportacion sale de lo que la persona VE: si oculto un objeto, no aparece en el
     // archivo. Es lo que 4.6 quiere decir con que la distincion viaje al exportar — el archivo
     // refleja la vista personalizada y lo dice en el encabezado.
-    personalization: await leerPersonalizacion(request.requestedBy, module.moduleId),
+    personalization: await readPersonalization(request.requestedBy, module.moduleId),
     userId: request.requestedBy,
     teamId: request.teamId,
     requestedFilters: request.appliedFilters,
@@ -65,9 +65,9 @@ export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) =
       {
         title: instance.title ?? instance.objectId,
         result: projected,
-        textos: textosDe(instance, projected),
+        textos: textsOf(instance, projected),
         ...(notas.length > 0 ? { notas } : {}),
-        isChart: categoria !== undefined && CATEGORIAS_DE_GRAFICO.has(categoria),
+        isChart: categoria !== undefined && CHART_CATEGORIES.has(categoria),
       },
     ];
   });
@@ -115,22 +115,22 @@ export async function encolarExportacion(input: EncolarInput) {
     // enviar `personalizada: false` para que un archivo salido de una vista personalizada se
     // presentara como la vista institucional oficial, que es justo lo que 4.6 impide.
     provenance: describeProvenance(
-      (await leerPersonalizacion(input.userId, module.moduleId)) !== undefined,
+      (await readPersonalization(input.userId, module.moduleId)) !== undefined,
     ),
     appliedFilters: input.appliedFilters,
   };
 
-  return colaExportaciones.encolar(request);
+  return queueExports.encolar(request);
 }
 
 /** Las mismas cifras, con el formato de la pantalla. */
-function textosDe(instance: ObjectInstance, projected: QueryResult): string[][] {
+function textsOf(instance: ObjectInstance, projected: QueryResult): string[][] {
   // Un formateador POR COLUMNA y no por celda: en una tabla larga son miles de llamadas, y el
   // formato depende de la medida, que es la columna.
   const porColumna = projected.columns.map((c) => measureFormatter(instance.presentacion, c.name));
   return projected.rows.map((fila) =>
-    fila.map((celda, i) =>
-      typeof celda === 'number' ? (porColumna[i] ?? String)(celda) : String(celda ?? ''),
+    fila.map((cell, i) =>
+      typeof cell === 'number' ? (porColumna[i] ?? String)(cell) : String(cell ?? ''),
     ),
   );
 }

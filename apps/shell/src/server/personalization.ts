@@ -10,7 +10,7 @@ import { borrar, escribir, leer } from './almacenCompartido';
 const clave = (userId: string, moduleId: string): string =>
   `app:personalizacion:${userId}:${moduleId}`;
 
-export async function leerPersonalizacion(
+export async function readPersonalization(
   userId: string,
   moduleId: string,
 ): Promise<UserPersonalization | undefined> {
@@ -34,7 +34,7 @@ export interface GuardarPersonalizacionInput {
   crudo?: Record<string, unknown>;
 }
 
-export async function guardarPersonalizacion(
+export async function savePersonalization(
   input: GuardarPersonalizacionInput,
 ): Promise<UserPersonalization> {
   if (input.crudo) assertPersonalizationIsPresentationOnly(input.crudo);

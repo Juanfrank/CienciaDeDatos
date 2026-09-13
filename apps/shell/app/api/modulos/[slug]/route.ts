@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { cargarModulo } from '../../../../src/server/datos';
+import { cargarModulo } from '../../../../src/server/data';
 import { actorDe, moduloServiblePorSlug } from '../../../../src/server/cicloDeVida';
-import { leerPersonalizacion } from '../../../../src/server/personalizacion';
+import { readPersonalization } from '../../../../src/server/personalization';
 import { serializarObjeto } from '../../../../src/server/serializar';
-import { sinSesion } from '../../../../src/server/respuestas';
-import { obtenerSesion } from '../../../../src/server/sesion';
+import { withoutSession } from '../../../../src/server/respuestas';
+import { obtenerSesion } from '../../../../src/server/session';
 
 export const runtime = 'nodejs';
 
@@ -14,7 +14,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const { slug } = await params;
   // Por slug pero filtrando por estado: un borrador ajeno no se sirve aunque se pida a mano.
@@ -32,7 +32,7 @@ export async function GET(
 
   const cargado = await cargarModulo({
     module,
-    personalization: await leerPersonalizacion(sesion.userId, module.moduleId),
+    personalization: await readPersonalization(sesion.userId, module.moduleId),
     userId: sesion.userId,
     teamId: sesion.activeTeamId,
     requestedFilters,

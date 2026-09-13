@@ -1,6 +1,6 @@
 import type { ConfigChangeLog } from '@app/observability';
 import { conAdmin } from '../guardia';
-import { contarAmpliaciones, listarAuditoria } from '../../../../src/server/auditoria';
+import { contarAmpliaciones, listarAuditoria } from '../../../../src/server/audit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

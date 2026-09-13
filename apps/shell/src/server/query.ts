@@ -1,6 +1,6 @@
 import { ResolvedorLocal, type ConsultaResuelta, type Vocabulary } from '@app/nl-query';
 import { fieldKey } from '@app/ui-components';
-import { cargarModulo } from './datos';
+import { cargarModulo } from './data';
 import { moduloServibleParaUsuario } from './cicloDeVida';
 
 /** Cableado de la consulta en lenguaje natural (4.9). */
@@ -8,12 +8,12 @@ import { moduloServibleParaUsuario } from './cicloDeVida';
 const resolutor = new ResolvedorLocal();
 
 /** Etiqueta legible de una dimension: el campo, sin la tabla. */
-const etiquetaDeDimension = (clave: string): string => clave.split('.').pop() ?? clave;
+const dimensionLabel = (clave: string): string => clave.split('.').pop() ?? clave;
 
 /** Cuantos valores distintos entran al vocabulario por dimension. */
-const MAXIMO_VALORES = 200;
+const MAX_VALUES = 200;
 
-export async function vocabularioDe(
+export async function vocabularyOf(
   moduleSlug: string,
   userId: string,
   teamId: string,
@@ -42,7 +42,7 @@ export async function vocabularioDe(
     // para entender "por materia" aunque no haya ningun valor que ofrecer.
     for (const dim of binding.dimensions) {
       const clave = fieldKey(dim);
-      if (!dimensions.has(clave)) dimensions.set(clave, etiquetaDeDimension(clave));
+      if (!dimensions.has(clave)) dimensions.set(clave, dimensionLabel(clave));
     }
 
     if (!objeto.result) continue;
@@ -53,11 +53,11 @@ export async function vocabularioDe(
     // filas YA filtradas por su ambito, que es lo que impide que esto revele nada.
     for (const [indice, column] of objeto.result.columns.entries()) {
       if (column.type === 'number') continue;
-      if (!dimensions.has(column.name)) dimensions.set(column.name, etiquetaDeDimension(column.name));
+      if (!dimensions.has(column.name)) dimensions.set(column.name, dimensionLabel(column.name));
 
       const conjunto = valores.get(column.name) ?? new Set<string>();
       for (const fila of objeto.result.rows) {
-        if (conjunto.size >= MAXIMO_VALORES) break;
+        if (conjunto.size >= MAX_VALUES) break;
         conjunto.add(String(fila[indice]));
       }
       valores.set(column.name, conjunto);
@@ -80,7 +80,7 @@ export async function resolverPregunta(
   userId: string,
   teamId: string,
 ): Promise<{ consulta: ConsultaResuelta; vocabulary: Vocabulary } | null> {
-  const vocabulary = await vocabularioDe(moduleSlug, userId, teamId);
+  const vocabulary = await vocabularyOf(moduleSlug, userId, teamId);
   if (!vocabulary) return null;
 
   return { consulta: resolutor.resolver(pregunta, vocabulary), vocabulary };

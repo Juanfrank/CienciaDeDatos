@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { FORMATS, type ExportFormat } from '@app/export';
 import type { Cadence, Subscription } from '@app/alerts';
-import { alertStore } from '../../../src/server/alertas';
+import { alertStore } from '../../../src/server/alerts';
 import { actorDe, moduloServiblePorSlug } from '../../../src/server/cicloDeVida';
-import { sinSesion } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/sesion';
-import { normalizarFiltros } from '../../../src/server/filtros';
+import { withoutSession } from '../../../src/server/respuestas';
+import { obtenerSesion } from '../../../src/server/session';
+import { normalizarFiltros } from '../../../src/server/filters';
 
 export const runtime = 'nodejs';
 
@@ -14,7 +14,7 @@ const CADENCIAS: Cadence[] = ['diaria', 'semanal', 'mensual'];
 /** Suscripciones: entrega programada de una vista (4.9). */
 export async function GET() {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
   const todas = await alertStore.listSubscriptions();
   return NextResponse.json({
     suscripciones: todas.filter((s) => s.ownerUserId === sesion.userId),
@@ -23,7 +23,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   let body: Record<string, unknown>;
   try {
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Falta el id.' }, { status: 400 });

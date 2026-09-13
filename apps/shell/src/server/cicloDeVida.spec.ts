@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { GridItem, ModuleDefinition } from '@app/module-model';
-import { CLAVE_MODULOS, modulos } from './almacenModulos';
+import { KEY_MODULES, modules } from './almacenModulos';
 import { borrar } from './almacenCompartido';
-import { limpiarAuditoria, listarAuditoria } from './auditoria';
-import { reiniciarConfiguracion } from './configuracion';
+import { limpiarAuditoria, listarAuditoria } from './audit';
+import { reiniciarConfiguracion } from './settings';
 import {
   type ActorDeModulo,
   CicloDeVidaError,
@@ -12,7 +12,7 @@ import {
   devolverABorrador,
   enviarAAprobacion,
   guardarBorrador,
-  modulosVisibles,
+  visibleModules,
   moduloServiblePorSlug,
   moduloVisiblePorSlug,
   podarPorEstado,
@@ -57,7 +57,7 @@ async function borradorListo(actor: ActorDeModulo, slug: string): Promise<Module
 
 beforeEach(async () => {
   // Se parte de la semilla en cada prueba: el almacen es compartido y persiste entre ficheros.
-  await borrar(CLAVE_MODULOS);
+  await borrar(KEY_MODULES);
   await limpiarAuditoria();
 });
 
@@ -200,10 +200,10 @@ describe('la puerta de publicacion: findPublishBlockers, por fin invocado', () =
     await enviarAAprobacion({ actor: colaborador, moduleId: modulo.moduleId });
 
     // Se rompe por debajo, escribiendo en el almacen como lo haria otra instancia.
-    const pendiente = await modulos.get(modulo.moduleId);
+    const pendiente = await modules.get(modulo.moduleId);
     if (!pendiente?.pages[0]?.items[0]) throw new Error('fixture inesperado');
     pendiente.pages[0].items[0].instance.binding.measures = ['NoExiste'];
-    await modulos.save(pendiente);
+    await modules.save(pendiente);
 
     await expect(publicar({ actor: admin, moduleId: modulo.moduleId })).rejects.toMatchObject({
       status: 422,
@@ -339,7 +339,7 @@ describe('la lista del editor no es el catalogo institucional', () => {
     await enviarAAprobacion({ actor: colaborador, moduleId: propuesto.moduleId });
 
     const slugsDe = async (actor: ActorDeModulo) =>
-      (await modulosVisibles(actor)).map((m) => m.slug).sort();
+      (await visibleModules(actor)).map((m) => m.slug).sort();
 
     expect(await slugsDe(colaborador)).toContain('de-ana');
     expect(await slugsDe(colaborador)).not.toContain('de-otro');

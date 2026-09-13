@@ -60,7 +60,7 @@ export function Avisos() {
       <h2>Bandeja</h2>
       {bandeja.length === 0 ? (
         <p className="texto-atenuado" data-testid="bandeja-vacia">
-          No hay notices. Los de una alerta llegan cuando su condicion empieza a cumplirse, y
+          No hay avisos. Los de una alerta llegan cuando su condicion empieza a cumplirse, y
           tambien cuando deja de cumplirse.
         </p>
       ) : (

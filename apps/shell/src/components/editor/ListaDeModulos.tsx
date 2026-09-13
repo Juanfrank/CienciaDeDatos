@@ -26,11 +26,11 @@ const ETIQUETA: Record<FilaDeModulo["status"], string> = {
 };
 
 export function ListaDeModulos({
-  modulos,
+  modules,
   role,
   user,
 }: {
-  modulos: FilaDeModulo[];
+  modules: FilaDeModulo[];
   role: string;
   user: string;
 }) {
@@ -160,7 +160,7 @@ export function ListaDeModulos({
         {error}
       </p>
 
-      {modulos.length === 0 ? (
+      {modules.length === 0 ? (
         <p className="texto-atenuado">
           No hay ningun modulo que pueda editar. Cree un borrador para empezar.
         </p>
@@ -177,7 +177,7 @@ export function ListaDeModulos({
               </tr>
             </thead>
             <tbody>
-              {modulos.map((m) => {
+              {modules.map((m) => {
                 // Las mismas tres condiciones que deciden cada boton, reunidas: una celda sin
                 // ninguna accion muestra una raya, no un hueco. Un hueco en la ultima columna se
                 // lee como algo que falta por cargar.

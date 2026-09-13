@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { EstadoDeCuentaLocal } from "../../server/identidad";
+import type { EstadoDeCuentaLocal } from "../../server/identity";
 
 /** Cuentas locales y sus dos vias de recuperacion — seccion 4.7.2. */
 export function CuentasLocales({
@@ -152,7 +152,7 @@ export function CuentasLocales({
                     "TOTP configurado"
                   ) : (
                     <strong data-testid={`sin-mfa-${c.userId}`}>
-                      Sin second factor
+                      Sin segundo factor
                     </strong>
                   )}
                 </td>

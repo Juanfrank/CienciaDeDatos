@@ -15,7 +15,7 @@ import {
 } from './navigation';
 import type { Team } from './Team';
 
-const modulosVisibles = (tree: NavNode[]): string[] => tree.flatMap(collectModuleIds).sort();
+const visibleModules = (tree: NavNode[]): string[] => tree.flatMap(collectModuleIds).sort();
 
 describe('conceder una carpeta concede todo su contenido (4.10.6)', () => {
   it('conceder carpeta-regional da acceso a los modulos de sus subcarpetas', () => {
@@ -46,13 +46,13 @@ describe('sin paquete asignado: organizacion general podada', () => {
   it('muestra la estructura real, limitada a lo concedido', () => {
     const vista = buildNavigationView({ generalTree: generalTree, team: equipoNorte });
     expect(vista.fromPackage).toBe(false);
-    expect(modulosVisibles(vista.tree)).toEqual([
+    expect(visibleModules(vista.tree)).toEqual([
       'audiencias-norte',
       'casos-pendientes-este',
       'casos-pendientes-norte',
     ]);
     // 'estadisticas-nacionales' vive fuera de lo concedido y no aparece.
-    expect(modulosVisibles(vista.tree)).not.toContain('estadisticas-nacionales');
+    expect(visibleModules(vista.tree)).not.toContain('estadisticas-nacionales');
   });
 
   it('no muestra carpetas que quedan sin contenido accesible', () => {
@@ -84,7 +84,7 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
       team: equipoNorte,
       pkg: paqueteReagrupado,
     });
-    expect(modulosVisibles(vista.tree)).not.toContain('estadisticas-nacionales');
+    expect(visibleModules(vista.tree)).not.toContain('estadisticas-nacionales');
   });
 
   it('reporta explicitamente al Administrador el nodo que no pudo mostrar', () => {
@@ -150,7 +150,7 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
     const v2 = buildNavigationView({ generalTree: generalTree, team: equipoNorte, pkg: agrupado });
 
     // Misma coleccion de modulos accesibles, presentada de dos formas distintas.
-    expect(modulosVisibles(v1.tree)).toEqual(modulosVisibles(v2.tree));
+    expect(visibleModules(v1.tree)).toEqual(visibleModules(v2.tree));
     expect(v1.tree.every((n) => n.type === 'module')).toBe(true);
     expect(v2.tree[0]?.type).toBe('folder');
   });

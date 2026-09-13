@@ -33,10 +33,10 @@ export async function borrar(clave: string): Promise<void> {
 
 /** Claves del estado de aplicacion. Agrupadas aqui para verlas todas de una vez. */
 export const CLAVE_GOBIERNO = 'app:gobierno';
-export const CLAVE_MARCADORES = 'app:marcadores';
-export const CLAVE_AUDITORIA = 'app:auditoria';
+export const KEY_BOOKMARKS = 'app:marcadores';
+export const KEY_AUDIT = 'app:auditoria';
 
 /** Lista con valor por defecto, para las colecciones que empiezan vacias. */
-export async function leerLista<T>(clave: string): Promise<T[]> {
+export async function readList<T>(clave: string): Promise<T[]> {
   return (await leer<T[]>(clave)) ?? [];
 }

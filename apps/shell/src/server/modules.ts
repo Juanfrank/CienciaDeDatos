@@ -1,5 +1,5 @@
 import type { ModuleDefinition } from '@app/module-model';
-import { modulos } from './almacenModulos';
+import { modules } from './almacenModulos';
 
 /** Definiciones de modulo de arranque. */
 
@@ -1791,9 +1791,9 @@ export const modulosDemo: ModuleDefinition[] = [
 
 /** Busqueda por slug, contra el ALMACEN y no contra la semilla. */
 export async function findModuleBySlug(slug: string): Promise<ModuleDefinition | undefined> {
-  return modulos.bySlug(slug);
+  return modules.bySlug(slug);
 }
 
 export async function findModuleById(moduleId: string): Promise<ModuleDefinition | undefined> {
-  return modulos.get(moduleId);
+  return modules.get(moduleId);
 }

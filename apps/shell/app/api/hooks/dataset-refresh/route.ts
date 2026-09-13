@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { datasetKeyPrefix, getDataset } from '@app/caching';
-import { cacheL2 } from '../../../../src/server/contexto';
+import { cacheL2 } from '../../../../src/server/context';
 
 export const runtime = 'nodejs';
 

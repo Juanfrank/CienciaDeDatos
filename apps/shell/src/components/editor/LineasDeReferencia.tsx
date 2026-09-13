@@ -103,7 +103,7 @@ export function LineasDeReferencia({
             data-testid={`${prueba}-quitar-${i}`}
             onClick={() => cambiar(lineas.filter((_, j) => j !== i))}
           >
-            Quitar esta line
+            Quitar esta linea
           </button>
         </fieldset>
       ))}
@@ -116,7 +116,7 @@ export function LineasDeReferencia({
           data-testid={`${prueba}-anadir`}
           onClick={() => cambiar([...lineas, { valor: 0, style: "discontinua" }])}
         >
-          Anadir line de referencia
+          Anadir linea de referencia
         </button>
       ) : (
         <p className="campo__pista">

@@ -53,4 +53,4 @@ export {
   type PublishBlocker,
   type ValidateModuleInput,
 } from './validation';
-export { healthOf, type ResumenDeSalud, type SaludDeModulo } from './health';
+export { healthOf, type HealthSummary, type ModuleHealth } from './health';

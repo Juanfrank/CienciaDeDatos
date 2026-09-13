@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { POPULATOR_HEARTBEAT_KEY, type PopulatorHeartbeat, buildHealthReport } from '@app/observability';
-import { cacheL2, conectorActivo, metricasDeCache } from '../../src/server/contexto';
+import { cacheL2, conectorActivo, metricasDeCache } from '../../src/server/context';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

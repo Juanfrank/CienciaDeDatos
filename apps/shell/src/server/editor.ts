@@ -8,12 +8,12 @@ import type {
   FieldWell,
 } from '@app/ui-components';
 import { fieldKey } from '@app/ui-components';
-import { objectRegistry } from './contexto';
-import { agregacionesDeclaradas, columnasDisponiblesDe } from './datos';
+import { objectRegistry } from './context';
+import { agregacionesDeclaradas, columnasDisponiblesDe } from './data';
 
 /** Paleta del editor de modulos — seccion 4.2. */
 
-export interface ObjetoDePaleta {
+export interface PaletteObject {
   objectId: string;
   name: string;
   description: string;
@@ -46,13 +46,13 @@ export interface DatasetDePaleta {
   grain: GranoDeDataset;
 }
 
-export interface PaletaDelEditor {
-  objetos: ObjetoDePaleta[];
+export interface EditorPalette {
+  objetos: PaletteObject[];
   datasets: DatasetDePaleta[];
 }
 
-export async function paletaDelEditor(): Promise<PaletaDelEditor> {
-  const objetos: ObjetoDePaleta[] = objectRegistry.list().map((definicion) => {
+export async function editorPalette(): Promise<EditorPalette> {
+  const objetos: PaletteObject[] = objectRegistry.list().map((definicion) => {
     // La ultima version publicada: un objeto nuevo se coloca en la mas reciente, no en la que
     // estuviera escrita en otro modulo.
     const version = objectRegistry.latest(definicion.objectId);

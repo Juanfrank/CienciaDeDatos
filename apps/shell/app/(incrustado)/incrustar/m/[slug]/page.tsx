@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { describeProvenance } from '@app/module-model';
-import { cargarModulo } from '../../../../../src/server/datos';
+import { cargarModulo } from '../../../../../src/server/data';
 import { actorDe, moduloServiblePorSlug } from '../../../../../src/server/cicloDeVida';
 import { serializarObjeto } from '../../../../../src/server/serializar';
-import { obtenerSesion } from '../../../../../src/server/sesion';
+import { obtenerSesion } from '../../../../../src/server/session';
 import { VistaModulo } from '../../../../../src/components/VistaModulo';
 
 /** Modulo incrustado en otro portal — seccion 4.9. */

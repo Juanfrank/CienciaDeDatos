@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
-import { navegacionDe } from '../../../src/server/cicloDeVida';
-import { sinSesion } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/sesion';
+import { navigationOf } from '../../../src/server/cicloDeVida';
+import { withoutSession } from '../../../src/server/respuestas';
+import { obtenerSesion } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 
 /** Arbol de navegacion visible para el equipo activo (4.1.1, 4.10.6). */
 export async function GET() {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
-  const vista = await navegacionDe(sesion);
+  if (!sesion) return withoutSession();
+  const vista = await navigationOf(sesion);
   return NextResponse.json({
     equipoActivo: sesion.activeTeamId,
     arbol: vista.tree,

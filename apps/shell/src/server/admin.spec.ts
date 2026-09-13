@@ -13,8 +13,8 @@ import {
   dimensionesAmpliadas,
   ejecutarOperacionDeArbol,
   esAdministrador,
-  guardarAmbito,
-  guardarEquipo,
+  saveScope,
+  saveTeam,
   previsualizarMovimiento,
   quienVeQue,
   rolMasAltoDe,
@@ -22,9 +22,9 @@ import {
   administradores,
   borrarEquipo,
 } from './admin';
-import { contarAmpliaciones, limpiarAuditoria, listarAuditoria } from './auditoria';
+import { contarAmpliaciones, limpiarAuditoria, listarAuditoria } from './audit';
 import { gobierno } from './gobierno';
-import type { SesionShell } from './sesion';
+import type { SesionShell } from './session';
 
 const { DIM_DISTRITO, DIM_MATERIA, scope } = gobiernoFixtures;
 
@@ -40,7 +40,7 @@ const sesion = (userId: string): SesionShell => ({
 });
 
 /** Equipo del almacen, o fallo explicito. Evita aserciones non-null en cada prueba. */
-const equipoDe = async (id: string) => {
+const teamOf = async (id: string) => {
   const equipo = await gobierno.getTeam(id);
   if (!equipo) throw new Error(`fixture inesperado: falta el equipo ${id}`);
   return equipo;
@@ -99,22 +99,22 @@ describe('assertAdmin: la comprobacion vive en el backend (criterio de la seccio
 });
 
 describe('la puerta de ampliacion de ambito (4.10.4)', () => {
-  const ambitoDelEquipo = async () => (await gobierno.getTeam('equipo-norte'))?.defaultScope;
+  const teamScope = async () => (await gobierno.getTeam('equipo-norte'))?.defaultScope;
 
   it('restringir mas no exige justificacion', async () => {
-    const guardado = await guardarAmbito({
+    const guardado = await saveScope({
       actor: admin,
       destino: { tipo: 'equipo', teamId: 'equipo-norte' },
       scope: scope(DIM_MATERIA, 'Penal'),
     });
     expect(guardado.authorizedExpansion).toBeUndefined();
-    expect((await ambitoDelEquipo())?.restrictions[0]?.allowedValues).toEqual(['Penal']);
+    expect((await teamScope())?.restrictions[0]?.allowedValues).toEqual(['Penal']);
   });
 
   it('AMPLIAR sin justificacion se RECHAZA, y dice que dimension se amplia', async () => {
     // El equipo Norte esta restringido a Penal y Civil. Anadir Laboral amplia.
     try {
-      await guardarAmbito({
+      await saveScope({
         actor: admin,
         destino: { tipo: 'equipo', teamId: 'equipo-norte' },
         scope: scope(DIM_MATERIA, 'Penal', 'Civil', 'Laboral'),
@@ -129,7 +129,7 @@ describe('la puerta de ampliacion de ambito (4.10.4)', () => {
 
   it('quitar la restriccion de una dimension tambien es ampliar', async () => {
     await expect(
-      guardarAmbito({
+      saveScope({
         actor: admin,
         destino: { tipo: 'equipo', teamId: 'equipo-norte' },
         scope: { restrictions: [] },
@@ -138,7 +138,7 @@ describe('la puerta de ampliacion de ambito (4.10.4)', () => {
   });
 
   it('con justificacion se guarda, marcada como excepcion y con su autor', async () => {
-    const guardado = await guardarAmbito({
+    const guardado = await saveScope({
       actor: admin,
       destino: { tipo: 'equipo', teamId: 'equipo-norte' },
       scope: scope(DIM_MATERIA, 'Penal', 'Civil', 'Laboral'),
@@ -149,21 +149,21 @@ describe('la puerta de ampliacion de ambito (4.10.4)', () => {
   });
 
   it('un rechazo NO deja rastro en el almacen ni en la auditoria', async () => {
-    const before = JSON.stringify(ambitoDelEquipo());
+    const before = JSON.stringify(teamScope());
     await expect(
-      guardarAmbito({
+      saveScope({
         actor: admin,
         destino: { tipo: 'equipo', teamId: 'equipo-norte' },
         scope: scope(DIM_MATERIA, 'Penal', 'Civil', 'Laboral'),
       }),
     ).rejects.toThrow();
-    expect(JSON.stringify(ambitoDelEquipo())).toBe(before);
+    expect(JSON.stringify(teamScope())).toBe(before);
     expect(await listarAuditoria()).toHaveLength(0);
   });
 
   it('un Colaborador no puede configurar ambitos', async () => {
     await expect(
-      guardarAmbito({
+      saveScope({
         actor: colaborador,
         destino: { tipo: 'equipo', teamId: 'equipo-norte' },
         scope: scope(DIM_MATERIA, 'Penal'),
@@ -183,12 +183,12 @@ describe('la puerta de ampliacion de ambito (4.10.4)', () => {
 
 describe('la puerta de auditoria (seccion 7)', () => {
   it('una ampliacion queda DESTACADA, separada del resto de cambios', async () => {
-    await guardarAmbito({
+    await saveScope({
       actor: admin,
       destino: { tipo: 'equipo', teamId: 'equipo-norte' },
       scope: scope(DIM_MATERIA, 'Penal'),
     });
-    await guardarAmbito({
+    await saveScope({
       actor: admin,
       destino: { tipo: 'equipo', teamId: 'equipo-norte' },
       scope: scope(DIM_MATERIA, 'Penal', 'Civil'),
@@ -203,7 +203,7 @@ describe('la puerta de auditoria (seccion 7)', () => {
   });
 
   it('guarda el estado anterior y el nuevo: no es sobrescritura silenciosa (4.10.7)', async () => {
-    await guardarAmbito({
+    await saveScope({
       actor: admin,
       destino: { tipo: 'equipo', teamId: 'equipo-norte' },
       scope: scope(DIM_MATERIA, 'Penal'),
@@ -216,8 +216,8 @@ describe('la puerta de auditoria (seccion 7)', () => {
   it('el registro se puede filtrar por tipo de entidad y por autor', async () => {
     const equipo = await gobierno.getTeam('equipo-norte');
     if (!equipo) throw new Error('fixture inesperado');
-    await guardarEquipo(admin, { ...equipo, name: 'Norte renombrado' });
-    await guardarAmbito({
+    await saveTeam(admin, { ...equipo, name: 'Norte renombrado' });
+    await saveScope({
       actor: admin,
       destino: { tipo: 'equipo', teamId: 'equipo-norte' },
       scope: scope(DIM_MATERIA, 'Penal'),
@@ -233,7 +233,7 @@ describe('editar el ambito de una carpeta cambia lo que contiene', () => {
   it('el ambito efectivo de un modulo cambia de inmediato', async () => {
     const before = resolveEffectiveScope({
       user: { userId: 'u-ana' },
-      activeTeam: await equipoDe('equipo-norte'),
+      activeTeam: await teamOf('equipo-norte'),
       moduleId: 'casos-pendientes',
       generalTree: (await gobierno.getTree()).nodes,
     });
@@ -243,7 +243,7 @@ describe('editar el ambito de una carpeta cambia lo que contiene', () => {
     expect(distritoAntes?.allowedValues).toEqual(['Distrito Norte']);
 
     // Se restringe aun mas la carpeta que lo contiene: de Norte a nada.
-    await guardarAmbito({
+    await saveScope({
       actor: admin,
       destino: { tipo: 'carpeta', nodeId: 'nodo-norte' },
       scope: scope(DIM_DISTRITO),
@@ -251,7 +251,7 @@ describe('editar el ambito de una carpeta cambia lo que contiene', () => {
 
     const after = resolveEffectiveScope({
       user: { userId: 'u-ana' },
-      activeTeam: await equipoDe('equipo-norte'),
+      activeTeam: await teamOf('equipo-norte'),
       moduleId: 'casos-pendientes',
       generalTree: (await gobierno.getTree()).nodes,
     });
@@ -288,7 +288,7 @@ describe('operaciones de arbol desde el panel', () => {
     // Y el arbol persistido refleja el cambio.
     const resuelto = resolveEffectiveScope({
       user: { userId: 'u-ana' },
-      activeTeam: await equipoDe('equipo-norte'),
+      activeTeam: await teamOf('equipo-norte'),
       moduleId: 'audiencias',
       generalTree: (await gobierno.getTree()).nodes,
     });
@@ -345,7 +345,7 @@ describe('quien ve que (4.10.8)', () => {
   });
 
   it('señala cuando el ambito resuelto proviene de una ampliacion', async () => {
-    await guardarAmbito({
+    await saveScope({
       actor: admin,
       destino: { tipo: 'carpeta', nodeId: 'nodo-norte' },
       scope: scope(DIM_DISTRITO, 'Distrito Norte', 'Distrito Este'),
@@ -387,12 +387,12 @@ describe('la institucion no se puede quedar sin Administrador (4.10.1)', () => {
   });
 
   it('guardar el equipo entero con la membresia reescrita tampoco cuela', async () => {
-    const equipo = await equipoDe('equipo-norte');
+    const equipo = await teamOf('equipo-norte');
 
     // Este es el camino que se salta por completo la palabra "rol": se manda el equipo con una
     // lista de miembros distinta, y el Administrador simplemente no esta en ella.
     await expect(
-      guardarEquipo(admin, {
+      saveTeam(admin, {
         ...equipo,
         members: equipo.members.filter((m) => m.userId !== 'u-admin'),
       }),

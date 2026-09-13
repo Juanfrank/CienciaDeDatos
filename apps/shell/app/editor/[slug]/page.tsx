@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 import { actorDe, bloqueosDePublicacion, moduloVisiblePorSlug } from '../../../src/server/cicloDeVida';
-import { diagnosticarDefinicion, vistaPreviaDelBorrador } from '../../../src/server/datos';
+import { diagnosticarDefinicion, vistaPreviaDelBorrador } from '../../../src/server/data';
 import { serializarObjeto } from '../../../src/server/serializar';
-import { paletaDelEditor } from '../../../src/server/editor';
-import { exigirSesionDePagina } from '../../../src/server/sesion';
+import { editorPalette } from '../../../src/server/editor';
+import { exigirSesionDePagina } from '../../../src/server/session';
 import { EditorDeModulo } from '../../../src/components/editor/EditorDeModulo';
 
 export const dynamic = 'force-dynamic';
@@ -36,7 +36,7 @@ export default async function PaginaEditorDeModulo({
       objetosIniciales={(previa?.objetos ?? []).map(serializarObjeto)}
       diagnosticos={await diagnosticarDefinicion(modulo)}
       bloqueos={await bloqueosDePublicacion(modulo)}
-      palette={await paletaDelEditor()}
+      palette={await editorPalette()}
       editable={modulo.status === 'borrador' && modulo.ownerUserId === sesion.userId}
     />
   );

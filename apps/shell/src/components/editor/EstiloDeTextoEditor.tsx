@@ -154,7 +154,7 @@ export function EstiloDeTextoEditor({
       </div>
 
       <label className="formulario__campo">
-        <span>Alignment</span>
+        <span>Alineacion</span>
         <select
           value={style.alignment ?? 'izquierda'}
           disabled={guardando}
@@ -171,7 +171,7 @@ export function EstiloDeTextoEditor({
 
       {conVertical ? (
         <label className="formulario__campo">
-          <span>Alignment vertical</span>
+          <span>Alineacion vertical</span>
           <select
             value={style.verticalAlignment ?? 'arriba'}
             disabled={guardando}

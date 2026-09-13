@@ -17,7 +17,7 @@ import { gobierno } from './gobierno';
 /*
  * El conector activo lo resuelve ahora `configuracion.ts` contra App Configuration (2.2).
  */
-export { conectorActivo } from './configuracion';
+export { conectorActivo } from './settings';
 
 export const objectRegistry = new ObjectRegistry(initialCatalog);
 

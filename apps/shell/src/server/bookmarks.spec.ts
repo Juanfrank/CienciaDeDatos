@@ -23,8 +23,8 @@ describe('un marcador compartido se filtra segun QUIEN LO ABRE (criterio de la s
   });
 
   it('quien comparte el ambito si ve lo mismo', () => {
-    const mismoAmbito = scope(DIM_DISTRITO, 'Distrito Norte');
-    expect(intersectRequestedFilters(mismoAmbito, marcadorDeAna.filters)).toEqual({
+    const sameScope = scope(DIM_DISTRITO, 'Distrito Norte');
+    expect(intersectRequestedFilters(sameScope, marcadorDeAna.filters)).toEqual({
       'DimTribunal.Distrito': ['Distrito Norte'],
     });
   });

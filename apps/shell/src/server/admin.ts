@@ -1,6 +1,6 @@
 import type { SchemaDescriptor } from '@app/data-contracts';
-import { getManagedTree } from './contexto';
-import { contarAmpliaciones } from './auditoria';
+import { getManagedTree } from './context';
+import { contarAmpliaciones } from './audit';
 import {
   type AccessScope,
   type AppRole,
@@ -27,10 +27,10 @@ import {
   wouldLeaveNoAdministrator,
 } from '@app/access-control';
 import { SCHEMA_CACHE_KEY } from '@app/caching';
-import { cacheL2, getGeneralTree } from './contexto';
+import { cacheL2, getGeneralTree } from './context';
 import { gobierno } from './gobierno';
-import { registrarCambio, registrarEventoDeArbol } from './auditoria';
-import type { SesionShell } from './sesion';
+import { registrarCambio, registrarEventoDeArbol } from './audit';
+import type { SesionShell } from './session';
 
 /** Servicio del panel de administracion — seccion 4.10.8. */
 
@@ -184,7 +184,7 @@ export function dimensionesAmpliadas(actual: AccessScope, propuesto: AccessScope
 }
 
 /** Guarda un ambito, cerrando la puerta que hasta ahora estaba abierta. */
-export async function guardarAmbito(input: GuardarAmbitoInput): Promise<AccessScope> {
+export async function saveScope(input: GuardarAmbitoInput): Promise<AccessScope> {
   const { actor, destino, scope, justificacion } = input;
   assertCan(actor.role, 'configurar-ambitos');
 
@@ -252,7 +252,7 @@ async function aplicarAmbito(destino: GuardarAmbitoInput['destino'], scope: Acce
 // ---------------------------------------------------------------------------
 
 /** Esquema de la fuente activa, leido del CACHE. */
-export async function esquemaActivo(): Promise<SchemaDescriptor | null> {
+export async function activeScheme(): Promise<SchemaDescriptor | null> {
   try {
     return (await cacheL2.get<SchemaDescriptor>(SCHEMA_CACHE_KEY))?.value ?? null;
   } catch {
@@ -264,7 +264,7 @@ export async function esquemaActivo(): Promise<SchemaDescriptor | null> {
 export async function dimensionesDisponibles(): Promise<
   { table: string; field: string; key: string }[]
 > {
-  const schema = await esquemaActivo();
+  const schema = await activeScheme();
   if (!schema) return [];
   return schema.tables.flatMap((tabla) =>
     tabla.fields
@@ -278,7 +278,7 @@ export async function dimensionesDisponibles(): Promise<
 }
 
 /** Rechaza un ambito que referencie dimensiones que no existen en el esquema activo. */
-export async function validarDimensiones(scope: AccessScope): Promise<string[]> {
+export async function validateDimensions(scope: AccessScope): Promise<string[]> {
   const disponibles = new Set((await dimensionesDisponibles()).map((d) => d.key));
   if (disponibles.size === 0) return [];
   return scope.restrictions
@@ -338,7 +338,7 @@ export async function administradores(): Promise<string[]> {
   return administratorsOf(await gobierno.listTeams());
 }
 
-export async function guardarEquipo(actor: Actor, equipo: Team): Promise<Team> {
+export async function saveTeam(actor: Actor, equipo: Team): Promise<Team> {
   assertCan(actor.role, 'gestionar-equipos');
   const anterior = await gobierno.getTeam(equipo.id);
   await escribirEquipo(equipo);

@@ -11,9 +11,9 @@ import {
 } from '@app/alerts';
 import { POPULATOR_HEARTBEAT_KEY, type PopulatorHeartbeat } from '@app/observability';
 import { aggregateBy, aggregationsFor } from '@app/ui-components';
-import { cacheL2 } from './contexto';
-import { cargarModulo } from './datos';
-import { colaExportaciones, encolarExportacion } from './exportaciones';
+import { cacheL2 } from './context';
+import { cargarModulo } from './data';
+import { queueExports, encolarExportacion } from './exports';
 import { moduloServibleParaUsuario } from './cicloDeVida';
 
 /** Cableado de alertas y suscripciones (4.9). */
@@ -160,7 +160,7 @@ export async function atenderSuscripciones(ahora = new Date()): Promise<Resultad
 }
 
 async function entregarSiEstaListo(sub: Subscription, ahora: Date): Promise<boolean> {
-  const job = sub.pendingJobId ? await colaExportaciones.consultar(sub.pendingJobId) : null;
+  const job = sub.pendingJobId ? await queueExports.consultar(sub.pendingJobId) : null;
 
   // El trabajo caduco del store antes de que nadie lo recogiera: se suelta el pendiente para
   // que la proxima vuelta vuelva a encolarlo, en vez de quedarse esperando para siempre.

@@ -10,9 +10,9 @@ import {
 } from '@app/design-tokens';
 import { Cabecera } from '../src/components/Cabecera';
 import { ProveedorDeIdioma } from '../src/components/Idioma';
-import { obtenerSesion } from '../src/server/sesion';
-import { idioma } from '../src/server/idioma';
-import { modoDeColor } from '../src/server/tema';
+import { obtenerSesion } from '../src/server/session';
+import { idioma } from '../src/server/locale';
+import { colorMode } from '../src/server/theme';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -37,7 +37,7 @@ function variablesDelTema(mode: ColorMode): Record<string, string> {
 
 /** Cromo comun a toda la aplicacion: documento, tema y cabecera. */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [sesion, mode, locale] = await Promise.all([obtenerSesion(), modoDeColor(), idioma()]);
+  const [sesion, mode, locale] = await Promise.all([obtenerSesion(), colorMode(), idioma()]);
 
   /*
    * `colorScheme` no es decorativo: es lo que hace que el navegador dibuje en oscuro lo que no

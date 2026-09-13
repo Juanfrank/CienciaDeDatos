@@ -4,9 +4,9 @@ import { applyPersonalization } from '@app/module-model';
 import {
   PersonalizacionInvalidaError,
   descartarPersonalizacion,
-  guardarPersonalizacion,
-  leerPersonalizacion,
-} from './personalizacion';
+  savePersonalization,
+  readPersonalization,
+} from './personalization';
 
 /** Personalizacion por usuario — seccion 4.6. */
 
@@ -42,18 +42,18 @@ beforeEach(async () => {
 
 describe('guardar y leer', () => {
   it('lo guardado se lee, y solo lo ve quien lo guardo', async () => {
-    await guardarPersonalizacion({ userId: 'u-ana', module: modulo, hiddenItemIds: ['dos'] });
+    await savePersonalization({ userId: 'u-ana', module: modulo, hiddenItemIds: ['dos'] });
 
-    expect((await leerPersonalizacion('u-ana', modulo.moduleId))?.hiddenItemIds).toEqual(['dos']);
+    expect((await readPersonalization('u-ana', modulo.moduleId))?.hiddenItemIds).toEqual(['dos']);
     // La de otra persona no existe: la personalizacion es por usuario, no del modulo.
-    expect(await leerPersonalizacion('u-beto', modulo.moduleId)).toBeUndefined();
+    expect(await readPersonalization('u-beto', modulo.moduleId)).toBeUndefined();
   });
 
   it('descartarla devuelve a la vista institucional', async () => {
-    await guardarPersonalizacion({ userId: 'u-ana', module: modulo, hiddenItemIds: ['dos'] });
+    await savePersonalization({ userId: 'u-ana', module: modulo, hiddenItemIds: ['dos'] });
     await descartarPersonalizacion('u-ana', modulo.moduleId);
 
-    expect(await leerPersonalizacion('u-ana', modulo.moduleId)).toBeUndefined();
+    expect(await readPersonalization('u-ana', modulo.moduleId)).toBeUndefined();
     // Y la definicion institucional nunca se toco: sigue con sus tres objetos.
     expect(modulo.pages[0]?.items).toHaveLength(3);
   });
@@ -62,13 +62,13 @@ describe('guardar y leer', () => {
 describe('lo que una personalizacion NO puede hacer (4.6)', () => {
   it('no puede nombrar un objeto que el modulo no tiene', async () => {
     await expect(
-      guardarPersonalizacion({ userId: 'u-ana', module: modulo, hiddenItemIds: ['inventado'] }),
+      savePersonalization({ userId: 'u-ana', module: modulo, hiddenItemIds: ['inventado'] }),
     ).rejects.toBeInstanceOf(PersonalizacionInvalidaError);
   });
 
   it('no puede ocultarlo todo: una pantalla vacia parece una averia', async () => {
     await expect(
-      guardarPersonalizacion({
+      savePersonalization({
         userId: 'u-ana',
         module: modulo,
         hiddenItemIds: ['uno', 'dos', 'tres'],
@@ -78,7 +78,7 @@ describe('lo que una personalizacion NO puede hacer (4.6)', () => {
 
   it('no puede tocar la logica de calculo, aunque lo intente por el cuerpo crudo', async () => {
     // El tipo no admite esto; lo que llega por la red, si. De ahi la comprobacion en ejecucion.
-    const fallo = await guardarPersonalizacion({
+    const fallo = await savePersonalization({
       userId: 'u-ana',
       module: modulo,
       hiddenItemIds: [],
@@ -89,7 +89,7 @@ describe('lo que una personalizacion NO puede hacer (4.6)', () => {
   });
 
   it('tampoco cambiando el dataset', async () => {
-    const fallo = await guardarPersonalizacion({
+    const fallo = await savePersonalization({
       userId: 'u-ana',
       module: modulo,
       hiddenItemIds: [],
@@ -102,7 +102,7 @@ describe('lo que una personalizacion NO puede hacer (4.6)', () => {
 
 describe('aplicada sobre la definicion', () => {
   it('oculta lo elegido y marca la vista como personalizada', async () => {
-    const guardada = await guardarPersonalizacion({
+    const guardada = await savePersonalization({
       userId: 'u-ana',
       module: modulo,
       hiddenItemIds: ['dos'],
@@ -123,7 +123,7 @@ describe('aplicada sobre la definicion', () => {
   });
 
   it('una personalizacion guardada que no oculta nada NO marca la vista como personalizada', async () => {
-    const guardada = await guardarPersonalizacion({
+    const guardada = await savePersonalization({
       userId: 'u-ana',
       module: modulo,
       hiddenItemIds: [],

@@ -3,7 +3,7 @@ import {
   ejecutarOperacionDeArbol,
   previsualizarMovimiento,
 } from '../../../../src/server/admin';
-import { getManagedTree } from '../../../../src/server/contexto';
+import { getManagedTree } from '../../../../src/server/context';
 import type { TreeOperation } from '@app/access-control';
 
 export const runtime = 'nodejs';

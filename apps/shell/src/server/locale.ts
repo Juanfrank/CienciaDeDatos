@@ -26,6 +26,6 @@ export async function idioma(): Promise<Locale> {
 }
 
 /** El traductor de la peticion en curso, para un componente de servidor. */
-export async function traductor(): Promise<Translator> {
+export async function translator(): Promise<Translator> {
   return createTranslator(await idioma());
 }

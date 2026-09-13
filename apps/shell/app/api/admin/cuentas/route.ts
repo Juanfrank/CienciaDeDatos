@@ -6,8 +6,8 @@ import {
   cuentasLocales,
   desbloquearCuenta,
   restablecimientos,
-} from '../../../../src/server/identidad';
-import { registrarCambio } from '../../../../src/server/auditoria';
+} from '../../../../src/server/identity';
+import { registrarCambio } from '../../../../src/server/audit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

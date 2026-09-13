@@ -3,10 +3,10 @@ import {
   actorDe,
   bloqueosDePublicacion,
   crearBorrador,
-  modulosVisibles,
+  visibleModules,
 } from '../../../src/server/cicloDeVida';
-import { respuestaDeError, sinSesion } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/sesion';
+import { respuestaDeError, withoutSession } from '../../../src/server/respuestas';
+import { obtenerSesion } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -14,14 +14,14 @@ export const dynamic = 'force-dynamic';
 /** Modulos del editor — secciones 4.1 y 4.2. */
 export async function GET() {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const actor = await actorDe(sesion);
-  const visibles = await modulosVisibles(actor);
+  const visibles = await visibleModules(actor);
 
   return NextResponse.json({
     role: actor.role,
-    modulos: await Promise.all(
+    modules: await Promise.all(
       visibles.map(async (m) => ({
         moduleId: m.moduleId,
         slug: m.slug,
@@ -41,7 +41,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   let body: Record<string, unknown>;
   try {

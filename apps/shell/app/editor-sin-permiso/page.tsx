@@ -8,7 +8,7 @@ export default function SinPermisoEditor() {
       <h1 data-testid="sin-permiso-editor">Sin permiso</h1>
       <p className="texto-atenuado">
         Crear y editar modulos esta reservado a los roles Colaborador y Administrador (4.10.1). Su
-        role permite ver los modulos de sus equipos y personalizar su vista.
+        rol permite ver los modulos de sus equipos y personalizar su vista.
       </p>
       <Link href="/" className="boton-contorno">
         Volver a los modulos

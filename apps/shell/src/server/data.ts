@@ -27,7 +27,7 @@ import {
   validateSlots,
   validateBinding,
 } from '@app/ui-components';
-import { cacheL2, datasetReader, findTeam, getGeneralTree, objectRegistry, scopeFor } from './contexto';
+import { cacheL2, datasetReader, findTeam, getGeneralTree, objectRegistry, scopeFor } from './context';
 
 /** Carga de un modulo para una persona concreta. */
 
@@ -70,7 +70,7 @@ export interface ModuloCargado {
 }
 
 /** Filtros sin los que corresponden a las dimensiones propias del objeto. */
-function sinFiltroPropio(
+function ownWithoutFilter(
   filtros: Record<string, string | string[]>,
   propias: { table: string; field: string }[],
 ): Record<string, string | string[]> {
@@ -79,7 +79,7 @@ function sinFiltroPropio(
 }
 
 /** Lee los datos de una lista de objetos bajo UN ambito. */
-async function leerObjetos(
+async function readObjects(
   items: GridItem[],
   scope: AccessScope,
   requestedFilters: Record<string, string | string[]>,
@@ -116,7 +116,7 @@ async function leerObjetos(
       if (isContainer(instance.objectId)) {
         panels = [];
         for (const panel of panelsOf(config as ContainerSettings | undefined)) {
-          const dentro = await leerObjetos(
+          const dentro = await readObjects(
             panel.items.map((i) => ({ id: i.id, instance: i.instance, position: i.position })),
             scope,
             requestedFilters,
@@ -154,7 +154,7 @@ async function leerObjetos(
     // sigue sin poder ofrecer valores fuera del alcance de quien mira.
     const filtrosParaEsteObjeto =
       instance.objectId === 'segmentador'
-        ? sinFiltroPropio(requestedFilters, instance.binding.dimensions)
+        ? ownWithoutFilter(requestedFilters, instance.binding.dimensions)
         : requestedFilters;
 
     const lectura = await datasetReader.read({
@@ -192,7 +192,7 @@ async function leerObjetos(
         measures: instance.binding.measures,
         aggregations,
         colapsa: colapsaElDataset(instance.binding.datasetId, instance.binding.dimensions),
-        dataGrain: granoDe(instance.binding.datasetId),
+        dataGrain: grainOf(instance.binding.datasetId),
       }).map((p) => ({
         slot: `agregacion.${p.medida}`,
         kind: 'contrato-incumplido' as const,
@@ -256,7 +256,7 @@ export async function cargarModulo(input: {
   const scope: AccessScope = resolucion?.scope ?? { restrictions: [{ dimension: { table: '', field: '' }, allowedValues: [] }] };
 
   const appliedFilters = intersectRequestedFilters(scope, requestedFilters);
-  const { objetos, masAntiguo, degraded } = await leerObjetos(page.items, scope, requestedFilters);
+  const { objetos, masAntiguo, degraded } = await readObjects(page.items, scope, requestedFilters);
 
   return {
     module,
@@ -328,7 +328,7 @@ export async function columnasDisponiblesDe(datasetId: string): Promise<ColumnaD
   const dimensiones = (declarado.query.dimensions ?? []).map(fieldKey);
   const medidas = declarado.query.measures ?? [];
 
-  const schema = await esquemaEnCache();
+  const schema = await cacheScheme();
 
   // Sin esquema en el cache no se conoce el tipo de nada. Se dice, en vez de suponer: una
   // validacion por tipo sobre un tipo inventado rechaza configuraciones correctas.
@@ -339,7 +339,7 @@ export async function columnasDisponiblesDe(datasetId: string): Promise<ColumnaD
   return [
     ...dimensiones
       .filter((clave) => campoExisteEnEsquema(schema, clave))
-      .map((name) => ({ name, type: tipoEnEsquema(schema, name) })),
+      .map((name) => ({ name, type: schemeKind(schema, name) })),
     ...medidas
       .filter((medida) => schema.measures.some((m) => m.name === medida))
       .map((name) => ({ name, type: 'number' })),
@@ -368,7 +368,7 @@ function infoDeDatasets(ids: Iterable<string>): Record<string, DatasetInfo> {
 }
 
 /** El grano declarado de un dataset, y si el objeto lo colapsa. */
-function granoDe(datasetId: string): GranoDeDataset {
+function grainOf(datasetId: string): GranoDeDataset {
   try {
     return getDataset(datasetId).grain;
   } catch {
@@ -391,11 +391,11 @@ function colapsaElDataset(datasetId: string, dimensiones: { table: string; field
 
 /** Que operador declara el esquema para cada medida. */
 export async function agregacionesDeclaradas(): Promise<Map<string, Aggregation>> {
-  const schema = await esquemaEnCache();
+  const schema = await cacheScheme();
   return new Map((schema?.measures ?? []).map((m) => [m.name, m.aggregation]));
 }
 
-const esquemaEnCache = async (): Promise<SchemaDescriptor | null> => {
+const cacheScheme = async (): Promise<SchemaDescriptor | null> => {
   try {
     return (await cacheL2.get<SchemaDescriptor>(SCHEMA_CACHE_KEY))?.value ?? null;
   } catch {
@@ -403,7 +403,7 @@ const esquemaEnCache = async (): Promise<SchemaDescriptor | null> => {
   }
 };
 
-function tipoEnEsquema(schema: SchemaDescriptor, clave: string): string {
+function schemeKind(schema: SchemaDescriptor, clave: string): string {
   const [tabla, fieldName] = clave.split('.');
   const encontrado = schema.tables
     .find((t) => t.name === tabla)
@@ -444,6 +444,6 @@ export async function vistaPreviaDelBorrador(input: {
 
   // Sin filtros: el editor construye la vista institucional, no una consulta concreta. Los
   // filtros son de quien mira el modulo publicado, no de quien lo disena.
-  const { objetos } = await leerObjetos(page.items, scope, {});
+  const { objetos } = await readObjects(page.items, scope, {});
   return { objetos, pageSlug: page.slug };
 }

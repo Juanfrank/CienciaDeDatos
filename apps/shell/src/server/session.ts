@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { sesiones } from './identidad';
+import { sesiones } from './identity';
 
 /** Sesion del shell — secciones 4.7 y 6.7. */
 
@@ -69,7 +69,7 @@ export async function cambiarEquipoActivo(
   }
 }
 
-export async function cerrarSesion(sessionId: string): Promise<void> {
+export async function closeSession(sessionId: string): Promise<void> {
   // Revocar es borrar la fila, no esperar a que caduque un token firmado.
   await sesiones.revoke(sessionId);
 }

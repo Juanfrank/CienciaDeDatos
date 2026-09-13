@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
 import { describeProvenance } from '@app/module-model';
-import { leerPersonalizacion } from '../../../../src/server/personalizacion';
-import { cargarModulo } from '../../../../src/server/datos';
+import { readPersonalization } from '../../../../src/server/personalization';
+import { cargarModulo } from '../../../../src/server/data';
 import { actorDe, moduloServiblePorSlug } from '../../../../src/server/cicloDeVida';
 import { serializarObjeto } from '../../../../src/server/serializar';
-import { exigirSesionDePagina } from '../../../../src/server/sesion';
+import { exigirSesionDePagina } from '../../../../src/server/session';
 import { VistaModulo } from '../../../../src/components/VistaModulo';
 import { InsigniaDeAmbito } from '../../../../src/components/InsigniaDeAmbito';
 import { InsigniaDeProcedencia } from '../../../../src/components/InsigniaDeProcedencia';
@@ -40,7 +40,7 @@ export default async function PaginaModulo({
   if (!module) notFound();
   const cargado = await cargarModulo({
     module,
-    personalization: await leerPersonalizacion(sesion.userId, module.moduleId),
+    personalization: await readPersonalization(sesion.userId, module.moduleId),
     ...(page ? { pageSlug: page } : {}),
     userId: sesion.userId,
     teamId: sesion.activeTeamId,

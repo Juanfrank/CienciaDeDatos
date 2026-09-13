@@ -89,7 +89,7 @@ function LineaEditor({
   return (
     <>
       <label className="formulario__campo">
-        <span>Estilo de line</span>
+        <span>Estilo de linea</span>
         <select
           value={line?.style ?? 'solida'}
           disabled={guardando}
@@ -121,7 +121,7 @@ function LineaEditor({
       </label>
 
       <div className="formulario__campo">
-        <span>Color de line</span>
+        <span>Color de linea</span>
         <PaletaDeColores
           valor={line?.color ?? 'atenuado'}
           nombre="la linea"
@@ -245,7 +245,7 @@ export function ConfiguracionDeObjetoEditor({
               </option>
             ))}
           </select>
-          <span className="campo__pista">Se reparten el ancho que sobre after del content.</span>
+          <span className="campo__pista">Se reparten el ancho que sobre despues del content.</span>
         </label>
 
         <LineaEditor
@@ -265,7 +265,7 @@ export function ConfiguracionDeObjetoEditor({
     return (
       <Section titulo="Linea divisoria" nivel={2} prueba={prueba}>
         <label className="formulario__campo">
-          <span>Orientation</span>
+          <span>Orientacion</span>
           <select
             value={l?.orientation ?? 'horizontal'}
             disabled={guardando}
@@ -296,7 +296,7 @@ export function ConfiguracionDeObjetoEditor({
     return (
       <Section titulo="Forma" nivel={2} prueba={prueba}>
         <label className="formulario__campo">
-          <span>Shape</span>
+          <span>Forma</span>
           <select
             value={f?.forma ?? 'rectangulo'}
             disabled={guardando}
@@ -384,7 +384,7 @@ export function ConfiguracionDeObjetoEditor({
           />
         </label>
         <label className="formulario__campo">
-          <span>Dash</span>
+          <span>Trazado</span>
           <select
             value={c?.dash ?? 'angulo'}
             disabled={guardando}
@@ -435,9 +435,9 @@ export function ConfiguracionDeObjetoEditor({
     // un mapa y no con cinco ifs sueltos para que anadir un contenedor no tenga que acordarse.
     const block: Record<string, keyof ContainerSettings> = {
       'contenedor-simple': 'simple',
-      'contenedor-desplazable': 'desplazable',
-      'contenedor-ampliable': 'ampliable',
-      'contenedor-con-pestanas': 'pestanas',
+      'contenedor-desplazable': 'scrollable',
+      'contenedor-ampliable': 'expandable',
+      'contenedor-con-pestanas': 'tabs',
     };
     const clave = block[objectId] ?? 'simple';
     poner({ [clave]: { ...(conf[clave] as object), gridColumns: n } } as ContainerSettings);
@@ -464,7 +464,7 @@ export function ConfiguracionDeObjetoEditor({
 
       {objectId === 'contenedor-desplazable' ? (
         <label className="formulario__campo">
-          <span>Axis de desplazamiento</span>
+          <span>Eje de desplazamiento</span>
           <select
             value={conf.scrollable?.axis ?? 'y'}
             disabled={guardando}
@@ -479,7 +479,7 @@ export function ConfiguracionDeObjetoEditor({
               </option>
             ))}
           </select>
-          <span className="campo__pista">Uno solo. El other axis nunca se desplaza.</span>
+          <span className="campo__pista">Uno solo. El otro eje nunca se desplaza.</span>
         </label>
       ) : null}
 

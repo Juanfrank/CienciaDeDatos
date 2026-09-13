@@ -1,4 +1,4 @@
-import { getGeneralTree, listTeams } from '../../../src/server/contexto';
+import { getGeneralTree, listTeams } from '../../../src/server/context';
 import { gobierno } from '../../../src/server/gobierno';
 import { buildNavigationView } from '@app/access-control';
 

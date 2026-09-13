@@ -4,7 +4,7 @@ import { ID_LATERAL } from '../../src/components/NavegacionPlegable';
 import { CarrilDeAdmin, SeccionActual } from '../../src/components/admin/CarrilDeAdmin';
 import { esAdministrador } from '../../src/server/admin';
 import { indicadoresDeAdmin } from '../../src/server/admin';
-import { exigirSesionDePagina } from '../../src/server/sesion';
+import { exigirSesionDePagina } from '../../src/server/session';
 
 /** Panel de administracion — seccion 4.10.8. */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

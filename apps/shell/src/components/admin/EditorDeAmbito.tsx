@@ -155,7 +155,7 @@ export function EditorDeAmbito({ destinos }: { destinos: DestinoDeAmbito[] }) {
             <strong>Esto AMPLIA el acceso</strong> en: <code>{ampliacion.join(', ')}</code>
           </p>
           <p className="texto-atenuado">
-            Una ampliacion exige justificacion y queda registrada aparte en el panel de audit.
+            Una ampliacion exige justificacion y queda registrada aparte en el panel de auditoria.
           </p>
           <label className="campo">
             <span>Justificacion</span>

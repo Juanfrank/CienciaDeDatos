@@ -1,13 +1,13 @@
 import type { Bookmark } from '@app/module-model';
-import { CLAVE_MARCADORES, escribir, leerLista } from './almacenCompartido';
+import { KEY_BOOKMARKS, escribir, readList } from './almacenCompartido';
 
 /** Almacen de marcadores. */
 
-const all = (): Promise<Bookmark[]> => leerLista<Bookmark>(CLAVE_MARCADORES);
+const all = (): Promise<Bookmark[]> => readList<Bookmark>(KEY_BOOKMARKS);
 
-export async function guardarMarcador(marcador: Bookmark): Promise<Bookmark> {
+export async function saveBookmark(marcador: Bookmark): Promise<Bookmark> {
   const actuales = await all();
-  await escribir(CLAVE_MARCADORES, [...actuales.filter((m) => m.id !== marcador.id), marcador]);
+  await escribir(KEY_BOOKMARKS, [...actuales.filter((m) => m.id !== marcador.id), marcador]);
   return marcador;
 }
 
@@ -24,6 +24,6 @@ export async function borrarMarcador(id: string, userId: string): Promise<boolea
   // Solo quien lo creo puede borrarlo.
   if (!marcador || marcador.ownerUserId !== userId) return false;
 
-  await escribir(CLAVE_MARCADORES, actuales.filter((m) => m.id !== id));
+  await escribir(KEY_BOOKMARKS, actuales.filter((m) => m.id !== id));
   return true;
 }

@@ -72,7 +72,7 @@ origen caen en el mismo punto. Solo entonces importa el operador:
 | `promedio`, `recuento`, `recuento-distinto` | ✔ | ✘ |
 | `ninguna` | ✘ | ✘ |
 
-Se comprueba **al guardar** (`validateModule`) y **al leer** (`leerObjetos`). Las dos, porque el
+Se comprueba **al guardar** (`validateModule`) y **al leer** (`readObjects`). Las dos, porque el
 grano de un dataset se declara en el registro y puede cambiar despues de que un modulo este
 publicado: lo que era correcto al guardarlo deja de serlo sin que nadie lo toque. Es el caso de
 4.2 —el campo que ya no existe— aplicado al operador en vez de al campo, y la respuesta es la

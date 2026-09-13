@@ -1,6 +1,6 @@
 import { procesarPendientes } from '@app/export';
-import { atenderSuscripciones, evaluarSiHayDatoNuevo } from './alertas';
-import { colaExportaciones, resolverObjetos } from './exportaciones';
+import { atenderSuscripciones, evaluarSiHayDatoNuevo } from './alerts';
+import { queueExports, resolverObjetos } from './exports';
 
 /** Trabajador de fondo del shell. */
 
@@ -9,7 +9,7 @@ const INTERVALO_ALERTAS_MS = 5_000;
 const INTERVALO_SUSCRIPCIONES_MS = 60_000;
 
 /** Los temporizadores se cuelgan de globalThis: la recarga en caliente crearia uno por recarga. */
-const CLAVE = '__trabajadorDeFondo';
+const KEY = '__trabajadorDeFondo';
 
 /** Ejecuta una tarea en bucle sin solaparla consigo misma. */
 function enBucle(nombre: string, intervaloMs: number, tarea: () => Promise<unknown>) {
@@ -34,11 +34,11 @@ function enBucle(nombre: string, intervaloMs: number, tarea: () => Promise<unkno
 
 export function iniciarTrabajadorDeFondo(): void {
   const global = globalThis as Record<string, unknown>;
-  if (global[CLAVE]) return;
+  if (global[KEY]) return;
 
-  global[CLAVE] = [
+  global[KEY] = [
     enBucle('exportaciones', INTERVALO_COLA_MS, () =>
-      procesarPendientes(colaExportaciones, resolverObjetos),
+      procesarPendientes(queueExports, resolverObjetos),
     ),
     enBucle('alertas', INTERVALO_ALERTAS_MS, () => evaluarSiHayDatoNuevo()),
     enBucle('suscripciones', INTERVALO_SUSCRIPCIONES_MS, () => atenderSuscripciones()),

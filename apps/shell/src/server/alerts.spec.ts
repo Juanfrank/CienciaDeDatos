@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { evaluarRegla, type AlertRule } from '@app/alerts';
-import { observacionesDe } from './alertas';
+import { observacionesDe } from './alerts';
 
 /** La decision de seguridad de toda la funcion, probada donde se toma. */
 

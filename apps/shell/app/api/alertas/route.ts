@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { AlertOperator, AlertRule } from '@app/alerts';
-import { alertStore } from '../../../src/server/alertas';
-import { normalizarFiltros } from '../../../src/server/filtros';
+import { alertStore } from '../../../src/server/alerts';
+import { normalizarFiltros } from '../../../src/server/filters';
 import { actorDe, moduloServiblePorSlug } from '../../../src/server/cicloDeVida';
-import { sinSesion } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/sesion';
+import { withoutSession } from '../../../src/server/respuestas';
+import { obtenerSesion } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 
@@ -13,7 +13,7 @@ const OPERADORES: AlertOperator[] = ['mayor-que', 'menor-que', 'cambia-mas-de'];
 /** Reglas de alerta (4.9). */
 export async function GET() {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
   const rules = await alertStore.listRules();
 
   // Solo las propias. Una regla ajena revelaria que modulo vigila alguien y con que umbral.
@@ -27,7 +27,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   let body: Record<string, unknown>;
   try {
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Falta el id.' }, { status: 400 });

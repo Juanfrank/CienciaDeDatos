@@ -1,16 +1,16 @@
-import { colaExportaciones } from '../../../../../src/server/exportaciones';
-import { sinSesion } from '../../../../../src/server/respuestas';
-import { obtenerSesion } from '../../../../../src/server/sesion';
+import { queueExports } from '../../../../../src/server/exports';
+import { withoutSession } from '../../../../../src/server/respuestas';
+import { obtenerSesion } from '../../../../../src/server/session';
 
 export const runtime = 'nodejs';
 
 /** Descarga del artefacto ya generado. */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const { id } = await params;
-  const job = await colaExportaciones.consultar(id);
+  const job = await queueExports.consultar(id);
 
   if (!job || job.request.requestedBy !== sesion.userId) {
     return new Response('Exportacion no encontrada.', { status: 404 });

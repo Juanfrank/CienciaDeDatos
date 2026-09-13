@@ -6,8 +6,8 @@ import {
   moduloVisiblePorSlug,
   publicar,
 } from '../../../../../src/server/cicloDeVida';
-import { respuestaDeError, sinSesion } from '../../../../../src/server/respuestas';
-import { obtenerSesion } from '../../../../../src/server/sesion';
+import { respuestaDeError, withoutSession } from '../../../../../src/server/respuestas';
+import { obtenerSesion } from '../../../../../src/server/session';
 
 export const runtime = 'nodejs';
 
@@ -17,7 +17,7 @@ type Transicion = (typeof TRANSICIONES)[number];
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const { slug } = await params;
   const actor = await actorDe(sesion);

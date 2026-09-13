@@ -12,7 +12,7 @@ export function Segmentador({
   opciones,
   instance,
   result,
-  iconoDelObjeto,
+  objectIcon,
 }: {
   titulo: string;
   fieldName: string;
@@ -21,7 +21,7 @@ export function Segmentador({
   instance?: ObjectInstance;
   result?: QueryResult;
   /** El icono que declara la version del objeto en el catalogo. */
-  iconoDelObjeto?: IconName;
+  objectIcon?: IconName;
 }) {
   const { valoresDe, alternar, limpiarCampo } = useFiltrosDeUrl();
   const seleccionados = valoresDe(fieldName);
@@ -31,7 +31,7 @@ export function Segmentador({
       titulo={titulo}
       {...(instance ? { instance } : {})}
       {...(result ? { result } : {})}
-      {...(iconoDelObjeto ? { iconoDelObjeto } : {})}
+      {...(objectIcon ? { objectIcon } : {})}
       accion={
         seleccionados.length > 0 ? (
           <button

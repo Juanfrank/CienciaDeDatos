@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { contarAmpliaciones, listarAuditoria } from '../../src/server/auditoria';
-import { getManagedTree, listTeams, listUsers } from '../../src/server/contexto';
+import { contarAmpliaciones, listarAuditoria } from '../../src/server/audit';
+import { getManagedTree, listTeams, listUsers } from '../../src/server/context';
 import { EventoDeAuditoria } from '../../src/components/admin/EventoDeAuditoria';
 import { Icono, type IconName } from '../../src/components/iconos/Icono';
 
@@ -53,7 +53,7 @@ export default async function AdminInicio() {
         </div>
 
         {recientes.length === 0 ? (
-          <p className="texto-atenuado">Sin cambios de settings registrados.</p>
+          <p className="texto-atenuado">Sin cambios de configuracion registrados.</p>
         ) : (
           <ul className="registro">
             {recientes.map((e, i) => (

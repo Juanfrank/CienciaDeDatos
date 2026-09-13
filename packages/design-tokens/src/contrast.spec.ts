@@ -43,7 +43,7 @@ describe('checkContrast', () => {
     expect(r.passes).toBe(true);
   });
 
-  it('un gris demasiado light sobre blanco no pasa AA', () => {
+  it('un gris demasiado claro sobre blanco no pasa AA', () => {
     // #8a8a8a sobre blanco da 3.45:1, por debajo del 4.5 que exige el texto normal.
     const r = checkContrast({ label: 't', foreground: '#8a8a8a', background: '#ffffff' });
     expect(r.ratio).toBeCloseTo(3.45, 1);

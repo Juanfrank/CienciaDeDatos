@@ -5,9 +5,9 @@ import {
   asegurarCredenciales,
   proveedorLocal,
   sesiones,
-} from '../../../src/server/identidad';
-import { teamsOf } from '../../../src/server/contexto';
-import { COOKIE_SESION, cerrarSesion, obtenerSesion } from '../../../src/server/sesion';
+} from '../../../src/server/identity';
+import { teamsOf } from '../../../src/server/context';
+import { COOKIE_SESION, closeSession, obtenerSesion } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
 /** Cierre de sesion: se revoca la fila y se retira la cookie. */
 export async function DELETE() {
   const sesion = await obtenerSesion();
-  if (sesion) await cerrarSesion(sesion.sessionId);
+  if (sesion) await closeSession(sesion.sessionId);
 
   const respuesta = NextResponse.json({ cerrada: true });
   respuesta.cookies.delete(COOKIE_SESION);

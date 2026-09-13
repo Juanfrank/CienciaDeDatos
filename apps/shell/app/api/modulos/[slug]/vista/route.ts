@@ -3,11 +3,11 @@ import { actorDe, moduloServiblePorSlug } from '../../../../../src/server/cicloD
 import {
   PersonalizacionInvalidaError,
   descartarPersonalizacion,
-  guardarPersonalizacion,
-  leerPersonalizacion,
-} from '../../../../../src/server/personalizacion';
-import { sinSesion } from '../../../../../src/server/respuestas';
-import { obtenerSesion } from '../../../../../src/server/sesion';
+  savePersonalization,
+  readPersonalization,
+} from '../../../../../src/server/personalization';
+import { withoutSession } from '../../../../../src/server/respuestas';
+import { obtenerSesion } from '../../../../../src/server/session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -15,13 +15,13 @@ export const dynamic = 'force-dynamic';
 /** Vista personalizada de una persona sobre un modulo — seccion 4.6. */
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const { slug } = await params;
   const modulo = await moduloServiblePorSlug(slug, await actorDe(sesion));
   if (!modulo) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
-  const personalizacion = await leerPersonalizacion(sesion.userId, modulo.moduleId);
+  const personalizacion = await readPersonalization(sesion.userId, modulo.moduleId);
   return NextResponse.json({
     personalizada: personalizacion !== undefined,
     ocultos: personalizacion?.hiddenItemIds ?? [],
@@ -36,7 +36,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
 
 export async function PUT(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const { slug } = await params;
   const modulo = await moduloServiblePorSlug(slug, await actorDe(sesion));
@@ -54,7 +54,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
     : [];
 
   try {
-    const personalizacion = await guardarPersonalizacion({
+    const personalizacion = await savePersonalization({
       userId: sesion.userId,
       module: modulo,
       hiddenItemIds: ocultos,
@@ -77,7 +77,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
 /** Descarta la personalizacion y devuelve a la vista institucional oficial. */
 export async function DELETE(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const { slug } = await params;
   const modulo = await moduloServiblePorSlug(slug, await actorDe(sesion));

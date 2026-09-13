@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { contractSlots, validatePresentation, validateSlots } from '@app/ui-components';
-import { objectRegistry } from './contexto';
-import { modulosDemo } from './modulos';
+import { objectRegistry } from './context';
+import { modulosDemo } from './modules';
 
 /**
  * Las ranuras que un modulo guardado usa tienen que existir en el contrato de su objeto.

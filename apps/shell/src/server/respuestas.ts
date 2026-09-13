@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { CicloDeVidaError } from './cicloDeVida';
 
 /** Respuestas compartidas de las rutas de API. */
-export const sinSesion = (): NextResponse =>
+export const withoutSession = (): NextResponse =>
   NextResponse.json({ error: 'Se requiere iniciar sesion.' }, { status: 401 });
 
 /** Traduce un error del ciclo de vida a HTTP. */

@@ -20,7 +20,7 @@ Sin flujo, la distincion entre "lo que alguien esta probando" y "lo que la insti
 | `pendiente-de-aprobacion` | su autor y los Administradores |
 | `publicado` | quien tenga concedido su nodo, como siempre |
 
-Todos los caminos que sirven un modulo pasan por `moduloVisiblePorSlug` o `moduloVisibleParaUsuario`: la pagina, la vista incrustada, la API de datos, la exportacion, las alertas, las suscripciones y la consulta en lenguaje natural. `findModuleBySlug` sigue existiendo sin filtrar porque el editor necesita abrir borradores, y por eso lleva escrito en su comentario que no se use en un camino de lectura.
+Todos los caminos que sirven un modulo pasan por `moduloVisiblePorSlug` o `visibleModuleUser`: la pagina, la vista incrustada, la API de datos, la exportacion, las alertas, las suscripciones y la consulta en lenguaje natural. `findModuleBySlug` sigue existiendo sin filtrar porque el editor necesita abrir borradores, y por eso lleva escrito en su comentario que no se use en un camino de lectura.
 
 **Un borrador es de quien lo escribe, y tampoco lo toca un Administrador.** Administrar no concede acceso al trabajo en curso de otra persona. Un Administrador interviene cuando el modulo se propone; para uno abandonado tiene el borrado definitivo, que no exige leerlo.
 
@@ -34,7 +34,7 @@ Todos los caminos que sirven un modulo pasan por `moduloVisiblePorSlug` o `modul
 
 - **Un modulo publicado no se edita en el sitio.** Para cambiarlo hay que retirarlo a borrador, y volver a pasar por aprobacion. Es incomodo a proposito: editar en vivo cambiaria lo que estan viendo todos los equipos sin que nadie lo aprobara, y el principio 8 dice lo mismo de los objetos compartidos.
 - **Retirar es posible y deja rastro.** La alternativa —que un publicado con un fallo no se pueda quitar sin desplegar codigo— es peor que el riesgo de que alguien lo retire por error. Exige motivo, que es lo unico que le dice a los equipos que lo usaban por que desaparecio.
-- **La navegacion se poda por estado, en un solo sitio.** `navegacionDe(sesion)` compone la concesion con la poda. Habia tres llamadas sueltas a `navigationFor` y bastaba olvidar una para que un modulo retirado siguiera apareciendo en la pantalla que no se reviso.
+- **La navegacion se poda por estado, en un solo sitio.** `navigationOf(sesion)` compone la concesion con la poda. Habia tres llamadas sueltas a `navigationFor` y bastaba olvidar una para que un modulo retirado siguiera apareciendo en la pantalla que no se reviso.
 - **El editor no tiene donde escribir una consulta.** Es lo que hace cumplible "nunca SQL libre construido por el modulo": no es una regla que haya que recordar, es que la caja no existe. Hay una prueba de navegador que comprueba que no hay ningun `<textarea>` en el editor.
 - **Un objeto roto se marca y no desaparece.** El modulo se sigue editando alrededor. Es literalmente lo que pide 4.2: "marcarlo visualmente roto, NO FALLAR EN SILENCIO".
 - **Los complementos no se ofrecen en la paleta.** Son adjuntables y la validacion los rechaza como elementos de la rejilla; ofrecerlos seria ofrecer un error.

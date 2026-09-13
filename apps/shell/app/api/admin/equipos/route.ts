@@ -5,9 +5,9 @@ import {
   administradores,
   borrarEquipo,
   cambiarMembresia,
-  guardarEquipo,
+  saveTeam,
 } from '../../../../src/server/admin';
-import { listTeams, listUsers } from '../../../../src/server/contexto';
+import { listTeams, listUsers } from '../../../../src/server/context';
 import { gobierno } from '../../../../src/server/gobierno';
 
 export const runtime = 'nodejs';
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     switch (body.accion) {
       case 'guardar': {
         if (!body.equipo) throw new AdminError('Falta el equipo.', 400);
-        return { equipo: await guardarEquipo(actor, body.equipo) };
+        return { equipo: await saveTeam(actor, body.equipo) };
       }
       case 'membresia': {
         if (!body.teamId || !body.userId) {

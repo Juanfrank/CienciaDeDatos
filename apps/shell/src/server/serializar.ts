@@ -6,8 +6,8 @@ import type {
   ObjectInstance,
   FieldSlot,
 } from '@app/ui-components';
-import { objectRegistry } from './contexto';
-import type { ObjetoCargado } from './datos';
+import { objectRegistry } from './context';
+import type { ObjetoCargado } from './data';
 
 /** Forma que cruza del servidor al cliente. */
 export interface ObjetoSerializado {
@@ -44,8 +44,8 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
     position: item.position,
     instance: item.instance,
     ...(objeto.result ? { result: objeto.result } : {}),
-    ...(ranurasDelObjeto(item.instance) ? { slots: ranurasDelObjeto(item.instance) } : {}),
-    ...(iconoDelObjeto(item.instance) ? { icono: iconoDelObjeto(item.instance) } : {}),
+    ...(objectSlots(item.instance) ? { slots: objectSlots(item.instance) } : {}),
+    ...(objectIcon(item.instance) ? { icono: objectIcon(item.instance) } : {}),
     problems: objeto.problems,
     aggregations: objeto.aggregations,
     ...(objeto.unresolvedObject ? { unresolvedObject: objeto.unresolvedObject } : {}),
@@ -64,7 +64,7 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
 }
 
 /** Las ranuras declaradas por la version que la instancia fija. */
-function ranurasDelObjeto(instance: ObjectInstance): FieldSlot[] | undefined {
+function objectSlots(instance: ObjectInstance): FieldSlot[] | undefined {
   try {
     return objectRegistry.resolve(instance.objectId, instance.version).dataContract.wells;
   } catch {
@@ -73,7 +73,7 @@ function ranurasDelObjeto(instance: ObjectInstance): FieldSlot[] | undefined {
 }
 
 /** El icono que declara el objeto. `undefined` si no se resuelve: el objeto roto no lo necesita. */
-function iconoDelObjeto(instance: ObjectInstance): IconName | undefined {
+function objectIcon(instance: ObjectInstance): IconName | undefined {
   try {
     return objectRegistry.get(instance.objectId)?.icono;
   } catch {

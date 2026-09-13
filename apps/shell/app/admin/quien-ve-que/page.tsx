@@ -1,5 +1,5 @@
 import { QuienVeQue } from '../../../src/components/admin/QuienVeQue';
-import { getGeneralTree, listTeams, listUsers } from '../../../src/server/contexto';
+import { getGeneralTree, listTeams, listUsers } from '../../../src/server/context';
 import type { NavNode } from '@app/access-control';
 
 export const dynamic = 'force-dynamic';
@@ -18,13 +18,13 @@ export default async function PaginaQuienVeQue() {
       <h2>Quien ve que</h2>
       <p className="texto-atenuado">
         Resuelve el ambito efectivo de una persona sobre un modulo y muestra que capa lo causo.
-        Sirve para depurar una settings ANTES de publicarla, no para descubrir el issue
-        after.
+        Sirve para depurar una configuracion ANTES de publicarla, no para descubrir el issue
+        despues.
       </p>
       <QuienVeQue
         usuarios={(await listUsers()).map((u) => u.userId)}
         equipos={(await listTeams()).map((t) => ({ id: t.id, name: t.name }))}
-        modulos={modulosDelArbol(await getGeneralTree())}
+        modules={modulosDelArbol(await getGeneralTree())}
       />
     </section>
   );

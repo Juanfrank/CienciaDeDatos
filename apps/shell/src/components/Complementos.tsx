@@ -14,8 +14,8 @@ import {
 
 /** Objetos adjuntados — complementos de un objeto, nunca objetos independientes. */
 
-const formatearCelda = (celda: unknown): string =>
-  typeof celda === 'number' ? new Intl.NumberFormat('es-DO').format(celda) : String(celda ?? '');
+const formatearCelda = (cell: unknown): string =>
+  typeof cell === 'number' ? new Intl.NumberFormat('es-DO').format(cell) : String(cell ?? '');
 
 /** Tooltip explicativo. */
 export function TooltipExplicativo({ content, titulo }: { content: string; titulo: string }) {
@@ -196,7 +196,7 @@ export function TablaDeDatos({
         {scope === 'subobjeto' && !seleccion ? (
           <>
             <p className="texto-atenuado">
-              Elija una categoria para ver las dataRows que hay detras de su figure.
+              Elija una categoria para ver las dataRows que hay detras de su cifra.
             </p>
             <div className="tabla-contenedor" tabIndex={0} role="region" aria-label="Categorias">
               <table className="tabla">
@@ -275,9 +275,9 @@ export function TablaDeDatos({
                 <tbody>
                   {dataRows.rows.map((fila, i) => (
                     <tr key={i}>
-                      {fila.map((celda, j) => (
-                        <td key={j} className={typeof celda === 'number' ? 'es-numero' : ''}>
-                          {formatearCelda(celda)}
+                      {fila.map((cell, j) => (
+                        <td key={j} className={typeof cell === 'number' ? 'es-numero' : ''}>
+                          {formatearCelda(cell)}
                         </td>
                       ))}
                     </tr>

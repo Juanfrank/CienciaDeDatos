@@ -28,7 +28,7 @@ describe('la puerta de publicacion (4.3) se pasa en LOS DOS modos', () => {
   }
 });
 
-describe('el tema dark es dark, y lo es de forma consistente', () => {
+describe('el tema oscuro es oscuro, y lo es de forma consistente', () => {
   const light = asThemeTokens(lightTheme).color;
   const dark = asThemeTokens(darkTheme).color;
 
@@ -40,7 +40,7 @@ describe('el tema dark es dark, y lo es de forma consistente', () => {
     expect(relativeLuminance(dark.text) ?? 0).toBeGreaterThan(relativeLuminance(light.text) ?? 1);
   });
 
-  it('el texto es mas light que la superficie sobre la que se lee', () => {
+  it('el texto es mas claro que la superficie sobre la que se lee', () => {
     expect(relativeLuminance(dark.text) ?? 0).toBeGreaterThan(relativeLuminance(dark.surface) ?? 1);
     expect(relativeLuminance(dark.textMuted) ?? 0).toBeGreaterThan(relativeLuminance(dark.surface) ?? 1);
   });
@@ -66,7 +66,7 @@ describe('el tema dark es dark, y lo es de forma consistente', () => {
   });
 });
 
-describe('las series de datos en dark', () => {
+describe('las series de datos en el tema oscuro', () => {
   it('las ocho se leen sobre la superficie del tema derivado', () => {
     const dark = asThemeTokens(darkTheme).color;
     for (const [i, color] of dark.categorical.entries()) {

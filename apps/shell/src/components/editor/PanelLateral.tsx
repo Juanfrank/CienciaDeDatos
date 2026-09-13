@@ -22,7 +22,7 @@ import {
   isContainer,
   isElement,
 } from '@app/ui-components';
-import type { DatasetDePaleta, ObjetoDePaleta } from '../../server/editor';
+import type { DatasetDePaleta, PaletteObject } from '../../server/editor';
 import { Icono } from '../iconos/Icono';
 import { ConfiguracionDeObjetoEditor } from './ConfiguracionDeObjetoEditor';
 import { Pestanas, type DefinicionDePestana } from './Pestanas';
@@ -45,7 +45,7 @@ export function PanelLateral({
   onCambiar,
   onQuitar,
 }: {
-  objetos: ObjetoDePaleta[];
+  objetos: PaletteObject[];
   datasets: DatasetDePaleta[];
   seleccionado: GridItem | null;
   guardando: boolean;
@@ -209,7 +209,7 @@ export function PanelLateral({
                   data-testid="limpiar-busqueda"
                   onClick={() => setFiltro('')}
                 >
-                  Ver all los ajustes
+                  Ver todos los ajustes
                 </button>
               </div>
             ) : null}
@@ -261,7 +261,7 @@ function Tienda({
   guardando,
   onAnadir,
 }: {
-  objetos: ObjetoDePaleta[];
+  objetos: PaletteObject[];
   guardando: boolean;
   onAnadir: (objectId: string) => void;
 }) {
@@ -275,7 +275,7 @@ function Tienda({
    * Se busca por nombre Y por descripcion.
    */
   const filtro = normalizar(busqueda.trim());
-  const coincide = (o: ObjetoDePaleta) =>
+  const coincide = (o: PaletteObject) =>
     filtro === '' ||
     normalizar(o.name).includes(filtro) ||
     normalizar(o.description).includes(filtro);
@@ -307,7 +307,7 @@ function Tienda({
             data-testid="limpiar-busqueda-objeto"
             onClick={() => setBusqueda('')}
           >
-            Ver all los objetos
+            Ver todos los objetos
           </button>
         </div>
       ) : null}
@@ -402,7 +402,7 @@ function ListaDeObjetos({
   guardando,
   onAnadir,
 }: {
-  objetos: ObjetoDePaleta[];
+  objetos: PaletteObject[];
   prueba: string;
   /*
    * El contrato solo se ensena donde significa algo.
@@ -449,7 +449,7 @@ function Datos({
   onQuitar,
 }: {
   item: GridItem;
-  definicion: ObjetoDePaleta | undefined;
+  definicion: PaletteObject | undefined;
   datasets: DatasetDePaleta[];
   guardando: boolean;
   onCambiar: (itemId: string, cambio: (item: GridItem) => GridItem) => void;
@@ -671,7 +671,7 @@ function Complementos({
   onCambiar,
 }: {
   item: GridItem;
-  objetos: ObjetoDePaleta[];
+  objetos: PaletteObject[];
   guardando: boolean;
   onCambiar: (itemId: string, cambio: (item: GridItem) => GridItem) => void;
 }) {

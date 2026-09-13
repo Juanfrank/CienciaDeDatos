@@ -1,5 +1,5 @@
 import { Avisos } from '../../src/components/Avisos';
-import { exigirSesionDePagina } from '../../src/server/sesion';
+import { exigirSesionDePagina } from '../../src/server/session';
 
 /** Pagina de avisos (4.9). */
 export const metadata = { title: 'Avisos' };

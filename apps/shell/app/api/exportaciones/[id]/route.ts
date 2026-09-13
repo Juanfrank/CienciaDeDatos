@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server';
-import { colaExportaciones } from '../../../../src/server/exportaciones';
-import { sinSesion } from '../../../../src/server/respuestas';
-import { obtenerSesion } from '../../../../src/server/sesion';
+import { queueExports } from '../../../../src/server/exports';
+import { withoutSession } from '../../../../src/server/respuestas';
+import { obtenerSesion } from '../../../../src/server/session';
 
 export const runtime = 'nodejs';
 
 /** Estado de una exportacion — el "estado de progreso consultable" que pide 5.3. */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const { id } = await params;
-  const job = await colaExportaciones.consultar(id);
+  const job = await queueExports.consultar(id);
 
   // Un trabajo ajeno se responde como inexistente, no como prohibido: decir "403" confirmaria
   // que ese identificador existe y de quien es.

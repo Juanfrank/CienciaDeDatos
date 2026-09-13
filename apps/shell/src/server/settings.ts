@@ -33,7 +33,7 @@ function source(): SettingsFont {
 /** Vive en `globalThis` como el resto del estado de proceso. */
 const global = globalThis as typeof globalThis & { __config?: ResolutorDeConfiguracion };
 
-function nuevoResolutor(): ResolutorDeConfiguracion {
+function newResolver(): ResolutorDeConfiguracion {
   return new ResolutorDeConfiguracion({
     source: source(),
     // La ultima foto buena se guarda en el almacen COMPARTIDO, no en memoria: si App
@@ -48,7 +48,7 @@ function nuevoResolutor(): ResolutorDeConfiguracion {
   });
 }
 
-const resolutor = (): ResolutorDeConfiguracion => (global.__config ??= nuevoResolutor());
+const resolutor = (): ResolutorDeConfiguracion => (global.__config ??= newResolver());
 
 /** Si un modulo esta encendido. Ausente en la configuracion significa encendido. */
 export async function moduloEncendido(slug: string): Promise<boolean> {

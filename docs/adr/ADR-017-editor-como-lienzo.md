@@ -41,7 +41,7 @@ El editor pasa a ser **un lienzo con el modulo dibujado** y **un panel lateral c
 
 `cargarModulo` comprueba que el EQUIPO tenga concedido el modulo en el arbol, y un borrador no
 esta en el arbol. La vista previa se salta esa comprobacion —la autorizacion para ver un borrador
-es «es tuyo», y la hace `moduloVisiblePorSlug`— pero **usa el mismo `leerObjetos` y el mismo
+es «es tuyo», y la hace `moduloVisiblePorSlug`— pero **usa el mismo `readObjects` y el mismo
 ambito**. Si fuera un camino aparte, crear un borrador seria la forma mas facil de ver datos fuera
 del alcance propio, y ninguna prueba de la vista normal lo detectaria.
 

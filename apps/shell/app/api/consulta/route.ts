@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { queryUrl } from '@app/nl-query';
-import { resolverPregunta } from '../../../src/server/consulta';
-import { sinSesion } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/sesion';
+import { resolverPregunta } from '../../../src/server/query';
+import { withoutSession } from '../../../src/server/respuestas';
+import { obtenerSesion } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 
@@ -12,7 +12,7 @@ const MAXIMO = 300;
 /** Resuelve una pregunta en lenguaje natural — seccion 4.9. */
 export async function POST(request: Request) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   let body: Record<string, unknown>;
   try {

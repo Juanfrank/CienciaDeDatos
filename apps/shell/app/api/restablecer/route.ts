@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PasswordResetError } from '@app/auth';
-import { restablecimientos } from '../../../src/server/identidad';
+import { restablecimientos } from '../../../src/server/identity';
 
 export const runtime = 'nodejs';
 

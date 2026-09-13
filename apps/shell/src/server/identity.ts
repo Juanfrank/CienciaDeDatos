@@ -16,7 +16,7 @@ import {
   type LoginAuditEvent,
   type ResetRecord,
 } from '@app/auth';
-import { borrar, escribir, leer, leerLista } from './almacenCompartido';
+import { borrar, escribir, leer, readList } from './almacenCompartido';
 import { CLAVE_DEMO, SECRETO_TOTP_DEMO, correoAUsuario, usuarioACorreo } from './credencialesDemo';
 import { gobierno } from './gobierno';
 
@@ -31,7 +31,7 @@ export {
 /** Cableado de la autenticacion — seccion 4.7. */
 
 const CLAVE_CREDENCIAL = (email: string) => `auth:credencial:${email.toLowerCase()}`;
-const CLAVE_SESION = (id: string) => `auth:sesion:${id}`;
+const KEY_SESSION = (id: string) => `auth:sesion:${id}`;
 const CLAVE_SESIONES_DE = (userId: string) => `auth:sesiones-de:${userId}`;
 const CLAVE_AUDITORIA_LOGIN = 'auth:auditoria-login';
 const CLAVE_SEMBRADO = 'auth:credenciales-sembradas';
@@ -62,24 +62,24 @@ class AlmacenDeCredenciales implements ILocalIdentityStore {
 
 class AlmacenDeSesiones implements ISessionStore {
   async create(session: AppSession): Promise<void> {
-    await escribir(CLAVE_SESION(session.sessionId), session);
+    await escribir(KEY_SESSION(session.sessionId), session);
 
-    const indice = await leerLista<string>(CLAVE_SESIONES_DE(session.userId));
+    const indice = await readList<string>(CLAVE_SESIONES_DE(session.userId));
     if (!indice.includes(session.sessionId)) {
       await escribir(CLAVE_SESIONES_DE(session.userId), [session.sessionId, ...indice]);
     }
   }
   async get(sessionId: string): Promise<AppSession | null> {
-    return (await leer<AppSession>(CLAVE_SESION(sessionId))) ?? null;
+    return (await leer<AppSession>(KEY_SESSION(sessionId))) ?? null;
   }
   async update(session: AppSession): Promise<void> {
-    await escribir(CLAVE_SESION(session.sessionId), session);
+    await escribir(KEY_SESSION(session.sessionId), session);
   }
   async delete(sessionId: string): Promise<void> {
     const sesion = await this.get(sessionId);
-    await borrar(CLAVE_SESION(sessionId));
+    await borrar(KEY_SESSION(sessionId));
     if (sesion) {
-      const indice = await leerLista<string>(CLAVE_SESIONES_DE(sesion.userId));
+      const indice = await readList<string>(CLAVE_SESIONES_DE(sesion.userId));
       await escribir(
         CLAVE_SESIONES_DE(sesion.userId),
         indice.filter((id) => id !== sessionId),
@@ -93,25 +93,25 @@ class AlmacenDeSesiones implements ISessionStore {
    * desaparece; aqui hay que mantenerlo, y por eso `create` y `delete` lo tocan.
    */
   async deleteAllFor(userId: string): Promise<void> {
-    for (const id of await leerLista<string>(CLAVE_SESIONES_DE(userId))) {
-      await borrar(CLAVE_SESION(id));
+    for (const id of await readList<string>(CLAVE_SESIONES_DE(userId))) {
+      await borrar(KEY_SESSION(id));
     }
     await escribir(CLAVE_SESIONES_DE(userId), []);
   }
 }
 
 /** Cuantos intentos de inicio de sesion se conservan. */
-const MAXIMO_AUDITORIA = 200;
+const MAX_AUDIT = 200;
 
 class AuditoriaDeLogin implements IAuditLog {
   async recordLogin(event: LoginAuditEvent): Promise<void> {
-    const actuales = await leerLista<LoginAuditEvent>(CLAVE_AUDITORIA_LOGIN);
-    await escribir(CLAVE_AUDITORIA_LOGIN, [event, ...actuales].slice(0, MAXIMO_AUDITORIA));
+    const actuales = await readList<LoginAuditEvent>(CLAVE_AUDITORIA_LOGIN);
+    await escribir(CLAVE_AUDITORIA_LOGIN, [event, ...actuales].slice(0, MAX_AUDIT));
   }
 }
 
 export const listarAuditoriaDeLogin = (): Promise<LoginAuditEvent[]> =>
-  leerLista<LoginAuditEvent>(CLAVE_AUDITORIA_LOGIN);
+  readList<LoginAuditEvent>(CLAVE_AUDITORIA_LOGIN);
 
 /** Directorio institucional. */
 class DirectorioDeGobierno implements IPrincipalDirectory {
@@ -192,7 +192,7 @@ class AlmacenDeRestablecimientos implements IResetStore {
   async save(record: ResetRecord): Promise<void> {
     await escribir(CLAVE_RESET(record.resetId), record);
 
-    const indice = await leerLista<string>(CLAVE_RESET_INDICE(record.email));
+    const indice = await readList<string>(CLAVE_RESET_INDICE(record.email));
     if (!indice.includes(record.resetId)) {
       // Se conservan los ultimos veinte por cuenta. El indice existe para poder invalidar los
       // vivos al emitir uno nuevo; guardarlos todos para siempre no aporta nada que la auditoria
@@ -206,7 +206,7 @@ class AlmacenDeRestablecimientos implements IResetStore {
   }
 
   async listPendingFor(email: string): Promise<ResetRecord[]> {
-    const ids = await leerLista<string>(CLAVE_RESET_INDICE(email));
+    const ids = await readList<string>(CLAVE_RESET_INDICE(email));
     const registros = await Promise.all(ids.map((id) => this.get(id)));
     return registros.filter((r): r is ResetRecord => r !== null);
   }

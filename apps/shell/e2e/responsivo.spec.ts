@@ -59,14 +59,14 @@ test.describe('la disposicion se adapta al ancho', () => {
     // con el primer cambio de diseno.
     await entrarComo(page, 'u-ana');
 
-    const celda = () =>
+    const cell = () =>
       page.locator('.rejilla__celda').filter({ hasText: 'Pendientes por distrito' });
 
     await page.setViewportSize(ESCRITORIO);
     await page.goto('/m/casos-pendientes');
     // En escritorio SI manda el alto guardado: son cuatro filas de rejilla.
     expect(
-      await celda().evaluate((el) => getComputedStyle(el).gridRow),
+      await cell().evaluate((el) => getComputedStyle(el).gridRow),
       'en escritorio la celda ocupa las filas que se guardaron',
     ).toContain('span');
 
@@ -74,12 +74,12 @@ test.describe('la disposicion se adapta al ancho', () => {
     await page.goto('/m/casos-pendientes');
 
     // En una sola columna la celda pasa a `auto`: la altura la pone lo que hay dentro.
-    expect(await celda().evaluate((el) => getComputedStyle(el).gridRow)).toBe('auto');
+    expect(await cell().evaluate((el) => getComputedStyle(el).gridRow)).toBe('auto');
 
     // Y lo que hay dentro la llena. NO se compara con el alto de escritorio: en una columna
     // estrecha las etiquetas se parten y el contenido ocupa MAS, legitimamente. Lo que la caja
     // no puede tener es hueco sobrante, que era el defecto original.
-    const sobrante = await celda().evaluate((el) => {
+    const sobrante = await cell().evaluate((el) => {
       const alto = el.getBoundingClientRect().height;
       const contenido = [...el.children].reduce((total, hijo) => {
         const caja = hijo.getBoundingClientRect();

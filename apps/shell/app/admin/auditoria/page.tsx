@@ -1,4 +1,4 @@
-import { contarAmpliaciones, listarAuditoria } from '../../../src/server/auditoria';
+import { contarAmpliaciones, listarAuditoria } from '../../../src/server/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +20,7 @@ export default async function PaginaAuditoria({
 
   return (
     <section>
-      <h2>Auditoria de settings</h2>
+      <h2>Auditoria de configuracion</h2>
 
       <p
         className={`aviso ${ampliaciones > 0 ? 'aviso--atencion' : 'aviso--ok'}`}

@@ -1,9 +1,9 @@
 import {
   actorDe,
   bloqueosDePublicacion,
-  modulosVisibles,
+  visibleModules,
 } from '../../src/server/cicloDeVida';
-import { exigirSesionDePagina } from '../../src/server/sesion';
+import { exigirSesionDePagina } from '../../src/server/session';
 import { CabeceraDeEditor } from '../../src/components/editor/CabeceraDeEditor';
 import { ListaDeModulos } from '../../src/components/editor/ListaDeModulos';
 
@@ -14,7 +14,7 @@ export const metadata = { title: 'Editor de modulos' };
 export default async function PaginaEditor() {
   const sesion = await exigirSesionDePagina();
   const actor = await actorDe(sesion);
-  const visibles = await modulosVisibles(actor);
+  const visibles = await visibleModules(actor);
 
   const dataRows = await Promise.all(
     visibles.map(async (m) => ({
@@ -34,7 +34,7 @@ export default async function PaginaEditor() {
     <>
       <CabeceraDeEditor />
       <main className="editor__cuerpo">
-        <ListaDeModulos modulos={dataRows} role={actor.role} user={actor.userId} />
+        <ListaDeModulos modules={dataRows} role={actor.role} user={actor.userId} />
       </main>
     </>
   );

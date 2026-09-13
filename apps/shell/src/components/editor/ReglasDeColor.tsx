@@ -122,7 +122,7 @@ export function ReglasDeColor({
                 }
               />
               {/* Sin el otro extremo la regla no casa nunca, y se rechaza al guardar. */}
-              <span className="campo__pista">Los dos ends entran.</span>
+              <span className="campo__pista">Los dos extremos entran.</span>
             </label>
           ) : null}
 
@@ -180,7 +180,7 @@ export function ReglasDeColor({
         </button>
       ) : (
         <p className="campo__pista">
-          Cinco es el maximo: mas rules dejan de ser excepciones y pasan a ser una scale, que es
+          Cinco es el maximo: mas reglas dejan de ser excepciones y pasan a ser una escala, que es
           otra herramienta.
         </p>
       )}

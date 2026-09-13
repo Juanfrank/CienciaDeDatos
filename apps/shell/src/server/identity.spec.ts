@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { AuthenticatedPrincipal } from '@app/auth';
-import { desbloquearCuenta, sesiones } from './identidad';
-import { almacenDeCredenciales } from './identidad';
+import { desbloquearCuenta, sesiones } from './identity';
+import { almacenDeCredenciales } from './identity';
 
 /** Cableado de identidad en el shell — seccion 4.7. */
 

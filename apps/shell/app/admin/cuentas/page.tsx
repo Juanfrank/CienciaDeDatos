@@ -1,4 +1,4 @@
-import { CORREO_DISPONIBLE, canalDeRestablecimiento, cuentasLocales } from '../../../src/server/identidad';
+import { CORREO_DISPONIBLE, canalDeRestablecimiento, cuentasLocales } from '../../../src/server/identity';
 import { CuentasLocales } from '../../../src/components/admin/CuentasLocales';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,7 @@ export default async function PaginaCuentas() {
       <p className="texto-atenuado">
         Son la EXCEPCION, no la via por defecto: cualquier persona con identidad institucional en
         Azure AD debe entrar por ahi, porque asi hereda el SSO, el MFA y el acceso condicional que
-        la institucion ya gestiona. Estas cuentas no heredan nada de eso, y por eso llevan second
+        la institucion ya gestiona. Estas cuentas no heredan nada de eso, y por eso llevan segundo
         factor obligatorio y se auditan aparte.
       </p>
 

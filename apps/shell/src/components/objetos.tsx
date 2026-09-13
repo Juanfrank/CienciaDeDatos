@@ -125,7 +125,7 @@ export function Marco({
   instance,
   result,
   aggregations,
-  iconoDelObjeto,
+  objectIcon,
 }: {
   titulo: string;
   children: React.ReactNode;
@@ -137,14 +137,14 @@ export function Marco({
   /** Para los complementos: la tabla de datos proyecta con los mismos operadores que el objeto. */
   aggregations?: Aggregation[];
   /** El que declara la version del objeto. La presentacion de la instancia lo anula. */
-  iconoDelObjeto?: IconName;
+  objectIcon?: IconName;
 }) {
   /*
    * La presentacion se dibuja AQUI, en el marco comun, y no en cada objeto.
    */
   const presentacion = instance?.presentacion;
   // El icono por defecto lo declara el objeto y viaja con el; la presentacion solo lo anula.
-  const icono = presentacion?.icono ?? iconoDelObjeto;
+  const icono = presentacion?.icono ?? objectIcon;
   const acento = presentacion?.acento ?? 'primario';
   /*
    * La cabecera entera se puede ocultar.
@@ -223,7 +223,7 @@ export function Marco({
   );
 }
 
-export function TarjetaKpi({ titulo, result, instance, slots, aggregations, iconoDelObjeto }: ObjetoProps) {
+export function TarjetaKpi({ titulo, result, instance, slots, aggregations, objectIcon }: ObjetoProps) {
   const r = porRanura(instance, slots);
   // El valor y la comparacion, en ese orden, salen de sus ranuras: con dos medidas mapeadas al
   // reves la tarjeta mostraba la comparacion como cifra principal.
@@ -252,7 +252,7 @@ export function TarjetaKpi({ titulo, result, instance, slots, aggregations, icon
       instance={instance}
       result={result}
       aggregations={aggregations}
-      iconoDelObjeto={iconoDelObjeto}
+      objectIcon={objectIcon}
     >
       {/*
         El valor y su ETIQUETA, que es un texto propio y no el titulo reutilizado.
@@ -327,13 +327,13 @@ export function Barras({
   slots,
   aggregations,
   horizontal,
-  iconoDelObjeto,
+  objectIcon,
 }: ObjetoProps & { horizontal?: boolean }) {
   /*
    * El eje X sale de SU ranura, no de la primera dimension.
    */
   const r = porRanura(instance, slots);
-  const multiplo = r ? r.uno('multiplo') : undefined;
+  const multiple = r ? r.uno('multiplo') : undefined;
   const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
   const serie = r ? r.uno('serie') : fieldKeyDe(instance.binding.dimensions[1]);
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
@@ -341,7 +341,7 @@ export function Barras({
   /*
    * El multiplo va PRIMERO en las dimensiones.
    */
-  const dimensiones = [multiplo, ejeX, serie]
+  const dimensiones = [multiple, ejeX, serie]
     .filter((c): c is string => c !== undefined)
     .map(aFieldRef);
   /*
@@ -366,14 +366,14 @@ export function Barras({
   const formatear = (valor: number, s: number) =>
     measureFormatter(instance.presentacion, medidas[s] ?? '')(valor);
 
-  const particion = multiplo ? splitMultiples(vm) : undefined;
+  const particion = multiple ? splitMultiples(vm) : undefined;
 
   return (
     <Marco
       titulo={titulo}
       instance={instance}
       result={result}
-      iconoDelObjeto={iconoDelObjeto}
+      objectIcon={objectIcon}
       pie={vm.aggregated ? <span className="texto-atenuado">Agregado sobre el dataset cacheado</span> : null}
     >
       {particion ? (
@@ -446,17 +446,17 @@ export function Lineas({
   aggregations,
   area,
   onFiltrar,
-  iconoDelObjeto,
+  objectIcon,
 }: ObjetoProps & { area?: boolean }) {
   const r = porRanura(instance, slots);
-  const multiplo = r ? r.uno('multiplo') : undefined;
+  const multiple = r ? r.uno('multiplo') : undefined;
   const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
 
   const dimension = ejeX ? aFieldRef(ejeX) : undefined;
   // El multiplo va PRIMERO, por lo mismo que en columnas: `toCategorical` compone las etiquetas
   // en el orden de las dimensiones y partirlas supone que el primer trozo es el panel.
-  const dimensiones = [multiplo, ejeX]
+  const dimensiones = [multiple, ejeX]
     .filter((c): c is string => c !== undefined)
     .map(aFieldRef);
   const vm = sortCategories(
@@ -470,7 +470,7 @@ export function Lineas({
   );
   const formatear = (valor: number, s: number) =>
     measureFormatter(instance.presentacion, medidas[s] ?? '')(valor);
-  const particion = multiplo ? splitMultiples(vm) : undefined;
+  const particion = multiple ? splitMultiples(vm) : undefined;
 
   return (
     <Marco
@@ -478,7 +478,7 @@ export function Lineas({
       instance={instance}
       result={result}
       aggregations={aggregations}
-      iconoDelObjeto={iconoDelObjeto}
+      objectIcon={objectIcon}
     >
       {particion ? (
         <Multiplos
@@ -732,7 +732,7 @@ export function Combinado({
   slots,
   aggregations,
   onFiltrar,
-  iconoDelObjeto,
+  objectIcon,
 }: ObjetoProps) {
   const r = porRanura(instance, slots);
   const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
@@ -757,7 +757,7 @@ export function Combinado({
       instance={instance}
       result={result}
       aggregations={aggregations}
-      iconoDelObjeto={iconoDelObjeto}
+      objectIcon={objectIcon}
     >
       <Grafico
         instanceId={instance.instanceId}
@@ -824,7 +824,7 @@ export function Dispersion({
   slots,
   aggregations,
   onFiltrar,
-  iconoDelObjeto,
+  objectIcon,
 }: ObjetoProps) {
   const r = porRanura(instance, slots);
   const punto = r ? r.uno('punto') : fieldKeyDe(instance.binding.dimensions[0]);
@@ -846,7 +846,7 @@ export function Dispersion({
       instance={instance}
       result={result}
       aggregations={aggregations}
-      iconoDelObjeto={iconoDelObjeto}
+      objectIcon={objectIcon}
     >
       <Grafico
         instanceId={instance.instanceId}
@@ -905,14 +905,14 @@ function UnaDimensionUnaMedida({
   slots,
   aggregations,
   onFiltrar,
-  iconoDelObjeto,
+  objectIcon,
   tipo,
   ranuraDeDimension,
   columnaExtra,
 }: ObjetoProps & {
   tipo: 'embudo' | 'cascada';
   ranuraDeDimension: string;
-  columnaExtra: { heading: string; celda: (valores: number[], i: number) => string };
+  columnaExtra: { heading: string; cell: (valores: number[], i: number) => string };
 }) {
   const r = porRanura(instance, slots);
   const dim = r ? r.uno(ranuraDeDimension) : fieldKeyDe(instance.binding.dimensions[0]);
@@ -939,7 +939,7 @@ function UnaDimensionUnaMedida({
       instance={instance}
       result={result}
       aggregations={aggregations}
-      iconoDelObjeto={iconoDelObjeto}
+      objectIcon={objectIcon}
     >
       <Grafico
         instanceId={instance.instanceId}
@@ -975,7 +975,7 @@ function UnaDimensionUnaMedida({
                     {...(onFiltrar ? { onFiltrar } : {})}
                   />
                   <td className="es-numero">{formatear(punto.values[0] ?? null)}</td>
-                  <td className="es-numero">{columnaExtra.celda(valores, i)}</td>
+                  <td className="es-numero">{columnaExtra.cell(valores, i)}</td>
                 </tr>
               ))}
             </tbody>
@@ -995,7 +995,7 @@ export function Embudo(props: ObjetoProps) {
       ranuraDeDimension="etapa"
       columnaExtra={{
         heading: compare === 'anterior' ? 'De la anterior' : 'De la primera',
-        celda: (valores, i) => {
+        cell: (valores, i) => {
           const base = compare === 'anterior' ? (valores[i - 1] ?? valores[i]) : valores[0];
           const valor = valores[i];
           // Una etapa de referencia en cero no da «caida infinita»: da una comparacion sin
@@ -1018,7 +1018,7 @@ export function Cascada(props: ObjetoProps) {
         // El acumulado es lo que la cascada DIBUJA: sin esta columna, el respaldo seria una lista
         // de contribuciones y la altura de cada barra —que es el acumulado— se perderia.
         heading: 'Acumulado',
-        celda: (valores, i) => {
+        cell: (valores, i) => {
           const hasta = valores.slice(0, i + 1).reduce((suma, v) => suma + v, 0);
           return String(hasta);
         },
@@ -1035,7 +1035,7 @@ export function MapaDeArbol({
   slots,
   aggregations,
   onFiltrar,
-  iconoDelObjeto,
+  objectIcon,
 }: ObjetoProps) {
   const r = porRanura(instance, slots);
   const grupo = r ? r.uno('grupo') : fieldKeyDe(instance.binding.dimensions[0]);
@@ -1066,7 +1066,7 @@ export function MapaDeArbol({
       instance={instance}
       result={result}
       aggregations={aggregations}
-      iconoDelObjeto={iconoDelObjeto}
+      objectIcon={objectIcon}
     >
       <Grafico
         instanceId={instance.instanceId}
@@ -1123,7 +1123,7 @@ export function Circular({
   slots,
   aggregations,
   onFiltrar,
-  iconoDelObjeto,
+  objectIcon,
   hole,
 }: ObjetoProps & { hole?: number }) {
   const r = porRanura(instance, slots);
@@ -1161,7 +1161,7 @@ export function Circular({
       instance={instance}
       result={result}
       aggregations={aggregations}
-      iconoDelObjeto={iconoDelObjeto}
+      objectIcon={objectIcon}
     >
       <Grafico
         instanceId={instance.instanceId}
@@ -1229,7 +1229,7 @@ export function Medidor({
   instance,
   slots,
   aggregations,
-  iconoDelObjeto,
+  objectIcon,
 }: ObjetoProps) {
   const r = porRanura(instance, slots);
   const medidas = r
@@ -1254,7 +1254,7 @@ export function Medidor({
       instance={instance}
       result={result}
       aggregations={aggregations}
-      iconoDelObjeto={iconoDelObjeto}
+      objectIcon={objectIcon}
     >
       <Grafico
         instanceId={instance.instanceId}
@@ -1306,7 +1306,7 @@ export function Medidor({
   );
 }
 
-export function Tabla({ titulo, result, instance, aggregations, iconoDelObjeto }: ObjetoProps) {
+export function Tabla({ titulo, result, instance, aggregations, objectIcon }: ObjetoProps) {
   // La tabla dibuja SU proyeccion, no el dataset en crudo.
   //
   // Antes pintaba todas las columnas del dataset, incluidas las que su mapeo no declara, y las
@@ -1321,7 +1321,7 @@ export function Tabla({ titulo, result, instance, aggregations, iconoDelObjeto }
       instance={instance}
       result={result}
       aggregations={aggregations}
-      iconoDelObjeto={iconoDelObjeto}
+      objectIcon={objectIcon}
     >
       {/*
         Una tabla tiene varias medidas y cada una con su formato: el formateador se elige POR
@@ -1340,7 +1340,7 @@ export function Tabla({ titulo, result, instance, aggregations, iconoDelObjeto }
   );
 }
 
-export function Matriz({ titulo, result, instance, slots, aggregations, iconoDelObjeto }: ObjetoProps) {
+export function Matriz({ titulo, result, instance, slots, aggregations, objectIcon }: ObjetoProps) {
   const r = porRanura(instance, slots);
   // Varios niveles por pozo: es lo que convierte el cruce plano en una jerarquia.
   const dimsFila = (r ? r.varios('filas') : instance.binding.dimensions.slice(0, 1).map(fieldKey))
@@ -1364,7 +1364,7 @@ export function Matriz({ titulo, result, instance, slots, aggregations, iconoDel
       instance={instance}
       result={result}
       aggregations={aggregations}
-      iconoDelObjeto={iconoDelObjeto}
+      objectIcon={objectIcon}
     >
       <TablaDeMatriz vm={vm} titulo={titulo} instance={instance} />
     </Marco>
@@ -1382,7 +1382,7 @@ export interface ObjetoProps {
   /** Filtrado cruzado (4.4): anade un filtro a la query string, no a un estado paralelo. */
   onFiltrar?: (fieldName: string, valor: string) => void;
   /** El icono que declara la version del objeto en el catalogo. */
-  iconoDelObjeto?: IconName;
+  objectIcon?: IconName;
 }
 
 /** `FieldRef` -> 'Tabla.Campo', tolerando que no haya campo. */

@@ -1,5 +1,5 @@
 import { EditorDeAmbito, type DestinoDeAmbito } from '../../../src/components/admin/EditorDeAmbito';
-import { getGeneralTree, listTeams } from '../../../src/server/contexto';
+import { getGeneralTree, listTeams } from '../../../src/server/context';
 import type { NavNode } from '@app/access-control';
 
 export const dynamic = 'force-dynamic';
@@ -36,7 +36,7 @@ export default async function PaginaAmbitos() {
       <p className="texto-atenuado">
         Cada capa solo puede RESTRINGIR respecto de la anterior. Ampliar es posible, pero exige
         una justificacion explicita y queda registrada aparte: el valor por defecto de cualquier
-        combinacion de rules es siempre "mas restrictivo o igual".
+        combinacion de reglas es siempre "mas restrictivo o igual".
       </p>
       <EditorDeAmbito destinos={destinos} />
     </section>

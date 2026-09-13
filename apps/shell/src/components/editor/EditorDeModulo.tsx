@@ -11,7 +11,7 @@ import type {
 } from '@app/module-model';
 import { findFreeSlot } from '@app/module-model';
 import { initialSettings } from '@app/ui-components';
-import type { PaletaDelEditor } from '../../server/editor';
+import type { EditorPalette } from '../../server/editor';
 import type { ObjetoSerializado } from '../../server/serializar';
 import { CabeceraDeEditor } from './CabeceraDeEditor';
 import { Lienzo } from './Lienzo';
@@ -30,7 +30,7 @@ export function EditorDeModulo({
   objetosIniciales: ObjetoSerializado[];
   diagnosticos: ModuleDiagnostics;
   bloqueos: PublishBlocker[];
-  palette: PaletaDelEditor;
+  palette: EditorPalette;
   editable: boolean;
 }) {
   const router = useRouter();
@@ -179,7 +179,7 @@ export function EditorDeModulo({
       {!editable ? (
         <p className="aviso" data-testid="editor-solo-lectura">
           Este modulo no se puede editar aqui: solo se editan los borradores propios. Un modulo
-          publicado se retira before de cambiarlo, para que el cambio pase por aprobacion.
+          publicado se retira antes de cambiarlo, para que el cambio pase por aprobacion.
         </p>
       ) : null}
 
@@ -194,7 +194,7 @@ export function EditorDeModulo({
         </div>
       ) : (
         <p className="texto-atenuado" data-testid="editor-sin-bloqueos">
-          Sin problems pendientes: el modulo se puede proponer para publicacion.
+          Sin problemas pendientes: el modulo se puede proponer para publicacion.
         </p>
       )}
 
@@ -227,7 +227,7 @@ export function EditorDeModulo({
       */}
       {diag.items.some((d) => d.broken) ? (
         <div className="aviso aviso--problema" data-testid="editor-problemas">
-          <p>Objetos con problems de scheme:</p>
+          <p>Objetos con problemas de esquema:</p>
           <ul>
             {diag.items
               .filter((d) => d.broken)

@@ -7,10 +7,10 @@ import {
   guardarBorrador,
   moduloVisiblePorSlug,
 } from '../../../../../src/server/cicloDeVida';
-import { diagnosticarDefinicion, vistaPreviaDelBorrador } from '../../../../../src/server/datos';
+import { diagnosticarDefinicion, vistaPreviaDelBorrador } from '../../../../../src/server/data';
 import { serializarObjeto } from '../../../../../src/server/serializar';
-import { respuestaDeError, sinSesion } from '../../../../../src/server/respuestas';
-import { obtenerSesion } from '../../../../../src/server/sesion';
+import { respuestaDeError, withoutSession } from '../../../../../src/server/respuestas';
+import { obtenerSesion } from '../../../../../src/server/session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic';
 /** La definicion con sus diagnosticos, que es lo que el editor necesita para dibujarla. */
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const { slug } = await params;
   const modulo = await moduloVisiblePorSlug(slug, await actorDe(sesion));
@@ -36,7 +36,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
 
 export async function PUT(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const { slug } = await params;
   const actor = await actorDe(sesion);
@@ -78,7 +78,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const sesion = await obtenerSesion();
-  if (!sesion) return sinSesion();
+  if (!sesion) return withoutSession();
 
   const { slug } = await params;
   const actor = await actorDe(sesion);

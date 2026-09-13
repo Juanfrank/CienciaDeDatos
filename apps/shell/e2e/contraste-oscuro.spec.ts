@@ -70,7 +70,7 @@ test('los dos juegos de variables vienen del MISMO modo', async ({ page }) => {
   expect(derived).toBe(md);
 });
 
-test.describe('paginas de modulo en dark', () => {
+test.describe('paginas de modulo en tema oscuro', () => {
   const paginas = [
     ['familia', 'columnas, barras y area'],
     ['proporcion', 'pastel, dona y medidor'],
@@ -84,7 +84,7 @@ test.describe('paginas de modulo en dark', () => {
   ] as const;
 
   for (const [slug, que] of paginas) {
-    test(`/${slug} — ${que} — no tiene infracciones WCAG 2.1 AA en dark`, async ({ page }) => {
+    test(`/${slug} — ${que} — no tiene infracciones WCAG 2.1 AA en tema oscuro`, async ({ page }) => {
       await page.goto(`/m/composicion/${slug}`);
       // Se espera a que ECharts monte: el grafico lee los colores de las variables CSS al
       // dibujar, asi que antes de montar la pagina no tiene todavia los colores del tema.
@@ -95,7 +95,7 @@ test.describe('paginas de modulo en dark', () => {
   }
 });
 
-test.describe('el resto de la aplicacion en dark', () => {
+test.describe('el resto de la aplicacion en tema oscuro', () => {
   test('un modulo con tabla, KPI y segmentadores', async ({ page }) => {
     await page.goto('/m/casos-pendientes');
     await expect(page.getByTestId('tabla')).toBeVisible();
@@ -117,7 +117,7 @@ test.describe('el resto de la aplicacion en dark', () => {
     // mayor concentracion de texto pequeno sobre superficies elevadas de toda la aplicacion.
     const slug = `dark-${Date.now()}`;
     const creado = await page.request.post('/api/modulos', {
-      data: { nombre: 'Modulo en dark', slug },
+      data: { nombre: 'Modulo en tema oscuro', slug },
     });
     expect(creado.ok(), await creado.text()).toBe(true);
 

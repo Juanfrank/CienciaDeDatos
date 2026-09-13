@@ -1,6 +1,6 @@
 import type { ModuleDefinition } from '@app/module-model';
 import { escribir, leer } from './almacenCompartido';
-import { modulosDemo } from './modulos';
+import { modulosDemo } from './modules';
 
 /** Almacen de definiciones de modulo — secciones 4.1 y 4.2. */
 export interface ModuleStore {
@@ -11,7 +11,7 @@ export interface ModuleStore {
   remove(moduleId: string): Promise<boolean>;
 }
 
-export const CLAVE_MODULOS = 'app:modulos';
+export const KEY_MODULES = 'app:modulos';
 
 const clonar = <T>(valor: T): T => JSON.parse(JSON.stringify(valor)) as T;
 
@@ -19,11 +19,11 @@ export class StoreModuleRepository implements ModuleStore {
   private async all(): Promise<ModuleDefinition[]> {
     // Igual que el gobierno: sin nada guardado se devuelve la semilla SIN persistirla, para no
     // meter una escritura en el camino de lectura.
-    return (await leer<ModuleDefinition[]>(CLAVE_MODULOS)) ?? clonar(modulosDemo);
+    return (await leer<ModuleDefinition[]>(KEY_MODULES)) ?? clonar(modulosDemo);
   }
 
-  private async guardarTodos(modulos: ModuleDefinition[]): Promise<void> {
-    await escribir(CLAVE_MODULOS, modulos);
+  private async guardarTodos(modules: ModuleDefinition[]): Promise<void> {
+    await escribir(KEY_MODULES, modules);
   }
 
   async list(): Promise<ModuleDefinition[]> {
@@ -55,4 +55,4 @@ export class StoreModuleRepository implements ModuleStore {
   }
 }
 
-export const modulos: ModuleStore = new StoreModuleRepository();
+export const modules: ModuleStore = new StoreModuleRepository();

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { Actor } from '@app/access-control';
 import { PermissionError } from '@app/access-control';
 import { AdminError, assertAdmin } from '../../../src/server/admin';
-import { obtenerSesion } from '../../../src/server/sesion';
+import { obtenerSesion } from '../../../src/server/session';
 
 /** Envoltorio de los handlers del panel. */
 export async function conAdmin<T>(

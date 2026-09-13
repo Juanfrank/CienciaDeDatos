@@ -9,20 +9,20 @@ import {
   materialVariables,
   type ColorMode,
 } from '@app/design-tokens';
-import { esModoDeColor } from './tema';
+import { colorModeIs } from './theme';
 
 /** El modo de color de la aplicacion — seccion 4.3. */
 describe('que modo se pide', () => {
   it('acepta los dos modos que existen', () => {
-    expect(esModoDeColor('light')).toBe(true);
-    expect(esModoDeColor('dark')).toBe(true);
+    expect(colorModeIs('light')).toBe(true);
+    expect(colorModeIs('dark')).toBe(true);
   });
 
   it('cualquier otra cosa no es un modo, y por tanto cae en light', () => {
     // Una cookie es texto que manda el cliente: mal escrita, con otra caja, vacia o manipulada
     // tiene que dejar la aplicacion en un estado dibujable, no a medio tema.
     for (const valor of ['obscuro', 'Dark', 'LIGHT', '', undefined, 'null']) {
-      expect(esModoDeColor(valor), String(valor)).toBe(false);
+      expect(colorModeIs(valor), String(valor)).toBe(false);
     }
   });
 });
@@ -48,7 +48,7 @@ describe('el tema cubre todas las variables que la hoja de estilo usa', () => {
     '--fila-escritorio',
   ];
 
-  const emitidasEn = (mode: ColorMode): Set<string> => {
+  const emittedIn = (mode: ColorMode): Set<string> => {
     const theme = mode === 'light' ? lightTheme : darkTheme;
     return new Set([
       ...Object.keys(materialVariables(theme)),
@@ -58,12 +58,12 @@ describe('el tema cubre todas las variables que la hoja de estilo usa', () => {
 
   for (const mode of ['light', 'dark'] as ColorMode[]) {
     it(`${mode}: ninguna variable leida se queda sin valor`, () => {
-      const emitidas = emitidasEn(mode);
-      const huerfanas = [...usadas].filter(
-        (v) => !definidasEnCss.has(v) && !emitidas.has(v) && !DE_COMPONENTE.includes(v),
+      const emitted = emittedIn(mode);
+      const orphans = [...usadas].filter(
+        (v) => !definidasEnCss.has(v) && !emitted.has(v) && !DE_COMPONENTE.includes(v),
       );
 
-      expect(huerfanas.sort()).toEqual([]);
+      expect(orphans.sort()).toEqual([]);
     });
   }
 

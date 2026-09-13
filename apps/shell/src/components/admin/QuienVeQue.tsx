@@ -37,15 +37,15 @@ const describir = (scope: Paso['resultado']): string =>
 export function QuienVeQue({
   usuarios,
   equipos,
-  modulos,
+  modules,
 }: {
   usuarios: string[];
   equipos: { id: string; name: string }[];
-  modulos: { moduleId: string; name: string }[];
+  modules: { moduleId: string; name: string }[];
 }) {
   const [userId, setUserId] = useState(usuarios[0] ?? '');
   const [teamId, setTeamId] = useState(equipos[0]?.id ?? '');
-  const [moduleId, setModuleId] = useState(modulos[0]?.moduleId ?? '');
+  const [moduleId, setModuleId] = useState(modules[0]?.moduleId ?? '');
   const [resultado, setResultado] = useState<Resultado | null>(null);
 
   const consultar = async () => {
@@ -77,13 +77,13 @@ export function QuienVeQue({
         <label className="campo">
           <span>Modulo</span>
           <select value={moduleId} data-testid="qvq-modulo" onChange={(e) => setModuleId(e.target.value)}>
-            {modulos.map((m) => (
+            {modules.map((m) => (
               <option key={m.moduleId} value={m.moduleId}>{m.name}</option>
             ))}
           </select>
         </label>
         <button type="button" data-testid="qvq-consultar" onClick={() => void consultar()}>
-          Resolver
+          Resolutor
         </button>
       </div>
 

@@ -1,6 +1,6 @@
 import { EditorDeEquipos } from '../../../src/components/admin/EditorDeEquipos';
 import { administradores } from '../../../src/server/admin';
-import { getGeneralTree, listTeams, listUsers } from '../../../src/server/contexto';
+import { getGeneralTree, listTeams, listUsers } from '../../../src/server/context';
 import { gobierno } from '../../../src/server/gobierno';
 import type { NavNode } from '@app/access-control';
 
@@ -24,7 +24,7 @@ export default async function PaginaEquipos() {
     <section>
       <h2>Equipos y membresia</h2>
       <p className="texto-atenuado">
-        Un equipo es la unit de agrupacion tanto para el acceso a modulos como para el ambito de
+        Un equipo es la unidad de agrupacion tanto para el acceso a modulos como para el ambito de
         datos por defecto. Su acceso se concede otorgando nodos del arbol real, para que el acceso
         y la estructura nunca diverjan.
       </p>

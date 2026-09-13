@@ -439,7 +439,7 @@ export function Presentacion({
           {admite("orden") ? (
             <>
               <label className="formulario__campo">
-                <span>Ordenar el axis por</span>
+                <span>Ordenar el eje por</span>
                 <select
                   value={p.orden?.por ?? "ninguno"}
                   disabled={guardando}
@@ -455,13 +455,13 @@ export function Presentacion({
                 >
                   <option value="ninguno">El orden del dataset</option>
                   <option value="categoria">Nombre de la categoria</option>
-                  <option value="valor">Valor de la first medida</option>
+                  <option value="valor">Valor de la primera medida</option>
                 </select>
               </label>
 
               {p.orden?.por ? (
                 <label className="formulario__campo">
-                  <span>Direction</span>
+                  <span>Direccion</span>
                   <select
                     value={p.orden.direction ?? "asc"}
                     disabled={guardando}
@@ -529,10 +529,10 @@ export function Presentacion({
                 poner({ multiplos: { ...p.multiplos, sameScale: e.target.checked } })
               }
             />{" "}
-            Misma scale en all los panels
+            Misma escala en todos los paneles
           </label>
           <span className="campo__pista">
-            Apagarla solo tiene sentido cuando lo que se compara es la SHAPE de cada serie y no su
+            Apagarla solo tiene sentido cuando lo que se compara es la FORMA de cada serie y no su
             magnitud.
           </span>
         </Section>
@@ -667,7 +667,7 @@ export function Presentacion({
           </label>
 
           <label className="formulario__campo">
-            <span>Etiquetas sobre las slices</span>
+            <span>Etiquetas sobre las porciones</span>
             <select
               value={p.circular?.labels ?? "porcentaje"}
               disabled={guardando}
@@ -710,7 +710,7 @@ export function Presentacion({
             Total en el centro
           </label>
           {(p.circular?.radioInterior ?? 0) === 0 ? (
-            <p className="campo__pista">Sin hole no hay centro donde escribir el total.</p>
+            <p className="campo__pista">Sin hueco no hay centro donde escribir el total.</p>
           ) : null}
         </Section>
       ) : null}
@@ -795,7 +795,7 @@ export function Presentacion({
               data-testid={`${prueba}-mostrar-valor`}
               onChange={(e) => poner({ medidor: { ...p.medidor, showValue: e.target.checked } })}
             />{" "}
-            Mostrar la figure bajo la aguja
+            Mostrar la cifra bajo la aguja
           </label>
         </Section>
       ) : null}
@@ -863,7 +863,7 @@ export function Presentacion({
               data-testid={`${prueba}-eje-secundario`}
               onChange={(e) => poner({ combinado: { axisSecondary: e.target.checked } })}
             />{" "}
-            Medir las lineas en un axis aparte, a la derecha
+            Medir las lineas en un eje aparte, a la derecha
           </label>
           {/*
             La advertencia va aqui y no en la ayuda del campo, a proposito.
@@ -872,8 +872,8 @@ export function Presentacion({
             del objeto— pero quien lo enciende tiene que leer que lo esta haciendo.
           */}
           <span className="campo__pista">
-            Con dos escalas, una line por encima de las gridColumns puede valer la mitad. Rotule los
-            dos ejes en la section «Ejes» para que se pueda leer sin adivinar.
+            Con dos escalas, una linea por encima de las gridColumns puede valer la mitad. Rotule los
+            dos ejes en la seccion «Ejes» para que se pueda leer sin adivinar.
           </span>
         </Section>
       ) : null}
@@ -890,11 +890,11 @@ export function Presentacion({
               data-testid={`${prueba}-eje-x`}
               onChange={(e) => poner({ ejes: { ...p.ejes, mostrarX: e.target.checked } })}
             />{" "}
-            Mostrar el axis de categorias
+            Mostrar el eje de categorias
           </label>
 
           <label className="formulario__campo">
-            <span>Titulo del axis de categorias</span>
+            <span>Titulo del eje de categorias</span>
             <input
               defaultValue={p.ejes?.tituloX ?? ""}
               disabled={guardando}
@@ -910,7 +910,7 @@ export function Presentacion({
 
           {p.combinado?.axisSecondary ? (
             <label className="formulario__campo">
-              <span>Titulo del axis de la derecha</span>
+              <span>Titulo del eje de la derecha</span>
               <input
                 defaultValue={p.ejes?.tituloY2 ?? ""}
                 disabled={guardando}
@@ -929,11 +929,11 @@ export function Presentacion({
               data-testid={`${prueba}-eje-y`}
               onChange={(e) => poner({ ejes: { ...p.ejes, mostrarY: e.target.checked } })}
             />{" "}
-            Mostrar el axis de valores
+            Mostrar el eje de valores
           </label>
 
           <label className="formulario__campo">
-            <span>Titulo del axis de valores</span>
+            <span>Titulo del eje de valores</span>
             <input
               defaultValue={p.ejes?.tituloY ?? ""}
               disabled={guardando}
@@ -950,7 +950,7 @@ export function Presentacion({
               data-testid={`${prueba}-cuadricula`}
               onChange={(e) => poner({ ejes: { ...p.ejes, gridlines: e.target.checked } })}
             />{" "}
-            Lineas de gridlines
+            Lineas de cuadricula
           </label>
 
           <label className="editor__interruptor">
@@ -964,7 +964,7 @@ export function Presentacion({
             Empezar en cero
           </label>
           <p className="campo__pista">
-            Un axis que no empieza en cero hace que una diferencia del 2 % parezca el triple.
+            Un eje que no empieza en cero hace que una diferencia del 2 % parezca el triple.
             Apagarlo deberia ser una decision, no el comportamiento por omision.
           </p>
 
@@ -975,7 +975,7 @@ export function Presentacion({
           */}
           <div className="formulario__pareja">
             <label className="formulario__campo">
-              <span>Minimo del axis</span>
+              <span>Minimo del eje</span>
               <input
                 type="number"
                 defaultValue={p.ejes?.minimoY ?? ""}
@@ -992,7 +992,7 @@ export function Presentacion({
               />
             </label>
             <label className="formulario__campo">
-              <span>Maximo del axis</span>
+              <span>Maximo del eje</span>
               <input
                 type="number"
                 defaultValue={p.ejes?.maximoY ?? ""}
@@ -1015,7 +1015,7 @@ export function Presentacion({
           </span>
 
           <label className="formulario__campo">
-            <span>Girar los rotulos del axis de categorias</span>
+            <span>Girar los rotulos del eje de categorias</span>
             <select
               value={String(p.ejes?.rotarX ?? 0)}
               disabled={guardando}
@@ -1039,7 +1039,7 @@ export function Presentacion({
               de cada tres categorias sin decir que las demas siguen ahi. Girados se ven todas.
             */}
             <span className="campo__pista">
-              Con names largos, en horizontal el grafico esconde los que no caben.
+              Con nombres largos, en horizontal el grafico esconde los que no caben.
             </span>
           </label>
         </Section>
@@ -1108,7 +1108,7 @@ function SelectoresDelPanel({
   if (efectivos.length === 0) {
     return (
       <p className="texto-atenuado" data-testid={`${prueba}-vacio`}>
-        Marque al menos una dimension arriba para configurar sus pickers.
+        Marque al menos una dimension arriba para configurar sus selectores.
       </p>
     );
   }
@@ -1334,7 +1334,7 @@ function RenglonDeFormato({
                 la institucion que publica —«RD$», «DOP», «$»— y una lista cerrada obligaria a
                 tocar codigo cada vez que alguien reporte en otra divisa.
               */}
-              <span className="campo__pista">Precede a la figure. Por defecto RD$.</span>
+              <span className="campo__pista">Precede a la cifra. Por defecto RD$.</span>
             </label>
           ) : null}
 

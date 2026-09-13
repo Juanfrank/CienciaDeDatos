@@ -95,15 +95,15 @@ export function TablaOrdenable({
         <tbody>
           {dataRows.map((fila, i) => (
             <tr key={i}>
-              {fila.map((celda, j) => {
-                const esCifra = typeof celda === 'number';
+              {fila.map((cell, j) => {
+                const esCifra = typeof cell === 'number';
                 /*
                  * El color se calcula POR CELDA, que es el unico sitio donde se puede: depende del
                  * valor. Lo que no se recalcula por celda es el formateador, que ya sale resuelto
                  * por columna — en una tabla larga eso son miles de llamadas.
                  */
                 const color = esCifra
-                  ? conditionalColor(condicional, celda, projected.columns[j]?.name)
+                  ? conditionalColor(condicional, cell, projected.columns[j]?.name)
                   : undefined;
                 return (
                   <td
@@ -111,7 +111,7 @@ export function TablaOrdenable({
                     className={esCifra ? 'es-numero' : ''}
                     style={color ? estiloDeTexto({ color }) : undefined}
                   >
-                    {esCifra ? (formateadores[j] ?? String)(celda) : String(celda ?? '')}
+                    {esCifra ? (formateadores[j] ?? String)(cell) : String(cell ?? '')}
                   </td>
                 );
               })}

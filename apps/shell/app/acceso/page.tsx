@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 import { defaultIdentity } from '@app/design-tokens';
 import { Acceso } from '../../src/components/Acceso';
-import { AZURE_AD_DISPONIBLE } from '../../src/server/identidad';
-import { obtenerSesion } from '../../src/server/sesion';
+import { AZURE_AD_DISPONIBLE } from '../../src/server/identity';
+import { obtenerSesion } from '../../src/server/session';
 
 /** Pantalla de acceso (4.7). */
 export const metadata = { title: 'Iniciar sesion' };
