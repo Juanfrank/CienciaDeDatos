@@ -211,6 +211,98 @@ const PRESENTACION_DE_GRAFICO_CON_CONDICIONAL = presenta(
 );
 
 /**
+ * El contrato de un combinado, compartido por sus versiones.
+ *
+ * Se factoriza por el mismo motivo que los demas: 1.0.0 y 1.1.0 piden exactamente los mismos
+ * campos y solo cambian en lo que admiten PRESENTAR, y con los pozos escritos dos veces un
+ * arreglo en uno deja al otro pidiendo cosas distintas para el mismo objeto.
+ */
+const CONTRATO_COMBINADO: VisualObjectDefinition['versions'][number]['dataContract'] = {
+  dimensions: { min: 1, max: 1 },
+  measures: { min: 2, max: 6 },
+  notes:
+    'Las medidas del pozo Columnas se dibujan como barras; las del pozo Lineas, como ' +
+    'linea. Con eje secundario, la linea se mide en la escala de la derecha.',
+  pozos: [
+    {
+      id: 'eje-x',
+      etiqueta: 'Eje X',
+      tipo: 'dimension',
+      max: 1,
+      min: 1,
+      ayuda: 'La dimension que reparte las columnas.',
+    },
+    {
+      id: 'columnas',
+      etiqueta: 'Columnas',
+      tipo: 'medida',
+      max: 3,
+      min: 1,
+      ayuda: 'Las medidas que se dibujan como barras.',
+    },
+    {
+      id: 'lineas',
+      etiqueta: 'Lineas',
+      tipo: 'medida',
+      max: 3,
+      min: 1,
+      ayuda: 'Las medidas que se dibujan como linea.',
+    },
+  ],
+};
+
+/** Lo que admite presentar un combinado en su version inicial. */
+const PRESENTACION_COMBINADA = presenta(
+  'formato',
+  'formatos',
+  'leyenda',
+  'etiquetasDeDato',
+  'ejes',
+  'orden',
+  'combinado',
+  'referencias',
+  'coloresDeSerie',
+  'tooltip',
+);
+
+/**
+ * El contrato de la matriz jerarquica, compartido por 1.1.0 y 1.2.0.
+ *
+ * Se factoriza como los demas: las dos piden los mismos campos y solo cambian en que 1.2.0
+ * admite ademas el formato condicional.
+ */
+const CONTRATO_DE_MATRIZ: VisualObjectDefinition['versions'][number]['dataContract'] = {
+  dimensions: { min: 1, max: 5 },
+  measures: { min: 1, max: 4 },
+  notes:
+    'Las dimensiones de fila anidan en el orden en que se mapean, y las de columna igual. ' +
+    'Cada nivel trae su subtotal, calculado sobre las filas de origen.',
+  pozos: [
+    { id: 'filas', etiqueta: 'Filas', tipo: 'dimension', max: 3, min: 1 },
+    {
+      id: 'columnas',
+      etiqueta: 'Columnas',
+      tipo: 'dimension',
+      max: 2,
+      ayuda: 'Opcional. Sin ninguna, la matriz es una tabla agrupada por sus filas.',
+    },
+    { id: 'valores', etiqueta: 'Valores', tipo: 'medida', max: 4, min: 1 },
+  ],
+};
+
+/**
+ * El contrato de las barras horizontales, compartido por sus versiones.
+ *
+ * Mismo motivo: 1.0.0 y 1.1.0 piden los mismos campos y solo cambian en el formato condicional.
+ */
+const CONTRATO_DE_BARRAS_H: VisualObjectDefinition['versions'][number]['dataContract'] = {
+  dimensions: { min: 1, max: 2 },
+  measures: { min: 1, max: 4 },
+  notes: 'Cada medida es una serie. La segunda dimension, si existe, agrupa las barras.',
+  pozos: POZOS_DE_BARRAS(4),
+};
+
+/**
  * Lo que un circular admite presentar.
  *
  * NO lleva `ejes`, `apilado` ni `orden`: no tiene ejes, no apila nada, y su orden lo decide
@@ -369,6 +461,35 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         },
         presentation: PRESENTACION_DE_TABLA,
       },
+      /*
+       * 1.3.0 — la ayuda de mapeo, que era lo unico que a la tabla le faltaba.
+       *
+       * `notes` es lo que el editor ensena junto a los pozos para decir que va en cada uno, y la
+       * tabla era el UNICO objeto de datos del catalogo sin ella: sus tres versiones salieron sin
+       * notas. No es cosmetico — es la diferencia entre un pozo llamado «Columnas de cifra» y
+       * saber que una tabla sin ninguna dimension sigue siendo valida y devuelve una fila.
+       *
+       * Version nueva y no un retoque de 1.2.0 porque `notes` vive DENTRO del contrato de datos, y
+       * el contrato es lo que la version congela (4.5).
+       */
+      {
+        version: '1.3.0',
+        publishedAt: '2026-09-13',
+        changelog: 'Ayuda de mapeo en el editor: que va en cada pozo y que pasa si se deja vacio.',
+        certification: certificacionInicial,
+        dataContract: {
+          dimensions: { min: 0, max: 8 },
+          measures: { min: 0, max: 12 },
+          notes:
+            'Cada dimension es una columna de detalle y cada medida una columna de cifra. Sin ' +
+            'ninguna dimension la tabla devuelve una sola fila con los totales.',
+          pozos: [
+            { id: 'columnas-dim', etiqueta: 'Columnas de detalle', tipo: 'dimension', max: 8 },
+            { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 12 },
+          ],
+        },
+        presentation: PRESENTACION_DE_TABLA,
+      },
     ],
   },
   {
@@ -510,14 +631,26 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: barras horizontales, hasta cuatro medidas, con apilado y 100 %.',
-        {
-          dimensions: { min: 1, max: 2 },
-          measures: { min: 1, max: 4 },
-          notes: 'Cada medida es una serie. La segunda dimension, si existe, agrupa las barras.',
-          pozos: POZOS_DE_BARRAS(4),
-        },
+        CONTRATO_DE_BARRAS_H,
         PRESENTACION_DE_GRAFICO,
       ),
+      /*
+       * 1.1.0 — formato condicional, que las columnas tienen desde su 1.4.0.
+       *
+       * El mismo constructor dibuja los dos objetos y `barrasConColor` colorea por valor sin
+       * mirar la orientacion: la capacidad estaba entera y lo unico que faltaba era DECLARARLA.
+       * Sin declararla el editor no la ofrece, asi que se podia usar escribiendo la instancia a
+       * mano y no desde el panel — que es la peor forma de tener una funcion, porque parece que
+       * no existe.
+       */
+      {
+        version: '1.1.0',
+        publishedAt: '2026-09-13',
+        changelog: 'Formato condicional: el color de una barra puede depender de su valor.',
+        certification: certificacionInicial,
+        dataContract: CONTRATO_DE_BARRAS_H,
+        presentation: PRESENTACION_DE_GRAFICO_CON_CONDICIONAL,
+      },
     ],
   },
   {
@@ -614,52 +747,24 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: columnas y lineas por pozo, con eje secundario opcional.',
-        {
-          dimensions: { min: 1, max: 1 },
-          measures: { min: 2, max: 6 },
-          notes:
-            'Las medidas del pozo Columnas se dibujan como barras; las del pozo Lineas, como ' +
-            'linea. Con eje secundario, la linea se mide en la escala de la derecha.',
-          pozos: [
-            {
-              id: 'eje-x',
-              etiqueta: 'Eje X',
-              tipo: 'dimension',
-              max: 1,
-              min: 1,
-              ayuda: 'La dimension que reparte las columnas.',
-            },
-            {
-              id: 'columnas',
-              etiqueta: 'Columnas',
-              tipo: 'medida',
-              max: 3,
-              min: 1,
-              ayuda: 'Las medidas que se dibujan como barras.',
-            },
-            {
-              id: 'lineas',
-              etiqueta: 'Lineas',
-              tipo: 'medida',
-              max: 3,
-              min: 1,
-              ayuda: 'Las medidas que se dibujan como linea.',
-            },
-          ],
-        },
-        presenta(
-          'formato',
-          'formatos',
-          'leyenda',
-          'etiquetasDeDato',
-          'ejes',
-          'orden',
-          'combinado',
-          'referencias',
-          'coloresDeSerie',
-          'tooltip',
-        ),
+        CONTRATO_COMBINADO,
+        PRESENTACION_COMBINADA,
       ),
+      /*
+       * 1.1.0 — apilado, que el constructor ya honraba.
+       *
+       * Las columnas de un combinado se apilan como las de cualquier otro grafico de barras: es
+       * la misma funcion. Sin `apilado` declarado, el panel no ofrecia la opcion y el unico modo
+       * de apilarlas era escribir la presentacion a mano.
+       */
+      {
+        version: '1.1.0',
+        publishedAt: '2026-09-13',
+        changelog: 'Las columnas se pueden apilar, tambien al 100 %.',
+        certification: certificacionInicial,
+        dataContract: CONTRATO_COMBINADO,
+        presentation: [...PRESENTACION_COMBINADA, 'apilado'],
+      },
     ],
   },
   {
@@ -967,25 +1072,24 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           'Jerarquia en filas y columnas (hasta tres y dos niveles), varias medidas, subtotales ' +
           'por nivel, colapsar y expandir, y orden por cualquier encabezado.',
         certification: certificacionInicial,
-        dataContract: {
-          dimensions: { min: 1, max: 5 },
-          measures: { min: 1, max: 4 },
-          notes:
-            'Las dimensiones de fila anidan en el orden en que se mapean, y las de columna igual. ' +
-            'Cada nivel trae su subtotal, calculado sobre las filas de origen.',
-          pozos: [
-            { id: 'filas', etiqueta: 'Filas', tipo: 'dimension', max: 3, min: 1 },
-            {
-              id: 'columnas',
-              etiqueta: 'Columnas',
-              tipo: 'dimension',
-              max: 2,
-              ayuda: 'Opcional. Sin ninguna, la matriz es una tabla agrupada por sus filas.',
-            },
-            { id: 'valores', etiqueta: 'Valores', tipo: 'medida', max: 4, min: 1 },
-          ],
-        },
+        dataContract: CONTRATO_DE_MATRIZ,
         presentation: presenta('formato', 'formatos'),
+      },
+      /*
+       * 1.2.0 — formato condicional, que la tabla tiene desde su 1.2.0.
+       *
+       * Las dos dibujan cifras en celdas y las dos comparten `PRESENTACION_DE_TABLA`, pero la
+       * matriz se quedo fuera: el color por valor entro en la tabla y nadie miro al lado. Y es en
+       * la matriz donde mas hace falta, porque un cruce de cinco por cuatro son veinte cifras y
+       * mirarlas una a una para encontrar la que se sale es justo lo que el color evita.
+       */
+      {
+        version: '1.2.0',
+        publishedAt: '2026-09-13',
+        changelog: 'Formato condicional: el color de una cifra puede depender de su valor.',
+        certification: certificacionInicial,
+        dataContract: CONTRATO_DE_MATRIZ,
+        presentation: PRESENTACION_DE_TABLA,
       },
     ],
   },
@@ -1090,6 +1194,44 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         measures: { min: 1, max: 1 },
         notes: 'La dimension debe ser una division territorial reconocida por la cartografia.',
       }),
+      /*
+       * 1.1.0 — pozos con nombre, que era el unico objeto de datos que no los declaraba.
+       *
+       * Sin ellos el editor cae en los rotulos genericos —«dimension 1», «medida 1»—, y en un
+       * mapa esos nombres no dicen nada: lo que hay que mapear es un territorio y una cifra. Que
+       * el render todavia no exista no es motivo para dejar el mapeo sin nombrar; al contrario,
+       * es lo unico que hoy se puede preparar del objeto.
+       */
+      {
+        version: '1.1.0',
+        publishedAt: '2026-09-13',
+        changelog: 'Pozos con nombre: Territorio y Valor. El render sigue pendiente.',
+        certification: certificacionInicial,
+        dataContract: {
+          dimensions: { min: 1, max: 1 },
+          measures: { min: 1, max: 1 },
+          notes: 'La dimension debe ser una division territorial reconocida por la cartografia.',
+          pozos: [
+            {
+              id: 'territorio',
+              etiqueta: 'Territorio',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              ayuda: 'La division territorial que colorea el mapa.',
+            },
+            {
+              id: 'valor',
+              etiqueta: 'Valor',
+              tipo: 'medida',
+              max: 1,
+              min: 1,
+              ayuda: 'La cifra que decide la intensidad del color.',
+            },
+          ],
+        },
+        presentation: presenta('formato', 'formatos'),
+      },
     ],
   },
   /* ── Elementos: no se enlazan a ningun dataset ───────────────────────────────────────── */

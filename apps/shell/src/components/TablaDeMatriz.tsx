@@ -7,11 +7,14 @@ import {
   type NodoDeMatriz,
   type ObjectInstance,
   compararValores,
+  colorCondicional,
+  estiloDeTexto,
   filasVisibles,
   formateadorDeMedida,
   hojas,
   ordenarNodos,
   rutaClave,
+  type FormatoCondicional,
 } from '@app/ui-components';
 import { Icono } from './iconos/Icono';
 
@@ -33,6 +36,37 @@ const alternar = (conjunto: ReadonlySet<string>, clave: string): Set<string> => 
   else siguiente.add(clave);
   return siguiente;
 };
+
+/**
+ * Una celda de cifra, con su formato y su color por valor.
+ *
+ * Se extrae en vez de repetirse en los cuatro sitios donde la matriz escribe una cifra —celda,
+ * total de fila, total de columna y total general— porque asi el color no se puede quedar en
+ * tres de los cuatro. Es el mismo motivo por el que la tabla llana lo hace en un solo punto.
+ */
+function CeldaDeCifra({
+  valor,
+  medida,
+  formatear,
+  condicional,
+  total,
+}: {
+  valor: number | null;
+  medida: string;
+  formatear: (n: number | null) => string;
+  condicional?: FormatoCondicional;
+  total?: boolean;
+}) {
+  const color = valor === null ? undefined : colorCondicional(condicional, valor, medida);
+  return (
+    <td
+      className={total ? 'es-numero es-total' : 'es-numero'}
+      style={color ? estiloDeTexto({ color }) : undefined}
+    >
+      {formatear(valor)}
+    </td>
+  );
+}
 
 /** Identifica una columna ordenable: la ruta de la hoja mas el indice de medida. */
 const claveDeOrden = (ruta: readonly string[], medida: number): string =>
@@ -60,6 +94,7 @@ export function TablaDeMatriz({
     [vm.medidas, instance.presentacion],
   );
   const columnas = useMemo(() => hojas(vm.columnas, plegadasColumna), [vm, plegadasColumna]);
+  const condicional = instance.presentacion?.condicional;
 
   /*
    * El orden se aplica ENTRE HERMANOS, no sobre la tabla entera.
@@ -165,6 +200,7 @@ export function TablaDeMatriz({
               columnas={columnas}
               plegada={plegadas.has(rutaClave(nodo.ruta))}
               formatear={formatear}
+              {...(condicional ? { condicional } : {})}
               onPlegar={() => setPlegadas((p) => alternar(p, rutaClave(nodo.ruta)))}
             />
           ))}
@@ -172,15 +208,25 @@ export function TablaDeMatriz({
             <th scope="row">Total</th>
             {columnas.map((columna) =>
               vm.medidas.map((medida, i) => (
-                <td key={`${rutaClave(columna.ruta)}-${medida}`} className="es-numero es-total">
-                  {(formatear[i] ?? String)(vm.valor([], columna.ruta, i))}
-                </td>
+                <CeldaDeCifra
+                  key={`${rutaClave(columna.ruta)}-${medida}`}
+                  valor={vm.valor([], columna.ruta, i)}
+                  medida={medida}
+                  formatear={formatear[i] ?? String}
+                  {...(condicional ? { condicional } : {})}
+                  total
+                />
               )),
             )}
             {vm.medidas.map((medida, i) => (
-              <td key={`gt-${medida}`} className="es-numero es-total">
-                {(formatear[i] ?? String)(vm.valor([], [], i))}
-              </td>
+              <CeldaDeCifra
+                key={`gt-${medida}`}
+                valor={vm.valor([], [], i)}
+                medida={medida}
+                formatear={formatear[i] ?? String}
+                {...(condicional ? { condicional } : {})}
+                total
+              />
             ))}
           </tr>
         </tbody>
@@ -195,6 +241,7 @@ function FilaDeMatriz({
   columnas,
   plegada,
   formatear,
+  condicional,
   onPlegar,
 }: {
   nodo: NodoDeMatriz;
@@ -202,6 +249,7 @@ function FilaDeMatriz({
   columnas: NodoDeMatriz[];
   plegada: boolean;
   formatear: ((n: number | null) => string)[];
+  condicional?: FormatoCondicional;
   onPlegar: () => void;
 }) {
   const tieneHijos = nodo.hijos.length > 0;
@@ -232,15 +280,24 @@ function FilaDeMatriz({
       </th>
       {columnas.map((columna) =>
         vm.medidas.map((medida, i) => (
-          <td key={`${rutaClave(columna.ruta)}-${medida}`} className="es-numero">
-            {(formatear[i] ?? String)(vm.valor(nodo.ruta, columna.ruta, i))}
-          </td>
+          <CeldaDeCifra
+            key={`${rutaClave(columna.ruta)}-${medida}`}
+            valor={vm.valor(nodo.ruta, columna.ruta, i)}
+            medida={medida}
+            formatear={formatear[i] ?? String}
+            {...(condicional ? { condicional } : {})}
+          />
         )),
       )}
       {vm.medidas.map((medida, i) => (
-        <td key={`t-${medida}`} className="es-numero es-total">
-          {(formatear[i] ?? String)(vm.valor(nodo.ruta, [], i))}
-        </td>
+        <CeldaDeCifra
+          key={`t-${medida}`}
+          valor={vm.valor(nodo.ruta, [], i)}
+          medida={medida}
+          formatear={formatear[i] ?? String}
+          {...(condicional ? { condicional } : {})}
+          total
+        />
       ))}
     </tr>
   );

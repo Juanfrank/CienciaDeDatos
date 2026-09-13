@@ -1579,6 +1579,62 @@ export const modulosDemo: ModuleDefinition[] = [
               },
             },
           },
+          {
+            /*
+             * Las barras horizontales con la MISMA regla que las columnas.
+             *
+             * Es lo que la auditoria del contrato encontro: el dibujo coloreaba por valor desde
+             * el primer dia —lo hace la misma funcion que en las columnas— y la version 1.0.0 no
+             * lo declaraba, asi que el panel no lo ofrecia. Puesto aqui, la pagina ensena las dos
+             * orientaciones respondiendo igual.
+             */
+            id: 'con-barras-h',
+            position: { x: 0, y: 7, w: 6, h: 4 },
+            instance: {
+              instanceId: 'con-barras-h',
+              objectId: 'barras-horizontales',
+              version: '1.1.0',
+              title: 'Pendientes por distrito',
+              binding: { datasetId: DATASET, dimensions: [DISTRITO], measures: ['CasosPendientes'] },
+              presentacion: {
+                subtitulo: 'La misma regla, en horizontal',
+                leyenda: 'oculta',
+                etiquetasDeDato: { mostrar: true },
+                condicional: { reglas: [{ comparador: 'mayor', valor: 600, color: 'error' }] },
+              },
+            },
+          },
+          {
+            /*
+             * Y la matriz, que es donde el color por valor mas se nota.
+             *
+             * Un cruce de distritos por trimestres son doce cifras: encontrar a ojo la que se sale
+             * es justo el trabajo que el color ahorra. La tabla llana lo tenia desde su 1.2.0 y la
+             * matriz no, aunque las dos comparten la lista de lo que admiten presentar.
+             */
+            id: 'con-matriz',
+            position: { x: 6, y: 7, w: 6, h: 4 },
+            instance: {
+              instanceId: 'con-matriz',
+              objectId: 'matriz',
+              version: '1.2.0',
+              title: 'Distrito por trimestre',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [DISTRITO, TRIMESTRE],
+                measures: ['CasosPendientes'],
+                ranuras: {
+                  filas: ['DimTribunal.Distrito'],
+                  columnas: ['DimTiempo.Trimestre'],
+                  valores: ['CasosPendientes'],
+                },
+              },
+              presentacion: {
+                subtitulo: 'El color tambien llega a los subtotales',
+                condicional: { reglas: [{ comparador: 'mayor', valor: 300, color: 'error' }] },
+              },
+            },
+          },
         ],
       },
       {

@@ -1385,8 +1385,16 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
   };
 
   return {
-    ...base(o),
-    // La leyenda no dice nada util aqui —hay una sola medida— y ademas nombraria el zocalo.
+    /*
+     * La base se construye con la leyenda YA OCULTA, no se oculta despues.
+     *
+     * La leyenda no dice nada util aqui —hay una sola medida— y ademas nombraria el zocalo, asi
+     * que se apaga. Apagarla DESPUES de `base(o)` dejaba el margen que `leyendaDe` habia
+     * reservado para ella: con `leyenda: 'derecha'` puesto a mano, la cascada cedia una franja
+     * del ancho a una leyenda que nunca se dibuja. Pidiendosela oculta a `base`, el margen y la
+     * leyenda salen de la misma decision y no pueden discrepar.
+     */
+    ...base({ ...o, leyenda: 'oculta' }),
     legend: { show: false },
     tooltip: {
       trigger: 'axis' as const,
