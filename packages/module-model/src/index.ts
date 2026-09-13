@@ -59,3 +59,4 @@ export {
   type PublishBlocker,
   type ValidateModuleInput,
 } from './validation';
+export { saludDe, type ResumenDeSalud, type SaludDeModulo } from './salud';

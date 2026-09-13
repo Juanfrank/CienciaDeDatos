@@ -539,7 +539,7 @@ export const modulosDemo: ModuleDefinition[] = [
             instance: {
               instanceId: 'flujo-origen',
               objectId: 'tarjeta-kpi',
-              version: '1.0.0',
+              version: '1.1.0',
               title: 'Ingresados',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosIngresados'] },
               presentacion: { icono: 'expediente', etiqueta: { texto: 'en el periodo', posicion: 'debajo' } },
@@ -578,7 +578,7 @@ export const modulosDemo: ModuleDefinition[] = [
             instance: {
               instanceId: 'flujo-destino',
               objectId: 'tarjeta-kpi',
-              version: '1.0.0',
+              version: '1.1.0',
               title: 'Resueltos',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosResueltos'] },
               presentacion: { icono: 'balanza', acento: 'secundario', etiqueta: { texto: 'en el periodo', posicion: 'debajo' } },

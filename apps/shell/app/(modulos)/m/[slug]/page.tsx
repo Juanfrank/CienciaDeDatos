@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { describeProvenance } from '@app/module-model';
 import { leerPersonalizacion } from '../../../../src/server/personalizacion';
 import { cargarModulo } from '../../../../src/server/datos';
-import { actorDe, moduloVisiblePorSlug } from '../../../../src/server/cicloDeVida';
+import { actorDe, moduloServiblePorSlug } from '../../../../src/server/cicloDeVida';
 import { serializarObjeto } from '../../../../src/server/serializar';
 import { exigirSesionDePagina } from '../../../../src/server/sesion';
 import { VistaModulo } from '../../../../src/components/VistaModulo';
@@ -46,7 +46,7 @@ export default async function PaginaModulo({
 
   const sesion = await exigirSesionDePagina();
 
-  const module = await moduloVisiblePorSlug(slug, await actorDe(sesion));
+  const module = await moduloServiblePorSlug(slug, await actorDe(sesion));
   if (!module) notFound();
   const cargado = await cargarModulo({
     module,

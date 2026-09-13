@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { POPULATOR_HEARTBEAT_KEY, type PopulatorHeartbeat, buildHealthReport } from '@app/observability';
-import { CONNECTOR_KIND, cacheL2, metricasDeCache } from '../../src/server/contexto';
+import { cacheL2, conectorActivo, metricasDeCache } from '../../src/server/contexto';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -23,7 +23,7 @@ export async function GET() {
   }
 
   const informe = buildHealthReport({
-    configuredConnector: CONNECTOR_KIND,
+    configuredConnector: await conectorActivo(),
     cacheStoreReachable,
     // Sin base de identidad en este entorno: el gobierno se lee del seed en memoria.
     identityDbReachable: true,

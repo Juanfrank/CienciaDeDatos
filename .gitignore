@@ -13,3 +13,5 @@ apps/shell/.next/
 test-results/
 playwright-report/
 .cache-e2e/
+.cache-ci/
+estado-de-modulos.json

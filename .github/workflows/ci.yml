@@ -64,3 +64,52 @@ jobs:
       - name: Compilar plantillas
         run: npm run verify:infra
 
+
+  # ──────────────────────────────────────────────────────────────────────────────────────────
+  # Etapa POR MODULO — seccion 3.4.
+  #
+  # Corre aparte de `verificacion` y NO la bloquea, que es el requisito: «un error de compilacion
+  # en un modulo no debe bloquear el despliegue de los demas». Si esto viviera dentro del job de
+  # verificacion, un modulo con un campo retirado pondria en rojo toda la ejecucion y con ella el
+  # despliegue de los otros nueve.
+  #
+  # `continue-on-error` va en el PASO y no en el job: el job tiene que terminar en verde para que
+  # el resumen y el artefacto se publiquen — es lo que lee el despliegue para decidir que apagar.
+  # ──────────────────────────────────────────────────────────────────────────────────────────
+  modulos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      # El cache se puebla primero: la validacion contrasta cada modulo contra las columnas que
+      # de verdad existen, no contra las que su definicion supone.
+      - name: Poblar el cache
+        run: npx tsx tools/poblar-cache.mts --connector mock --dir .cache-ci
+
+      - name: Validar cada modulo por separado
+        id: estado
+        env:
+          CACHE_DIR: .cache-ci
+        run: npx tsx tools/estado-de-modulos.mts estado-de-modulos.json | tee $GITHUB_STEP_SUMMARY
+
+      # Viaja al despliegue: es la lista de que se apaga y que no.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: estado-de-modulos
+          path: estado-de-modulos.json
+
+      # Un modulo caido no rompe la ejecucion, pero tiene que VERSE. Sin este paso, el informe
+      # seria un archivo que nadie abre y los modulos se apagarian en silencio.
+      - name: Avisar de los modulos caidos
+        run: |
+          caidos=$(jq -r '.modulos[] | select(.salud == "fallo") | .slug' estado-de-modulos.json)
+          if [ -n "$caidos" ]; then
+            for slug in $caidos; do
+              echo "::warning title=Modulo caido::$slug no se puede componer y quedara APAGADO en produccion"
+            done
+          fi

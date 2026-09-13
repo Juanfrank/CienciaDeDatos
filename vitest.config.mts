@@ -18,6 +18,7 @@ export default defineConfig({
       '@app/ui-components': r('./packages/ui-components/src/index.ts'),
       '@app/auth': r('./packages/auth/src/index.ts'),
       '@app/caching': r('./packages/caching/src/index.ts'),
+      '@app/config': r('./packages/config/src/index.ts'),
       '@app/design-tokens': r('./packages/design-tokens/src/index.ts'),
       '@app/testing-utils': r('./packages/testing-utils/src/index.ts'),
     },

@@ -17,6 +17,7 @@ import { rolMasAltoDe } from './admin';
 import { navigationFor } from './contexto';
 import { registrarCambio, registrarEventoDeArbol } from './auditoria';
 import { gobierno } from './gobierno';
+import { moduloEncendido, slugsApagados } from './configuracion';
 import { modulos } from './almacenModulos';
 import { diagnosticarDefinicion } from './datos';
 import type { SesionShell } from './sesion';
@@ -473,6 +474,30 @@ export async function moduloVisiblePorSlug(
 }
 
 /**
+ * Visible Y ENCENDIDO — la puerta de los caminos que SIRVEN un modulo (3.4).
+ *
+ * Son dos preguntas distintas y por eso son dos funciones:
+ *
+ *   - `moduloVisiblePorSlug` responde al CICLO DE VIDA: existe, y su estado permite que esta
+ *     persona lo abra. Es la que usan el editor y el panel de administracion.
+ *   - esta responde ademas a la bandera de App Configuration: si el modulo esta apagado en
+ *     produccion, no se sirve a nadie.
+ *
+ * La distincion importa en la direccion que no es obvia: un modulo apagado TIENE que seguir
+ * abriendose en el editor. Apagarlo es lo que se hace cuando esta dando cifras malas, y si el
+ * interruptor cerrara tambien la puerta de arreglarlo, la unica salida seria volver a encenderlo
+ * en produccion para poder tocarlo.
+ */
+export async function moduloServiblePorSlug(
+  slug: string,
+  actor: ActorDeModulo,
+): Promise<ModuleDefinition | undefined> {
+  const modulo = await moduloVisiblePorSlug(slug, actor);
+  if (!modulo) return undefined;
+  return (await moduloEncendido(modulo.slug)) ? modulo : undefined;
+}
+
+/**
  * Poda del arbol de navegacion por estado del modulo.
  *
  * Un modulo publicado que se RETIRA sigue colgando de su carpeta en la organizacion general: el
@@ -485,6 +510,15 @@ export async function moduloVisiblePorSlug(
  */
 export async function podarPorEstado(nodos: NavNode[], actor: ActorDeModulo): Promise<NavNode[]> {
   const definiciones = new Map((await modulos.list()).map((m) => [m.moduleId, m]));
+  /*
+   * Los apagados se leen UNA VEZ para todo el arbol.
+   *
+   * Con una consulta por nodo, pintar la barra lateral de un equipo con ocho modulos serian ocho
+   * resoluciones de configuracion. Y ademas todas las decisiones de este arbol tienen que salir
+   * de la MISMA foto: si a mitad de la poda venciera el TTL, media rama se podaria con una
+   * configuracion y la otra media con otra.
+   */
+  const apagados = new Set(await slugsApagados());
 
   const podar = (lista: NavNode[]): NavNode[] =>
     lista.flatMap((nodo): NavNode[] => {
@@ -494,6 +528,7 @@ export async function podarPorEstado(nodos: NavNode[], actor: ActorDeModulo): Pr
         // que aun no existe, y de eso ya avisa `dangling` al Administrador con su propio
         // mensaje. Ocultarlo aqui haria desaparecer el sintoma sin arreglar la causa.
         if (!definicion) return [nodo];
+        if (apagados.has(definicion.slug)) return [];
         return puedeVer(definicion, actor) ? [nodo] : [];
       }
 
@@ -541,4 +576,19 @@ export async function moduloVisibleParaUsuario(
   userId: string,
 ): Promise<ModuleDefinition | undefined> {
   return moduloVisiblePorSlug(slug, { userId, role: await rolMasAltoDe(userId) });
+}
+
+/**
+ * Como `moduloServiblePorSlug`, resolviendo el rol a partir del usuario.
+ *
+ * La usan la exportacion y la evaluacion de alertas, que corren en el trabajador de fondo. Apagar
+ * un modulo tiene que parar tambien lo que sigue produciendo a su nombre sin que nadie mire: una
+ * alerta que sigue notificando sobre un modulo apagado es peor que el modulo encendido, porque
+ * nadie puede ir a comprobar de donde sale la cifra.
+ */
+export async function moduloServibleParaUsuario(
+  slug: string,
+  userId: string,
+): Promise<ModuleDefinition | undefined> {
+  return moduloServiblePorSlug(slug, { userId, role: await rolMasAltoDe(userId) });
 }

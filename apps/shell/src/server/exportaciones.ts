@@ -8,7 +8,7 @@ import { describeProvenance } from '@app/module-model';
 import { proyectarObjeto } from '@app/ui-components';
 import { cacheL2, objectRegistry } from './contexto';
 import { cargarModulo } from './datos';
-import { moduloVisibleParaUsuario } from './cicloDeVida';
+import { moduloServibleParaUsuario } from './cicloDeVida';
 import { leerPersonalizacion } from './personalizacion';
 
 /**
@@ -34,7 +34,7 @@ const ES_CONTROL = new Set(['segmentador']);
 const CATEGORIAS_DE_GRAFICO = new Set(['grafico', 'mapa']);
 
 export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) => {
-  const module = await moduloVisibleParaUsuario(request.moduleSlug, request.requestedBy);
+  const module = await moduloServibleParaUsuario(request.moduleSlug, request.requestedBy);
   if (!module) throw new Error(`El modulo '${request.moduleSlug}' ya no existe.`);
 
   const cargado = await cargarModulo({
@@ -102,7 +102,7 @@ export interface EncolarInput {
 }
 
 export async function encolarExportacion(input: EncolarInput) {
-  const module = await moduloVisibleParaUsuario(input.moduleSlug, input.userId);
+  const module = await moduloServibleParaUsuario(input.moduleSlug, input.userId);
   if (!module) return null;
 
   const request: ExportRequest = {

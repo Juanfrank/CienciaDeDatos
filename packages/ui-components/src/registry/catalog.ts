@@ -95,6 +95,36 @@ const POZOS_DE_BARRAS = (medidas: number): RanuraDeCampos[] => [
   },
 ];
 
+/**
+ * El contrato de datos de la tarjeta KPI, compartido por sus dos versiones.
+ *
+ * Se factoriza porque 1.0.0 y 1.1.0 solo se diferencian en lo que admiten PRESENTAR: escribirlo
+ * dos veces invita a que alguien arregle un pozo en una version y se olvide de la otra, y
+ * entonces la misma tarjeta pediria campos distintos segun la version que fije la instancia.
+ */
+const CONTRATO_DE_KPI: VisualObjectDefinition['versions'][number]['dataContract'] = {
+  dimensions: { min: 0, max: 1 },
+  measures: { min: 1, max: 2 },
+  notes: 'La primera medida es el valor; la segunda, opcional, es la comparacion.',
+  pozos: [
+    { id: 'valor', etiqueta: 'Valor', tipo: 'medida', max: 1, min: 1, ayuda: 'La cifra grande de la tarjeta.' },
+    {
+      id: 'comparacion',
+      etiqueta: 'Comparacion',
+      tipo: 'medida',
+      max: 1,
+      ayuda: 'Opcional. La variacion se calcula contra esta.',
+    },
+    {
+      id: 'detalle',
+      etiqueta: 'Detalle',
+      tipo: 'dimension',
+      max: 1,
+      ayuda: 'Opcional. Desglosa la cifra en la tabla de datos adjunta.',
+    },
+  ],
+};
+
 export const catalogoInicial: VisualObjectDefinition[] = [
   {
     objectId: 'tarjeta-kpi',
@@ -104,40 +134,31 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: valor agregado, etiqueta y variacion respecto del periodo anterior.',
-        {
-          dimensions: { min: 0, max: 1 },
-          measures: { min: 1, max: 2 },
-          notes: 'La primera medida es el valor; la segunda, opcional, es la comparacion.',
-          pozos: [
-            {
-              id: 'valor',
-              etiqueta: 'Valor',
-              tipo: 'medida',
-              max: 1,
-              min: 1,
-              ayuda: 'La cifra grande de la tarjeta.',
-            },
-            {
-              id: 'comparacion',
-              etiqueta: 'Comparacion',
-              tipo: 'medida',
-              max: 1,
-              ayuda: 'Opcional. La variacion se calcula contra esta.',
-            },
-            {
-              id: 'detalle',
-              etiqueta: 'Detalle',
-              tipo: 'dimension',
-              max: 1,
-              ayuda: 'Opcional. Desglosa la cifra en la tabla de datos adjunta.',
-            },
-          ],
-        },
+        CONTRATO_DE_KPI,
         // Una tarjeta es una cifra: el formato es lo que mas cambia de una a otra —casos enteros,
         // porcentajes con un decimal, importes compactos—. No tiene leyenda ni etiquetas de dato,
         // porque no tiene series ni puntos.
         presenta('formato', 'formatos'),
       ),
+      /*
+       * 1.1.0 — la etiqueta que acompana al valor.
+       *
+       * `etiqueta` se anadio al contrato de presentacion, al panel y al renderizador, pero NO a
+       * esta lista: la tarjeta dibujaba una etiqueta que su propia version no declaraba admitir, y
+       * la validacion del editor marcaba rota cualquier tarjeta que la usara. No se vio en pantalla
+       * porque el camino de LECTURA no comprueba la presentacion —solo el del editor lo hace—, y
+       * ninguna prueba abria el editor sobre un modulo con etiquetas.
+       *
+       * Version nueva y no un retoque de la 1.0.0: publicar no altera lo ya desplegado (4.5).
+       */
+      {
+        version: '1.1.0',
+        publishedAt: '2026-09-13',
+        changelog: 'Admite la etiqueta que acompana al valor, encima o debajo.',
+        certification: certificacionInicial,
+        dataContract: CONTRATO_DE_KPI,
+        presentation: presenta('formato', 'formatos', 'etiqueta'),
+      },
     ],
   },
   {

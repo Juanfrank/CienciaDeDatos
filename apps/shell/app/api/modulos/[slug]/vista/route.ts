@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { actorDe, moduloVisiblePorSlug } from '../../../../../src/server/cicloDeVida';
+import { actorDe, moduloServiblePorSlug } from '../../../../../src/server/cicloDeVida';
 import {
   PersonalizacionInvalidaError,
   descartarPersonalizacion,
@@ -27,7 +27,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   if (!sesion) return sinSesion();
 
   const { slug } = await params;
-  const modulo = await moduloVisiblePorSlug(slug, await actorDe(sesion));
+  const modulo = await moduloServiblePorSlug(slug, await actorDe(sesion));
   if (!modulo) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
   const personalizacion = await leerPersonalizacion(sesion.userId, modulo.moduleId);
@@ -48,7 +48,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
   if (!sesion) return sinSesion();
 
   const { slug } = await params;
-  const modulo = await moduloVisiblePorSlug(slug, await actorDe(sesion));
+  const modulo = await moduloServiblePorSlug(slug, await actorDe(sesion));
   if (!modulo) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
   let cuerpo: Record<string, unknown>;
@@ -89,7 +89,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   if (!sesion) return sinSesion();
 
   const { slug } = await params;
-  const modulo = await moduloVisiblePorSlug(slug, await actorDe(sesion));
+  const modulo = await moduloServiblePorSlug(slug, await actorDe(sesion));
   if (!modulo) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
   await descartarPersonalizacion(sesion.userId, modulo.moduleId);

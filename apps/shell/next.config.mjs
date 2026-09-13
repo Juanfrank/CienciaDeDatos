@@ -9,6 +9,7 @@ const nextConfig = {
     '@app/alerts',
     '@app/auth',
     '@app/caching',
+    '@app/config',
     '@app/data-contracts',
     '@app/design-tokens',
     '@app/export',

@@ -30,8 +30,14 @@ import { gobierno } from './gobierno';
  * compartido entre instancias —y en produccion, en la base de identidad—, no en este proceso.
  */
 
-/** Conector configurado como activo. En produccion lo resuelve Azure App Configuration (2.2). */
-export const CONNECTOR_KIND = process.env['DATA_CONNECTOR'] ?? 'mock';
+/*
+ * El conector activo lo resuelve ahora `configuracion.ts` contra App Configuration (2.2).
+ *
+ * Era una constante leida de `process.env` al cargar el modulo, asi que cambiar de mock a sql
+ * exigia reiniciar — justo lo que el Bicep decia que NO debia hacer falta. Se reexporta desde
+ * alli para que este siga siendo el sitio donde se busca.
+ */
+export { conectorActivo } from './configuracion';
 
 export const objectRegistry = new ObjectRegistry(catalogoInicial);
 

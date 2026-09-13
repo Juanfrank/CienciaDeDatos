@@ -31,6 +31,9 @@
       "@app/auth": [
         "packages/auth/src/index.ts"
       ],
+      "@app/config": [
+        "packages/config/src/index.ts"
+      ],
       "@app/caching": [
         "packages/caching/src/index.ts"
       ],

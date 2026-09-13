@@ -3,6 +3,7 @@ import type { GridItem, ModuleDefinition } from '@app/module-model';
 import { CLAVE_MODULOS, modulos } from './almacenModulos';
 import { borrar } from './almacenCompartido';
 import { limpiarAuditoria, listarAuditoria } from './auditoria';
+import { reiniciarConfiguracion } from './configuracion';
 import {
   type ActorDeModulo,
   CicloDeVidaError,
@@ -12,6 +13,7 @@ import {
   enviarAAprobacion,
   guardarBorrador,
   modulosVisibles,
+  moduloServiblePorSlug,
   moduloVisiblePorSlug,
   podarPorEstado,
   publicar,
@@ -358,5 +360,83 @@ describe('la lista del editor no es el catalogo institucional', () => {
     expect(puedeVer(borrador, colaborador)).toBe(true);
     expect(puedeVer(borrador, admin)).toBe(false);
     expect(puedeVer({ ...base, status: 'publicado' }, visor)).toBe(true);
+  });
+});
+
+describe('banderas por modulo (3.4)', () => {
+  /** Un modulo publicado, recorriendo el ciclo completo: borrador, aprobacion, publicado. */
+  const publicado = async (slug: string): Promise<ModuleDefinition> => {
+    const borrador = await borradorListo(colaborador, slug);
+    await enviarAAprobacion({ actor: colaborador, moduleId: borrador.moduleId });
+    return publicar({ actor: admin, moduleId: borrador.moduleId });
+  };
+
+  /*
+   * La bandera se prueba contra la MISMA puerta que usa la aplicacion, no simulando el resolutor.
+   * `ConfiguracionDeEntorno` lee `MODULOS_APAGADOS`, asi que apagar aqui es exactamente lo que
+   * hace Azure en produccion: poner la bandera en false.
+   */
+  const conApagados = async (apagados: string, prueba: () => Promise<void>) => {
+    const antes = process.env['MODULOS_APAGADOS'];
+    process.env['MODULOS_APAGADOS'] = apagados;
+    // El resolutor cachea 30 s: sin reiniciarlo, la prueba leeria la foto de la prueba anterior.
+    reiniciarConfiguracion();
+    try {
+      await prueba();
+    } finally {
+      if (antes === undefined) delete process.env['MODULOS_APAGADOS'];
+      else process.env['MODULOS_APAGADOS'] = antes;
+      reiniciarConfiguracion();
+    }
+  };
+
+  it('un modulo apagado no se SIRVE, aunque su ciclo de vida lo permita', async () => {
+    await publicado('apagable');
+
+    expect(await moduloServiblePorSlug('apagable', visor)).toBeDefined();
+
+    await conApagados('apagable', async () => {
+      expect(await moduloServiblePorSlug('apagable', visor)).toBeUndefined();
+      // Y no es que haya dejado de existir: sigue publicado. Es el interruptor, no el ciclo.
+      expect(await moduloVisiblePorSlug('apagable', visor)).toBeDefined();
+    });
+  });
+
+  it('un modulo apagado SIGUE abriendose en el editor', async () => {
+    await publicado('arreglable');
+    await conApagados('arreglable', async () => {
+      // Apagar es lo que se hace cuando un modulo da cifras malas. Si el interruptor cerrara
+      // tambien la puerta de arreglarlo, habria que reencenderlo en produccion para tocarlo.
+      expect(await moduloVisiblePorSlug('arreglable', admin)).toBeDefined();
+      expect(await moduloServiblePorSlug('arreglable', admin)).toBeUndefined();
+    });
+  });
+
+  it('desaparece del arbol de navegacion', async () => {
+    const modulo = await publicado('en-arbol');
+    const arbol = [
+      {
+        id: 'hoja',
+        type: 'module' as const,
+        moduleRef: { moduleId: modulo.moduleId, slug: modulo.slug, name: modulo.name },
+      },
+    ];
+
+    expect(await podarPorEstado(arbol, visor)).toHaveLength(1);
+    await conApagados('en-arbol', async () => {
+      // Ocultar el enlace no basta —la ruta tambien lo rechaza— pero dejarlo visible seria
+      // ofrecer un modulo que al pulsarlo da 404, que parece una averia.
+      expect(await podarPorEstado(arbol, visor)).toEqual([]);
+    });
+  });
+
+  it('apagar uno no afecta a los demas', async () => {
+    await publicado('vivo');
+    await publicado('muerto');
+    await conApagados('muerto', async () => {
+      // Es el requisito de 3.4 en una linea: el interruptor es POR MODULO.
+      expect(await moduloServiblePorSlug('vivo', visor)).toBeDefined();
+      expect(await moduloServiblePorSlug('muerto', visor)).toBeUndefined();
+    });
   });
 });

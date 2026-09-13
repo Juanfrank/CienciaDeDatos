@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cargarModulo } from '../../../../src/server/datos';
-import { actorDe, moduloVisiblePorSlug } from '../../../../src/server/cicloDeVida';
+import { actorDe, moduloServiblePorSlug } from '../../../../src/server/cicloDeVida';
 import { leerPersonalizacion } from '../../../../src/server/personalizacion';
 import { serializarObjeto } from '../../../../src/server/serializar';
 import { sinSesion } from '../../../../src/server/respuestas';
@@ -24,7 +24,7 @@ export async function GET(
 
   const { slug } = await params;
   // Por slug pero filtrando por estado: un borrador ajeno no se sirve aunque se pida a mano.
-  const module = await moduloVisiblePorSlug(slug, await actorDe(sesion));
+  const module = await moduloServiblePorSlug(slug, await actorDe(sesion));
   if (!module) {
     return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
   }

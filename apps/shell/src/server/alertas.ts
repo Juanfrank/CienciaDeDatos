@@ -14,7 +14,7 @@ import { aggregateBy, agregacionesPara } from '@app/ui-components';
 import { cacheL2 } from './contexto';
 import { cargarModulo } from './datos';
 import { colaExportaciones, encolarExportacion } from './exportaciones';
-import { moduloVisibleParaUsuario } from './cicloDeVida';
+import { moduloServibleParaUsuario } from './cicloDeVida';
 
 /**
  * Cableado de alertas y suscripciones (4.9).
@@ -44,7 +44,7 @@ const nuevoId = (): string => crypto.randomUUID();
  * puede evaluar.
  */
 export async function observacionesDe(rule: AlertRule): Promise<Observacion[] | null> {
-  const module = await moduloVisibleParaUsuario(rule.moduleSlug, rule.ownerUserId);
+  const module = await moduloServibleParaUsuario(rule.moduleSlug, rule.ownerUserId);
   if (!module) return null;
 
   const cargado = await cargarModulo({
