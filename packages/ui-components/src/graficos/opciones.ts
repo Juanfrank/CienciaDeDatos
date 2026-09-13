@@ -18,6 +18,7 @@ import {
   type ModoDeApilado,
   type ModoDeLeyenda,
 } from '../presentacion/contrato';
+import { colorCondicional, type FormatoCondicional } from '../presentacion/condicional';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
 /**
@@ -67,6 +68,7 @@ export interface OpcionesDeGrafico {
   combinado?: ConfiguracionDeCombinado;
   referencias?: LineaDeReferencia[];
   coloresDeSerie?: number[];
+  condicional?: FormatoCondicional;
   embudo?: ConfiguracionDeEmbudo;
   cascada?: ConfiguracionDeCascada;
   medidor?: ConfiguracionDeMedidor;
@@ -573,6 +575,32 @@ const ejeValor = (o: OpcionesDeGrafico) => ({
  * Se factoriza porque columnas y barras solo se diferencian en que ejes intercambian y hacia donde
  * redondea la esquina: con dos copias, anadir el apilado significaria acordarse de los dos sitios.
  */
+/**
+ * Los datos de una serie, con el color que le toque a cada barra por su VALOR.
+ *
+ * Solo se convierte el array de numeros en objetos cuando hay reglas y alguna casa. Sin eso se
+ * devuelve tal cual: un array de numeros es lo que ECharts consume mas rapido, y convertirlo
+ * siempre cargaria todos los graficos con el coste del caso que casi nunca se usa.
+ *
+ * Al 100 %, la regla se evalua sobre el valor ORIGINAL y no sobre la parte.
+ * `datos` ya viene normalizado a porcentaje, asi que «mayor que 900» no casaria nunca — el valor
+ * que se dibuja es 42, no 948. La regla habla de casos, no de cuanto ocupa la barra.
+ */
+function barrasConColor(o: OpcionesDeGrafico, datos: (number | null)[], s: number) {
+  if (!o.condicional || o.condicional.reglas.length === 0) return datos;
+  const medida = o.vm.series[s];
+
+  let alguna = false;
+  const conColor = datos.map((valor, i) => {
+    const original = o.vm.points[i]?.values[s] ?? null;
+    const color = colorCondicional(o.condicional, original, medida);
+    if (color === undefined) return valor;
+    alguna = true;
+    return { value: valor, itemStyle: { color: colorDeRol(o, color) } };
+  });
+  return alguna ? conColor : datos;
+}
+
 function seriesDeBarras(o: OpcionesDeGrafico, horizontal: boolean) {
   const datos = valoresApilados(o);
   const apilada = o.apilado && o.apilado !== 'ninguno';
@@ -580,7 +608,7 @@ function seriesDeBarras(o: OpcionesDeGrafico, horizontal: boolean) {
   return o.vm.series.map((nombre, s) => ({
     name: nombre,
     type: 'bar',
-    data: datos[s] ?? [],
+    data: barrasConColor(o, datos[s] ?? [], s),
     ...pilaDe(o),
     /*
      * La esquina redondeada solo en la barra SUELTA.

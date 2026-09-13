@@ -106,6 +106,7 @@ export default function Lienzo({
         ...(presentacion?.cascada ? { cascada: presentacion.cascada } : {}),
         ...(presentacion?.referencias ? { referencias: presentacion.referencias } : {}),
         ...(presentacion?.coloresDeSerie ? { coloresDeSerie: presentacion.coloresDeSerie } : {}),
+        ...(presentacion?.condicional ? { condicional: presentacion.condicional } : {}),
         ...(seriesDeColumna === undefined ? {} : { seriesDeColumna }),
         ...(formatear ? { formatear } : {}),
       }),

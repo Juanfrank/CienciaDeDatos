@@ -1479,6 +1479,109 @@ export const modulosDemo: ModuleDefinition[] = [
         ],
       },
       {
+        pageId: 'p-condicional',
+        slug: 'condicional',
+        name: 'Color por valor',
+        items: [
+          {
+            id: 'con-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'con-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'titulo-de-seccion',
+                tituloDeSeccion: {
+                  texto: 'Cuando el color lo decide el dato',
+                  posicionDelTexto: 'izquierda',
+                  linea: 'derecha',
+                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'con-kpi',
+            position: { x: 0, y: 1, w: 3, h: 2 },
+            instance: {
+              instanceId: 'con-kpi',
+              objectId: 'tarjeta-kpi',
+              version: '1.2.0',
+              title: 'Pendientes',
+              binding: { datasetId: DATASET, dimensions: [], measures: ['CasosPendientes'] },
+              presentacion: {
+                subtitulo: 'Roja por encima de 2.000',
+                etiqueta: { texto: 'Al cierre del trimestre', posicion: 'debajo' },
+                condicional: { reglas: [{ comparador: 'mayor', valor: 2000, color: 'error' }] },
+              },
+            },
+          },
+          {
+            id: 'con-kpi-ok',
+            position: { x: 3, y: 1, w: 3, h: 2 },
+            instance: {
+              instanceId: 'con-kpi-ok',
+              objectId: 'tarjeta-kpi',
+              version: '1.2.0',
+              title: 'Resueltos',
+              binding: { datasetId: DATASET, dimensions: [], measures: ['CasosResueltos'] },
+              presentacion: {
+                subtitulo: 'La misma regla, y esta no salta',
+                etiqueta: { texto: 'Al cierre del trimestre', posicion: 'debajo' },
+                condicional: { reglas: [{ comparador: 'menor', valor: 1000, color: 'error' }] },
+              },
+            },
+          },
+          {
+            id: 'con-tabla',
+            position: { x: 6, y: 1, w: 6, h: 4 },
+            instance: {
+              instanceId: 'con-tabla',
+              objectId: 'tabla',
+              version: '1.2.0',
+              title: 'Por trimestre, con umbrales',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosResueltos', 'CasosPendientes'],
+              },
+              presentacion: {
+                subtitulo: 'Tres reglas, evaluadas en orden',
+                condicional: {
+                  reglas: [
+                    { medida: 'CasosPendientes', comparador: 'mayor', valor: 600, color: 'error' },
+                    { medida: 'CasosPendientes', comparador: 'menor', valor: 400, color: 'terciario' },
+                    { medida: 'CasosResueltos', comparador: 'mayor', valor: 900, color: 'primario' },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            id: 'con-barras',
+            position: { x: 0, y: 3, w: 6, h: 4 },
+            instance: {
+              instanceId: 'con-barras',
+              objectId: 'barras',
+              version: '1.4.0',
+              title: 'Pendientes por trimestre',
+              binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosPendientes'] },
+              presentacion: {
+                subtitulo: 'La barra que se pasa del umbral se pinta sola',
+                leyenda: 'oculta',
+                etiquetasDeDato: { mostrar: true },
+                ejes: { tituloY: 'Casos' },
+                referencias: [{ valor: 600, etiqueta: 'Umbral', color: 'error' }],
+                condicional: { reglas: [{ comparador: 'mayor', valor: 600, color: 'error' }] },
+              },
+            },
+          },
+        ],
+      },
+      {
         pageId: 'p-contenedores',
         slug: 'contenedores',
         name: 'Contenedores',

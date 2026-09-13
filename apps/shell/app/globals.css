@@ -849,6 +849,7 @@ input[type='radio'] {
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-small);
 }
+.referencia__acciones { display: flex; gap: 4px; flex-wrap: wrap; }
 .referencia__titulo {
   padding: 0 4px;
   font-size: var(--md-sys-typescale-label-medium-size);

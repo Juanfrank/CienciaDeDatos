@@ -2,7 +2,13 @@
 
 import { useMemo, useState } from 'react';
 import type { QueryResult } from '@app/data-contracts';
-import { type Direccion, compararValores } from '@app/ui-components';
+import {
+  type Direccion,
+  type FormatoCondicional,
+  colorCondicional,
+  compararValores,
+  estiloDeTexto,
+} from '@app/ui-components';
 
 /**
  * Una tabla que se ordena pulsando su encabezado.
@@ -33,11 +39,14 @@ export function TablaOrdenable({
   proyectado,
   titulo,
   formatearColumna,
+  condicional,
 }: {
   proyectado: QueryResult;
   titulo: string;
   /** Un formateador POR COLUMNA: cada medida puede tener el suyo. */
   formatearColumna: (nombre: string) => (n: number | null) => string;
+  /** Reglas de color por valor. La celda que se sale es lo que se busca en una tabla. */
+  condicional?: FormatoCondicional;
 }) {
   const [orden, setOrden] = useState<{ columna: number; direccion: Direccion } | null>(null);
 
@@ -96,13 +105,26 @@ export function TablaOrdenable({
         <tbody>
           {filas.map((fila, i) => (
             <tr key={i}>
-              {fila.map((celda, j) => (
-                <td key={j} className={typeof celda === 'number' ? 'es-numero' : ''}>
-                  {typeof celda === 'number'
-                    ? (formateadores[j] ?? String)(celda)
-                    : String(celda ?? '')}
-                </td>
-              ))}
+              {fila.map((celda, j) => {
+                const esCifra = typeof celda === 'number';
+                /*
+                 * El color se calcula POR CELDA, que es el unico sitio donde se puede: depende del
+                 * valor. Lo que no se recalcula por celda es el formateador, que ya sale resuelto
+                 * por columna — en una tabla larga eso son miles de llamadas.
+                 */
+                const color = esCifra
+                  ? colorCondicional(condicional, celda, proyectado.columns[j]?.name)
+                  : undefined;
+                return (
+                  <td
+                    key={j}
+                    className={esCifra ? 'es-numero' : ''}
+                    style={color ? estiloDeTexto({ color }) : undefined}
+                  >
+                    {esCifra ? (formateadores[j] ?? String)(celda) : String(celda ?? '')}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>

@@ -1,3 +1,4 @@
+import { COMPARADORES, MAX_REGLAS, type FormatoCondicional } from './condicional';
 import { esNombreDeIcono, type NombreDeIcono } from './iconos';
 import {
   TIPOS_DE_FORMATO,
@@ -488,6 +489,8 @@ export interface PresentacionDeObjeto {
   etiquetasDeDato?: EtiquetasDeDato;
   tooltip?: ConfiguracionDeTooltip;
   multiplos?: ConfiguracionDeMultiplos;
+  /** Que el color dependa del dato: reglas evaluadas en orden, gana la primera que casa. */
+  condicional?: FormatoCondicional;
   ejes?: ConfiguracionDeEjes;
   orden?: OrdenDeCategorias;
   apilado?: ModoDeApilado;
@@ -542,6 +545,7 @@ export const CLAVES_DE_PRESENTACION = [
   'coloresDeSerie',
   'tooltip',
   'multiplos',
+  'condicional',
   'embudo',
   'cascada',
   'medidor',
@@ -764,6 +768,48 @@ export function validarPresentacion(
         problemas.push({
           clave: `referencias.${i}.estilo`,
           problema: `'${String(linea.estilo)}' no es un estilo. Use: ${ESTILOS_DE_REFERENCIA.join(', ')}.`,
+        });
+      }
+    });
+  }
+
+  const reglas = presentacion.condicional?.reglas;
+  if (reglas !== undefined) {
+    if (reglas.length > MAX_REGLAS) {
+      problemas.push({
+        clave: 'condicional',
+        problema:
+          `${reglas.length} reglas de color. El maximo es ${MAX_REGLAS}: mas dejan de ser ` +
+          `excepciones y pasan a ser una escala, que es otra herramienta.`,
+      });
+    }
+    reglas.forEach((regla, i) => {
+      if (!(COMPARADORES as readonly string[]).includes(regla.comparador)) {
+        problemas.push({
+          clave: `condicional.${i}.comparador`,
+          problema: `'${String(regla.comparador)}' no es una comparacion. Use: ${COMPARADORES.join(', ')}.`,
+        });
+      }
+      if (!Number.isFinite(regla.valor)) {
+        problemas.push({
+          clave: `condicional.${i}.valor`,
+          problema: 'Una regla necesita un numero con el que comparar.',
+        });
+      }
+      /*
+       * `entre` sin el otro extremo no es un rango incompleto: es una regla que NUNCA casa.
+       * Guardarla dejaria un color en el panel que no se aplica nunca y nadie sabria por que.
+       */
+      if (regla.comparador === 'entre' && regla.hasta === undefined) {
+        problemas.push({
+          clave: `condicional.${i}.hasta`,
+          problema: 'La comparacion «entre» necesita los dos extremos; con uno solo no casa nunca.',
+        });
+      }
+      if (!(COLORES_DE_TEXTO as readonly string[]).includes(regla.color)) {
+        problemas.push({
+          clave: `condicional.${i}.color`,
+          problema: `'${String(regla.color)}' no es un color del tema. Use: ${COLORES_DE_TEXTO.join(', ')}.`,
         });
       }
     });

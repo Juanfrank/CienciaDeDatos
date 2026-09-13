@@ -102,6 +102,9 @@ const POZOS_DE_BARRAS = (medidas: number): RanuraDeCampos[] => [
  * dos veces invita a que alguien arregle un pozo en una version y se olvide de la otra, y
  * entonces la misma tarjeta pediria campos distintos segun la version que fije la instancia.
  */
+/** Lo que admite presentar una tabla o una matriz. El color por valor es aqui donde mas se usa. */
+const PRESENTACION_DE_TABLA = presenta('formato', 'formatos', 'condicional');
+
 const CONTRATO_DE_KPI: VisualObjectDefinition['versions'][number]['dataContract'] = {
   dimensions: { min: 0, max: 1 },
   measures: { min: 1, max: 2 },
@@ -181,6 +184,33 @@ const PRESENTACION_DE_GRAFICO = presenta(
 );
 
 /**
+ * CONGELADA. Lo que admite presentar una version YA PUBLICADA no vuelve a crecer.
+ *
+ * `PRESENTACION_DE_GRAFICO` esta compartida entre varias versiones, y por eso anadirle una clave
+ * ampliaba en silencio lo que admiten versiones ya publicadas — justo lo que 4.5 cierra: la
+ * version es lo que hace reproducible un modulo desplegado, y un objeto que hoy admite mas que
+ * ayer con el mismo numero de version no lo es.
+ *
+ * A partir de aqui, una clave de presentacion nueva entra en una version NUEVA, con su lista
+ * propia. La regla no es «cambia solo si rompe»: es que la version describe lo que el objeto
+ * hacia el dia que se publico.
+ */
+const PRESENTACION_DE_GRAFICO_CON_CONDICIONAL = presenta(
+  'formato',
+  'formatos',
+  'leyenda',
+  'etiquetasDeDato',
+  'ejes',
+  'orden',
+  'apilado',
+  'referencias',
+  'coloresDeSerie',
+  'tooltip',
+  'multiplos',
+  'condicional',
+);
+
+/**
  * Lo que un circular admite presentar.
  *
  * NO lleva `ejes`, `apilado` ni `orden`: no tiene ejes, no apila nada, y su orden lo decide
@@ -256,6 +286,20 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         dataContract: CONTRATO_DE_KPI,
         presentation: presenta('formato', 'formatos', 'etiqueta'),
       },
+      /*
+       * 1.2.0 — formato condicional.
+       *
+       * En una tarjeta es donde mas se nota: la cifra ES el objeto, y que cambie de color cuando
+       * se pasa del umbral convierte un numero en un aviso.
+       */
+      {
+        version: '1.2.0',
+        publishedAt: '2026-09-13',
+        changelog: 'Formato condicional: la cifra cambia de color segun su valor.',
+        certification: certificacionInicial,
+        dataContract: CONTRATO_DE_KPI,
+        presentation: presenta('formato', 'formatos', 'etiqueta', 'condicional'),
+      },
     ],
   },
   {
@@ -306,6 +350,22 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           ],
         },
         presentation: presenta('formato', 'formatos'),
+      },
+      /* 1.2.0 — formato condicional. En una tabla es donde mas se usa: la celda que se sale. */
+      {
+        version: '1.2.0',
+        publishedAt: '2026-09-13',
+        changelog: 'Formato condicional: el color de una cifra puede depender de su valor.',
+        certification: certificacionInicial,
+        dataContract: {
+          dimensions: { min: 0, max: 8 },
+          measures: { min: 0, max: 12 },
+          pozos: [
+            { id: 'columnas-dim', etiqueta: 'Columnas de detalle', tipo: 'dimension', max: 8 },
+            { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 12 },
+          ],
+        },
+        presentation: PRESENTACION_DE_TABLA,
       },
     ],
   },
@@ -399,6 +459,28 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           pozos: [...POZOS_DE_BARRAS(4), POZO_DE_MULTIPLO],
         },
         presentation: PRESENTACION_DE_GRAFICO,
+      },
+      /*
+       * 1.4.0 — formato condicional.
+       *
+       * El contrato de datos no cambia: es una clave de presentacion mas. Y aun asi es una version
+       * nueva, porque lo que una version admite PRESENTAR tambien forma parte de lo que describe.
+       * Meterla en 1.3.0 ampliaria en silencio un objeto ya publicado.
+       */
+      {
+        version: '1.4.0',
+        publishedAt: '2026-09-13',
+        changelog: 'Formato condicional: el color de cada barra puede depender de su valor.',
+        certification: certificacionInicial,
+        dataContract: {
+          dimensions: { min: 1, max: 3 },
+          measures: { min: 1, max: 4 },
+          notes:
+            'Cada medida es una serie. La dimension de multiplos, si existe, reparte el objeto en ' +
+            'un panel por valor; la de serie agrupa las columnas dentro de cada panel.',
+          pozos: [...POZOS_DE_BARRAS(4), POZO_DE_MULTIPLO],
+        },
+        presentation: PRESENTACION_DE_GRAFICO_CON_CONDICIONAL,
       },
     ],
   },

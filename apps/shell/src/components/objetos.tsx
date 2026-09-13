@@ -11,6 +11,7 @@ import {
   aFieldRef,
   agregacionesPara,
   campoDeRanura,
+  colorCondicional,
   columnasPara,
   escalaBonita,
   maximoComun,
@@ -277,6 +278,11 @@ export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones, ic
   );
   const delta = kpi.delta;
   const formatear = formateadorDeMedida(instance.presentacion, medidas[0]);
+  const colorDelValor = colorCondicional(
+    instance.presentacion?.condicional,
+    kpi.value,
+    medidas[0],
+  );
   const etiqueta = instance.presentacion?.etiqueta?.texto;
   const posicionDeEtiqueta = instance.presentacion?.etiqueta?.posicion ?? 'debajo';
 
@@ -304,7 +310,20 @@ export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones, ic
             {etiqueta}
           </p>
         ) : null}
-        <p className="kpi__valor" data-testid="kpi-valor">
+        {/*
+          El color condicional se aplica ENCIMA del estilo de texto del valor, no en su lugar.
+          El estilo dice como se ve la cifra siempre —peso, alineacion, color base— y la regla dice
+          que hoy esa cifra pide atencion. Si sustituyera al estilo, encender una regla borraria la
+          negrita que alguien puso.
+        */}
+        <p
+          className="kpi__valor"
+          data-testid="kpi-valor"
+          style={estiloDeTexto({
+            ...instance.presentacion?.textos?.valor,
+            ...(colorDelValor ? { color: colorDelValor } : {}),
+          })}
+        >
           {formatear(kpi.value)}
         </p>
         {etiqueta && posicionDeEtiqueta === 'debajo' ? (
@@ -1338,6 +1357,9 @@ export function Tabla({ titulo, result, instance, agregaciones, iconoDelObjeto }
         proyectado={proyectado}
         titulo={titulo}
         formatearColumna={(nombre) => formateadorDeMedida(instance.presentacion, nombre)}
+        {...(instance.presentacion?.condicional
+          ? { condicional: instance.presentacion.condicional }
+          : {})}
       />
     </Marco>
   );

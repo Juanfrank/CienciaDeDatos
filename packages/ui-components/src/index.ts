@@ -16,6 +16,15 @@ export {
 } from './registry/attachments';
 export { catalogoInicial } from './registry/catalog';
 export {
+  COMPARADORES,
+  MAX_REGLAS,
+  colorCondicional,
+  describirRegla,
+  type Comparador,
+  type FormatoCondicional,
+  type ReglaDeColor,
+} from './presentacion/condicional';
+export {
   ACENTOS,
   COMPARACIONES_DE_EMBUDO,
   ESTILOS_DE_REFERENCIA,

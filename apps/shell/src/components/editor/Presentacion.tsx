@@ -38,6 +38,7 @@ import { Icono } from "../iconos/Icono";
 import { Ayuda } from "./Ayuda";
 import { EstiloDeTextoEditor, PaletaDeColores } from "./EstiloDeTextoEditor";
 import { LineasDeReferencia } from "./LineasDeReferencia";
+import { ReglasDeColor } from "./ReglasDeColor";
 import { Seccion } from "./Seccion";
 
 /**
@@ -586,6 +587,18 @@ export function Presentacion({
             />{" "}
             Ordenar las filas de mayor a menor
           </label>
+        </Seccion>
+      ) : null}
+
+      {admite("condicional") ? (
+        <Seccion titulo="Color por valor" nivel={2} abierta={false} prueba={`${prueba}-condicional`}>
+          <ReglasDeColor
+            reglas={p.condicional?.reglas ?? []}
+            medidas={instance.binding.measures}
+            guardando={guardando}
+            prueba={`${prueba}-cond`}
+            onCambiar={(reglas) => poner({ condicional: reglas ? { reglas } : undefined })}
+          />
         </Seccion>
       ) : null}
 
