@@ -1,0 +1,43 @@
+# packages/ui-components — objetos visuales versionados
+
+No es solo React: es el REPOSITORIO de objetos (4.5). Contratos de datos, semver, politica de
+deprecacion, modelo de vista y construccion de las opciones de ECharts.
+
+| Carpeta | Que hay |
+|---|---|
+| `registry/` | Catalogo, tipos, semver, proyeccion, modelo de vista y agregacion |
+| `presentacion/` | Claves de presentacion, pozos, elementos, contenedores, iconos, formato |
+| `graficos/` | Opciones de ECharts, orden y pequenos multiplos |
+
+## Las tres listas que no pueden discrepar
+
+1. Lo que el **catalogo declara** que admite una version (`presentation`).
+2. Lo que el **dibujo honra** (`graficos/opciones.ts`).
+3. Lo que el **panel ofrece** (`apps/shell/.../editor/Presentacion.tsx`).
+
+`registry/presentacionDeclarada.spec.ts` compara las dos primeras con una sonda de
+comportamiento; `apps/shell/src/server/panel-de-formato.spec.ts` compara la primera con la
+tercera. Una clave que el dibujo honra y el catalogo no declara solo se puede usar escribiendo
+la instancia a mano.
+
+## Publicar un objeto o una version
+
+- **Una version publicada no se modifica.** Ni sus limites, ni sus pozos, ni sus notas, ni su
+  lista de presentacion: todo eso lo congela la version. Lo que cambie entra en una nueva.
+- **Toda version lleva changelog y certificacion.** El registro rechaza publicar sin ellos.
+- **Toda version vigente de un objeto de datos declara `pozos` y `notes`.**
+- **Todo objeto declara `icono`**, y los que consumen datos declaran ademas `familia`.
+- **`presentation` incluye `PRESENTACION_MINIMA` entera.**
+
+## Las funciones de grafico son puras
+
+Reciben modelo de vista y paleta, devuelven el objeto de opciones. No tocan el DOM ni importan
+ECharts, y por eso se prueban sin navegador.
+
+## Que NO hacer
+
+- No anadir una clave de presentacion a una lista compartida entre versiones: amplia en silencio
+  lo que admiten versiones ya publicadas.
+- No leer variables CSS desde aqui: la paleta llega como argumento.
+- No escribir un color literal. La unica excepcion documentada es el blanco de las etiquetas del
+  mapa de arbol, y esta razonada en el codigo.
