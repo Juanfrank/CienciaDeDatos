@@ -276,3 +276,68 @@ test.describe('navegacion solo con teclado', () => {
     await expect(page).toHaveURL(/Materia=Civil/);
   });
 });
+
+test.describe('los objetos anadidos en los ultimos lotes', () => {
+  /*
+   * Doce tipos de grafico y ocho claves de presentacion nuevas se anadieron sin volver a pasar
+   * axe por las paginas donde viven. Un objeto puede estar bien por dentro y romper la pagina al
+   * componer: un encabezado que salta de nivel, un color de serie que no contrasta con la
+   * superficie, un rotulo que se queda sin nombre accesible.
+   *
+   * Se recorren TODAS las paginas del modulo de ejemplo y no una de muestra. Con una sola, el
+   * objeto que rompa en otra no falla: simplemente no tiene prueba.
+   */
+  const paginas = [
+    ['familia', 'columnas, barras y area'],
+    ['proporcion', 'pastel, dona y medidor'],
+    ['relacion', 'combinado y dispersion'],
+    ['flujo', 'embudo, cascada y mapa de arbol'],
+    ['referencia', 'metas, escalas y colores de serie'],
+    ['detalle', 'etiquetas, tooltip y rotulos girados'],
+    ['multiplos', 'pequenos multiplos'],
+    ['condicional', 'formato condicional'],
+  ] as const;
+
+  for (const [slug, que] of paginas) {
+    test(`/${slug} — ${que} — no tiene infracciones WCAG 2.1 AA`, async ({ page }) => {
+      await entrarComo(page, 'u-ana');
+      await page.goto(`/m/composicion/${slug}`);
+      // Se espera a que ECharts monte: el lienzo anade su capa `aria` y sus patrones al dibujar,
+      // y analizar antes seria analizar una pagina que todavia no es la que se ve.
+      await expect(page.locator('.grafico').first()).toHaveAttribute('data-montado', 'si');
+
+      expect(await infracciones(page)).toEqual([]);
+    });
+  }
+
+  test('el respaldo de cada objeto nuevo sigue siendo alcanzable con el tabulador', async ({
+    page,
+  }) => {
+    /*
+     * El respaldo es el camino accesible, no un apano: un `<canvas>` no tiene nada dentro que un
+     * lector de pantalla pueda recorrer. Cada objeto nuevo trae el suyo, y la comprobacion es que
+     * SIGUE en el documento despues de que ECharts monte encima.
+     */
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/composicion/flujo');
+
+    for (const testid of ['embudo', 'cascada', 'mapa-de-arbol']) {
+      const respaldo = page.getByTestId(testid).first();
+      await expect(respaldo).toBeAttached();
+      // Oculto a la vista, presente en el documento: es lo que distingue «no se dibuja» de «no
+      // existe para quien no ve el dibujo».
+      await expect(respaldo).not.toBeInViewport();
+    }
+  });
+
+  test('los paneles de un multiplo se recorren por sus encabezados', async ({ page }) => {
+    // Es como se navega con lector de pantalla una tarjeta con varios graficos dentro: sin
+    // encabezados, los seis paneles son un unico bloque sin estructura.
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/composicion/multiplos');
+
+    const titulos = page.locator('.multiplos__titulo');
+    expect(await titulos.count()).toBeGreaterThan(1);
+    await expect(titulos.first()).toHaveText(/\w/);
+  });
+});

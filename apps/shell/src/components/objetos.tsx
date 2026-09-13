@@ -570,7 +570,7 @@ export function Lineas({
           forma de la curva, lo util son las cifras. Dibujar unas barras aqui seria inventar una
           lectura que el objeto no propone.
         */}
-        <div className="tabla-contenedor">
+        <TablaDeRespaldo nombre={titulo}>
           <table className="tabla" data-testid="lineas">
             <thead>
               <tr>
@@ -595,7 +595,7 @@ export function Lineas({
               ))}
             </tbody>
           </table>
-        </div>
+        </TablaDeRespaldo>
       </Grafico>
       )}
     </Marco>
@@ -669,7 +669,10 @@ function Multiplos({
             {...(seriesDeColumna === undefined ? {} : { seriesDeColumna })}
             {...(dimension ? { dimension } : {})}
           >
-            <div className="tabla-contenedor">
+            {/* El nombre lleva el del PANEL: con el del objeto, los seis respaldos de una
+                tarjeta de multiplos se anunciarian con el mismo rotulo y no habria forma de
+                saber cual se esta leyendo. */}
+            <TablaDeRespaldo nombre={`${titulo} — ${panel.titulo}`}>
               <table className="tabla">
                 <thead>
                   <tr>
@@ -694,7 +697,7 @@ function Multiplos({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TablaDeRespaldo>
           </Grafico>
         </section>
       ))}
@@ -724,6 +727,26 @@ function presentacionDePanel(
    * que usa el medidor, y por el mismo motivo: una escala tiene que caer en numeros redondos.
    */
   return { ...presentacion, ejes: { ...presentacion?.ejes, maximoY: escalaBonita(maximo) } };
+}
+
+/**
+ * El contenedor del respaldo accesible de un objeto.
+ *
+ * Existe porque los tres atributos que lo hacen alcanzable —`tabIndex`, `role` y el nombre— se
+ * olvidaron en los SIETE respaldos que se escribieron en los ultimos lotes. Cada uno era un
+ * `<div className="tabla-contenedor">` pelado, y axe los marcaba todos con la misma infraccion:
+ * una region que se desplaza y a la que no se llega con el tabulador (WCAG 2.1.1).
+ *
+ * El arreglo no es anadir los atributos siete veces: es que no se puedan olvidar. Un respaldo
+ * nuevo que use este componente los trae; uno que escriba el `div` a mano vuelve a fallar, y por
+ * eso la prueba recorre TODAS las paginas y no una de muestra.
+ */
+function TablaDeRespaldo({ nombre, children }: { nombre: string; children: React.ReactNode }) {
+  return (
+    <div className="tabla-contenedor" tabIndex={0} role="region" aria-label={nombre}>
+      {children}
+    </div>
+  );
 }
 
 /**
@@ -789,7 +812,7 @@ export function Combinado({
           lineas normal, y justo lo que este objeto anade —que unas medidas son columnas y otras
           linea— desapareceria para quien no ve el dibujo.
         */}
-        <div className="tabla-contenedor">
+        <TablaDeRespaldo nombre={titulo}>
           <table className="tabla" data-testid="combinado">
             <thead>
               <tr>
@@ -814,7 +837,7 @@ export function Combinado({
               ))}
             </tbody>
           </table>
-        </div>
+        </TablaDeRespaldo>
       </Grafico>
     </Marco>
   );
@@ -869,7 +892,7 @@ export function Dispersion({
         }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
       >
-        <div className="tabla-contenedor">
+        <TablaDeRespaldo nombre={titulo}>
           <table className="tabla" data-testid="dispersion">
             <thead>
               <tr>
@@ -906,7 +929,7 @@ export function Dispersion({
               ))}
             </tbody>
           </table>
-        </div>
+        </TablaDeRespaldo>
       </Grafico>
     </Marco>
   );
@@ -974,7 +997,7 @@ function UnaDimensionUnaMedida({
           ? { onSeleccionar: (c: string) => onFiltrar(fieldKey(dimension), c) }
           : {})}
       >
-        <div className="tabla-contenedor">
+        <TablaDeRespaldo nombre={titulo}>
           <table className="tabla" data-testid={tipo}>
             <thead>
               <tr>
@@ -1009,7 +1032,7 @@ function UnaDimensionUnaMedida({
               ))}
             </tbody>
           </table>
-        </div>
+        </TablaDeRespaldo>
       </Grafico>
     </Marco>
   );
@@ -1106,7 +1129,7 @@ export function MapaDeArbol({
           ? { onSeleccionar: (c: string) => onFiltrar(fieldKey(principal), c) }
           : {})}
       >
-        <div className="tabla-contenedor">
+        <TablaDeRespaldo nombre={titulo}>
           <table className="tabla" data-testid="mapa-de-arbol">
             <thead>
               <tr>
@@ -1125,7 +1148,7 @@ export function MapaDeArbol({
               ))}
             </tbody>
           </table>
-        </div>
+        </TablaDeRespaldo>
       </Grafico>
     </Marco>
   );
@@ -1208,7 +1231,7 @@ export function Circular({
           cifras obligaria a dividir de cabeza para leer lo mismo que el grafico ensena de un
           vistazo, y entonces el camino accesible diria menos que el otro.
         */}
-        <div className="tabla-contenedor">
+        <TablaDeRespaldo nombre={titulo}>
           <table className="tabla" data-testid="circular">
             <thead>
               <tr>
@@ -1245,7 +1268,7 @@ export function Circular({
               ))}
             </tbody>
           </table>
-        </div>
+        </TablaDeRespaldo>
       </Grafico>
     </Marco>
   );
