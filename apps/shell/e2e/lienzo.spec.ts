@@ -991,3 +991,67 @@ test.describe('estilo de texto y paleta', () => {
     );
   });
 });
+
+test.describe('el panel de formato se busca, no se recorre', () => {
+  /*
+   * Los identificadores del panel llevan dentro el de la instancia, que se genera al crearla, asi
+   * que se localizan por su SUFIJO. Fijar el identificador completo obligaria a leer antes el de
+   * la instancia, y eso ataria la prueba a como se generan.
+   */
+  const panelDe = (page: import('@playwright/test').Page) => page.locator('.editor__formato');
+  const enPanel = (page: import('@playwright/test').Page, sufijo: string) =>
+    panelDe(page).locator(`[data-testid$="${sufijo}"]`);
+  const buscador = (page: import('@playwright/test').Page) =>
+    panelDe(page).getByTestId('buscar-ajuste');
+
+  const conUnGrafico = async (page: import('@playwright/test').Page, slug: string) => {
+    await nuevoModulo(page, slug);
+    await page.getByTestId('anadir-barras').click();
+    await guardado(page);
+    await page.getByRole('tab', { name: 'Formato' }).click();
+    await expect(panelDe(page)).toBeVisible();
+  };
+
+  test('escribir «meta» deja solo las secciones que hablan de eso', async ({ page }) => {
+    /*
+     * El panel llego a dieciocho secciones. Con esa cantidad la pregunta deja de ser «que
+     * opciones hay» y pasa a ser «donde esta la que quiero», y plegar no lo resuelve: plegado,
+     * encontrar algo obliga a abrir y cerrar una por una.
+     */
+    await conUnGrafico(page, 'panel-buscar');
+
+    const antes = await panelDe(page).locator('details.seccion').count();
+    expect(antes).toBeGreaterThan(5);
+
+    // «Meta» no es el titulo de ninguna seccion: es como se llama de verdad una linea de
+    // referencia. Un buscador que solo mirara el titulo obligaria a saber ya como se llama.
+    await buscador(page).fill('meta');
+    await expect(enPanel(page, '-referencias')).toBeVisible();
+    await expect(enPanel(page, '-rotulo')).toHaveCount(0);
+
+    // Y lo que queda se abre solo: si siguiera plegado haria falta un clic mas para ver lo que se
+    // estaba buscando.
+    await expect(enPanel(page, '-ref-anadir')).toBeVisible();
+  });
+
+  test('busca sin acentos y vaciar el buscador lo devuelve todo', async ({ page }) => {
+    await conUnGrafico(page, 'panel-buscar-2');
+
+    // Quien busca «grafico» tiene que encontrar «Gráfico».
+    await buscador(page).fill('grafico');
+    await expect(enPanel(page, '-rotulo')).toHaveCount(0);
+
+    await buscador(page).fill('');
+    await expect(enPanel(page, '-rotulo')).toBeVisible();
+  });
+
+  test('una busqueda sin resultados no deja el panel en blanco sin explicacion', async ({ page }) => {
+    await conUnGrafico(page, 'panel-buscar-3');
+    await buscador(page).fill('zzzzz');
+
+    await expect(panelDe(page).locator('details.seccion')).toHaveCount(0);
+    // Un panel vacio se lee como «este objeto no tiene ajustes», que es falso, y ademas no da la
+    // salida.
+    await expect(panelDe(page).getByTestId('sin-resultados')).toBeVisible();
+  });
+});

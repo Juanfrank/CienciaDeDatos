@@ -849,6 +849,42 @@ input[type='radio'] {
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-small);
 }
+/*
+ * El buscador del panel de formato.
+ *
+ * `type="search"` y no `text`: el navegador anade la cruz para vaciarlo y lo anuncia como lo que
+ * es. Va pegado arriba porque con dieciocho secciones es lo primero que hace falta, y su rotulo
+ * se ve —no es un `placeholder`—: un `placeholder` desaparece al escribir y deja el campo sin
+ * nombre para quien vuelve a el.
+ */
+.editor__buscador {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+/*
+ * El aviso de «nada coincide», gobernado por `:has()`.
+ *
+ * Se dibuja siempre que hay busqueda y solo aparece cuando no queda ninguna seccion. Preguntarlo
+ * en JavaScript obligaria a repetir ahi la lista de que secciones admite cada objeto.
+ */
+.editor__vacio { display: none; }
+.editor__formato:not(:has(details.seccion)) .editor__vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 16px 0;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.editor__vacio p { margin: 0; }
+
+.editor__buscador-rotulo {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
 .referencia__acciones { display: flex; gap: 4px; flex-wrap: wrap; }
 .referencia__titulo {
   padding: 0 4px;

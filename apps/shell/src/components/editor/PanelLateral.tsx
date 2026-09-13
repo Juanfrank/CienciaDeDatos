@@ -23,7 +23,7 @@ import { ConfiguracionDeObjetoEditor } from './ConfiguracionDeObjetoEditor';
 import { Pestanas, type DefinicionDePestana } from './Pestanas';
 import { Pozo } from './Pozo';
 import { Presentacion } from './Presentacion';
-import { Seccion } from './Seccion';
+import { ProveedorDeFiltro, Seccion } from './Seccion';
 
 /**
  * El panel del editor: la tienda y el banco de trabajo, en uno.
@@ -62,6 +62,7 @@ export function PanelLateral({
   onQuitar: (itemId: string) => void;
 }) {
   const [pestana, setPestana] = useState<Pestana>('objetos');
+  const [filtro, setFiltro] = useState('');
 
   /*
    * Al elegir un objeto, el panel salta a «Datos».
@@ -133,7 +134,32 @@ export function PanelLateral({
         ) : null}
 
         {pestana === 'formato' && seleccionado ? (
-          <>
+          <div className="editor__formato">
+            {/*
+              El buscador, PRIMERO y para la pestana ENTERA.
+
+              La pestana llego a dieciocho secciones, y con esa cantidad la pregunta deja de ser
+              «que opciones hay» y pasa a ser «donde esta la que quiero». Plegar no lo resuelve:
+              plegado, encontrar algo obliga a abrir y cerrar una por una.
+
+              Cubre las tres piezas de la pestana —la configuracion del objeto, la presentacion y
+              el tamano— y no solo la del medio. Un buscador que dejara una seccion fuera seria
+              peor que no tenerlo: quien no la encuentra concluye que no existe.
+
+              No se guarda: el filtro es un gesto de un momento, no una preferencia.
+            */}
+            <label className="editor__buscador">
+              <span className="editor__buscador-rotulo">Buscar un ajuste</span>
+              <input
+                type="search"
+                value={filtro}
+                placeholder="meta, decimales, leyenda…"
+                data-testid="buscar-ajuste"
+                onChange={(e) => setFiltro(e.target.value)}
+              />
+            </label>
+
+            <ProveedorDeFiltro filtro={filtro}>
             {/* `Presentacion` ya trae sus propias subsecciones: envolverlo en otra repetiria el
                 rotulo «Presentacion» dos veces seguidas. */}
             <ConfiguracionDeObjetoEditor
@@ -162,10 +188,36 @@ export function PanelLateral({
               Abierta por defecto: redimensionar es lo que mas se hace en esta pestana, y llegar a
               ella para encontrarse un titulo plegado anade un clic a cada ajuste.
             */}
-            <Seccion titulo="Tamano y posicion" prueba={`seccion-tamano-${seleccionado.id}`}>
+            <Seccion
+              titulo="Tamano y posicion"
+              claves={['ancho', 'alto', 'columnas', 'filas', 'mover', 'rejilla', 'redimensionar']}
+              prueba={`seccion-tamano-${seleccionado.id}`}
+            >
               <Tamano item={seleccionado} guardando={guardando} onCambiar={onCambiar} />
             </Seccion>
-          </>
+            </ProveedorDeFiltro>
+
+            {/*
+              Una busqueda sin resultados no puede dejar la pestana en blanco.
+              Vacia se lee como «este objeto no tiene ajustes», que es falso, y ademas no da la
+              salida. QUIEN decide si se ve es el CSS, con `:has()`: preguntarlo aqui obligaria a
+              repetir la lista de que secciones admite cada objeto, y dos listas que hay que
+              mantener iguales acaban desincronizandose.
+            */}
+            {filtro.trim() !== '' ? (
+              <div className="editor__vacio" data-testid="sin-resultados">
+                <p>Nada coincide con «{filtro.trim()}».</p>
+                <button
+                  type="button"
+                  className="md-boton md-boton--texto"
+                  data-testid="limpiar-busqueda"
+                  onClick={() => setFiltro('')}
+                >
+                  Ver todos los ajustes
+                </button>
+              </div>
+            ) : null}
+          </div>
         ) : null}
 
         {pestana === 'complementos' && seleccionado ? (
