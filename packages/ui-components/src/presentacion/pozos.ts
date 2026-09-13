@@ -143,14 +143,14 @@ export function validarRanuras(
   ranuras: RanuraDeCampos[],
 ): ProblemaDeRanura[] {
   if (ranuras.length === 0) return [];
-  const problemas: ProblemaDeRanura[] = [];
+  const problems: ProblemaDeRanura[] = [];
   const asignacion = ranurasDe(instance, ranuras);
 
   for (const ranura of ranuras) {
     const campos = asignacion.get(ranura.id) ?? [];
     const minimo = ranura.min ?? 0;
     if (campos.length < minimo) {
-      problemas.push({
+      problems.push({
         ranura: ranura.id,
         problema:
           `'${ranura.etiqueta}' necesita ${minimo} ${minimo === 1 ? 'campo' : 'campos'} y ` +
@@ -158,13 +158,13 @@ export function validarRanuras(
       });
     }
     if (campos.length > ranura.max) {
-      problemas.push({
+      problems.push({
         ranura: ranura.id,
         problema: `'${ranura.etiqueta}' admite ${ranura.max} y tiene ${campos.length}.`,
       });
     }
     if (new Set(campos).size !== campos.length) {
-      problemas.push({
+      problems.push({
         ranura: ranura.id,
         problema: `'${ranura.etiqueta}' tiene el mismo campo dos veces.`,
       });
@@ -175,14 +175,14 @@ export function validarRanuras(
   // quedarian mapeados sin que el editor los muestre ni nadie pueda quitarlos.
   for (const id of Object.keys(instance.binding.ranuras ?? {})) {
     if (!ranuras.some((r) => r.id === id) && (instance.binding.ranuras?.[id]?.length ?? 0) > 0) {
-      problemas.push({
+      problems.push({
         ranura: id,
         problema: `Este objeto ya no tiene la ranura '${id}', y quedan campos asignados a ella.`,
       });
     }
   }
 
-  return problemas;
+  return problems;
 }
 
 /** Las ranuras por defecto cuando un objeto no las declara. */

@@ -68,42 +68,42 @@ export interface RegistryProblem {
  * de producir un fallo de aislamiento silencioso en produccion.
  */
 export function validateRegistry(registry: DatasetRegistry = defaultRegistry): RegistryProblem[] {
-  const problemas: RegistryProblem[] = [];
+  const problems: RegistryProblem[] = [];
   const vistos = new Set<string>();
 
   for (const d of registry.datasets) {
     if (vistos.has(d.datasetId)) {
-      problemas.push({ datasetId: d.datasetId, problem: 'datasetId duplicado en el registro.' });
+      problems.push({ datasetId: d.datasetId, problem: 'datasetId duplicado en el registro.' });
     }
     vistos.add(d.datasetId);
 
     if (d.securityBinding !== 'none' && d.securityBinding !== 'connector-native') {
-      problemas.push({
+      problems.push({
         datasetId: d.datasetId,
         problem: `securityBinding invalido: '${String(d.securityBinding)}'. Debe ser 'none' o 'connector-native'.`,
       });
     }
 
     if (!d.securityBindingRationale?.trim()) {
-      problemas.push({
+      problems.push({
         datasetId: d.datasetId,
         problem: 'Falta securityBindingRationale: la estrategia de aislamiento no puede quedar implicita (6.6).',
       });
     }
 
     if (!d.recurrence?.trim()) {
-      problemas.push({ datasetId: d.datasetId, problem: 'Falta recurrence: cada dataset declara la suya (6.4).' });
+      problems.push({ datasetId: d.datasetId, problem: 'Falta recurrence: cada dataset declara la suya (6.4).' });
     }
 
     if (d.grain !== 'atomico' && d.grain !== 'preagregado') {
-      problemas.push({
+      problems.push({
         datasetId: d.datasetId,
         problem: `grain invalido: '${String(d.grain)}'. Debe ser 'atomico' o 'preagregado'.`,
       });
     }
 
     if (!d.grainRationale?.trim()) {
-      problemas.push({
+      problems.push({
         datasetId: d.datasetId,
         problem:
           'Falta grainRationale: el grano decide que se puede calcular despues sobre el cache ' +
@@ -112,7 +112,7 @@ export function validateRegistry(registry: DatasetRegistry = defaultRegistry): R
     }
 
     if (d.consumedByModules.length === 0) {
-      problemas.push({ datasetId: d.datasetId, problem: 'Ningun modulo lo consume: o se declara el consumidor, o se retira.' });
+      problems.push({ datasetId: d.datasetId, problem: 'Ningun modulo lo consume: o se declara el consumidor, o se retira.' });
     }
 
     // La comprobacion que evita una fuga: si el dataset se comparte entre ambitos, tiene que
@@ -121,7 +121,7 @@ export function validateRegistry(registry: DatasetRegistry = defaultRegistry): R
       const declaradas = new Set((d.query.dimensions ?? []).map(dimensionKey));
       for (const dim of d.scopeDimensions) {
         if (!declaradas.has(dimensionKey(dim))) {
-          problemas.push({
+          problems.push({
             datasetId: d.datasetId,
             problem:
               `La dimension de ambito '${dimensionKey(dim)}' no esta entre las dimensiones de la ` +
@@ -133,5 +133,5 @@ export function validateRegistry(registry: DatasetRegistry = defaultRegistry): R
     }
   }
 
-  return problemas;
+  return problems;
 }

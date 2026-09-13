@@ -18,11 +18,11 @@ export function validateAttachments(
   instance: ObjectInstance,
   buscar: BuscarDefinicion,
 ): BindingProblem[] {
-  const problemas: BindingProblem[] = [];
+  const problems: BindingProblem[] = [];
 
   const anfitrion = buscar(instance.objectId);
   if (anfitrion?.attachable) {
-    problemas.push({
+    problems.push({
       slot: instance.objectId,
       kind: 'contrato-incumplido',
       problem:
@@ -37,7 +37,7 @@ export function validateAttachments(
     const definicion = buscar(adjunto.objectId);
 
     if (!definicion) {
-      problemas.push({
+      problems.push({
         slot: adjunto.objectId,
         kind: 'campo-inexistente',
         problem: `El complemento '${adjunto.objectId}' no existe en el repositorio de objetos.`,
@@ -46,7 +46,7 @@ export function validateAttachments(
     }
 
     if (!definicion.attachable) {
-      problemas.push({
+      problems.push({
         slot: adjunto.objectId,
         kind: 'contrato-incumplido',
         problem:
@@ -58,7 +58,7 @@ export function validateAttachments(
     // Dos tooltips explicativos en el mismo objeto no significan nada, y dos tablas de datos
     // dejarian al anfitrion con dos iconos que abren lo mismo.
     if (vistos.has(adjunto.objectId)) {
-      problemas.push({
+      problems.push({
         slot: adjunto.objectId,
         kind: 'contrato-incumplido',
         problem: `El objeto ya tiene adjunto un '${definicion.name}'. Solo se admite uno de cada tipo.`,
@@ -67,7 +67,7 @@ export function validateAttachments(
     vistos.add(adjunto.objectId);
 
     if (exigeDimension(adjunto) && instance.binding.dimensions.length === 0) {
-      problemas.push({
+      problems.push({
         slot: adjunto.objectId,
         kind: 'contrato-incumplido',
         problem:
@@ -77,7 +77,7 @@ export function validateAttachments(
     }
   }
 
-  return problemas;
+  return problems;
 }
 
 /** El complemento de un tipo dado, si el objeto lo tiene adjunto. */

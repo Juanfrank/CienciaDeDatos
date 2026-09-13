@@ -188,8 +188,8 @@ function Nodos({
                 if (!esCarpeta) return;
                 e.preventDefault();
                 e.stopPropagation();
-                const origen = e.dataTransfer.getData('text/plain');
-                if (origen && origen !== nodo.id) onMover(origen, nodo.id);
+                const source = e.dataTransfer.getData('text/plain');
+                if (source && source !== nodo.id) onMover(source, nodo.id);
               }}
             >
               <button

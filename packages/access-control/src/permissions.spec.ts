@@ -4,9 +4,9 @@ import { APP_ROLES } from './Team';
 
 describe('matriz de permisos (4.10.1)', () => {
   it('las tres capacidades basicas las tienen los tres roles', () => {
-    for (const rol of APP_ROLES) {
-      expect(can(rol, 'ver-modulos-de-sus-equipos')).toBe(true);
-      expect(can(rol, 'personalizar-su-vista')).toBe(true);
+    for (const role of APP_ROLES) {
+      expect(can(role, 'ver-modulos-de-sus-equipos')).toBe(true);
+      expect(can(role, 'personalizar-su-vista')).toBe(true);
     }
   });
 

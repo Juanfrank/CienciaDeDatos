@@ -7,7 +7,7 @@ export interface ResumenDeSalud {
   salud: SaludDeModulo;
   objetos: { total: number; rotos: number };
   /** Motivos, ya legibles. Los de disposicion primero: son los que tumban el modulo. */
-  problemas: string[];
+  problems: string[];
 }
 
 /** Que hace que un modulo NO se pueda componer: */
@@ -27,5 +27,5 @@ export function saludDe(diagnostico: ModuleDiagnostics): ResumenDeSalud {
         ? 'degradado'
         : 'ok';
 
-  return { salud, objetos: { total, rotos: rotos.length }, problemas: [...disposicion, ...deObjetos] };
+  return { salud, objetos: { total, rotos: rotos.length }, problems: [...disposicion, ...deObjetos] };
 }

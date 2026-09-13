@@ -5,7 +5,7 @@ import { useState } from 'react';
 /** Vista de "quien ve que" — seccion 4.10.8. */
 interface Paso {
   capa: string;
-  origen: string;
+  source: string;
   amplio: boolean;
   resultado: { restrictions: { dimension: { table: string; field: string }; allowedValues: string[] }[] };
 }
@@ -120,7 +120,7 @@ export function QuienVeQue({
                   <li key={i} className={p.amplio ? 'es-ampliacion' : ''}>
                     <strong>{ETIQUETAS[p.capa] ?? p.capa}</strong>
                     {/* El origen es lo que el documento pide destacar: que carpeta lo causo. */}
-                    <span className="quien-ve-que__origen"> — {p.origen}</span>
+                    <span className="quien-ve-que__origen"> — {p.source}</span>
                     <div className="texto-atenuado">{describir(p.resultado)}</div>
                   </li>
                 ))}

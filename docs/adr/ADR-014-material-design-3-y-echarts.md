@@ -16,8 +16,8 @@ La consecuencia practica: la prueba de contraste deja de comprobar unos cuantos 
 
 - **El azul institucional es `primary`; el rojo es `tertiary` Y `error`.** La institucion tiene un rojo y significa "atencion": sirve igual para destacar que para avisar. Inventar un segundo rojo anadiria a la marca un color que la marca no tiene; usar el rojo por defecto de MD3 pondria dos rojos casi iguales en la misma pantalla. Los dos roles se distinguen por **donde** se usan, no por el matiz.
 - **Los colores de marca son el ORIGEN, no el resultado.** `primary` es el tono 40 de la paleta del azul, que para `#0050DD` cae a medio tono del color original: imperceptible, y a cambio el par con su `onPrimary` deja de depender de que alguien lo comprobara. Lo que se fija como dato institucional —y tiene prueba— es el origen.
-- **El esquema oscuro se genera y se verifica, y no se aplica.** MD3 define los dos modos y generarlos cuesta lo mismo, asi que la prueba de contraste recorre los dos. Encenderlo con `prefers-color-scheme` sin revisar cada pantalla en ese modo seria peor que no tenerlo.
-- **La paleta categorica sale de las paletas del tema**, alternando familia antes que tono para que dos series contiguas no sean dos tonos del mismo color. Sus tonos son los que alcanzan 3:1 contra la superficie de su modo: en claro el tono 60 da 3.01, justo en el limite, asi que la banda segura acaba en 55.
+- **El esquema dark se genera y se verifica, y no se aplica.** MD3 define los dos modos y generarlos cuesta lo mismo, asi que la prueba de contraste recorre los dos. Encenderlo con `prefers-color-scheme` sin revisar cada pantalla en ese modo seria peor que no tenerlo.
+- **La paleta categorica sale de las paletas del tema**, alternando familia antes que tono para que dos series contiguas no sean dos tonos del mismo color. Sus tonos son los que alcanzan 3:1 contra la superficie de su modo: en light el tono 60 da 3.01, justo en el limite, asi que la banda segura acaba en 55.
 
 ## Las cuatro ideas que cambian la hoja de estilo
 

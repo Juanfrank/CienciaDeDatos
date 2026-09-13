@@ -326,7 +326,7 @@ describe('quien ve que (4.10.8)', () => {
   it('muestra el ambito resuelto y NOMBRA la carpeta que lo origino', async () => {
     const r = await quienVeQue('u-ana', 'equipo-norte', 'casos-pendientes');
     expect(r.tieneAcceso).toBe(true);
-    expect(r.pasos.map((p) => p.origen)).toEqual([
+    expect(r.pasos.map((p) => p.source)).toEqual([
       'Equipo Distrito Norte',
       'Regional',
       'Distrito Norte',

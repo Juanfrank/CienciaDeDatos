@@ -42,7 +42,7 @@ const VALORES: Partial<Record<ClaveDePresentacion, unknown[]>> = {
     { cuadricula: false, mostrarX: false },
   ],
   apilado: ['apilado', 'porcentaje'],
-  circular: [{ radioInterior: 40 }, { etiquetas: 'categoria', totalEnElCentro: true }],
+  circular: [{ radioInterior: 40 }, { labels: 'categoria', totalEnElCentro: true }],
   medidor: [{ minimo: 0, maximo: 100 }, { maximo: 7 }],
   combinado: [{ ejeSecundario: true }, { ejeSecundario: false }],
   embudo: [{ comparar: 'anterior' }, { comparar: 'ninguna' }],

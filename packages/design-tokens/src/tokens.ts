@@ -1,6 +1,6 @@
 /** Tema organizacional — seccion 4.3 del contrato de ingenieria. */
 
-import { comoThemeTokens, temaClaro } from './temaInstitucional';
+import { asThemeTokens, lightTheme } from './institutionalTheme';
 
 export interface ColorScale {
   50: string;
@@ -51,7 +51,7 @@ export interface ThemeTokens {
 
 /** Tema institucional del Poder Judicial de la Republica Dominicana. */
 /** Tema institucional por defecto — DERIVADO del esquema Material Design 3. */
-export const defaultTheme: ThemeTokens = comoThemeTokens(temaClaro);
+export const defaultTheme: ThemeTokens = asThemeTokens(lightTheme);
 
 /** Tokens que un objeto PUEDE anular. El resto no es anulable. */
 export const OVERRIDABLE_TOKENS = [

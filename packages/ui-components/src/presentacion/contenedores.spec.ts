@@ -48,11 +48,11 @@ describe('validarContenedor', () => {
   });
 
   it('rechaza dos hijos superpuestos', () => {
-    const problemas = con({
+    const problems = con({
       paneles: [{ panelId: 'p1', nombre: '', items: [item('a', 0, 0), item('b', 1, 1)] }],
     });
-    expect(problemas).toHaveLength(1);
-    expect(problemas[0]?.problema).toContain('solapa');
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.problema).toContain('solapa');
   });
 
   it('acepta dos hijos que se tocan sin pisarse', () => {
@@ -62,23 +62,23 @@ describe('validarContenedor', () => {
   });
 
   it('rechaza un hijo que se sale de las columnas del contenedor', () => {
-    const problemas = con({
+    const problems = con({
       simple: { columnas: 3 },
       paneles: [{ panelId: 'p1', nombre: '', items: [item('a', 2, 0, 2)] }],
     });
-    expect(problemas[0]?.problema).toContain('3 columnas');
+    expect(problems[0]?.problema).toContain('3 columnas');
   });
 
   it('rechaza un contenedor con pestanas que solo tiene una', () => {
-    const problemas = validarContenedor('c1', {
+    const problems = validarContenedor('c1', {
       objectId: 'contenedor-con-pestanas',
       configuracion: { paneles: [{ panelId: 'p1', nombre: 'Sola', items: [] }] },
     });
-    expect(problemas[0]?.problema).toContain('al menos dos');
+    expect(problems[0]?.problema).toContain('al menos dos');
   });
 
   it('rechaza dos paneles con el mismo id', () => {
-    const problemas = validarContenedor('c1', {
+    const problems = validarContenedor('c1', {
       objectId: 'contenedor-con-pestanas',
       configuracion: {
         paneles: [
@@ -87,16 +87,16 @@ describe('validarContenedor', () => {
         ],
       },
     });
-    expect(problemas.some((p) => p.problema.includes("id 'p1'"))).toBe(true);
+    expect(problems.some((p) => p.problema.includes("id 'p1'"))).toBe(true);
   });
 
   it('rechaza un eje que no es X ni Y', () => {
-    const problemas = validarContenedor('c1', {
+    const problems = validarContenedor('c1', {
       objectId: 'contenedor-desplazable',
       // Lo que este caso protege: que «ambos» no entre por la puerta de atras editando el JSON.
       configuracion: { desplazable: { eje: 'ambos' as unknown as 'x' } },
     });
-    expect(problemas[0]?.problema).toContain('nunca por los dos');
+    expect(problems[0]?.problema).toContain('nunca por los dos');
   });
 });
 

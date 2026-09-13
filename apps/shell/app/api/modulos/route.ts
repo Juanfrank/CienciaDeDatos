@@ -20,7 +20,7 @@ export async function GET() {
   const visibles = await modulosVisibles(actor);
 
   return NextResponse.json({
-    rol: actor.role,
+    role: actor.role,
     modulos: await Promise.all(
       visibles.map(async (m) => ({
         moduleId: m.moduleId,

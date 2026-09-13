@@ -436,7 +436,7 @@ export interface QuienVeQue {
   tieneAcceso: boolean;
   scope: AccessScope;
   /** Traza legible: que capa aplico que, y desde que carpeta. */
-  pasos: { capa: string; origen: string; amplio: boolean; resultado: AccessScope }[];
+  pasos: { capa: string; source: string; amplio: boolean; resultado: AccessScope }[];
   usoAmpliacion: boolean;
   noVeNada: boolean;
   existeEnElArbol: boolean;
@@ -464,7 +464,7 @@ export async function quienVeQue(userId: string, teamId: string, moduleId: strin
     scope: resolucion.scope,
     pasos: resolucion.steps.map((s) => ({
       capa: s.layer,
-      origen: s.source,
+      source: s.source,
       amplio: s.expanded,
       resultado: s.result,
     })),

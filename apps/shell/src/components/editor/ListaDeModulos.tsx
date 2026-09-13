@@ -27,11 +27,11 @@ const ETIQUETA: Record<FilaDeModulo["status"], string> = {
 
 export function ListaDeModulos({
   modulos,
-  rol,
+  role,
   usuario,
 }: {
   modulos: FilaDeModulo[];
-  rol: string;
+  role: string;
   usuario: string;
 }) {
   const router = useRouter();
@@ -40,7 +40,7 @@ export function ListaDeModulos({
   const [error, setError] = useState("");
   const [trabajando, setTrabajando] = useState(false);
 
-  const esAdmin = rol === "administrador";
+  const esAdmin = role === "administrador";
 
   const pedir = async (url: string, init: RequestInit): Promise<boolean> => {
     setError("");

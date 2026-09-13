@@ -818,7 +818,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'Cuanto pesa cada materia',
                 leyenda: 'abajo',
-                circular: { etiquetas: 'porcentaje' },
+                circular: { labels: 'porcentaje' },
               },
             },
           },
@@ -834,7 +834,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'El hueco deja sitio a la cifra',
                 leyenda: 'abajo',
-                circular: { totalEnElCentro: true, etiquetas: 'porcentaje' },
+                circular: { totalEnElCentro: true, labels: 'porcentaje' },
               },
             },
           },
@@ -850,7 +850,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'Etiquetas con nombre y parte',
                 leyenda: 'oculta',
-                circular: { radioInterior: 40, etiquetas: 'categoria-porcentaje' },
+                circular: { radioInterior: 40, labels: 'categoria-porcentaje' },
               },
             },
           },

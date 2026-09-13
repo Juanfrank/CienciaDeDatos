@@ -44,12 +44,12 @@ export const seSolapan = (a: GridPosition, b: GridPosition): boolean => {
 
 /** Valida una disposicion. */
 export function validateLayout(items: { id: string; position: GridPosition }[]): GridProblem[] {
-  const problemas: GridProblem[] = [];
+  const problems: GridProblem[] = [];
 
   for (const item of items) {
     const { x, y, w, h } = item.position;
     if (w < 1 || h < 1 || !Number.isInteger(w) || !Number.isInteger(h)) {
-      problemas.push({
+      problems.push({
         kind: 'tamano-invalido',
         itemIds: [item.id],
         problem: `El objeto '${item.id}' declara un tamano invalido (${w}x${h}). Minimo 1x1, en enteros.`,
@@ -57,7 +57,7 @@ export function validateLayout(items: { id: string; position: GridPosition }[]):
       continue;
     }
     if (x < 0 || y < 0 || !Number.isInteger(x) || !Number.isInteger(y)) {
-      problemas.push({
+      problems.push({
         kind: 'fuera-de-rejilla',
         itemIds: [item.id],
         problem: `El objeto '${item.id}' tiene una posicion invalida (${x},${y}).`,
@@ -65,7 +65,7 @@ export function validateLayout(items: { id: string; position: GridPosition }[]):
       continue;
     }
     if (x + w > GRID_COLUMNS) {
-      problemas.push({
+      problems.push({
         kind: 'fuera-de-rejilla',
         itemIds: [item.id],
         problem:
@@ -81,7 +81,7 @@ export function validateLayout(items: { id: string; position: GridPosition }[]):
       const b = items[j];
       if (!a || !b) continue;
       if (seSolapan(a.position, b.position)) {
-        problemas.push({
+        problems.push({
           kind: 'solapamiento',
           itemIds: [a.id, b.id],
           problem: `Los objetos '${a.id}' y '${b.id}' se solapan y uno ocultaria al otro.`,
@@ -90,7 +90,7 @@ export function validateLayout(items: { id: string; position: GridPosition }[]):
     }
   }
 
-  return problemas;
+  return problems;
 }
 
 /** Deriva la disposicion para un tamano de pantalla. */

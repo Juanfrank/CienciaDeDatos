@@ -68,17 +68,17 @@ describe('rejilla (4.2)', () => {
   });
 
   it('detecta solapamientos: un objeto encima de otro oculta datos sin que nadie lo note', () => {
-    const problemas = validateLayout([
+    const problems = validateLayout([
       { id: 'a', position: { x: 0, y: 0, w: 6, h: 2 } },
       { id: 'b', position: { x: 3, y: 1, w: 6, h: 2 } },
     ]);
-    expect(problemas[0]?.kind).toBe('solapamiento');
-    expect(problemas[0]?.itemIds).toEqual(['a', 'b']);
+    expect(problems[0]?.kind).toBe('solapamiento');
+    expect(problems[0]?.itemIds).toEqual(['a', 'b']);
   });
 
   it('detecta un objeto que se sale de las doce columnas', () => {
-    const problemas = validateLayout([{ id: 'a', position: { x: 8, y: 0, w: 6, h: 2 } }]);
-    expect(problemas[0]?.kind).toBe('fuera-de-rejilla');
+    const problems = validateLayout([{ id: 'a', position: { x: 8, y: 0, w: 6, h: 2 } }]);
+    expect(problems[0]?.kind).toBe('fuera-de-rejilla');
   });
 
   it('detecta tamanos invalidos', () => {

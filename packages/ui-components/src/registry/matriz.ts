@@ -37,10 +37,10 @@ export interface MatrizJerarquica {
   valor(rutaFila: readonly string[], rutaColumna: readonly string[], medida: number): number | null;
 }
 
-function insertar(raiz: NodoDeMatriz[], etiquetas: string[]): void {
+function insertar(raiz: NodoDeMatriz[], labels: string[]): void {
   let nivel = raiz;
   const ruta: string[] = [];
-  for (const [i, etiqueta] of etiquetas.entries()) {
+  for (const [i, etiqueta] of labels.entries()) {
     ruta.push(etiqueta);
     let nodo = nivel.find((n) => n.etiqueta === etiqueta);
     if (!nodo) {

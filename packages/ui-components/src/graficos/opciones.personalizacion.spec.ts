@@ -99,12 +99,12 @@ describe('orden de las categorias', () => {
   });
 
   it('por categoria y por valor, en las dos direcciones', () => {
-    const etiquetas = (o: Parameters<typeof ordenarCategorias>[1]) =>
+    const labels = (o: Parameters<typeof ordenarCategorias>[1]) =>
       ordenarCategorias(datos, o).points.map((p) => p.label);
-    expect(etiquetas({ por: 'categoria' })).toEqual(['a', 'b', 'c']);
-    expect(etiquetas({ por: 'categoria', direccion: 'desc' })).toEqual(['c', 'b', 'a']);
-    expect(etiquetas({ por: 'valor' })).toEqual(['c', 'b', 'a']);
-    expect(etiquetas({ por: 'valor', direccion: 'desc' })).toEqual(['a', 'b', 'c']);
+    expect(labels({ por: 'categoria' })).toEqual(['a', 'b', 'c']);
+    expect(labels({ por: 'categoria', direccion: 'desc' })).toEqual(['c', 'b', 'a']);
+    expect(labels({ por: 'valor' })).toEqual(['c', 'b', 'a']);
+    expect(labels({ por: 'valor', direccion: 'desc' })).toEqual(['a', 'b', 'c']);
   });
 
   it('los huecos van al final, se ordene como se ordene', () => {

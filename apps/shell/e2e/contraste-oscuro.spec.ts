@@ -9,7 +9,7 @@ const NIVEL = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 /** Pone el modo oscuro en el contexto, que es como lo pediria una persona desde sus ajustes. */
 async function enOscuro(page: Page): Promise<void> {
   await page.context().addCookies([
-    { name: 'tema', value: 'oscuro', url: 'http://localhost:4310' },
+    { name: 'tema', value: 'dark', url: 'http://localhost:4310' },
   ]);
 }
 
@@ -34,7 +34,7 @@ test('el modo se pide con una cookie y llega al documento', async ({ page }) => 
    * la clase de prueba que aprueba por coincidencia.
    */
   await page.goto('/m/composicion/familia');
-  await expect(page.locator('html')).toHaveAttribute('data-tema', 'oscuro');
+  await expect(page.locator('html')).toHaveAttribute('data-tema', 'dark');
 
   const fondo = await page.evaluate(() =>
     getComputedStyle(document.body).getPropertyValue('--md-sys-color-surface').trim(),
@@ -58,19 +58,19 @@ test('los dos juegos de variables vienen del MISMO modo', async ({ page }) => {
    */
   await page.goto('/m/casos-pendientes');
 
-  const { md, derivado } = await page.evaluate(() => {
+  const { md, derived } = await page.evaluate(() => {
     const e = getComputedStyle(document.body);
     return {
       md: e.getPropertyValue('--md-sys-color-on-surface').trim(),
-      derivado: e.getPropertyValue('--color-text').trim(),
+      derived: e.getPropertyValue('--color-text').trim(),
     };
   });
 
   expect(md).not.toBe('');
-  expect(derivado).toBe(md);
+  expect(derived).toBe(md);
 });
 
-test.describe('paginas de modulo en oscuro', () => {
+test.describe('paginas de modulo en dark', () => {
   const paginas = [
     ['familia', 'columnas, barras y area'],
     ['proporcion', 'pastel, dona y medidor'],
@@ -84,7 +84,7 @@ test.describe('paginas de modulo en oscuro', () => {
   ] as const;
 
   for (const [slug, que] of paginas) {
-    test(`/${slug} — ${que} — no tiene infracciones WCAG 2.1 AA en oscuro`, async ({ page }) => {
+    test(`/${slug} — ${que} — no tiene infracciones WCAG 2.1 AA en dark`, async ({ page }) => {
       await page.goto(`/m/composicion/${slug}`);
       // Se espera a que ECharts monte: el grafico lee los colores de las variables CSS al
       // dibujar, asi que antes de montar la pagina no tiene todavia los colores del tema.
@@ -95,7 +95,7 @@ test.describe('paginas de modulo en oscuro', () => {
   }
 });
 
-test.describe('el resto de la aplicacion en oscuro', () => {
+test.describe('el resto de la aplicacion en dark', () => {
   test('un modulo con tabla, KPI y segmentadores', async ({ page }) => {
     await page.goto('/m/casos-pendientes');
     await expect(page.getByTestId('tabla')).toBeVisible();
@@ -115,9 +115,9 @@ test.describe('el resto de la aplicacion en oscuro', () => {
   test('el editor de modulos, que es la pantalla con mas cromo', async ({ page }) => {
     // Con un objeto YA DIBUJADO y su panel abierto: la paleta, los pozos y las pestanas son la
     // mayor concentracion de texto pequeno sobre superficies elevadas de toda la aplicacion.
-    const slug = `oscuro-${Date.now()}`;
+    const slug = `dark-${Date.now()}`;
     const creado = await page.request.post('/api/modulos', {
-      data: { nombre: 'Modulo en oscuro', slug },
+      data: { nombre: 'Modulo en dark', slug },
     });
     expect(creado.ok(), await creado.text()).toBe(true);
 
@@ -141,7 +141,7 @@ test.describe('el resto de la aplicacion en oscuro', () => {
     // El tema se aplica en el layout raiz, que envuelve tambien lo que se ve sin haber entrado:
     // si el modo dependiera de la sesion, esta pantalla saldria en claro.
     await page.goto('/restablecer');
-    await expect(page.locator('html')).toHaveAttribute('data-tema', 'oscuro');
+    await expect(page.locator('html')).toHaveAttribute('data-tema', 'dark');
     await expect(page.getByTestId('restablecer-enviar')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);

@@ -84,7 +84,7 @@ export function Presentacion({
   const hayMedida = admite("formato") || admite("formatos");
   // La forma anterior era un booleano; se normaliza una vez aqui para que el panel no tenga que
   // preguntarse en cada control cual de las dos formas le ha llegado.
-  const etiquetas = etiquetasNormalizadas(p.etiquetasDeDato);
+  const labels = etiquetasNormalizadas(p.etiquetasDeDato);
   const hayGrafico =
     admite("leyenda") || admite("etiquetasDeDato") || admite("orden") || admite("apilado");
   const esTarjeta = instance.objectId === "tarjeta-kpi";
@@ -356,7 +356,7 @@ export function Presentacion({
               <label className="editor__interruptor">
                 <input
                   type="checkbox"
-                  checked={etiquetas.mostrar === true}
+                  checked={labels.mostrar === true}
                   disabled={guardando}
                   data-testid={`${prueba}-etiquetas`}
                   // Se guarda como objeto en cuanto se toca, aunque venga de la forma antigua:
@@ -366,18 +366,18 @@ export function Presentacion({
                 Cifra sobre cada barra o punto
               </label>
 
-              {etiquetas.mostrar ? (
+              {labels.mostrar ? (
                 <>
                   <label className="formulario__campo">
                     <span>Donde</span>
                     <select
-                      value={etiquetas.posicion ?? "auto"}
+                      value={labels.posicion ?? "auto"}
                       disabled={guardando}
                       data-testid={`${prueba}-posicion-dato`}
                       onChange={(e) =>
                         poner({
                           etiquetasDeDato: {
-                            ...etiquetas,
+                            ...labels,
                             posicion: e.target.value as PosicionDeDato,
                           },
                         })
@@ -399,12 +399,12 @@ export function Presentacion({
                   <label className="editor__interruptor">
                     <input
                       type="checkbox"
-                      checked={etiquetas.soloExtremos === true}
+                      checked={labels.soloExtremos === true}
                       disabled={guardando}
                       data-testid={`${prueba}-solo-extremos`}
                       onChange={(e) =>
                         poner({
-                          etiquetasDeDato: { ...etiquetas, soloExtremos: e.target.checked },
+                          etiquetasDeDato: { ...labels, soloExtremos: e.target.checked },
                         })
                       }
                     />{" "}
@@ -532,7 +532,7 @@ export function Presentacion({
             Misma escala en todos los paneles
           </label>
           <span className="campo__pista">
-            Apagarla solo tiene sentido cuando lo que se compara es la FORMA de cada serie y no su
+            Apagarla solo tiene sentido cuando lo que se compara es la SHAPE de cada serie y no su
             magnitud.
           </span>
         </Seccion>
@@ -669,12 +669,12 @@ export function Presentacion({
           <label className="formulario__campo">
             <span>Etiquetas sobre las porciones</span>
             <select
-              value={p.circular?.etiquetas ?? "porcentaje"}
+              value={p.circular?.labels ?? "porcentaje"}
               disabled={guardando}
               data-testid={`${prueba}-etiquetas-circular`}
               onChange={(e) =>
                 poner({
-                  circular: { ...p.circular, etiquetas: e.target.value as EtiquetaCircular },
+                  circular: { ...p.circular, labels: e.target.value as EtiquetaCircular },
                 })
               }
             >

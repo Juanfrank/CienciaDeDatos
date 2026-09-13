@@ -1105,16 +1105,16 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
     // interesan es lo que deja a la vista las que si.
     await nuevoModulo(page, 'paleta-plegar');
 
-    const familia = page.getByTestId('familia-proporcion');
+    const family = page.getByTestId('familia-proporcion');
     const objeto = page.getByTestId('anadir-embudo');
     await expect(objeto).toBeVisible();
 
-    await familia.locator('summary').click();
+    await family.locator('summary').click();
     await expect(objeto).not.toBeVisible();
     // Plegar una no toca a las demas: son secciones independientes, no un acordeon.
     await expect(page.getByTestId('anadir-barras')).toBeVisible();
 
-    await familia.locator('summary').click();
+    await family.locator('summary').click();
     await expect(objeto).toBeVisible();
   });
 

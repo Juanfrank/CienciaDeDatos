@@ -34,7 +34,7 @@ export default async function PaginaEditor() {
     <>
       <CabeceraDeEditor />
       <main className="editor__cuerpo">
-        <ListaDeModulos modulos={filas} rol={actor.role} usuario={actor.userId} />
+        <ListaDeModulos modulos={filas} role={actor.role} usuario={actor.userId} />
       </main>
     </>
   );

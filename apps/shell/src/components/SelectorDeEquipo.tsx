@@ -46,7 +46,7 @@ export function SelectorDeEquipo({
       </label>
       {rolActivo ? (
         <p className="selector-equipo__rol" data-testid="rol-en-equipo">
-          Su rol aqui: {rolActivo}
+          Su role aqui: {rolActivo}
         </p>
       ) : null}
     </div>

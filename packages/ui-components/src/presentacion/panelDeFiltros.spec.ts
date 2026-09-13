@@ -54,7 +54,7 @@ describe('validarPanelDeFiltros', () => {
   });
 
   it('rechaza dos selectores para la misma dimension', () => {
-    const problemas = validarPanelDeFiltros(
+    const problems = validarPanelDeFiltros(
       instancia(['DimTribunal.Materia']),
       {
         selectores: [
@@ -64,8 +64,8 @@ describe('validarPanelDeFiltros', () => {
       },
       TIPOS,
     );
-    expect(problemas).toHaveLength(1);
-    expect(problemas[0]?.problema).toContain('mas de un selector');
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.problema).toContain('mas de un selector');
   });
 
   it('rechaza un calendario sobre una dimension que no es fecha', () => {

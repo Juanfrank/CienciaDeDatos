@@ -154,11 +154,11 @@ function porQueNoSePuede(
 export function validarAgregacion(
   input: ContextoDeAgregacion & { measures: string[]; agregaciones: Agregacion[] },
 ): ProblemaDeAgregacion[] {
-  const problemas: ProblemaDeAgregacion[] = [];
+  const problems: ProblemaDeAgregacion[] = [];
   input.measures.forEach((medida, i) => {
     const agregacion = input.agregaciones[i] ?? AGREGACION_POR_DEFECTO;
     const problema = porQueNoSePuede(medida, agregacion, input);
-    if (problema) problemas.push({ medida, agregacion, problema });
+    if (problema) problems.push({ medida, agregacion, problema });
   });
-  return problemas;
+  return problems;
 }

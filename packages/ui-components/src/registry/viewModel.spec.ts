@@ -44,44 +44,44 @@ describe('validateBinding (4.2)', () => {
   });
 
   it('marca roto un campo que ya no existe, en vez de fallar en silencio', () => {
-    const problemas = validateBinding(
+    const problems = validateBinding(
       instancia([{ table: 'DimTribunal', field: 'CampoBorrado' }], ['CasosPendientes']),
       contrato,
       columnas,
     );
-    expect(problemas).toHaveLength(1);
-    expect(problemas[0]).toMatchObject({
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatchObject({
       slot: 'DimTribunal.CampoBorrado',
       kind: 'campo-inexistente',
     });
   });
 
   it('marca rota una medida que ya no existe', () => {
-    const problemas = validateBinding(
+    const problems = validateBinding(
       instancia([DISTRITO], ['MedidaBorrada']),
       contrato,
       columnas,
     );
-    expect(problemas[0]?.kind).toBe('campo-inexistente');
+    expect(problems[0]?.kind).toBe('campo-inexistente');
   });
 
   it('distingue el incumplimiento de contrato del campo inexistente', () => {
-    const problemas = validateBinding(
+    const problems = validateBinding(
       instancia([DISTRITO, MATERIA], ['CasosPendientes']),
       contrato,
       columnas,
     );
-    expect(problemas[0]?.kind).toBe('contrato-incumplido');
-    expect(problemas[0]?.problem).toMatch(/admite entre 1 y 1 dimensiones/);
+    expect(problems[0]?.kind).toBe('contrato-incumplido');
+    expect(problems[0]?.problem).toMatch(/admite entre 1 y 1 dimensiones/);
   });
 
   it('devuelve TODOS los problemas, para poder señalarlos de una vez en el editor', () => {
-    const problemas = validateBinding(
+    const problems = validateBinding(
       instancia([{ table: 'X', field: 'Y' }, MATERIA], ['Inexistente']),
       contrato,
       columnas,
     );
-    expect(problemas.length).toBeGreaterThanOrEqual(3);
+    expect(problems.length).toBeGreaterThanOrEqual(3);
   });
 });
 

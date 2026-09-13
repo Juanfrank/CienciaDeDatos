@@ -44,7 +44,7 @@ describe('salud de un modulo', () => {
     );
     expect(resumen.salud).toBe('fallo');
     // El motivo de disposicion va PRIMERO: es el que explica por que se apaga.
-    expect(resumen.problemas[0]).toBe('Se solapan.');
+    expect(resumen.problems[0]).toBe('Se solapan.');
   });
 
   it('un modulo sin objetos es fallo, no degradado', () => {

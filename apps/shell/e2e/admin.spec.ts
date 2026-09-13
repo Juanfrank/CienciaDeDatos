@@ -111,7 +111,7 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
       },
     });
     expect(respuesta.status()).toBe(422);
-    expect((await respuesta.json()).error).toMatch(/no existen en el esquema activo/);
+    expect((await respuesta.json()).error).toMatch(/no existen en el scheme activo/);
   });
 
   test('el editor solo ofrece dimensiones del esquema, no un campo de texto libre', async ({ page }) => {
@@ -171,7 +171,7 @@ test.describe('editor de arbol (4.1.2)', () => {
       '/api/admin/quien-ve-que?userId=u-ana&teamId=equipo-norte&moduleId=audiencias',
     );
     const cuerpo = await r.json();
-    const origenes = (cuerpo.pasos as { origen: string }[]).map((p) => p.origen);
+    const origenes = (cuerpo.pasos as { source: string }[]).map((p) => p.source);
     expect(origenes).toContain('Distrito Este');
     expect(origenes).not.toContain('Distrito Norte');
   });

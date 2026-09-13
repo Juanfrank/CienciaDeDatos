@@ -194,7 +194,7 @@ export function EditorDeModulo({
         </div>
       ) : (
         <p className="texto-atenuado" data-testid="editor-sin-bloqueos">
-          Sin problemas pendientes: el modulo se puede proponer para publicacion.
+          Sin problems pendientes: el modulo se puede proponer para publicacion.
         </p>
       )}
 
@@ -227,7 +227,7 @@ export function EditorDeModulo({
       */}
       {diag.items.some((d) => d.broken) ? (
         <div className="aviso aviso--problema" data-testid="editor-problemas">
-          <p>Objetos con problemas de esquema:</p>
+          <p>Objetos con problems de scheme:</p>
           <ul>
             {diag.items
               .filter((d) => d.broken)

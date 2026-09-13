@@ -72,7 +72,7 @@ beforeEach(async () => {
 });
 
 describe('emision del token', () => {
-  it('el token NO se guarda en claro', async () => {
+  it('el token NO se guarda en light', async () => {
     const emitido = await servicio.issue('externo@ejemplo.do', 'u-admin');
     if (!emitido) throw new Error('deberia emitir');
 

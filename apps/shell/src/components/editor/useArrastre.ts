@@ -9,7 +9,7 @@ export type ModoDeArrastre = 'mover' | 'redimensionar';
 
 export interface ArrastreEnCurso {
   itemId: string;
-  modo: ModoDeArrastre;
+  mode: ModoDeArrastre;
   /** Donde caeria si se soltara ahora. */
   destino: GridPosition;
   valido: boolean;
@@ -17,7 +17,7 @@ export interface ArrastreEnCurso {
 
 interface Origen {
   itemId: string;
-  modo: ModoDeArrastre;
+  mode: ModoDeArrastre;
   inicial: GridPosition;
   /** Coordenadas del puntero al empezar, para medir el desplazamiento. */
   x: number;
@@ -91,7 +91,7 @@ export function useArrastre({
   onSoltar: (itemId: string, position: GridPosition) => void;
 }) {
   const [enCurso, setEnCurso] = useState<ArrastreEnCurso | null>(null);
-  const origen = useRef<Origen | null>(null);
+  const source = useRef<Origen | null>(null);
 
   const calcular = useCallback(
     (o: Origen, clienteX: number, clienteY: number): ArrastreEnCurso => {
@@ -101,7 +101,7 @@ export function useArrastre({
       const tope = o.pistas.altos.length + 4;
 
       let destino: GridPosition;
-      if (o.modo === 'mover') {
+      if (o.mode === 'mover') {
         // El borde de ARRIBA del bloque busca la linea mas cercana a donde lo han llevado.
         const arriba = lineaDeFila(o.pistas, o.inicial.y) + arrastradoY;
         destino = {
@@ -124,13 +124,13 @@ export function useArrastre({
       const valido = !items.some(
         (i) => i.id !== o.itemId && seSolapan(i.position, destino),
       );
-      return { itemId: o.itemId, modo: o.modo, destino, valido };
+      return { itemId: o.itemId, mode: o.mode, destino, valido };
     },
     [items],
   );
 
   const alEmpezar = useCallback(
-    (e: React.PointerEvent, item: GridItem, modo: ModoDeArrastre) => {
+    (e: React.PointerEvent, item: GridItem, mode: ModoDeArrastre) => {
       // Solo el boton principal: con el secundario se abre el menu contextual y el arrastre se
       // quedaria pegado al cursor sin que nada lo suelte.
       if (e.button !== 0) return;
@@ -142,9 +142,9 @@ export function useArrastre({
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
 
       const medida = medirRejilla(el);
-      origen.current = {
+      source.current = {
         itemId: item.id,
-        modo,
+        mode,
         inicial: item.position,
         x: e.clientX,
         y: e.clientY,
@@ -152,14 +152,14 @@ export function useArrastre({
         hueco: medida.hueco,
         pistas: medida.pistas,
       };
-      setEnCurso({ itemId: item.id, modo, destino: item.position, valido: true });
+      setEnCurso({ itemId: item.id, mode, destino: item.position, valido: true });
     },
     [rejilla],
   );
 
   const alMover = useCallback(
     (e: React.PointerEvent) => {
-      const o = origen.current;
+      const o = source.current;
       if (!o) return;
       setEnCurso(calcular(o, e.clientX, e.clientY));
     },
@@ -168,8 +168,8 @@ export function useArrastre({
 
   const alSoltar = useCallback(
     (e: React.PointerEvent) => {
-      const o = origen.current;
-      origen.current = null;
+      const o = source.current;
+      source.current = null;
       if (!o) return;
       (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
 
@@ -191,7 +191,7 @@ export function useArrastre({
   );
 
   const alCancelar = useCallback(() => {
-    origen.current = null;
+    source.current = null;
     setEnCurso(null);
   }, []);
 

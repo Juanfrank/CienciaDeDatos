@@ -24,7 +24,7 @@ const instancia = (parcial: Partial<ObjectInstance> = {}): ObjectInstance => ({
 
 describe('validateAttachments', () => {
   it('acepta un objeto con sus dos complementos bien configurados', () => {
-    const problemas = validateAttachments(
+    const problems = validateAttachments(
       instancia({
         attachments: [
           { instanceId: 'a1', objectId: 'tooltip-explicativo', version: '1.0.0', text: 'Que es esto.' },
@@ -34,21 +34,21 @@ describe('validateAttachments', () => {
       buscar,
     );
 
-    expect(problemas).toEqual([]);
+    expect(problems).toEqual([]);
   });
 
   it('rechaza colocar un complemento como objeto independiente de la rejilla', () => {
-    const problemas = validateAttachments(
+    const problems = validateAttachments(
       instancia({ objectId: 'tooltip-explicativo', attachments: [] }),
       buscar,
     );
 
-    expect(problemas).toHaveLength(1);
-    expect(problemas[0]?.problem).toMatch(/no puede colocarse como objeto independiente/);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.problem).toMatch(/no puede colocarse como objeto independiente/);
   });
 
   it('rechaza adjuntar un objeto que no es complemento', () => {
-    const problemas = validateAttachments(
+    const problems = validateAttachments(
       instancia({
         attachments: [
           // Un grafico de barras adjunto a otro grafico no es un complemento: es otro objeto.
@@ -58,22 +58,22 @@ describe('validateAttachments', () => {
       buscar,
     );
 
-    expect(problemas[0]?.problem).toMatch(/no es un complemento/);
+    expect(problems[0]?.problem).toMatch(/no es un complemento/);
   });
 
   it('rechaza un complemento que no existe en el repositorio', () => {
-    const problemas = validateAttachments(
+    const problems = validateAttachments(
       instancia({
         attachments: [{ instanceId: 'a1', objectId: 'tooltip-inventado', version: '1.0.0' } as never],
       }),
       buscar,
     );
 
-    expect(problemas[0]?.kind).toBe('campo-inexistente');
+    expect(problems[0]?.kind).toBe('campo-inexistente');
   });
 
   it('rechaza dos complementos del mismo tipo en un mismo objeto', () => {
-    const problemas = validateAttachments(
+    const problems = validateAttachments(
       instancia({
         attachments: [
           { instanceId: 'a1', objectId: 'tooltip-explicativo', version: '1.0.0', text: 'Uno.' },
@@ -83,13 +83,13 @@ describe('validateAttachments', () => {
       buscar,
     );
 
-    expect(problemas[0]?.problem).toMatch(/Solo se admite uno de cada tipo/);
+    expect(problems[0]?.problem).toMatch(/Solo se admite uno de cada tipo/);
   });
 
   it('rechaza el alcance de subobjeto cuando el anfitrion no mapea ninguna dimension', () => {
     // Una tarjeta KPI no tiene categorias: no hay subobjeto por el que desglosar, y ofrecerlo
     // daria un emergente que siempre muestra lo mismo que el alcance de objeto.
-    const problemas = validateAttachments(
+    const problems = validateAttachments(
       instancia({
         objectId: 'tarjeta-kpi',
         binding: { datasetId: 'casos', dimensions: [], measures: ['CasosPendientes'] },
@@ -98,11 +98,11 @@ describe('validateAttachments', () => {
       buscar,
     );
 
-    expect(problemas[0]?.problem).toMatch(/no hay subobjeto por el que desglosar/);
+    expect(problems[0]?.problem).toMatch(/no hay subobjeto por el que desglosar/);
   });
 
   it('acepta el alcance de objeto en una tarjeta sin dimensiones', () => {
-    const problemas = validateAttachments(
+    const problems = validateAttachments(
       instancia({
         objectId: 'tarjeta-kpi',
         binding: { datasetId: 'casos', dimensions: [], measures: ['CasosPendientes'] },
@@ -111,7 +111,7 @@ describe('validateAttachments', () => {
       buscar,
     );
 
-    expect(problemas).toEqual([]);
+    expect(problems).toEqual([]);
   });
 });
 

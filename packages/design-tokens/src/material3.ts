@@ -12,7 +12,7 @@ export interface PaletasTonales {
   error: TonalPalette;
 }
 
-export interface OrigenDelTema {
+export interface ThemeSource {
   /** Color institucional principal. De el salen primary, secondary y los neutros. */
   primario: string;
   /** Gris institucional. De el salen las superficies y los bordes. */
@@ -24,16 +24,16 @@ export interface OrigenDelTema {
 /** Croma de las paletas derivadas. */
 const CROMA = { secondary: 18, neutral: 8, neutralVariant: 16 } as const;
 
-export function paletasDe(origen: OrigenDelTema): PaletasTonales {
-  const primario = Hct.fromInt(argbFromHex(origen.primario));
-  const acento = Hct.fromInt(argbFromHex(origen.acento));
+export function palettesFor(source: ThemeSource): PaletasTonales {
+  const primario = Hct.fromInt(argbFromHex(source.primario));
+  const acento = Hct.fromInt(argbFromHex(source.acento));
   // El matiz de los neutros sale del GRIS de la norma, no del primario. Ver `neutro`.
-  const neutro = Hct.fromInt(argbFromHex(origen.neutro));
+  const neutro = Hct.fromInt(argbFromHex(source.neutro));
 
   return {
-    primary: TonalPalette.fromInt(argbFromHex(origen.primario)),
+    primary: TonalPalette.fromInt(argbFromHex(source.primario)),
     secondary: TonalPalette.fromHueAndChroma(primario.hue, CROMA.secondary),
-    tertiary: TonalPalette.fromInt(argbFromHex(origen.acento)),
+    tertiary: TonalPalette.fromInt(argbFromHex(source.acento)),
     neutral: TonalPalette.fromHueAndChroma(neutro.hue, CROMA.neutral),
     neutralVariant: TonalPalette.fromHueAndChroma(neutro.hue, CROMA.neutralVariant),
     // El rojo institucional tambien para el error. Ver la nota de `acento`.
@@ -42,7 +42,7 @@ export function paletasDe(origen: OrigenDelTema): PaletasTonales {
 }
 
 /** Roles de color de MD3. Son los nombres de la especificacion, sin traducir. */
-export interface EsquemaMaterial {
+export interface MaterialScheme {
   primary: string;
   onPrimary: string;
   primaryContainer: string;
@@ -82,72 +82,72 @@ export interface EsquemaMaterial {
   scrim: string;
 }
 
-export type ModoDeColor = 'claro' | 'oscuro';
+export type ColorMode = 'light' | 'dark';
 
 /** Tonos de cada rol. La tabla de la especificacion, tal cual. */
-const TONOS: Record<keyof EsquemaMaterial, { paleta: keyof PaletasTonales; claro: number; oscuro: number }> = {
-  primary: { paleta: 'primary', claro: 40, oscuro: 80 },
-  onPrimary: { paleta: 'primary', claro: 100, oscuro: 20 },
-  primaryContainer: { paleta: 'primary', claro: 90, oscuro: 30 },
-  onPrimaryContainer: { paleta: 'primary', claro: 10, oscuro: 90 },
+const TONOS: Record<keyof MaterialScheme, { paleta: keyof PaletasTonales; light: number; dark: number }> = {
+  primary: { paleta: 'primary', light: 40, dark: 80 },
+  onPrimary: { paleta: 'primary', light: 100, dark: 20 },
+  primaryContainer: { paleta: 'primary', light: 90, dark: 30 },
+  onPrimaryContainer: { paleta: 'primary', light: 10, dark: 90 },
 
-  secondary: { paleta: 'secondary', claro: 40, oscuro: 80 },
-  onSecondary: { paleta: 'secondary', claro: 100, oscuro: 20 },
-  secondaryContainer: { paleta: 'secondary', claro: 90, oscuro: 30 },
-  onSecondaryContainer: { paleta: 'secondary', claro: 10, oscuro: 90 },
+  secondary: { paleta: 'secondary', light: 40, dark: 80 },
+  onSecondary: { paleta: 'secondary', light: 100, dark: 20 },
+  secondaryContainer: { paleta: 'secondary', light: 90, dark: 30 },
+  onSecondaryContainer: { paleta: 'secondary', light: 10, dark: 90 },
 
-  tertiary: { paleta: 'tertiary', claro: 40, oscuro: 80 },
-  onTertiary: { paleta: 'tertiary', claro: 100, oscuro: 20 },
-  tertiaryContainer: { paleta: 'tertiary', claro: 90, oscuro: 30 },
-  onTertiaryContainer: { paleta: 'tertiary', claro: 10, oscuro: 90 },
+  tertiary: { paleta: 'tertiary', light: 40, dark: 80 },
+  onTertiary: { paleta: 'tertiary', light: 100, dark: 20 },
+  tertiaryContainer: { paleta: 'tertiary', light: 90, dark: 30 },
+  onTertiaryContainer: { paleta: 'tertiary', light: 10, dark: 90 },
 
-  error: { paleta: 'error', claro: 40, oscuro: 80 },
-  onError: { paleta: 'error', claro: 100, oscuro: 20 },
-  errorContainer: { paleta: 'error', claro: 90, oscuro: 30 },
-  onErrorContainer: { paleta: 'error', claro: 10, oscuro: 90 },
+  error: { paleta: 'error', light: 40, dark: 80 },
+  onError: { paleta: 'error', light: 100, dark: 20 },
+  errorContainer: { paleta: 'error', light: 90, dark: 30 },
+  onErrorContainer: { paleta: 'error', light: 10, dark: 90 },
 
-  background: { paleta: 'neutral', claro: 98, oscuro: 6 },
-  onBackground: { paleta: 'neutral', claro: 10, oscuro: 90 },
-  surface: { paleta: 'neutral', claro: 98, oscuro: 6 },
-  onSurface: { paleta: 'neutral', claro: 10, oscuro: 90 },
-  surfaceVariant: { paleta: 'neutralVariant', claro: 90, oscuro: 30 },
-  onSurfaceVariant: { paleta: 'neutralVariant', claro: 30, oscuro: 80 },
+  background: { paleta: 'neutral', light: 98, dark: 6 },
+  onBackground: { paleta: 'neutral', light: 10, dark: 90 },
+  surface: { paleta: 'neutral', light: 98, dark: 6 },
+  onSurface: { paleta: 'neutral', light: 10, dark: 90 },
+  surfaceVariant: { paleta: 'neutralVariant', light: 90, dark: 30 },
+  onSurfaceVariant: { paleta: 'neutralVariant', light: 30, dark: 80 },
 
-  surfaceContainerLowest: { paleta: 'neutral', claro: 100, oscuro: 4 },
-  surfaceContainerLow: { paleta: 'neutral', claro: 96, oscuro: 10 },
-  surfaceContainer: { paleta: 'neutral', claro: 94, oscuro: 12 },
-  surfaceContainerHigh: { paleta: 'neutral', claro: 92, oscuro: 17 },
-  surfaceContainerHighest: { paleta: 'neutral', claro: 90, oscuro: 22 },
-  surfaceDim: { paleta: 'neutral', claro: 87, oscuro: 6 },
-  surfaceBright: { paleta: 'neutral', claro: 98, oscuro: 24 },
+  surfaceContainerLowest: { paleta: 'neutral', light: 100, dark: 4 },
+  surfaceContainerLow: { paleta: 'neutral', light: 96, dark: 10 },
+  surfaceContainer: { paleta: 'neutral', light: 94, dark: 12 },
+  surfaceContainerHigh: { paleta: 'neutral', light: 92, dark: 17 },
+  surfaceContainerHighest: { paleta: 'neutral', light: 90, dark: 22 },
+  surfaceDim: { paleta: 'neutral', light: 87, dark: 6 },
+  surfaceBright: { paleta: 'neutral', light: 98, dark: 24 },
 
-  outline: { paleta: 'neutralVariant', claro: 50, oscuro: 60 },
-  outlineVariant: { paleta: 'neutralVariant', claro: 80, oscuro: 30 },
+  outline: { paleta: 'neutralVariant', light: 50, dark: 60 },
+  outlineVariant: { paleta: 'neutralVariant', light: 80, dark: 30 },
 
-  inverseSurface: { paleta: 'neutral', claro: 20, oscuro: 90 },
-  inverseOnSurface: { paleta: 'neutral', claro: 95, oscuro: 20 },
-  inversePrimary: { paleta: 'primary', claro: 80, oscuro: 40 },
+  inverseSurface: { paleta: 'neutral', light: 20, dark: 90 },
+  inverseOnSurface: { paleta: 'neutral', light: 95, dark: 20 },
+  inversePrimary: { paleta: 'primary', light: 80, dark: 40 },
 
-  shadow: { paleta: 'neutral', claro: 0, oscuro: 0 },
-  scrim: { paleta: 'neutral', claro: 0, oscuro: 0 },
+  shadow: { paleta: 'neutral', light: 0, dark: 0 },
+  scrim: { paleta: 'neutral', light: 0, dark: 0 },
 };
 
-export function esquemaDe(origen: OrigenDelTema, modo: ModoDeColor): EsquemaMaterial {
-  const paletas = paletasDe(origen);
-  const esquema = {} as EsquemaMaterial;
+export function schemeFor(source: ThemeSource, mode: ColorMode): MaterialScheme {
+  const palettes = palettesFor(source);
+  const scheme = {} as MaterialScheme;
 
-  for (const [rol, { paleta, claro, oscuro }] of Object.entries(TONOS) as [
-    keyof EsquemaMaterial,
-    (typeof TONOS)[keyof EsquemaMaterial],
+  for (const [role, { paleta, light, dark }] of Object.entries(TONOS) as [
+    keyof MaterialScheme,
+    (typeof TONOS)[keyof MaterialScheme],
   ][]) {
-    esquema[rol] = hexFromArgb(paletas[paleta].tone(modo === 'claro' ? claro : oscuro));
+    scheme[role] = hexFromArgb(palettes[paleta].tone(mode === 'light' ? light : dark));
   }
 
-  return esquema;
+  return scheme;
 }
 
 /** Pares de roles que DEBEN cumplir contraste de texto. */
-export const PARES_DE_CONTRASTE: readonly [keyof EsquemaMaterial, keyof EsquemaMaterial][] = [
+export const CONTRAST_PAIRS: readonly [keyof MaterialScheme, keyof MaterialScheme][] = [
   ['onPrimary', 'primary'],
   ['onPrimaryContainer', 'primaryContainer'],
   ['onSecondary', 'secondary'],
@@ -170,7 +170,7 @@ export const PARES_DE_CONTRASTE: readonly [keyof EsquemaMaterial, keyof EsquemaM
 ];
 
 /** Pares que solo tienen que cumplir el umbral de ELEMENTO GRAFICO (3:1). */
-export const PARES_GRAFICOS: readonly [keyof EsquemaMaterial, keyof EsquemaMaterial][] = [
+export const CHART_PAIRS: readonly [keyof MaterialScheme, keyof MaterialScheme][] = [
   ['outline', 'surface'],
   ['primary', 'surface'],
   ['error', 'surface'],

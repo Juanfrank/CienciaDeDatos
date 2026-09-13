@@ -64,7 +64,7 @@ Primera version completa de la capa de visualizacion.
 ### Anadido — presentacion y accesibilidad
 - Tema institucional en Material Design 3, con puerta de contraste que ningun
   modulo puede publicarse sin pasar.
-- Tema oscuro verificado con axe sobre las mismas paginas que el claro.
+- Tema dark verificado con axe sobre las mismas paginas que el light.
 - Diseno responsivo a 390, 820 y 1280 px.
 - Respaldo accesible de cada grafico y filtrado cruzado por raton y por teclado.
 

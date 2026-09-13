@@ -202,9 +202,9 @@ export function applyTreeOperation(
       const destino = childrenOf(siguiente, op.newParentId);
       if (!destino) return { ok: false, error: `La carpeta destino '${op.newParentId}' no existe.` };
 
-      const origen = encontrado.parent ? encontrado.parent.children : siguiente.nodes;
+      const source = encontrado.parent ? encontrado.parent.children : siguiente.nodes;
       const scopeBefore = encontrado.parent?.scope;
-      const [extraido] = origen.splice(encontrado.index, 1);
+      const [extraido] = source.splice(encontrado.index, 1);
       if (!extraido) return { ok: false, error: `No se pudo extraer el nodo '${op.nodeId}'.` };
 
       const indice = op.index === undefined ? destino.length : Math.max(0, Math.min(op.index, destino.length));

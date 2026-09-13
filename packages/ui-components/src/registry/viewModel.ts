@@ -24,12 +24,12 @@ export function validateBinding(
   contract: ObjectDataContract,
   availableColumns: string[],
 ): BindingProblem[] {
-  const problemas: BindingProblem[] = [];
+  const problems: BindingProblem[] = [];
   const disponibles = new Set(availableColumns);
   const { dimensions, measures } = instance.binding;
 
   if (dimensions.length < contract.dimensions.min || dimensions.length > contract.dimensions.max) {
-    problemas.push({
+    problems.push({
       slot: 'dimensiones',
       kind: 'contrato-incumplido',
       problem:
@@ -39,7 +39,7 @@ export function validateBinding(
   }
 
   if (measures.length < contract.measures.min || measures.length > contract.measures.max) {
-    problemas.push({
+    problems.push({
       slot: 'medidas',
       kind: 'contrato-incumplido',
       problem:
@@ -50,7 +50,7 @@ export function validateBinding(
 
   for (const dim of dimensions) {
     if (!disponibles.has(fieldKey(dim))) {
-      problemas.push({
+      problems.push({
         slot: fieldKey(dim),
         kind: 'campo-inexistente',
         problem: `La dimension '${fieldKey(dim)}' ya no existe en el dataset que alimenta este objeto.`,
@@ -60,7 +60,7 @@ export function validateBinding(
 
   for (const medida of measures) {
     if (!disponibles.has(medida)) {
-      problemas.push({
+      problems.push({
         slot: medida,
         kind: 'campo-inexistente',
         problem: `La medida '${medida}' ya no existe en el dataset que alimenta este objeto.`,
@@ -68,7 +68,7 @@ export function validateBinding(
     }
   }
 
-  return problemas;
+  return problems;
 }
 
 export interface CategoryPoint {

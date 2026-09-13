@@ -1,30 +1,30 @@
 import { hexFromArgb } from '@material/material-color-utilities';
 import {
-  type EsquemaMaterial,
-  type ModoDeColor,
-  type OrigenDelTema,
-  esquemaDe,
-  paletasDe,
+  type MaterialScheme,
+  type ColorMode,
+  type ThemeSource,
+  schemeFor,
+  palettesFor,
 } from './material3';
 
 /** El resto del sistema de Material Design 3: tipografia, forma, elevacion y capas de estado. */
 
 /** Escala tipografica de MD3: cinco familias de rol, tres tamanos cada una. */
-export interface EstiloTipografico {
+export interface TypographicStyle {
   size: string;
   lineHeight: string;
   weight: number;
   tracking: string;
 }
 
-export type RolTipografico =
+export type TypographicRole =
   | 'display-large' | 'display-medium' | 'display-small'
   | 'headline-large' | 'headline-medium' | 'headline-small'
   | 'title-large' | 'title-medium' | 'title-small'
   | 'body-large' | 'body-medium' | 'body-small'
   | 'label-large' | 'label-medium' | 'label-small';
 
-export const TIPOGRAFIA: Record<RolTipografico, EstiloTipografico> = {
+export const TYPOGRAPHY: Record<TypographicRole, TypographicStyle> = {
   'display-large': { size: '3.5625rem', lineHeight: '4rem', weight: 400, tracking: '-0.015625rem' },
   'display-medium': { size: '2.8125rem', lineHeight: '3.25rem', weight: 400, tracking: '0' },
   'display-small': { size: '2.25rem', lineHeight: '2.75rem', weight: 400, tracking: '0' },
@@ -47,7 +47,7 @@ export const TIPOGRAFIA: Record<RolTipografico, EstiloTipografico> = {
 };
 
 /** Escala de forma. `full` es una pastilla; el valor grande deja que el borde lo resuelva. */
-export const FORMA = {
+export const SHAPE = {
   none: '0',
   'extra-small': '4px',
   small: '8px',
@@ -58,7 +58,7 @@ export const FORMA = {
 } as const;
 
 /** Elevacion: seis niveles, cada uno con su sombra. */
-export const ELEVACION = {
+export const ELEVATION = {
   0: 'none',
   1: '0 1px 2px 0 rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15)',
   2: '0 1px 2px 0 rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15)',
@@ -68,7 +68,7 @@ export const ELEVACION = {
 } as const;
 
 /** Opacidad de las capas de estado. */
-export const ESTADO = { hover: 0.08, focus: 0.1, pressed: 0.1, dragged: 0.16, disabled: 0.38 } as const;
+export const STATUS = { hover: 0.08, focus: 0.1, pressed: 0.1, dragged: 0.16, disabled: 0.38 } as const;
 
 /** Duraciones y curvas de movimiento. */
 export const MOVIMIENTO = {
@@ -82,13 +82,13 @@ export const MOVIMIENTO = {
 
 /** Paleta categorica para series de datos, derivada de las paletas tonales. */
 /** Tonos de la paleta categorica, por modo. */
-const TONOS_CATEGORICOS: Record<ModoDeColor, [keyof ReturnType<typeof paletasDe>, number][]> = {
-  claro: [
+const TONOS_CATEGORICOS: Record<ColorMode, [keyof ReturnType<typeof palettesFor>, number][]> = {
+  light: [
     ['primary', 40], ['tertiary', 40], ['secondary', 40],
     ['primary', 25], ['tertiary', 25], ['secondary', 25],
     ['primary', 55], ['tertiary', 55],
   ],
-  oscuro: [
+  dark: [
     ['primary', 80], ['tertiary', 80], ['secondary', 80],
     ['primary', 65], ['tertiary', 65], ['secondary', 65],
     ['primary', 90], ['tertiary', 90],
@@ -96,80 +96,80 @@ const TONOS_CATEGORICOS: Record<ModoDeColor, [keyof ReturnType<typeof paletasDe>
 };
 
 /** Paleta categorica para series de datos, derivada de las paletas tonales. */
-export function categoricaDe(origen: OrigenDelTema, modo: ModoDeColor): string[] {
-  const p = paletasDe(origen);
-  return TONOS_CATEGORICOS[modo].map(([familia, tono]) => hexFromArgb(p[familia].tone(tono)));
+export function categoricalFor(source: ThemeSource, mode: ColorMode): string[] {
+  const p = palettesFor(source);
+  return TONOS_CATEGORICOS[mode].map(([family, tono]) => hexFromArgb(p[family].tone(tono)));
 }
 
-export interface TemaMaterial {
-  modo: ModoDeColor;
-  color: EsquemaMaterial;
+export interface MaterialTheme {
+  mode: ColorMode;
+  color: MaterialScheme;
   categorical: string[];
-  typography: Record<RolTipografico, EstiloTipografico>;
-  shape: typeof FORMA;
-  elevation: typeof ELEVACION;
-  state: typeof ESTADO;
+  typography: Record<TypographicRole, TypographicStyle>;
+  shape: typeof SHAPE;
+  elevation: typeof ELEVATION;
+  state: typeof STATUS;
   motion: typeof MOVIMIENTO;
   font: { sans: string; mono: string };
 }
 
-export function temaMaterial(
-  origen: OrigenDelTema,
-  modo: ModoDeColor,
-  fuentes: { sans: string; mono: string },
-): TemaMaterial {
+export function materialTheme(
+  source: ThemeSource,
+  mode: ColorMode,
+  fonts: { sans: string; mono: string },
+): MaterialTheme {
   return {
-    modo,
-    color: esquemaDe(origen, modo),
-    categorical: categoricaDe(origen, modo),
-    typography: TIPOGRAFIA,
-    shape: FORMA,
-    elevation: ELEVACION,
-    state: ESTADO,
+    mode,
+    color: schemeFor(source, mode),
+    categorical: categoricalFor(source, mode),
+    typography: TYPOGRAPHY,
+    shape: SHAPE,
+    elevation: ELEVATION,
+    state: STATUS,
     motion: MOVIMIENTO,
-    font: fuentes,
+    font: fonts,
   };
 }
 
 /** Variables CSS con los nombres de MD3 (`--md-sys-*`). */
-export function variablesMaterial(tema: TemaMaterial): Record<string, string> {
+export function materialVariables(theme: MaterialTheme): Record<string, string> {
   const vars: Record<string, string> = {};
-  const guion = (rol: string) => rol.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+  const guion = (role: string) => role.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 
-  for (const [rol, valor] of Object.entries(tema.color)) {
-    vars[`--md-sys-color-${guion(rol)}`] = valor;
+  for (const [role, valor] of Object.entries(theme.color)) {
+    vars[`--md-sys-color-${guion(role)}`] = valor;
   }
-  tema.categorical.forEach((color, i) => {
+  theme.categorical.forEach((color, i) => {
     vars[`--md-sys-color-categorical-${i}`] = color;
   });
 
-  for (const [rol, estilo] of Object.entries(tema.typography)) {
-    vars[`--md-sys-typescale-${rol}-size`] = estilo.size;
-    vars[`--md-sys-typescale-${rol}-line-height`] = estilo.lineHeight;
-    vars[`--md-sys-typescale-${rol}-weight`] = String(estilo.weight);
-    vars[`--md-sys-typescale-${rol}-tracking`] = estilo.tracking;
+  for (const [role, estilo] of Object.entries(theme.typography)) {
+    vars[`--md-sys-typescale-${role}-size`] = estilo.size;
+    vars[`--md-sys-typescale-${role}-line-height`] = estilo.lineHeight;
+    vars[`--md-sys-typescale-${role}-weight`] = String(estilo.weight);
+    vars[`--md-sys-typescale-${role}-tracking`] = estilo.tracking;
     /*
      * Y el rol COMPLETO, valido como abreviatura `font:`.
      */
-    vars[`--md-sys-typescale-${rol}`] =
-      `${estilo.weight} ${estilo.size}/${estilo.lineHeight} ${tema.font.sans}`;
+    vars[`--md-sys-typescale-${role}`] =
+      `${estilo.weight} ${estilo.size}/${estilo.lineHeight} ${theme.font.sans}`;
   }
 
-  for (const [nombre, valor] of Object.entries(tema.shape)) {
+  for (const [nombre, valor] of Object.entries(theme.shape)) {
     vars[`--md-sys-shape-corner-${nombre}`] = valor;
   }
-  for (const [nivel, sombra] of Object.entries(tema.elevation)) {
+  for (const [nivel, sombra] of Object.entries(theme.elevation)) {
     vars[`--md-sys-elevation-${nivel}`] = sombra;
   }
-  for (const [nombre, valor] of Object.entries(tema.state)) {
+  for (const [nombre, valor] of Object.entries(theme.state)) {
     vars[`--md-sys-state-${nombre}-opacity`] = String(valor);
   }
-  for (const [nombre, valor] of Object.entries(tema.motion)) {
+  for (const [nombre, valor] of Object.entries(theme.motion)) {
     vars[`--md-sys-motion-${nombre}`] = valor;
   }
 
-  vars['--md-ref-typeface-plain'] = tema.font.sans;
-  vars['--md-ref-typeface-mono'] = tema.font.mono;
+  vars['--md-ref-typeface-plain'] = theme.font.sans;
+  vars['--md-ref-typeface-mono'] = theme.font.mono;
 
   return vars;
 }

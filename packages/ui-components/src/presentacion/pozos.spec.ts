@@ -173,9 +173,9 @@ describe('validarRanuras', () => {
     let i = conCampoEnRanura(instancia(), RANURAS, 'serie', 'DimTribunal.Materia');
     i = conCampoEnRanura(i, RANURAS, 'eje-y', 'M');
 
-    const problemas = validarRanuras(i, RANURAS);
-    expect(problemas.map((p) => p.ranura)).toEqual(['eje-x']);
-    expect(problemas[0]?.problema).toContain('Eje X');
+    const problems = validarRanuras(i, RANURAS);
+    expect(problems.map((p) => p.ranura)).toEqual(['eje-x']);
+    expect(problems[0]?.problema).toContain('Eje X');
   });
 
   it('avisa de campos asignados a una ranura que el objeto ya no tiene', () => {
@@ -184,8 +184,8 @@ describe('validarRanuras', () => {
     const i = instancia({
       ranuras: { 'eje-x': ['D'], 'eje-y': ['M'], 'ranura-vieja': ['Z'] },
     });
-    const problemas = validarRanuras(i, RANURAS);
-    expect(problemas.map((p) => p.ranura)).toContain('ranura-vieja');
+    const problems = validarRanuras(i, RANURAS);
+    expect(problems.map((p) => p.ranura)).toContain('ranura-vieja');
   });
 
   it('sin ranuras declaradas no se valida nada', () => {

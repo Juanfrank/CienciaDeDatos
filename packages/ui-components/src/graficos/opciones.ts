@@ -152,8 +152,8 @@ function tooltipDe(o: OpcionesDeGrafico) {
  */
 function leyendaDe(o: OpcionesDeGrafico, hayQueDistinguir = o.vm.series.length > 1) {
   const varias = hayQueDistinguir;
-  const modo: ModoDeLeyenda = o.leyenda ?? 'auto';
-  const visible = modo === 'auto' ? varias : modo !== 'oculta';
+  const mode: ModoDeLeyenda = o.leyenda ?? 'auto';
+  const visible = mode === 'auto' ? varias : mode !== 'oculta';
   if (!visible) return { legend: { show: false }, margen: { bottom: 8, left: 8, right: 16, top: 24 } };
 
   /*
@@ -173,7 +173,7 @@ function leyendaDe(o: OpcionesDeGrafico, hayQueDistinguir = o.vm.series.length >
     ...comun,
     textStyle: { color: o.paleta.textoAtenuado, width: 96, overflow: 'truncate' as const },
   };
-  const lado = modo === 'auto' ? 'abajo' : modo;
+  const lado = mode === 'auto' ? 'abajo' : mode;
 
   switch (lado) {
     case 'arriba':
@@ -619,13 +619,13 @@ function porcionesDe(o: OpcionesDeGrafico): { name: string; value: number }[] {
  * `{d}` sale con dos decimales y no cabe en una tarjeta estrecha.
  */
 const etiquetaDePorcion = (
-  modo: EtiquetaCircular,
+  mode: EtiquetaCircular,
   formatear: (n: number) => string,
   total: number,
 ) => {
   const parte = (valor: number) => (total === 0 ? '—' : `${((valor / total) * 100).toFixed(1)} %`);
   return (p: { name: string; value: number }) => {
-    switch (modo) {
+    switch (mode) {
       case 'categoria':
         return p.name;
       case 'valor':
@@ -661,7 +661,7 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
   const porciones = porcionesDe(o);
   const total = porciones.reduce((suma, p) => suma + p.value, 0);
   const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
-  const modo: EtiquetaCircular = c.etiquetas ?? 'porcentaje';
+  const mode: EtiquetaCircular = c.labels ?? 'porcentaje';
 
   /*
    * Aqui la leyenda distingue CATEGORIAS, no series: en un circular siempre hay una serie, asi
@@ -708,29 +708,29 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
          * comprobado (4.3). Depende del modo de etiqueta porque «52.6 %» y «Q3: 31.4 %» no ocupan
          * lo mismo.
          */
-        radius: [`${hueco}%`, RADIO_EXTERIOR[modo]],
+        radius: [`${hueco}%`, RADIO_EXTERIOR[mode]],
         center: ['50%', '50%'],
         // Sin reordenar por su cuenta: el orden ya se decidio arriba, y con `false` ECharts
         // respeta el del modelo, que es el mismo que ve la tabla de datos adjunta.
         avoidLabelOverlap: true,
         itemStyle: { borderColor: o.paleta.superficie, borderWidth: 2 },
         label:
-          modo === 'ninguna'
+          mode === 'ninguna'
             ? { show: false }
             : {
                 show: true,
                 color: o.paleta.texto,
                 fontSize: 11,
-                formatter: etiquetaDePorcion(modo, formatear, total),
+                formatter: etiquetaDePorcion(mode, formatear, total),
                 /*
                  * Las etiquetas largas se alinean al borde de la tarjeta y no a la porcion: asi
                  * todas arrancan en el mismo sitio y ECharts estira la guia hasta ellas.
                  */
-                ...(modo === 'categoria' || modo === 'categoria-porcentaje'
+                ...(mode === 'categoria' || mode === 'categoria-porcentaje'
                   ? { alignTo: 'edge' as const, edgeDistance: 2 }
                   : {}),
               },
-        labelLine: { show: modo !== 'ninguna', lineStyle: { color: o.paleta.linea } },
+        labelLine: { show: mode !== 'ninguna', lineStyle: { color: o.paleta.linea } },
         data: porciones,
         emphasis: { focus: 'self' },
       },
@@ -1172,7 +1172,7 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
     acumulado += valor;
   }
 
-  const etiquetas = [...puntos.map((p) => p.label), ...(conTotal ? ['Total'] : [])];
+  const labels = [...puntos.map((p) => p.label), ...(conTotal ? ['Total'] : [])];
   if (conTotal) {
     zocalos.push(0);
     alturas.push(acumulado);
@@ -1208,7 +1208,7 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
         return `${p.name}<br/>${signo}${formatear(valor)}`;
       },
     },
-    xAxis: { ...ejeCategoria(o), data: etiquetas },
+    xAxis: { ...ejeCategoria(o), data: labels },
     yAxis: ejeValor(o),
     series: [
       {

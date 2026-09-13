@@ -46,28 +46,28 @@ describe('validateRegistry detecta configuraciones que causarian fugas o redunda
   });
 
   it('detecta un dataset compartido que no trae la dimension por la que se restringe', () => {
-    const problemas = validateRegistry(
+    const problems = validateRegistry(
       conDataset({
         query: { measures: ['CasosIngresados'], dimensions: [{ table: 'DimTiempo', field: 'Anio' }] },
         scopeDimensions: [{ table: 'DimTribunal', field: 'Distrito' }],
         securityBinding: 'none',
       }),
     );
-    expect(problemas[0]?.problem).toMatch(/no esta entre las dimensiones de la consulta/);
+    expect(problems[0]?.problem).toMatch(/no esta entre las dimensiones de la consulta/);
   });
 
   it('detecta un securityBinding sin justificacion', () => {
-    const problemas = validateRegistry(conDataset({ securityBindingRationale: '  ' }));
-    expect(problemas[0]?.problem).toMatch(/Falta securityBindingRationale/);
+    const problems = validateRegistry(conDataset({ securityBindingRationale: '  ' }));
+    expect(problems[0]?.problem).toMatch(/Falta securityBindingRationale/);
   });
 
   it('detecta un dataset que nadie consume', () => {
-    const problemas = validateRegistry(conDataset({ consumedByModules: [] }));
-    expect(problemas[0]?.problem).toMatch(/Ningun modulo lo consume/);
+    const problems = validateRegistry(conDataset({ consumedByModules: [] }));
+    expect(problems[0]?.problem).toMatch(/Ningun modulo lo consume/);
   });
 
   it('detecta ids duplicados', () => {
-    const problemas = validateRegistry({ datasets: [base, base] });
-    expect(problemas.some((p) => p.problem.includes('duplicado'))).toBe(true);
+    const problems = validateRegistry({ datasets: [base, base] });
+    expect(problems.some((p) => p.problem.includes('duplicado'))).toBe(true);
   });
 });

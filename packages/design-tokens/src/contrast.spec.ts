@@ -6,7 +6,7 @@ import {
   institutionalContrastChecks,
   parseHex,
 } from './contrast';
-import { ORIGEN_INSTITUCIONAL } from './temaInstitucional';
+import { INSTITUTIONAL_SOURCE } from './institutionalTheme';
 import { OVERRIDABLE_TOKENS, defaultTheme, toCssVariables, validateOverrides } from './tokens';
 
 describe('contrastRatio (WCAG 2.1)', () => {
@@ -43,7 +43,7 @@ describe('checkContrast', () => {
     expect(r.passes).toBe(true);
   });
 
-  it('un gris demasiado claro sobre blanco no pasa AA', () => {
+  it('un gris demasiado light sobre blanco no pasa AA', () => {
     // #8a8a8a sobre blanco da 3.45:1, por debajo del 4.5 que exige el texto normal.
     const r = checkContrast({ label: 't', foreground: '#8a8a8a', background: '#ffffff' });
     expect(r.ratio).toBeCloseTo(3.45, 1);
@@ -85,8 +85,8 @@ describe('puerta de publicacion de un modulo institucional (4.3)', () => {
 
   it('comprueba tambien cada color de la paleta categorica sobre la superficie', () => {
     // Una serie de datos que no contrasta con el fondo es ilegible aunque el texto si contraste.
-    const etiquetas = institutionalContrastChecks(defaultTheme).map((c) => c.label);
-    expect(etiquetas.filter((e) => e.startsWith('serie'))).toHaveLength(
+    const labels = institutionalContrastChecks(defaultTheme).map((c) => c.label);
+    expect(labels.filter((e) => e.startsWith('serie'))).toHaveLength(
       defaultTheme.color.categorical.length,
     );
   });
@@ -113,9 +113,9 @@ describe('anulaciones por objeto (4.3)', () => {
   });
 
   it('rechaza cualquier token fuera de ese conjunto', () => {
-    const problemas = validateOverrides({ 'color.brand': '#ff0000' });
-    expect(problemas).toHaveLength(1);
-    expect(problemas[0]?.problem).toMatch(/no esta en el conjunto de tokens anulables/);
+    const problems = validateOverrides({ 'color.brand': '#ff0000' });
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.problem).toMatch(/no esta en el conjunto de tokens anulables/);
   });
 
   it('el conjunto anulable es deliberadamente pequeno', () => {
@@ -150,26 +150,26 @@ describe('marca institucional del Poder Judicial', () => {
     // son TONOS derivados de esos dos colores, no los colores mismos: `primary` es el tono 40 de
     // la paleta del azul. Es lo que compra la garantia de contraste, y es donde estaba el apaño
     // del tema anterior — ver el bloque del acento, mas abajo.
-    expect(ORIGEN_INSTITUCIONAL.primario).toBe('#0050dd');
-    expect(ORIGEN_INSTITUCIONAL.acento).toBe('#ef3340');
+    expect(INSTITUTIONAL_SOURCE.primario).toBe('#0050dd');
+    expect(INSTITUTIONAL_SOURCE.acento).toBe('#ef3340');
   });
 
   it('el azul derivado es el mismo azul a ojo: la marca no se altera, se normaliza', () => {
     // #0050DD esta en el tono 39.5 de su propia paleta, asi que el tono 40 cae practicamente
     // encima. La diferencia es de medio tono —imperceptible— y a cambio el par con su `onPrimary`
     // deja de depender de que alguien lo comprobara.
-    const derivado = defaultTheme.color.brand[500];
-    expect(derivado).not.toBe(ORIGEN_INSTITUCIONAL.primario);
-    expect(contrastRatio(derivado, ORIGEN_INSTITUCIONAL.primario) ?? 0).toBeLessThan(1.1);
+    const derived = defaultTheme.color.brand[500];
+    expect(derived).not.toBe(INSTITUTIONAL_SOURCE.primario);
+    expect(contrastRatio(derived, INSTITUTIONAL_SOURCE.primario) ?? 0).toBeLessThan(1.1);
   });
 
   it('la tipografia institucional encabeza la pila, con alternativas detras', () => {
-    const pila = defaultTheme.font.sans;
+    const stack = defaultTheme.font.sans;
     // La variable la rellena `next/font`, que sirve Montserrat desde el propio origen; el nombre
     // suelto detras cubre el caso de que la fuente este instalada en el sistema.
-    expect(pila.indexOf('Montserrat')).toBeLessThan(pila.indexOf('system-ui'));
+    expect(stack.indexOf('Montserrat')).toBeLessThan(stack.indexOf('system-ui'));
     // Si nada de eso carga, la aplicacion no puede caer en la serif por defecto del navegador.
-    expect(pila).toMatch(/sans-serif$/);
+    expect(stack).toMatch(/sans-serif$/);
   });
 
   it('las series de datos abren con el azul y siguen con el rojo, como fija la marca', () => {
@@ -186,9 +186,9 @@ describe('el rojo institucional no puede llevar texto pequeno', () => {
   it('EL ROJO DE MARCA sigue sin admitir texto encima: el hecho no ha cambiado', () => {
     // Es el hecho que ordenaba todo el uso del acento en el tema anterior, y sigue siendo cierto
     // del color de marca: #EF3340 da 4.02:1 sobre blanco.
-    const sobreBlanco = contrastRatio(ORIGEN_INSTITUCIONAL.acento, '#ffffff') ?? 0;
-    expect(sobreBlanco).toBeGreaterThanOrEqual(3); // vale como elemento grafico
-    expect(sobreBlanco).toBeLessThan(4.5); // y no como texto
+    const overWhite = contrastRatio(INSTITUTIONAL_SOURCE.acento, '#ffffff') ?? 0;
+    expect(overWhite).toBeGreaterThanOrEqual(3); // vale como elemento grafico
+    expect(overWhite).toBeLessThan(4.5); // y no como texto
   });
 
   it('lo que cambia es QUIEN lo resuelve: antes una nota al pie, ahora el sistema', () => {
@@ -213,7 +213,7 @@ describe('el rojo institucional no puede llevar texto pequeno', () => {
       {
         label: 'texto blanco sobre el rojo de marca',
         foreground: '#ffffff',
-        background: ORIGEN_INSTITUCIONAL.acento,
+        background: INSTITUTIONAL_SOURCE.acento,
       },
     ]);
     expect(fallos).toHaveLength(1);

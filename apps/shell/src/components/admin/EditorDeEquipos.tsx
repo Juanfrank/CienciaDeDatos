@@ -160,8 +160,8 @@ export function EditorDeEquipos({
                           }
                         >
                           <option value="">(no es miembro)</option>
-                          {APP_ROLES.map((rol) => (
-                            <option key={rol} value={rol}>{rol}</option>
+                          {APP_ROLES.map((role) => (
+                            <option key={role} value={role}>{role}</option>
                           ))}
                         </select>
                       </li>

@@ -4,7 +4,7 @@ export type WcagLevel = 'AA' | 'AAA';
 export type TextSize = 'normal' | 'large';
 
 /** Umbrales de WCAG 2.1. "Grande" es >=18.66px en negrita o >=24px normal. */
-const UMBRALES: Record<WcagLevel, Record<TextSize, number>> = {
+const THRESHOLDS: Record<WcagLevel, Record<TextSize, number>> = {
   AA: { normal: 4.5, large: 3 },
   AAA: { normal: 7, large: 4.5 },
 };
@@ -43,9 +43,9 @@ export function contrastRatio(foreground: string, background: string): number | 
   const l1 = relativeLuminance(foreground);
   const l2 = relativeLuminance(background);
   if (l1 === null || l2 === null) return null;
-  const claro = Math.max(l1, l2);
-  const oscuro = Math.min(l1, l2);
-  return (claro + 0.05) / (oscuro + 0.05);
+  const light = Math.max(l1, l2);
+  const dark = Math.min(l1, l2);
+  return (light + 0.05) / (dark + 0.05);
 }
 
 export interface ContrastCheck {
@@ -66,7 +66,7 @@ export interface ContrastResult extends ContrastCheck {
 
 export function checkContrast(check: ContrastCheck, level: WcagLevel = 'AA'): ContrastResult {
   const size = check.size ?? 'normal';
-  const required = UMBRALES[level][size];
+  const required = THRESHOLDS[level][size];
   const ratio = contrastRatio(check.foreground, check.background);
 
   if (ratio === null) {

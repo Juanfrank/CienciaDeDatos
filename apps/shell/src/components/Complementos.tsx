@@ -187,7 +187,7 @@ export function TablaDeDatos({
         onClose={cerrar}
       >
         <div className="emergente__cabecera">
-          <h2>Datos de origen — {titulo}</h2>
+          <h2>Datos de source — {titulo}</h2>
           <button type="button" className="boton-enlace" onClick={cerrar} data-testid="tabla-datos-cerrar">
             Cerrar
           </button>

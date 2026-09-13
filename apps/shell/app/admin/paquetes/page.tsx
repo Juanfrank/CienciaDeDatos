@@ -28,7 +28,7 @@ export default async function PaginaPaquetes() {
         <ul className="lista-simple" data-testid="lista-paquetes">
           {paquetes.map((pkg) => {
             const usuarios = equipos.filter((t) => t.assignedPackageId === pkg.id);
-            const problemas = usuarios.flatMap((equipo) =>
+            const problems = usuarios.flatMap((equipo) =>
               buildNavigationView({ generalTree, team: equipo, pkg }).dangling.map((d) => ({
                 equipo: equipo.name,
                 ...d,
@@ -41,14 +41,14 @@ export default async function PaginaPaquetes() {
                 <span className="texto-atenuado">
                   {' '}· asignado a {usuarios.length} equipo(s)
                 </span>
-                {problemas.length > 0 ? (
+                {problems.length > 0 ? (
                   <div className="aviso aviso--atencion" data-testid={`paquete-problemas-${pkg.id}`}>
                     <p>
-                      <strong>{problemas.length} nodo(s) no se muestran</strong> porque la
+                      <strong>{problems.length} nodo(s) no se muestran</strong> porque la
                       audiencia no los tiene concedidos:
                     </p>
                     <ul>
-                      {problemas.map((p, i) => (
+                      {problems.map((p, i) => (
                         <li key={i}>
                           <code>{p.moduleId}</code> para {p.equipo} — {p.reason}
                         </li>

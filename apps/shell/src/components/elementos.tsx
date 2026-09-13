@@ -172,7 +172,7 @@ export function Conexion({
   if (puntos.length < 2) {
     return (
       <p className="conexion__sin-extremos" data-testid="conexion-sin-extremos">
-        Elija un objeto de origen y uno de destino.
+        Elija un objeto de source y uno de destino.
       </p>
     );
   }

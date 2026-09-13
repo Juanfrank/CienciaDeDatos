@@ -651,7 +651,7 @@ input[type='radio'] {
  * sin que nada parezca un dialogo: es la elevacion que MD3 asigna justamente a `Elevated card`.
  *
  * El contorno se queda ademas de la sombra, no en su lugar. La sombra depende de que el fondo
- * sea claro; en tema oscuro casi no se ve, y entonces lo unico que delimita la tarjeta es la
+ * sea light; en tema dark casi no se ve, y entonces lo unico que delimita la tarjeta es la
  * linea.
  */
 .objeto,
@@ -1769,7 +1769,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * fila con la vista de un extremo al otro es donde se cometen los errores de lectura.
  *
  * 1. **Filas alternas.** La franja da un asidero horizontal. Es un fondo de contenedor y no un
- *    gris inventado, asi que sigue al tema y al modo oscuro; y es una diferencia de fondo, no de
+ *    gris inventado, asi que sigue al tema y al modo dark; y es una diferencia de fondo, no de
  *    texto, asi que ningun par de contraste cambia.
  * 2. **La cabecera de fila con su propio fondo.** La primera columna es el rotulo de la fila, no
  *    un dato: si se ve igual que las cifras, la tabla parece una rejilla sin eje.

@@ -28,7 +28,7 @@ for (const modulo of lista) {
       slug: modulo.slug,
       moduleId: modulo.moduleId,
       salud: 'fallo',
-      problemas: [error instanceof Error ? error.message : String(error)],
+      problems: [error instanceof Error ? error.message : String(error)],
       objetos: { total: 0, rotos: 0 },
     });
   }
@@ -39,7 +39,7 @@ writeFileSync(destino, `${JSON.stringify(informe, null, 2)}\n`);
 
 const MARCA: Record<SaludDeModulo, string> = { ok: '✓', degradado: '~', fallo: '✗' };
 for (const e of estados) {
-  console.log(`${MARCA[e.salud]} ${e.slug}${e.problemas.length ? ` — ${e.problemas.join(' · ')}` : ''}`);
+  console.log(`${MARCA[e.salud]} ${e.slug}${e.problems.length ? ` — ${e.problems.join(' · ')}` : ''}`);
 }
 
 const caidos = estados.filter((e) => e.salud === 'fallo');

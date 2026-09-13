@@ -58,14 +58,14 @@ export function validarPanelDeFiltros(
   configuracion: ConfiguracionDePanelDeFiltros | undefined,
   tiposPorCampo: Record<string, string>,
 ): ProblemaDeSelector[] {
-  const problemas: ProblemaDeSelector[] = [];
+  const problems: ProblemaDeSelector[] = [];
   const dimensiones = instance.binding.dimensions.map(fieldKey);
   const selectores = configuracion?.selectores ?? [];
 
   const vistos = new Set<string>();
   for (const selector of selectores) {
     if (!dimensiones.includes(selector.campo)) {
-      problemas.push({
+      problems.push({
         campo: selector.campo,
         problema:
           `'${selector.campo}' no esta entre las dimensiones mapeadas de este panel. ` +
@@ -75,7 +75,7 @@ export function validarPanelDeFiltros(
     }
 
     if (vistos.has(selector.campo)) {
-      problemas.push({
+      problems.push({
         campo: selector.campo,
         problema: `'${selector.campo}' tiene mas de un selector. Cada dimension lleva uno.`,
       });
@@ -83,7 +83,7 @@ export function validarPanelDeFiltros(
     vistos.add(selector.campo);
 
     if (!(TIPOS_DE_SELECTOR as readonly string[]).includes(selector.tipo)) {
-      problemas.push({
+      problems.push({
         campo: selector.campo,
         problema: `'${String(selector.tipo)}' no es un tipo de selector.`,
       });
@@ -96,7 +96,7 @@ export function validarPanelDeFiltros(
       tipoDeColumna !== undefined &&
       !esTipoDeFecha(tipoDeColumna)
     ) {
-      problemas.push({
+      problems.push({
         campo: selector.campo,
         problema:
           `El selector '${selector.tipo}' necesita una dimension de fecha, y ` +
@@ -105,7 +105,7 @@ export function validarPanelDeFiltros(
     }
   }
 
-  return problemas;
+  return problems;
 }
 
 /** Los selectores efectivos: los configurados, mas uno por defecto para cada dimension sin el. */

@@ -238,15 +238,15 @@ export function PanelLateral({
  * aqui hasta que se traduzca tambien. Que el orden viva en un array y no en el catalogo es
  * deliberado: es una decision de producto, no una cadena.
  */
-const FAMILIAS: { familia: FamiliaDeObjeto; que: string }[] = [
-  { familia: 'valor', que: 'El dato que hay que ver de un vistazo.' },
-  { familia: 'comparacion', que: 'Cuanto mide cada distrito, cada materia, cada tribunal.' },
-  { familia: 'evolucion', que: 'La trayectoria de una medida a lo largo de una dimension ordenada.' },
-  { familia: 'proporcion', que: 'Que parte aporta cada categoria, y donde se pierde.' },
-  { familia: 'relacion', que: 'Si dos cifras se mueven juntas, o cada una en su escala.' },
-  { familia: 'detalle', que: 'Cuando hace falta la cifra exacta.' },
-  { familia: 'ubicacion', que: 'La dimension geografica.' },
-  { familia: 'control', que: 'No dibujan datos: eligen cuales se ven.' },
+const FAMILIAS: { family: FamiliaDeObjeto; que: string }[] = [
+  { family: 'valor', que: 'El dato que hay que ver de un vistazo.' },
+  { family: 'comparacion', que: 'Cuanto mide cada distrito, cada materia, cada tribunal.' },
+  { family: 'evolucion', que: 'La trayectoria de una medida a lo largo de una dimension ordenada.' },
+  { family: 'proporcion', que: 'Que parte aporta cada categoria, y donde se pierde.' },
+  { family: 'relacion', que: 'Si dos cifras se mueven juntas, o cada una en su escala.' },
+  { family: 'detalle', que: 'Cuando hace falta la cifra exacta.' },
+  { family: 'ubicacion', que: 'La dimension geografica.' },
+  { family: 'control', que: 'No dibujan datos: eligen cuales se ven.' },
 ];
 
 /** Sin acentos y en minusculas, como el buscador del panel de formato y por lo mismo. */
@@ -335,15 +335,15 @@ function Tienda({
             y «Elementos» desapareceran al buscar «barras», porque sus titulos no coinciden.
           */}
           <ProveedorDeFiltro filtro={busqueda}>
-            {FAMILIAS.map(({ familia, que }) => {
-              const dela = conDatos.filter((o) => o.familia === familia);
+            {FAMILIAS.map(({ family, que }) => {
+              const dela = conDatos.filter((o) => o.family === family);
               if (dela.length === 0) return null;
               return (
                 <Seccion
-                  key={familia}
-                  titulo={t(`familia.${familia}` as ClaveDeMensaje)}
+                  key={family}
+                  titulo={t(`familia.${family}` as ClaveDeMensaje)}
                   nivel={2}
-                  prueba={`familia-${familia}`}
+                  prueba={`familia-${family}`}
                   /*
                    * Las claves son los objetos que la familia contiene EN ESTA busqueda.
                    */
@@ -352,7 +352,7 @@ function Tienda({
                   <p className="tienda__familia-que">{que}</p>
                   <ListaDeObjetos
                     objetos={dela}
-                    prueba={`tienda-${familia}`}
+                    prueba={`tienda-${family}`}
                     conContrato
                     guardando={guardando}
                     onAnadir={onAnadir}

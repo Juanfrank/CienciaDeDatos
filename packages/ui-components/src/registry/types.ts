@@ -110,7 +110,7 @@ export interface VisualObjectDefinition {
    * A que pregunta responde. Obligatoria salvo en elementos, contenedores y complementos, que
    * no consumen datos; lo comprueba una prueba del catalogo.
    */
-  familia?: FamiliaDeObjeto;
+  family?: FamiliaDeObjeto;
   /** true si el objeto se adjunta a otro en vez de ocupar una celda de la rejilla. */
   attachable?: boolean;
   versions: ObjectVersion[];

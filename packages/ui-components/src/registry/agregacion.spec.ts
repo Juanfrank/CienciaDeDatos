@@ -148,13 +148,13 @@ describe('validarAgregacion: lo que no se puede guardar', () => {
   const base = { measures: ['DiasResolucion'], colapsa: true };
 
   it('un promedio sobre un dataset YA agrupado se rechaza', () => {
-    const problemas = validarAgregacion({
+    const problems = validarAgregacion({
       ...base,
       agregaciones: ['promedio'],
       grano: 'preagregado',
     });
-    expect(problemas).toHaveLength(1);
-    expect(problemas[0]?.problema).toMatch(/ya agrupado/);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]?.problema).toMatch(/ya agrupado/);
   });
 
   it('el mismo promedio sobre grano atomico se acepta', () => {
@@ -218,13 +218,13 @@ describe('agregacionesPosibles: lo que el editor puede OFRECER', () => {
       for (const colapsa of [true, false]) {
         const posibles = agregacionesPosibles({ colapsa, grano });
         for (const agregacion of AGREGACIONES) {
-          const problemas = validarAgregacion({
+          const problems = validarAgregacion({
             measures: ['m'],
             agregaciones: [agregacion],
             colapsa,
             grano,
           });
-          expect(problemas.length === 0).toBe(posibles.includes(agregacion));
+          expect(problems.length === 0).toBe(posibles.includes(agregacion));
         }
       }
     }

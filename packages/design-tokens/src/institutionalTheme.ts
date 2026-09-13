@@ -1,9 +1,9 @@
 import type { ThemeTokens } from './tokens';
-import { type ModoDeColor, type OrigenDelTema } from './material3';
-import { type TemaMaterial, temaMaterial } from './material3Tokens';
+import { type ColorMode, type ThemeSource } from './material3';
+import { type MaterialTheme, materialTheme } from './material3Tokens';
 
 /** El tema de la institucion, expresado en Material Design 3. */
-export const ORIGEN_INSTITUCIONAL: OrigenDelTema = {
+export const INSTITUTIONAL_SOURCE: ThemeSource = {
   primario: '#0050dd',
   acento: '#ef3340',
   // El gris de la norma de marca, el mismo que rotula la institucion en la portada de un informe.
@@ -11,22 +11,22 @@ export const ORIGEN_INSTITUCIONAL: OrigenDelTema = {
 };
 
 /** Montserrat, la tipografia institucional. */
-const FUENTES = {
+const FONTS = {
   sans: "var(--font-montserrat), Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
   mono: 'ui-monospace, SFMono-Regular, Menlo, monospace',
 };
 
-export const temaClaro: TemaMaterial = temaMaterial(ORIGEN_INSTITUCIONAL, 'claro', FUENTES);
+export const lightTheme: MaterialTheme = materialTheme(INSTITUTIONAL_SOURCE, 'light', FONTS);
 
 /** El esquema oscuro existe y esta verificado, y NO esta aplicado. */
-export const temaOscuro: TemaMaterial = temaMaterial(ORIGEN_INSTITUCIONAL, 'oscuro', FUENTES);
+export const darkTheme: MaterialTheme = materialTheme(INSTITUTIONAL_SOURCE, 'dark', FONTS);
 
-export const temaPorModo = (modo: ModoDeColor): TemaMaterial =>
-  modo === 'claro' ? temaClaro : temaOscuro;
+export const themeForMode = (mode: ColorMode): MaterialTheme =>
+  mode === 'light' ? lightTheme : darkTheme;
 
 /** Puente hacia la forma de tema anterior. */
-export function comoThemeTokens(tema: TemaMaterial): ThemeTokens {
-  const c = tema.color;
+export function asThemeTokens(theme: MaterialTheme): ThemeTokens {
+  const c = theme.color;
 
   return {
     color: {
@@ -64,27 +64,27 @@ export function comoThemeTokens(tema: TemaMaterial): ThemeTokens {
       textMuted: c.onSurfaceVariant,
       textOnBrand: c.onPrimary,
       border: c.outlineVariant,
-      categorical: tema.categorical,
+      categorical: theme.categorical,
     },
     font: {
-      sans: tema.font.sans,
-      mono: tema.font.mono,
+      sans: theme.font.sans,
+      mono: theme.font.mono,
       size: {
-        xs: tema.typography['body-small'].size,
-        sm: tema.typography['body-medium'].size,
-        base: tema.typography['body-large'].size,
-        lg: tema.typography['title-large'].size,
-        xl: tema.typography['headline-small'].size,
-        xxl: tema.typography['headline-medium'].size,
+        xs: theme.typography['body-small'].size,
+        sm: theme.typography['body-medium'].size,
+        base: theme.typography['body-large'].size,
+        lg: theme.typography['title-large'].size,
+        xl: theme.typography['headline-small'].size,
+        xxl: theme.typography['headline-medium'].size,
       },
       weight: { regular: 400, medium: 500, bold: 700 },
     },
     space: { xs: '0.25rem', sm: '0.5rem', md: '1rem', lg: '1.5rem', xl: '2.5rem' },
     radius: {
-      sm: tema.shape['extra-small'],
-      md: tema.shape.medium,
-      lg: tema.shape.large,
+      sm: theme.shape['extra-small'],
+      md: theme.shape.medium,
+      lg: theme.shape.large,
     },
-    shadow: { sm: tema.elevation[1], md: tema.elevation[2] },
+    shadow: { sm: theme.elevation[1], md: theme.elevation[2] },
   };
 }

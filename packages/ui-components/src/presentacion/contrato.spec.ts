@@ -83,31 +83,31 @@ describe('validarPresentacion', () => {
   });
 
   it('rechaza un icono que no esta en el catalogo', () => {
-    const problemas = validarPresentacion(
+    const problems = validarPresentacion(
       { icono: 'unicornio' as never },
       PRESENTACION_MINIMA,
     );
-    expect(problemas.map((p) => p.clave)).toEqual(['icono']);
+    expect(problems.map((p) => p.clave)).toEqual(['icono']);
   });
 
   it('rechaza un color en vez de un rol de acento', () => {
     // El punto de 4.3: si aqui entrara '#ff0000', la puerta de contraste dejaria de garantizar
     // nada sobre lo que se ve, porque ese color no sale de ningun par comprobado.
-    const problemas = validarPresentacion({ acento: '#ff0000' as never }, PRESENTACION_MINIMA);
-    expect(problemas.map((p) => p.clave)).toEqual(['acento']);
+    const problems = validarPresentacion({ acento: '#ff0000' as never }, PRESENTACION_MINIMA);
+    expect(problems.map((p) => p.clave)).toEqual(['acento']);
   });
 
   it('rechaza un subtitulo que es un parrafo', () => {
-    const problemas = validarPresentacion({ subtitulo: 'x'.repeat(81) }, PRESENTACION_MINIMA);
-    expect(problemas.map((p) => p.clave)).toEqual(['subtitulo']);
+    const problems = validarPresentacion({ subtitulo: 'x'.repeat(81) }, PRESENTACION_MINIMA);
+    expect(problems.map((p) => p.clave)).toEqual(['subtitulo']);
   });
 
   it('rechaza decimales fuera de rango y unidades que son frases', () => {
-    const problemas = validarPresentacion(
+    const problems = validarPresentacion(
       { formato: { decimales: 9, unidad: 'casos pendientes' } },
       todas,
     );
-    expect(problemas.map((p) => p.clave).sort()).toEqual(['formato.decimales', 'formato.unidad']);
+    expect(problems.map((p) => p.clave).sort()).toEqual(['formato.decimales', 'formato.unidad']);
   });
 
   it('no se queja de una instancia sin presentacion', () => {
@@ -153,11 +153,11 @@ describe('circular y medidor: lo que se rechaza al guardar', () => {
   });
 
   it('un modo de etiqueta inventado se rechaza', () => {
-    const problemas = validarPresentacion(
-      { circular: { etiquetas: 'ambos' as never } },
+    const problems = validarPresentacion(
+      { circular: { labels: 'ambos' as never } },
       conCircular,
     );
-    expect(problemas[0]?.clave).toBe('circular.etiquetas');
+    expect(problems[0]?.clave).toBe('circular.etiquetas');
   });
 
   it('un minimo por encima del maximo se rechaza, no se intercambia', () => {
@@ -165,8 +165,8 @@ describe('circular y medidor: lo que se rechaza al guardar', () => {
      * Intercambiarlos al dibujar dejaria pasar el error y pintaria una aguja que nadie pidio.
      * 4.2 manda marcar el mapeo que no cuadra, no arreglarlo por dentro.
      */
-    const problemas = validarPresentacion({ medidor: { minimo: 100, maximo: 10 } }, conMedidor);
-    expect(problemas[0]?.clave).toBe('medidor.maximo');
+    const problems = validarPresentacion({ medidor: { minimo: 100, maximo: 10 } }, conMedidor);
+    expect(problems[0]?.clave).toBe('medidor.maximo');
     expect(validarPresentacion({ medidor: { minimo: 0, maximo: 3000 } }, conMedidor)).toEqual([]);
   });
 
@@ -213,7 +213,7 @@ describe('la familia de cada objeto', () => {
   it('todo objeto que consume datos declara a que pregunta responde', () => {
     for (const objeto of catalogoInicial) {
       if (SIN_FAMILIA.has(objeto.category)) continue;
-      expect(objeto.familia, `${objeto.objectId} no declara familia`).toBeDefined();
+      expect(objeto.family, `${objeto.objectId} no declara familia`).toBeDefined();
     }
   });
 
@@ -222,14 +222,14 @@ describe('la familia de cada objeto', () => {
     // seria rellenar un campo para que no estuviera vacio.
     for (const objeto of catalogoInicial) {
       if (!SIN_FAMILIA.has(objeto.category)) continue;
-      expect(objeto.familia, `${objeto.objectId} no deberia declarar familia`).toBeUndefined();
+      expect(objeto.family, `${objeto.objectId} no deberia declarar familia`).toBeUndefined();
     }
   });
 
   it('todas las familias declaradas existen', () => {
     for (const objeto of catalogoInicial) {
-      if (objeto.familia === undefined) continue;
-      expect(FAMILIAS_DE_OBJETO).toContain(objeto.familia);
+      if (objeto.family === undefined) continue;
+      expect(FAMILIAS_DE_OBJETO).toContain(objeto.family);
     }
   });
 });

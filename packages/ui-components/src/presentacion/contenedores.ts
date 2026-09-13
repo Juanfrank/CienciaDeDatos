@@ -121,12 +121,12 @@ export function validarContenedor(
 ): ProblemaDeContenedor[] {
   if (!esContenedor(instance.objectId)) return [];
   const config = (instance.configuracion ?? {}) as ConfiguracionDeContenedor;
-  const problemas: ProblemaDeContenedor[] = [];
+  const problems: ProblemaDeContenedor[] = [];
   const columnas = columnasDe(instance.objectId, config);
 
   const paneles = config.paneles ?? [];
   if (instance.objectId === 'contenedor-con-pestanas' && paneles.length < 2) {
-    problemas.push({
+    problems.push({
       slot: `contenedor.${itemId}`,
       problema:
         'Un contenedor con pestanas necesita al menos dos. Con una sola, la barra de pestanas ' +
@@ -137,7 +137,7 @@ export function validarContenedor(
   const ids = new Set<string>();
   for (const panel of paneles) {
     if (ids.has(panel.panelId)) {
-      problemas.push({
+      problems.push({
         slot: `contenedor.${itemId}.${panel.panelId}`,
         problema: `Hay dos paneles con el id '${panel.panelId}'. El id identifica a cual se cambia.`,
       });
@@ -146,13 +146,13 @@ export function validarContenedor(
 
     for (const item of panel.items) {
       if (item.position.w < 1 || item.position.h < 1) {
-        problemas.push({
+        problems.push({
           slot: `contenedor.${itemId}.${item.id}`,
           problema: 'Un objeto de ancho o alto cero no se puede ver ni seleccionar.',
         });
       }
       if (item.position.x < 0 || item.position.x + item.position.w > columnas) {
-        problemas.push({
+        problems.push({
           slot: `contenedor.${itemId}.${item.id}`,
           problema: `Se sale de las ${columnas} columnas del contenedor.`,
         });
@@ -164,7 +164,7 @@ export function validarContenedor(
         const a = panel.items[i];
         const b = panel.items[j];
         if (a && b && seSolapanEnRejilla(a.position, b.position)) {
-          problemas.push({
+          problems.push({
             slot: `contenedor.${itemId}.${a.id}`,
             problema: `Se solapa con '${b.id}' dentro del contenedor.`,
           });
@@ -176,14 +176,14 @@ export function validarContenedor(
   if (instance.objectId === 'contenedor-desplazable') {
     const eje = config.desplazable?.eje;
     if (eje !== undefined && !(EJES as readonly string[]).includes(eje)) {
-      problemas.push({
+      problems.push({
         slot: `contenedor.${itemId}`,
         problema: `'${String(eje)}' no es un eje. Se desplaza por X o por Y, nunca por los dos.`,
       });
     }
   }
 
-  return problemas;
+  return problems;
 }
 
 export const seSolapanEnRejilla = (a: PosicionEnRejilla, b: PosicionEnRejilla): boolean =>

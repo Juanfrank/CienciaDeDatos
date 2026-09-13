@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
 import {
-  comoThemeTokens,
+  asThemeTokens,
   defaultIdentity,
-  temaPorModo,
+  themeForMode,
   toCssVariables,
-  variablesMaterial,
-  type ModoDeColor,
+  materialVariables,
+  type ColorMode,
 } from '@app/design-tokens';
 import { Cabecera } from '../src/components/Cabecera';
 import { ProveedorDeIdioma } from '../src/components/Idioma';
@@ -30,14 +30,14 @@ const montserrat = Montserrat({
 });
 
 /** El tema organizacional (4.3) se inyecta como variables CSS en la raiz del documento. */
-function variablesDelTema(modo: ModoDeColor): Record<string, string> {
-  const tema = temaPorModo(modo);
-  return { ...variablesMaterial(tema), ...toCssVariables(comoThemeTokens(tema)) };
+function variablesDelTema(mode: ColorMode): Record<string, string> {
+  const theme = themeForMode(mode);
+  return { ...materialVariables(theme), ...toCssVariables(asThemeTokens(theme)) };
 }
 
 /** Cromo comun a toda la aplicacion: documento, tema y cabecera. */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [sesion, modo, locale] = await Promise.all([obtenerSesion(), modoDeColor(), idioma()]);
+  const [sesion, mode, locale] = await Promise.all([obtenerSesion(), modoDeColor(), idioma()]);
 
   /*
    * `colorScheme` no es decorativo: es lo que hace que el navegador dibuje en oscuro lo que no
@@ -45,9 +45,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
    * evita una casilla blanca sobre una tarjeta oscura, que ademas de feo es un fallo de contraste.
    */
   return (
-    <html lang={locale} className={montserrat.variable} data-tema={modo}>
+    <html lang={locale} className={montserrat.variable} data-theme={mode}>
       <body
-        style={{ ...variablesDelTema(modo), colorScheme: modo === 'oscuro' ? 'dark' : 'light' } as React.CSSProperties}
+        style={{ ...variablesDelTema(mode), colorScheme: mode === 'dark' ? 'dark' : 'light' } as React.CSSProperties}
       >
         <ProveedorDeIdioma locale={locale}>
           {sesion ? <Cabecera sesion={sesion} /> : null}

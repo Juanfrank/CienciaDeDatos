@@ -2,26 +2,26 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  comoThemeTokens,
-  temaClaro,
-  temaOscuro,
+  asThemeTokens,
+  lightTheme,
+  darkTheme,
   toCssVariables,
-  variablesMaterial,
-  type ModoDeColor,
+  materialVariables,
+  type ColorMode,
 } from '@app/design-tokens';
 import { esModoDeColor } from './tema';
 
 /** El modo de color de la aplicacion — seccion 4.3. */
 describe('que modo se pide', () => {
   it('acepta los dos modos que existen', () => {
-    expect(esModoDeColor('claro')).toBe(true);
-    expect(esModoDeColor('oscuro')).toBe(true);
+    expect(esModoDeColor('light')).toBe(true);
+    expect(esModoDeColor('dark')).toBe(true);
   });
 
-  it('cualquier otra cosa no es un modo, y por tanto cae en claro', () => {
-    // Una cookie es texto que manda el cliente. `dark`, vacia o manipulada tiene que dejar la
-    // aplicacion en un estado dibujable, no a medio tema.
-    for (const valor of ['dark', 'Oscuro', '', undefined, 'null']) {
+  it('cualquier otra cosa no es un modo, y por tanto cae en light', () => {
+    // Una cookie es texto que manda el cliente: mal escrita, con otra caja, vacia o manipulada
+    // tiene que dejar la aplicacion en un estado dibujable, no a medio tema.
+    for (const valor of ['obscuro', 'Dark', 'LIGHT', '', undefined, 'null']) {
       expect(esModoDeColor(valor), String(valor)).toBe(false);
     }
   });
@@ -48,17 +48,17 @@ describe('el tema cubre todas las variables que la hoja de estilo usa', () => {
     '--fila-escritorio',
   ];
 
-  const emitidasEn = (modo: ModoDeColor): Set<string> => {
-    const tema = modo === 'claro' ? temaClaro : temaOscuro;
+  const emitidasEn = (mode: ColorMode): Set<string> => {
+    const theme = mode === 'light' ? lightTheme : darkTheme;
     return new Set([
-      ...Object.keys(variablesMaterial(tema)),
-      ...Object.keys(toCssVariables(comoThemeTokens(tema))),
+      ...Object.keys(materialVariables(theme)),
+      ...Object.keys(toCssVariables(asThemeTokens(theme))),
     ]);
   };
 
-  for (const modo of ['claro', 'oscuro'] as ModoDeColor[]) {
-    it(`${modo}: ninguna variable leida se queda sin valor`, () => {
-      const emitidas = emitidasEn(modo);
+  for (const mode of ['light', 'dark'] as ColorMode[]) {
+    it(`${mode}: ninguna variable leida se queda sin valor`, () => {
+      const emitidas = emitidasEn(mode);
       const huerfanas = [...usadas].filter(
         (v) => !definidasEnCss.has(v) && !emitidas.has(v) && !DE_COMPONENTE.includes(v),
       );
@@ -70,9 +70,9 @@ describe('el tema cubre todas las variables que la hoja de estilo usa', () => {
   it('la abreviatura `font:` de cada rol tipografico es un valor valido', () => {
     // No basta con que la variable exista: `font` exige grosor, tamano/interlineado y familia en
     // ese orden. Una variable presente pero mal formada vuelve a descartar la declaracion entera.
-    const vars = variablesMaterial(temaOscuro);
-    for (const rol of ['title-large', 'title-medium', 'label-large', 'body-small']) {
-      expect(vars[`--md-sys-typescale-${rol}`]).toMatch(/^\d{3} [\d.]+rem\/[\d.]+rem .+sans-serif$/);
+    const vars = materialVariables(darkTheme);
+    for (const role of ['title-large', 'title-medium', 'label-large', 'body-small']) {
+      expect(vars[`--md-sys-typescale-${role}`]).toMatch(/^\d{3} [\d.]+rem\/[\d.]+rem .+sans-serif$/);
     }
   });
 

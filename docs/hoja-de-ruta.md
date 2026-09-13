@@ -113,15 +113,15 @@ hechos— y el editor solo edita la primera.
 
 ---
 
-### 2.6 Encender el tema oscuro
+### 2.6 Encender el tema dark
 
-Los tokens del esquema oscuro de Material Design 3 **existen y estan verificados**: se generan
-igual que los del claro y la prueba de contraste recorre los dos modos entero, los 54 pares de
+Los tokens del esquema dark de Material Design 3 **existen y estan verificados**: se generan
+igual que los del light y la prueba de contraste recorre los dos modos entero, los 54 pares de
 rol. Lo que no esta hecho es aplicarlos.
 
 Encenderlos es una media query —`prefers-color-scheme: dark` redefiniendo las variables— mas una
 pasada de revision de cada pantalla en ese modo. Se deja pendiente a proposito: las pruebas de
-accesibilidad que hoy pasan lo hacen sobre el claro, y un tema oscuro a medias es peor que no
+accesibilidad que hoy pasan lo hacen sobre el light, y un tema dark a medias es peor que no
 tenerlo.
 
 ### 2.7 Mas tipos de visualizacion sobre ECharts

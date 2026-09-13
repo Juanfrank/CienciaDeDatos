@@ -15,13 +15,13 @@ import { join } from 'node:path';
  * Se copian, no se comparten, para que tampoco puedan escribirse encima.
  */
 const destino = mkdtempSync(join(tmpdir(), 'capa-visualizacion-pruebas-'));
-const origen = process.env['CACHE_DIR'] ?? join(process.cwd(), '.cache-datos');
+const source = process.env['CACHE_DIR'] ?? join(process.cwd(), '.cache-datos');
 
-if (existsSync(origen)) {
-  for (const archivo of readdirSync(origen)) {
+if (existsSync(source)) {
+  for (const archivo of readdirSync(source)) {
     // `ds%3A` son datasets y `ops%3A` el latido y el esquema: todo lo que puebla el job.
     if (archivo.startsWith('ds%3A') || archivo.startsWith('ops%3A')) {
-      cpSync(join(origen, archivo), join(destino, archivo));
+      cpSync(join(source, archivo), join(destino, archivo));
     }
   }
 }
