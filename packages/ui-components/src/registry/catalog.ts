@@ -144,6 +144,28 @@ const POZOS_DE_LINEAS: RanuraDeCampos[] = [
   { id: 'eje-y', etiqueta: 'Eje Y', tipo: 'medida', max: 4, min: 1, ayuda: 'Una linea por medida.' },
 ];
 
+/**
+ * El pozo que reparte los pequenos multiplos.
+ *
+ * Va el ULTIMO de la lista, que es donde va lo opcional: al anadir un grafico, lo primero que hay
+ * que rellenar es el eje, no una opcion avanzada que la mayoria no usa.
+ *
+ * Que sea el ultimo en el panel no significa que sea la ultima dimension al dibujar: ahi va
+ * primero, porque `toCategorical` compone las etiquetas en el orden en que se le pasan y partirlas
+ * supone que el primer trozo es el panel. Ese orden lo fija el render con su propio array, no la
+ * posicion del pozo.
+ *
+ * Opcional: sin el, el objeto dibuja UN grafico, que es lo que hacia antes.
+ */
+const POZO_DE_MULTIPLO: RanuraDeCampos = {
+  id: 'multiplo',
+  etiqueta: 'Multiplos',
+  tipo: 'dimension',
+  max: 1,
+  ayuda: 'Opcional. Repite el grafico una vez por cada valor de esta dimension.',
+};
+
+/** Lo que admite presentar un grafico que puede repetirse en paneles. */
 const PRESENTACION_DE_GRAFICO = presenta(
   'formato',
   'formatos',
@@ -155,6 +177,7 @@ const PRESENTACION_DE_GRAFICO = presenta(
   'referencias',
   'coloresDeSerie',
   'tooltip',
+  'multiplos',
 );
 
 /**
@@ -352,6 +375,28 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           notes:
             'Cada medida es una serie. La segunda dimension, si existe, agrupa las columnas por serie.',
           pozos: POZOS_DE_BARRAS(4),
+        },
+        presentation: PRESENTACION_DE_GRAFICO,
+      },
+      /*
+       * 1.3.0 — pequenos multiplos.
+       *
+       * Es un cambio del CONTRATO DE DATOS —una dimension mas— y por eso es una version nueva y no
+       * un ajuste sobre 1.2.0. Una instancia que fija 1.2.0 sigue viendo el objeto que mapeo, sin
+       * un pozo que aparece de la nada; es lo que 4.5 pide de un objeto ya publicado.
+       */
+      {
+        version: '1.3.0',
+        publishedAt: '2026-09-13',
+        changelog: 'Pequenos multiplos: el grafico se repite por cada valor de una dimension.',
+        certification: certificacionInicial,
+        dataContract: {
+          dimensions: { min: 1, max: 3 },
+          measures: { min: 1, max: 4 },
+          notes:
+            'Cada medida es una serie. La dimension de multiplos, si existe, reparte el objeto en ' +
+            'un panel por valor; la de serie agrupa las columnas dentro de cada panel.',
+          pozos: [...POZOS_DE_BARRAS(4), POZO_DE_MULTIPLO],
         },
         presentation: PRESENTACION_DE_GRAFICO,
       },
@@ -761,6 +806,20 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 1, max: 1 },
           measures: { min: 1, max: 4 },
           pozos: POZOS_DE_LINEAS,
+        },
+        presentation: PRESENTACION_DE_GRAFICO,
+      },
+      /* 1.2.0 — pequenos multiplos, por lo mismo que en columnas. */
+      {
+        version: '1.2.0',
+        publishedAt: '2026-09-13',
+        changelog: 'Pequenos multiplos: una linea por panel, con escala comun.',
+        certification: certificacionInicial,
+        dataContract: {
+          dimensions: { min: 1, max: 2 },
+          measures: { min: 1, max: 4 },
+          notes: 'La dimension de multiplos reparte el objeto en un panel por valor.',
+          pozos: [...POZOS_DE_LINEAS, POZO_DE_MULTIPLO],
         },
         presentation: PRESENTACION_DE_GRAFICO,
       },

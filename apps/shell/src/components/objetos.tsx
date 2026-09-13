@@ -4,10 +4,17 @@ import type { Agregacion, QueryResult } from '@app/data-contracts';
 import {
   type BindingProblem,
   type NombreDeIcono,
+  type PanelDeMultiplo,
+  type PresentacionDeObjeto,
   type RanuraDeCampos,
+  type TipoDeGrafico,
   aFieldRef,
   agregacionesPara,
   campoDeRanura,
+  columnasPara,
+  escalaBonita,
+  maximoComun,
+  partirEnMultiplos,
   estiloDeTexto,
   fieldKey,
   ordenarCategorias,
@@ -362,11 +369,21 @@ export function Barras({
    * mapeo los campos.
    */
   const r = porRanura(instance, ranuras);
+  const multiplo = r ? r.uno('multiplo') : undefined;
   const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
   const serie = r ? r.uno('serie') : fieldKeyDe(instance.binding.dimensions[1]);
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
 
-  const dimensiones = [ejeX, serie].filter((c): c is string => c !== undefined).map(aFieldRef);
+  /*
+   * El multiplo va PRIMERO en las dimensiones.
+   *
+   * `toCategorical` compone las etiquetas en el orden en que se le pasan las dimensiones, y
+   * partirlas despues supone que el primer trozo es el panel. Pasarlo en otro orden partiria por
+   * la categoria del eje y saldria un panel por cada barra.
+   */
+  const dimensiones = [multiplo, ejeX, serie]
+    .filter((c): c is string => c !== undefined)
+    .map(aFieldRef);
   /*
    * El orden se aplica al MODELO, antes de repartirlo.
    *
@@ -390,6 +407,10 @@ export function Barras({
     ...vm.points.flatMap((p) => p.values.filter((v): v is number => v !== null)),
   );
   const dimension = ejeX ? aFieldRef(ejeX) : undefined;
+  const formatear = (valor: number, s: number) =>
+    formateadorDeMedida(instance.presentacion, medidas[s] ?? '')(valor);
+
+  const paneles = multiplo ? partirEnMultiplos(vm) : undefined;
 
   return (
     <Marco
@@ -399,6 +420,18 @@ export function Barras({
       iconoDelObjeto={iconoDelObjeto}
       pie={vm.aggregated ? <span className="texto-atenuado">Agregado sobre el dataset cacheado</span> : null}
     >
+      {paneles ? (
+        <Multiplos
+          paneles={paneles}
+          instance={instance}
+          presentacion={presentacionDePanel(instance.presentacion, paneles)}
+          tipo={horizontal ? 'barras-horizontales' : 'barras'}
+          titulo={titulo}
+          formatear={formatear}
+          {...(dimension ? { dimension: fieldKey(dimension) } : {})}
+          columnas={columnasPara(paneles.length, instance.presentacion?.multiplos?.columnas)}
+        />
+      ) : (
       <Grafico
         instanceId={instance.instanceId}
         tipo={horizontal ? 'barras-horizontales' : 'barras'}
@@ -442,6 +475,7 @@ export function Barras({
         })}
       </ul>
       </Grafico>
+      )}
     </Marco>
   );
 }
@@ -456,19 +490,28 @@ export function Lineas({
   iconoDelObjeto,
 }: ObjetoProps & { area?: boolean }) {
   const r = porRanura(instance, ranuras);
+  const multiplo = r ? r.uno('multiplo') : undefined;
   const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
 
   const dimension = ejeX ? aFieldRef(ejeX) : undefined;
+  // El multiplo va PRIMERO, por lo mismo que en columnas: `toCategorical` compone las etiquetas
+  // en el orden de las dimensiones y partirlas supone que el primer trozo es el panel.
+  const dimensiones = [multiplo, ejeX]
+    .filter((c): c is string => c !== undefined)
+    .map(aFieldRef);
   const vm = ordenarCategorias(
     toCategorical(
       result,
-      dimension ? [dimension] : [],
+      dimensiones,
       medidas,
       agregacionesPara(medidas, instance.binding.measures, agregaciones),
     ),
     instance.presentacion?.orden,
   );
+  const formatear = (valor: number, s: number) =>
+    formateadorDeMedida(instance.presentacion, medidas[s] ?? '')(valor);
+  const paneles = multiplo ? partirEnMultiplos(vm) : undefined;
 
   return (
     <Marco
@@ -478,6 +521,18 @@ export function Lineas({
       agregaciones={agregaciones}
       iconoDelObjeto={iconoDelObjeto}
     >
+      {paneles ? (
+        <Multiplos
+          paneles={paneles}
+          instance={instance}
+          presentacion={presentacionDePanel(instance.presentacion, paneles)}
+          tipo={area ? 'area' : 'lineas'}
+          titulo={titulo}
+          formatear={formatear}
+          {...(dimension ? { dimension: fieldKey(dimension) } : {})}
+          columnas={columnasPara(paneles.length, instance.presentacion?.multiplos?.columnas)}
+        />
+      ) : (
       <Grafico
         instanceId={instance.instanceId}
         tipo={area ? 'area' : 'lineas'}
@@ -523,8 +578,133 @@ export function Lineas({
           </table>
         </div>
       </Grafico>
+      )}
     </Marco>
   );
+}
+
+/**
+ * Pequenos multiplos: el mismo grafico, una vez por panel, dentro de UNA tarjeta.
+ *
+ * Una tarjeta y no varias, y eso es lo que los distingue de poner seis objetos a mano: el titulo,
+ * el formato, el orden, las referencias y las medidas se configuran una vez y valen para todos.
+ * Hoy, sin esto, mantener seis objetos identicos sincronizados es trabajo manual, y la primera vez
+ * que alguien se salta uno el panel miente.
+ *
+ * Cada panel lleva su propio `<Grafico>`, asi que cada uno conserva su respaldo accesible: la
+ * rejilla es visual, no una capa que haya que atravesar con el tabulador para llegar a los datos.
+ */
+function Multiplos({
+  paneles,
+  instance,
+  presentacion,
+  tipo,
+  titulo,
+  formatear,
+  seriesDeColumna,
+  dimension,
+  columnas,
+}: {
+  paneles: PanelDeMultiplo[];
+  instance: ObjectInstance;
+  presentacion: PresentacionDeObjeto | undefined;
+  tipo: TipoDeGrafico;
+  titulo: string;
+  formatear: (valor: number, serie: number) => string;
+  seriesDeColumna?: number;
+  dimension?: string;
+  columnas: number;
+}) {
+  return (
+    <div
+      className="multiplos"
+      data-testid="multiplos"
+      style={{ '--multiplos-columnas': columnas } as React.CSSProperties}
+    >
+      {paneles.map((panel, i) => (
+        <section key={panel.titulo} className="multiplos__panel">
+          {/*
+            El rotulo de cada panel es un encabezado de verdad, no un texto suelto.
+            Es lo unico que dice de que valor es cada grafico, y con lector de pantalla la lista de
+            encabezados es como se recorre una tarjeta con seis graficos dentro.
+          */}
+          <h4 className="multiplos__titulo">{panel.titulo}</h4>
+          <Grafico
+            instanceId={`${instance.instanceId}-m${i}`}
+            tipo={tipo}
+            vm={panel.vm}
+            titulo={`${titulo} — ${panel.titulo}`}
+            {...(presentacion
+              ? {
+                  /*
+                   * La leyenda, SOLO en el primer panel.
+                   *
+                   * Las series son las mismas en todos —es lo que hace que los paneles se puedan
+                   * comparar— asi que repetirla una vez por panel gasta el alto que le falta a los
+                   * graficos para decir exactamente lo mismo tres veces.
+                   */
+                  presentacion: i === 0 ? presentacion : { ...presentacion, leyenda: 'oculta' },
+                }
+              : {})}
+            formatear={formatear}
+            {...(seriesDeColumna === undefined ? {} : { seriesDeColumna })}
+            {...(dimension ? { dimension } : {})}
+          >
+            <div className="tabla-contenedor">
+              <table className="tabla">
+                <thead>
+                  <tr>
+                    <th scope="col">{panel.titulo}</th>
+                    {panel.vm.series.map((serie) => (
+                      <th key={serie} scope="col" className="es-numero">
+                        {serie}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {panel.vm.points.map((punto) => (
+                    <tr key={punto.label}>
+                      <th scope="row">{punto.label}</th>
+                      {panel.vm.series.map((serie, sIdx) => (
+                        <td key={serie} className="es-numero">
+                          {formatearNumero(punto.values[sIdx] ?? null)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Grafico>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * La presentacion con la que se dibuja CADA panel.
+ *
+ * La escala comun se implementa fijando el maximo del eje en todos ellos, que es lo mismo que
+ * haria alguien a mano y reutiliza lo que ya existe. Se pone solo si nadie escribio un maximo:
+ * un limite puesto a proposito manda sobre el que se deduce.
+ */
+function presentacionDePanel(
+  presentacion: PresentacionDeObjeto | undefined,
+  paneles: PanelDeMultiplo[],
+): PresentacionDeObjeto | undefined {
+  if (presentacion?.multiplos?.mismaEscala === false) return presentacion;
+  const maximo = maximoComun(paneles);
+  if (maximo === undefined || presentacion?.ejes?.maximoY !== undefined) return presentacion;
+  /*
+   * El maximo se REDONDEA hacia arriba a un numero de escala.
+   *
+   * Con el maximo exacto —861— ECharts dibuja su marca ademas de la escala regular, y «861» se
+   * dibujaba pegado a «800»: dos rotulos superpuestos donde deberia haber uno. Es la misma funcion
+   * que usa el medidor, y por el mismo motivo: una escala tiene que caer en numeros redondos.
+   */
+  return { ...presentacion, ejes: { ...presentacion?.ejes, maximoY: escalaBonita(maximo) } };
 }
 
 /**

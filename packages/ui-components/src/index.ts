@@ -38,6 +38,7 @@ export {
   type FormatoNumerico,
   type ComparacionDeEmbudo,
   type ConfiguracionDeEtiquetas,
+  type ConfiguracionDeMultiplos,
   type ConfiguracionDeTooltip,
   type EstiloDeReferencia,
   type EtiquetasDeDato,
@@ -250,6 +251,12 @@ export {
   type MatrixViewModel,
 } from './registry/viewModel';
 export { ordenarCategorias } from './graficos/orden';
+export {
+  columnasPara,
+  maximoComun,
+  partirEnMultiplos,
+  type PanelDeMultiplo,
+} from './graficos/multiplos';
 export {
   UMBRAL_DE_ELEMENTOS,
   elementosDe,

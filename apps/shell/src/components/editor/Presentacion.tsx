@@ -504,6 +504,60 @@ export function Presentacion({
         </Seccion>
       ) : null}
 
+      {admite("multiplos") ? (
+        <Seccion titulo="Multiplos" nivel={2} abierta={false} prueba={`${prueba}-multiplos`}>
+          <p className="campo__pista">
+            Ponga una dimension en el pozo «Multiplos», en la pestana Datos, y el objeto se repite
+            una vez por cada valor.
+          </p>
+
+          <label className="formulario__campo">
+            <span>Columnas</span>
+            <select
+              value={String(p.multiplos?.columnas ?? 0)}
+              disabled={guardando}
+              data-testid={`${prueba}-multiplos-columnas`}
+              onChange={(e) =>
+                poner({
+                  multiplos: {
+                    ...p.multiplos,
+                    columnas: e.target.value === "0" ? undefined : Number(e.target.value),
+                  },
+                })
+              }
+            >
+              <option value="0">Automaticas</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </label>
+
+          {/*
+            La escala comun viene encendida, y esa es la decision que importa. Con escalas
+            independientes, seis paneles de alturas parecidas pueden estar diciendo 20 y 2.000: la
+            comparacion, que es la unica razon de ponerlos juntos, sale al reves.
+          */}
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.multiplos?.mismaEscala !== false}
+              disabled={guardando}
+              data-testid={`${prueba}-misma-escala`}
+              onChange={(e) =>
+                poner({ multiplos: { ...p.multiplos, mismaEscala: e.target.checked } })
+              }
+            />{" "}
+            Misma escala en todos los paneles
+          </label>
+          <span className="campo__pista">
+            Apagarla solo tiene sentido cuando lo que se compara es la FORMA de cada serie y no su
+            magnitud.
+          </span>
+        </Seccion>
+      ) : null}
+
       {admite("tooltip") ? (
         <Seccion titulo="Tooltip" nivel={2} abierta={false} prueba={`${prueba}-tooltip`}>
           <label className="editor__interruptor">

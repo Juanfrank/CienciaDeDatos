@@ -409,6 +409,20 @@ export function etiquetasNormalizadas(valor: EtiquetasDeDato | undefined): Confi
  * la categoria: el grafico ensena los trozos y la suma hay que hacerla de cabeza, justo cuando se
  * esta comparando una categoria con otra.
  */
+/**
+ * ---- Pequenos multiplos ----
+ *
+ * `mismaEscala` esta encendido por defecto y esa es la decision que importa. Con escalas
+ * independientes, seis paneles de alturas parecidas pueden estar diciendo 20 y 2.000, y la
+ * comparacion —que es la unica razon de ponerlos juntos— sale exactamente al reves de lo que los
+ * datos dicen. Apagarlo es legitimo cuando lo que se compara es la FORMA de cada serie y no su
+ * magnitud, pero es una decision que alguien toma.
+ */
+export interface ConfiguracionDeMultiplos {
+  columnas?: number;
+  mismaEscala?: boolean;
+}
+
 export interface ConfiguracionDeTooltip {
   /** Una ultima fila con la suma de las series de esa categoria. */
   total?: boolean;
@@ -473,6 +487,7 @@ export interface PresentacionDeObjeto {
    */
   etiquetasDeDato?: EtiquetasDeDato;
   tooltip?: ConfiguracionDeTooltip;
+  multiplos?: ConfiguracionDeMultiplos;
   ejes?: ConfiguracionDeEjes;
   orden?: OrdenDeCategorias;
   apilado?: ModoDeApilado;
@@ -526,6 +541,7 @@ export const CLAVES_DE_PRESENTACION = [
   'referencias',
   'coloresDeSerie',
   'tooltip',
+  'multiplos',
   'embudo',
   'cascada',
   'medidor',

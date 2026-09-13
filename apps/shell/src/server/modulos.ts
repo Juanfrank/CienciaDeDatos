@@ -1401,6 +1401,84 @@ export const modulosDemo: ModuleDefinition[] = [
         ],
       },
       {
+        pageId: 'p-multiplos',
+        slug: 'multiplos',
+        name: 'Pequenos multiplos',
+        items: [
+          {
+            id: 'mul-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'mul-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'titulo-de-seccion',
+                tituloDeSeccion: {
+                  texto: 'El mismo grafico, una vez por cada valor',
+                  posicionDelTexto: 'izquierda',
+                  linea: 'derecha',
+                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'mul-columnas',
+            position: { x: 0, y: 1, w: 6, h: 5 },
+            instance: {
+              instanceId: 'mul-columnas',
+              objectId: 'barras',
+              version: '1.3.0',
+              title: 'Casos por trimestre, por materia',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [MATERIA, TRIMESTRE],
+                measures: ['CasosIngresados'],
+                ranuras: {
+                  multiplo: ['DimTribunal.Materia'],
+                  'eje-x': ['DimTiempo.Trimestre'],
+                  serie: [],
+                  'eje-y': ['CasosIngresados'],
+                },
+              },
+              presentacion: {
+                subtitulo: 'Misma escala: los paneles se pueden comparar',
+                leyenda: 'oculta',
+                ejes: { cuadricula: true },
+              },
+            },
+          },
+          {
+            id: 'mul-lineas',
+            position: { x: 6, y: 1, w: 6, h: 5 },
+            instance: {
+              instanceId: 'mul-lineas',
+              objectId: 'lineas',
+              version: '1.2.0',
+              title: 'Lo mismo, como linea',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [MATERIA, TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos'],
+                ranuras: {
+                  multiplo: ['DimTribunal.Materia'],
+                  'eje-x': ['DimTiempo.Trimestre'],
+                  'eje-y': ['CasosIngresados', 'CasosResueltos'],
+                },
+              },
+              presentacion: {
+                subtitulo: 'Dos medidas por panel, en una sola configuracion',
+                leyenda: 'abajo',
+                multiplos: { columnas: 1 },
+              },
+            },
+          },
+        ],
+      },
+      {
         pageId: 'p-contenedores',
         slug: 'contenedores',
         name: 'Contenedores',
