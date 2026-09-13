@@ -1,4 +1,4 @@
-import type { Agregacion, QueryResult } from '@app/data-contracts';
+import type { Aggregation, QueryResult } from '@app/data-contracts';
 import { type Acumulador, acumular, cerrar, nuevoAcumulador } from './agregacion';
 import type { ObjectDataContract, ObjectInstance } from './types';
 
@@ -107,11 +107,11 @@ export function aggregateBy(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
   measures: string[],
-  agregaciones: Agregacion[],
+  agregaciones: Aggregation[],
 ): AggregatedRows {
   const indiceDim = dimensions.map((d) => result.columns.findIndex((c) => c.name === fieldKey(d)));
   const indiceMed = measures.map((m) => result.columns.findIndex((c) => c.name === m));
-  const operador = (i: number): Agregacion => agregaciones[i] ?? 'suma';
+  const operador = (i: number): Aggregation => agregaciones[i] ?? 'suma';
 
   const acumulado = new Map<string, { labels: string[]; accs: Acumulador[] }>();
   let filasAgregadas = 0;
@@ -153,7 +153,7 @@ export function toCategorical(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
   measures: string[],
-  agregaciones: Agregacion[],
+  agregaciones: Aggregation[],
 ): CategoricalViewModel {
   const { rows, aggregated } = aggregateBy(result, dimensions, measures, agregaciones);
 
@@ -177,7 +177,7 @@ export function toKpi(
   result: QueryResult,
   measures: string[],
   label: string,
-  agregaciones: Agregacion[],
+  agregaciones: Aggregation[],
 ): KpiViewModel {
   const { rows } = aggregateBy(result, [], measures, agregaciones);
   const valores = rows[0]?.values ?? [];
@@ -219,7 +219,7 @@ export function toMatrix(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
   measure: string,
-  agregacion: Agregacion,
+  aggregation: Aggregation,
 ): MatrixViewModel {
   const [dimFila, dimColumna] = dimensions;
   const iFila = dimFila ? result.columns.findIndex((c) => c.name === fieldKey(dimFila)) : -1;
@@ -231,12 +231,12 @@ export function toMatrix(
   const celdas = new Map<string, Acumulador>();
   const totalDeFila = new Map<string, Acumulador>();
   const totalDeColumna = new Map<string, Acumulador>();
-  const general = nuevoAcumulador(agregacion);
+  const general = nuevoAcumulador(aggregation);
 
   const enMapa = (mapa: Map<string, Acumulador>, clave: string): Acumulador => {
     let acc = mapa.get(clave);
     if (!acc) {
-      acc = nuevoAcumulador(agregacion);
+      acc = nuevoAcumulador(aggregation);
       mapa.set(clave, acc);
     }
     return acc;

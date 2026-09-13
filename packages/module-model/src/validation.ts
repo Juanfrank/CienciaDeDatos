@@ -1,4 +1,4 @@
-import type { Agregacion, GranoDeDataset } from '@app/data-contracts';
+import type { Aggregation, GranoDeDataset } from '@app/data-contracts';
 import {
   type BindingProblem,
   type ObjectInstance,
@@ -69,7 +69,7 @@ export interface ValidateModuleInput {
   /** Grano y dimensiones de cada dataset, del registro. */
   datasets?: Record<string, DatasetInfo>;
   /** Que operador declara el esquema para cada medida. Sin el, cada medida cae en `suma`. */
-  agregacionesDeclaradas?: Record<string, Agregacion>;
+  agregacionesDeclaradas?: Record<string, Aggregation>;
 }
 
 function problemasDeAgregacion(

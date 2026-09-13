@@ -1,4 +1,4 @@
-import type { Agregacion, GranoDeDataset } from '@app/data-contracts';
+import type { Aggregation, GranoDeDataset } from '@app/data-contracts';
 import { defaultRegistry } from '@app/caching';
 import type {
   ClaveDePresentacion,
@@ -42,7 +42,7 @@ export interface DatasetDePaleta {
   /** Tipo de cada columna. Decide que selectores tienen sentido sobre cada dimension. */
   tipos: Record<string, string>;
   /** Como declara el esquema que se resume cada medida, y a que grano quedaron las filas. */
-  agregaciones: Record<string, Agregacion>;
+  agregaciones: Record<string, Aggregation>;
   grain: GranoDeDataset;
 }
 
@@ -97,7 +97,7 @@ export async function paletaDelEditor(): Promise<PaletaDelEditor> {
       agregaciones: Object.fromEntries(
         (declarado.query.measures ?? [])
           .map((m) => [m, declaradas.get(m)] as const)
-          .filter((par): par is [string, Agregacion] => par[1] !== undefined),
+          .filter((par): par is [string, Aggregation] => par[1] !== undefined),
       ),
       grain: declarado.grain,
     });

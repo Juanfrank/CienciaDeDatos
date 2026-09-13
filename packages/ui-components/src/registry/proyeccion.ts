@@ -1,4 +1,4 @@
-import type { Agregacion, QueryResult } from '@app/data-contracts';
+import type { Aggregation, QueryResult } from '@app/data-contracts';
 import type { ObjectInstance } from './types';
 import { construirMatriz, filasVisibles, hojas } from './matriz';
 import { aFieldRef } from '../presentacion/pozos';
@@ -28,7 +28,7 @@ function mismaProcedencia(result: QueryResult, columns: QueryResult['columns'], 
 export function proyectarObjeto(
   instance: ObjectInstance,
   result: QueryResult,
-  agregaciones: Agregacion[],
+  agregaciones: Aggregation[],
 ): QueryResult {
   const { dimensions, measures } = instance.binding;
 

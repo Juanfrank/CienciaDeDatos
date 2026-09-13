@@ -1,13 +1,13 @@
 /** Punto de entrada publico de tipos: `@app/data-contracts`. */
 export {
-  AGREGACIONES,
+  AGGREGATIONS,
   AGREGACIONES_ADITIVAS,
   esAditiva,
-  esAgregacion,
+  isAggregation,
 } from './IDataConnector';
 
 export type {
-  Agregacion,
+  Aggregation,
   ConnectorCapabilities,
   ConnectorKind,
   FieldRef,

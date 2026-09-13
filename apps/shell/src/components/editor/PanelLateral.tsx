@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { Agregacion } from '@app/data-contracts';
+import type { Aggregation } from '@app/data-contracts';
 import { GRID_COLUMNS, type GridItem } from '@app/module-model';
 import {
   AGREGACION_POR_DEFECTO,
@@ -484,7 +484,7 @@ function Datos({
   /*
    * Como se resume cada medida.
    */
-  const agregacionDe = (campo: string): Agregacion =>
+  const agregacionDe = (campo: string): Aggregation =>
     item.instance.binding.agregaciones?.[campo] ??
     dataset?.agregaciones[campo] ??
     AGREGACION_POR_DEFECTO;
@@ -499,15 +499,15 @@ function Datos({
     grano: dataset?.grain ?? 'atomico',
   });
 
-  const cambiarAgregacion = (campo: string, agregacion: Agregacion) =>
+  const cambiarAgregacion = (campo: string, aggregation: Aggregation) =>
     cambiarInstancia((i) => {
       const resto = { ...(i.binding.agregaciones ?? {}) };
       // Volver a la del esquema se guarda BORRANDO la anulacion, no copiando el mismo valor: si
       // se copiara, el modulo dejaria de seguir a la fuente sin que nadie lo hubiera pedido.
-      if (agregacion === (dataset?.agregaciones[campo] ?? AGREGACION_POR_DEFECTO)) {
+      if (aggregation === (dataset?.agregaciones[campo] ?? AGREGACION_POR_DEFECTO)) {
         delete resto[campo];
       } else {
-        resto[campo] = agregacion;
+        resto[campo] = aggregation;
       }
       // Se reconstruye el binding SIN la clave, en vez de extenderlo: con un spread, quitar la
       // ultima anulacion habria dejado la del objeto anterior intacta — el `...i.binding` la
@@ -639,9 +639,9 @@ function RanuraDeEdicion({
   guardando: boolean;
   onAnadir: (ranuraId: string, campo: string) => void;
   onQuitar: (ranuraId: string, campo: string) => void;
-  agregacionDe?: (campo: string) => Agregacion;
-  onAgregacion?: (campo: string, agregacion: Agregacion) => void;
-  posibles?: Agregacion[];
+  agregacionDe?: (campo: string) => Aggregation;
+  onAgregacion?: (campo: string, aggregation: Aggregation) => void;
+  posibles?: Aggregation[];
 }) {
   return (
     <Pozo

@@ -1,4 +1,4 @@
-import type { Agregacion, FieldRef } from '@app/data-contracts';
+import type { Aggregation, FieldRef } from '@app/data-contracts';
 import type { ClaveDePresentacion, PresentacionDeObjeto } from '../presentacion/contrato';
 import type { NombreDeIcono } from '../presentacion/iconos';
 import type { ConfiguracionDeContenedor, IdDeContenedor } from '../presentacion/contenedores';
@@ -186,7 +186,7 @@ export interface ObjectInstance {
      * Agregacion por medida, solo cuando difiere de la que declara el esquema. Lo no dicho se
      * resuelve contra el esquema en cada lectura.
      */
-    agregaciones?: Record<string, Agregacion>;
+    agregaciones?: Record<string, Aggregation>;
   };
   /**
    * Objetos adjuntados a este, anidados: un complemento no existe sin su anfitrion ni le

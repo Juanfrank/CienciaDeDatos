@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { AGREGACIONES, type Agregacion } from '@app/data-contracts';
+import { AGGREGATIONS, type Aggregation } from '@app/data-contracts';
 import { ETIQUETA_DE_AGREGACION, type PozoDeCampos } from '@app/ui-components';
 import { Icono } from '../iconos/Icono';
 import { Ayuda } from './Ayuda';
@@ -29,10 +29,10 @@ export function Pozo({
   onAnadir: (campo: string) => void;
   onQuitar: (campo: string) => void;
   /** Como se resume cada campo de este pozo, y como cambiarlo. */
-  agregacionDe?: (campo: string) => Agregacion;
-  onAgregacion?: (campo: string, agregacion: Agregacion) => void;
+  agregacionDe?: (campo: string) => Aggregation;
+  onAgregacion?: (campo: string, aggregation: Aggregation) => void;
   /** Los operadores que se pueden aplicar aqui, del grano del dataset y de si el objeto colapsa. */
-  posibles?: Agregacion[];
+  posibles?: Aggregation[];
   prueba: string;
 }) {
   const [abierto, setAbierto] = useState(false);
@@ -115,9 +115,9 @@ export function Pozo({
                     // El titulo es lo unico que dice el operador sin abrir el menu: para el raton
                     // al pasar por encima, y ahi no estorba a nada.
                     title={`Se resume con ${ETIQUETA_DE_AGREGACION[agregacionDe(campo)].toLowerCase()}`}
-                    onChange={(e) => onAgregacion(campo, e.target.value as Agregacion)}
+                    onChange={(e) => onAgregacion(campo, e.target.value as Aggregation)}
                   >
-                    {(posibles ?? AGREGACIONES).map((a) => (
+                    {(posibles ?? AGGREGATIONS).map((a) => (
                       <option key={a} value={a}>
                         {ETIQUETA_DE_AGREGACION[a]}
                       </option>

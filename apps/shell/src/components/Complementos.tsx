@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import type { Agregacion, QueryResult } from '@app/data-contracts';
+import type { Aggregation, QueryResult } from '@app/data-contracts';
 import { Icono } from './iconos/Icono';
 import {
   aggregateBy,
@@ -133,7 +133,7 @@ export function TablaDeDatos({
   result: QueryResult;
   titulo: string;
   scope: 'objeto' | 'subobjeto';
-  agregaciones: Agregacion[];
+  agregaciones: Aggregation[];
 }) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [abierto, setAbierto] = useState(false);
@@ -302,7 +302,7 @@ export function Complementos({
   instance: ObjectInstance;
   result: QueryResult;
   titulo: string;
-  agregaciones: Agregacion[];
+  agregaciones: Aggregation[];
 }) {
   const tooltip = attachmentOf(instance, 'tooltip-explicativo');
   const tabla = attachmentOf(instance, 'tabla-de-datos');

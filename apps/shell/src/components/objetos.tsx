@@ -1,6 +1,6 @@
 'use client';
 
-import type { Agregacion, QueryResult } from '@app/data-contracts';
+import type { Aggregation, QueryResult } from '@app/data-contracts';
 import {
   type BindingProblem,
   type NombreDeIcono,
@@ -135,7 +135,7 @@ export function Marco({
   instance?: ObjectInstance;
   result?: QueryResult;
   /** Para los complementos: la tabla de datos proyecta con los mismos operadores que el objeto. */
-  agregaciones?: Agregacion[];
+  agregaciones?: Aggregation[];
   /** El que declara la version del objeto. La presentacion de la instancia lo anula. */
   iconoDelObjeto?: NombreDeIcono;
 }) {
@@ -1376,7 +1376,7 @@ export interface ObjetoProps {
   result: QueryResult;
   instance: ObjectInstance;
   /** Con que operador se resume cada medida, alineado con `instance.binding.measures`. */
-  agregaciones: Agregacion[];
+  agregaciones: Aggregation[];
   /** Las ranuras que declara la version del objeto. */
   ranuras?: RanuraDeCampos[];
   /** Filtrado cruzado (4.4): anade un filtro a la query string, no a un estado paralelo. */

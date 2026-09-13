@@ -1,4 +1,4 @@
-import type { Agregacion, GranoDeDataset, QueryResult, SchemaDescriptor } from '@app/data-contracts';
+import type { Aggregation, GranoDeDataset, QueryResult, SchemaDescriptor } from '@app/data-contracts';
 import { canTeamAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
 import { SCHEMA_CACHE_KEY, type ReadResult, getDataset } from '@app/caching';
 import {
@@ -42,7 +42,7 @@ export interface ObjetoCargado {
   /** Problemas de mapeo. Si hay alguno, el objeto se dibuja MARCADO COMO ROTO (4.2). */
   problems: BindingProblem[];
   /** Con que operador se resume cada medida, alineado con `binding.measures`. */
-  agregaciones: Agregacion[];
+  agregaciones: Aggregation[];
   unresolvedObject?: string;
   /** Lo que hay dentro de un contenedor, ya cargado por el mismo camino que lo de fuera. */
   paneles?: PanelCargado[];
@@ -390,7 +390,7 @@ function colapsaElDataset(datasetId: string, dimensiones: { table: string; field
 }
 
 /** Que operador declara el esquema para cada medida. */
-export async function agregacionesDeclaradas(): Promise<Map<string, Agregacion>> {
+export async function agregacionesDeclaradas(): Promise<Map<string, Aggregation>> {
   const schema = await esquemaEnCache();
   return new Map((schema?.measures ?? []).map((m) => [m.name, m.aggregation]));
 }

@@ -1,4 +1,4 @@
-import type { Agregacion, QueryResult } from '@app/data-contracts';
+import type { Aggregation, QueryResult } from '@app/data-contracts';
 import type { GridPosition } from '@app/module-model';
 import type {
   BindingProblem,
@@ -22,7 +22,7 @@ export interface ObjetoSerializado {
   /** El icono que declara la VERSION del objeto. */
   icono?: NombreDeIcono;
   /** Con que operador se resume cada medida, alineado con `instance.binding.measures`. */
-  agregaciones: Agregacion[];
+  agregaciones: Aggregation[];
   unresolvedObject?: string;
   generatedAt?: string;
   stale?: boolean;

@@ -25,8 +25,8 @@ const datos: QueryResult = {
   generatedAt: '2026-09-12T00:00:00.000Z',
 };
 
-const matriz = (agregacion: 'suma' | 'promedio') =>
-  construirMatriz(datos, [DISTRITO, MATERIA], [TRIMESTRE], ['Dias'], [agregacion]);
+const matriz = (aggregation: 'suma' | 'promedio') =>
+  construirMatriz(datos, [DISTRITO, MATERIA], [TRIMESTRE], ['Dias'], [aggregation]);
 
 describe('la jerarquia', () => {
   it('anida las filas en el orden en que se mapean', () => {

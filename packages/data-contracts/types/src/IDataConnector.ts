@@ -47,7 +47,7 @@ export interface QueryResult {
 }
 
 /** Como se resume una medida al agrupar — el operador que Power BI llama «agregacion implicita». */
-export const AGREGACIONES = [
+export const AGGREGATIONS = [
   'suma',
   'promedio',
   'minimo',
@@ -57,17 +57,17 @@ export const AGREGACIONES = [
   'ninguna',
 ] as const;
 
-export type Agregacion = (typeof AGREGACIONES)[number];
+export type Aggregation = (typeof AGGREGATIONS)[number];
 
-export function esAgregacion(valor: unknown): valor is Agregacion {
-  return typeof valor === 'string' && (AGREGACIONES as readonly string[]).includes(valor);
+export function isAggregation(valor: unknown): valor is Aggregation {
+  return typeof valor === 'string' && (AGGREGATIONS as readonly string[]).includes(valor);
 }
 
 /** Las que se pueden volver a aplicar sobre un resultado YA agrupado sin mentir. */
-export const AGREGACIONES_ADITIVAS: readonly Agregacion[] = ['suma', 'minimo', 'maximo'];
+export const AGREGACIONES_ADITIVAS: readonly Aggregation[] = ['suma', 'minimo', 'maximo'];
 
-export function esAditiva(agregacion: Agregacion): boolean {
-  return AGREGACIONES_ADITIVAS.includes(agregacion);
+export function esAditiva(aggregation: Aggregation): boolean {
+  return AGREGACIONES_ADITIVAS.includes(aggregation);
 }
 
 /** Descriptor de esquema de la fuente activa. */
@@ -100,7 +100,7 @@ export interface SchemaMeasure {
    * del registro de datasets: una decision que cambia el numero que se muestra no puede quedar
    * implicita en una constante del codigo ni en el nombre de la columna.
    */
-  aggregation: Agregacion;
+  aggregation: Aggregation;
   description?: string;
 }
 

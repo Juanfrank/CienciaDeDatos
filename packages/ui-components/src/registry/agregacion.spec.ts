@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AGREGACIONES, type QueryResult } from '@app/data-contracts';
+import { AGGREGATIONS, type QueryResult } from '@app/data-contracts';
 import {
   agregacionesDe,
   agregacionesPara,
@@ -50,8 +50,8 @@ describe('el operador decide, y el resultado cambia', () => {
   });
 
   it('minimo, maximo, recuento y recuento distinto', () => {
-    const de = (agregacion: Parameters<typeof aggregateBy>[3][number]) =>
-      aggregateBy(casos, [DISTRITO], ['DiasResolucion'], [agregacion]).rows[0]?.values[0];
+    const de = (aggregation: Parameters<typeof aggregateBy>[3][number]) =>
+      aggregateBy(casos, [DISTRITO], ['DiasResolucion'], [aggregation]).rows[0]?.values[0];
     expect(de('minimo')).toBe(100);
     expect(de('maximo')).toBe(300);
     expect(de('recuento')).toBe(3);
@@ -162,9 +162,9 @@ describe('validarAgregacion: lo que no se puede guardar', () => {
   });
 
   it('las aditivas se aceptan sobre cualquier grano', () => {
-    for (const agregacion of ['suma', 'minimo', 'maximo'] as const) {
+    for (const aggregation of ['suma', 'minimo', 'maximo'] as const) {
       expect(
-        validarAgregacion({ ...base, agregaciones: [agregacion], grano: 'preagregado' }),
+        validarAgregacion({ ...base, agregaciones: [aggregation], grano: 'preagregado' }),
       ).toEqual([]);
     }
   });
@@ -217,14 +217,14 @@ describe('agregacionesPosibles: lo que el editor puede OFRECER', () => {
     for (const grano of ['atomico', 'preagregado'] as const) {
       for (const colapsa of [true, false]) {
         const posibles = agregacionesPosibles({ colapsa, grano });
-        for (const agregacion of AGREGACIONES) {
+        for (const aggregation of AGGREGATIONS) {
           const problems = validarAgregacion({
             measures: ['m'],
-            agregaciones: [agregacion],
+            agregaciones: [aggregation],
             colapsa,
             grano,
           });
-          expect(problems.length === 0).toBe(posibles.includes(agregacion));
+          expect(problems.length === 0).toBe(posibles.includes(aggregation));
         }
       }
     }

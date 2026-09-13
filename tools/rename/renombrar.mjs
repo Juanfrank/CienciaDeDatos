@@ -217,6 +217,34 @@ function proponer(raiz) {
   }
 
   /*
+   * Un identificador que TAMBIEN es un literal de cadena en algun sitio es ambiguo.
+   *
+   * `valor` es una variable en veinte archivos y a la vez un miembro de la union
+   * `'valor' | 'titulo' | 'etiqueta'`. Renombrar el lado del codigo sin el de la union deja un
+   * `Record` con claves que su propio tipo no admite, y eso no se ve hasta el typecheck; peor, si
+   * el literal es un valor de negocio —el texto que se compara en una consulta— compila y falla
+   * al ejecutar.
+   *
+   * Se apartan y se deciden a mano: o van tambien en `valores`, que renombra las dos zonas, o se
+   * quedan como estan.
+   */
+  const literales = new Set();
+  for (const ruta of rutasDe("'*.ts' '*.tsx' '*.mts'")) {
+    if (ruta.startsWith('tools/rename/')) continue;
+    for (const trozo of segmentar(readFileSync(ruta, 'utf8'))) {
+      if (trozo.tipo !== 'cadena') continue;
+      for (const m of trozo.texto.matchAll(/['"`]([A-Za-z_$][\w$-]*)['"`]/g)) literales.add(m[1]);
+    }
+  }
+  const ambiguos = {};
+  for (const viejo of Object.keys(identificadores)) {
+    if (literales.has(viejo)) {
+      ambiguos[viejo] = identificadores[viejo];
+      delete identificadores[viejo];
+    }
+  }
+
+  /*
    * Dos nombres distintos no pueden acabar en el mismo.
    *
    * `tema` y `temaDe` traducen los dos a `theme`, y en el mismo ambito eso no compila. Se
@@ -239,6 +267,7 @@ function proponer(raiz) {
     interfaz,
     archivos,
     colisiones,
+    ambiguos,
     sinGlosario: [...sinGlosario].sort(),
   };
 }

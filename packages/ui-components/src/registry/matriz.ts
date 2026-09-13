@@ -1,4 +1,4 @@
-import type { Agregacion, QueryResult } from '@app/data-contracts';
+import type { Aggregation, QueryResult } from '@app/data-contracts';
 import { type Acumulador, acumular, cerrar, nuevoAcumulador } from './agregacion';
 import { fieldKey } from './viewModel';
 
@@ -56,7 +56,7 @@ export function construirMatriz(
   dimensionesDeFila: { table: string; field: string }[],
   dimensionesDeColumna: { table: string; field: string }[],
   medidas: string[],
-  agregaciones: Agregacion[],
+  agregaciones: Aggregation[],
 ): MatrizJerarquica {
   const indice = (d: { table: string; field: string }) =>
     result.columns.findIndex((c) => c.name === fieldKey(d));
