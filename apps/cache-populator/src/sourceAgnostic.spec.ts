@@ -13,9 +13,9 @@ import { populate } from './populate';
 
 /** Prueba de fuente-agnosticismo — criterio de aceptacion de la seccion 2.4. */
 
-const CONECTORES = ['mock', 'sql', 'xmla'] as const;
+const CONNECTORS = ['mock', 'sql', 'xmla'] as const;
 
-const configuracionDe = (kind: (typeof CONECTORES)[number]) => ({
+const settingsOf = (kind: (typeof CONNECTORS)[number]) => ({
   kind,
   sql: { server: 'pendiente', database: 'pendiente' },
   xmla: { endpoint: 'pendiente', catalog: 'pendiente' },
@@ -23,9 +23,9 @@ const configuracionDe = (kind: (typeof CONECTORES)[number]) => ({
 
 describe('2.4 — cambiar de conector es configuracion, no codigo', () => {
   it('una sola variable selecciona cualquiera de los tres conectores', () => {
-    expect(createDataConnector(configuracionDe('mock'))).toBeInstanceOf(MockDataConnector);
-    expect(createDataConnector(configuracionDe('sql'))).toBeInstanceOf(SqlDataConnector);
-    expect(createDataConnector(configuracionDe('xmla'))).toBeInstanceOf(XmlaDataConnector);
+    expect(createDataConnector(settingsOf('mock'))).toBeInstanceOf(MockDataConnector);
+    expect(createDataConnector(settingsOf('sql'))).toBeInstanceOf(SqlDataConnector);
+    expect(createDataConnector(settingsOf('xmla'))).toBeInstanceOf(XmlaDataConnector);
   });
 
   it('el valor viene de configuracion externa y se valida antes de usarse', () => {
@@ -36,10 +36,10 @@ describe('2.4 — cambiar de conector es configuracion, no codigo', () => {
   });
 
   it('el job recorre el MISMO camino con los tres, sin ramas por tipo de conector', async () => {
-    for (const kind of CONECTORES) {
+    for (const kind of CONNECTORS) {
       const cacheStore = new InMemoryCacheStore({ ttlMs: 60_000 });
       const resultado = await populate({
-        connector: createDataConnector(configuracionDe(kind)),
+        connector: createDataConnector(settingsOf(kind)),
         cacheStore,
         connectorKind: kind,
       });
@@ -56,7 +56,7 @@ describe('2.4 — cambiar de conector es configuracion, no codigo', () => {
   it('un conector no implementado falla limpio y no corrompe el cache', async () => {
     const cacheStore = new InMemoryCacheStore({ ttlMs: 60_000 });
     const { heartbeat } = await populate({
-      connector: createDataConnector(configuracionDe('sql')),
+      connector: createDataConnector(settingsOf('sql')),
       cacheStore,
       connectorKind: 'sql',
     });
@@ -108,9 +108,9 @@ describe('2.4 — ni apps/* ni ui-components conocen la fuente', () => {
     const hallazgos: string[] = [];
     for (const archivo of archivos) {
       const codigo = sinComentarios(readFileSync(archivo, 'utf8'));
-      for (const termino of PROHIBIDOS) {
-        if (codigo.includes(termino)) {
-          hallazgos.push(`${archivo.replace(RAIZ, '')}: ${termino}`);
+      for (const term of PROHIBIDOS) {
+        if (codigo.includes(term)) {
+          hallazgos.push(`${archivo.replace(RAIZ, '')}: ${term}`);
         }
       }
     }

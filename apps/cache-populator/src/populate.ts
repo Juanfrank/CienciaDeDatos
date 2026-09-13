@@ -42,7 +42,7 @@ export interface PopulateOptions {
   isDue?: (dataset: CacheableDataset, lastRunAt: string | undefined, now: Date) => boolean;
 }
 
-const contextoVacio: QueryContext = {
+const emptyContext: QueryContext = {
   userId: 'cache-populator',
   userPrincipalName: 'cache-populator@sistema',
   roles: [],
@@ -80,7 +80,7 @@ export async function populate(options: PopulateOptions): Promise<PopulateResult
 
   const now = options.now ?? (() => new Date());
   const startedAt = now();
-  const ultimoExito = lastSuccessByDataset(previousHeartbeat);
+  const lastSuccess = lastSuccessByDataset(previousHeartbeat);
 
   // La conectividad se comprueba UNA vez por ejecucion y se reporta en el latido: /health la lee
   // de ahi en vez de abrir su propio camino hacia la fuente (principio 2).
@@ -96,7 +96,7 @@ export async function populate(options: PopulateOptions): Promise<PopulateResult
 
   for (const dataset of registry.datasets) {
     if (only && !only.includes(dataset.datasetId)) continue;
-    if (!only && isDue && !isDue(dataset, ultimoExito[dataset.datasetId], startedAt)) {
+    if (!only && isDue && !isDue(dataset, lastSuccess[dataset.datasetId], startedAt)) {
       skipped.push(dataset.datasetId);
       continue;
     }
@@ -104,7 +104,7 @@ export async function populate(options: PopulateOptions): Promise<PopulateResult
     const contextos =
       dataset.securityBinding === 'connector-native' && securityContexts?.length
         ? securityContexts
-        : [{ ctx: contextoVacio }];
+        : [{ ctx: emptyContext }];
 
     for (const contexto of contextos) {
       results.push(await populateOne(dataset, contexto, {

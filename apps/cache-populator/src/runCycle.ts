@@ -41,9 +41,9 @@ export async function runScheduledCycle(
     isDue: (dataset, lastRunAt, ahora) => isDue(dataset.recurrence, lastRunAt, ahora),
   });
 
-  const ultimoEsquema = anterior?.schemaRefreshedAt;
+  const lastScheme = anterior?.schemaRefreshedAt;
   const tocaEsquema =
-    !ultimoEsquema || now().getTime() - new Date(ultimoEsquema).getTime() >= intervaloEsquema;
+    !lastScheme || now().getTime() - new Date(lastScheme).getTime() >= intervaloEsquema;
 
   let schemaRefreshed = false;
   if (tocaEsquema) {
@@ -57,15 +57,15 @@ export async function runScheduledCycle(
     if (schemaRefreshed) {
       // El latido ya se escribio dentro de populate(); se reescribe con la marca del esquema
       // para que /health pueda reportar tambien cuando se refresco por ultima vez.
-      const conEsquema: PopulatorHeartbeat = {
+      const withScheme: PopulatorHeartbeat = {
         ...resultado.heartbeat,
         schemaRefreshedAt: now().toISOString(),
       };
       await options.cacheStore.set(POPULATOR_HEARTBEAT_KEY, {
-        value: conEsquema,
-        generatedAt: conEsquema.finishedAt,
+        value: withScheme,
+        generatedAt: withScheme.finishedAt,
       });
-      return { ...resultado, heartbeat: conEsquema, schemaRefreshed };
+      return { ...resultado, heartbeat: withScheme, schemaRefreshed };
     }
   }
 
