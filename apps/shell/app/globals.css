@@ -818,6 +818,23 @@ input[type='radio'] {
   flex: 1;
   min-height: 0;
 }
+
+/*
+ * Por debajo de dos paneles legibles, uno.
+ *
+ * `columnasPara` elige la rejilla mas cuadrada por el NUMERO de paneles, y no puede hacer otra
+ * cosa: es una funcion pura que corre en el servidor y no sabe en que pantalla va a caer. Dos
+ * columnas en un movil dejan cada panel en 170 px, donde no cabe ni el rotulo del eje.
+ *
+ * Se consulta el ancho del CONTENEDOR y no el de la ventana: un multiplo dentro de una tarjeta
+ * estrecha en un escritorio tiene el mismo problema, y una media query no lo ve. El contenedor es
+ * el CUERPO de la tarjeta y no la rejilla: `container-type` sobre la propia rejilla le aplica
+ * contencion en el eje en linea y la colapsa a cero de ancho — con las columnas en «0px 0px» y
+ * los paneles superpuestos.
+ */
+@container tarjeta (max-width: 380px) {
+  .multiplos { grid-template-columns: 1fr; }
+}
 .multiplos__panel {
   display: flex;
   flex-direction: column;
@@ -963,6 +980,9 @@ input[type='radio'] {
  * sigue mas abajo y no lo anuncia es un contenido que nadie descubre.
  */
 .objeto__cuerpo {
+  /* Contenedor de consulta para lo que hay dentro de una tarjeta: ver `.multiplos`. */
+  container-type: inline-size;
+  container-name: tarjeta;
   padding: var(--space-md);
   flex: 1;
   min-width: 0;
@@ -1573,10 +1593,33 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   grid-row: var(--fila-escritorio);
 }
 
+/*
+ * El NUMERO DE COLUMNAS tambien cambia, no solo la celda.
+ *
+ * Es el defecto que tenia el diseno movil desde el principio, y no se veia en ninguna prueba. El
+ * modelo deriva bien las tres disposiciones —doce columnas en escritorio, seis en tableta, UNA en
+ * movil— y la celda recibia su `grid-column` correcto; lo que no cambiaba era la rejilla, que
+ * repartia doce columnas siempre. En un movil, «ocupa 1 de 1» se interpretaba como «1 de 12»: las
+ * tarjetas quedaban en quince pixeles de ancho, vacias y en fila, y el modulo era inservible.
+ *
+ * Las cifras salen de `COLUMNS_BY_BREAKPOINT` en `module-model`. Estan repetidas aqui porque una
+ * media query no puede leer TypeScript, y por eso hay una prueba que compara las dos.
+ */
 @media (max-width: 1023px) {
+  .rejilla { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .rejilla__celda { grid-column: var(--col-tableta); grid-row: var(--fila-tableta); }
 }
 @media (max-width: 639px) {
+  .rejilla { grid-template-columns: 1fr; }
+  /*
+   * Y las filas se dimensionan por su CONTENIDO.
+   *
+   * El componente emite `--fila-movil: auto` con la intencion de que «el contenido marque el
+   * alto», y eso no era lo que pasaba: `grid-auto-rows` fija el alto de toda fila implicita, asi
+   * que `auto` solo significaba «colocate en la siguiente fila», de 72 px. Las tarjetas salian
+   * con su cabecera y nada debajo, con el grafico recortado dentro.
+   */
+  .rejilla { grid-auto-rows: auto; }
   .rejilla__celda { grid-column: var(--col-movil); grid-row: var(--fila-movil); }
 }
 
@@ -3478,6 +3521,39 @@ th[aria-sort='descending'] .tabla__flecha {
   min-height: 0;
 }
 .grafico__lienzo { width: 100%; flex: 1; min-width: 0; min-height: 120px; }
+
+/*
+ * En movil, el grafico APORTA alto; en escritorio se encoge.
+ *
+ * `min-height: 0` es lo correcto con una tarjeta de alto fijo: es lo que permite que el grafico
+ * quepa dentro sin empujarla, que es el criterio «el alto de un objeto nunca depende de su
+ * contenido». En movil la fila pasa a `auto` —el alto lo marca el contenido— y ahi ese mismo cero
+ * lo colapsa: un grafico no tiene contenido con alto propio, porque el lienzo lo llena ECharts
+ * despues de que el navegador haya decidido la disposicion. La tarjeta salia con su cabecera y
+ * nada debajo.
+ *
+ * Las dos reglas son ciertas, cada una en su sitio, y lo que las separa es exactamente el ancho.
+ */
+@media (max-width: 639px) {
+  /*
+   * El cuerpo crece con su contenido en vez de repartir un alto que no existe.
+   *
+   * `flex-basis: 0` es lo que hace que en escritorio el cuerpo ocupe lo que le sobra a la tarjeta.
+   * Con la fila en `auto` no sobra nada que repartir: el cuerpo se quedaba en 32 px y el grafico,
+   * que ya media 200, aparecia recortado dentro de su propio desplazamiento.
+   *
+   * Y el desplazamiento se quita: `overflow: auto` es lo que impide que el contenido empuje —lo
+   * recorta en vez de crecer— y solo tiene sentido cuando hay un alto fijo que respetar. Las
+   * tablas siguen teniendo el suyo en `.tabla-contenedor`, que es donde hace falta.
+   */
+  .objeto,
+  .objeto__cuerpo { overflow: visible; }
+  .objeto__cuerpo { flex: 1 1 auto; }
+  .grafico { min-height: 200px; }
+  /* Dentro de un multiplo hay varios apilados: cada uno pide menos para que la tarjeta no crezca
+     hasta ser una pagina entera. */
+  .multiplos__panel .grafico { min-height: 140px; }
+}
 
 /*
  * El respaldo se oculta VISUALMENTE cuando ECharts monta, y sigue en el documento.

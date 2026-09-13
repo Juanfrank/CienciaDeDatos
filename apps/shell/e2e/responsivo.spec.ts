@@ -44,6 +44,19 @@ test.describe('la disposicion se adapta al ancho', () => {
     const topes = cajas.map((c) => Math.round(c.top));
     expect(new Set(topes).size).toBe(topes.length);
     expect(new Set(cajas.map((c) => Math.round(c.width))).size).toBe(1);
+
+    /*
+     * Y ese ancho es el de la REJILLA, no un doceavo.
+     *
+     * Sin esta comprobacion la prueba pasaba con el diseno movil roto: la rejilla repartia doce
+     * columnas en todos los tamanos, cada celda ocupaba «1 de 12» —quince pixeles— y seguia
+     * cumpliendo «todas del mismo ancho, ninguna comparte fila». Las tarjetas eran tiras
+     * verticales vacias y ninguna prueba lo veia.
+     */
+    const rejilla = await page
+      .locator('.rejilla')
+      .evaluate((n) => Math.round(n.getBoundingClientRect().width));
+    expect(Math.round(cajas[0]?.width ?? 0)).toBe(rejilla);
   });
 
   test('en movil el alto lo marca el contenido, no el alto guardado', async ({ page }) => {
@@ -260,5 +273,70 @@ test.describe('accesibilidad en movil (4.9)', () => {
     // oculto es peor que ninguno.
     await expect(boton).toHaveAttribute('aria-expanded', 'true');
     await expect(boton).toHaveAttribute('aria-controls', 'navegacion-lateral');
+  });
+});
+
+test.describe('las paginas de objetos nuevos, en un movil', () => {
+  /*
+   * Doce tipos de grafico y los pequenos multiplos se disenaron y se revisaron a 1500 px. A 390
+   * los problemas son otros: una rejilla de paneles que no cabe, un objeto mas ancho que la
+   * pantalla, un rotulo girado que empuja el area de dibujo hasta dejarla sin alto.
+   *
+   * Se recorren las OCHO paginas y no una de muestra, por lo mismo que en axe: con una sola, la
+   * que rompa en otra no falla, simplemente no tiene prueba.
+   */
+  const paginas = [
+    'familia',
+    'proporcion',
+    'relacion',
+    'flujo',
+    'referencia',
+    'detalle',
+    'multiplos',
+    'condicional',
+  ];
+
+  for (const slug of paginas) {
+    test(`/${slug} no desborda a lo ancho`, async ({ page }) => {
+      await page.setViewportSize(MOVIL);
+      await entrarComo(page, 'u-ana');
+      await page.goto(`/m/composicion/${slug}`);
+      await expect(page.locator('.grafico').first()).toHaveAttribute('data-montado', 'si');
+
+      /*
+       * El documento no se desplaza a lo ancho.
+       *
+       * Es el sintoma de todo lo que no cabe: un objeto con ancho minimo mayor que la pantalla,
+       * una tabla sin su contenedor de desplazamiento, una rejilla de multiplos con columnas
+       * fijas. Un modulo que obliga a arrastrar de lado en un movil es inservible ahi.
+       */
+      const desborda = await page.evaluate(
+        () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+      );
+      expect(desborda, 'la pagina se desplaza a lo ancho').toBe(false);
+
+      // Y ninguna tarjeta se sale de su columna.
+      const anchoMaximo = await page.locator('.objeto').evaluateAll((nodos) =>
+        Math.max(0, ...nodos.map((n) => n.getBoundingClientRect().right)),
+      );
+      expect(anchoMaximo).toBeLessThanOrEqual(MOVIL.width + 1);
+    });
+  }
+
+  test('un multiplo se apila en una sola columna cuando no caben dos', async ({ page }) => {
+    /*
+     * `columnasPara` elige la rejilla mas cuadrada por el NUMERO de paneles, sin saber cuanto
+     * ancho hay. En un movil, dos columnas dejan cada panel en 170 px: un grafico donde no cabe
+     * ni el rotulo del eje.
+     */
+    await page.setViewportSize(MOVIL);
+    await entrarComo(page, 'u-ana');
+    await page.goto('/m/composicion/multiplos');
+    await expect(page.locator('.grafico').first()).toHaveAttribute('data-montado', 'si');
+
+    const izquierdas = await page.locator('.multiplos__panel').evaluateAll((nodos) =>
+      nodos.map((n) => Math.round(n.getBoundingClientRect().left)),
+    );
+    expect(new Set(izquierdas).size).toBe(1);
   });
 });
