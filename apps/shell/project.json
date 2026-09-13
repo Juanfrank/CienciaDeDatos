@@ -30,7 +30,10 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "next build apps/shell"
-      }
+      },
+      "outputs": [
+        "{projectRoot}/.next"
+      ]
     },
     "start": {
       "executor": "nx:run-commands",
@@ -48,7 +51,10 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "playwright test --config playwright.config.mts"
-      }
+      },
+      "dependsOn": [
+        "build"
+      ]
     }
   }
 }

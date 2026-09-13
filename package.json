@@ -12,15 +12,18 @@
   "description": "Capa de visualizacion institucional sobre Azure App Service",
   "license": "UNLICENSED",
   "scripts": {
+    "dev": "nx run shell:dev",
+    "build": "nx run shell:build",
+    "start": "nx run shell:start",
     "lint": "nx run-many -t lint",
     "test": "nx run-many -t test",
-    "typecheck": "tsc -b --pretty && tsc -p apps/shell/tsconfig.json --pretty",
-    "verify:boundaries": "bash tools/verify-module-boundaries.sh",
-    "verify:schema": "prisma validate --schema packages/identity-db/prisma/schema.prisma",
-    "verify:infra": "bash tools/verify-infra.sh",
-    "e2e": "playwright test --config playwright.config.mts",
+    "typecheck": "nx run verificacion:typecheck",
+    "e2e": "nx run shell:e2e",
     "poblar": "tsx tools/poblar-cache.mts",
-    "dev": "next dev apps/shell --port 4300"
+    "verify": "nx run-many -t typecheck lint test limites esquema && nx run shell:e2e",
+    "verify:boundaries": "nx run verificacion:limites",
+    "verify:schema": "nx run verificacion:esquema",
+    "verify:infra": "nx run verificacion:infra"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

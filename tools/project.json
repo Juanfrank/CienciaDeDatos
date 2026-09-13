@@ -1,0 +1,67 @@
+{
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "name": "verificacion",
+  "projectType": "library",
+  "sourceRoot": "tools",
+  "tags": [
+    "type:tooling",
+    "scope:repo"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b --pretty"
+      },
+      "inputs": [
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/apps/**/*.ts",
+        "{workspaceRoot}/apps/**/*.tsx",
+        "{workspaceRoot}/apps/**/tsconfig*.json",
+        "{workspaceRoot}/packages/**/*.ts",
+        "{workspaceRoot}/packages/**/*.tsx",
+        "{workspaceRoot}/packages/**/tsconfig*.json"
+      ],
+      "outputs": [
+        "{workspaceRoot}/tsconfig.tsbuildinfo",
+        "{workspaceRoot}/apps/shell/tsconfig.tsbuildinfo",
+        "{workspaceRoot}/packages/*/dist",
+        "{workspaceRoot}/packages/data-contracts/*/dist"
+      ]
+    },
+    "limites": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bash tools/verify-module-boundaries.sh"
+      },
+      "inputs": [
+        "{workspaceRoot}/tools/verify-module-boundaries.sh",
+        "{workspaceRoot}/eslint.config.mjs",
+        "{workspaceRoot}/apps/modules/**/__boundary-fixture__/**",
+        "{workspaceRoot}/**/project.json"
+      ]
+    },
+    "esquema": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma validate --schema packages/identity-db/prisma/schema.prisma",
+        "env": {
+          "IDENTITY_DATABASE_URL": "sqlserver://localhost:1433;database=validacion;user=sa;password=noop"
+        }
+      },
+      "inputs": [
+        "{workspaceRoot}/packages/identity-db/prisma/**/*"
+      ]
+    },
+    "infra": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bash tools/verify-infra.sh"
+      },
+      "inputs": [
+        "{workspaceRoot}/infra/**/*",
+        "{workspaceRoot}/tools/verify-infra.sh"
+      ]
+    }
+  }
+}

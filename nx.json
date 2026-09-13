@@ -5,22 +5,42 @@
     "production": [
       "default",
       "!{projectRoot}/**/*.spec.ts",
+      "!{projectRoot}/**/*.spec.tsx",
+      "!{projectRoot}/e2e/**/*",
+      "!{projectRoot}/**/*.md",
       "!{projectRoot}/**/__boundary-fixture__/**"
     ],
     "sharedGlobals": [
       "{workspaceRoot}/tsconfig.base.json",
       "{workspaceRoot}/eslint.config.mjs",
-      "{workspaceRoot}/vitest.config.mts"
+      "{workspaceRoot}/vitest.config.mts",
+      "{workspaceRoot}/vitest.setup.mts",
+      "{workspaceRoot}/playwright.config.mts",
+      "{workspaceRoot}/package.json",
+      "{workspaceRoot}/.nvmrc"
     ]
   },
   "targetDefaults": {
     "lint": {
       "cache": true,
-      "inputs": ["default", "sharedGlobals"]
+      "inputs": ["default", "^production"]
     },
     "test": {
       "cache": true,
-      "inputs": ["default", "sharedGlobals"]
+      "inputs": ["default", "^production"]
+    },
+    "typecheck": {
+      "cache": true,
+      "inputs": ["default", "^production"]
+    },
+    "build": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
+    "e2e": {
+      "cache": false,
+      "dependsOn": ["build"]
     }
   },
   "defaultBase": "main"

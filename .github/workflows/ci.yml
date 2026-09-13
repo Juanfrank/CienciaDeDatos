@@ -44,9 +44,43 @@ jobs:
         run: npm run verify:boundaries
 
       - name: Esquema de la base de identidad
-        run: npx prisma validate --schema packages/identity-db/prisma/schema.prisma
-        env:
-          IDENTITY_DATABASE_URL: sqlserver://localhost:1433;database=validacion;user=sa;password=noop
+        run: npm run verify:schema
+
+  # ──────────────────────────────────────────────────────────────────────────────────────────
+  # Navegador.
+  #
+  # Las pruebas de punta a punta cubren los criterios de la seccion 9 que no se pueden comprobar
+  # de otra forma —accesibilidad con axe, contraste con el tema aplicado, que el navegador no
+  # hable con nadie fuera del origen, que un Visor reciba 403 pidiendo /admin a mano— y hasta
+  # ahora no corrian en CI: existian y solo se ejecutaban a mano.
+  #
+  # El job es independiente porque tarda ~7 minutos y necesita un navegador; ponerlo dentro de
+  # `verificacion` alargaria el ciclo de cualquier cambio de tipos.
+  # ──────────────────────────────────────────────────────────────────────────────────────────
+  navegador:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      - name: Instalar el navegador
+        run: npx playwright install --with-deps chromium
+
+      # `shell:e2e` depende de `shell:build`: nx construye antes de arrancar. Es lo que evita que
+      # las pruebas midan una version anterior de la aplicacion.
+      - name: Pruebas de navegador
+        run: npm run e2e
+
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-navegador
+          path: test-results/
+          retention-days: 7
 
   infraestructura:
     runs-on: ubuntu-latest
