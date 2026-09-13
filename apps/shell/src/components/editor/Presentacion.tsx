@@ -1300,7 +1300,9 @@ function RenglonDeFormato({
   const problema = tipo === "personalizado" ? problemaDelPatron(formato.patron ?? "") : null;
 
   return (
-    <div className="estilo-texto">
+    // El renglon entero lleva identificador, como la paleta y el estilo de texto: preguntar si un
+    // objeto deja dar formato a sus cifras no deberia obligar a nombrar el campo de decimales.
+    <div className="estilo-texto" data-testid={prueba}>
       <p className="estilo-texto__rotulo">
         {titulo}
         {ayuda ? <Ayuda texto={ayuda} de={titulo} /> : null}

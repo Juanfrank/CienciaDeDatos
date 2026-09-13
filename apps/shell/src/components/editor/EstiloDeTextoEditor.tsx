@@ -76,7 +76,19 @@ export function PaletaDeColores({
   onCambiar: (color: ColorDeTexto) => void;
 }) {
   return (
-    <div className="paleta" role="radiogroup" aria-label={`Color de ${nombre}`}>
+    /*
+      El grupo lleva su propio identificador, ademas del de cada muestra.
+
+      Sin el, para preguntar «¿esta la paleta?» hay que nombrar una muestra concreta —«el rojo»— y
+      la pregunta pasa a depender de que ese color siga en la lista. El grupo ES el control; las
+      muestras son sus opciones.
+    */
+    <div
+      className="paleta"
+      role="radiogroup"
+      aria-label={`Color de ${nombre}`}
+      data-testid={prueba}
+    >
       {COLORES_DE_TEXTO.map((color) => (
         <button
           key={color}
@@ -146,7 +158,9 @@ export function EstiloDeTextoEditor({
   );
 
   return (
-    <div className="estilo-texto">
+    // Igual que la paleta: el bloque entero lleva identificador, ademas de cada control suyo.
+    // Preguntar «¿se puede dar estilo al titulo?» no deberia obligar a nombrar la negrita.
+    <div className="estilo-texto" data-testid={prueba}>
       <p className="estilo-texto__rotulo">
         {titulo}
         {ayuda ? <Ayuda texto={ayuda} de={titulo} /> : null}

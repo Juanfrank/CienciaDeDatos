@@ -926,15 +926,33 @@ export function escalaBonita(n: number): number {
  * medida manda: si el mapeo trae una, es la que se dibuja, porque un numero escrito en la
  * configuracion no se actualiza y el del dataset si.
  */
+/**
+ * La escala de un medidor: de donde a donde llega el arco.
+ *
+ * Se extrae del constructor para que el RESPALDO accesible pueda decir la misma escala que dibuja
+ * la aguja. Calcularla dos veces daria dos escalas cuando el maximo se deduce, y entonces el
+ * respaldo afirmaria un limite que el dibujo no tiene — que es peor que no decirlo.
+ */
+export function escalaDelMedidor(
+  medidor: ConfiguracionDeMedidor | undefined,
+  valor: number | null,
+  objetivo: number | null,
+): { minimo: number; maximo: number } {
+  const m = medidor ?? {};
+  const minimo = m.minimo ?? 0;
+  return {
+    minimo,
+    maximo: m.maximo ?? escalaBonita(Math.max(valor ?? 0, objetivo ?? 0, minimo + 1) * 1.1),
+  };
+}
+
 export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown> {
   const m = o.medidor ?? {};
   const punto = o.vm.points[0];
   const valor = punto?.values[0] ?? null;
   const objetivo = punto?.values[1] ?? m.objetivo ?? null;
 
-  const minimo = m.minimo ?? 0;
-  const maximo =
-    m.maximo ?? escalaBonita(Math.max(valor ?? 0, objetivo ?? 0, minimo + 1) * 1.1);
+  const { minimo, maximo } = escalaDelMedidor(m, valor, objetivo);
   const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
   const color = o.paleta.series[0] ?? o.paleta.texto;
 

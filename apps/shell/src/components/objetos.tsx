@@ -10,6 +10,7 @@ import {
   type TipoDeGrafico,
   aFieldRef,
   agregacionesPara,
+  escalaDelMedidor,
   campoDeRanura,
   colorCondicional,
   columnasPara,
@@ -1414,6 +1415,7 @@ export function Medidor({
   const punto = vm.points[0];
   const valor = punto?.values[0] ?? null;
   const objetivo = punto?.values[1] ?? instance.presentacion?.medidor?.objetivo ?? null;
+  const escala = escalaDelMedidor(instance.presentacion?.medidor, valor, objetivo);
 
   return (
     <Marco
@@ -1441,6 +1443,19 @@ export function Medidor({
           <div>
             <dt>{medidas[0] ?? 'Valor'}</dt>
             <dd>{formatear(valor)}</dd>
+          </div>
+          {/*
+            La ESCALA, que es lo que convierte la cifra en un medidor.
+            Sin ella el respaldo dice «15,741» y no dice de cuanto: un medidor no mide una
+            magnitud, mide una POSICION dentro de un rango, y esa es justo la informacion que la
+            aguja contra el arco da de un vistazo y que dos cifras sueltas no pueden dar. Sale de
+            la misma funcion que el dibujo, para que el respaldo no afirme un limite distinto.
+          */}
+          <div>
+            <dt>Escala</dt>
+            <dd>
+              {formatear(escala.minimo)} – {formatear(escala.maximo)}
+            </dd>
           </div>
           {objetivo === null ? null : (
             <>

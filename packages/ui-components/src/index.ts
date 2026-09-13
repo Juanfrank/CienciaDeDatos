@@ -272,6 +272,7 @@ export {
   UMBRAL_DE_ELEMENTOS,
   elementosDe,
   escalaBonita,
+  escalaDelMedidor,
   opcionesDe,
   opcionesDeBarras,
   opcionesDeCircular,
