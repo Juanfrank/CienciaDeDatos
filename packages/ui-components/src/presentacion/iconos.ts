@@ -38,6 +38,8 @@ export const TRAZOS_DE_ICONO = {
   indicador: 'M4 18V9M10 18V5M16 18v-6M20 18H4',
   barras: 'M5 19V10M11 19V5M17 19v-7M3 21h18',
   lineas: 'M4 16l4-5 4 3 5-7M4 20h16',
+  'barras-horizontales': 'M5 5h11M5 10h7M5 15h14M5 20h4M3 3v18',
+  area: 'M3 19l5-7 4 3 5-8 4 4v8z',
   tabla: 'M4 5h16v14H4zM4 10h16M4 15h16M10 5v14',
   filtro: 'M4 5h16l-6 7v6l-4 2v-8z',
   // Elementos: no miden nada, componen.

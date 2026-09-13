@@ -708,6 +708,129 @@ export const modulosDemo: ModuleDefinition[] = [
         ],
       },
       {
+        pageId: 'p-familia',
+        slug: 'familia',
+        name: 'Barras y area',
+        items: [
+          {
+            id: 'f-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'f-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'titulo-de-seccion',
+                tituloDeSeccion: {
+                  texto: 'La misma medida en seis formas',
+                  posicionDelTexto: 'izquierda',
+                  linea: 'derecha',
+                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'f-col-apiladas',
+            position: { x: 0, y: 1, w: 6, h: 4 },
+            instance: {
+              instanceId: 'f-col-apiladas',
+              objectId: 'barras',
+              version: '1.2.0',
+              title: 'Columnas apiladas',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [MATERIA],
+                measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
+              },
+              presentacion: { subtitulo: 'El total y de que se compone', leyenda: 'abajo', apilado: 'apilado' },
+            },
+          },
+          {
+            id: 'f-col-100',
+            position: { x: 6, y: 1, w: 6, h: 4 },
+            instance: {
+              instanceId: 'f-col-100',
+              objectId: 'barras',
+              version: '1.2.0',
+              title: 'Columnas al 100 %',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [MATERIA],
+                measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
+              },
+              presentacion: { subtitulo: 'La composicion, no la magnitud', leyenda: 'abajo', apilado: 'porcentaje' },
+            },
+          },
+          {
+            id: 'f-barras',
+            position: { x: 0, y: 5, w: 6, h: 4 },
+            instance: {
+              instanceId: 'f-barras',
+              objectId: 'barras-horizontales',
+              version: '1.0.0',
+              title: 'Barras horizontales',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [DISTRITO],
+                measures: ['CasosPendientes'],
+              },
+              presentacion: { subtitulo: 'Los nombres largos caben enteros', leyenda: 'abajo', etiquetasDeDato: true },
+            },
+          },
+          {
+            id: 'f-barras-100',
+            position: { x: 6, y: 5, w: 6, h: 4 },
+            instance: {
+              instanceId: 'f-barras-100',
+              objectId: 'barras-horizontales',
+              version: '1.0.0',
+              title: 'Barras al 100 %',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [MATERIA],
+                measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
+              },
+              presentacion: { subtitulo: 'Reparto por materia', leyenda: 'abajo', apilado: 'porcentaje' },
+            },
+          },
+          {
+            id: 'f-area',
+            position: { x: 0, y: 9, w: 6, h: 4 },
+            instance: {
+              instanceId: 'f-area',
+              objectId: 'area',
+              version: '1.0.0',
+              title: 'Area',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos'],
+              },
+              presentacion: { subtitulo: 'Volumen a lo largo del tiempo', leyenda: 'abajo' },
+            },
+          },
+          {
+            id: 'f-area-apilada',
+            position: { x: 6, y: 9, w: 6, h: 4 },
+            instance: {
+              instanceId: 'f-area-apilada',
+              objectId: 'area',
+              version: '1.0.0',
+              title: 'Area apilada',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
+              },
+              presentacion: { subtitulo: 'De que se compone el total', leyenda: 'abajo', apilado: 'apilado' },
+            },
+          },
+        ],
+      },
+      {
         pageId: 'p-contenedores',
         slug: 'contenedores',
         name: 'Contenedores',

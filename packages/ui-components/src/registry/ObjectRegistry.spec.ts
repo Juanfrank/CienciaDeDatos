@@ -18,6 +18,7 @@ const version = (v: string, overrides: Partial<ObjectVersion> = {}): ObjectVersi
 
 const objeto = (versions: ObjectVersion[]): VisualObjectDefinition => ({
   objectId: 'barras',
+  icono: 'barras',
   name: 'Barras',
   description: 'd',
   category: 'grafico',

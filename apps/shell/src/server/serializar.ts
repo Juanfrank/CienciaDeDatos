@@ -1,6 +1,11 @@
 import type { Agregacion, QueryResult } from '@app/data-contracts';
 import type { GridPosition } from '@app/module-model';
-import type { BindingProblem, ObjectInstance, RanuraDeCampos } from '@app/ui-components';
+import type {
+  BindingProblem,
+  NombreDeIcono,
+  ObjectInstance,
+  RanuraDeCampos,
+} from '@app/ui-components';
 import { objectRegistry } from './contexto';
 import type { ObjetoCargado } from './datos';
 
@@ -25,6 +30,14 @@ export interface ObjetoSerializado {
    * volverian a leer por posicion — que es justo lo que este cambio quita.
    */
   ranuras?: RanuraDeCampos[];
+  /**
+   * El icono que declara la VERSION del objeto.
+   *
+   * Viaja con el objeto por el mismo motivo que las ranuras: el cliente no tiene el registro. Sin
+   * esto, la tarjeta necesitaba su propio mapa de `objectId` a icono — y ese mapa se quedaba sin
+   * entrada cada vez que se publicaba un objeto nuevo, sin fallar ni avisar.
+   */
+  icono?: NombreDeIcono;
   /**
    * Con que operador se resume cada medida, alineado con `instance.binding.measures`.
    *
@@ -61,6 +74,7 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
     instance: item.instance,
     ...(objeto.result ? { result: objeto.result } : {}),
     ...(ranurasDelObjeto(item.instance) ? { ranuras: ranurasDelObjeto(item.instance) } : {}),
+    ...(iconoDelObjeto(item.instance) ? { icono: iconoDelObjeto(item.instance) } : {}),
     problems: objeto.problems,
     agregaciones: objeto.agregaciones,
     ...(objeto.unresolvedObject ? { unresolvedObject: objeto.unresolvedObject } : {}),
@@ -87,6 +101,15 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
 function ranurasDelObjeto(instance: ObjectInstance): RanuraDeCampos[] | undefined {
   try {
     return objectRegistry.resolve(instance.objectId, instance.version).dataContract.pozos;
+  } catch {
+    return undefined;
+  }
+}
+
+/** El icono que declara el objeto. `undefined` si no se resuelve: el objeto roto no lo necesita. */
+function iconoDelObjeto(instance: ObjectInstance): NombreDeIcono | undefined {
+  try {
+    return objectRegistry.get(instance.objectId)?.icono;
   } catch {
     return undefined;
   }

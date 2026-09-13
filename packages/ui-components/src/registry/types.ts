@@ -1,5 +1,6 @@
 import type { Agregacion, FieldRef } from '@app/data-contracts';
 import type { ClaveDePresentacion, PresentacionDeObjeto } from '../presentacion/contrato';
+import type { NombreDeIcono } from '../presentacion/iconos';
 import type { ConfiguracionDeContenedor, IdDeContenedor } from '../presentacion/contenedores';
 import type { ConfiguracionDeElemento, IdDeElemento } from '../presentacion/elementos';
 import type { ConfiguracionDePanelDeFiltros } from '../presentacion/panelDeFiltros';
@@ -103,6 +104,16 @@ export interface VisualObjectDefinition {
   name: string;
   description: string;
   category: ObjectCategory;
+  /**
+   * El icono con el que se reconoce este objeto.
+   *
+   * Lo declara el OBJETO y no lo deciden sus consumidores. Habia dos mapas de `objectId` a icono
+   * —uno en la tienda del editor y otro en la cabecera de la tarjeta— y publicar `area` los dejo a
+   * los dos sin entrada: el objeto salia sin icono en las dos pantallas, y eso no falla, no avisa
+   * y solo se nota mirando. Obligatorio, para que un objeto nuevo sin icono sea un error de
+   * compilacion y no un hallazgo de captura de pantalla.
+   */
+  icono: NombreDeIcono;
   /**
    * true si el objeto se adjunta a otro en vez de ocupar una celda de la rejilla.
    *

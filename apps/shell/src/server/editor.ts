@@ -1,6 +1,11 @@
 import type { Agregacion, GranoDeDataset } from '@app/data-contracts';
 import { defaultRegistry } from '@app/caching';
-import type { ClaveDePresentacion, ObjectCategory, PozoDeCampos } from '@app/ui-components';
+import type {
+  ClaveDePresentacion,
+  NombreDeIcono,
+  ObjectCategory,
+  PozoDeCampos,
+} from '@app/ui-components';
 import { fieldKey } from '@app/ui-components';
 import { objectRegistry } from './contexto';
 import { agregacionesDeclaradas, columnasDisponiblesDe } from './datos';
@@ -22,6 +27,8 @@ export interface ObjetoDePaleta {
   name: string;
   description: string;
   category: ObjectCategory;
+  /** Lo declara el objeto: la tienda y la tarjeta leen del mismo sitio. */
+  icono: NombreDeIcono;
   version: string;
   attachable: boolean;
   dimensiones: { min: number; max: number };
@@ -70,6 +77,7 @@ export async function paletaDelEditor(): Promise<PaletaDelEditor> {
     }
     return {
       objectId: definicion.objectId,
+      icono: definicion.icono,
       name: definicion.name,
       description: definicion.description,
       category: definicion.category,

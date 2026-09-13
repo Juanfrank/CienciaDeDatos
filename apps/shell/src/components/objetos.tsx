@@ -76,16 +76,6 @@ const VARIABLE_DE_RESALTADO: Record<string, string> = {
 };
 
 /** Icono por defecto de cada tipo, cuando la instancia no elige otro. */
-const ICONO_POR_TIPO: Record<string, NombreDeIcono> = {
-  'tarjeta-kpi': 'indicador',
-  barras: 'barras',
-  lineas: 'lineas',
-  tabla: 'tabla',
-  matriz: 'tabla',
-  segmentador: 'filtro',
-  'panel-de-filtros': 'filtro',
-};
-
 /** Un objeto cuyo mapeo ya no se puede resolver se dibuja MARCADO, nunca omitido (4.2). */
 export function ObjetoRoto({
   titulo,
@@ -158,6 +148,7 @@ export function Marco({
   instance,
   result,
   agregaciones,
+  iconoDelObjeto,
 }: {
   titulo: string;
   children: React.ReactNode;
@@ -168,6 +159,8 @@ export function Marco({
   result?: QueryResult;
   /** Para los complementos: la tabla de datos proyecta con los mismos operadores que el objeto. */
   agregaciones?: Agregacion[];
+  /** El que declara la version del objeto. La presentacion de la instancia lo anula. */
+  iconoDelObjeto?: NombreDeIcono;
 }) {
   /*
    * La presentacion se dibuja AQUI, en el marco comun, y no en cada objeto.
@@ -178,7 +171,8 @@ export function Marco({
    * solo en el tipo.
    */
   const presentacion = instance?.presentacion;
-  const icono = presentacion?.icono ?? (instance ? ICONO_POR_TIPO[instance.objectId] : undefined);
+  // El icono por defecto lo declara el objeto y viaja con el; la presentacion solo lo anula.
+  const icono = presentacion?.icono ?? iconoDelObjeto;
   const acento = presentacion?.acento ?? 'primario';
   /*
    * La cabecera entera se puede ocultar.
@@ -261,7 +255,7 @@ export function Marco({
   );
 }
 
-export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones }: ObjetoProps) {
+export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones, iconoDelObjeto }: ObjetoProps) {
   const r = porRanura(instance, ranuras);
   // El valor y la comparacion, en ese orden, salen de sus ranuras: con dos medidas mapeadas al
   // reves la tarjeta mostraba la comparacion como cifra principal.
@@ -280,7 +274,13 @@ export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones }: 
   const posicionDeEtiqueta = instance.presentacion?.etiqueta?.posicion ?? 'debajo';
 
   return (
-    <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
+    <Marco
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      agregaciones={agregaciones}
+      iconoDelObjeto={iconoDelObjeto}
+    >
       {/*
         El valor y su ETIQUETA, que es un texto propio y no el titulo reutilizado.
         El titulo dice que objeto es —y va en la cabecera, con el icono y los complementos—; la
@@ -321,7 +321,31 @@ export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones }: 
   );
 }
 
-export function Barras({ titulo, result, instance, onFiltrar, ranuras, agregaciones }: ObjetoProps) {
+/**
+ * Barras horizontales — el mismo objeto con los ejes intercambiados.
+ *
+ * Comparte TODO con las columnas: las mismas ranuras, el mismo modelo, el mismo respaldo en HTML.
+ * Lo unico que cambia es que tipo de grafico se pide, y por eso `Barras` recibe la orientacion en
+ * vez de existir dos componentes con el mismo cuerpo copiado.
+ */
+export function BarrasHorizontales(props: ObjetoProps) {
+  return <Barras {...props} horizontal />;
+}
+
+export function Area(props: ObjetoProps) {
+  return <Lineas {...props} area />;
+}
+
+export function Barras({
+  titulo,
+  result,
+  instance,
+  onFiltrar,
+  ranuras,
+  agregaciones,
+  horizontal,
+  iconoDelObjeto,
+}: ObjetoProps & { horizontal?: boolean }) {
   /*
    * El eje X sale de SU ranura, no de la primera dimension.
    *
@@ -364,11 +388,12 @@ export function Barras({ titulo, result, instance, onFiltrar, ranuras, agregacio
       titulo={titulo}
       instance={instance}
       result={result}
+      iconoDelObjeto={iconoDelObjeto}
       pie={vm.aggregated ? <span className="texto-atenuado">Agregado sobre el dataset cacheado</span> : null}
     >
       <Grafico
         instanceId={instance.instanceId}
-        tipo="barras"
+        tipo={horizontal ? 'barras-horizontales' : 'barras'}
         vm={vm}
         titulo={titulo}
         presentacion={instance.presentacion}
@@ -413,7 +438,15 @@ export function Barras({ titulo, result, instance, onFiltrar, ranuras, agregacio
   );
 }
 
-export function Lineas({ titulo, result, instance, ranuras, agregaciones }: ObjetoProps) {
+export function Lineas({
+  titulo,
+  result,
+  instance,
+  ranuras,
+  agregaciones,
+  area,
+  iconoDelObjeto,
+}: ObjetoProps & { area?: boolean }) {
   const r = porRanura(instance, ranuras);
   const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
@@ -430,10 +463,16 @@ export function Lineas({ titulo, result, instance, ranuras, agregaciones }: Obje
   );
 
   return (
-    <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
+    <Marco
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      agregaciones={agregaciones}
+      iconoDelObjeto={iconoDelObjeto}
+    >
       <Grafico
         instanceId={instance.instanceId}
-        tipo="lineas"
+        tipo={area ? 'area' : 'lineas'}
         vm={vm}
         titulo={titulo}
         presentacion={instance.presentacion}
@@ -480,7 +519,7 @@ export function Lineas({ titulo, result, instance, ranuras, agregaciones }: Obje
   );
 }
 
-export function Tabla({ titulo, result, instance, agregaciones }: ObjetoProps) {
+export function Tabla({ titulo, result, instance, agregaciones, iconoDelObjeto }: ObjetoProps) {
   // La tabla dibuja SU proyeccion, no el dataset en crudo.
   //
   // Antes pintaba todas las columnas del dataset, incluidas las que su mapeo no declara, y las
@@ -490,7 +529,13 @@ export function Tabla({ titulo, result, instance, agregaciones }: ObjetoProps) {
   const proyectado = proyectarObjeto(instance, result, agregaciones);
 
   return (
-    <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
+    <Marco
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      agregaciones={agregaciones}
+      iconoDelObjeto={iconoDelObjeto}
+    >
       {/*
         Una tabla tiene varias medidas y cada una con su formato: el formateador se elige POR
         COLUMNA, no uno para toda la tabla. Es el caso que la forma anterior del formato no podia
@@ -505,7 +550,7 @@ export function Tabla({ titulo, result, instance, agregaciones }: ObjetoProps) {
   );
 }
 
-export function Matriz({ titulo, result, instance, ranuras, agregaciones }: ObjetoProps) {
+export function Matriz({ titulo, result, instance, ranuras, agregaciones, iconoDelObjeto }: ObjetoProps) {
   const r = porRanura(instance, ranuras);
   // Varios niveles por pozo: es lo que convierte el cruce plano en una jerarquia.
   const dimsFila = (r ? r.varios('filas') : instance.binding.dimensions.slice(0, 1).map(fieldKey))
@@ -524,7 +569,13 @@ export function Matriz({ titulo, result, instance, ranuras, agregaciones }: Obje
   );
 
   return (
-    <Marco titulo={titulo} instance={instance} result={result} agregaciones={agregaciones}>
+    <Marco
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      agregaciones={agregaciones}
+      iconoDelObjeto={iconoDelObjeto}
+    >
       <TablaDeMatriz vm={vm} titulo={titulo} instance={instance} />
     </Marco>
   );
@@ -550,6 +601,14 @@ export interface ObjetoProps {
   ranuras?: RanuraDeCampos[];
   /** Filtrado cruzado (4.4): anade un filtro a la query string, no a un estado paralelo. */
   onFiltrar?: (campo: string, valor: string) => void;
+  /**
+   * El icono que declara la version del objeto en el catalogo.
+   *
+   * Viaja con el objeto en vez de salir de un mapa por tipo: habia dos mapas —uno en la paleta y
+   * otro aqui— y un objeto nuevo se dibujaba sin icono hasta que alguien se acordaba de los dos.
+   * Ahora el catalogo lo exige y el render solo lo reenvia al marco.
+   */
+  iconoDelObjeto?: NombreDeIcono;
 }
 
 /** `FieldRef` -> 'Tabla.Campo', tolerando que no haya campo. */

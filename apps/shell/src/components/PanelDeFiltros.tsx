@@ -5,6 +5,7 @@ import type { QueryResult } from "@app/data-contracts";
 import {
   selectoresEfectivos,
   toSlicerOptions,
+  type NombreDeIcono,
   type ObjectInstance,
   type SelectorEfectivo,
 } from "@app/ui-components";
@@ -30,10 +31,13 @@ export function PanelDeFiltros({
   titulo,
   instance,
   result,
+  iconoDelObjeto,
 }: {
   titulo: string;
   instance: ObjectInstance;
   result: QueryResult;
+  /** El icono que declara la version del objeto en el catalogo. */
+  iconoDelObjeto?: NombreDeIcono;
 }) {
   const { valoresDe, alternar, limpiarCampo, fijar, searchParams } =
     useFiltrosDeUrl();
@@ -70,6 +74,7 @@ export function PanelDeFiltros({
       titulo={titulo}
       instance={instance}
       result={result}
+      {...(iconoDelObjeto ? { iconoDelObjeto } : {})}
       pie={
         puestos > 0 ? (
           <span

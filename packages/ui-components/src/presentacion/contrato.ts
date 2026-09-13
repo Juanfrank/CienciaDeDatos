@@ -74,6 +74,21 @@ export interface ConfiguracionDeEjes {
   desdeCero?: boolean;
 }
 
+/**
+ * Como se apilan las series.
+ *
+ * Es una PROPIEDAD del grafico y no tres objetos distintos del catalogo, aunque una herramienta
+ * de informes suela ofrecerlos por separado. El contrato de datos es identico en los tres —las
+ * mismas dimensiones y las mismas medidas—; lo unico que cambia es como se dibuja. Publicar tres
+ * objetos con el mismo contrato para cambiar una propiedad significaria que probar «apilado»
+ * obliga a borrar el objeto y perder toda su configuracion.
+ *
+ * `porcentaje` es el «100 %»: cada categoria suma el total y lo que se compara es la COMPOSICION,
+ * no la magnitud.
+ */
+export const MODOS_DE_APILADO = ['ninguno', 'apilado', 'porcentaje'] as const;
+export type ModoDeApilado = (typeof MODOS_DE_APILADO)[number];
+
 /** Por que se ordenan las categorias del eje. Power BI lo llama «ordenar eje». */
 export const CRITERIOS_DE_ORDEN = ['categoria', 'valor'] as const;
 export type CriterioDeOrden = (typeof CRITERIOS_DE_ORDEN)[number];
@@ -246,6 +261,7 @@ export interface PresentacionDeObjeto {
   etiquetasDeDato?: boolean;
   ejes?: ConfiguracionDeEjes;
   orden?: OrdenDeCategorias;
+  apilado?: ModoDeApilado;
   /** Peso, estilo, alineacion y color de los textos del objeto. */
   textos?: TextosDeObjeto;
 }
@@ -274,6 +290,7 @@ export const CLAVES_DE_PRESENTACION = [
   'etiquetasDeDato',
   'ejes',
   'orden',
+  'apilado',
 ] as const satisfies readonly (keyof PresentacionDeObjeto)[];
 
 export type ClaveDePresentacion = keyof PresentacionDeObjeto;

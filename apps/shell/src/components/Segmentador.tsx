@@ -1,7 +1,7 @@
 "use client";
 
 import type { QueryResult } from "@app/data-contracts";
-import type { ObjectInstance } from "@app/ui-components";
+import type { NombreDeIcono, ObjectInstance } from "@app/ui-components";
 import { useFiltrosDeUrl } from "../hooks/useFiltrosDeUrl";
 import { Marco } from "./objetos";
 
@@ -21,6 +21,7 @@ export function Segmentador({
   opciones,
   instance,
   result,
+  iconoDelObjeto,
 }: {
   titulo: string;
   campo: string;
@@ -28,6 +29,8 @@ export function Segmentador({
   /** Se pasan para que un segmentador pueda llevar complementos como cualquier otro objeto. */
   instance?: ObjectInstance;
   result?: QueryResult;
+  /** El icono que declara la version del objeto en el catalogo. */
+  iconoDelObjeto?: NombreDeIcono;
 }) {
   const { valoresDe, alternar, limpiarCampo } = useFiltrosDeUrl();
   const seleccionados = valoresDe(campo);
@@ -37,6 +40,7 @@ export function Segmentador({
       titulo={titulo}
       {...(instance ? { instance } : {})}
       {...(result ? { result } : {})}
+      {...(iconoDelObjeto ? { iconoDelObjeto } : {})}
       accion={
         seleccionados.length > 0 ? (
           <button

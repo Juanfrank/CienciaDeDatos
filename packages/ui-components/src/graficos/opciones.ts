@@ -1,4 +1,4 @@
-import type { ConfiguracionDeEjes, ModoDeLeyenda } from '../presentacion/contrato';
+import type { ConfiguracionDeEjes, ModoDeApilado, ModoDeLeyenda } from '../presentacion/contrato';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
 /**
@@ -42,6 +42,69 @@ export interface OpcionesDeGrafico {
    * formateador, el mismo numero saldria «2,216» en un sitio y «2216» en el otro.
    */
   formatear?: (valor: number, serie: number) => string;
+  apilado?: ModoDeApilado;
+}
+
+/* ── Apilado ──────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Los valores que se dibujan, segun el modo de apilado.
+ *
+ * En `porcentaje` NO se le pasan a ECharts los valores originales: se convierten a su parte del
+ * total de la categoria. ECharts no sabe apilar al 100 % por su cuenta —lo que ofrece es `stack`,
+ * que suma—, asi que el reparto se hace aqui.
+ *
+ * Un total de cero deja todas las partes en cero y no en `NaN`: dividir por cero pintaria el
+ * grafico vacio sin decir por que, y «no hubo casos» es una respuesta legitima que hay que poder
+ * dibujar.
+ */
+function valoresApilados(o: OpcionesDeGrafico): (number | null)[][] {
+  const crudos = o.vm.series.map((_, s) => o.vm.points.map((p) => p.values[s] ?? null));
+  if (o.apilado !== 'porcentaje') return crudos;
+
+  return crudos.map((serie, s) =>
+    serie.map((valor, i) => {
+      if (valor === null) return null;
+      const total = o.vm.series.reduce((suma, _, otra) => suma + (o.vm.points[i]?.values[otra] ?? 0), 0);
+      void s;
+      return total === 0 ? 0 : (valor / total) * 100;
+    }),
+  );
+}
+
+/** `stack` de ECharts: el mismo nombre en todas las series es lo que las apila. */
+const pilaDe = (o: OpcionesDeGrafico) => (o.apilado && o.apilado !== 'ninguno' ? { stack: 'total' } : {});
+
+/**
+ * El tooltip de un grafico al 100 %.
+ *
+ * Ensena el porcentaje Y la cifra original. Solo el porcentaje esconderia la magnitud —dos
+ * categorias con el mismo reparto pueden ser 12 casos y 12.000— y solo la cifra contradiria lo que
+ * se ve dibujado.
+ */
+function tooltipDe(o: OpcionesDeGrafico) {
+  const comun = {
+    trigger: 'axis' as const,
+    backgroundColor: o.paleta.superficieElevada,
+    borderWidth: 0,
+    textStyle: { color: o.paleta.texto },
+    extraCssText: 'box-shadow: none;',
+  };
+  if (o.apilado !== 'porcentaje') return comun;
+
+  return {
+    ...comun,
+    formatter: (params: { name: string; seriesName: string; value: number; dataIndex: number }[]) => {
+      const punto = params[0];
+      if (!punto) return '';
+      const filas = params.map((p) => {
+        const crudo = o.vm.points[p.dataIndex]?.values[o.vm.series.indexOf(p.seriesName)] ?? null;
+        const cifra = crudo === null ? '—' : (o.formatear?.(crudo, o.vm.series.indexOf(p.seriesName)) ?? String(crudo));
+        return `${p.seriesName}: ${p.value.toFixed(1)} % (${cifra})`;
+      });
+      return [punto.name, ...filas].join('<br/>');
+    },
+  };
 }
 
 /**
@@ -66,10 +129,21 @@ function leyendaDe(o: OpcionesDeGrafico) {
    * `overflow: truncate`, ECharts corta con puntos suspensivos y el nombre entero sigue en el
    * tooltip de la propia leyenda.
    */
-  const comun = { textStyle: { color: o.paleta.textoAtenuado }, icon: 'roundRect' as const };
+  /*
+   * `type: 'scroll'` en TODAS las posiciones.
+   *
+   * Con tres series y una tarjeta estrecha, la leyenda inferior se salia por el lado derecho y el
+   * ultimo nombre quedaba cortado. Desplazable, ECharts pagina y pone flechas en vez de recortar.
+   */
+  const comun = {
+    textStyle: { color: o.paleta.textoAtenuado },
+    icon: 'roundRect' as const,
+    type: 'scroll' as const,
+    pageIconColor: o.paleta.textoAtenuado,
+    pageTextStyle: { color: o.paleta.textoAtenuado },
+  };
   const aLosLados = {
     ...comun,
-    type: 'scroll' as const,
     textStyle: { color: o.paleta.textoAtenuado, width: 96, overflow: 'truncate' as const },
   };
   const lado = modo === 'auto' ? 'abajo' : modo;
@@ -150,13 +224,7 @@ function base(o: OpcionesDeGrafico) {
      * categorias y ambos quedaban ilegibles.
      */
     grid: { ...margenDe(o, margen), containLabel: true },
-    tooltip: {
-      trigger: 'axis' as const,
-      backgroundColor: o.paleta.superficieElevada,
-      borderWidth: 0,
-      textStyle: { color: o.paleta.texto },
-      extraCssText: 'box-shadow: none;',
-    },
+    tooltip: tooltipDe(o),
     legend,
   };
 }
@@ -214,7 +282,13 @@ const ejeCategoria = (o: OpcionesDeGrafico) => ({
 const ejeValor = (o: OpcionesDeGrafico) => ({
   type: 'value' as const,
   show: o.ejes?.mostrarY !== false,
-  axisLabel: { color: o.paleta.textoAtenuado },
+  // Al 100 % el eje va de 0 a 100 y con el simbolo puesto: sin el, la escala parece de unidades
+  // y el grafico se lee como si midiera casos.
+  ...(o.apilado === 'porcentaje' ? { max: 100, min: 0 } : {}),
+  axisLabel: {
+    color: o.paleta.textoAtenuado,
+    ...(o.apilado === 'porcentaje' ? { formatter: '{value} %' } : {}),
+  },
   splitLine: {
     show: o.ejes?.cuadricula !== false,
     lineStyle: { color: o.paleta.linea, type: 'dashed' as const },
@@ -245,20 +319,106 @@ const ejeValor = (o: OpcionesDeGrafico) => ({
     : {}),
 });
 
-/** Barras verticales. Una serie por medida mapeada. */
+/**
+ * Las series de un grafico de barras, verticales u horizontales.
+ *
+ * Se factoriza porque columnas y barras solo se diferencian en que ejes intercambian y hacia donde
+ * redondea la esquina: con dos copias, anadir el apilado significaria acordarse de los dos sitios.
+ */
+function seriesDeBarras(o: OpcionesDeGrafico, horizontal: boolean) {
+  const datos = valoresApilados(o);
+  const apilada = o.apilado && o.apilado !== 'ninguno';
+
+  return o.vm.series.map((nombre, s) => ({
+    name: nombre,
+    type: 'bar',
+    data: datos[s] ?? [],
+    ...pilaDe(o),
+    /*
+     * La esquina redondeada solo en la barra SUELTA.
+     *
+     * Apiladas, redondear cada segmento dibuja muescas entre uno y otro y la pila deja de leerse
+     * como un total: parecen trozos sueltos que casualmente estan pegados.
+     */
+    itemStyle: apilada
+      ? {}
+      : { borderRadius: horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0] },
+    barMaxWidth: 48,
+    // Apilada, la cifra va DENTRO del segmento: encima se dibujaria sobre el segmento siguiente.
+    label: etiquetaDeSerie(o, s, apilada ? 'inside' : horizontal ? 'right' : 'top'),
+    emphasis: { focus: 'series' },
+  }));
+}
+
+/** Columnas verticales. Una serie por medida mapeada. */
 export function opcionesDeBarras(o: OpcionesDeGrafico): Record<string, unknown> {
   return {
     ...base(o),
     xAxis: ejeCategoria(o),
     yAxis: ejeValor(o),
+    series: seriesDeBarras(o, false),
+  };
+}
+
+/**
+ * Barras horizontales — el «grafico de barras» de verdad.
+ *
+ * No es un capricho de estilo: con nombres de categoria largos —«Juzgado de Primera Instancia de
+ * Santiago»— las columnas obligan a girar los rotulos o a recortarlos, y en horizontal caben
+ * enteros. Es el caso normal cuando la dimension son tribunales o materias.
+ *
+ * Es el MISMO objeto con los ejes intercambiados; lo unico que no se intercambia es cual es la
+ * categoria y cual el valor, y eso lo decide quien construye, no ECharts.
+ */
+export function opcionesDeBarrasHorizontales(o: OpcionesDeGrafico): Record<string, unknown> {
+  return {
+    ...base(o),
+    xAxis: ejeValor(o),
+    yAxis: {
+      ...ejeCategoria(o),
+      /*
+       * Se invierte el eje de categorias.
+       *
+       * ECharts numera el eje vertical de abajo arriba, asi que sin esto la primera categoria del
+       * modelo sale ABAJO y la lista se lee al reves de como se ordeno — justo lo que rompe el
+       * «ordenar por valor descendente» que se acaba de anadir.
+       */
+      inverse: true,
+    },
+    series: seriesDeBarras(o, true),
+  };
+}
+
+/**
+ * Area. Es una linea con el relleno debajo.
+ *
+ * Sirve para lo que la linea no: cuando importa el VOLUMEN acumulado y no solo la trayectoria.
+ * Apilada responde ademas a «de que se compone ese total a lo largo del tiempo», que con lineas
+ * sueltas hay que sumar de cabeza.
+ */
+export function opcionesDeArea(o: OpcionesDeGrafico): Record<string, unknown> {
+  const datos = valoresApilados(o);
+  return {
+    ...base(o),
+    xAxis: { ...ejeCategoria(o), boundaryGap: false },
+    yAxis: ejeValor(o),
     series: o.vm.series.map((nombre, s) => ({
       name: nombre,
-      type: 'bar',
-      data: o.vm.points.map((p) => p.values[s] ?? 0),
-      // Barras con la esquina redondeada arriba: es la forma `extra-small` de MD3 aplicada al
-      // dato, para que el grafico no parezca de otra aplicacion.
-      itemStyle: { borderRadius: [4, 4, 0, 0] },
-      barMaxWidth: 48,
+      type: 'line',
+      data: datos[s] ?? [],
+      ...pilaDe(o),
+      smooth: false,
+      symbol: 'circle',
+      symbolSize: 5,
+      lineStyle: { width: 2 },
+      /*
+       * Sin apilar, el relleno va semitransparente.
+       *
+       * Con varias areas opacas, la de delante tapa a las de atras y las de atras dejan de
+       * existir. Apiladas no se solapan —cada una ocupa su banda— y ahi el relleno solido es lo
+       * que hace legible la composicion.
+       */
+      areaStyle: o.apilado && o.apilado !== 'ninguno' ? {} : { opacity: 0.25 },
       label: etiquetaDeSerie(o, s, 'top'),
       emphasis: { focus: 'series' },
     })),
@@ -285,10 +445,24 @@ export function opcionesDeLineas(o: OpcionesDeGrafico): Record<string, unknown> 
   };
 }
 
-export type TipoDeGrafico = 'barras' | 'lineas';
+export type TipoDeGrafico = 'barras' | 'lineas' | 'barras-horizontales' | 'area';
 
+const CONSTRUCTORES: Record<TipoDeGrafico, (o: OpcionesDeGrafico) => Record<string, unknown>> = {
+  barras: opcionesDeBarras,
+  'barras-horizontales': opcionesDeBarrasHorizontales,
+  lineas: opcionesDeLineas,
+  area: opcionesDeArea,
+};
+
+/**
+ * Un mapa y no una cadena de ternarios.
+ *
+ * Con `Record<TipoDeGrafico, ...>`, anadir un tipo al union sin escribir su constructor es un
+ * error de compilacion. Con ternarios, el tipo nuevo caeria en silencio en el `else` y se
+ * dibujaria como columnas — un fallo que no revienta y que solo se ve mirando la pantalla.
+ */
 export function opcionesDe(tipo: TipoDeGrafico, o: OpcionesDeGrafico): Record<string, unknown> {
-  return tipo === 'lineas' ? opcionesDeLineas(o) : opcionesDeBarras(o);
+  return (CONSTRUCTORES[tipo] ?? opcionesDeBarras)(o);
 }
 
 /**

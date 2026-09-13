@@ -3,8 +3,10 @@
 import {
   ACENTOS,
   ICONOS_DE_OBJETO,
+  MODOS_DE_APILADO,
   MODOS_DE_LEYENDA,
   type CriterioDeOrden,
+  type ModoDeApilado,
   POSICIONES_DE_ETIQUETA,
   TIPOS_DE_FORMATO,
   TIPOS_DE_SELECTOR,
@@ -101,7 +103,8 @@ export function Presentacion({
    * cifra: el valor y la etiqueta que lo acompana.
    */
   const hayMedida = admite("formato") || admite("formatos");
-  const hayGrafico = admite("leyenda") || admite("etiquetasDeDato") || admite("orden");
+  const hayGrafico =
+    admite("leyenda") || admite("etiquetasDeDato") || admite("orden") || admite("apilado");
   const esTarjeta = instance.objectId === "tarjeta-kpi";
   const mostrarTitulo = p.mostrarTitulo !== false;
 
@@ -368,6 +371,27 @@ export function Presentacion({
                 onChange={(e) => poner({ etiquetasDeDato: e.target.checked })}
               />{" "}
               Cifra sobre cada barra o punto
+            </label>
+          ) : null}
+
+          {admite("apilado") ? (
+            <label className="formulario__campo">
+              <span>Apilado</span>
+              <select
+                value={p.apilado ?? "ninguno"}
+                disabled={guardando}
+                data-testid={`${prueba}-apilado`}
+                onChange={(e) => poner({ apilado: e.target.value as ModoDeApilado })}
+              >
+                {MODOS_DE_APILADO.map((m) => (
+                  <option key={m} value={m}>
+                    {ETIQUETA_DE_APILADO[m]}
+                  </option>
+                ))}
+              </select>
+              <span className="campo__pista">
+                Al 100 % se compara la composicion de cada categoria, no su magnitud.
+              </span>
             </label>
           ) : null}
 
@@ -852,6 +876,12 @@ const DECIMALES_POR_DEFECTO: Record<TipoDeFormato, number> = {
   porcentaje: 1,
   moneda: 2,
   personalizado: 0,
+};
+
+const ETIQUETA_DE_APILADO: Record<ModoDeApilado, string> = {
+  ninguno: "Sin apilar (una al lado de otra)",
+  apilado: "Apilado",
+  porcentaje: "Apilado al 100 %",
 };
 
 const ETIQUETA_DE_LEYENDA: Record<ModoDeLeyenda, string> = {

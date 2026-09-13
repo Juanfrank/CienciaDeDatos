@@ -90,11 +90,11 @@ export default function Lienzo({
         ...(presentacion?.leyenda ? { leyenda: presentacion.leyenda } : {}),
         ...(presentacion?.etiquetasDeDato ? { etiquetasDeDato: true } : {}),
         ...(presentacion?.ejes ? { ejes: presentacion.ejes } : {}),
+        ...(presentacion?.apilado ? { apilado: presentacion.apilado } : {}),
         ...(formatear ? { formatear } : {}),
       }),
     // `formatear` se redefine en cada render del padre, asi que NO entra en las dependencias: lo
     // que de verdad decide como se formatea es la presentacion, y esa si esta.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [tipo, vm, paleta, titulo, dimension, presentacion],
   );
   const clave = useMemo(() => JSON.stringify(opciones), [opciones]);

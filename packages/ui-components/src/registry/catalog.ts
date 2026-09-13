@@ -144,11 +144,20 @@ const POZOS_DE_LINEAS: RanuraDeCampos[] = [
   { id: 'eje-y', etiqueta: 'Eje Y', tipo: 'medida', max: 4, min: 1, ayuda: 'Una linea por medida.' },
 ];
 
-const PRESENTACION_DE_GRAFICO = presenta('formato', 'formatos', 'leyenda', 'etiquetasDeDato', 'ejes', 'orden');
+const PRESENTACION_DE_GRAFICO = presenta(
+  'formato',
+  'formatos',
+  'leyenda',
+  'etiquetasDeDato',
+  'ejes',
+  'orden',
+  'apilado',
+);
 
 export const catalogoInicial: VisualObjectDefinition[] = [
   {
     objectId: 'tarjeta-kpi',
+    icono: 'indicador',
     name: 'Tarjeta KPI',
     description: 'Un unico valor destacado, con su etiqueta y una variacion opcional.',
     category: 'indicador',
@@ -184,6 +193,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'tabla',
+    icono: 'tabla',
     name: 'Tabla',
     description: 'Filas y columnas con las dimensiones y medidas mapeadas.',
     category: 'tabla',
@@ -234,6 +244,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'barras',
+    icono: 'barras',
     name: 'Grafico de barras',
     description: 'Comparacion de una o varias medidas entre las categorias de una dimension.',
     category: 'grafico',
@@ -303,7 +314,54 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     ],
   },
   {
+    /*
+     * El «grafico de barras» de verdad: horizontales.
+     *
+     * No es el mismo objeto con una opcion porque el caso de uso es distinto, no la estetica: con
+     * nombres largos —«Juzgado de Primera Instancia de Santiago»— las columnas obligan a girar los
+     * rotulos o a recortarlos, y en horizontal caben enteros. Quien elige este objeto lo elige por
+     * eso, y una opcion escondida en el panel de formato no se encuentra.
+     */
+    objectId: 'barras-horizontales',
+    icono: 'barras-horizontales',
+    name: 'Grafico de barras',
+    description: 'Barras horizontales. Para categorias con nombres largos o muchas categorias.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: barras horizontales, hasta cuatro medidas, con apilado y 100 %.',
+        {
+          dimensions: { min: 1, max: 2 },
+          measures: { min: 1, max: 4 },
+          notes: 'Cada medida es una serie. La segunda dimension, si existe, agrupa las barras.',
+          pozos: POZOS_DE_BARRAS(4),
+        },
+        PRESENTACION_DE_GRAFICO,
+      ),
+    ],
+  },
+  {
+    objectId: 'area',
+    icono: 'area',
+    name: 'Grafico de area',
+    description: 'Una linea con el volumen debajo. Apilada, ensena de que se compone un total.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: area simple, apilada y al 100 %.',
+        {
+          dimensions: { min: 1, max: 1 },
+          measures: { min: 1, max: 4 },
+          notes: 'Apilada responde a «de que se compone ese total», que con lineas hay que sumar.',
+          pozos: POZOS_DE_LINEAS,
+        },
+        PRESENTACION_DE_GRAFICO,
+      ),
+    ],
+  },
+  {
     objectId: 'lineas',
+    icono: 'lineas',
     name: 'Grafico de lineas',
     description: 'Evolucion de una o varias medidas a lo largo de una dimension ordenada.',
     category: 'grafico',
@@ -335,6 +393,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'matriz',
+    icono: 'tabla',
     name: 'Matriz',
     description: 'Cruce jerarquico de dimensiones, con subtotales por nivel.',
     category: 'tabla',
@@ -396,6 +455,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'panel-de-filtros',
+    icono: 'filtro',
     name: 'Panel de filtros',
     description:
       'Agrupa de 1 a 10 dimensiones en un solo objeto, cada una con su propio tipo de selector. ' +
@@ -426,6 +486,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'segmentador',
+    icono: 'filtro',
     name: 'Segmentador',
     description: 'Filtro interactivo sobre los valores de una dimension.',
     category: 'filtro',
@@ -440,6 +501,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'tooltip-explicativo',
+    icono: 'informacion',
     name: 'Tooltip explicativo',
     description:
       'Icono que, al posarse o al enfocarlo, explica que representa el objeto entero. No es el ' +
@@ -458,6 +520,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'tabla-de-datos',
+    icono: 'datos',
     name: 'Tabla de datos',
     description:
       'Emergente con los datos de origen del objeto. Con alcance de objeto muestra todas sus ' +
@@ -474,6 +537,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'mapa',
+    icono: 'lugar',
     name: 'Mapa',
     description: 'Distribucion geografica de una medida por division territorial.',
     category: 'mapa',
@@ -493,6 +557,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
 
   {
     objectId: 'cuadro-de-texto',
+    icono: 'texto',
     name: 'Cuadro de texto',
     description: 'Texto con formato: notas, aclaraciones, contexto. No consume datos.',
     category: 'elemento',
@@ -505,6 +570,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'titulo-de-seccion',
+    icono: 'titulo',
     name: 'Titulo de seccion',
     description: 'Encabeza un grupo de objetos, con lineas que se adaptan al ancho disponible.',
     category: 'elemento',
@@ -517,6 +583,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'linea-divisoria',
+    icono: 'linea',
     name: 'Linea divisoria',
     description: 'Una linea horizontal o vertical, para separar bloques.',
     category: 'elemento',
@@ -529,6 +596,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'forma',
+    icono: 'forma',
     name: 'Forma',
     description: 'Rectangulo, cuadrado, triangulo, circulo, rombo o flecha.',
     category: 'elemento',
@@ -541,6 +609,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'conexion',
+    icono: 'conexion',
     name: 'Conexion',
     description: 'Conector tipo diagrama de flujo entre dos objetos del modulo.',
     category: 'elemento',
@@ -556,6 +625,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
 
   {
     objectId: 'contenedor-simple',
+    icono: 'contenedor',
     name: 'Contenedor simple',
     description: 'Agrupa elementos y visualizaciones en su propia rejilla.',
     category: 'contenedor',
@@ -566,6 +636,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'contenedor-desplazable',
+    icono: 'contenedor',
     name: 'Contenedor desplazable',
     description: 'Como el simple, pero su contenido se desplaza por UN eje: X o Y, nunca los dos.',
     category: 'contenedor',
@@ -576,6 +647,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'contenedor-ampliable',
+    icono: 'expandir',
     name: 'Contenedor ampliable',
     description: 'Ensena parte de su contenido y se amplia a una ventana con su propia rejilla.',
     category: 'contenedor',
@@ -586,6 +658,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'contenedor-con-pestanas',
+    icono: 'pestanas',
     name: 'Contenedor con pestanas',
     description: 'Varias pestanas, cada una con su propio contenido y su propia disposicion.',
     category: 'contenedor',

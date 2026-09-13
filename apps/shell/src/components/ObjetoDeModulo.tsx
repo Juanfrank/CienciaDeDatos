@@ -18,7 +18,9 @@ import { ConexionEnRejilla } from './ConexionEnRejilla';
 import { PanelDeFiltros } from './PanelDeFiltros';
 import { Segmentador } from './Segmentador';
 import {
+  Area,
   Barras,
+  BarrasHorizontales,
   Lineas,
   Matriz,
   ObjetoGenerandose,
@@ -81,7 +83,11 @@ export function ObjetoDeModulo({
   switch (objeto.instance.objectId) {
     case 'cuadro-de-texto':
       return (
-        <Marco titulo={titulo} instance={objeto.instance}>
+        <Marco
+          titulo={titulo}
+          instance={objeto.instance}
+          {...(objeto.icono ? { iconoDelObjeto: objeto.icono } : {})}
+        >
           <CuadroDeTexto config={elemento?.cuadroDeTexto} />
         </Marco>
       );
@@ -132,6 +138,8 @@ export function ObjetoDeModulo({
     agregaciones: objeto.agregaciones,
     // Las ranuras viajan con el objeto: sin ellas los renderizadores volverian a leer por posicion.
     ...(objeto.ranuras ? { ranuras: objeto.ranuras } : {}),
+    // Y el icono, por lo mismo: el cliente no tiene el registro.
+    ...(objeto.icono ? { iconoDelObjeto: objeto.icono } : {}),
     // Los objetos esperan un `onFiltrar`; sin filtrado cruzado se les pasa uno que no hace nada,
     // y ellos deciden no ofrecer el gesto por su cuenta cuando no hay dimension.
     onFiltrar: onFiltrar ?? SIN_FILTRADO,
@@ -142,6 +150,10 @@ export function ObjetoDeModulo({
       return <TarjetaKpi {...props} />;
     case 'barras':
       return <Barras {...props} />;
+    case 'barras-horizontales':
+      return <BarrasHorizontales {...props} />;
+    case 'area':
+      return <Area {...props} />;
     case 'lineas':
       return <Lineas {...props} />;
     case 'tabla':
@@ -149,7 +161,14 @@ export function ObjetoDeModulo({
     case 'matriz':
       return <Matriz {...props} />;
     case 'panel-de-filtros':
-      return <PanelDeFiltros titulo={titulo} instance={objeto.instance} result={result} />;
+      return (
+        <PanelDeFiltros
+          titulo={titulo}
+          instance={objeto.instance}
+          result={result}
+          {...(objeto.icono ? { iconoDelObjeto: objeto.icono } : {})}
+        />
+      );
     case 'segmentador': {
       const dimension = objeto.instance.binding.dimensions[0];
       if (!dimension) return <ObjetoRoto titulo={titulo} problems={[]} />;
@@ -160,6 +179,7 @@ export function ObjetoDeModulo({
           opciones={toSlicerOptions(result, dimension)}
           instance={objeto.instance}
           result={result}
+          {...(objeto.icono ? { iconoDelObjeto: objeto.icono } : {})}
         />
       );
     }

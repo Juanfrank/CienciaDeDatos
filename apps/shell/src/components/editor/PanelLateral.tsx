@@ -18,7 +18,7 @@ import {
 } from '@app/ui-components';
 import { type ObjectCategory, esContenedor, esElemento } from '@app/ui-components';
 import type { DatasetDePaleta, ObjetoDePaleta } from '../../server/editor';
-import { Icono, type NombreDeIcono } from '../iconos/Icono';
+import { Icono } from '../iconos/Icono';
 import { ConfiguracionDeObjetoEditor } from './ConfiguracionDeObjetoEditor';
 import { Pestanas, type DefinicionDePestana } from './Pestanas';
 import { Pozo } from './Pozo';
@@ -43,29 +43,6 @@ import { Seccion } from './Seccion';
  */
 
 type Pestana = 'objetos' | 'datos' | 'formato' | 'complementos';
-
-/** Icono con el que cada tipo se ofrece en la tienda. */
-const ICONO_DE_TIPO: Record<string, NombreDeIcono> = {
-  'tarjeta-kpi': 'indicador',
-  barras: 'barras',
-  lineas: 'lineas',
-  tabla: 'tabla',
-  matriz: 'tabla',
-  segmentador: 'filtro',
-  'panel-de-filtros': 'filtro',
-  mapa: 'lugar',
-  'tooltip-explicativo': 'informacion',
-  'tabla-de-datos': 'datos',
-  'cuadro-de-texto': 'texto',
-  'titulo-de-seccion': 'titulo',
-  'linea-divisoria': 'linea',
-  forma: 'forma',
-  conexion: 'conexion',
-  'contenedor-simple': 'contenedor',
-  'contenedor-desplazable': 'contenedor',
-  'contenedor-ampliable': 'expandir',
-  'contenedor-con-pestanas': 'pestanas',
-};
 
 export function PanelLateral({
   objetos,
@@ -302,7 +279,9 @@ function ListaDeObjetos({
             title={o.description}
             onClick={() => onAnadir(o.objectId)}
           >
-            <Icono nombre={ICONO_DE_TIPO[o.objectId] ?? 'barras'} tamano={22} />
+            {/* El icono lo declara el OBJETO. Habia un mapa aqui y otro en la tarjeta, y publicar
+                un objeto nuevo dejaba a los dos sin entrada. */}
+            <Icono nombre={o.icono} tamano={22} />
             <span className="tienda__nombre">{o.name}</span>
             {conContrato ? (
               <span className="tienda__contrato">
@@ -710,7 +689,7 @@ function Complementos({
                   data-testid={`adjuntar-${o.objectId}-${item.id}`}
                   onClick={() => anadir(o.objectId, o.version)}
                 >
-                  <Icono nombre={ICONO_DE_TIPO[o.objectId] ?? 'informacion'} tamano={22} />
+                  <Icono nombre={o.icono} tamano={22} />
                   <span className="tienda__nombre">{o.name}</span>
                   <span className="tienda__contrato">{yaPuesto ? 'ya puesto' : 'anadir'}</span>
                 </button>
