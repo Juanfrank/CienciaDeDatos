@@ -1,8 +1,8 @@
 import type {
   ConsultaResuelta,
   INaturalLanguageResolver,
-  Intencion,
-  Vocabulario,
+  Intent,
+  Vocabulary,
 } from './types';
 
 /** Resolutor local y determinista. */
@@ -29,7 +29,7 @@ const VACIAS = new Set(
   ].map(normalizar),
 );
 
-const PALABRAS_DESGLOSE = new Set(['por', 'segun', 'desglosado', 'desglose', 'cada', 'agrupado']);
+const WORDS_BREAKDOWN = new Set(['por', 'segun', 'desglosado', 'desglose', 'cada', 'agrupado']);
 const PALABRAS_RANKING = new Set(['top', 'mayores', 'mayor', 'principales', 'primeros', 'ranking']);
 
 const tokenizar = (content: string): string[] =>
@@ -58,7 +58,7 @@ interface Candidato {
 }
 
 export class ResolvedorLocal implements INaturalLanguageResolver {
-  resolver(pregunta: string, vocabulario: Vocabulario): ConsultaResuelta {
+  resolver(pregunta: string, vocabulary: Vocabulary): ConsultaResuelta {
     const tokens = tokenizar(pregunta);
     const consumido = new Array<boolean>(tokens.length).fill(false);
     const candidatos: Candidato[] = [];
@@ -68,7 +68,7 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
     for (const gram of ngramas(tokens)) {
       if (consumido.slice(gram.desde, gram.hasta + 1).some(Boolean)) continue;
 
-      const encontrado = this.search(gram.content, vocabulario);
+      const encontrado = this.search(gram.content, vocabulary);
       if (!encontrado) continue;
 
       candidatos.push({ ...encontrado, desde: gram.desde, hasta: gram.hasta });
@@ -82,25 +82,25 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
     }
 
     const measure = candidatos.find((c) => c.tipo === 'measure')?.clave;
-    const dimensionMencionada = candidatos.find((c) => c.tipo === 'dimension')?.clave;
+    const mentionedDimension = candidatos.find((c) => c.tipo === 'dimension')?.clave;
 
     const restantes = tokens.filter((t, i) => !consumido[i]);
-    const palabras = new Set(restantes);
-    const intencion: Intencion = [...palabras].some((p) => PALABRAS_RANKING.has(p))
+    const words = new Set(restantes);
+    const intent: Intent = [...words].some((p) => PALABRAS_RANKING.has(p))
       ? 'ranking'
-      : [...palabras].some((p) => PALABRAS_DESGLOSE.has(p)) && dimensionMencionada
+      : [...words].some((p) => WORDS_BREAKDOWN.has(p)) && mentionedDimension
         ? 'desglose'
-        : dimensionMencionada
+        : mentionedDimension
           ? 'desglose'
           : 'total';
 
-    const limite = intencion === 'ranking' ? this.numeroEn(restantes) : undefined;
+    const limite = intent === 'ranking' ? this.numeroEn(restantes) : undefined;
 
     // Las palabras de intencion y las vacias no son "no entendidas": se usaron para decidir.
     const noEntendido = restantes.filter(
       (t) =>
         !VACIAS.has(t) &&
-        !PALABRAS_DESGLOSE.has(t) &&
+        !WORDS_BREAKDOWN.has(t) &&
         !PALABRAS_RANKING.has(t) &&
         !/^\d+$/.test(t),
     );
@@ -108,13 +108,13 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
     const resoluble = measure !== undefined || Object.keys(filtros).length > 0;
 
     return {
-      intencion,
+      intent,
       ...(measure ? { measure } : {}),
-      ...(dimensionMencionada ? { groupBy: dimensionMencionada } : {}),
+      ...(mentionedDimension ? { groupBy: mentionedDimension } : {}),
       filters: filtros,
       ...(limite !== undefined ? { limite } : {}),
       noEntendido,
-      explicacion: this.explicar(vocabulario, measure, dimensionMencionada, filtros, intencion),
+      explicacion: this.explicar(vocabulary, measure, mentionedDimension, filtros, intent),
       resoluble,
     };
   }
@@ -126,19 +126,19 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
 
   private search(
     content: string,
-    vocabulario: Vocabulario,
+    vocabulary: Vocabulary,
   ): { tipo: Candidato['tipo']; clave: string; valor?: string } | undefined {
-    for (const valor of vocabulario.values) {
+    for (const valor of vocabulary.values) {
       if (normalizar(valor.valor) === content) {
         return { tipo: 'valor', clave: valor.dimension, valor: valor.valor };
       }
     }
-    for (const medida of vocabulario.measures) {
+    for (const medida of vocabulary.measures) {
       if (normalizar(medida.etiqueta) === content || normalizar(medida.clave) === content) {
         return { tipo: 'measure', clave: medida.clave };
       }
     }
-    for (const dim of vocabulario.dimensions) {
+    for (const dim of vocabulary.dimensions) {
       if (normalizar(dim.etiqueta) === content || normalizar(dim.clave) === content) {
         return { tipo: 'dimension', clave: dim.clave };
       }
@@ -147,20 +147,20 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
   }
 
   private explicar(
-    vocabulario: Vocabulario,
+    vocabulary: Vocabulary,
     measure: string | undefined,
     groupBy: string | undefined,
     filtros: Record<string, string[]>,
-    intencion: Intencion,
+    intent: Intent,
   ): string {
-    const nombreDe = (clave: string, lista: Vocabulario['measures']) =>
+    const nombreDe = (clave: string, lista: Vocabulary['measures']) =>
       lista.find((t) => t.clave === clave)?.etiqueta ?? clave;
 
     const partes: string[] = [];
-    if (measure) partes.push(nombreDe(measure, vocabulario.measures));
+    if (measure) partes.push(nombreDe(measure, vocabulary.measures));
     if (groupBy) {
       partes.push(
-        `${intencion === 'ranking' ? 'ordenado por' : 'por'} ${nombreDe(groupBy, vocabulario.dimensions)}`,
+        `${intent === 'ranking' ? 'ordenado por' : 'por'} ${nombreDe(groupBy, vocabulary.dimensions)}`,
       );
     }
 
@@ -168,7 +168,7 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
     if (entradas.length > 0) {
       partes.push(
         `filtrado a ${entradas
-          .map(([d, v]) => `${nombreDe(d, vocabulario.dimensions)} = ${v.join(', ')}`)
+          .map(([d, v]) => `${nombreDe(d, vocabulary.dimensions)} = ${v.join(', ')}`)
           .join(' y ')}`,
       );
     }
@@ -178,7 +178,7 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
 }
 
 /** URL que responde a la consulta — seccion 4.11. */
-export function urlDeConsulta(moduleSlug: string, consulta: ConsultaResuelta): string {
+export function queryUrl(moduleSlug: string, consulta: ConsultaResuelta): string {
   const params = new URLSearchParams();
   for (const [fieldName, valores] of Object.entries(consulta.filters)) {
     for (const v of valores) params.append(fieldName, v);

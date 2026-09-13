@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { urlDeConsulta } from '@app/nl-query';
+import { queryUrl } from '@app/nl-query';
 import { resolverPregunta } from '../../../src/server/consulta';
 import { sinSesion } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/sesion';
@@ -40,6 +40,6 @@ export async function POST(request: Request) {
     resoluble: consulta.resoluble,
     noEntendido: consulta.noEntendido,
     filtros: consulta.filters,
-    url: urlDeConsulta(moduleSlug, consulta),
+    url: queryUrl(moduleSlug, consulta),
   });
 }

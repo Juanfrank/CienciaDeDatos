@@ -1,10 +1,10 @@
 /** Consulta en lenguaje natural — seccion 4.9. */
-export { ResolvedorLocal, normalizar, urlDeConsulta } from './resolver';
+export { ResolvedorLocal, normalizar, queryUrl } from './resolver';
 export type {
   ConsultaResuelta,
   INaturalLanguageResolver,
-  Intencion,
-  TerminoDeVocabulario,
-  ValorDeDimension,
-  Vocabulario,
+  Intent,
+  VocabularyTerm,
+  DimensionValue,
+  Vocabulary,
 } from './types';

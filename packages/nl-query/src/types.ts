@@ -1,13 +1,13 @@
 /** Consulta en lenguaje natural — seccion 4.9. */
 
-export interface TerminoDeVocabulario {
+export interface VocabularyTerm {
   /** Lo que se escribe en la URL: nombre de medida o clave de dimension. */
   clave: string;
   /** Como se dice en la interfaz. */
   etiqueta: string;
 }
 
-export interface ValorDeDimension {
+export interface DimensionValue {
   dimension: string;
   valor: string;
 }
@@ -17,19 +17,19 @@ export interface ValorDeDimension {
  *
  * Se construye por persona y por modulo, nunca una vez para toda la aplicacion.
  */
-export interface Vocabulario {
+export interface Vocabulary {
   moduleSlug: string;
-  measures: TerminoDeVocabulario[];
-  dimensions: TerminoDeVocabulario[];
+  measures: VocabularyTerm[];
+  dimensions: VocabularyTerm[];
   /** Valores presentes en los datos que quien pregunta puede ver. */
-  values: ValorDeDimension[];
+  values: DimensionValue[];
 }
 
-export type Intencion = 'total' | 'desglose' | 'ranking';
+export type Intent = 'total' | 'desglose' | 'ranking';
 
 export interface ConsultaResuelta {
   /** Que se entendio. Vacio si no se entendio nada reconocible. */
-  intencion: Intencion;
+  intent: Intent;
   measure?: string;
   /** Dimension por la que agrupar, cuando la pregunta pide un desglose. */
   groupBy?: string;
@@ -46,5 +46,5 @@ export interface ConsultaResuelta {
 
 /** Puerto del resolutor. */
 export interface INaturalLanguageResolver {
-  resolver(pregunta: string, vocabulario: Vocabulario): ConsultaResuelta;
+  resolver(pregunta: string, vocabulary: Vocabulary): ConsultaResuelta;
 }

@@ -414,7 +414,8 @@
     "institucional",
     "tipografico",
     "derivado",
-    "derivada"
+    "derivada",
+    "mencionada"
   ],
   "_singular": {
     "bars": "bar",
@@ -525,5 +526,12 @@
   "advertencia": "warning",
   "negrita": "bold",
   "cursiva": "italic",
-  "subrayado": "underline"
+  "subrayado": "underline",
+  "consulta": "query",
+  "vocabulario": "vocabulary",
+  "termino": "term",
+  "palabras": "words",
+  "mencionada": "mentioned",
+  "intencion": "intent",
+  "resolutor": "resolver"
 }
