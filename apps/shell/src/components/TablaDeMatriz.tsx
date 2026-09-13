@@ -14,7 +14,7 @@ import {
   leaves,
   ordenarNodos,
   rutaClave,
-  type FormatoCondicional,
+  type ConditionalFormat,
 } from '@app/ui-components';
 import { Icono } from './iconos/Icono';
 
@@ -38,7 +38,7 @@ function CeldaDeCifra({
   valor: number | null;
   medida: string;
   formatear: (n: number | null) => string;
-  condicional?: FormatoCondicional;
+  condicional?: ConditionalFormat;
   total?: boolean;
 }) {
   const color = valor === null ? undefined : colorCondicional(condicional, valor, medida);
@@ -229,7 +229,7 @@ function FilaDeMatriz({
   gridColumns: NodoDeMatriz[];
   plegada: boolean;
   formatear: ((n: number | null) => string)[];
-  condicional?: FormatoCondicional;
+  condicional?: ConditionalFormat;
   onPlegar: () => void;
 }) {
   const tieneHijos = node.hijos.length > 0;

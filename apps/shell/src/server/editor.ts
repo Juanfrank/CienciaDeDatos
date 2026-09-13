@@ -40,7 +40,7 @@ export interface DatasetDePaleta {
   dimensiones: string[];
   medidas: string[];
   /** Tipo de cada columna. Decide que selectores tienen sentido sobre cada dimension. */
-  tipos: Record<string, string>;
+  kinds: Record<string, string>;
   /** Como declara el esquema que se resume cada medida, y a que grano quedaron las filas. */
   aggregations: Record<string, Aggregation>;
   grain: GranoDeDataset;
@@ -93,7 +93,7 @@ export async function paletaDelEditor(): Promise<PaletaDelEditor> {
       description: declarado.description,
       dimensiones: (declarado.query.dimensions ?? []).map(fieldKey).filter((c) => disponibles.has(c)),
       medidas: (declarado.query.measures ?? []).filter((m) => disponibles.has(m)),
-      tipos: Object.fromEntries(disponibles),
+      kinds: Object.fromEntries(disponibles),
       aggregations: Object.fromEntries(
         (declarado.query.measures ?? [])
           .map((m) => [m, declaradas.get(m)] as const)

@@ -47,7 +47,7 @@ export function TooltipExplicativo({ content, titulo }: { content: string; titul
       const icono = el.getBoundingClientRect();
       const caja = tarjeta.getBoundingClientRect();
       const ancho = 260;
-      const hueco = 12;
+      const hole = 12;
 
       /*
        * Se prefiere el lado que NO cae sobre otra tarjeta.
@@ -59,8 +59,8 @@ export function TooltipExplicativo({ content, titulo }: { content: string; titul
           return !(izquierda + ancho <= r.left || izquierda >= r.right);
         }).length;
 
-      const derecha = caja.right + hueco;
-      const izquierda = caja.left - hueco - ancho;
+      const derecha = caja.right + hole;
+      const izquierda = caja.left - hole - ancho;
       const cabeDerecha = derecha + ancho <= window.innerWidth;
       const cabeIzquierda = izquierda >= 0;
 
@@ -73,7 +73,7 @@ export function TooltipExplicativo({ content, titulo }: { content: string; titul
         setSitio({ top: icono.top, left: izquierda });
       } else {
         // Sin sitio a los lados: debajo de la tarjeta entera, no encima de su contenido.
-        setSitio({ top: caja.bottom + hueco, left: Math.max(hueco, caja.left) });
+        setSitio({ top: caja.bottom + hole, left: Math.max(hole, caja.left) });
       }
     };
 
@@ -196,7 +196,7 @@ export function TablaDeDatos({
         {scope === 'subobjeto' && !seleccion ? (
           <>
             <p className="texto-atenuado">
-              Elija una categoria para ver las dataRows que hay detras de su cifra.
+              Elija una categoria para ver las dataRows que hay detras de su figure.
             </p>
             <div className="tabla-contenedor" tabIndex={0} role="region" aria-label="Categorias">
               <table className="tabla">

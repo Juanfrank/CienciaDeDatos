@@ -1,4 +1,4 @@
-import { COMPARADORES, MAX_REGLAS, type FormatoCondicional } from './condicional';
+import { COMPARADORES, MAX_REGLAS, type ConditionalFormat } from './condicional';
 import { esNombreDeIcono, type NombreDeIcono } from './iconos';
 import {
   TIPOS_DE_FORMATO,
@@ -17,10 +17,10 @@ export type AcentoDeObjeto = (typeof ACENTOS)[number];
 
 /** Donde va la leyenda, no solo si esta. */
 export const MODOS_DE_LEYENDA = ['auto', 'oculta', 'arriba', 'abajo', 'izquierda', 'derecha'] as const;
-export type ModoDeLeyenda = (typeof MODOS_DE_LEYENDA)[number];
+export type LegendMode = (typeof MODOS_DE_LEYENDA)[number];
 
 /** Los ejes, como en cualquier herramienta de informes. */
-export interface ConfiguracionDeEjes {
+export interface AxisSettings {
   mostrarX?: boolean;
   mostrarY?: boolean;
   tituloX?: string;
@@ -40,13 +40,13 @@ export interface ConfiguracionDeEjes {
 
 /** ---- Lineas de referencia ---- */
 export const ESTILOS_DE_REFERENCIA = ['solida', 'discontinua', 'punteada'] as const;
-export type EstiloDeReferencia = (typeof ESTILOS_DE_REFERENCIA)[number];
+export type ReferenceStyle = (typeof ESTILOS_DE_REFERENCIA)[number];
 
-export interface LineaDeReferencia {
+export interface ReferenceLine {
   valor: number;
   etiqueta?: string;
   color?: ColorDeTexto;
-  estilo?: EstiloDeReferencia;
+  estilo?: ReferenceStyle;
 }
 
 /** Mas de tres rayas sobre un grafico dejan de ser referencias y pasan a ser una rejilla. */
@@ -54,7 +54,7 @@ export const MAX_REFERENCIAS = 3;
 
 /** Como se apilan las series. */
 export const MODOS_DE_APILADO = ['ninguno', 'apilado', 'porcentaje'] as const;
-export type ModoDeApilado = (typeof MODOS_DE_APILADO)[number];
+export type StackingMode = (typeof MODOS_DE_APILADO)[number];
 
 /** ---- Circular: pastel y dona ---- */
 export const ETIQUETAS_CIRCULARES = [
@@ -64,12 +64,12 @@ export const ETIQUETAS_CIRCULARES = [
   'porcentaje',
   'categoria-porcentaje',
 ] as const;
-export type EtiquetaCircular = (typeof ETIQUETAS_CIRCULARES)[number];
+export type PieLabel = (typeof ETIQUETAS_CIRCULARES)[number];
 
-export interface ConfiguracionCircular {
+export interface PieSettings {
   /** El hueco del centro, en porcentaje del radio. 0 es un pastel; 55 es una dona. */
   radioInterior?: number;
-  labels?: EtiquetaCircular;
+  labels?: PieLabel;
   /** Ordenar las porciones de mayor a menor. Encendido por defecto: es como se compara un area. */
   ordenar?: boolean;
   /** El total en el centro de la dona. Solo se dibuja si hay hueco donde ponerlo. */
@@ -78,25 +78,25 @@ export interface ConfiguracionCircular {
 
 /** ---- Medidor (tacometro) ---- */
 /** ---- Combinado de columnas y lineas ---- */
-export interface ConfiguracionDeCombinado {
+export interface ComboSettings {
   ejeSecundario?: boolean;
 }
 
 /** ---- Embudo ---- */
 export const COMPARACIONES_DE_EMBUDO = ['primero', 'anterior', 'ninguna'] as const;
-export type ComparacionDeEmbudo = (typeof COMPARACIONES_DE_EMBUDO)[number];
+export type FunnelComparison = (typeof COMPARACIONES_DE_EMBUDO)[number];
 
-export interface ConfiguracionDeEmbudo {
-  comparar?: ComparacionDeEmbudo;
+export interface FunnelSettings {
+  compare?: FunnelComparison;
 }
 
 /** ---- Cascada ---- */
-export interface ConfiguracionDeCascada {
+export interface WaterfallSettings {
   /** Una ultima barra, desde cero, con la suma. Encendida por defecto: es a donde lleva todo. */
   mostrarTotal?: boolean;
 }
 
-export interface ConfiguracionDeMedidor {
+export interface GaugeSettings {
   minimo?: number;
   maximo?: number;
   /** El objetivo, cuando es un numero fijo y no una medida del dataset. */
@@ -197,7 +197,7 @@ export function estiloDeTexto(estilo: EstiloDeTexto | undefined): Record<string,
 export const POSICIONES_DE_DATO = ['auto', 'encima', 'debajo', 'dentro'] as const;
 export type PosicionDeDato = (typeof POSICIONES_DE_DATO)[number];
 
-export interface ConfiguracionDeEtiquetas {
+export interface LabelSettings {
   mostrar?: boolean;
   cellPosition?: PosicionDeDato;
   /** Solo el maximo y el minimo de cada serie. Con muchas categorias es la unica opcion legible. */
@@ -205,9 +205,9 @@ export interface ConfiguracionDeEtiquetas {
 }
 
 /** La forma anterior era un `boolean`, y lo sigue siendo para lo ya guardado. */
-export type EtiquetasDeDato = boolean | ConfiguracionDeEtiquetas;
+export type DatumLabels = boolean | LabelSettings;
 
-export function etiquetasNormalizadas(valor: EtiquetasDeDato | undefined): ConfiguracionDeEtiquetas {
+export function etiquetasNormalizadas(valor: DatumLabels | undefined): LabelSettings {
   if (valor === undefined) return { mostrar: false };
   if (typeof valor === 'boolean') return { mostrar: valor };
   return { mostrar: true, ...valor };
@@ -220,7 +220,7 @@ export interface ConfiguracionDeMultiplos {
   mismaEscala?: boolean;
 }
 
-export interface ConfiguracionDeTooltip {
+export interface TooltipSettings {
   /** Una ultima fila con la suma de las series de esa categoria. */
   total?: boolean;
   /** Ordenar las filas de mayor a menor en vez de por el orden de las series. */
@@ -257,25 +257,25 @@ export interface PresentacionDeObjeto {
   formato?: FormatoNumerico;
   /** Formato de numero POR MEDIDA, con un renglon general de respaldo. */
   formatos?: FormatosDelObjeto;
-  leyenda?: ModoDeLeyenda;
+  leyenda?: LegendMode;
   /** La cifra encima de cada barra o punto, con el formato de SU medida. */
-  etiquetasDeDato?: EtiquetasDeDato;
-  tooltip?: ConfiguracionDeTooltip;
+  etiquetasDeDato?: DatumLabels;
+  tooltip?: TooltipSettings;
   multiplos?: ConfiguracionDeMultiplos;
   /** Que el color dependa del dato: reglas evaluadas en orden, gana la primera que casa. */
-  condicional?: FormatoCondicional;
-  ejes?: ConfiguracionDeEjes;
+  condicional?: ConditionalFormat;
+  ejes?: AxisSettings;
   orden?: OrdenDeCategorias;
-  apilado?: ModoDeApilado;
-  circular?: ConfiguracionCircular;
-  combinado?: ConfiguracionDeCombinado;
+  apilado?: StackingMode;
+  circular?: PieSettings;
+  combinado?: ComboSettings;
   /** La meta, el promedio, el umbral: hasta tres rayas sobre el area de dibujo. */
-  referencias?: LineaDeReferencia[];
+  referencias?: ReferenceLine[];
   /** Que color de la paleta usa cada serie, por indice. */
   coloresDeSerie?: number[];
-  embudo?: ConfiguracionDeEmbudo;
-  cascada?: ConfiguracionDeCascada;
-  medidor?: ConfiguracionDeMedidor;
+  embudo?: FunnelSettings;
+  cascada?: WaterfallSettings;
+  medidor?: GaugeSettings;
   /** Peso, estilo, alineacion y color de los textos del objeto. */
   textos?: TextosDeObjeto;
 }
@@ -557,13 +557,13 @@ export function validarPresentacion(
   }
 
   if (
-    presentacion.embudo?.comparar !== undefined &&
-    !(COMPARACIONES_DE_EMBUDO as readonly string[]).includes(presentacion.embudo.comparar)
+    presentacion.embudo?.compare !== undefined &&
+    !(COMPARACIONES_DE_EMBUDO as readonly string[]).includes(presentacion.embudo.compare)
   ) {
     problems.push({
       clave: 'embudo.comparar',
       issue:
-        `'${String(presentacion.embudo.comparar)}' no es una comparacion. ` +
+        `'${String(presentacion.embudo.compare)}' no es una comparacion. ` +
         `Use: ${COMPARACIONES_DE_EMBUDO.join(', ')}.`,
     });
   }

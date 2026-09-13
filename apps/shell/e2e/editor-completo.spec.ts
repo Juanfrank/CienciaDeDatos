@@ -164,14 +164,14 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
 
     await page.getByTestId('pestana-formato').click();
     await abrirSecciones(page);
-    const comparar = page.getByTestId(`pres-${item}-comparar`);
-    await expect(comparar).toBeVisible();
+    const compare = page.getByTestId(`pres-${item}-comparar`);
+    await expect(compare).toBeVisible();
 
-    await comparar.selectOption('anterior');
+    await compare.selectOption('anterior');
     await guardado(page);
     await expect(page.getByTestId('embudo').first()).toContainText('De la anterior');
 
-    await comparar.selectOption('primero');
+    await compare.selectOption('primero');
     await guardado(page);
     await expect(page.getByTestId('embudo').first()).toContainText('De la primera');
   });

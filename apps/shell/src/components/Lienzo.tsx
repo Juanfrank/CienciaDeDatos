@@ -3,26 +3,26 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { CategoricalViewModel } from '@app/ui-components';
 import {
-  UMBRAL_DE_ELEMENTOS,
-  elementosDe,
-  opcionesDe,
-  type PaletaDeGrafico,
+  ELEMENT_THRESHOLD,
+  elementsOf,
+  optionsOf,
+  type ChartPalette,
   type PresentacionDeObjeto,
-  type TipoDeGrafico,
+  type ChartKind,
 } from '@app/ui-components';
 
 /** Monta un grafico de Apache ECharts sobre un contenedor. */
 
 export interface LienzoProps {
-  tipo: TipoDeGrafico;
+  tipo: ChartKind;
   vm: CategoricalViewModel;
-  palette: PaletaDeGrafico;
+  palette: ChartPalette;
   titulo: string;
   dimension?: string;
   presentacion?: PresentacionDeObjeto;
   formatear?: (valor: number, serie: number) => string;
   /** Solo el combinado: cuantas series iniciales son columnas. Sale del mapeo, no del formato. */
-  seriesDeColumna?: number;
+  columnSeries?: number;
   /** Se invoca al pulsar una categoria, para el filtrado cruzado (4.4). */
   onSeleccionar?: (categoria: string) => void;
   /** Se avisa cuando el grafico esta montado, para ocultar el respaldo visual. */
@@ -37,7 +37,7 @@ export default function Lienzo({
   dimension,
   presentacion,
   formatear,
-  seriesDeColumna,
+  columnSeries,
   onSeleccionar,
   onMontado,
 }: LienzoProps) {
@@ -57,7 +57,7 @@ export default function Lienzo({
    */
   const opciones = useMemo(
     () =>
-      opcionesDe(tipo, {
+      optionsOf(tipo, {
         vm,
         palette,
         titulo,
@@ -79,15 +79,15 @@ export default function Lienzo({
         ...(presentacion?.referencias ? { referencias: presentacion.referencias } : {}),
         ...(presentacion?.coloresDeSerie ? { coloresDeSerie: presentacion.coloresDeSerie } : {}),
         ...(presentacion?.condicional ? { condicional: presentacion.condicional } : {}),
-        ...(seriesDeColumna === undefined ? {} : { seriesDeColumna }),
+        ...(columnSeries === undefined ? {} : { columnSeries }),
         ...(formatear ? { formatear } : {}),
       }),
     // `formatear` se redefine en cada render del padre, asi que NO entra en las dependencias: lo
     // que de verdad decide como se formatea es la presentacion, y esa si esta.
-    [tipo, vm, palette, titulo, dimension, presentacion, seriesDeColumna],
+    [tipo, vm, palette, titulo, dimension, presentacion, columnSeries],
   );
   const clave = useMemo(() => JSON.stringify(opciones), [opciones]);
-  const porDefecto: 'canvas' | 'svg' = elementosDe(vm) >= UMBRAL_DE_ELEMENTOS ? 'canvas' : 'svg';
+  const porDefecto: 'canvas' | 'svg' = elementsOf(vm) >= ELEMENT_THRESHOLD ? 'canvas' : 'svg';
 
   /*
    * Las opciones viajan por referencia, y se le entrega a ECharts el OBJETO, no la cadena.

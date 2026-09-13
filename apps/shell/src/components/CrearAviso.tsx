@@ -65,7 +65,7 @@ export function CrearAviso({
 
   const guardar = async () => {
     setError('');
-    const comun = {
+    const common = {
       nombre,
       modulo: moduleSlug,
       pagina: pageSlug,
@@ -74,8 +74,8 @@ export function CrearAviso({
 
     const body =
       pestana === 'alerta'
-        ? { ...comun, objeto, medida, operador, umbral: Number(umbral) }
-        : { ...comun, formato, cadencia, hora: Number(hora) };
+        ? { ...common, objeto, medida, operador, umbral: Number(umbral) }
+        : { ...common, formato, cadencia, hora: Number(hora) };
 
     const respuesta = await fetch(pestana === 'alerta' ? '/api/alertas' : '/api/suscripciones', {
       method: 'POST',

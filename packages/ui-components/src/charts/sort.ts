@@ -2,7 +2,7 @@ import type { OrdenDeCategorias } from '../presentacion/contrato';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
 /** Ordena las categorias del eje. */
-export function ordenarCategorias(
+export function sortCategories(
   vm: CategoricalViewModel,
   orden: OrdenDeCategorias | undefined,
 ): CategoricalViewModel {

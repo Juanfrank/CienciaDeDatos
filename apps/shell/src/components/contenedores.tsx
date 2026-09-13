@@ -68,7 +68,7 @@ export function ContenedorSimple({ objeto, titulo, config, dibujar }: PropsDeCon
     <Marco titulo={titulo} instance={objeto.instance}>
       <div className="contenedor" data-testid="contenedor-simple">
         <RejillaInterna
-          panel={objeto.paneles?.[0]}
+          panel={objeto.panels?.[0]}
           gridColumns={columnasDe('contenedor-simple', config)}
           dibujar={dibujar}
         />
@@ -102,7 +102,7 @@ export function ContenedorDesplazable({ objeto, titulo, config, dibujar }: Props
           // el ancho visible, no habria nada que desplazar y el contenedor no haria nada.
           style={eje === 'x' ? { minWidth: `${gridColumns * 180}px` } : undefined}
         >
-          <RejillaInterna panel={objeto.paneles?.[0]} gridColumns={gridColumns} dibujar={dibujar} />
+          <RejillaInterna panel={objeto.panels?.[0]} gridColumns={gridColumns} dibujar={dibujar} />
         </div>
       </div>
     </Marco>
@@ -136,7 +136,7 @@ export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDe
         }
       >
         <div className="contenedor" data-testid="contenedor-ampliable">
-          <RejillaInterna panel={objeto.paneles?.[0]} gridColumns={gridColumns} dibujar={dibujar} />
+          <RejillaInterna panel={objeto.panels?.[0]} gridColumns={gridColumns} dibujar={dibujar} />
         </div>
       </Marco>
 
@@ -166,7 +166,7 @@ export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDe
             </div>
             <div className="contenedor contenedor--ampliado">
               <RejillaInterna
-                panel={objeto.paneles?.[0]}
+                panel={objeto.panels?.[0]}
                 gridColumns={columnasAmpliado}
                 dibujar={dibujar}
               />
@@ -182,10 +182,10 @@ export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDe
 
 /** Varias pestanas, cada una con su contenido y su disposicion. */
 export function ContenedorConPestanas({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
-  const paneles = objeto.paneles ?? [];
+  const panels = objeto.panels ?? [];
   const inicial = config?.pestanas?.pestanaInicial;
   const [activa, setActiva] = useState(
-    paneles.some((p) => p.panelId === inicial) ? (inicial as string) : (paneles[0]?.panelId ?? ''),
+    panels.some((p) => p.panelId === inicial) ? (inicial as string) : (panels[0]?.panelId ?? ''),
   );
   const gridColumns = columnasDe('contenedor-con-pestanas', config);
   const id = useId();
@@ -194,7 +194,7 @@ export function ContenedorConPestanas({ objeto, titulo, config, dibujar }: Props
     <Marco titulo={titulo} instance={objeto.instance}>
       <div className="contenedor contenedor--pestanas" data-testid="contenedor-con-pestanas">
         <div className="contenedor__pestanas" role="tablist" aria-label={titulo}>
-          {paneles.map((panel) => (
+          {panels.map((panel) => (
             <button
               key={panel.panelId}
               type="button"
@@ -209,11 +209,11 @@ export function ContenedorConPestanas({ objeto, titulo, config, dibujar }: Props
               data-testid={`pestana-${panel.panelId}`}
               onClick={() => setActiva(panel.panelId)}
               onKeyDown={(e) => {
-                const i = paneles.findIndex((p) => p.panelId === activa);
+                const i = panels.findIndex((p) => p.panelId === activa);
                 const salto = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
                 if (salto === 0) return;
                 e.preventDefault();
-                const destino = paneles[(i + salto + paneles.length) % paneles.length];
+                const destino = panels[(i + salto + panels.length) % panels.length];
                 if (destino) setActiva(destino.panelId);
               }}
             >
@@ -222,7 +222,7 @@ export function ContenedorConPestanas({ objeto, titulo, config, dibujar }: Props
           ))}
         </div>
 
-        {paneles.map((panel) => (
+        {panels.map((panel) => (
           <div
             key={panel.panelId}
             id={`${id}-panel-${panel.panelId}`}

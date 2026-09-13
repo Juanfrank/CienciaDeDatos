@@ -15,7 +15,7 @@ export interface ReglaDeColor {
   color: ColorDeTexto;
 }
 
-export interface FormatoCondicional {
+export interface ConditionalFormat {
   rules: ReglaDeColor[];
 }
 
@@ -49,7 +49,7 @@ function cumple(colorRule: ReglaDeColor, valor: number): boolean {
 
 /** El color que le toca a un valor, o nada. */
 export function colorCondicional(
-  condicional: FormatoCondicional | undefined,
+  condicional: ConditionalFormat | undefined,
   valor: number | null | undefined,
   medida?: string,
 ): ColorDeTexto | undefined {

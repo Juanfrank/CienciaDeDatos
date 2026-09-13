@@ -122,7 +122,7 @@ export function ReglasDeColor({
                 }
               />
               {/* Sin el otro extremo la regla no casa nunca, y se rechaza al guardar. */}
-              <span className="campo__pista">Los dos extremos entran.</span>
+              <span className="campo__pista">Los dos ends entran.</span>
             </label>
           ) : null}
 

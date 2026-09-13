@@ -99,10 +99,10 @@ test.describe('el limite de 4.6 se comprueba en el backend', () => {
 
   test('no se puede dejar la vista vacia', async ({ page }) => {
     const vista = await (await page.request.get(`/api/modulos/${MODULO}/vista`)).json();
-    const todos = (vista.objetos as { id: string }[]).map((o) => o.id);
+    const all = (vista.objetos as { id: string }[]).map((o) => o.id);
 
     const respuesta = await page.request.put(`/api/modulos/${MODULO}/vista`, {
-      data: { ocultos: todos },
+      data: { ocultos: all },
     });
     expect(respuesta.status()).toBe(400);
   });

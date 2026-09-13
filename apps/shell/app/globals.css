@@ -822,7 +822,7 @@ input[type='radio'] {
 /*
  * Por debajo de dos paneles legibles, uno.
  *
- * `columnasPara` elige la rejilla mas cuadrada por el NUMERO de paneles, y no puede hacer otra
+ * `columnsFor` elige la rejilla mas cuadrada por el NUMERO de paneles, y no puede hacer otra
  * cosa: es una funcion pura que corre en el servidor y no sabe en que pantalla va a caer. Dos
  * columnas en un movil dejan cada panel en 170 px, donde no cabe ni el rotulo del eje.
  *

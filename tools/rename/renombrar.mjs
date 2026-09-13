@@ -25,6 +25,9 @@ import { segmentar, unir } from './segmentos.mjs';
 
 const GLOSARIO = JSON.parse(readFileSync('tools/rename/glosario.json', 'utf8'));
 const ENLACES = new Set(['de', 'del', 'en', 'por', 'con', 'a', 'y', 'que', 'para', 'un', 'una']);
+
+/** El enlace del final se conserva: distingue el valor (`margen`) de la funcion (`margenDe`). */
+const PREPOSICIONES = { de: 'of', del: 'of', para: 'for', en: 'in', por: 'by', que: 'where' };
 const VERBOS = new Set(GLOSARIO['_verbos']);
 const ADJETIVOS = new Set(GLOSARIO['_adjetivos']);
 const SINGULAR = GLOSARIO['_singular'];
@@ -125,8 +128,27 @@ export function traducir(identificador) {
     return propuesto === identificador ? null : propuesto;
   }
 
-  const partes = palabras(identificador);
+  let partes = palabras(identificador);
   if (partes.length === 0) return null;
+
+  /*
+   * El enlace del final y el `con` del principio se conservan como preposicion inglesa.
+   *
+   * Sin esto, `margen` y `margenDe` traducen los dos a `margin` y no compilan en el mismo ambito;
+   * lo mismo con `extremos`/`extremosDe` y `porciones`/`porcionesDe`. El enlace no es ruido: es
+   * la diferencia entre el valor y la funcion que lo calcula.
+   */
+  let sufijo = '';
+  let prefijo = '';
+  const ultimo = partes[partes.length - 1];
+  if (partes.length > 1 && PREPOSICIONES[ultimo] !== undefined) {
+    sufijo = PREPOSICIONES[ultimo];
+    partes = partes.slice(0, -1);
+  }
+  if (partes.length > 1 && partes[0] === 'con') {
+    prefijo = 'with';
+    partes = partes.slice(1);
+  }
 
   const hayComplemento = partes.some((p) => ENLACES.has(p) && p !== 'y');
   const utiles = partes.filter((p) => !ENLACES.has(p));
@@ -151,7 +173,8 @@ export function traducir(identificador) {
 
   const planas = ordenadas.flatMap((p) => palabras(p));
   const atributivas = planas.map((p, i) => (i < planas.length - 1 ? (SINGULAR[p] ?? p) : p));
-  const propuesto = recomponer(atributivas, estilo(identificador));
+  const conAfijos = [...(prefijo ? [prefijo] : []), ...atributivas, ...(sufijo ? [sufijo] : [])];
+  const propuesto = recomponer(conAfijos, estilo(identificador));
   if (propuesto === identificador) return null;
   return RESERVADAS.has(propuesto) ? null : propuesto;
 }
@@ -482,6 +505,33 @@ function especificadoresRotos() {
   return rotos;
 }
 
+/*
+ * Una cadena en posicion de PROPIEDAD sigue siendo un nombre de propiedad.
+ *
+ * `obj['clave']`, `'clave' in obj` y el tipo indexado `Tipo['clave']` nombran lo mismo que
+ * `obj.clave`, pero viven en una cadena y ningun mapa de codigo las alcanza. Renombrar solo el
+ * lado del codigo deja las dos mitades apuntando a sitios distintos: unas veces lo ve el
+ * typecheck —`'paneles' in config` cuando la propiedad ya es `panels`— y otras no, porque el
+ * objeto es un `Record<string, unknown>` que viene de la red.
+ *
+ * No se sustituye sola: `body['clave']` es el contrato HTTP y renombrarlo sin tocar al emisor
+ * devuelve 400. Se avisa, con el archivo y la linea, y se decide caso por caso.
+ */
+function accesosPorCadena(claves) {
+  if (claves.length === 0) return [];
+  const alternativa = claves.map((c) => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  const re = new RegExp(`\\[\\s*['"\`](${alternativa})['"\`]\\s*\\]|['"\`](${alternativa})['"\`]\\s+in\\s`, 'g');
+  const avisos = [];
+  for (const ruta of rutasDe("'*.ts' '*.tsx' '*.mts'")) {
+    if (ruta.startsWith('tools/rename/')) continue;
+    const lineas = readFileSync(ruta, 'utf8').split('\n');
+    lineas.forEach((linea, i) => {
+      for (const m of linea.matchAll(re)) avisos.push(`${ruta}:${i + 1}: ${m[1] ?? m[2]}`);
+    });
+  }
+  return avisos;
+}
+
 function moverArchivos(mapa) {
   let movidos = 0;
   for (const [viejo, nuevo] of Object.entries(mapa)) {
@@ -526,6 +576,15 @@ if (orden === '--proponer') {
     console.error('IMPORTS SIN DESTINO tras aplicar:');
     console.error(sinDestino.join('\n'));
     process.exit(4);
+  }
+
+  const porCadena = accesosPorCadena([
+    ...Object.keys(plan.identificadores ?? {}),
+    ...Object.keys(plan.valores ?? {}),
+  ]);
+  if (porCadena.length > 0) {
+    console.error('AVISO - cadenas en posicion de propiedad que siguen en espanol:');
+    console.error(porCadena.join('\n'));
   }
 } else if (orden === '--traducir') {
   console.log(traducir(argumento) ?? '(sin traduccion)');

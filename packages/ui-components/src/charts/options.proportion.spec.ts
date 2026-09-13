@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { escalaBonita, opcionesDe } from './opciones';
+import { niceScale, optionsOf } from './options';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
 const palette = {
@@ -19,10 +19,10 @@ const vm = (series: string[], puntos: [string, ...(number | null)[]][]): Categor
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- se comprueba la forma que consume ECharts */
 const circular = (extra: Record<string, unknown> = {}, v = vm(['Casos'], [['A', 30], ['B', 70]])) =>
-  opcionesDe('circular', { vm: v, palette, titulo: 'T', ...extra }) as any;
+  optionsOf('circular', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 const medidor = (extra: Record<string, unknown> = {}, v = vm(['Casos'], [['', 40, 100]])) =>
-  opcionesDe('medidor', { vm: v, palette, titulo: 'T', ...extra }) as any;
+  optionsOf('medidor', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 describe('circular: pastel y dona', () => {
   it('el hueco del centro distingue un pastel de una dona, y nada mas', () => {
@@ -63,8 +63,8 @@ describe('circular: pastel y dona', () => {
 
   it('el total en el centro solo se dibuja si hay centro donde ponerlo', () => {
     expect(circular({ circular: { totalEnElCentro: true } }).title).toBeUndefined();
-    const conHueco = circular({ circular: { totalEnElCentro: true, radioInterior: 55 } });
-    expect(conHueco.title.text).toBe('100');
+    const withHole = circular({ circular: { totalEnElCentro: true, radioInterior: 55 } });
+    expect(withHole.title.text).toBe('100');
   });
 
   it('el total del centro usa el formateador de la medida', () => {
@@ -92,11 +92,11 @@ describe('medidor', () => {
      * Con el maximo pegado a los datos, 2.216 y 2.220 dibujan la misma aguja en el mismo sitio y
      * dos capturas dejan de ser comparables.
      */
-    expect(escalaBonita(2216)).toBe(2500);
-    expect(escalaBonita(1)).toBe(1);
-    expect(escalaBonita(11)).toBe(20);
-    expect(escalaBonita(0)).toBe(1);
-    expect(escalaBonita(-5)).toBe(1);
+    expect(niceScale(2216)).toBe(2500);
+    expect(niceScale(1)).toBe(1);
+    expect(niceScale(11)).toBe(20);
+    expect(niceScale(0)).toBe(1);
+    expect(niceScale(-5)).toBe(1);
   });
 
   it('el minimo y el maximo fijados mandan sobre lo deducido', () => {
@@ -142,17 +142,17 @@ describe('medidor', () => {
 const combinado = (
   extra: Record<string, unknown> = {},
   v = vm(['Ingresados', 'Resueltos', 'Pendientes'], [['Q1', 10, 8, 900]]),
-) => opcionesDe('combinado', { vm: v, palette, titulo: 'T', seriesDeColumna: 2, ...extra }) as any;
+) => optionsOf('combinado', { vm: v, palette, titulo: 'T', columnSeries: 2, ...extra }) as any;
 
 const dispersion = (
   extra: Record<string, unknown> = {},
   v = vm(['X', 'Y', 'Tamano'], [['Q1', 10, 8, 4], ['Q2', 20, 16, 8]]),
-) => opcionesDe('dispersion', { vm: v, palette, titulo: 'T', ...extra }) as any;
+) => optionsOf('dispersion', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 describe('combinado de columnas y lineas', () => {
   it('el mapeo decide la forma: las primeras son barras y el resto linea', () => {
-    const tipos = combinado().series.map((s: { type: string }) => s.type);
-    expect(tipos).toEqual(['bar', 'bar', 'line']);
+    const kinds = combinado().series.map((s: { type: string }) => s.type);
+    expect(kinds).toEqual(['bar', 'bar', 'line']);
   });
 
   it('sin eje secundario hay UN eje de valores y ninguna serie se va a otro', () => {
@@ -181,7 +181,7 @@ describe('combinado de columnas y lineas', () => {
   });
 
   it('mas columnas que series no desborda', () => {
-    const o = combinado({ seriesDeColumna: 99 });
+    const o = combinado({ columnSeries: 99 });
     expect(o.series.every((s: { type: string }) => s.type === 'bar')).toBe(true);
   });
 });
@@ -231,15 +231,15 @@ describe('dispersion', () => {
 const embudo = (
   extra: Record<string, unknown> = {},
   v = vm(['Casos'], [['Q1', 1000], ['Q2', 800], ['Q3', 400]]),
-) => opcionesDe('embudo', { vm: v, palette, titulo: 'T', ...extra }) as any;
+) => optionsOf('embudo', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 const cascada = (
   extra: Record<string, unknown> = {},
   v = vm(['Casos'], [['A', 100], ['B', -40], ['C', 30]]),
-) => opcionesDe('cascada', { vm: v, palette, titulo: 'T', ...extra }) as any;
+) => optionsOf('cascada', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 const arbol = (extra: Record<string, unknown> = {}, v = vm(['Casos'], [['Penal / Q1', 10]])) =>
-  opcionesDe('mapa-de-arbol', { vm: v, palette, titulo: 'T', ...extra }) as any;
+  optionsOf('mapa-de-arbol', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 describe('embudo', () => {
   it('NO reordena las etapas', () => {
@@ -259,12 +259,12 @@ describe('embudo', () => {
 
   it('y contra la anterior cuando se pide', () => {
     // Dos preguntas distintas: «cuanto queda de lo que entro» y «cuanto se pierde en ESTE paso».
-    const o = embudo({ embudo: { comparar: 'anterior' } });
+    const o = embudo({ embudo: { compare: 'anterior' } });
     expect(o.series[0].label.formatter({ name: 'Q3', value: 400, dataIndex: 2 })).toContain('50.0 %');
   });
 
   it('una etapa de referencia en cero da raya, no una caida infinita', () => {
-    const o = embudo({ embudo: { comparar: 'anterior' } }, vm(['Casos'], [['Q1', 0], ['Q2', 50]]));
+    const o = embudo({ embudo: { compare: 'anterior' } }, vm(['Casos'], [['Q1', 0], ['Q2', 50]]));
     expect(o.series[0].label.formatter({ name: 'Q2', value: 50, dataIndex: 1 })).toContain('—');
   });
 });

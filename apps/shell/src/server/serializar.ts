@@ -27,7 +27,7 @@ export interface ObjetoSerializado {
   generatedAt?: string;
   stale?: boolean;
   /** El contenido de un contenedor, ya serializado. */
-  paneles?: PanelSerializado[];
+  panels?: PanelSerializado[];
 }
 
 export interface PanelSerializado {
@@ -51,9 +51,9 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
     ...(objeto.unresolvedObject ? { unresolvedObject: objeto.unresolvedObject } : {}),
     ...(objeto.generatedAt ? { generatedAt: objeto.generatedAt } : {}),
     ...(objeto.stale ? { stale: true } : {}),
-    ...(objeto.paneles
+    ...(objeto.panels
       ? {
-          paneles: objeto.paneles.map((panel) => ({
+          panels: objeto.panels.map((panel) => ({
             panelId: panel.panelId,
             nombre: panel.nombre,
             objetos: panel.objetos.map(serializarObjeto),

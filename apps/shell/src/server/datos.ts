@@ -45,7 +45,7 @@ export interface ObjetoCargado {
   aggregations: Aggregation[];
   unresolvedObject?: string;
   /** Lo que hay dentro de un contenedor, ya cargado por el mismo camino que lo de fuera. */
-  paneles?: PanelCargado[];
+  panels?: PanelCargado[];
 }
 
 /** Un panel de contenedor con sus objetos ya cargados. Un contenedor sin pestanas tiene uno. */
@@ -111,10 +111,10 @@ async function leerObjetos(
      */
     if (noConsumeDatos(contrato)) {
       const config = instance.configuracion;
-      let paneles: PanelCargado[] | undefined;
+      let panels: PanelCargado[] | undefined;
 
       if (esContenedor(instance.objectId)) {
-        paneles = [];
+        panels = [];
         for (const panel of panelesDe(config as ContainerSettings | undefined)) {
           const dentro = await leerObjetos(
             panel.items.map((i) => ({ id: i.id, instance: i.instance, position: i.position })),
@@ -128,7 +128,7 @@ async function leerObjetos(
           if (dentro.masAntiguo && (!masAntiguo || dentro.masAntiguo < masAntiguo)) {
             masAntiguo = dentro.masAntiguo;
           }
-          paneles.push({ panelId: panel.panelId, nombre: panel.nombre, objetos: dentro.objetos });
+          panels.push({ panelId: panel.panelId, nombre: panel.nombre, objetos: dentro.objetos });
         }
       }
 
@@ -141,7 +141,7 @@ async function leerObjetos(
           problem: p.issue,
         })),
         aggregations: [],
-        ...(paneles ? { paneles } : {}),
+        ...(panels ? { panels } : {}),
       });
       continue;
     }

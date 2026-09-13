@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { opcionesDe, type OpcionesDeGrafico, type TipoDeGrafico } from '../graficos/opciones';
+import { optionsOf, type ChartOptions, type ChartKind } from '../charts/options';
 import type { CategoricalViewModel } from './viewModel';
 import { catalogoInicial } from './catalog';
 import { CLAVES_DE_PRESENTACION, type ClaveDePresentacion } from '../presentacion/contrato';
@@ -27,7 +27,7 @@ const PALETA = {
   superficieElevada: '#eeeeee',
 };
 
-const BASE: OpcionesDeGrafico = { vm, palette: PALETA, titulo: 'T', dimension: 'Tribunal' };
+const BASE: ChartOptions = { vm, palette: PALETA, titulo: 'T', dimension: 'Tribunal' };
 
 /** DOS valores validos y distintos por clave. */
 const VALORES: Partial<Record<ClaveDePresentacion, unknown[]>> = {
@@ -45,7 +45,7 @@ const VALORES: Partial<Record<ClaveDePresentacion, unknown[]>> = {
   circular: [{ radioInterior: 40 }, { labels: 'categoria', totalEnElCentro: true }],
   medidor: [{ minimo: 0, maximo: 100 }, { maximo: 7 }],
   combinado: [{ ejeSecundario: true }, { ejeSecundario: false }],
-  embudo: [{ comparar: 'anterior' }, { comparar: 'ninguna' }],
+  embudo: [{ compare: 'anterior' }, { compare: 'ninguna' }],
   cascada: [{ mostrarTotal: false }, { mostrarTotal: true }],
   referencias: [[{ valor: 15, etiqueta: 'meta', estilo: 'discontinua', color: 'primario' }], [{ valor: 5 }]],
   coloresDeSerie: [
@@ -64,7 +64,7 @@ const FUERA_DEL_DIBUJO: ClaveDePresentacion[] = CLAVES_DE_PRESENTACION.filter(
 );
 
 /** Que tipo de grafico dibuja cada objeto del catalogo. Los demas objetos no pasan por aqui. */
-const TIPO_DE_OBJETO: Record<string, TipoDeGrafico> = {
+const TIPO_DE_OBJETO: Record<string, ChartKind> = {
   barras: 'barras',
   'barras-horizontales': 'barras-horizontales',
   lineas: 'lineas',
@@ -141,11 +141,11 @@ const huella = (x: unknown): string =>
   });
 
 /** true si poner la clave cambia lo que se dibuja. */
-function honra(tipo: TipoDeGrafico, clave: ClaveDePresentacion): boolean {
-  const sin = huella(opcionesDe(tipo, BASE));
+function honra(tipo: ChartKind, clave: ClaveDePresentacion): boolean {
+  const sin = huella(optionsOf(tipo, BASE));
   return (VALORES[clave] ?? []).some((valor) => {
     try {
-      return huella(opcionesDe(tipo, { ...BASE, [clave]: valor } as OpcionesDeGrafico)) !== sin;
+      return huella(optionsOf(tipo, { ...BASE, [clave]: valor } as ChartOptions)) !== sin;
     } catch {
       // Que la construccion reviente con la clave puesta tambien es honrarla: la esta leyendo.
       return true;
@@ -167,7 +167,7 @@ describe('lo que el objeto declara es lo que su dibujo honra', () => {
   });
 
   for (const objeto of graficos) {
-    const tipo = TIPO_DE_OBJETO[objeto.objectId] as TipoDeGrafico;
+    const tipo = TIPO_DE_OBJETO[objeto.objectId] as ChartKind;
 
     it(`${objeto.objectId}: no honra en silencio nada que no ofrezca el editor`, () => {
       const declara = new Set(ultima(objeto.objectId)?.presentation ?? []);
@@ -210,7 +210,7 @@ describe('las excepciones estan justificadas, no silenciadas', () => {
      * declararla, la excepcion tiene que desaparecer con ella.
      */
     const sobrantes = EXCEPCIONES.filter((e) => {
-      const tipo = TIPO_DE_OBJETO[e.objeto] as TipoDeGrafico;
+      const tipo = TIPO_DE_OBJETO[e.objeto] as ChartKind;
       const declara = new Set(ultima(e.objeto)?.presentation ?? []);
       return !honra(tipo, e.clave) || declara.has(e.clave);
     });

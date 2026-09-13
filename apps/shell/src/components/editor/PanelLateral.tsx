@@ -169,7 +169,7 @@ export function PanelLateral({
             <Presentacion
               instance={seleccionado.instance}
               admitidas={definicion?.presentacion ?? []}
-              tipos={dataset?.tipos ?? {}}
+              kinds={dataset?.kinds ?? {}}
               guardando={guardando}
               onCambiar={(cambio) =>
                 onCambiar(seleccionado.id, (i) => ({ ...i, instance: cambio(i.instance) }))
@@ -209,7 +209,7 @@ export function PanelLateral({
                   data-testid="limpiar-busqueda"
                   onClick={() => setFiltro('')}
                 >
-                  Ver todos los ajustes
+                  Ver all los ajustes
                 </button>
               </div>
             ) : null}
@@ -307,7 +307,7 @@ function Tienda({
             data-testid="limpiar-busqueda-objeto"
             onClick={() => setBusqueda('')}
           >
-            Ver todos los objetos
+            Ver all los objetos
           </button>
         </div>
       ) : null}

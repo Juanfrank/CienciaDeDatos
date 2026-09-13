@@ -176,16 +176,16 @@ function aplicar(seccion: Seccion, valor: number): string {
     decimales = decimales.slice(0, -1);
   }
 
-  const cifra = decimales.length > 0 ? `${entero}${SEP_DECIMAL}${decimales}` : entero;
+  const figure = decimales.length > 0 ? `${entero}${SEP_DECIMAL}${decimales}` : entero;
   /*
    * Una seccion SIN marcador de digito es puro literal, y ahi no va ninguna cifra.
    */
   if (!seccion.patron.includes('\u0000')) {
     return seccion.decimalesMax === 0 && seccion.enterosMin === 0
       ? seccion.patron
-      : cifra + seccion.patron;
+      : figure + seccion.patron;
   }
-  return seccion.patron.replace('\u0000', cifra);
+  return seccion.patron.replace('\u0000', figure);
 }
 
 export class PatronInvalidoError extends Error {

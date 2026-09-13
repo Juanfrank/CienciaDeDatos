@@ -1076,7 +1076,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 // bonita de no contarla.
                 subtitulo: 'Una etapa que crece se ve, no se disimula',
                 leyenda: 'oculta',
-                embudo: { comparar: 'anterior' },
+                embudo: { compare: 'anterior' },
               },
             },
           },
@@ -1597,7 +1597,7 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'contenedor-simple',
                 simple: { gridColumns: 6 },
-                paneles: [
+                panels: [
                   {
                     panelId: 'p1',
                     nombre: 'Contenido',
@@ -1647,7 +1647,7 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'contenedor-desplazable',
                 desplazable: { eje: 'y', gridColumns: 4 },
-                paneles: [
+                panels: [
                   {
                     panelId: 'p1',
                     nombre: 'Contenido',
@@ -1686,7 +1686,7 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'contenedor-con-pestanas',
                 pestanas: { gridColumns: 8, pestanaInicial: 'p1' },
-                paneles: [
+                panels: [
                   {
                     panelId: 'p1',
                     nombre: 'Por distrito',
@@ -1757,7 +1757,7 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'contenedor-ampliable',
                 ampliable: { gridColumns: 6, columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' },
-                paneles: [
+                panels: [
                   {
                     panelId: 'p1',
                     nombre: 'Contenido',

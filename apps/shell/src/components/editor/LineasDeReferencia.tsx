@@ -3,14 +3,14 @@
 import {
   ESTILOS_DE_REFERENCIA,
   MAX_REFERENCIAS,
-  type EstiloDeReferencia,
-  type LineaDeReferencia,
+  type ReferenceStyle,
+  type ReferenceLine,
 } from "@app/ui-components";
 import { PaletaDeColores } from "./EstiloDeTextoEditor";
 
 /** Editor de lineas de referencia — la meta, el promedio, el umbral. */
 
-const ETIQUETA_DE_ESTILO: Record<EstiloDeReferencia, string> = {
+const ETIQUETA_DE_ESTILO: Record<ReferenceStyle, string> = {
   solida: "Continua",
   discontinua: "Discontinua",
   punteada: "Punteada",
@@ -22,17 +22,17 @@ export function LineasDeReferencia({
   prueba,
   onCambiar,
 }: {
-  lineas: LineaDeReferencia[];
+  lineas: ReferenceLine[];
   guardando: boolean;
   prueba: string;
-  onCambiar: (lineas: LineaDeReferencia[] | undefined) => void;
+  onCambiar: (lineas: ReferenceLine[] | undefined) => void;
 }) {
   // Una lista vacia se guarda como `undefined`: «sin lineas» y «una lista de cero lineas» son lo
   // mismo para quien dibuja, y dejar el array vacio ensuciaria la presentacion guardada.
-  const cambiar = (siguiente: LineaDeReferencia[]) =>
+  const cambiar = (siguiente: ReferenceLine[]) =>
     onCambiar(siguiente.length === 0 ? undefined : siguiente);
 
-  const editar = (i: number, cambio: Partial<LineaDeReferencia>) =>
+  const editar = (i: number, cambio: Partial<ReferenceLine>) =>
     cambiar(lineas.map((line, j) => (i === j ? { ...line, ...cambio } : line)));
 
   return (
@@ -74,7 +74,7 @@ export function LineasDeReferencia({
               value={line.estilo ?? "discontinua"}
               disabled={guardando}
               data-testid={`${prueba}-estilo-${i}`}
-              onChange={(e) => editar(i, { estilo: e.target.value as EstiloDeReferencia })}
+              onChange={(e) => editar(i, { estilo: e.target.value as ReferenceStyle })}
             >
               {ESTILOS_DE_REFERENCIA.map((estilo) => (
                 <option key={estilo} value={estilo}>

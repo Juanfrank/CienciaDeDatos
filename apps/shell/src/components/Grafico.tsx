@@ -4,9 +4,9 @@ import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useState } from 'react';
 import type {
   CategoricalViewModel,
-  PaletaDeGrafico,
+  ChartPalette,
   PresentacionDeObjeto,
-  TipoDeGrafico,
+  ChartKind,
 } from '@app/ui-components';
 
 /** Un grafico: el lienzo de ECharts MAS el respaldo en DOM. */
@@ -25,13 +25,13 @@ export function Grafico({
   dimension,
   presentacion,
   formatear,
-  seriesDeColumna,
+  columnSeries,
   onSeleccionar,
   children,
 }: {
   /** Identifica ESTE grafico en la pagina. Un modulo lleva varios. */
   instanceId: string;
-  tipo: TipoDeGrafico;
+  tipo: ChartKind;
   vm: CategoricalViewModel;
   titulo: string;
   dimension?: string;
@@ -40,13 +40,13 @@ export function Grafico({
   /** Formatea una cifra de la serie `s` con el formato de SU medida. */
   formatear?: (valor: number, serie: number) => string;
   /** Solo el combinado: cuantas series iniciales son columnas. */
-  seriesDeColumna?: number;
+  columnSeries?: number;
   onSeleccionar?: (categoria: string) => void;
   /** El respaldo: las barras en HTML, con sus botones. */
   children: React.ReactNode;
 }) {
   const [montado, setMontado] = useState(false);
-  const [palette, setPaleta] = useState<PaletaDeGrafico | null>(null);
+  const [palette, setPaleta] = useState<ChartPalette | null>(null);
 
   /*
    * Los colores se leen de las variables CSS del tema, ya resueltas por el navegador.
@@ -85,7 +85,7 @@ export function Grafico({
           {...(dimension ? { dimension } : {})}
           {...(presentacion ? { presentacion } : {})}
           {...(formatear ? { formatear } : {})}
-          {...(seriesDeColumna === undefined ? {} : { seriesDeColumna })}
+          {...(columnSeries === undefined ? {} : { columnSeries })}
           {...(onSeleccionar ? { onSeleccionar } : {})}
           onMontado={alMontar}
         />

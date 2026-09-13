@@ -2,23 +2,23 @@ import {
   MAX_RADIO_INTERIOR,
   MAX_REFERENCIAS,
   etiquetasNormalizadas,
-  type ConfiguracionCircular,
-  type ComparacionDeEmbudo,
-  type ConfiguracionDeCascada,
-  type ConfiguracionDeCombinado,
-  type ConfiguracionDeEmbudo,
-  type ConfiguracionDeEjes,
-  type ConfiguracionDeMedidor,
-  type EstiloDeReferencia,
-  type ConfiguracionDeEtiquetas,
-  type ConfiguracionDeTooltip,
-  type EtiquetaCircular,
-  type EtiquetasDeDato,
-  type LineaDeReferencia,
-  type ModoDeApilado,
-  type ModoDeLeyenda,
+  type PieSettings,
+  type FunnelComparison,
+  type WaterfallSettings,
+  type ComboSettings,
+  type FunnelSettings,
+  type AxisSettings,
+  type GaugeSettings,
+  type ReferenceStyle,
+  type LabelSettings,
+  type TooltipSettings,
+  type PieLabel,
+  type DatumLabels,
+  type ReferenceLine,
+  type StackingMode,
+  type LegendMode,
 } from '../presentacion/contrato';
-import { colorCondicional, type FormatoCondicional } from '../presentacion/condicional';
+import { colorCondicional, type ConditionalFormat } from '../presentacion/condicional';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
 /**
@@ -28,7 +28,7 @@ import type { CategoricalViewModel } from '../registry/viewModel';
  * tocan el DOM ni importan ECharts, asi que se prueban sin navegador. El montaje vive en el shell.
  */
 
-export interface PaletaDeGrafico {
+export interface ChartPalette {
   /** Ocho colores de serie, del tema institucional. */
   series: string[];
   content: string;
@@ -38,30 +38,30 @@ export interface PaletaDeGrafico {
   superficieElevada: string;
 }
 
-export interface OpcionesDeGrafico {
+export interface ChartOptions {
   vm: CategoricalViewModel;
-  palette: PaletaDeGrafico;
+  palette: ChartPalette;
   titulo: string;
   /** Nombre de la dimension del eje, para el rotulo accesible. */
   dimension?: string;
-  leyenda?: ModoDeLeyenda;
+  leyenda?: LegendMode;
   /** La cifra sobre cada barra o punto. `true` es la forma anterior y se sigue admitiendo. */
-  etiquetasDeDato?: EtiquetasDeDato;
-  tooltip?: ConfiguracionDeTooltip;
-  ejes?: ConfiguracionDeEjes;
+  etiquetasDeDato?: DatumLabels;
+  tooltip?: TooltipSettings;
+  ejes?: AxisSettings;
   /** Como formatear una cifra de la serie `s`. */
   formatear?: (valor: number, serie: number) => string;
-  apilado?: ModoDeApilado;
-  circular?: ConfiguracionCircular;
-  combinado?: ConfiguracionDeCombinado;
-  referencias?: LineaDeReferencia[];
+  apilado?: StackingMode;
+  circular?: PieSettings;
+  combinado?: ComboSettings;
+  referencias?: ReferenceLine[];
   coloresDeSerie?: number[];
-  condicional?: FormatoCondicional;
-  embudo?: ConfiguracionDeEmbudo;
-  cascada?: ConfiguracionDeCascada;
-  medidor?: ConfiguracionDeMedidor;
+  condicional?: ConditionalFormat;
+  embudo?: FunnelSettings;
+  cascada?: WaterfallSettings;
+  medidor?: GaugeSettings;
   /** Cuantas series iniciales son columnas, en un combinado. */
-  seriesDeColumna?: number;
+  columnSeries?: number;
 }
 
 /* ── Apilado ──────────────────────────────────────────────────────────────────────────────── */
@@ -72,7 +72,7 @@ export interface OpcionesDeGrafico {
  * En `porcentaje` se convierten a su parte del total de la categoria: `stack` de ECharts suma,
  * no reparte. Un total de cero deja las partes en cero y no en `NaN`.
  */
-function valoresApilados(o: OpcionesDeGrafico): (number | null)[][] {
+function valueStacked(o: ChartOptions): (number | null)[][] {
   const crudos = o.vm.series.map((_, s) => o.vm.points.map((p) => p.values[s] ?? null));
   if (o.apilado !== 'porcentaje') return crudos;
 
@@ -87,11 +87,11 @@ function valoresApilados(o: OpcionesDeGrafico): (number | null)[][] {
 }
 
 /** `stack` de ECharts: el mismo nombre en todas las series es lo que las apila. */
-const pilaDe = (o: OpcionesDeGrafico) => (o.apilado && o.apilado !== 'ninguno' ? { stack: 'total' } : {});
+const stackOf = (o: ChartOptions) => (o.apilado && o.apilado !== 'ninguno' ? { stack: 'total' } : {});
 
 /** El tooltip de un grafico al 100 %. */
-function tooltipDe(o: OpcionesDeGrafico) {
-  const comun = {
+function tooltipOf(o: ChartOptions) {
+  const common = {
     trigger: 'axis' as const,
     backgroundColor: o.palette.superficieElevada,
     borderWidth: 0,
@@ -100,13 +100,13 @@ function tooltipDe(o: OpcionesDeGrafico) {
   };
 
   const porcentaje = o.apilado === 'porcentaje';
-  const conTotal = o.tooltip?.total === true;
+  const withTotal = o.tooltip?.total === true;
   const ordenar = o.tooltip?.ordenarPorValor === true;
   // Sin nada que anadir, se deja el tooltip de ECharts: formatea igual y no cuesta nada.
-  if (!porcentaje && !conTotal && !ordenar) return comun;
+  if (!porcentaje && !withTotal && !ordenar) return common;
 
   return {
-    ...comun,
+    ...common,
     formatter: (params: { name: string; seriesName: string; value: number; dataIndex: number }[]) => {
       const punto = params[0];
       if (!punto) return '';
@@ -121,19 +121,19 @@ function tooltipDe(o: OpcionesDeGrafico) {
 
       const dataRows = params.map((p) => {
         const crudo = crudoDe(p.seriesName, p.dataIndex);
-        const cifra = crudo === null ? '—' : formatear(crudo, p.seriesName);
+        const figure = crudo === null ? '—' : formatear(crudo, p.seriesName);
         return {
           orden: crudo ?? Number.NEGATIVE_INFINITY,
           content: porcentaje
-            ? `${p.seriesName}: ${p.value.toFixed(1)} % (${cifra})`
-            : `${p.seriesName}: ${cifra}`,
+            ? `${p.seriesName}: ${p.value.toFixed(1)} % (${figure})`
+            : `${p.seriesName}: ${figure}`,
         };
       });
       // Los nulos quedan al final: no compiten por «el mayor», porque no son un numero.
       if (ordenar) dataRows.sort((a, b) => b.orden - a.orden);
 
       const lineas = [punto.name, ...dataRows.map((f) => f.content)];
-      if (conTotal) {
+      if (withTotal) {
         const suma = params.reduce((total, p) => total + (crudoDe(p.seriesName, p.dataIndex) ?? 0), 0);
         // El total usa el formato de la PRIMERA serie: es una suma de las medidas apiladas, que
         // por construccion comparten unidad; usar otro dejaria «2,216» junto a «2216».
@@ -150,11 +150,11 @@ function tooltipDe(o: OpcionesDeGrafico) {
  * `auto` la ensena solo con mas de una serie. El margen se devuelve aparte porque `containLabel`
  * de ECharts cuenta los rotulos del eje pero no la leyenda.
  */
-function leyendaDe(o: OpcionesDeGrafico, hayQueDistinguir = o.vm.series.length > 1) {
+function legendOf(o: ChartOptions, hayQueDistinguir = o.vm.series.length > 1) {
   const varias = hayQueDistinguir;
-  const mode: ModoDeLeyenda = o.leyenda ?? 'auto';
+  const mode: LegendMode = o.leyenda ?? 'auto';
   const visible = mode === 'auto' ? varias : mode !== 'oculta';
-  if (!visible) return { legend: { show: false }, margen: { bottom: 8, left: 8, right: 16, top: 24 } };
+  if (!visible) return { legend: { show: false }, margin: { bottom: 8, left: 8, right: 16, top: 24 } };
 
   /*
    * A los lados, la leyenda se ACOTA y trunca.
@@ -162,7 +162,7 @@ function leyendaDe(o: OpcionesDeGrafico, hayQueDistinguir = o.vm.series.length >
   /*
    * `type: 'scroll'` en TODAS las posiciones.
    */
-  const comun = {
+  const common = {
     textStyle: { color: o.palette.textoAtenuado },
     icon: 'roundRect' as const,
     type: 'scroll' as const,
@@ -170,26 +170,26 @@ function leyendaDe(o: OpcionesDeGrafico, hayQueDistinguir = o.vm.series.length >
     pageTextStyle: { color: o.palette.textoAtenuado },
   };
   const aLosLados = {
-    ...comun,
+    ...common,
     textStyle: { color: o.palette.textoAtenuado, width: 96, overflow: 'truncate' as const },
   };
   const lado = mode === 'auto' ? 'abajo' : mode;
 
   switch (lado) {
     case 'arriba':
-      return { legend: { ...comun, top: 0 }, margen: { bottom: 8, left: 8, right: 16, top: 36 } };
+      return { legend: { ...common, top: 0 }, margin: { bottom: 8, left: 8, right: 16, top: 36 } };
     case 'izquierda':
       return {
         legend: { ...aLosLados, left: 0, top: 'middle', orient: 'vertical' as const },
-        margen: { bottom: 8, left: 130, right: 16, top: 24 },
+        margin: { bottom: 8, left: 130, right: 16, top: 24 },
       };
     case 'derecha':
       return {
         legend: { ...aLosLados, right: 0, top: 'middle', orient: 'vertical' as const },
-        margen: { bottom: 8, left: 8, right: 130, top: 24 },
+        margin: { bottom: 8, left: 8, right: 130, top: 24 },
       };
     default:
-      return { legend: { ...comun, bottom: 0 }, margen: { bottom: 32, left: 8, right: 16, top: 24 } };
+      return { legend: { ...common, bottom: 0 }, margin: { bottom: 32, left: 8, right: 16, top: 24 } };
   }
 }
 
@@ -206,7 +206,7 @@ function leyendaDe(o: OpcionesDeGrafico, hayQueDistinguir = o.vm.series.length >
  * `containLabel` reserva sitio para los rotulos del eje, pero no para la leyenda ni para los
  * titulos de los ejes: esos se suman aqui.
  */
-function margenDe(o: OpcionesDeGrafico, deLaLeyenda: { top: number; bottom: number; left: number; right: number }) {
+function marginOf(o: ChartOptions, deLaLeyenda: { top: number; bottom: number; left: number; right: number }) {
   return {
     ...deLaLeyenda,
     left: deLaLeyenda.left + (o.ejes?.tituloY ? 44 : 0),
@@ -221,7 +221,7 @@ function margenDe(o: OpcionesDeGrafico, deLaLeyenda: { top: number; bottom: numb
  * color llega igual a las barras, la leyenda, los decals y el tooltip. Una serie sin asignacion
  * conserva el color que le tocaba por orden.
  */
-function paletteOf(o: OpcionesDeGrafico): string[] {
+function paletteOf(o: ChartOptions): string[] {
   const elegidos = o.coloresDeSerie;
   if (!elegidos || elegidos.length === 0) return o.palette.series;
   return o.palette.series.map((porOrden, s) => {
@@ -230,7 +230,7 @@ function paletteOf(o: OpcionesDeGrafico): string[] {
   });
 }
 
-const TRAZO_DE_REFERENCIA: Record<EstiloDeReferencia, 'solid' | 'dashed' | 'dotted'> = {
+const REFERENCE_STROKE: Record<ReferenceStyle, 'solid' | 'dashed' | 'dotted'> = {
   solida: 'solid',
   discontinua: 'dashed',
   punteada: 'dotted',
@@ -242,7 +242,7 @@ const TRAZO_DE_REFERENCIA: Record<EstiloDeReferencia, 'solid' | 'dashed' | 'dott
  * En una serie existente y no en una propia, que apareceria en la leyenda como un dato mas;
  * `silent: true` por lo mismo. El eje al que se anclan lo decide `horizontal`.
  */
-function referenciasDe(o: OpcionesDeGrafico, horizontal = false) {
+function referencesOf(o: ChartOptions, horizontal = false) {
   const lineas = (o.referencias ?? []).slice(0, MAX_REFERENCIAS);
   if (lineas.length === 0) return {};
 
@@ -255,15 +255,15 @@ function referenciasDe(o: OpcionesDeGrafico, horizontal = false) {
       data: lineas.map((line) => ({
         [horizontal ? 'xAxis' : 'yAxis']: line.valor,
         lineStyle: {
-          color: colorDeRol(o, line.color),
-          type: TRAZO_DE_REFERENCIA[line.estilo ?? 'discontinua'],
+          color: roleColor(o, line.color),
+          type: REFERENCE_STROKE[line.estilo ?? 'discontinua'],
           width: 2,
         },
         label: {
           show: line.etiqueta !== undefined && line.etiqueta !== '',
           formatter: line.etiqueta ?? '',
           position: horizontal ? ('end' as const) : ('insideEndTop' as const),
-          color: colorDeRol(o, line.color),
+          color: roleColor(o, line.color),
           fontSize: 11,
         },
       })),
@@ -277,7 +277,7 @@ function referenciasDe(o: OpcionesDeGrafico, horizontal = false) {
  * El grafico es una funcion pura y no lee variables CSS: trabaja con lo que la paleta le pasa.
  * `primario` y `error` son sus dos primeros colores de serie; el resto cae al color de texto.
  */
-function colorDeRol(o: OpcionesDeGrafico, color: LineaDeReferencia['color']): string {
+function roleColor(o: ChartOptions, color: ReferenceLine['color']): string {
   switch (color) {
     case 'primario':
       return o.palette.series[0] ?? o.palette.content;
@@ -290,7 +290,7 @@ function colorDeRol(o: OpcionesDeGrafico, color: LineaDeReferencia['color']): st
   }
 }
 
-function nucleo(o: OpcionesDeGrafico, conDecal: boolean) {
+function core(o: ChartOptions, conDecal: boolean) {
   return {
     aria: {
       enabled: true,
@@ -319,27 +319,27 @@ function nucleo(o: OpcionesDeGrafico, conDecal: boolean) {
  * escala. Ampliar el margen no sirve —`containLabel` lo recalcula— asi que se mueve la etiqueta
  * por su indice con `labelLayout`. Solo la primera y la ultima caen fuera del area.
  */
-function desplazarEtiquetasDelBorde(o: OpcionesDeGrafico) {
+function shiftLabelBorder(o: ChartOptions) {
   if (etiquetasNormalizadas(o.etiquetasDeDato).mostrar !== true) return {};
-  const ultimo = o.vm.points.length - 1;
+  const last = o.vm.points.length - 1;
   return {
     labelLayout: (p: { dataIndex: number }) => {
       if (p.dataIndex === 0) return { dx: 16 };
-      if (p.dataIndex === ultimo) return { dx: -16 };
+      if (p.dataIndex === last) return { dx: -16 };
       return {};
     },
   };
 }
 
-function base(o: OpcionesDeGrafico) {
-  const { legend, margen } = leyendaDe(o);
+function base(o: ChartOptions) {
+  const { legend, margin } = legendOf(o);
   return {
-    ...nucleo(o, o.vm.series.length > 1),
+    ...core(o, o.vm.series.length > 1),
     /*
      * El margen inferior reserva sitio para la leyenda cuando la hay.
      */
-    grid: { ...margenDe(o, margen), containLabel: true },
-    tooltip: tooltipDe(o),
+    grid: { ...marginOf(o, margin), containLabel: true },
+    tooltip: tooltipOf(o),
     legend,
   };
 }
@@ -353,7 +353,7 @@ const POSICION_ECHARTS: Record<string, string | undefined> = {
 };
 
 /** Los indices del maximo y el minimo de una serie. */
-function extremosDe(o: OpcionesDeGrafico, s: number): Set<number> {
+function endsOf(o: ChartOptions, s: number): Set<number> {
   let masAlto: number | undefined;
   let masBajo: number | undefined;
   o.vm.points.forEach((punto, i) => {
@@ -365,12 +365,12 @@ function extremosDe(o: OpcionesDeGrafico, s: number): Set<number> {
   return new Set([masAlto, masBajo].filter((i): i is number => i !== undefined));
 }
 
-const etiquetaDeSerie = (o: OpcionesDeGrafico, s: number, cellPosition: string) => {
-  const config: ConfiguracionDeEtiquetas = etiquetasNormalizadas(o.etiquetasDeDato);
+const seriesLabel = (o: ChartOptions, s: number, cellPosition: string) => {
+  const config: LabelSettings = etiquetasNormalizadas(o.etiquetasDeDato);
   if (config.mostrar !== true) return { show: false };
 
   const elegida = POSICION_ECHARTS[config.cellPosition ?? 'auto'] ?? cellPosition;
-  const extremos = config.soloExtremos ? extremosDe(o, s) : undefined;
+  const ends = config.soloExtremos ? endsOf(o, s) : undefined;
 
   return {
     show: true,
@@ -381,13 +381,13 @@ const etiquetaDeSerie = (o: OpcionesDeGrafico, s: number, cellPosition: string) 
      * «Solo los extremos» se resuelve en el FORMATTER, devolviendo cadena vacia.
      */
     formatter: (p: { value: number; dataIndex: number }) => {
-      if (extremos && !extremos.has(p.dataIndex)) return '';
+      if (ends && !ends.has(p.dataIndex)) return '';
       return o.formatear ? o.formatear(p.value, s) : String(p.value);
     },
   };
 };
 
-const ejeCategoria = (o: OpcionesDeGrafico) => ({
+const axisCategory = (o: ChartOptions) => ({
   type: 'category' as const,
   show: o.ejes?.mostrarX !== false,
   data: o.vm.points.map((p) => p.label),
@@ -420,7 +420,7 @@ const ejeCategoria = (o: OpcionesDeGrafico) => ({
    */
 });
 
-const ejeValor = (o: OpcionesDeGrafico) => ({
+const ejeValor = (o: ChartOptions) => ({
   type: 'value' as const,
   show: o.ejes?.mostrarY !== false,
   /*
@@ -471,30 +471,30 @@ const ejeValor = (o: OpcionesDeGrafico) => ({
  * numeros sueltos mas rapido que los objetos. Al 100 % la regla se evalua sobre el valor ORIGINAL
  * y no sobre la parte, porque habla de casos y no de cuanto ocupa la barra.
  */
-function barrasConColor(o: OpcionesDeGrafico, datos: (number | null)[], s: number) {
+function colorBars(o: ChartOptions, datos: (number | null)[], s: number) {
   if (!o.condicional || o.condicional.rules.length === 0) return datos;
   const medida = o.vm.series[s];
 
   let alguna = false;
-  const conColor = datos.map((valor, i) => {
+  const withColor = datos.map((valor, i) => {
     const original = o.vm.points[i]?.values[s] ?? null;
     const color = colorCondicional(o.condicional, original, medida);
     if (color === undefined) return valor;
     alguna = true;
-    return { value: valor, itemStyle: { color: colorDeRol(o, color) } };
+    return { value: valor, itemStyle: { color: roleColor(o, color) } };
   });
-  return alguna ? conColor : datos;
+  return alguna ? withColor : datos;
 }
 
-function seriesDeBarras(o: OpcionesDeGrafico, horizontal: boolean) {
-  const datos = valoresApilados(o);
+function barSeries(o: ChartOptions, horizontal: boolean) {
+  const datos = valueStacked(o);
   const apilada = o.apilado && o.apilado !== 'ninguno';
 
   return o.vm.series.map((nombre, s) => ({
     name: nombre,
     type: 'bar',
-    data: barrasConColor(o, datos[s] ?? [], s),
-    ...pilaDe(o),
+    data: colorBars(o, datos[s] ?? [], s),
+    ...stackOf(o),
     /*
      * La esquina redondeada solo en la barra SUELTA.
      */
@@ -503,21 +503,21 @@ function seriesDeBarras(o: OpcionesDeGrafico, horizontal: boolean) {
       : { borderRadius: horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0] },
     barMaxWidth: 48,
     // Apilada, la cifra va DENTRO del segmento: encima se dibujaria sobre el segmento siguiente.
-    label: etiquetaDeSerie(o, s, apilada ? 'inside' : horizontal ? 'right' : 'top'),
+    label: seriesLabel(o, s, apilada ? 'inside' : horizontal ? 'right' : 'top'),
     // Las referencias cuelgan de la PRIMERA serie: son del grafico, no de una medida, y en una
     // serie cualquiera desaparecerian al ocultar esa medida desde la leyenda.
-    ...(s === 0 ? referenciasDe(o, horizontal) : {}),
+    ...(s === 0 ? referencesOf(o, horizontal) : {}),
     emphasis: { focus: 'series' },
   }));
 }
 
 /** Columnas verticales. Una serie por medida mapeada. */
-export function opcionesDeBarras(o: OpcionesDeGrafico): Record<string, unknown> {
+export function barOptions(o: ChartOptions): Record<string, unknown> {
   return {
     ...base(o),
-    xAxis: ejeCategoria(o),
+    xAxis: axisCategory(o),
     yAxis: ejeValor(o),
-    series: seriesDeBarras(o, false),
+    series: barSeries(o, false),
   };
 }
 
@@ -527,34 +527,34 @@ export function opcionesDeBarras(o: OpcionesDeGrafico): Record<string, unknown> 
  * El mismo objeto que las columnas con los ejes intercambiados; cual es la categoria y cual el
  * valor lo decide quien construye, no ECharts.
  */
-export function opcionesDeBarrasHorizontales(o: OpcionesDeGrafico): Record<string, unknown> {
+export function opcionesDeBarrasHorizontales(o: ChartOptions): Record<string, unknown> {
   return {
     ...base(o),
     xAxis: ejeValor(o),
     yAxis: {
-      ...ejeCategoria(o),
+      ...axisCategory(o),
       /*
        * Se invierte el eje de categorias: ECharts numera el vertical de abajo arriba, asi que sin
        * esto la primera categoria del modelo sale abajo y la lista se lee al reves.
        */
       inverse: true,
     },
-    series: seriesDeBarras(o, true),
+    series: barSeries(o, true),
   };
 }
 
 /** Area. Es una linea con el relleno debajo. */
-export function opcionesDeArea(o: OpcionesDeGrafico): Record<string, unknown> {
-  const datos = valoresApilados(o);
+export function areaOptions(o: ChartOptions): Record<string, unknown> {
+  const datos = valueStacked(o);
   return {
     ...base(o),
-    xAxis: { ...ejeCategoria(o), boundaryGap: false },
+    xAxis: { ...axisCategory(o), boundaryGap: false },
     yAxis: ejeValor(o),
     series: o.vm.series.map((nombre, s) => ({
       name: nombre,
       type: 'line',
       data: datos[s] ?? [],
-      ...pilaDe(o),
+      ...stackOf(o),
       smooth: false,
       symbol: 'circle',
       symbolSize: 5,
@@ -564,19 +564,19 @@ export function opcionesDeArea(o: OpcionesDeGrafico): Record<string, unknown> {
        * las de atras. Apiladas no se solapan y el relleno solido hace legible la composicion.
        */
       areaStyle: o.apilado && o.apilado !== 'ninguno' ? {} : { opacity: 0.25 },
-      label: etiquetaDeSerie(o, s, 'top'),
-      ...desplazarEtiquetasDelBorde(o),
-      ...(s === 0 ? referenciasDe(o) : {}),
+      label: seriesLabel(o, s, 'top'),
+      ...shiftLabelBorder(o),
+      ...(s === 0 ? referencesOf(o) : {}),
       emphasis: { focus: 'series' },
     })),
   };
 }
 
 /** Lineas. `smooth` desactivado: una curva inventa valores entre dos puntos medidos. */
-export function opcionesDeLineas(o: OpcionesDeGrafico): Record<string, unknown> {
+export function lineOptions(o: ChartOptions): Record<string, unknown> {
   return {
     ...base(o),
-    xAxis: { ...ejeCategoria(o), boundaryGap: false },
+    xAxis: { ...axisCategory(o), boundaryGap: false },
     yAxis: ejeValor(o),
     series: o.vm.series.map((nombre, s) => ({
       name: nombre,
@@ -586,9 +586,9 @@ export function opcionesDeLineas(o: OpcionesDeGrafico): Record<string, unknown> 
       symbol: 'circle',
       symbolSize: 6,
       lineStyle: { width: 2 },
-      label: etiquetaDeSerie(o, s, 'top'),
-      ...desplazarEtiquetasDelBorde(o),
-      ...(s === 0 ? referenciasDe(o) : {}),
+      label: seriesLabel(o, s, 'top'),
+      ...shiftLabelBorder(o),
+      ...(s === 0 ? referencesOf(o) : {}),
       emphasis: { focus: 'series' },
     })),
   };
@@ -602,15 +602,15 @@ export function opcionesDeLineas(o: OpcionesDeGrafico): Record<string, unknown> 
  * Un valor nulo se DESCARTA, no se dibuja como cero: `null` es «no hay respuesta», y una porcion
  * de cero afirmaria que la categoria no aporto nada y alteraria el total del que sale cada parte.
  */
-function porcionesDe(o: OpcionesDeGrafico): { name: string; value: number }[] {
-  const porciones = o.vm.points
+function slicesOf(o: ChartOptions): { name: string; value: number }[] {
+  const slices = o.vm.points
     .map((p) => ({ name: p.label, valor: p.values[0] ?? null }))
     .filter((p): p is { name: string; valor: number } => p.valor !== null)
     .map((p) => ({ name: p.name, value: p.valor }));
 
   // Ordenadas de mayor a menor por defecto: dos areas parecidas solo se distinguen si estan una
   // al lado de la otra, y ese es justo el caso en el que un circular se lee mal.
-  return o.circular?.ordenar === false ? porciones : [...porciones].sort((a, b) => b.value - a.value);
+  return o.circular?.ordenar === false ? slices : [...slices].sort((a, b) => b.value - a.value);
 }
 
 /**
@@ -618,8 +618,8 @@ function porcionesDe(o: OpcionesDeGrafico): { name: string; value: number }[] {
  *
  * `{d}` sale con dos decimales y no cabe en una tarjeta estrecha.
  */
-const etiquetaDePorcion = (
-  mode: EtiquetaCircular,
+const sliceLabel = (
+  mode: PieLabel,
   formatear: (n: number) => string,
   total: number,
 ) => {
@@ -641,7 +641,7 @@ const etiquetaDePorcion = (
 };
 
 /** Cuanto circulo queda, segun lo que ocupe la etiqueta que vive fuera de el. */
-const RADIO_EXTERIOR: Record<EtiquetaCircular, string> = {
+const RADIO_EXTERIOR: Record<PieLabel, string> = {
   ninguna: '72%',
   porcentaje: '62%',
   valor: '62%',
@@ -655,22 +655,22 @@ const RADIO_EXTERIOR: Record<EtiquetaCircular, string> = {
  * Un solo constructor para los dos objetos del catalogo: el contrato de datos es identico y el
  * hueco del centro es una propiedad. Solo lee la primera medida, como fija `measures: { max: 1 }`.
  */
-export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown> {
+export function pieOptions(o: ChartOptions): Record<string, unknown> {
   const c = o.circular ?? {};
-  const hueco = Math.min(Math.max(c.radioInterior ?? 0, 0), MAX_RADIO_INTERIOR);
-  const porciones = porcionesDe(o);
-  const total = porciones.reduce((suma, p) => suma + p.value, 0);
+  const hole = Math.min(Math.max(c.radioInterior ?? 0, 0), MAX_RADIO_INTERIOR);
+  const slices = slicesOf(o);
+  const total = slices.reduce((suma, p) => suma + p.value, 0);
   const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
-  const mode: EtiquetaCircular = c.labels ?? 'porcentaje';
+  const mode: PieLabel = c.labels ?? 'porcentaje';
 
   /*
    * Aqui la leyenda distingue CATEGORIAS, no series: en un circular siempre hay una serie, asi
    * que `auto` la ocultaria siempre y un pastel sin leyenda es una rueda de colores sin nombre.
    */
-  const { legend } = leyendaDe(o, porciones.length > 1);
+  const { legend } = legendOf(o, slices.length > 1);
 
   return {
-    ...nucleo(o, porciones.length > 1),
+    ...core(o, slices.length > 1),
     legend,
     tooltip: {
       trigger: 'item' as const,
@@ -685,7 +685,7 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
     /*
      * El total en el centro, solo si hay centro: con hueco cero la cifra caeria sobre las porciones.
      */
-    ...(c.totalEnElCentro && hueco > 0
+    ...(c.totalEnElCentro && hole > 0
       ? {
           title: {
             text: formatear(total),
@@ -708,7 +708,7 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
          * comprobado (4.3). Depende del modo de etiqueta porque «52.6 %» y «Q3: 31.4 %» no ocupan
          * lo mismo.
          */
-        radius: [`${hueco}%`, RADIO_EXTERIOR[mode]],
+        radius: [`${hole}%`, RADIO_EXTERIOR[mode]],
         center: ['50%', '50%'],
         // Sin reordenar por su cuenta: el orden ya se decidio arriba, y con `false` ECharts
         // respeta el del modelo, que es el mismo que ve la tabla de datos adjunta.
@@ -721,7 +721,7 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
                 show: true,
                 color: o.palette.content,
                 fontSize: 11,
-                formatter: etiquetaDePorcion(mode, formatear, total),
+                formatter: sliceLabel(mode, formatear, total),
                 /*
                  * Las etiquetas largas se alinean al borde de la tarjeta y no a la porcion: asi
                  * todas arrancan en el mismo sitio y ECharts estira la guia hasta ellas.
@@ -731,7 +731,7 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
                   : {}),
               },
         labelLine: { show: mode !== 'ninguna', lineStyle: { color: o.palette.line } },
-        data: porciones,
+        data: slices,
         emphasis: { focus: 'self' },
       },
     ],
@@ -746,7 +746,7 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
  * La escala de un medidor no puede salir del maximo de los datos: cambiaria con cada lectura y
  * la misma aguja en el mismo sitio significaria dos cifras distintas.
  */
-export function escalaBonita(n: number): number {
+export function niceScale(n: number): number {
   if (!Number.isFinite(n) || n <= 0) return 1;
   const decada = 10 ** Math.floor(Math.log10(n));
   for (const paso of [1, 2, 2.5, 5, 10]) {
@@ -766,8 +766,8 @@ export function escalaBonita(n: number): number {
  *
  * Vive fuera del constructor para que el respaldo accesible diga la misma escala que la aguja.
  */
-export function escalaDelMedidor(
-  medidor: ConfiguracionDeMedidor | undefined,
+export function gaugeScale(
+  medidor: GaugeSettings | undefined,
   valor: number | null,
   objetivo: number | null,
 ): { minimo: number; maximo: number } {
@@ -775,17 +775,17 @@ export function escalaDelMedidor(
   const minimo = m.minimo ?? 0;
   return {
     minimo,
-    maximo: m.maximo ?? escalaBonita(Math.max(valor ?? 0, objetivo ?? 0, minimo + 1) * 1.1),
+    maximo: m.maximo ?? niceScale(Math.max(valor ?? 0, objetivo ?? 0, minimo + 1) * 1.1),
   };
 }
 
-export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown> {
+export function gaugeOptions(o: ChartOptions): Record<string, unknown> {
   const m = o.medidor ?? {};
   const punto = o.vm.points[0];
   const valor = punto?.values[0] ?? null;
   const objetivo = punto?.values[1] ?? m.objetivo ?? null;
 
-  const { minimo, maximo } = escalaDelMedidor(m, valor, objetivo);
+  const { minimo, maximo } = gaugeScale(m, valor, objetivo);
   const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
   const color = o.palette.series[0] ?? o.palette.content;
 
@@ -800,7 +800,7 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
   };
 
   return {
-    ...nucleo(o, false),
+    ...core(o, false),
     tooltip: { show: false },
     series: [
       {
@@ -881,7 +881,7 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
  * El eje de la derecha: la misma escala de valores, sin repetir la cuadricula y con su propio
  * titulo (`tituloY2`). Todo lo demas se hereda para que los dos ejes se lean igual.
  */
-const ejeValorSecundario = (o: OpcionesDeGrafico) => ({
+const axisValueSecondary = (o: ChartOptions) => ({
   ...ejeValor(o),
   position: 'right' as const,
   splitLine: { show: false },
@@ -900,26 +900,26 @@ const ejeValorSecundario = (o: OpcionesDeGrafico) => ({
  * Combinado: unas medidas como columnas y otras como linea.
  *
  * Cuales van de cada forma lo dice el MAPEO, con un pozo para cada una, no una opcion del panel.
- * `seriesDeColumna` es cuantas series iniciales son columnas; el resto son lineas.
+ * `columnSeries` es cuantas series iniciales son columnas; el resto son lineas.
  */
-export function opcionesDeCombinado(o: OpcionesDeGrafico): Record<string, unknown> {
-  const gridColumns = Math.min(Math.max(o.seriesDeColumna ?? 1, 0), o.vm.series.length);
+export function comboOptions(o: ChartOptions): Record<string, unknown> {
+  const gridColumns = Math.min(Math.max(o.columnSeries ?? 1, 0), o.vm.series.length);
   const dos = o.combinado?.ejeSecundario === true;
 
   return {
     ...base(o),
-    xAxis: ejeCategoria(o),
-    yAxis: dos ? [ejeValor(o), ejeValorSecundario(o)] : ejeValor(o),
+    xAxis: axisCategory(o),
+    yAxis: dos ? [ejeValor(o), axisValueSecondary(o)] : ejeValor(o),
     series: o.vm.series.map((nombre, s) => {
-      const esColumna = s < gridColumns;
+      const isColumn = s < gridColumns;
       return {
         name: nombre,
-        type: esColumna ? 'bar' : 'line',
+        type: isColumn ? 'bar' : 'line',
         data: o.vm.points.map((p) => p.values[s] ?? null),
         // Solo las lineas se van al segundo eje: las columnas son la referencia y se quedan en el
         // de la izquierda. Al reves, la magnitud principal cambiaria de escala sin avisar.
-        ...(dos && !esColumna ? { yAxisIndex: 1 } : {}),
-        ...(esColumna
+        ...(dos && !isColumn ? { yAxisIndex: 1 } : {}),
+        ...(isColumn
           ? { barMaxWidth: 48, itemStyle: { borderRadius: [4, 4, 0, 0] } }
           : {
               smooth: false,
@@ -932,8 +932,8 @@ export function opcionesDeCombinado(o: OpcionesDeGrafico): Record<string, unknow
                */
               z: 3,
             }),
-        label: etiquetaDeSerie(o, s, 'top'),
-        ...(s === 0 ? referenciasDe(o) : {}),
+        label: seriesLabel(o, s, 'top'),
+        ...(s === 0 ? referencesOf(o) : {}),
         emphasis: { focus: 'series' },
       };
     }),
@@ -949,26 +949,26 @@ export function opcionesDeCombinado(o: OpcionesDeGrafico): Record<string, unknow
  * ejes son medidas. La tercera medida, si la hay, es el TAMANO del punto, repartido entre un
  * minimo y un maximo — el area de un circulo crece con el cuadrado del radio.
  */
-export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unknown> {
-  const conTamano = o.vm.series.length > 2;
-  const tamanos = conTamano
+export function scatterOptions(o: ChartOptions): Record<string, unknown> {
+  const withSize = o.vm.series.length > 2;
+  const tamanos = withSize
     ? o.vm.points.map((p) => p.values[2]).filter((v): v is number => v !== null)
     : [];
-  const maxTamano = Math.max(1, ...tamanos);
+  const maxSize = Math.max(1, ...tamanos);
 
-  const { legend, margen } = leyendaDe(o, false);
+  const { legend, margin } = legendOf(o, false);
   const formatear = (n: number, s: number) => o.formatear?.(n, s) ?? String(n);
 
   /*
    * Se reserva alto por el radio del punto mas grande: `scale` ajusta el eje a los valores, pero
    * el eje no sabe nada del tamano del simbolo.
    */
-  const holgura = (conTamano ? TAMANO_MAXIMO : 12) / 2 + (o.etiquetasDeDato ? 14 : 0);
+  const holgura = (withSize ? MAX_SIZE : 12) / 2 + (o.etiquetasDeDato ? 14 : 0);
 
   return {
-    ...nucleo(o, false),
+    ...core(o, false),
     legend,
-    grid: { ...margenDe(o, { ...margen, top: margen.top + holgura }), containLabel: true },
+    grid: { ...marginOf(o, { ...margin, top: margin.top + holgura }), containLabel: true },
     tooltip: {
       trigger: 'item' as const,
       backgroundColor: o.palette.superficieElevada,
@@ -1024,13 +1024,13 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
           name: p.label,
           value: [p.values[0], p.values[1], p.values[2] ?? null],
         })),
-        symbolSize: conTamano
+        symbolSize: withSize
           ? (valores: (number | null)[]) =>
-              TAMANO_MINIMO +
-              (Number(valores[2] ?? 0) / maxTamano) * (TAMANO_MAXIMO - TAMANO_MINIMO)
+              MIN_SIZE +
+              (Number(valores[2] ?? 0) / maxSize) * (MAX_SIZE - MIN_SIZE)
           : 12,
         itemStyle: { opacity: 0.8 },
-        ...referenciasDe(o),
+        ...referencesOf(o),
         label: o.etiquetasDeDato
           ? {
               show: true,
@@ -1047,8 +1047,8 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
 }
 
 /** El punto mas pequeno sigue siendo visible, y el mas grande no tapa a sus vecinos. */
-const TAMANO_MINIMO = 8;
-const TAMANO_MAXIMO = 42;
+const MIN_SIZE = 8;
+const MAX_SIZE = 42;
 
 /* ── Embudo ────────────────────────────────────────────────────────────────────────────────── */
 
@@ -1059,13 +1059,13 @@ const TAMANO_MAXIMO = 42;
  * destruiria. Que la segunda sea mayor que la primera es una anomalia que hay que poder ver. El
  * orden de mayor a menor se pide en «Ordenar» y se aplica al modelo antes de llegar aqui.
  */
-export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> {
+export function funnelOptions(o: ChartOptions): Record<string, unknown> {
   const etapas = o.vm.points
     .map((p) => ({ name: p.label, valor: p.values[0] }))
     .filter((p): p is { name: string; valor: number } => p.valor !== null);
 
   const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
-  const comparar: ComparacionDeEmbudo = o.embudo?.comparar ?? 'primero';
+  const compare: FunnelComparison = o.embudo?.compare ?? 'primero';
   const primero = etapas[0]?.valor ?? 0;
 
   /*
@@ -1073,15 +1073,15 @@ export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> 
    * etapa de referencia en cero no da «caida infinita» sino una comparacion sin sentido.
    */
   const parte = (valor: number, indice: number) => {
-    const base = comparar === 'anterior' ? (etapas[indice - 1]?.valor ?? valor) : primero;
+    const base = compare === 'anterior' ? (etapas[indice - 1]?.valor ?? valor) : primero;
     if (base === 0) return '—';
     return `${((valor / base) * 100).toFixed(1)} %`;
   };
 
-  const { legend } = leyendaDe(o, etapas.length > 1);
+  const { legend } = legendOf(o, etapas.length > 1);
 
   return {
-    ...nucleo(o, etapas.length > 1),
+    ...core(o, etapas.length > 1),
     legend,
     tooltip: {
       trigger: 'item' as const,
@@ -1093,9 +1093,9 @@ export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> 
         [
           p.name,
           formatear(p.value),
-          comparar === 'ninguna'
+          compare === 'ninguna'
             ? ''
-            : `${comparar === 'anterior' ? 'De la etapa anterior' : 'De la primera etapa'}: ` +
+            : `${compare === 'anterior' ? 'De la etapa anterior' : 'De la primera etapa'}: ` +
               parte(p.value, p.dataIndex),
         ]
           .filter(Boolean)
@@ -1130,7 +1130,7 @@ export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> 
           color: o.palette.content,
           fontSize: 11,
           formatter: (p: { name: string; value: number; dataIndex: number }) =>
-            comparar === 'ninguna'
+            compare === 'ninguna'
               ? `${p.name}: ${formatear(p.value)}`
               : `${p.name}: ${parte(p.value, p.dataIndex)}`,
         },
@@ -1152,9 +1152,9 @@ export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> 
  * en el tooltip ni al pasar el raton. La etiqueta lleva siempre el signo, porque el color no
  * puede ser el unico medio de distinguir subida de bajada (WCAG 1.4.1).
  */
-export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown> {
+export function waterfallOptions(o: ChartOptions): Record<string, unknown> {
   const puntos = o.vm.points.map((p) => ({ label: p.label, valor: p.values[0] ?? 0 }));
-  const conTotal = o.cascada?.mostrarTotal !== false;
+  const withTotal = o.cascada?.mostrarTotal !== false;
   const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
 
   /*
@@ -1172,14 +1172,14 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
     acumulado += valor;
   }
 
-  const labels = [...puntos.map((p) => p.label), ...(conTotal ? ['Total'] : [])];
-  if (conTotal) {
+  const labels = [...puntos.map((p) => p.label), ...(withTotal ? ['Total'] : [])];
+  if (withTotal) {
     zocalos.push(0);
     alturas.push(acumulado);
   }
 
-  const colorDe = (indice: number) => {
-    if (conTotal && indice === puntos.length) return o.palette.series[0] ?? o.palette.content;
+  const colorOf = (indice: number) => {
+    if (withTotal && indice === puntos.length) return o.palette.series[0] ?? o.palette.content;
     const valor = puntos[indice]?.valor ?? 0;
     // La subida usa el color principal de la paleta y la bajada el de contraste, que en el tema
     // institucional son el azul y el rojo. Salen del tema, no se eligen aqui.
@@ -1189,7 +1189,7 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
   return {
     /*
      * La base se construye con la leyenda ya oculta, no se oculta despues: apagarla tras `base(o)`
-     * dejaria el margen que `leyendaDe` ya habia reservado para ella.
+     * dejaria el margen que `legendOf` ya habia reservado para ella.
      */
     ...base({ ...o, leyenda: 'oculta' }),
     legend: { show: false },
@@ -1202,13 +1202,13 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
       formatter: (params: { name: string; dataIndex: number }[]) => {
         const p = params[0];
         if (!p) return '';
-        const esTotal = conTotal && p.dataIndex === puntos.length;
-        const valor = esTotal ? acumulado : (puntos[p.dataIndex]?.valor ?? 0);
-        const signo = esTotal || valor < 0 ? '' : '+';
+        const totalIs = withTotal && p.dataIndex === puntos.length;
+        const valor = totalIs ? acumulado : (puntos[p.dataIndex]?.valor ?? 0);
+        const signo = totalIs || valor < 0 ? '' : '+';
         return `${p.name}<br/>${signo}${formatear(valor)}`;
       },
     },
-    xAxis: { ...ejeCategoria(o), data: labels },
+    xAxis: { ...axisCategory(o), data: labels },
     yAxis: ejeValor(o),
     series: [
       {
@@ -1226,8 +1226,8 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
         type: 'bar',
         stack: 'cascada',
         barMaxWidth: 56,
-        ...referenciasDe(o),
-        data: alturas.map((alto, i) => ({ value: alto, itemStyle: { color: colorDe(i) } })),
+        ...referencesOf(o),
+        data: alturas.map((alto, i) => ({ value: alto, itemStyle: { color: colorOf(i) } })),
         label: {
           show: true,
           position: 'top' as const,
@@ -1238,9 +1238,9 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
            * puede ser el unico medio de transmitir esa informacion (WCAG 1.4.1).
            */
           formatter: (p: { dataIndex: number }) => {
-            const esTotal = conTotal && p.dataIndex === puntos.length;
-            const valor = esTotal ? acumulado : (puntos[p.dataIndex]?.valor ?? 0);
-            return `${esTotal || valor < 0 ? '' : '+'}${formatear(valor)}`;
+            const totalIs = withTotal && p.dataIndex === puntos.length;
+            const valor = totalIs ? acumulado : (puntos[p.dataIndex]?.valor ?? 0);
+            return `${totalIs || valor < 0 ? '' : '+'}${formatear(valor)}`;
           },
         },
       },
@@ -1256,7 +1256,7 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
  * Un rectangulo conserva dos dimensiones donde escribir el nombre; una porcion fina, no. Con dos
  * dimensiones dibuja dos niveles: el primero agrupa y el segundo reparte dentro.
  */
-export function opcionesDeMapaDeArbol(o: OpcionesDeGrafico): Record<string, unknown> {
+export function treeMapOptions(o: ChartOptions): Record<string, unknown> {
   const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
 
   /*
@@ -1281,7 +1281,7 @@ export function opcionesDeMapaDeArbol(o: OpcionesDeGrafico): Record<string, unkn
   );
 
   return {
-    ...nucleo(o, false),
+    ...core(o, false),
     tooltip: {
       trigger: 'item' as const,
       backgroundColor: o.palette.superficieElevada,
@@ -1336,7 +1336,7 @@ export function opcionesDeMapaDeArbol(o: OpcionesDeGrafico): Record<string, unkn
   };
 }
 
-export type TipoDeGrafico =
+export type ChartKind =
   | 'barras'
   | 'lineas'
   | 'barras-horizontales'
@@ -1349,26 +1349,26 @@ export type TipoDeGrafico =
   | 'mapa-de-arbol'
   | 'medidor';
 
-const CONSTRUCTORES: Record<TipoDeGrafico, (o: OpcionesDeGrafico) => Record<string, unknown>> = {
-  barras: opcionesDeBarras,
+const CONSTRUCTORES: Record<ChartKind, (o: ChartOptions) => Record<string, unknown>> = {
+  barras: barOptions,
   'barras-horizontales': opcionesDeBarrasHorizontales,
-  lineas: opcionesDeLineas,
-  area: opcionesDeArea,
-  circular: opcionesDeCircular,
-  combinado: opcionesDeCombinado,
-  dispersion: opcionesDeDispersion,
-  embudo: opcionesDeEmbudo,
-  cascada: opcionesDeCascada,
-  'mapa-de-arbol': opcionesDeMapaDeArbol,
-  medidor: opcionesDeMedidor,
+  lineas: lineOptions,
+  area: areaOptions,
+  circular: pieOptions,
+  combinado: comboOptions,
+  dispersion: scatterOptions,
+  embudo: funnelOptions,
+  cascada: waterfallOptions,
+  'mapa-de-arbol': treeMapOptions,
+  medidor: gaugeOptions,
 };
 
 /**
- * Un mapa y no una cadena de ternarios: con `Record<TipoDeGrafico, ...>`, anadir un tipo al union
+ * Un mapa y no una cadena de ternarios: con `Record<ChartKind, ...>`, anadir un tipo al union
  * sin escribir su constructor es un error de compilacion.
  */
-export function opcionesDe(tipo: TipoDeGrafico, o: OpcionesDeGrafico): Record<string, unknown> {
-  return (CONSTRUCTORES[tipo] ?? opcionesDeBarras)(o);
+export function optionsOf(tipo: ChartKind, o: ChartOptions): Record<string, unknown> {
+  return (CONSTRUCTORES[tipo] ?? barOptions)(o);
 }
 
 /**
@@ -1378,8 +1378,8 @@ export function opcionesDe(tipo: TipoDeGrafico, o: OpcionesDeGrafico): Record<st
  * umbral un SVG no cuesta nada y se puede seleccionar e inspeccionar; y al IMPRIMIR siempre se
  * usa SVG, porque un canvas impreso es un mapa de bits a la resolucion de la pantalla.
  */
-export const UMBRAL_DE_ELEMENTOS = 400;
+export const ELEMENT_THRESHOLD = 400;
 
-export function elementosDe(vm: CategoricalViewModel): number {
+export function elementsOf(vm: CategoricalViewModel): number {
   return vm.points.length * Math.max(1, vm.series.length);
 }

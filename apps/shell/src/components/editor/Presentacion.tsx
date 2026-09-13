@@ -9,9 +9,9 @@ import {
   MODOS_DE_APILADO,
   MODOS_DE_LEYENDA,
   type CriterioDeOrden,
-  type ComparacionDeEmbudo,
-  type EtiquetaCircular,
-  type ModoDeApilado,
+  type FunnelComparison,
+  type PieLabel,
+  type StackingMode,
   POSICIONES_DE_DATO,
   POSICIONES_DE_ETIQUETA,
   etiquetasNormalizadas,
@@ -25,7 +25,7 @@ import {
   type EstiloDeTexto,
   type FormatoDeNumero,
   type FormatosDelObjeto,
-  type ModoDeLeyenda,
+  type LegendMode,
   type PosicionDeDato,
   type PosicionDeEtiqueta,
   type TipoDeFormato,
@@ -45,14 +45,14 @@ import { Seccion } from "./Seccion";
 export function Presentacion({
   instance,
   admitidas,
-  tipos,
+  kinds,
   guardando,
   onCambiar,
 }: {
   instance: ObjectInstance;
   admitidas: ClaveDePresentacion[];
   /** Tipo de cada columna del dataset, para ofrecer los selectores que tienen sentido. */
-  tipos: Record<string, string>;
+  kinds: Record<string, string>;
   guardando: boolean;
   onCambiar: (cambio: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
@@ -340,7 +340,7 @@ export function Presentacion({
                 value={p.leyenda ?? "auto"}
                 disabled={guardando}
                 data-testid={`${prueba}-leyenda`}
-                onChange={(e) => poner({ leyenda: e.target.value as ModoDeLeyenda })}
+                onChange={(e) => poner({ leyenda: e.target.value as LegendMode })}
               >
                 {MODOS_DE_LEYENDA.map((m) => (
                   <option key={m} value={m}>
@@ -422,7 +422,7 @@ export function Presentacion({
                 value={p.apilado ?? "ninguno"}
                 disabled={guardando}
                 data-testid={`${prueba}-apilado`}
-                onChange={(e) => poner({ apilado: e.target.value as ModoDeApilado })}
+                onChange={(e) => poner({ apilado: e.target.value as StackingMode })}
               >
                 {MODOS_DE_APILADO.map((m) => (
                   <option key={m} value={m}>
@@ -529,7 +529,7 @@ export function Presentacion({
                 poner({ multiplos: { ...p.multiplos, mismaEscala: e.target.checked } })
               }
             />{" "}
-            Misma scale en todos los paneles
+            Misma scale en all los panels
           </label>
           <span className="campo__pista">
             Apagarla solo tiene sentido cuando lo que se compara es la SHAPE de cada serie y no su
@@ -667,14 +667,14 @@ export function Presentacion({
           </label>
 
           <label className="formulario__campo">
-            <span>Etiquetas sobre las porciones</span>
+            <span>Etiquetas sobre las slices</span>
             <select
               value={p.circular?.labels ?? "porcentaje"}
               disabled={guardando}
               data-testid={`${prueba}-etiquetas-circular`}
               onChange={(e) =>
                 poner({
-                  circular: { ...p.circular, labels: e.target.value as EtiquetaCircular },
+                  circular: { ...p.circular, labels: e.target.value as PieLabel },
                 })
               }
             >
@@ -710,7 +710,7 @@ export function Presentacion({
             Total en el centro
           </label>
           {(p.circular?.radioInterior ?? 0) === 0 ? (
-            <p className="campo__pista">Sin hueco no hay centro donde escribir el total.</p>
+            <p className="campo__pista">Sin hole no hay centro donde escribir el total.</p>
           ) : null}
         </Seccion>
       ) : null}
@@ -762,7 +762,7 @@ export function Presentacion({
           </div>
           <span className="campo__pista">
             Vacio = se deduce de los datos, redondeando a una scale estable. Fijarla es lo que
-            permite comparar dos capturas del mismo medidor.
+            permite compare dos capturas del mismo medidor.
           </span>
 
           <label className="formulario__campo">
@@ -795,7 +795,7 @@ export function Presentacion({
               data-testid={`${prueba}-mostrar-valor`}
               onChange={(e) => poner({ medidor: { ...p.medidor, mostrarValor: e.target.checked } })}
             />{" "}
-            Mostrar la cifra bajo la aguja
+            Mostrar la figure bajo la aguja
           </label>
         </Seccion>
       ) : null}
@@ -807,10 +807,10 @@ export function Presentacion({
           <label className="formulario__campo">
             <span>Que compara la etiqueta</span>
             <select
-              value={p.embudo?.comparar ?? "primero"}
+              value={p.embudo?.compare ?? "primero"}
               disabled={guardando}
               data-testid={`${prueba}-comparar`}
-              onChange={(e) => poner({ embudo: { comparar: e.target.value as ComparacionDeEmbudo } })}
+              onChange={(e) => poner({ embudo: { compare: e.target.value as FunnelComparison } })}
             >
               {COMPARACIONES_DE_EMBUDO.map((c) => (
                 <option key={c} value={c}>
@@ -1051,7 +1051,7 @@ export function Presentacion({
           titulo="Selectores" nivel={2} prueba={`${prueba}-selectores`}>
           <SelectoresDelPanel
             instance={instance}
-            tipos={tipos}
+            kinds={kinds}
             guardando={guardando}
             onCambiar={onCambiar}
           />
@@ -1065,12 +1065,12 @@ export function Presentacion({
 /** El tipo de selector de cada dimension del panel. */
 function SelectoresDelPanel({
   instance,
-  tipos,
+  kinds,
   guardando,
   onCambiar,
 }: {
   instance: ObjectInstance;
-  tipos: Record<string, string>;
+  kinds: Record<string, string>;
   guardando: boolean;
   onCambiar: (cambio: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
@@ -1078,7 +1078,7 @@ function SelectoresDelPanel({
     instance.configuracion?.objectId === "panel-de-filtros"
       ? instance.configuracion
       : undefined;
-  const efectivos = selectoresEfectivos(instance, configuracion, tipos);
+  const efectivos = selectoresEfectivos(instance, configuracion, kinds);
   const prueba = `selectores-${instance.instanceId}`;
 
   const ponerTipo = (fieldName: string, tipo: TipoDeSelector) =>
@@ -1117,7 +1117,7 @@ function SelectoresDelPanel({
     <div className="editor__selectores" data-testid={prueba}>
       <p className="texto-atenuado">Como se filtra cada dimension</p>
       {efectivos.map((s) => {
-        const tipoDeColumna = tipos[s.fieldName] ?? "";
+        const tipoDeColumna = kinds[s.fieldName] ?? "";
         return (
           <label key={s.fieldName} className="formulario__campo">
             <span>{s.fieldName}</span>
@@ -1334,7 +1334,7 @@ function RenglonDeFormato({
                 la institucion que publica —«RD$», «DOP», «$»— y una lista cerrada obligaria a
                 tocar codigo cada vez que alguien reporte en otra divisa.
               */}
-              <span className="campo__pista">Precede a la cifra. Por defecto RD$.</span>
+              <span className="campo__pista">Precede a la figure. Por defecto RD$.</span>
             </label>
           ) : null}
 
@@ -1390,7 +1390,7 @@ const DECIMALES_POR_DEFECTO: Record<TipoDeFormato, number> = {
   personalizado: 0,
 };
 
-const ETIQUETA_DE_APILADO: Record<ModoDeApilado, string> = {
+const ETIQUETA_DE_APILADO: Record<StackingMode, string> = {
   ninguno: "Sin apilar (una al lado de otra)",
   apilado: "Apilado",
   porcentaje: "Apilado al 100 %",
@@ -1406,13 +1406,13 @@ const ETIQUETA_DE_POSICION: Record<PosicionDeDato, string> = {
   dentro: "Dentro de la barra",
 };
 
-const ETIQUETA_DE_COMPARACION: Record<ComparacionDeEmbudo, string> = {
+const ETIQUETA_DE_COMPARACION: Record<FunnelComparison, string> = {
   primero: "Contra la primera etapa (cuanto queda)",
   anterior: "Contra la etapa anterior (cuanto se pierde aqui)",
   ninguna: "Sin comparar: solo la cifra",
 };
 
-const ETIQUETA_CIRCULAR: Record<EtiquetaCircular, string> = {
+const ETIQUETA_CIRCULAR: Record<PieLabel, string> = {
   ninguna: "Sin etiquetas",
   categoria: "Nombre de la categoria",
   valor: "Cifra",
@@ -1420,7 +1420,7 @@ const ETIQUETA_CIRCULAR: Record<EtiquetaCircular, string> = {
   "categoria-porcentaje": "Nombre y porcentaje",
 };
 
-const ETIQUETA_DE_LEYENDA: Record<ModoDeLeyenda, string> = {
+const ETIQUETA_DE_LEYENDA: Record<LegendMode, string> = {
   auto: "Automatica (solo con varias series)",
   oculta: "Oculta",
   arriba: "Arriba",

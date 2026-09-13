@@ -27,11 +27,11 @@ const VARIABLE: Record<ColorDeTexto, string> = {
   atenuado: 'var(--md-sys-color-outline)',
 };
 
-const colorDe = (color: ColorDeTexto | undefined): string => VARIABLE[color ?? 'atenuado'];
+const colorOf = (color: ColorDeTexto | undefined): string => VARIABLE[color ?? 'atenuado'];
 
 /** El borde CSS de una linea, en un solo sitio: las cuatro que hay deben verse iguales. */
 const bordeDe = (line: ConfiguracionDeLinea | undefined): string =>
-  `${grosorValido(line?.grosor)}px ${trazoDeLinea(line?.estilo)} ${colorDe(line?.color)}`;
+  `${grosorValido(line?.grosor)}px ${trazoDeLinea(line?.estilo)} ${colorOf(line?.color)}`;
 
 /* ── Cuadro de texto ───────────────────────────────────────────────────────────────────────── */
 
@@ -140,9 +140,9 @@ export function FormaBasica({ config }: { config: ConfiguracionDeForma | undefin
         className="forma__cuerpo"
         data-regular={regular ? 'si' : undefined}
         style={{
-          background: colorDe(config?.relleno ?? 'primario'),
+          background: colorOf(config?.relleno ?? 'primario'),
           opacity: Math.min(100, Math.max(0, config?.opacidad ?? 100)) / 100,
-          ...(config?.trazo ? { border: `${grosorValido(config.grosorDeTrazo)}px solid ${colorDe(config.trazo)}` } : {}),
+          ...(config?.trazo ? { border: `${grosorValido(config.grosorDeTrazo)}px solid ${colorOf(config.trazo)}` } : {}),
           ...(forma === 'circulo' ? { borderRadius: '50%' } : { borderRadius: `${config?.radio ?? 0}px` }),
           ...(recorte ? { clipPath: recorte } : {}),
           /*
@@ -185,7 +185,7 @@ export function Conexion({
         ? curva(puntos)
         : puntos.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
 
-  const color = colorDe(config?.estiloDeLinea?.color ?? 'primario');
+  const color = colorOf(config?.estiloDeLinea?.color ?? 'primario');
   const grosor = grosorValido(config?.estiloDeLinea?.grosor ?? 2);
   const id = `punta-${config?.desde ?? 'a'}-${config?.hasta ?? 'b'}`;
 

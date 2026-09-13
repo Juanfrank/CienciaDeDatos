@@ -97,7 +97,7 @@ export function VistaModulo({
               data-testid="limpiar-filtros"
               onClick={limpiarTodo}
             >
-              Limpiar todos los filtros
+              Limpiar all los filtros
             </button>
           ) : null}
         </div>

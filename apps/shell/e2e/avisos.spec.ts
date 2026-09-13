@@ -172,13 +172,13 @@ test.describe('suscripciones', () => {
 
   test('rechaza una hora fuera de rango y una cadencia desconocida', async ({ page }) => {
     await entrarComo(page, 'u-ana');
-    const comun = { nombre: 'X', modulo: 'casos-pendientes', formato: 'pdf' };
+    const common = { nombre: 'X', modulo: 'casos-pendientes', formato: 'pdf' };
 
     expect(
-      (await page.request.post('/api/suscripciones', { data: { ...comun, cadencia: 'diaria', hora: 99 } })).status(),
+      (await page.request.post('/api/suscripciones', { data: { ...common, cadencia: 'diaria', hora: 99 } })).status(),
     ).toBe(400);
     expect(
-      (await page.request.post('/api/suscripciones', { data: { ...comun, cadencia: 'cuando-sea', hora: 8 } })).status(),
+      (await page.request.post('/api/suscripciones', { data: { ...common, cadencia: 'cuando-sea', hora: 8 } })).status(),
     ).toBe(400);
   });
 });

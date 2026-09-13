@@ -307,7 +307,7 @@ test.describe('las paginas de objetos nuevos, en un movil', () => {
 
   test('un multiplo se apila en una sola columna cuando no caben dos', async ({ page }) => {
     /*
-     * `columnasPara` elige la rejilla mas cuadrada por el NUMERO de paneles, sin saber cuanto
+     * `columnsFor` elige la rejilla mas cuadrada por el NUMERO de paneles, sin saber cuanto
      * ancho hay. En un movil, dos columnas dejan cada panel en 170 px: un grafico donde no cabe
      * ni el rotulo del eje.
      */

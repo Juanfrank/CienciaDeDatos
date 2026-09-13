@@ -4,22 +4,22 @@ import type { Aggregation, QueryResult } from '@app/data-contracts';
 import {
   type BindingProblem,
   type NombreDeIcono,
-  type PanelDeMultiplo,
+  type MultiplePanel,
   type PresentacionDeObjeto,
   type RanuraDeCampos,
-  type TipoDeGrafico,
+  type ChartKind,
   aFieldRef,
   agregacionesPara,
-  escalaDelMedidor,
+  gaugeScale,
   campoDeRanura,
   colorCondicional,
-  columnasPara,
-  escalaBonita,
-  maximoComun,
-  partirEnMultiplos,
+  columnsFor,
+  niceScale,
+  maxCommon,
+  splitMultiples,
   estiloDeTexto,
   fieldKey,
-  ordenarCategorias,
+  sortCategories,
   ranurasDe,
   formateadorDeMedida,
   proyectarObjeto,
@@ -347,7 +347,7 @@ export function Barras({
   /*
    * El orden se aplica al MODELO, antes de repartirlo.
    */
-  const vm = ordenarCategorias(
+  const vm = sortCategories(
     toCategorical(
       result,
       dimensiones,
@@ -366,7 +366,7 @@ export function Barras({
   const formatear = (valor: number, s: number) =>
     formateadorDeMedida(instance.presentacion, medidas[s] ?? '')(valor);
 
-  const particion = multiplo ? partirEnMultiplos(vm) : undefined;
+  const particion = multiplo ? splitMultiples(vm) : undefined;
 
   return (
     <Marco
@@ -378,15 +378,15 @@ export function Barras({
     >
       {particion ? (
         <Multiplos
-          paneles={particion.paneles}
-          omitidos={particion.omitidos}
+          panels={particion.panels}
+          omitted={particion.omitted}
           instance={instance}
-          presentacion={presentacionDePanel(instance.presentacion, particion.paneles)}
+          presentacion={presentacionDePanel(instance.presentacion, particion.panels)}
           tipo={horizontal ? 'barras-horizontales' : 'barras'}
           titulo={titulo}
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
-          gridColumns={columnasPara(particion.paneles.length, instance.presentacion?.multiplos?.gridColumns)}
+          gridColumns={columnsFor(particion.panels.length, instance.presentacion?.multiplos?.gridColumns)}
           {...(onFiltrar ? { onFiltrar } : {})}
         />
       ) : (
@@ -459,7 +459,7 @@ export function Lineas({
   const dimensiones = [multiplo, ejeX]
     .filter((c): c is string => c !== undefined)
     .map(aFieldRef);
-  const vm = ordenarCategorias(
+  const vm = sortCategories(
     toCategorical(
       result,
       dimensiones,
@@ -470,7 +470,7 @@ export function Lineas({
   );
   const formatear = (valor: number, s: number) =>
     formateadorDeMedida(instance.presentacion, medidas[s] ?? '')(valor);
-  const particion = multiplo ? partirEnMultiplos(vm) : undefined;
+  const particion = multiplo ? splitMultiples(vm) : undefined;
 
   return (
     <Marco
@@ -482,15 +482,15 @@ export function Lineas({
     >
       {particion ? (
         <Multiplos
-          paneles={particion.paneles}
-          omitidos={particion.omitidos}
+          panels={particion.panels}
+          omitted={particion.omitted}
           instance={instance}
-          presentacion={presentacionDePanel(instance.presentacion, particion.paneles)}
+          presentacion={presentacionDePanel(instance.presentacion, particion.panels)}
           tipo={area ? 'area' : 'lineas'}
           titulo={titulo}
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
-          gridColumns={columnasPara(particion.paneles.length, instance.presentacion?.multiplos?.gridColumns)}
+          gridColumns={columnsFor(particion.panels.length, instance.presentacion?.multiplos?.gridColumns)}
           {...(onFiltrar ? { onFiltrar } : {})}
         />
       ) : (
@@ -556,27 +556,27 @@ export function Lineas({
 
 /** Pequenos multiplos: el mismo grafico, una vez por panel, dentro de UNA tarjeta. */
 function Multiplos({
-  paneles,
-  omitidos,
+  panels,
+  omitted,
   instance,
   presentacion,
   tipo,
   titulo,
   formatear,
-  seriesDeColumna,
+  columnSeries,
   dimension,
   gridColumns,
   onFiltrar,
 }: {
-  paneles: PanelDeMultiplo[];
+  panels: MultiplePanel[];
   /** Cuantos valores de la dimension no caben en el limite. Se dicen; no se ocultan. */
-  omitidos: number;
+  omitted: number;
   instance: ObjectInstance;
   presentacion: PresentacionDeObjeto | undefined;
-  tipo: TipoDeGrafico;
+  tipo: ChartKind;
   titulo: string;
   formatear: (valor: number, serie: number) => string;
-  seriesDeColumna?: number;
+  columnSeries?: number;
   dimension?: string;
   gridColumns: number;
   /** Filtrar desde un panel filtra por la CATEGORIA DEL EJE, no por el valor del panel. */
@@ -588,7 +588,7 @@ function Multiplos({
       data-testid="multiplos"
       style={{ '--multiplos-columnas': gridColumns } as React.CSSProperties}
     >
-      {paneles.map((panel, i) => (
+      {panels.map((panel, i) => (
         <section key={panel.titulo} className="multiplos__panel">
           {/*
             El rotulo de cada panel es un encabezado de verdad, no un texto suelto.
@@ -610,7 +610,7 @@ function Multiplos({
                 }
               : {})}
             formatear={formatear}
-            {...(seriesDeColumna === undefined ? {} : { seriesDeColumna })}
+            {...(columnSeries === undefined ? {} : { columnSeries })}
             {...(dimension ? { dimension } : {})}
             {...(dimension && onFiltrar
               ? { onSeleccionar: (categoria: string) => onFiltrar(dimension, categoria) }
@@ -659,11 +659,11 @@ function Multiplos({
         es la misma clase de mentira que 4.2 cierra al obligar a marcar un objeto roto en vez de
         omitirlo. Ocupa su propia celda de la rejilla para no robarle alto a ningun panel.
       */}
-      {omitidos > 0 ? (
+      {omitted > 0 ? (
         <p className="multiplos__omitidos" data-testid="multiplos-omitidos">
-          {omitidos === 1
+          {omitted === 1
             ? 'Hay 1 valor mas que no cabe. Ordene la dimension para ver otros.'
-            : `Hay ${omitidos} valores mas que no caben. Ordene la dimension para ver otros.`}
+            : `Hay ${omitted} valores mas que no caben. Ordene la dimension para ver otros.`}
         </p>
       ) : null}
     </div>
@@ -673,15 +673,15 @@ function Multiplos({
 /** La presentacion con la que se dibuja CADA panel. */
 function presentacionDePanel(
   presentacion: PresentacionDeObjeto | undefined,
-  paneles: PanelDeMultiplo[],
+  panels: MultiplePanel[],
 ): PresentacionDeObjeto | undefined {
   if (presentacion?.multiplos?.mismaEscala === false) return presentacion;
-  const maximo = maximoComun(paneles);
+  const maximo = maxCommon(panels);
   if (maximo === undefined || presentacion?.ejes?.maximoY !== undefined) return presentacion;
   /*
    * El maximo se REDONDEA hacia arriba a un numero de escala.
    */
-  return { ...presentacion, ejes: { ...presentacion?.ejes, maximoY: escalaBonita(maximo) } };
+  return { ...presentacion, ejes: { ...presentacion?.ejes, maximoY: niceScale(maximo) } };
 }
 
 /** La celda de categoria del respaldo, que ademas FILTRA. */
@@ -741,7 +741,7 @@ export function Combinado({
   const medidas = [...deColumnas, ...deLineas];
 
   const dimension = ejeX ? aFieldRef(ejeX) : undefined;
-  const vm = ordenarCategorias(
+  const vm = sortCategories(
     toCategorical(
       result,
       dimension ? [dimension] : [],
@@ -765,7 +765,7 @@ export function Combinado({
         vm={vm}
         titulo={titulo}
         presentacion={instance.presentacion}
-        seriesDeColumna={deColumnas.length}
+        columnSeries={deColumnas.length}
         formatear={(valor, serie) =>
           formateadorDeMedida(instance.presentacion, medidas[serie] ?? '')(valor)
         }
@@ -919,7 +919,7 @@ function UnaDimensionUnaMedida({
   const medidas = r ? r.varios('valor') : instance.binding.measures;
   const dimension = dim ? aFieldRef(dim) : undefined;
 
-  const vm = ordenarCategorias(
+  const vm = sortCategories(
     toCategorical(
       result,
       dimension ? [dimension] : [],
@@ -987,16 +987,16 @@ function UnaDimensionUnaMedida({
 }
 
 export function Embudo(props: ObjetoProps) {
-  const comparar = props.instance.presentacion?.embudo?.comparar ?? 'primero';
+  const compare = props.instance.presentacion?.embudo?.compare ?? 'primero';
   return (
     <UnaDimensionUnaMedida
       {...props}
       tipo="embudo"
       ranuraDeDimension="etapa"
       columnaExtra={{
-        heading: comparar === 'anterior' ? 'De la anterior' : 'De la primera',
+        heading: compare === 'anterior' ? 'De la anterior' : 'De la primera',
         celda: (valores, i) => {
-          const base = comparar === 'anterior' ? (valores[i - 1] ?? valores[i]) : valores[0];
+          const base = compare === 'anterior' ? (valores[i - 1] ?? valores[i]) : valores[0];
           const valor = valores[i];
           // Una etapa de referencia en cero no da «caida infinita»: da una comparacion sin
           // sentido, y la raya lo dice mejor que un numero inventado.
@@ -1124,8 +1124,8 @@ export function Circular({
   aggregations,
   onFiltrar,
   iconoDelObjeto,
-  hueco,
-}: ObjetoProps & { hueco?: number }) {
+  hole,
+}: ObjetoProps & { hole?: number }) {
   const r = porRanura(instance, ranuras);
   const categoria = r ? r.uno('categoria') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('valor') : instance.binding.measures;
@@ -1143,7 +1143,7 @@ export function Circular({
    * El hueco por defecto del objeto, que la presentacion anula.
    */
   const circular = {
-    ...(hueco === undefined ? {} : { radioInterior: hueco }),
+    ...(hole === undefined ? {} : { radioInterior: hole }),
     ...instance.presentacion?.circular,
   };
   const presentacion = { ...instance.presentacion, circular };
@@ -1219,7 +1219,7 @@ export function Circular({
 
 /** La dona es el circular con hueco. Nada mas: mismo contrato, mismo dibujo, mismo respaldo. */
 export function Dona(props: ObjetoProps) {
-  return <Circular {...props} hueco={HUECO_DE_DONA} />;
+  return <Circular {...props} hole={HUECO_DE_DONA} />;
 }
 
 /** Medidor — una cifra contra su meta. */
@@ -1246,7 +1246,7 @@ export function Medidor({
   const punto = vm.points[0];
   const valor = punto?.values[0] ?? null;
   const objetivo = punto?.values[1] ?? instance.presentacion?.medidor?.objetivo ?? null;
-  const scale = escalaDelMedidor(instance.presentacion?.medidor, valor, objetivo);
+  const scale = gaugeScale(instance.presentacion?.medidor, valor, objetivo);
 
   return (
     <Marco

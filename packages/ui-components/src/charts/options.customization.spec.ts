@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { opcionesDe, type TipoDeGrafico } from './opciones';
-import { ordenarCategorias } from './orden';
+import { optionsOf, type ChartKind } from './options';
+import { sortCategories } from './sort';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
 const palette = {
@@ -23,7 +23,7 @@ const vm = (series: string[], puntos: [string, ...(number | null)[]][]): Categor
  */
 /* eslint-disable @typescript-eslint/no-explicit-any -- ver el comentario de arriba */
 const opciones = (extra: Record<string, unknown> = {}, v = vm(['A'], [['x', 1]])) =>
-  opcionesDe('barras', { vm: v, palette, titulo: 'T', ...extra }) as any;
+  optionsOf('barras', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 describe('leyenda', () => {
   it('auto la ensena solo con varias series', () => {
@@ -95,12 +95,12 @@ describe('orden de las categorias', () => {
   const datos = vm(['A'], [['b', 2], ['a', 3], ['c', 1]]);
 
   it('sin criterio, respeta el orden del dataset', () => {
-    expect(ordenarCategorias(datos, undefined).points.map((p) => p.label)).toEqual(['b', 'a', 'c']);
+    expect(sortCategories(datos, undefined).points.map((p) => p.label)).toEqual(['b', 'a', 'c']);
   });
 
   it('por categoria y por valor, en las dos direcciones', () => {
-    const labels = (o: Parameters<typeof ordenarCategorias>[1]) =>
-      ordenarCategorias(datos, o).points.map((p) => p.label);
+    const labels = (o: Parameters<typeof sortCategories>[1]) =>
+      sortCategories(datos, o).points.map((p) => p.label);
     expect(labels({ por: 'categoria' })).toEqual(['a', 'b', 'c']);
     expect(labels({ por: 'categoria', direccion: 'desc' })).toEqual(['c', 'b', 'a']);
     expect(labels({ por: 'valor' })).toEqual(['c', 'b', 'a']);
@@ -108,17 +108,17 @@ describe('orden de las categorias', () => {
   });
 
   it('los huecos van al final, se ordene como se ordene', () => {
-    const conHueco = vm(['A'], [['a', null], ['b', 5], ['c', 0]]);
+    const withHole = vm(['A'], [['a', null], ['b', 5], ['c', 0]]);
     // Tratar `null` como cero lo mezclaria con las categorias que valen cero de verdad, y
     // «no se puede calcular» y «vale cero» son cosas distintas.
-    expect(ordenarCategorias(conHueco, { por: 'valor' }).points.map((p) => p.label)).toEqual(['c', 'b', 'a']);
-    expect(ordenarCategorias(conHueco, { por: 'valor', direccion: 'desc' }).points.map((p) => p.label)).toEqual(['b', 'c', 'a']);
+    expect(sortCategories(withHole, { por: 'valor' }).points.map((p) => p.label)).toEqual(['c', 'b', 'a']);
+    expect(sortCategories(withHole, { por: 'valor', direccion: 'desc' }).points.map((p) => p.label)).toEqual(['b', 'c', 'a']);
   });
 
   it('no muta el modelo recibido', () => {
     // El mismo `vm` alimenta al grafico y a su respaldo en HTML: mutarlo aqui reordenaria uno
     // de los dos a mitad de render.
-    ordenarCategorias(datos, { por: 'valor' });
+    sortCategories(datos, { por: 'valor' });
     expect(datos.points.map((p) => p.label)).toEqual(['b', 'a', 'c']);
   });
 });
@@ -133,9 +133,9 @@ describe('el margen reserva sitio para lo que vive fuera del area de dibujo', ()
   });
 
   it('la leyenda lateral y el titulo del eje SUMAN margen, no compiten por el', () => {
-    const soloLeyenda = opciones({ leyenda: 'izquierda' });
+    const onlyLegend = opciones({ leyenda: 'izquierda' });
     const ambos = opciones({ leyenda: 'izquierda', ejes: { tituloY: 'Casos' } });
-    expect(ambos.grid.left).toBeGreaterThan(soloLeyenda.grid.left);
+    expect(ambos.grid.left).toBeGreaterThan(onlyLegend.grid.left);
   });
 });
 
@@ -158,7 +158,7 @@ describe('lineas de referencia', () => {
     // En unas barras horizontales el eje de valores es el X: anclarlas siempre al Y dibujaria la
     // meta atravesada.
     expect(conRef().series[0].markLine.data[0].yAxis).toBe(900);
-    const horizontal = opcionesDe('barras-horizontales', {
+    const horizontal = optionsOf('barras-horizontales', {
       vm: vm(['A'], [['x', 1]]),
       palette,
       titulo: 'T',
@@ -192,7 +192,7 @@ describe('lineas de referencia', () => {
     /*
      * Esta prueba existe porque faltaron en las lineas.
      */
-    const conEjes: TipoDeGrafico[] = [
+    const withAxes: ChartKind[] = [
       'barras',
       'barras-horizontales',
       'lineas',
@@ -201,16 +201,16 @@ describe('lineas de referencia', () => {
       'cascada',
       'dispersion',
     ];
-    for (const tipo of conEjes) {
-      const o = opcionesDe(tipo, {
+    for (const tipo of withAxes) {
+      const o = optionsOf(tipo, {
         vm: vm(['A', 'B'], [['x', 1, 2]]),
         palette,
         titulo: 'T',
-        seriesDeColumna: 1,
+        columnSeries: 1,
         referencias: [{ valor: 5, etiqueta: 'Meta' }],
       }) as any;
-      const conMarca = o.series.filter((s: { markLine?: unknown }) => s.markLine !== undefined);
-      expect(conMarca, tipo).toHaveLength(1);
+      const withMark = o.series.filter((s: { markLine?: unknown }) => s.markLine !== undefined);
+      expect(withMark, tipo).toHaveLength(1);
     }
   });
 });
@@ -245,35 +245,35 @@ describe('limites del eje y color por serie', () => {
 });
 
 describe('etiquetas de dato: las tres opciones, no dos', () => {
-  const conEtiquetas = (
+  const withLabels = (
     valor: unknown,
     v = vm(['A'], [['x', 10], ['y', 50], ['z', 30]]),
   ) => opciones({ etiquetasDeDato: valor, formatear: (n: number) => `${n} c` }, v);
 
   it('la forma anterior —un booleano— se sigue leyendo', () => {
     // Un modulo publicado antes de esto lleva `etiquetasDeDato: true` y tiene que dibujarse igual.
-    expect(conEtiquetas(true).series[0].label.show).toBe(true);
-    expect(conEtiquetas(false).series[0].label.show).toBe(false);
+    expect(withLabels(true).series[0].label.show).toBe(true);
+    expect(withLabels(false).series[0].label.show).toBe(false);
   });
 
   it('solo los extremos rotula el maximo y el minimo, y calla el resto', () => {
-    const etiqueta = conEtiquetas({ soloExtremos: true }).series[0].label.formatter;
+    const etiqueta = withLabels({ soloExtremos: true }).series[0].label.formatter;
     expect(etiqueta({ value: 50, dataIndex: 1 })).toBe('50 c');
     expect(etiqueta({ value: 10, dataIndex: 0 })).toBe('10 c');
     expect(etiqueta({ value: 30, dataIndex: 2 })).toBe('');
   });
 
   it('un nulo no compite por ser el minimo: no es un numero', () => {
-    const o = conEtiquetas({ soloExtremos: true }, vm(['A'], [['x', 10], ['y', null], ['z', 30]]));
+    const o = withLabels({ soloExtremos: true }, vm(['A'], [['x', 10], ['y', null], ['z', 30]]));
     const etiqueta = o.series[0].label.formatter;
     expect(etiqueta({ value: 10, dataIndex: 0 })).toBe('10 c');
     expect(etiqueta({ value: 30, dataIndex: 2 })).toBe('30 c');
   });
 
   it('la posicion elegida manda sobre la que el tipo de grafico propone', () => {
-    expect(conEtiquetas({ cellPosition: 'dentro' }).series[0].label.position).toBe('inside');
+    expect(withLabels({ cellPosition: 'dentro' }).series[0].label.position).toBe('inside');
     // `auto` deja la del tipo: encima en columnas.
-    expect(conEtiquetas({ cellPosition: 'auto' }).series[0].label.position).toBe('top');
+    expect(withLabels({ cellPosition: 'auto' }).series[0].label.position).toBe('top');
   });
 });
 

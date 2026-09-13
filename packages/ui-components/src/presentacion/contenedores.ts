@@ -70,7 +70,7 @@ export interface ContainerSettings {
    * El contenido. Una lista de paneles para TODOS los tipos; los que no tienen pestanas usan el
    * primero.
    */
-  paneles?: PanelDeContenedor[];
+  panels?: PanelDeContenedor[];
   simple?: ConfiguracionDeContenedorSimple;
   desplazable?: ConfiguracionDeContenedorDesplazable;
   ampliable?: ConfiguracionDeContenedorAmpliable;
@@ -98,8 +98,8 @@ export const PANEL_VACIO = (n = 1): PanelDeContenedor => ({
 
 /** Los paneles de un contenedor, siempre al menos uno. */
 export function panelesDe(config: ContainerSettings | undefined): PanelDeContenedor[] {
-  const paneles = config?.paneles ?? [];
-  return paneles.length > 0 ? paneles : [PANEL_VACIO()];
+  const panels = config?.panels ?? [];
+  return panels.length > 0 ? panels : [PANEL_VACIO()];
 }
 
 /** Todas las instancias anidadas de un contenedor, para los avisos de deprecacion y la validacion. */
@@ -124,8 +124,8 @@ export function validarContenedor(
   const problems: ProblemaDeContenedor[] = [];
   const gridColumns = columnasDe(instance.objectId, config);
 
-  const paneles = config.paneles ?? [];
-  if (instance.objectId === 'contenedor-con-pestanas' && paneles.length < 2) {
+  const panels = config.panels ?? [];
+  if (instance.objectId === 'contenedor-con-pestanas' && panels.length < 2) {
     problems.push({
       slot: `contenedor.${itemId}`,
       issue:
@@ -135,7 +135,7 @@ export function validarContenedor(
   }
 
   const ids = new Set<string>();
-  for (const panel of paneles) {
+  for (const panel of panels) {
     if (ids.has(panel.panelId)) {
       problems.push({
         slot: `contenedor.${itemId}.${panel.panelId}`,
@@ -227,17 +227,17 @@ export function configuracionInicial(
 
   // El de pestanas nace con DOS: su validacion exige al menos dos, asi que nacer con una lo haria
   // nacer roto — y el editor lo marcaria antes de que nadie hubiera hecho nada mal.
-  const paneles =
+  const panels =
     objectId === 'contenedor-con-pestanas' ? [PANEL_VACIO(1), PANEL_VACIO(2)] : [PANEL_VACIO()];
 
   switch (objectId) {
     case 'contenedor-desplazable':
-      return { objectId, paneles, desplazable: { eje: 'y' } };
+      return { objectId, panels, desplazable: { eje: 'y' } };
     case 'contenedor-ampliable':
-      return { objectId, paneles, ampliable: { columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' } };
+      return { objectId, panels, ampliable: { columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' } };
     case 'contenedor-con-pestanas':
-      return { objectId, paneles, pestanas: { pestanaInicial: 'p1' } };
+      return { objectId, panels, pestanas: { pestanaInicial: 'p1' } };
     default:
-      return { objectId, paneles };
+      return { objectId, panels };
   }
 }

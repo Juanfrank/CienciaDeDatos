@@ -16,7 +16,7 @@ export const CLAVE_MODULOS = 'app:modulos';
 const clonar = <T>(valor: T): T => JSON.parse(JSON.stringify(valor)) as T;
 
 export class StoreModuleRepository implements ModuleStore {
-  private async todos(): Promise<ModuleDefinition[]> {
+  private async all(): Promise<ModuleDefinition[]> {
     // Igual que el gobierno: sin nada guardado se devuelve la semilla SIN persistirla, para no
     // meter una escritura en el camino de lectura.
     return (await leer<ModuleDefinition[]>(CLAVE_MODULOS)) ?? clonar(modulosDemo);
@@ -27,19 +27,19 @@ export class StoreModuleRepository implements ModuleStore {
   }
 
   async list(): Promise<ModuleDefinition[]> {
-    return this.todos();
+    return this.all();
   }
 
   async get(moduleId: string): Promise<ModuleDefinition | undefined> {
-    return (await this.todos()).find((m) => m.moduleId === moduleId);
+    return (await this.all()).find((m) => m.moduleId === moduleId);
   }
 
   async bySlug(slug: string): Promise<ModuleDefinition | undefined> {
-    return (await this.todos()).find((m) => m.slug === slug);
+    return (await this.all()).find((m) => m.slug === slug);
   }
 
   async save(module: ModuleDefinition): Promise<void> {
-    const actuales = await this.todos();
+    const actuales = await this.all();
     await this.guardarTodos([
       ...actuales.filter((m) => m.moduleId !== module.moduleId),
       clonar(module),
@@ -47,7 +47,7 @@ export class StoreModuleRepository implements ModuleStore {
   }
 
   async remove(moduleId: string): Promise<boolean> {
-    const actuales = await this.todos();
+    const actuales = await this.all();
     const quedan = actuales.filter((m) => m.moduleId !== moduleId);
     if (quedan.length === actuales.length) return false;
     await this.guardarTodos(quedan);

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { colorCondicional, describirRegla, type FormatoCondicional } from './condicional';
+import { colorCondicional, describirRegla, type ConditionalFormat } from './condicional';
 
-const rules = (...r: FormatoCondicional['rules']): FormatoCondicional => ({ rules: r });
+const rules = (...r: ConditionalFormat['rules']): ConditionalFormat => ({ rules: r });
 
 describe('colorCondicional', () => {
   it('gana la PRIMERA regla que casa, no la mas especifica', () => {

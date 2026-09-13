@@ -135,15 +135,15 @@ test.describe('la pantalla de acceso no informa a quien tantea', () => {
     // sintoma —"no se pudo iniciar sesion"— no apuntaria a esta prueba.
     const correo = usuarioACorreo('u-sin-equipo');
 
-    let ultimo = '';
+    let last = '';
     for (let i = 0; i < 6; i += 1) {
       const r = await page.request.post('/api/acceso', {
         data: { correo, clave: `Mal-${i}-2026!` },
       });
-      ultimo = (await r.json()).motivo as string;
+      last = (await r.json()).motivo as string;
     }
 
-    expect(ultimo).toBe('cuenta-bloqueada');
+    expect(last).toBe('cuenta-bloqueada');
 
     // Y estando bloqueada, la contrasena CORRECTA tampoco entra: si entrara, el bloqueo solo
     // frenaria a quien se equivoca, no a quien acierta al final.

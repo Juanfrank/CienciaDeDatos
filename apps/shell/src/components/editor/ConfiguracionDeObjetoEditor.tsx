@@ -422,7 +422,7 @@ export function ConfiguracionDeObjetoEditor({
 
   /* ── Contenedores ─────────────────────────────────────────────────────────────────────── */
 
-  const paneles = panelesDe(conf);
+  const panels = panelesDe(conf);
   const gridColumns =
     conf.simple?.gridColumns ??
     conf.desplazable?.gridColumns ??
@@ -505,7 +505,7 @@ export function ConfiguracionDeObjetoEditor({
 
       {objectId === 'contenedor-con-pestanas' ? (
         <>
-          {paneles.map((panel, i) => (
+          {panels.map((panel, i) => (
             <label key={panel.panelId} className="formulario__campo">
               <span>Pestana {i + 1}</span>
               <input
@@ -514,7 +514,7 @@ export function ConfiguracionDeObjetoEditor({
                 data-testid={`${prueba}-pestana-${panel.panelId}`}
                 onBlur={(e) =>
                   poner({
-                    paneles: paneles.map((p) =>
+                    panels: panels.map((p) =>
                       p.panelId === panel.panelId ? { ...p, nombre: e.target.value } : p,
                     ),
                   })
@@ -527,7 +527,7 @@ export function ConfiguracionDeObjetoEditor({
             className="boton-contorno"
             disabled={guardando}
             data-testid={`${prueba}-anadir-pestana`}
-            onClick={() => poner({ paneles: [...paneles, PANEL_VACIO(paneles.length + 1)] })}
+            onClick={() => poner({ panels: [...panels, PANEL_VACIO(panels.length + 1)] })}
           >
             Anadir pestana
           </button>

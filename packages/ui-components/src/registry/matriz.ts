@@ -145,9 +145,9 @@ export type Direccion = 'asc' | 'desc';
 /** Ordena una lista de nodos entre HERMANOS, sin romper la jerarquia. */
 export function ordenarNodos(
   nodos: NodoDeMatriz[],
-  comparar: (a: NodoDeMatriz, b: NodoDeMatriz) => number,
+  compare: (a: NodoDeMatriz, b: NodoDeMatriz) => number,
 ): NodoDeMatriz[] {
-  return [...nodos].sort(comparar).map((n) => ({ ...n, hijos: ordenarNodos(n.hijos, comparar) }));
+  return [...nodos].sort(compare).map((n) => ({ ...n, hijos: ordenarNodos(n.hijos, compare) }));
 }
 
 /** Comparador de cifras: los huecos al final SIEMPRE, se ordene como se ordene. */

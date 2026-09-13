@@ -84,7 +84,7 @@ export function PanelDeFiltros({
           <SelectorDeCampo
             key={selector.fieldName}
             selector={selector}
-            opciones={opcionesDe(result, selector.fieldName)}
+            opciones={optionsOf(result, selector.fieldName)}
             valores={valoresDe(selector.fieldName)}
             desde={searchParams.get(DESDE(selector.fieldName)) ?? ""}
             hasta={searchParams.get(HASTA(selector.fieldName)) ?? ""}
@@ -111,7 +111,7 @@ export function PanelDeFiltros({
 }
 
 /** Valores distintos de una columna, ordenados. Salen del dataset YA recortado por el ambito. */
-function opcionesDe(result: QueryResult, fieldName: string): string[] {
+function optionsOf(result: QueryResult, fieldName: string): string[] {
   const [tabla, ...resto] = fieldName.split(".");
   return toSlicerOptions(result, {
     table: tabla ?? "",
@@ -235,7 +235,7 @@ function SelectorDeCampo({
           data-testid={`${prueba}-desplegable`}
           onChange={(e) => onFijar(e.target.value)}
         >
-          <option value="">(todos)</option>
+          <option value="">(all)</option>
           {opciones.map((opcion) => (
             <option key={opcion} value={opcion}>
               {opcion}

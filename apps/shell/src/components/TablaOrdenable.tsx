@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import type { QueryResult } from '@app/data-contracts';
 import {
   type Direccion,
-  type FormatoCondicional,
+  type ConditionalFormat,
   colorCondicional,
   compararValores,
   estiloDeTexto,
@@ -13,7 +13,7 @@ import {
 /** Una tabla que se ordena pulsando su encabezado. */
 
 /** Texto o cifra, cada uno con su comparacion. Mezclarlos ordena por la representacion, no por el valor. */
-const comparar = (a: unknown, b: unknown, direccion: Direccion): number => {
+const compare = (a: unknown, b: unknown, direccion: Direccion): number => {
   if (typeof a === 'number' || typeof b === 'number') {
     return compararValores(
       typeof a === 'number' ? a : null,
@@ -36,7 +36,7 @@ export function TablaOrdenable({
   /** Un formateador POR COLUMNA: cada medida puede tener el suyo. */
   formatearColumna: (nombre: string) => (n: number | null) => string;
   /** Reglas de color por valor. La celda que se sale es lo que se busca en una tabla. */
-  condicional?: FormatoCondicional;
+  condicional?: ConditionalFormat;
 }) {
   const [orden, setOrden] = useState<{ column: number; direccion: Direccion } | null>(null);
 
@@ -50,7 +50,7 @@ export function TablaOrdenable({
     if (!orden) return proyectado.rows;
     // Copia antes de ordenar: `sort` muta, y `proyectado.rows` viene del servidor por referencia.
     return [...proyectado.rows].sort((a, b) =>
-      comparar(a[orden.column], b[orden.column], orden.direccion),
+      compare(a[orden.column], b[orden.column], orden.direccion),
     );
   }, [proyectado.rows, orden]);
 

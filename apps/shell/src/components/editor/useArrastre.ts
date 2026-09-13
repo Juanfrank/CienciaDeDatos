@@ -25,7 +25,7 @@ interface Origen {
   /** Ancho de una columna, medido del propio lienzo. Las doce miden igual (`1fr`). */
   anchoDeCelda: number;
   /** El hueco entre columnas. */
-  hueco: number;
+  hole: number;
   /** Las filas NO miden igual: se guardan las pistas reales. */
   pistas: Pistas;
 }
@@ -35,14 +35,14 @@ interface Pistas {
   /** Alto resuelto de cada fila, en pixeles. */
   altos: number[];
   /** El hueco entre filas, que tambien cuenta al medir. */
-  hueco: number;
+  hole: number;
 }
 
 /** Desplazamiento, en pixeles, de la LINEA `i` de la rejilla (0 = borde de arriba del todo). */
 function lineaDeFila(p: Pistas, i: number): number {
-  const ultimo = p.altos[p.altos.length - 1] ?? 56;
+  const last = p.altos[p.altos.length - 1] ?? 56;
   let y = 0;
-  for (let f = 0; f < i; f += 1) y += (p.altos[f] ?? ultimo) + p.hueco;
+  for (let f = 0; f < i; f += 1) y += (p.altos[f] ?? last) + p.hole;
   return y;
 }
 
@@ -63,7 +63,7 @@ const acotar = (valor: number, minimo: number, maximo: number) =>
   Math.min(maximo, Math.max(minimo, valor));
 
 /** La rejilla, medida de la rejilla real. */
-function medirRejilla(rejilla: HTMLElement): { ancho: number; hueco: number; pistas: Pistas } {
+function medirRejilla(rejilla: HTMLElement): { ancho: number; hole: number; pistas: Pistas } {
   const caja = rejilla.getBoundingClientRect();
   const estilo = getComputedStyle(rejilla);
   const huecoX = parseFloat(estilo.columnGap || '0') || 0;
@@ -74,10 +74,10 @@ function medirRejilla(rejilla: HTMLElement): { ancho: number; hueco: number; pis
     .filter((v) => Number.isFinite(v) && v > 0);
   return {
     ancho: (caja.width - huecoX * (GRID_COLUMNS - 1)) / GRID_COLUMNS,
-    hueco: huecoX,
+    hole: huecoX,
     // Si por lo que sea no hay pistas resueltas, una fila del minimo: se extrapola desde ella y el
     // arrastre sigue funcionando en vez de pegarse a la primera fila.
-    pistas: { altos: altos.length ? altos : [56], hueco: huecoY },
+    pistas: { altos: altos.length ? altos : [56], hole: huecoY },
   };
 }
 
@@ -95,7 +95,7 @@ export function useArrastre({
 
   const calcular = useCallback(
     (o: Origen, clienteX: number, clienteY: number): ArrastreEnCurso => {
-      const dx = Math.round((clienteX - o.x) / (o.anchoDeCelda + o.hueco));
+      const dx = Math.round((clienteX - o.x) / (o.anchoDeCelda + o.hole));
       const arrastradoY = clienteY - o.y;
       // Hasta cuatro filas por debajo de las dibujadas: al soltar, la rejilla crece sola.
       const tope = o.pistas.altos.length + 4;
@@ -149,7 +149,7 @@ export function useArrastre({
         x: e.clientX,
         y: e.clientY,
         anchoDeCelda: medida.ancho,
-        hueco: medida.hueco,
+        hole: medida.hole,
         pistas: medida.pistas,
       };
       setEnCurso({ itemId: item.id, mode, destino: item.position, valido: true });
