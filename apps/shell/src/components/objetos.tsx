@@ -429,7 +429,7 @@ export function Barras({
   const formatear = (valor: number, s: number) =>
     formateadorDeMedida(instance.presentacion, medidas[s] ?? '')(valor);
 
-  const paneles = multiplo ? partirEnMultiplos(vm) : undefined;
+  const particion = multiplo ? partirEnMultiplos(vm) : undefined;
 
   return (
     <Marco
@@ -439,16 +439,17 @@ export function Barras({
       iconoDelObjeto={iconoDelObjeto}
       pie={vm.aggregated ? <span className="texto-atenuado">Agregado sobre el dataset cacheado</span> : null}
     >
-      {paneles ? (
+      {particion ? (
         <Multiplos
-          paneles={paneles}
+          paneles={particion.paneles}
+          omitidos={particion.omitidos}
           instance={instance}
-          presentacion={presentacionDePanel(instance.presentacion, paneles)}
+          presentacion={presentacionDePanel(instance.presentacion, particion.paneles)}
           tipo={horizontal ? 'barras-horizontales' : 'barras'}
           titulo={titulo}
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
-          columnas={columnasPara(paneles.length, instance.presentacion?.multiplos?.columnas)}
+          columnas={columnasPara(particion.paneles.length, instance.presentacion?.multiplos?.columnas)}
         />
       ) : (
       <Grafico
@@ -530,7 +531,7 @@ export function Lineas({
   );
   const formatear = (valor: number, s: number) =>
     formateadorDeMedida(instance.presentacion, medidas[s] ?? '')(valor);
-  const paneles = multiplo ? partirEnMultiplos(vm) : undefined;
+  const particion = multiplo ? partirEnMultiplos(vm) : undefined;
 
   return (
     <Marco
@@ -540,16 +541,17 @@ export function Lineas({
       agregaciones={agregaciones}
       iconoDelObjeto={iconoDelObjeto}
     >
-      {paneles ? (
+      {particion ? (
         <Multiplos
-          paneles={paneles}
+          paneles={particion.paneles}
+          omitidos={particion.omitidos}
           instance={instance}
-          presentacion={presentacionDePanel(instance.presentacion, paneles)}
+          presentacion={presentacionDePanel(instance.presentacion, particion.paneles)}
           tipo={area ? 'area' : 'lineas'}
           titulo={titulo}
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
-          columnas={columnasPara(paneles.length, instance.presentacion?.multiplos?.columnas)}
+          columnas={columnasPara(particion.paneles.length, instance.presentacion?.multiplos?.columnas)}
         />
       ) : (
       <Grafico
@@ -615,6 +617,7 @@ export function Lineas({
  */
 function Multiplos({
   paneles,
+  omitidos,
   instance,
   presentacion,
   tipo,
@@ -625,6 +628,8 @@ function Multiplos({
   columnas,
 }: {
   paneles: PanelDeMultiplo[];
+  /** Cuantos valores de la dimension no caben en el limite. Se dicen; no se ocultan. */
+  omitidos: number;
   instance: ObjectInstance;
   presentacion: PresentacionDeObjeto | undefined;
   tipo: TipoDeGrafico;
@@ -701,6 +706,20 @@ function Multiplos({
           </Grafico>
         </section>
       ))}
+
+      {/*
+        Lo que no cabe se DICE.
+        Recortar en silencio deja a quien mira creyendo que la dimension tiene doce valores, que
+        es la misma clase de mentira que 4.2 cierra al obligar a marcar un objeto roto en vez de
+        omitirlo. Ocupa su propia celda de la rejilla para no robarle alto a ningun panel.
+      */}
+      {omitidos > 0 ? (
+        <p className="multiplos__omitidos" data-testid="multiplos-omitidos">
+          {omitidos === 1
+            ? 'Hay 1 valor mas que no cabe. Ordene la dimension para ver otros.'
+            : `Hay ${omitidos} valores mas que no caben. Ordene la dimension para ver otros.`}
+        </p>
+      ) : null}
     </div>
   );
 }

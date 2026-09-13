@@ -824,6 +824,12 @@ input[type='radio'] {
   min-height: 0;
   min-width: 0;
 }
+.multiplos__omitidos {
+  align-self: center;
+  margin: 0;
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
 .multiplos__titulo {
   margin: 0 0 2px;
   font-size: var(--md-sys-typescale-label-medium-size);

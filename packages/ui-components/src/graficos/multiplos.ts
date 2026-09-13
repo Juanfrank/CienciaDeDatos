@@ -16,6 +16,19 @@ import type { CategoricalViewModel } from '../registry/viewModel';
 /** Separador con el que `toCategorical` compone las etiquetas de varias dimensiones. */
 const SEPARADOR = ' / ';
 
+/**
+ * Cuantos paneles se dibujan como maximo.
+ *
+ * Cada panel es una instancia de ECharts: una dimension con cincuenta valores montaria cincuenta
+ * en una sola tarjeta, y eso no es un grafico lento sino un navegador bloqueado. Ademas, cincuenta
+ * graficos del tamano de un sello no dicen nada — que es el otro motivo, y el que de verdad
+ * importa: el limite existe porque por encima de el los multiplos dejan de servir para lo que
+ * sirven, no solo porque cuesten.
+ *
+ * Doce caben en tres columnas de cuatro y siguen siendo legibles.
+ */
+export const MAX_PANELES = 12;
+
 export interface PanelDeMultiplo {
   /** El valor de la dimension que reparte: el titulo de este panel. */
   titulo: string;
@@ -32,7 +45,19 @@ export interface PanelDeMultiplo {
  * Sin la segunda dimension no hay nada que partir y se devuelve un solo panel, que es lo que
  * permite que el render no tenga que preguntarse si el mapeo trae multiplo o no.
  */
-export function partirEnMultiplos(vm: CategoricalViewModel): PanelDeMultiplo[] {
+export interface ParticionEnMultiplos {
+  paneles: PanelDeMultiplo[];
+  /**
+   * Cuantos quedaron fuera del limite.
+   *
+   * Se devuelve para poder DECIRLO. Recortar en silencio deja a quien mira creyendo que la
+   * dimension tiene doce valores, que es exactamente la clase de mentira que 4.2 cierra cuando
+   * obliga a marcar un objeto roto en vez de omitirlo.
+   */
+  omitidos: number;
+}
+
+export function partirEnMultiplos(vm: CategoricalViewModel): ParticionEnMultiplos {
   const paneles = new Map<string, CategoricalViewModel>();
 
   for (const punto of vm.points) {
@@ -46,8 +71,20 @@ export function partirEnMultiplos(vm: CategoricalViewModel): PanelDeMultiplo[] {
     paneles.set(titulo, panel);
   }
 
-  if (paneles.size === 0) return [{ titulo: '', vm }];
-  return [...paneles.entries()].map(([titulo, panel]) => ({ titulo, vm: panel }));
+  if (paneles.size === 0) return { paneles: [{ titulo: '', vm }], omitidos: 0 };
+
+  /*
+   * Se quedan los PRIMEROS del orden vigente, no los doce mayores.
+   *
+   * «Los mayores» seria una decision tomada a espaldas de quien edita: el orden lo fija el panel
+   * —por categoria, por valor, ascendente o descendente— y respetarlo significa que para ver
+   * otros doce basta con cambiarlo, en vez de tener que adivinar por que aparecen esos.
+   */
+  const todos = [...paneles.entries()].map(([titulo, panel]) => ({ titulo, vm: panel }));
+  return {
+    paneles: todos.slice(0, MAX_PANELES),
+    omitidos: Math.max(0, todos.length - MAX_PANELES),
+  };
 }
 
 /**

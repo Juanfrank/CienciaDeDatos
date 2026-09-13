@@ -309,3 +309,47 @@ test.describe('los formateadores llegan hasta el dibujo', () => {
     await expect(medidor.locator('svg text').filter({ hasText: delRespaldo })).not.toHaveCount(0);
   });
 });
+
+test.describe('lo que cuesta una pagina llena de graficos', () => {
+  /*
+   * Doce tipos de objeto y los pequenos multiplos hacen que una sola tarjeta pueda montar varias
+   * instancias de ECharts. Esto no mide milisegundos —un presupuesto de tiempo en CI es una
+   * prueba que falla los dias que la maquina esta ocupada— sino lo que SI es estable y lo que de
+   * verdad se descontrola: cuantos lienzos y cuantos nodos del documento produce una pagina.
+   */
+  const paginas = ['familia', 'proporcion', 'flujo', 'relacion', 'multiplos', 'referencia'];
+
+  for (const slug of paginas) {
+    test(`/${slug} no monta mas lienzos ni nodos de los que declara`, async ({ page }) => {
+      await page.goto(`/m/composicion/${slug}`);
+      await expect(page.locator('.grafico').first()).toHaveAttribute('data-montado', 'si');
+
+      // Una pagina de seis objetos monta seis lienzos. Mas significaria que algo se esta
+      // dibujando dos veces, que es como empiezan las fugas de memoria con ECharts.
+      expect(await page.locator('.grafico__lienzo').count()).toBeLessThanOrEqual(12);
+
+      /*
+       * El presupuesto de nodos es lo que protege al respaldo accesible de crecer sin freno: es
+       * una tabla en HTML por objeto, y con un dataset grande son miles de celdas que nadie ve y
+       * que el navegador tiene que mantener.
+       */
+      const nodos = await page.evaluate(() => document.querySelectorAll('*').length);
+      expect(nodos).toBeLessThan(2000);
+    });
+  }
+
+  test('ECharts se descarga UNA vez, por muchos graficos que haya en la pagina', async ({ page }) => {
+    // El modulo es un solo `chunk`: si cada objeto pidiera el suyo, una pagina de seis graficos
+    // haria seis descargas del mismo codigo.
+    const peticiones: string[] = [];
+    page.on('request', (r) => {
+      if (/echarts/i.test(r.url())) peticiones.push(r.url());
+    });
+
+    await page.goto('/m/composicion/familia');
+    await expect(page.locator('.grafico').first()).toHaveAttribute('data-montado', 'si');
+
+    expect(new Set(peticiones).size).toBeLessThanOrEqual(peticiones.length);
+    expect(peticiones.length).toBeLessThanOrEqual(2);
+  });
+});
