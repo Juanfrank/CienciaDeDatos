@@ -18,7 +18,7 @@
   },
   {
    "path": "packages/access-control/src/index.ts",
-   "hash": "c2d14da815ff4e3483c7f8f3c1cad4a1eed776a572b252b1e2f6d70caf01e427",
+   "hash": "f84ce9e5f76da7be34940022ed3b29c9a1b7012f5feea7b5732f754437afe6cc",
    "imports": [],
    "defines": [
     {
@@ -479,7 +479,7 @@
   },
   {
    "path": "packages/access-control/src/navigation.ts",
-   "hash": "87f50db1a70dbfd60038a1d4d5cb3f694a85ff73791a3cb65277e234431a3add",
+   "hash": "c2537980f23b3d0bb56fb5c2790d9bb1a6fdb24b9183d285f15d1873c0fc6701",
    "imports": [
     "./ModulePackage",
     "./NavigationTree",
@@ -537,7 +537,7 @@
   },
   {
    "path": "packages/access-control/src/treeOperations.ts",
-   "hash": "fca0f580c0afe486d6415cf1ea2da53ae84f965c45562f8a94fad4488618b226",
+   "hash": "241574bba5c9024e94a19c55d6c1e14e0ad9b134dde36a3ed996b17639c71c58",
    "imports": [
     "./AccessScope",
     "./NavigationTree",
@@ -588,7 +588,7 @@
   },
   {
    "path": "packages/access-control/src/lastAdministrator.spec.ts",
-   "hash": "b98d55034632feddca31c01fe28eb388929506e7629a366f21872589d7fe35b2",
+   "hash": "0166b936dd1bfd2efd7892278f60ed1fc5ae19026f920717fbd9c8cf64655a46",
    "imports": [
     "./index",
     "vitest"
@@ -609,7 +609,7 @@
   },
   {
    "path": "packages/access-control/src/Team.ts",
-   "hash": "d77bd0e79022e57451eba3af5518ac89b2aa67b6d8b461fa6d9de11d4cb93e19",
+   "hash": "a4227db975ac41bcd683028979e228c79d061aba400fa746181cece7b97def7e",
    "imports": [
     "./AccessScope"
    ],
@@ -712,7 +712,7 @@
   },
   {
    "path": "packages/access-control/src/lastAdministrator.ts",
-   "hash": "df6170aee107e4c0ef59fc6e5636aa78afe7ecf13ddd38d16d7af6ff50fa67cf",
+   "hash": "674a53eb0402802580b0fa879b561c22b835f295b3b7b84d5a31c5c55d996b80",
    "imports": [
     "./Team"
    ],
@@ -783,7 +783,7 @@
   },
   {
    "path": "packages/access-control/src/NavigationTree.ts",
-   "hash": "c9805c6f2df3d5f79d1a3229e4e25eb83bce1dba374d55a44d61c8a70aa33c34",
+   "hash": "617a0813f82f788fb1e535cb1f3c61865bb684a5bd4b4869419b1d4f10c76375",
    "imports": [
     "./AccessScope",
     "@app/data-contracts"
@@ -848,7 +848,7 @@
   },
   {
    "path": "packages/access-control/src/ModulePackage.ts",
-   "hash": "0eef26fa3acbd4c54d1ca0216010da25afcd1738517c7600268a448c3e4a68c3",
+   "hash": "bbb941163a3a635a1cebab93ab26f95f7c72140b24c73cab031d4a8fce1a3a5d",
    "imports": [
     "./NavigationTree"
    ],
@@ -864,7 +864,7 @@
   },
   {
    "path": "packages/access-control/src/permissions.ts",
-   "hash": "d129db222b60e78b15220b28f9cc379d4bd3c95956a54b477eece1f4dd139540",
+   "hash": "6b39ce500ed31078ccb8d6cdc0a1aa9080bde51a8683c6d8ad12da72198ce82d",
    "imports": [
     "./Team"
    ],
@@ -912,7 +912,7 @@
   },
   {
    "path": "packages/access-control/src/AccessScope.ts",
-   "hash": "f804fd606c348e4dfe854c174c3414d6fa067940ec17c13f003e0a6f74609149",
+   "hash": "737884a981012d4c87b93403940db95daf395af64bc63bbaa242196f7afc4957",
    "imports": [
     "@app/data-contracts"
    ],
@@ -1002,7 +1002,7 @@
   },
   {
    "path": "packages/access-control/src/resolveEffectiveScope.ts",
-   "hash": "8f20a4db027d122dc2d6151b4bc35ae3bb488b1c3e298d5d560bd5d7ee0d1ba9",
+   "hash": "68dbefa40c72d7759de1fb429b1f92802a4ec4a1299d78bd216dabb4b57763c2",
    "imports": [
     "./AccessScope",
     "./NavigationTree",
@@ -1036,7 +1036,7 @@
   },
   {
    "path": "packages/access-control/src/__fixtures__/gobierno.ts",
-   "hash": "382e900fd8b5a9a33ec0463f8f7a9f803eb003bd2797d117a0b33a4bbbaf787f",
+   "hash": "837d059e0247880ee90192d972d20c8432dd79e4b7423a31dbb18328e7e56d7d",
    "imports": [
     "../AccessScope",
     "../ModulePackage",
@@ -1129,7 +1129,7 @@
   },
   {
    "path": "packages/identity-db/prisma/seed.ts",
-   "hash": "6adfe9324606dab5e3da5461f19f989e5be0dfb9987caf039e14fd91ffa793e9",
+   "hash": "e32e761c434476dc125d7196ea5d2efd2ecd7b8793c8a4209eb56dae60e46b7d",
    "imports": [
     "../src/seedData"
    ],
@@ -1145,7 +1145,7 @@
   },
   {
    "path": "packages/identity-db/src/seedData.ts",
-   "hash": "4e88d0013b7f2f648afb25ab25ee3b4c99aee71e088011c8ec46e232cab47921",
+   "hash": "0f6fad84316fa957c9da8d40be7a539346322e66d0566391042e6db9edbac3ec",
    "imports": [
     "./rows"
    ],
@@ -1217,7 +1217,7 @@
   },
   {
    "path": "packages/identity-db/src/mappers.ts",
-   "hash": "619f03c002fd44b615d444437dcf7967902a62ed2d9ba8fb9044c360ddb13c90",
+   "hash": "5e81d49d0f65786e4e0d67f8c07ec0d9ed5012f81d9fa9e9e2ba0056fac6483c",
    "imports": [
     "./rows",
     "@app/access-control"
@@ -1294,7 +1294,7 @@
   },
   {
    "path": "packages/identity-db/src/index.ts",
-   "hash": "dbba556af86d562cfac3765d6bb680364b39f1ec6bc2986c60379c1bd5cea0e0",
+   "hash": "f49854c01f07f1f71975017a80fe1b6bb6dc9876e67adf5b06a739e1517ecdc7",
    "imports": [],
    "defines": [
     {
@@ -1486,7 +1486,7 @@
   },
   {
    "path": "packages/identity-db/src/rows.ts",
-   "hash": "0c05f0a0241aaffcbe78f732e58ac0e60e3832fe4308f282a1b2bd308e9ac67d",
+   "hash": "3c1830fb461267045eb847aeea87e7ce4aba0999eba7fe1fb77ccd8ecf01406c",
    "imports": [],
    "defines": [],
    "exports": [],
@@ -1578,7 +1578,7 @@
   },
   {
    "path": "packages/config/src/instantanea.ts",
-   "hash": "d6e1ffa1b7e290350d65707e2fed60ed73cde7fd513d4ffe0e19d417aad88086",
+   "hash": "1fd71897903f1101adbe50e91d368f489a7af41064c9396019f6482625be45e2",
    "imports": [],
    "defines": [
     {
@@ -1619,7 +1619,7 @@
   },
   {
    "path": "packages/config/src/fuentes.ts",
-   "hash": "3292214c1e3efe2c17c06ca9dd639dc6597b3bb85241ef7a1b4610a1560856cd",
+   "hash": "c23b8e1ba477c013543dc515e1cf98947196c5d5edb6a6b2919ab7eb2ad0c561",
    "imports": [
     "./instantanea"
    ],
@@ -1649,7 +1649,7 @@
   },
   {
    "path": "packages/config/src/Resolutor.ts",
-   "hash": "ab129389855431fe0d0adbe7a00a075f42ee4c6e6378280bd924eb382e8d218a",
+   "hash": "5496ac2472501c91d2e55cee8cc01edee574bc81a8cf52bb40463ed10effaa71",
    "imports": [
     "./instantanea",
     "@app/caching"
@@ -1710,7 +1710,7 @@
   },
   {
    "path": "packages/module-model/src/index.ts",
-   "hash": "ae8babb3387566dea33e7b13ad486b7d4bd5c4c03cf1fca9b9bd01d1e6151d74",
+   "hash": "2f1de1eb858e04b89cf01f2e0db34fa63447d36bc8926ef5e115625e25eb99f2",
    "imports": [],
    "defines": [
     {
@@ -1997,7 +1997,7 @@
   },
   {
    "path": "packages/module-model/src/validation.ts",
-   "hash": "344ab424eeb64074a5c9631ec8b7379823c7b88a11e74d818399a076b6c89b18",
+   "hash": "603d6c3955e5e9c22b75521594c25a6fc7784cd96b52085586b02b5a2f5c35d7",
    "imports": [
     "./ModuleDefinition",
     "./grid",
@@ -2095,7 +2095,7 @@
   },
   {
    "path": "packages/module-model/src/ModuleDefinition.ts",
-   "hash": "01fb9be181f5dc97812ced86578e2769c19d9f329a451129c7d8b3b897e7cb1f",
+   "hash": "08d3e59fcb38f350a8545bddb7b0f4a43539530ac1f49fd98acccce53235acce",
    "imports": [
     "./grid",
     "@app/ui-components"
@@ -2142,7 +2142,7 @@
   },
   {
    "path": "packages/module-model/src/personalization.ts",
-   "hash": "3ae2d6dc00d4efbc90a3c3dd9c5435348c2e72b5a3ab5d84ad636cd743725c8c",
+   "hash": "75933ebca117b143af2f651eda59142b2995dac83c1fcb7f1c253c7d489b89b8",
    "imports": [
     "./ModuleDefinition",
     "./grid"
@@ -2183,7 +2183,7 @@
   },
   {
    "path": "packages/module-model/src/interaccion.ts",
-   "hash": "40afe95dd2f964f292da8dde2ae6eab3e1688ad3a9a8eaad03e34a1d8ac3dc37",
+   "hash": "d1bf2024eb764ea366e118174afd5a413e5b8c70b2f2578a19fb27b34ec5e75d",
    "imports": [],
    "defines": [
     {
@@ -2239,7 +2239,7 @@
   },
   {
    "path": "packages/module-model/src/grid.ts",
-   "hash": "328433b6fbdb1fdc97eee54ed40d73e226e98d406d215cee93c17fec31ea7944",
+   "hash": "ab27c12dcb8ba6c07577a48fe59c97284caaa05420ded1f51799d3afceecb4e1",
    "imports": [],
    "defines": [
     {
@@ -2304,7 +2304,7 @@
   },
   {
    "path": "packages/module-model/src/salud.ts",
-   "hash": "6f666834ad80cbd2f4239cb4f70c9837d48ed1c0c7a398878fc8fdf3dba5eff2",
+   "hash": "49c7a59b8e20b4264a363caaea0cca035e52bd14dd5bd5ec9b109eeeacab5234",
    "imports": [
     "./validation"
    ],
@@ -2354,7 +2354,7 @@
   },
   {
    "path": "packages/auth/src/index.ts",
-   "hash": "318291ad2bf4a9a438212177a25b047cbdd8a2d8c2b7ca1f2c68eea1f3786fcc",
+   "hash": "f31074ae993ae817754e61f78bc78677b3c0ded5e53faf823e9d19756eaf8624",
    "imports": [],
    "defines": [
     {
@@ -2617,7 +2617,7 @@
   },
   {
    "path": "packages/auth/src/passwordPolicy.ts",
-   "hash": "154264bd67aa3ee1c95fa837674951f876529c7f249b5029d826cfd65e739c4a",
+   "hash": "898cf8d9121d655e17bba67969ee555c51555ca99fb97a11383a112dc3fb5009",
    "imports": [],
    "defines": [
     {
@@ -2652,7 +2652,7 @@
   },
   {
    "path": "packages/auth/src/AzureAdIdentityProvider.ts",
-   "hash": "420810f1a8c30fb7281a32062507274fa28a0fa52b1d4eef19793c9254155166",
+   "hash": "1f317f1bb738687b1341422542cb1aff6d518497c7fafee7f22b519882df6074",
    "imports": [
     "./IIdentityProvider",
     "./stores"
@@ -2681,7 +2681,7 @@
   },
   {
    "path": "packages/auth/src/session.ts",
-   "hash": "f352c5dbe312a63758529009b046e2d5151959ad095104d4b77d202673f957e6",
+   "hash": "06bb74ff9acd25a74d37a802f0fa560951b58b4bedb9c391a243c404b9ef4554",
    "imports": [
     "./IIdentityProvider",
     "./stores",
@@ -2715,7 +2715,7 @@
   },
   {
    "path": "packages/auth/src/LocalIdentityProvider.ts",
-   "hash": "b701d5eef4dbe8f5ef3c79093e48dc0cb17e181af0e9480d7895c0f2c0a99661",
+   "hash": "d6454ceb0ca398846c3866ddcde11f24a3aabcdfbd126133f179d145c9cee271",
    "imports": [
     "./IIdentityProvider",
     "./passwordPolicy",
@@ -2759,7 +2759,7 @@
   },
   {
    "path": "packages/auth/src/passwordReset.ts",
-   "hash": "b2b770c89d1af8f0537aff886c7639b5af0c7da1e1170fd980a496a9c381f645",
+   "hash": "321311cc1c981a3deb60611df000d13c6aac758c8878559d02673613b6600638",
    "imports": [
     "./passwordPolicy",
     "./stores",
@@ -2816,7 +2816,7 @@
   },
   {
    "path": "packages/auth/src/IIdentityProvider.ts",
-   "hash": "b52ff65049007bdc2212d196557fc8cd5f4efbfbb1d0b7fe1cee8b028b50ad5e",
+   "hash": "88d5672d80711c05c4f0e4b30af541d01f34977067922de59fa6194494d4f1e8",
    "imports": [],
    "defines": [
     {
@@ -2885,7 +2885,7 @@
   },
   {
    "path": "packages/auth/src/passwordReset.spec.ts",
-   "hash": "f16f1dd20e225a414f7c79257b85ca0f30de008bcbbe72ed37858f54d84195d9",
+   "hash": "5b4b350371c396e3704c6dee72e67cc8623e8863204c454bb5b153d7f10a0550",
    "imports": [
     "./passwordReset",
     "./stores",
@@ -2916,7 +2916,7 @@
   },
   {
    "path": "packages/auth/src/stores.ts",
-   "hash": "8c63986c04bd00be42eab66e34296bd19c465978af0d06bd66705b31f8adbb7b",
+   "hash": "f934b50bd91bbd6b9209c2e54b15ca3f1b6b66c5718055b9f36a18370d450958",
    "imports": [
     "./IIdentityProvider"
    ],
@@ -2983,7 +2983,7 @@
   },
   {
    "path": "packages/observability/src/auditEvents.ts",
-   "hash": "649e3b7c4193e74984a31da15d3a5ede25baeb6c6198bdf6f489a607caa231c9",
+   "hash": "ca70525b062921efec958722cb9901c6620f6e5d2db8909de4acfce11800b13e",
    "imports": [
     "@app/data-contracts"
    ],
@@ -3013,7 +3013,7 @@
   },
   {
    "path": "packages/observability/src/index.ts",
-   "hash": "90cc66d9111326d9cdfc5aa995f55a8c7a63bf92af2725930957d23b15a367d0",
+   "hash": "c58a549a7950dfaefcdd6bca37cf3eb791a493068ad593cd19d79c2aa2835189",
    "imports": [],
    "defines": [
     {
@@ -3126,7 +3126,7 @@
   },
   {
    "path": "packages/observability/src/health.ts",
-   "hash": "9bd15a7dc889ceeaef942261b02e5298d1f5f2dcbcdbab0239f9f72f8d80b13f",
+   "hash": "44473a49b14c88792e60ba365b8a0f57a283b80cff551c41e19060b04aac02a2",
    "imports": [
     "./heartbeat"
    ],
@@ -3150,7 +3150,7 @@
   },
   {
    "path": "packages/observability/src/heartbeat.ts",
-   "hash": "29c15498f7cd2b2474489e99187522477bf8d5a2352a71d0c38d6afecf2e7a34",
+   "hash": "eaa1470c9cc88a894227ba0bbeb6023a13fbebef99d21cdf8d5abe5cd40adfb2",
    "imports": [
     "@app/data-contracts"
    ],
@@ -3180,7 +3180,7 @@
   },
   {
    "path": "packages/observability/src/cacheMetrics.ts",
-   "hash": "c904d3ff3ad293a3cd148b44e7bde0d95c55b624819a66fd556728e96d225633",
+   "hash": "5f12cbb2e6b23ce7382c5d1b38a479cabd090a02e1452dbdd62b968ce0b5fd07",
    "imports": [],
    "defines": [
     {
@@ -3218,7 +3218,7 @@
   },
   {
    "path": "packages/export/src/encabezado.ts",
-   "hash": "7726f0775b55226f821ff753dc7601d0d2675f9ecc6467f294f72abdb955ffbc",
+   "hash": "5f6567e313a15715610ad5ea9c2c2391a1a03e97a78556260cb13378baf1346f",
    "imports": [
     "./types"
    ],
@@ -3278,7 +3278,7 @@
   },
   {
    "path": "packages/export/src/documento.ts",
-   "hash": "edd2dd7ffbb0ddb8595464052de0cb28964713f08d1aacec0a2cce84bd3ecf0a",
+   "hash": "4ee5df4e5e49b9c699b03dcd873e26b568a1137ec2bc9a8d9fea02aefbca8130",
    "imports": [
     "./encabezado",
     "./types",
@@ -3324,7 +3324,7 @@
   },
   {
    "path": "packages/export/src/formatos.ts",
-   "hash": "5ee797642b2a0841ab16a10182ad58e090d8deb5be581864df726f4a3f11de67",
+   "hash": "214d295483b44efb6c3e01bf45ea73fe8c8c6dfe7e14e5c35e35bfae3568649a",
    "imports": [
     "./documento"
    ],
@@ -3360,7 +3360,7 @@
   },
   {
    "path": "packages/export/src/index.ts",
-   "hash": "ba9926488a730e955e2898db572025b4bb4b76d6274a5983c11014d2d1358533",
+   "hash": "2c99c70c5c923bbdfdc8e43bffbeb7b97a1c7e0cf436bb816548f019ff1710f7",
    "imports": [],
    "defines": [
     {
@@ -3605,7 +3605,7 @@
   },
   {
    "path": "packages/export/src/binarios.ts",
-   "hash": "1dc83d4f6434f317aed4d3cbf9af47a67b12270f5477469bf51783ecb6562621",
+   "hash": "055ad6e2ea9ab1fdf33935dcd938a3fa7f2236a8771cec675e1e9d0815744e49",
    "imports": [
     "./documento",
     "exceljs",
@@ -3645,7 +3645,7 @@
   },
   {
    "path": "packages/export/src/cola.ts",
-   "hash": "c32362b224c43c42a7c68096fbac1416256840c71ddabd369e10a5d1935551cc",
+   "hash": "bebd868698099c64c387aaa8756b0b3d5183504eca146bc5b55fc76f20e89a57",
    "imports": [
     "./types",
     "@app/caching"
@@ -3686,7 +3686,7 @@
   },
   {
    "path": "packages/export/src/formatos.spec.ts",
-   "hash": "e8260b9bed6e299c5fd77c0b62833495792fd8fa474f8cd51320ebcf71498fef",
+   "hash": "30a2e30ff07cd7d86f9021ed2bc19d178ddae257d56eb56479b253d03d38a3d5",
    "imports": [
     "./binarios",
     "./documento",
@@ -3732,7 +3732,7 @@
   },
   {
    "path": "packages/export/src/procesar.ts",
-   "hash": "2d3d9a0629f9fbd60671c312a864b1d2cce1e4dd956188cdb66ae077fe9900e2",
+   "hash": "65ea00eedfcf5a01d077a113004bc4a83aca78b535ac260f5536945f5e1582d4",
    "imports": [
     "./binarios",
     "./cola",
@@ -3793,7 +3793,7 @@
   },
   {
    "path": "packages/export/src/types.ts",
-   "hash": "c571ca96c9505310aa9a72aa37a548dff4b14530ead03fee72fc747bd09f342f",
+   "hash": "34467d915f7dd402e4715a6510c7a66ded911e112d4af6a518cddbf918c9aa55",
    "imports": [
     "@app/data-contracts"
    ],
@@ -3835,7 +3835,7 @@
   },
   {
    "path": "packages/testing-utils/src/index.ts",
-   "hash": "e7f5598dbf88e4e674485863137add2b0375c1864035495590d5f0afcb5dea11",
+   "hash": "0a990674eaf1d8f62b94685cf22e66167625746044ccdc987ddf81e987282d97",
    "imports": [],
    "defines": [
     {
@@ -3852,7 +3852,7 @@
   },
   {
    "path": "packages/design-tokens/src/material3Tokens.ts",
-   "hash": "a24ccc43d8a63fb2ccdccf1f2656afa15f0979162177a8c667b92c2bb2a7f892",
+   "hash": "911a2edfc6020be0f4d28fd5478fcf29907009a301957539c86609a8872b6ce6",
    "imports": [
     "./material3",
     "@material/material-color-utilities"
@@ -3923,7 +3923,7 @@
   },
   {
    "path": "packages/design-tokens/src/index.ts",
-   "hash": "c86f15f04f97a319c0bc62f775bbd291b4ae6d9c7fec80afb783b02f09dc5da7",
+   "hash": "3257971d75a48f1911ef2cca35cd3d23ae99c9b2de268dc4453fdca8f61f1f4f",
    "imports": [],
    "defines": [
     {
@@ -4235,7 +4235,7 @@
   },
   {
    "path": "packages/design-tokens/src/tokens.ts",
-   "hash": "e78001e411ade545551b5d4288c9e6cbd7fb6acd606c4f770d8d746312b8712d",
+   "hash": "694b467749916586a2741426707729f1179c1e3ac212651834592012384d5488",
    "imports": [
     "./temaInstitucional"
    ],
@@ -4277,7 +4277,7 @@
   },
   {
    "path": "packages/design-tokens/src/material3.spec.ts",
-   "hash": "971ee7ea247c34361268230503bfce7fbaaf15b29ff1b5b9ce37aea19e2ebdd1",
+   "hash": "dbab8f05274bcce059456c86c6e72ce18bb0d13984d3dce8b35e10fee52cb916",
    "imports": [
     "./contrast",
     "./index",
@@ -4303,7 +4303,7 @@
   },
   {
    "path": "packages/design-tokens/src/material3.ts",
-   "hash": "63886277612fc23a013a80e159da61e13187f4863aed21336e82e1fe12e3d0ba",
+   "hash": "6d4d6eaa450bcbd74be818a3e36bb33826ab03c34d7e57ed21f8ff5a4e5f1fd9",
    "imports": [
     "@material/material-color-utilities"
    ],
@@ -4345,7 +4345,7 @@
   },
   {
    "path": "packages/design-tokens/src/temaOscuro.spec.ts",
-   "hash": "4675a065c67c1d09b3c55b0645ed8dd9cecfd7575577bf0d6f0a725b7297633f",
+   "hash": "43ac2c1043e795670ac2a2e5b5f95a7985bbb12f4a17774bb37521cb09c2b0f7",
    "imports": [
     "./contrast",
     "./material3",
@@ -4381,7 +4381,7 @@
   },
   {
    "path": "packages/design-tokens/src/temaInstitucional.ts",
-   "hash": "746448dbd95623516813552e50b21ddb8c2b089f68c27d3f797a065fd3abf444",
+   "hash": "a629ca5c2acb1f873120d7cd321c266c5180240bb512115651bb1f1674628034",
    "imports": [
     "./material3",
     "./material3Tokens",
@@ -4439,7 +4439,7 @@
   },
   {
    "path": "packages/design-tokens/src/contrast.ts",
-   "hash": "cacb667314cc44a1923ad755e59f979a216bfc41ce62a2be5159aeabb4c6d57c",
+   "hash": "8bf00035bb35c70d1fd38f4a1611b5289da8dcbf2d42dac7fe87f8a2606b4aab",
    "imports": [],
    "defines": [
     {
@@ -4486,7 +4486,7 @@
   },
   {
    "path": "packages/design-tokens/src/identity.ts",
-   "hash": "547009e8f8bf33101f2c68514daacac71fd0cf202fdd1de8f383cc5a252a322d",
+   "hash": "cdc5637d442563d2103c4674a921eeecf32465ca19db116d7a19b90b635bc011",
    "imports": [],
    "defines": [
     {
@@ -4529,7 +4529,7 @@
   },
   {
    "path": "packages/alerts/src/index.ts",
-   "hash": "1239af42fcbeb31b4980b4baf377e2e1fbabae46778512a609a01a0cbca54e45",
+   "hash": "b40dbf9519df062913a28b748782735835c55b0f766ea19637481f9c6e3e309b",
    "imports": [],
    "defines": [
     {
@@ -4720,7 +4720,7 @@
   },
   {
    "path": "packages/alerts/src/calendario.ts",
-   "hash": "cbd7a275860f5fca9aed0dbe8a0fa0cdd51d185f90b4576c6f792afa48666bf5",
+   "hash": "a93a83fa10f873b44d8f33e55f702095cefc87aabf7e7ba9faf736289f79e243",
    "imports": [
     "./types"
    ],
@@ -4756,7 +4756,7 @@
   },
   {
    "path": "packages/alerts/src/notificaciones.ts",
-   "hash": "b1d7c39f1b78aa1c08ec0901f5c07e3727fdf62faa71775764b1a5c9fd4fc2de",
+   "hash": "18cfe0ee943fb40405f73a76512849ebeadc86c3a4ac35a196d071231e556305",
    "imports": [
     "./types",
     "@app/caching"
@@ -4797,7 +4797,7 @@
   },
   {
    "path": "packages/alerts/src/almacen.ts",
-   "hash": "b490f77dfa612d583a2bac7188c6789cc30482432f0ddb80681eed75b390e245",
+   "hash": "40f0518a28e1cee8d33210bc037e6e914169ab64a9b86800b398058aa98056a2",
    "imports": [
     "./types",
     "@app/caching"
@@ -4852,7 +4852,7 @@
   },
   {
    "path": "packages/alerts/src/evaluar.ts",
-   "hash": "56f195c365a35ba68560c37b374306f35bb87950822cb0230250269197dacf27",
+   "hash": "22d7f68de75a6ad6cd556362cb7ac0396fb54a230e8abc0841e99326119967bf",
    "imports": [
     "./types"
    ],
@@ -4900,7 +4900,7 @@
   },
   {
    "path": "packages/alerts/src/types.ts",
-   "hash": "eda7236857154446a43eaf7b12f57e9ca26ce9cb4e9092b575ec01c78a294df7",
+   "hash": "0ade7eb57da29d6f896ca6fd10e00297b2b4776cffbbbf7a71b851f210651c73",
    "imports": [],
    "defines": [
     {
@@ -4941,7 +4941,7 @@
   },
   {
    "path": "packages/ui-components/src/index.ts",
-   "hash": "539d1f5d0a81f06131b2d955dd58c32f6d0aba002dd2e61cba517d83329a8571",
+   "hash": "97202247782a74391dc06604e013dca7298885870e6762828e4820358e47ebb9",
    "imports": [],
    "defines": [
     {
@@ -6358,7 +6358,7 @@
   },
   {
    "path": "packages/ui-components/src/presentacion/elementos.ts",
-   "hash": "e33b708c22d827a13dc757d8b9b82a6b3ce869c25dd69d328f27dec7ef951452",
+   "hash": "2fe11550e6a81b041e3be7eef6cedb35ffbcba2810654f43bbcb1354a726f1e0",
    "imports": [
     "./contrato"
    ],
@@ -6493,7 +6493,7 @@
   },
   {
    "path": "packages/ui-components/src/presentacion/contrato.ts",
-   "hash": "e9ee807ada1a464c833a941b27522e8abc6311522b011ec5cb09919df9161b8b",
+   "hash": "c870679e7bc8ab92a3e0fbcbb8fbb1defe019a2197fbd6b727f9e3ace31a4fd0",
    "imports": [
     "./condicional",
     "./iconos",
@@ -6677,7 +6677,7 @@
   },
   {
    "path": "packages/ui-components/src/presentacion/numero.ts",
-   "hash": "428544962911ddd6d835be959a8a8fcff2f562b24b6ea38db4953b2e4c72ecd3",
+   "hash": "82f9c58910b9c7b246d5259b04066db6b56ed04a9a77fc71b55fdc6e0bd700de",
    "imports": [],
    "defines": [
     {
@@ -6718,7 +6718,7 @@
   },
   {
    "path": "packages/ui-components/src/presentacion/panelDeFiltros.ts",
-   "hash": "5c4c05414056092f8c10df751b7908f78df7b85d42c202bc6244039be9c7cdbf",
+   "hash": "54353faffd49f046324cc8012326be6a93fdad03f38196c6c40d570be5c101b7",
    "imports": [
     "../registry/types",
     "../registry/viewModel"
@@ -6783,7 +6783,7 @@
   },
   {
    "path": "packages/ui-components/src/presentacion/iconos.ts",
-   "hash": "a624695af3f693d4be917e43998a8e52d66345d5cbeeef918dd1b471ae974a2d",
+   "hash": "32e16a7e9c7d3078d27da6e3572f194ef7a94f12459b5a30987a522a4f71486d",
    "imports": [],
    "defines": [
     {
@@ -6818,7 +6818,7 @@
   },
   {
    "path": "packages/ui-components/src/presentacion/condicional.ts",
-   "hash": "a90295d5fe300c3ee3c8c698719080a85b0df61bbcfcc6ce381ce0973e7882af",
+   "hash": "073645f664764aa4b88017a948385766d542ce138b2abec5399a903970b27ef1",
    "imports": [
     "./contrato"
    ],
@@ -6891,7 +6891,7 @@
   },
   {
    "path": "packages/ui-components/src/presentacion/conectores.spec.ts",
-   "hash": "55acabdfe6d56a87489989aff5afe3ae4545a77bfde775b1df4b9e0024b8330f",
+   "hash": "c2992d53202dbcd479eac5c2026faa6809f459db98e720ff16915a5b49ebf48e",
    "imports": [
     "./conectores",
     "vitest"
@@ -6912,7 +6912,7 @@
   },
   {
    "path": "packages/ui-components/src/presentacion/conectores.ts",
-   "hash": "d811b72053d38686f72a0b48a827bc8ad1a975c834e59e3c75e0f61ddbb16a6b",
+   "hash": "212da897be27afec741a93f87ecc1c37d0772bc4825bf17605c56d40c6339583",
    "imports": [],
    "defines": [
     {
@@ -6971,7 +6971,7 @@
   },
   {
    "path": "packages/ui-components/src/presentacion/contrato.spec.ts",
-   "hash": "e9ad5842250573e2b5aa33b4ad3b60b039e16c4465f642e053207836a837d656",
+   "hash": "0347ca42f86589255cfe329a91adc46ad32e10c8e63b70cd7c65afc16391a1a1",
    "imports": [
     "../registry/catalog",
     "../registry/types",
@@ -7007,7 +7007,7 @@
   },
   {
    "path": "packages/ui-components/src/presentacion/pozos.ts",
-   "hash": "bc49a774400cea1da97128ef95ae113fe34d4df78b61c8eb8f1212272987df1b",
+   "hash": "69ea57d34a3ea05f59dca77eb048e5735ba2a073bc3180f620e6f663393dbb10",
    "imports": [
     "../registry/types",
     "../registry/viewModel",
@@ -7095,7 +7095,7 @@
   },
   {
    "path": "packages/ui-components/src/presentacion/contenedores.ts",
-   "hash": "c1a155159526f464ac1506ce55812c954e066e3339abaa38bdfa595a77d09983",
+   "hash": "59f729054fbf97f1edf3eb0ac146d3b1d171a78419525741497d2896cef09e35",
    "imports": [
     "../registry/types",
     "./elementos"
@@ -7184,7 +7184,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/catalog.ts",
-   "hash": "4939866719c9e6eb7cbce95350a018d32d21ad6818c7cd20fcd3563301e62731",
+   "hash": "82dc5997ccbae28a4299ee74d8e9bc93f57bd155faac7f97777f5df06f3ab62c",
    "imports": [
     "../presentacion/contrato",
     "../presentacion/pozos",
@@ -7218,7 +7218,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/matriz.ts",
-   "hash": "2fc92b971231aa5718a8a5f7c997a91e014115a8f2e647f6aff6a65371397f5b",
+   "hash": "e66bb8d5ccaa6718408b6799984b424245078795493ae24dcacbae67eb9f3703",
    "imports": [
     "./agregacion",
     "./viewModel",
@@ -7282,7 +7282,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/proyeccion.ts",
-   "hash": "a695ec89d3e8adddb970f2ec0222fd4696c9a81e56f245b7e0a609f974030f77",
+   "hash": "0f3b3a2d34809d9347fe05517701835f16fc0b40e42b0cc6be259fb6af03ecee",
    "imports": [
     "../presentacion/pozos",
     "./matriz",
@@ -7358,7 +7358,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/presentacionDeclarada.spec.ts",
-   "hash": "50386f3673673914b4b7d9baa87fdf9c5aa1a6510f19c9f62e8bfca420c0d6f5",
+   "hash": "4e62fd217fc5fbbcb10ad94f585c737dc9db9d22437a552227bd976ea7cc77a5",
    "imports": [
     "../graficos/opciones",
     "../presentacion/contrato",
@@ -7394,7 +7394,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/attachments.ts",
-   "hash": "128bf3502ba2e5de2876b323f114c9881047f9ca3af199e2c4dc7c90611fc38d",
+   "hash": "3ae1c6707fab751f2796233c2c9f6ed449f4d8ad009f611f3b3e133793ea4d93",
    "imports": [
     "./types",
     "./viewModel"
@@ -7460,7 +7460,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/agregacion.spec.ts",
-   "hash": "927e1f0289438a731ef841ca7d68f37e15ad6a0c20ef4d1198955ee6087b1d67",
+   "hash": "de6a0a75da26b4f9294a96c23e296043d4f743d57b17833a4f6bee6cdf1d78e6",
    "imports": [
     "./agregacion",
     "./viewModel",
@@ -7527,7 +7527,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/agregacion.ts",
-   "hash": "a3594504d3f5180786966cdffe59c3299e32c13417064640396bfeefe6527816",
+   "hash": "c11c67a627e048b430704b0f3a081c09e90df3f1cefd84af717e8c062f7d48f3",
    "imports": [
     "@app/data-contracts"
    ],
@@ -7599,7 +7599,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/semver.ts",
-   "hash": "2edc53ceac4ee9840d26bcd2620996a22e6baa406feecaf42b55ea0abdd17b7a",
+   "hash": "67d7153e679e69ea498667ef80448676d42b2564422a7b9a5b591d27d1740cca",
    "imports": [],
    "defines": [
     {
@@ -7646,7 +7646,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/ObjectRegistry.ts",
-   "hash": "7f1f1b74c9b4e28207afb62bcd62b86def7e0aec049d86960c729b74b0acced7",
+   "hash": "d70cc144d8550fea990d224db220ea3085813592605c2314bd31571fe7c781f3",
    "imports": [
     "./semver",
     "./types"
@@ -7717,7 +7717,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/viewModel.ts",
-   "hash": "79cb46d836f309e93db9cd0b9530139025d638e16a8c4a2709d911cfbd75ab6a",
+   "hash": "341c647d7aefac47cbb80ee74a0c4521684605f6f7d6e8aaf4198336fd614392",
    "imports": [
     "./agregacion",
     "./types",
@@ -7787,7 +7787,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/proyeccion.spec.ts",
-   "hash": "46f253a7874c16d643647645e55a9907f2205fcaacb937d7e247ab84d6bc866a",
+   "hash": "b4e412b7d30b5c4bcde7ef93e1fab0a942e95249f16500b7c3826aace2240af8",
    "imports": [
     "./proyeccion",
     "./types",
@@ -7818,7 +7818,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/types.ts",
-   "hash": "6b2b5f6daf36a62708ebc9f8bb6d3cc4a9cbbfcf906d30797c73e4fa03811a0b",
+   "hash": "10b4cd16fd5760084a8afe30acdf4ef7f0bbf777f266f9de8905fb733d5c1252",
    "imports": [
     "../presentacion/contenedores",
     "../presentacion/contrato",
@@ -7878,7 +7878,7 @@
   },
   {
    "path": "packages/ui-components/src/graficos/multiplos.ts",
-   "hash": "004fe44ef7d6c2d19426b60b8d92c59b191acdb0996457ac47ac818bc7cb63c4",
+   "hash": "2d571856e648ac1f3edc027f27f74684d07109539ad526883b1d746abb763d1e",
    "imports": [
     "../registry/viewModel"
    ],
@@ -7920,7 +7920,7 @@
   },
   {
    "path": "packages/ui-components/src/graficos/opciones.personalizacion.spec.ts",
-   "hash": "f4cb7eaa2af3bd860b50c83c7991d3951d853ecdd44a94c8cd0b840c0ebdc5d1",
+   "hash": "8b78d43e57a6724d3bebe4c89e055deb1ac73b017588e548d0a02bd68084410b",
    "imports": [
     "../registry/viewModel",
     "./opciones",
@@ -7951,7 +7951,7 @@
   },
   {
    "path": "packages/ui-components/src/graficos/opciones.ts",
-   "hash": "be2e56c9335be4eb7b3e1624564f2fd8280dcb95d7fbed91dd92cd10a84716c4",
+   "hash": "5a9dbc757f5105151f880c98636d810fbd8625582196f5ff254a31011623263f",
    "imports": [
     "../presentacion/condicional",
     "../presentacion/contrato",
@@ -8127,7 +8127,7 @@
   },
   {
    "path": "packages/ui-components/src/graficos/orden.ts",
-   "hash": "1b22e17cde2318bc6e47b220db3db14dc13906fae43988e98348ba97ad0f74ca",
+   "hash": "3530533bf23b16f4c6423f29cac28dda5108b2f64f9176e8556dba1da8363fd3",
    "imports": [
     "../presentacion/contrato",
     "../registry/viewModel"
@@ -8156,7 +8156,7 @@
   },
   {
    "path": "packages/caching/src/ICacheStore.ts",
-   "hash": "ee1b25cfca65b95113d8522627852343f020490b5ba2b2b0f9e7e9be2def22b8",
+   "hash": "bf981832e22d74a18b8f1ba99c1b0b79e6662e9ee40fbb6274f51f42fa0c9c00",
    "imports": [],
    "defines": [
     {
@@ -8194,7 +8194,7 @@
   },
   {
    "path": "packages/caching/src/CachedDatasetReader.ts",
-   "hash": "abc6d09832240e5dfac73d97d196534a37234cf148e269dc60fee94f76a9beb3",
+   "hash": "d61d8705ae8dbb03b417da3d5ad07a72c69b18aff138fd15ab051896ea63ce3e",
    "imports": [
     "./ICacheStore",
     "./InMemoryCacheStore",
@@ -8249,7 +8249,7 @@
   },
   {
    "path": "packages/caching/src/index.ts",
-   "hash": "680c03b67cd5ecf6795bd5ac2a26464a1406e412e380ad141f1271335d20dbd1",
+   "hash": "652006e7a5fda4d8fa95101cd5bdc5c326df86a293e6b35b628b8cd1fee8f8f6",
    "imports": [],
    "defines": [
     {
@@ -8486,7 +8486,7 @@
   },
   {
    "path": "packages/caching/src/BlobCacheStore.ts",
-   "hash": "61651cc7fc5bab25d1baf11149ebe91ff875a5011f87c863d0cf63d96494ce50",
+   "hash": "0b661f1b8dc69e9e9dec06aad10199f2c7ad77a16b19e34ba6271e7deef19565",
    "imports": [
     "./ICacheStore",
     "@azure/storage-blob"
@@ -8536,7 +8536,7 @@
   },
   {
    "path": "packages/caching/src/cacheKey.ts",
-   "hash": "3654e1ea465080803e68ecd49cd4b77aa78ca4fdaf634033b9e8cf002e9b8498",
+   "hash": "93ac1d1f5be1d1f96fb4d2091d272ee08851bc88ce485e3570b7585143a56f57",
    "imports": [
     "@app/data-contracts",
     "node:crypto"
@@ -8583,7 +8583,7 @@
   },
   {
    "path": "packages/caching/src/datasetRegistry.ts",
-   "hash": "290c8d5d83a894b87dc370ed9ec9b3090188222076500d524cfb1a2a03b7c59b",
+   "hash": "4c45294b5a6c658939336fecdc6990147d3c94ba1f4d6ab62fa89f887cc7bd95",
    "imports": [
     "../datasets/registry.json",
     "./cacheKey",
@@ -8646,7 +8646,7 @@
   },
   {
    "path": "packages/caching/src/InMemoryCacheStore.ts",
-   "hash": "6e1124df0d7b0a4d5a52e497bc212af1c2500130bfe6c45f926d9de31636d215",
+   "hash": "3491d7527b51f0f3d755c968b7b92f55901380d2c293111991f3931714e85122",
    "imports": [
     "./ICacheStore"
    ],
@@ -8691,7 +8691,7 @@
   },
   {
    "path": "packages/caching/src/FileCacheStore.ts",
-   "hash": "5b497275988f13fac7945184887931825ed4fb5b3410490e95f641601a407fb7",
+   "hash": "339ee446ab1cfb82fc47836f6c9b5add4666c4af84dcfacb88fe95225817a864",
    "imports": [
     "./ICacheStore",
     "node:fs/promises",
@@ -8724,8 +8724,273 @@
    ]
   },
   {
+   "path": "packages/i18n/src/index.ts",
+   "hash": "0a6b0351bddbc45600d5fda756ca6fd86b3664a470484f8408de0bab8718fafd",
+   "imports": [],
+   "defines": [
+    {
+     "name": "CATALOGOS",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "LOCALES",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "LOCALE_POR_DEFECTO",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "crearTraductor",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "en",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "es",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "esLocale",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "formatearMensaje",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "negociarLocale",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "preferenciasDeCabecera",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "type ClaveDeMensaje",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "type Locale",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "type ParametrosDeMensaje",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "type Traductor",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "CATALOGOS",
+    "LOCALES",
+    "LOCALE_POR_DEFECTO",
+    "crearTraductor",
+    "en",
+    "es",
+    "esLocale",
+    "formatearMensaje",
+    "negociarLocale",
+    "preferenciasDeCabecera",
+    "type ClaveDeMensaje",
+    "type Locale",
+    "type ParametrosDeMensaje",
+    "type Traductor"
+   ],
+   "references": [],
+   "import_edges": []
+  },
+  {
+   "path": "packages/i18n/src/traductor.ts",
+   "hash": "52c20e08414857862ceb22334cf1d42e828196d4fc2c764305d98fc115c076f8",
+   "imports": [
+    "./catalogo/en",
+    "./catalogo/es",
+    "./formato",
+    "./locales"
+   ],
+   "defines": [
+    {
+     "name": "CATALOGOS",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "crearTraductor",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "CATALOGOS",
+    "crearTraductor"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./catalogo/en",
+     "resolved": null
+    },
+    {
+     "module": "./catalogo/es",
+     "resolved": null
+    },
+    {
+     "module": "./formato",
+     "resolved": null
+    },
+    {
+     "module": "./locales",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "packages/i18n/src/catalogo.spec.ts",
+   "hash": "0940ce94f734bf2dc8c815e99b9edc6418243de0fa5695b741acdf02065a8c3d",
+   "imports": [
+    "./index",
+    "./locales",
+    "vitest"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./index",
+     "resolved": null
+    },
+    {
+     "module": "./locales",
+     "resolved": null
+    },
+    {
+     "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "packages/i18n/src/locales.ts",
+   "hash": "d73164e7ea8c1ffcc439f2634b5b123954ffbc9a53489621e8eb204bdf9b556c",
+   "imports": [],
+   "defines": [
+    {
+     "name": "LOCALES",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "LOCALE_POR_DEFECTO",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "esLocale",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "negociarLocale",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "preferenciasDeCabecera",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "LOCALES",
+    "LOCALE_POR_DEFECTO",
+    "esLocale",
+    "negociarLocale",
+    "preferenciasDeCabecera"
+   ],
+   "references": [],
+   "import_edges": []
+  },
+  {
+   "path": "packages/i18n/src/formato.ts",
+   "hash": "4cba509fd4f731ed9130aca884bff2ab19e8f7c8b3bcc18991f310671c6d1824",
+   "imports": [],
+   "defines": [
+    {
+     "name": "formatearMensaje",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "formatearMensaje"
+   ],
+   "references": [],
+   "import_edges": []
+  },
+  {
+   "path": "packages/i18n/src/catalogo/es.ts",
+   "hash": "43a6a1d7644ea9beb9b93b219eaf9b78ec745c0b8a059adbc1965757cd2a9c89",
+   "imports": [],
+   "defines": [
+    {
+     "name": "es",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "es"
+   ],
+   "references": [],
+   "import_edges": []
+  },
+  {
+   "path": "packages/i18n/src/catalogo/en.ts",
+   "hash": "89b2b5f1e916e1bf58891a8452d5ec6dcc82ac4b0fa7077dae2750aea9815944",
+   "imports": [
+    "./es"
+   ],
+   "defines": [
+    {
+     "name": "en",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "en"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./es",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "packages/nl-query/src/index.ts",
-   "hash": "eb195f5c00994aa093d721fce4b3bd79bcc292952f98d7b712a5974253e8af0a",
+   "hash": "d308b55da0325fc43b09435f0954aa0911481984674a8b4a085a233a359a609c",
    "imports": [],
    "defines": [
     {
@@ -8754,7 +9019,7 @@
   },
   {
    "path": "packages/nl-query/src/resolver.ts",
-   "hash": "6c127587aaa46da6f749726642dd1bac41a6ef0b00d4e08b0f4536574004113d",
+   "hash": "99b5a8ab003f63179d9259641797b8cf816556953398d1cc38e1192d7af7632d",
    "imports": [
     "./types"
    ],
@@ -8816,7 +9081,7 @@
   },
   {
    "path": "packages/nl-query/src/types.ts",
-   "hash": "fd15059b184bb5c803518a98df81d004ed3cbd66d3b4112b2f66e352215693da",
+   "hash": "4a4ab98b0d60b02a8a972f742b16b5b7001ccdc09940dd299ff87d8c4ef412b7",
    "imports": [],
    "defines": [],
    "exports": [],
@@ -8825,7 +9090,7 @@
   },
   {
    "path": "packages/data-contracts/types/src/index.ts",
-   "hash": "c72777e85e39d85464503b2eb4babd7b6ae95c2f37ef6248a7fdf33b240ee0af",
+   "hash": "83d5b35287eefaa2e6b0d3efa3ef201bc07f40b8606d876ce66bb572d73d4a15",
    "imports": [],
    "defines": [
     {
@@ -8860,7 +9125,7 @@
   },
   {
    "path": "packages/data-contracts/types/src/IDataConnector.ts",
-   "hash": "8432841e2450d595ac482479f24ae3687d41d101e1c86813b88edd09127b628e",
+   "hash": "df0554a852974aff0764d3c2264cc85b8a53073b3a2457175def8906753d5fcb",
    "imports": [],
    "defines": [
     {
@@ -8895,7 +9160,7 @@
   },
   {
    "path": "packages/data-contracts/server/src/index.ts",
-   "hash": "8d6843def0247e4de5462c05ab1be88b9a35fe3e698ed4f3b638521286460130",
+   "hash": "800dc6206698d063e040f175d66b46c0a21d890afb0f9c2bad8910d89ee9dbd9",
    "imports": [],
    "defines": [
     {
@@ -8990,7 +9255,7 @@
   },
   {
    "path": "packages/data-contracts/server/src/mockSchemaFile.ts",
-   "hash": "b58b4cfca4dc435f02679504435d3c745a3fdad2008ab0ffed7e2fefaeb22c17",
+   "hash": "65540afb2c38995cdf259489fe6ca06092360e6aa2784b9e09eaf14decded516",
    "imports": [
     "@app/data-contracts"
    ],
@@ -9050,7 +9315,7 @@
   },
   {
    "path": "packages/data-contracts/server/src/createDataConnector.ts",
-   "hash": "4bbb7cb69ff6461bde3174bc1022100423323923618eb913a6684a00e1fe29ea",
+   "hash": "d7ac60ee791e8d9b9d041892efb1c407377b064261d74c5b688b7d906110cfa1",
    "imports": [
     "./connectors/MockDataConnector",
     "./connectors/SqlDataConnector",
@@ -9095,7 +9360,7 @@
   },
   {
    "path": "packages/data-contracts/server/src/connectors/pending.ts",
-   "hash": "11246acf8434f1a9b66acd0a336b51834b080b48e09ea08651236390680f1f49",
+   "hash": "648f95a1055a6828299d63491cd35f044c69bd3b21a2bd92b4a857bb45c7793a",
    "imports": [],
    "defines": [
     {
@@ -9143,7 +9408,7 @@
   },
   {
    "path": "packages/data-contracts/server/src/connectors/SqlDataConnector.ts",
-   "hash": "a3de6572519c1440b4b624e3e4a76df782d76f55c592ab70df65a771b9fdeeda",
+   "hash": "8503a00a6dfa52655929e7803b02afb270e9463f9b77c307226f24c267ce37a4",
    "imports": [
     "./pending",
     "@app/data-contracts"
@@ -9198,7 +9463,7 @@
   },
   {
    "path": "packages/data-contracts/server/src/connectors/MockDataConnector.ts",
-   "hash": "00296e90576d4faf2edefea4420fbbbdaab2017e837bb6cf18c293317a25d97b",
+   "hash": "4a37b49843e65c9627f79111c9cbec3812c7b5e6d8b00fbef1f6ec7947a6330f",
    "imports": [
     "../../schema/mock-schema.json",
     "../mockSchemaFile",
@@ -9232,7 +9497,7 @@
   },
   {
    "path": "packages/data-contracts/server/src/connectors/XmlaDataConnector.ts",
-   "hash": "5c5c2418a2c427db0cf8e6afaeb4869414011b13f97c4bb4732a65b8a5ef6a53",
+   "hash": "6f61a72ae2d725a0c8dfee3e476d816805c3a11d74751b38dbb2b0a901bfab27",
    "imports": [
     "./pending",
     "@app/data-contracts"
@@ -9260,8 +9525,34 @@
    ]
   },
   {
+   "path": "tools/especificaciones.spec.ts",
+   "hash": "ac29049792313c15b01a8ee161c4e779fd3a2e365e99aee5fefe9bdcafbc3613",
+   "imports": [
+    "node:fs",
+    "node:path",
+    "vitest"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "node:fs",
+     "resolved": null
+    },
+    {
+     "module": "node:path",
+     "resolved": null
+    },
+    {
+     "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/modules/modulo-ejemplo/module.contract.ts",
-   "hash": "73c379c2b89626d4a49beeb85db7cad0d9b0a7ef10597ef3ed6d855c1a59de08",
+   "hash": "b1c267c393953b869ea456f24fb93d56306ad7f2932439e7e5894d63fdd4a64a",
    "imports": [
     "@app/data-contracts"
    ],
@@ -9285,7 +9576,7 @@
   },
   {
    "path": "apps/modules/modulo-ejemplo/src/index.ts",
-   "hash": "d7c3df724f649c9f669dcfc14dbd374b0dbca54741f2880f44ada641e0fb077b",
+   "hash": "9fcc037a5909011c2b81e3f2b05ad044aa8133c9335228cf994f4bc18d226bd2",
    "imports": [
     "../module.contract",
     "@app/data-contracts"
@@ -9341,7 +9632,7 @@
   },
   {
    "path": "apps/modules/modulo-ejemplo/src/__boundary-fixture__/forbidden-import.ts",
-   "hash": "16ea6ab3bb738f0376b40fcbd3ce24c5962f8ad8d6e9caec7d4a218284237cc4",
+   "hash": "1e4811b688c98ab3e219bfd9bd9e8735943feae286c22f74863edf249c123892",
    "imports": [
     "@app/data-contracts-server"
    ],
@@ -9365,7 +9656,7 @@
   },
   {
    "path": "apps/cache-populator/src/index.ts",
-   "hash": "ac6dad56581b52845ed0868e2b782c45a1ad5cd7e977238fabfaebf9d5f00498",
+   "hash": "bf700251d26b9f37cf18eebf564ffef96335c52b43b8567554bb01a6b1db0c92",
    "imports": [],
    "defines": [
     {
@@ -9515,7 +9806,7 @@
   },
   {
    "path": "apps/cache-populator/src/sourceAgnostic.spec.ts",
-   "hash": "fbde7d60f1bc3034dba44eaff027e0829eee2cb37799bf76482ce8ef110e2feb",
+   "hash": "aafcf947edb155c3bb695c2f11f2ee2c13744f5c28bf003d14ef57b9da850be3",
    "imports": [
     "./populate",
     "@app/caching",
@@ -9556,7 +9847,7 @@
   },
   {
    "path": "apps/cache-populator/src/runCycle.ts",
-   "hash": "41600363d5898046228d872e99ffa0c17898a50a2a93884bac6ea731ef364430",
+   "hash": "257729e94a24dd02f19500d33df487beac1c913e0d5491e71fcf0d25a0bddc2e",
    "imports": [
     "./populate",
     "./schedule",
@@ -9600,7 +9891,7 @@
   },
   {
    "path": "apps/cache-populator/src/schedule.ts",
-   "hash": "5f37b746f2e385a0bb4634bf980ff363c093c6472ed0fb41933da686bcbe701f",
+   "hash": "91764dafda934be70b93e215aae333fc15be3f98fc81492c63118de811851d7b",
    "imports": [],
    "defines": [
     {
@@ -9635,7 +9926,7 @@
   },
   {
    "path": "apps/cache-populator/src/populate.ts",
-   "hash": "dba37ce193928a7814868d57907bbb7e17dd1b89fc916bd3d2f9eebc662ad0a9",
+   "hash": "f770c3d09d0367bc5ca4e07efc62d19ff9db48d10fcf794199594800086aa22a",
    "imports": [
     "@app/caching",
     "@app/data-contracts",
@@ -9711,7 +10002,7 @@
   },
   {
    "path": "apps/shell/middleware.ts",
-   "hash": "c443f8b7b2dc3df1d1d1750121b75831fce0b2b2be8cb2383b7e2a8937e8d345",
+   "hash": "a5863356ab1f37eb1e84439b6d92ddd69b8b404aa7073b5acafe24bb58a6ab30",
    "imports": [
     "./src/server/incrustacion",
     "next/server"
@@ -9746,7 +10037,7 @@
   },
   {
    "path": "apps/shell/instrumentation.ts",
-   "hash": "7ce6d46a24f87274e584a654c9e384baa1087f1adcfae9712866f6585f6dd000",
+   "hash": "4b0f3225d4b040ded3ec828c023a42d4ae9e40b15c9374882ae3b5cfd4cfe009",
    "imports": [],
    "defines": [
     {
@@ -9784,7 +10075,7 @@
   },
   {
    "path": "apps/shell/src/components/VistaModulo.tsx",
-   "hash": "c2c7e88ae43735c4d54e2f18ea133870476ac01bfd180e19dd8f5fdc4677a533",
+   "hash": "a00ea2a2bee39235c6626ec8a198ac623a597f41ae7da041e9534efe24efe1ba",
    "imports": [
     "../hooks/useFiltrosDeUrl",
     "../server/serializar",
@@ -9858,7 +10149,7 @@
   },
   {
    "path": "apps/shell/src/components/Marcadores.tsx",
-   "hash": "1e7945d3da8fff6d43895ec1cf9302d2e30eb79618c67b4e26b1276a67d90367",
+   "hash": "b6e047c2304abd283981367d8604ea263e16f4eda17b5f34f0389ef155f252f3",
    "imports": [
     "../hooks/useFiltrosDeUrl",
     "./iconos/BotonDeIcono",
@@ -9907,7 +10198,7 @@
   },
   {
    "path": "apps/shell/src/components/Avisos.tsx",
-   "hash": "474fdc4d4d22a938c98728e93fb7bddd4a5a8177ac99d767c761fb20a2efd4ff",
+   "hash": "0ecd1237e34035bf8f93f30ab3dd515f5f81235121f898f807193ade5efabcf8",
    "imports": [
     "./Campana",
     "@app/alerts",
@@ -9946,7 +10237,7 @@
   },
   {
    "path": "apps/shell/src/components/CerrarSesion.tsx",
-   "hash": "27d059aa956b0d0f590b6044ca5840e0863d20a576723c422168e41540dd75cd",
+   "hash": "293ac0abcf13d9a431cf650b3ca06a59444d211dff0451f6735d97dba804c171",
    "imports": [
     "next/navigation",
     "react"
@@ -9975,7 +10266,7 @@
   },
   {
    "path": "apps/shell/src/components/NavegacionPlegable.tsx",
-   "hash": "7e709eb0d8aab37a46ed31fcb45e702dd9e12324d8d9b155490f997c5d4ea561",
+   "hash": "01f072a833487a80a556031afbf2f614422b57d504871b95123e8357903af262",
    "imports": [
     "./SelectorDeEquipo"
    ],
@@ -10005,7 +10296,7 @@
   },
   {
    "path": "apps/shell/src/components/contenedores.tsx",
-   "hash": "0470defe3960102f1c2a3fb3492300a6ae9921b0d3825566bcd31ff1430291ea",
+   "hash": "6ca6fdc970627a72db7a91f6af22bd9acff81796b75d344b78efa01d23570a8f",
    "imports": [
     "../server/serializar",
     "./iconos/Icono",
@@ -10067,7 +10358,7 @@
   },
   {
    "path": "apps/shell/src/components/TablaDeMatriz.tsx",
-   "hash": "6d43b0b51b72b73fabbb27a220c515cb20a84d453517427ee00fa5ab10809a21",
+   "hash": "f47dc42f0c753c564f666640f2dda07fc77a482d16cdca5246a1086fbb0dde16",
    "imports": [
     "./iconos/Icono",
     "@app/ui-components",
@@ -10101,7 +10392,7 @@
   },
   {
    "path": "apps/shell/src/components/Grafico.tsx",
-   "hash": "182df1acabc1825ea3b1766486b8992de89d8ef191fa811a63336eff2e4d4f1b",
+   "hash": "9104f65383db5a03be470610f7be908dc26b63a6fad0d96694d10db996600114",
    "imports": [
     "@app/ui-components",
     "next/dynamic",
@@ -10135,7 +10426,7 @@
   },
   {
    "path": "apps/shell/src/components/ObjetoDeModulo.tsx",
-   "hash": "2c5c3729e7992560412e00544e4012160e0b554c0bf9ccd4bb71157f6a67fd44",
+   "hash": "ec3da280388da4d33bb64f3d84f9098935b3747625a110aa46f1c9a114ddbc76",
    "imports": [
     "../server/serializar",
     "./ConexionEnRejilla",
@@ -10199,7 +10490,7 @@
   },
   {
    "path": "apps/shell/src/components/Incrustar.tsx",
-   "hash": "bb49ffb966669b64bfb548f2e560e96ffcab7c7d4be9f8390d418ed71913872d",
+   "hash": "3fefbac10fa19ad04899fb3c5ad2ebdf4bad242dc0591f326dea9a5d3e1fb88d",
    "imports": [
     "../hooks/useFiltrosDeUrl",
     "./iconos/BotonDeIcono",
@@ -10233,7 +10524,7 @@
   },
   {
    "path": "apps/shell/src/components/ArbolNavegacion.tsx",
-   "hash": "42d2dadbc7e2414e113a9967e6c1b82f7ca2f83a0e75ab2ce599314ac378b377",
+   "hash": "ab39f3beb6a4ef01492fd4d06e27ecaa3314a3a5b4d795d3ea1f24b7bb670010",
    "imports": [
     "@app/access-control",
     "next/link",
@@ -10267,7 +10558,7 @@
   },
   {
    "path": "apps/shell/src/components/TablaOrdenable.tsx",
-   "hash": "75a912fdce4d1573685b420de64f782383994a96d53d9e847bc477887b93c9b2",
+   "hash": "082cd5f3c01a103a1039c47f260556bfc1f4819b3259c31dc8a5e21c5b4f1d72",
    "imports": [
     "@app/data-contracts",
     "@app/ui-components",
@@ -10301,7 +10592,7 @@
   },
   {
    "path": "apps/shell/src/components/Exportar.tsx",
-   "hash": "5f6ee650417b4f26ccc3b308035bfc1e08390e0c0c01617af3f8a72913ebf470",
+   "hash": "801d5b349b9fbd51fbeaf0a0ad13da87c68dfcc59d94bbf38ca6226695bed832",
    "imports": [
     "../hooks/useFiltrosDeUrl",
     "./iconos/BotonDeIcono",
@@ -10335,7 +10626,7 @@
   },
   {
    "path": "apps/shell/src/components/PanelDeFiltros.tsx",
-   "hash": "38bcfed532d166c9d499ea581d41f341d58e12214be049bf739f1af7b23d7da7",
+   "hash": "eb63e024326d44ede561a795c10566d341346fef7634f1bf5bd6fb9a073e46ea",
    "imports": [
     "../hooks/useFiltrosDeUrl",
     "./objetos",
@@ -10379,7 +10670,7 @@
   },
   {
    "path": "apps/shell/src/components/CrearAviso.tsx",
-   "hash": "47aab4b12a603f74b131a38c0d36085859214915fc373b8259b18f1228c7d890",
+   "hash": "09dce7d9f74bd234ce700b177cd7ff49e204e31837356912bf166dcd0bea206d",
    "imports": [
     "../hooks/useFiltrosDeUrl",
     "./iconos/BotonDeIcono",
@@ -10423,7 +10714,7 @@
   },
   {
    "path": "apps/shell/src/components/Segmentador.tsx",
-   "hash": "74196b2d99e97f26b5326c6f7e04f4a771f9670cda4c5b040df2825aa5c76ef2",
+   "hash": "44e8a4748e7a8ad40af79a9a211a64446f8cc653ca91539349cab6d3d1a1ba9c",
    "imports": [
     "../hooks/useFiltrosDeUrl",
     "./objetos",
@@ -10462,7 +10753,7 @@
   },
   {
    "path": "apps/shell/src/components/ConexionEnRejilla.tsx",
-   "hash": "93dc5f4a4ace246f444d4eccf909cb4fd6fb2a65cd055b5f9f266b8972706a34",
+   "hash": "6b39a0b087312bb8b4de3d706283d161baa50f4609e8fbcb43a24e54853c42d0",
    "imports": [
     "./elementos",
     "@app/ui-components",
@@ -10496,7 +10787,7 @@
   },
   {
    "path": "apps/shell/src/components/Lienzo.tsx",
-   "hash": "6719742d1943dab7247cf16edb551cdcb9adbec2aec7432a37f5a2186020343f",
+   "hash": "b7cd438d43a3501ef060e5ac7b524592e4d5d5dd0dedef0eb23c15f47fcfd519",
    "imports": [
     "@app/ui-components",
     "react"
@@ -10525,7 +10816,7 @@
   },
   {
    "path": "apps/shell/src/components/Complementos.tsx",
-   "hash": "0365a2d78a6566a12eef356f9dccd426aef57311d3bed0f9217960600eaa91da",
+   "hash": "5b13b302d4319b3e43c98af56d7492af205191775da4d830b82f6e491a51f244",
    "imports": [
     "./iconos/Icono",
     "@app/data-contracts",
@@ -10576,7 +10867,7 @@
   },
   {
    "path": "apps/shell/src/components/Rejilla.tsx",
-   "hash": "451bc833c5d76d7956c4ea09feb4c03548dcb438caf315401be3c5333df4a993",
+   "hash": "eaea5cb2500e41b3de51d15fe00753533f72ac001ef54e1656108f2cc1581e54",
    "imports": [
     "@app/module-model"
    ],
@@ -10600,7 +10891,7 @@
   },
   {
    "path": "apps/shell/src/components/Cabecera.tsx",
-   "hash": "11041e99f4d4169ff4f2bb881491674db3e088f9197f832ee98e24ab0822973c",
+   "hash": "35e9da85f0059df7a8b943653d8c32c82f2fdc5ef0d87a36bae7ae0d5d9f6bef",
    "imports": [
     "../server/admin",
     "../server/contexto",
@@ -10664,7 +10955,7 @@
   },
   {
    "path": "apps/shell/src/components/AlternarLateral.tsx",
-   "hash": "3b8170d36617a95914129b49bc9f85e43e687b5f66387ff211cc17d11b270cbe",
+   "hash": "92f6a307431c335b88ee6afa83a14a5eaec9060161808fd4dc306a59a2f3ad3c",
    "imports": [
     "./NavegacionPlegable",
     "./iconos/Icono",
@@ -10708,8 +10999,43 @@
    ]
   },
   {
+   "path": "apps/shell/src/components/Idioma.tsx",
+   "hash": "294357dcd89712c25c5621240bf610783e2c314a37c8af0ee055a8c0c0f6db0a",
+   "imports": [
+    "@app/i18n",
+    "react"
+   ],
+   "defines": [
+    {
+     "name": "ProveedorDeIdioma",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "useTraductor",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "ProveedorDeIdioma",
+    "useTraductor"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "@app/i18n",
+     "resolved": null
+    },
+    {
+     "module": "react",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/src/components/MiVista.tsx",
-   "hash": "f2c8efc1fd9e45bf199ea6af1a79149b8030a3a7ba2ecc9a1613b21deb91c64e",
+   "hash": "7af5b285dfaf9c7bed29c65319a205571cbeca1446fdfc1b8efcd65c00103674",
    "imports": [
     "./iconos/BotonDeIcono",
     "next/navigation",
@@ -10743,7 +11069,7 @@
   },
   {
    "path": "apps/shell/src/components/SelectorDeEquipo.tsx",
-   "hash": "2de59b4b51e8ebc00e79fd0e6754f70c90d2f0129fb7abe660fa6e028ca72e3e",
+   "hash": "11f016f721c51dbc00eea98c5bce56329dfe0b339fac3c3ec40ff83507f73942",
    "imports": [
     "next/navigation",
     "react"
@@ -10772,7 +11098,7 @@
   },
   {
    "path": "apps/shell/src/components/Acceso.tsx",
-   "hash": "543692823df4fa91df7a97fb662ebfe4c61017d46efec73de7c4d00db465da05",
+   "hash": "65d06875aaa62829565a178c08296a78d102502751342b368c46fd592a17de58",
    "imports": [
     "next/navigation",
     "react"
@@ -10801,7 +11127,7 @@
   },
   {
    "path": "apps/shell/src/components/Restablecer.tsx",
-   "hash": "2f419d136600bacba91daeca97a4a1e185aa76c35d5f317bd9daf73e86a064e1",
+   "hash": "8de966f9f20cfb3116b9e0b6a8dde8021051b877f69f1f0f087021784352d293",
    "imports": [
     "next/navigation",
     "react"
@@ -10830,7 +11156,7 @@
   },
   {
    "path": "apps/shell/src/components/Preguntar.tsx",
-   "hash": "12ba7b479b7ab3cdad7c67df32f346aa020518d13e2ebc8d9247c978da37eef4",
+   "hash": "e1d01b4665499dbc814738a1f49c436f950dbd12e4becb3eaed8390289f33be3",
    "imports": [
     "next/navigation",
     "react"
@@ -10859,7 +11185,7 @@
   },
   {
    "path": "apps/shell/src/components/objetos.tsx",
-   "hash": "8864a91cc8522ac9faa428d7d343b3a0039070e641d6cc2a758d3d5c1e0aa431",
+   "hash": "eae21714cda08c1550080fdc1931609ad222b45d2a8dc3fbf118adb2165eefe4",
    "imports": [
     "../hooks/useDesborda",
     "./Complementos",
@@ -11043,7 +11369,7 @@
   },
   {
    "path": "apps/shell/src/components/InsigniaDeProcedencia.tsx",
-   "hash": "6dd330c2366ff4dd77dc79c0dedaef9f7c05d65dfa0aa40f441f01ca60834e7e",
+   "hash": "17cbe0eb26cad7064ef143f8f7a1a3c93e2ea2f3a77dcb656c96405420200303",
    "imports": [],
    "defines": [
     {
@@ -11060,7 +11386,7 @@
   },
   {
    "path": "apps/shell/src/components/elementos.tsx",
-   "hash": "352c6e8926b9f188c4c1ef67c90382ccbaa2d64b743a932593ab88d8bb8dd9a4",
+   "hash": "9e1245284c87ae1050751e3edf8561afa9302faa7e9635ad47b91e1e032ac55c",
    "imports": [
     "@app/ui-components"
    ],
@@ -11120,7 +11446,7 @@
   },
   {
    "path": "apps/shell/src/components/Campana.tsx",
-   "hash": "406baf02a2d86bb3e38dde1be1b02c14bb15160cd13c2179cc3b2246955e607c",
+   "hash": "7af46e50b1568f140b7bc47d72ed7cb52e42da53405f3fd63c909157ea801a36",
    "imports": [
     "@app/alerts",
     "next/link",
@@ -11165,7 +11491,7 @@
   },
   {
    "path": "apps/shell/src/components/InsigniaDeAmbito.tsx",
-   "hash": "c77080be004d52af3b9538b21511a077b8b89565276c9aea4eb3ffe6c1dca017",
+   "hash": "cd6c855c91aa7cf4b72eff6ff530681c58a4513f16ab79e689810542b0eaf850",
    "imports": [
     "./iconos/Icono",
     "react"
@@ -11194,7 +11520,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/ConfiguracionDeObjetoEditor.tsx",
-   "hash": "5a301e693e5bcbdda3515ce02a1ff3902b42387d8b34fab3648069afeb3c9f52",
+   "hash": "57d73de4e1782fc969056fc79d3ab5e1f141421c71cee39f4b91aa667c6760a6",
    "imports": [
     "./EstiloDeTextoEditor",
     "./Seccion",
@@ -11228,7 +11554,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/ListaDeModulos.tsx",
-   "hash": "677eb16e5bb064675971bba73f04fb5be5246ce6f5b5d9340c6750cd6cd57717",
+   "hash": "eb781c384ec4de2258cf910a49a938a5ebd08914ce83e73874ee01b7f9caff20",
    "imports": [
     "@app/module-model",
     "next/link",
@@ -11267,7 +11593,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Presentacion.tsx",
-   "hash": "e3b79202a096c42dfcf4d3ce988bb633706e77b1179ab751c83a98c3b1b0da76",
+   "hash": "0924684f26feb0ae5bfaf53b206598a6a3b4534c7d2f2e6dc91929987fc3dba7",
    "imports": [
     "../iconos/Icono",
     "./Ayuda",
@@ -11321,7 +11647,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Pozo.tsx",
-   "hash": "2c397445cd61ea562fb6b1032a9a72f55a6012bcb35d04617e22a5151aadbb7d",
+   "hash": "e07b10643230bd6e10112eaea808b83af09781a1c48e16146887956220b6923e",
    "imports": [
     "../iconos/Icono",
     "./Ayuda",
@@ -11365,7 +11691,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Seccion.tsx",
-   "hash": "2aca8a56671c4a697ced1e2bc640de41101a5ebd616e48ce4edb1493663b9d3f",
+   "hash": "23c594d748ce6bbb9425e64810c4c2cb68c5e368be5a698d0c0d9da2a2eabb74",
    "imports": [
     "react"
    ],
@@ -11395,7 +11721,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/ReglasDeColor.tsx",
-   "hash": "105d57ae630673d59e0da978c5cc975046bc3d3a439be89b2295094bb5c7d79b",
+   "hash": "4a679d6ed2171a5ea85f90384516c51745617c934e87ff0ce456aa6c0c2394a8",
    "imports": [
     "./EstiloDeTextoEditor",
     "@app/ui-components"
@@ -11424,7 +11750,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/CabeceraDeEditor.tsx",
-   "hash": "00c0f896b6bc4bd5a81da070a4375b3e3b7e8dbbea7d04db1f4509e30a53c8e4",
+   "hash": "be7272c9ab48486451a8070b91e8a60dcb1d34bfe7d20e9ee0ee2a8893f0583b",
    "imports": [
     "next/link"
    ],
@@ -11448,7 +11774,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/EstiloDeTextoEditor.tsx",
-   "hash": "5989b84196a5d445b299df0df2159653908a6b936f7dede3ccd48ba01f6c1ae0",
+   "hash": "9dc25c4aed5f038ec05b8c01d44045f8f052096d3e900dd45bffda01e54bde7a",
    "imports": [
     "./Ayuda",
     "@app/ui-components"
@@ -11483,7 +11809,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/EditorDeModulo.tsx",
-   "hash": "e54c87b155ca835909778d4d65bc3d83f6b9f5e5350a127f5e3b376398712f49",
+   "hash": "52c70a98bc5a8dd6a5bc7d415f7379bffcfdf09a48d8417b1f237a66721afbec",
    "imports": [
     "../../server/editor",
     "../../server/serializar",
@@ -11552,7 +11878,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/controles.ts",
-   "hash": "607ccf84ac86641d73772014cf8407444e215627f2eb54050ff508730fe06782",
+   "hash": "d9d69ed60a4405ac9caac78fe4048457f1e464d5a5b77e4e41cc55b8f88cb065",
    "imports": [
     "@app/ui-components"
    ],
@@ -11582,7 +11908,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Lienzo.tsx",
-   "hash": "e0133c6250226f01327fe30fe73af1dd06d43c2dcd886a1d3a579e4e9ba8d173",
+   "hash": "877d1ca9fd151ad9131772ffa4f8762790e9b22858cc5631b3e5231bc2ed19ad",
    "imports": [
     "../../server/serializar",
     "../ObjetoDeModulo",
@@ -11631,7 +11957,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/LineasDeReferencia.tsx",
-   "hash": "39036eae6c1bcf7ddd1d919cfb97160a1dd20a6595c9f84de7bab37336931245",
+   "hash": "b46571cb4686d813a44bd41f2cb65bed5c26f9df990a2ca853bee24be89884a6",
    "imports": [
     "./EstiloDeTextoEditor",
     "@app/ui-components"
@@ -11660,7 +11986,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/useArrastre.ts",
-   "hash": "3ba3504a2fe428005ac61716119ed95c318b79049777b9275de77b891b1b2504",
+   "hash": "df71dded36c6d92fd4ea9b109cb95d9f0f0bbbe09726266085b34d8a9722d685",
    "imports": [
     "@app/module-model",
     "react"
@@ -11689,7 +12015,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Pestanas.tsx",
-   "hash": "832545fe03eb71388be599be94165ba85a208c4e13f572f997f9ec8edef66e38",
+   "hash": "b8195f27cae6f20cdef2eb8526b1c09a096db46bb52eb0d6a46f79b82fae2e48",
    "imports": [
     "../iconos/Icono",
     "react"
@@ -11718,7 +12044,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Ayuda.tsx",
-   "hash": "1ef967929aa70ea3c833e0c3d25af546c4d0209c64b94d2547fcd15dc2d582d0",
+   "hash": "b8e5c88e5dace0aa9865889238282158e00775a57e50d3de94a37d795089ec24",
    "imports": [
     "../iconos/Icono",
     "react"
@@ -11747,9 +12073,10 @@
   },
   {
    "path": "apps/shell/src/components/editor/PanelLateral.tsx",
-   "hash": "2464af01439ec5ddb33371045ea1862daeab0c9122b19ca889e54f6b20359800",
+   "hash": "1fbd4fae2f61044100bd45309f07b51b8a994c7d39627ec5edd9aa96f9b22e1b",
    "imports": [
     "../../server/editor",
+    "../Idioma",
     "../iconos/Icono",
     "./ConfiguracionDeObjetoEditor",
     "./Pestanas",
@@ -11757,6 +12084,7 @@
     "./Presentacion",
     "./Seccion",
     "@app/data-contracts",
+    "@app/i18n",
     "@app/module-model",
     "@app/ui-components",
     "react"
@@ -11775,6 +12103,10 @@
    "import_edges": [
     {
      "module": "../../server/editor",
+     "resolved": null
+    },
+    {
+     "module": "../Idioma",
      "resolved": null
     },
     {
@@ -11806,6 +12138,10 @@
      "resolved": null
     },
     {
+     "module": "@app/i18n",
+     "resolved": null
+    },
+    {
      "module": "@app/module-model",
      "resolved": null
     },
@@ -11821,7 +12157,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/secciones.ts",
-   "hash": "22e474b5fdb04312b78ff8cd590c1bb11bdd87d7bc91f1e1b0fd0607c9308306",
+   "hash": "4384e4a6caf26e0fed3be8cd9accb9e526d23600bd912f5b5c8c7da55db83733",
    "imports": [
     "../iconos/Icono"
    ],
@@ -11869,7 +12205,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/CarrilDeAdmin.tsx",
-   "hash": "e4680d273ff28edd51529bc097bfdb91120d851033b58086fa133635eb07aff0",
+   "hash": "caac6b94c0815b828ea96b227b236fad44055d81c9d74c57a2a8b129fc47b080",
    "imports": [
     "../iconos/Icono",
     "./secciones",
@@ -11914,7 +12250,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/EditorDeEquipos.tsx",
-   "hash": "3147b078e30da5d4e9cc655f5089f23660d744e0dfdcfa5528eaafd33f261642",
+   "hash": "98f7e2a3986c0f87b78eb889222055fe48c363809213eb8fdf3160a56983571b",
    "imports": [
     "@app/access-control",
     "next/navigation",
@@ -11948,7 +12284,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/CuentasLocales.tsx",
-   "hash": "39eb19dc1ddb26e836fdd6335fbef14dc6bbc6253ee4fec887f5d7f2d624dd4f",
+   "hash": "01780c611a2f0205d8f70ca0f0131f2f37e703f7d588ea5d7825fca700fd7c5e",
    "imports": [
     "../../server/identidad",
     "next/navigation",
@@ -11982,7 +12318,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/EditorDeArbol.tsx",
-   "hash": "07e50c0a57b004a2dd3053c1cf721b3c590f00c94f64f11f2d84a2c627a17101",
+   "hash": "2b55539f5bb61bdca229632d2fa5a857edbce9490756c9b96ed243cc9292b604",
    "imports": [
     "@app/access-control",
     "react"
@@ -12011,7 +12347,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/QuienVeQue.tsx",
-   "hash": "06a336df9f39e41ab492f1d40e5f05e37c147e08d3c3fd9592a0fc6fe13f09e1",
+   "hash": "b7d71366c50848a60669fa9883258464ead60770a10593f1340d5130cc701743",
    "imports": [
     "react"
    ],
@@ -12035,7 +12371,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/EditorDeAmbito.tsx",
-   "hash": "6971438062785e959890c845e1ea1a8f616f977a09b3f6e227ebce14e5a3f0f6",
+   "hash": "de744edf083bf9244e912e8cea9c29283bd89f69e2840f0b1c2fd228b00e5737",
    "imports": [
     "@app/access-control",
     "react"
@@ -12064,7 +12400,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/EventoDeAuditoria.tsx",
-   "hash": "2bbd062f02f2ab3fc8e049e5090318f46898b6285400132a978fde911779448b",
+   "hash": "15ec0b8e16bc537d9e45bc8aeb76ebb1425281b76aec816e0e9f94237a5ad91b",
    "imports": [
     "@app/observability"
    ],
@@ -12088,7 +12424,7 @@
   },
   {
    "path": "apps/shell/src/components/iconos/BotonDeIcono.tsx",
-   "hash": "fcbd0fde5ed3e5b341dbe2cb0d1af3d1f1bbfb1a424693ea0d08f91b1b3b1e8e",
+   "hash": "cda7bc85d773adc065a431e94712878925b301e10ae19c04a390d1c3b9e32422",
    "imports": [
     "./Icono",
     "react"
@@ -12117,7 +12453,7 @@
   },
   {
    "path": "apps/shell/src/components/iconos/Icono.tsx",
-   "hash": "68b63b69a628cae2378da44951b6811b3e4eb75efbef5cb55d8d261520d356f3",
+   "hash": "a6cfae2dcfae6d0b81e681452c007d37cebf0960889c014d75aae94a17d751ab",
    "imports": [
     "@app/ui-components"
    ],
@@ -12141,7 +12477,7 @@
   },
   {
    "path": "apps/shell/src/server/cicloDeVida.ts",
-   "hash": "2690eeff790a9f231161db771d95c42c39cdefb5f10f3e536aa6bf405cee1a78",
+   "hash": "bb0de10aec97e1cf65673a507d7da53f955932575401cf449d2b3cd282c3b480",
    "imports": [
     "./admin",
     "./almacenModulos",
@@ -12306,7 +12642,7 @@
   },
   {
    "path": "apps/shell/src/server/incrustacion.ts",
-   "hash": "e74e6765fa68581514a2ae0975d032c2187ac075e0c6bd230a3bd55b9173725c",
+   "hash": "a51aa1cd7b255ab173264278a724641fefa492a973f90554ef124cba26468eae",
    "imports": [],
    "defines": [
     {
@@ -12365,7 +12701,7 @@
   },
   {
    "path": "apps/shell/src/server/admin.ts",
-   "hash": "5cd8097ecb57b027720f0aedb6762b001100c321c0188565d78898470765bd9f",
+   "hash": "6fea90365fc6e87636afba01200ed3cadb0ac6480664adead565e2eddb8fabf1",
    "imports": [
     "./auditoria",
     "./contexto",
@@ -12533,7 +12869,7 @@
   },
   {
    "path": "apps/shell/src/server/almacenModulos.ts",
-   "hash": "7785fb263aebde72c1517132a2e392e6210e2acaabb6f6939c58b7b8899839fc",
+   "hash": "6f9844410c11a87364134bd939ec384a4ee87c214f31f0e2873324af1cf4e267",
    "imports": [
     "./almacenCompartido",
     "./modulos",
@@ -12579,7 +12915,7 @@
   },
   {
    "path": "apps/shell/src/server/marcadores.spec.ts",
-   "hash": "62a622bff0a9c41c0814e3f57846e07ba6b8266cea17c336765ff5d933b80f7b",
+   "hash": "8fd8e89a1ca7eea4590f47ff988a0fde736cb247398a9a6aa60651e1d221d6ef",
    "imports": [
     "@app/access-control",
     "@app/module-model",
@@ -12605,7 +12941,7 @@
   },
   {
    "path": "apps/shell/src/server/editor.ts",
-   "hash": "6dffbd7e99774eac1938a0882757b19a13e2d0211c94dec14f89bdd9a6f4f499",
+   "hash": "ee54a4fe418b4a3991b774f425790380a2e41819275dfcbf00b8757a68450740",
    "imports": [
     "./contexto",
     "./datos",
@@ -12649,7 +12985,7 @@
   },
   {
    "path": "apps/shell/src/server/identidad.spec.ts",
-   "hash": "7e30a5fff34f8b14173ed2d78da9d30cdbf265f942fcce362dc81af23e92f6cc",
+   "hash": "8503e862d52fe49617fe1ce2d4af10c8dc3c62830bc38bd514e9e361bc53d68d",
    "imports": [
     "./identidad",
     "@app/auth",
@@ -12675,7 +13011,7 @@
   },
   {
    "path": "apps/shell/src/server/personalizacion.ts",
-   "hash": "d2240be0d79b38f280520b10d959a3d9c779b932aea24348553e4aa78202ccf9",
+   "hash": "b9c72a3b78678a06b2712377865cfd86be562e4cbfa1a0c1aaaddcc8923110bd",
    "imports": [
     "./almacenCompartido",
     "@app/module-model"
@@ -12722,7 +13058,7 @@
   },
   {
    "path": "apps/shell/src/server/tema.spec.ts",
-   "hash": "e70c28dba2a2b4ea21e1348781c85764a6108b39b26cc4a677fd1bb2c0f971a5",
+   "hash": "ad6aace969daf7ef760b1c99f0b0336dc9650eeb1183a1094fa72261790497c2",
    "imports": [
     "./tema",
     "@app/design-tokens",
@@ -12758,7 +13094,7 @@
   },
   {
    "path": "apps/shell/src/server/panel-de-formato.spec.ts",
-   "hash": "6f9c22ade266de957f722fb94668b00e00a1bcb04d157d47ff75d8e534b5a1a0",
+   "hash": "bffbc817b0228f2c3f14caac43c940da8ecf4623c15d6354820b744e57ebcc89",
    "imports": [
     "../components/editor/controles",
     "@app/ui-components",
@@ -12794,7 +13130,7 @@
   },
   {
    "path": "apps/shell/src/server/contexto.ts",
-   "hash": "8c66f16e9ed2ac7ec3c88e6c885af9f21e15ecd44308e3394f20d2e2929ff7e0",
+   "hash": "ed08dc86f5a6aed9635627af3c6cdd38ed9d6834a31b2752052e2054a3b37485",
    "imports": [
     "./almacenCompartido",
     "./gobierno",
@@ -12933,7 +13269,7 @@
   },
   {
    "path": "apps/shell/src/server/rejilla-css.spec.ts",
-   "hash": "baecfcbb5d09825f6920dd27c963e4b516d8042939d4c353e78a0a8c2350b6a0",
+   "hash": "e503a15954920791f368b9c7b6205cb731e4de82de140eeef261632b75a6ff50",
    "imports": [
     "@app/module-model",
     "node:fs",
@@ -12964,7 +13300,7 @@
   },
   {
    "path": "apps/shell/src/server/auditoria.ts",
-   "hash": "531164022ae03a26ace3676fe95d893fdd2f4ecfbdeaabe3fb32fb89b82279bf",
+   "hash": "05a1fd000aa74e1e37712de583d98892a2a970d9c9d6fbda84ff236c79beac8a",
    "imports": [
     "./almacenCompartido",
     "@app/access-control",
@@ -13022,7 +13358,7 @@
   },
   {
    "path": "apps/shell/src/server/modulos.ts",
-   "hash": "083b46afe2381775f7691d7f45399af738eedecd0416d1e959422e27f2c32a30",
+   "hash": "214cbc97216a9d600fafcd37893e9fb92b7e9134db001e92767dcc053151f371",
    "imports": [
     "./almacenModulos",
     "@app/module-model"
@@ -13063,7 +13399,7 @@
   },
   {
    "path": "apps/shell/src/server/sesion.ts",
-   "hash": "7e5c98c92f8f2c5d042eb86bbfea985308e8c4ef58a828958bc753a9141e6bcc",
+   "hash": "f3751099ac988e85b97ee8973be867762670260c154765738eb920b8de8404a4",
    "imports": [
     "./identidad",
     "next/headers",
@@ -13154,7 +13490,7 @@
   },
   {
    "path": "apps/shell/src/server/tema.ts",
-   "hash": "c31561c1890c4ff08c4cc199c6ad418f6640c4c73e0b93c3eeb7ff6c7eb22ab5",
+   "hash": "0e7eea66661c96c7351b58a490c0bed92d49430a8afe48e9508da2027d30da91",
    "imports": [
     "@app/design-tokens",
     "next/headers"
@@ -13201,7 +13537,7 @@
   },
   {
    "path": "apps/shell/src/server/identidad.ts",
-   "hash": "2d26e74efae98eb94b44f15273bebd26cb819c7356554e5fc0e11fa397ec2969",
+   "hash": "032c75fb5da61426287c6ed92bd26f2c322faf9d8ef4f9a789f8731b2e31bdc6",
    "imports": [
     "./almacenCompartido",
     "./credencialesDemo",
@@ -13341,7 +13677,7 @@
   },
   {
    "path": "apps/shell/src/server/marcadores.ts",
-   "hash": "90c1b41b70870eb380578cd74eee9ade446ef3253d496f424176c972adcb37cc",
+   "hash": "5123276ffc405511130b15dd15f51a9921cbdd6cdc8aaa93a87c3c4b22780f58",
    "imports": [
     "./almacenCompartido",
     "@app/module-model"
@@ -13382,7 +13718,7 @@
   },
   {
    "path": "apps/shell/src/server/filtros.ts",
-   "hash": "bee79db6928d597266e9735f9ac9ceaa3d3528f31ac8fe85231af1297773d907",
+   "hash": "d2b6fe8f778c0619e7f69c62712108f393100e43faed5041ae2399ffd4f06685",
    "imports": [],
    "defines": [
     {
@@ -13399,7 +13735,7 @@
   },
   {
    "path": "apps/shell/src/server/serializar.ts",
-   "hash": "4a36df85f67faab06c8184fd6c3263031c73b1edd2a2d80ed1102c625443fe0e",
+   "hash": "1899886df4ffcda4b62f3c270b0c75cbdc2089bd8b46ec6bee0d47f661829351",
    "imports": [
     "./contexto",
     "./datos",
@@ -13443,7 +13779,7 @@
   },
   {
    "path": "apps/shell/src/server/almacenCompartido.ts",
-   "hash": "a08df0035155284fd397aca793dce72dafd4787b9386068e74aa6e5905c52067",
+   "hash": "ce3066139d023db9674338167f2077bd7eb31fa612fe5fafb8d841eaafc30a90",
    "imports": [
     "@app/caching",
     "node:path"
@@ -13526,7 +13862,7 @@
   },
   {
    "path": "apps/shell/src/server/consulta.ts",
-   "hash": "bbd2d392cb0b9090aed8b68be639b319caa32fd3b3d202b7f447e388048bfa35",
+   "hash": "0720bbb2051a763f6deff7f075d937282a76165be291ddcbe334b7c0134c075e",
    "imports": [
     "./cicloDeVida",
     "./datos",
@@ -13571,7 +13907,7 @@
   },
   {
    "path": "apps/shell/src/server/credencialesDemo.ts",
-   "hash": "c2094717d448774ec7049a0e3b45ac8e8f93ea736eca7db56fcf2ad22cac2ecd",
+   "hash": "99ee645bf6a6df3ab9ca9bc011c5ab6dc015d84ddbd52ff1abf32073c3da437a",
    "imports": [
     "otpauth"
    ],
@@ -13619,7 +13955,7 @@
   },
   {
    "path": "apps/shell/src/server/cicloDeVida.spec.ts",
-   "hash": "beb28d6b462e28ce903ae47c266ef43d2d64e73cd558cddfb7176dd87cbe9feb",
+   "hash": "69bd57596ff8f67e298b712f0f70f1a0eefae81f0fb13c861500d608b76f1f78",
    "imports": [
     "./almacenCompartido",
     "./almacenModulos",
@@ -13665,7 +14001,7 @@
   },
   {
    "path": "apps/shell/src/server/personalizacion.spec.ts",
-   "hash": "caae21414dd6a08593bbc43ddadb52cc62779ae95830d6a0ef0b2d87b2f27a97",
+   "hash": "44c8a4662fc34452aecaea5806c7b768b546a2ac723164c3ace6da3093358213",
    "imports": [
     "./personalizacion",
     "@app/module-model",
@@ -13691,7 +14027,7 @@
   },
   {
    "path": "apps/shell/src/server/datos.ts",
-   "hash": "fd3ebe1bafe7cb46267d2acb3b3f737119b8a92085bce26ee4ad9987830bdcaa",
+   "hash": "6d08058117f78b18976cf0983ed6aff2ed780ec2ffcbed5cc06798d7f958bc31",
    "imports": [
     "./contexto",
     "@app/access-control",
@@ -13770,7 +14106,7 @@
   },
   {
    "path": "apps/shell/src/server/gobierno.ts",
-   "hash": "e304fb434e547b844e3a1efd982b24ed6e8297b53da24487535bef2882f2082e",
+   "hash": "6bb411a5133db5ba41afa1f09e65aaeb328ecb80be663edef4c34b83d8833908",
    "imports": [
     "./almacenCompartido",
     "@app/access-control",
@@ -13816,7 +14152,7 @@
   },
   {
    "path": "apps/shell/src/server/configuracion.ts",
-   "hash": "2c55d97268586b30174ee0f9d21f1cc69f917bb754de1125d58f8fbae97286fb",
+   "hash": "7d063f580d126d70aeb4d4bc19b608d4dcd6c4e412118d8f316308fc9373632e",
    "imports": [
     "./almacenCompartido",
     "@app/config",
@@ -13868,7 +14204,7 @@
   },
   {
    "path": "apps/shell/src/server/exportaciones.ts",
-   "hash": "0ab0ef1de546912605627a98f595741aac310af1a7f828adbc4966ed4aa581fd",
+   "hash": "2065f55f27038cf6a18d62b80be13025c8be34b13d0c0ab1adb3e406f527f3cf",
    "imports": [
     "./cicloDeVida",
     "./contexto",
@@ -13939,7 +14275,7 @@
   },
   {
    "path": "apps/shell/src/server/trabajador.ts",
-   "hash": "62d039ad425f12df38a863f2429878f9c032c5c51fae09ad4414e9e3569badd7",
+   "hash": "7bccaa89653177da859ee7173a559ff37120594bdb7d8a447feed6f806e213a7",
    "imports": [
     "./alertas",
     "./exportaciones",
@@ -13972,8 +14308,49 @@
    ]
   },
   {
+   "path": "apps/shell/src/server/idioma.ts",
+   "hash": "3339dceec326ae8c7be148585b7d65cf1fe44537d20c57ff8471be68349d3354",
+   "imports": [
+    "@app/i18n",
+    "next/headers"
+   ],
+   "defines": [
+    {
+     "name": "COOKIE_DE_IDIOMA",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "idioma",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "traductor",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "COOKIE_DE_IDIOMA",
+    "idioma",
+    "traductor"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "@app/i18n",
+     "resolved": null
+    },
+    {
+     "module": "next/headers",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/src/server/alertas.spec.ts",
-   "hash": "fb184aa7c10cb82f25e3a22a2ad42b53cd46bf7ba6e975e93f30fbd456ea58be",
+   "hash": "65750650eace80d872b7e2d1d48cc63125f2fe6e4b0f608a1ed90a25915cfd9d",
    "imports": [
     "./alertas",
     "@app/alerts",
@@ -13999,7 +14376,7 @@
   },
   {
    "path": "apps/shell/src/server/respuestas.ts",
-   "hash": "642cb7f293f81c672910bf90b18f3a2bab34bbfae9d04f04c5a8154d0c988e34",
+   "hash": "88729f498a894b62a91a2eeb0dbb267d0413c0727d574ffef6c9cd79a6590254",
    "imports": [
     "./cicloDeVida",
     "next/server"
@@ -14075,7 +14452,7 @@
   },
   {
    "path": "apps/shell/src/server/alertas.ts",
-   "hash": "5607aa553baf9ddbfb44502890b32b584a2ac3ad857ab198f3ad170bfd635e57",
+   "hash": "f3d89b6bc42c4e3849b91088d23253baab26c0d14278e68852ae39758354469b",
    "imports": [
     "./cicloDeVida",
     "./contexto",
@@ -14159,7 +14536,7 @@
   },
   {
    "path": "apps/shell/src/hooks/useFiltrosDeUrl.ts",
-   "hash": "838082885b08c6874fdbb78062f4ff5b3767e225ac83dc927b40f3f7b226bab3",
+   "hash": "fe1d3ac1fcf270b4439c0a424dd46dad2709941720a38a40f1840a5e76982279",
    "imports": [
     "next/navigation",
     "react"
@@ -14188,7 +14565,7 @@
   },
   {
    "path": "apps/shell/src/hooks/useDesborda.ts",
-   "hash": "77ed3f588bb69af3cbb9069fd88d65355199b1ea9b54f826bfc711740409e8dd",
+   "hash": "ce21c97e02df663cdd0be996bb2f3352c7adee9ae897ce509dc4b45829bd9ea7",
    "imports": [
     "react"
    ],
@@ -14229,9 +14606,11 @@
   },
   {
    "path": "apps/shell/app/layout.tsx",
-   "hash": "acadd30fc835bbc74f376c8292f85dd7a60262475597ff771861a45500431349",
+   "hash": "526c266f76470e79e3282cf8c276800c476a4a586bf68ecf65422bbee6abcaac",
    "imports": [
     "../src/components/Cabecera",
+    "../src/components/Idioma",
+    "../src/server/idioma",
     "../src/server/sesion",
     "../src/server/tema",
     "./globals.css",
@@ -14262,6 +14641,14 @@
      "resolved": null
     },
     {
+     "module": "../src/components/Idioma",
+     "resolved": null
+    },
+    {
+     "module": "../src/server/idioma",
+     "resolved": null
+    },
+    {
      "module": "../src/server/sesion",
      "resolved": null
     },
@@ -14289,7 +14676,7 @@
   },
   {
    "path": "apps/shell/app/restablecer/page.tsx",
-   "hash": "94ba0fd4546070ad001eaab53d77e2531d6ababca5fce580e0dd68215d4dbc53",
+   "hash": "49a73a3efb28998fb19fa5cf9549896511cb360e4b9af7017ea46f6e850094e5",
    "imports": [
     "../../src/components/Restablecer"
    ],
@@ -14319,7 +14706,7 @@
   },
   {
    "path": "apps/shell/app/avisos/page.tsx",
-   "hash": "2b5d4d7cd21c2786911d1c82fafea9a707913930765ed20fafa43d0fe7eb1690",
+   "hash": "fb2d49ffddbade93eb50270ca888fa97bc1f3dde886a6c0758ed4ed9c47c0277",
    "imports": [
     "../../src/components/Avisos",
     "../../src/server/sesion"
@@ -14354,7 +14741,7 @@
   },
   {
    "path": "apps/shell/app/editor/page.tsx",
-   "hash": "1939a73cfd778ec6a4f069e790d645b4d7caa89b284f6fb7bb81cb6e192c41ae",
+   "hash": "93322f3c73c99c19c07136f24094878f86fa72b67b5aa3f43af2804fe764f92b",
    "imports": [
     "../../src/components/editor/CabeceraDeEditor",
     "../../src/components/editor/ListaDeModulos",
@@ -14405,7 +14792,7 @@
   },
   {
    "path": "apps/shell/app/editor/layout.tsx",
-   "hash": "430d8524ecfecf48ce999ac87855dc192f85f25ffe5232e45381ad65d80dc7d0",
+   "hash": "f6af7de7d0d05c90aefe9455fb7af93584c44a6e971bfa0ec524c999bd89bab3",
    "imports": [
     "../../src/server/cicloDeVida",
     "../../src/server/sesion",
@@ -14444,7 +14831,7 @@
   },
   {
    "path": "apps/shell/app/editor/[slug]/page.tsx",
-   "hash": "9b3febd99091b10328576dc36af7b08d0064f452921f28cf9cf04c50807f6c7f",
+   "hash": "664f957a5a42f6dbeb391479538f82429f1e9a2f89da1a5309a8b36707a01430",
    "imports": [
     "../../../src/components/editor/EditorDeModulo",
     "../../../src/server/cicloDeVida",
@@ -14504,7 +14891,7 @@
   },
   {
    "path": "apps/shell/app/admin/page.tsx",
-   "hash": "40757e5688cd115e951ea28c4f3d0073dc6b1d06bef2fb65f58c259d0245945d",
+   "hash": "6eb89f4d92569ee13d80cfdb4eb080f300a80b1ea3b6f88cfc28e980b5a793aa",
    "imports": [
     "../../src/components/admin/EventoDeAuditoria",
     "../../src/components/iconos/Icono",
@@ -14554,7 +14941,7 @@
   },
   {
    "path": "apps/shell/app/admin/layout.tsx",
-   "hash": "ac317c4a060bca4a16f203d07d9a202e78639beae9edd41ec31ec5a27ddfc9fa",
+   "hash": "22405a648187ff6cb5300090ac658b983b9e2055ebff4463e6c940bb5781f577",
    "imports": [
     "../../src/components/NavegacionPlegable",
     "../../src/components/admin/CarrilDeAdmin",
@@ -14653,7 +15040,7 @@
   },
   {
    "path": "apps/shell/app/admin/auditoria/page.tsx",
-   "hash": "678acadb083f1b85e7ff6ad898e08eb62e6e12d848335326aedc820ad49280a3",
+   "hash": "42fe578d9b69050b5a616250c9222e02e0cfbac081988511a6403ece54087fd2",
    "imports": [
     "../../../src/server/auditoria"
    ],
@@ -14758,7 +15145,7 @@
   },
   {
    "path": "apps/shell/app/admin/paquetes/page.tsx",
-   "hash": "b98e792afbb694a820988adef548bc5683013a415f4b969b89b0f33f8b0da874",
+   "hash": "be99c3318eb77b021c6ee2483c51c3af6f51b755362f7b44dcc93fdb7f2d5858",
    "imports": [
     "../../../src/server/contexto",
     "../../../src/server/gobierno",
@@ -14798,7 +15185,7 @@
   },
   {
    "path": "apps/shell/app/admin/cuentas/page.tsx",
-   "hash": "9a5842fdb5e0148cd6a01eb5ebd23ade7b14fc580a044182e0647ad1ee09772d",
+   "hash": "a1b2bdf16c713ddca72bcb50526abb79aae0b22f6bced9bbff1a588371a5bcbd",
    "imports": [
     "../../../src/components/admin/CuentasLocales",
     "../../../src/server/identidad"
@@ -14903,7 +15290,7 @@
   },
   {
    "path": "apps/shell/app/api/restablecer/route.ts",
-   "hash": "153e9bf4d8f4c83044106253a13bb44c11d64a21061f4a88a5405bc2e59475a3",
+   "hash": "dbce8412d29f0dacfc7835429c162748af2ed35bca8cf9f283e74280c148c4fb",
    "imports": [
     "../../../src/server/identidad",
     "@app/auth",
@@ -14943,7 +15330,7 @@
   },
   {
    "path": "apps/shell/app/api/notificaciones/route.ts",
-   "hash": "25670c68564eeacf875e6a2088cd22aa2aba0411a0b4c939d294720083e93d9f",
+   "hash": "e46624422c5c36898780190d199eb1e84ce72c5c88c6a38205124d48547ecd3c",
    "imports": [
     "../../../src/server/alertas",
     "../../../src/server/respuestas",
@@ -14999,7 +15386,7 @@
   },
   {
    "path": "apps/shell/app/api/admin/guardia.ts",
-   "hash": "7b2bc0863cc5c034e211020ae46a2dfab351094a3c3068c1fd7157d666e760ff",
+   "hash": "fd78349c64549c2a568eb0e31aa0d05d665fc7d79b09cb8e4384b064f3aa24e7",
    "imports": [
     "../../../src/server/admin",
     "../../../src/server/sesion",
@@ -15100,7 +15487,7 @@
   },
   {
    "path": "apps/shell/app/api/admin/auditoria/route.ts",
-   "hash": "10fba14d51c22c88ebd1bbb2bd1b4a77028ba601db3c9826342fc3692e71d3f0",
+   "hash": "eb2caf7e0256f1fbff0bc3f780f811f45bbb3afb118bcfaacebe64ec5c8ce9d4",
    "imports": [
     "../../../../src/server/auditoria",
     "../guardia",
@@ -15146,7 +15533,7 @@
   },
   {
    "path": "apps/shell/app/api/admin/arbol/route.ts",
-   "hash": "b27ed0f73720cbb282b71b438829d38e62898ecc13b0cb5f61a78e0e0df7e8e9",
+   "hash": "289115fc672dd233f654290dc8c3724c04b3fdd270fa13abecf4d480c2ed3d66",
    "imports": [
     "../../../../src/server/admin",
     "../../../../src/server/contexto",
@@ -15203,7 +15590,7 @@
   },
   {
    "path": "apps/shell/app/api/admin/quien-ve-que/route.ts",
-   "hash": "167bbb43b82899c50dba538528291c6f0dbd03682400936b7f4500e22048e6c5",
+   "hash": "b48b70be78222196ccafd9f3a34f4946acbab6c2261e33078183e726cef87339",
    "imports": [
     "../../../../src/server/admin",
     "../guardia"
@@ -15244,7 +15631,7 @@
   },
   {
    "path": "apps/shell/app/api/admin/paquetes/route.ts",
-   "hash": "8dba9b2e5455b4e6ea5df68a47e2a864199bae35e342b5c63f294803c11af75a",
+   "hash": "24eccb0cbdb06974750401bd1d93e13d65b0ca299f9ee88011acc29480027afb",
    "imports": [
     "../../../../src/server/admin",
     "../../../../src/server/gobierno",
@@ -15301,7 +15688,7 @@
   },
   {
    "path": "apps/shell/app/api/admin/cuentas/route.ts",
-   "hash": "63ad71a46c5ec73c68b79e88cd1fffa1061fe1b3432234d655d890f3f8f41c2d",
+   "hash": "1cf2ebbbb6e0ee4ff2f2aa6fc33dcee4309472174ee73507771063ca9a20ef2a",
    "imports": [
     "../../../../src/server/admin",
     "../../../../src/server/auditoria",
@@ -15358,7 +15745,7 @@
   },
   {
    "path": "apps/shell/app/api/admin/esquema/route.ts",
-   "hash": "f6a0b15ac328bc447b1661ec96cdad971930379b8e5cc1ec48f68e0be2da505a",
+   "hash": "26eeb675fa306c2d11e8b30e0c5bfcdb28064d29b62d811706675081895bac0b",
    "imports": [
     "../../../../src/server/admin",
     "../guardia"
@@ -15399,7 +15786,7 @@
   },
   {
    "path": "apps/shell/app/api/admin/ambitos/route.ts",
-   "hash": "33a41ec36e1bed94e4c0ed98575f77c58fe8da0d3dcc9a3d2f2a1306fa7cd35b",
+   "hash": "9a228ec94ea1dd8259bc136ea0aa6303f68ca81bde0245fa68a254783f3a16c2",
    "imports": [
     "../../../../src/server/admin",
     "../guardia",
@@ -15445,7 +15832,7 @@
   },
   {
    "path": "apps/shell/app/api/marcadores/route.ts",
-   "hash": "392fa8187114960ac04f7617cfd268f73ffe15ae918d1ee0b363c2e8bb867efa",
+   "hash": "dbca6fa0c23176005f5c2f6d6299cd705bc66407f20a2f88eccf363dd8ee7f25",
    "imports": [
     "../../../src/server/marcadores",
     "../../../src/server/respuestas",
@@ -15513,7 +15900,7 @@
   },
   {
    "path": "apps/shell/app/api/hooks/dataset-refresh/route.ts",
-   "hash": "d19cd0930f645f675f75276a1efb52ed896773a5f8adc95641a13b9588167795",
+   "hash": "b5ec97c6a34703e184799404348afbcb8100057a5535cea6d467143626fdf4e2",
    "imports": [
     "../../../../src/server/contexto",
     "@app/caching",
@@ -15598,7 +15985,7 @@
   },
   {
    "path": "apps/shell/app/api/modulos/route.ts",
-   "hash": "13e7a5d96205bf4309861427fd4228528acb3c6ff773a0d856f207dc60ece870",
+   "hash": "3ad229ad523b45ae0de510f27d97d31851e5bf146ac1738022ef89fb8137773a",
    "imports": [
     "../../../src/server/cicloDeVida",
     "../../../src/server/respuestas",
@@ -15655,7 +16042,7 @@
   },
   {
    "path": "apps/shell/app/api/modulos/[slug]/route.ts",
-   "hash": "bc1f40c0adede89a3e5fc1d68c52b71fafc57f91a0df6066f56154540473cf0e",
+   "hash": "125fbdaf2253aace26ba5be2af0eb0fede29b4599afad244fbfaca9d8ce1d353",
    "imports": [
     "../../../../src/server/cicloDeVida",
     "../../../../src/server/datos",
@@ -15715,7 +16102,7 @@
   },
   {
    "path": "apps/shell/app/api/modulos/[slug]/edicion/route.ts",
-   "hash": "cb827fac84d74ae630f51255c209168a3359d2e9e870e12609abf2608f1bd2b3",
+   "hash": "c7f924dd17d73c2b9c8d0dec1f67f5747683a29a854938c7da3c05e4c56b7b73",
    "imports": [
     "../../../../../src/server/cicloDeVida",
     "../../../../../src/server/datos",
@@ -15793,7 +16180,7 @@
   },
   {
    "path": "apps/shell/app/api/modulos/[slug]/vista/route.ts",
-   "hash": "7ed1871214a12adf4da875de7f0ba0e976724d738679322302bcfefa23c15915",
+   "hash": "885865d1c22388fb0e506d68f126724d29ecaac7bebfc88ac4277cc64af24dea",
    "imports": [
     "../../../../../src/server/cicloDeVida",
     "../../../../../src/server/personalizacion",
@@ -15861,7 +16248,7 @@
   },
   {
    "path": "apps/shell/app/api/modulos/[slug]/estado/route.ts",
-   "hash": "c35420f6e61915244aa6e95a1238b725b781d176ad3fb0b1385eb9f9c2e65f7f",
+   "hash": "ccc324d450014b3f1e27d798ab61556a76c2394b1de5e20263800bba28919f34",
    "imports": [
     "../../../../../src/server/cicloDeVida",
     "../../../../../src/server/respuestas",
@@ -15906,7 +16293,7 @@
   },
   {
    "path": "apps/shell/app/api/consulta/route.ts",
-   "hash": "53a6b68d422a613bbba7f3d79a1d7181d5ca868856667eee0a13392378f9e99d",
+   "hash": "247410668ddf6793069cab3cf670e811095e8ed81cdaade643405443ad225122",
    "imports": [
     "../../../src/server/consulta",
     "../../../src/server/respuestas",
@@ -15956,7 +16343,7 @@
   },
   {
    "path": "apps/shell/app/api/alertas/route.ts",
-   "hash": "53b7af6f3408fe96dc0acc31852d9dde97b3af9331e4e1109bed10d89f55438b",
+   "hash": "f99bacb76fd81d4fc45a59ef8ee448606f868a870c39cf557485956f94a2401a",
    "imports": [
     "../../../src/server/alertas",
     "../../../src/server/cicloDeVida",
@@ -16028,7 +16415,7 @@
   },
   {
    "path": "apps/shell/app/api/acceso/route.ts",
-   "hash": "c1952343cd7ed813b3bac97d615af820a6ceb91bb7a7ce0bc0cb213d6ce56188",
+   "hash": "0182724e7f778a97d4ac4f569ce7c633befd228d798b8c6eca5f401bb8c0cc2f",
    "imports": [
     "../../../src/server/contexto",
     "../../../src/server/identidad",
@@ -16084,7 +16471,7 @@
   },
   {
    "path": "apps/shell/app/api/suscripciones/route.ts",
-   "hash": "74c55622b691dd59c9a49bda07988c91f77bcd9f51a7f17ff0242a0eb134b0a4",
+   "hash": "d5df9b68a13d0c6778b17f1fea9195234315a69ae7f36c0083e842ed3624ccfa",
    "imports": [
     "../../../src/server/alertas",
     "../../../src/server/cicloDeVida",
@@ -16161,7 +16548,7 @@
   },
   {
    "path": "apps/shell/app/api/exportaciones/route.ts",
-   "hash": "8617d518f566822449f36181d5613ce01a838fcaf50b7ca43ba39a628b6a9707",
+   "hash": "1b47e3251a065ea7f5737dcb2f373492989cd5236d1640660b1829bc992b016d",
    "imports": [
     "../../../src/server/exportaciones",
     "../../../src/server/filtros",
@@ -16216,7 +16603,7 @@
   },
   {
    "path": "apps/shell/app/api/exportaciones/[id]/route.ts",
-   "hash": "6e93472dc961a963d85daf9fc8d019ee5576a5e9902db1f1d77404d2655cb445",
+   "hash": "9d817a4fe0d4e4153eacebb1550f92f864c8634d07fc0f005211ba5cde1271d5",
    "imports": [
     "../../../../src/server/exportaciones",
     "../../../../src/server/respuestas",
@@ -16261,7 +16648,7 @@
   },
   {
    "path": "apps/shell/app/api/exportaciones/[id]/descarga/route.ts",
-   "hash": "8b43e497ffcab83cea3a7bb0b4a364192307874d8279a00e85d0cf84f22c4878",
+   "hash": "64f50e35e960f9a0c0fafc7a0c8ae3561b9499c0dea182bc12875e91d402804f",
    "imports": [
     "../../../../../src/server/exportaciones",
     "../../../../../src/server/respuestas",
@@ -16301,7 +16688,7 @@
   },
   {
    "path": "apps/shell/app/api/sesion/equipo-activo/route.ts",
-   "hash": "1009e3e1500e375f1cc99278793a987a07d68da419f7d41ea3e169a90f1d6712",
+   "hash": "dba8810dad99411a5c18fbe0b7cc82df4fb47e0e1b69ec214102165724724ba9",
    "imports": [
     "../../../../src/server/contexto",
     "../../../../src/server/respuestas",
@@ -16346,7 +16733,7 @@
   },
   {
    "path": "apps/shell/app/acceso/page.tsx",
-   "hash": "fc4e2c10109733b4665bc639e79173ead5f111f5c94927a6a7d67d0fea5bc61c",
+   "hash": "5c02909044d88fe1115478a32719d191e33487487b36c1fe0692fabdc9352f3e",
    "imports": [
     "../../src/components/Acceso",
     "../../src/server/identidad",
@@ -16396,7 +16783,7 @@
   },
   {
    "path": "apps/shell/app/(incrustado)/layout.tsx",
-   "hash": "d20152fba7a9d6dc38ae8d7e0b28d6ca8928208afd135bf7e40b4352be43ae64",
+   "hash": "26325d2fb31392902332c5f18fa81693e02eb4d58ce5e7ba77c1a44398819270",
    "imports": [
     "@app/design-tokens"
    ],
@@ -16420,7 +16807,7 @@
   },
   {
    "path": "apps/shell/app/(incrustado)/incrustar/m/[slug]/page.tsx",
-   "hash": "cd06a64d143f0e5bbcfac006d38953ac74bea784a934d2d1a7c265b18e05f503",
+   "hash": "1a18fb3db8b706bb616bd085c09fe0e46f4924db3700fc6f6efbbf88bcd01eda",
    "imports": [
     "../../../../../src/components/VistaModulo",
     "../../../../../src/server/cicloDeVida",
@@ -16518,7 +16905,7 @@
   },
   {
    "path": "apps/shell/app/(modulos)/layout.tsx",
-   "hash": "8570d8e04dccd942250587fc3f90ac7bfd12ebe54787156b79f0c28ed65c5481",
+   "hash": "230fb4fc656483c71c5ffb4363db63534e0a0f481423560fde015291724c28cb",
    "imports": [
     "../../src/components/ArbolNavegacion",
     "../../src/components/NavegacionPlegable",
@@ -16562,7 +16949,7 @@
   },
   {
    "path": "apps/shell/app/(modulos)/m/[slug]/page.tsx",
-   "hash": "63a6b4cebf788bf58490f2031beee71ce7882275e1a9840a971e35cf3f619387",
+   "hash": "1682c022ed0ce05bf69ecd6224b422b755cc2184879aa704b614b08b1773ab9d",
    "imports": [
     "../../../../src/components/InsigniaDeAmbito",
     "../../../../src/components/InsigniaDeProcedencia",
@@ -16648,7 +17035,7 @@
   },
   {
    "path": "apps/shell/app/health/route.ts",
-   "hash": "4ef3f3073f49d402cefbdf1297ac6f868e26b2c3bd1cc2cff2ab1b4255b1ca87",
+   "hash": "be6c78eeb44ebbb07591783cd38c076578e44a8018f652c1c53ea5f4cdae3542",
    "imports": [
     "../../src/server/contexto",
     "@app/observability",
@@ -16694,7 +17081,7 @@
   },
   {
    "path": "apps/shell/app/admin-sin-permiso/page.tsx",
-   "hash": "6cd7f18a0e99dbeeba1693f4a6bd96da271a611588892dcf7c3c007921c8cc08",
+   "hash": "90444e51c1b007b197992efd16ad71e00853d9edabcdba07dedeb9746b5d8a35",
    "imports": [],
    "defines": [
     {
@@ -16711,7 +17098,7 @@
   },
   {
    "path": "apps/shell/e2e/contrato-de-objetos.spec.ts",
-   "hash": "d26a34aeee6818b534e3b39d58a8e8227a48400ede3b963911651ddffd392e77",
+   "hash": "c234a89915aad83cbae070c64bb8f3cc8fb4c5d80f667835f06d367c61b52393",
    "imports": [
     "./sesion",
     "@playwright/test"
@@ -16732,7 +17119,28 @@
   },
   {
    "path": "apps/shell/e2e/objetos.spec.ts",
-   "hash": "2070894b942aaa9c705967f65a4ce5e9aad3434ecc30214264d289c384c8c35c",
+   "hash": "1cd0be12e077cea81583edf70fa1218e3c07374cc1798d52c939e7e714c0a0e9",
+   "imports": [
+    "./sesion",
+    "@playwright/test"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./sesion",
+     "resolved": null
+    },
+    {
+     "module": "@playwright/test",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/e2e/idioma.spec.ts",
+   "hash": "38cdf7dc459a842d5884c8581aeeebff54a3d1784ed632352b4faec607169d4e",
    "imports": [
     "./sesion",
     "@playwright/test"
@@ -16753,7 +17161,7 @@
   },
   {
    "path": "apps/shell/e2e/exportacion.spec.ts",
-   "hash": "a70c19753d2cb84b3c0f5397921e6177efa97a8048b1c0017c6598a3bffae324",
+   "hash": "e7190c8a02bf509226e75109c4f6b8405a1b1eeb220486077088eaf41edc4e55",
    "imports": [
     "./sesion",
     "@playwright/test"
@@ -16774,7 +17182,7 @@
   },
   {
    "path": "apps/shell/e2e/graficos.spec.ts",
-   "hash": "a61bbf00ae67aa2681d46a8756a7cf9953a416e3e8eeb34c3e8b44424d7eed40",
+   "hash": "ae968edb21f94486648e5cf9419734c8799ed12e172ec131a92ce02cbe6fa05a",
    "imports": [
     "./sesion",
     "@axe-core/playwright",
@@ -16800,7 +17208,7 @@
   },
   {
    "path": "apps/shell/e2e/consulta.spec.ts",
-   "hash": "6d9987e53ee9f6090f1121c81f9be2526c6de6a4fdf339f003551123cb06223c",
+   "hash": "7cc56f023589577e85401945a3bb4bd392b78ab8a167ae491fdbd195af5fc57e",
    "imports": [
     "./sesion",
     "@axe-core/playwright",
@@ -16826,7 +17234,7 @@
   },
   {
    "path": "apps/shell/e2e/multiinstancia.spec.ts",
-   "hash": "48bf89ae77ce982a0e8756ecc267a46bdd1a3cb988ac2ec2da473df0ce0d7a28",
+   "hash": "bbab6956ded7719ca0c316d2a5d2ac970600bd5eab9cab92b78fe6a052f83a6e",
    "imports": [
     "./sesion",
     "@playwright/test"
@@ -16847,7 +17255,7 @@
   },
   {
    "path": "apps/shell/e2e/responsivo.spec.ts",
-   "hash": "79f2ae1190a2997c6de27f5b1b542ba0ae98b74cf9c671381a9df95db46e07c2",
+   "hash": "3a8dbf0a161cd21c313c57b89df6f68d370ad26f21fdcb84a2bdc4703416ce58",
    "imports": [
     "./sesion",
     "@axe-core/playwright",
@@ -16873,7 +17281,7 @@
   },
   {
    "path": "apps/shell/e2e/lienzo.spec.ts",
-   "hash": "070e394656df369029cf0d9c7054ae7efe4288b1272562fd1a15783459bc8b53",
+   "hash": "78a85ccbfd60e340fadebcefe4c139eef6e3cf2ec75ae7c33b12b2782752ca93",
    "imports": [
     "./sesion",
     "@axe-core/playwright",
@@ -16899,7 +17307,7 @@
   },
   {
    "path": "apps/shell/e2e/shell.spec.ts",
-   "hash": "a3f969da2e18820e1a035d4737eacbf86e657955871a915315e4e6d4de7174b3",
+   "hash": "d48eae8e4087a55dfc6460879f8cf82ece053105f57f9de1b352af400b0dd76e",
    "imports": [
     "./sesion",
     "@playwright/test"
@@ -16920,7 +17328,7 @@
   },
   {
    "path": "apps/shell/e2e/avisos.spec.ts",
-   "hash": "687d843e70a8510bd9fd81642dad545b82d42f3920df1c4ab1d4d43ab28c18d5",
+   "hash": "78e4d15f3fe018c92f8b565577425bf81d703cfbef84347be0c7deb9add42c1b",
    "imports": [
     "./sesion",
     "@playwright/test"
@@ -16941,7 +17349,7 @@
   },
   {
    "path": "apps/shell/e2e/filtros.spec.ts",
-   "hash": "aa073e36e39c21bbb917345e92fb5a39d74e442615ffe8ed62894ed6ba333446",
+   "hash": "3fa9a3345f18f701ce3b37f2e251d7f59393a3a1a49d314f3fc682696824ed23",
    "imports": [
     "./sesion",
     "@axe-core/playwright",
@@ -16967,7 +17375,7 @@
   },
   {
    "path": "apps/shell/e2e/sesion.ts",
-   "hash": "86a94e76c97be0f553b2d879a5641d0aec9f981a89235cf7db2dd272c1229553",
+   "hash": "ed873b0a07f2cf7df97a8bdde8cc115b2557bbabe9b7a5722bb36e868a15a0d8",
    "imports": [
     "../src/server/credencialesDemo",
     "@playwright/test"
@@ -17002,7 +17410,7 @@
   },
   {
    "path": "apps/shell/e2e/complementos.spec.ts",
-   "hash": "f6d0d492e249acc72e6938ef3aca6f0df06b900f8e1ca2a5d00afc6aae973ca4",
+   "hash": "7b5c03617a3901230c0d218b16cd6e8e63d211cf20a24b096f4872b93bb39b84",
    "imports": [
     "./sesion",
     "@playwright/test"
@@ -17023,7 +17431,7 @@
   },
   {
    "path": "apps/shell/e2e/incrustacion.spec.ts",
-   "hash": "b3787385c159afb733bdbc0089527ffc18235bb3ce57882ba8484d8e15292fc5",
+   "hash": "6f8926cc5e14a19202e9dc80a3fd41ebfda6f865c07572de997bfb95a590c0eb",
    "imports": [
     "./sesion",
     "@axe-core/playwright",
@@ -17049,7 +17457,7 @@
   },
   {
    "path": "apps/shell/e2e/acceso.spec.ts",
-   "hash": "548546e93d488799f094f4179c52c5b7a7d49f707891cc8323f6f730acae3886",
+   "hash": "329278e95a06cc78010b1e20ba33a6e85474654863f8e2b7fa401f0e75604e66",
    "imports": [
     "../src/server/credencialesDemo",
     "./sesion",
@@ -17075,7 +17483,7 @@
   },
   {
    "path": "apps/shell/e2e/accesibilidad.spec.ts",
-   "hash": "ee96b21410e5e4014be946e9a44afa095e0e50d2c6cdc88e56b7e313f5df47d2",
+   "hash": "6f36cae4c40396de1cc6f680fed6ce550e01563909428f1524477e18dda4c281",
    "imports": [
     "./sesion",
     "@axe-core/playwright",
@@ -17101,7 +17509,7 @@
   },
   {
    "path": "apps/shell/e2e/editor-completo.spec.ts",
-   "hash": "e86ff91304c93334da0ba0035657257bf0b1253489251f510248761537bbcf78",
+   "hash": "654b3630d01c61ca1f015e24a95e2339cbf0b8039b138be41376dbd158583691",
    "imports": [
     "../src/components/editor/controles",
     "./sesion",
@@ -17132,7 +17540,7 @@
   },
   {
    "path": "apps/shell/e2e/personalizacion-de-objetos.spec.ts",
-   "hash": "4928ebe21ac1b3f037e4fe2266b8f42addd31e8daf48233aedbe3a48714bd76e",
+   "hash": "f4c3e4cfd92241ef23c06202416477286e9f4cfa4898284431b19fc8ad6b77a8",
    "imports": [
     "./sesion",
     "@playwright/test"
@@ -17153,7 +17561,7 @@
   },
   {
    "path": "apps/shell/e2e/contraste-oscuro.spec.ts",
-   "hash": "6e93a9a738898da4beab0d23f3caea59cff9cdda984c782269a081d1d6e8ee6b",
+   "hash": "69e4db66db7fd7d1f6013e327c6b0ce2ff5fc1825175826f9f7be370429d5b92",
    "imports": [
     "./sesion",
     "@axe-core/playwright",
@@ -17179,7 +17587,7 @@
   },
   {
    "path": "apps/shell/e2e/personalizacion.spec.ts",
-   "hash": "f095c04faabe64a9d7f2a6b1de344cd0171c722bfc6007b690d9f2ece616e1cc",
+   "hash": "a65d01e9b0bcb19266938bc14c3714097386b277864eeb8a7c75aefce06f35eb",
    "imports": [
     "./sesion",
     "@playwright/test"
@@ -17200,7 +17608,7 @@
   },
   {
    "path": "apps/shell/e2e/cuentas.spec.ts",
-   "hash": "494c83ea438e42b120de6278db96abf59d74c69a8e6c994545b99f2abde293d3",
+   "hash": "9e0894d7e718f2e5a1ea69117d948c5f4dda65c22c2c910a2d876c245598e689",
    "imports": [
     "../src/server/credencialesDemo",
     "./sesion",
@@ -17226,7 +17634,7 @@
   },
   {
    "path": "apps/shell/e2e/admin.spec.ts",
-   "hash": "276a5a67a560c40294b2bcc37bd60153ab99f3d7d98be96673ec080c98dbdb96",
+   "hash": "fd633451695a96544cda8ab7b263ace0bec5ff01ea708a14f6b3956d0cd7ce3e",
    "imports": [
     "./sesion",
     "@playwright/test"
@@ -17247,7 +17655,7 @@
   },
   {
    "path": "apps/shell/e2e/editor.spec.ts",
-   "hash": "76bc6d7b9061c8d3d6d84fd3262ac6307aadcba84127343ebc2ac6535abe8714",
+   "hash": "8eae51123542bbb8d4a80a8d881a419e5bbbcca9bcf6ed73ae59d21240bf48fd",
    "imports": [
     "./sesion",
     "@playwright/test"
@@ -17267,5 +17675,5 @@
    ]
   }
  ],
- "file_count": 340
+ "file_count": 351
 }

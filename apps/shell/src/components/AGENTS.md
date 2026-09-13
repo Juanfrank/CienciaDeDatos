@@ -25,8 +25,19 @@ envuelve a todos con la cabecera, el icono, el subtitulo y los complementos.
    de la tarjeta.
 5. **Lo que se corta se cuenta y se dice**, como hacen los multiplos con `omitidos`.
 
+## Texto visible
+
+Ninguna cadena que una persona vea se escribe aqui: sale del catalogo de `@app/i18n`. En un
+componente de cliente con `useTraductor()`, en uno de servidor con `traductor()` de
+`src/server/idioma.ts`. Los numeros y las fechas salen de `t.numero` y `t.fecha`, nunca de
+`toLocaleString()` sin idioma.
+
+La migracion del catalogo esta en curso: lo ya migrado no vuelve al componente, y lo nuevo entra
+directamente por el catalogo.
+
 ## Que NO hacer
 
+- No escribir una cadena visible dentro del componente: va al catalogo.
 - No importar ECharts fuera de `Lienzo.tsx`: se rompe la carga diferida.
 - No serializar las opciones del grafico a JSON para pasarlas: `JSON.stringify` borra los
   `formatter` y las cifras salen sin formato sin que nada falle.

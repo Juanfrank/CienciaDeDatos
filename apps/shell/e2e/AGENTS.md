@@ -14,6 +14,17 @@ Visor reciba 403 pidiendo `/admin` a mano, y que la aplicacion escale a mas de u
 | `responsivo.spec.ts` | 390, 820 y 1280 px |
 | `admin.spec.ts`, `shell.spec.ts` | Gobierno, acceso, filtros, marcadores |
 
+## Como ejecutarlas
+
+```bash
+npx nx run shell:e2e            # construye antes; es la forma correcta
+npx playwright test --config …  # NO: sirve el `.next` que hubiera, que puede ser anterior
+```
+
+`shell:e2e` depende de `shell:build`. Invocar Playwright directamente se salta esa dependencia y
+las pruebas miden una version anterior de la aplicacion: fallan o —peor— pasan por lo que ya no
+esta en el codigo.
+
 ## Como escribirlas
 
 - **Recorre todos los casos, no una muestra.** Se importa el catalogo y se itera: un objeto sin

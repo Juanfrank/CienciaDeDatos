@@ -15,6 +15,12 @@ como adiciones y jamas como rupturas.
 - Licencia de uso interno sin redistribucion, aviso de componentes de terceros y
   declaracion de autoria.
 - Este registro de cambios.
+- `@app/i18n`: catalogos en sintaxis ICU MessageFormat con espanol e ingles,
+  plurales por `Intl.PluralRules`, negociacion BCP 47 y formateadores de numero,
+  fecha y lista atados al idioma. El idioma de la aplicacion sigue siendo el
+  espanol y solo lo cambia la cookie `idioma`.
+- `<html lang>` refleja el idioma en uso, que es lo que usa un lector de pantalla
+  para elegir voz.
 
 ## [1.0.0] — 2026-09-13
 

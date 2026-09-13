@@ -28,6 +28,8 @@ import { ConfiguracionDeObjetoEditor } from './ConfiguracionDeObjetoEditor';
 import { Pestanas, type DefinicionDePestana } from './Pestanas';
 import { Pozo } from './Pozo';
 import { Presentacion } from './Presentacion';
+import type { ClaveDeMensaje } from '@app/i18n';
+import { useTraductor } from '../Idioma';
 import { ProveedorDeFiltro, Seccion } from './Seccion';
 
 /** El panel del editor: la tienda y el banco de trabajo, en uno. */
@@ -51,6 +53,7 @@ export function PanelLateral({
   onCambiar: (itemId: string, cambio: (item: GridItem) => GridItem) => void;
   onQuitar: (itemId: string) => void;
 }) {
+  const t = useTraductor();
   const [pestana, setPestana] = useState<Pestana>('objetos');
   const [filtro, setFiltro] = useState('');
 
@@ -84,10 +87,20 @@ export function PanelLateral({
   const consumeDatos = (definicion?.dimensiones.max ?? 0) > 0 || (definicion?.medidas.max ?? 0) > 0;
 
   const PESTANAS: DefinicionDePestana<Pestana>[] = [
-    { id: 'objetos', etiqueta: 'Objetos', icono: 'barras', habilitada: true },
-    { id: 'datos', etiqueta: 'Datos', icono: 'tabla', habilitada: hayObjeto && consumeDatos },
-    { id: 'formato', etiqueta: 'Formato', icono: 'indicador', habilitada: hayObjeto },
-    { id: 'complementos', etiqueta: 'Complementos', icono: 'informacion', habilitada: hayObjeto },
+    { id: 'objetos', etiqueta: t('editor.pestana.objetos'), icono: 'barras', habilitada: true },
+    {
+      id: 'datos',
+      etiqueta: t('editor.pestana.datos'),
+      icono: 'tabla',
+      habilitada: hayObjeto && consumeDatos,
+    },
+    { id: 'formato', etiqueta: t('editor.pestana.formato'), icono: 'indicador', habilitada: hayObjeto },
+    {
+      id: 'complementos',
+      etiqueta: t('editor.pestana.complementos'),
+      icono: 'informacion',
+      habilitada: hayObjeto,
+    },
   ];
 
   return (
@@ -218,31 +231,22 @@ export function PanelLateral({
 
 /** La tienda: la unica puerta por la que entra un objeto al modulo. */
 /** Que pregunta responde cada familia, dicho en una linea. */
-const FAMILIAS: { familia: FamiliaDeObjeto; titulo: string; que: string }[] = [
-  { familia: 'valor', titulo: 'Una sola cifra', que: 'El dato que hay que ver de un vistazo.' },
-  {
-    familia: 'comparacion',
-    titulo: 'Comparar entre categorias',
-    que: 'Cuanto mide cada distrito, cada materia, cada tribunal.',
-  },
-  {
-    familia: 'evolucion',
-    titulo: 'Ver como cambia en el tiempo',
-    que: 'La trayectoria de una medida a lo largo de una dimension ordenada.',
-  },
-  {
-    familia: 'proporcion',
-    titulo: 'Repartir un total',
-    que: 'Que parte aporta cada categoria, y donde se pierde.',
-  },
-  {
-    familia: 'relacion',
-    titulo: 'Dos medidas a la vez',
-    que: 'Si dos cifras se mueven juntas, o cada una en su escala.',
-  },
-  { familia: 'detalle', titulo: 'El dato, fila a fila', que: 'Cuando hace falta la cifra exacta.' },
-  { familia: 'ubicacion', titulo: 'Donde', que: 'La dimension geografica.' },
-  { familia: 'control', titulo: 'Filtrar', que: 'No dibujan datos: eligen cuales se ven.' },
+/**
+ * Las familias de la paleta, en el orden en que se ofrecen.
+ *
+ * El rotulo sale del catalogo de mensajes —`familia.<id>`— y la linea que lo explica se queda
+ * aqui hasta que se traduzca tambien. Que el orden viva en un array y no en el catalogo es
+ * deliberado: es una decision de producto, no una cadena.
+ */
+const FAMILIAS: { familia: FamiliaDeObjeto; que: string }[] = [
+  { familia: 'valor', que: 'El dato que hay que ver de un vistazo.' },
+  { familia: 'comparacion', que: 'Cuanto mide cada distrito, cada materia, cada tribunal.' },
+  { familia: 'evolucion', que: 'La trayectoria de una medida a lo largo de una dimension ordenada.' },
+  { familia: 'proporcion', que: 'Que parte aporta cada categoria, y donde se pierde.' },
+  { familia: 'relacion', que: 'Si dos cifras se mueven juntas, o cada una en su escala.' },
+  { familia: 'detalle', que: 'Cuando hace falta la cifra exacta.' },
+  { familia: 'ubicacion', que: 'La dimension geografica.' },
+  { familia: 'control', que: 'No dibujan datos: eligen cuales se ven.' },
 ];
 
 /** Sin acentos y en minusculas, como el buscador del panel de formato y por lo mismo. */
@@ -261,6 +265,7 @@ function Tienda({
   guardando: boolean;
   onAnadir: (objectId: string) => void;
 }) {
+  const t = useTraductor();
   // Los complementos se adjuntan a otro objeto, no se colocan en la rejilla. La validacion lo
   // rechaza, asi que tampoco se ofrecen aqui: tienen su propia pestana.
   const colocables = objetos.filter((o) => !o.attachable);
@@ -283,7 +288,7 @@ function Tienda({
   return (
     <>
       <label className="editor__buscador">
-        <span className="editor__buscador-rotulo">Buscar un objeto</span>
+        <span className="editor__buscador-rotulo">{t('editor.buscarObjeto')}</span>
         <input
           type="search"
           value={busqueda}
@@ -295,7 +300,7 @@ function Tienda({
 
       {visibles.length === 0 ? (
         <div className="editor__vacio editor__vacio--visible" data-testid="sin-objetos">
-          <p>Ningun objeto coincide con «{busqueda.trim()}».</p>
+          <p>{t('editor.sinObjetos', { consulta: busqueda.trim() })}</p>
           <button
             type="button"
             className="md-boton md-boton--texto"
@@ -330,13 +335,13 @@ function Tienda({
             y «Elementos» desapareceran al buscar «barras», porque sus titulos no coinciden.
           */}
           <ProveedorDeFiltro filtro={busqueda}>
-            {FAMILIAS.map(({ familia, titulo, que }) => {
+            {FAMILIAS.map(({ familia, que }) => {
               const dela = conDatos.filter((o) => o.familia === familia);
               if (dela.length === 0) return null;
               return (
                 <Seccion
                   key={familia}
-                  titulo={titulo}
+                  titulo={t(`familia.${familia}` as ClaveDeMensaje)}
                   nivel={2}
                   prueba={`familia-${familia}`}
                   /*

@@ -25,6 +25,7 @@ tiene su propio `AGENTS.md` con las reglas locales; este fija las que valen en t
 | Un objeto publicado no se modifica: se publica una version nueva | `packages/ui-components/src/registry` | Prueba del catalogo |
 | La version de una instancia es exacta, nunca un rango | `ObjectInstance.version` | Tipo |
 | El color es siempre un rol del tema, nunca un valor suelto | `packages/design-tokens` | Puerta de contraste |
+| El texto visible sale del catalogo, no del componente | `packages/i18n` | Prueba de catalogo y de navegador |
 | El estado visible vive en la URL | `apps/shell` | Prueba de navegador |
 | El alto de un objeto no depende de su contenido | `globals.css` + rejilla | Prueba de navegador |
 | Lo que se corta se cuenta y se dice | validacion y proyeccion | Pruebas unitarias |
@@ -93,6 +94,9 @@ de lint, y `npm run verify:boundaries` comprueba que esa regla sigue mordiendo.
 - No modificar una version publicada de un objeto visual.
 - No escribir colores literales: solo roles del tema. La unica excepcion documentada es el
   blanco de las etiquetas del mapa de arbol.
+- No escribir una cadena visible dentro de un componente: va al catalogo de `@app/i18n`.
+- No encender la negociacion de idioma por `Accept-Language`: el idioma de la aplicacion es el
+  espanol y solo lo cambia una eleccion explicita.
 - No desactivar, saltar ni marcar como pendiente una prueba para poner algo en verde.
 - No inventar cifras, fechas ni citas en contenido institucional.
 
@@ -104,6 +108,7 @@ de lint, y `npm run verify:boundaries` comprueba que esa regla sigue mordiendo.
 | `apps/cache-populator` | El job que lee la fuente y deja el resultado en el cache |
 | `apps/modules` | Modulos de negocio; solo consumen objetos y datos ya leidos |
 | `packages/*` | Librerias compartidas, una por responsabilidad |
+| `packages/i18n` | Catalogos ICU y traductor. El idioma se elige con la cookie `idioma` |
 | `tools` | Scripts de verificacion y utilidades de desarrollo |
 | `infra` | Plantillas Bicep |
 | `.claude/depgraph.json` | Mapa de imports y definiciones, para consultas estructurales |
