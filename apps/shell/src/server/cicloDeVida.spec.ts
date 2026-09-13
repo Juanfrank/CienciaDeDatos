@@ -20,13 +20,7 @@ import {
   puedeVer,
 } from './cicloDeVida';
 
-/**
- * Ciclo de vida de un modulo — seccion 4.1.
- *
- * Lo que se comprueba no es que los tres estados existan —eso estaba tipado desde F2.3— sino
- * que hay un flujo que los recorre, que cada transicion exige el permiso que dice 4.10.1 y que
- * un borrador no se ve desde fuera.
- */
+/** Ciclo de vida de un modulo — seccion 4.1. */
 
 const admin: ActorDeModulo = { userId: 'u-admin', role: 'administrador' };
 const colaborador: ActorDeModulo = { userId: 'u-ana', role: 'colaborador' };

@@ -1,31 +1,12 @@
 import type { ColorDeTexto } from './contrato';
 
-/**
- * Formato condicional — que el color dependa del DATO, no solo del mapeo.
- *
- * Es la diferencia entre un grafico que se mira y uno que avisa. Hoy, el color de una barra lo
- * decide en que serie esta; con esto lo puede decidir cuanto vale, que es lo que permite que «por
- * encima de 90 dias» salte a la vista sin que nadie tenga que leer el eje.
- *
- * Las reglas se evaluan EN ORDEN y gana la primera que case. No se combinan ni se busca la «mas
- * especifica»: con dos reglas que se solapan, quien edita decide cual manda subiendola, y eso se
- * puede razonar mirando la lista. Una resolucion por especificidad obligaria a simular el
- * algoritmo de cabeza para saber de que color va a salir una barra.
- *
- * El color es un ROL del tema, por lo mismo que el acento: un color suelto no tiene par de
- * contraste comprobado contra la superficie donde acabe ni sigue al tema oscuro (4.3).
- */
+/** Formato condicional — que el color dependa del DATO, no solo del mapeo. */
 
 export const COMPARADORES = ['mayor', 'mayor-o-igual', 'menor', 'menor-o-igual', 'igual', 'entre'] as const;
 export type Comparador = (typeof COMPARADORES)[number];
 
 export interface ReglaDeColor {
-  /**
-   * A que medida se aplica. Sin ella, a todas.
-   *
-   * Hace falta porque un objeto con «Casos» y «Dias» en la misma tarjeta tiene dos escalas
-   * distintas: «mayor que 90» significa una cosa en una y un disparate en la otra.
-   */
+  /** A que medida se aplica. Sin ella, a todas. */
   medida?: string;
   comparador: Comparador;
   valor: number;
@@ -66,13 +47,7 @@ function cumple(regla: ReglaDeColor, valor: number): boolean {
   }
 }
 
-/**
- * El color que le toca a un valor, o nada.
- *
- * `null` NO entra en ninguna regla, ni siquiera en «menor que». `null` es «no hay respuesta», no
- * un numero pequeno: tratarlo como cero lo pintaria de rojo en cuanto alguien escriba «menor que
- * 10», y eso es afirmar algo sobre un dato que no existe.
- */
+/** El color que le toca a un valor, o nada. */
 export function colorCondicional(
   condicional: FormatoCondicional | undefined,
   valor: number | null | undefined,

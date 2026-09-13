@@ -2,32 +2,7 @@ import type { FieldRef } from '@app/data-contracts';
 import type { ObjectDataContract, ObjectInstance } from '../registry/types';
 import { fieldKey } from '../registry/viewModel';
 
-/**
- * Ranuras con nombre — seccion 4.2.
- *
- * ## Por que se rehizo
- *
- * La primera version usaba el ORDEN del array como criterio de reparto: el primer pozo se quedaba
- * los primeros campos, el siguiente los siguientes. Se sostiene mientras se llenan en orden y se
- * rompe en cuanto uno quiere saltarse alguno. En un grafico de barras con eje X, serie y eje Y,
- * no habia forma de poner SOLO la serie: el primer campo que se anadiera caeria en el eje X,
- * porque «primero» es lo unico que el reparto sabia mirar.
- *
- * Ahora el campo dice a QUE RANURA pertenece. `binding.ranuras` es un mapa de identificador de
- * ranura a claves de campo, y es la fuente de verdad. Un eje X vacio con una serie llena es un
- * estado perfectamente expresable, que es justo lo que faltaba.
- *
- * ## Que se conserva, y por que
- *
- * `binding.dimensions` y `binding.measures` siguen existiendo y siguen siendo la lista de columnas
- * que el objeto necesita: es lo que leen el lector del cache, la validacion de esquema, la
- * proyeccion y la exportacion. Se DERIVAN de las ranuras y se guardan junto a ellas, de modo que
- * nada rio abajo cambia. Lo que cambia es quien manda: antes el array, ahora el mapa.
- *
- * Una instancia sin `ranuras` —todo lo guardado antes de esto— se interpreta con el reparto
- * posicional de siempre. La migracion es una funcion pura y probada, no un script que haya que
- * acordarse de ejecutar.
- */
+/** Ranuras con nombre — seccion 4.2. */
 
 export interface RanuraDeCampos {
   id: string;
@@ -36,12 +11,7 @@ export interface RanuraDeCampos {
   tipo: 'dimension' | 'medida';
   /** Cuantos campos caben. */
   max: number;
-  /**
-   * Cuantos hacen falta para que el objeto se dibuje. 0 = opcional.
-   *
-   * Es lo que permite decir «el eje X es obligatorio y la serie no» en vez de deducirlo del minimo
-   * global del contrato, que no sabe repartirlo entre ranuras.
-   */
+  /** Cuantos hacen falta para que el objeto se dibuje. 0 = opcional. */
   min?: number;
   /** Una linea que explica que hace la ranura con lo que se le ponga. */
   ayuda?: string;
@@ -58,13 +28,7 @@ export const aFieldRef = (clave: string): FieldRef => {
   return { table, field };
 };
 
-/**
- * Las ranuras de una instancia, con sus campos.
- *
- * Si la instancia trae `ranuras`, mandan. Si no, se deduce del orden —que es como se guardo— y se
- * devuelve lo mismo que habria devuelto la version anterior. Sin esa deduccion, cada modulo
- * guardado antes de este cambio apareceria con todas las ranuras vacias y sus campos perdidos.
- */
+/** Las ranuras de una instancia, con sus campos. */
 export function ranurasDe(
   instance: ObjectInstance,
   ranuras: RanuraDeCampos[],
@@ -88,15 +52,6 @@ export function ranurasDe(
 
   /*
    * DOS pasadas: primero los minimos de cada ranura, y solo despues el resto hasta el maximo.
-   *
-   * En una sola pasada, la primera ranura se llevaba todo lo que cabia en ella y la siguiente se
-   * quedaba vacia. Con un solo pozo por tipo eso no se notaba nunca; con dos —«Columnas» y
-   * «Lineas» del combinado, los dos obligatorios— un objeto sin asignacion guardada salia SIEMPRE
-   * roto, aunque el mapeo trajera medidas de sobra: las tres se iban a Columnas y Lineas pedia
-   * una que ya no quedaba.
-   *
-   * Repartir los minimos primero es lo que hace que el reparto por omision cumpla el contrato
-   * siempre que haya campos suficientes, que es justo lo que se espera de un valor por omision.
    */
   for (const ranura of ranuras) {
     declaradas.set(ranura.id, claves[ranura.tipo].splice(0, ranura.min ?? 0));
@@ -108,13 +63,7 @@ export function ranurasDe(
   return declaradas;
 }
 
-/**
- * Los arrays que consumen el lector, la validacion y la proyeccion.
- *
- * Salen de las ranuras EN EL ORDEN EN QUE SE DECLARAN, no en el que se llenaron. Es lo que hace
- * que dos modulos con los mismos campos en las mismas ranuras produzcan la misma consulta, y por
- * tanto la misma clave de cache.
- */
+/** Los arrays que consumen el lector, la validacion y la proyeccion. */
 export function bindingDesdeRanuras(
   asignacion: Map<string, string[]>,
   ranuras: RanuraDeCampos[],
@@ -151,13 +100,7 @@ export function conCampoEnRanura(
   return { ...instance, binding: { ...instance.binding, ...bindingDesdeRanuras(asignacion, ranuras) } };
 }
 
-/**
- * Quita un campo de UNA ranura, no de todas.
- *
- * El mismo campo puede estar en dos ranuras a la vez —una fecha en el eje X y en el detalle, por
- * ejemplo— y quitarlo de una no debe vaciar la otra. Es la diferencia entre «quitar este chiclet»
- * y «quitar este campo del objeto», y en pantalla se pulsa un chiclet concreto.
- */
+/** Quita un campo de UNA ranura, no de todas. */
 export function sinCampoEnRanura(
   instance: ObjectInstance,
   ranuras: RanuraDeCampos[],
@@ -194,13 +137,7 @@ export interface ProblemaDeRanura {
   problema: string;
 }
 
-/**
- * Valida la asignacion contra lo que las ranuras declaran.
- *
- * Comprueba lo que el contrato global NO puede: que cada ranura tenga lo que necesita. Un grafico
- * de barras con una dimension cumple «entre 1 y 2 dimensiones» tanto si esa dimension esta en el
- * eje X como si esta en la serie, y solo el segundo caso es un grafico que no se puede dibujar.
- */
+/** Valida la asignacion contra lo que las ranuras declaran. */
 export function validarRanuras(
   instance: ObjectInstance,
   ranuras: RanuraDeCampos[],
@@ -248,12 +185,7 @@ export function validarRanuras(
   return problemas;
 }
 
-/**
- * Las ranuras por defecto cuando un objeto no las declara.
- *
- * Una por tipo, con el rotulo generico de siempre. Es lo que hace que anadir un objeto al catalogo
- * no obligue a declarar ranuras: se comporta como antes, y quien quiera nombres los declara.
- */
+/** Las ranuras por defecto cuando un objeto no las declara. */
 export function ranurasPorDefecto(contrato: ObjectDataContract): RanuraDeCampos[] {
   const ranuras: RanuraDeCampos[] = [];
   if (contrato.dimensions.max > 0) {

@@ -1,44 +1,22 @@
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Personalizar un objeto SIN escribir codigo — secciones 4.2 y 4.3.
- *
- * Lo que se comprueba de punta a punta: lo que se elige en el editor sale en la pantalla del
- * modulo. Antes, cambiar el icono, el color o el formato de una cifra era tocar codigo y
- * desplegar, y las pruebas del editor solo llegaban hasta el mapeo.
- */
+/** Personalizar un objeto SIN escribir codigo — secciones 4.2 y 4.3. */
 
 type Pagina = import('@playwright/test').Page;
 
-/**
- * Espera a que el editor termine de guardar.
- *
- * Cada cambio guarda el modulo entero y deshabilita los controles mientras tanto. Encadenar dos
- * gestos sin esperar hace que el segundo caiga sobre un control muerto.
- */
+/** Espera a que el editor termine de guardar. */
 const guardado = async (page: Pagina) => {
   await expect(page.locator('.editor')).toHaveAttribute('data-guardando', 'no');
 };
 
-/**
- * El id del objeto recien colocado, leido del BLOQUE del lienzo.
- *
- * El editor genera el id, asi que la prueba lo descubre de donde se ve: el lienzo. Antes se leia
- * de la ficha de una lista que ya no existe.
- */
+/** El id del objeto recien colocado, leido del BLOQUE del lienzo. */
 const idDelPrimerBloque = async (page: Pagina): Promise<string> => {
   const testid = await page.locator('[data-testid^="bloque-obj-"]').first().getAttribute('data-testid');
   return (testid ?? '').replace('bloque-', '');
 };
 
-/**
- * Abre una subseccion del panel por su testid.
- *
- * Las subsecciones de «Formato» vienen plegadas salvo la primera: en un panel de 300 px, siete
- * controles apilados obligan a recorrerlos todos para encontrar uno. Las pruebas abren la que
- * necesitan, igual que haria quien edita.
- */
+/** Abre una subseccion del panel por su testid. */
 const abrir = async (page: Pagina, prueba: string) => {
   const seccion = page.getByTestId(prueba);
   if (await seccion.evaluate((el) => !(el as HTMLDetailsElement).open)) {
@@ -105,10 +83,6 @@ test.describe('el editor configura como se ve un objeto', () => {
   test('y lo configurado se DIBUJA en la pantalla del modulo', async ({ page }) => {
     /*
      * La otra mitad, sobre un modulo publicado.
-     *
-     * El borrador que crea la prueba anterior no se puede abrir en /m/: no esta publicado ni
-     * concedido a ningun equipo, y eso es correcto —publicar pasa por aprobacion—. Asi que el
-     * dibujado se comprueba sobre un modulo del seed que lleva presentacion configurada.
      */
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
@@ -148,11 +122,6 @@ test.describe('el editor configura como se ve un objeto', () => {
   test('no hay ninguna caja donde escribir un color ni una ruta SVG', async ({ page }) => {
     /*
      * El limite de 4.3, comprobado en la interfaz.
-     *
-     * Un hexadecimal escrito a mano seria un color que la puerta de contraste no ha comprobado
-     * nunca, y una ruta SVG pegada seria contenido sin revisar dentro del documento. Los dos
-     * controles son desplegables de un conjunto cerrado, y esta prueba falla si alguien los
-     * convierte en campos de texto «para que sea mas flexible».
      */
     await entrarComo(page, 'u-admin');
     await crearModulo(page, 'pers-cerrado');

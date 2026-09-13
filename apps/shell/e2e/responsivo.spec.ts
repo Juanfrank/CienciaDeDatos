@@ -2,13 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Diseño responsivo y movil — seccion 4.9.
- *
- * Se comprueba en un navegador real a tres anchos, porque los tres fallos que se corrigieron
- * aqui —el arbol entero por encima del contenido, las cajas altas y vacias en una columna, y la
- * disposicion de escritorio pintada primero en un movil— no se ven en ninguna prueba unitaria.
- */
+/** Diseño responsivo y movil — seccion 4.9. */
 
 const MOVIL = { width: 390, height: 844 };
 const TABLETA = { width: 820, height: 1180 };
@@ -47,11 +41,6 @@ test.describe('la disposicion se adapta al ancho', () => {
 
     /*
      * Y ese ancho es el de la REJILLA, no un doceavo.
-     *
-     * Sin esta comprobacion la prueba pasaba con el diseno movil roto: la rejilla repartia doce
-     * columnas en todos los tamanos, cada celda ocupaba «1 de 12» —quince pixeles— y seguia
-     * cumpliendo «todas del mismo ancho, ninguna comparte fila». Las tarjetas eran tiras
-     * verticales vacias y ninguna prueba lo veia.
      */
     const rejilla = await page
       .locator('.rejilla')
@@ -281,9 +270,6 @@ test.describe('las paginas de objetos nuevos, en un movil', () => {
    * Doce tipos de grafico y los pequenos multiplos se disenaron y se revisaron a 1500 px. A 390
    * los problemas son otros: una rejilla de paneles que no cabe, un objeto mas ancho que la
    * pantalla, un rotulo girado que empuja el area de dibujo hasta dejarla sin alto.
-   *
-   * Se recorren las OCHO paginas y no una de muestra, por lo mismo que en axe: con una sola, la
-   * que rompa en otra no falla, simplemente no tiene prueba.
    */
   const paginas = [
     'familia',
@@ -305,10 +291,6 @@ test.describe('las paginas de objetos nuevos, en un movil', () => {
 
       /*
        * El documento no se desplaza a lo ancho.
-       *
-       * Es el sintoma de todo lo que no cabe: un objeto con ancho minimo mayor que la pantalla,
-       * una tabla sin su contenedor de desplazamiento, una rejilla de multiplos con columnas
-       * fijas. Un modulo que obliga a arrastrar de lado en un movil es inservible ahi.
        */
       const desborda = await page.evaluate(
         () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,

@@ -1,25 +1,6 @@
 import { Hct, TonalPalette, argbFromHex, hexFromArgb } from '@material/material-color-utilities';
 
-/**
- * Sistema de color de Material Design 3 — seccion 4.3.
- *
- * MD3 no es una paleta: es un PROCEDIMIENTO. De un color de origen se derivan seis paletas
- * tonales en el espacio HCT —matiz, croma y tono percibido—, y cada rol de la interfaz se define
- * como un TONO concreto de una de ellas. Que `primary` sea el tono 40 y `onPrimary` el 100 no es
- * una eleccion estetica: es lo que garantiza que el par tenga contraste suficiente, porque el
- * tono de HCT es luminosidad percibida y la diferencia de 60 tonos da 4.5:1 por construccion.
- *
- * Eso es lo que hace que valga la pena adoptarlo aqui en vez de elegir colores a mano: el tema
- * institucional pasa de ser una lista de valores que alguien reviso una vez a un sistema donde
- * el contraste es una propiedad de como se construye. La prueba de contraste sigue existiendo
- * —y ahora recorre TODOS los pares de roles, no unos cuantos elegidos— pero comprueba algo que
- * deberia ser cierto por construccion en lugar de algo que se espera que alguien no rompa.
- *
- * Los tonos de cada rol son los de la especificacion de MD3. Se escriben aqui explicitamente, y
- * no se toman de `Scheme` de la libreria, porque esa clase es la version anterior del sistema y
- * no tiene los niveles de `surfaceContainer`, que son justamente los que MD3 introdujo para
- * separar superficies sin recurrir a sombras.
- */
+/** Sistema de color de Material Design 3 — seccion 4.3. */
 
 /** Los seis roles de paleta de MD3. */
 export interface PaletasTonales {
@@ -34,44 +15,13 @@ export interface PaletasTonales {
 export interface OrigenDelTema {
   /** Color institucional principal. De el salen primary, secondary y los neutros. */
   primario: string;
-  /**
-   * Gris institucional. De el salen las superficies y los bordes.
-   *
-   * Es la correccion que mas se nota. MD3 deriva los neutros del PRIMARIO, y `#0050DD` esta en
-   * el matiz HCT 273 —azul-violeta—, asi que las superficies salian lavanda: el "blanco" era
-   * #FBF8FD, un blanco rosado, y toda la interfaz se leia como gris sucio.
-   *
-   * La norma de marca ya tiene su propio gris, `#5B6B87`, y no esta en 273 sino en 261, con
-   * croma 22. O sea: la institucion usa grises CLARAMENTE azulados, no los casi-acromaticos que
-   * MD3 produce por defecto con croma 4. Tomarlo como origen de los neutros no es inventar un
-   * color, es dejar de ignorar uno que la norma ya fijaba.
-   */
+  /** Gris institucional. De el salen las superficies y los bordes. */
   neutro: string;
-  /**
-   * Segundo color de marca. Ocupa el rol `tertiary` Y el rol `error`.
-   *
-   * Es una decision, no un descuido. La institucion tiene UN rojo y significa "atencion": sirve
-   * igual para destacar que para avisar de un fallo. Inventar un segundo rojo para los errores
-   * anadiria a la marca un color que la marca no tiene, y usar el rojo de MD3 por defecto
-   * pondria dos rojos casi iguales en la misma pantalla. Los dos roles se distinguen por DONDE
-   * se usan —`errorContainer` y `onError` solo aparecen en mensajes de error— no por el matiz.
-   */
+  /** Segundo color de marca. Ocupa el rol `tertiary` Y el rol `error`. */
   acento: string;
 }
 
-/**
- * Croma de las paletas derivadas.
- *
- * `secondary` es el primario desaturado: acompana sin competir.
- *
- * Los NEUTROS no llevan el croma 4 que MD3 usa por defecto. Con 4, y sobre el matiz del azul,
- * las superficies quedaban casi acromaticas y con un resto lavanda: gris sucio. La norma de
- * marca no usa esos grises —`#5B6B87` tiene croma 22— asi que se sube hasta que las superficies
- * lean como azul muy claro, que es lo que la institucion usa en sus documentos.
- *
- * `neutralVariant` va mas alto todavia porque de el salen los BORDES y las superficies
- * variantes: son las piezas donde un tinte se percibe sin que el fondo se coloree de mas.
- */
+/** Croma de las paletas derivadas. */
 const CROMA = { secondary: 18, neutral: 8, neutralVariant: 16 } as const;
 
 export function paletasDe(origen: OrigenDelTema): PaletasTonales {
@@ -196,13 +146,7 @@ export function esquemaDe(origen: OrigenDelTema, modo: ModoDeColor): EsquemaMate
   return esquema;
 }
 
-/**
- * Pares de roles que DEBEN cumplir contraste de texto.
- *
- * MD3 los empareja por construccion —`onX` esta pensado para ir sobre `X`— y aqui se declaran
- * para poder comprobarlo. Un par que falle significa que la generacion esta mal, no que haya que
- * retocar un color a mano: lo que se corrige es el tono de la tabla, no el resultado.
- */
+/** Pares de roles que DEBEN cumplir contraste de texto. */
 export const PARES_DE_CONTRASTE: readonly [keyof EsquemaMaterial, keyof EsquemaMaterial][] = [
   ['onPrimary', 'primary'],
   ['onPrimaryContainer', 'primaryContainer'],
@@ -225,12 +169,7 @@ export const PARES_DE_CONTRASTE: readonly [keyof EsquemaMaterial, keyof EsquemaM
   ['inverseOnSurface', 'inverseSurface'],
 ];
 
-/**
- * Pares que solo tienen que cumplir el umbral de ELEMENTO GRAFICO (3:1).
- *
- * Un borde, un separador o el trazo de una barra no son texto. Exigirles 4.5:1 obligaria a
- * oscurecerlos hasta que la interfaz pareciera dibujada con rotulador.
- */
+/** Pares que solo tienen que cumplir el umbral de ELEMENTO GRAFICO (3:1). */
 export const PARES_GRAFICOS: readonly [keyof EsquemaMaterial, keyof EsquemaMaterial][] = [
   ['outline', 'surface'],
   ['primary', 'surface'],

@@ -2,13 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { AccessScope, Team } from './index';
 import { administratorsOf, wouldLeaveNoAdministrator } from './index';
 
-/**
- * La institucion no puede quedarse sin ningun Administrador — seccion 4.10.1.
- *
- * El caso que esta funcion existe para impedir no es hipotetico: el modelo de permisos es
- * circular, y sin esta comprobacion un Administrador puede retirarse el rol a si mismo y dejar
- * el gobierno inaccesible para todos, incluido el.
- */
+/** La institucion no puede quedarse sin ningun Administrador — seccion 4.10.1. */
 
 const SIN_AMBITO: AccessScope = { restrictions: [] };
 

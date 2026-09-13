@@ -1,13 +1,6 @@
 import type { AuthProvider } from './IIdentityProvider';
 
-/**
- * Puertos de persistencia de identidad.
- *
- * El paquete define los puertos; la implementacion sobre Azure SQL vive en el backend y se
- * inyecta. Asi la logica de autenticacion se prueba de forma exhaustiva sin base de datos, y
- * el almacen de identidades queda donde debe: una base dedicada y de alcance minimo, separada
- * del Data Warehouse y NUNCA accesible desde SqlDataConnector (4.7.2).
- */
+/** Puertos de persistencia de identidad. */
 
 export interface LocalCredentialRecord {
   userId: string;
@@ -30,14 +23,7 @@ export interface ILocalIdentityStore {
   save(record: LocalCredentialRecord): Promise<void>;
 }
 
-/**
- * Sesion de aplicacion — secciones 5.3 y 6.7.
- *
- * Vive en una tabla dedicada de la base de identidad, no en memoria del proceso ni en Redis,
- * para que la app escale horizontalmente sin perder sesion. La cookie lleva un identificador
- * opaco: el estado real vive aqui, lo que permite cambiar el equipo activo del lado servidor
- * sin reemitir credenciales ni cerrar sesion (criterio de aceptacion de la seccion 9).
- */
+/** Sesion de aplicacion — secciones 5.3 y 6.7. */
 export interface AppSession {
   sessionId: string;
   userId: string;
@@ -54,24 +40,11 @@ export interface ISessionStore {
   get(sessionId: string): Promise<AppSession | null>;
   update(session: AppSession): Promise<void>;
   delete(sessionId: string): Promise<void>;
-  /**
-   * Borra TODAS las sesiones de una persona.
-   *
-   * Es obligatorio en el puerto y no opcional: sin esto, cambiar una contraseña comprometida no
-   * echa de dentro a quien ya entro con ella, y el restablecimiento de 4.7.2 seria un gesto sin
-   * efecto. Un almacen de sesiones que no sepa hacer esto no sirve para esta aplicacion.
-   */
+  /** Borra TODAS las sesiones de una persona. */
   deleteAllFor(userId: string): Promise<void>;
 }
 
-/**
- * Evento de inicio de sesion — seccion 7.
- *
- * Se registra para AMBOS proveedores con el mismo formato y el mismo nivel de detalle, aunque
- * Azure AD ya tenga sus propios logs nativos en Entra ID: la consolidacion existe para tener
- * una sola vista de auditoria de acceso a la aplicacion. Para cuentas locales no hay
- * alternativa, hay que construirlo.
- */
+/** Evento de inicio de sesion — seccion 7. */
 export interface LoginAuditEvent {
   timestamp: string;
   authProvider: AuthProvider;

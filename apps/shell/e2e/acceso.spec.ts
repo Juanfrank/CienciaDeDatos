@@ -7,14 +7,7 @@ import {
 } from '../src/server/credencialesDemo';
 import { entrarComo } from './sesion';
 
-/**
- * Autenticacion de punta a punta — seccion 4.7 y criterios de la seccion 9.
- *
- * El paquete `@app/auth` ya probaba Argon2id, TOTP y bloqueo por su cuenta. Lo que se comprueba
- * aqui es otra cosa: que la APLICACION los usa. Esa distincion es el motivo de que exista este
- * fichero — durante varias fases la autenticacion estuvo escrita, probada y sin cablear, y desde
- * fuera era indistinguible de no tenerla.
- */
+/** Autenticacion de punta a punta — seccion 4.7 y criterios de la seccion 9. */
 
 const CORREO = usuarioACorreo('u-ana');
 

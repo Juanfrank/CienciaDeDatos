@@ -5,14 +5,7 @@ import type {
   Vocabulario,
 } from './types';
 
-/**
- * Resolutor local y determinista.
- *
- * Sin servicio externo ni licencia: reconoce la pregunta contra el vocabulario que quien
- * pregunta ya puede ver. Es menos flexible que un modelo de lenguaje y tiene dos virtudes que
- * compensan de sobra mientras no haya uno: da siempre el mismo resultado para la misma pregunta
- * —se puede probar— y no puede inventarse una dimension que no existe.
- */
+/** Resolutor local y determinista. */
 
 /** Quita acentos y mayusculas: "penal" y "Penál" son la misma palabra para quien pregunta. */
 export function normalizar(texto: string): string {
@@ -23,12 +16,7 @@ export function normalizar(texto: string): string {
     .trim();
 }
 
-/**
- * Palabras sin contenido, que no se cuentan como "no entendidas".
- *
- * Sin esta lista, preguntar "¿cuantos casos hay en Penal?" devolveria "no entendi: hay, en", que
- * hace parecer roto algo que funciono.
- */
+/** Palabras sin contenido, que no se cuentan como "no entendidas". */
 const VACIAS = new Set(
   [
     'de', 'del', 'la', 'las', 'el', 'los', 'un', 'una', 'unos', 'unas', 'en', 'por', 'para',
@@ -189,13 +177,7 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
   }
 }
 
-/**
- * URL que responde a la consulta — seccion 4.11.
- *
- * Resolver una pregunta termina en una URL y no en un resultado, y eso es lo que la hace
- * compartible, marcable y —sobre todo— sujeta al mismo ambito que cualquier otra URL de la
- * aplicacion. Una pregunta no abre un camino de lectura distinto.
- */
+/** URL que responde a la consulta — seccion 4.11. */
 export function urlDeConsulta(moduleSlug: string, consulta: ConsultaResuelta): string {
   const params = new URLSearchParams();
   for (const [campo, valores] of Object.entries(consulta.filters)) {

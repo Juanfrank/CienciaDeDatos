@@ -3,13 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { desgloseDe, proyectarObjeto } from './proyeccion';
 import type { ObjectInstance } from './types';
 
-/**
- * Lo que se vigila aqui es que lo proyectado sea LO QUE EL OBJETO MUESTRA.
- *
- * Antes de existir esta funcion, la exportacion volcaba el dataset entero bajo el titulo de cada
- * objeto: una tarjeta KPI que muestra un numero exportaba las filas completas, y cinco objetos
- * sobre el mismo dataset producian cinco veces la misma tabla.
- */
+/** Lo que se vigila aqui es que lo proyectado sea LO QUE EL OBJETO MUESTRA. */
 
 const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };
 const MATERIA = { table: 'DimTribunal', field: 'Materia' };

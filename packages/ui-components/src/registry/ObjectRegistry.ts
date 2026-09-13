@@ -6,13 +6,7 @@ import type {
   VisualObjectDefinition,
 } from './types';
 
-/**
- * Registro de objetos versionados — seccion 4.5.
- *
- * Impone las cuatro reglas del documento en el momento de publicar, no como recomendacion:
- * changelog obligatorio, certificacion minima, versiones que solo avanzan, y resolucion por
- * version EXACTA para que publicar no altere instancias ya desplegadas.
- */
+/** Registro de objetos versionados — seccion 4.5. */
 
 export class ObjectRegistryError extends Error {
   constructor(message: string) {
@@ -94,12 +88,7 @@ export class ObjectRegistry {
     return objeto.versions.find((v) => v.version === ultima);
   }
 
-  /**
-   * Publica una version nueva.
-   *
-   * Exige que la version avance —nunca republicar ni retroceder, porque una instancia fijada a
-   * esa version veria cambiar el objeto bajo sus pies— y que traiga changelog y certificacion.
-   */
+  /** Publica una version nueva. */
   publish(input: PublishInput): VisualObjectDefinition {
     const { objectId, version } = input;
     const objeto = this.objects.get(objectId);
@@ -150,13 +139,7 @@ export class ObjectRegistry {
     });
   }
 
-  /**
-   * Aviso ACTIVO a los modulos que usan una version proxima a deprecarse (4.5).
-   *
-   * El documento pide aviso activo, no una nota en la documentacion: se calcula sobre las
-   * instancias reales desplegadas, para que la interfaz pueda mostrarlo a quien lo tiene que
-   * corregir.
-   */
+  /** Aviso ACTIVO a los modulos que usan una version proxima a deprecarse (4.5). */
   findDeprecationWarnings(
     instances: ObjectInstance[],
     now: Date = new Date(),

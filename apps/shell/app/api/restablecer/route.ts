@@ -4,15 +4,7 @@ import { restablecimientos } from '../../../src/server/identidad';
 
 export const runtime = 'nodejs';
 
-/**
- * Canje de un token de restablecimiento — seccion 4.7.2.
- *
- * SIN sesion, por definicion: quien llega aqui no puede entrar. La autorizacion es el token, que
- * es de un solo uso, corto de vida y se guardo hasheado.
- *
- * No hay ningun GET: no existe forma de preguntar si un resetId es valido sin intentar canjearlo.
- * Un endpoint de comprobacion seria un oraculo para tantear tokens sin gastar intentos.
- */
+/** Canje de un token de restablecimiento — seccion 4.7.2. */
 export async function POST(request: Request) {
   let cuerpo: Record<string, unknown>;
   try {

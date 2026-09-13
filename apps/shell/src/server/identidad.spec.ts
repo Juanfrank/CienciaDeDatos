@@ -3,14 +3,7 @@ import type { AuthenticatedPrincipal } from '@app/auth';
 import { desbloquearCuenta, sesiones } from './identidad';
 import { almacenDeCredenciales } from './identidad';
 
-/**
- * Cableado de identidad en el shell — seccion 4.7.
- *
- * Lo que se comprueba aqui es lo que el paquete `@app/auth` no puede: que la implementacion de
- * los puertos sobre el almacen compartido hace lo que el puerto promete. En particular
- * `deleteAllFor`, del que depende que restablecer una contrasena eche de dentro a quien ya
- * entro con la anterior.
- */
+/** Cableado de identidad en el shell — seccion 4.7. */
 
 const principal = (userId: string): AuthenticatedPrincipal => ({
   userId,

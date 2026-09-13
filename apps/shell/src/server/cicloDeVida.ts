@@ -22,24 +22,7 @@ import { modulos } from './almacenModulos';
 import { diagnosticarDefinicion } from './datos';
 import type { SesionShell } from './sesion';
 
-/**
- * Ciclo de vida de un modulo — seccion 4.1.
- *
- *   borrador -> pendiente-de-aprobacion -> publicado
- *
- * Los tres estados estaban tipados desde F2.3 y nunca hubo un flujo que los recorriera: todo
- * modulo nacia 'publicado' porque venia escrito a mano en el codigo. Sin flujo, la distincion
- * entre "lo que alguien esta probando" y "lo que la institucion respalda" no existia.
- *
- * Las dos reglas que ordenan el resto:
- *
- * 1. QUIEN. Crear y editar borradores es de Colaborador y Administrador; publicar a nivel
- *    institucional es solo de Administrador (matriz de 4.10.1). Un Colaborador PROPONE.
- *
- * 2. QUE SE PUEDE PUBLICAR. Un modulo con objetos rotos, disposicion invalida o instancias en
- *    versiones vencidas no se publica. `findPublishBlockers` decidia eso desde F2.3 y hasta
- *    ahora no lo llamaba nadie; esta es la puerta donde sirve.
- */
+/** Ciclo de vida de un modulo — seccion 4.1. */
 
 export class CicloDeVidaError extends Error {
   constructor(
@@ -57,16 +40,7 @@ export interface ActorDeModulo {
   role: AppRole;
 }
 
-/**
- * Visibilidad por estado — la parte de 4.1 con consecuencias de seguridad.
- *
- * Un borrador es PERSONAL: no lo ve nadie mas que su autor, ni por la navegacion ni escribiendo
- * la URL. Uno pendiente de aprobacion lo ve ademas quien tiene que aprobarlo, porque revisar a
- * ciegas no es revisar. Publicado lo ve quien tenga concedido el nodo, como hasta ahora.
- *
- * Se resuelve aqui y no en la interfaz: ocultar un borrador del arbol y servirlo por API seria
- * el mismo fallo que la seccion 9 manda probar a nivel de backend.
- */
+/** Visibilidad por estado — la parte de 4.1 con consecuencias de seguridad. */
 export function puedeVer(module: ModuleDefinition, actor: ActorDeModulo): boolean {
   if (module.status === 'publicado') return true;
   if (module.ownerUserId === actor.userId) return true;
@@ -78,17 +52,7 @@ export async function modulosVisibles(actor: ActorDeModulo): Promise<ModuleDefin
   return (await modulos.list()).filter((m) => puedeVer(m, actor));
 }
 
-/**
- * Solo el autor de un borrador lo edita. Tampoco un Administrador.
- *
- * Tener el permiso de "crear y editar modulos borrador" no es tener permiso sobre el borrador DE
- * OTRO: si lo fuera, cualquier Colaborador podria reescribir el trabajo en curso de un companero.
- *
- * Y administrar tampoco lo concede, por coherencia con `puedeVer`: un Administrador no ve los
- * borradores ajenos, asi que permitirle editarlos seria dejarle cambiar algo que no puede leer.
- * Su intervencion empieza cuando el modulo se propone; para uno abandonado tiene el borrado
- * definitivo, que no exige leerlo.
- */
+/** Solo el autor de un borrador lo edita. Tampoco un Administrador. */
 function exigirAutoria(module: ModuleDefinition, actor: ActorDeModulo): void {
   if (module.ownerUserId === actor.userId) return;
   throw new CicloDeVidaError('Ese borrador es de otra persona.', 403);
@@ -183,13 +147,7 @@ export interface GuardarBorradorInput {
   cambios: Partial<Pick<ModuleDefinition, 'name' | 'icon' | 'pages'>>;
 }
 
-/**
- * Guarda cambios en un borrador.
- *
- * Solo sobre un BORRADOR. Editar en el sitio un modulo publicado seria cambiar bajo los pies de
- * todos los equipos que lo estan viendo, sin que nadie lo aprobara; el principio 8 dice lo mismo
- * de los objetos compartidos. Para cambiar uno publicado hay que retirarlo primero.
- */
+/** Guarda cambios en un borrador. */
 export async function guardarBorrador(input: GuardarBorradorInput): Promise<ModuleDefinition> {
   permiso(input.actor, 'crear-editar-modulos-borrador');
 
@@ -229,13 +187,7 @@ export async function guardarBorrador(input: GuardarBorradorInput): Promise<Modu
   return actualizado;
 }
 
-/**
- * Diagnostico del modulo tal como lo veria el editor.
- *
- * Se calcula contra el esquema REAL que el job dejo en el cache, no contra el conector: el
- * principio 2 vale tambien dentro del editor, que es justo donde seria tentador saltarselo para
- * "comprobar de verdad" que existe un campo.
- */
+/** Diagnostico del modulo tal como lo veria el editor. */
 export async function bloqueosDePublicacion(module: ModuleDefinition): Promise<PublishBlocker[]> {
   return findPublishBlockers(await diagnosticarDefinicion(module));
 }
@@ -281,12 +233,7 @@ export async function enviarAAprobacion(input: TransicionInput): Promise<ModuleD
   return actualizado;
 }
 
-/**
- * pendiente-de-aprobacion -> publicado. Solo un Administrador, y solo sin bloqueos.
- *
- * Al publicar sube la `version`: lo que se publica es una version nueva de la definicion, no una
- * mutacion de la anterior.
- */
+/** pendiente-de-aprobacion -> publicado. Solo un Administrador, y solo sin bloqueos. */
 export async function publicar(input: TransicionInput): Promise<ModuleDefinition> {
   permiso(input.actor, 'publicar-modulo-institucional');
 
@@ -329,18 +276,7 @@ export async function publicar(input: TransicionInput): Promise<ModuleDefinition
   return actualizado;
 }
 
-/**
- * Al publicar, el modulo tiene que existir en la ORGANIZACION GENERAL.
- *
- * Sin nodo en el arbol no hay ambito que resolver (4.10.4 lo dice expresamente: un modulo
- * ausente del arbol general no debe poder mostrarse), asi que un modulo publicado y sin colgar
- * de ningun sitio no lo ve NADIE. Publicar algo que nadie puede abrir no es publicar.
- *
- * Se cuelga en la RAIZ, que es el sitio mas restrictivo que existe —no hereda ambito de ninguna
- * carpeta— y desde el que un Administrador lo mueve a donde toque con el editor de arbol, viendo
- * antes como cambia el acceso. Colocarlo automaticamente dentro de una carpeta existente seria
- * concederle el ambito de esa carpeta sin que nadie lo decidiera.
- */
+/** Al publicar, el modulo tiene que existir en la ORGANIZACION GENERAL. */
 async function colgarDelArbolSiFalta(
   module: ModuleDefinition,
   actor: ActorDeModulo,
@@ -376,12 +312,7 @@ async function colgarDelArbolSiFalta(
   for (const evento of resultado.audit) await registrarEventoDeArbol(evento);
 }
 
-/**
- * Vuelta a borrador: rechazo de una propuesta, o retirada de algo publicado.
- *
- * Exige motivo en los dos casos. Un rechazo sin motivo deja a quien lo propuso adivinando, y una
- * retirada sin motivo deja a los equipos que lo usaban sin saber si volvera.
- */
+/** Vuelta a borrador: rechazo de una propuesta, o retirada de algo publicado. */
 export async function devolverABorrador(input: TransicionInput): Promise<ModuleDefinition> {
   const modulo = await modulos.get(input.moduleId);
   if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
@@ -452,18 +383,7 @@ export async function borrarModulo(input: TransicionInput): Promise<void> {
   });
 }
 
-/**
- * El modulo de un slug, SOLO si este actor puede verlo.
- *
- * Es la funcion que deben usar los caminos que sirven un modulo a una persona —paginas, API de
- * modulos, exportacion, alertas—. `findModuleBySlug` devuelve tambien borradores, porque el
- * editor los necesita; usarla sin mas en un camino de lectura serviria el trabajo en curso de
- * otra persona como si fuera contenido oficial.
- *
- * Devuelve undefined tanto si el modulo no existe como si existe y no se puede ver, para no
- * distinguir "no hay" de "no puedes": 4.11 pide lo mismo de los parametros de URL, y por la
- * misma razon —saber que algo existe ya es informacion—.
- */
+/** El modulo de un slug, SOLO si este actor puede verlo. */
 export async function moduloVisiblePorSlug(
   slug: string,
   actor: ActorDeModulo,
@@ -473,21 +393,7 @@ export async function moduloVisiblePorSlug(
   return puedeVer(modulo, actor) ? modulo : undefined;
 }
 
-/**
- * Visible Y ENCENDIDO — la puerta de los caminos que SIRVEN un modulo (3.4).
- *
- * Son dos preguntas distintas y por eso son dos funciones:
- *
- *   - `moduloVisiblePorSlug` responde al CICLO DE VIDA: existe, y su estado permite que esta
- *     persona lo abra. Es la que usan el editor y el panel de administracion.
- *   - esta responde ademas a la bandera de App Configuration: si el modulo esta apagado en
- *     produccion, no se sirve a nadie.
- *
- * La distincion importa en la direccion que no es obvia: un modulo apagado TIENE que seguir
- * abriendose en el editor. Apagarlo es lo que se hace cuando esta dando cifras malas, y si el
- * interruptor cerrara tambien la puerta de arreglarlo, la unica salida seria volver a encenderlo
- * en produccion para poder tocarlo.
- */
+/** Visible Y ENCENDIDO — la puerta de los caminos que SIRVEN un modulo (3.4). */
 export async function moduloServiblePorSlug(
   slug: string,
   actor: ActorDeModulo,
@@ -497,26 +403,11 @@ export async function moduloServiblePorSlug(
   return (await moduloEncendido(modulo.slug)) ? modulo : undefined;
 }
 
-/**
- * Poda del arbol de navegacion por estado del modulo.
- *
- * Un modulo publicado que se RETIRA sigue colgando de su carpeta en la organizacion general: el
- * arbol describe donde vive cada cosa, no si esta publicada. Sin esta poda seguiria apareciendo
- * en la navegacion de todo el mundo despues de retirarlo, y al pulsarlo daria 404 — peor que no
- * aparecer, porque parece una averia.
- *
- * Las carpetas que se quedan sin nada dentro tambien se retiran: una carpeta vacia en el arbol
- * no lleva a ningun sitio.
- */
+/** Poda del arbol de navegacion por estado del modulo. */
 export async function podarPorEstado(nodos: NavNode[], actor: ActorDeModulo): Promise<NavNode[]> {
   const definiciones = new Map((await modulos.list()).map((m) => [m.moduleId, m]));
   /*
    * Los apagados se leen UNA VEZ para todo el arbol.
-   *
-   * Con una consulta por nodo, pintar la barra lateral de un equipo con ocho modulos serian ocho
-   * resoluciones de configuracion. Y ademas todas las decisiones de este arbol tienen que salir
-   * de la MISMA foto: si a mitad de la poda venciera el TTL, media rama se podaria con una
-   * configuracion y la otra media con otra.
    */
   const apagados = new Set(await slugsApagados());
 
@@ -539,38 +430,18 @@ export async function podarPorEstado(nodos: NavNode[], actor: ActorDeModulo): Pr
   return podar(nodos);
 }
 
-/**
- * Actor a partir de la sesion.
- *
- * El rol es el de APLICACION —el mas alto entre los equipos de la persona—, no el del equipo
- * activo: administrar no es un permiso por equipo (4.10.1). El ambito de DATOS sigue siendo el
- * del equipo activo, que es otra cosa y se resuelve en otro sitio.
- */
+/** Actor a partir de la sesion. */
 export async function actorDe(sesion: SesionShell): Promise<ActorDeModulo> {
   return { userId: sesion.userId, role: await rolMasAltoDe(sesion.userId) };
 }
 
-/**
- * Navegacion de una sesion: lo concedido al equipo activo Y publicado.
- *
- * Existe para que la poda por estado no haya que acordarse de hacerla en cada sitio. Antes de
- * esta funcion habia tres llamadas sueltas a `navigationFor` —el arbol lateral, la redireccion
- * de la raiz y la API—, y bastaba olvidar una para que un modulo retirado siguiera apareciendo
- * justo en la pantalla que no se reviso.
- */
+/** Navegacion de una sesion: lo concedido al equipo activo Y publicado. */
 export async function navegacionDe(sesion: SesionShell) {
   const vista = await navigationFor(sesion.activeTeamId);
   return { ...vista, tree: await podarPorEstado(vista.tree, await actorDe(sesion)) };
 }
 
-/**
- * Como `moduloVisiblePorSlug`, resolviendo el rol a partir del usuario.
- *
- * Para los caminos que no tienen una sesion a mano: la exportacion y la evaluacion de alertas
- * corren en el trabajador de fondo, fuera del ciclo de una solicitud (5.3), y solo guardan de
- * quien es el trabajo. Que pasen por aqui es lo que impide que una alerta creada sobre un modulo
- * siga evaluandose —y notificando— despues de que ese modulo se retirara.
- */
+/** Como `moduloVisiblePorSlug`, resolviendo el rol a partir del usuario. */
 export async function moduloVisibleParaUsuario(
   slug: string,
   userId: string,
@@ -578,14 +449,7 @@ export async function moduloVisibleParaUsuario(
   return moduloVisiblePorSlug(slug, { userId, role: await rolMasAltoDe(userId) });
 }
 
-/**
- * Como `moduloServiblePorSlug`, resolviendo el rol a partir del usuario.
- *
- * La usan la exportacion y la evaluacion de alertas, que corren en el trabajador de fondo. Apagar
- * un modulo tiene que parar tambien lo que sigue produciendo a su nombre sin que nadie mire: una
- * alerta que sigue notificando sobre un modulo apagado es peor que el modulo encendido, porque
- * nadie puede ir a comprobar de donde sale la cifra.
- */
+/** Como `moduloServiblePorSlug`, resolviendo el rol a partir del usuario. */
 export async function moduloServibleParaUsuario(
   slug: string,
   userId: string,

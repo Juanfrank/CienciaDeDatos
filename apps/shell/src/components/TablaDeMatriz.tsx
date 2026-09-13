@@ -18,17 +18,7 @@ import {
 } from '@app/ui-components';
 import { Icono } from './iconos/Icono';
 
-/**
- * El cuerpo de la matriz: jerarquia, colapso y orden.
- *
- * Vive fuera de `objetos.tsx` porque necesita ESTADO —que esta plegado y por que columna se
- * ordena— y los demas objetos son funciones puras de sus props. Mezclarlo alli habria obligado a
- * convertir el modulo entero en cliente.
- *
- * El estado es de la VISTA y no de la instancia a proposito: plegar un grupo para mirar algo no
- * es editar el modulo, y guardarlo haria que un gesto de lectura ensuciara lo publicado. Se pierde
- * al recargar, que es lo que uno espera de haber plegado una fila.
- */
+/** El cuerpo de la matriz: jerarquia, colapso y orden. */
 
 const alternar = (conjunto: ReadonlySet<string>, clave: string): Set<string> => {
   const siguiente = new Set(conjunto);
@@ -37,13 +27,7 @@ const alternar = (conjunto: ReadonlySet<string>, clave: string): Set<string> => 
   return siguiente;
 };
 
-/**
- * Una celda de cifra, con su formato y su color por valor.
- *
- * Se extrae en vez de repetirse en los cuatro sitios donde la matriz escribe una cifra —celda,
- * total de fila, total de columna y total general— porque asi el color no se puede quedar en
- * tres de los cuatro. Es el mismo motivo por el que la tabla llana lo hace en un solo punto.
- */
+/** Una celda de cifra, con su formato y su color por valor. */
 function CeldaDeCifra({
   valor,
   medida,
@@ -98,10 +82,6 @@ export function TablaDeMatriz({
 
   /*
    * El orden se aplica ENTRE HERMANOS, no sobre la tabla entera.
-   *
-   * Ordenar todas las filas por una columna repartiria los hijos de un distrito entre otros
-   * distritos y la jerarquia dejaria de significar nada. Ordenando cada nivel por separado,
-   * «mayor total primero» ordena los distritos entre si y, dentro de cada uno, sus materias.
    */
   const arbol = useMemo(() => {
     if (orden.por === null) return vm.filas;

@@ -40,14 +40,7 @@ import {
 } from './objetos';
 import type { ObjetoSerializado } from '../server/serializar';
 
-/**
- * Que componente dibuja cada instancia.
- *
- * Vivia dentro de `VistaModulo` y sale de ahi para que el LIENZO DEL EDITOR use exactamente este
- * mismo codigo. Es lo que hace que la vista previa sea fiel: si el editor tuviera su propia
- * version, las dos divergirian en cuanto alguien anadiera un tipo de objeto —y el primero en
- * notarlo seria quien publicara algo que no se parece a lo que vio—.
- */
+/** Que componente dibuja cada instancia. */
 
 /** Filtrado cruzado apagado: el objeto recibe siempre la funcion, y esta no hace nada. */
 const SIN_FILTRADO = (): undefined => undefined;
@@ -57,23 +50,13 @@ export function ObjetoDeModulo({
   onFiltrar,
 }: {
   objeto: ObjetoSerializado;
-  /**
-   * Opcional a proposito: en la vista previa del editor no hay filtrado cruzado.
-   *
-   * Alli el bloque entero es un boton de seleccion, asi que un objeto que ademas filtrara haria
-   * dos cosas distintas con el mismo gesto. Sin este callback, los objetos se dibujan igual pero
-   * no ofrecen filtrar — que es justo lo que corresponde a una vista previa.
-   */
+  /** Opcional a proposito: en la vista previa del editor no hay filtrado cruzado. */
   onFiltrar?: (campo: string, valor: string) => void;
 }) {
   const titulo = objeto.titulo;
 
   /*
    * Los elementos y los contenedores se resuelven ANTES de exigir `result`.
-   *
-   * Mas abajo, un objeto sin `result` se dibuja como «generandose» — que es correcto para todo lo
-   * que lee del cache, y absurdo para un cuadro de texto: se quedaria esperando un job que nunca
-   * va a poblar algo que no pidio.
    */
   const conf = objeto.instance.configuracion;
 

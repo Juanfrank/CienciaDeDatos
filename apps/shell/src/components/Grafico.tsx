@@ -9,22 +9,7 @@ import type {
   TipoDeGrafico,
 } from '@app/ui-components';
 
-/**
- * Un grafico: el lienzo de ECharts MAS el respaldo en DOM.
- *
- * El respaldo no es un apano para navegadores viejos: es el camino accesible, y por eso NO
- * desaparece cuando ECharts monta. Un `<canvas>` es un mapa de bits — no hay nada dentro que un
- * lector de pantalla pueda recorrer ni que el tabulador pueda alcanzar—, asi que el filtrado
- * cruzado de 4.4 dejaria de existir para quien navega con teclado. Con el respaldo delante:
- *
- *  - SIN JavaScript se ve el respaldo, con sus barras y sus botones. La pagina sigue sirviendo.
- *  - CON JavaScript se ve el grafico, y el respaldo pasa a estar oculto VISUALMENTE pero sigue
- *    en el documento y sigue siendo alcanzable con el tabulador. Al recibir el foco se muestra,
- *    porque un control invisible que recibe el foco desorienta mas que uno que no existe.
- *
- * ECharts aporta ademas su capa `aria`, que describe el grafico, y los patrones `decal`, que
- * hacen que las series se distingan sin depender del color.
- */
+/** Un grafico: el lienzo de ECharts MAS el respaldo en DOM. */
 
 const Lienzo = dynamic(() => import('./Lienzo'), {
   ssr: false,
@@ -54,12 +39,7 @@ export function Grafico({
   presentacion?: PresentacionDeObjeto;
   /** Formatea una cifra de la serie `s` con el formato de SU medida. */
   formatear?: (valor: number, serie: number) => string;
-  /**
-   * Solo el combinado: cuantas series iniciales son columnas.
-   *
-   * Viene del mapeo —de cuantos campos hay en el pozo «Columnas»— y no de la presentacion, porque
-   * que una medida sea columna o linea es una propiedad de los datos y no de como se ven.
-   */
+  /** Solo el combinado: cuantas series iniciales son columnas. */
   seriesDeColumna?: number;
   onSeleccionar?: (categoria: string) => void;
   /** El respaldo: las barras en HTML, con sus botones. */
@@ -70,18 +50,10 @@ export function Grafico({
 
   /*
    * Los colores se leen de las variables CSS del tema, ya resueltas por el navegador.
-   *
-   * Es lo que hace que el grafico pertenezca al mismo sistema que el resto: no hay una paleta
-   * de ECharts que mantener al lado de la de Material Design. El dia que cambie el tema, cambia
-   * el grafico, sin tocar esto.
    */
   useEffect(() => {
     /*
      * Se lee de `body`, que es donde el layout inyecta el tema — NO de `documentElement`.
-     *
-     * Leerlo de la raiz devolvia cadena vacia en las ocho series y en todos los textos, asi que
-     * ECharts caia en su paleta por defecto: el grafico salia con los colores de la libreria y
-     * nadie lo notaba, porque un grafico con colores plausibles no parece roto.
      */
     const estilo = getComputedStyle(document.body);
     const v = (nombre: string) => estilo.getPropertyValue(nombre).trim();

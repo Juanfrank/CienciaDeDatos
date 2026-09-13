@@ -2,18 +2,7 @@ import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { type CacheEntry, CacheStoreUnavailableError, type ICacheStore } from './ICacheStore';
 
-/**
- * Store de cache sobre disco — implementacion de DESARROLLO.
- *
- * No es un atajo: es necesaria. El job de poblacion y el servidor de la aplicacion son procesos
- * DISTINTOS, asi que un L2 en memoria no se compartiria entre ellos y el camino de dos niveles
- * de la seccion 6.3 quedaria sin ejercitar en local. Con esto, el job escribe y el servidor lee
- * exactamente igual que lo haran contra Azure Storage.
- *
- * `BlobCacheStore` sigue siendo la implementacion de produccion. Ambas cumplen `ICacheStore`,
- * que es justo el punto de la seccion 6.2: el backend de almacenamiento es sustituible sin
- * tocar logica de negocio.
- */
+/** Store de cache sobre disco — implementacion de DESARROLLO. */
 export interface FileCacheStoreOptions {
   /** Directorio raiz. Se crea si no existe. */
   directory: string;

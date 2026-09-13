@@ -4,24 +4,7 @@ import { comoThemeTokens, temaClaro, temaOscuro } from './temaInstitucional';
 import { type ModoDeColor } from './material3';
 import { variablesMaterial } from './material3Tokens';
 
-/**
- * La puerta de contraste, aplicada al TEMA OSCURO — seccion 4.3 y accesibilidad de 4.9.
- *
- * Lo que ya estaba probado del oscuro eran sus PARES DE ROL: `onSurface` sobre `surface`,
- * `onPrimary` sobre `primary`, las ocho series sobre la superficie. Eso comprueba que la tabla de
- * tonos de Material Design 3 hace lo que promete, y es necesario, pero no es el tema.
- *
- * Lo que faltaba son las combinaciones que la aplicacion usa DE VERDAD, que no son pares `onX`/`X`
- * sino las que fija `institutionalContrastChecks`: el enlace sobre la superficie, el texto
- * atenuado sobre el fondo, el acento como elemento grafico. Esas se comprobaban solo sobre
- * `defaultTheme`, que es el tema claro —una constante—, asi que el tema oscuro derivado nunca pasó
- * por la puerta que decide si un modulo se puede publicar.
- *
- * Y el derivado es justo donde puede romperse, porque `comoThemeTokens` ELIGE un rol para cada
- * token: `surface` es `surfaceContainerLowest`, `textMuted` es `onSurfaceVariant`. Una eleccion
- * puede estar bien en claro y no en oscuro: en claro `surfaceContainerLowest` es el blanco puro y
- * en oscuro es el negro mas profundo del esquema, y no es la misma distancia a los mismos textos.
- */
+/** La puerta de contraste, aplicada al TEMA OSCURO — seccion 4.3 y accesibilidad de 4.9. */
 
 const MODOS: ModoDeColor[] = ['claro', 'oscuro'];
 const temaDe = (modo: ModoDeColor) => (modo === 'claro' ? temaClaro : temaOscuro);
@@ -122,10 +105,6 @@ describe('encender el modo oscuro es redefinir, nunca anadir', () => {
      * `shadow` y `scrim` son negro en los dos modos POR DEFINICION: MD3 los fija en el tono 0 de
      * la paleta neutra porque una sombra es ausencia de luz y un velo es lo que oscurece lo que
      * hay detras. Aclararlos en oscuro no daria un tema mas oscuro, daria una sombra que ilumina.
-     *
-     * Se nombran uno a uno en vez de filtrarse por patron: asi, el dia que un tercer rol se quede
-     * igual en los dos modos, la prueba lo señala y alguien decide si es otra excepcion legitima
-     * o el descuido que esta prueba busca.
      */
     const SIN_MODO = ['--md-sys-color-shadow', '--md-sys-color-scrim'];
     const claras = variablesMaterial(temaClaro);

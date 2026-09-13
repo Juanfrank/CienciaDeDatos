@@ -1,19 +1,7 @@
 import type { OrdenDeCategorias } from '../presentacion/contrato';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
-/**
- * Ordena las categorias del eje.
- *
- * Se hace sobre el MODELO DE VISTA y no dentro de ECharts, y eso importa mas de lo que parece:
- * cada grafico tiene un respaldo en HTML —las barras como botones, que es la capa por la que
- * navega quien usa teclado o lector de pantalla—, y ese respaldo se dibuja desde el mismo modelo.
- * Ordenando en ECharts, el grafico saldria de mayor a menor y el respaldo en el orden del dataset:
- * dos lecturas distintas de la misma tarjeta, y la que discrepa es justo la accesible.
- *
- * Por `valor` usa la PRIMERA serie. Con varias medidas no hay un «el valor» que ordenar, y elegir
- * la primera es lo que hace cualquier herramienta de informes: es la que se mapeo primero, o sea
- * la principal.
- */
+/** Ordena las categorias del eje. */
 export function ordenarCategorias(
   vm: CategoricalViewModel,
   orden: OrdenDeCategorias | undefined,
@@ -31,9 +19,6 @@ export function ordenarCategorias(
       const vb = b.values[0] ?? null;
       /*
        * Los huecos van SIEMPRE al final, se ordene como se ordene.
-       *
-       * Tratar `null` como cero los mezclaria entre las categorias con valor cero real, y
-       * «no se puede calcular» y «vale cero» son cosas distintas que no deben quedar juntas.
        */
       if (va === null && vb === null) return 0;
       if (va === null) return 1;

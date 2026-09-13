@@ -2,26 +2,7 @@ import type { Agregacion, QueryResult } from '@app/data-contracts';
 import { type Acumulador, acumular, cerrar, nuevoAcumulador } from './agregacion';
 import { fieldKey } from './viewModel';
 
-/**
- * La matriz, con jerarquia de verdad.
- *
- * La primera version cruzaba UNA dimension de filas con UNA de columnas y una sola medida, y con
- * eso no hay nada que expandir: un cruce plano no tiene niveles. Pero una matriz es exactamente
- * el objeto donde la jerarquia importa —distrito y dentro materia, ano y dentro trimestre—, asi
- * que el limite no era una simplificacion: era lo que impedia usarla para lo que sirve.
- *
- * Dos decisiones que sostienen todo lo demas:
- *
- * 1. **Los subtotales se acumulan desde las filas de ORIGEN, para cada prefijo.** Al leer cada
- *    fila del dataset se alimenta su celda y tambien la de cada nivel por encima. Es lo que hace
- *    que colapsar un grupo muestre su subtotal ya calculado y, sobre todo, que ese subtotal sea
- *    correcto con cualquier operador: el promedio de un distrito es el de sus casos, no el de los
- *    promedios de sus materias, que solo coincidirian si todas pesaran igual.
- *
- * 2. **El prefijo vacio es el total.** Una ruta de longitud cero representa «todo», asi que los
- *    totales generales, los de fila y los de columna salen del mismo mecanismo que las celdas, sin
- *    un camino aparte que pueda divergir.
- */
+/** La matriz, con jerarquia de verdad. */
 
 /** Separador interno de rutas. No aparece en ninguna etiqueta visible. */
 const SEP = '||';
@@ -104,11 +85,6 @@ export function construirMatriz(
 
     /*
      * Cada fila de origen alimenta su celda Y la de todos sus niveles por encima.
-     *
-     * Con tres niveles de fila y dos de columna son doce combinaciones de prefijo por fila leida.
-     * Parece mucho y no lo es: evita recorrer el dataset otra vez por cada subtotal y, sobre todo,
-     * evita calcular un subtotal a partir de otros ya calculados, que es donde un promedio deja de
-     * ser el promedio.
      */
     for (let f = 0; f <= etiquetasFila.length; f += 1) {
       const prefijoFila = etiquetasFila.slice(0, f);
@@ -135,13 +111,7 @@ export function construirMatriz(
   };
 }
 
-/**
- * Las filas que se DIBUJAN, en orden, segun lo que este colapsado.
- *
- * Un nodo colapsado aparece —con su subtotal— y sus descendientes no. Se devuelve plano y no
- * anidado porque una tabla HTML es plana: la jerarquia se expresa con la sangria y con el nivel,
- * no anidando filas.
- */
+/** Las filas que se DIBUJAN, en orden, segun lo que este colapsado. */
 export function filasVisibles(
   nodos: NodoDeMatriz[],
   colapsados: ReadonlySet<string>,
@@ -172,13 +142,7 @@ export function hojas(nodos: NodoDeMatriz[], colapsados: ReadonlySet<string>): N
 
 export type Direccion = 'asc' | 'desc';
 
-/**
- * Ordena una lista de nodos entre HERMANOS, sin romper la jerarquia.
- *
- * Ordenar la tabla entera por una columna destruiria los grupos: los hijos de un distrito
- * acabarian repartidos entre otros distritos. Se ordena cada nivel por separado, que es lo que
- * hace que «ordenar por total descendente» signifique lo que uno espera.
- */
+/** Ordena una lista de nodos entre HERMANOS, sin romper la jerarquia. */
 export function ordenarNodos(
   nodos: NodoDeMatriz[],
   comparar: (a: NodoDeMatriz, b: NodoDeMatriz) => number,

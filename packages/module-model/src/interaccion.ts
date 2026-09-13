@@ -1,16 +1,4 @@
-/**
- * Interactividad — seccion 4.4.
- *
- * "Catalogo DOCUMENTADO de patrones de interaccion soportados (no arbitrario)."
- *
- * El catalogo se declara como dato, igual que el de objetos visuales, para que el conjunto sea
- * explicito y revisable en vez de emerger de lo que cada pantalla haya ido implementando.
- *
- * Los cuatro patrones comparten una decision de diseño: su estado vive en la QUERY STRING, no en
- * estado de componente. La seccion 4.11 exige que la URL sea en todo momento la representacion
- * completa del estado visible, y al cumplirla resulta que compartir, marcar y recargar salen
- * gratis — no hacen falta mecanismos aparte para ninguna de las tres cosas.
- */
+/** Interactividad — seccion 4.4. */
 
 export type InteractionPattern =
   | 'segmentador'
@@ -82,16 +70,7 @@ export const PATRONES_DE_INTERACCION: InteractionPatternSpec[] = [
   },
 ];
 
-/**
- * Marcador — seccion 4.4.
- *
- * "Un marcador es, en terminos de implementacion, una URL con nombre que captura el estado de
- * filtros de la seccion 4.11 — no un mecanismo de guardado de estado aparte."
- *
- * Lo que se guarda y lo que NO se guarda es la parte importante: se guardan los filtros; no se
- * guardan ni las filas resultantes ni el ambito de quien lo creo. Si se guardara cualquiera de
- * las dos cosas, un marcador compartido filtraria datos del creador a quien lo abre.
- */
+/** Marcador — seccion 4.4. */
 export interface Bookmark {
   id: string;
   name: string;
@@ -156,12 +135,7 @@ export function captureBookmark(input: {
   };
 }
 
-/**
- * Destino de drill-through declarado en un objeto del modulo.
- *
- * Vive en la composicion del modulo y no en el objeto visual: a que otro modulo se navega es
- * una decision de quien arma el modulo, no una propiedad del grafico de barras.
- */
+/** Destino de drill-through declarado en un objeto del modulo. */
 export interface DrillThroughTarget {
   /** Modulo al que se navega. */
   moduleSlug: string;

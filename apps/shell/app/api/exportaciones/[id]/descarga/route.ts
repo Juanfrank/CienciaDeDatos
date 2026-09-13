@@ -4,14 +4,7 @@ import { obtenerSesion } from '../../../../../src/server/sesion';
 
 export const runtime = 'nodejs';
 
-/**
- * Descarga del artefacto ya generado.
- *
- * La comprobacion de propiedad se repite aqui, no se hereda de la ruta de estado: son dos
- * solicitudes distintas y una URL de descarga se comparte por chat con facilidad. Es el mismo
- * criterio de la seccion 9 —comprobar en el backend, no ocultar en la interfaz— aplicado al
- * archivo, que es donde estan los datos.
- */
+/** Descarga del artefacto ya generado. */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();

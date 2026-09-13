@@ -2,12 +2,7 @@ import { contarAmpliaciones, listarAuditoria } from '../../../src/server/auditor
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Registro de auditoria — secciones 4.10.7 y 7.
- *
- * Las ampliaciones de ambito se muestran DESTACADAS y en su propia seccion, no mezcladas
- * indistintamente con el resto de cambios, que es lo que pide el documento.
- */
+/** Registro de auditoria — secciones 4.10.7 y 7. */
 export default async function PaginaAuditoria({
   searchParams,
 }: {

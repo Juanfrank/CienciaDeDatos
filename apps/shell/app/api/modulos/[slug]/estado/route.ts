@@ -11,14 +11,7 @@ import { obtenerSesion } from '../../../../../src/server/sesion';
 
 export const runtime = 'nodejs';
 
-/**
- * Transiciones del ciclo de vida — seccion 4.1.
- *
- * Una ruta y una transicion pedida por nombre, en vez de un PATCH que acepte `status`. La
- * diferencia no es cosmetica: con `status` libre, "publicar" seria escribir una cadena, y la
- * comprobacion de si se PUEDE publicar dependeria de acordarse de hacerla. Aqui cada transicion
- * es una funcion con su permiso y sus bloqueos.
- */
+/** Transiciones del ciclo de vida — seccion 4.1. */
 const TRANSICIONES = ['enviar', 'publicar', 'devolver'] as const;
 type Transicion = (typeof TRANSICIONES)[number];
 

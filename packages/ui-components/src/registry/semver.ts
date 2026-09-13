@@ -1,11 +1,4 @@
-/**
- * Versionado semantico del repositorio de objetos — seccion 4.5.
- *
- * Se implementa aqui, en vez de depender de una libreria, porque solo se necesita una fraccion
- * minima de semver (comparar y clasificar incrementos) y porque las reglas de publicacion del
- * documento —cuando exige certificacion, cuando una version es "nueva mayor"— dependen de esa
- * clasificacion y conviene tenerla a la vista.
- */
+/** Versionado semantico del repositorio de objetos — seccion 4.5. */
 
 export interface Semver {
   major: number;

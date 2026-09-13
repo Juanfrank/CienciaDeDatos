@@ -3,22 +3,7 @@
 import { useEffect, useId, useState } from 'react';
 import { Icono } from './iconos/Icono';
 
-/**
- * El ambito que impone el RLS, reducido a una insignia.
- *
- * Antes era una frase que enumeraba cada campo y cada valor concedido, a ancho completo y encima
- * del modulo. Con dos dimensiones ya ocupaba una linea entera, y crece con el ambito: la persona
- * cuyo acceso es mas complejo es la que mas texto tiene que saltarse cada vez que abre un
- * modulo, y justo esa persona es la que ya sabe cual es su ambito.
- *
- * Lo que hay que ver SIEMPRE es que la vista esta recortada —porque explica que las cifras no
- * cuadren con las de otro— y eso cabe en tres palabras. El detalle es una consulta puntual, y va
- * detras del puntero.
- *
- * El detalle no se pierde para quien no usa raton: el mismo patron que el tooltip explicativo de
- * los objetos, que cumple 1.4.13 de WCAG —aparece tambien al enfocar con teclado, se cierra con
- * Escape y aguanta el puntero encima para poder leerlo o seleccionarlo.
- */
+/** El ambito que impone el RLS, reducido a una insignia. */
 export function InsigniaDeAmbito({ restricciones }: { restricciones: [string, string[]][] }) {
   const id = useId();
   const [visible, setVisible] = useState(false);

@@ -1,12 +1,4 @@
-/**
- * Validacion automatica de contraste — seccion 4.3.
- *
- * El documento la exige "sobre combinaciones de color elegidas ANTES de publicar un modulo
- * institucional". Es decir: es una puerta de publicacion, no una advertencia cosmetica. Y la
- * seccion 4.9 es explicita en que la accesibilidad no es opcional y no se pospone.
- *
- * Implementa el calculo de razon de contraste de WCAG 2.1 (luminancia relativa).
- */
+/** Validacion automatica de contraste — seccion 4.3. */
 
 export type WcagLevel = 'AA' | 'AAA';
 export type TextSize = 'normal' | 'large';
@@ -91,12 +83,7 @@ export function checkContrast(check: ContrastCheck, level: WcagLevel = 'AA'): Co
   return { ...check, size, ratio, required, passes: ratio >= required };
 }
 
-/**
- * Puerta de publicacion: comprueba todas las combinaciones y devuelve las que no pasan.
- *
- * Devolver la lista completa —en vez de lanzar al primer fallo— es deliberado: quien publica
- * necesita ver de una vez todo lo que hay que corregir, no descubrirlo de uno en uno.
- */
+/** Puerta de publicacion: comprueba todas las combinaciones y devuelve las que no pasan. */
 export function findContrastFailures(
   checks: ContrastCheck[],
   level: WcagLevel = 'AA',
@@ -104,12 +91,7 @@ export function findContrastFailures(
   return checks.map((c) => checkContrast(c, level)).filter((r) => !r.passes);
 }
 
-/**
- * Combinaciones que todo modulo institucional debe superar antes de publicarse.
- *
- * Incluye cada color de la paleta categorica sobre la superficie: una serie de datos que no
- * contrasta con el fondo es ilegible, aunque el texto de la pagina si contraste.
- */
+/** Combinaciones que todo modulo institucional debe superar antes de publicarse. */
 export function institutionalContrastChecks(theme: {
   color: {
     text: string;
@@ -139,26 +121,14 @@ export function institutionalContrastChecks(theme: {
       foreground: color.textOnBrand,
       background: color.danger,
     },
-    /**
-     * El acento se comprueba como ELEMENTO GRAFICO (3:1), no como texto.
-     *
-     * No es una excepcion que se hace para que pase: es lo que el acento es, segun la propia
-     * norma de marca —enfasis y contraste, nunca relleno dominante—. Comprobarlo a 4.5:1 daria
-     * un fallo permanente que alguien acabaria silenciando, y silenciar la puerta de contraste
-     * es peor que no tenerla.
-     */
+    /** El acento se comprueba como ELEMENTO GRAFICO (3:1), no como texto. */
     {
       label: 'acento como elemento grafico sobre superficie',
       foreground: color.accent[500],
       background: color.surface,
       size: 'large' as const,
     },
-    /**
-     * Y el tono con el que SI se puede escribir en rojo se comprueba como texto.
-     *
-     * Estas dos comprobaciones juntas son la regla: si alguien aclara `accent[700]` buscando
-     * acercarlo al rojo de la marca, esta prueba lo detiene antes de que llegue a un rotulo.
-     */
+    /** Y el tono con el que SI se puede escribir en rojo se comprueba como texto. */
     {
       label: 'texto de acento sobre superficie',
       foreground: color.accent[700],

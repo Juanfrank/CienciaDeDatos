@@ -5,19 +5,7 @@ import { cambiarEquipoActivo, obtenerSesion } from '../../../../src/server/sesio
 
 export const runtime = 'nodejs';
 
-/**
- * Cambio de equipo activo (4.10.2).
- *
- * Es una accion explicita de la persona usuaria y una escritura del lado servidor: el ambito de
- * datos efectivo cambia de inmediato SIN cerrar sesion.
- *
- * Comprueba que la persona pertenece al equipo. Sin esa comprobacion, cualquiera podria fijar
- * un teamId arbitrario con una peticion a mano y leer los datos de otro equipo — el caso
- * exacto que la seccion 9 pide probar a nivel de backend, no de interfaz.
- *
- * Esta ruta aceptaba tambien un `userId` que cambiaba de identidad sin autenticar. Ya no: la
- * identidad la fija el inicio de sesion y nada mas.
- */
+/** Cambio de equipo activo (4.10.2). */
 export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();

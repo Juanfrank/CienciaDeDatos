@@ -3,24 +3,9 @@ import { type FolderNode, type ModuleRef, type NavNode, isFolder, isModule } fro
 import { type Capability, type PermissionDenial, can, denial } from './permissions';
 import type { AppRole } from './Team';
 
-/**
- * Operaciones sobre la organizacion general — seccion 4.1.
- *
- * Funciones PURAS: reciben el arbol y devuelven uno nuevo. No persisten, no consultan y no
- * mutan la entrada. Quien persiste es el backend, que ademas traduce los eventos de dominio
- * que se devuelven aqui a entradas del log de auditoria de configuracion (4.10.7).
- */
+/** Operaciones sobre la organizacion general — seccion 4.1. */
 
-/**
- * Nodo en la papelera.
- *
- * La papelera es una LISTA APARTE y no un campo dentro de NavNode. Dos razones: mantiene el
- * tipo de dominio limpio —el arbol es siempre el arbol vigente— y modela literalmente lo que
- * pide 4.1: papelera temporal antes del borrado definitivo, NUNCA borrado inmediato.
- *
- * Guarda padre e indice previos porque restaurar sin ellos devolveria el nodo a la raiz, y eso
- * lo sacaria de la carpeta restrictiva en la que estaba: una ampliacion de acceso silenciosa.
- */
+/** Nodo en la papelera. */
 export interface TrashedNode {
   node: NavNode;
   deletedAt: string;
@@ -39,13 +24,7 @@ export interface Actor {
   role: AppRole;
 }
 
-/**
- * Evento de auditoria de dominio.
- *
- * Se define AQUI y no se importa de `@app/observability`: este paquete es `type:lib` y no puede
- * depender de `type:server`. Ademas de respetar el limite, es mejor estratificacion — el
- * dominio emite eventos de dominio y el backend los traduce a su formato de log.
- */
+/** Evento de auditoria de dominio. */
 export interface TreeAuditEvent {
   actorId: string;
   action:
@@ -139,13 +118,7 @@ function isSelfOrAncestor(nodes: NavNode[], nodeId: string, possibleDescendantId
 const describir = (node: NavNode): string =>
   isFolder(node) ? `carpeta '${node.name}'` : `modulo '${node.moduleRef.name}'`;
 
-/**
- * Aplica una operacion sobre el arbol.
- *
- * Comprueba SIEMPRE el permiso primero. Esa comprobacion vive en el dominio, no en la interfaz:
- * ocultar un boton no impide que alguien llame al endpoint directamente (criterio de la
- * seccion 9).
- */
+/** Aplica una operacion sobre el arbol. */
 export function applyTreeOperation(
   tree: ManagedTree,
   op: TreeOperation,

@@ -12,13 +12,7 @@ import {
 } from '@app/alerts';
 import { kindLabel } from './Campana';
 
-/**
- * Bandeja de avisos: lo recibido, y lo que lo genera.
- *
- * Las tres listas van juntas a proposito. Un aviso que molesta se apaga donde se lee, no
- * buscando su regla en otra pantalla; y una alerta que no llega nunca se diagnostica viendo su
- * estado al lado de la bandeja vacia.
- */
+/** Bandeja de avisos: lo recibido, y lo que lo genera. */
 
 type ReglaConEstado = AlertRule & { estado: AlertState | null };
 

@@ -1,17 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Panel de administracion — verificacion en navegador (4.10.8).
- *
- * Cada bloque corresponde a un criterio de aceptacion de la seccion 9.
- *
- * Nota sobre el estado: el almacen de gobierno es del proceso y las pruebas corren en serie
- * contra un unico servidor, asi que las escrituras PERSISTEN entre pruebas. Por eso cada una
- * toca entidades distintas, y las que no pueden evitar compartir asertan sobre lo que es
- * estable (la cadena de carpetas que origina un ambito) y no sobre valores que otra prueba
- * pueda haber cambiado.
- */
+/** Panel de administracion — verificacion en navegador (4.10.8). */
 
 test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9)', () => {
   test('un Visor no ve el enlace y la API le responde 403', async ({ page }) => {
@@ -316,8 +306,6 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
    * El caso que esto impide no es hipotetico: el modelo de permisos es circular, y sin la
    * comprobacion un Administrador puede retirarse el rol a si mismo y dejar el gobierno
    * inaccesible para todos, incluido el. Restituirlo exigiria entrar en la base de datos.
-   *
-   * Se comprueba contra la API a mano, no pulsando botones: la seccion 9 pide exactamente eso.
    */
   test.beforeEach(async ({ page }) => {
     await entrarComo(page, 'u-admin');
@@ -389,11 +377,6 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
     } finally {
       /*
        * La restitucion la hace BETO, no u-admin.
-       *
-       * Es la consecuencia que esta prueba descubrio y que conviene dejar escrita: al soltar el
-       * rol, u-admin pierde el acceso al panel EN EL ACTO, incluida la ruta que se lo devolveria.
-       * Ya no es un bloqueo de la institucion —para eso esta la comprobacion del ultimo
-       * Administrador— pero si de esa persona, y solo otro Administrador puede deshacerlo.
        */
       await entrarComo(page, 'u-beto');
       await membresia('equipo-norte', 'u-admin', 'administrador');

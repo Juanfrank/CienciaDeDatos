@@ -4,22 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { CLAVES_DE_PRESENTACION, catalogoInicial, type ClaveDePresentacion } from '@app/ui-components';
 import { CONTROL_DE_CLAVE } from '../components/editor/controles';
 
-/**
- * Toda clave de presentacion que un objeto DECLARA tiene un control en el panel — 4.2.
- *
- * Es la tercera lista del mismo asunto. La primera es lo que el objeto declara en el catalogo, la
- * segunda lo que el dibujo honra —se comparan en `presentacionDeclarada.spec.ts`— y esta es la
- * que decide si alguien puede USARLO: una clave declarada, honrada por el dibujo y sin control en
- * el panel solo se puede poner escribiendo la instancia a mano.
- *
- * Es el mismo fallo que la auditoria encontro en las barras horizontales, un paso mas adelante, y
- * no lo detecta ninguna de las otras dos pruebas: las dos listas anteriores pueden coincidir
- * perfectamente mientras el editor no dibuja el control.
- *
- * Se lee el panel como TEXTO. Es un componente de cliente de mil quinientas lineas con estado,
- * contexto y un lienzo de ECharts detras: montarlo en una prueba unitaria costaria mas que lo que
- * comprueba, y lo que hay que comprobar es una correspondencia entre dos listas.
- */
+/** Toda clave de presentacion que un objeto DECLARA tiene un control en el panel — 4.2. */
 
 const PANEL = readFileSync(
   join(process.cwd(), 'apps/shell/src/components/editor/Presentacion.tsx'),

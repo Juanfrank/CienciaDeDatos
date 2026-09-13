@@ -1,12 +1,4 @@
-/**
- * Puebla el cache local contra el conector configurado, para desarrollo y pruebas.
- *
- * Es el equivalente local del Timer Trigger: corre el mismo `runScheduledCycle` que correra en
- * el Function App. Se ejecuta como PROCESO APARTE del servidor, igual que en produccion, y por
- * eso el L2 es un cache en disco y no en memoria.
- *
- *   npx tsx tools/poblar-cache.mts [--connector mock|sql|xmla] [--dir .cache-datos]
- */
+/** Puebla el cache local contra el conector configurado, para desarrollo y pruebas. */
 import { createDataConnector, isConnectorKind } from '@app/data-contracts-server';
 import { FileCacheStore } from '@app/caching';
 import { runScheduledCycle } from '@app/cache-populator';

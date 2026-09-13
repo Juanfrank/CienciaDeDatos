@@ -1,15 +1,4 @@
-/**
- * Formas de fila del almacen de identidad y gobierno.
- *
- * Se declaran a mano, reflejando `prisma/schema.prisma`, en vez de depender de los tipos
- * generados por Prisma. El motivo es de capas: los mapeadores de este paquete son funciones
- * PURAS y deben poder probarse sin cliente de base de datos ni motor de consulta. La capa de
- * repositorio, que si usa el cliente de Prisma, es delgada y se limita a leer filas con esta
- * forma y pasarlas por estos mapeadores.
- *
- * Consecuencia a vigilar: un cambio en schema.prisma que no se refleje aqui no lo detecta el
- * compilador. Por eso `mappers.spec.ts` incluye una prueba de coherencia entre ambos.
- */
+/** Formas de fila del almacen de identidad y gobierno. */
 
 export interface AccessScopeRow {
   id: string;

@@ -16,18 +16,7 @@ import {
 
 export { trazar, type CajaDeObjeto } from '@app/ui-components';
 
-/**
- * Los elementos: lo que se coloca en un modulo sin enlazarlo a datos.
- *
- * Ninguno lleva `Marco` salvo el cuadro de texto. No es un olvido: una linea divisoria, un
- * conector, un titulo de seccion y una forma son TRAZOS, y encerrarlos en una tarjeta con borde,
- * fondo y sombra los convierte en un bloque mas — que es justo lo contrario de separar, encabezar
- * o senalar.
- *
- * El color sale siempre de un rol del tema (4.3). Un hex escrito a mano no tiene par de contraste
- * comprobado contra la superficie donde acabe, ni sigue al tema oscuro, y aqui seria especialmente
- * tentador: «es solo una linea decorativa» es como empiezan los elementos invisibles en oscuro.
- */
+/** Los elementos: lo que se coloca en un modulo sin enlazarlo a datos. */
 
 const VARIABLE: Record<ColorDeTexto, string> = {
   predeterminado: 'var(--md-sys-color-on-surface)',
@@ -62,10 +51,6 @@ export function CuadroDeTexto({ config }: { config: ConfiguracionDeCuadroDeTexto
         }
         /*
          * El nivel produce un encabezado REAL, no un parrafo en grande.
-         *
-         * Quien navega con lector de pantalla salta de encabezado en encabezado; un texto grande
-         * que no es `h4`/`h5` se pierde en ese recorrido. Empieza en 4 porque el titulo del objeto
-         * ya es un `h3`: un `h1` dentro de una tarjeta rompe el orden de la pagina.
          */
         if (p.nivel) {
           const Etiqueta = (['h4', 'h5', 'h6'] as const)[p.nivel - 1] ?? 'h4';
@@ -87,13 +72,7 @@ export function CuadroDeTexto({ config }: { config: ConfiguracionDeCuadroDeTexto
 
 /* ── Titulo de seccion ─────────────────────────────────────────────────────────────────────── */
 
-/**
- * Un titulo que encabeza un grupo, con lineas que se reparten lo que sobra.
- *
- * Las lineas son `flex: 1` y no un ancho fijo: el mismo titulo tiene que funcionar en cuatro
- * columnas y en doce. Con un ancho en pixeles habria que reconfigurarlo cada vez que se mueve, y
- * en la rejilla de movil —una sola columna— se saldria.
- */
+/** Un titulo que encabeza un grupo, con lineas que se reparten lo que sobra. */
 export function TituloDeSeccion({ config }: { config: ConfiguracionDeTituloDeSeccion | undefined }) {
   const linea = config?.linea ?? 'ninguna';
   const borde = bordeDe(config?.estiloDeLinea);
@@ -141,12 +120,7 @@ export function LineaDivisoria({ config }: { config: ConfiguracionDeLineaDivisor
 
 /* ── Formas ────────────────────────────────────────────────────────────────────────────────── */
 
-/**
- * El recorte de cada forma.
- *
- * `clip-path` sobre porcentajes y no un SVG por forma: asi la forma se adapta a la celda que le
- * toque sin recalcular nada, y anadir una es una linea aqui en vez de un componente nuevo.
- */
+/** El recorte de cada forma. */
 const RECORTE: Partial<Record<Forma, string>> = {
   triangulo: 'polygon(50% 0%, 100% 100%, 0% 100%)',
   rombo: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
@@ -173,12 +147,6 @@ export function FormaBasica({ config }: { config: ConfiguracionDeForma | undefin
           ...(recorte ? { clipPath: recorte } : {}),
           /*
            * El lado de un cuadrado o un circulo lo pone el CSS, no este objeto de estilos.
-           *
-           * Tiene que ser el MENOR de los dos ejes de la celda, y eso no se puede expresar con
-           * `height: 100%` mas una proporcion: al recortar el ancho, el alto se queda donde estaba
-           * y el circulo sale elipse. Con unidades de contenedor (`cqw`/`cqh`) los dos lados salen
-           * del mismo `min()`, asi que son iguales por construccion. Va en `globals.css` bajo
-           * `[data-regular]`.
            */
         }}
       />
@@ -193,12 +161,7 @@ export function FormaBasica({ config }: { config: ConfiguracionDeForma | undefin
 
 /* ── Conexiones ────────────────────────────────────────────────────────────────────────────── */
 
-/**
- * El conector dibujado.
- *
- * Las coordenadas llegan ya en PIXELES relativos al lienzo, medidas por quien lo dibuja: solo
- * quien tiene el DOM sabe donde acabaron las cajas despues de que la rejilla las repartiera.
- */
+/** El conector dibujado. */
 export function Conexion({
   config,
   puntos,

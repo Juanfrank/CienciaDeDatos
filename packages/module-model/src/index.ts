@@ -1,10 +1,4 @@
-/**
- * Definicion de modulo — secciones 4.1, 4.2 y 4.6.
- *
- * Es el documento que produce el editor y consume el renderizador: que objetos hay, donde
- * estan, y contra que dataset se enlazan. Nunca una consulta, ni una cadena de conexion, ni
- * nada que revele la fuente activa.
- */
+/** Definicion de modulo — secciones 4.1, 4.2 y 4.6. */
 export {
   datasetsConsumedBy,
   findPage,

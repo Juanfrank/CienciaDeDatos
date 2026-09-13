@@ -1,12 +1,4 @@
-/**
- * Observabilidad — seccion 7 del contrato de ingenieria.
- *
- * Contiene el contrato de /health, el latido que el job de poblacion deja en el cache, y las
- * formas de evento estructurado que alimentan el panel operativo.
- *
- * Etiquetado `type:server`: NO puede importar `type:server-data`. Eso es deliberado y es lo
- * que permite que /health reporte el conector activo sin instanciar ninguno.
- */
+/** Observabilidad — seccion 7 del contrato de ingenieria. */
 export {
   assertConfigChangeIsAuditable,
   assertQueryCameFromPopulator,

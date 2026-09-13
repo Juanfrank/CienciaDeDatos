@@ -11,18 +11,7 @@ import { Icono } from './iconos/Icono';
 import { Marco } from './objetos';
 import type { ObjetoSerializado, PanelSerializado } from '../server/serializar';
 
-/**
- * Los contenedores: objetos que llevan otros objetos dentro.
- *
- * Los cinco comparten `Marco`, que es lo que les da titulo, subtitulo, icono, acento y los
- * interruptores de mostrar u ocultar cada cosa. No es reutilizacion por ahorrar lineas: si un
- * contenedor tuviera su propia cabecera «parecida», personalizar un objeto dependeria de que clase
- * de objeto se selecciono, que es justo lo que el estandar minimo cerro.
- *
- * Y los cinco respetan la regla que no se negocia: el alto lo manda la rejilla, nunca el contenido.
- * Un contenedor que creciera con lo que lleva dentro seria la forma mas facil de romperla, porque
- * lo que lleva dentro cambia con cada filtro.
- */
+/** Los contenedores: objetos que llevan otros objetos dentro. */
 
 /** La rejilla interna. La misma para los cinco: un contenedor es una rejilla con una cabecera. */
 function RejillaInterna({
@@ -90,13 +79,7 @@ export function ContenedorSimple({ objeto, titulo, config, dibujar }: PropsDeCon
 
 /* ── Desplazable ───────────────────────────────────────────────────────────────────────────── */
 
-/**
- * Se desplaza por UN eje.
- *
- * El otro se bloquea con `overflow: hidden`, no se deja en `auto` confiando en que el contenido
- * quepa: en cuanto un filtro alargue una tabla de dentro, «auto» pondria la segunda barra sin que
- * nadie lo decidiera, y la regla dejaria de cumplirse justo cuando mas contenido hay.
- */
+/** Se desplaza por UN eje. */
 export function ContenedorDesplazable({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
   const eje: Eje = config?.desplazable?.eje === 'x' ? 'x' : 'y';
   const columnas = columnasDe('contenedor-desplazable', config);
@@ -128,14 +111,7 @@ export function ContenedorDesplazable({ objeto, titulo, config, dibujar }: Props
 
 /* ── Ampliable ─────────────────────────────────────────────────────────────────────────────── */
 
-/**
- * Ensena parte de su contenido y se amplia a una ventana con SU PROPIA rejilla.
- *
- * La ventana no reutiliza la rejilla de la tarjeta: en la tarjeta caben dos cosas estrechas y en la
- * ventana caben diez repartidas de otra forma, y eso es lo que hace util ampliar. El cierre es
- * EXPLICITO —un boton, y Escape— porque una capa que solo se cierra pulsando fuera deja a quien
- * navega con teclado encerrado dentro.
- */
+/** Ensena parte de su contenido y se amplia a una ventana con SU PROPIA rejilla. */
 export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
   const [ampliado, setAmpliado] = useState(false);
   const columnas = columnasDe('contenedor-ampliable', config);
@@ -204,14 +180,7 @@ export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDe
 
 /* ── Con pestanas ──────────────────────────────────────────────────────────────────────────── */
 
-/**
- * Varias pestanas, cada una con su contenido y su disposicion.
- *
- * Cambiar de pestana NO cambia la posicion, las dimensiones ni el espacio que ocupa el contenedor.
- * Se consigue con la misma regla de siempre —el alto lo manda la rejilla— y con los paneles
- * inactivos ocultos en lugar de desmontados: el contenedor mide lo que mide, y la pestana con mas
- * contenido se desplaza dentro de su sitio en vez de estirarlo.
- */
+/** Varias pestanas, cada una con su contenido y su disposicion. */
 export function ContenedorConPestanas({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
   const paneles = objeto.paneles ?? [];
   const inicial = config?.pestanas?.pestanaInicial;

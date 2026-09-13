@@ -2,28 +2,12 @@ import { expect, test } from '@playwright/test';
 import { CLAVE_DEMO, SECRETO_TOTP_DEMO, codigoTotpDe, usuarioACorreo } from '../src/server/credencialesDemo';
 import { entrarComo } from './sesion';
 
-/**
- * Cuentas locales, desbloqueo y restablecimiento — seccion 4.7.2.
- *
- * El criterio que se comprueba es el que dice "no bloqueo indefinido sin via de recuperacion".
- * Las dos vias existen y son distintas: desbloquear no cambia la contrasena; restablecer emite
- * un token de un solo uso.
- *
- * Se usa `u-sin-equipo`, la cuenta reservada para tocar el estado de credenciales sin dejar sin
- * sesion a las demas pruebas.
- */
+/** Cuentas locales, desbloqueo y restablecimiento — seccion 4.7.2. */
 
 const CUENTA = 'u-sin-equipo';
 const CORREO = usuarioACorreo(CUENTA);
 
-/**
- * Una contrasena distinta por uso.
- *
- * No se puede reutilizar ninguna de las ultimas cinco (4.7.2), asi que una prueba no puede
- * "devolver la cuenta a su clave de siempre" al terminar: el propio servicio lo impide, y con
- * razon. Cada prueba se lleva la cuenta a una contrasena nueva y asienta sobre esa; ninguna
- * depende de cual quedo puesta antes.
- */
+/** Una contrasena distinta por uso. */
 let contador = 0;
 const claveNueva = (): string => `Restablecida-${Date.now()}-${(contador += 1)}-Aa!`;
 

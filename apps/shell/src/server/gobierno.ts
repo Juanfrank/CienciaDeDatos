@@ -22,18 +22,7 @@ import {
   toTeam,
 } from '@app/identity-db';
 
-/**
- * Almacen de gobierno — secciones 4.10.7 y 4.10.8.
- *
- * El panel de administracion ESCRIBE configuracion (arbol, equipos, ambitos, paquetes), asi que
- * el gobierno ya no puede ser un puñado de constantes derivadas del seed.
- *
- * Se define como PUERTO, y es ASINCRONO. Lo era todo menos eso hasta ahora, y ese era el error:
- * un puerto sincrono NO LO PUEDE IMPLEMENTAR una base de datos, asi que el adaptador de Azure SQL
- * que este archivo prometia era imposible de escribir sin cambiar antes la firma y con ella todos
- * los sitios que la usan. Hacerlo ahora es pagar esa deuda en el momento en que aparece el
- * segundo motivo para hacerlo: el estado tiene que dejar de ser del proceso (seccion 9).
- */
+/** Almacen de gobierno — secciones 4.10.7 y 4.10.8. */
 export interface GovernanceStore {
   getTree(): Promise<ManagedTree>;
   setTree(tree: ManagedTree): Promise<void>;
@@ -84,19 +73,7 @@ export function estadoInicial(): {
 /** Copia profunda. Evita que quien lee pueda mutar el estado del almacen por accidente. */
 const clonar = <T>(valor: T): T => JSON.parse(JSON.stringify(valor)) as T;
 
-/**
- * Adaptador sobre el almacen compartido.
- *
- * Guarda UNA instantanea completa. Es lo correcto para el tamano real de este dato —un arbol de
- * carpetas, unos equipos y unos usuarios— y para lo poco que se escribe: solo el Administrador,
- * y solo cuando cambia la configuracion. Partirlo por entidad complicaria las lecturas, que son
- * casi todas, para optimizar unas escrituras que casi nunca ocurren.
- *
- * Limite conocido: dos escrituras simultaneas del panel pueden pisarse, porque `ICacheStore` no
- * ofrece lectura-modificacion-escritura atomica. En la base de identidad lo resuelve una
- * transaccion; aqui se acota a que el panel lo usa un Administrador cada vez, y queda escrito
- * para que nadie lo confunda con un almacen transaccional.
- */
+/** Adaptador sobre el almacen compartido. */
 export class StoreGovernanceRepository implements GovernanceStore {
   private async instantanea(): Promise<InstantaneaDeGobierno> {
     const guardada = await leer<InstantaneaDeGobierno>(CLAVE_GOBIERNO);
@@ -191,10 +168,5 @@ export class StoreGovernanceRepository implements GovernanceStore {
   }
 }
 
-/**
- * Almacen de gobierno en uso.
- *
- * Ya no se cuelga de globalThis: el estado vive en el almacen compartido, asi que sobrevive por
- * si solo a la recarga en caliente Y lo ven todas las instancias.
- */
+/** Almacen de gobierno en uso. */
 export const gobierno = new StoreGovernanceRepository();

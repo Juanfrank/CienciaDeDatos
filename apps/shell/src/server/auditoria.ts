@@ -3,23 +3,8 @@ import { assertConfigChangeIsAuditable } from '@app/observability';
 import type { TreeAuditEvent } from '@app/access-control';
 import { CLAVE_AUDITORIA, escribir, leerLista } from './almacenCompartido';
 
-/**
- * Registro de auditoria de configuracion — secciones 4.10.7 y 7.
- *
- * Los cambios son EVENTOS VERSIONADOS, no sobrescritura silenciosa: se guarda el estado anterior
- * y el nuevo, de modo que la configuracion previa nunca se pierde.
- *
- * Las ampliaciones de ambito llevan marca propia para poder mostrarse destacadas, no mezcladas
- * indistintamente con el resto de cambios. El documento es explicito en que su numero deberia
- * tender a cero y que un numero creciente es señal de gobierno de RLS deteriorandose.
- */
-/**
- * Los eventos viven en el almacen COMPARTIDO.
- *
- * Un registro de auditoria por instancia no es un registro de auditoria: quien lo consulte vera
- * los cambios que hizo la instancia que le toco y no los de las demas, y justamente la fila que
- * mas importa —una ampliacion de ambito— podria ser la que no aparece.
- */
+/** Registro de auditoria de configuracion — secciones 4.10.7 y 7. */
+/** Los eventos viven en el almacen COMPARTIDO. */
 const leerEventos = (): Promise<ConfigChangeLog[]> => leerLista<ConfigChangeLog>(CLAVE_AUDITORIA);
 
 export interface RegistrarCambioInput {
@@ -33,13 +18,7 @@ export interface RegistrarCambioInput {
   isScopeExpansion?: boolean;
 }
 
-/**
- * Registra un cambio de configuracion.
- *
- * Pasa SIEMPRE por `assertConfigChangeIsAuditable`, que lanza si una ampliacion de ambito llega
- * sin justificacion. Esa funcion existia desde B.6 pero hasta ahora no guardaba nada, porque no
- * habia ninguna superficie desde la que configurar un ambito. Esta es esa superficie.
- */
+/** Registra un cambio de configuracion. */
 export async function registrarCambio(input: RegistrarCambioInput): Promise<ConfigChangeLog> {
   const evento: ConfigChangeLog = {
     kind: 'config-change',
@@ -108,12 +87,7 @@ export async function listarAuditoria(filtro: FiltroAuditoria = {}): Promise<Con
     .reverse();
 }
 
-/**
- * Numero de ampliaciones de ambito vigentes.
- *
- * Metrica de salud de gobierno, no de actividad: deberia tender a cero, y una tendencia
- * creciente indica que el modelo de RLS se esta relajando por acumulacion de excepciones.
- */
+/** Numero de ampliaciones de ambito vigentes. */
 export async function contarAmpliaciones(): Promise<number> {
   return (await leerEventos()).filter((e) => e.isScopeExpansion).length;
 }

@@ -17,17 +17,7 @@ import {
 } from './passwordPolicy';
 import type { IAuditLog, ILocalIdentityStore, LocalCredentialRecord } from './stores';
 
-/**
- * Proveedor de identidad local — seccion 4.7.2.
- *
- * Metodo SECUNDARIO, independiente de Easy Auth, para cuentas sin identidad institucional en
- * Azure AD (por ejemplo, usuarios externos autorizados). Deben tratarse como la excepcion, no
- * como la via por defecto.
- *
- * Como estas cuentas no heredan el acceso condicional ni el MFA centralizado de Azure AD, esa
- * ausencia de gobernanza se compensa aqui y no se deja como hueco de seguridad: TOTP
- * obligatorio, bloqueo con backoff progresivo y auditoria explicita de cada intento.
- */
+/** Proveedor de identidad local — seccion 4.7.2. */
 
 export interface LocalCredentials {
   email: string;
@@ -93,12 +83,7 @@ export class LocalIdentityProvider implements IIdentityProvider {
     return hash(this.season(password), ARGON2_OPTIONS);
   }
 
-  /**
-   * Valida una contraseña nueva contra la politica y el historial.
-   *
-   * Devuelve la lista de incumplimientos en vez de lanzar, para que la interfaz pueda
-   * mostrarlos todos de una vez en lugar de uno por intento.
-   */
+  /** Valida una contraseña nueva contra la politica y el historial. */
   async validateNewPassword(
     password: string,
     record?: Pick<LocalCredentialRecord, 'passwordHash' | 'passwordHistory'>,

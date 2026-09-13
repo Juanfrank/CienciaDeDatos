@@ -12,16 +12,7 @@ import { obtenerSesion } from '../../../../../src/server/sesion';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/**
- * Vista personalizada de una persona sobre un modulo — seccion 4.6.
- *
- * Es la vista de QUIEN PIDE, siempre: no hay parametro de usuario y no lo habra. La sesion dice
- * de quien es la vista, igual que en marcadores y avisos; aceptarlo del cuerpo convertiria esto
- * en una forma de leer —y de reescribir— la vista de otra persona.
- *
- * La personalizacion se limita a la capa de presentacion (4.6). El tipo no admite un cambio de
- * medida y, ademas, el cuerpo se comprueba: lo que llega por la red no lo protege un tipo.
- */
+/** Vista personalizada de una persona sobre un modulo — seccion 4.6. */
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();

@@ -1,13 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Personalizacion por usuario — seccion 4.6.
- *
- * Lo que se comprueba en un navegador y no se puede comprobar de otra forma: que la vista
- * personalizada se DISTINGUE de la institucional, que esa distincion viaja al exportar, que la
- * personalizacion de una persona no toca la de nadie mas, y que siempre hay camino de vuelta.
- */
+/** Personalizacion por usuario — seccion 4.6. */
 
 const MODULO = 'casos-pendientes';
 const OCULTABLE = 'kpi-ingresados';

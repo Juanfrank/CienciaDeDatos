@@ -7,23 +7,9 @@ import {
   paletasDe,
 } from './material3';
 
-/**
- * El resto del sistema de Material Design 3: tipografia, forma, elevacion y capas de estado.
- *
- * El color es la parte de MD3 que mas se nota, pero no es la que mas ordena. Lo que de verdad
- * hace que una interfaz se lea como un sistema son las OTRAS tres escalas, porque eliminan las
- * decisiones sueltas: un radio no es "12 px porque quedaba bien", es `medium`; un texto no es
- * "14 px en gris", es `body-medium` sobre `on-surface-variant`.
- */
+/** El resto del sistema de Material Design 3: tipografia, forma, elevacion y capas de estado. */
 
-/**
- * Escala tipografica de MD3: cinco familias de rol, tres tamanos cada una.
- *
- * `display` para cifras que dominan una pantalla, `headline` para titulos de region, `title`
- * para encabezados de tarjeta y tabla, `body` para prosa, `label` para controles. La regla que
- * evita el desorden es que un rol NO se elige por tamano sino por funcion; si un titulo queda
- * grande, se baja de rol, no se le cambia el tamano.
- */
+/** Escala tipografica de MD3: cinco familias de rol, tres tamanos cada una. */
 export interface EstiloTipografico {
   size: string;
   lineHeight: string;
@@ -71,13 +57,7 @@ export const FORMA = {
   full: '9999px',
 } as const;
 
-/**
- * Elevacion: seis niveles, cada uno con su sombra.
- *
- * En MD3 la elevacion es sobre todo un TONO de superficie —de ahi los `surfaceContainer`— y la
- * sombra solo acompana. Por eso las sombras de aqui son mas suaves que las de Material 2: si se
- * usan para hacer todo el trabajo, una pantalla con seis tarjetas parece un relieve.
- */
+/** Elevacion: seis niveles, cada uno con su sombra. */
 export const ELEVACION = {
   0: 'none',
   1: '0 1px 2px 0 rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15)',
@@ -87,13 +67,7 @@ export const ELEVACION = {
   5: '0 8px 12px 6px rgba(0,0,0,.15), 0 4px 4px 0 rgba(0,0,0,.30)',
 } as const;
 
-/**
- * Opacidad de las capas de estado.
- *
- * Un control de MD3 no cambia de color al pasar el raton: se le superpone una capa del color de
- * SU contenido con esta opacidad. Por eso un boton relleno y uno de texto reaccionan igual sin
- * declarar dos juegos de colores, y por eso no hace falta un token de "azul un poco mas oscuro".
- */
+/** Opacidad de las capas de estado. */
 export const ESTADO = { hover: 0.08, focus: 0.1, pressed: 0.1, dragged: 0.16, disabled: 0.38 } as const;
 
 /** Duraciones y curvas de movimiento. */
@@ -106,28 +80,8 @@ export const MOVIMIENTO = {
   'easing-decelerate': 'cubic-bezier(0, 0, 0, 1)',
 } as const;
 
-/**
- * Paleta categorica para series de datos, derivada de las paletas tonales.
- *
- * No son colores elegidos aparte: son tonos de las paletas del propio tema, lo que hace que un
- * grafico pertenezca a la misma familia visual que el resto de la aplicacion. Se alternan matices
- * distintos ANTES de repetir familia, para que dos series contiguas nunca sean dos tonos del
- * mismo color — que es como se pierde la distincion al imprimir en gris.
- *
- * Ocho valores: mas alla de ocho categorias un grafico deja de leerse por color, y para eso
- * estan los patrones (`decal`) que ECharts dibuja encima.
- */
-/**
- * Tonos de la paleta categorica, por modo.
- *
- * No son arbitrarios: son los tonos que alcanzan 3:1 contra la superficie de su modo, con margen.
- * En claro, el tono 60 da 3.01 —justo en el limite— asi que la banda segura acaba en 55; en
- * oscuro empieza en 55. Salirse de ahi produce una serie que se pierde contra el fondo, y hay
- * una prueba que lo comprueba para las ocho.
- *
- * El orden alterna FAMILIA antes que tono, para que dos series contiguas nunca sean dos tonos
- * del mismo color — que es como se pierde la distincion al imprimir en gris.
- */
+/** Paleta categorica para series de datos, derivada de las paletas tonales. */
+/** Tonos de la paleta categorica, por modo. */
 const TONOS_CATEGORICOS: Record<ModoDeColor, [keyof ReturnType<typeof paletasDe>, number][]> = {
   claro: [
     ['primary', 40], ['tertiary', 40], ['secondary', 40],
@@ -141,15 +95,7 @@ const TONOS_CATEGORICOS: Record<ModoDeColor, [keyof ReturnType<typeof paletasDe>
   ],
 };
 
-/**
- * Paleta categorica para series de datos, derivada de las paletas tonales.
- *
- * No son colores elegidos aparte: son tonos de las paletas del propio tema, lo que hace que un
- * grafico pertenezca a la misma familia visual que el resto de la aplicacion.
- *
- * Ocho valores: mas alla de ocho categorias un grafico deja de leerse por color, y para eso
- * estan los patrones (`decal`) que ECharts dibuja encima.
- */
+/** Paleta categorica para series de datos, derivada de las paletas tonales. */
 export function categoricaDe(origen: OrigenDelTema, modo: ModoDeColor): string[] {
   const p = paletasDe(origen);
   return TONOS_CATEGORICOS[modo].map(([familia, tono]) => hexFromArgb(p[familia].tone(tono)));
@@ -185,13 +131,7 @@ export function temaMaterial(
   };
 }
 
-/**
- * Variables CSS con los nombres de MD3 (`--md-sys-*`).
- *
- * Se conserva el prefijo de la especificacion a proposito: quien conozca Material encuentra lo
- * que busca sin leer este archivo, y quien lea una hoja de estilo sabe que `--md-sys-color-*`
- * viene de un sistema y no de una decision suelta.
- */
+/** Variables CSS con los nombres de MD3 (`--md-sys-*`). */
 export function variablesMaterial(tema: TemaMaterial): Record<string, string> {
   const vars: Record<string, string> = {};
   const guion = (rol: string) => rol.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
@@ -210,16 +150,6 @@ export function variablesMaterial(tema: TemaMaterial): Record<string, string> {
     vars[`--md-sys-typescale-${rol}-tracking`] = estilo.tracking;
     /*
      * Y el rol COMPLETO, valido como abreviatura `font:`.
-     *
-     * La hoja de estilo lo escribe en trece sitios —`font: var(--md-sys-typescale-title-large)`—
-     * y esta variable no existia: `font` con un valor vacio es una declaracion invalida, asi que
-     * el navegador la descartaba entera y esos trece rotulos se quedaban con el tamano heredado.
-     * No fallaba nada visible, que es por lo que duro: un titulo con el tamano del cuerpo parece
-     * una decision de diseno.
-     *
-     * El orden es el que exige la abreviatura: grosor, tamano/interlineado y familia. El
-     * interletrado NO va dentro —no forma parte de `font`— y quien lo necesite sigue teniendo
-     * `--md-sys-typescale-<rol>-tracking`.
      */
     vars[`--md-sys-typescale-${rol}`] =
       `${estilo.weight} ${estilo.size}/${estilo.lineHeight} ${tema.font.sans}`;

@@ -6,13 +6,7 @@ import { Icono, type NombreDeIcono } from '../../src/components/iconos/Icono';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Inicio del panel — el estado del gobierno de un vistazo.
- *
- * Cada cifra ES un enlace a donde se actua sobre ella. Antes eran cinco numeros muertos: se leia
- * «2 en papelera» y habia que buscar en el carril donde esta la papelera. Una cifra que informa de
- * un problema y no lleva a el obliga a un paso que el panel ya sabia dar.
- */
+/** Inicio del panel — el estado del gobierno de un vistazo. */
 export default async function AdminInicio() {
   const [arbol, equipos, personas, ampliaciones, recientes] = await Promise.all([
     getManagedTree(),

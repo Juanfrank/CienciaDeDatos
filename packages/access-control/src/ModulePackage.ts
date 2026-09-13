@@ -1,19 +1,6 @@
 import type { NavNode } from './NavigationTree';
 
-/**
- * Paquete visual — seccion 4.1.3.
- *
- * Reorganizacion PURAMENTE VISUAL de los modulos ya accesibles para un equipo, sin alterar
- * ni la organizacion general ni el ambito de acceso de nadie.
- *
- * Un paquete es una vista, no un permiso. Puede reagrupar en carpetas visuales distintas,
- * renombrar, reordenar u ocultar; nunca puede mostrar un modulo que la organizacion general
- * y el ambito resuelto no permitan ya para ese equipo.
- *
- * La resolucion de ambito efectivo (4.10.4) NUNCA consulta un paquete: camina siempre la
- * organizacion general. Eso es lo que garantiza que un paquete no pueda, ni por accidente,
- * ampliar el acceso de nadie.
- */
+/** Paquete visual — seccion 4.1.3. */
 export interface ModulePackage {
   id: string;
   name: string;

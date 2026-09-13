@@ -17,27 +17,7 @@ import { CabeceraDeEditor } from './CabeceraDeEditor';
 import { Lienzo } from './Lienzo';
 import { PanelLateral } from './PanelLateral';
 
-/**
- * Editor de un modulo — seccion 4.2.
- *
- * Era una lista de fichas con desplegables: para saber que aspecto tenia lo que se estaba
- * construyendo habia que publicarlo y abrirlo. Ahora el editor DIBUJA EL MODULO —los mismos
- * componentes, los mismos datos, la misma rejilla— y todo lo que se configura se configura desde
- * un panel lateral.
- *
- * Las tres cosas que 4.2 exige y que siguen siendo ciertas, ahora mas visibles:
- *
- * 1. Un PANEL DE OBJETOS PREDISEÑADOS, que aqui es la pestana «Visualizaciones» y es la unica
- *    puerta por la que entra un objeto: no hay forma de inventar uno.
- * 2. El enlace es a un DATASET y a sus campos, elegidos de casillas. No hay ninguna caja donde
- *    escribir una consulta, porque «nunca SQL libre construido por el modulo».
- * 3. VALIDACION DE ESQUEMA EN CADA CARGA: un objeto con un campo que ya no existe se dibuja
- *    marcado roto EN EL LIENZO, con su problema, y el resto del modulo se sigue editando.
- *
- * El estado del lienzo viene del servidor en cada guardado —definicion, diagnosticos y datos en
- * la misma respuesta—. No hay estado optimista: lo que se ve es lo que esta guardado, y esa es la
- * propiedad que hace que la vista previa signifique algo.
- */
+/** Editor de un modulo — seccion 4.2. */
 export function EditorDeModulo({
   inicial,
   objetosIniciales,
@@ -89,11 +69,6 @@ export function EditorDeModulo({
         if (!r.ok) {
           /*
            * El cuerpo de un error puede no ser JSON.
-           *
-           * Un 500 sin cuerpo hacia que `r.json()` lanzara DENTRO del `try`, la excepcion subiera
-           * sin capturar y `setError` no llegara a ejecutarse: el editor se quedaba callado con un
-           * fallo del servidor delante. Lo que hay que mostrar es que no se pudo guardar, venga
-           * el motivo o no venga.
            */
           const cuerpo = await r.json().catch(() => ({}) as { error?: string });
           setError(cuerpo.error ?? `No se pudo guardar (${r.status}).`);
@@ -125,10 +100,6 @@ export function EditorDeModulo({
     if (!definicion) return;
     /*
      * Un elemento o un contenedor no necesita dataset, y por eso no se exige uno.
-     *
-     * Antes la funcion salia si `paleta.datasets[0]` no existia. Eso era correcto cuando todo lo
-     * que se podia colocar leia datos; hoy significaria que en un espacio sin datasets poblados no
-     * se puede ni poner un cuadro de texto, que es justo lo que uno pone mientras espera.
      */
     const config = configuracionInicial(objectId);
     const sinDatos = definicion.dimensiones.max === 0 && definicion.medidas.max === 0;
@@ -179,14 +150,6 @@ export function EditorDeModulo({
   /*
    * Dos columnas de pantalla completa: el taller a la izquierda y el carril de objetos a la
    * derecha, los dos desde justo debajo del banner hasta el fondo.
-   *
-   * El panel estaba dentro del banco de trabajo, con el margen del `main` a su derecha y flotando
-   * a media altura con `position: sticky`. Sacarlo a este nivel es lo que le permite pegarse al
-   * borde: un carril no se puede construir desde dentro de una caja con padding, por mucho
-   * `sticky` que se le ponga.
-   *
-   * La cabecera de la ruta —«Editor de modulos»— tambien va dentro de la columna izquierda, por
-   * el mismo motivo: encima de las dos habria cortado el carril por arriba.
    */
   return (
     <div className="taller">

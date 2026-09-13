@@ -20,16 +20,6 @@ export interface SqlDataConnectorOptions {
  * Conector de PRIMERA CLASE contra las vistas curadas del Data Warehouse (seccion 2.2).
  * No es una excepcion temporal: puede terminar siendo la fuente definitiva si la capa
  * de analisis decide no construir un modelo semantico SSAS/AAS.
- *
- * ESTADO: pendiente. Requiere que exista una vista curada contra la cual consultar y el
- * registro de consultas de 2.3. Se implementa en la Fase 4 (conexion real), o antes si
- * la capa de analisis entrega vistas curadas.
- *
- * Cuando se implemente, dos reglas no negociables (4.7.4):
- *  - El predicado de seguridad es un parametro OBLIGATORIO de cada consulta registrada,
- *    nunca opcional ni anadido post-hoc.
- *  - La consulta vive en un archivo versionado y revisado por pares, jamas construida
- *    en tiempo de ejecucion por el modulo que la solicita.
  */
 export class SqlDataConnector implements IDataConnector {
   constructor(private readonly options: SqlDataConnectorOptions) {}

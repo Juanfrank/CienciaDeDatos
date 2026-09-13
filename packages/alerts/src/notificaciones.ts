@@ -1,21 +1,7 @@
 import type { CacheEntry, ICacheStore } from '@app/caching';
 import { claveBandeja, type Notification } from './types';
 
-/**
- * Canal de notificacion.
- *
- * El contrato pide alertas y suscripciones pero no fija el canal, asi que se define como puerto
- * —el mismo patron que IDataConnector, ICacheStore e IExportQueue— y se implementa la bandeja
- * dentro de la aplicacion, que es la que se puede construir y probar hoy. El correo entra
- * despues como otra implementacion de esta misma interfaz, sin tocar ni la evaluacion ni la
- * interfaz de usuario.
- *
- * Una nota deliberada sobre el contenido: la notificacion lleva CIFRAS, porque una alerta que
- * solo dice "algo paso" obliga a abrir la aplicacion y no sirve de alerta. Eso esta bien en la
- * bandeja interna, donde quien lee ya se autentico. El dia que se anada correo, el adaptador
- * tendra que decidir si esas cifras salen del perimetro o si el mensaje se queda en un enlace:
- * es una decision de la institucion, no del codigo, y por eso queda en el adaptador y no aqui.
- */
+/** Canal de notificacion. */
 
 export interface INotificationChannel {
   send(notification: Notification): Promise<void>;

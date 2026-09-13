@@ -1,10 +1,4 @@
-/**
- * Alertas y suscripciones basadas en datos — seccion 4.9.
- *
- * Etiquetado `type:server`. No importa el repositorio de objetos: quien evalua le pasa las
- * observaciones ya calculadas, porque proyectar un objeto es cosa de quien sabe resolver el
- * ambito de su dueno. Aqui solo se compara, se decide si toca avisar y se guarda el estado.
- */
+/** Alertas y suscripciones basadas en datos — seccion 4.9. */
 export {
   StoreAlertRepository,
   type IAlertStore,

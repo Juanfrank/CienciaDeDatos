@@ -1,17 +1,6 @@
 import { type CacheEntry, type ICacheStore } from './ICacheStore';
 
-/**
- * Cache en memoria del proceso — L1 de la seccion 6.3.
- *
- * Por instancia, con TTL muy corto (segundos). NO es la fuente de verdad: solo evita golpear
- * el Storage Account repetidamente cuando varios objetos de una misma carga de pagina piden
- * la misma clave.
- *
- * Tiene un segundo papel, el de la seccion 6.9: si el Storage Account no esta disponible, la
- * aplicacion sigue sirviendo desde aqui mientras dure la interrupcion, mostrando de forma
- * honesta la marca de tiempo del ultimo dato valido conocido. Para eso, una entrada expirada
- * no se borra: se marca vencida y `getEvenIfExpired` puede recuperarla.
- */
+/** Cache en memoria del proceso — L1 de la seccion 6.3. */
 export interface InMemoryCacheStoreOptions {
   /** TTL en milisegundos. Segundos, no minutos: L1 reduce round-trips, no sustituye a L2. */
   ttlMs?: number;
@@ -45,13 +34,7 @@ export class InMemoryCacheStore implements ICacheStore {
     return guardado.entry as CacheEntry<T>;
   }
 
-  /**
-   * Devuelve la entrada aunque su TTL haya vencido.
-   *
-   * Solo la usa el camino de degradacion de 6.9, cuando L2 no responde: es preferible servir
-   * el ultimo dato valido conocido, con su fecha visible, a devolver un error — y en ningun
-   * caso se recurre a una consulta sincrona a la fuente como contingencia.
-   */
+  /** Devuelve la entrada aunque su TTL haya vencido. */
   async getEvenIfExpired<T>(key: string): Promise<{ entry: CacheEntry<T>; expired: boolean } | null> {
     const guardado = this.map.get(key);
     if (!guardado) return null;

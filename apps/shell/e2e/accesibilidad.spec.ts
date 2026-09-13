@@ -5,13 +5,6 @@ import { entrarComo } from './sesion';
 /**
  * Accesibilidad — seccion 4.9, "no opcional, no se pospone", y criterio de la seccion 9:
  * "Accesibilidad verificada (no pospuesta) en los modulos publicados a nivel institucional".
- *
- * Se verifica con axe sobre la aplicacion REAL, no sobre componentes aislados: la mayoria de los
- * fallos de accesibilidad aparecen al componer (un encabezado que salta de h1 a h3, un control
- * sin etiqueta dentro de una barra, contraste que solo falla con el tema aplicado).
- *
- * El alcance es WCAG 2.1 AA, que es el nivel que exige la normativa de accesibilidad web en el
- * sector publico. Un fallo hace fallar la prueba: sin eso, "verificada" no significa nada.
  */
 
 const NIVEL = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
@@ -283,9 +276,6 @@ test.describe('los objetos anadidos en los ultimos lotes', () => {
    * axe por las paginas donde viven. Un objeto puede estar bien por dentro y romper la pagina al
    * componer: un encabezado que salta de nivel, un color de serie que no contrasta con la
    * superficie, un rotulo que se queda sin nombre accesible.
-   *
-   * Se recorren TODAS las paginas del modulo de ejemplo y no una de muestra. Con una sola, el
-   * objeto que rompa en otra no falla: simplemente no tiene prueba.
    */
   const paginas = [
     ['familia', 'columnas, barras y area'],

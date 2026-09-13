@@ -6,21 +6,6 @@ import { CLAVES_DE_PRESENTACION, type ClaveDePresentacion } from '../presentacio
 
 /**
  * Lo que un objeto DECLARA admitir y lo que su dibujo HONRA tienen que ser lo mismo — 4.2 y 4.5.
- *
- * Son dos listas distintas escritas en dos archivos distintos, y se separan en las dos
- * direcciones, cada una con su sintoma:
- *
- *  - Honra y NO declara: la capacidad existe, funciona, y el editor no la ofrece. Se puede usar
- *    escribiendo la instancia a mano y no desde el panel. Es la peor de las dos, porque parece
- *    que la funcion no existe — asi estuvo el formato condicional en las barras horizontales,
- *    con el mismo constructor que las columnas, que si lo declaraban.
- *  - Declara y NO honra: una opcion en el panel que no hace nada. Se mueve el control, no pasa
- *    nada, y quien lo prueba una vez deja de fiarse del resto del panel.
- *
- * La prueba es de COMPORTAMIENTO, no de lectura del codigo: construye las opciones del grafico
- * con la clave puesta y sin ella, y compara. Un analisis del texto del modulo daria por usada
- * una clave que se lee dentro de una rama muerta, y por no usada una que se lee a traves de un
- * ayudante compartido.
  */
 
 const vm: CategoricalViewModel = {
@@ -44,15 +29,7 @@ const PALETA = {
 
 const BASE: OpcionesDeGrafico = { vm, paleta: PALETA, titulo: 'T', dimension: 'Tribunal' };
 
-/**
- * DOS valores validos y distintos por clave.
- *
- * Dos y no uno porque el primero puede coincidir con el valor por defecto, y entonces la sonda
- * concluiria que la clave no hace nada cuando lo que pasa es que no ha cambiado nada. Y validos
- * —tomados de las constantes del contrato— porque un valor inventado cae en la rama por defecto
- * y produce el mismo falso negativo: escribiendo `'nunca'` donde la leyenda espera `'oculta'`,
- * esta prueba daba por muerta la leyenda de todos los graficos.
- */
+/** DOS valores validos y distintos por clave. */
 const VALORES: Partial<Record<ClaveDePresentacion, unknown[]>> = {
   leyenda: ['oculta', 'derecha'],
   etiquetasDeDato: [
@@ -81,13 +58,7 @@ const VALORES: Partial<Record<ClaveDePresentacion, unknown[]>> = {
   ],
 };
 
-/**
- * Claves que NO decide el constructor de opciones, y que por tanto esta sonda no puede ver.
- *
- * `orden` y `multiplos` se aplican ANTES de llegar aqui —uno reordena el modelo de vista y el
- * otro lo parte en paneles—, y el formato y el minimo de personalizacion son del marco de la
- * tarjeta, no del dibujo. Declararlas sin que la sonda las detecte no es una incoherencia.
- */
+/** Claves que NO decide el constructor de opciones, y que por tanto esta sonda no puede ver. */
 const FUERA_DEL_DIBUJO: ClaveDePresentacion[] = CLAVES_DE_PRESENTACION.filter(
   (c) => !(c in VALORES),
 );
@@ -108,13 +79,7 @@ const TIPO_DE_OBJETO: Record<string, TipoDeGrafico> = {
   'mapa-de-arbol': 'mapa-de-arbol',
 };
 
-/**
- * Lo que el dibujo lee pero el objeto NO declara, a proposito.
- *
- * Cada entrada lleva su motivo, y ese es el punto de la lista: sin ella la unica forma de callar
- * la prueba seria declarar la clave, y acabariamos con controles en el panel que no significan
- * nada para ese objeto. Con ella, quitar una excepcion exige explicar por que.
- */
+/** Lo que el dibujo lee pero el objeto NO declara, a proposito. */
 const EXCEPCIONES: { objeto: string; clave: ClaveDePresentacion; porque: string }[] = [
   ...['pastel', 'dona', 'medidor', 'embudo', 'cascada', 'mapa-de-arbol'].map((objeto) => ({
     objeto,
@@ -154,13 +119,7 @@ const EXCEPCIONES: { objeto: string; clave: ClaveDePresentacion; porque: string 
 const esExcepcion = (objeto: string, clave: ClaveDePresentacion) =>
   EXCEPCIONES.some((e) => e.objeto === objeto && e.clave === clave);
 
-/**
- * Los `formatter` se comparan LLAMANDOLOS, no por el texto de su fuente.
- *
- * Varias claves solo se leen dentro de un cierre: el embudo decide ahi contra que etapa compara y
- * el mapa de arbol si la etiqueta lleva cifra. Serializando la funcion como texto, las dos
- * variantes salen identicas —el codigo fuente es el mismo— y la sonda las daria por muertas.
- */
+/** Los `formatter` se comparan LLAMANDOLOS, no por el texto de su fuente. */
 const MUESTRA = {
   name: 'A',
   value: 10,
@@ -260,13 +219,7 @@ describe('las excepciones estan justificadas, no silenciadas', () => {
   });
 });
 
-/**
- * Y el resto del contrato, que no es de presentacion pero se olvida igual.
- *
- * Son las dos cosas que la auditoria encontro sueltas: la tabla era el unico objeto de datos sin
- * ayuda de mapeo y el mapa el unico sin pozos con nombre. Ninguna de las dos falla nada al
- * dibujar —se cae en los rotulos genericos— y por eso duraron.
- */
+/** Y el resto del contrato, que no es de presentacion pero se olvida igual. */
 describe('la version vigente de cada objeto de datos esta completa', () => {
   const conDatos = catalogoInicial.filter((o) => {
     const v = o.versions[o.versions.length - 1];

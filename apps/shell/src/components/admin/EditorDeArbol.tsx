@@ -3,19 +3,7 @@
 import { useCallback, useState } from 'react';
 import type { ManagedTree, NavNode, TreeOperation } from '@app/access-control';
 
-/**
- * Editor de la organizacion general — seccion 4.10.8.
- *
- * Dos gestos para la MISMA operacion:
- *  - Arrastrar y soltar, que es lo que pide 4.10.8.
- *  - Botones de mover y un selector de destino, porque arrastrar y soltar es inaccesible por
- *    teclado y con lector de pantalla, y la seccion 4.9 dice que la accesibilidad no es opcional
- *    y no se pospone.
- *
- * Los dos caminos llaman al MISMO endpoint, que a su vez llama a la misma `applyTreeOperation`.
- * Si fueran dos implementaciones, podrian divergir y una de las dos acabaria saltandose la
- * auditoria o la comprobacion de permiso.
- */
+/** Editor de la organizacion general — seccion 4.10.8. */
 
 interface Previsualizacion {
   moduleIds: string[];
@@ -53,12 +41,7 @@ export function EditorDeArbol({ inicial }: { inicial: ManagedTree }) {
     return true;
   }, []);
 
-  /**
-   * Mover pasa SIEMPRE por una previsualizacion.
-   *
-   * Mover es estructural (4.1.2): si el destino tiene otro ambito, lo que se mueve lo hereda de
-   * inmediato. Confirmar a ciegas es como se cambia el acceso de un modulo "solo para ordenar".
-   */
+  /** Mover pasa SIEMPRE por una previsualizacion. */
   const pedirMovimiento = useCallback(async (nodeId: string, newParentId: string | null) => {
     setError(null);
     const op: TreeOperation = { type: 'mover', nodeId, newParentId };

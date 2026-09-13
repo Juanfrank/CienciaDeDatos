@@ -2,12 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Panel de filtros — objeto de categoria `filtro` con varias dimensiones.
- *
- * Lo que se comprueba aqui, por encima de que dibuje, es lo de siempre en 4.11: cada seleccion
- * es la URL. Un panel con filtros puestos tiene que poder pegarse en un correo y abrirse igual.
- */
+/** Panel de filtros — objeto de categoria `filtro` con varias dimensiones. */
 
 test.beforeEach(async ({ page }) => {
   await entrarComo(page, 'u-ana');
@@ -61,11 +56,6 @@ test.describe('agrupa varias dimensiones en un solo objeto', () => {
   test('dos gestos seguidos no se pisan', async ({ page }) => {
     /*
      * Esta es la prueba del defecto real que destapo el panel.
-     *
-     * Sin esperar entre un gesto y otro —que es como se usa un panel de varios controles—, el
-     * segundo manejador partia de los parametros del render anterior y borraba lo que el primero
-     * acababa de poner. Con un segmentador por objeto casi no pasaba; con diez controles juntos,
-     * es el gesto normal.
      */
     await page.goto('/m/casos-pendientes');
 

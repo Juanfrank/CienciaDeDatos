@@ -1,13 +1,4 @@
-/**
- * Store de cache — seccion 6.2 del contrato de ingenieria.
- *
- * Toda la logica de cache depende de esta interfaz, nunca de un SDK concreto, para que el
- * backend de almacenamiento sea sustituible sin tocar logica de negocio. Esa sustituibilidad
- * no es teorica: la seccion 6.1 deja Redis explicitamente fuera de esta fase por ser un
- * servicio de costo fijo, pero documentado como opcion de escalado futuro. El dia que se
- * justifique, `RedisCacheStore` se añade como una implementacion mas de esta interfaz,
- * seleccionable por configuracion — el mismo patron que ya rige IDataConnector.
- */
+/** Store de cache — seccion 6.2 del contrato de ingenieria. */
 
 export interface CacheEntry<T> {
   value: T;

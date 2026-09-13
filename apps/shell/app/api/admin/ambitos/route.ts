@@ -11,16 +11,7 @@ interface CuerpoAmbito {
   justificacion?: string;
 }
 
-/**
- * Guarda un ambito de acceso (4.10.3).
- *
- * Dos validaciones, en este orden:
- *  1. Las dimensiones deben existir en el esquema REAL. Nunca texto libre sin validar (4.10.8).
- *  2. Si el ambito amplia, exige justificacion explicita (4.10.4) — la puerta de `wouldExpand`.
- *
- * El orden importa: validar el esquema primero evita pedir una justificacion para guardar algo
- * que de todas formas no se podria aplicar.
- */
+/** Guarda un ambito de acceso (4.10.3). */
 export async function POST(request: Request) {
   const cuerpo = (await request.json()) as CuerpoAmbito;
 

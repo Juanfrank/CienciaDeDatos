@@ -5,14 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import type { Notification } from '@app/alerts';
 
-/**
- * Campana de notificaciones.
- *
- * Sondea la bandeja cada poco porque las alertas se evaluan en el trabajador de fondo, fuera
- * del ciclo de cualquier solicitud (5.3): no hay una respuesta HTTP en la que pudiera venir el
- * aviso. Un sondeo corto es lo honesto mientras no haya un canal empujado; el dia que lo haya,
- * se sustituye aqui sin tocar nada mas.
- */
+/** Campana de notificaciones. */
 
 const INTERVALO_MS = 5_000;
 

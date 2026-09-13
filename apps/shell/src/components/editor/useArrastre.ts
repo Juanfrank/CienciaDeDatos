@@ -3,28 +3,7 @@
 import { GRID_COLUMNS, seSolapan, type GridItem, type GridPosition } from '@app/module-model';
 import { useCallback, useRef, useState } from 'react';
 
-/**
- * Arrastrar para mover y para redimensionar, sobre la rejilla del editor.
- *
- * Tres decisiones que conviene tener escritas:
- *
- * 1. **Va sobre las MISMAS operaciones que los botones.** El arrastre calcula una `GridPosition` y
- *    la entrega; quien la recibe es el mismo `onCambiar` que usan «Mas ancho» y «Mover a la
- *    derecha». No hay un segundo camino que pueda divergir del primero, que era la condicion con
- *    la que se aplazo esto.
- *
- * 2. **El teclado no pierde nada.** Los botones siguen ahi y hacen lo mismo. 4.9 no admite que una
- *    funcion exista solo para quien usa raton, y un lienzo que solo se ordena arrastrando ordena
- *    solo para parte de la gente.
- *
- * 3. **Un destino ocupado se RECHAZA, no se resuelve solo.** Empujar los objetos de alrededor es
- *    lo que hacen otros editores y es donde se pierde el control: se mueve uno y se descolocan
- *    tres. Aqui la vista previa se marca invalida y al soltar no pasa nada.
- *
- * Se usan eventos de PUNTERO, no de raton: el mismo codigo vale para dedo y para lapiz, y
- * `setPointerCapture` mantiene el arrastre aunque el cursor salga del bloque, que es lo que pasa
- * en cuanto se mueve deprisa.
- */
+/** Arrastrar para mover y para redimensionar, sobre la rejilla del editor. */
 
 export type ModoDeArrastre = 'mover' | 'redimensionar';
 
@@ -51,15 +30,7 @@ interface Origen {
   pistas: Pistas;
 }
 
-/**
- * Las pistas de la rejilla, tal y como el navegador las resolvio.
- *
- * Las filas son `minmax(56px, auto)`: la que lleva un grafico mide 118px y la libre de al lado 56.
- * Un «alto de celda» promedio —el alto total entre el numero de filas— es una media que no existe
- * en ninguna parte de la pantalla, y arrastrando se nota: tres filas de 118 y dos de 56 dan una
- * media de 93, asi que bajar un bloque tres filas se calculaba como cuatro. Es el mismo error que
- * tenian las guias dibujadas, y se arregla igual: preguntando por las pistas de verdad.
- */
+/** Las pistas de la rejilla, tal y como el navegador las resolvio. */
 interface Pistas {
   /** Alto resuelto de cada fila, en pixeles. */
   altos: number[];
@@ -75,13 +46,7 @@ function lineaDeFila(p: Pistas, i: number): number {
   return y;
 }
 
-/**
- * La linea de rejilla mas cercana a `px`.
- *
- * Se busca la mas cercana en vez de dividir porque las filas no son iguales: no hay ningun divisor
- * que valga para todas. Se mira tambien mas alla de la ultima fila dibujada —la rejilla crece al
- * soltar algo debajo— extrapolando con el alto de la ultima.
- */
+/** La linea de rejilla mas cercana a `px`. */
 function lineaMasCercana(p: Pistas, px: number, maximo: number): number {
   let mejor = 0;
   let distancia = Infinity;
@@ -97,14 +62,7 @@ function lineaMasCercana(p: Pistas, px: number, maximo: number): number {
 const acotar = (valor: number, minimo: number, maximo: number) =>
   Math.min(maximo, Math.max(minimo, valor));
 
-/**
- * La rejilla, medida de la rejilla real.
- *
- * No se calcula de una constante: es fluida y su ancho depende del panel, del lateral y de la
- * ventana. Medirla es lo unico que hace que el bloque siga al cursor en vez de ir por delante o
- * por detras. Las columnas se pueden resumir en un ancho —son doce iguales—; las filas no, asi
- * que se leen una a una de `grid-template-rows`, que el navegador devuelve ya resuelto en pixeles.
- */
+/** La rejilla, medida de la rejilla real. */
 function medirRejilla(rejilla: HTMLElement): { ancho: number; hueco: number; pistas: Pistas } {
   const caja = rejilla.getBoundingClientRect();
   const estilo = getComputedStyle(rejilla);

@@ -9,112 +9,36 @@ import {
   problemaDelPatron,
 } from './numero';
 
-/**
- * El minimo de personalizacion que TODO objeto visual admite — seccion 4.2 y 4.3.
- *
- * El problema que resuelve: cada objeto habia crecido con las opciones que su autor necesito el
- * dia que lo escribio. La tarjeta KPI no podia llevar icono, las barras no podian ocultar la
- * leyenda, y nada tenia subtitulo. Desde el editor no se podia cambiar nada de eso, asi que
- * pedir «la misma tarjeta pero en rojo y con otro rotulo» significaba tocar codigo.
- *
- * La solucion NO es una bolsa de opciones libre. Una bolsa libre reintroduce lo que 4.3 cierra:
- * el color deja de salir de los roles del tema y la puerta de contraste ya no garantiza nada
- * sobre lo que se ve. Aqui se declara un conjunto CERRADO de claves, y cada una toma valores de
- * un conjunto cerrado tambien: el acento es un ROL del tema, no un color; el icono es un nombre
- * del catalogo, no una ruta SVG que alguien pegue.
- *
- * Lo que hace que esto sea un estandar y no una sugerencia esta en `catalog.spec.ts`: hay una
- * prueba que recorre TODAS las versiones de TODOS los objetos del catalogo y falla si alguna no
- * admite las cuatro claves basicas. Un objeto nuevo no se puede publicar sin ellas.
- */
+/** El minimo de personalizacion que TODO objeto visual admite — seccion 4.2 y 4.3. */
 
-/**
- * El acento es un ROL, no un color.
- *
- * `'rojo'` obligaria a elegir un rojo, y el elegido no tendria por que contrastar con la
- * superficie donde acabe ni seguir al tema oscuro. `'terciario'` lo resuelve el tema, que ya
- * tiene un par de contraste comprobado para cada rol.
- */
+/** El acento es un ROL, no un color. */
 export const ACENTOS = ['primario', 'secundario', 'terciario', 'neutro'] as const;
 export type AcentoDeObjeto = (typeof ACENTOS)[number];
 
-/**
- * Donde va la leyenda, no solo si esta.
- *
- * Eran tres modos —`auto`, `siempre`, `nunca`— y ninguno llegaba al grafico: se podian elegir en
- * el editor y no hacian absolutamente nada. Ahora ademas se elige el lado, que es lo que resuelve
- * el caso real: con seis series y un objeto ancho y bajo, la leyenda abajo se come el grafico, y
- * a la derecha no.
- *
- * `auto` la ensena solo cuando hay mas de una serie, que es cuando distingue algo.
- */
+/** Donde va la leyenda, no solo si esta. */
 export const MODOS_DE_LEYENDA = ['auto', 'oculta', 'arriba', 'abajo', 'izquierda', 'derecha'] as const;
 export type ModoDeLeyenda = (typeof MODOS_DE_LEYENDA)[number];
 
-/**
- * Los ejes, como en cualquier herramienta de informes.
- *
- * Lo que falta cuando no se puede tocar un eje: un grafico de porcentajes con el eje entre 40 y
- * 60 exagera diferencias de dos puntos, y uno de importes sin titulo obliga a adivinar si son
- * pesos o miles. Las dos cosas se resuelven aqui y no en el titulo del objeto.
- */
+/** Los ejes, como en cualquier herramienta de informes. */
 export interface ConfiguracionDeEjes {
   mostrarX?: boolean;
   mostrarY?: boolean;
   tituloX?: string;
   tituloY?: string;
-  /**
-   * El titulo del eje de la derecha, cuando hay dos.
-   *
-   * Con dos escalas en el mismo grafico, saber cual mide cada serie deja de ser evidente: la
-   * linea puede estar por encima de las columnas y valer la mitad. Rotular los dos ejes es lo
-   * que hace que el combinado se pueda leer sin adivinar.
-   */
+  /** El titulo del eje de la derecha, cuando hay dos. */
   tituloY2?: string;
   /** Las lineas horizontales de fondo. Con pocas barras estorban mas que ayudan. */
   cuadricula?: boolean;
-  /**
-   * Empezar el eje de valores en cero.
-   *
-   * Encendido por defecto, y a proposito: un eje que empieza donde le conviene a los datos hace
-   * que una diferencia del 2 % parezca el triple. Apagarlo es una decision que alguien toma, no
-   * el comportamiento por omision.
-   */
+  /** Empezar el eje de valores en cero. */
   desdeCero?: boolean;
-  /**
-   * Los limites del eje de valores, a mano.
-   *
-   * Es la otra mitad de `desdeCero`, y la que de verdad hace falta para comparar dos objetos
-   * entre si: dos graficos de la misma medida con escalas distintas se leen como si dijeran cosas
-   * distintas aunque digan lo mismo. Fijar los dos limites es lo que los hace comparables.
-   *
-   * Tambien es la forma mas facil de mentir con un grafico —un eje de 40 a 60 convierte dos
-   * puntos de diferencia en el triple—, y por eso se escribe a mano y no se sugiere.
-   */
+  /** Los limites del eje de valores, a mano. */
   minimoY?: number;
   maximoY?: number;
-  /**
-   * Cuanto se giran los rotulos del eje de categorias.
-   *
-   * Con nombres largos, ECharts esconde los que no caben —`hideOverlap`— y el grafico acaba
-   * enseñando una de cada tres categorias sin decir que las demas siguen ahi. Girarlos es lo que
-   * permite verlas todas; 0 es horizontal y 90 es vertical.
-   */
+  /** Cuanto se giran los rotulos del eje de categorias. */
   rotarX?: number;
 }
 
-/**
- * ---- Lineas de referencia ----
- *
- * La meta, el promedio, el umbral. Es lo que convierte una serie de cifras en una respuesta:
- * «1.063 casos» no dice nada solo, y «1.063 sobre una meta de 900» si.
- *
- * Hoy, sin esto, la unica forma de poner una meta en un grafico es anadir una medida constante al
- * dataset, que es inventarse una columna para dibujar una raya.
- *
- * El color es un ROL del tema, como en todo lo demas. Y la etiqueta es opcional pero recomendada:
- * una raya sin rotulo obliga a adivinar que significa.
- */
+/** ---- Lineas de referencia ---- */
 export const ESTILOS_DE_REFERENCIA = ['solida', 'discontinua', 'punteada'] as const;
 export type EstiloDeReferencia = (typeof ESTILOS_DE_REFERENCIA)[number];
 
@@ -128,32 +52,11 @@ export interface LineaDeReferencia {
 /** Mas de tres rayas sobre un grafico dejan de ser referencias y pasan a ser una rejilla. */
 export const MAX_REFERENCIAS = 3;
 
-/**
- * Como se apilan las series.
- *
- * Es una PROPIEDAD del grafico y no tres objetos distintos del catalogo, aunque una herramienta
- * de informes suela ofrecerlos por separado. El contrato de datos es identico en los tres —las
- * mismas dimensiones y las mismas medidas—; lo unico que cambia es como se dibuja. Publicar tres
- * objetos con el mismo contrato para cambiar una propiedad significaria que probar «apilado»
- * obliga a borrar el objeto y perder toda su configuracion.
- *
- * `porcentaje` es el «100 %»: cada categoria suma el total y lo que se compara es la COMPOSICION,
- * no la magnitud.
- */
+/** Como se apilan las series. */
 export const MODOS_DE_APILADO = ['ninguno', 'apilado', 'porcentaje'] as const;
 export type ModoDeApilado = (typeof MODOS_DE_APILADO)[number];
 
-/**
- * ---- Circular: pastel y dona ----
- *
- * Lo que una herramienta de informes llama «etiquetas de detalle». Sin ellas, un pastel obliga a
- * ir del color al rotulo de la leyenda y volver, para cada porcion; con la etiqueta puesta sobre
- * la porcion, se lee de una vez.
- *
- * `porcentaje` es el modo por defecto y no es un capricho: la razon de existir de un circular es
- * la PROPORCION —cuanto pesa cada parte del total— y la cifra absoluta ya la da mejor cualquier
- * grafico de barras. Quien quiera las dos, tiene `categoria-porcentaje`.
- */
+/** ---- Circular: pastel y dona ---- */
 export const ETIQUETAS_CIRCULARES = [
   'ninguna',
   'categoria',
@@ -164,14 +67,7 @@ export const ETIQUETAS_CIRCULARES = [
 export type EtiquetaCircular = (typeof ETIQUETAS_CIRCULARES)[number];
 
 export interface ConfiguracionCircular {
-  /**
-   * El hueco del centro, en porcentaje del radio. 0 es un pastel; 55 es una dona.
-   *
-   * Es una MEDIDA y no un interruptor «dona si/no» porque el hueco tiene una consecuencia real:
-   * cuanto mas grande, menos area queda para comparar porciones —que es lo unico que un circular
-   * hace bien— y mas sitio hay para la cifra del centro. Quien lo sube esta cambiando ese canje,
-   * y conviene que lo vea como lo que es.
-   */
+  /** El hueco del centro, en porcentaje del radio. 0 es un pastel; 55 es una dona. */
   radioInterior?: number;
   etiquetas?: EtiquetaCircular;
   /** Ordenar las porciones de mayor a menor. Encendido por defecto: es como se compara un area. */
@@ -180,40 +76,13 @@ export interface ConfiguracionCircular {
   totalEnElCentro?: boolean;
 }
 
-/**
- * ---- Medidor (tacometro) ----
- *
- * La aguja necesita un minimo y un maximo: sin ellos no hay escala y el angulo no significa nada.
- * Se pueden fijar a mano o dejar que se deduzcan; lo que NO se puede es que el objeto invente una
- * escala distinta cada vez que llegan datos nuevos, porque entonces la misma cifra se dibuja en
- * dos sitios distintos y la comparacion entre dos capturas deja de valer. Por eso, cuando no se
- * fijan, se deducen del objetivo y del valor de forma estable y se ROTULAN en los extremos.
- */
-/**
- * ---- Combinado de columnas y lineas ----
- *
- * El eje secundario es la razon de ser del objeto. Con una escala unica, una medida de miles y
- * otra de decenas dejan a la segunda pegada al suelo, sin forma. Es la misma pregunta —«que pasa
- * con las dos a la vez»— que hoy obliga a poner dos objetos uno al lado del otro y a que quien
- * mira cruce los ejes de cabeza.
- *
- * Que sea una DECISION y no el comportamiento por omision tambien importa: dos escalas se pueden
- * elegir para que dos series se crucen donde a uno le convenga, y eso es un grafico enganoso. Con
- * una sola escala, la comparacion es directa y honesta; con dos, hace falta que alguien la pida.
- */
+/** ---- Medidor (tacometro) ---- */
+/** ---- Combinado de columnas y lineas ---- */
 export interface ConfiguracionDeCombinado {
   ejeSecundario?: boolean;
 }
 
-/**
- * ---- Embudo ----
- *
- * Un embudo no mide magnitudes: mide CAIDA. Por eso lo que la etiqueta enseña por defecto no es
- * la cifra sino contra que se compara, y hay dos comparaciones distintas que responden a dos
- * preguntas distintas: «cuanto queda de lo que entro» (contra la primera etapa) y «cuanto se
- * pierde en ESTE paso» (contra la anterior). Con una sola de las dos, la otra hay que calcularla
- * de cabeza, que es justo lo que el objeto viene a evitar.
- */
+/** ---- Embudo ---- */
 export const COMPARACIONES_DE_EMBUDO = ['primero', 'anterior', 'ninguna'] as const;
 export type ComparacionDeEmbudo = (typeof COMPARACIONES_DE_EMBUDO)[number];
 
@@ -221,13 +90,7 @@ export interface ConfiguracionDeEmbudo {
   comparar?: ComparacionDeEmbudo;
 }
 
-/**
- * ---- Cascada ----
- *
- * La cascada dibuja de que se compone una diferencia: cada barra empieza donde acabo la anterior,
- * asi que lo que se ve es la CONTRIBUCION de cada categoria y no su magnitud. Es la unica forma
- * de responder «por que el total subio» sin poner al lado una tabla de diferencias.
- */
+/** ---- Cascada ---- */
 export interface ConfiguracionDeCascada {
   /** Una ultima barra, desde cero, con la suma. Encendida por defecto: es a donde lleva todo. */
   mostrarTotal?: boolean;
@@ -236,13 +99,7 @@ export interface ConfiguracionDeCascada {
 export interface ConfiguracionDeMedidor {
   minimo?: number;
   maximo?: number;
-  /**
-   * El objetivo, cuando es un numero fijo y no una medida del dataset.
-   *
-   * La medida manda sobre esto: si el mapeo trae un objetivo, es el que se dibuja. Este existe
-   * para la meta que no esta en ningun dato —«90 dias»— y que hoy obligaria a inventarse una
-   * columna para poder pintarla.
-   */
+  /** El objetivo, cuando es un numero fijo y no una medida del dataset. */
   objetivo?: number;
   /** Mostrar la cifra bajo la aguja. Encendida por defecto: un angulo no es un numero. */
   mostrarValor?: boolean;
@@ -257,12 +114,7 @@ export interface OrdenDeCategorias {
   direccion?: 'asc' | 'desc';
 }
 
-/**
- * Compatibilidad: la forma anterior del formato, que era del OBJETO y no de la medida.
- *
- * Se conserva porque los modulos guardados antes la llevan y tienen que seguir abriendose. Al
- * leer, se interpreta como el renglon general — que es exactamente lo que era.
- */
+/** Compatibilidad: la forma anterior del formato, que era del OBJETO y no de la medida. */
 export interface FormatoNumerico {
   /** 0 a 4. Mas alla, la cifra deja de leerse y empieza a ser ruido de precision. */
   decimales?: number;
@@ -272,18 +124,7 @@ export interface FormatoNumerico {
   compacto?: boolean;
 }
 
-/**
- * ---- Texto: peso, estilo, alineacion y color ----
- *
- * El color es un ROL del tema, igual que el acento y por el mismo motivo. Es tentador ofrecer un
- * selector de color libre —es lo que pide cualquiera— y es justo lo que romperia 4.3: un color
- * elegido a mano no tiene par de contraste comprobado contra la superficie donde acabe, no sigue
- * al tema oscuro, y la puerta de contraste deja de garantizar nada sobre lo que se ve. Con roles
- * hay paleta de verdad —seis opciones con su muestra— y la garantia se conserva.
- *
- * `atenuado` no es «gris claro»: es `on-surface-variant`, que es el rol para el texto secundario y
- * viene con su propio par comprobado. La diferencia importa cuando alguien cambia el tema.
- */
+/** ---- Texto: peso, estilo, alineacion y color ---- */
 export const COLORES_DE_TEXTO = [
   'predeterminado',
   'primario',
@@ -310,13 +151,7 @@ export interface EstiloDeTexto {
   color?: ColorDeTexto;
 }
 
-/**
- * A QUE textos se les puede poner estilo. Conjunto cerrado, como todo lo demas.
- *
- * Abierto —«cualquier texto del objeto»— obligaria a cada objeto a inventarse sus propias claves,
- * y dos objetos acabarian llamando de forma distinta a lo mismo. Con tres destinos fijos, lo que
- * se configura en una tarjeta significa lo mismo en un grafico.
- */
+/** A QUE textos se les puede poner estilo. Conjunto cerrado, como todo lo demas. */
 export const DESTINOS_DE_TEXTO = ['titulo', 'subtitulo', 'valor', 'etiqueta'] as const;
 export type DestinoDeTexto = (typeof DESTINOS_DE_TEXTO)[number];
 
@@ -344,16 +179,7 @@ const VERTICAL_CSS: Record<AlineacionVertical, string> = {
   abajo: 'flex-end',
 };
 
-/**
- * El METODO COMUN: un estilo de texto a propiedades CSS.
- *
- * Una sola funcion para todos los objetos. Con cada uno traduciendo por su cuenta, «negrita» en
- * una tarjeta y «negrita» en una tabla acabarian siendo pesos distintos, que es exactamente el
- * tipo de deriva que el estandar minimo de personalizacion vino a cerrar.
- *
- * Devuelve un objeto de estilo y no clases porque las combinaciones son 2x2x2x3x3x6: como clases
- * serian cientos de reglas muertas para las que nadie usa.
- */
+/** El METODO COMUN: un estilo de texto a propiedades CSS. */
 export function estiloDeTexto(estilo: EstiloDeTexto | undefined): Record<string, string> {
   if (!estilo) return {};
   const css: Record<string, string> = {};
@@ -367,17 +193,7 @@ export function estiloDeTexto(estilo: EstiloDeTexto | undefined): Record<string,
   return css;
 }
 
-/**
- * ---- Etiquetas de dato ----
- *
- * Era un interruptor: la cifra sobre cada barra, o nada. Con veinte categorias, «todas» es una
- * maranha ilegible y «ninguna» obliga a leer el eje punto por punto; las dos opciones son malas y
- * no habia una tercera.
- *
- * `soloExtremos` es esa tercera: rotula solo el maximo y el minimo de cada serie, que son los dos
- * puntos por los que se mira un grafico. Y la posicion existe porque en una linea la cifra encima
- * del punto choca con la serie de arriba, y debajo no.
- */
+/** ---- Etiquetas de dato ---- */
 export const POSICIONES_DE_DATO = ['auto', 'encima', 'debajo', 'dentro'] as const;
 export type PosicionDeDato = (typeof POSICIONES_DE_DATO)[number];
 
@@ -388,13 +204,7 @@ export interface ConfiguracionDeEtiquetas {
   soloExtremos?: boolean;
 }
 
-/**
- * La forma anterior era un `boolean`, y lo sigue siendo para lo ya guardado.
- *
- * Un modulo publicado antes de esto lleva `etiquetasDeDato: true`, y tiene que seguir
- * dibujandose igual. Se normaliza al leer, en una funcion pura, en vez de migrar los datos: no
- * hay script que acordarse de ejecutar ni dos formas conviviendo en el almacen.
- */
+/** La forma anterior era un `boolean`, y lo sigue siendo para lo ya guardado. */
 export type EtiquetasDeDato = boolean | ConfiguracionDeEtiquetas;
 
 export function etiquetasNormalizadas(valor: EtiquetasDeDato | undefined): ConfiguracionDeEtiquetas {
@@ -403,22 +213,8 @@ export function etiquetasNormalizadas(valor: EtiquetasDeDato | undefined): Confi
   return { mostrar: true, ...valor };
 }
 
-/**
- * ---- Tooltip ----
- *
- * Lo que se lee al senalar un punto. En un apilado, el dato que falta casi siempre es el TOTAL de
- * la categoria: el grafico ensena los trozos y la suma hay que hacerla de cabeza, justo cuando se
- * esta comparando una categoria con otra.
- */
-/**
- * ---- Pequenos multiplos ----
- *
- * `mismaEscala` esta encendido por defecto y esa es la decision que importa. Con escalas
- * independientes, seis paneles de alturas parecidas pueden estar diciendo 20 y 2.000, y la
- * comparacion —que es la unica razon de ponerlos juntos— sale exactamente al reves de lo que los
- * datos dicen. Apagarlo es legitimo cuando lo que se compara es la FORMA de cada serie y no su
- * magnitud, pero es una decision que alguien toma.
- */
+/** ---- Tooltip ---- */
+/** ---- Pequenos multiplos ---- */
 export interface ConfiguracionDeMultiplos {
   columnas?: number;
   mismaEscala?: boolean;
@@ -435,14 +231,7 @@ export interface ConfiguracionDeTooltip {
 export const POSICIONES_DE_ETIQUETA = ['encima', 'debajo'] as const;
 export type PosicionDeEtiqueta = (typeof POSICIONES_DE_ETIQUETA)[number];
 
-/**
- * La etiqueta que acompana al valor en una tarjeta.
- *
- * Era el titulo del objeto, reutilizado como rotulo de la cifra, y eso confunde dos cosas: el
- * titulo dice QUE objeto es —y va en la cabecera, con el icono y los complementos— y la etiqueta
- * dice que mide la cifra. Con uno solo no se puede tener una tarjeta titulada «Casos pendientes»
- * cuya cifra se rotule «al cierre del trimestre».
- */
+/** La etiqueta que acompana al valor en una tarjeta. */
 export interface EtiquetaDeValor {
   texto?: string;
   posicion?: PosicionDeEtiqueta;
@@ -455,13 +244,7 @@ export interface PresentacionDeObjeto {
   acento?: AcentoDeObjeto;
   /** Linea de color en el borde superior de la tarjeta. */
   resaltado?: boolean;
-  /**
-   * Color de la linea de resaltado, si debe ser otro que el acento.
-   *
-   * Va aparte de `acento` porque son dos cosas: el acento tine el icono y da el tono general del
-   * objeto, y el resaltado es una marca de estado —«esto pide atencion»— que a veces tiene que
-   * decir algo distinto. Sigue siendo un ROL, por lo mismo que todo lo demas.
-   */
+  /** Color de la linea de resaltado, si debe ser otro que el acento. */
   colorDeResaltado?: ColorDeTexto;
   /** Mostrar la cabecera con el titulo. Por defecto si. */
   mostrarTitulo?: boolean;
@@ -472,20 +255,10 @@ export interface PresentacionDeObjeto {
   /** Una linea bajo el titulo. Para la unidad, el periodo o la salvedad. */
   subtitulo?: string;
   formato?: FormatoNumerico;
-  /**
-   * Formato de numero POR MEDIDA, con un renglon general de respaldo.
-   *
-   * Convive con `formato`, que es la forma anterior —del objeto entero— y sigue valiendo para lo
-   * ya guardado. Cuando los dos estan, manda `formatos`: es el mas especifico.
-   */
+  /** Formato de numero POR MEDIDA, con un renglon general de respaldo. */
   formatos?: FormatosDelObjeto;
   leyenda?: ModoDeLeyenda;
-  /**
-   * La cifra encima de cada barra o punto, con el formato de SU medida.
-   *
-   * `true`/`false` es la forma anterior y se sigue leyendo; la forma nueva anade posicion y el
-   * modo «solo los extremos».
-   */
+  /** La cifra encima de cada barra o punto, con el formato de SU medida. */
   etiquetasDeDato?: EtiquetasDeDato;
   tooltip?: ConfiguracionDeTooltip;
   multiplos?: ConfiguracionDeMultiplos;
@@ -498,14 +271,7 @@ export interface PresentacionDeObjeto {
   combinado?: ConfiguracionDeCombinado;
   /** La meta, el promedio, el umbral: hasta tres rayas sobre el area de dibujo. */
   referencias?: LineaDeReferencia[];
-  /**
-   * Que color de la paleta usa cada serie, por indice.
-   *
-   * Indices y no colores, por lo mismo que el acento es un rol: un color suelto no tiene par de
-   * contraste comprobado ni sigue al tema oscuro. Lo que se elige es CUAL de los ocho colores ya
-   * comprobados le toca a cada serie, que es lo que resuelve el caso real —«resueltos en verde y
-   * pendientes en rojo, como en el resto del informe»— sin salirse del sistema.
-   */
+  /** Que color de la paleta usa cada serie, por indice. */
   coloresDeSerie?: number[];
   embudo?: ConfiguracionDeEmbudo;
   cascada?: ConfiguracionDeCascada;
@@ -514,14 +280,7 @@ export interface PresentacionDeObjeto {
   textos?: TextosDeObjeto;
 }
 
-/**
- * TODAS las claves de presentacion, como dato.
- *
- * El tipo `keyof PresentacionDeObjeto` no existe en tiempo de ejecucion, asi que la prueba que
- * comprueba «ningun objeto declara una clave inventada» mantenia su propia lista a mano — y se
- * quedo obsoleta en cuanto se anadio una clave nueva. Declarandola aqui, la lista y el tipo se
- * comprueban entre si: si falta una, `satisfies` no compila.
- */
+/** TODAS las claves de presentacion, como dato. */
 export const CLAVES_DE_PRESENTACION = [
   'icono',
   'acento',
@@ -553,18 +312,7 @@ export const CLAVES_DE_PRESENTACION = [
 
 export type ClaveDePresentacion = keyof PresentacionDeObjeto;
 
-/**
- * Las cinco que no son negociables.
- *
- * Son las que no dependen de lo que el objeto dibuje: cualquier cosa que ocupe una celda tiene
- * cabecera, y por tanto puede llevar icono, acento, resaltado, subtitulo y estilo de texto.
- * `formato`, `leyenda` y `etiquetasDeDato` sí dependen —una tabla no tiene leyenda— y por eso
- * cada objeto declara si las admite.
- *
- * `textos` entra en el minimo, no en lo opcional: si cada objeto decidiera por su cuenta si deja
- * poner su titulo en negrita, la personalizacion volveria a depender de lo que el autor de cada
- * uno tuvo en mente el dia que lo escribio — que es exactamente lo que este estandar cerro.
- */
+/** Las cinco que no son negociables. */
 export const PRESENTACION_MINIMA: ClaveDePresentacion[] = [
   'icono',
   'acento',
@@ -587,12 +335,7 @@ export const MAX_DECIMALES = 4;
 /** El hueco maximo de una dona. Por encima queda un hilo, no un anillo que se pueda comparar. */
 export const MAX_RADIO_INTERIOR = 80;
 
-/**
- * Valida una presentacion contra lo que el objeto declara admitir.
- *
- * Devuelve diagnosticos en vez de lanzar, como todo lo demas de 4.2: el editor tiene que poder
- * dibujar el objeto con su problema senalado, no quedarse en blanco.
- */
+/** Valida una presentacion contra lo que el objeto declara admitir. */
 export function validarPresentacion(
   presentacion: PresentacionDeObjeto | undefined,
   admitidas: ClaveDePresentacion[],
@@ -629,10 +372,6 @@ export function validarPresentacion(
 
   /*
    * Los estilos de texto, destino a destino.
-   *
-   * Se valida el vocabulario, no la combinacion: negrita y cursiva a la vez es feo y es una
-   * decision de quien edita, no un error de configuracion. Lo que si es un error es un color que
-   * no es un rol del tema, porque eso si rompe una garantia.
    */
   for (const [destino, estilo] of Object.entries(presentacion.textos ?? {})) {
     if (!(DESTINOS_DE_TEXTO as readonly string[]).includes(destino)) {
@@ -671,10 +410,6 @@ export function validarPresentacion(
 
   /*
    * El formato de numero, renglon a renglon.
-   *
-   * Una cadena personalizada que no se entiende NO rompe el objeto —al dibujar se cae al formato
-   * general— pero si se avisa aqui: el editor lo senala antes de guardar, que es donde 4.2 quiere
-   * que se vea, en vez de dejar que alguien publique un formato que no hace lo que cree.
    */
   const renglones: [string, FormatoDeNumero | undefined][] = [
     ['general', presentacion.formatos?.general],
@@ -720,9 +455,6 @@ export function validarPresentacion(
   }
   /*
    * Un maximo por debajo del minimo no es un rango: es una escala del reves.
-   *
-   * Se rechaza al guardar y no se «arregla» intercambiandolos al dibujar. Intercambiarlos dejaria
-   * pasar el error y dibujaria un grafico que nadie pidio; 4.2 manda marcar.
    */
   const ejes = presentacion.ejes;
   if (ejes?.rotarX !== undefined && (ejes.rotarX < -90 || ejes.rotarX > 90)) {
@@ -848,9 +580,6 @@ export function validarPresentacion(
 
   /*
    * Un minimo por encima del maximo no es un rango: es una escala del reves.
-   *
-   * Se rechaza aqui, al guardar, y no se «arregla» al dibujar intercambiandolos. Intercambiarlos
-   * dejaria pasar el error y dibujaria una aguja que no es la que nadie pidio; 4.2 manda marcar.
    */
   const medidor = presentacion.medidor;
   if (medidor?.minimo !== undefined && medidor.maximo !== undefined && medidor.minimo >= medidor.maximo) {
@@ -894,28 +623,9 @@ export function validarPresentacion(
   return problemas;
 }
 
-/**
- * El formateador que sale de una presentacion.
- *
- * Existe para que la cifra salga IGUAL en los cuatro sitios donde aparece —la tarjeta, la
- * etiqueta del grafico, la tabla y el archivo exportado—. Cada uno tenia su propia llamada a
- * `Intl.NumberFormat` con sus propias opciones, asi que cambiar el formato en un sitio dejaba los
- * otros tres como estaban.
- */
-/**
- * @returns un formateador que acepta `null` y lo dibuja como raya.
- *
- * `null` no es cero: es «no hay respuesta», que es lo que devuelve una medida ya calculada por la
- * fuente cuando el objeto la colapsa. Formatearla como 0 volveria a poner en pantalla un numero
- * que nadie calculo. La raya es el mismo signo que la matriz usa para una celda sin filas.
- */
-/**
- * Traduce la forma ANTERIOR del formato a la nueva.
- *
- * Un modulo guardado antes de que el formato fuera por medida lleva `{decimales, unidad,
- * compacto}` en el objeto. Eso es, exactamente, el renglon general del nuevo modelo: se lee asi y
- * no hace falta migrar nada ni mantener dos caminos de formateo.
- */
+/** El formateador que sale de una presentacion. */
+/** @returns un formateador que acepta `null` y lo dibuja como raya. */
+/** Traduce la forma ANTERIOR del formato a la nueva. */
 export const comoFormatoDeNumero = (formato: FormatoNumerico | undefined): FormatoDeNumero =>
   formato
     ? {
@@ -926,14 +636,7 @@ export const comoFormatoDeNumero = (formato: FormatoNumerico | undefined): Forma
       }
     : {};
 
-/**
- * El formateador de UNA medida del objeto.
- *
- * Es el unico punto por el que pasan todas las cifras que se dibujan. Resuelve las tres capas en
- * orden —lo de la medida, el renglon general, y la forma anterior del formato— y devuelve una
- * funcion, no un texto: el patron se analiza una vez y se aplica a cada celda, que en una tabla
- * larga son miles.
- */
+/** El formateador de UNA medida del objeto. */
 export function formateadorDeMedida(
   presentacion: PresentacionDeObjeto | undefined,
   medida?: string,

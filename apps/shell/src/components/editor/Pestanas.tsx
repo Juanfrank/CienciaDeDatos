@@ -3,20 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icono, type NombreDeIcono } from '../iconos/Icono';
 
-/**
- * La barra de pestanas del panel, con paginado.
- *
- * Las pestanas son `role="tablist"` de verdad, con flechas: es el patron que un lector de pantalla
- * anuncia como pestanas, y sin el serian unos botones que casualmente se parecen. Solo la activa
- * esta en el orden de tabulacion; dentro del grupo se navega con flechas.
- *
- * El paginado existe porque la lista CRECE. Empezo con tres, ya son cuatro, y cada tipo nuevo de
- * interaccion añade una. En 340 px de panel eso deja de caber pronto, y cuando no cabe la solucion
- * habitual —encogerlas hasta que el rotulo se corta— convierte la barra en una fila de iconos sin
- * nombre. Aqui se desplazan, y aparecen sendos chevrones estrechos en los extremos SOLO cuando hay
- * algo fuera de la vista: un control que siempre esta pero a veces no hace nada es peor que uno que
- * aparece cuando hace falta.
- */
+/** La barra de pestanas del panel, con paginado. */
 
 export interface DefinicionDePestana<T extends string> {
   id: T;

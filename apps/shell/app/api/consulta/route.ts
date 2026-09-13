@@ -9,14 +9,7 @@ export const runtime = 'nodejs';
 /** Longitud maxima de una pregunta. Mas alla de esto no es una pregunta, es un texto pegado. */
 const MAXIMO = 300;
 
-/**
- * Resuelve una pregunta en lenguaje natural — seccion 4.9.
- *
- * Devuelve QUE SE ENTENDIO y la URL que lo responde, no los datos. Esa separacion es la que
- * mantiene la funcion dentro del contrato: quien pregunta navega a una URL normal, que el mismo
- * camino de lectura de siempre resuelve aplicando su ambito. Una pregunta no abre una via
- * distinta de lectura, y por eso este endpoint no consulta nada.
- */
+/** Resuelve una pregunta en lenguaje natural — seccion 4.9. */
 export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();

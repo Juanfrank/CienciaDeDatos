@@ -10,13 +10,7 @@ import { ListaDeModulos } from '../../src/components/editor/ListaDeModulos';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Editor de modulos' };
 
-/**
- * Lista de modulos del editor — secciones 4.1 y 4.2.
- *
- * Muestra estado, autor y BLOQUEOS. Los bloqueos van en la lista y no escondidos tras el boton
- * de enviar: saber por que algo no se puede proponer antes de intentarlo es la diferencia entre
- * una pantalla que informa y una que solo dice que no.
- */
+/** Lista de modulos del editor — secciones 4.1 y 4.2. */
 export default async function PaginaEditor() {
   const sesion = await exigirSesionDePagina();
   const actor = await actorDe(sesion);

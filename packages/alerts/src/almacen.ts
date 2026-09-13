@@ -9,15 +9,7 @@ import {
   type Subscription,
 } from './types';
 
-/**
- * Almacen de reglas, estados y suscripciones.
- *
- * `IAlertStore` es el puerto; el adaptador de este entorno se apoya en el `ICacheStore` que ya
- * comparten el shell y el job, para que una regla creada en una instancia la vea la que evalua.
- * En produccion la implementacion vive en la base de identidad, junto al resto del gobierno
- * (4.10.7): una alerta pertenece a una persona y a un equipo, y ese es su sitio, no el cache.
- * El puerto es lo que permite cambiarlo sin tocar ni la evaluacion ni la interfaz.
- */
+/** Almacen de reglas, estados y suscripciones. */
 
 export interface IAlertStore {
   listRules(): Promise<AlertRule[]>;
@@ -59,13 +51,7 @@ export class StoreAlertRepository implements IAlertStore {
     await this.store.set(CLAVE_REGLAS, entrada([...sinEsta, rule]));
   }
 
-  /**
-   * Borrar exige el dueno, no solo el id.
-   *
-   * La comprobacion de propiedad va en el almacen y no solo en el Route Handler: el mismo
-   * criterio de la seccion 9 —comprobar en el backend, no ocultar en la interfaz— aplicado al
-   * sitio por el que pasan TODOS los caminos de borrado, presentes y futuros.
-   */
+  /** Borrar exige el dueno, no solo el id. */
   async deleteRule(id: string, ownerUserId: string): Promise<boolean> {
     const reglas = await this.listRules();
     const objetivo = reglas.find((r) => r.id === id);

@@ -1,19 +1,4 @@
-/**
- * Alertas y suscripciones basadas en datos — seccion 4.9.
- *
- * El documento las nombra en una linea y no las desarrolla, asi que el modelo lo fija este
- * repositorio. Dos decisiones lo ordenan todo, y las dos vienen del resto del contrato:
- *
- * 1. UNA ALERTA VIGILA LO QUE ALGUIEN VE, no una consulta suelta. Se define sobre un objeto de
- *    un modulo y se evalua bajo el AMBITO de su dueno, resuelto en el momento de evaluar. Sin
- *    eso, una alerta seria un canal por el que sacar cifras que su destinatario no puede ver:
- *    el principio 5 —aislamiento por seguridad— no admite excepciones por ser una notificacion.
- *
- * 2. SE EVALUAN CUANDO EL DATO CAMBIA, no en un reloj propio. El job de poblacion deja su
- *    latido en el cache al terminar un ciclo (seccion 7); esa marca es la senal. Una alerta
- *    "basada en datos" que se dispara por calendario evalua el mismo dato dos veces y se pierde
- *    el cambio que ocurre entre dos vueltas.
- */
+/** Alertas y suscripciones basadas en datos — seccion 4.9. */
 
 export type AlertOperator = 'mayor-que' | 'menor-que' | 'cambia-mas-de';
 
@@ -26,14 +11,7 @@ export interface AlertRule {
   id: string;
   name: string;
   ownerUserId: string;
-  /**
-   * Equipo bajo cuyo ambito se evalua.
-   *
-   * Se fija en la regla y no se toma del equipo activo al evaluar: una persona que pertenece a
-   * dos equipos tiene dos ambitos distintos, y una alerta tiene que saber cual es el suyo. Es
-   * la misma razon por la que 4.10.4 resuelve el ambito con el equipo ACTIVO y nunca con la
-   * union de todos.
-   */
+  /** Equipo bajo cuyo ambito se evalua. */
   teamId: string;
   moduleSlug: string;
   pageSlug?: string;
@@ -64,14 +42,7 @@ export interface AlertEvaluation {
   observedAt: string;
 }
 
-/**
- * Estado persistido de una regla.
- *
- * Existe para no notificar en cada vuelta mientras la condicion sigue cumpliendose. Una alerta
- * que repite el mismo aviso cada media hora se desactiva a la semana, y entonces no avisa de
- * nada: se notifica en la TRANSICION, y tambien cuando deja de cumplirse, que suele ser la
- * mitad de la informacion.
- */
+/** Estado persistido de una regla. */
 export interface AlertState {
   ruleId: string;
   triggered: boolean;

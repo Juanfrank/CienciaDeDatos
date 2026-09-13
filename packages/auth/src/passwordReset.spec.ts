@@ -9,13 +9,7 @@ import {
 } from './passwordReset';
 import { InMemoryAuditLog, InMemoryLocalIdentityStore } from './stores';
 
-/**
- * Restablecimiento de contraseña — seccion 4.7.2.
- *
- * Lo que se comprueba: un solo uso, expiracion corta, nada en claro en el almacen, la politica
- * de contraseñas y la no reutilizacion aplicadas tambien aqui, el desbloqueo de la cuenta y la
- * revocacion de las sesiones abiertas.
- */
+/** Restablecimiento de contraseña — seccion 4.7.2. */
 
 const PIMIENTA = 'pimienta-de-prueba';
 const CLAVE_ANTERIOR = 'Anterior-2026!';

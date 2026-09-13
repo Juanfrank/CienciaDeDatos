@@ -37,36 +37,14 @@ import { Grafico } from './Grafico';
 import { Segmentador } from './Segmentador';
 import { Icono } from './iconos/Icono';
 
-/**
- * Objetos prediseñados — seccion 4.2.
- *
- * Envoltorios DELGADOS sobre los view-model puros, que son los que estan probados. Cada objeto
- * recibe filas ya leidas del cache y ya filtradas por el ambito de quien mira: ninguno conoce
- * la fuente, la consulta ni el conector activo.
- */
+/** Objetos prediseñados — seccion 4.2. */
 
-/**
- * El formato por defecto, para lo que no es una cifra de la instancia.
- *
- * Las cifras que el objeto MUESTRA salen de `formateadorDe(instance.presentacion?.formato)`, para
- * que la tarjeta, la etiqueta del grafico, la tabla y el archivo exportado no puedan divergir.
- * Este se queda para los rotulos que no pertenecen a ninguna instancia.
- */
+/** El formato por defecto, para lo que no es una cifra de la instancia. */
 /** Numero para pantalla. `null` es «no hay respuesta» y se dibuja como raya, no como cero. */
 const formatearNumero = (n: number | null): string =>
   n === null ? '—' : new Intl.NumberFormat('es-DO').format(Math.round(n));
 
-/**
- * Los campos de un objeto, LEIDOS POR RANURA.
- *
- * Antes se leia por posicion —`dimensions[0]` era el eje— y eso hacia imposible dejar el eje X
- * vacio con la serie llena: el unico campo del array habria pasado por eje. Preguntando por la
- * ranura, un eje vacio es un eje vacio y el objeto se marca roto en vez de dibujar otra cosa.
- *
- * Las ranuras llegan como prop desde el registro porque este componente no lo consulta: recibe una
- * instancia ya resuelta. `undefined` significa «este objeto no declara ranuras», y entonces se cae
- * al orden de siempre.
- */
+/** Los campos de un objeto, LEIDOS POR RANURA. */
 function porRanura(instance: ObjectInstance, ranuras: RanuraDeCampos[] | undefined) {
   if (!ranuras || ranuras.length === 0) return null;
   return {
@@ -135,19 +113,9 @@ export function ObjetoGenerandose({ titulo }: { titulo: string }) {
   );
 }
 
-/**
- * Marco comun de un objeto.
- *
- * Dibuja los complementos adjuntados el: asi ningun objeto tiene que acordarse de hacerlo, y uno
- * nuevo los hereda por existir. Si cada objeto los pintara por su cuenta, el primero que se
- * anadiera sin ellos los perderia en silencio.
- */
+/** Marco comun de un objeto. */
 /*
  * Se EXPORTA.
- *
- * El segmentador y el panel de filtros se dibujaban su propia cabecera a mano, asi que quedaban
- * fuera de todo lo que el marco hace: sin icono, sin acento, sin resaltado y sin subtitulo. El
- * estandar minimo solo es cierto si no hay forma de dibujar un objeto sin pasar por aqui.
  */
 export function Marco({
   titulo,
@@ -173,11 +141,6 @@ export function Marco({
 }) {
   /*
    * La presentacion se dibuja AQUI, en el marco comun, y no en cada objeto.
-   *
-   * Es el mismo motivo por el que los complementos viven aqui: asi un objeto nuevo hereda icono,
-   * acento, resaltado y subtitulo por el hecho de existir, y no hay forma de anadir uno que se
-   * los deje sin querer. Es lo que hace que el minimo del contrato sea cierto en pantalla y no
-   * solo en el tipo.
    */
   const presentacion = instance?.presentacion;
   // El icono por defecto lo declara el objeto y viaja con el; la presentacion solo lo anula.
@@ -185,10 +148,6 @@ export function Marco({
   const acento = presentacion?.acento ?? 'primario';
   /*
    * La cabecera entera se puede ocultar.
-   *
-   * No es solo el texto: sin titulo no hay fila de cabecera que ocupe sitio, y en una tarjeta de
-   * dos filas eso es la mitad del alto. Los complementos se van con ella —viven ahi— y por eso
-   * ocultarla es una decision y no un ajuste cosmetico.
    */
   const conCabecera = presentacion?.mostrarTitulo !== false;
   const cuerpo = useDesborda<HTMLDivElement>();
@@ -348,19 +307,8 @@ export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones, ic
   );
 }
 
-/**
- * Barras horizontales — el mismo objeto con los ejes intercambiados.
- *
- * Comparte TODO con las columnas: las mismas ranuras, el mismo modelo, el mismo respaldo en HTML.
- * Lo unico que cambia es que tipo de grafico se pide, y por eso `Barras` recibe la orientacion en
- * vez de existir dos componentes con el mismo cuerpo copiado.
- */
-/**
- * El hueco de una dona recien puesta, en porcentaje del radio.
- *
- * 55 deja anillo de sobra para comparar porciones y hueco suficiente para el total. Es el valor
- * por defecto del objeto, no un limite: el panel lo mueve entre 0 y 80.
- */
+/** Barras horizontales — el mismo objeto con los ejes intercambiados. */
+/** El hueco de una dona recien puesta, en porcentaje del radio. */
 const HUECO_DE_DONA = 55;
 
 export function BarrasHorizontales(props: ObjetoProps) {
@@ -383,10 +331,6 @@ export function Barras({
 }: ObjetoProps & { horizontal?: boolean }) {
   /*
    * El eje X sale de SU ranura, no de la primera dimension.
-   *
-   * `toCategorical` sigue recibiendo arrays ordenados —eje primero, serie despues— porque asi es
-   * como agrega. Lo que cambia es quien decide ese orden: la ranura, no el orden en que alguien
-   * mapeo los campos.
    */
   const r = porRanura(instance, ranuras);
   const multiplo = r ? r.uno('multiplo') : undefined;
@@ -396,20 +340,12 @@ export function Barras({
 
   /*
    * El multiplo va PRIMERO en las dimensiones.
-   *
-   * `toCategorical` compone las etiquetas en el orden en que se le pasan las dimensiones, y
-   * partirlas despues supone que el primer trozo es el panel. Pasarlo en otro orden partiria por
-   * la categoria del eje y saldria un panel por cada barra.
    */
   const dimensiones = [multiplo, ejeX, serie]
     .filter((c): c is string => c !== undefined)
     .map(aFieldRef);
   /*
    * El orden se aplica al MODELO, antes de repartirlo.
-   *
-   * El grafico y su respaldo en HTML se dibujan los dos desde este mismo `vm`. Ordenando dentro de
-   * ECharts, el grafico saldria de mayor a menor y el respaldo en el orden del dataset — dos
-   * lecturas distintas de la misma tarjeta, y la que discrepa seria justo la accesible.
    */
   const vm = ordenarCategorias(
     toCategorical(
@@ -560,10 +496,6 @@ export function Lineas({
       ) : (
       /*
        * Una linea tambien FILTRA.
-       *
-       * No lo hacia, y no habia motivo: pulsar el punto de un trimestre para ver el resto del
-       * modulo en ese trimestre es exactamente lo que pide 4.4. La capacidad estaba en las
-       * columnas y no aqui solo porque nadie la cableo.
        */
       <Grafico
         instanceId={instance.instanceId}
@@ -622,17 +554,7 @@ export function Lineas({
   );
 }
 
-/**
- * Pequenos multiplos: el mismo grafico, una vez por panel, dentro de UNA tarjeta.
- *
- * Una tarjeta y no varias, y eso es lo que los distingue de poner seis objetos a mano: el titulo,
- * el formato, el orden, las referencias y las medidas se configuran una vez y valen para todos.
- * Hoy, sin esto, mantener seis objetos identicos sincronizados es trabajo manual, y la primera vez
- * que alguien se salta uno el panel miente.
- *
- * Cada panel lleva su propio `<Grafico>`, asi que cada uno conserva su respaldo accesible: la
- * rejilla es visual, no una capa que haya que atravesar con el tabulador para llegar a los datos.
- */
+/** Pequenos multiplos: el mismo grafico, una vez por panel, dentro de UNA tarjeta. */
 function Multiplos({
   paneles,
   omitidos,
@@ -657,13 +579,7 @@ function Multiplos({
   seriesDeColumna?: number;
   dimension?: string;
   columnas: number;
-  /**
-   * Filtrar desde un panel filtra por la CATEGORIA DEL EJE, no por el valor del panel.
-   *
-   * Es lo que se ha pulsado. Filtrar ademas por la dimension que reparte los paneles seria hacer
-   * dos cosas con un gesto, y quien pulsa la barra «Q1» dentro del panel «Penal» para ver el
-   * resto del modulo en Q1 se encontraria tambien con Penal puesto sin haberlo pedido.
-   */
+  /** Filtrar desde un panel filtra por la CATEGORIA DEL EJE, no por el valor del panel. */
   onFiltrar?: (campo: string, valor: string) => void;
 }) {
   return (
@@ -689,10 +605,6 @@ function Multiplos({
               ? {
                   /*
                    * La leyenda, SOLO en el primer panel.
-                   *
-                   * Las series son las mismas en todos —es lo que hace que los paneles se puedan
-                   * comparar— asi que repetirla una vez por panel gasta el alto que le falta a los
-                   * graficos para decir exactamente lo mismo tres veces.
                    */
                   presentacion: i === 0 ? presentacion : { ...presentacion, leyenda: 'oculta' },
                 }
@@ -758,13 +670,7 @@ function Multiplos({
   );
 }
 
-/**
- * La presentacion con la que se dibuja CADA panel.
- *
- * La escala comun se implementa fijando el maximo del eje en todos ellos, que es lo mismo que
- * haria alguien a mano y reutiliza lo que ya existe. Se pone solo si nadie escribio un maximo:
- * un limite puesto a proposito manda sobre el que se deduce.
- */
+/** La presentacion con la que se dibuja CADA panel. */
 function presentacionDePanel(
   presentacion: PresentacionDeObjeto | undefined,
   paneles: PanelDeMultiplo[],
@@ -774,26 +680,11 @@ function presentacionDePanel(
   if (maximo === undefined || presentacion?.ejes?.maximoY !== undefined) return presentacion;
   /*
    * El maximo se REDONDEA hacia arriba a un numero de escala.
-   *
-   * Con el maximo exacto —861— ECharts dibuja su marca ademas de la escala regular, y «861» se
-   * dibujaba pegado a «800»: dos rotulos superpuestos donde deberia haber uno. Es la misma funcion
-   * que usa el medidor, y por el mismo motivo: una escala tiene que caer en numeros redondos.
    */
   return { ...presentacion, ejes: { ...presentacion?.ejes, maximoY: escalaBonita(maximo) } };
 }
 
-/**
- * La celda de categoria del respaldo, que ademas FILTRA.
- *
- * El filtrado cruzado de 4.4 tiene que existir tambien para quien navega con teclado: un
- * `<canvas>` no tiene nada dentro que el tabulador alcance, asi que si el gesto solo vive en el
- * lienzo, la capacidad desaparece para esa persona. El respaldo es donde vive su version.
- *
- * Se factoriza porque estaba escrito a mano en unos objetos y OLVIDADO en otros: el combinado y
- * el mapa de arbol filtraban con el raton y no con el teclado, y las lineas no filtraban de
- * ninguna de las dos formas. Con un componente, un objeto nuevo lo trae; escribiendo el `<th>` a
- * mano se vuelve a olvidar.
- */
+/** La celda de categoria del respaldo, que ademas FILTRA. */
 function CeldaDeCategoria({
   etiqueta,
   valor,
@@ -801,14 +692,7 @@ function CeldaDeCategoria({
   onFiltrar,
 }: {
   etiqueta: string;
-  /**
-   * Lo que se manda al filtro, cuando no es lo mismo que se lee.
-   *
-   * Un mapa de arbol de dos niveles rotula sus filas «Penal / Q1» —la etiqueta compuesta que
-   * `toCategorical` produce— y filtrarlo por eso buscaria una materia llamada «Penal / Q1», que
-   * no existe: el filtro no encontraria nada y quien lo pulsara veria el modulo vaciarse sin
-   * entender por que.
-   */
+  /** Lo que se manda al filtro, cuando no es lo mismo que se lee. */
   valor?: string;
   /** La dimension por la que se filtra. Sin ella el objeto no tiene por que ofrecer el gesto. */
   campo?: string;
@@ -831,18 +715,7 @@ function CeldaDeCategoria({
   );
 }
 
-/**
- * El contenedor del respaldo accesible de un objeto.
- *
- * Existe porque los tres atributos que lo hacen alcanzable —`tabIndex`, `role` y el nombre— se
- * olvidaron en los SIETE respaldos que se escribieron en los ultimos lotes. Cada uno era un
- * `<div className="tabla-contenedor">` pelado, y axe los marcaba todos con la misma infraccion:
- * una region que se desplaza y a la que no se llega con el tabulador (WCAG 2.1.1).
- *
- * El arreglo no es anadir los atributos siete veces: es que no se puedan olvidar. Un respaldo
- * nuevo que use este componente los trae; uno que escriba el `div` a mano vuelve a fallar, y por
- * eso la prueba recorre TODAS las paginas y no una de muestra.
- */
+/** El contenedor del respaldo accesible de un objeto. */
 function TablaDeRespaldo({ nombre, children }: { nombre: string; children: React.ReactNode }) {
   return (
     <div className="tabla-contenedor" tabIndex={0} role="region" aria-label={nombre}>
@@ -851,13 +724,7 @@ function TablaDeRespaldo({ nombre, children }: { nombre: string; children: React
   );
 }
 
-/**
- * Combinado de columnas y lineas.
- *
- * El orden de las medidas NO es el del mapeo: primero las del pozo «Columnas» y despues las del
- * pozo «Lineas». Es lo que permite que el constructor de opciones solo necesite saber CUANTAS son
- * columnas, en vez de arrastrar un mapa de medida a forma hasta ECharts.
- */
+/** Combinado de columnas y lineas. */
 export function Combinado({
   titulo,
   result,
@@ -949,13 +816,7 @@ export function Combinado({
   );
 }
 
-/**
- * Dispersion — dos medidas enfrentadas, un punto por categoria.
- *
- * La dimension no reparte ningun eje: cada uno de sus valores ES un punto. Por eso el modelo de
- * vista se construye igual que en los demas —una fila por categoria— pero se lee al reves: las
- * «series» son las tres medidas y los «puntos» son las categorias.
- */
+/** Dispersion — dos medidas enfrentadas, un punto por categoria. */
 export function Dispersion({
   titulo,
   result,
@@ -1036,13 +897,7 @@ export function Dispersion({
   );
 }
 
-/**
- * Embudo y cascada comparten la misma forma de datos: una dimension y una medida.
- *
- * Se escriben juntos porque el respaldo accesible tambien es el mismo salvo por la columna que
- * explica la lectura —«de la primera etapa» o «acumulado»—, y esa columna es justo lo que hace
- * que el camino accesible diga lo mismo que el dibujo en vez de una tabla de cifras sueltas.
- */
+/** Embudo y cascada comparten la misma forma de datos: una dimension y una medida. */
 function UnaDimensionUnaMedida({
   titulo,
   result,
@@ -1172,12 +1027,7 @@ export function Cascada(props: ObjetoProps) {
   );
 }
 
-/**
- * Mapa de arbol — una o dos dimensiones, una medida.
- *
- * El segundo nivel es opcional y por eso no se puede reutilizar el componente de arriba: con dos
- * dimensiones el respaldo tiene una columna mas, y esa columna es la jerarquia.
- */
+/** Mapa de arbol — una o dos dimensiones, una medida. */
 export function MapaDeArbol({
   titulo,
   result,
@@ -1204,10 +1054,6 @@ export function MapaDeArbol({
 
   /*
    * El nombre que ECharts entrega al pulsar, convertido en un valor de la PRIMERA dimension.
-   *
-   * Con dos niveles, pulsar un rectangulo interior entrega el nombre de la hoja —«Q1»— y filtrar
-   * la materia por «Q1» no encuentra nada: el modulo se vaciaria sin decir por que. Se busca a
-   * que grupo pertenece esa hoja en el propio modelo, que es donde esta la respuesta.
    */
   const grupoDe = (nodo: string): string => {
     const conEseNombre = vm.points.find((p) => p.label === nodo || p.label.endsWith(` / ${nodo}`));
@@ -1269,13 +1115,7 @@ export function MapaDeArbol({
   );
 }
 
-/**
- * Circular — pastel y dona.
- *
- * El MISMO componente para los dos objetos del catalogo. Lo unico que los separa es el hueco del
- * centro, que es presentacion: `dona` se publica con un valor por defecto y `pastel` sin el, y
- * cualquiera de los dos se puede mover al otro extremo desde el panel sin perder nada.
- */
+/** Circular — pastel y dona. */
 export function Circular({
   titulo,
   result,
@@ -1301,10 +1141,6 @@ export function Circular({
 
   /*
    * El hueco por defecto del objeto, que la presentacion anula.
-   *
-   * `dona` llega con 55 y `pastel` sin nada; lo que el editor ponga manda sobre los dos. Sin este
-   * `??`, una dona recien puesta en el lienzo saldria como un pastel hasta que alguien abriera el
-   * panel — o sea, el objeto no seria lo que su nombre dice.
    */
   const circular = {
     ...(hueco === undefined ? {} : { radioInterior: hueco }),
@@ -1386,12 +1222,7 @@ export function Dona(props: ObjetoProps) {
   return <Circular {...props} hueco={HUECO_DE_DONA} />;
 }
 
-/**
- * Medidor — una cifra contra su meta.
- *
- * Sin dimensiones: `toCategorical` con la lista vacia devuelve UN punto con las dos medidas, que
- * es exactamente lo que la aguja necesita. No hace falta un modelo de vista aparte.
- */
+/** Medidor — una cifra contra su meta. */
 export function Medidor({
   titulo,
   result,
@@ -1544,29 +1375,13 @@ export interface ObjetoProps {
   titulo: string;
   result: QueryResult;
   instance: ObjectInstance;
-  /**
-   * Con que operador se resume cada medida, alineado con `instance.binding.measures`.
-   *
-   * Llega resuelto del servidor, que es quien tiene el esquema. Los objetos consumen sus medidas
-   * por ranura y no por orden, asi que aqui se reordena con `agregacionesPara` en vez de indexar.
-   */
+  /** Con que operador se resume cada medida, alineado con `instance.binding.measures`. */
   agregaciones: Agregacion[];
-  /**
-   * Las ranuras que declara la version del objeto.
-   *
-   * Llegan como dato desde el servidor, que es quien tiene el registro. Un objeto que no las
-   * declare recibe `undefined` y se dibuja leyendo por orden, como siempre.
-   */
+  /** Las ranuras que declara la version del objeto. */
   ranuras?: RanuraDeCampos[];
   /** Filtrado cruzado (4.4): anade un filtro a la query string, no a un estado paralelo. */
   onFiltrar?: (campo: string, valor: string) => void;
-  /**
-   * El icono que declara la version del objeto en el catalogo.
-   *
-   * Viaja con el objeto en vez de salir de un mapa por tipo: habia dos mapas —uno en la paleta y
-   * otro aqui— y un objeto nuevo se dibujaba sin icono hasta que alguien se acordaba de los dos.
-   * Ahora el catalogo lo exige y el render solo lo reenvia al marco.
-   */
+  /** El icono que declara la version del objeto en el catalogo. */
   iconoDelObjeto?: NombreDeIcono;
 }
 

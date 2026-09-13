@@ -7,13 +7,7 @@ import { type Bookmark, bookmarkToUrl } from '@app/module-model';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
 import { BotonDeIcono } from './iconos/BotonDeIcono';
 
-/**
- * Marcadores — seccion 4.4.
- *
- * Un marcador es una URL con nombre. Guardar uno es capturar la query string actual; abrirlo es
- * navegar a esa URL. No hay un formato interno ni un mecanismo de estado aparte, y por eso un
- * marcador compartido se filtra automaticamente segun el ambito de quien lo abre.
- */
+/** Marcadores — seccion 4.4. */
 export function Marcadores({
   moduleSlug,
   pageSlug,

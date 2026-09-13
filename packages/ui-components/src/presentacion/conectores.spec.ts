@@ -1,13 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { trazar } from './conectores';
 
-/**
- * El trazado de un conector.
- *
- * Lo que se prueba no es la estetica de la curva: es que el conector SALGA DE la caja y ENTRE EN
- * la otra por el borde que toca. Es la propiedad que hace que la flecha parezca unir dos objetos
- * en vez de atravesarlos, y la que se rompe en silencio si alguien invierte un signo.
- */
+/** El trazado de un conector. */
 describe('trazar', () => {
   const a = { x: 0, y: 0, w: 100, h: 50 };
 

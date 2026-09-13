@@ -5,28 +5,7 @@ import {
   type InstantaneaDeConfiguracion,
 } from './instantanea';
 
-/**
- * Sirve la instantanea vigente, con refresco y con memoria.
- *
- * Tres decisiones, y ninguna es de rendimiento:
- *
- * **TTL corto (30 s).** «Desactivar un modulo en produccion sin redeploy» solo significa algo si
- * surte efecto en segundos. Un TTL de minutos convierte el interruptor de emergencia en un
- * tramite, y entonces la gente reinicia la aplicacion, que es justo lo que el requisito evita.
- *
- * **Ante un fallo, el ULTIMO VALOR CONOCIDO.** Si App Configuration no responde, lo que no puede
- * pasar es que un modulo apagado a proposito —porque esta dando cifras malas— se vuelva a
- * encender solo. Servir la ultima foto buena es lo unico que conserva esa decision.
- *
- * **La ultima foto se PERSISTE en el almacen compartido.** Sin eso, un reinicio durante la caida
- * —que es justo cuando hay reinicios— dejaria a la instancia nueva sin memoria y volveria a
- * encender lo apagado. Ademas hace que todas las instancias arranquen con la misma foto en vez de
- * cada una con la suya.
- *
- * Y lo que pasa cuando NO hay ninguna foto, ni fresca ni guardada: se abre todo. El estado por
- * defecto de un modulo es encendido, y dejar el portal en blanco porque el servicio de banderas
- * no contesta seria convertir una dependencia auxiliar en un punto unico de fallo.
- */
+/** Sirve la instantanea vigente, con refresco y con memoria. */
 
 export const CLAVE_ULTIMA_INSTANTANEA = 'config:ultima-instantanea';
 

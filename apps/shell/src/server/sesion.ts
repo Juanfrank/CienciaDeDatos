@@ -2,18 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { sesiones } from './identidad';
 
-/**
- * Sesion del shell — secciones 4.7 y 6.7.
- *
- * La cookie lleva un identificador OPACO y el estado real vive del lado servidor, en el almacen
- * compartido, para que reciclar o anadir una instancia no pierda la sesion (criterio de la
- * seccion 9).
- *
- * Lo que cambia respecto de antes, y es el punto: `obtenerSesion` ya NO emite una sesion cuando
- * no hay ninguna. Devuelve null, y quien la pide decide —una pagina redirige a la pantalla de
- * acceso, una ruta de API responde 401—. Emitirla sola era comodo para desarrollar y significaba
- * que la aplicacion no tenia autenticacion: cualquiera que llegara a una URL ya estaba dentro.
- */
+/** Sesion del shell — secciones 4.7 y 6.7. */
 
 export const COOKIE_SESION = 'sesion';
 
@@ -41,12 +30,7 @@ export async function obtenerSesion(): Promise<SesionShell | null> {
   };
 }
 
-/**
- * Sesion o error, para los Route Handlers.
- *
- * Se separa de `obtenerSesion` para que el caso "no hay sesion" sea imposible de olvidar: quien
- * llame a esta obtiene una sesion o una excepcion, nunca un null que se pueda ignorar.
- */
+/** Sesion o error, para los Route Handlers. */
 export class SinSesionError extends Error {
   constructor() {
     super('Se requiere iniciar sesion.');
@@ -60,27 +44,14 @@ export async function exigirSesion(): Promise<SesionShell> {
   return sesion;
 }
 
-/**
- * Sesion o pantalla de acceso, para las paginas.
- *
- * Cada pagina protegida la llama por su cuenta en vez de delegar en el layout raiz. Es
- * deliberado: un layout de Next.js NO se vuelve a ejecutar en cada navegacion del cliente, asi
- * que un guardian puesto solo alli deja de mirar en cuanto se navega por dentro. Ademas una ruta
- * nueva que olvide el guardian queda cerrada por defecto solo si el guardian esta en la ruta.
- */
+/** Sesion o pantalla de acceso, para las paginas. */
 export async function exigirSesionDePagina(): Promise<SesionShell> {
   const sesion = await obtenerSesion();
   if (!sesion) redirect('/acceso');
   return sesion;
 }
 
-/**
- * Cambia el equipo activo (4.10.2).
- *
- * Escritura del lado servidor sobre la sesion existente: el ambito de datos efectivo cambia de
- * inmediato SIN cerrar sesion ni reemitir credenciales, que es un criterio de la seccion 9 y la
- * razon de que la sesion sea opaca en vez de un token autocontenido.
- */
+/** Cambia el equipo activo (4.10.2). */
 export async function cambiarEquipoActivo(
   sessionId: string,
   teamId: string,

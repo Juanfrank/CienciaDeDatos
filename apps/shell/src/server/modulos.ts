@@ -1,30 +1,14 @@
 import type { ModuleDefinition } from '@app/module-model';
 import { modulos } from './almacenModulos';
 
-/**
- * Definiciones de modulo de arranque.
- *
- * En produccion las produce el editor de modulos (4.2) y viven en la base de gobierno. Aqui se
- * declaran como dato para que el shell tenga algo que renderizar contra el seed, y para que las
- * pruebas de punta a punta tengan modulos reales que abrir.
- *
- * Los `moduleId` coinciden con los del arbol del seed: es lo que permite que la resolucion de
- * ambito (4.10.4) encuentre el modulo en la organizacion general y aplique la herencia de
- * carpetas.
- */
+/** Definiciones de modulo de arranque. */
 
 const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };
 const MATERIA = { table: 'DimTribunal', field: 'Materia' };
 const TRIMESTRE = { table: 'DimTiempo', field: 'Trimestre' };
 const DATASET = 'casos-por-distrito-trimestre';
 
-/**
- * El enlace de un objeto que no lee datos.
- *
- * El `datasetId` vacio no es un hueco por rellenar: es la declaracion de que este objeto no pide
- * nada al cache. `datasetsConsumedBy` lo filtra, y por eso un modulo lleno de elementos no aparece
- * degradado por un dataset inexistente.
- */
+/** El enlace de un objeto que no lee datos. */
 const SIN_DATOS = { datasetId: '', dimensions: [], measures: [] };
 
 export const modulosDemo: ModuleDefinition[] = [
@@ -53,10 +37,6 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosPendientes'] },
               /*
                * La primera instancia del seed que configura su presentacion.
-               *
-               * Sirve de ejemplo vivo de lo que se puede hacer desde el editor sin tocar codigo:
-               * el mismo objeto `tarjeta-kpi` con otro icono, otro acento y otro rotulo es otra
-               * tarjeta, sin publicar ningun objeto nuevo.
                */
               presentacion: {
                 icono: 'expediente',
@@ -108,12 +88,6 @@ export const modulosDemo: ModuleDefinition[] = [
           },
           /*
            * Panel de filtros en vez de dos segmentadores.
-           *
-           * Antes esta celda era un segmentador de una sola dimension, y filtrar tambien por
-           * distrito habria pedido otra celda con otro objeto identico salvo por el campo. El
-           * panel agrupa las dos y deja elegir COMO se filtra cada una: materia tiene dos valores
-           * y cabe en pastillas; distrito crece con el ambito de quien mira y se lleva mejor con
-           * un desplegable.
            */
           {
             id: 'filtros',
@@ -180,12 +154,6 @@ export const modulosDemo: ModuleDefinition[] = [
                 measures: ['CasosPendientes'],
                 /*
                  * Materia y, dentro, trimestre. Cruzado por distrito.
-                 *
-                 * La primera version anidaba distrito y dentro materia, y se veia un solo padre:
-                 * el ambito de este modulo restringe a un distrito, asi que la jerarquia quedaba
-                 * demostrada sobre un arbol de una rama. Materia tiene varias dentro del mismo
-                 * ambito, asi que los niveles y los subtotales se ven de verdad — y el eje de
-                 * columnas ensena de paso el efecto del RLS: una sola columna.
                  */
                 ranuras: {
                   filas: ['DimTribunal.Materia', 'DimTiempo.Trimestre'],
@@ -197,21 +165,9 @@ export const modulosDemo: ModuleDefinition[] = [
           },
           /*
            * El unico objeto del seed con MAS DE UNA medida mapeada, y esta aqui a proposito.
-           *
-           * Toda la galeria mapeaba una sola medida, asi que ningun grafico llegaba a usar la
-           * paleta categorica ni la leyenda: el codigo que reparte ocho colores entre series
-           * nunca se ejecutaba contra datos reales, y un fallo ahi no se habria visto. Ademas es
-           * la comparacion que el modulo pedia —lo que entra frente a lo que sale— y estaba solo
-           * en la tabla del final.
            */
           /*
            * El segmentador se queda, al lado del panel, y sobre la MISMA dimension.
-           *
-           * No es un resto del pasado: los dos escriben el mismo parametro de la URL, asi que
-           * elegir «Penal» en cualquiera de ellos mueve al otro sin que ninguno sepa que el otro
-           * existe. Es la demostracion de que 4.11 no es una formalidad —el estado vive en la
-           * direccion, no en los componentes—, y el sitio donde se notaria si algun dia alguien
-           * mete estado local en un filtro.
            */
           {
             id: 'segmentador-materia',
@@ -382,11 +338,6 @@ export const modulosDemo: ModuleDefinition[] = [
   },
   /*
    * Modulo de muestra de los objetos que no leen datos.
-   *
-   * Existe para que cada elemento y cada contenedor tenga un sitio donde verse funcionando, y no
-   * solo un tipo de TypeScript y una prueba. Es tambien lo que hace que una regresion en ellos se
-   * note: las pruebas de navegador abren este modulo, asi que un contenedor que deje de dibujarse
-   * rompe la suite en vez de descubrirse el dia que alguien lo use.
    */
   {
     moduleId: 'composicion',
@@ -1582,11 +1533,6 @@ export const modulosDemo: ModuleDefinition[] = [
           {
             /*
              * Las barras horizontales con la MISMA regla que las columnas.
-             *
-             * Es lo que la auditoria del contrato encontro: el dibujo coloreaba por valor desde
-             * el primer dia —lo hace la misma funcion que en las columnas— y la version 1.0.0 no
-             * lo declaraba, asi que el panel no lo ofrecia. Puesto aqui, la pagina ensena las dos
-             * orientaciones respondiendo igual.
              */
             id: 'con-barras-h',
             position: { x: 0, y: 7, w: 6, h: 4 },
@@ -1607,10 +1553,6 @@ export const modulosDemo: ModuleDefinition[] = [
           {
             /*
              * Y la matriz, que es donde el color por valor mas se nota.
-             *
-             * Un cruce de distritos por trimestres son doce cifras: encontrar a ojo la que se sale
-             * es justo el trabajo que el color ahorra. La tabla llana lo tenia desde su 1.2.0 y la
-             * matriz no, aunque las dos comparten la lista de lo que admiten presentar.
              */
             id: 'con-matriz',
             position: { x: 6, y: 7, w: 6, h: 4 },
@@ -1847,16 +1789,7 @@ export const modulosDemo: ModuleDefinition[] = [
   },
 ];
 
-/**
- * Busqueda por slug, contra el ALMACEN y no contra la semilla.
- *
- * Es asincrona desde que existe el editor: los modulos se escriben, asi que ya no se pueden
- * resolver leyendo un array del modulo. La semilla sigue siendo el estado inicial.
- *
- * OJO: esto NO filtra por estado. Devuelve tambien borradores, porque el editor tiene que poder
- * abrirlos. Quien sirva un modulo a una persona debe pasar ademas por `puedeVer` del ciclo de
- * vida; servir un borrador ajeno seria mostrar trabajo en curso de otro como si fuera oficial.
- */
+/** Busqueda por slug, contra el ALMACEN y no contra la semilla. */
 export async function findModuleBySlug(slug: string): Promise<ModuleDefinition | undefined> {
   return modulos.bySlug(slug);
 }

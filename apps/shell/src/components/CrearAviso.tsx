@@ -6,16 +6,7 @@ import type { AlertOperator, Cadence } from '@app/alerts';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
 import { BotonDeIcono } from './iconos/BotonDeIcono';
 
-/**
- * Crear una alerta o una suscripcion desde el modulo que se esta viendo.
- *
- * Se crean AQUI y no en una pantalla de configuracion aparte porque las dos capturan la vista
- * actual: los filtros que viajan son los de la URL, que segun 4.11 son la representacion
- * completa del estado visible. Es el mismo gesto que guardar un marcador.
- *
- * Lo que NO viaja es el equipo ni el ambito: los pone el servidor desde la sesion, porque son
- * los que deciden con que datos se evalua la regla y que lleva el archivo entregado.
- */
+/** Crear una alerta o una suscripcion desde el modulo que se esta viendo. */
 
 const OPERADORES: { valor: AlertOperator; etiqueta: string }[] = [
   { valor: 'mayor-que', etiqueta: 'supera' },

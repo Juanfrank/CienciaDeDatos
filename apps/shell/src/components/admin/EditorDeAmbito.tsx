@@ -3,17 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { AccessScope } from '@app/access-control';
 
-/**
- * Editor de ambitos — seccion 4.10.8, y la puerta de 4.10.4.
- *
- * Dos reglas que la interfaz hace visibles:
- *  1. Las dimensiones se ELIGEN de una lista que sale del esquema real. Nunca se escriben a mano.
- *  2. Si el ambito propuesto AMPLIA, el servidor lo rechaza y la interfaz pide una justificacion
- *     de TEXTO —no una casilla— antes de reintentar.
- *
- * La comprobacion real esta en el servidor (`guardarAmbito`). Esto es la interfaz de esa regla,
- * no la regla: quitar este formulario no permitiria ampliar sin justificar.
- */
+/** Editor de ambitos — seccion 4.10.8, y la puerta de 4.10.4. */
 interface Dimension {
   table: string;
   field: string;

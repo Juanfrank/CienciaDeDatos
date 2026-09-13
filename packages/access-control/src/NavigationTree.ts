@@ -1,14 +1,7 @@
 import type { FieldRef } from '@app/data-contracts';
 import type { AccessScope } from './AccessScope';
 
-/**
- * Organizacion general de modulos — seccion 4.1.1 del contrato de ingenieria.
- *
- * Este arbol es la estructura CANONICA y unica fuente de verdad sobre donde vive cada
- * modulo, quien lo administra, y que ambito de acceso hereda por estar dentro de una
- * carpeta determinada. No existe una segunda estructura "real" en paralelo: los paquetes
- * visuales (ModulePackage) son presentacion, nunca permisos.
- */
+/** Organizacion general de modulos — seccion 4.1.1 del contrato de ingenieria. */
 
 export type NavNode = FolderNode | ModuleLeaf;
 
@@ -45,14 +38,7 @@ export interface ModuleLeaf {
 export const isFolder = (node: NavNode): node is FolderNode => node.type === 'folder';
 export const isModule = (node: NavNode): node is ModuleLeaf => node.type === 'module';
 
-/**
- * Ruta de ancestros de un modulo en la organizacion general, desde la raiz hasta el modulo.
- *
- * Es el paso 2 del algoritmo obligatorio de 4.10.4. Devuelve `null` si el modulo no existe
- * en el arbol — que NO es lo mismo que existir en la raiz sin carpetas (que devuelve []).
- * Esa distincion importa: un modulo ausente del arbol general no tiene ambito que resolver
- * y no debe poder mostrarse, mientras que uno en la raiz simplemente no hereda de nadie.
- */
+/** Ruta de ancestros de un modulo en la organizacion general, desde la raiz hasta el modulo. */
 export function findModulePath(tree: NavNode[], moduleId: string): FolderNode[] | null {
   for (const node of tree) {
     if (isModule(node) && node.moduleRef.moduleId === moduleId) return [];

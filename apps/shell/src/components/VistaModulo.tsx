@@ -12,20 +12,10 @@ import { ObjetoDeModulo } from './ObjetoDeModulo';
 import { Rejilla } from './Rejilla';
 import type { ObjetoSerializado } from '../server/serializar';
 
-/**
- * Interruptor de la consulta en lenguaje natural (4.9).
- *
- * Una constante y no una variable de entorno a proposito: no es algo que se configure por
- * despliegue, es una funcionalidad a medio hacer. Cuando responda, esto pasa a `true` y se borra.
- */
+/** Interruptor de la consulta en lenguaje natural (4.9). */
 const CONSULTA_VISIBLE = false;
 
-/**
- * Vista de un modulo.
- *
- * Recibe objetos YA cargados y YA filtrados en el servidor. Este componente no pide datos ni
- * conoce el cache: solo decide que objeto dibuja cada instancia y propaga el filtrado cruzado.
- */
+/** Vista de un modulo. */
 export function VistaModulo({
   objetos,
   provenance,
@@ -36,25 +26,11 @@ export function VistaModulo({
 }: {
   objetos: ObjetoSerializado[];
   provenance: { isPersonalized: boolean; label: string };
-  /**
-   * Las insignias de procedencia y ambito, ya renderizadas en el servidor.
-   *
-   * Llegan como prop y no se construyen aqui porque salen de datos que solo tiene la pagina —el
-   * ambito efectivo con el que se cargo el modulo—, y porque asi comparten fila con los iconos
-   * sin que este componente tenga que saber calcularlas. Next permite pasar JSX del servidor a un
-   * componente de cliente: lo que viaja es el arbol ya pintado, no el codigo que lo pinta.
-   */
+  /** Las insignias de procedencia y ambito, ya renderizadas en el servidor. */
   insignias?: React.ReactNode;
   moduleSlug: string;
   pageSlug?: string;
-  /**
-   * true cuando la vista se dibuja dentro del portal de otra institucion (4.9).
-   *
-   * Oculta los controles que sacan de la vista o escriben —marcadores, exportar, avisarme—:
-   * dentro de un iframe de 640 pixeles no llevan a ningun sitio util. Lo que SI se conserva es
-   * la insignia de procedencia (4.6) y el filtrado cruzado, que se queda dentro del marco
-   * porque vive en la query string.
-   */
+  /** true cuando la vista se dibuja dentro del portal de otra institucion (4.9). */
   incrustado?: boolean;
 }) {
   const { alternar, limpiarTodo, searchParams } = useFiltrosDeUrl();

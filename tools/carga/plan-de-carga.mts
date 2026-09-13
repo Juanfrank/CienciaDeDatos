@@ -1,19 +1,4 @@
-/**
- * Prueba de carga del camino de lectura — secciones 5.5 y 8.3.
- *
- * La seccion 9 exige "una prueba de carga documentada que sustenta los umbrales de autoscale
- * configurados". Este archivo es el PLAN: que se pide, con que concurrencia y que se mide.
- * Sirve igual para ejecutarlo aqui contra una instancia local —para conocer la forma de la
- * curva— y como definicion del escenario que Azure Load Testing ejecutara contra el entorno de
- * pruebas, que es lo unico que puede fijar los umbrales de verdad.
- *
- * Lo que NO puede hacer una ejecucion local: sustituir a la de Azure. Aqui no hay Front Door, ni
- * el plan de App Service real, ni la latencia del Storage Account, y la maquina que ejecuta el
- * cliente es la misma que sirve. Los numeros valen para comparar cambios entre si, nunca para
- * escribir un umbral de autoscale. Ver `docs/operacion/prueba-de-carga.md`.
- *
- *   npx tsx tools/carga/plan-de-carga.mts --url http://localhost:4310 --concurrencia 20 --segundos 20
- */
+/** Prueba de carga del camino de lectura — secciones 5.5 y 8.3. */
 
 interface Escenario {
   nombre: string;
@@ -22,12 +7,7 @@ interface Escenario {
   peso: number;
 }
 
-/**
- * Perfil de uso.
- *
- * Los pesos salen de como se usa un modulo, no de repartir por igual: se abre una vez, se filtra
- * varias y se exporta de tanto en tanto. Un perfil plano mediria un uso que no existe.
- */
+/** Perfil de uso. */
 export const ESCENARIOS: Escenario[] = [
   { nombre: 'modulo completo', ruta: '/api/modulos/casos-pendientes', peso: 4 },
   {

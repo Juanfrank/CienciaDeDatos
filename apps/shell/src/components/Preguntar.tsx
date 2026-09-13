@@ -3,13 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-/**
- * Caja de pregunta en lenguaje natural — seccion 4.9.
- *
- * Enseña lo que ENTENDIO antes de aplicarlo, y lo que no entendio al lado. Contestar en silencio
- * a medias —aplicar el filtro que se reconocio y callar el termino que no— es como se pierde la
- * confianza en una funcion asi: quien pregunta cree que la respuesta cubre lo que pidio.
- */
+/** Caja de pregunta en lenguaje natural — seccion 4.9. */
 export function Preguntar({ moduleSlug }: { moduleSlug: string }) {
   const router = useRouter();
   const [pregunta, setPregunta] = useState('');

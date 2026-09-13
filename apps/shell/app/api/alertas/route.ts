@@ -10,14 +10,7 @@ export const runtime = 'nodejs';
 
 const OPERADORES: AlertOperator[] = ['mayor-que', 'menor-que', 'cambia-mas-de'];
 
-/**
- * Reglas de alerta (4.9).
- *
- * Lo importante de este endpoint es lo que NO acepta del cuerpo: ni el usuario ni el equipo.
- * Los dos se toman de la sesion del lado servidor, para que nadie pueda crear una alerta a
- * nombre de otra persona —ni, peor, bajo el equipo de otra, que es lo que decide el ambito con
- * el que se evalua.
- */
+/** Reglas de alerta (4.9). */
 export async function GET() {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();

@@ -10,16 +10,7 @@ import { type CacheEntry, CacheStoreUnavailableError, type ICacheStore } from '.
 import { type CacheableDataset, type DatasetRegistry, defaultRegistry, getDataset } from './datasetRegistry';
 import type { InMemoryCacheStore } from './InMemoryCacheStore';
 
-/**
- * Camino de lectura de una solicitud de usuario — seccion 6.3.
- *
- * Lee de L1 -> L2 y NADA MAS. Si no hay entrada disponible en ninguna de las dos, devuelve un
- * estado explicito ("generandose"), nunca una consulta sincrona a IDataConnector. La unica via
- * que invoca al conector es el proceso de poblacion (6.4).
- *
- * Este paquete esta etiquetado `type:server` y no puede importar `type:server-data`: la regla
- * de limites hace imposible, no solo desaconsejable, que este archivo alcance un conector.
- */
+/** Camino de lectura de una solicitud de usuario — seccion 6.3. */
 
 export type ReadStatus = 'ok' | 'generating' | 'degraded';
 
@@ -157,12 +148,7 @@ export class CachedDatasetReader {
   }
 }
 
-/**
- * Aplica sobre el dataset ya cacheado los filtros efectivos.
- *
- * Es el "filtrando o agregando sobre el dataset ya cacheado, en el backend" de 6.6: un modulo
- * que necesita una vista mas especifica no genera una consulta nueva a la fuente.
- */
+/** Aplica sobre el dataset ya cacheado los filtros efectivos. */
 export function applyRequestedFilters(
   result: QueryResult,
   filters: Record<string, string[]>,

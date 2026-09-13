@@ -6,13 +6,7 @@ import { obtenerSesion } from '../../../src/server/sesion';
 
 export const runtime = 'nodejs';
 
-/**
- * Bandeja de notificaciones.
- *
- * Se sirve siempre la de QUIEN PIDE, tomada de la sesion: no hay parametro de usuario que
- * manipular. Una bandeja ajena contiene cifras del ambito de otra persona, asi que no es solo
- * un asunto de privacidad de la bandeja — es el mismo aislamiento del principio 5.
- */
+/** Bandeja de notificaciones. */
 export async function GET() {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();

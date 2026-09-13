@@ -3,13 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-/**
- * Cierre de sesion (4.7).
- *
- * Llama a DELETE /api/acceso, que REVOCA la sesion del lado servidor ademas de borrar la cookie.
- * Borrar solo la cookie dejaria la sesion viva en el almacen: quien tuviera el identificador
- * —una copia de la cookie tomada antes— seguiria dentro despues de "cerrar sesion".
- */
+/** Cierre de sesion (4.7). */
 export function CerrarSesion({ usuario }: { usuario: string }) {
   const router = useRouter();
   const [saliendo, setSaliendo] = useState(false);

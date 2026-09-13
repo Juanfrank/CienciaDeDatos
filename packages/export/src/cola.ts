@@ -2,24 +2,7 @@ import type { CacheEntry, ICacheStore } from '@app/caching';
 import { claveDeTrabajo } from './types';
 import type { ExportJob, ExportRequest } from './types';
 
-/**
- * Cola de exportaciones — seccion 5.3.
- *
- *   "Cualquier operacion de larga duracion (exportacion de un reporte grande, por ejemplo) se
- *    despacha a una cola (Azure Queue Storage o Service Bus) y se procesa fuera del ciclo de
- *    solicitud HTTP, con estado de progreso consultable."
- *
- * `IExportQueue` es el puerto; `StoreExportQueue` es el adaptador de desarrollo, apoyado en el
- * mismo `ICacheStore` que ya comparten el shell y el job de poblacion. El adaptador de Azure
- * Queue Storage implementa esta misma interfaz y se sustituye en el cableado, igual que ocurre
- * con `ICacheStore` e `IDataConnector`.
- *
- * Limite conocido del adaptador de desarrollo: `ICacheStore` no ofrece operacion atomica de
- * lectura-modificacion-escritura, asi que el indice de pendientes admite carreras si hubiera
- * varios trabajadores a la vez. En desarrollo hay uno solo. En Azure no aplica: la exclusion la
- * da la propia cola con su tiempo de invisibilidad, que es justamente por lo que ahi se usa una
- * cola de verdad y no un indice en el store.
- */
+/** Cola de exportaciones — seccion 5.3. */
 
 export const CLAVE_COLA = 'export:queue:pendientes';
 

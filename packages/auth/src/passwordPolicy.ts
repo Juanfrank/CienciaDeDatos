@@ -47,13 +47,7 @@ export function checkPasswordPolicy(password: string, policy: PasswordPolicy): P
   return fallos;
 }
 
-/**
- * Bloqueo de cuenta con backoff progresivo — nunca bloqueo indefinido sin via de recuperacion.
- *
- * Es independiente del rate limiting del endpoint de login, que vive en Front Door/App Service
- * y mitiga la fuerza bruta DISTRIBUIDA. Este bloqueo protege una cuenta concreta; aquel protege
- * el endpoint. El documento pide los dos, y uno no sustituye al otro.
- */
+/** Bloqueo de cuenta con backoff progresivo — nunca bloqueo indefinido sin via de recuperacion. */
 export interface LockoutPolicy {
   /** Intentos fallidos antes del primer bloqueo. */
   maxAttempts: number;

@@ -16,33 +16,14 @@ import { cargarModulo } from './datos';
 import { colaExportaciones, encolarExportacion } from './exportaciones';
 import { moduloServibleParaUsuario } from './cicloDeVida';
 
-/**
- * Cableado de alertas y suscripciones (4.9).
- *
- * Aqui esta la decision de seguridad de la funcion entera: una regla se evalua con
- * `cargarModulo` bajo el USUARIO Y EQUIPO que la crearon, igual que la exportacion. La
- * alternativa —evaluar la condicion sobre el dataset sin ambito y mandar el numero— convertiria
- * una notificacion en un canal por el que salen cifras que su destinatario no puede ver. El
- * principio 5 no tiene una excepcion para las alertas.
- *
- * Y se evalua CUANDO EL DATO CAMBIA: el disparador es el latido que el job deja en el cache al
- * terminar un ciclo de poblacion (seccion 7), no un reloj propio. Una alerta "basada en datos"
- * con reloj propio evalua dos veces el mismo dato y se pierde el cambio que ocurre entre vueltas.
- */
+/** Cableado de alertas y suscripciones (4.9). */
 
 export const alertStore = new StoreAlertRepository(cacheL2);
 export const notificaciones = new InboxNotificationChannel(cacheL2);
 
 const nuevoId = (): string => crypto.randomUUID();
 
-/**
- * Observaciones del objeto que vigila una regla.
- *
- * Devuelve `null` —y no una lista vacia— cuando el modulo o el objeto ya no existen, o cuando el
- * equipo dejo de tener concedido el modulo. La diferencia importa: una lista vacia significa
- * "no hay nada que cumpla la condicion" y podria RESOLVER una alerta que en realidad ya no se
- * puede evaluar.
- */
+/** Observaciones del objeto que vigila una regla. */
 export async function observacionesDe(rule: AlertRule): Promise<Observacion[] | null> {
   const module = await moduloServibleParaUsuario(rule.moduleSlug, rule.ownerUserId);
   if (!module) return null;
@@ -119,12 +100,7 @@ export async function evaluarAlertas(ahora = new Date()): Promise<ResultadoDeEva
   return { evaluadas: reglas.length - omitidas, notificadas, omitidas };
 }
 
-/**
- * Evalua solo si el job ha completado un ciclo NUEVO desde la ultima vez.
- *
- * Sin esta comprobacion, el bucle del trabajador reevaluaria las mismas cifras cada pocos
- * segundos: mucho trabajo para nada, y ninguna transicion que notificar.
- */
+/** Evalua solo si el job ha completado un ciclo NUEVO desde la ultima vez. */
 export async function evaluarSiHayDatoNuevo(ahora = new Date()): Promise<ResultadoDeEvaluacion | null> {
   const latido = await cacheL2.get<PopulatorHeartbeat>(POPULATOR_HEARTBEAT_KEY);
   const finishedAt = latido?.value.finishedAt;
@@ -145,13 +121,7 @@ export interface ResultadoDeSuscripciones {
   entregadas: number;
 }
 
-/**
- * Atiende las suscripciones: encola lo que toca y entrega lo que ya esta listo.
- *
- * La generacion del archivo NO ocurre aqui: se encola en la misma cola de exportacion que usa
- * el boton de exportar (5.3). Una suscripcion es, exactamente, una exportacion programada, y
- * darle un camino propio duplicaria la generacion de archivos y la puerta de ambito con ella.
- */
+/** Atiende las suscripciones: encola lo que toca y entrega lo que ya esta listo. */
 export async function atenderSuscripciones(ahora = new Date()): Promise<ResultadoDeSuscripciones> {
   const suscripciones = await alertStore.listSubscriptions();
   let encoladas = 0;

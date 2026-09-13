@@ -1,33 +1,10 @@
 import type { Alineacion, ColorDeTexto, EstiloDeTexto } from './contrato';
 
-/**
- * Elementos: los objetos que NO se enlazan a un origen de datos.
- *
- * Un modulo no es solo una rejilla de cifras. Hay que poder decir donde empieza una seccion,
- * separar dos bloques, poner una nota, senalar que un cuadro alimenta a otro. Hasta ahora todo eso
- * habia que resolverlo con un titulo de objeto vacio o no resolverlo, y la consecuencia era que
- * los modulos largos se leian como una lista plana de tarjetas sin jerarquia visible.
- *
- * Se publican como objetos del catalogo, igual que un grafico, y por el mismo motivo: asi llevan
- * version fijada (4.5), se colocan con el mismo arrastre, se validan con la misma comprobacion y
- * se personalizan con los mismos textos. Lo unico que los distingue es que su contrato de datos
- * admite cero dimensiones y cero medidas — y de ahi se DEDUCE que no necesitan dataset, en vez de
- * llevar un interruptor aparte que alguien pueda dejar desincronizado.
- */
+/** Elementos: los objetos que NO se enlazan a un origen de datos. */
 
 /* ── Cuadro de texto ───────────────────────────────────────────────────────────────────────── */
 
-/**
- * Texto con formato, escrito a mano.
- *
- * El contenido se guarda como una lista de parrafos y no como HTML: HTML pegado desde fuera
- * traeria estilos ajenos al tema, y guardarlo obligaria a sanearlo en cada lectura. Con parrafos y
- * marcas explicitas, lo que se puede escribir es exactamente lo que el tema sabe dibujar.
- *
- * `campos` queda reservado para el enlace futuro a un dataset: un parrafo podra intercalar el
- * valor de una medida. Hoy no se ofrece en el editor, pero el hueco esta en el modelo para que
- * anadirlo no obligue a migrar lo ya guardado.
- */
+/** Texto con formato, escrito a mano. */
 export interface ParrafoDeTexto {
   texto: string;
   estilo?: EstiloDeTexto;
@@ -47,13 +24,7 @@ export const CUADRO_DE_TEXTO_POR_DEFECTO: ConfiguracionDeCuadroDeTexto = {
 
 /* ── Titulo de seccion ─────────────────────────────────────────────────────────────────────── */
 
-/**
- * Donde estan las lineas de un titulo de seccion.
- *
- * `ambos` es horizontal —izquierda y derecha del texto—, que es el titulo centrado clasico. Las
- * lineas se adaptan al espacio: no miden un fijo, se reparten lo que sobra despues del texto, de
- * modo que el mismo titulo funciona en seis columnas y en doce sin volver a configurarlo.
- */
+/** Donde estan las lineas de un titulo de seccion. */
 export const POSICIONES_DE_LINEA = ['ninguna', 'izquierda', 'derecha', 'ambos', 'arriba', 'abajo'] as const;
 export type PosicionDeLinea = (typeof POSICIONES_DE_LINEA)[number];
 
@@ -87,13 +58,7 @@ export const TITULO_DE_SECCION_POR_DEFECTO: ConfiguracionDeTituloDeSeccion = {
 export const ORIENTACIONES = ['horizontal', 'vertical'] as const;
 export type Orientacion = (typeof ORIENTACIONES)[number];
 
-/**
- * Una linea, sola.
- *
- * Se coloca en el hueco entre celdas de la rejilla —una fila de alto uno, o una columna de ancho
- * uno— y se centra dentro de el. Por eso no lleva tarjeta ni cabecera: una linea con borde,
- * sombra y titulo deja de separar y pasa a ser un objeto mas que separar.
- */
+/** Una linea, sola. */
 export interface ConfiguracionDeLineaDivisoria extends ConfiguracionDeLinea {
   orientacion?: Orientacion;
 }
@@ -110,16 +75,7 @@ export const LINEA_DIVISORIA_POR_DEFECTO: ConfiguracionDeLineaDivisoria = {
 export const FORMAS = ['rectangulo', 'cuadrado', 'triangulo', 'circulo', 'rombo', 'flecha'] as const;
 export type Forma = (typeof FORMAS)[number];
 
-/**
- * Una forma basica.
- *
- * El relleno y el trazo son ROLES del tema, no colores sueltos, por el mismo motivo que en
- * cualquier otro sitio (4.3): un hex escrito a mano no tiene par de contraste comprobado contra la
- * superficie donde acabe, ni sigue al tema oscuro.
- *
- * `cuadrado` y `circulo` se dibujan con lado igual al MENOR de los dos ejes y centrados: si se
- * estiraran para llenar la celda dejarian de ser lo que su nombre dice.
- */
+/** Una forma basica. */
 export interface ConfiguracionDeForma {
   forma: Forma;
   relleno?: ColorDeTexto;
@@ -149,17 +105,7 @@ export type Extremo = (typeof EXTREMOS)[number];
 export const TRAZADOS = ['recto', 'angulo', 'curva'] as const;
 export type Trazado = (typeof TRAZADOS)[number];
 
-/**
- * Un conector de diagrama entre dos objetos del modulo.
- *
- * Guarda los IDS de los dos objetos, NUNCA coordenadas. Es la diferencia entre un conector y una
- * linea dibujada encima: si guardara puntos, mover o redimensionar cualquiera de los dos extremos
- * lo dejaria apuntando al aire, y ese es exactamente el fallo que hace que los diagramas de las
- * herramientas de oficina se rompan en cuanto alguien toca la disposicion.
- *
- * El trazado se RECALCULA en cada render a partir de la caja de los dos objetos, asi que sigue
- * pegado por construccion y no por acordarse de actualizarlo.
- */
+/** Un conector de diagrama entre dos objetos del modulo. */
 export interface ConfiguracionDeConexion {
   /** `id` del `GridItem` de origen. */
   desde?: string;
@@ -181,13 +127,7 @@ export const CONEXION_POR_DEFECTO: ConfiguracionDeConexion = {
 
 /* ── El sobre comun ────────────────────────────────────────────────────────────────────────── */
 
-/**
- * La configuracion de un elemento, sea cual sea.
- *
- * Un solo campo opcional por tipo, y no un campo generico `config: unknown`: asi el editor y el
- * renderizador comparten el tipo exacto de cada uno, y anadir un elemento nuevo es un error de
- * compilacion en los sitios que hay que tocar en vez de un `any` que pasa desapercibido.
- */
+/** La configuracion de un elemento, sea cual sea. */
 export interface ConfiguracionDeElemento {
   cuadroDeTexto?: ConfiguracionDeCuadroDeTexto;
   tituloDeSeccion?: ConfiguracionDeTituloDeSeccion;
@@ -209,13 +149,7 @@ export type IdDeElemento = (typeof ELEMENTOS)[number];
 export const esElemento = (objectId: string): objectId is IdDeElemento =>
   (ELEMENTOS as readonly string[]).includes(objectId);
 
-/**
- * Los elementos que se dibujan SIN tarjeta.
- *
- * Una linea divisoria o un conector con borde, fondo y sombra dejan de separar y de conectar: son
- * trazos, no bloques. El titulo de seccion tampoco la lleva porque su trabajo es encabezar lo que
- * viene debajo, y una caja alrededor lo convertiria en un bloque mas.
- */
+/** Los elementos que se dibujan SIN tarjeta. */
 export const SIN_TARJETA: readonly string[] = [
   'linea-divisoria',
   'conexion',

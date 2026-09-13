@@ -1,14 +1,4 @@
-/**
- * Organizacion general, equipos y ambitos de acceso (RLS de negocio).
- *
- * Implementa las secciones 4.1.1, 4.1.3, 4.10.2, 4.10.3, 4.10.4 y 4.10.6 del contrato de
- * ingenieria. Es un paquete de LOGICA PURA: define el modelo y lo resuelve, pero no lo
- * persiste ni lo lee de ningun sitio. La persistencia vive en la base de identidad (4.10.7)
- * y quien la orquesta es el backend.
- *
- * La pieza central es `resolveEffectiveScope`, que decide que subconjunto de datos ve cada
- * persona. Se mantiene pura precisamente para poder probarla de forma exhaustiva.
- */
+/** Organizacion general, equipos y ambitos de acceso (RLS de negocio). */
 export {
   UNRESTRICTED_SCOPE,
   applyLayer,
@@ -92,12 +82,7 @@ export {
   type ScopeResolutionStep,
 } from './resolveEffectiveScope';
 
-/**
- * Fixtures del modelo de gobierno, para pruebas.
- *
- * Viven con el dominio que describen: ponerlos en un paquete aparte que importe este creaba
- * una dependencia circular. Son datos puros, asi que no lastran el bundle de produccion.
- */
+/** Fixtures del modelo de gobierno, para pruebas. */
 export * as gobiernoFixtures from './__fixtures__/gobierno';
 export {
   administratorsOf,

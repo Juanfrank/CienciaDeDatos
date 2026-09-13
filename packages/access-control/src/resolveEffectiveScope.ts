@@ -7,28 +7,7 @@ import {
 import { type NavNode, findModulePath } from './NavigationTree';
 import type { GovernedUser, Team } from './Team';
 
-/**
- * Resolucion del ambito efectivo — algoritmo obligatorio de la seccion 4.10.4.
- *
- * Funcion PURA, testeable de forma aislada: no consulta base de datos, no lee sesion, no
- * tiene efectos. Todo lo que necesita llega por parametro. Esa pureza es deliberada — es la
- * pieza de la que depende que dos equipos distintos vean datos distintos y correctos, y
- * tiene que poder probarse exhaustivamente sin levantar infraestructura.
- *
- * Precedencia, de mas general a mas especifico. Cada capa solo puede RESTRINGIR, nunca
- * ampliar, salvo excepcion marcada explicitamente:
- *
- *   1. scope = activeTeam.defaultScope
- *   2. ruta = ancestros del modulo en la ORGANIZACION GENERAL, de la raiz al modulo
- *   3. por cada carpeta de la ruta, si tiene scope: scope = intersect(scope, carpeta.scope)
- *   4. si activeTeam.moduleScopeOverrides[moduleId]: scope = intersect(scope, override)
- *   5. si user.personalScope (general o por modulo): scope = intersect(scope, personal)
- *   6. devolver scope
- *
- * Nota critica: esta resolucion SIEMPRE camina la organizacion general (4.1.1), nunca un
- * paquete visual (4.1.3). El ambito de un modulo depende exclusivamente de donde vive
- * realmente en el arbol general, no de en que carpeta visual aparezca mostrado.
- */
+/** Resolucion del ambito efectivo — algoritmo obligatorio de la seccion 4.10.4. */
 
 /** Paso de la resolucion, para la vista "quien ve que" del panel de administracion (4.10.8). */
 export interface ScopeResolutionStep {

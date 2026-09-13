@@ -2,16 +2,7 @@
 
 import { useState } from 'react';
 
-/**
- * Vista de "quien ve que" — seccion 4.10.8.
- *
- * "Dado un usuario y un modulo, mostrar el ambito efectivo resuelto de forma legible, INCLUYENDO
- * QUE CARPETA DE LA ORGANIZACION GENERAL LO ORIGINO, para poder auditar y depurar configuraciones
- * ANTES de publicarlas."
- *
- * Sale casi gratis: `resolveEffectiveScope` ya devuelve la traza con la capa, su origen y el
- * ambito acumulado tras cada paso. Se construyo en B.4 exactamente para esto.
- */
+/** Vista de "quien ve que" — seccion 4.10.8. */
 interface Paso {
   capa: string;
   origen: string;

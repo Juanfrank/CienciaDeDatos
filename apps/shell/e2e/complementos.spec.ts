@@ -1,14 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Objetos adjuntados: tooltip explicativo y tabla de datos emergente.
- *
- * No son objetos independientes — no ocupan celda en la rejilla y no se enlazan contra ningun
- * dataset: leen el de su anfitrion, que ya viene filtrado por el ambito de quien mira. Eso
- * ultimo es lo que estas pruebas vigilan mas de cerca: un complemento no puede convertirse en
- * una via para ver filas que la persona no podria ver de otro modo.
- */
+/** Objetos adjuntados: tooltip explicativo y tabla de datos emergente. */
 
 /** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
 test.beforeEach(async ({ page }) => {
@@ -151,9 +144,6 @@ test.describe('donde se coloca el tooltip', () => {
      * Caia hacia abajo desde el icono, o sea justo sobre el contenido: para leer que significa la
      * cifra habia que tapar la cifra. Es el peor sitio posible para una explicacion, porque lo
      * explicado y la explicacion no se pueden mirar a la vez.
-     *
-     * Se comprueba con coordenadas y no con estilos: el como —`fixed` y unas medidas— puede
-     * cambiar; lo que no puede es que las dos cajas se crucen.
      */
     await page.goto('/m/casos-pendientes');
     await page.locator('.complemento__icono').first().hover();

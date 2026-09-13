@@ -1,10 +1,4 @@
-/**
- * Exportacion — seccion 4.9, encolada como exige 5.3.
- *
- * Etiquetado `type:server`: genera archivos en el servidor y no puede importar
- * `type:server-data`. La exportacion lee del cache como cualquier otra lectura; el resolutor de
- * objetos se inyecta desde el shell, que es quien sabe resolver el ambito de una persona.
- */
+/** Exportacion — seccion 4.9, encolada como exige 5.3. */
 export { aExcel, aPdf } from './binarios';
 export {
   CLAVE_COLA,

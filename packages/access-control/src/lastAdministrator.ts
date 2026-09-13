@@ -1,21 +1,6 @@
 import type { AppRole, Team } from './Team';
 
-/**
- * La institucion no puede quedarse sin ningun Administrador — seccion 4.10.1.
- *
- * El modelo de permisos es circular por diseno, y es correcto que lo sea: administrar el
- * gobierno exige el rol Administrador, y el rol Administrador se concede desde el gobierno. La
- * consecuencia es que si el ultimo Administrador pierde su rol, NADIE puede devolverselo ni
- * nombrar a otro: el panel exige ser Administrador para entrar.
- *
- * La matriz de 4.10.1 comprueba el permiso de QUIEN hace el cambio. Esta comprobacion es de otra
- * naturaleza —mira el ESTADO EN QUE QUEDA el sistema, no quien lo propone— y por eso vive aqui
- * al lado de `wouldExpand`, que hace lo mismo con el ambito: las dos responden a "¿que pasa si
- * guardo esto?" y no a "¿puede esta persona guardar algo?".
- *
- * Que sea una funcion pura sobre el resultado propuesto es lo que permite comprobarla antes de
- * escribir, en vez de descubrir el problema cuando ya nadie puede entrar.
- */
+/** La institucion no puede quedarse sin ningun Administrador — seccion 4.10.1. */
 
 const ADMINISTRADOR: AppRole = 'administrador';
 
@@ -34,15 +19,7 @@ export interface LastAdministratorDenial {
   reason: string;
 }
 
-/**
- * Determina si pasar de `before` a `after` deja la institucion sin ningun Administrador.
- *
- * Recibe los dos estados, y no solo el propuesto, por una razon que importa: si el sistema YA
- * esta sin Administradores —tras una restauracion de emergencia, o con una semilla que no
- * declara ninguno— denegar todo cambio dejaria el gobierno bloqueado para siempre, incluido el
- * cambio que lo arregla. La comprobacion no es "el resultado tiene Administradores" sino "este
- * cambio SE LLEVA al ultimo".
- */
+/** Determina si pasar de `before` a `after` deja la institucion sin ningun Administrador. */
 export function wouldLeaveNoAdministrator(
   before: Team[],
   after: Team[],

@@ -7,19 +7,13 @@ import type { ConfiguracionDePanelDeFiltros } from '../presentacion/panelDeFiltr
 import type { AsignacionDeRanuras, RanuraDeCampos } from '../presentacion/pozos';
 
 /**
- * Repositorio de objetos visuales versionados — seccion 4.5.
+ * Repositorio de objetos visuales versionados (4.5).
  *
- * Cada objeto se publica con version MAYOR.MENOR.PARCHE, y cada instancia insertada en un
- * modulo FIJA la version exacta que usa. Esa fijacion es lo que garantiza el criterio de
- * aceptacion de la seccion 9: publicar una version nueva no altera retroactivamente
- * instancias ya desplegadas.
+ * Cada objeto se publica con version MAYOR.MENOR.PARCHE y cada instancia fija la version
+ * exacta que usa, de modo que publicar una version nueva no altera las ya desplegadas.
  */
 
-/**
- * `complemento` es la categoria de los objetos ADJUNTABLES: no se colocan en la rejilla, se
- * adjuntan a otro objeto y complementan lo que ese objeto muestra. Un complemento suelto no
- * significa nada, y por eso el registro rechaza colocarlo como objeto independiente.
- */
+/** `complemento` agrupa los objetos que se adjuntan a otro en vez de ocupar la rejilla. */
 export type ObjectCategory =
   | 'grafico'
   | 'tabla'
@@ -31,17 +25,10 @@ export type ObjectCategory =
   | 'contenedor';
 
 /**
- * A que PREGUNTA responde un objeto.
+ * A que PREGUNTA responde un objeto: comparar, ver la evolucion, repartir un total.
  *
- * Es distinto de la categoria, que dice de que TIPO es. La paleta llego a quince visualizaciones
- * en una lista plana donde «Grafico de columnas» y «Grafico de barras» se distinguen por el
- * icono, y eso convierte elegir un objeto en recordar su nombre. Agrupadas por la pregunta
- * —«comparar», «ver la evolucion», «repartir un total»— se elige por lo que se quiere contar, que
- * es como llega la necesidad.
- *
- * No se deduce de `category`: ahi todos los graficos son `grafico`, que es justo lo que no
- * distingue. Y no se deduce con un mapa en el editor, porque un mapa aparte es una segunda fuente
- * de verdad — la misma que dejo sin icono a dos objetos nuevos hasta que se vio en una captura.
+ * Distinta de `category`, que dice de que tipo es. La paleta agrupa por familia, de modo que
+ * se elige por lo que se quiere contar y no por el nombre del objeto.
  */
 export const FAMILIAS_DE_OBJETO = [
   'comparacion',
@@ -56,11 +43,9 @@ export const FAMILIAS_DE_OBJETO = [
 export type FamiliaDeObjeto = (typeof FAMILIAS_DE_OBJETO)[number];
 
 /**
- * Que necesita un objeto de un dataset para poder dibujarse.
+ * Que necesita un objeto de un dataset para dibujarse.
  *
- * Se declara como dato para que el editor de modulos (4.2) pueda validar un mapeo ANTES de
- * guardarlo, en vez de descubrir en tiempo de render que el objeto recibio dos medidas cuando
- * solo admite una.
+ * Se declara como dato para que el editor valide un mapeo antes de guardarlo (4.2).
  */
 export interface ObjectDataContract {
   dimensions: { min: number; max: number };
@@ -68,15 +53,10 @@ export interface ObjectDataContract {
   /** Descripcion legible de que representa cada ranura, para la interfaz del editor. */
   notes?: string;
   /**
-   * Las ranuras CON NOMBRE, en el orden en que el objeto consume sus campos.
+   * Ranuras con nombre, en el orden en que el objeto consume sus campos.
    *
-   * Opcional: un objeto que no las declare se edita con los rotulos genericos de siempre
-   * (`pozosPorDefecto`). Declararlas no cambia el modelo de datos —siguen siendo los mismos dos
-   * arrays ordenados—, solo hace que el editor diga «Eje X» donde antes decia «dimension 1».
-   *
-   * La suma de los `max` de cada tipo tiene que cuadrar con el maximo del contrato, y hay una
-   * prueba del catalogo que lo comprueba: un pozo que prometiera mas de lo que el objeto admite
-   * dejaria guardar un mapeo que la validacion rechaza despues.
+   * Opcional: sin ellas el editor usa los rotulos genericos de `pozosPorDefecto`. La suma de
+   * los `max` de cada tipo debe cuadrar con el maximo del contrato; el catalogo lo comprueba.
    */
   pozos?: RanuraDeCampos[];
 }
@@ -110,15 +90,10 @@ export interface ObjectVersion {
   certification: ObjectCertification;
   dataContract: ObjectDataContract;
   /**
-   * Que claves de presentacion admite esta version.
+   * Claves de presentacion que admite esta version.
    *
-   * Se declara como dato, igual que el contrato de datos y por el mismo motivo: el editor tiene
-   * que poder ofrecer SOLO lo que el objeto entiende, y la validacion rechazar lo demas antes de
-   * guardar. Una tabla que aceptara `leyenda` porque nadie lo comprueba guardaria una opcion que
-   * no hace nada, y esa es la clase de configuracion que luego nadie se atreve a borrar.
-   *
-   * Tiene que incluir `PRESENTACION_MINIMA` entera. Hay una prueba que lo comprueba sobre todo el
-   * catalogo, asi que un objeto nuevo no se puede publicar sin las cuatro basicas.
+   * El editor solo ofrece estas y la validacion rechaza el resto. Debe incluir
+   * `PRESENTACION_MINIMA` entera.
    */
   presentation: ClaveDePresentacion[];
   deprecation?: DeprecationNotice;
@@ -129,32 +104,14 @@ export interface VisualObjectDefinition {
   name: string;
   description: string;
   category: ObjectCategory;
-  /**
-   * El icono con el que se reconoce este objeto.
-   *
-   * Lo declara el OBJETO y no lo deciden sus consumidores. Habia dos mapas de `objectId` a icono
-   * —uno en la tienda del editor y otro en la cabecera de la tarjeta— y publicar `area` los dejo a
-   * los dos sin entrada: el objeto salia sin icono en las dos pantallas, y eso no falla, no avisa
-   * y solo se nota mirando. Obligatorio, para que un objeto nuevo sin icono sea un error de
-   * compilacion y no un hallazgo de captura de pantalla.
-   */
+  /** Icono con el que se reconoce el objeto. Lo declara el objeto, no sus consumidores. */
   icono: NombreDeIcono;
   /**
-   * A que pregunta responde. Solo los objetos que consumen datos la declaran.
-   *
-   * Los elementos y los contenedores no responden a ninguna: componen la pagina, y su seccion de
-   * la paleta ya lo dice. Que sea opcional en el tipo y OBLIGATORIA para los demas lo comprueba
-   * una prueba del catalogo, igual que el estandar minimo de personalizacion: el tipo no puede
-   * expresar «obligatoria salvo en dos categorias» sin partir la definicion en dos.
+   * A que pregunta responde. Obligatoria salvo en elementos, contenedores y complementos, que
+   * no consumen datos; lo comprueba una prueba del catalogo.
    */
   familia?: FamiliaDeObjeto;
-  /**
-   * true si el objeto se adjunta a otro en vez de ocupar una celda de la rejilla.
-   *
-   * Es una propiedad del objeto y no del sitio donde se use: asi el editor puede ofrecerlo en la
-   * lista correcta, y la validacion puede rechazar los dos errores simetricos —colocar un
-   * complemento como objeto suelto, y adjuntar un objeto que no es complemento.
-   */
+  /** true si el objeto se adjunta a otro en vez de ocupar una celda de la rejilla. */
   attachable?: boolean;
   versions: ObjectVersion[];
 }
@@ -163,9 +120,7 @@ export interface VisualObjectDefinition {
  * Alcance de un complemento de tabla de datos.
  *
  * - `objeto`: todas las filas que alimentan el objeto.
- * - `subobjeto`: solo las que hay detras de la categoria elegida — la barra que se pulso, la
- *   celda de la matriz, la fila de la tabla. Responde a "de que filas sale ESTE numero", que es
- *   justo la granularidad que el objeto agrego y dejo de mostrar.
+ * - `subobjeto`: solo las de la categoria elegida — la barra pulsada, la celda, la fila.
  */
 export type AttachmentScope = 'objeto' | 'subobjeto';
 
@@ -176,11 +131,9 @@ interface AttachedObjectBase {
 }
 
 /**
- * Tooltip explicativo.
+ * Tooltip explicativo: que representa el objeto entero.
  *
- * No es el tooltip de eje ni el de un punto de datos, que pertenecen al objeto anfitrion: es una
- * explicacion de lo que el objeto entero representa, para que quien lo mire por primera vez sepa
- * que esta viendo sin preguntarle a nadie.
+ * No es el tooltip de eje ni el de un punto de datos, que pertenecen al objeto anfitrion.
  */
 export interface TooltipAttachment extends AttachedObjectBase {
   objectId: 'tooltip-explicativo';
@@ -196,19 +149,15 @@ export interface TablePopupAttachment extends AttachedObjectBase {
 /**
  * Instancia de un objeto adjuntado.
  *
- * Es una union discriminada y no un `Record<string, unknown>` de configuracion a proposito: cada
- * complemento tiene su propia configuracion OBLIGATORIA —un tooltip sin texto no es nada— y con
- * una bolsa generica ese error solo aparecería al dibujar. La seccion 4.2 pide justo lo
- * contrario: validar el mapeo antes de guardarlo. Añadir un complemento nuevo añade un miembro
- * aqui, que es el sitio donde se quiere sentir el cambio.
+ * Union discriminada y no una bolsa generica: cada complemento tiene configuracion propia y
+ * obligatoria, y asi falta se detecta al guardar y no al dibujar.
  */
 export type AttachedObjectInstance = TooltipAttachment | TablePopupAttachment;
 
 /**
  * Instancia de un objeto dentro de un modulo.
  *
- * `version` es la version EXACTA fijada, nunca un rango. Un rango reintroduciria por la puerta
- * de atras justo lo que 4.5 prohibe: que publicar altere lo ya desplegado.
+ * `version` es exacta, nunca un rango: un rango dejaria que publicar alterase lo desplegado.
  */
 export interface ObjectInstance {
   instanceId: string;
@@ -219,61 +168,45 @@ export interface ObjectInstance {
   binding: {
     datasetId: string;
     /**
-     * Las columnas que el objeto necesita, en el orden en que se declaran sus ranuras.
+     * Columnas que el objeto necesita, en el orden de sus ranuras.
      *
-     * Se DERIVAN de `ranuras` y se guardan junto a ellas. Siguen aqui porque son lo que leen el
-     * lector del cache, la validacion de esquema, la proyeccion y la exportacion: cambiar eso
-     * habria obligado a tocar todo el camino de lectura para no ganar nada.
+     * Se derivan de `ranuras` y se guardan junto a ellas porque son lo que leen el lector del
+     * cache, la validacion de esquema, la proyeccion y la exportacion.
      */
     dimensions: FieldRef[];
     measures: string[];
     /**
-     * A QUE RANURA pertenece cada campo. Es la fuente de verdad del mapeo.
+     * A que ranura pertenece cada campo. Es la fuente de verdad del mapeo.
      *
-     * Antes el reparto lo decidia el orden del array, y eso impedia llenar una ranura sin llenar
-     * antes las anteriores: en un grafico de barras no habia forma de poner solo la serie, porque
-     * el primer campo caia siempre en el eje X.
-     *
-     * Opcional para que lo guardado antes de esto siga abriendose: sin el mapa se deduce del
-     * orden, que es exactamente como se guardo.
+     * Opcional: sin el mapa el reparto se deduce del orden del array, que es como se guardaba
+     * antes de que existiera.
      */
     ranuras?: AsignacionDeRanuras;
     /**
-     * Con que operador se resume cada medida, si quien edita eligio uno distinto del que declara
-     * el esquema. Solo las anuladas: lo no dicho se resuelve contra el esquema en cada lectura,
-     * asi que una medida a la que la fuente le cambie la agregacion la sigue sin tener que tocar
-     * ningun modulo.
+     * Agregacion por medida, solo cuando difiere de la que declara el esquema. Lo no dicho se
+     * resuelve contra el esquema en cada lectura.
      */
     agregaciones?: Record<string, Agregacion>;
   };
   /**
-   * Objetos adjuntados a este.
-   *
-   * Van ANIDADOS y no como elementos sueltos de la rejilla con un puntero al anfitrion: asi un
-   * complemento no puede existir sin el objeto al que complementa, ni sobrevivirle cuando se
-   * borra. La relacion es estructural, no una convencion que haya que recordar mantener.
+   * Objetos adjuntados a este, anidados: un complemento no existe sin su anfitrion ni le
+   * sobrevive.
    */
   attachments?: AttachedObjectInstance[];
   /** Anulaciones de tema, limitadas al conjunto documentado de 4.3. */
   themeOverrides?: Record<string, string | string[]>;
   /**
-   * Como se presenta este objeto: icono, acento, resaltado, subtitulo, formato.
+   * Como se presenta esta INSTANCIA: icono, acento, resaltado, subtitulo, formato.
    *
-   * Es configuracion de la INSTANCIA y no del objeto: dos tarjetas KPI del mismo tipo pueden
-   * llevar iconos y acentos distintos sin publicar dos objetos. Eso es justo lo que permite armar
-   * visuales parecidas desde el editor sin escribir codigo.
+   * De la instancia y no del objeto, para que dos tarjetas del mismo tipo puedan verse distinto
+   * sin publicar dos objetos.
    */
   presentacion?: PresentacionDeObjeto;
   /**
-   * Configuracion PROPIA del tipo de objeto.
+   * Configuracion propia del tipo de objeto, discriminada por `objectId`.
    *
-   * Union discriminada por `objectId`, igual que los complementos y por el mismo motivo: cada
-   * tipo tiene su configuracion obligatoria y con una bolsa generica el error solo aparece al
-   * dibujar. 4.2 pide justo lo contrario — validar antes de guardar.
-   *
-   * `presentacion` es como SE VE un objeto y esto es que HACE. Un icono es presentacion; que la
-   * dimension de fecha se filtre con un calendario o con un rango no lo es: cambia lo que el
-   * objeto ofrece hacer.
+   * `presentacion` es como SE VE un objeto; esto es que HACE. Un icono es presentacion; que una
+   * fecha se filtre con calendario o con rango no lo es.
    */
   configuracion?: ConfiguracionDeObjeto;
 }
@@ -287,13 +220,9 @@ export type ConfiguracionDeObjeto =
 /**
  * Si un objeto no necesita ningun dataset.
  *
- * Se DEDUCE del contrato —cero dimensiones y cero medidas— y no de un campo aparte. Un
- * interruptor `sinDatos` seria una segunda fuente de verdad sobre lo mismo, y el dia que discrepara
- * del contrato la validacion pediria un dataset a un objeto que no tiene donde ponerlo, o al
- * reves: dejaria pasar un grafico sin cache poblada.
- *
- * Lo consultan la validacion de modulo, la lista de datasets consumidos y el lector del cache, que
- * son los tres sitios donde antes se daba por hecho que todo objeto se enlaza a algo.
+ * Se deduce del contrato —cero dimensiones y cero medidas— en vez de un campo aparte, que seria
+ * una segunda fuente de verdad. Lo consultan la validacion de modulo, la lista de datasets
+ * consumidos y el lector del cache.
  */
 export const noConsumeDatos = (contrato: ObjectDataContract): boolean =>
   contrato.dimensions.max === 0 && contrato.measures.max === 0;

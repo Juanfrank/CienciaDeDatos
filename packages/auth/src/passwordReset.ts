@@ -3,26 +3,7 @@ import { randomBytes } from 'node:crypto';
 import { type PasswordPolicy, DEFAULT_PASSWORD_POLICY, checkPasswordPolicy } from './passwordPolicy';
 import type { IAuditLog, ILocalIdentityStore } from './stores';
 
-/**
- * Restablecimiento de contraseña — seccion 4.7.2.
- *
- * "Flujo de recuperacion de contraseña por correo verificado, con token de un solo uso y
- * expiracion corta — nunca envio de la contraseña actual ni de una nueva por canal no
- * verificado." Y, en el mismo apartado: "no bloqueo indefinido sin via de recuperacion".
- *
- * El flujo se parte en dos piezas con responsabilidades distintas:
- *
- *  - lo que aqui se implementa: generar un token de un solo uso, guardarlo HASHEADO, caducarlo
- *    pronto, canjearlo una sola vez y revocar las sesiones abiertas al hacerlo;
- *  - lo que se DECLARA y no se implementa: por donde viaja el token, que es `IResetChannel`.
- *
- * Esa division es deliberada. El canal de correo institucional no existe en este entorno, y lo
- * que NO se hace es inventar un sustituto que parezca equivalente: entregar el token por la
- * bandeja de avisos de la propia aplicacion seria absurdo —no se puede leer sin entrar— y
- * mostrarlo en pantalla a quien lo pide convertiria "he olvidado mi contraseña" en "dame acceso
- * a esta cuenta". El unico canal implementado es el mediado por un Administrador, que verifica
- * la identidad por una via de la que el responde.
- */
+/** Restablecimiento de contraseña — seccion 4.7.2. */
 
 /** Token en claro: solo existe en memoria, el tiempo de entregarlo. Nunca se persiste asi. */
 export interface IssuedResetToken {
@@ -54,13 +35,7 @@ export interface IResetStore {
   listPendingFor(email: string): Promise<ResetRecord[]>;
 }
 
-/**
- * Canal por el que viaja el token.
- *
- * Puerto, no implementacion. `name` es lo que se muestra a quien opera y lo que se registra:
- * quien audite un restablecimiento tiene que poder ver por donde se entrego el token, porque de
- * eso depende si el flujo fue seguro.
- */
+/** Canal por el que viaja el token. */
 export interface IResetChannel {
   readonly name: string;
   /**
@@ -120,16 +95,7 @@ export class PasswordResetService {
     this.now = options.now ?? Date.now;
   }
 
-  /**
-   * Emite un token para una cuenta.
-   *
-   * Devuelve `null` si la cuenta no existe, y quien llama DEBE responder lo mismo en los dos
-   * casos. Distinguirlos convierte el formulario de recuperacion en un comprobador de correos
-   * institucionales validos, igual que pasaria en el de inicio de sesion.
-   *
-   * Emitir uno nuevo invalida los anteriores: dos tokens vivos para la misma cuenta duplican la
-   * ventana de robo sin dar nada a cambio.
-   */
+  /** Emite un token para una cuenta. */
   async issue(email: string, requestedBy: string): Promise<IssuedResetToken | null> {
     const cuenta = await this.options.identities.findByEmail(email);
     if (!cuenta) return null;
@@ -165,13 +131,7 @@ export class PasswordResetService {
     return { resetId, token, expiresAt: new Date(expiresAt).toISOString() };
   }
 
-  /**
-   * Canjea el token y fija la contraseña nueva.
-   *
-   * Al consumarlo: se marca el token como usado, se limpia el bloqueo de la cuenta —de eso se
-   * trata, que el bloqueo tenga via de salida (4.7.2)— y se revocan las sesiones abiertas. Lo
-   * ultimo importa: si alguien entro con la contraseña robada, cambiarla sin revocar no le echa.
-   */
+  /** Canjea el token y fija la contraseña nueva. */
   async redeem(input: {
     resetId: string;
     token: string;
@@ -274,14 +234,7 @@ export class PasswordResetService {
   }
 }
 
-/**
- * Canal de correo: DECLARADO, no disponible.
- *
- * Es el canal que pide 4.7.2 y el que debe usarse en produccion. No esta implementado porque no
- * hay servicio de correo institucional configurado en este entorno, y se declara asi —en vez de
- * omitirlo— para que conste que el flujo lo contempla y para que el dia que exista solo haya que
- * implementar `deliver`. Devuelve false: no finge haber enviado nada.
- */
+/** Canal de correo: DECLARADO, no disponible. */
 export class CorreoInstitucionalNoDisponible implements IResetChannel {
   readonly name = 'correo institucional (no configurado en este entorno)';
   async deliver(): Promise<boolean> {

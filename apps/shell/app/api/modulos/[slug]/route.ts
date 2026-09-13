@@ -8,13 +8,7 @@ import { obtenerSesion } from '../../../../src/server/sesion';
 
 export const runtime = 'nodejs';
 
-/**
- * Datos de un modulo.
- *
- * Devuelve filas YA filtradas por el ambito de quien pide. Un cliente que llame a este endpoint
- * directamente obtiene exactamente lo mismo que la pagina: el filtrado no es una decision de la
- * interfaz, ocurre aqui.
- */
+/** Datos de un modulo. */
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> },

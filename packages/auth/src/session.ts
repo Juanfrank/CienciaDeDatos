@@ -2,12 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { AuthenticatedPrincipal } from './IIdentityProvider';
 import type { AppSession, ISessionStore } from './stores';
 
-/**
- * Gestion de la sesion de aplicacion — secciones 5.3, 6.7 y 4.10.2.
- *
- * Tras autenticar por CUALQUIERA de los dos caminos se emite el mismo tipo de sesion: el resto
- * del sistema no ramifica logica segun el metodo de login.
- */
+/** Gestion de la sesion de aplicacion — secciones 5.3, 6.7 y 4.10.2. */
 
 export interface SessionServiceOptions {
   store: ISessionStore;
@@ -59,14 +54,7 @@ export class SessionService {
     return session;
   }
 
-  /**
-   * Cambia el equipo activo de una sesion en curso.
-   *
-   * Es una accion explicita de la persona usuaria, registrada en auditoria, y surte efecto de
-   * inmediato SIN cerrar sesion: el ambito de datos efectivo cambia porque resolveEffectiveScope
-   * parte del equipo activo. Con un token autocontenido habria que reemitirlo y gestionar su
-   * revocacion; por eso la sesion es opaca y vive del lado servidor.
-   */
+  /** Cambia el equipo activo de una sesion en curso. */
   async switchActiveTeam(sessionId: string, teamId: string): Promise<AppSession> {
     const session = await this.resolve(sessionId);
     if (!session) throw new Error('La sesion no existe o ha expirado.');
@@ -80,13 +68,7 @@ export class SessionService {
     await this.store.delete(sessionId);
   }
 
-  /**
-   * Revoca todas las sesiones de una persona.
-   *
-   * Se invoca al restablecer una contraseña (4.7.2) y al retirar el acceso a alguien. Cambiar la
-   * credencial sin esto deja dentro a quien ya entro con la anterior, que es precisamente de
-   * quien uno se quiere deshacer al restablecerla.
-   */
+  /** Revoca todas las sesiones de una persona. */
   async revokeAllFor(userId: string): Promise<void> {
     await this.store.deleteAllFor(userId);
   }

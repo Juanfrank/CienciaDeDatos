@@ -1,10 +1,4 @@
-/**
- * Error que emiten los conectores todavia no implementados.
- *
- * Existe para que la ausencia de una implementacion sea RUIDOSA y trazable, en vez de
- * devolver datos vacios que se confundan con "no hay resultados". Se registra en
- * Application Insights igual que cualquier fallo de fuente (6.4).
- */
+/** Error que emiten los conectores todavia no implementados. */
 export class ConnectorNotImplementedError extends Error {
   constructor(
     readonly connector: string,

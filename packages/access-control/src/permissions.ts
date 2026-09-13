@@ -1,13 +1,6 @@
 import type { AppRole } from './Team';
 
-/**
- * Matriz de permisos por rol — seccion 4.10.1.
- *
- * Exactamente tres roles, no configurables arbitrariamente, para mantener el modelo de permisos
- * auditable y predecible. La matriz se expresa como DATO y no como condicionales repartidos por
- * el codigo, para que se pueda leer de un vistazo, probar entera, y comprobar tanto en el
- * backend como en la interfaz sin que las dos versiones puedan divergir.
- */
+/** Matriz de permisos por rol — seccion 4.10.1. */
 
 export type Capability =
   | 'ver-modulos-de-sus-equipos'
@@ -60,13 +53,7 @@ export function denial(role: AppRole, capability: Capability): PermissionDenial 
   };
 }
 
-/**
- * Comprobacion que debe ejecutarse en el BACKEND, no solo ocultando botones.
- *
- * Criterio de aceptacion de la seccion 9: "un usuario Visor no puede crear ni editar modulos,
- * ni acceder al panel de administracion, AUNQUE INTENTE HACERLO MEDIANTE MANIPULACION DIRECTA
- * DE SOLICITUDES (prueba a nivel de backend, no solo ocultamiento de UI)".
- */
+/** Comprobacion que debe ejecutarse en el BACKEND, no solo ocultando botones. */
 export function assertCan(role: AppRole, capability: Capability): void {
   if (!can(role, capability)) {
     const d = denial(role, capability);

@@ -32,14 +32,7 @@ import { gobierno } from './gobierno';
 import { registrarCambio, registrarEventoDeArbol } from './auditoria';
 import type { SesionShell } from './sesion';
 
-/**
- * Servicio del panel de administracion — seccion 4.10.8.
- *
- * Compone lo que ya existe: `applyTreeOperation` para el arbol, `wouldExpand` para detectar
- * ampliaciones, `buildNavigationView` para validar paquetes, `resolveEffectiveScope` para la
- * vista de "quien ve que". Aqui no hay logica de gobierno nueva; hay orquestacion, permisos y
- * auditoria.
- */
+/** Servicio del panel de administracion — seccion 4.10.8. */
 
 export class AdminError extends Error {
   constructor(
@@ -52,13 +45,7 @@ export class AdminError extends Error {
   }
 }
 
-/**
- * Rol de aplicacion mas alto que una persona tiene en CUALQUIERA de sus equipos.
- *
- * Administrar la aplicacion no es un permiso por equipo: quien administra, administra. El ambito
- * de DATOS sigue siendo el de su equipo activo — un Administrador ve los datos que su equipo le
- * permite, igual que cualquier otra persona (4.10.1).
- */
+/** Rol de aplicacion mas alto que una persona tiene en CUALQUIERA de sus equipos. */
 export async function rolMasAltoDe(userId: string): Promise<AppRole> {
   const equipos = await gobierno.listTeams();
   const roles = equipos.flatMap((t) =>
@@ -69,13 +56,7 @@ export async function rolMasAltoDe(userId: string): Promise<AppRole> {
   return 'visor';
 }
 
-/**
- * Guardian de todas las rutas del panel.
- *
- * Se invoca al PRINCIPIO de cada pagina de /admin y de cada handler de /api/admin. Ocultar el
- * enlace no protege nada: la seccion 9 pide expresamente que la comprobacion resista
- * "manipulacion directa de solicitudes, no solo ocultamiento de UI".
- */
+/** Guardian de todas las rutas del panel. */
 export async function assertAdmin(sesion: SesionShell | null): Promise<Actor> {
   // Sin sesion es 401, no 403: "no se quien eres" y "se quien eres y no puedes" son respuestas
   // distintas, y devolver 403 a quien no ha entrado le hace buscar un permiso que le falta
@@ -102,12 +83,7 @@ export async function esAdministrador(userId: string): Promise<boolean> {
 // Arbol (4.1, 4.1.2)
 // ---------------------------------------------------------------------------
 
-/**
- * Aplica una operacion sobre la organizacion general y la persiste.
- *
- * `applyTreeOperation` ya comprueba el permiso concreto de la operacion y devuelve los eventos
- * de dominio; aqui solo se persiste el arbol resultante y se traducen esos eventos al log.
- */
+/** Aplica una operacion sobre la organizacion general y la persiste. */
 export async function ejecutarOperacionDeArbol(actor: Actor, op: TreeOperation): Promise<ManagedTree> {
   const resultado = applyTreeOperation(await gobierno.getTree(), op, actor);
 
@@ -121,13 +97,7 @@ export async function ejecutarOperacionDeArbol(actor: Actor, op: TreeOperation):
   return resultado.tree;
 }
 
-/**
- * Previsualiza el efecto de un movimiento ANTES de confirmarlo.
- *
- * Mover es estructural: si la carpeta de destino tiene otro ambito, todo lo que se mueve lo
- * hereda de inmediato (4.1.2). Que el panel muestre ese cambio antes de aceptar es lo que
- * impide moverlo "solo para ordenar" sin ver que se altera el acceso.
- */
+/** Previsualiza el efecto de un movimiento ANTES de confirmarlo. */
 export interface PrevisualizacionDeMovimiento {
   moduleIds: string[];
   scopeAntes?: AccessScope;
@@ -213,14 +183,7 @@ export function dimensionesAmpliadas(actual: AccessScope, propuesto: AccessScope
   return ampliadas;
 }
 
-/**
- * Guarda un ambito, cerrando la puerta que hasta ahora estaba abierta.
- *
- * `wouldExpand` existia y estaba probada desde B.4, pero nunca se invocaba desde un camino de
- * produccion porque no habia superficie de configuracion. Aqui es donde la regla de 4.10.4 —"cada
- * capa solo puede restringir, salvo excepcion marcada explicitamente"— pasa de estar modelada a
- * estar HECHA CUMPLIR.
- */
+/** Guarda un ambito, cerrando la puerta que hasta ahora estaba abierta. */
 export async function guardarAmbito(input: GuardarAmbitoInput): Promise<AccessScope> {
   const { actor, destino, scope, justificacion } = input;
   assertCan(actor.role, 'configurar-ambitos');
@@ -288,13 +251,7 @@ async function aplicarAmbito(destino: GuardarAmbitoInput['destino'], scope: Acce
 // Validacion de dimensiones contra el esquema real (4.10.8)
 // ---------------------------------------------------------------------------
 
-/**
- * Esquema de la fuente activa, leido del CACHE.
- *
- * El documento pide validacion en vivo contra `getSchema()`, pero el principio 2 prohibe que el
- * proceso web invoque el conector. El job deja el `SchemaDescriptor` en el cache justamente para
- * esto (6.4): el panel valida contra el esquema real sin abrir un camino a la fuente.
- */
+/** Esquema de la fuente activa, leido del CACHE. */
 export async function esquemaActivo(): Promise<SchemaDescriptor | null> {
   try {
     return (await cacheL2.get<SchemaDescriptor>(SCHEMA_CACHE_KEY))?.value ?? null;
@@ -333,13 +290,7 @@ export async function validarDimensiones(scope: AccessScope): Promise<string[]> 
 // Equipos, membresia y paquetes (4.10.2, 4.1.3)
 // ---------------------------------------------------------------------------
 
-/**
- * Error de la comprobacion del ultimo Administrador.
- *
- * 409 y no 403: quien lo intenta TIENE permiso para gestionar equipos y roles. Lo que falla no
- * es su autorizacion, es el estado en que quedaria el sistema. Un 403 le haria buscar un permiso
- * que ya tiene.
- */
+/** Error de la comprobacion del ultimo Administrador. */
 export class UltimoAdministradorError extends AdminError {
   constructor(readonly denegacion: LastAdministratorDenial) {
     super(denegacion.reason, 409, denegacion);
@@ -347,15 +298,7 @@ export class UltimoAdministradorError extends AdminError {
   }
 }
 
-/**
- * UNICO camino por el que este servicio escribe equipos.
- *
- * Existe para que la comprobacion del ultimo Administrador no haya que acordarse de hacerla en
- * cada sitio. Hoy solo dos de las escrituras pueden tocar la membresia —guardar un equipo entero
- * y cambiar un rol—, pero "esta no puede quitar un Administrador" es justo la clase de suposicion
- * que deja de ser cierta cuando alguien amplia la funcion un ano despues. Sobre un cambio que no
- * toca la membresia, la comprobacion compara dos listas identicas y no cuesta nada.
- */
+/** UNICO camino por el que este servicio escribe equipos. */
 async function escribirEquipo(equipo: Team): Promise<void> {
   const antes = await gobierno.listTeams();
   const despues = [...antes.filter((t) => t.id !== equipo.id), equipo];
@@ -366,16 +309,7 @@ async function escribirEquipo(equipo: Team): Promise<void> {
   await gobierno.upsertTeam(equipo);
 }
 
-/**
- * Borrado de un equipo, con la misma comprobacion.
- *
- * Borrar el equipo donde estaba el ultimo Administrador deja a la institucion sin ninguno igual
- * que retirarle el rol, y por un camino que no menciona la palabra "rol" en ningun sitio.
- *
- * Estaba ademas SIN AUDITAR: el handler llamaba directamente al almacen y no emitia ningun
- * `ConfigChangeLog`, asi que un equipo podia desaparecer sin dejar rastro de quien lo borro. Se
- * arregla aqui porque es la misma funcion que habia que tocar.
- */
+/** Borrado de un equipo, con la misma comprobacion. */
 export async function borrarEquipo(actor: Actor, teamId: string): Promise<void> {
   assertCan(actor.role, 'gestionar-equipos');
 
@@ -457,13 +391,7 @@ export interface ValidacionDePaquete {
   noMostrables: { teamId: string; moduleId: string; reason: string }[];
 }
 
-/**
- * Guarda un paquete y comprueba, contra CADA equipo que lo usa, que no cuela accesos.
- *
- * El documento pide validacion automatica al construir el paquete (4.10.6). No se rechaza el
- * guardado —un paquete puede crearse antes de asignarlo— pero se devuelve lo que no seria
- * mostrable, para que el Administrador lo vea explicitamente en vez de descubrirlo despues.
- */
+/** Guarda un paquete y comprueba, contra CADA equipo que lo usa, que no cuela accesos. */
 export async function guardarPaquete(actor: Actor, pkg: ModulePackage): Promise<ValidacionDePaquete> {
   assertCan(actor.role, 'gestionar-paquetes-visuales');
   const anterior = await gobierno.getPackage(pkg.id);
@@ -514,12 +442,7 @@ export interface QuienVeQue {
   existeEnElArbol: boolean;
 }
 
-/**
- * Resuelve "quien ve que" para un usuario y un modulo.
- *
- * Es casi gratis: `resolveEffectiveScope` ya devuelve `steps` con la capa, su origen y el ambito
- * acumulado. Se construyo en B.4 exactamente para esta vista y hasta ahora nadie lo consumia.
- */
+/** Resuelve "quien ve que" para un usuario y un modulo. */
 export async function quienVeQue(userId: string, teamId: string, moduleId: string): Promise<QuienVeQue> {
   const equipo = await gobierno.getTeam(teamId);
   if (!equipo) throw new AdminError(`El equipo '${teamId}' no existe.`, 404);
@@ -551,17 +474,7 @@ export async function quienVeQue(userId: string, teamId: string, moduleId: strin
   };
 }
 
-/**
- * Los numeros que el carril de administracion muestra junto a dos secciones.
- *
- * Se cuentan AQUI, en el servidor y una sola vez por navegacion, y viajan al carril como props.
- * El carril se dibuja en las siete paginas del panel: pedirlos desde el cliente serian dos
- * peticiones mas en cada una para pintar dos numeros que ya estaban a mano.
- *
- * Solo dos, y las dos piden accion: las ampliaciones de ambito deberian tender a cero (§7), y lo
- * que hay en la papelera espera a que alguien lo restaure o lo tire. Un indicador en cada seccion
- * los volveria a todos invisibles.
- */
+/** Los numeros que el carril de administracion muestra junto a dos secciones. */
 export async function indicadoresDeAdmin(): Promise<{ ampliaciones: number; papelera: number }> {
   const [ampliaciones, arbol] = await Promise.all([contarAmpliaciones(), getManagedTree()]);
   return { ampliaciones, papelera: arbol.trash.length };

@@ -11,23 +11,7 @@ import {
 } from '@app/data-contracts-server';
 import { populate } from './populate';
 
-/**
- * Prueba de fuente-agnosticismo — criterio de aceptacion de la seccion 2.4.
- *
- * "El agente debe poder demostrar, cambiando UNA SOLA VARIABLE DE CONFIGURACION, que la
- * aplicacion completa funciona indistintamente contra MockDataConnector, SqlDataConnector y
- * XmlaDataConnector, sin ningun cambio de codigo en apps/* ni en packages/ui-components."
- *
- * LIMITE HONESTO DE ESTA FASE: no se puede demostrar una ejecucion VERDE de punta a punta
- * contra `sql` ni `xmla`, porque ninguno de los dos esta implementado todavia (Fase 4) y en
- * este entorno no hay forma de levantar un SQL Server contra el que probarlos.
- *
- * Lo que si se demuestra, y es lo que esta prueba fija para que no se pierda:
- *  1. El conector activo se resuelve por configuracion, no por codigo.
- *  2. El job corre por el mismo camino con los tres, sin ramas por tipo de conector.
- *  3. Ni `apps/*` ni `packages/ui-components` referencian un conector concreto.
- *  4. Un conector no implementado falla de forma limpia y trazable, no corrompe el cache.
- */
+/** Prueba de fuente-agnosticismo — criterio de aceptacion de la seccion 2.4. */
 
 const CONECTORES = ['mock', 'sql', 'xmla'] as const;
 
@@ -87,11 +71,6 @@ describe('2.4 — cambiar de conector es configuracion, no codigo', () => {
 /**
  * La comprobacion estructural: que NADA en apps/* ni en packages/ui-components nombre un
  * conector concreto.
- *
- * La regla de limites de dependencia ya impide importar `@app/data-contracts-server` desde
- * ahi. Esto cubre el hueco que la regla no ve: una referencia por cadena de texto —un
- * `if (conector === 'xmla')` en una pantalla, por ejemplo— que compilaria sin problema y
- * acoplaria la interfaz a una fuente concreta.
  */
 describe('2.4 — ni apps/* ni ui-components conocen la fuente', () => {
   const RAIZ = join(import.meta.dirname, '..', '..', '..');
@@ -116,13 +95,7 @@ describe('2.4 — ni apps/* ni ui-components conocen la fuente', () => {
     'connectionString',
   ];
 
-  /**
-   * Quita comentarios antes de buscar.
-   *
-   * Lo que se persigue es acoplamiento en el CODIGO. Un comentario que explique por que un
-   * conector no se puede importar aqui es documentacion util, no una violacion, y marcarlo
-   * incentivaria a borrar justo las explicaciones que conviene conservar.
-   */
+  /** Quita comentarios antes de buscar. */
   const sinComentarios = (texto: string): string =>
     texto.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 

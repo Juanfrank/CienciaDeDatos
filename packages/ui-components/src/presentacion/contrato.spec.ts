@@ -10,13 +10,7 @@ import {
   type ClaveDePresentacion,
 } from './contrato';
 
-/**
- * El estandar minimo, como prueba.
- *
- * Esto es lo que convierte «todo objeto deberia poder personalizarse» en una regla: sin esta
- * prueba, la frase vive en un comentario y el primer objeto que se anada con prisa se la salta
- * sin que nadie se entere hasta que alguien pide ponerle un icono.
- */
+/** El estandar minimo, como prueba. */
 describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
   const versiones = catalogoInicial.flatMap((o) =>
     o.versions.map((v) => ({ objectId: o.objectId, categoria: o.category, version: v })),

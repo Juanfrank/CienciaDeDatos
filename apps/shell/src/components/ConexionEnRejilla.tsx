@@ -4,19 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ConfiguracionDeConexion } from '@app/ui-components';
 import { Conexion, trazar } from './elementos';
 
-/**
- * El conector, medido contra la rejilla de verdad.
- *
- * La geometria no se puede calcular en el servidor: solo el navegador sabe donde acabaron las dos
- * cajas despues de que la rejilla repartiera el ancho, y cambia con el tamano de la ventana y con
- * el punto de ruptura. Por eso se mide aqui, y se vuelve a medir cuando algo se mueve.
- *
- * El SVG se dibuja con `position: absolute` desde la celda del propio conector: `.rejilla__celda`
- * no esta posicionada, asi que el ancla es la `.rejilla`, y las coordenadas del trazado son
- * directamente las de la rejilla entera. Sin eso habria que restar el desplazamiento de la celda
- * en cada punto, y el dia que alguien posicionara la celda por otro motivo el conector se iria a
- * otro sitio sin que nada avisara.
- */
+/** El conector, medido contra la rejilla de verdad. */
 export function ConexionEnRejilla({ config }: { config: ConfiguracionDeConexion | undefined }) {
   const ancla = useRef<HTMLDivElement>(null);
   const [puntos, setPuntos] = useState<[number, number][]>([]);

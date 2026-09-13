@@ -9,12 +9,7 @@ import { VistaModulo } from '../../../../src/components/VistaModulo';
 import { InsigniaDeAmbito } from '../../../../src/components/InsigniaDeAmbito';
 import { InsigniaDeProcedencia } from '../../../../src/components/InsigniaDeProcedencia';
 
-/**
- * Pagina de un modulo — ruta /m/{module-slug}[/{page-slug}] (4.11).
- *
- * Componente de servidor: resuelve ambito, lee del cache y filtra ANTES de enviar nada al
- * navegador. Lo que cruza al cliente ya esta filtrado.
- */
+/** Pagina de un modulo — ruta /m/{module-slug}[/{page-slug}] (4.11). */
 
 /** Convierte la query string en filtros, conservando los valores repetidos de un mismo campo. */
 function filtrosDe(searchParams: Record<string, string | string[] | undefined>): Record<string, string | string[]> {
@@ -32,11 +27,6 @@ export default async function PaginaModulo({
 }: {
   /*
    * `page` es UNA cadena, no un array.
-   *
-   * La ruta es `[page]`, un segmento dinamico simple; solo un comodin `[...page]` entrega array.
-   * Estaba tipado como `string[]` y leido como `page?.[0]`, o sea el PRIMER CARACTER del slug:
-   * `/m/x/general` buscaba la pagina «g», no la encontraba y devolvia 404. Nunca se noto porque
-   * hasta ahora ningun modulo tenia mas de una pagina y nadie escribia la segunda parte de la URL.
    */
   params: Promise<{ slug: string; page?: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;

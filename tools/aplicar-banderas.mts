@@ -1,20 +1,4 @@
-/**
- * Lleva el estado de los modulos a Azure App Configuration — seccion 3.4.
- *
- * Es el paso que convierte el informe en efecto: el modulo que no se puede componer queda APAGADO
- * antes del swap, y los demas se despliegan. Sin esto, «un error en un modulo no bloquea a los
- * demas» seria cierto solo en el build y falso en produccion, donde el modulo roto seguiria
- * ofreciendose en el arbol para dar un error al pulsarlo.
- *
- * Escribe SOLO lo que cambia, y en las dos direcciones: apaga lo caido y **vuelve a encender lo
- * que se recupero**. Un interruptor que solo sabe apagar deja el modulo arreglado invisible hasta
- * que alguien se acuerde de ir a Azure, y eso convierte cada arreglo en dos tareas.
- *
- *   npx tsx tools/aplicar-banderas.mts estado-de-modulos.json https://<tienda>.azconfig.io
- *
- * La credencial sale de `DefaultAzureCredential`: en CI la resuelve la federacion de `azure/login`,
- * en una maquina la sesion de `az login`. No hay ninguna cadena de conexion que guardar.
- */
+/** Lleva el estado de los modulos a Azure App Configuration — seccion 3.4. */
 import { readFileSync } from 'node:fs';
 import { DefaultAzureCredential } from '@azure/identity';
 import { banderaDeModulo } from '@app/config';

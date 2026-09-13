@@ -2,13 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Consulta en lenguaje natural — seccion 4.9.
- *
- * Lo que se verifica aqui, por encima de que entienda bien, es que no sea una puerta trasera:
- * el vocabulario sale de los datos que quien pregunta ya puede ver, la respuesta es una URL
- * normal, y una pregunta por algo fuera de su ambito no confirma que ese algo exista.
- */
+/** Consulta en lenguaje natural — seccion 4.9. */
 
 interface RespuestaDeConsulta {
   entendido: string;
@@ -105,10 +99,6 @@ test.describe('una pregunta no revela lo que hay fuera del ambito (4.11)', () =>
  * respuesta util (`CONSULTA_VISIBLE` en VistaModulo). El componente y su ruta siguen ahi y las
  * pruebas tambien: saltarlas deja constancia de que existen y las devuelve al servicio cambiando
  * una sola constante, mientras que borrarlas obligaria a reescribirlas cuando el campo vuelva.
- *
- * Lo que NO se salta es nada de arriba: la ruta /api/consulta se sigue probando entera, incluido
- * que no filtre vocabulario fuera del ambito de quien pregunta. Es la parte con consecuencias de
- * seguridad, y esa no depende de que el campo se dibuje.
  */
 test.describe.skip('la interfaz enseña lo que entendio antes de aplicarlo', () => {
   test('muestra la interpretacion y navega a la vista al confirmar', async ({ page }) => {

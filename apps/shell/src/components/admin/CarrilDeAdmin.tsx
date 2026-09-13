@@ -5,17 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Icono } from '../iconos/Icono';
 import { GRUPOS, RESUMEN, type SeccionDeAdmin, seccionActivaEn, seccionDe } from './secciones';
 
-/**
- * El carril de administracion.
- *
- * Es de cliente por una sola razon: el layout de /admin se renderiza en el servidor y alli no hay
- * ruta actual. `usePathname` la da sin convertir el layout entero —ni la comprobacion de permiso
- * que hace— en codigo de cliente.
- *
- * Los indicadores llegan como props desde el servidor, ya contados. No se piden aqui: el carril se
- * dibuja en TODAS las paginas del panel, y una consulta por render seria siete consultas por
- * navegacion para pintar dos numeros.
- */
+/** El carril de administracion. */
 
 export interface Indicadores {
   ampliaciones: number;
@@ -99,13 +89,7 @@ function EnlaceDeSeccion({
   );
 }
 
-/**
- * El nombre de la seccion actual, en la cabecera.
- *
- * Existe porque el carril se puede plegar —y en pantalla estrecha arranca plegado—, y sin el la
- * pagina no dice en ninguna parte donde esta uno. Dos elementos y no una miga de pan completa: la
- * jerarquia real es de dos niveles, y unas migas de dos niveles son un adorno.
- */
+/** El nombre de la seccion actual, en la cabecera. */
 export function SeccionActual() {
   const seccion = seccionDe(usePathname());
   // En el resumen no se anade nada: «Administracion / Resumen» repite lo que el titulo ya dice.

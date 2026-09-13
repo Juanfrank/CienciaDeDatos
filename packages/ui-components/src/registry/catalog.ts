@@ -2,17 +2,7 @@ import { PRESENTACION_MINIMA, type ClaveDePresentacion } from '../presentacion/c
 import type { RanuraDeCampos } from '../presentacion/pozos';
 import type { ObjectCertification, VisualObjectDefinition } from './types';
 
-/**
- * Catalogo de objetos prediseñados — seccion 4.2.
- *
- * "Panel de objetos prediseñados (barras, lineas, tarjeta/KPI, tabla, matriz, mapa,
- * segmentador) que se enlazan UNICAMENTE contra IDataConnector, nunca contra una fuente ad hoc."
- *
- * En esta arquitectura "enlazarse contra IDataConnector" significa, en la practica, enlazarse
- * contra un datasetId del registro de datasets: el objeto recibe filas ya leidas del cache y ya
- * filtradas por el ambito de quien mira. Ningun objeto conoce la fuente, ni la consulta, ni el
- * conector activo.
- */
+/** Catalogo de objetos prediseñados — seccion 4.2. */
 
 const certificacionInicial: ObjectCertification = {
   testsPassed: true,
@@ -20,26 +10,13 @@ const certificacionInicial: ObjectCertification = {
   reviewedAt: '2026-09-11',
 };
 
-/**
- * Lo que admite cualquier objeto, mas lo que anada el suyo.
- *
- * Se compone asi y no se escribe a mano en cada entrada para que el minimo no se pueda olvidar
- * por descuido al anadir un objeto: para dejarlo fuera hay que quitarlo explicitamente, y
- * entonces la prueba del catalogo falla y dice por que.
- */
+/** Lo que admite cualquier objeto, mas lo que anada el suyo. */
 const presenta = (...propias: ClaveDePresentacion[]): ClaveDePresentacion[] => [
   ...PRESENTACION_MINIMA,
   ...propias,
 ];
 
-/**
- * El contrato de un objeto que NO consume datos.
- *
- * Cero dimensiones y cero medidas no es una limitacion que estos objetos tengan: es lo que los
- * DEFINE. Todo el camino de lectura —la validacion de esquema, la lista de datasets del modulo, la
- * consulta al cache— deduce de ahi que no hay nada que leer, en vez de mirar un interruptor aparte
- * que alguien pueda dejar en desacuerdo con el contrato.
- */
+/** El contrato de un objeto que NO consume datos. */
 const SIN_DATOS = (notes: string): VisualObjectDefinition['versions'][number]['dataContract'] => ({
   dimensions: { min: 0, max: 0 },
   measures: { min: 0, max: 0 },
@@ -60,12 +37,7 @@ const v1 = (
   presentation,
 });
 
-/**
- * Los pozos de un grafico de barras, parametrizados por cuantas medidas admite la version.
- *
- * Se factoriza porque 1.0.0 y 1.1.0 comparten las dimensiones y solo cambian en el cupo del eje
- * Y: escribirlos dos veces invita a que alguien arregle uno y se olvide del otro.
- */
+/** Los pozos de un grafico de barras, parametrizados por cuantas medidas admite la version. */
 const POZOS_DE_BARRAS = (medidas: number): RanuraDeCampos[] => [
   {
     id: 'eje-x',
@@ -95,13 +67,7 @@ const POZOS_DE_BARRAS = (medidas: number): RanuraDeCampos[] => [
   },
 ];
 
-/**
- * El contrato de datos de la tarjeta KPI, compartido por sus dos versiones.
- *
- * Se factoriza porque 1.0.0 y 1.1.0 solo se diferencian en lo que admiten PRESENTAR: escribirlo
- * dos veces invita a que alguien arregle un pozo en una version y se olvide de la otra, y
- * entonces la misma tarjeta pediria campos distintos segun la version que fije la instancia.
- */
+/** El contrato de datos de la tarjeta KPI, compartido por sus dos versiones. */
 /** Lo que admite presentar una tabla o una matriz. El color por valor es aqui donde mas se usa. */
 const PRESENTACION_DE_TABLA = presenta('formato', 'formatos', 'condicional');
 
@@ -130,10 +96,6 @@ const CONTRATO_DE_KPI: VisualObjectDefinition['versions'][number]['dataContract'
 
 /*
  * Lo que un grafico deja personalizar, en un solo sitio.
- *
- * Se factoriza porque las versiones nuevas de columnas y lineas declaran exactamente lo mismo, y
- * con la lista escrita cuatro veces anadir una clave significaria acordarse de cuatro sitios —
- * que es como `etiqueta` acabo dibujandose en una tarjeta que no la declaraba.
  */
 const POZOS_DE_LINEAS: RanuraDeCampos[] = [
   {
@@ -147,19 +109,7 @@ const POZOS_DE_LINEAS: RanuraDeCampos[] = [
   { id: 'eje-y', etiqueta: 'Eje Y', tipo: 'medida', max: 4, min: 1, ayuda: 'Una linea por medida.' },
 ];
 
-/**
- * El pozo que reparte los pequenos multiplos.
- *
- * Va el ULTIMO de la lista, que es donde va lo opcional: al anadir un grafico, lo primero que hay
- * que rellenar es el eje, no una opcion avanzada que la mayoria no usa.
- *
- * Que sea el ultimo en el panel no significa que sea la ultima dimension al dibujar: ahi va
- * primero, porque `toCategorical` compone las etiquetas en el orden en que se le pasan y partirlas
- * supone que el primer trozo es el panel. Ese orden lo fija el render con su propio array, no la
- * posicion del pozo.
- *
- * Opcional: sin el, el objeto dibuja UN grafico, que es lo que hacia antes.
- */
+/** El pozo que reparte los pequenos multiplos. */
 const POZO_DE_MULTIPLO: RanuraDeCampos = {
   id: 'multiplo',
   etiqueta: 'Multiplos',
@@ -183,18 +133,7 @@ const PRESENTACION_DE_GRAFICO = presenta(
   'multiplos',
 );
 
-/**
- * CONGELADA. Lo que admite presentar una version YA PUBLICADA no vuelve a crecer.
- *
- * `PRESENTACION_DE_GRAFICO` esta compartida entre varias versiones, y por eso anadirle una clave
- * ampliaba en silencio lo que admiten versiones ya publicadas — justo lo que 4.5 cierra: la
- * version es lo que hace reproducible un modulo desplegado, y un objeto que hoy admite mas que
- * ayer con el mismo numero de version no lo es.
- *
- * A partir de aqui, una clave de presentacion nueva entra en una version NUEVA, con su lista
- * propia. La regla no es «cambia solo si rompe»: es que la version describe lo que el objeto
- * hacia el dia que se publico.
- */
+/** CONGELADA. Lo que admite presentar una version YA PUBLICADA no vuelve a crecer. */
 const PRESENTACION_DE_GRAFICO_CON_CONDICIONAL = presenta(
   'formato',
   'formatos',
@@ -210,13 +149,7 @@ const PRESENTACION_DE_GRAFICO_CON_CONDICIONAL = presenta(
   'condicional',
 );
 
-/**
- * El contrato de un combinado, compartido por sus versiones.
- *
- * Se factoriza por el mismo motivo que los demas: 1.0.0 y 1.1.0 piden exactamente los mismos
- * campos y solo cambian en lo que admiten PRESENTAR, y con los pozos escritos dos veces un
- * arreglo en uno deja al otro pidiendo cosas distintas para el mismo objeto.
- */
+/** El contrato de un combinado, compartido por sus versiones. */
 const CONTRATO_COMBINADO: VisualObjectDefinition['versions'][number]['dataContract'] = {
   dimensions: { min: 1, max: 1 },
   measures: { min: 2, max: 6 },
@@ -265,12 +198,7 @@ const PRESENTACION_COMBINADA = presenta(
   'tooltip',
 );
 
-/**
- * El contrato de la matriz jerarquica, compartido por 1.1.0 y 1.2.0.
- *
- * Se factoriza como los demas: las dos piden los mismos campos y solo cambian en que 1.2.0
- * admite ademas el formato condicional.
- */
+/** El contrato de la matriz jerarquica, compartido por 1.1.0 y 1.2.0. */
 const CONTRATO_DE_MATRIZ: VisualObjectDefinition['versions'][number]['dataContract'] = {
   dimensions: { min: 1, max: 5 },
   measures: { min: 1, max: 4 },
@@ -302,23 +230,10 @@ const CONTRATO_DE_BARRAS_H: VisualObjectDefinition['versions'][number]['dataCont
   pozos: POZOS_DE_BARRAS(4),
 };
 
-/**
- * Lo que un circular admite presentar.
- *
- * NO lleva `ejes`, `apilado` ni `orden`: no tiene ejes, no apila nada, y su orden lo decide
- * `circular.ordenar` —de mayor a menor o el del modelo— que es una pregunta distinta de «por
- * categoria o por valor». Declararlas para no pensarlo dejaria opciones en el panel que no hacen
- * nada, que es de donde venimos.
- */
+/** Lo que un circular admite presentar. */
 const PRESENTACION_CIRCULAR = presenta('formato', 'formatos', 'leyenda', 'circular');
 
-/**
- * El contrato de un circular, compartido por el pastel y la dona.
- *
- * UNA dimension y UNA medida. Es la limitacion que hace que el objeto signifique algo: las
- * porciones tienen que sumar un total, y dos medidas no suman nada en comun. El resto de
- * herramientas lo permite y el resultado es un grafico que no se puede leer.
- */
+/** El contrato de un circular, compartido por el pastel y la dona. */
 const CONTRATO_CIRCULAR: VisualObjectDefinition['versions'][number]['dataContract'] = {
   dimensions: { min: 1, max: 1 },
   measures: { min: 1, max: 1 },
@@ -362,14 +277,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       ),
       /*
        * 1.1.0 — la etiqueta que acompana al valor.
-       *
-       * `etiqueta` se anadio al contrato de presentacion, al panel y al renderizador, pero NO a
-       * esta lista: la tarjeta dibujaba una etiqueta que su propia version no declaraba admitir, y
-       * la validacion del editor marcaba rota cualquier tarjeta que la usara. No se vio en pantalla
-       * porque el camino de LECTURA no comprueba la presentacion —solo el del editor lo hace—, y
-       * ninguna prueba abria el editor sobre un modulo con etiquetas.
-       *
-       * Version nueva y no un retoque de la 1.0.0: publicar no altera lo ya desplegado (4.5).
        */
       {
         version: '1.1.0',
@@ -381,9 +288,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       },
       /*
        * 1.2.0 — formato condicional.
-       *
-       * En una tarjeta es donde mas se nota: la cifra ES el objeto, y que cambie de color cuando
-       * se pasa del umbral convierte un numero en un aviso.
        */
       {
         version: '1.2.0',
@@ -417,16 +321,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       ),
       /*
        * 1.1.0 — orden por encabezado, mas columnas, y estilo de texto.
-       *
-       * El changelog de 1.0.0 decia «columnas ordenables» y la capacidad no existia: un encabezado
-       * que no responde ensena que la tabla no se ordena, y quien lo prueba una vez no lo vuelve a
-       * intentar. Se corrige el changelog de 1.0.0 —describia algo que no hacia— y la capacidad
-       * llega aqui, con su version.
-       *
-       * Version nueva y no un retoque de 1.0.0, aunque ampliar un maximo no rompa a nadie. La
-       * regla de 4.5 no es «cambia solo si rompe»: es que la version es lo que hace reproducible
-       * un modulo ya desplegado. La primera vez que escribi esto subi los limites dentro de 1.0.0,
-       * que es exactamente lo que 4.5 prohibe.
        */
       {
         version: '1.1.0',
@@ -463,14 +357,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       },
       /*
        * 1.3.0 — la ayuda de mapeo, que era lo unico que a la tabla le faltaba.
-       *
-       * `notes` es lo que el editor ensena junto a los pozos para decir que va en cada uno, y la
-       * tabla era el UNICO objeto de datos del catalogo sin ella: sus tres versiones salieron sin
-       * notas. No es cosmetico — es la diferencia entre un pozo llamado «Columnas de cifra» y
-       * saber que una tabla sin ninguna dimension sigue siendo valida y devuelve una fila.
-       *
-       * Version nueva y no un retoque de 1.2.0 porque `notes` vive DENTRO del contrato de datos, y
-       * el contrato es lo que la version congela (4.5).
        */
       {
         version: '1.3.0',
@@ -517,17 +403,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       ),
       /*
        * 1.1.0 — varias medidas, como ya admitia `lineas`.
-       *
-       * El constructor de opciones recorria `vm.series` desde el primer dia, y la leyenda y la
-       * paleta de ocho colores estaban escritas y probadas; lo que no existia era un objeto que
-       * pudiera declarar dos medidas, asi que ese camino no se ejecutaba nunca contra datos
-       * reales. Comparar lo que entra con lo que sale es la pregunta basica del dominio y solo se
-       * podia responder con una tabla.
-       *
-       * Va como version NUEVA y no como correccion de 1.0.0 porque 4.5 no admite otra cosa: un
-       * objeto compartido publicado no se modifica. Las instancias fijadas a 1.0.0 siguen viendo
-       * el contrato de 1.0.0 — ampliar el maximo no las romperia, pero la regla no es "cambia
-       * solo si rompe", es que la version es lo que hace reproducible un modulo ya desplegado.
        */
       {
         version: '1.1.0',
@@ -546,11 +421,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       },
       /*
        * 1.2.0 — la personalizacion que se configuraba y no llegaba al grafico.
-       *
-       * `leyenda` y `etiquetasDeDato` se podian elegir en el editor desde F5.10 y NO se aplicaban:
-       * el panel las guardaba y el constructor de opciones no las leia. Aqui se cablean, y de paso
-       * entra lo que faltaba para que un grafico sea configurable de verdad — posicion de la
-       * leyenda, titulos y visibilidad de los ejes, cuadricula, empezar en cero, y orden del eje.
        */
       {
         version: '1.2.0',
@@ -569,10 +439,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       },
       /*
        * 1.3.0 — pequenos multiplos.
-       *
-       * Es un cambio del CONTRATO DE DATOS —una dimension mas— y por eso es una version nueva y no
-       * un ajuste sobre 1.2.0. Una instancia que fija 1.2.0 sigue viendo el objeto que mapeo, sin
-       * un pozo que aparece de la nada; es lo que 4.5 pide de un objeto ya publicado.
        */
       {
         version: '1.3.0',
@@ -591,10 +457,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       },
       /*
        * 1.4.0 — formato condicional.
-       *
-       * El contrato de datos no cambia: es una clave de presentacion mas. Y aun asi es una version
-       * nueva, porque lo que una version admite PRESENTAR tambien forma parte de lo que describe.
-       * Meterla en 1.3.0 ampliaria en silencio un objeto ya publicado.
        */
       {
         version: '1.4.0',
@@ -616,11 +478,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   {
     /*
      * El «grafico de barras» de verdad: horizontales.
-     *
-     * No es el mismo objeto con una opcion porque el caso de uso es distinto, no la estetica: con
-     * nombres largos —«Juzgado de Primera Instancia de Santiago»— las columnas obligan a girar los
-     * rotulos o a recortarlos, y en horizontal caben enteros. Quien elige este objeto lo elige por
-     * eso, y una opcion escondida en el panel de formato no se encuentra.
      */
     objectId: 'barras-horizontales',
     familia: 'comparacion',
@@ -636,12 +493,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       ),
       /*
        * 1.1.0 — formato condicional, que las columnas tienen desde su 1.4.0.
-       *
-       * El mismo constructor dibuja los dos objetos y `barrasConColor` colorea por valor sin
-       * mirar la orientacion: la capacidad estaba entera y lo unico que faltaba era DECLARARLA.
-       * Sin declararla el editor no la ofrece, asi que se podia usar escribiendo la instancia a
-       * mano y no desde el panel — que es la peor forma de tener una funcion, porque parece que
-       * no existe.
        */
       {
         version: '1.1.0',
@@ -656,12 +507,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   {
     /*
      * Pastel y dona son DOS entradas del catalogo y UN solo dibujo.
-     *
-     * El contrato de datos es identico y el hueco del centro es una propiedad de presentacion, asi
-     * que pasar de uno a otro no cuesta la configuracion. Estan los dos por separado porque la
-     * paleta es como se encuentran los objetos: quien busca «dona» la busca por su nombre, y
-     * esconderla dentro del pastel como una casilla significa que no existe para quien no sepa ya
-     * que esta ahi.
      */
     objectId: 'pastel',
     familia: 'proporcion',
@@ -733,10 +578,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   {
     /*
      * Combinado — la pregunta que hoy obliga a poner dos objetos juntos.
-     *
-     * Que medida va como columna y cual como linea lo dice el MAPEO, con un pozo para cada una.
-     * Una opcion del panel obligaria a preguntar «cual de las cuatro medidas es la linea», que no
-     * tiene una respuesta corta; arrastrar un campo de un pozo al otro si.
      */
     objectId: 'combinado',
     familia: 'relacion',
@@ -752,10 +593,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       ),
       /*
        * 1.1.0 — apilado, que el constructor ya honraba.
-       *
-       * Las columnas de un combinado se apilan como las de cualquier otro grafico de barras: es
-       * la misma funcion. Sin `apilado` declarado, el panel no ofrecia la opcion y el unico modo
-       * de apilarlas era escribir la presentacion a mano.
        */
       {
         version: '1.1.0',
@@ -770,10 +607,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   {
     /*
      * Dispersion — el unico objeto donde la dimension NO reparte el eje.
-     *
-     * Cada categoria es un punto y los dos ejes son medidas. Es la unica forma de responder «se
-     * relacionan estas dos cifras»: en cualquier grafico de barras una de las dos ES la escala,
-     * asi que la pregunta no se puede ni plantear.
      */
     objectId: 'dispersion',
     familia: 'relacion',
@@ -829,10 +662,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   {
     /*
      * Embudo — etapas de un proceso, en SU orden.
-     *
-     * Se parece a un circular en que reparte un total, y se comporta al reves en lo unico que
-     * importa: no reordena. Las etapas de un proceso tienen un orden propio, y que la segunda sea
-     * mayor que la primera es una anomalia que hay que poder ver.
      */
     objectId: 'embudo',
     familia: 'proporcion',
@@ -873,10 +702,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   {
     /*
      * Cascada — de que se compone una diferencia.
-     *
-     * Cada barra empieza donde acabo la anterior, asi que lo que se ve es la CONTRIBUCION de cada
-     * categoria y no su magnitud. Es la unica forma de responder «por que el total subio» sin
-     * poner al lado una tabla de diferencias.
      */
     objectId: 'cascada',
     familia: 'proporcion',
@@ -917,9 +742,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   {
     /*
      * Mapa de arbol — la composicion cuando hay demasiadas partes para un circular.
-     *
-     * Un circular con veinte porciones no se puede leer: las pequenas se vuelven hilos sin sitio
-     * para su nombre. Un rectangulo sigue teniendo dos dimensiones donde escribir.
      */
     objectId: 'mapa-de-arbol',
     familia: 'proporcion',
@@ -1055,15 +877,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       ),
       /*
        * 1.1.0 — jerarquia.
-       *
-       * 1.0.0 cruzaba UNA dimension con UNA dimension, y sobre un cruce plano no hay nada que
-       * expandir: no tiene niveles. Pero la matriz es justo el objeto donde la jerarquia importa
-       * —distrito y dentro materia, ano y dentro trimestre—, asi que el limite de uno no
-       * simplificaba nada: impedia usarla para lo que sirve.
-       *
-       * Version nueva y no correccion de 1.0.0, como manda 4.5: las instancias fijadas a 1.0.0
-       * siguen viendo su contrato. Ampliar un maximo no las romperia, pero la regla no es «cambia
-       * solo si rompe»; es que la version es lo que hace reproducible un modulo ya desplegado.
        */
       {
         version: '1.1.0',
@@ -1077,11 +890,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       },
       /*
        * 1.2.0 — formato condicional, que la tabla tiene desde su 1.2.0.
-       *
-       * Las dos dibujan cifras en celdas y las dos comparten `PRESENTACION_DE_TABLA`, pero la
-       * matriz se quedo fuera: el color por valor entro en la tabla y nadie miro al lado. Y es en
-       * la matriz donde mas hace falta, porque un cruce de cinco por cuatro son veinte cifras y
-       * mirarlas una a una para encontrar la que se sale es justo lo que el color evita.
        */
       {
         version: '1.2.0',
@@ -1196,11 +1004,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       }),
       /*
        * 1.1.0 — pozos con nombre, que era el unico objeto de datos que no los declaraba.
-       *
-       * Sin ellos el editor cae en los rotulos genericos —«dimension 1», «medida 1»—, y en un
-       * mapa esos nombres no dicen nada: lo que hay que mapear es un territorio y una cifra. Que
-       * el render todavia no exista no es motivo para dejar el mapeo sin nombrar; al contrario,
-       * es lo unico que hoy se puede preparar del objeto.
        */
       {
         version: '1.1.0',

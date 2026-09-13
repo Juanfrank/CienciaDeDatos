@@ -5,20 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ID_LATERAL } from './NavegacionPlegable';
 import { Icono } from './iconos/Icono';
 
-/**
- * Pliega y despliega el panel lateral desde la cabecera.
- *
- * El boton esta en el layout raiz y el panel en el de los modulos: son dos arboles de React
- * distintos y no comparten estado. En vez de montar un contexto que atraviese toda la
- * aplicacion, el boton escribe `data-lateral` en `<body>` y el CSS hace el resto. Es una sola
- * fuente de verdad —la del boton, que es quien tiene que anunciar `aria-expanded`— y funciona
- * igual sobre el arbol de modulos que sobre el menu de administracion.
- *
- * Solo se dibuja si en la pagina HAY panel. No es cosmetica: `aria-controls` que apunta a un
- * elemento inexistente es una violacion de `aria-valid-attr-value`, y un boton que no hace nada
- * es peor que ninguno. Por eso se comprueba en el cliente y se vuelve a comprobar en cada
- * navegacion.
- */
+/** Pliega y despliega el panel lateral desde la cabecera. */
 
 /** El mismo ancho que la media query del CSS. Si uno cambia, el otro tambien. */
 export const CONSULTA_MOVIL = '(max-width: 640px)';
@@ -29,14 +16,6 @@ export function AlternarLateral() {
   const [abierto, setAbierto] = useState(true);
   /*
    * Si la persona ya decidio, el ancho deja de opinar.
-   *
-   * Sin esto, cualquier `change` de la media query reabria el panel que se acababa de cerrar, y
-   * no hace falta cruzar el umbral para que llegue uno: basta que el navegador reevalue las
-   * metricas del dispositivo. El resultado era un boton que parecia no funcionar, porque el
-   * panel volvia solo unas decimas despues.
-   *
-   * La regla es la que se espera de un control: el ancho fija el estado INICIAL, y a partir de
-   * la primera pulsacion manda la pulsacion.
    */
   const decidido = useRef(false);
 

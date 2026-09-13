@@ -3,17 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-/**
- * Pantalla de inicio de sesion — seccion 4.7.
- *
- * Dos caminos que coexisten: Azure AD como principal y credenciales locales como secundario. El
- * de Azure AD se ofrece y se explica que no esta habilitado en este entorno, en vez de ocultarlo
- * — ocultarlo haria pensar que la aplicacion solo tiene cuentas locales, que es justo lo
- * contrario de lo que 4.7 quiere.
- *
- * El campo del segundo factor solo aparece cuando el servidor lo pide (428). Pedirlo de entrada
- * obligaria a sacar el telefono antes de saber si la contrasena era correcta.
- */
+/** Pantalla de inicio de sesion — seccion 4.7. */
 export function Acceso({
   azureAdDisponible,
   identidad,

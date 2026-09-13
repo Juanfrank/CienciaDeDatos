@@ -1,15 +1,6 @@
 import type { ConfigChangeLog } from '@app/observability';
 
-/**
- * Una fila del registro de auditoria, en castellano.
- *
- * Se dibujaba como `entityType · action · entityId` —los identificadores internos tal cual— y sin
- * fecha ni autor. Un registro de auditoria existe para responder «quien cambio que y cuando»; sin
- * esas tres cosas era una lista de cadenas que solo entiende quien escribio el modelo.
- *
- * Vive como componente y no dentro de la pagina porque el inicio y la pagina de auditoria muestran
- * lo MISMO: con dos copias, traducir una accion nueva se haria en uno de los dos sitios.
- */
+/** Una fila del registro de auditoria, en castellano. */
 
 const ACCION: Record<ConfigChangeLog['action'], string> = {
   create: 'creo',

@@ -14,12 +14,7 @@ export async function GET() {
   return conAdmin(async () => await getManagedTree());
 }
 
-/**
- * Aplica una operacion sobre el arbol (4.1, 4.1.2).
- *
- * Con `?previsualizar=1` no escribe: devuelve que ambito tendria lo que se mueve, antes y
- * despues, para que el panel pueda avisar de que mover no es cosmetico.
- */
+/** Aplica una operacion sobre el arbol (4.1, 4.1.2). */
 export async function POST(request: Request) {
   const url = new URL(request.url);
   const cuerpo = (await request.json()) as TreeOperation;

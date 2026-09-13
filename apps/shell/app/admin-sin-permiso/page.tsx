@@ -1,9 +1,4 @@
-/**
- * Pagina de acceso denegado al panel.
- *
- * Vive FUERA del layout de /admin —en su propia ruta— porque ese layout redirige aqui: si
- * estuviera dentro, la redireccion seria un bucle.
- */
+/** Pagina de acceso denegado al panel. */
 export default function SinPermiso() {
   return (
     <div className="vacio" data-testid="sin-permiso">

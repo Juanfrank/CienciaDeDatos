@@ -5,22 +5,7 @@ import {
 } from '@app/module-model';
 import { borrar, escribir, leer } from './almacenCompartido';
 
-/**
- * Personalizacion por usuario final — seccion 4.6.
- *
- * `applyPersonalization` existia desde F2.3 y de todo este modulo solo se consumia el distintivo
- * de procedencia, que ademas iba fijo a `false`: la aplicacion anunciaba en cada modulo "vista
- * institucional oficial" sin que hubiera ninguna otra posibilidad. Esto es lo que faltaba para
- * que esa etiqueta signifique algo.
- *
- * La personalizacion va al almacen COMPARTIDO por el mismo motivo que el resto del estado: la
- * seccion 9 pide expresamente que reciclar o anadir una instancia no pierda la personalizacion.
- *
- * El limite de 4.6 —"limitada a la capa de PRESENTACION, nunca a la logica de calculo de la
- * metrica"— se hace cumplir dos veces: el tipo `UserPersonalization` no tiene forma de expresar
- * un cambio de medida, y `assertPersonalizationIsPresentationOnly` rechaza un cuerpo que traiga
- * campos de mas, porque el tipo no protege de lo que llega por la red.
- */
+/** Personalizacion por usuario final — seccion 4.6. */
 
 const clave = (userId: string, moduleId: string): string =>
   `app:personalizacion:${userId}:${moduleId}`;
@@ -88,13 +73,7 @@ export async function guardarPersonalizacion(
   return personalizacion;
 }
 
-/**
- * Descarta la personalizacion y devuelve a la vista institucional.
- *
- * Es la salida que 4.6 hace posible al decir que la definicion institucional sigue siendo la
- * fuente de verdad: se borra la personalizacion, no se "despersonaliza" el modulo. Una vista
- * personalizada de la que no se pueda salir es una vista rota.
- */
+/** Descarta la personalizacion y devuelve a la vista institucional. */
 export async function descartarPersonalizacion(userId: string, moduleId: string): Promise<void> {
   await borrar(clave(userId, moduleId));
 }

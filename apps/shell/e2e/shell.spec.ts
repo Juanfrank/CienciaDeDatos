@@ -1,12 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Verificacion de punta a punta del shell, en un navegador real.
- *
- * Cada bloque corresponde a un criterio de aceptacion de la seccion 9 que solo se puede
- * comprobar con la aplicacion corriendo.
- */
+/** Verificacion de punta a punta del shell, en un navegador real. */
 
 /**
  * Toda prueba empieza con una sesion de verdad. Antes no hacia falta: la aplicacion emitia una
@@ -355,8 +350,6 @@ test.describe('el alto de un objeto no depende de su contenido', () => {
    * tarjetas declaradas iguales salen con alturas distintas porque una tiene el subtitulo mas
    * largo, la fila entera crece para acomodar a la mas alta, y lo que alguien compuso cuadrado se
    * publica descuadrado. Se nota poco en el editor y mucho en pantalla.
-   *
-   * Lo que no cabe se DESPLAZA dentro del objeto. Nunca se resuelve creciendo.
    */
   test('dos objetos de la misma fila miden exactamente lo mismo', async ({ page }) => {
     await entrarComo(page, 'u-admin');

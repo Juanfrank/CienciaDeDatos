@@ -2,14 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Galeria de objetos sobre Apache ECharts — seccion 4.2 y accesibilidad de 4.9.
- *
- * Lo que se comprueba aqui no es que ECharts dibuje bien —eso es cosa de ECharts— sino las tres
- * decisiones de esta aplicacion: que el grafico se carga de forma diferida, que el respaldo
- * accesible sigue existiendo detras del lienzo, y que el color no es el unico medio de
- * distinguir una serie.
- */
+/** Galeria de objetos sobre Apache ECharts — seccion 4.2 y accesibilidad de 4.9. */
 
 test.beforeEach(async ({ page }) => {
   await entrarComo(page, 'u-ana');
@@ -170,12 +163,6 @@ test.describe('la matriz, con jerarquia', () => {
 
   /*
    * Nada se busca por su etiqueta.
-   *
-   * Las etiquetas dependen del seed y del ambito efectivo de quien mira, y una version anterior de
-   * estas pruebas nombraba «Distrito Norte» y sus dos materias: fallaba en cuanto cambiaba la
-   * jerarquia del modulo, y tambien en la suite completa, donde otra prueba deja la sesion con
-   * otro equipo activo. Lo que se comprueba es la ESTRUCTURA —un padre, sus hijos, su subtotal—,
-   * que es lo que no puede cambiar.
    */
   const rutaDelPrimerPadre = async (page: import('@playwright/test').Page): Promise<string> => {
     const boton = page.locator('[data-testid^="matriz-plegar-"]').first();
@@ -263,20 +250,7 @@ test.describe('la tabla se ordena por su encabezado', () => {
   });
 });
 
-/**
- * Lo que ECharts dibuja de VERDAD, no lo que el constructor de opciones devuelve.
- *
- * Es la distincion que hizo falta aprender por las malas. Las pruebas unitarias llaman al
- * constructor y ven el `formatter` ahi, tal cual se escribio; el camino real pasaba las opciones
- * por `JSON.stringify` para compararlas por contenido y luego montaba el grafico con el
- * resultado — y `JSON.stringify` omite las funciones. Asi que TODOS los formateadores se perdian
- * entre el constructor y ECharts, en silencio y sin romper nada: el grafico salia entero, con
- * datos correctos, y solo las cifras aparecian en crudo.
- *
- * Estas dos comprobaciones existen para que ese hueco no se pueda reabrir. Leen el SVG, donde el
- * texto es un nodo del documento: con pocos elementos el renderizador por defecto es SVG, que es
- * justo lo que permite comprobarlo sin mirar pixeles.
- */
+/** Lo que ECharts dibuja de VERDAD, no lo que el constructor de opciones devuelve. */
 test.describe('los formateadores llegan hasta el dibujo', () => {
   test('la cifra sobre la barra dice lo MISMO que el respaldo de la misma tarjeta', async ({
     page,
@@ -288,10 +262,6 @@ test.describe('los formateadores llegan hasta el dibujo', () => {
 
     /*
      * Se compara con el respaldo y no con una cifra escrita aqui.
-     *
-     * La regla que importa no es «pone 2,216»: es que el dibujo y el camino accesible de la MISMA
-     * tarjeta digan el mismo numero de la misma forma. Escrita con una cifra fija, la prueba
-     * dependeria ademas del ambito de quien la ejecuta.
      */
     const delRespaldo = (await grafico.locator('.barras__valor').first().innerText()).trim();
     expect(delRespaldo).toMatch(/\d/);
@@ -360,10 +330,6 @@ test.describe('el filtrado cruzado llega a TODOS los objetos (4.4)', () => {
    * combinado y el mapa de arbol filtraban con el raton y no con el teclado, la dispersion al
    * reves, y las lineas y los multiplos de ninguna de las dos maneras. Ninguna prueba fallaba:
    * cada objeto tenia la mitad que alguien se acordo de cablear.
-   *
-   * Se recorren TODOS, y las dos vias. Un objeto que solo filtre con el raton deja sin la
-   * capacidad a quien navega con teclado, y un `<canvas>` no tiene nada dentro que el tabulador
-   * alcance.
    */
   const objetos = [
     // El respaldo de las columnas es una lista de barras, no una tabla: su boton es otro y por eso

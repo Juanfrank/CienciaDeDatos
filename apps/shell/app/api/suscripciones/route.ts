@@ -11,13 +11,7 @@ export const runtime = 'nodejs';
 
 const CADENCIAS: Cadence[] = ['diaria', 'semanal', 'mensual'];
 
-/**
- * Suscripciones: entrega programada de una vista (4.9).
- *
- * Una suscripcion es una exportacion programada, asi que reutiliza la cola de 5.3 y su misma
- * puerta de ambito. Igual que en las alertas, el usuario y el equipo salen de la sesion y nunca
- * del cuerpo: son los que deciden que datos lleva el archivo entregado.
- */
+/** Suscripciones: entrega programada de una vista (4.9). */
 export async function GET() {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();

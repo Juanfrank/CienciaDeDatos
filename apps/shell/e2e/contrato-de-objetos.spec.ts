@@ -1,14 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Lo que el catalogo declara tiene que estar EN EL PANEL — secciones 4.2 y 4.5.
- *
- * La auditoria del contrato encontro capacidades que el dibujo honraba y la version no declaraba.
- * El sintoma no es un error: es que el control no sale en el panel, asi que la funcion solo se
- * puede usar escribiendo la instancia a mano. Una prueba unitaria compara las dos listas; estas
- * comprueban lo que de verdad importa, que es que la persona que edita lo vea.
- */
+/** Lo que el catalogo declara tiene que estar EN EL PANEL — secciones 4.2 y 4.5. */
 
 test.describe('lo que se declaro en la auditoria llega al editor', () => {
   test('las barras horizontales ofrecen color por valor, como las columnas', async ({ page }) => {
@@ -49,10 +42,6 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
 
     /*
      * Se busca el ajuste por su nombre, que es como se llega a el de verdad.
-     *
-     * La pestana de Formato tiene dieciocho secciones y casi todas empiezan plegadas: comprobar
-     * que el control esta en el documento no dice que alguien pueda encontrarlo. El buscador del
-     * panel abre la seccion que lo contiene, asi que esto prueba el camino entero.
      */
     await page.getByTestId('pestana-formato').click();
     await page.getByTestId('buscar-ajuste').fill('apilado');
@@ -99,12 +88,6 @@ test.describe('la matriz colorea por valor', () => {
 
     /*
      * Se comprueba la REGLA, no cuantas celdas salen pintadas.
-     *
-     * La primera version contaba: «alguna pintada y no todas». Pasaba sola y fallaba dentro de la
-     * suite completa, porque el ambito activo cambia los numeros y con otro reparto salian las
-     * diez por encima del umbral — una prueba que depende de los datos y no de lo que afirma.
-     * Leyendo cada celda y su color, lo que se comprueba es que pintada equivale a pasar de 300,
-     * que es lo que la regla dice y vale con cualquier reparto.
      */
     const celdas = await matriz.locator('td').evaluateAll((tds) =>
       tds.map((td) => ({

@@ -6,14 +6,7 @@ import type {
   Observacion,
 } from './types';
 
-/**
- * Evaluacion de una regla y decision de notificar.
- *
- * Funciones puras: reciben las observaciones ya calculadas y no leen nada. Quien las llama es
- * el que sabe resolver el ambito de quien la creo y proyectar el objeto vigilado; aqui solo se
- * compara. Esa separacion es lo que permite probar la regla de "avisar solo en la transicion"
- * sin montar un modulo entero.
- */
+/** Evaluacion de una regla y decision de notificar. */
 
 const formatear = (n: number): string => new Intl.NumberFormat('es-DO').format(Math.round(n));
 
@@ -58,13 +51,7 @@ export interface Transicion {
   notificacion?: Omit<Notification, 'id'>;
 }
 
-/**
- * Decide si esta evaluacion merece aviso.
- *
- * Solo en la TRANSICION: de no cumplirse a cumplirse, y de cumplirse a dejar de cumplirse. Una
- * alerta que repite el mismo aviso en cada ciclo de poblacion se desactiva en una semana, y
- * entonces no avisa de nada. Que se haya resuelto es tan informativo como que salte.
- */
+/** Decide si esta evaluacion merece aviso. */
 export function decidirNotificacion(
   rule: AlertRule,
   evaluacion: AlertEvaluation,

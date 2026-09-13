@@ -3,17 +3,7 @@
 import { forwardRef } from 'react';
 import { Icono, type NombreDeIcono } from './Icono';
 
-/**
- * Boton que solo muestra un icono.
- *
- * La etiqueta NO desaparece: viaja en `aria-label`, asi que un lector de pantalla anuncia
- * exactamente lo mismo que antes decia el texto del boton, y en `title`, para que quien mire con
- * los ojos pueda recuperarla pasando el raton. Un icono sin nombre accesible es un boton que no
- * se puede nombrar ni por voz ni con un lector, y ninguna prueba de axe lo deja pasar.
- *
- * `contador` existe para el unico caso en el que el icono no basta: cuantos marcadores hay. Es
- * una cifra, no un estado, y esconderla detras del raton la haria inutil.
- */
+/** Boton que solo muestra un icono. */
 export const BotonDeIcono = forwardRef<
   HTMLButtonElement,
   {

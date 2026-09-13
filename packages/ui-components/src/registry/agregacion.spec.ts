@@ -8,14 +8,7 @@ import {
 } from './agregacion';
 import { aggregateBy, toKpi, toMatrix } from './viewModel';
 
-/**
- * El fallo que estas pruebas fijan tenia un numero concreto.
- *
- * Sobre las 64 filas del dataset de casos, una tarjeta con la columna de dias de resolucion
- * mostraba 10 593 dias — la suma de 64 promedios — donde el promedio real eran 165,5. No fallaba
- * ni avisaba: devolvia una cifra perfectamente plausible y falsa. La capa de presentacion sumaba
- * siempre, porque sumar era la unica operacion que sabia hacer.
- */
+/** El fallo que estas pruebas fijan tenia un numero concreto. */
 
 const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };
 

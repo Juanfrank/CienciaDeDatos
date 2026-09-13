@@ -4,20 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { BotonDeIcono } from './iconos/BotonDeIcono';
 
-/**
- * Personalizacion de la vista — seccion 4.6.
- *
- * "Personalizacion limitada a la capa de PRESENTACION (campos visibles dentro de una perspectiva
- * aprobada, orden, layout) — NUNCA a la logica de calculo de la metrica."
- *
- * De ahi que aqui solo se marque QUE OBJETOS SE VEN. No hay nada que permita cambiar una medida,
- * ni un filtro que se guarde como parte de la vista: los filtros viven en la URL (4.11) y son
- * otra cosa, que se comparte con un marcador y no altera la vista de nadie.
- *
- * La lista se pide al abrir el dialogo y no viene con la pagina, porque tiene que enumerar los
- * objetos del modulo INSTITUCIONAL: los que la persona oculto ya no estan en lo que ve, y sin
- * esa lista no habria forma de volver a mostrarlos.
- */
+/** Personalizacion de la vista — seccion 4.6. */
 export function MiVista({
   moduleSlug,
   personalizada,

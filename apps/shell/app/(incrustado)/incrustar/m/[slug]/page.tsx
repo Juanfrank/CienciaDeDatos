@@ -7,17 +7,7 @@ import { serializarObjeto } from '../../../../../src/server/serializar';
 import { obtenerSesion } from '../../../../../src/server/sesion';
 import { VistaModulo } from '../../../../../src/components/VistaModulo';
 
-/**
- * Modulo incrustado en otro portal — seccion 4.9.
- *
- * Es la MISMA carga que la pagina normal, con la misma sesion y el mismo ambito: `cargarModulo`
- * resuelve el ambito de quien mira y devuelve datos ya filtrados. No hay aqui ninguna via
- * alternativa de lectura, ni un token que salte la autenticacion — una vista incrustada no es
- * una vista publica.
- *
- * Si quien abre el portal anfitrion no tiene sesion en esta aplicacion, el iframe no muestra
- * datos. Es el comportamiento correcto, no un fallo de la incrustacion.
- */
+/** Modulo incrustado en otro portal — seccion 4.9. */
 export default async function PaginaIncrustada({
   params,
   searchParams,

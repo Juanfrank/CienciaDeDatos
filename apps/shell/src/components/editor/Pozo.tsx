@@ -6,21 +6,7 @@ import { ETIQUETA_DE_AGREGACION, type PozoDeCampos } from '@app/ui-components';
 import { Icono } from '../iconos/Icono';
 import { Ayuda } from './Ayuda';
 
-/**
- * Un pozo de campos, al estilo de Power BI.
- *
- * Lo que habia era una lista de casillas con TODOS los campos del dataset a la vista, marcados o
- * no. Con cuatro campos se lee; con cuarenta, el panel se convierte en un listado por el que hay
- * que buscar a ojo, y lo que importa —que hay puesto en este pozo— queda disuelto entre lo que no
- * esta puesto.
- *
- * Aqui solo se ve lo ELEGIDO, como chiclets apilados, y para anadir hay un boton `+` que abre un
- * buscador. La diferencia es de escala: la lista crece con el dataset, los chiclets crecen con lo
- * que uno ha decidido.
- *
- * El emergente se cierra con Escape y al pulsar fuera, y devuelve el foco al boton que lo abrio.
- * Un emergente que se queda abierto al tabular fuera es una trampa para quien navega con teclado.
- */
+/** Un pozo de campos, al estilo de Power BI. */
 export function Pozo({
   pozo,
   elegidos,
@@ -38,32 +24,14 @@ export function Pozo({
   elegidos: string[];
   disponibles: string[];
   guardando: boolean;
-  /**
-   * Si la ranura ya no admite mas.
-   *
-   * Lo decide quien conoce la instancia entera; aqui solo se dibuja. Sin el, se deduce del cupo,
-   * que es lo correcto cuando no hay nadie que lo sepa mejor.
-   */
+  /** Si la ranura ya no admite mas. */
   lleno?: boolean;
   onAnadir: (campo: string) => void;
   onQuitar: (campo: string) => void;
-  /**
-   * Como se resume cada campo de este pozo, y como cambiarlo.
-   *
-   * Solo tiene sentido en un pozo de MEDIDAS, y solo si quien llama lo ofrece. Es el desplegable
-   * del chiclet de Power BI: el esquema declara el operador por defecto y aqui se puede cambiar
-   * para esta instancia, sin escribir codigo. Elegir el que no toca no dibuja una cifra falsa —la
-   * validacion lo rechaza al guardar y el objeto se marca—, asi que ofrecerlos todos es seguro.
-   */
+  /** Como se resume cada campo de este pozo, y como cambiarlo. */
   agregacionDe?: (campo: string) => Agregacion;
   onAgregacion?: (campo: string, agregacion: Agregacion) => void;
-  /**
-   * Los operadores que se pueden aplicar aqui, del grano del dataset y de si el objeto colapsa.
-   *
-   * El desplegable ofrece SOLO estos. Ofrecer los siete y rechazar cuatro al guardar obliga a
-   * descubrir el limite probando, cuando el editor ya lo sabe — el mismo criterio por el que los
-   * botones de borde del lienzo se apagan en el borde.
-   */
+  /** Los operadores que se pueden aplicar aqui, del grano del dataset y de si el objeto colapsa. */
   posibles?: Agregacion[];
   prueba: string;
 }) {
@@ -78,14 +46,6 @@ export function Pozo({
 
   /*
    * Escape cierra ESTE emergente y no llega a nadie mas.
-   *
-   * El editor tiene su propio Escape, que deselecciona el bloque. Con los dos escuchando en
-   * `document`, cerrar el buscador deseleccionaba ademas el objeto y el panel entero se iba a la
-   * tienda: se perdia justo lo que se estaba configurando.
-   *
-   * Se registra en fase de CAPTURA y se corta la propagacion ahi. Es la regla que se espera de
-   * unas capas superpuestas —cierra la de dentro— y, al ir por captura, no depende del orden en
-   * que se hayan registrado los manejadores.
    */
   useEffect(() => {
     if (!abierto) return;
@@ -145,16 +105,6 @@ export function Pozo({
               {pozo.tipo === 'medida' && agregacionDe && onAgregacion ? (
                 /*
                  * Solo el chevron. El operador activo se ve AL ABRIR, no antes.
-                 *
-                 * Con el nombre del operador siempre a la vista, el chiclet tenia tres cosas
-                 * compitiendo por 300 px y la que se recortaba era la que identifica el campo:
-                 * «DiasResolu…  Promedio  ×». Un chiclet que no dice de que campo es no sirve, y
-                 * el operador es lo que se consulta de vez en cuando, no lo que se lee siempre.
-                 *
-                 * Sigue siendo un `select` nativo, no un menu propio: al desplegarse marca la
-                 * opcion activa —que es justo como se consulta—, y trae gratis el teclado, el
-                 * lector de pantalla y el comportamiento tactil. Lo que se oculta es el texto de
-                 * la caja cerrada, no el control.
                  */
                 <label className="chiclet__agregacion">
                   <span className="visualmente-oculto">Como se resume {campo}</span>

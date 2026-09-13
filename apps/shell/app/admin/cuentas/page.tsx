@@ -3,12 +3,7 @@ import { CuentasLocales } from '../../../src/components/admin/CuentasLocales';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Cuentas locales — seccion 4.7.2.
- *
- * "Documenta y haz visible en el panel de administracion cuantas cuentas locales existen y por
- * que. Estas cuentas deben tratarse como la excepcion, no como la via por defecto."
- */
+/** Cuentas locales — seccion 4.7.2. */
 export default async function PaginaCuentas() {
   return (
     <section>

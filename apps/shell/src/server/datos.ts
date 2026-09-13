@@ -29,13 +29,7 @@ import {
 } from '@app/ui-components';
 import { cacheL2, datasetReader, findTeam, getGeneralTree, objectRegistry, scopeFor } from './contexto';
 
-/**
- * Carga de un modulo para una persona concreta.
- *
- * Todo el camino ocurre en el servidor: resolver el ambito, leer del cache, filtrar y devolver
- * al navegador datos YA filtrados. El navegador nunca recibe nada que su ambito no permita, y
- * nunca habla con otra cosa que no sea la API de esta aplicacion (principio 1).
- */
+/** Carga de un modulo para una persona concreta. */
 
 export interface ObjetoCargado {
   item: GridItem;
@@ -47,14 +41,7 @@ export interface ObjetoCargado {
   stale?: boolean;
   /** Problemas de mapeo. Si hay alguno, el objeto se dibuja MARCADO COMO ROTO (4.2). */
   problems: BindingProblem[];
-  /**
-   * Con que operador se resume cada medida, alineado con `binding.measures`.
-   *
-   * Se resuelve UNA VEZ aqui y viaja con el objeto. Es lo que hace que el grafico en pantalla, el
-   * complemento de datos y los cuatro formatos de exportacion no puedan dar cifras distintas: si
-   * cada consumidor lo dedujera por su cuenta, bastaria con que uno leyera el esquema un instante
-   * antes de un refresco para que lo exportado y lo mostrado dejaran de coincidir.
-   */
+  /** Con que operador se resume cada medida, alineado con `binding.measures`. */
   agregaciones: Agregacion[];
   unresolvedObject?: string;
   /** Lo que hay dentro de un contenedor, ya cargado por el mismo camino que lo de fuera. */
@@ -78,13 +65,7 @@ export interface ModuloCargado {
   generatedAt?: string;
   /** true si algo se sirvio degradado desde L1 porque L2 no respondia (6.9). */
   degraded: boolean;
-  /**
-   * true si lo que se devuelve es la vista PERSONALIZADA de esta persona y no la institucional.
-   *
-   * Viaja con los datos y no se decide en la pantalla porque 4.6 pide esa distincion "incluida
-   * al exportar/compartir": un PDF que circula por correo sin la marca es exactamente el caso
-   * que esa seccion quiere evitar, y la marca tiene que salir del mismo sitio que el contenido.
-   */
+  /** true si lo que se devuelve es la vista PERSONALIZADA de esta persona y no la institucional. */
   isPersonalized: boolean;
 }
 
@@ -97,14 +78,7 @@ function sinFiltroPropio(
   return Object.fromEntries(Object.entries(filtros).filter(([clave]) => !claves.has(clave)));
 }
 
-/**
- * Lee los datos de una lista de objetos bajo UN ambito.
- *
- * Se extrae de `cargarModulo` para que la vista previa del editor use exactamente este codigo y
- * no una copia. Es lo que garantiza que la vista previa este recortada por el ambito de quien
- * edita: si fuera un camino aparte, el editor seria una forma de ver datos fuera del alcance
- * propio sin mas que crear un borrador, y ninguna prueba de la vista normal lo detectaria.
- */
+/** Lee los datos de una lista de objetos bajo UN ambito. */
 async function leerObjetos(
   items: GridItem[],
   scope: AccessScope,
@@ -134,15 +108,6 @@ async function leerObjetos(
 
     /*
      * Un objeto que no consume datos no consulta el cache.
-     *
-     * Sin esta salida, un cuadro de texto pediria un dataset vacio, el lector devolveria
-     * «generandose» y el elemento se quedaria para siempre en el marcador de carga — esperando un
-     * job que nunca va a poblar algo que no pidio.
-     *
-     * Los HIJOS de un contenedor si consumen: se cargan por el mismo camino, recursivamente, para
-     * que un grafico dentro de un contenedor sea exactamente el mismo grafico que fuera. Si el
-     * contenedor tuviera su propia carga, el ambito, los filtros y la agregacion tendrian dos
-     * implementaciones, y solo una se acordaria de actualizarse.
      */
     if (noConsumeDatos(contrato)) {
       const config = instance.configuracion;
@@ -158,11 +123,6 @@ async function leerObjetos(
           );
           /*
            * La frescura y la degradacion de lo de DENTRO cuentan como las de fuera.
-           *
-           * Sin esto, un modulo cuyos datos viven todos dentro de contenedores decia «sin datos
-           * poblados todavia» en su cabecera mientras dibujaba las cifras debajo — y una lectura
-           * degradada de un grafico anidado no levantaba el aviso de que se estaba sirviendo el
-           * ultimo dato valido conocido.
            */
           if (dentro.degraded) degraded = true;
           if (dentro.masAntiguo && (!masAntiguo || dentro.masAntiguo < masAntiguo)) {
@@ -211,12 +171,6 @@ async function leerObjetos(
     const columnas = lectura.result.columns.map((c) => c.name);
     /*
      * Las ranuras se comprueban AQUI tambien, no solo en `validateModule`.
-     *
-     * Son dos caminos distintos: `validateModule` alimenta la lista de diagnosticos del editor, y
-     * esto decide si el objeto se DIBUJA o se marca roto. Sin la comprobacion aqui, un grafico con
-     * el eje X vacio y la serie llena se dibujaba tan campante usando la serie como eje, mientras
-     * el editor avisaba de que faltaba el eje — dos respuestas distintas a la misma pregunta en la
-     * misma pantalla.
      */
     const agregaciones = agregacionesDe(
       instance.binding.measures,
@@ -233,11 +187,6 @@ async function leerObjetos(
       })),
       /*
        * La agregacion se comprueba AQUI, en el camino de lectura, y no solo al guardar.
-       *
-       * El grano de un dataset se declara en el registro y puede cambiar despues de que un modulo
-       * este publicado: lo que era correcto al guardarse deja de serlo sin que nadie toque el
-       * modulo. Es exactamente el caso de 4.2 —el campo que ya no existe— aplicado al operador en
-       * vez de al campo, y la respuesta es la misma: marcarlo, no dibujar un numero plausible.
        */
       ...validarAgregacion({
         measures: instance.binding.measures,
@@ -278,14 +227,7 @@ export async function cargarModulo(input: {
   teamId: string;
   /** Filtros pedidos por la query string, ya parseados (4.11). */
   requestedFilters: Record<string, string | string[]>;
-  /**
-   * Personalizacion de esta persona para este modulo, si la hay (4.6).
-   *
-   * Se pasa como DATO en vez de leerla aqui, y es deliberado: no todos los caminos deben
-   * aplicarla. Una alerta se evalua sobre la definicion institucional —si no, ocultar un objeto
-   * apagaria en silencio la alerta que vigila su medida—, y el vocabulario de la consulta en
-   * lenguaje natural tampoco debe encogerse porque alguien escondiera un grafico.
-   */
+  /** Personalizacion de esta persona para este modulo, si la hay (4.6). */
   personalization?: UserPersonalization | undefined;
 }): Promise<ModuloCargado | null> {
   const { userId, teamId, requestedFilters } = input;
@@ -351,26 +293,7 @@ export async function diagnosticarModulo(module: ModuleDefinition, userId: strin
   });
 }
 
-/**
- * Diagnosticos para el EDITOR, sin ambito de por medio.
- *
- * El de arriba necesita un `userId` y un `teamId` porque valida contra las columnas que salieron
- * de una lectura ya filtrada. Un borrador recien creado todavia no cuelga de ninguna carpeta de
- * la organizacion general, asi que no tiene ambito que resolver y esa version devolveria null: el
- * editor no podria decir nada sobre el modulo que se esta escribiendo.
- *
- * Aqui las columnas disponibles salen de dos sitios que no dependen de quien mira:
- *
- *  - el REGISTRO de datasets, que declara que dimensiones y medidas trae cada uno (6.6), y
- *  - el `SchemaDescriptor` que el job dejo en el cache, que dice cuales siguen existiendo.
- *
- * Se INTERSECAN. Solo el registro pasaria por bueno un campo que la fuente ya retiro —que es
- * justo lo que 4.2 manda marcar roto—, y solo el esquema daria por disponible en un dataset
- * cualquier campo del modelo, incluidos los que ese dataset no trae.
- *
- * Ninguno de los dos invoca al conector: el principio 2 vale tambien dentro del editor, que es
- * donde seria mas tentador saltarselo para "comprobar de verdad" que un campo existe.
- */
+/** Diagnosticos para el EDITOR, sin ambito de por medio. */
 export async function diagnosticarDefinicion(module: ModuleDefinition) {
   const columnsByDataset: Record<string, ColumnaDisponible[]> = {};
 
@@ -391,13 +314,6 @@ export async function diagnosticarDefinicion(module: ModuleDefinition) {
 
 /**
  * Columnas que un dataset ofrece HOY: lo que declara el registro y el esquema sigue reconociendo.
- *
- * La interseccion es el punto. Solo el registro daria por bueno un campo que la fuente ya retiro
- * —lo que 4.2 manda marcar roto—; solo el esquema daria por disponible en un dataset cualquier
- * campo del modelo, incluidos los que ese dataset no trae.
- *
- * Sin esquema en el cache se devuelve lo declarado: es el estado de un despliegue en el que el
- * job aun no ha corrido, y cortar ahi dejaria el editor inservible hasta la primera poblacion.
  */
 export async function columnasDisponiblesDe(datasetId: string): Promise<ColumnaDisponible[]> {
   let declarado;
@@ -451,17 +367,7 @@ function infoDeDatasets(ids: Iterable<string>): Record<string, DatasetInfo> {
   return info;
 }
 
-/**
- * El grano declarado de un dataset, y si el objeto lo colapsa.
- *
- * «Colapsa» es la pregunta que decide si el operador importa: un objeto que muestra las MISMAS
- * dimensiones que trae el dataset dibuja una fila por fila y no combina nada, asi que cualquier
- * operador da igual. En cuanto muestra menos, varias filas de origen caen en el mismo punto — y
- * ahi es donde sumar promedios deja de ser inocuo.
- *
- * Se compara por conjunto y no por longitud: un objeto puede mapear tres dimensiones que no sean
- * las tres del dataset, y entonces colapsa aunque cuente igual.
- */
+/** El grano declarado de un dataset, y si el objeto lo colapsa. */
 function granoDe(datasetId: string): GranoDeDataset {
   try {
     return getDataset(datasetId).grain;
@@ -483,14 +389,7 @@ function colapsaElDataset(datasetId: string, dimensiones: { table: string; field
   return declaradas.some((d) => !mostradas.has(d));
 }
 
-/**
- * Que operador declara el esquema para cada medida.
- *
- * Del cache, nunca preguntando a la fuente: el principio 2 vale tambien aqui, y este mapa se
- * consulta en cada lectura de modulo. Sin esquema todavia en el cache el mapa sale vacio y cada
- * medida cae en `suma`, que es el comportamiento de siempre — un despliegue en el que el job aun
- * no ha corrido no puede dejar todos los objetos en blanco.
- */
+/** Que operador declara el esquema para cada medida. */
 export async function agregacionesDeclaradas(): Promise<Map<string, Agregacion>> {
   const schema = await esquemaEnCache();
   return new Map((schema?.measures ?? []).map((m) => [m.name, m.aggregation]));
@@ -519,23 +418,7 @@ function campoExisteEnEsquema(schema: SchemaDescriptor, clave: string): boolean 
   );
 }
 
-/**
- * Vista previa de un BORRADOR, para el editor.
- *
- * Se separa de `cargarModulo` por una razon concreta: aquella comprueba que el EQUIPO tenga
- * concedido el modulo en el arbol, y un borrador no esta en el arbol —todavia no se ha publicado
- * ni concedido a nadie—. Con esa comprobacion, el editor no podria dibujar nunca lo que se esta
- * construyendo.
- *
- * Lo que NO se relaja es el ambito. La autorizacion para ver un borrador es «es tuyo», y la
- * comprueba `moduloVisiblePorSlug` antes de llegar aqui; el ambito de DATOS se sigue resolviendo
- * y aplicando igual, con el mismo `leerObjetos` que usa la vista real. Si se saltara, crear un
- * borrador seria la forma mas facil de ver datos fuera del alcance propio, y ninguna prueba de la
- * vista normal lo detectaria.
- *
- * `scopeFor` se resuelve contra el modulo por su id aunque no este en el arbol: sin carpeta que
- * lo contenga, lo que queda es el ambito general del equipo, que es el mas restrictivo aplicable.
- */
+/** Vista previa de un BORRADOR, para el editor. */
 export async function vistaPreviaDelBorrador(input: {
   module: ModuleDefinition;
   pageSlug?: string;
@@ -553,11 +436,6 @@ export async function vistaPreviaDelBorrador(input: {
    * centinela de «no permite nada»: una restriccion sobre una dimension vacia. Ese centinela es
    * un MARCADOR, no un filtro — el lector no sabe filtrar por una columna que no existe y lanza—,
    * y en la vista normal nunca llega tan lejos porque la comprobacion de acceso corta antes.
-   *
-   * Lo que corresponde aqui es la primera capa de la resolucion: el ambito general del equipo
-   * activo. No es una ampliacion —es el ambito propio del equipo de quien edita, el que se aplica
-   * a todo lo que ese equipo ve—, y publicar el modulo en cualquier carpeta solo puede
-   * restringirlo mas. Asi que la vista previa muestra COMO MUCHO lo que se vera publicado.
    */
   const general = resolucion.steps[0]?.result;
   const scope: AccessScope = resolucion.moduleExistsInGeneralTree

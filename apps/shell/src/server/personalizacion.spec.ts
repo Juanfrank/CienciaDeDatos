@@ -8,13 +8,7 @@ import {
   leerPersonalizacion,
 } from './personalizacion';
 
-/**
- * Personalizacion por usuario — seccion 4.6.
- *
- * `applyPersonalization` ya estaba probada en su paquete. Lo que se comprueba aqui es el
- * almacen y sus reglas: que la personalizacion es de quien la guarda, que no puede nombrar
- * objetos inexistentes, que no puede dejar una pantalla vacia, y que siempre hay salida.
- */
+/** Personalizacion por usuario — seccion 4.6. */
 
 const item = (id: string): GridItem => ({
   id,

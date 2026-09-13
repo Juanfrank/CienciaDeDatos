@@ -7,17 +7,7 @@ import {
 
 /* ── Entorno: desarrollo, pruebas y el arranque sin Azure ─────────────────────────────────── */
 
-/**
- * La configuracion que sale de variables de entorno.
- *
- * No es un apaño de desarrollo: es la que corre en las pruebas de navegador y en cualquier
- * despliegue sin App Configuration. Que exista como implementacion del MISMO puerto es lo que
- * permite probar de verdad el apagado de un modulo —hay una prueba que apaga uno y comprueba que
- * desaparece del arbol y que su URL da 404— sin depender de un servicio en la nube.
- *
- *   DATA_CONNECTOR=mock
- *   MODULOS_APAGADOS=casos-pendientes,audiencias
- */
+/** La configuracion que sale de variables de entorno. */
 export class ConfiguracionDeEntorno implements FuenteDeConfiguracion {
   readonly nombre = 'entorno';
 
@@ -53,27 +43,14 @@ interface ParDeClaveValor {
 export interface OpcionesDeAppConfiguration {
   /** `https://<tienda>.azconfig.io`, el mismo que el Bicep pasa como APP_CONFIG_ENDPOINT. */
   endpoint: string;
-  /**
-   * Devuelve un token de acceso para el plano de datos.
-   *
-   * Se inyecta en vez de construir aqui `DefaultAzureCredential` para que el analisis de la
-   * respuesta —que es donde de verdad se puede fallar— se pueda probar con un `fetch` de mentira
-   * y sin nube. Quien lo cablea es `configuracionDeAzure()`.
-   */
+  /** Devuelve un token de acceso para el plano de datos. */
   obtenerToken: () => Promise<string>;
   /** Etiqueta de App Configuration, si se separan entornos por etiqueta. */
   etiqueta?: string;
   buscar?: typeof fetch;
 }
 
-/**
- * Lee la instantanea de Azure App Configuration por su API REST.
- *
- * Por REST y no con `@azure/app-configuration` a proposito: `@azure/identity` ya es dependencia
- * del proyecto y el plano de datos son dos llamadas HTTP. Anadir un paquete mas a una aplicacion
- * que se despliega en un entorno cerrado tiene un coste —revision, renovacion, superficie— que no
- * compensa por un `GET` con paginacion.
- */
+/** Lee la instantanea de Azure App Configuration por su API REST. */
 export class AppConfiguration implements FuenteDeConfiguracion {
   readonly nombre = 'app-configuration';
 
@@ -118,13 +95,7 @@ export class AppConfiguration implements FuenteDeConfiguracion {
   }
 }
 
-/**
- * `enabled` de una bandera.
- *
- * Un JSON que no se puede leer cuenta como ENCENDIDA, no como apagada. Apagar por no saber
- * interpretar un valor convertiria un error de formato en una caida de modulo, y el sintoma
- * —«el modulo desaparecio»— no diria nada de la causa.
- */
+/** `enabled` de una bandera. */
 function leerBandera(valor: string | undefined): boolean {
   if (!valor) return true;
   try {

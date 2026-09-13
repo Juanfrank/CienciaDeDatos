@@ -1,19 +1,6 @@
 import type { QueryResult } from '@app/data-contracts';
 
-/**
- * Exportacion — seccion 4.9, con la restriccion arquitectonica de 5.3.
- *
- * La seccion 5.3 nombra la exportacion COMO EJEMPLO de operacion de larga duracion:
- *
- *   "Cualquier operacion de larga duracion (exportacion de un reporte grande, por ejemplo) se
- *    despacha a una cola y se procesa fuera del ciclo de solicitud HTTP, con estado de progreso
- *    consultable — NUNCA bloqueando una instancia del App Service."
- *
- * Por eso exportar no es "generar el archivo y devolverlo": es encolar un trabajo, consultar su
- * estado y descargar cuando este listo. Se aplica a TODAS las exportaciones, no solo a las
- * grandes: si el camino rapido fuera sincrono, el dia que alguien exporte algo grande por esa via
- * bloquearia una instancia, y nadie se acordaria de por que existian dos caminos.
- */
+/** Exportacion — seccion 4.9, con la restriccion arquitectonica de 5.3. */
 
 export type ExportFormat = 'csv' | 'xlsx' | 'pdf' | 'svg';
 
@@ -28,13 +15,7 @@ export const TIPOS_MIME: Record<ExportFormat, string> = {
 
 export type ExportStatus = 'encolada' | 'procesando' | 'lista' | 'fallida';
 
-/**
- * Procedencia de la vista exportada — seccion 4.6.
- *
- * "Distinguir visualmente una vista personalizada de la vista institucional oficial, INCLUIDA AL
- * EXPORTAR/COMPARTIR." De ahi que viaje en la peticion y se incruste en los cuatro formatos: un
- * PDF que circula por correo sin esa marca es exactamente el caso que 4.6 quiere evitar.
- */
+/** Procedencia de la vista exportada — seccion 4.6. */
 export interface ExportProvenance {
   isPersonalized: boolean;
   label: string;
@@ -50,14 +31,7 @@ export interface ExportRequest {
   /** Equipo activo en el momento de exportar, para la trazabilidad del archivo. */
   teamId: string;
   provenance: ExportProvenance;
-  /**
-   * Filtros EFECTIVAMENTE aplicados, tras intersecarlos con el ambito — no los que se pidieron.
-   *
-   * La diferencia importa: un archivo que anuncia "Distrito = Este" y no trae ninguna fila hace
-   * creer que no hay casos en el Este, cuando lo que ocurre es que quien exporto no tiene acceso
-   * a ese distrito. Lo que se escribe en el archivo tiene que describir lo que el archivo
-   * contiene.
-   */
+  /** Filtros EFECTIVAMENTE aplicados, tras intersecarlos con el ambito — no los que se pidieron. */
   appliedFilters: Record<string, string[]>;
   /** Filtros pedidos que el ambito descarto por completo. Se anotan aparte, sin sus valores. */
   outOfScopeFilters?: string[];
@@ -65,36 +39,13 @@ export interface ExportRequest {
   generatedAt?: string;
 }
 
-/**
- * Un objeto del modulo, ya resuelto, filtrado y PROYECTADO, listo para volcarse.
- *
- * `result` no es el dataset: es lo que el objeto muestra, proyectado por `proyectarObjeto` en el
- * repositorio de objetos. Ese detalle es la diferencia entre exportar un modulo y exportar cinco
- * veces el mismo dataset bajo cinco titulos distintos.
- */
+/** Un objeto del modulo, ya resuelto, filtrado y PROYECTADO, listo para volcarse. */
 export interface ExportableObject {
   title: string;
   result: QueryResult;
-  /**
-   * Las mismas filas, con cada cifra YA formateada como se ve en pantalla.
-   *
-   * Viaja aparte de `result` y no en su lugar porque los cuatro formatos no quieren lo mismo: un
-   * CSV o un XLSX con «2,216» es un dato roto —quien lo abra en Excel no puede sumarlo— y un PDF
-   * con «2216» es un documento que contradice a la pantalla de la que salio. Numeros donde se va
-   * a calcular; texto donde se va a leer.
-   *
-   * Lo formatea quien cablea, que conoce la presentacion del objeto. Este paquete no puede
-   * depender del repositorio de objetos (regla de limites) y tampoco deberia: aqui solo hace
-   * falta saber que texto poner en cada celda.
-   */
+  /** Las mismas filas, con cada cifra YA formateada como se ve en pantalla. */
   textos?: string[][];
-  /**
-   * Lo que el objeto dice ADEMAS de sus cifras: la meta, el umbral, la regla de color.
-   *
-   * Sin esto, un PDF ensena una tabla donde una cifra estaba en rojo en pantalla y aqui no, sin
-   * decir por que; y un grafico exportado pierde la raya de la meta, que suele ser la mitad del
-   * mensaje. Van como texto porque un CSV no tiene donde dibujarlas y un lector tampoco.
-   */
+  /** Lo que el objeto dice ADEMAS de sus cifras: la meta, el umbral, la regla de color. */
   notas?: string[];
   /**
    * true si el objeto es un grafico. Lo decide quien cablea, que conoce el catalogo; el paquete

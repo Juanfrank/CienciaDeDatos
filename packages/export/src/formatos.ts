@@ -1,11 +1,6 @@
 import { textoDeCelda, type DocumentoExportable, type HojaExportable } from './documento';
 
-/**
- * Formatos de texto: CSV y SVG.
- *
- * Los dos parten del mismo `DocumentoExportable` y no deciden nada sobre su contenido: solo
- * COMO se dibuja. Van aparte de los binarios porque no necesitan ninguna libreria de Node.
- */
+/** Formatos de texto: CSV y SVG. */
 
 /** Escapa un valor para CSV segun RFC 4180. */
 export function escaparCsv(valor: unknown): string {
@@ -13,13 +8,7 @@ export function escaparCsv(valor: unknown): string {
   return /[",\n\r]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto;
 }
 
-/**
- * CSV.
- *
- * Lleva el encabezado como lineas comentadas antes de la tabla. Un CSV con metadatos arriba
- * incomoda un poco al abrirlo en una hoja de calculo, pero la alternativa —perder la procedencia—
- * incumple 4.6. El BOM va delante para que Excel abra los acentos correctamente.
- */
+/** CSV. */
 export function aCsv(documento: DocumentoExportable): string {
   const { encabezado, hojas } = documento;
   const lineas: string[] = [
@@ -33,10 +22,6 @@ export function aCsv(documento: DocumentoExportable): string {
     lineas.push(hoja.columns.map((c) => escaparCsv(c.name)).join(','));
     /*
      * El CSV lleva los VALORES, no los textos formateados.
-     *
-     * Un CSV con «2,216» es un dato roto: quien lo abra en una hoja de calculo no puede sumarlo,
-     * y la coma ademas parte la celda. Es la diferencia con el PDF, que se lee y por eso lleva el
-     * texto de la pantalla.
      */
     for (const fila of hoja.rows) {
       lineas.push(fila.map(escaparCsv).join(','));
@@ -53,21 +38,7 @@ export function aCsv(documento: DocumentoExportable): string {
 const escaparXml = (t: string): string =>
   t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/**
- * SVG de un grafico de barras.
- *
- * Se exporta VECTOR y no PNG a proposito: rasterizar exigiria un navegador o una libreria de
- * imagen en el servidor, y un SVG se abre en cualquier navegador, se incrusta en un documento y
- * escala sin perder nitidez. Si mas adelante hace falta PNG, se rasteriza desde aqui.
- *
- * Dibuja `documento.grafico`, que es el primer objeto MARCADO como grafico. Si el modulo no
- * tiene ninguno, cae en la primera hoja: es mejor una imagen pobre que un archivo vacio, y el
- * encabezado dice de que objeto sale.
- *
- * Los colores salen de `documento.paleta`, que viene del tema institucional. Antes estaban
- * escritos a mano aqui, y una imagen exportada con otra paleta que la pantalla rompe la marca en
- * el sitio donde mas circula.
- */
+/** SVG de un grafico de barras. */
 export function aSvg(documento: DocumentoExportable): string {
   const hoja: HojaExportable | undefined = documento.grafico ?? documento.hojas[0];
   const { encabezado, paleta } = documento;

@@ -202,25 +202,13 @@ describe('aPdf', () => {
   });
 });
 
-/**
- * Abre un xlsx generado.
- *
- * El `as never` es por exceljs: sus tipos declaran un `Buffer` propio, heredado de una version
- * antigua de @types/node, que ya no coincide con el `Buffer` del Node actual. El valor que se le
- * pasa es el correcto —lo confirma que el libro se lea— y el desajuste es solo de declaracion.
- */
+/** Abre un xlsx generado. */
 async function abrirLibro(buffer: Buffer) {
   const { Workbook } = await import('exceljs');
   return new Workbook().xlsx.load(buffer as never);
 }
 
-/**
- * Texto legible de un PDF.
- *
- * pdfkit comprime los flujos de contenido con Flate y escribe el texto como cadenas
- * hexadecimales dentro de operadores `TJ`/`Tj`. Con las fuentes estandar (Helvetica) los codigos
- * son los del propio caracter en WinAnsi, asi que basta decodificar el hexadecimal.
- */
+/** Texto legible de un PDF. */
 function textoDePdf(buffer: Buffer): string {
   let texto = '';
   const marca = Buffer.from('stream');

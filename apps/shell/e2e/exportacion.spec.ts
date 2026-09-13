@@ -1,13 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Exportacion — seccion 4.9, encolada como exige 5.3.
- *
- * Lo que se verifica aqui no es que salga un archivo, sino COMO sale: encolar devuelve un
- * identificador, el estado se consulta y la descarga es una peticion aparte. Si alguien
- * convirtiera esto en una generacion sincrona, la primera prueba fallaria.
- */
+/** Exportacion — seccion 4.9, encolada como exige 5.3. */
 
 interface EstadoExportacion {
   id: string;
@@ -307,14 +301,6 @@ test.describe('lo exportado dice lo mismo que la pantalla', () => {
 
     /*
      * Se comprueba la INVARIANTE, no una cifra concreta.
-     *
-     * Las cifras del archivo dependen del ambito de quien exporta, y el ambito de esta sesion
-     * cambia segun que otras pruebas hayan corrido antes: fijar «2216» hacia que la prueba pasara
-     * aislada y fallara en la suite. Lo que siempre tiene que ser cierto es que ninguna cifra
-     * llegue formateada.
-     *
-     * Y se mira por celda y no como subcadena: en un CSV, dos celdas contiguas con 2 y 216
-     * producen literalmente «2,216» en el texto del archivo.
      */
     const celdas = csv
       .split(/\r?\n/)

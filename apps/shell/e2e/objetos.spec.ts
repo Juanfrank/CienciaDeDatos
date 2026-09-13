@@ -1,13 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Elementos y contenedores.
- *
- * Lo que se comprueba aqui no es que se dibujen —eso se ve en una captura— sino las reglas que se
- * rompen en silencio: que cambiar de pestana no mueva el contenedor, que el desplazamiento sea por
- * un solo eje, y que un conector siga pegado a sus dos extremos cuando la ventana cambia de tamano.
- */
+/** Elementos y contenedores. */
 
 test.beforeEach(async ({ page }) => {
   await entrarComo(page, 'u-admin');
@@ -138,10 +132,6 @@ test.describe('contenedores', () => {
     await expect(page.getByTestId('contenedor-con-pestanas').getByTestId('kpi-valor')).toBeVisible();
     /*
      * La pestana inactiva se OCULTA, no se desmonta.
-     *
-     * Es a proposito: desmontarla haria que al volver el grafico se reconstruyera desde cero —y,
-     * con el, el alto que la rejilla ya habia repartido—, que es justo lo que la regla de tamano
-     * fijo prohibe. Oculta, sigue ahi y no la ve ni la recorre nadie.
      */
     await expect(page.getByTestId('grafico-cp-barras')).toBeHidden();
   });
@@ -214,13 +204,7 @@ test.describe('la seccion Objetos del editor', () => {
 });
 
 test.describe('los dos carriles de pantalla', () => {
-  /**
-   * La caja de un elemento frente al banner y a la ventana.
-   *
-   * Se mide contra el banner REAL y no contra un numero escrito aqui: el alto de la cabecera
-   * depende de la tipografia y de si el nombre del equipo cabe en una linea, asi que una
-   * constante habria hecho pasar la prueba en una pantalla y fallar en otra.
-   */
+  /** La caja de un elemento frente al banner y a la ventana. */
   const medir = (page: import('@playwright/test').Page, selector: string) =>
     page.evaluate((sel) => {
       const banner = document.querySelector('.cabecera');

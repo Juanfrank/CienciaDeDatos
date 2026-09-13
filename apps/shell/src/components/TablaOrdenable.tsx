@@ -10,17 +10,7 @@ import {
   estiloDeTexto,
 } from '@app/ui-components';
 
-/**
- * Una tabla que se ordena pulsando su encabezado.
- *
- * Es lo primero que alguien intenta hacer con una tabla y no pasaba nada. El objeto declaraba
- * «columnas ordenables» en su propio changelog desde la version inicial, y la capacidad no
- * existia: un encabezado que no responde ensena que la tabla no se ordena, y quien lo prueba una
- * vez no lo vuelve a intentar.
- *
- * Vive fuera de `objetos.tsx` porque necesita estado, y el estado es de la VISTA: ordenar para
- * mirar algo no es editar el modulo. Se pierde al recargar, que es lo que uno espera.
- */
+/** Una tabla que se ordena pulsando su encabezado. */
 
 /** Texto o cifra, cada uno con su comparacion. Mezclarlos ordena por la representacion, no por el valor. */
 const comparar = (a: unknown, b: unknown, direccion: Direccion): number => {

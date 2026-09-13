@@ -5,14 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { PublishBlocker } from "@app/module-model";
 
-/**
- * Lista de modulos del editor — secciones 4.1 y 4.2.
- *
- * Las acciones que se ofrecen son las que el ciclo de vida admite DESDE el estado en que esta
- * cada modulo. Ofrecer "publicar" sobre un borrador y responder 409 al pulsarlo enseña a la
- * gente que los botones mienten; el servidor lo rechaza igual, pero la pantalla no tiene por
- * que proponerlo.
- */
+/** Lista de modulos del editor — secciones 4.1 y 4.2. */
 
 export interface FilaDeModulo {
   moduleId: string;

@@ -3,13 +3,7 @@ import type { ModulePackage } from '../ModulePackage';
 import type { NavNode } from '../NavigationTree';
 import type { GovernedUser, Team } from '../Team';
 
-/**
- * Fixtures del modelo de gobierno: organizacion general, equipos, ambitos y paquetes.
- *
- * Reproducen el escenario que exige el entregable de la Fase de cimiento (seccion 8.1):
- * "al menos dos equipos de prueba con ambitos distintos". Los usan las pruebas de
- * resolucion de ambito, de navegacion y de aislamiento de cache.
- */
+/** Fixtures del modelo de gobierno: organizacion general, equipos, ambitos y paquetes. */
 
 export const DIM_DISTRITO = { table: 'DimTribunal', field: 'Distrito' } as const;
 export const DIM_MATERIA = { table: 'DimTribunal', field: 'Materia' } as const;
@@ -38,18 +32,7 @@ const modulo = (moduleId: string, slug: string, name: string): NavNode => ({
   moduleRef: { moduleId, slug, name },
 });
 
-/**
- * Organizacion general de prueba, con tres niveles de anidamiento:
- *
- *   Institucional
- *     Regional                  [Distrito in Norte, Este, Sur]
- *       Distrito Norte          [Distrito in Norte]
- *         casos-pendientes-norte
- *         audiencias-norte
- *       Distrito Este           [Distrito in Este]
- *         casos-pendientes-este
- *     estadisticas-nacionales   (sin restriccion de carpeta)
- */
+/** Organizacion general de prueba, con tres niveles de anidamiento: */
 export const arbolGeneral: NavNode[] = [
   {
     id: 'carpeta-institucional',

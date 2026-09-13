@@ -4,18 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
 import { BotonDeIcono } from './iconos/BotonDeIcono';
 
-/**
- * Exportar — seccion 4.9, encolado como exige 5.3.
- *
- * La interfaz refleja la arquitectura en vez de disimularla: al pulsar no aparece un archivo,
- * aparece un estado. Es lo correcto, porque el archivo se genera en otro sitio y puede tardar;
- * fingir que es instantaneo obligaria a mantener la solicitud abierta, que es exactamente lo que
- * 5.3 prohibe.
- *
- * Se exporta LO QUE SE VE: los filtros que viajan son los de la URL, que segun 4.11 son la
- * representacion completa del estado visible. El ambito no se envia ni se puede enviar — lo
- * resuelve el servidor al generar el archivo.
- */
+/** Exportar — seccion 4.9, encolado como exige 5.3. */
 
 const FORMATOS = [
   { valor: 'csv', etiqueta: 'CSV' },
@@ -100,10 +89,6 @@ export function Exportar({
 
   /*
    * El formato se elige DENTRO del panel, no al lado del icono.
-   *
-   * Exportar es la unica de las cinco acciones que necesita una decision antes de dispararse, y
-   * por eso es la unica cuyo icono abre algo en vez de actuar. Dejar el selector suelto en la
-   * barra obligaba a que la barra mezclara controles de dos tamanos y dos naturalezas.
    */
   return (
     <div className="exportar">

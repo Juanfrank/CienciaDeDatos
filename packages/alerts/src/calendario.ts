@@ -1,13 +1,6 @@
 import type { Cadence, Subscription } from './types';
 
-/**
- * Cuando toca entregar una suscripcion.
- *
- * Funcion pura sobre la hora actual y la ultima entrega. Se decide aqui, y no con un temporizador
- * por suscripcion, porque el proceso que las atiende se reinicia con cada despliegue y con cada
- * reciclado de instancia del App Service: un temporizador en memoria perderia las entregas y
- * nadie se enteraria. Preguntar "¿toca ya?" en cada vuelta sobrevive a los reinicios.
- */
+/** Cuando toca entregar una suscripcion. */
 
 /** Inicio del periodo al que pertenece `ahora` para una cadencia dada. */
 export function inicioDelPeriodo(cadencia: Cadence, ahora: Date): Date {
@@ -23,13 +16,7 @@ export function inicioDelPeriodo(cadencia: Cadence, ahora: Date): Date {
   return d;
 }
 
-/**
- * true si la suscripcion tiene una entrega pendiente en el periodo actual.
- *
- * Compara contra el PERIODO y no contra "han pasado N horas": si el proceso estuvo caido a la
- * hora exacta, la entrega sigue debiendose al volver, en vez de perderse hasta el periodo
- * siguiente. Y si ya se entrego en este periodo, no se repite aunque el proceso se reinicie.
- */
+/** true si la suscripcion tiene una entrega pendiente en el periodo actual. */
 export function debeEntregarse(sub: Subscription, ahora: Date): boolean {
   if (!sub.enabled) return false;
   // Con un archivo ya en cola no se encola otro: dos vueltas seguidas entregarian dos veces.

@@ -7,13 +7,7 @@ import { obtenerSesion } from '../../../src/server/sesion';
 
 export const runtime = 'nodejs';
 
-/**
- * Encola una exportacion (4.9, encolada por 5.3).
- *
- * Devuelve 202 y un identificador, NUNCA el archivo: generar aqui bloquearia la instancia. El
- * cuerpo no lleva datos, solo que modulo, que pagina y que filtros; quien exporta se toma del
- * lado servidor, no del cuerpo, para que nadie pueda exportar con la identidad de otro.
- */
+/** Encola una exportacion (4.9, encolada por 5.3). */
 export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();

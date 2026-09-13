@@ -2,13 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * El lienzo del editor — seccion 4.2, con la accesibilidad de 4.9.
- *
- * Lo que se comprueba, por encima de que dibuje: que lo que se edita es el modulo y no una
- * representacion suya. Un editor que muestra un formulario obliga a publicar para saber que se ha
- * construido; uno que muestra el modulo, no.
- */
+/** El lienzo del editor — seccion 4.2, con la accesibilidad de 4.9. */
 
 const guardado = async (page: Page) =>
   expect(page.locator('.editor')).toHaveAttribute('data-guardando', 'no');
@@ -64,13 +58,6 @@ test.describe('se edita el modulo, no un formulario', () => {
 
     /*
      * Antes esto comprobaba SOLO que la cifra cambiara, y con eso no basta.
-     *
-     * La medida que usaba era `DiasPromedioResolucion`, y la tarjeta mostraba su suma: 10 593
-     * dias donde el promedio real eran 165,5. La cifra cambiaba, asi que la prueba pasaba — un
-     * valor inventado la satisface igual de bien que uno correcto. Que el numero sea el que toca
-     * lo fijan ahora las pruebas de agregacion, con cifras exactas; aqui se comprueba lo que esta
-     * prueba si mira —que redibuja sin recargar— y, al menos, que lo dibujado es una cifra real y
-     * no un cero ni un hueco.
      */
     await expect(valor).not.toHaveText(antes);
     await expect(valor).not.toHaveText('0');
@@ -123,20 +110,6 @@ test.describe('la rejilla es visible y se maneja', () => {
   test('un bloque de N filas cubre EXACTAMENTE N celdas de guia', async ({ page }) => {
     /*
      * La insignia decia 6x3 y el bloque cubria tres celdas y media largas.
-     *
-     * No era la insignia: eran las guias. La capa iba absoluta sobre la caja entera con filas
-     * `minmax(56px, 1fr)`, o sea el alto TOTAL repartido en partes iguales; las filas de verdad no
-     * lo son, porque las que llevan contenido alto crecen (`auto`) y las libres se quedan en 56px.
-     * Con tres filas de 118px y dos de 56px salian cinco franjas de 93px y el bloque, que ocupa
-     * tres filas de verdad, cubria 3,69 de ellas.
-     *
-     * Importa porque el lienzo se lee mirando. Si el dibujo y el numero discrepan, gana el dibujo,
-     * y entonces la rejilla deja de servir para lo unico que sirve: ver donde empieza y acaba
-     * cada cosa, y donde cabe la siguiente.
-     *
-     * Se comprueba con las coordenadas, no con los estilos: `subgrid` es el como, y un dia puede
-     * ser otro. Lo que no puede cambiar es que el borde de arriba del bloque caiga en el borde de
-     * arriba de su primera fila y el de abajo en el de la ultima.
      */
     await nuevoModulo(page, 'lienzo-filas');
     // Un grafico: alto de sobra para que las filas que ocupa crezcan por encima del minimo, que es
@@ -609,10 +582,6 @@ test.describe('las ranuras mandan, no el orden', () => {
 
     /*
      * Y el bloque se marca ROTO en el lienzo, no se dibuja con la serie haciendo de eje.
-     *
-     * Sin esta comprobacion, el lector daba el objeto por bueno —el contrato global se cumple— y
-     * el editor avisaba de que faltaba el eje: dos respuestas distintas a la misma pregunta en la
-     * misma pantalla.
      */
     await expect(page.getByTestId(`bloque-${id}`).getByTestId('objeto-roto')).toBeVisible();
   });
@@ -786,10 +755,6 @@ test.describe('como se resume cada medida', () => {
     /*
      * No es cosmetico: el mismo mapeo con otro operador es otra cifra. La suma de 1 200 casos es
      * ordenes de magnitud mayor que su promedio.
-     *
-     * Se analiza el numero DE VERDAD, no sus digitos. Quitar todo lo que no sea digito funcionaba
-     * mientras las cifras salian sin decimales; en cuanto el formato general empezo a mostrarlos,
-     * «179,591» y «107,216» comparaban 179591 contra 107216 — o sea al reves.
      */
     const aNumero = (texto: string) =>
       Number(texto.replace(/[^0-9.,]/g, '').replace(/,/g, ''));
@@ -1108,12 +1073,6 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
   test('las fichas van en DOS columnas, no en fila india', async ({ page }) => {
     /*
      * Se MIDEN las cajas, no se comprueba la regla de CSS.
-     *
-     * La hoja de estilo decia `auto-fill` con columnas de 140 px de minimo y el comentario de al
-     * lado decia «dos columnas». En un carril de 340 px, descontados los rellenos, no caben dos
-     * de 140: la tienda llevaba los objetos en una sola columna con medio carril en blanco al
-     * lado de cada ficha. Una prueba que leyera la regla habria dado por buena la intencion; solo
-     * mirar donde caen las fichas distingue lo que se quiso de lo que se ve.
      */
     await nuevoModulo(page, 'paleta-columnas');
 

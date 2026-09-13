@@ -22,13 +22,7 @@ import type {
   UserScopeRow,
 } from './rows';
 
-/**
- * Mapeadores entre las filas del almacen y los tipos de dominio.
- *
- * Funciones puras. La reconstruccion del arbol a partir de una lista de adyacencia es la mas
- * delicada: la profundidad no tiene limite predefinido, los hermanos llevan orden explicito, y
- * los nodos en papelera no deben aparecer.
- */
+/** Mapeadores entre las filas del almacen y los tipos de dominio. */
 
 export function parseAllowedValues(serialized: string): string[] {
   if (!serialized) return [];
@@ -74,16 +68,7 @@ export interface ScopeLookup {
   get(scopeId: string): AccessScope | undefined;
 }
 
-/**
- * Reconstruye la organizacion general desde la lista de adyacencia.
- *
- * - Excluye los nodos en papelera (`deletedAt`): siguen existiendo para poder restaurarlos,
- *   pero no forman parte del arbol vigente (4.1).
- * - Respeta `orderIndex` entre hermanos, y desempata por nombre para que el resultado sea
- *   determinista aunque dos nodos compartan indice.
- * - Un nodo cuyo padre no existe o esta en papelera se trata como huerfano y NO se cuelga de
- *   la raiz: colgarlo ahi podria sacarlo de una carpeta restrictiva y ampliar su ambito.
- */
+/** Reconstruye la organizacion general desde la lista de adyacencia. */
 export function buildNavTree(rows: NavNodeRow[], scopes: ScopeLookup): NavNode[] {
   const vigentes = rows.filter((r) => r.deletedAt === null);
   const porId = new Map(vigentes.map((r) => [r.id, r]));
@@ -182,12 +167,7 @@ export function toGovernedUser(row: UserRow, userScopes: UserScopeRow[], scopes:
   };
 }
 
-/**
- * Reconstruye el arbol de presentacion de un paquete.
- *
- * A diferencia del arbol general, un paquete no lleva ambito: es estrictamente presentacional
- * (4.10.6). Si esta funcion empezara a mapear ambitos, un paquete podria influir en el acceso.
- */
+/** Reconstruye el arbol de presentacion de un paquete. */
 export function buildPackageTree(pkg: ModulePackageRow, rows: PackageNodeRow[]): ModulePackage {
   const mios = rows.filter((r) => r.packageId === pkg.id);
   const hijosDe = new Map<string | null, PackageNodeRow[]>();

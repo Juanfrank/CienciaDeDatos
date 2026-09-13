@@ -3,16 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-/**
- * Restablecimiento de contraseña — seccion 4.7.2.
- *
- * Los dos datos se escriben a mano y no vienen en la URL: un identificador en la barra de
- * direcciones acaba en el historial del navegador, en los logs del proxy y en la cabecera
- * `Referer` de la siguiente peticion. Escribirlos es un poco mas incomodo y bastante mas seguro.
- *
- * Los requisitos de la contraseña se enseñan ANTES de escribirla. Descubrirlos uno a uno, a base
- * de que el formulario rechace, es como se acaban eligiendo contraseñas peores.
- */
+/** Restablecimiento de contraseña — seccion 4.7.2. */
 export function Restablecer() {
   const router = useRouter();
   const [resetId, setResetId] = useState('');

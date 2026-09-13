@@ -41,23 +41,7 @@ import { LineasDeReferencia } from "./LineasDeReferencia";
 import { ReglasDeColor } from "./ReglasDeColor";
 import { Seccion } from "./Seccion";
 
-/**
- * Personalizacion de un objeto DESDE el editor — secciones 4.2 y 4.3.
- *
- * Esto es lo que hace que «la misma tarjeta pero en rojo, con otro icono y con la cifra en
- * porcentaje» deje de ser una peticion de desarrollo. Antes, cambiar cualquiera de esas tres
- * cosas significaba tocar codigo y desplegar.
- *
- * Lo que NO hay aqui, y es deliberado: ninguna caja donde escribir un color, una ruta SVG o un
- * formato libre. Cada control ofrece un conjunto CERRADO de valores que salen del contrato, por
- * el mismo motivo por el que no hay una caja para escribir SQL. Un hexadecimal escrito a mano
- * seria un color que la puerta de contraste de 4.3 no ha comprobado nunca, y una ruta SVG pegada
- * seria contenido sin revisar dentro del documento.
- *
- * Solo se dibujan las claves que ESTE objeto declara admitir. Ofrecer «leyenda» en una tabla
- * guardaria una opcion que no hace nada, y esa es la configuracion que luego nadie se atreve a
- * borrar por si acaso sirve para algo.
- */
+/** Personalizacion de un objeto DESDE el editor — secciones 4.2 y 4.3. */
 export function Presentacion({
   instance,
   admitidas,
@@ -84,9 +68,6 @@ export function Presentacion({
 
   /*
    * El estilo de un texto se funde con lo que ya hubiera de los OTROS textos.
-   *
-   * Sin el `...i.presentacion?.textos`, configurar la cifra borraria lo que se hubiera puesto en
-   * el titulo: el objeto entero se reemplazaria por el del ultimo destino tocado.
    */
   const ponerTexto = (destino: DestinoDeTexto, estilo: EstiloDeTexto) =>
     onCambiar((i) => ({
@@ -99,18 +80,6 @@ export function Presentacion({
 
   /*
    * Subsecciones, no una tira de veinte controles.
-   *
-   * En un panel de 340 px todo se apila en una columna, asi que quien busca «decimales» recorre
-   * lo demas primero. Agrupadas por lo que hacen, cada una se pliega y lo que no interesa deja de
-   * ocupar sitio. Los grupos que un objeto no admite no se dibujan: una tabla no tiene «Grafico».
-   *
-   * Secciones por lo que hacen, no por lo que son.
-   *
-   * «Rotulo» reune TODO lo que rotula el objeto —titulo, subtitulo, icono— con su texto y su
-   * estilo juntos. Antes el texto del titulo vivia en la pestana Datos y su estilo en Formato,
-   * asi que cambiar como se ve un titulo obligaba a ir y venir entre dos pestanas para tocar la
-   * misma cosa. «Borde» agrupa lo que dibuja el limite de la tarjeta. «Medida» es lo que hace la
-   * cifra: el valor y la etiqueta que lo acompana.
    */
   const hayMedida = admite("formato") || admite("formatos");
   // La forma anterior era un booleano; se normaliza una vez aqui para que el panel no tenga que
@@ -1093,13 +1062,7 @@ export function Presentacion({
   );
 }
 
-/**
- * El tipo de selector de cada dimension del panel.
- *
- * Se dibuja una fila por dimension MAPEADA, no una por selector configurado: asi anadir una
- * dimension al panel la hace aparecer aqui con su valor por defecto, y no queda ninguna sin
- * configurar y por tanto invisible.
- */
+/** El tipo de selector de cada dimension del panel. */
 function SelectoresDelPanel({
   instance,
   tipos,
@@ -1180,13 +1143,7 @@ function SelectoresDelPanel({
   );
 }
 
-/**
- * Un selector de fecha sobre una columna que no lo es se ofrece DESHABILITADO, no se esconde.
- *
- * Esconderlo dejaria a quien edita preguntandose por que el calendario existe en otro panel y no
- * en este. Deshabilitado con su motivo al lado, la respuesta esta donde surge la pregunta — y la
- * validacion del servidor lo rechazaria igual, asi que nada depende de este control.
- */
+/** Un selector de fecha sobre una columna que no lo es se ofrece DESHABILITADO, no se esconde. */
 function aplicaA(tipo: TipoDeSelector, tipoDeColumna: string): boolean {
   if (tipo !== "calendario" && tipo !== "rango-de-fechas") return true;
   return ["date", "datetime", "timestamp", "fecha"].includes(
@@ -1194,15 +1151,7 @@ function aplicaA(tipo: TipoDeSelector, tipoDeColumna: string): boolean {
   );
 }
 
-/**
- * El formato de numero, renglon a renglon.
- *
- * Un renglon GENERAL y uno por cada medida mapeada. El general no es un valor por defecto que se
- * copie a cada medida: es la regla que se consulta cuando la medida no dice nada, asi que
- * cambiarlo cambia todas las que nadie haya tocado — que es lo que uno espera de «general». Una
- * medida solo aparece con formato propio si alguien se lo pone, y se puede devolver al general
- * quitandoselo.
- */
+/** El formato de numero, renglon a renglon. */
 function FormatoDeMedidas({
   instance,
   guardando,

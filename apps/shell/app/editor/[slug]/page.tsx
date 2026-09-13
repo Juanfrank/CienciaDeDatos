@@ -8,14 +8,7 @@ import { EditorDeModulo } from '../../../src/components/editor/EditorDeModulo';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Editor de un modulo — seccion 4.2.
- *
- * "En cada carga del editor se valida el esquema" — de ahi que los diagnosticos se calculen aqui,
- * en el servidor, y viajen con la definicion. Si un campo mapeado ya no existe, el objeto se
- * dibuja MARCADO ROTO y el modulo sigue editandose: no se falla en silencio ni se deja la
- * pantalla en blanco.
- */
+/** Editor de un modulo — seccion 4.2. */
 export default async function PaginaEditorDeModulo({
   params,
 }: {

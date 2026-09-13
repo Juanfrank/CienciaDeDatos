@@ -3,21 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
-/**
- * Selector de espacio de trabajo — seccion 4.10.2.
- *
- * "La aplicacion debe operar con un EQUIPO ACTIVO POR SESION, visible en todo momento en la
- * interfaz, no con una union implicita de todos los equipos del usuario."
- *
- * Cambiarlo es una escritura del lado servidor sobre la sesion: el ambito de datos efectivo
- * cambia de inmediato SIN cerrar sesion (criterio de la seccion 9). Por eso llama a la API y
- * refresca, en vez de guardar nada en el cliente.
- *
- * Aqui habia tambien un desplegable de PERSONA que cambiaba de identidad sin autenticar. Era el
- * andamio con el que se desarrollo el resto y, existiendo, la aplicacion no tenia control de
- * acceso en absoluto: bastaba elegir a otra persona en un desplegable para ver sus datos. Se
- * cambia de identidad cerrando sesion y volviendo a entrar.
- */
+/** Selector de espacio de trabajo — seccion 4.10.2. */
 export function SelectorDeEquipo({
   equipos,
   equipoActivo,
@@ -39,12 +25,6 @@ export function SelectorDeEquipo({
 
   /*
    * El rol va DEBAJO, no dentro de la opcion.
-   *
-   * Estaba como «Equipo Distrito Norte (colaborador)» en el texto de cada `<option>`. Un
-   * `<select>` no deja dar estilo a sus opciones ni ponerlas en dos lineas, asi que en el ancho
-   * del panel el nombre se cortaba justo donde empezaba lo que lo distingue: «Equipo Distrito
-   * Norte (cola». Fuera del desplegable el rol cabe entero y ademas se puede atenuar, que es lo
-   * que merece: es contexto, no la eleccion.
    */
   const rolActivo = equipos.find((t) => t.id === equipoActivo)?.role;
 

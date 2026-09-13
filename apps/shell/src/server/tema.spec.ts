@@ -11,13 +11,7 @@ import {
 } from '@app/design-tokens';
 import { esModoDeColor } from './tema';
 
-/**
- * El modo de color de la aplicacion — seccion 4.3.
- *
- * La parte de la cookie se prueba aqui y no en una prueba de navegador porque lo que importa es
- * el caso raro: que la cookie traiga cualquier cosa. `modoDeColor` necesita el contexto de
- * peticion de Next, asi que lo que se comprueba es el predicado que decide.
- */
+/** El modo de color de la aplicacion — seccion 4.3. */
 describe('que modo se pide', () => {
   it('acepta los dos modos que existen', () => {
     expect(esModoDeColor('claro')).toBe(true);
@@ -33,17 +27,7 @@ describe('que modo se pide', () => {
   });
 });
 
-/**
- * Toda variable CSS que la hoja de estilo LEE tiene que existir en los dos modos.
- *
- * Es la prueba que encontro lo que ninguna otra podia: trece reglas escribian
- * `font: var(--md-sys-typescale-title-large)` y esa variable no la emitia nadie. `font` con un
- * valor vacio es una declaracion invalida y el navegador la descarta entera, asi que esos rotulos
- * se quedaban con el tamano heredado — sin error, sin aviso y sin diferencia aparente.
- *
- * Se lee el CSS como TEXTO, igual que hace la prueba de la rejilla: una hoja de estilo no puede
- * importar TypeScript, asi que la unica forma de comparar las dos listas es esta.
- */
+/** Toda variable CSS que la hoja de estilo LEE tiene que existir en los dos modos. */
 describe('el tema cubre todas las variables que la hoja de estilo usa', () => {
   const css = readFileSync(join(process.cwd(), 'apps/shell/app/globals.css'), 'utf8');
   const usadas = new Set([...css.matchAll(/var\(\s*(--[a-z0-9-]+)/g)].map((m) => m[1] as string));
@@ -51,12 +35,7 @@ describe('el tema cubre todas las variables que la hoja de estilo usa', () => {
     [...css.matchAll(/^\s*(--[a-z0-9-]+)\s*:/gm)].map((m) => m[1] as string),
   );
 
-  /**
-   * Las que rellena un componente al dibujar, no el tema.
-   *
-   * Se enumeran a mano para que anadir una obligue a pasar por aqui: una variable que nadie
-   * define y nadie declara en esta lista es una regla de CSS que no hace nada.
-   */
+  /** Las que rellena un componente al dibujar, no el tema. */
   const DE_COMPONENTE = [
     '--rejilla-columnas',
     '--multiplos-columnas',

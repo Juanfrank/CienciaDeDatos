@@ -12,17 +12,7 @@ import {
 import { useFiltrosDeUrl } from "../hooks/useFiltrosDeUrl";
 import { Marco } from "./objetos";
 
-/**
- * Panel de filtros — de 1 a 10 dimensiones en un solo objeto.
- *
- * Cada selector escribe en la URL, igual que hacia el segmentador: eso es lo que hace que un
- * panel con seis filtros puestos sea una direccion que se comparte, se marca y se recupera
- * (4.11). No hay estado local que sincronizar, y por eso el boton «atras» funciona.
- *
- * Los rangos de fecha viajan como DOS parametros, `campo.desde` y `campo.hasta`, y no como uno
- * solo con un separador. Un separador obliga a que quien lea la URL conozca el formato para
- * partirlo, y el dia que un valor contenga ese caracter el filtro se rompe en silencio.
- */
+/** Panel de filtros — de 1 a 10 dimensiones en un solo objeto. */
 
 const DESDE = (campo: string) => `${campo}.desde`;
 const HASTA = (campo: string) => `${campo}.hasta`;

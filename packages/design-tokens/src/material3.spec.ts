@@ -14,14 +14,7 @@ import {
   type ModoDeColor,
 } from './index';
 
-/**
- * Sistema de color de Material Design 3 — seccion 4.3 y accesibilidad de 4.9.
- *
- * Lo que se comprueba no es que los colores gusten: es que la GENERACION cumple lo que MD3
- * promete. Si un par `onX`/`X` no llega a 4.5:1, lo que esta mal es la tabla de tonos, no el
- * color — y por eso la prueba recorre todos los pares en los dos modos en vez de unos cuantos
- * elegidos a mano, que es lo que hacia la version anterior del tema.
- */
+/** Sistema de color de Material Design 3 — seccion 4.3 y accesibilidad de 4.9. */
 
 const MODOS: ModoDeColor[] = ['claro', 'oscuro'];
 

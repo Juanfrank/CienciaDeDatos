@@ -1,18 +1,7 @@
 import { RestError, type ContainerClient } from '@azure/storage-blob';
 import { type CacheEntry, CacheStoreUnavailableError, type ICacheStore } from './ICacheStore';
 
-/**
- * L2: Azure Blob Storage — seccion 6.2.
- *
- * Fuente de verdad del cache, compartida entre todas las instancias de la aplicacion. Se elige
- * Storage Account y no un servicio dedicado porque cobra por uso real y no tiene costo por
- * estar simplemente disponible: la app escala horizontalmente y necesita un store compartido
- * sin el costo fijo que la seccion 6.1 descarta en esta fase.
- *
- * Los datasets completos van serializados como JSON, con su metadata de frescura propia
- * (`generatedAt`, `datasetVersion`) guardada como metadata del blob ademas de en el cuerpo,
- * para poder consultarla sin descargar el contenido.
- */
+/** L2: Azure Blob Storage — seccion 6.2. */
 export interface BlobCacheStoreOptions {
   container: ContainerClient;
   /** Prefijo opcional dentro del contenedor, para convivir con otros usos del mismo Storage. */

@@ -4,19 +4,7 @@ import { useRef, useState } from 'react';
 import { useFiltrosDeUrl } from '../hooks/useFiltrosDeUrl';
 import { BotonDeIcono } from './iconos/BotonDeIcono';
 
-/**
- * Codigo para incrustar esta vista en otro portal — seccion 4.9.
- *
- * Se genera desde la vista que se esta mirando, porque los filtros viajan en la URL (4.11): lo
- * que se incrusta es exactamente lo que hay delante, sin volver a configurarlo en el portal
- * anfitrion.
- *
- * El aviso sobre la sesion no es un detalle de cortesia. Quien pega este codigo espera que el
- * iframe "simplemente funcione" para cualquier visitante del portal, y no es asi ni debe serlo:
- * una vista incrustada no es una vista publica, y quien la mire tiene que estar autenticado aqui
- * para ver algo. Decirlo en el sitio donde se copia el codigo evita que se descubra en
- * produccion y se pida "un modo publico" para arreglarlo.
- */
+/** Codigo para incrustar esta vista en otro portal — seccion 4.9. */
 export function Incrustar({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?: string }) {
   const { searchParams } = useFiltrosDeUrl();
   const dialogo = useRef<HTMLDialogElement>(null);

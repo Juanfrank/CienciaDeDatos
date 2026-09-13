@@ -1,11 +1,4 @@
-/**
- * Autenticacion — seccion 4.7 del contrato de ingenieria.
- *
- * Dos mecanismos de inicio de sesion que COEXISTEN —Azure AD como principal, credenciales
- * locales como secundario— convergiendo en el mismo modelo de identidad interno antes de
- * llegar a cualquier conector. Ningun modulo, conector o regla de RLS ramifica su
- * comportamiento segun por cual de las dos entro la persona usuaria.
- */
+/** Autenticacion — seccion 4.7 del contrato de ingenieria. */
 export {
   AzureAdIdentityProvider,
   type AzureAdCredentials,

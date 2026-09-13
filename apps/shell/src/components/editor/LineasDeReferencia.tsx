@@ -8,17 +8,7 @@ import {
 } from "@app/ui-components";
 import { PaletaDeColores } from "./EstiloDeTextoEditor";
 
-/**
- * Editor de lineas de referencia — la meta, el promedio, el umbral.
- *
- * Es lo que convierte una serie de cifras en una respuesta: «1.063 casos» no dice nada solo, y
- * «1.063 sobre una meta de 900» si. Hoy, sin esto, la unica forma de poner una meta en un grafico
- * era anadir una medida constante al dataset, o sea inventarse una columna para dibujar una raya.
- *
- * La lista se edita ENTERA en cada cambio y no por indices sueltos: son como mucho tres, y un
- * editor por indice invita a estados intermedios —una linea a medio crear— que luego hay que
- * validar. Aqui una linea existe o no existe.
- */
+/** Editor de lineas de referencia — la meta, el promedio, el umbral. */
 
 const ETIQUETA_DE_ESTILO: Record<EstiloDeReferencia, string> = {
   solida: "Continua",

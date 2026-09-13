@@ -2,19 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Contraste con el TEMA OSCURO — secciones 4.3 y 4.9.
- *
- * El esquema oscuro se generaba desde siempre y sus pares de rol estaban probados, pero nadie lo
- * habia dibujado nunca: el layout fijaba el tema claro. Probar los tokens comprueba la tabla de
- * tonos de Material Design 3; no comprueba la aplicacion, porque un tema no se rompe en la tabla
- * de tonos sino al componer — un texto sobre una superficie que no es la que se supuso, un color
- * que no viene del tema, una sombra que en oscuro no separa nada.
- *
- * Estas pruebas dibujan las MISMAS paginas que ya se recorren en claro, con el modo oscuro
- * puesto, y le piden a axe las infracciones de contraste sobre los pixeles reales. Es lo que
- * faltaba para poder encender el modo oscuro a alguien que no sea quien lo pide a mano.
- */
+/** Contraste con el TEMA OSCURO — secciones 4.3 y 4.9. */
 
 const NIVEL = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 

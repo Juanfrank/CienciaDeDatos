@@ -5,13 +5,7 @@ import { cacheL2, conectorActivo, metricasDeCache } from '../../src/server/conte
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/**
- * Endpoint de salud — seccion 7.
- *
- * Reporta el conector activo SIN instanciar ninguno: lee el latido que el job de poblacion dejo
- * en el cache. Si el shell instanciara un conector para probar la conexion, abriria en el
- * proceso web justo el camino que el principio 2 cierra.
- */
+/** Endpoint de salud — seccion 7. */
 export async function GET() {
   let cacheStoreReachable = true;
   let heartbeat: PopulatorHeartbeat | null = null;
@@ -33,13 +27,7 @@ export async function GET() {
   return NextResponse.json(
     {
       ...informe,
-      /**
-       * Metricas del camino de lectura (8.3), ACUMULADAS POR ESTA INSTANCIA.
-       *
-       * Van aqui y no en un endpoint propio porque es el sitio que ya consulta quien opera, y
-       * porque con varias instancias lo util es precisamente ver la de cada una: una sola
-       * sirviendo degradado se pierde en cualquier agregado.
-       */
+      /** Metricas del camino de lectura (8.3), ACUMULADAS POR ESTA INSTANCIA. */
       cache: { instancia: process.pid, ...metricasDeCache.resumen() },
     },
     { status: informe.status === 'caido' ? 503 : 200 },

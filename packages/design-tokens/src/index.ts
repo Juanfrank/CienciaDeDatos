@@ -1,10 +1,4 @@
-/**
- * Tema organizacional y accesibilidad — seccion 4.3.
- *
- * Tema por defecto con un conjunto documentado y limitado de anulaciones por objeto, mas la
- * validacion de contraste que debe pasar ANTES de publicar un modulo institucional. La
- * accesibilidad no es opcional ni se pospone (seccion 4.9).
- */
+/** Tema organizacional y accesibilidad — seccion 4.3. */
 export {
   checkContrast,
   contrastRatio,

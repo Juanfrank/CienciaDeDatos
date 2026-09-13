@@ -1,31 +1,4 @@
-/**
- * Valida cada modulo POR SEPARADO y emite el resultado — seccion 3.4.
- *
- * Es la pieza que hace cierto «un error en un modulo no debe bloquear el despliegue de los
- * demas». No basta con que CI use `nx affected`: eso construye menos, pero sigue siendo un
- * resultado unico. Aqui cada modulo se valida contra el esquema real del cache y produce su
- * propia linea, y el que falla se lleva SOLO su bandera.
- *
- * La salida es un JSON que consume el despliegue:
- *
- *   { "generadoEn": "...", "modulos": [ { "slug": "...", "estado": "ok" | "degradado" | "fallo",
- *                                        "problemas": ["..."] } ] }
- *
- * **Tres estados, no dos, porque un objeto roto NO es un modulo caido.** Es literalmente lo que
- * manda 4.2: un objeto cuyo campo desaparecio se marca y el resto del modulo sigue funcionando.
- * Apagar el modulo entero por eso seria incumplir esa regla desde el despliegue, y ademas
- * convertiria el fixture que demuestra ese comportamiento en un modulo permanentemente rojo.
- *
- *   - `ok`         nada roto.
- *   - `degradado`  algun objeto roto, el modulo abre. Se despliega y se reporta.
- *   - `fallo`      no se puede componer: la disposicion es invalida, no hay paginas, o no queda
- *                  ni un objeto sano. Este es el unico que se apaga.
- *
- * El codigo de salida es 0 aunque haya modulos rojos. No es indulgencia: es el requisito. Si
- * saliera 1, el paso de despliegue no correria y un modulo roto bloquearia a los otros nueve,
- * que es exactamente lo que 3.4 prohibe. Quien decide si eso es aceptable es la puerta de
- * publicacion, con el JSON delante.
- */
+/** Valida cada modulo POR SEPARADO y emite el resultado — seccion 3.4. */
 import { writeFileSync } from 'node:fs';
 import { type ResumenDeSalud, type SaludDeModulo, saludDe } from '@app/module-model';
 import { diagnosticarDefinicion } from '../apps/shell/src/server/datos';
@@ -50,9 +23,6 @@ for (const modulo of lista) {
   } catch (error) {
     /*
      * Que un modulo reviente al validarse tampoco tumba a los demas.
-     *
-     * Sin este `catch`, una excepcion en el septimo modulo dejaria sin evaluar del octavo al
-     * decimo, y esos aparecerian como «no reportados» en vez de como lo que son: sanos.
      */
     estados.push({
       slug: modulo.slug,

@@ -8,18 +8,7 @@ import {
 } from "@app/ui-components";
 import { PaletaDeColores } from "./EstiloDeTextoEditor";
 
-/**
- * Editor de formato condicional — que el color dependa del DATO.
- *
- * Es la diferencia entre un objeto que se mira y uno que avisa. Hoy el color lo decide el mapeo;
- * con esto lo puede decidir el valor, que es lo que hace que «por encima de 90 dias» salte a la
- * vista sin que nadie tenga que leer el eje.
- *
- * El orden de la lista ES la precedencia, y se dice en la interfaz. Gana la primera regla que
- * casa, y con dos que se solapan quien edita decide cual manda moviendola: una resolucion
- * automatica por «la mas especifica» obligaria a simular el algoritmo de cabeza para saber de que
- * color va a salir una barra.
- */
+/** Editor de formato condicional — que el color dependa del DATO. */
 
 const ETIQUETA_DE_COMPARADOR: Record<Comparador, string> = {
   mayor: "Mayor que",

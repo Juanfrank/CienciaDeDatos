@@ -4,16 +4,7 @@ import { cacheL2 } from '../../../../src/server/contexto';
 
 export const runtime = 'nodejs';
 
-/**
- * Webhook de la capa de analisis — seccion 4.8.
- *
- * Lo invoca la capa de analisis al completar una carga incremental, para disparar la poblacion
- * dirigida del cache en vez de depender solo de la recurrencia programada.
- *
- * Lo que este endpoint NO hace, y es lo importante: consultar la fuente. Valida, invalida las
- * entradas afectadas y encola; quien consulta es el job (principio 2). Ejecutar la consulta
- * aqui la ataria al ciclo de vida de una solicitud HTTP, que es justo lo que 6.4 separa.
- */
+/** Webhook de la capa de analisis — seccion 4.8. */
 export async function POST(request: Request) {
   const secreto = process.env['WEBHOOK_SECRET'];
   if (secreto && request.headers.get('x-webhook-secret') !== secreto) {

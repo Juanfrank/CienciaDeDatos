@@ -2,16 +2,7 @@ import type { Agregacion, QueryResult } from '@app/data-contracts';
 import { type Acumulador, acumular, cerrar, nuevoAcumulador } from './agregacion';
 import type { ObjectDataContract, ObjectInstance } from './types';
 
-/**
- * Transformacion de un QueryResult en los datos que un objeto necesita para dibujarse.
- *
- * Son funciones PURAS y es donde vive la logica que de verdad puede fallar: localizar columnas,
- * agregar cuando el dataset trae mas granularidad de la que el objeto muestra, y reaccionar a
- * un campo que ya no existe. Los componentes de React son envoltorios delgados sobre esto.
- *
- * Los objetos reciben filas YA leidas del cache y YA filtradas por el ambito de quien mira. No
- * conocen la fuente, ni la consulta, ni el conector activo.
- */
+/** Transformacion de un QueryResult en los datos que un objeto necesita para dibujarse. */
 
 export const fieldKey = (ref: { table: string; field: string }): string =>
   `${ref.table}.${ref.field}`;
@@ -27,10 +18,6 @@ export interface BindingProblem {
 /**
  * Valida el mapeo de una instancia contra el contrato del objeto y contra las columnas
  * realmente presentes en el dataset.
- *
- * Seccion 4.2: "si un campo mapeado ya no existe en el modelo, marcarlo visualmente roto, no
- * fallar en silencio". Por eso devuelve problemas en vez de lanzar: el editor tiene que poder
- * dibujar el objeto roto y senalarlo, no quedarse en blanco.
  */
 export function validateBinding(
   instance: ObjectInstance,
@@ -102,13 +89,7 @@ export interface CategoricalViewModel {
 /** Separador interno de claves compuestas. No aparece en ninguna etiqueta visible. */
 const SEP = '||';
 
-/**
- * Una combinacion distinta de dimensiones, con sus medidas ya resumidas.
- *
- * `null` en un valor significa «no hay respuesta», no cero: es lo que devuelve una medida que la
- * fuente ya calculo (`ninguna`) cuando al grupo llegan varias filas. Sumarlas o quedarse con la
- * primera seria inventar un numero, y 4.2 manda marcar, no disimular.
- */
+/** Una combinacion distinta de dimensiones, con sus medidas ya resumidas. */
 export interface AggregatedRow {
   /** Un valor por dimension, en el orden del mapeo. Sin componer en una sola cadena. */
   labels: string[];
@@ -121,22 +102,7 @@ export interface AggregatedRows {
   aggregated: boolean;
 }
 
-/**
- * Agrupa las filas por las dimensiones pedidas y resume las medidas CON SU OPERADOR.
- *
- * `agregaciones` va alineada con `measures`, una por medida. Antes no existia y aqui habia un
- * `+`: sumaba siempre, asi que una columna de promedios se mostraba como la suma de sus
- * promedios. El operador no se deduce del nombre de la columna ni se adivina — lo declara el
- * esquema de la fuente y lo puede cambiar quien edita, desde el pozo.
- *
- * La agregacion ocurre aqui, sobre el dataset ya cacheado, y no generando una consulta nueva:
- * es la aplicacion directa de 6.6 -- "un modulo que necesita una vista mas especifica de un
- * dataset ya cacheado debe resolverla filtrando o agregando sobre el, en el backend".
- *
- * Devuelve las etiquetas SEPARADAS, una por dimension. Componerlas en una sola cadena es cosa de
- * quien dibuja: un grafico quiere "Norte / Penal" en el eje, pero una tabla quiere dos columnas
- * que se puedan ordenar por separado.
- */
+/** Agrupa las filas por las dimensiones pedidas y resume las medidas CON SU OPERADOR. */
 export function aggregateBy(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
@@ -152,11 +118,6 @@ export function aggregateBy(
 
   /*
    * Sin dimensiones hay UN grupo, lo traiga filas o no.
-   *
-   * Es el caso de la tarjeta, que colapsa el dataset entero en un numero. Sin sembrarlo, un
-   * dataset vacio no producia ningun grupo y el resultado era «no hay respuesta» para cualquier
-   * operador — cuando la suma de un conjunto vacio es cero y solo el promedio es indefinido.
-   * Dejando que el acumulador vacio decida, cada operador responde lo suyo.
    */
   if (dimensions.length === 0) {
     acumulado.set('', { labels: [], accs: measures.map((_, i) => nuevoAcumulador(operador(i))) });
@@ -187,12 +148,7 @@ export function aggregateBy(
   };
 }
 
-/**
- * Vista categorica: lo mismo que `aggregateBy`, con las etiquetas ya compuestas para un eje.
- *
- * Delega en `aggregateBy` a proposito. Con dos implementaciones de la agregacion, un grafico y
- * la exportacion del mismo objeto podrian acabar dando numeros distintos.
- */
+/** Vista categorica: lo mismo que `aggregateBy`, con las etiquetas ya compuestas para un eje. */
 export function toCategorical(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
@@ -216,14 +172,7 @@ export interface KpiViewModel {
   delta?: { absolute: number; relative: number | null };
 }
 
-/**
- * Resume la medida principal sobre todas las filas visibles, con SU operador.
- *
- * Una tarjeta colapsa el dataset entero en un numero, asi que es donde mas se notaba el fallo:
- * `DiasPromedioResolucion` sobre 64 filas daba 10 593 dias (la suma de 64 promedios) en vez de
- * 165,5. Delega en `aggregateBy` sin dimensiones —que es exactamente «un solo grupo»— para no
- * tener una segunda implementacion del promedio que pueda separarse de la de los graficos.
- */
+/** Resume la medida principal sobre todas las filas visibles, con SU operador. */
 export function toKpi(
   result: QueryResult,
   measures: string[],
@@ -265,16 +214,7 @@ export interface MatrixViewModel {
   grandTotal: number | null;
 }
 
-/**
- * Cruza dos dimensiones con una medida. La primera va en filas; la segunda, en columnas.
- *
- * Los totales se acumulan DESDE LAS FILAS DE ORIGEN, no desde las celdas ya calculadas. Con la
- * suma daba igual —la suma de las celdas es la suma total—, pero con cualquier otro operador no:
- * el promedio de una fila es el promedio de sus registros, no el promedio de los promedios de sus
- * celdas, que solo coincide si todas las celdas pesan lo mismo. Por eso cada fila de origen
- * alimenta cuatro acumuladores a la vez: su celda, su total de fila, su total de columna y el
- * total general.
- */
+/** Cruza dos dimensiones con una medida. La primera va en filas; la segunda, en columnas. */
 export function toMatrix(
   result: QueryResult,
   dimensions: { table: string; field: string }[],

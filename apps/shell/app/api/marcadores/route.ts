@@ -14,12 +14,7 @@ export async function GET() {
   return NextResponse.json({ marcadores: await listarMarcadores(sesion.userId, sesion.activeTeamId) });
 }
 
-/**
- * Guarda el estado de filtros actual como marcador.
- *
- * Recibe la query string, no las filas: un marcador es una URL con nombre. Guardar el resultado
- * seria lo que convertiria un marcador compartido en una fuga de datos del creador.
- */
+/** Guarda el estado de filtros actual como marcador. */
 export async function POST(request: Request) {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();

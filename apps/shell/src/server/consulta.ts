@@ -3,20 +3,7 @@ import { fieldKey } from '@app/ui-components';
 import { cargarModulo } from './datos';
 import { moduloServibleParaUsuario } from './cicloDeVida';
 
-/**
- * Cableado de la consulta en lenguaje natural (4.9).
- *
- * Aqui esta la decision que hace que la funcion sea segura: EL VOCABULARIO SE CONSTRUYE CON LOS
- * DATOS QUE QUIEN PREGUNTA YA PUEDE VER. `cargarModulo` devuelve resultados ya filtrados por su
- * ambito, asi que los valores que el resolutor reconoce son exactamente los que esa persona
- * podria leer en la pantalla.
- *
- * La alternativa —un vocabulario construido del esquema, con todos los valores de cada
- * dimension— haria que preguntar por un valor fuera de alcance se contestara con "entendi
- * Distrito = Este", y eso confirma que ese distrito existe. La seccion 4.11 pide justo lo
- * contrario: un parametro fuera de ambito "no amplia el resultado NI REVELA que valores existen
- * fuera de su alcance". Una caja de texto no es una excepcion a esa regla.
- */
+/** Cableado de la consulta en lenguaje natural (4.9). */
 
 const resolutor = new ResolvedorLocal();
 

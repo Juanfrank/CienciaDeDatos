@@ -1,11 +1,4 @@
-/**
- * Sistema de cuadricula responsivo — seccion 4.2.
- *
- * Doce columnas, que es el minimo comun multiplo practico para dividir en mitades, tercios,
- * cuartos y sextos sin decimales. Las posiciones se guardan SIEMPRE en la rejilla ancha; las
- * pantallas estrechas se derivan de ella con `layoutForBreakpoint`, de modo que exista una
- * sola disposicion guardada y no una por tamano que haya que mantener en paralelo.
- */
+/** Sistema de cuadricula responsivo — seccion 4.2. */
 
 export const GRID_COLUMNS = 12;
 
@@ -42,26 +35,14 @@ const ocupa = (p: GridPosition): { x1: number; x2: number; y1: number; y2: numbe
   y2: p.y + p.h,
 });
 
-/**
- * Si dos posiciones se pisan.
- *
- * Se exporta porque el arrastre del editor la necesita para decidir, MIENTRAS se arrastra, si el
- * destino esta libre. Sin ella tendria que reimplementar la misma comparacion, y el dia que una
- * de las dos cambiara el editor aceptaria colocaciones que la validacion rechaza al guardar.
- */
+/** Si dos posiciones se pisan. */
 export const seSolapan = (a: GridPosition, b: GridPosition): boolean => {
   const ra = ocupa(a);
   const rb = ocupa(b);
   return ra.x1 < rb.x2 && rb.x1 < ra.x2 && ra.y1 < rb.y2 && rb.y1 < ra.y2;
 };
 
-/**
- * Valida una disposicion.
- *
- * El solapamiento se trata como error y no como algo que el navegador resuelva por su cuenta:
- * dos objetos superpuestos ocultan datos sin que nadie lo note, que es exactamente el tipo de
- * fallo silencioso que la seccion 4.2 quiere evitar.
- */
+/** Valida una disposicion. */
 export function validateLayout(items: { id: string; position: GridPosition }[]): GridProblem[] {
   const problemas: GridProblem[] = [];
 
@@ -112,13 +93,7 @@ export function validateLayout(items: { id: string; position: GridPosition }[]):
   return problemas;
 }
 
-/**
- * Deriva la disposicion para un tamano de pantalla.
- *
- * En movil todo se apila a una columna, en el orden de lectura de la rejilla ancha (arriba a
- * abajo, izquierda a derecha). En tableta se escala proporcionalmente y se reflowa: un objeto
- * que no cabe pasa a la fila siguiente en vez de recortarse.
- */
+/** Deriva la disposicion para un tamano de pantalla. */
 export function layoutForBreakpoint<T extends { id: string; position: GridPosition }>(
   items: T[],
   breakpoint: Breakpoint,
@@ -156,25 +131,12 @@ export function layoutForBreakpoint<T extends { id: string; position: GridPositi
   });
 }
 
-/**
- * Alto efectivo de un objeto para un tamano de pantalla.
- *
- * En una sola columna el alto guardado deja de significar nada: se eligio para equilibrar una
- * rejilla ancha, y aplicado a un movil deja cajas altas y medio vacias debajo de un grafico de
- * tres barras. Devuelve `null` —alto marcado por el contenido— en ese caso.
- */
+/** Alto efectivo de un objeto para un tamano de pantalla. */
 export function rowSpanForBreakpoint(h: number, breakpoint: Breakpoint): number | null {
   return COLUMNS_BY_BREAKPOINT[breakpoint] === 1 ? null : h;
 }
 
-/**
- * Las tres disposiciones a la vez, indexadas por id.
- *
- * Se calculan juntas para que el servidor pueda emitirlas todas y la eleccion la haga una media
- * query de CSS. La alternativa —medir el ancho de la ventana al montar— pinta primero la
- * disposicion de escritorio y la reordena despues, que en un movil es un salto visible, y ademas
- * deja la pagina mal dispuesta si el JavaScript no llega a ejecutarse.
- */
+/** Las tres disposiciones a la vez, indexadas por id. */
 export function layoutsForAllBreakpoints<T extends { id: string; position: GridPosition }>(
   items: T[],
 ): Record<Breakpoint, Map<string, GridPosition>> {

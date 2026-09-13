@@ -1,42 +1,4 @@
-/**
- * Formato de numero — declarado, y por medida.
- *
- * Lo que habia eran tres interruptores sueltos: decimales, unidad y «compacto». Sirve para una
- * tarjeta y se queda corto en cuanto hay mas de una medida en el mismo objeto: una tabla con
- * casos y con dias de resolucion los formateaba igual, porque el formato era del OBJETO y no de
- * la medida. Y no habia forma de pedir un porcentaje, ni un negativo entre parentesis, ni un cero
- * dibujado como raya.
- *
- * Ahora hay cuatro tipos y una cadena personalizada. Los tres primeros cubren el 95 % de los
- * casos sin escribir nada; el cuarto es la valvula de escape, con la sintaxis que quien viene de
- * Power BI o de Excel ya conoce — no una inventada aqui.
- *
- * ---- La sintaxis de la cadena personalizada ----
- *
- * Es el subconjunto NUMERICO de las cadenas de formato personalizadas de Power BI, que a su vez
- * vienen de VBA. Se implementa lo que de verdad se usa para cifras:
- *
- *   `0`   digito o CERO. Si no hay digito en esa posicion, escribe un cero (rellena).
- *   `#`   digito o NADA. Si no hay digito en esa posicion, no escribe nada (no rellena).
- *   `.`   separador decimal. Los `0` y `#` a su derecha fijan cuantos decimales salen.
- *   `,`   entre marcadores de digito, separador de millares.
- *   `%`   multiplica por 100 y escribe el simbolo.
- *   `\\x`  el caracter siguiente, literal, aunque sea reservado.
- *   `"…"` texto literal.
- *   `;`   hasta TRES secciones: positivo ; negativo ; cero.
- *
- * Cualquier otro caracter se escribe tal cual, que es como se ponen «$», «RD$» o « dias».
- *
- * Dos decisiones sobre lo que NO se implementa, y por que:
- *
- * - **Fecha y hora, no.** Este formateador se aplica a MEDIDAS, y una medida es una cifra. Una
- *   dimension de fecha se formatea donde se dibuja la dimension, no aqui.
- * - **Notacion cientifica (`E+0`), no.** No aparece en un informe judicial, y admitirla obliga a
- *   mantener un camino que nadie ejercita — que es como se acumulan los caminos rotos.
- *
- * Una cadena que el formateador no entiende NO rompe el objeto: se avisa al validar y, al
- * dibujar, se cae al formato general. Un numero sin formatear se lee; un objeto en blanco, no.
- */
+/** Formato de numero — declarado, y por medida. */
 
 export const TIPOS_DE_FORMATO = [
   'general',
@@ -60,23 +22,11 @@ export interface FormatoDeNumero {
   compacto?: boolean;
   /** Solo con `tipo: 'personalizado'`. */
   patron?: string;
-  /**
-   * Simbolo de la moneda. Solo con `tipo: 'moneda'`.
-   *
-   * Es un TEXTO y no un codigo ISO a proposito. `Intl` con `currency: 'DOP'` escribe «RD$» en unas
-   * plataformas y «DOP» en otras segun los datos que traiga el motor, y un informe institucional no
-   * puede depender de eso. Con el simbolo escrito, lo que se ve es lo que se puso.
-   */
+  /** Simbolo de la moneda. Solo con `tipo: 'moneda'`. */
   simbolo?: string;
 }
 
-/**
- * Formato por medida, con un renglon GENERAL que vale para las que no tengan el suyo.
- *
- * El general no es un valor por defecto copiado a cada medida: es una regla que se consulta
- * cuando la medida no dice nada. La diferencia importa — cambiar el general cambia todas las que
- * no se hayan tocado, que es lo que uno espera de «general».
- */
+/** Formato por medida, con un renglon GENERAL que vale para las que no tengan el suyo. */
 export interface FormatosDelObjeto {
   general?: FormatoDeNumero;
   porMedida?: Record<string, FormatoDeNumero>;
@@ -105,11 +55,6 @@ interface Seccion {
 
 /*
  * Los separadores se LEEN de la configuracion regional, no se escriben aqui.
- *
- * Escribirlos a mano fue el primer error: puse coma decimal y punto de millares —la convencion de
- * Espana— y `es-DO` usa justo la contraria. Los tipos generales van por `Intl` y el personalizado
- * no, asi que dos numeros del mismo informe salian con separadores distintos segun el formato que
- * llevaran. Preguntandolos, las dos vias coinciden por construccion.
  */
 const partesDeEjemplo = new Intl.NumberFormat('es-DO').formatToParts(1234.5);
 const SEP_MILLARES = partesDeEjemplo.find((x) => x.type === 'group')?.value ?? ',';
@@ -117,13 +62,7 @@ const SEP_DECIMAL = partesDeEjemplo.find((x) => x.type === 'decimal')?.value ?? 
 
 const RESERVADOS = new Set(['0', '#', '.', ',', '%', '\\', '"', ';']);
 
-/**
- * Analiza UNA seccion del patron.
- *
- * Devuelve el esqueleto con los literales en su sitio, y aparte cuantos decimales exige. El
- * analisis se hace una vez por formateador y no por numero: un informe puede dibujar miles de
- * celdas con el mismo formato.
- */
+/** Analiza UNA seccion del patron. */
 function analizar(texto: string): Seccion {
   const seccion: Seccion = {
     patron: '',
@@ -221,13 +160,7 @@ function secciones(patron: string): string[] {
 const agrupar = (entero: string): string =>
   entero.replace(/\B(?=(\d{3})+(?!\d))/g, SEP_MILLARES);
 
-/**
- * Aplica una seccion analizada a un numero ya en positivo.
- *
- * El separador decimal es la coma y el de millares el punto, que es la convencion de `es-DO`. No
- * se usa `Intl` aqui porque el patron ya dice exactamente cuantos decimales salen, y mezclar las
- * dos reglas produce redondeos que no coinciden con lo que la cadena pide.
- */
+/** Aplica una seccion analizada a un numero ya en positivo. */
 function aplicar(seccion: Seccion, valor: number): string {
   const n = seccion.porcentaje ? valor * 100 : valor;
   const fijado = n.toFixed(seccion.decimalesMax);
@@ -246,10 +179,6 @@ function aplicar(seccion: Seccion, valor: number): string {
   const cifra = decimales.length > 0 ? `${entero}${SEP_DECIMAL}${decimales}` : entero;
   /*
    * Una seccion SIN marcador de digito es puro literal, y ahi no va ninguna cifra.
-   *
-   * Es lo que permite `#,##0;(#,##0);—`: el cero se dibuja como una raya y no como «0—». Es
-   * tambien como se lee un informe contable — un cero real y un hueco tienen que distinguirse, y
-   * ahi el cero es el que se marca.
    */
   if (!seccion.patron.includes('\u0000')) {
     return seccion.decimalesMax === 0 && seccion.enterosMin === 0
@@ -285,8 +214,6 @@ export function problemaDelPatron(patron: string): string | null {
 /**
  * El formateador. Devuelve una funcion, no un texto: se analiza el patron UNA vez y se aplica a
  * cada celda, que en una tabla larga son miles.
- *
- * `null` es «no hay respuesta» y se dibuja como raya, nunca como cero.
  */
 export function formateadorDeNumero(formato: FormatoDeNumero | undefined): (n: number | null) => string {
   const tipo = formato?.tipo ?? 'general';
@@ -310,11 +237,6 @@ export function formateadorDeNumero(formato: FormatoDeNumero | undefined): (n: n
    * Los tipos sin cadena van por `Intl`, que resuelve la convencion local sin que nadie tenga que
    * escribirla. `general` no fija decimales: ensena los que el numero traiga, hasta tres — es lo
    * que se espera de «general», y lo que evita que un 0,5 salga como 1.
-   *
-   * Porcentaje y moneda NO usan `style: 'percent'` ni `style: 'currency'` de `Intl`. El primero
-   * multiplicaria por 100 y ya viene multiplicado en unos datasets y no en otros; el segundo
-   * escribe el simbolo que el motor tenga para el codigo ISO, que varia entre plataformas. Los dos
-   * se resuelven con sufijo y prefijo explicitos: lo que se ve es lo que se configuro.
    */
   const decimales =
     tipo === 'entero'

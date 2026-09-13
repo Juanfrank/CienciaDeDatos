@@ -11,12 +11,7 @@ import { obtenerSesion } from '../../../src/server/sesion';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/**
- * Modulos del editor — secciones 4.1 y 4.2.
- *
- * Devuelve lo que ESTA PERSONA puede ver: los publicados, sus propios borradores y, si
- * administra, lo que espera aprobacion. La lista del editor no es el catalogo institucional.
- */
+/** Modulos del editor — secciones 4.1 y 4.2. */
 export async function GET() {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();

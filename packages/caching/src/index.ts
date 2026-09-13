@@ -1,16 +1,4 @@
-/**
- * Cache de la aplicacion — seccion 6 del contrato de ingenieria.
- *
- * El caching aqui no es una optimizacion de rendimiento: es la arquitectura de lectura
- * completa. Ninguna solicitud de un modulo, disparada por una persona usuaria, invoca
- * IDataConnector.query(). La persona usuaria siempre lee de un cache ya poblado; la poblacion
- * de ese cache ocurre en un proceso separado (apps/cache-populator), desacoplado del ciclo de
- * vida de cualquier solicitud HTTP.
- *
- * Este paquete esta etiquetado `type:server` y NO puede importar `type:server-data`. La regla
- * de limites hace imposible, no solo desaconsejable, que el camino de lectura alcance un
- * conector de datos.
- */
+/** Cache de la aplicacion — seccion 6 del contrato de ingenieria. */
 export { BlobCacheStore, type BlobCacheStoreOptions } from './BlobCacheStore';
 export {
   CachedDatasetReader,

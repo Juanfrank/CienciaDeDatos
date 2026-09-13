@@ -4,16 +4,7 @@ import { navegacionDe } from '../../src/server/cicloDeVida';
 import { findTeam, roleOf, teamsOf } from '../../src/server/contexto';
 import { exigirSesionDePagina } from '../../src/server/sesion';
 
-/**
- * Disposicion de los modulos de negocio.
- *
- * El arbol de navegacion vive aqui y no en el layout raiz para que el panel de administracion
- * —que es otra superficie— no lo arrastre consigo.
- *
- * El panel se pliega desde el boton de la cabecera, a cualquier ancho. En pantalla estrecha
- * arranca plegado (4.9): antes ocupaba toda la parte de arriba y habia que pasar por el entero
- * —cabecera, selectores y el arbol completo— antes de llegar al modulo que se venia a ver.
- */
+/** Disposicion de los modulos de negocio. */
 export default async function ModulosLayout({ children }: { children: React.ReactNode }) {
   const sesion = await exigirSesionDePagina();
   const equipo = await findTeam(sesion.activeTeamId);

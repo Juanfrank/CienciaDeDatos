@@ -1,21 +1,6 @@
 import { SelectorDeEquipo } from './SelectorDeEquipo';
 
-/**
- * El panel lateral de los modulos.
- *
- * Ya no lleva logica: es un `<aside>` que el servidor emite VISIBLE y que el boton de la
- * cabecera pliega escribiendo `data-lateral` en `<body>`. Antes era un `<details>` con su propio
- * estado, y con el boton fuera del panel habia dos fuentes de verdad para lo mismo — el
- * `open` del elemento y lo que el boton creyera—, que es como se acaba con un boton que dice
- * "cerrado" sobre un panel abierto. El estado vive en un solo sitio, y ese sitio es el boton.
- *
- * Emitirlo visible es lo que hace que degrade del lado seguro: sin JavaScript el panel se queda
- * desplegado —imperfecto en un movil, pero utilizable— y nunca una navegacion que no se puede
- * abrir.
- *
- * El `id` es el que apunta `aria-controls` del boton. El panel de administracion usa el MISMO,
- * porque nunca coexisten en una pagina y asi el boton sirve para los dos sin saber en cual esta.
- */
+/** El panel lateral de los modulos. */
 
 export const ID_LATERAL = 'navegacion-lateral';
 

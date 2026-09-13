@@ -8,13 +8,7 @@ import { AlternarLateral } from './AlternarLateral';
 import { Campana } from './Campana';
 import { CerrarSesion } from './CerrarSesion';
 
-/**
- * Cromo de cabecera de la aplicacion.
- *
- * Sale del layout raiz porque todo lo que lleva —equipo activo, campana, enlace de
- * administracion— presupone que hay alguien dentro. La pantalla de acceso comparte el layout
- * raiz y no debe mostrar nada de esto.
- */
+/** Cromo de cabecera de la aplicacion. */
 export async function Cabecera({ sesion }: { sesion: SesionShell }) {
   const equipo = await findTeam(sesion.activeTeamId);
 

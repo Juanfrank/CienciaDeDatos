@@ -12,30 +12,10 @@ import { ObjectRegistry, catalogoInicial } from '@app/ui-components';
 import { cacheL1, cacheL2 } from './almacenCompartido';
 import { gobierno } from './gobierno';
 
-/**
- * Contexto de servidor del shell.
- *
- * Es la unica pieza que conoce de donde sale cada cosa. Cablea los adaptadores de DESARROLLO:
- * gobierno en el almacen escribible de `gobierno.ts`, sesion en memoria, y un cache en disco
- * compartido con el job. Los adaptadores de Azure implementan los mismos puertos y se sustituyen
- * aqui, sin tocar nada mas.
- *
- * Lo que NO hay aqui, y es deliberado: ninguna referencia a `@app/data-contracts-server`. El
- * shell no puede instanciar un conector —la regla de limites lo prohibe— porque el camino de
- * lectura de una solicitud de usuario se sirve exclusivamente desde el cache (6.3).
- *
- * Todo lo relativo al gobierno se expone como FUNCION ASINCRONA, no como constante: el panel de
- * administracion escribe, y una constante calculada al cargar el modulo devolveria para siempre
- * la configuracion que habia en ese instante. Asincrona porque el gobierno vive en un almacen
- * compartido entre instancias —y en produccion, en la base de identidad—, no en este proceso.
- */
+/** Contexto de servidor del shell. */
 
 /*
  * El conector activo lo resuelve ahora `configuracion.ts` contra App Configuration (2.2).
- *
- * Era una constante leida de `process.env` al cargar el modulo, asi que cambiar de mock a sql
- * exigia reiniciar — justo lo que el Bicep decia que NO debia hacer falta. Se reexporta desde
- * alli para que este siga siendo el sitio donde se busca.
  */
 export { conectorActivo } from './configuracion';
 
@@ -45,13 +25,7 @@ export const objectRegistry = new ObjectRegistry(catalogoInicial);
 // aqui creaba un ciclo de importacion con el gobierno.
 export { CACHE_DIR, cacheL2 } from './almacenCompartido';
 
-/**
- * Metricas del camino de lectura (8.3).
- *
- * El lector emite un evento por lectura desde B.5; hasta ahora no lo recogia nadie. Se acumulan
- * por proceso y se exponen en /health: en un App Service con varias instancias, cada una
- * reporta lo suyo y el agregado lo hace Application Insights.
- */
+/** Metricas del camino de lectura (8.3). */
 export const metricasDeCache = new CacheMetrics();
 
 export const datasetReader = new CachedDatasetReader({
@@ -102,12 +76,7 @@ export async function roleOf(userId: string, teamId: string): Promise<string> {
   return equipo?.members.find((m) => m.userId === userId)?.role ?? 'visor';
 }
 
-/**
- * Vista de navegacion de una persona con un equipo activo dado.
- *
- * Si el equipo tiene paquete asignado, se pasa al constructor: el paquete reagrupa, pero la
- * validacion contra grantedNodes ocurre dentro y lo no concedido no se muestra (4.10.6).
- */
+/** Vista de navegacion de una persona con un equipo activo dado. */
 export async function navigationFor(teamId: string) {
   const team = await gobierno.getTeam(teamId);
   if (!team) return { tree: [], fromPackage: false, dangling: [] };

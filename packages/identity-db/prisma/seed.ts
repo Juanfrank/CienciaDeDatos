@@ -1,19 +1,4 @@
-/**
- * Siembra del entorno de staging.
- *
- * Escribe `src/seedData.ts` en la base. Los DATOS viven aparte, en forma de fila, para que las
- * pruebas puedan pasarlos por los mapeadores reales y verificar que producen efectivamente dos
- * equipos con ambitos distintos (seccion 8.1) sin necesidad de una base viva. Este archivo es
- * solo el escritor.
- *
- * Requiere:
- *   export IDENTITY_DATABASE_URL="sqlserver://..."
- *   npx prisma generate --schema packages/identity-db/prisma/schema.prisma
- *   npx prisma db seed --schema packages/identity-db/prisma/schema.prisma
- *
- * Es idempotente: usa upsert, de modo que volver a ejecutarlo no duplica ni pisa cambios
- * hechos a mano sobre otras entidades.
- */
+/** Siembra del entorno de staging. */
 import {
   seedGrantedNodes,
   seedMemberships,

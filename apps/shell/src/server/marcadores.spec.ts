@@ -2,13 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { dimensionKey, gobiernoFixtures, intersectRequestedFilters } from '@app/access-control';
 import { bookmarkToUrl, captureBookmark, drillThroughUrl } from '@app/module-model';
 
-/**
- * Composicion de marcadores y drill-through con el ambito de acceso.
- *
- * Esta prueba vive en el shell y no en `packages/module-model` porque es justo aqui donde los
- * dos dominios se componen: module-model define QUE se captura y access-control decide QUE se
- * puede ver. Cada paquete se prueba solo por su lado; su interaccion se prueba donde ocurre.
- */
+/** Composicion de marcadores y drill-through con el ambito de acceso. */
 const { DIM_DISTRITO, scope } = gobiernoFixtures;
 
 const marcadorDeAna = captureBookmark({

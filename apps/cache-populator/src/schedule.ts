@@ -1,15 +1,4 @@
-/**
- * Evaluador minimo de recurrencia cron — seccion 6.4.
- *
- * La recurrencia se define POR DOMINIO DE DATOS, no con un unico intervalo global: minutos para
- * indicadores casi en tiempo real, horas para los de carga por lotes. Cada dataset declara la
- * suya en el registro.
- *
- * Se implementa aqui en vez de traer una libreria de cron porque solo hace falta responder una
- * pregunta —"¿le toca a este dataset?"— sobre el subconjunto de expresiones que el registro
- * usa realmente: valores literales, comodines, rangos y pasos. Traer un parser completo para eso
- * anadiria superficie sin resolver nada mas.
- */
+/** Evaluador minimo de recurrencia cron — seccion 6.4. */
 
 export interface CronFields {
   minute: string;
@@ -99,17 +88,7 @@ export function matchesCron(expression: string, date: Date): boolean {
   return true;
 }
 
-/**
- * ¿Le toca a este dataset?
- *
- * Sin ejecucion previa, SIEMPRE toca: un dataset nunca poblado debe poblarse en el primer ciclo,
- * no esperar a que su recurrencia coincida — si no, un dataset horario tardaria hasta una hora
- * en aparecer tras un despliegue, y la persona usuaria veria "generandose" sin motivo.
- *
- * Con ejecucion previa, toca si la recurrencia se cumple en algun minuto entre la ultima
- * ejecucion y ahora. Comprobar solo el minuto actual perderia disparos si el ciclo del job se
- * retrasa, que es exactamente lo que pasa cuando mas carga hay.
- */
+/** ¿Le toca a este dataset? */
 export function isDue(expression: string, lastRunAt: string | undefined, now: Date): boolean {
   if (!lastRunAt) return true;
 

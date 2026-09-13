@@ -15,28 +15,11 @@ import {
   type PopulatorHeartbeat,
 } from '@app/observability';
 
-/**
- * Poblacion del cache — seccion 6.4.
- *
- * Este archivo es el UNICO de todo el repositorio que invoca IDataConnector.query(). No es una
- * convencion: `apps/cache-populator` es el unico proyecto etiquetado `type:job`, el unico que la
- * regla de limites autoriza a importar `@app/data-contracts-server`, y eso lo comprueba
- * `npm run verify:boundaries` en cada CI.
- *
- * Corre desacoplado del ciclo de vida de cualquier solicitud HTTP. La persona usuaria nunca
- * espera a que esto termine: lee de lo que este ya poblado.
- */
+/** Poblacion del cache — seccion 6.4. */
 
 /** Clave del esquema cacheado, que consumen el editor (4.2) y la validacion de URL (4.11). */
 
-/**
- * Contexto de seguridad con el que el job consulta.
- *
- * Es deliberadamente VACIO cuando el dataset no esta ligado a un contexto concreto: el job pide
- * el superconjunto y el ambito se aplica al leer (6.6). Solo los datasets con
- * `securityBinding: 'connector-native'` se pueblan por contexto, y entonces hay una entrada por
- * contexto, que es el precio del aislamiento cuando la fuente filtra por su cuenta.
- */
+/** Contexto de seguridad con el que el job consulta. */
 export interface PopulationSecurityContext {
   ctx: QueryContext;
   securityContext?: Record<string, string | string[]>;
@@ -224,12 +207,7 @@ async function populateOne(
   }
 }
 
-/**
- * Refresco del esquema cacheado (6.4), con recurrencia mas espaciada porque cambia poco.
- *
- * Lo consumen el editor de modulos y la validacion de parametros de URL sin tener que consultar
- * la fuente en cada validacion.
- */
+/** Refresco del esquema cacheado (6.4), con recurrencia mas espaciada porque cambia poco. */
 export async function refreshSchema(options: {
   connector: IDataConnector;
   cacheStore: ICacheStore;
@@ -250,12 +228,7 @@ export async function refreshSchema(options: {
   }
 }
 
-/**
- * Repoblacion dirigida (6.5), que dispara el webhook de la capa de analisis (4.8).
- *
- * Invalida por prefijo solo los datasets afectados por esa carga y los vuelve a poblar, en vez
- * de vaciar todo el cache y esperar al siguiente ciclo programado.
- */
+/** Repoblacion dirigida (6.5), que dispara el webhook de la capa de analisis (4.8). */
 export async function repopulateTargeted(
   datasetIds: string[],
   options: Omit<PopulateOptions, 'only'>,

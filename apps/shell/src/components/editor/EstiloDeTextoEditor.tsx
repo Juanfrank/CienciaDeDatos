@@ -11,16 +11,7 @@ import {
 } from '@app/ui-components';
 import { Ayuda } from './Ayuda';
 
-/**
- * Peso, estilo, alineacion y color de un texto — el mismo control para los tres destinos.
- *
- * Es un componente y no tres bloques copiados en el panel porque configurar el titulo y configurar
- * la cifra son la misma operacion sobre cosas distintas: con tres copias, anadir «tachado» algun
- * dia significaria acordarse de tocar tres sitios.
- *
- * La alineacion vertical solo se ofrece donde hay alto que repartir. En un titulo de una linea no
- * significa nada, y un control que no hace nada es peor que no tenerlo.
- */
+/** Peso, estilo, alineacion y color de un texto — el mismo control para los tres destinos. */
 
 const ETIQUETA_DE_COLOR: Record<ColorDeTexto, string> = {
   predeterminado: 'Predeterminado',
@@ -53,17 +44,7 @@ const ETIQUETA_VERTICAL: Record<AlineacionVertical, string> = {
   abajo: 'Abajo',
 };
 
-/**
- * La paleta, como metodo comun.
- *
- * Seis muestras, y cada una es un ROL del tema — no un color elegido a mano. Es la unica forma de
- * que siga existiendo la garantia de 4.3: un color suelto no tiene par de contraste comprobado
- * contra la superficie donde acabe, ni sigue al tema oscuro. La muestra se pinta con la variable
- * del tema, asi que la paleta cambia sola cuando cambia el tema.
- *
- * `radiogroup` y no una lista de botones: elegir un color es elegir UNO de un conjunto, y con
- * radios las flechas del teclado recorren la paleta como se espera.
- */
+/** La paleta, como metodo comun. */
 export function PaletaDeColores({
   valor,
   nombre,

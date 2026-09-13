@@ -1,12 +1,4 @@
-/**
- * La geometria de un conector.
- *
- * Vive en el paquete y no junto al componente porque no dibuja nada: convierte dos cajas en una
- * lista de puntos. Separarlo es lo que permite probarlo —una funcion pura con cajas de mentira, sin
- * navegador— y es la parte que de verdad se puede equivocar: un signo invertido manda la flecha a
- * atravesar el objeto en vez de salir de el, y eso en una captura de pantalla se ve como «raro»
- * pero no se sabe por que.
- */
+/** La geometria de un conector. */
 
 export interface CajaDeObjeto {
   x: number;
@@ -15,17 +7,7 @@ export interface CajaDeObjeto {
   h: number;
 }
 
-/**
- * El trazado de un conector entre dos cajas, en coordenadas de rejilla.
- *
- * Se calcula A PARTIR de las cajas en cada render, y por eso el conector sigue pegado cuando
- * cualquiera de los dos extremos se mueve o cambia de tamano. Guardar los puntos habria sido mas
- * barato y es el fallo clasico de los diagramas de las herramientas de oficina: la flecha se queda
- * donde estaba y apunta al aire.
- *
- * Sale de cada caja por el borde MAS CERCANO al otro, que es lo que hace que la flecha parezca
- * salir del objeto y no atravesarlo.
- */
+/** El trazado de un conector entre dos cajas, en coordenadas de rejilla. */
 export function trazar(desde: CajaDeObjeto, hasta: CajaDeObjeto): { puntos: [number, number][] } {
   const ca = { x: desde.x + desde.w / 2, y: desde.y + desde.h / 2 };
   const cb = { x: hasta.x + hasta.w / 2, y: hasta.y + hasta.h / 2 };

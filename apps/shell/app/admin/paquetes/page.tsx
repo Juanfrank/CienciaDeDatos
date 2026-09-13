@@ -4,16 +4,7 @@ import { buildNavigationView } from '@app/access-control';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Paquetes visuales — secciones 4.1.3 y 4.10.6.
- *
- * Muestra, por cada paquete asignado, que nodos NO se mostrarian a su audiencia por no estar
- * concedidos. El documento pide que eso se señale explicitamente al Administrador, no que se
- * oculte sin aviso.
- *
- * La seguridad no depende de esta vista: aunque un paquete incluya un modulo no concedido,
- * `buildNavigationView` no lo muestra. Esto existe para que el Administrador lo SEPA.
- */
+/** Paquetes visuales — secciones 4.1.3 y 4.10.6. */
 export default async function PaginaPaquetes() {
   const paquetes = await gobierno.listPackages();
   const generalTree = await getGeneralTree();

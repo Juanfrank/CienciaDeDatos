@@ -1,14 +1,4 @@
-/**
- * Catalogo de iconos, como DATO.
- *
- * Los trazos viven aqui, en una libreria pura, y no junto al componente de React que los dibuja,
- * por un motivo concreto: el nombre del icono es parte de la configuracion de un objeto, y la
- * validacion tiene que poder rechazar un nombre que no existe ANTES de guardar, no descubrirlo al
- * dibujar. 4.2 pide exactamente eso del mapeo, y un icono elegido en el editor es mapeo tambien.
- *
- * Son trazos, no rellenos: con `stroke="currentColor"` un icono hereda el color del sitio donde
- * se pone y sigue al tema oscuro sin declarar nada.
- */
+/** Catalogo de iconos, como DATO. */
 
 export const TRAZOS_DE_ICONO = {
   // Cromo de la aplicacion.
@@ -79,13 +69,7 @@ export const NOMBRES_DE_ICONO = Object.keys(TRAZOS_DE_ICONO) as NombreDeIcono[];
 export const esNombreDeIcono = (valor: unknown): valor is NombreDeIcono =>
   typeof valor === 'string' && valor in TRAZOS_DE_ICONO;
 
-/**
- * Los iconos que se ofrecen para rotular un objeto.
- *
- * Es un subconjunto del catalogo a proposito: el cromo de la aplicacion —el sandwich, el aspa de
- * cerrar— no significa nada sobre un dato, y ofrecerlo en el editor solo invita a poner un aspa
- * de cerrar encima de una cifra.
- */
+/** Los iconos que se ofrecen para rotular un objeto. */
 export const ICONOS_DE_OBJETO: NombreDeIcono[] = [
   'indicador',
   'barras',

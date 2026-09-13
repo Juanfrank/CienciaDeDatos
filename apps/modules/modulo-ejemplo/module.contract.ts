@@ -1,12 +1,6 @@
 import type { FieldRef } from '@app/data-contracts';
 
-/**
- * Contrato de modulo (seccion 3.3) — obligatorio en cada carpeta de /apps/modules/*.
- *
- * El pipeline de CI debe fallar si un modulo accede a datos o componentes no declarados
- * aqui. En el Entregable A este archivo fija la FORMA del contrato; el verificador que
- * lo contrasta contra el codigo real se implementa junto con el editor de modulos (Fase 2).
- */
+/** Contrato de modulo (seccion 3.3) — obligatorio en cada carpeta de /apps/modules/*. */
 export interface ModuleContract {
   /** Slug estable usado en la URL del modulo: /m/{slug} (seccion 4.11). */
   slug: string;

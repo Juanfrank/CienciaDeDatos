@@ -30,22 +30,7 @@ import { Pozo } from './Pozo';
 import { Presentacion } from './Presentacion';
 import { ProveedorDeFiltro, Seccion } from './Seccion';
 
-/**
- * El panel del editor: la tienda y el banco de trabajo, en uno.
- *
- * Cuatro pestanas, y el corte responde a cuatro preguntas distintas:
- *
- *   - **Visualizaciones** — «que quiero poner». La unica puerta por la que entra un objeto al
- *     modulo, y por eso tambien donde se ve que el catalogo es cerrado.
- *   - **Datos** — «que mide». Los pozos con nombre del objeto elegido.
- *   - **Formato** — «como se ve». Presentacion, y el tamano y la posicion, que tambien son como se
- *     ve: cuanto ocupa un objeto en la rejilla no cambia lo que mide.
- *   - **Complementos** — «que lo acompana». Los objetos adjuntables, que no van en la rejilla.
- *
- * Sin nada elegido solo tiene sentido la primera, asi que las otras se deshabilitan en vez de
- * desaparecer: una barra que cambia de numero de pestanas obliga a volver a buscar donde estaba
- * cada cosa.
- */
+/** El panel del editor: la tienda y el banco de trabajo, en uno. */
 
 type Pestana = 'objetos' | 'datos' | 'formato' | 'complementos';
 
@@ -71,10 +56,6 @@ export function PanelLateral({
 
   /*
    * Al elegir un objeto, el panel salta a «Datos».
-   *
-   * Es lo que se quiere hacer justo despues de colocar algo, y dejarlo en «Visualizaciones»
-   * obligaria a un clic mas en el 100 % de los casos. Al deseleccionar vuelve a la tienda, porque
-   * las otras pestanas ya no tienen contenido.
    */
   const idSeleccionado = seleccionado?.id ?? null;
   const objetoSeleccionado = seleccionado?.instance.objectId ?? null;
@@ -99,9 +80,6 @@ export function PanelLateral({
 
   /*
    * «Datos» se deshabilita para lo que no consume datos.
-   *
-   * Un cuadro de texto o un contenedor abriria la pestana con un desplegable de datasets y cero
-   * pozos: una pantalla en la que no hay nada que hacer, y que sugiere que falta configurar algo.
    */
   const consumeDatos = (definicion?.dimensiones.max ?? 0) > 0 || (definicion?.medidas.max ?? 0) > 0;
 
@@ -238,23 +216,8 @@ export function PanelLateral({
   );
 }
 
-/**
- * La tienda: la unica puerta por la que entra un objeto al modulo.
- *
- * Tres familias, cada una en su subseccion, y las visualizaciones primero porque son lo que se
- * viene a poner. Las tres arrancan abiertas: plegarlas de inicio ahorraria un poco de barra a
- * cambio de esconder dos tercios del catalogo a quien no sepa todavia que existe.
- *
- * El corte lo da la CATEGORIA que cada objeto ya declara, no una lista de ids escrita aqui: con
- * una lista, publicar un elemento nuevo lo dejaria fuera de la tienda sin que nada fallara.
- */
-/**
- * Que pregunta responde cada familia, dicho en una linea.
- *
- * El rotulo es la pregunta y no el nombre tecnico —«Comparar entre categorias», no
- * «Comparacion»— porque asi es como llega la necesidad: alguien quiere comparar dos distritos,
- * no quiere «un objeto de la familia comparacion».
- */
+/** La tienda: la unica puerta por la que entra un objeto al modulo. */
+/** Que pregunta responde cada familia, dicho en una linea. */
 const FAMILIAS: { familia: FamiliaDeObjeto; titulo: string; que: string }[] = [
   { familia: 'valor', titulo: 'Una sola cifra', que: 'El dato que hay que ver de un vistazo.' },
   {
@@ -305,10 +268,6 @@ function Tienda({
 
   /*
    * Se busca por nombre Y por descripcion.
-   *
-   * La descripcion es donde estan las palabras con las que alguien busca: «meta», «umbral»,
-   * «etapas», «jerarquia». Buscando solo por el nombre habria que saber ya como se llama el
-   * objeto, que es justo lo que no se sabe cuando se busca.
    */
   const filtro = normalizar(busqueda.trim());
   const coincide = (o: ObjetoDePaleta) =>
@@ -382,12 +341,6 @@ function Tienda({
                   prueba={`familia-${familia}`}
                   /*
                    * Las claves son los objetos que la familia contiene EN ESTA busqueda.
-                   *
-                   * Sin ellas, buscar «barras» plegaria la familia que contiene las barras: el
-                   * titulo de la familia es la pregunta —«Comparar entre categorias»— y no
-                   * coincide con lo que se escribe. Como `dela` ya viene filtrada, que tenga algo
-                   * dentro implica que alguno de estos nombres casa con el filtro, asi que la
-                   * seccion sale y ademas se abre sola.
                    */
                   claves={dela.flatMap((o) => [o.name, o.description])}
                 >
@@ -448,9 +401,6 @@ function ListaDeObjetos({
   prueba: string;
   /*
    * El contrato solo se ensena donde significa algo.
-   *
-   * «0–0 dim · 0–0 med» debajo de «Cuadro de texto» no informa de nada: repite en cifras lo que la
-   * nota de la seccion ya dijo en palabras, y ocupa la linea que podria decir para que sirve.
    */
   conContrato?: boolean;
   guardando: boolean;
@@ -519,10 +469,6 @@ function Datos({
 
   /*
    * Poner y quitar van POR RANURA, no por indice.
-   *
-   * Es todo el cambio: antes el editor insertaba en una posicion calculada del array y el pozo
-   * era una particion sobre ese orden, asi que no habia forma de llenar el eje Y sin llenar antes
-   * el eje X. Ahora el campo dice a que ranura pertenece y las demas pueden quedarse vacias.
    */
   const poner = (ranuraId: string, campo: string) =>
     cambiarInstancia((i) => conCampoEnRanura(i, ranuras, ranuraId, campo));
@@ -532,10 +478,6 @@ function Datos({
 
   /*
    * Como se resume cada medida.
-   *
-   * Se guarda SOLO lo anulado. Lo que no se toca se resuelve contra el esquema en cada lectura,
-   * asi que si la fuente cambia el operador de una medida, los modulos que no lo habian anulado
-   * lo siguen sin que nadie los edite — que es la diferencia entre declarar el valor y copiarlo.
    */
   const agregacionDe = (campo: string): Agregacion =>
     item.instance.binding.agregaciones?.[campo] ??
@@ -544,10 +486,6 @@ function Datos({
 
   /*
    * Los operadores que el desplegable puede ofrecer, de la MISMA regla que valida al guardar.
-   *
-   * `colapsa` se calcula igual aqui que en el servidor: el objeto muestra menos dimensiones de
-   * las que trae el dataset. Se compara por conjunto y no por cantidad, porque tres dimensiones
-   * que no sean las tres del dataset tambien colapsan.
    */
   const posibles = agregacionesPosibles({
     colapsa: (dataset?.dimensiones ?? []).some(
@@ -688,13 +626,7 @@ function RanuraDeEdicion({
   posibles,
 }: {
   ranura: RanuraDeCampos;
-  /**
-   * TODAS las ranuras del objeto, no solo esta.
-   *
-   * `cabeEnRanura` necesita la lista completa: con una sola, la deduccion por orden —la que hace
-   * que lo guardado antes de las ranuras se siga viendo— le asigna el primer campo del array, que
-   * es el de otra ranura. El sintoma era una ranura vacia que se anunciaba completa.
-   */
+  /** TODAS las ranuras del objeto, no solo esta. */
   todas: RanuraDeCampos[];
   item: GridItem;
   elegidos: string[];
@@ -726,16 +658,7 @@ function RanuraDeEdicion({
   );
 }
 
-/**
- * Los objetos ADJUNTABLES del objeto elegido.
- *
- * Estaban en el catalogo y en el modelo desde F3.4, con su validacion y sus pruebas, y no habia
- * forma de anadir uno desde el editor: los del seed se escribieron a mano. Octavo caso de codigo
- * construido al que no llamaba nada.
- *
- * Tienen pestana propia y no se mezclan con la tienda porque no son lo mismo: un complemento no
- * ocupa celda en la rejilla, acompana a otro objeto, y la validacion rechaza colocarlo suelto.
- */
+/** Los objetos ADJUNTABLES del objeto elegido. */
 function Complementos({
   item,
   objetos,
@@ -891,14 +814,7 @@ function Complementos({
   );
 }
 
-/**
- * Tamano y posicion, con numeros y con botones.
- *
- * Arrastrar seria mas directo con un raton y deja fuera a quien no lo usa: 4.9 dice que la
- * accesibilidad no se pospone. Los botones mueven de columna en columna y son el camino que
- * cualquiera puede recorrer; el arrastre puede venir despues SOBRE ESTAS MISMAS operaciones, no
- * como un segundo camino que pueda divergir.
- */
+/** Tamano y posicion, con numeros y con botones. */
 function Tamano({
   item,
   guardando,

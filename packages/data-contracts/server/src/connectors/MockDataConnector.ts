@@ -19,10 +19,6 @@ export interface MockDataConnectorOptions {
    * Capacidades declaradas. Por defecto imita a SqlDataConnector (`nativeRls: false`),
    * que es el camino mas exigente: obliga a que la aplicacion resuelva el ambito por su
    * cuenta (4.10.4) en vez de confiar en que la fuente lo haga.
-   *
-   * Poner `nativeRls: true` hace que este conector filtre por `securityContext` antes de
-   * devolver, imitando a XmlaDataConnector — util para probar las DOS estrategias de
-   * cacheo de la seccion 6.6 sin depender de que exista una fuente real.
    */
   capabilities?: Partial<ConnectorCapabilities>;
   /** Tope de filas generadas antes de aplicar topN. Evita productos cartesianos enormes. */
@@ -65,13 +61,7 @@ function allowedValues(value: unknown): string[] | null {
   return [String(value)];
 }
 
-/**
- * Conector de desarrollo local y CI/CD (seccion 2.2).
- *
- * Es un PAR de los otros dos conectores, no un andamio: sirve datos sinteticos con la
- * misma forma que la fuente real y respeta el mismo contrato, para que la prueba de
- * fuente-agnosticismo (2.4) sea ejecutable desde el dia 1.
- */
+/** Conector de desarrollo local y CI/CD (seccion 2.2). */
 export class MockDataConnector implements IDataConnector {
   private readonly schema: MockSchemaFile;
   private readonly seed: number;
@@ -168,20 +158,7 @@ export class MockDataConnector implements IDataConnector {
       ?.fields.find((f) => f.name === ref.field);
   }
 
-  /**
-   * Las filas de las dimensiones pedidas, al grano que esas dimensiones implican.
-   *
-   * DOS granos, porque la seccion 6.6 admite los dos y hasta ahora este conector solo sabia
-   * producir uno:
-   *
-   * - Si entre las dimensiones va una CLAVE, cada fila es un hecho. Se generan `cardinality`
-   *   hechos y a cada uno se le asigna un valor de cada dimension, de forma determinista. Es el
-   *   grano sobre el que cualquier agregacion sale bien, porque no hay ninguna agregacion previa
-   *   que arruinar.
-   *
-   * - Si no, producto cartesiano: una fila por combinacion, o sea pre-agrupado. Es lo que habia,
-   *   y sigue siendo legitimo — para medidas aditivas ocupa una fraccion y da lo mismo.
-   */
+  /** Las filas de las dimensiones pedidas, al grano que esas dimensiones implican. */
   private buildDimensionRows(dimensions: FieldRef[]): unknown[][] {
     if (dimensions.length === 0) return [[]];
 

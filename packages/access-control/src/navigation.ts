@@ -9,17 +9,7 @@ import {
 } from './NavigationTree';
 import type { Team } from './Team';
 
-/**
- * Construccion de la vista de navegacion de una persona — secciones 4.1.3 y 4.10.6.
- *
- * Dos reglas gobiernan este modulo:
- *
- *  1. Conceder acceso a una carpeta es conceder acceso a TODO lo que contiene. Las carpetas
- *     son la unidad practica de administracion de permisos, no solo de organizacion visual.
- *  2. Un paquete visual no puede "colar" accesos. El backend valida, al construir la vista,
- *     que cada nodo del paquete corresponda a algo efectivamente concedido en la
- *     organizacion general; si no lo esta, el paquete simplemente NO lo muestra.
- */
+/** Construccion de la vista de navegacion de una persona — secciones 4.1.3 y 4.10.6. */
 
 /** Ids de modulo efectivamente concedidos a un equipo por sus grantedNodes. */
 export function accessibleModuleIds(generalTree: NavNode[], team: Team): Set<string> {
@@ -78,13 +68,7 @@ export interface BuildNavigationViewInput {
   pkg?: ModulePackage;
 }
 
-/**
- * Construye la vista de navegacion de un equipo.
- *
- * Sin paquete asignado, el equipo ve la organizacion general tal cual, limitada a lo que sus
- * grantedNodes conceden. Con paquete, ve el arbol de presentacion del paquete — pero filtrado
- * contra esos mismos grantedNodes, de modo que reagrupar nunca concede.
- */
+/** Construye la vista de navegacion de un equipo. */
 export function buildNavigationView(input: BuildNavigationViewInput): NavigationView {
   const { generalTree, team, pkg } = input;
   const accesibles = accessibleModuleIds(generalTree, team);
@@ -125,12 +109,7 @@ export function buildNavigationView(input: BuildNavigationViewInput): Navigation
   return { tree: filtrar(pkg.visualTree), fromPackage: true, dangling };
 }
 
-/**
- * Comprueba si una persona puede ver un modulo concreto.
- *
- * Se resuelve SIEMPRE contra la organizacion general y los grantedNodes del equipo, jamas
- * contra el paquete: el paquete decide como se presenta lo accesible, nunca que es accesible.
- */
+/** Comprueba si una persona puede ver un modulo concreto. */
 export function canTeamAccessModule(generalTree: NavNode[], team: Team, moduleId: string): boolean {
   return accessibleModuleIds(generalTree, team).has(moduleId);
 }

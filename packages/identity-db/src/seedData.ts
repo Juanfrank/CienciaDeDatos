@@ -10,16 +10,7 @@ import type {
   UserScopeRow,
 } from './rows';
 
-/**
- * Datos de arranque del entorno de staging.
- *
- * Cubren el entregable de la Fase de cimiento (seccion 8.1): "modelo de roles/equipos/ambitos
- * de acceso implementado con AL MENOS DOS EQUIPOS DE PRUEBA CON AMBITOS DISTINTOS".
- *
- * Se declaran en forma de FILA, no de dominio, por dos razones: el script de siembra los
- * escribe tal cual, y las pruebas los pasan por los mapeadores reales, de modo que lo que se
- * verifica es la cadena completa —fila -> dominio -> ambito efectivo— y no una maqueta.
- */
+/** Datos de arranque del entorno de staging. */
 
 export const seedScopes: AccessScopeRow[] = [
   { id: 'sc-regional', expansionId: null },

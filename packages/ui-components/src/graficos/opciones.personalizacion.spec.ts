@@ -20,9 +20,6 @@ const vm = (series: string[], puntos: [string, ...(number | null)[]][]): Categor
 
 /*
  * Se comprueba la FORMA del objeto de opciones, que es lo que ECharts consume.
- *
- * Tipar ese objeto entero seria reescribir la definicion de ECharts para las cinco propiedades
- * que miran estas pruebas; `unknown` con un acceso por indice dice lo mismo sin ese coste.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any -- ver el comentario de arriba */
 const opciones = (extra: Record<string, unknown> = {}, v = vm(['A'], [['x', 1]])) =>
@@ -194,11 +191,6 @@ describe('lineas de referencia', () => {
   it('llegan a TODOS los tipos que las declaran, no solo a las columnas', () => {
     /*
      * Esta prueba existe porque faltaron en las lineas.
-     *
-     * Cada constructor arma sus series por su cuenta —es lo que les permite diferenciarse— y eso
-     * significa que anadir algo transversal hay que hacerlo en cada uno. Con una prueba por tipo
-     * suelto, el que falta no falla: simplemente no tiene prueba. Recorriendo la lista, el tipo
-     * nuevo que se olvide de las referencias aparece aqui.
      */
     const conEjes: TipoDeGrafico[] = [
       'barras',

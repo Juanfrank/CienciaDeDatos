@@ -2,17 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { evaluarRegla, type AlertRule } from '@app/alerts';
 import { observacionesDe } from './alertas';
 
-/**
- * La decision de seguridad de toda la funcion, probada donde se toma.
- *
- * Una alerta se evalua con el ambito de QUIEN LA CREO. La alternativa —evaluar la condicion
- * sobre el dataset sin ambito y mandar el numero— convertiria una notificacion en un canal por
- * el que salen cifras que su destinatario no puede ver abriendo el modulo. El principio 5 no
- * tiene una excepcion para las notificaciones, y este es el punto donde se cumple o no.
- *
- * Se ejecuta contra el cache poblado en disco, igual que la aplicacion: si el cache esta vacio,
- * `observacionesDe` devuelve null y las pruebas lo dicen en vez de pasar por vacio.
- */
+/** La decision de seguridad de toda la funcion, probada donde se toma. */
 
 const regla = (parcial: Partial<AlertRule>): AlertRule => ({
   id: 'r-prueba',

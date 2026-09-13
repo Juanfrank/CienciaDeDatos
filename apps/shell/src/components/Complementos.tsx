@@ -12,28 +12,12 @@ import {
   type ObjectInstance,
 } from '@app/ui-components';
 
-/**
- * Objetos adjuntados — complementos de un objeto, nunca objetos independientes.
- *
- * Se dibujan en la cabecera del objeto anfitrion como iconos. No ocupan celda en la rejilla y no
- * se enlazan contra ningun dataset: leen el del anfitrion, que ya viene filtrado por el ambito de
- * quien mira. Por eso un complemento no puede revelar nada que la persona no pudiera ver de
- * todas formas.
- */
+/** Objetos adjuntados — complementos de un objeto, nunca objetos independientes. */
 
 const formatearCelda = (celda: unknown): string =>
   typeof celda === 'number' ? new Intl.NumberFormat('es-DO').format(celda) : String(celda ?? '');
 
-/**
- * Tooltip explicativo.
- *
- * No es el tooltip de eje ni el de un punto de datos: explica que representa el objeto ENTERO.
- *
- * Cumple 1.4.13 de WCAG (contenido al pasar el puntero o al enfocar), que es donde casi todos
- * los tooltips fallan: aparece tambien al enfocar con teclado, se cierra con Escape, y se puede
- * llevar el puntero encima sin que desaparezca —hace falta para leerlo despacio o para
- * seleccionar el texto.
- */
+/** Tooltip explicativo. */
 export function TooltipExplicativo({ texto, titulo }: { texto: string; titulo: string }) {
   const id = useId();
   const [visible, setVisible] = useState(false);
@@ -51,18 +35,6 @@ export function TooltipExplicativo({ texto, titulo }: { texto: string; titulo: s
 
   /*
    * El globo se coloca FUERA de la tarjeta que explica.
-   *
-   * Antes caia hacia abajo desde el icono, o sea justo encima del contenido: para leer que
-   * significa la cifra habia que tapar la cifra. Es el peor sitio posible para una explicacion,
-   * porque lo que se explica y la explicacion no se pueden mirar a la vez.
-   *
-   * Ahora se ancla al icono —de ahi nace, y ahi vuelve el foco— pero se situa al lado de la
-   * tarjeta: a la derecha si cabe, a la izquierda si no, y solo debajo del TODO cuando no hay
-   * hueco a ningun lado, que es el caso del movil. Nunca sobre el contenido.
-   *
-   * `position: fixed` y coordenadas medidas, no CSS a secas: `absolute` lo confina a la caja de la
-   * tarjeta, que es exactamente de donde hay que salir. Se recalcula al desplazar y al redimensionar
-   * porque una posicion fija que no sigue a su ancla se queda flotando en mitad de la pantalla.
    */
   useEffect(() => {
     if (!visible) return;
@@ -79,11 +51,6 @@ export function TooltipExplicativo({ texto, titulo }: { texto: string; titulo: s
 
       /*
        * Se prefiere el lado que NO cae sobre otra tarjeta.
-       *
-       * En una rejilla densa casi siempre hay algo al lado, y entonces el globo se superpone a la
-       * vecina — transitoriamente, mientras dura el puntero. Lo que no puede pasar nunca es que
-       * tape la tarjeta que explica: mirar la cifra y leer que significa tienen que poder hacerse
-       * a la vez. Entre dos lados igual de validos gana el que deje libre otra tarjeta.
        */
       const otras = Array.from(document.querySelectorAll('.objeto')).filter((o) => o !== tarjeta);
       const tapa = (izquierda: number) =>
@@ -154,16 +121,7 @@ export function TooltipExplicativo({ texto, titulo }: { texto: string; titulo: s
   );
 }
 
-/**
- * Tabla de datos emergente.
- *
- * Con alcance de OBJETO muestra las filas de origen del objeto entero. Con alcance de SUBOBJETO
- * lista primero las categorias que el objeto muestra y, al elegir una, las filas que hay detras
- * de ESE numero — que es justo la granularidad que el objeto agrego y dejo de mostrar.
- *
- * Se usa el `<dialog>` nativo con `showModal`: trae el atrapado de foco, el cierre con Escape y
- * la inercia del fondo sin reimplementarlos, y reimplementarlos es donde se rompen.
- */
+/** Tabla de datos emergente. */
 export function TablaDeDatos({
   instance,
   result,

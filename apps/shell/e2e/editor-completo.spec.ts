@@ -3,31 +3,12 @@ import { catalogoInicial } from '@app/ui-components';
 import { ABRE_PRIMERO, CONTROL_DE_CLAVE } from '../src/components/editor/controles';
 import { entrarComo } from './sesion';
 
-/**
- * Todo objeto del catalogo se COLOCA y se CONFIGURA desde el editor — seccion 4.2.
- *
- * «Panel de objetos prediseñados que se enlazan unicamente contra el registro» describe una
- * superficie para armar modulos sin escribir codigo. Cada lote nuevo anadia objetos y claves de
- * presentacion, y la unica comprobacion de que llegaban al editor era que alguien los usara en el
- * modulo de ejemplo — que se escribe A MANO, en TypeScript, y por tanto no demuestra nada sobre
- * el panel.
- *
- * Estas pruebas recorren el catalogo ENTERO en vez de una muestra. Con una muestra, el objeto que
- * no se pueda colocar simplemente no tiene prueba, que es exactamente como las barras
- * horizontales pasaron cinco lotes sin ofrecer el color por valor.
- */
+/** Todo objeto del catalogo se COLOCA y se CONFIGURA desde el editor — seccion 4.2. */
 
 const guardado = async (page: Page) =>
   expect(page.locator('.editor')).toHaveAttribute('data-guardando', 'no');
 
-/**
- * Despliega todas las secciones del panel.
- *
- * Casi todas nacen plegadas —dieciocho abiertas no caben en un carril de 340 px— y un control
- * dentro de un `<details>` cerrado existe pero no se puede pulsar. Lo que estas pruebas
- * comprueban es que el control ESTA para ese objeto; que plegar y desplegar funciona lo
- * comprueban las pruebas de la propia seccion.
- */
+/** Despliega todas las secciones del panel. */
 const abrirSecciones = async (page: Page) => {
   await page
     .locator('.panel-editor details')
@@ -57,10 +38,6 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
     for (const [i, objeto] of COLOCABLES.entries()) {
       /*
        * Primero se vuelve a la pestana de Objetos, y LUEGO se busca el boton.
-       *
-       * Al colocar algo el panel salta a Datos o a Formato, asi que la paleta deja de estar en el
-       * documento: preguntar por el boton antes de volver da «no esta en la paleta» para todo lo
-       * que no sea el primero, que es un diagnostico falso.
        */
       await page.getByTestId('pestana-objetos').click();
 
@@ -97,10 +74,6 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
 test.describe('configurable: lo que cada objeto declara sale en su panel', () => {
   /*
    * Se comprueba OBJETO A OBJETO y no sobre la union de las claves.
-   *
-   * La union pasaria con que cada control exista en algun objeto, y lo que se quiere saber es
-   * otra cosa: que el medidor ofrece su escala, que el embudo ofrece su caida y que la cascada
-   * ofrece su total. Un control que existe para otro objeto no sirve de nada aqui.
    */
   for (const objeto of COLOCABLES) {
     const version = objeto.versions[objeto.versions.length - 1];
@@ -130,12 +103,6 @@ test.describe('configurable: lo que cada objeto declara sale en su panel', () =>
         if (interruptor) {
           /*
            * Se espera al guardado ANTES de pulsar, y se afirma el estado despues.
-           *
-           * Cada cambio del panel guarda y vuelve a dibujar desde el estado del servidor. Con
-           * `check()`, Playwright pulsa y comprueba el estado en el mismo instante: si el
-           * redibujado cae justo ahi, ve la casilla como estaba y falla con «pulsar no cambio su
-           * estado» en unos objetos si y en otros no, segun el momento. Es una carrera, no un
-           * fallo del panel — y una prueba que falla segun el momento es peor que ninguna.
            */
           await guardado(page);
           const casilla = page.getByTestId(`pres-${item}-${interruptor}`);
@@ -158,9 +125,6 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
   /*
    * Que el control exista no es que funcione. Estas pruebas mueven el control de verdad y miran
    * el objeto, que es la unica forma de distinguir un panel de una lista de campos.
-   *
-   * Se eligen las claves que llegaron en los ultimos lotes y que hasta ahora solo se habian
-   * ejercitado desde el modulo de ejemplo, o sea desde codigo.
    */
 
   test('el medidor: fijar el maximo desde el panel cambia la escala del respaldo', async ({
@@ -182,11 +146,6 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
 
     /*
      * Se escribe y se SALE del campo.
-     *
-     * Los campos de texto del panel se confirman al perder el foco y no en cada pulsacion: con
-     * `onChange`, escribir «5000» guardaria cuatro veces —«5», «50», «500»— y el objeto parpadearia
-     * con tres escalas absurdas antes de la buena. Rellenar sin salir deja el valor escrito y sin
-     * confirmar, que es lo que hacia fallar esta prueba con la escala deducida todavia puesta.
      */
     await page.getByTestId(`pres-${item}-maximo`).fill('5000');
     await page.getByTestId(`pres-${item}-maximo`).blur();

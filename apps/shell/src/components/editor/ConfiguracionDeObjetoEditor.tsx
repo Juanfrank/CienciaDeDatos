@@ -27,16 +27,7 @@ import {
 import { PaletaDeColores } from './EstiloDeTextoEditor';
 import { Seccion } from './Seccion';
 
-/**
- * Configuracion propia de los elementos y los contenedores.
- *
- * Va en la pestana de Formato, junto a la presentacion, y no en Datos: lo que configura un elemento
- * es COMO SE VE —cuantas lineas, de que color, hacia donde se abre—, y ninguno lee datos, asi que
- * en Datos no tendria nada al lado.
- *
- * El componente no hace nada cuando el objeto no es de estos tipos, en vez de que el panel decida
- * si dibujarlo: asi anadir un tipo se resuelve aqui dentro y no en dos sitios.
- */
+/** Configuracion propia de los elementos y los contenedores. */
 
 const ETIQUETA_DE_LINEA: Record<PosicionDeLinea, string> = {
   ninguna: 'Ninguna',
@@ -158,10 +149,6 @@ export function ConfiguracionDeObjetoEditor({
 
   /*
    * Cada cambio funde sobre lo ya guardado y REPONE el `objectId`.
-   *
-   * Sin reponerlo, la union discriminada perderia su discriminante en la primera edicion y la
-   * configuracion dejaria de resolverse al dibujar: el objeto se quedaria con la de por defecto
-   * sin que nada avisara de por que.
    */
   const poner = (parcial: ConfiguracionDeElemento | ConfiguracionDeContenedor) =>
     onCambiar((i) => ({

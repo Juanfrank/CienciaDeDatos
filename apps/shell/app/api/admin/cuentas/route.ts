@@ -12,16 +12,7 @@ import { registrarCambio } from '../../../../src/server/auditoria';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/**
- * Cuentas locales — seccion 4.7.2.
- *
- * "Documenta y haz visible en el panel de administracion cuantas cuentas locales existen y por
- * que": son la excepcion, no la via por defecto, y una lista que crece sin que nadie la mire es
- * como dejan de serlo.
- *
- * Aqui viven las dos vias de recuperacion que 4.7.2 exige cuando dice "no bloqueo indefinido sin
- * via de recuperacion": desbloquear, y restablecer la contraseña.
- */
+/** Cuentas locales — seccion 4.7.2. */
 export async function GET() {
   return conAdmin(async () => ({
     cuentas: await cuentasLocales(),
@@ -82,11 +73,6 @@ export async function POST(request: Request) {
          * El token viaja en la RESPUESTA a quien lo tramito, y solo cuando el canal automatico
          * no pudo entregarlo. Es el flujo mediado: el Administrador ya verifico la identidad de
          * la persona por una via de la que responde, y le dicta el codigo.
-         *
-         * No es lo que pide 4.7.2 —eso es el correo verificado— y por eso la respuesta lleva el
-         * canal y el `entregado: false` bien visibles, y queda registrado quien lo tramito. El
-         * dia que haya correo, `deliver` devuelve true y este campo deja de venir, sin tocar
-         * nada mas. Ver docs/hoja-de-ruta.md.
          */
         ...(entregado ? {} : { codigo: emitido.token }),
       };

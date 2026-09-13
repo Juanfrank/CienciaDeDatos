@@ -3,17 +3,7 @@ import { dimensionKey } from '@app/access-control';
 import type { SecurityBinding } from './cacheKey';
 import registryFile from '../datasets/registry.json' with { type: 'json' };
 
-/**
- * Registro de datasets cacheables — seccion 6.6.
- *
- * Cuando distintos modulos necesitan la misma medida, o una variante filtrada de la misma
- * informacion, la estrategia prioriza cachear el dataset UNA SOLA VEZ y reutilizarlo, en vez
- * de que cada modulo mantenga su propia entrada redundante para, en esencia, el mismo dato.
- *
- * Un modulo que necesita una vista mas especifica de un dataset ya cacheado debe resolverla
- * filtrando o agregando sobre el dataset ya cacheado, en el backend — nunca generando una
- * nueva consulta a la fuente ni una entrada de cache redundante.
- */
+/** Registro de datasets cacheables — seccion 6.6. */
 export interface CacheableDataset {
   datasetId: string;
   description: string;
@@ -34,14 +24,7 @@ export interface CacheableDataset {
   /** Obligatorio y explicito: nunca se decide caso por caso sin registrar (6.6). */
   securityBinding: SecurityBinding;
   securityBindingRationale: string;
-  /**
-   * Dimensiones por las que algun consumidor puede quedar restringido.
-   *
-   * No esta en el documento: se añade porque un dataset con `securityBinding: 'none'` se
-   * comparte entre ambitos y solo puede filtrarse al leerlo si TRAE esas dimensiones como
-   * columnas. Declararlas permite detectar el hueco al validar el registro, en vez de
-   * descubrirlo en produccion cuando un ambito no se pueda hacer cumplir.
-   */
+  /** Dimensiones por las que algun consumidor puede quedar restringido. */
   scopeDimensions?: FieldRef[];
   consumedByModules: string[];
   owner: string;

@@ -7,17 +7,7 @@ import {
 } from './IIdentityProvider';
 import type { IAuditLog } from './stores';
 
-/**
- * Proveedor de identidad Azure AD — seccion 4.7.1.
- *
- * Metodo PRINCIPAL, y el que debe ofrecerse primero en la pantalla de inicio de sesion:
- * hereda SSO, MFA y acceso condicional ya gestionados centralmente por la institucion.
- *
- * Se apoya en la autenticacion integrada de App Service (Easy Auth) como capa PERIMETRAL,
- * con validacion adicional del token en el backend. Las dos capas no son redundancia inutil:
- * Easy Auth protege el perimetro, pero el backend no debe confiar ciegamente en una cabecera
- * inyectada por la plataforma sin validar el token por su cuenta.
- */
+/** Proveedor de identidad Azure AD — seccion 4.7.1. */
 
 export interface AzureAdCredentials {
   /** Token de acceso o de identidad recibido del cliente. */
@@ -32,13 +22,7 @@ export interface ValidatedTokenClaims {
   name?: string;
 }
 
-/**
- * Validador de tokens, inyectable.
- *
- * En produccion valida firma, emisor, audiencia y expiracion contra las claves publicas del
- * tenant (MSAL / jwks). Se define como puerto para que la logica de normalizacion de identidad
- * sea probable sin un tenant real, y para que cambiar de libreria no toque este archivo.
- */
+/** Validador de tokens, inyectable. */
 export interface ITokenValidator {
   validate(token: string): Promise<ValidatedTokenClaims>;
 }

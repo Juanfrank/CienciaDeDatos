@@ -28,19 +28,7 @@ export {
   usuarioACorreo,
 } from './credencialesDemo';
 
-/**
- * Cableado de la autenticacion — seccion 4.7.
- *
- * El paquete `@app/auth` estaba completo y probado desde B.3 —Argon2id con pimienta, TOTP
- * obligatorio, bloqueo con backoff, los dos proveedores convergiendo en un mismo principal— y
- * el shell no lo usaba: la sesion se emitia sola con un usuario de demostracion. Esto es lo que
- * faltaba para que los criterios de la seccion 9 sobre autenticacion se puedan comprobar de
- * punta a punta y no solo argumentar por las pruebas del paquete.
- *
- * Los tres almacenes van al almacen COMPARTIDO, por lo mismo que el resto del estado: una
- * sesion que solo conoce una instancia se pierde al escalar. En produccion los tres viven en la
- * base de identidad (4.7.2, 6.7) y solo cambia el adaptador.
- */
+/** Cableado de la autenticacion — seccion 4.7. */
 
 const CLAVE_CREDENCIAL = (email: string) => `auth:credencial:${email.toLowerCase()}`;
 const CLAVE_SESION = (id: string) => `auth:sesion:${id}`;
@@ -48,15 +36,7 @@ const CLAVE_SESIONES_DE = (userId: string) => `auth:sesiones-de:${userId}`;
 const CLAVE_AUDITORIA_LOGIN = 'auth:auditoria-login';
 const CLAVE_SEMBRADO = 'auth:credenciales-sembradas';
 
-/**
- * Pimienta de aplicacion.
- *
- * En produccion sale de Key Vault y NUNCA del registro del usuario: un volcado de la base de
- * identidad, por si solo, no permite atacar los hashes. Aqui hay un valor de desarrollo fijo
- * —tiene que ser estable entre instancias o los hashes dejan de verificar— y el arranque FALLA
- * si no viene de configuracion fuera de desarrollo, en vez de usar el valor conocido en
- * produccion sin que nadie se entere.
- */
+/** Pimienta de aplicacion. */
 function pimienta(): string {
   const configurada = process.env['AUTH_PEPPER'];
   if (configurada) return configurada;
@@ -133,17 +113,7 @@ class AuditoriaDeLogin implements IAuditLog {
 export const listarAuditoriaDeLogin = (): Promise<LoginAuditEvent[]> =>
   leerLista<LoginAuditEvent>(CLAVE_AUDITORIA_LOGIN);
 
-/**
- * Directorio institucional.
- *
- * Es la pieza de 4.7.3 que hace que los roles NO dependan de la puerta de entrada: los dos
- * proveedores preguntan aqui, y aqui se responde con el gobierno. Si un proveedor construyera
- * roles por su cuenta, entrar por Azure AD o en local daria accesos distintos.
- *
- * El `securityContext` va vacio a proposito: el ambito de datos lo resuelve `access-control` a
- * partir del equipo ACTIVO (4.10.4), y duplicarlo aqui daria dos fuentes de verdad para la
- * misma pregunta.
- */
+/** Directorio institucional. */
 class DirectorioDeGobierno implements IPrincipalDirectory {
   async lookup(userPrincipalName: string): Promise<DirectoryEntry | null> {
     const usuario = correoAUsuario(userPrincipalName);
@@ -168,15 +138,7 @@ export const auditoriaDeLogin = new AuditoriaDeLogin();
 
 export const sesiones = new SessionService({ store: new AlmacenDeSesiones() });
 
-/**
- * El proveedor se construye PEREZOSAMENTE, en el primer inicio de sesion.
- *
- * Construirlo al evaluar el modulo hacia que `pimienta()` corriera durante `next build`, que
- * tambien pone NODE_ENV=production: la construccion fallaba por falta de un secreto que solo
- * hace falta para autenticar. Construir no es ejecutar, y una aplicacion que no se puede
- * compilar sin los secretos de produccion obliga a tenerlos en la maquina de compilacion, que
- * es justo lo contrario de lo que pretende guardarlos en Key Vault.
- */
+/** El proveedor se construye PEREZOSAMENTE, en el primer inicio de sesion. */
 let proveedorMemorizado: LocalIdentityProvider | undefined;
 
 export function proveedorLocal(): LocalIdentityProvider {
@@ -189,12 +151,7 @@ export function proveedorLocal(): LocalIdentityProvider {
   return proveedorMemorizado;
 }
 
-/**
- * Siembra las credenciales locales la primera vez.
- *
- * Es idempotente y perezosa: hashear con Argon2id cuesta cientos de milisegundos por cuenta, y
- * hacerlo en cada arranque penalizaria el inicio de todas las instancias para nada.
- */
+/** Siembra las credenciales locales la primera vez. */
 export async function asegurarCredenciales(): Promise<void> {
   if (await leer<boolean>(CLAVE_SEMBRADO)) return;
 
@@ -224,26 +181,10 @@ export async function asegurarCredenciales(): Promise<void> {
   await escribir(CLAVE_SEMBRADO, true);
 }
 
-/**
- * Azure AD: declarado, no disponible.
- *
- * `AzureAdIdentityProvider` esta implementado y probado, pero necesita un tenant contra el que
- * validar tokens. Se reporta como no disponible en vez de simular un inicio de sesion que
- * pareceria funcionar — el mismo criterio que siguen los conectores de datos pendientes.
- */
+/** Azure AD: declarado, no disponible. */
 export const AZURE_AD_DISPONIBLE = Boolean(process.env['AZURE_AD_TENANT_ID']);
 
-/**
- * Restablecimiento de contraseña — seccion 4.7.2.
- *
- * El canal de correo institucional NO existe en este entorno. Lo que se implementa es el flujo
- * entero —token de un solo uso, hasheado, con expiracion corta, que desbloquea la cuenta y
- * revoca las sesiones al canjearse— y el canal queda como puerto con una unica implementacion:
- * la mediada por un Administrador, que verifica la identidad por una via de la que el responde y
- * entrega el codigo en mano o por telefono.
- *
- * Lo que NO se hace es inventar un sustituto que parezca correo. Ver docs/hoja-de-ruta.md.
- */
+/** Restablecimiento de contraseña — seccion 4.7.2. */
 const CLAVE_RESET = (resetId: string) => `auth:reset:${resetId}`;
 const CLAVE_RESET_INDICE = (email: string) => `auth:reset-indice:${email.toLowerCase()}`;
 
@@ -284,25 +225,11 @@ export const restablecimientos = new PasswordResetService({
   },
 });
 
-/**
- * Canal de entrega disponible en este entorno.
- *
- * `CorreoInstitucionalNoDisponible` esta declarado en el paquete y devuelve false. Aqui se
- * escoge cual se usa, con la misma regla que los conectores de datos pendientes: si el canal
- * institucional estuviera configurado, seria ese; como no lo esta, el flujo es mediado y la
- * interfaz lo dice en vez de simular un envio.
- */
+/** Canal de entrega disponible en este entorno. */
 export const CORREO_DISPONIBLE = Boolean(process.env['SMTP_HOST']);
 export const canalDeRestablecimiento: IResetChannel = new CorreoInstitucionalNoDisponible();
 
-/**
- * Desbloqueo de una cuenta local, sin cambiar la contraseña.
- *
- * Es la otra mitad de "no bloqueo indefinido sin via de recuperacion" (4.7.2): quien se
- * equivoco cinco veces y ya recuerda su contraseña no necesita una nueva, necesita que el
- * contador se ponga a cero. Obligarle a restablecerla convertiria un error de dedos en un
- * cambio de credencial, que es peor: mas contraseñas nuevas, mas apuntadas en un papel.
- */
+/** Desbloqueo de una cuenta local, sin cambiar la contraseña. */
 export async function desbloquearCuenta(email: string): Promise<boolean> {
   const cuenta = await almacenDeCredenciales.findByEmail(email);
   if (!cuenta) return false;
@@ -322,13 +249,7 @@ export interface EstadoDeCuentaLocal {
   tieneSegundoFactor: boolean;
 }
 
-/**
- * Cuentas locales existentes y por que.
- *
- * 4.7.2 lo pide expresamente: "Documenta y haz visible en el panel de administracion cuantas
- * cuentas locales existen y por que". Son la excepcion, no la via por defecto, y una lista que
- * crece sin que nadie la mire es como dejan de ser la excepcion.
- */
+/** Cuentas locales existentes y por que. */
 export async function cuentasLocales(): Promise<EstadoDeCuentaLocal[]> {
   const ahora = Date.now();
   const usuarios = await gobierno.listUsers();

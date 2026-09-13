@@ -6,17 +6,7 @@ import type { IExportQueue } from './cola';
 import { TIPOS_MIME, nombreDeArchivo } from './types';
 import type { ExportJob, ExportRequest, ExportableObject } from './types';
 
-/**
- * Procesamiento de un trabajo de exportacion.
- *
- * El trabajo guarda la PETICION, nunca las filas. Es deliberado y es de seguridad: el trabajador
- * vuelve a resolver el ambito de quien pidio la exportacion en el momento de generar el archivo,
- * asi que el contenido sale filtrado por el ambito vigente y por el equipo activo de esa persona.
- * Si el trabajo llevara los datos dentro, un cambio de permisos entre encolar y procesar —o
- * simplemente un trabajo leido por otro proceso— romperia el principio 5, el aislamiento por
- * seguridad. Ademas el resolutor lee del CACHE (principio 2): la exportacion no es una excepcion
- * al camino de lectura, es un consumidor mas.
- */
+/** Procesamiento de un trabajo de exportacion. */
 
 /** Resuelve los objetos a exportar para una peticion. Lo aporta quien cablea, que sabe leer. */
 export type ResolverObjetos = (request: ExportRequest) => Promise<{

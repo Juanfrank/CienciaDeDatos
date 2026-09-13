@@ -4,16 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { NavNode } from '@app/access-control';
 
-/**
- * Arbol de navegacion.
- *
- * Dibuja lo que `buildNavigationView` devolvio, que ya esta filtrado por lo concedido al equipo.
- * Este componente no decide que es visible: si decidiera, habria dos fuentes de verdad sobre el
- * acceso y podrian divergir.
- *
- * Los enlaces son URLs por slug (4.11), no navegacion por estado: se pueden copiar, compartir y
- * abrir en una pestaña nueva.
- */
+/** Arbol de navegacion. */
 export function ArbolNavegacion({ nodos, nivel = 0 }: { nodos: NavNode[]; nivel?: number }) {
   const pathname = usePathname();
 

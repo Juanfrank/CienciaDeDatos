@@ -8,13 +8,7 @@ import {
 import { populate, refreshSchema, type PopulateResult } from './populate';
 import { isDue } from './schedule';
 
-/**
- * Un ciclo completo del job: lo que ejecuta el Timer Trigger.
- *
- * Lee el latido anterior para saber a que datasets les toca, puebla los que corresponda y deja
- * el latido nuevo. El esquema se refresca con cadencia propia, mas espaciada, porque cambia con
- * mucha menos frecuencia que los datos.
- */
+/** Un ciclo completo del job: lo que ejecuta el Timer Trigger. */
 export interface ScheduledCycleOptions {
   connector: IDataConnector;
   cacheStore: ICacheStore;

@@ -4,22 +4,7 @@ import { construirMatriz, filasVisibles, hojas } from './matriz';
 import { aFieldRef } from '../presentacion/pozos';
 import { aggregateBy, fieldKey, toSlicerOptions } from './viewModel';
 
-/**
- * Proyeccion tabular de un objeto — la forma de tabla de LO QUE EL OBJETO MUESTRA.
- *
- * Es la unica funcion que traduce "una instancia sobre un dataset" a filas y columnas, y la
- * comparten tres consumidores que antes habrian divergido:
- *
- *   1. El objeto de tabla en pantalla, que sin esto dibujaba TODAS las columnas del dataset en
- *      vez de las que su mapeo declara.
- *   2. El complemento de tabla de datos (el emergente con los datos de origen del objeto).
- *   3. La exportacion a CSV, Excel, PDF e imagen.
- *
- * Antes de existir, la exportacion volcaba el dataset entero bajo el titulo de cada objeto: un
- * modulo con cinco objetos sobre el mismo dataset producia cinco veces la misma tabla, y una
- * tarjeta KPI —que muestra UN numero— exportaba las filas completas. Una sola proyeccion
- * garantiza que lo exportado y lo mostrado no puedan separarse.
- */
+/** Proyeccion tabular de un objeto — la forma de tabla de LO QUE EL OBJETO MUESTRA. */
 
 const columnaNumero = (name: string) => ({ name, type: 'number' });
 const columnaTexto = (name: string) => ({ name, type: 'string' });
@@ -65,14 +50,6 @@ export function proyectarObjeto(
     case 'matriz': {
       /*
        * La misma matriz JERARQUICA que se dibuja, aplanada.
-       *
-       * Se construye con `construirMatriz` y no con un calculo propio porque si no, lo exportado y
-       * lo mostrado serian dos cosas distintas: la pantalla con sus niveles y subtotales, y el
-       * archivo con un cruce plano. Es la razon de que esta funcion exista.
-       *
-       * Se exporta TODO desplegado, a proposito: plegar un grupo es un gesto de lectura y no una
-       * propiedad del objeto, y un archivo al que le faltan filas porque alguien las tenia
-       * cerradas al pulsar «exportar» es un archivo que miente sobre lo que contiene.
        */
       const nada = new Set<string>();
       const deRanura = (id: string): string[] | undefined => instance.binding.ranuras?.[id];
@@ -153,13 +130,6 @@ export function proyectarObjeto(
 /**
  * Filas de ORIGEN detras de una categoria concreta del objeto — el alcance de subobjeto del
  * complemento de tabla de datos.
- *
- * Responde a "de que filas sale este numero". Por eso devuelve el dataset SIN proyectar,
- * filtrado por la combinacion seleccionada: lo interesante es justamente la granularidad que el
- * objeto agrego y dejo de mostrar.
- *
- * El dataset del que parte ya viene filtrado por el ambito de quien mira, asi que el desglose no
- * puede revelar ninguna fila que la persona no pudiera ver de todas formas.
  */
 export function desgloseDe(
   result: QueryResult,

@@ -5,13 +5,7 @@ import { useState } from 'react';
 import type { AppRole, Team } from '@app/access-control';
 import { APP_ROLES } from '@app/access-control';
 
-/**
- * CRUD de equipos y membresia — seccion 4.10.2 y 4.10.8.
- *
- * Un equipo concede acceso otorgando NODOS DE LA ORGANIZACION GENERAL, no una lista arbitraria
- * desconectada del arbol real: por eso los nodos se eligen de una lista del arbol y no se
- * escriben. Asi el acceso y la estructura nunca divergen.
- */
+/** CRUD de equipos y membresia — seccion 4.10.2 y 4.10.8. */
 export function EditorDeEquipos({
   administradores,
   equipos,

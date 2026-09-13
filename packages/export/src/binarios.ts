@@ -2,17 +2,7 @@ import PDFDocument from 'pdfkit';
 import { Workbook } from 'exceljs';
 import { textoDeCelda, type DocumentoExportable, type HojaExportable, type PaletaDeExportacion } from './documento';
 
-/**
- * Formatos binarios: Excel y PDF.
- *
- * Van en un modulo aparte de `formatos.ts` porque exigen librerias de Node (exceljs, pdfkit).
- * CSV y SVG son cadenas de texto y se generan sin dependencias, asi que pueden usarse desde
- * cualquier parte; estos dos solo corren en el proceso de servidor que atiende la cola (5.3).
- *
- * Como los otros dos, parten del `DocumentoExportable` ya construido y no deciden nada sobre su
- * contenido. De ahi que los cuatro lleven el mismo encabezado —procedencia (4.6), filtros y
- * marca de tiempo (4.8)— sin que ninguno tenga que acordarse de ponerlo.
- */
+/** Formatos binarios: Excel y PDF. */
 
 /** Ancho de columna aproximado a partir del contenido, para que no salga todo cortado. */
 function anchoDeColumna(nombre: string, valores: unknown[]): number {
@@ -26,13 +16,7 @@ export async function aExcel(documento: DocumentoExportable): Promise<Buffer> {
   libro.creator = encabezado.autor;
   libro.created = new Date();
 
-  /**
-   * Primera hoja: la procedencia, sola.
-   *
-   * En Excel el encabezado NO va encima de la tabla: una hoja de datos con cinco filas de
-   * metadatos delante rompe los filtros, las tablas dinamicas y cualquier formula que apunte a
-   * un rango. Se pone en su propia hoja, que es visible al abrir el archivo y no estorba.
-   */
+  /** Primera hoja: la procedencia, sola. */
   const portada = libro.addWorksheet('Procedencia');
   portada.columns = [{ width: 100 }];
   portada.addRow([encabezado.titulo]).font = { bold: true, size: 14 };
@@ -111,10 +95,6 @@ export function aPdf(documento: DocumentoExportable): Promise<Buffer> {
 
       /*
        * Las notas, DEBAJO de su tabla.
-       *
-       * Es donde explican algo: la meta contra la que hay que leer las cifras de arriba y la
-       * regla por la que en pantalla una de ellas estaba en rojo. Sin ellas, el PDF ensena los
-       * numeros y se calla la mitad del mensaje.
        */
       for (const nota of hoja.notas ?? []) {
         doc.font('Helvetica-Oblique').fontSize(7).fillColor(paleta.textoAtenuado).text(nota);

@@ -10,14 +10,7 @@ export interface TeamMember {
   role: AppRole;
 }
 
-/**
- * Equipo — seccion 4.10.2.
- *
- * Unidad de agrupacion tanto para el acceso a modulos como para el ambito de datos por
- * defecto. Su acceso se concede otorgando nodos de la ORGANIZACION GENERAL (4.1.1), no una
- * lista arbitraria desconectada del arbol real, para que el acceso y la estructura nunca
- * diverjan.
- */
+/** Equipo — seccion 4.10.2. */
 export interface Team {
   id: string;
   name: string;
@@ -38,12 +31,7 @@ export interface Team {
   assignedPackageId?: string;
 }
 
-/**
- * Usuario en el modelo de gobierno.
- *
- * `personalScope` es el ambito individual de 4.10.3: el caso de uso tipico es RESTRINGIR
- * aun mas a una persona puntual, no ampliarla — ampliar exige marca explicita de excepcion.
- */
+/** Usuario en el modelo de gobierno. */
 export interface GovernedUser {
   userId: string;
   personalScope?: AccessScope;

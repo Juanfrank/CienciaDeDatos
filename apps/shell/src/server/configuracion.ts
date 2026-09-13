@@ -10,14 +10,7 @@ import {
 } from '@app/config';
 import { cacheL2 } from './almacenCompartido';
 
-/**
- * Configuracion en ejecucion del shell — seccion 3.4 y 2.2.
- *
- * La fuente se elige por si hay endpoint, no por una variable de «entorno» que haya que acordarse
- * de poner: si el Bicep paso `APP_CONFIG_ENDPOINT`, se lee de Azure; si no, del entorno. Asi el
- * mismo binario corre en local, en las pruebas de navegador y en produccion sin ramas por entorno
- * —que son las que acaban comportandose distinto justo donde no se puede depurar—.
- */
+/** Configuracion en ejecucion del shell — seccion 3.4 y 2.2. */
 
 const endpoint = process.env['APP_CONFIG_ENDPOINT'];
 
@@ -37,12 +30,7 @@ function fuente(): FuenteDeConfiguracion {
   });
 }
 
-/**
- * Vive en `globalThis` como el resto del estado de proceso.
- *
- * La recarga en caliente del servidor de desarrollo reevalua los modulos, y con una constante de
- * modulo cada recarga estrenaria resolutor —y con el, credencial y cache— varias veces por minuto.
- */
+/** Vive en `globalThis` como el resto del estado de proceso. */
 const global = globalThis as typeof globalThis & { __config?: ResolutorDeConfiguracion };
 
 function nuevoResolutor(): ResolutorDeConfiguracion {
@@ -72,25 +60,13 @@ export async function slugsApagados(): Promise<string[]> {
   return modulosApagados(await resolutor().instantanea());
 }
 
-/**
- * El conector activo (2.2).
- *
- * Sale de la configuracion en ejecucion, no de una variable horneada en el contenedor: cambiar
- * entre mock, sql y xmla no debe requerir redespliegue, que es lo que el propio Bicep declara.
- * `DATA_CONNECTOR` sigue funcionando como respaldo local a traves de `ConfiguracionDeEntorno`.
- */
+/** El conector activo (2.2). */
 export async function conectorActivo(): Promise<string> {
   const instantanea = await resolutor().instantanea();
   return instantanea.valores[CLAVE_CONECTOR] ?? 'mock';
 }
 
-/**
- * Descarta el resolutor vigente.
- *
- * Existe para las PRUEBAS: el resolutor cachea treinta segundos, asi que sin esto una prueba que
- * apaga un modulo leeria la foto que dejo la anterior. No lo llama ningun camino de produccion —
- * alli el TTL es precisamente lo que se quiere—.
- */
+/** Descarta el resolutor vigente. */
 export function reiniciarConfiguracion(): void {
   delete global.__config;
 }

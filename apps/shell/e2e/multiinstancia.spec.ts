@@ -4,14 +4,6 @@ import { entrarComo } from './sesion';
 /**
  * Criterio de la seccion 9: "la aplicacion escala a mas de una instancia sin perdida de sesion
  * ni de estado de personalizacion en edicion".
- *
- * Se comprueba con DOS PROCESOS de verdad, no simulando uno. El servidor de pruebas levanta una
- * segunda instancia del mismo build sobre el mismo almacen compartido —que es la situacion de
- * App Service con escalado horizontal— y cada prueba escribe en una y lee en la otra.
- *
- * Antes de F4.1 todas estas pruebas fallaban: sesion, marcadores, gobierno y auditoria vivian en
- * un mapa por proceso. Lo grave no era perder un marcador, sino que un ambito reducido por el
- * Administrador en la instancia A no se aplicara en la B.
  */
 
 const OTRA = process.env['SEGUNDA_INSTANCIA'] ?? 'http://localhost:4311';

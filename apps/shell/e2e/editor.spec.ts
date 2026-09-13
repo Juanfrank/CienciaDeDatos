@@ -1,13 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Editor de modulos y ciclo de vida — secciones 4.1, 4.2 y criterios de la seccion 9.
- *
- * Cada prueba usa un slug propio con marca de tiempo. El almacen de modulos es compartido y
- * persiste entre pruebas, igual que el gobierno; sin slugs distintos, una prueba que publica
- * dejaria publicado para la siguiente.
- */
+/** Editor de modulos y ciclo de vida — secciones 4.1, 4.2 y criterios de la seccion 9. */
 
 const nuevoSlug = (prefijo: string) => `${prefijo}-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
 

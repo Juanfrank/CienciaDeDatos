@@ -2,13 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { entrarComo } from './sesion';
 
-/**
- * Incorporacion en otros portales — seccion 4.9.
- *
- * Lo que mas se vigila aqui no es que el iframe se vea bien, sino que NO sea una via
- * alternativa: una vista incrustada no es una vista publica. El mismo ambito, la misma sesion y
- * ningun token que salte la autenticacion.
- */
+/** Incorporacion en otros portales — seccion 4.9. */
 
 /** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
 test.beforeEach(async ({ page }) => {

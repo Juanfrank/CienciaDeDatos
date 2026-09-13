@@ -22,15 +22,10 @@ import { colorCondicional, type FormatoCondicional } from '../presentacion/condi
 import type { CategoricalViewModel } from '../registry/viewModel';
 
 /**
- * Construccion de las opciones de Apache ECharts — seccion 4.2.
+ * Construccion de las opciones de Apache ECharts (4.2).
  *
- * Funciones PURAS: reciben el modelo de vista y la paleta, y devuelven el objeto de opciones.
- * No tocan el DOM ni importan ECharts, y por eso se pueden probar sin navegador. Lo que monta
- * el grafico es otra cosa, en el shell.
- *
- * Esa separacion no es ceremonia: lo que hay que poder comprobar de un grafico es que los datos
- * y los rotulos que le llegan son los correctos, y eso es una comparacion de objetos. Que ECharts
- * dibuje bien un `bar` no es cosa de este repositorio.
+ * Funciones puras: reciben el modelo de vista y la paleta y devuelven el objeto de opciones. No
+ * tocan el DOM ni importan ECharts, asi que se prueban sin navegador. El montaje vive en el shell.
  */
 
 export interface PaletaDeGrafico {
@@ -54,14 +49,7 @@ export interface OpcionesDeGrafico {
   etiquetasDeDato?: EtiquetasDeDato;
   tooltip?: ConfiguracionDeTooltip;
   ejes?: ConfiguracionDeEjes;
-  /**
-   * Como formatear una cifra de la serie `s`.
-   *
-   * Lo inyecta quien dibuja, ya resuelto contra el formato de cada medida. Aqui no se puede
-   * deducir: este modulo no conoce la presentacion de la instancia, y lo importante es que la
-   * etiqueta sobre la barra diga exactamente lo mismo que la tabla de datos adjunta — con otro
-   * formateador, el mismo numero saldria «2,216» en un sitio y «2216» en el otro.
-   */
+  /** Como formatear una cifra de la serie `s`. */
   formatear?: (valor: number, serie: number) => string;
   apilado?: ModoDeApilado;
   circular?: ConfiguracionCircular;
@@ -72,12 +60,7 @@ export interface OpcionesDeGrafico {
   embudo?: ConfiguracionDeEmbudo;
   cascada?: ConfiguracionDeCascada;
   medidor?: ConfiguracionDeMedidor;
-  /**
-   * Cuantas series iniciales son columnas, en un combinado.
-   *
-   * Sale del MAPEO —de cuantos campos hay en el pozo «Columnas»— y no de la presentacion: cual
-   * es columna y cual es linea es una propiedad de los datos, no de como se ven.
-   */
+  /** Cuantas series iniciales son columnas, en un combinado. */
   seriesDeColumna?: number;
 }
 
@@ -86,13 +69,8 @@ export interface OpcionesDeGrafico {
 /**
  * Los valores que se dibujan, segun el modo de apilado.
  *
- * En `porcentaje` NO se le pasan a ECharts los valores originales: se convierten a su parte del
- * total de la categoria. ECharts no sabe apilar al 100 % por su cuenta —lo que ofrece es `stack`,
- * que suma—, asi que el reparto se hace aqui.
- *
- * Un total de cero deja todas las partes en cero y no en `NaN`: dividir por cero pintaria el
- * grafico vacio sin decir por que, y «no hubo casos» es una respuesta legitima que hay que poder
- * dibujar.
+ * En `porcentaje` se convierten a su parte del total de la categoria: `stack` de ECharts suma,
+ * no reparte. Un total de cero deja las partes en cero y no en `NaN`.
  */
 function valoresApilados(o: OpcionesDeGrafico): (number | null)[][] {
   const crudos = o.vm.series.map((_, s) => o.vm.points.map((p) => p.values[s] ?? null));
@@ -111,13 +89,7 @@ function valoresApilados(o: OpcionesDeGrafico): (number | null)[][] {
 /** `stack` de ECharts: el mismo nombre en todas las series es lo que las apila. */
 const pilaDe = (o: OpcionesDeGrafico) => (o.apilado && o.apilado !== 'ninguno' ? { stack: 'total' } : {});
 
-/**
- * El tooltip de un grafico al 100 %.
- *
- * Ensena el porcentaje Y la cifra original. Solo el porcentaje esconderia la magnitud —dos
- * categorias con el mismo reparto pueden ser 12 casos y 12.000— y solo la cifra contradiria lo que
- * se ve dibujado.
- */
+/** El tooltip de un grafico al 100 %. */
 function tooltipDe(o: OpcionesDeGrafico) {
   const comun = {
     trigger: 'axis' as const,
@@ -141,9 +113,6 @@ function tooltipDe(o: OpcionesDeGrafico) {
 
       /*
        * Se vuelve al MODELO para cada fila, en vez de usar el valor que ECharts pasa.
-       *
-       * Al 100 % ese valor es el porcentaje, no la cifra, y el total de una categoria seria
-       * siempre 100. El modelo es de donde salieron los dos.
        */
       const crudoDe = (nombreDeSerie: string, i: number) =>
         o.vm.points[i]?.values[o.vm.series.indexOf(nombreDeSerie)] ?? null;
@@ -176,12 +145,10 @@ function tooltipDe(o: OpcionesDeGrafico) {
 }
 
 /**
- * Donde poner la leyenda, resuelto.
+ * Donde poner la leyenda, resuelto, y cuanto margen hay que reservarle.
  *
- * `auto` la ensena solo con mas de una serie: con una sola no distingue nada y se come el alto.
- * Devuelve tambien cuanto margen hay que reservarle, porque `containLabel` de ECharts cuenta los
- * rotulos del eje pero NO la leyenda — sin reservar, se dibuja encima de los nombres de las
- * categorias y quedan ilegibles los dos.
+ * `auto` la ensena solo con mas de una serie. El margen se devuelve aparte porque `containLabel`
+ * de ECharts cuenta los rotulos del eje pero no la leyenda.
  */
 function leyendaDe(o: OpcionesDeGrafico, hayQueDistinguir = o.vm.series.length > 1) {
   const varias = hayQueDistinguir;
@@ -191,17 +158,9 @@ function leyendaDe(o: OpcionesDeGrafico, hayQueDistinguir = o.vm.series.length >
 
   /*
    * A los lados, la leyenda se ACOTA y trunca.
-   *
-   * Sin acotar, «CasosIngresados» se salia del objeto y quedaba cortado a media palabra por el
-   * borde — que se lee como un fallo de dibujo, no como un nombre largo. Con `width` y
-   * `overflow: truncate`, ECharts corta con puntos suspensivos y el nombre entero sigue en el
-   * tooltip de la propia leyenda.
    */
   /*
    * `type: 'scroll'` en TODAS las posiciones.
-   *
-   * Con tres series y una tarjeta estrecha, la leyenda inferior se salia por el lado derecho y el
-   * ultimo nombre quedaba cortado. Desplazable, ECharts pagina y pone flechas en vez de recortar.
    */
   const comun = {
     textStyle: { color: o.paleta.textoAtenuado },
@@ -237,24 +196,15 @@ function leyendaDe(o: OpcionesDeGrafico, hayQueDistinguir = o.vm.series.length >
 /**
  * Lo que comparten todos los graficos.
  *
- * `aria.enabled` hace que ECharts genere una descripcion del grafico y la ponga en el
- * contenedor; `aria.decal.show` dibuja un PATRON distinto sobre cada serie. Lo segundo es lo que
- * cumple el criterio de WCAG 1.4.1: el color no puede ser el unico medio de transmitir
- * informacion, y con ocho series eso deja de ser una formalidad — al imprimir en gris, o para
- * quien no distingue rojo y verde, el patron es lo unico que separa una serie de otra.
- *
- * Pero SOLO con mas de una serie. Con una sola no hay nada que distinguir del color: el trazado
- * no transmite ninguna informacion y la unica consecuencia es una barra rayada que se lee como
- * ruido. 1.4.1 pide que el color no sea el UNICO medio de distinguir cosas; donde no hay cosas
- * que distinguir, no hay nada que cumplir.
+ * `aria.enabled` hace que ECharts describa el grafico en el contenedor y `aria.decal.show` dibuja
+ * un patron distinto sobre cada serie, para que el color no sea el unico medio de distinguirlas
+ * (WCAG 1.4.1). El decal solo se activa con mas de una serie: con una sola no distingue nada.
  */
 /*
- * El margen del area de dibujo, con TODO lo que vive fuera de ella.
+ * El margen del area de dibujo, con todo lo que vive fuera de ella.
  *
- * `containLabel` de ECharts reserva sitio para los rotulos del eje, pero no para la leyenda ni
- * para los TITULOS de los ejes. Sin sumarlos, el titulo del eje de valores se dibujaba 44 px a la
- * izquierda de la linea del eje — o sea, fuera de la tarjeta, invisible. Un titulo que se
- * configura y no aparece es peor que no ofrecerlo.
+ * `containLabel` reserva sitio para los rotulos del eje, pero no para la leyenda ni para los
+ * titulos de los ejes: esos se suman aqui.
  */
 function margenDe(o: OpcionesDeGrafico, deLaLeyenda: { top: number; bottom: number; left: number; right: number }) {
   return {
@@ -267,10 +217,9 @@ function margenDe(o: OpcionesDeGrafico, deLaLeyenda: { top: number; bottom: numb
 /**
  * La paleta, con los colores que cada serie tenga asignados.
  *
- * Se permuta el array que ECharts consume en vez de escribir `itemStyle.color` en cada serie: asi
- * el color llega igual a las barras, a la leyenda, a los decals y al tooltip, sin que ninguno de
- * los cuatro pueda quedarse con el de antes. Una serie sin asignacion se queda con el color que
- * le tocaba por orden.
+ * Se permuta el array que ECharts consume en vez de escribir `itemStyle.color` por serie: asi el
+ * color llega igual a las barras, la leyenda, los decals y el tooltip. Una serie sin asignacion
+ * conserva el color que le tocaba por orden.
  */
 function paletaDe(o: OpcionesDeGrafico): string[] {
   const elegidos = o.coloresDeSerie;
@@ -288,15 +237,10 @@ const TRAZO_DE_REFERENCIA: Record<EstiloDeReferencia, 'solid' | 'dashed' | 'dott
 };
 
 /**
- * Las lineas de referencia, como `markLine` de la PRIMERA serie.
+ * Las lineas de referencia, como `markLine` de la primera serie.
  *
- * Van en una serie y no en una serie propia porque una serie propia aparaceria en la leyenda y en
- * el tooltip como si fuera un dato mas, y una meta no es un dato medido. `silent: true` por lo
- * mismo: la raya no responde al raton.
- *
- * El eje al que se anclan depende de la orientacion, y eso lo decide quien construye: en unas
- * barras horizontales el eje de valores es el X, y anclarlas siempre al Y dibujaria la meta
- * atravesada.
+ * En una serie existente y no en una propia, que apareceria en la leyenda como un dato mas;
+ * `silent: true` por lo mismo. El eje al que se anclan lo decide `horizontal`.
  */
 function referenciasDe(o: OpcionesDeGrafico, horizontal = false) {
   const lineas = (o.referencias ?? []).slice(0, MAX_REFERENCIAS);
@@ -330,10 +274,8 @@ function referenciasDe(o: OpcionesDeGrafico, horizontal = false) {
 /**
  * Un rol del tema a un color concreto, dentro del grafico.
  *
- * El grafico no tiene acceso a las variables CSS —es una funcion pura— asi que trabaja con lo que
- * la paleta le pasa. `primario` y `error` son los dos roles que ya vienen resueltos en ella (el
- * primer color de serie y el segundo, que en el tema institucional son el azul y el rojo); el
- * resto cae al color de texto, que siempre contrasta con la superficie.
+ * El grafico es una funcion pura y no lee variables CSS: trabaja con lo que la paleta le pasa.
+ * `primario` y `error` son sus dos primeros colores de serie; el resto cae al color de texto.
  */
 function colorDeRol(o: OpcionesDeGrafico, color: LineaDeReferencia['color']): string {
   switch (color) {
@@ -369,25 +311,13 @@ function nucleo(o: OpcionesDeGrafico, conDecal: boolean) {
   };
 }
 
+/** Lo comun a los graficos CON ejes. */
 /**
- * Lo comun a los graficos CON ejes.
+ * Empuja hacia dentro las cifras de los puntos que tocan el borde.
  *
- * El nucleo —aria, colores, animacion— lo comparten todos, tambien los que no tienen rejilla
- * (circular y medidor). Lo que separa a estos es exactamente la rejilla y un tooltip por eje:
- * meterlos en el nucleo obligaria a los otros a borrarlos, y borrar una opcion que el padre puso
- * es justo la forma de que una de ellas se cuele algun dia.
- */
-/**
- * Empuja hacia dentro las cifras de los puntos que TOCAN el borde.
- *
- * En una linea, `boundaryGap: false` pone el primer punto justo sobre el eje —que es lo correcto
- * para una serie temporal— y su cifra, centrada encima, se dibujaba pisando el rotulo de la
- * escala: «400312» donde deberia leerse «400» y «312».
- *
- * Ampliar el margen del area no sirve: con `containLabel`, ECharts lo recalcula para que quepan
- * los rotulos y se come lo que se le anada. Lo que si funciona es mover ESA etiqueta, que es lo
- * que `labelLayout` permite hacer sabiendo su indice. Solo se mueven la primera y la ultima: son
- * las unicas que caen fuera del area.
+ * Con `boundaryGap: false` el primer punto cae sobre el eje y su cifra pisa el rotulo de la
+ * escala. Ampliar el margen no sirve —`containLabel` lo recalcula— asi que se mueve la etiqueta
+ * por su indice con `labelLayout`. Solo la primera y la ultima caen fuera del area.
  */
 function desplazarEtiquetasDelBorde(o: OpcionesDeGrafico) {
   if (etiquetasNormalizadas(o.etiquetasDeDato).mostrar !== true) return {};
@@ -407,10 +337,6 @@ function base(o: OpcionesDeGrafico) {
     ...nucleo(o, o.vm.series.length > 1),
     /*
      * El margen inferior reserva sitio para la leyenda cuando la hay.
-     *
-     * `containLabel` cuenta los rotulos del eje, pero NO la leyenda, que se posiciona sobre el
-     * contenedor entero. Con el margen fijo, la leyenda se dibujaba encima de los nombres de las
-     * categorias y ambos quedaban ilegibles.
      */
     grid: { ...margenDe(o, margen), containLabel: true },
     tooltip: tooltipDe(o),
@@ -418,13 +344,7 @@ function base(o: OpcionesDeGrafico) {
   };
 }
 
-/**
- * La etiqueta sobre cada barra o punto.
- *
- * Se formatea con el formateador de SU medida. Sin eso, la cifra sobre la barra saldria en crudo
- * —«2216»— mientras la tabla de datos adjunta dice «2,216 casos», y el mismo numero en la misma
- * tarjeta se leeria de dos formas.
- */
+/** La etiqueta sobre cada barra o punto. */
 const POSICION_ECHARTS: Record<string, string | undefined> = {
   auto: undefined,
   encima: 'top',
@@ -432,13 +352,7 @@ const POSICION_ECHARTS: Record<string, string | undefined> = {
   dentro: 'inside',
 };
 
-/**
- * Los indices del maximo y el minimo de una serie.
- *
- * Son los dos puntos por los que se mira un grafico, y con veinte categorias son los dos unicos
- * que se pueden rotular sin que el resultado sea una maranha. Los nulos no compiten: «no hay
- * respuesta» no es un minimo.
- */
+/** Los indices del maximo y el minimo de una serie. */
 function extremosDe(o: OpcionesDeGrafico, s: number): Set<number> {
   let masAlto: number | undefined;
   let masBajo: number | undefined;
@@ -465,10 +379,6 @@ const etiquetaDeSerie = (o: OpcionesDeGrafico, s: number, posicion: string) => {
     fontSize: 11,
     /*
      * «Solo los extremos» se resuelve en el FORMATTER, devolviendo cadena vacia.
-     *
-     * La alternativa seria apagar la etiqueta punto a punto en los datos, y eso obliga a que cada
-     * constructor convierta su array de valores en un array de objetos: cuatro sitios donde el
-     * dato deja de ser un numero suelto, y cuatro oportunidades de que uno se quede atras.
      */
     formatter: (p: { value: number; dataIndex: number }) => {
       if (extremos && !extremos.has(p.dataIndex)) return '';
@@ -483,13 +393,12 @@ const ejeCategoria = (o: OpcionesDeGrafico) => ({
   data: o.vm.points.map((p) => p.label),
   axisLabel: {
     color: o.paleta.textoAtenuado,
-    /*
-     * Girados, se dejan de esconder.
-     *
-     * `hideOverlap` es lo correcto con los rotulos en horizontal —solapados no se lee ninguno—
-     * pero esconde sin avisar: el grafico acaba ensenando una de cada tres categorias como si las
-     * demas no existieran. Quien gira los rotulos lo hace justamente para verlas todas.
-     */
+  /*
+   * Girados, los rotulos se dejan de esconder.
+   *
+   * `hideOverlap` es lo correcto en horizontal, pero esconde sin avisar; quien gira los rotulos
+   * lo hace para verlos todos.
+   */
     hideOverlap: !o.ejes?.rotarX,
     ...(o.ejes?.rotarX ? { rotate: o.ejes.rotarX } : {}),
   },
@@ -497,10 +406,6 @@ const ejeCategoria = (o: OpcionesDeGrafico) => ({
   axisTick: { show: false },
   /*
    * El titulo del eje se pone A MANO o no se pone.
-   *
-   * Con `DimTribunal.Distrito` en un objeto de 400 px, ECharts lo recortaba a una letra suelta al
-   * borde del grafico: ruido que ademas parecia un fallo. Ahora quien edita escribe «Distrito» si
-   * hace falta, y si no lo escribe no sale nada.
    */
   ...(o.ejes?.tituloX
     ? {
@@ -512,10 +417,6 @@ const ejeCategoria = (o: OpcionesDeGrafico) => ({
     : {}),
   /*
    * El nombre de la dimension NO se rotula en el eje.
-   *
-   * Con `DimTribunal.Distrito` en un objeto de 400 px, ECharts lo recortaba a una letra suelta
-   * —"D"— al borde del grafico: ruido que ademas parecia un fallo. El titulo del objeto ya dice
-   * de que va, y la dimension exacta viaja en la descripcion accesible, que es donde hace falta.
    */
 });
 
@@ -523,11 +424,8 @@ const ejeValor = (o: OpcionesDeGrafico) => ({
   type: 'value' as const,
   show: o.ejes?.mostrarY !== false,
   /*
-   * Los limites, en orden de quien manda.
-   *
-   * El 100 % los impone: el eje va de 0 a 100 porque eso es lo que el grafico mide, y dejar que
-   * alguien lo cambie produciria un «100 %» que no llega al borde. Fuera de ahi manda lo que se
-   * haya escrito a mano, y si no hay nada, ECharts.
+   * Los limites, en orden de quien manda: el 100 % los impone (0 a 100), luego lo escrito a
+   * mano, y si no hay nada, ECharts.
    */
   ...(o.apilado === 'porcentaje'
     ? { max: 100, min: 0 }
@@ -546,17 +444,13 @@ const ejeValor = (o: OpcionesDeGrafico) => ({
   /*
    * El eje empieza en cero salvo que alguien decida lo contrario.
    *
-   * `scale: true` de ECharts es lo contrario: ajusta el minimo a los datos, y con eso una
-   * diferencia del 2 % entre dos barras parece el triple. Que sea una decision explicita y no el
-   * comportamiento por omision es la diferencia entre un grafico y un grafico enganoso.
+   * `scale: true` de ECharts ajusta el minimo a los datos, y con eso una diferencia del 2 % entre
+   * dos barras parece el triple.
    */
   scale: o.ejes?.desdeCero === false,
   /*
-   * El titulo del eje de valores va ROTADO y a media altura, no arriba.
-   *
-   * Arriba —que es donde ECharts lo pone por omision en un eje de valores— se dibujaba justo
-   * encima del rotulo mas alto, «2,500», y los dos quedaban ilegibles. Rotado en el margen
-   * izquierdo es ademas donde lo pone cualquier herramienta de informes.
+   * El titulo del eje de valores va rotado y a media altura: arriba, que es donde ECharts lo pone
+   * por omision, se dibuja encima del rotulo mas alto de la escala.
    */
   ...(o.ejes?.tituloY
     ? {
@@ -569,22 +463,13 @@ const ejeValor = (o: OpcionesDeGrafico) => ({
     : {}),
 });
 
+/** Las series de un grafico de barras, verticales u horizontales. */
 /**
- * Las series de un grafico de barras, verticales u horizontales.
+ * Los datos de una serie, con el color que le toque a cada barra por su valor.
  *
- * Se factoriza porque columnas y barras solo se diferencian en que ejes intercambian y hacia donde
- * redondea la esquina: con dos copias, anadir el apilado significaria acordarse de los dos sitios.
- */
-/**
- * Los datos de una serie, con el color que le toque a cada barra por su VALOR.
- *
- * Solo se convierte el array de numeros en objetos cuando hay reglas y alguna casa. Sin eso se
- * devuelve tal cual: un array de numeros es lo que ECharts consume mas rapido, y convertirlo
- * siempre cargaria todos los graficos con el coste del caso que casi nunca se usa.
- *
- * Al 100 %, la regla se evalua sobre el valor ORIGINAL y no sobre la parte.
- * `datos` ya viene normalizado a porcentaje, asi que «mayor que 900» no casaria nunca — el valor
- * que se dibuja es 42, no 948. La regla habla de casos, no de cuanto ocupa la barra.
+ * Devuelve el array de numeros tal cual salvo que haya reglas y alguna case: ECharts consume los
+ * numeros sueltos mas rapido que los objetos. Al 100 % la regla se evalua sobre el valor ORIGINAL
+ * y no sobre la parte, porque habla de casos y no de cuanto ocupa la barra.
  */
 function barrasConColor(o: OpcionesDeGrafico, datos: (number | null)[], s: number) {
   if (!o.condicional || o.condicional.reglas.length === 0) return datos;
@@ -612,9 +497,6 @@ function seriesDeBarras(o: OpcionesDeGrafico, horizontal: boolean) {
     ...pilaDe(o),
     /*
      * La esquina redondeada solo en la barra SUELTA.
-     *
-     * Apiladas, redondear cada segmento dibuja muescas entre uno y otro y la pila deja de leerse
-     * como un total: parecen trozos sueltos que casualmente estan pegados.
      */
     itemStyle: apilada
       ? {}
@@ -640,14 +522,10 @@ export function opcionesDeBarras(o: OpcionesDeGrafico): Record<string, unknown> 
 }
 
 /**
- * Barras horizontales — el «grafico de barras» de verdad.
+ * Barras horizontales.
  *
- * No es un capricho de estilo: con nombres de categoria largos —«Juzgado de Primera Instancia de
- * Santiago»— las columnas obligan a girar los rotulos o a recortarlos, y en horizontal caben
- * enteros. Es el caso normal cuando la dimension son tribunales o materias.
- *
- * Es el MISMO objeto con los ejes intercambiados; lo unico que no se intercambia es cual es la
- * categoria y cual el valor, y eso lo decide quien construye, no ECharts.
+ * El mismo objeto que las columnas con los ejes intercambiados; cual es la categoria y cual el
+ * valor lo decide quien construye, no ECharts.
  */
 export function opcionesDeBarrasHorizontales(o: OpcionesDeGrafico): Record<string, unknown> {
   return {
@@ -656,11 +534,8 @@ export function opcionesDeBarrasHorizontales(o: OpcionesDeGrafico): Record<strin
     yAxis: {
       ...ejeCategoria(o),
       /*
-       * Se invierte el eje de categorias.
-       *
-       * ECharts numera el eje vertical de abajo arriba, asi que sin esto la primera categoria del
-       * modelo sale ABAJO y la lista se lee al reves de como se ordeno — justo lo que rompe el
-       * «ordenar por valor descendente» que se acaba de anadir.
+       * Se invierte el eje de categorias: ECharts numera el vertical de abajo arriba, asi que sin
+       * esto la primera categoria del modelo sale abajo y la lista se lee al reves.
        */
       inverse: true,
     },
@@ -668,13 +543,7 @@ export function opcionesDeBarrasHorizontales(o: OpcionesDeGrafico): Record<strin
   };
 }
 
-/**
- * Area. Es una linea con el relleno debajo.
- *
- * Sirve para lo que la linea no: cuando importa el VOLUMEN acumulado y no solo la trayectoria.
- * Apilada responde ademas a «de que se compone ese total a lo largo del tiempo», que con lineas
- * sueltas hay que sumar de cabeza.
- */
+/** Area. Es una linea con el relleno debajo. */
 export function opcionesDeArea(o: OpcionesDeGrafico): Record<string, unknown> {
   const datos = valoresApilados(o);
   return {
@@ -691,11 +560,8 @@ export function opcionesDeArea(o: OpcionesDeGrafico): Record<string, unknown> {
       symbolSize: 5,
       lineStyle: { width: 2 },
       /*
-       * Sin apilar, el relleno va semitransparente.
-       *
-       * Con varias areas opacas, la de delante tapa a las de atras y las de atras dejan de
-       * existir. Apiladas no se solapan —cada una ocupa su banda— y ahi el relleno solido es lo
-       * que hace legible la composicion.
+       * Sin apilar, el relleno va semitransparente: con varias areas opacas la de delante tapa a
+       * las de atras. Apiladas no se solapan y el relleno solido hace legible la composicion.
        */
       areaStyle: o.apilado && o.apilado !== 'ninguno' ? {} : { opacity: 0.25 },
       label: etiquetaDeSerie(o, s, 'top'),
@@ -733,11 +599,8 @@ export function opcionesDeLineas(o: OpcionesDeGrafico): Record<string, unknown> 
 /**
  * Las porciones que se dibujan.
  *
- * Un valor NULO se DESCARTA, no se dibuja como cero. `null` significa «no hay respuesta» —una
- * medida ya calculada por la fuente que el objeto colapso—, y una porcion de tamano cero afirma
- * que esa categoria no aporto nada, que es una afirmacion distinta y probablemente falsa. En un
- * circular la consecuencia es peor que en una barra: el total del que todo lo demas es porcentaje
- * cambiaria segun lo que se invente aqui.
+ * Un valor nulo se DESCARTA, no se dibuja como cero: `null` es «no hay respuesta», y una porcion
+ * de cero afirmaria que la categoria no aporto nada y alteraria el total del que sale cada parte.
  */
 function porcionesDe(o: OpcionesDeGrafico): { name: string; value: number }[] {
   const porciones = o.vm.points
@@ -751,11 +614,9 @@ function porcionesDe(o: OpcionesDeGrafico): { name: string; value: number }[] {
 }
 
 /**
- * La etiqueta de una porcion, con el porcentaje calculado AQUI y no con el `{d}` de ECharts.
+ * La etiqueta de una porcion, con el porcentaje calculado aqui y no con el `{d}` de ECharts.
  *
- * `{d}` sale con dos decimales —«47.61 %»— y esos cuatro caracteres de mas son justo los que no
- * caben en una tarjeta estrecha: ECharts los recortaba a «47....», que se lee como un fallo de
- * dibujo. Un decimal dice lo mismo y cabe.
+ * `{d}` sale con dos decimales y no cabe en una tarjeta estrecha.
  */
 const etiquetaDePorcion = (
   modo: EtiquetaCircular,
@@ -791,13 +652,8 @@ const RADIO_EXTERIOR: Record<EtiquetaCircular, string> = {
 /**
  * Pastel y dona — la proporcion, no la magnitud.
  *
- * Es el mismo constructor para los dos objetos del catalogo, y el hueco del centro es una
- * propiedad y no un objeto aparte: el contrato de datos es identico, asi que pasar de pastel a
- * dona no puede costar la configuracion entera. Que en el catalogo esten los dos por separado es
- * cosa de la PALETA —quien busca «dona» tiene que encontrarla por su nombre—, no del dibujo.
- *
- * Solo lee la PRIMERA medida. Un circular con dos medidas no es un circular: son dos, y el
- * contrato lo dice con `measures: { max: 1 }` en vez de dejar que el render elija en silencio.
+ * Un solo constructor para los dos objetos del catalogo: el contrato de datos es identico y el
+ * hueco del centro es una propiedad. Solo lee la primera medida, como fija `measures: { max: 1 }`.
  */
 export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown> {
   const c = o.circular ?? {};
@@ -808,11 +664,8 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
   const modo: EtiquetaCircular = c.etiquetas ?? 'porcentaje';
 
   /*
-   * Aqui la leyenda distingue CATEGORIAS, no series.
-   *
-   * `auto` mira cuantas series hay y en un circular siempre hay una, asi que se ocultaba siempre
-   * —y sin leyenda, un pastel es una rueda de colores sin nombre—. Lo que hay que distinguir es
-   * cada porcion, y eso es lo que se le pasa.
+   * Aqui la leyenda distingue CATEGORIAS, no series: en un circular siempre hay una serie, asi
+   * que `auto` la ocultaria siempre y un pastel sin leyenda es una rueda de colores sin nombre.
    */
   const { legend } = leyendaDe(o, porciones.length > 1);
 
@@ -830,10 +683,7 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
         `${p.name}<br/>${formatear(p.value)} (${p.percent} %)`,
     },
     /*
-     * El total en el centro, solo si hay centro.
-     *
-     * Con hueco cero la cifra caeria encima de las porciones y taparia justo lo que el grafico
-     * dibuja. No es una preferencia: sin anillo no hay hueco donde escribir.
+     * El total en el centro, solo si hay centro: con hueco cero la cifra caeria sobre las porciones.
      */
     ...(c.totalEnElCentro && hueco > 0
       ? {
@@ -854,14 +704,9 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
         /*
          * El radio exterior deja sitio a las etiquetas, que viven FUERA del circulo.
          *
-         * Fuera y no dentro porque dentro habria que escribir sobre el color de la serie, y ese
-         * color lo elige el tema: no hay par de contraste comprobado contra el, que es justo la
-         * garantia que 4.3 no deja romper. Fuera, el texto va sobre la superficie de la tarjeta,
-         * donde el contraste si esta comprobado.
-         *
-         * Y por eso el radio depende de LO QUE DIGA la etiqueta: «52.6 %» ocupa seis caracteres y
-         * «Q3: 31.4 %» casi el doble. Con un radio fijo, el modo que lleva el nombre se recortaba
-         * a «Q3: 31....», que no se lee como un nombre largo sino como un fallo de dibujo.
+         * Dentro habria que escribir sobre el color de la serie, que no tiene par de contraste
+         * comprobado (4.3). Depende del modo de etiqueta porque «52.6 %» y «Q3: 31.4 %» no ocupan
+         * lo mismo.
          */
         radius: [`${hueco}%`, RADIO_EXTERIOR[modo]],
         center: ['50%', '50%'],
@@ -878,12 +723,8 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
                 fontSize: 11,
                 formatter: etiquetaDePorcion(modo, formatear, total),
                 /*
-                 * Las etiquetas largas se alinean al BORDE de la tarjeta, no a la porcion.
-                 *
-                 * Con el radio ya reducido, «Q2: 25.4 %» seguia recortandose a la izquierda: cada
-                 * etiqueta arranca donde acaba su linea guia y ahi ya no queda ancho. Alineadas al
-                 * borde, todas empiezan en el mismo sitio —el maximo disponible— y ECharts estira
-                 * la guia hasta ellas.
+                 * Las etiquetas largas se alinean al borde de la tarjeta y no a la porcion: asi
+                 * todas arrancan en el mismo sitio y ECharts estira la guia hasta ellas.
                  */
                 ...(modo === 'categoria' || modo === 'categoria-porcentaje'
                   ? { alignTo: 'edge' as const, edgeDistance: 2 }
@@ -900,12 +741,10 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
 /* ── Medidor (tacometro) ───────────────────────────────────────────────────────────────────── */
 
 /**
- * El siguiente numero «redondo» por encima de `n`.
+ * El siguiente numero «redondo» por encima de `n`, a 1, 2, 2,5 o 5 por decada.
  *
- * La escala de un medidor no puede salir del maximo de los datos: con 2.216 casos el arco
- * terminaria en 2.216, y manana con 2.220 terminaria en 2.220 — la misma aguja en el mismo sitio
- * para dos cifras distintas, y dos capturas que no se pueden comparar. Redondeando hacia arriba a
- * 1, 2, 2,5 o 5 por decada, la escala solo cambia cuando la magnitud cambia de verdad.
+ * La escala de un medidor no puede salir del maximo de los datos: cambiaria con cada lectura y
+ * la misma aguja en el mismo sitio significaria dos cifras distintas.
  */
 export function escalaBonita(n: number): number {
   if (!Number.isFinite(n) || n <= 0) return 1;
@@ -919,19 +758,13 @@ export function escalaBonita(n: number): number {
 /**
  * Medidor — una cifra contra su meta.
  *
- * Responde a «cuanto llevamos de lo que teniamos que hacer», que es lo que un KPI no dice: la
- * tarjeta da el numero y la variacion contra el periodo anterior, pero no contra el OBJETIVO.
- *
- * El objetivo puede venir del dataset (la segunda medida) o fijarse a mano en la presentacion. La
- * medida manda: si el mapeo trae una, es la que se dibuja, porque un numero escrito en la
- * configuracion no se actualiza y el del dataset si.
+ * El objetivo puede venir del dataset (la segunda medida) o fijarse en la presentacion. La medida
+ * manda: un numero escrito en la configuracion no se actualiza y el del dataset si.
  */
 /**
  * La escala de un medidor: de donde a donde llega el arco.
  *
- * Se extrae del constructor para que el RESPALDO accesible pueda decir la misma escala que dibuja
- * la aguja. Calcularla dos veces daria dos escalas cuando el maximo se deduce, y entonces el
- * respaldo afirmaria un limite que el dibujo no tiene — que es peor que no decirlo.
+ * Vive fuera del constructor para que el respaldo accesible diga la misma escala que la aguja.
  */
 export function escalaDelMedidor(
   medidor: ConfiguracionDeMedidor | undefined,
@@ -980,11 +813,8 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
         axisTick: { show: false },
         splitLine: { show: false },
         /*
-         * Solo los extremos van rotulados.
-         *
-         * `splitNumber: 1` deja dos marcas —el minimo y el maximo— y esas son las que hacen que el
-         * angulo signifique algo. Con la escala entera rotulada, en una tarjeta de dos filas los
-         * numeros se pisan entre si y no se lee ninguno.
+         * Solo los extremos van rotulados: `splitNumber: 1` deja el minimo y el maximo, que son
+         * los que hacen que el angulo signifique algo. Con la escala entera los numeros se pisan.
          */
         splitNumber: 1,
         axisLabel: {
@@ -994,10 +824,7 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
           formatter: (n: number) => formatear(n),
         },
         /*
-         * La cifra, debajo de la aguja.
-         *
-         * Un angulo no es un numero: sin esto, «a poco mas de la mitad» es todo lo que el objeto
-         * comunica, y la cifra exacta habria que ir a buscarla a otro sitio.
+         * La cifra, debajo de la aguja: un angulo no es un numero.
          */
         detail:
           m.mostrarValor === false
@@ -1014,12 +841,10 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
         data: [{ value: valor ?? minimo }],
       },
       /*
-       * El objetivo, como una marca sobre el arco y no como una segunda aguja.
+       * El objetivo, como una marca sobre el arco: una serie aparte con solo su puntero.
        *
-       * Es una serie aparte con SOLO su puntero: una raya fina en el angulo de la meta. Dibujarlo
-       * como un segundo `data` de la misma serie pondria dos agujas iguales y no habria forma de
-       * saber cual es el valor y cual la meta — que es exactamente el tipo de ambiguedad que
-       * 1.4.1 no admite resolver solo con el color.
+       * Como segundo `data` de la misma serie saldrian dos agujas iguales y no habria forma de
+       * saber cual es el valor y cual la meta (1.4.1).
        */
       ...(objetivo === null
         ? []
@@ -1053,11 +878,8 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
 /* ── Combinado de columnas y lineas ────────────────────────────────────────────────────────── */
 
 /**
- * El eje de la derecha: la MISMA escala de valores, con dos diferencias.
- *
- * No repite la cuadricula —dos rejillas superpuestas a distinta altura convierten el fondo en
- * ruido— y su titulo sale de `tituloY2`. Todo lo demas se hereda para que los dos ejes se lean
- * igual: si uno empieza en cero y el otro no, la comparacion entre las dos series es un truco.
+ * El eje de la derecha: la misma escala de valores, sin repetir la cuadricula y con su propio
+ * titulo (`tituloY2`). Todo lo demas se hereda para que los dos ejes se lean igual.
  */
 const ejeValorSecundario = (o: OpcionesDeGrafico) => ({
   ...ejeValor(o),
@@ -1077,12 +899,8 @@ const ejeValorSecundario = (o: OpcionesDeGrafico) => ({
 /**
  * Combinado: unas medidas como columnas y otras como linea.
  *
- * Cuales van de cada forma NO se decide aqui ni por una opcion del panel: lo dice el MAPEO, con
- * un pozo para cada una. Es lo que evita la pregunta imposible de «cual de las cuatro medidas es
- * la linea», y lo que hace que cambiar una medida de forma sea arrastrarla de un pozo al otro.
- *
- * `seriesDeColumna` es cuantas series iniciales son columnas; el resto son lineas. El render
- * garantiza ese orden al construir la lista de medidas, y por eso aqui basta un numero.
+ * Cuales van de cada forma lo dice el MAPEO, con un pozo para cada una, no una opcion del panel.
+ * `seriesDeColumna` es cuantas series iniciales son columnas; el resto son lineas.
  */
 export function opcionesDeCombinado(o: OpcionesDeGrafico): Record<string, unknown> {
   const columnas = Math.min(Math.max(o.seriesDeColumna ?? 1, 0), o.vm.series.length);
@@ -1109,10 +927,8 @@ export function opcionesDeCombinado(o: OpcionesDeGrafico): Record<string, unknow
               symbolSize: 7,
               lineStyle: { width: 2.5 },
               /*
-               * La linea se dibuja POR ENCIMA de las columnas.
-               *
-               * Por omision ECharts apila las series en el orden en que llegan, y la linea
-               * quedaba tapada por las columnas justo en los puntos que importan.
+               * La linea se dibuja por encima de las columnas: por omision ECharts las apila en
+               * el orden en que llegan y la linea queda tapada.
                */
               z: 3,
             }),
@@ -1129,13 +945,9 @@ export function opcionesDeCombinado(o: OpcionesDeGrafico): Record<string, unknow
 /**
  * Dispersion: dos medidas, una contra la otra.
  *
- * Es el unico objeto donde la dimension NO reparte el eje: cada categoria es UN punto, y los dos
- * ejes son medidas. Responde a «se relacionan estas dos cifras», que ningun grafico de barras
- * puede contestar porque en todos ellos una de las dos es la escala.
- *
- * La tercera medida, si la hay, es el TAMANO del punto. Se reparte entre un minimo y un maximo
- * en vez de usar el valor crudo como radio: el area de un circulo crece con el cuadrado del
- * radio, asi que un valor cuatro veces mayor se veria dieciseis veces mas grande.
+ * Es el unico objeto donde la dimension no reparte el eje: cada categoria es un punto y los dos
+ * ejes son medidas. La tercera medida, si la hay, es el TAMANO del punto, repartido entre un
+ * minimo y un maximo — el area de un circulo crece con el cuadrado del radio.
  */
 export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unknown> {
   const conTamano = o.vm.series.length > 2;
@@ -1148,12 +960,8 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
   const formatear = (n: number, s: number) => o.formatear?.(n, s) ?? String(n);
 
   /*
-   * Se reserva alto por el RADIO del punto mas grande.
-   *
-   * `scale` ajusta el eje a los valores, pero el eje no sabe nada del tamano del simbolo: una
-   * burbuja en el valor maximo se dibujaba medio cortada por el borde de arriba, con su etiqueta
-   * fuera de la tarjeta. Los puntos son circulos, no marcas de un pixel, y el margen tiene que
-   * contar con eso.
+   * Se reserva alto por el radio del punto mas grande: `scale` ajusta el eje a los valores, pero
+   * el eje no sabe nada del tamano del simbolo.
    */
   const holgura = (conTamano ? TAMANO_MAXIMO : 12) / 2 + (o.etiquetasDeDato ? 14 : 0);
 
@@ -1168,10 +976,8 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
       textStyle: { color: o.paleta.texto },
       extraCssText: 'box-shadow: none;',
       /*
-       * El tooltip nombra las MEDIDAS, no «x» e «y».
-       *
-       * Es lo unico que ata cada numero a lo que mide: en una dispersion no hay rotulo de
-       * categoria en el eje que lo diga, como si lo hay en unas barras.
+       * El tooltip nombra las MEDIDAS, no «x» e «y»: en una dispersion no hay rotulo de categoria
+       * en el eje que ate cada numero a lo que mide.
        */
       formatter: (p: { name: string; value: (number | null)[] }) => {
         const [x, y] = p.value;
@@ -1192,11 +998,8 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
       },
       show: o.ejes?.mostrarX !== false,
       /*
-       * El titulo del eje horizontal va HORIZONTAL y debajo.
-       *
-       * `ejeValor` lo escribe rotado 90 grados porque en los demas graficos ese eje es el
-       * vertical. Aqui los dos ejes son medidas, y heredar la rotacion dejaba «Ingresados» de
-       * canto bajo el grafico, recortado a una letra suelta.
+       * El titulo del eje horizontal va horizontal y debajo. `ejeValor` lo escribe rotado 90
+       * grados porque en los demas graficos ese eje es el vertical.
        */
       ...(o.ejes?.tituloX
         ? {
@@ -1214,11 +1017,8 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
         type: 'scatter',
         name: o.titulo,
         /*
-         * Cada punto es un OBJETO con `name`, no un array suelto.
-         *
-         * Como array, ECharts no tiene de donde sacar el nombre del punto: el evento de clic
-         * llega con `name` vacio y el filtrado cruzado no hace nada. Se veia el gesto —el cursor
-         * cambia, el punto se resalta— y no pasaba nada, que es peor que no ofrecerlo.
+         * Cada punto es un objeto con `name`, no un array suelto: como array, el evento de clic
+         * llega con `name` vacio y el filtrado cruzado no recibe la categoria.
          */
         data: o.vm.points.map((p) => ({
           name: p.label,
@@ -1255,14 +1055,9 @@ const TAMANO_MAXIMO = 42;
 /**
  * Embudo — la caida entre etapas.
  *
- * No reordena POR SU CUENTA. Es la diferencia con un circular, y no es un detalle: las etapas de
- * un proceso tienen un orden propio —«ingresado», «admitido», «fallado»— y ordenarlas por tamano
- * lo destruiria. Que la segunda etapa sea mayor que la primera es una anomalia que hay que poder
- * VER, no un error de dibujo que haya que esconder ordenando.
- *
- * Quien quiera el embudo clasico —de mayor a menor— lo pide en «Ordenar», como en cualquier otro
- * objeto, y entonces el orden se aplica al MODELO antes de llegar aqui. Lo que no pasa es que se
- * ordene solo.
+ * No reordena por su cuenta: las etapas tienen un orden propio y ordenarlas por tamano lo
+ * destruiria. Que la segunda sea mayor que la primera es una anomalia que hay que poder ver. El
+ * orden de mayor a menor se pide en «Ordenar» y se aplica al modelo antes de llegar aqui.
  */
 export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> {
   const etapas = o.vm.points
@@ -1274,10 +1069,8 @@ export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> 
   const primero = etapas[0]?.valor ?? 0;
 
   /*
-   * El porcentaje se calcula sobre la etapa que toque, y con la division por cero cerrada.
-   *
-   * Una etapa de referencia en cero no da «caida infinita»: da una comparacion sin sentido, y la
-   * raya lo dice mejor que un numero inventado.
+   * El porcentaje se calcula sobre la etapa que toque, con la division por cero cerrada: una
+   * etapa de referencia en cero no da «caida infinita» sino una comparacion sin sentido.
    */
   const parte = (valor: number, indice: number) => {
     const base = comparar === 'anterior' ? (etapas[indice - 1]?.valor ?? valor) : primero;
@@ -1313,21 +1106,16 @@ export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> 
         type: 'funnel',
         name: o.vm.series[0] ?? o.titulo,
         /*
-         * El embudo se estrecha a la IZQUIERDA del objeto y deja la derecha para las etiquetas.
+         * El embudo se estrecha a la izquierda y deja la derecha para las etiquetas.
          *
-         * Centrado y con las etiquetas dentro, el texto cae sobre el relleno de la serie: un color
-         * que elige el tema y contra el que no hay par de contraste comprobado (4.3). En azul
-         * oscuro, «Q1: 29.4 %» quedaba casi ilegible. Fuera, el texto va sobre la superficie de la
-         * tarjeta, que es justo la pareja que el tema si garantiza.
+         * Dentro, el texto caeria sobre el relleno de la serie, un color sin par de contraste
+         * comprobado (4.3). Fuera va sobre la superficie de la tarjeta, que el tema si garantiza.
          */
         left: '2%',
         right: '42%',
         /*
-         * Se reserva alto arriba y abajo, y NO se deja en cero.
-         *
-         * ECharts reparte el alto entre las etapas y dibuja cada trapecio hasta el borde del area.
-         * Con el area pegada al borde del objeto, la primera y la ultima quedaban cortadas por la
-         * mitad —con su etiqueta dentro— y parecia que faltaban etapas.
+         * Se reserva alto arriba y abajo: ECharts dibuja cada trapecio hasta el borde del area, y
+         * pegada al borde del objeto la primera y la ultima etapa quedan cortadas.
          */
         top: 12,
         bottom: 12,
@@ -1359,14 +1147,10 @@ export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> 
 /**
  * Cascada — de que se compone una diferencia.
  *
- * ECharts no tiene un tipo `waterfall`: se construye con DOS series de barras apiladas, una
- * invisible que hace de zocalo y otra visible con la contribucion encima. Es la tecnica estandar,
- * y lo que hay que cuidar es que el zocalo no aparezca en ningun sitio donde signifique algo: ni
- * en la leyenda, ni en el tooltip, ni al pasar el raton.
- *
- * El color distingue subidas de bajadas, y por eso la etiqueta lleva SIEMPRE el signo: con el
- * color como unico medio, una bajada y una subida serian indistinguibles al imprimir en gris o
- * para quien no separa rojo y verde (WCAG 1.4.1).
+ * ECharts no tiene un tipo `waterfall`: son DOS series de barras apiladas, una invisible que hace
+ * de zocalo y otra visible con la contribucion encima. El zocalo no puede aparecer en la leyenda,
+ * en el tooltip ni al pasar el raton. La etiqueta lleva siempre el signo, porque el color no
+ * puede ser el unico medio de distinguir subida de bajada (WCAG 1.4.1).
  */
 export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown> {
   const puntos = o.vm.points.map((p) => ({ label: p.label, valor: p.values[0] ?? 0 }));
@@ -1376,8 +1160,8 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
   /*
    * El zocalo de cada barra: donde acabo la anterior, o el suelo del tramo si el valor baja.
    *
-   * Con valores negativos, la barra visible cuelga DESDE el acumulado anterior, asi que el zocalo
-   * es el acumulado ya restado. Sin esa distincion, una bajada se dibujaba hacia arriba.
+   * Con valores negativos la barra visible cuelga desde el acumulado anterior, asi que el zocalo
+   * es el acumulado ya restado.
    */
   const zocalos: number[] = [];
   const alturas: number[] = [];
@@ -1404,13 +1188,8 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
 
   return {
     /*
-     * La base se construye con la leyenda YA OCULTA, no se oculta despues.
-     *
-     * La leyenda no dice nada util aqui —hay una sola medida— y ademas nombraria el zocalo, asi
-     * que se apaga. Apagarla DESPUES de `base(o)` dejaba el margen que `leyendaDe` habia
-     * reservado para ella: con `leyenda: 'derecha'` puesto a mano, la cascada cedia una franja
-     * del ancho a una leyenda que nunca se dibuja. Pidiendosela oculta a `base`, el margen y la
-     * leyenda salen de la misma decision y no pueden discrepar.
+     * La base se construye con la leyenda ya oculta, no se oculta despues: apagarla tras `base(o)`
+     * dejaria el margen que `leyendaDe` ya habia reservado para ella.
      */
     ...base({ ...o, leyenda: 'oculta' }),
     legend: { show: false },
@@ -1455,11 +1234,8 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
           color: o.paleta.texto,
           fontSize: 11,
           /*
-           * El SIGNO va en la etiqueta, siempre.
-           *
-           * El color ya distingue subida de bajada, pero el color no puede ser el unico medio de
-           * transmitir la informacion: impreso en gris, o para quien no separa rojo y verde, «+180»
-           * y «-180» serian la misma barra (WCAG 1.4.1).
+           * El signo va en la etiqueta, siempre: el color distingue subida de bajada, pero no
+           * puede ser el unico medio de transmitir esa informacion (WCAG 1.4.1).
            */
           formatter: (p: { dataIndex: number }) => {
             const esTotal = conTotal && p.dataIndex === puntos.length;
@@ -1477,21 +1253,15 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
 /**
  * Mapa de arbol — la composicion cuando hay demasiadas partes para un circular.
  *
- * Un circular con veinte porciones no se puede leer: las pequenas se vuelven hilos sin sitio para
- * su nombre. Un rectangulo, en cambio, sigue teniendo dos dimensiones donde escribir, y por eso
- * este es el objeto de la composicion con muchas categorias.
- *
- * Con DOS dimensiones dibuja dos niveles: el primero agrupa y el segundo reparte dentro. Es la
- * jerarquia, que es lo otro que un circular no puede hacer.
+ * Un rectangulo conserva dos dimensiones donde escribir el nombre; una porcion fina, no. Con dos
+ * dimensiones dibuja dos niveles: el primero agrupa y el segundo reparte dentro.
  */
 export function opcionesDeMapaDeArbol(o: OpcionesDeGrafico): Record<string, unknown> {
   const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
 
   /*
-   * Las etiquetas del modelo vienen compuestas con « / » cuando hay dos dimensiones.
-   *
-   * Es lo que `toCategorical` hace para todos los objetos, y aqui es exactamente lo que hace
-   * falta deshacer: el primer trozo es el grupo y el segundo la hoja.
+   * Las etiquetas del modelo vienen compuestas con « / » cuando hay dos dimensiones, y aqui hay
+   * que deshacerlo: el primer trozo es el grupo y el segundo la hoja.
    */
   const raices = new Map<string, { name: string; value: number }[]>();
   let jerarquico = false;
@@ -1529,11 +1299,8 @@ export function opcionesDeMapaDeArbol(o: OpcionesDeGrafico): Record<string, unkn
         top: 0,
         bottom: 0,
         /*
-         * Sin la barra de migas ni el zoom por rueda.
-         *
-         * Las dos convierten el objeto en un navegador con estado propio, y el estado de lo que se
-         * ve vive en la URL (4.11): un zoom que no esta en la direccion no se comparte ni se marca,
-         * y quien abriera el enlace veria otra cosa.
+         * Sin barra de migas ni zoom por rueda: las dos dan al objeto estado propio, y el estado
+         * de lo que se ve vive en la URL (4.11).
          */
         breadcrumb: { show: false },
         roam: false,
@@ -1545,13 +1312,11 @@ export function opcionesDeMapaDeArbol(o: OpcionesDeGrafico): Record<string, unkn
         label: {
           show: true,
           /*
-           * Aqui el blanco SI se fija a mano, y es la unica excepcion del repositorio.
+           * El blanco fijado a mano, unica excepcion del repositorio.
            *
-           * En un mapa de arbol el rectangulo ES el dato: no hay «fuera» donde poner la etiqueta,
-           * como si lo hay en un circular o un embudo. Y los ocho colores de serie del tema son
-           * saturados por construccion —la puerta de contraste lo comprueba—, asi que el blanco es
-           * el unico valor que contrasta con todos ellos. Un rol del tema pensado para texto sobre
-           * superficie no lo haria.
+           * En un mapa de arbol el rectangulo es el dato y no hay «fuera» donde poner la etiqueta.
+           * Los ocho colores de serie son saturados por construccion —la puerta de contraste lo
+           * comprueba— y el blanco es el unico valor que contrasta con todos.
            */
           color: '#fff',
           fontSize: 12,
@@ -1599,11 +1364,8 @@ const CONSTRUCTORES: Record<TipoDeGrafico, (o: OpcionesDeGrafico) => Record<stri
 };
 
 /**
- * Un mapa y no una cadena de ternarios.
- *
- * Con `Record<TipoDeGrafico, ...>`, anadir un tipo al union sin escribir su constructor es un
- * error de compilacion. Con ternarios, el tipo nuevo caeria en silencio en el `else` y se
- * dibujaria como columnas — un fallo que no revienta y que solo se ve mirando la pantalla.
+ * Un mapa y no una cadena de ternarios: con `Record<TipoDeGrafico, ...>`, anadir un tipo al union
+ * sin escribir su constructor es un error de compilacion.
  */
 export function opcionesDe(tipo: TipoDeGrafico, o: OpcionesDeGrafico): Record<string, unknown> {
   return (CONSTRUCTORES[tipo] ?? opcionesDeBarras)(o);
@@ -1612,15 +1374,9 @@ export function opcionesDe(tipo: TipoDeGrafico, o: OpcionesDeGrafico): Record<st
 /**
  * Umbral a partir del cual conviene Canvas.
  *
- * Canvas es el renderizador POR DEFECTO, como pide el pliego, porque aguanta volumen y
- * interaccion sin degradarse. SVG se reserva para el caso en el que "resulta tecnicamente
- * conveniente", y ese caso tiene un nombre concreto: IMPRIMIR. Un canvas impreso es un mapa de
- * bits a la resolucion de la pantalla, es decir, borroso; un SVG sale nitido a cualquier tamano.
- *
- * El numero existe para el caso contrario: por debajo de el, un SVG no cuesta nada y trae
- * ventajas —se puede seleccionar, se inspecciona en las herramientas del navegador—, asi que no
- * hay motivo para rasterizar. Por encima, cada elemento del SVG es un nodo del DOM y el
- * navegador se ahoga.
+ * Canvas es el renderizador por defecto porque aguanta volumen e interaccion. Por debajo del
+ * umbral un SVG no cuesta nada y se puede seleccionar e inspeccionar; y al IMPRIMIR siempre se
+ * usa SVG, porque un canvas impreso es un mapa de bits a la resolucion de la pantalla.
  */
 export const UMBRAL_DE_ELEMENTOS = 400;
 

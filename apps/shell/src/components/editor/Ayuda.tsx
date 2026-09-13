@@ -3,26 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Icono } from '../iconos/Icono';
 
-/**
- * La explicacion de un control, detras de un icono.
- *
- * Estaba como parrafo debajo de cada rotulo — «La dimension que reparte las barras», «Opcional.
- * Agrupa las barras de cada categoria» — y en un panel de 340 px eso es media pantalla de texto
- * que se lee una vez y estorba siempre despues. La explicacion sigue haciendo falta la primera
- * vez; lo que no hace falta es tenerla delante la vez ciento.
- *
- * Tres reglas de 1.4.13, que es el criterio que gobierna cualquier cosa que aparezca al pasar por
- * encima, y que un `title` del navegador NO cumple:
- *
- *  - **Se descarta**: Escape la cierra sin mover el puntero.
- *  - **Se puede senalar**: el raton puede entrar en el globo sin que desaparezca —por eso el
- *    `onMouseLeave` va en el envoltorio y no en el boton—, que es lo que permite seleccionar el
- *    texto o leerlo con una lupa.
- *  - **Persiste**: se va cuando se va el foco o el puntero, nunca sola por tiempo.
- *
- * Es un boton y no un `<span>` con `title` porque tiene que alcanzarse con el tabulador: quien
- * navega con teclado necesita llegar a la explicacion igual que quien usa raton.
- */
+/** La explicacion de un control, detras de un icono. */
 export function Ayuda({ texto, de }: { texto: string; de: string }) {
   const [abierto, setAbierto] = useState(false);
   const id = useId();

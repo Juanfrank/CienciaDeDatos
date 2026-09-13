@@ -10,19 +10,7 @@ import {
   esElemento,
 } from './elementos';
 
-/**
- * Contenedores: objetos que agrupan a otros objetos.
- *
- * Un contenedor ocupa una celda de la rejilla principal como cualquier otro objeto, y dentro tiene
- * SU PROPIA rejilla. Esa es la parte que hace que funcionen: si los hijos se posicionaran contra la
- * rejilla del modulo, mover el contenedor obligaria a recolocar todo lo que lleva dentro, y
- * «agrupar» no significaria nada.
- *
- * Todos llevan titulo, subtitulo e icono opcionales, con el mismo patron visual y los mismos
- * interruptores que un objeto visual — no una cabecera propia parecida pero distinta. Un contenedor
- * es un objeto: si su cabecera se configurara aparte, la personalizacion volveria a depender de
- * que clase de cosa se selecciono, que es justo lo que el estandar minimo cerro.
- */
+/** Contenedores: objetos que agrupan a otros objetos. */
 
 /** Posicion dentro de una rejilla, igual que `GridPosition` de module-model. */
 export interface PosicionEnRejilla {
@@ -32,26 +20,14 @@ export interface PosicionEnRejilla {
   h: number;
 }
 
-/**
- * Un objeto dentro de un contenedor.
- *
- * Es la misma forma que un `GridItem` del modulo, a proposito: asi el mismo componente dibuja la
- * rejilla de dentro y la de fuera, y el dia que un contenedor lleve otro contenedor no hace falta
- * nada nuevo.
- */
+/** Un objeto dentro de un contenedor. */
 export interface ItemAnidado {
   id: string;
   instance: ObjectInstance;
   position: PosicionEnRejilla;
 }
 
-/**
- * Un panel de contenido.
- *
- * Los contenedores que no tienen pestanas tienen exactamente UNO. Modelarlo asi y no con «items
- * sueltos, y ademas pestanas» evita el estado imposible de un contenedor con las dos cosas, y hace
- * que anadir pestanas a un contenedor simple sea anadir un panel, no migrar su contenido.
- */
+/** Un panel de contenido. */
 export interface PanelDeContenedor {
   panelId: string;
   /** Rotulo de la pestana. Se ignora en los contenedores de un solo panel. */
@@ -61,14 +37,7 @@ export interface PanelDeContenedor {
 
 /* ── Ejes, lados y tamanos ─────────────────────────────────────────────────────────────────── */
 
-/**
- * El eje por el que se desplaza un contenedor desplazable. UNO, nunca los dos.
- *
- * Dos barras a la vez obligan a buscar el contenido en un plano en lugar de en una linea: no se ve
- * cuanto falta por ninguno de los dos lados, y el gesto de rueda deja de ser predecible porque
- * depende de que eje crea el navegador que se esta moviendo. Por eso el modelo ni siquiera admite
- * «ambos» — no es una opcion que se desaconseje, es una que no existe.
- */
+/** El eje por el que se desplaza un contenedor desplazable. UNO, nunca los dos. */
 export const EJES = ['x', 'y'] as const;
 export type Eje = (typeof EJES)[number];
 
@@ -83,13 +52,7 @@ export interface ConfiguracionDeContenedorDesplazable extends ConfiguracionDeCon
   eje?: Eje;
 }
 
-/**
- * Contenedor ampliable: ensena una parte y se abre a una ventana con su propia rejilla.
- *
- * La rejilla de la ventana es INDEPENDIENTE de la de la tarjeta. Reutilizar la misma haria que
- * ampliar solo estirase lo mismo, y lo que se quiere es lo contrario: en la tarjeta caben dos
- * cosas y en la ventana caben diez, colocadas de otra forma.
- */
+/** Contenedor ampliable: ensena una parte y se abre a una ventana con su propia rejilla. */
 export interface ConfiguracionDeContenedorAmpliable extends ConfiguracionDeContenedorSimple {
   /** Columnas de la rejilla de la ventana ampliada. */
   columnasAmpliado?: number;
@@ -151,18 +114,7 @@ export interface ProblemaDeContenedor {
   problema: string;
 }
 
-/**
- * Lo que un contenedor tiene que cumplir antes de guardarse.
- *
- * Se comprueba en el MISMO sitio que el resto de la configuracion (4.2) y no al dibujar: un
- * contenedor con dos hijos superpuestos, o uno con pestanas sin ninguna pestana, es un error de
- * configuracion como un campo inexistente, y tiene que bloquear la publicacion igual.
- *
- * La rejilla interna se comprueba con las mismas reglas que la de fuera —dentro de los limites, sin
- * solapamiento— pero aqui, y no delegando en `validateLayout` de module-model, porque este paquete
- * no puede depender de aquel. La comprobacion es corta y la alternativa seria invertir la dependencia
- * para ahorrar quince lineas.
- */
+/** Lo que un contenedor tiene que cumplir antes de guardarse. */
 export function validarContenedor(
   itemId: string,
   instance: { objectId: string; configuracion?: unknown },
@@ -249,16 +201,7 @@ export function columnasDe(objectId: string, config: ConfiguracionDeContenedor |
 
 /* ── Lo que trae un objeto recien puesto ───────────────────────────────────────────────────── */
 
-/**
- * La configuracion inicial de un elemento o un contenedor.
- *
- * Vive AQUI y no en el editor porque hay dos caminos que crean objetos —el panel y el sembrado de
- * modulos de ejemplo— y con dos copias de los valores por defecto un contenedor sembrado y uno
- * puesto a mano acabarian pareciendose solo por casualidad.
- *
- * Nunca devuelve un contenedor vacio de paneles: un contenedor sin ningun panel no tiene donde
- * poner lo que se le arrastre, y el primer gesto que alguien hace con el fallaria en silencio.
- */
+/** La configuracion inicial de un elemento o un contenedor. */
 export function configuracionInicial(
   objectId: string,
 ):

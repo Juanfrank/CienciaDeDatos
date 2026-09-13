@@ -11,18 +11,7 @@ import { COOKIE_SESION, cerrarSesion, obtenerSesion } from '../../../src/server/
 
 export const runtime = 'nodejs';
 
-/**
- * Inicio de sesion — seccion 4.7.
- *
- * Autentica con el proveedor local: Argon2id con pimienta, TOTP obligatorio y bloqueo con
- * backoff, todo dentro de `LocalIdentityProvider`. Esta ruta no implementa nada de eso; solo
- * traduce el resultado a una cookie y a un codigo HTTP. Esa separacion es la que permite que la
- * politica de contrasenas se pruebe sin levantar un servidor.
- *
- * El mensaje de error es DELIBERADAMENTE el mismo para credencial inexistente y para contrasena
- * incorrecta. Distinguirlos convierte la pantalla en un comprobador de correos institucionales
- * validos, que es justo lo que un ataque necesita antes de empezar.
- */
+/** Inicio de sesion — seccion 4.7. */
 const MENSAJES: Record<string, string> = {
   'credenciales-invalidas': 'Correo o contrasena incorrectos.',
   'cuenta-bloqueada': 'La cuenta esta bloqueada temporalmente por intentos fallidos.',

@@ -5,18 +5,7 @@ import type {
   VisualObjectDefinition,
 } from './types';
 
-/**
- * Validacion de objetos adjuntados.
- *
- * Un complemento no es un objeto independiente: no ocupa una celda de la rejilla y no se enlaza
- * contra un dataset propio, sino que lee el de su anfitrion. Eso deja dos errores simetricos que
- * hay que rechazar por igual — colocar un complemento como objeto suelto, y adjuntar un objeto
- * que no es complemento — y ambos son de configuracion, asi que tienen que detectarse al GUARDAR
- * el modulo y no al dibujarlo. Es el mismo criterio de 4.2 que ya rige el mapeo de campos.
- *
- * Devuelve problemas en vez de lanzar, por la misma razon que `validateBinding`: el editor tiene
- * que poder dibujar lo que hay y senalarlo, no quedarse en blanco.
- */
+/** Validacion de objetos adjuntados. */
 
 export type BuscarDefinicion = (objectId: string) => VisualObjectDefinition | undefined;
 

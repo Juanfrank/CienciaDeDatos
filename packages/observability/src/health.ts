@@ -1,13 +1,6 @@
 import { POPULATOR_HEARTBEAT_KEY, type PopulatorHeartbeat, summarizeHeartbeat } from './heartbeat';
 
-/**
- * Endpoint de salud — seccion 7.
- *
- * Lo usan las sondas de App Service para decisiones de reinicio y enrutamiento, asi que la
- * distincion entre "degradado" y "caido" importa: un cache vencido o un job atrasado NO deben
- * provocar que se reinicie una instancia que esta sirviendo correctamente el ultimo dato
- * valido conocido (6.9). Solo lo que impide servir marca la aplicacion como caida.
- */
+/** Endpoint de salud — seccion 7. */
 
 export type HealthStatus = 'ok' | 'degradado' | 'caido';
 

@@ -17,19 +17,7 @@ import { cargarModulo } from './datos';
 import { moduloServibleParaUsuario } from './cicloDeVida';
 import { leerPersonalizacion } from './personalizacion';
 
-/**
- * Cableado de la exportacion en el shell (4.9 con la restriccion de 5.3).
- *
- * La cola se apoya en el mismo store en disco que comparten el shell y el job: asi el trabajo
- * encolado por una instancia lo puede procesar otra, que es la situacion normal en App Service
- * con escalado horizontal. En Azure este mismo puerto se cablea a Azure Queue Storage.
- *
- * El resolutor es la pieza que importa para la seguridad. Llama a `cargarModulo` con el usuario
- * y el equipo QUE PIDIERON la exportacion, asi que el archivo sale filtrado por el ambito
- * efectivo de esa persona, resuelto EN EL MOMENTO DE GENERARLO — no en el de encolar. Y
- * `cargarModulo` lee del cache, nunca del conector (principio 2): exportar no abre un camino de
- * lectura paralelo.
- */
+/** Cableado de la exportacion en el shell (4.9 con la restriccion de 5.3). */
 
 export const colaExportaciones = new StoreExportQueue({ store: cacheL2 });
 
@@ -135,16 +123,7 @@ export async function encolarExportacion(input: EncolarInput) {
   return colaExportaciones.encolar(request);
 }
 
-/**
- * Las mismas cifras, con el formato de la pantalla.
- *
- * Es la unica forma de que un PDF no contradiga al objeto del que salio. Se calcula aqui —en el
- * shell— y no en el paquete de exportacion porque el formato vive en la presentacion de la
- * instancia, y ese paquete no puede depender del repositorio de objetos.
- *
- * Las columnas de dimension se dejan tal cual: formatear un nombre de distrito no significa nada,
- * y `formateadorDeMedida` solo sabe de numeros.
- */
+/** Las mismas cifras, con el formato de la pantalla. */
 function textosDe(instance: ObjectInstance, proyectado: QueryResult): string[][] {
   // Un formateador POR COLUMNA y no por celda: en una tabla larga son miles de llamadas, y el
   // formato depende de la medida, que es la columna.
@@ -156,13 +135,7 @@ function textosDe(instance: ObjectInstance, proyectado: QueryResult): string[][]
   );
 }
 
-/**
- * Lo que el objeto dice ademas de sus cifras.
- *
- * Una meta y una regla de color son parte del mensaje, no decoracion: en pantalla se ven como una
- * raya y como una cifra en rojo, y en un archivo hay que escribirlas o se pierden. Un PDF con una
- * tabla donde no se ve por que una cifra estaba marcada es peor que uno que lo explica.
- */
+/** Lo que el objeto dice ademas de sus cifras. */
 function notasDe(instance: ObjectInstance): string[] {
   const p = instance.presentacion;
   const notas: string[] = [];

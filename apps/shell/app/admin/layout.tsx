@@ -6,15 +6,7 @@ import { esAdministrador } from '../../src/server/admin';
 import { indicadoresDeAdmin } from '../../src/server/admin';
 import { exigirSesionDePagina } from '../../src/server/sesion';
 
-/**
- * Panel de administracion — seccion 4.10.8.
- *
- * "El rol Administrador necesita una superficie de gestion DEDICADA, SEPARADA de los modulos de
- * negocio." De ahi que viva bajo /admin con su propia disposicion.
- *
- * La comprobacion de permiso se hace aqui y ademas en cada handler de /api/admin. Dos veces a
- * proposito: esta evita que se dibuje la pagina, la otra evita que sirva de algo saltarsela.
- */
+/** Panel de administracion — seccion 4.10.8. */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const sesion = await exigirSesionDePagina();
 

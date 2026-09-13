@@ -4,23 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { EstadoDeCuentaLocal } from "../../server/identidad";
 
-/**
- * Cuentas locales y sus dos vias de recuperacion — seccion 4.7.2.
- *
- * "Bloqueo de cuenta tras un numero configurable de intentos fallidos, con backoff progresivo —
- * NO BLOQUEO INDEFINIDO SIN VIA DE RECUPERACION."
- *
- * Las dos vias son distintas a proposito:
- *
- *  - **Desbloquear** pone el contador a cero sin tocar la contraseña. Es lo que necesita quien
- *    se equivoco cinco veces y ya la recuerda. Obligarle a cambiarla convertiria un error de
- *    dedos en una credencial nueva, que es peor: mas contraseñas nuevas, mas apuntadas en papel.
- *  - **Restablecer** emite un token de un solo uso con expiracion corta.
- *
- * El canal por el que viaja el token se muestra siempre. Cuando no es el correo institucional,
- * quien opera tiene que saberlo: de ese canal depende que todo el flujo sea seguro, y es el
- * Administrador —no el codigo— quien responde de haber verificado la identidad.
- */
+/** Cuentas locales y sus dos vias de recuperacion — seccion 4.7.2. */
 export function CuentasLocales({
   cuentas,
   canal,

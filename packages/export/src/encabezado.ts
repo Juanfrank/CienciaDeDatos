@@ -1,22 +1,10 @@
 import type { ExportRequest } from './types';
 
-/**
- * Encabezado comun a los cuatro formatos.
- *
- * Lleva SIEMPRE la procedencia de la vista (4.6), los filtros aplicados y la marca de tiempo del
- * dato (4.8). Un archivo exportado circula por correo, se imprime y se archiva: sin esos tres
- * datos, quien lo reciba no puede saber si esta mirando la vista institucional o la version
- * personalizada de alguien, ni de cuando son las cifras.
- */
+/** Encabezado comun a los cuatro formatos. */
 export interface Encabezado {
   titulo: string;
   lineas: string[];
-  /**
-   * Procedencia (4.6) como DATO, no solo como texto dentro de `lineas`.
-   *
-   * Excel y PDF la destacan en color y en negrita; CSV y SVG solo pueden escribirla. Si cada
-   * formato tuviera que mirar la peticion para saberlo, uno acabaria olvidandose.
-   */
+  /** Procedencia (4.6) como DATO, no solo como texto dentro de `lineas`. */
   personalizada: boolean;
   /** Quien exporta, para los metadatos de autor del archivo. */
   autor: string;

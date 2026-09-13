@@ -2,17 +2,7 @@ import type { ModuleDefinition } from '@app/module-model';
 import { escribir, leer } from './almacenCompartido';
 import { modulosDemo } from './modulos';
 
-/**
- * Almacen de definiciones de modulo — secciones 4.1 y 4.2.
- *
- * Hasta ahora los modulos eran un `const` en `modulos.ts`: para crear uno habia que editar
- * codigo y desplegar. El editor de 4.2 ESCRIBE definiciones, asi que hace falta un almacen, y
- * por el mismo motivo que el gobierno tiene que ser compartido entre instancias y asincrono —un
- * puerto sincrono no lo puede implementar una base de datos—.
- *
- * `modulos.ts` sigue existiendo como SEMILLA. Que el estado inicial sea codigo determinista es
- * lo que hace que las pruebas y el arranque en limpio partan siempre del mismo sitio.
- */
+/** Almacen de definiciones de modulo — secciones 4.1 y 4.2. */
 export interface ModuleStore {
   list(): Promise<ModuleDefinition[]>;
   get(moduleId: string): Promise<ModuleDefinition | undefined>;
