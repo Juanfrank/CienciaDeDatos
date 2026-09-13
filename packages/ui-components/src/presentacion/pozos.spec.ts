@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { catalogoInicial } from '../registry/catalog';
+import { initialCatalog } from '../registry/catalog';
 import type { ObjectInstance } from '../registry/types';
 import {
   cabeEnRanura,
@@ -116,7 +116,7 @@ describe('compatibilidad con lo guardado antes', () => {
     });
     const puesta = conCampoEnRanura(antigua, RANURAS, 'eje-y', 'CasosPendientes');
 
-    expect(puesta.binding.ranuras).toEqual({
+    expect(puesta.binding.slots).toEqual({
       'eje-x': ['DimTribunal.Distrito'],
       serie: [],
       'eje-y': ['CasosPendientes'],
@@ -125,7 +125,7 @@ describe('compatibilidad con lo guardado antes', () => {
 
   it('una asignacion guardada con mas campos de los que caben se recorta, no desborda', () => {
     // Pasa al bajar el cupo de una ranura entre versiones del objeto.
-    const i = objectInstance({ ranuras: { 'eje-x': ['A', 'B'] } });
+    const i = objectInstance({ slots: { 'eje-x': ['A', 'B'] } });
     expect(ranurasDe(i, RANURAS).get('eje-x')).toEqual(['A']);
   });
 
@@ -182,7 +182,7 @@ describe('validarRanuras', () => {
     // Pasa al cambiar de version: sin el aviso, quedarian mapeados sin que el editor los muestre
     // ni nadie pueda quitarlos.
     const i = objectInstance({
-      ranuras: { 'eje-x': ['D'], 'eje-y': ['M'], 'ranura-vieja': ['Z'] },
+      slots: { 'eje-x': ['D'], 'eje-y': ['M'], 'ranura-vieja': ['Z'] },
     });
     const problems = validarRanuras(i, RANURAS);
     expect(problems.map((p) => p.ranura)).toContain('ranura-vieja');
@@ -195,11 +195,11 @@ describe('validarRanuras', () => {
 
 describe('ranurasPorDefecto', () => {
   it('una por tipo, con el cupo del contrato', () => {
-    const ranuras = ranurasPorDefecto({
+    const slots = ranurasPorDefecto({
       dimensions: { min: 1, max: 2 },
       measures: { min: 1, max: 4 },
     });
-    expect(ranuras.map((r) => [r.id, r.min, r.max])).toEqual([
+    expect(slots.map((r) => [r.id, r.min, r.max])).toEqual([
       ['dimensiones', 1, 2],
       ['medidas', 1, 4],
     ]);
@@ -208,27 +208,27 @@ describe('ranurasPorDefecto', () => {
   it('sin ranuras de un tipo, no hay ranura de ese tipo', () => {
     // Un segmentador no mapea medidas: ofrecerle una ranura de medidas vacia invita a preguntarse
     // que se pone ahi.
-    const ranuras = ranurasPorDefecto({
+    const slots = ranurasPorDefecto({
       dimensions: { min: 1, max: 1 },
       measures: { min: 0, max: 0 },
     });
-    expect(ranuras.map((r) => r.tipo)).toEqual(['dimension']);
+    expect(slots.map((r) => r.tipo)).toEqual(['dimension']);
   });
 });
 
 describe('las ranuras que declara el catalogo cuadran con su contrato', () => {
-  const versiones = catalogoInicial.flatMap((o) =>
+  const versiones = initialCatalog.flatMap((o) =>
     o.versions.map((v) => ({ nombre: `${o.objectId}@${v.version}`, contrato: v.dataContract })),
   );
 
   it.each(versiones.map((v) => [v.nombre, v] as const))(
     '%s no promete mas ranuras de las que admite',
     (_n, { contrato }) => {
-      const ranuras = contrato.pozos ?? [];
-      if (ranuras.length === 0) return;
+      const slots = contrato.wells ?? [];
+      if (slots.length === 0) return;
 
       const cupo = (tipo: 'dimension' | 'medida') =>
-        ranuras.filter((r) => r.tipo === tipo).reduce((n, r) => n + r.max, 0);
+        slots.filter((r) => r.tipo === tipo).reduce((n, r) => n + r.max, 0);
 
       expect(cupo('dimension')).toBe(contrato.dimensions.max);
       expect(cupo('medida')).toBe(contrato.measures.max);
@@ -243,11 +243,11 @@ describe('las ranuras que declara el catalogo cuadran con su contrato', () => {
        * asignacion valida por ranura incumpliria el contrato y el objeto saldria roto sin que el
        * editor hubiera avisado de nada.
        */
-      const ranuras = contrato.pozos ?? [];
-      if (ranuras.length === 0) return;
+      const slots = contrato.wells ?? [];
+      if (slots.length === 0) return;
 
       const minimo = (tipo: 'dimension' | 'medida') =>
-        ranuras.filter((r) => r.tipo === tipo).reduce((n, r) => n + (r.min ?? 0), 0);
+        slots.filter((r) => r.tipo === tipo).reduce((n, r) => n + (r.min ?? 0), 0);
 
       expect(minimo('dimension')).toBeGreaterThanOrEqual(contrato.dimensions.min);
       expect(minimo('medida')).toBeGreaterThanOrEqual(contrato.measures.min);
@@ -256,9 +256,9 @@ describe('las ranuras que declara el catalogo cuadran con su contrato', () => {
 
   it('ninguna se queda sin etiqueta ni con cupo cero, y sus ids son distintos', () => {
     for (const { nombre, contrato } of versiones) {
-      const ids = (contrato.pozos ?? []).map((r) => r.id);
+      const ids = (contrato.wells ?? []).map((r) => r.id);
       expect(new Set(ids).size, nombre).toBe(ids.length);
-      for (const ranura of contrato.pozos ?? []) {
+      for (const ranura of contrato.wells ?? []) {
         expect(ranura.etiqueta.trim().length, `${nombre}/${ranura.id}`).toBeGreaterThan(0);
         expect(ranura.max, `${nombre}/${ranura.id}`).toBeGreaterThan(0);
       }

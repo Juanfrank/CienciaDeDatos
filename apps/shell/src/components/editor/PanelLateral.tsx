@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import type { Aggregation } from '@app/data-contracts';
 import { GRID_COLUMNS, type GridItem } from '@app/module-model';
 import {
-  AGREGACION_POR_DEFECTO,
+  DEFAULT_AGGREGATION,
   agregacionesPosibles,
   cabeEnRanura,
   fieldKey,
@@ -17,7 +17,7 @@ import {
   type RanuraDeCampos,
 } from '@app/ui-components';
 import {
-  type FamiliaDeObjeto,
+  type ObjectFamily,
   type ObjectCategory,
   esContenedor,
   esElemento,
@@ -238,7 +238,7 @@ export function PanelLateral({
  * aqui hasta que se traduzca tambien. Que el orden viva en un array y no en el catalogo es
  * deliberado: es una decision de producto, no una cadena.
  */
-const FAMILIAS: { family: FamiliaDeObjeto; que: string }[] = [
+const FAMILIAS: { family: ObjectFamily; que: string }[] = [
   { family: 'valor', que: 'El dato que hay que ver de un vistazo.' },
   { family: 'comparacion', que: 'Cuanto mide cada distrito, cada materia, cada tribunal.' },
   { family: 'evolucion', que: 'La trayectoria de una medida a lo largo de una dimension ordenada.' },
@@ -283,7 +283,7 @@ function Tienda({
   const visibles = colocables.filter(coincide);
   const de = (...categorias: ObjectCategory[]) =>
     visibles.filter((o) => categorias.includes(o.category));
-  const conDatos = de('grafico', 'tabla', 'indicador', 'filtro', 'mapa');
+  const withData = de('grafico', 'tabla', 'indicador', 'filtro', 'mapa');
 
   return (
     <>
@@ -312,7 +312,7 @@ function Tienda({
         </div>
       ) : null}
 
-      {conDatos.length > 0 ? (
+      {withData.length > 0 ? (
         <Seccion titulo="Visualizaciones" prueba="seccion-visualizaciones">
           <p className="texto-atenuado panel-editor__nota">
             Se enlazan a un dataset certificado del registro. Un modulo no construye consultas (4.2).
@@ -336,7 +336,7 @@ function Tienda({
           */}
           <ProveedorDeFiltro filtro={busqueda}>
             {FAMILIAS.map(({ family, que }) => {
-              const dela = conDatos.filter((o) => o.family === family);
+              const dela = withData.filter((o) => o.family === family);
               if (dela.length === 0) return null;
               return (
                 <Seccion
@@ -459,8 +459,8 @@ function Datos({
   const cambiarInstancia = (cambio: (i: ObjectInstance) => ObjectInstance) =>
     onCambiar(item.id, (it) => ({ ...it, instance: cambio(it.instance) }));
 
-  const declaradas = definicion?.pozos ?? [];
-  const ranuras =
+  const declaradas = definicion?.wells ?? [];
+  const slots =
     declaradas.length > 0
       ? declaradas
       : ranurasPorDefecto({
@@ -468,18 +468,18 @@ function Datos({
           measures: definicion?.medidas ?? { min: 0, max: 0 },
         });
 
-  const deDimension = ranuras.filter((r) => r.tipo === 'dimension');
-  const deMedida = ranuras.filter((r) => r.tipo === 'medida');
-  const asignacion = ranurasDe(item.instance, ranuras);
+  const deDimension = slots.filter((r) => r.tipo === 'dimension');
+  const deMedida = slots.filter((r) => r.tipo === 'medida');
+  const asignacion = ranurasDe(item.instance, slots);
 
   /*
    * Poner y quitar van POR RANURA, no por indice.
    */
   const poner = (ranuraId: string, fieldName: string) =>
-    cambiarInstancia((i) => conCampoEnRanura(i, ranuras, ranuraId, fieldName));
+    cambiarInstancia((i) => conCampoEnRanura(i, slots, ranuraId, fieldName));
 
   const quitar = (ranuraId: string, fieldName: string) =>
-    cambiarInstancia((i) => sinCampoEnRanura(i, ranuras, ranuraId, fieldName));
+    cambiarInstancia((i) => sinCampoEnRanura(i, slots, ranuraId, fieldName));
 
   /*
    * Como se resume cada medida.
@@ -487,7 +487,7 @@ function Datos({
   const agregacionDe = (fieldName: string): Aggregation =>
     item.instance.binding.aggregations?.[fieldName] ??
     dataset?.aggregations[fieldName] ??
-    AGREGACION_POR_DEFECTO;
+    DEFAULT_AGGREGATION;
 
   /*
    * Los operadores que el desplegable puede ofrecer, de la MISMA regla que valida al guardar.
@@ -504,7 +504,7 @@ function Datos({
       const resto = { ...(i.binding.aggregations ?? {}) };
       // Volver a la del esquema se guarda BORRANDO la anulacion, no copiando el mismo valor: si
       // se copiara, el modulo dejaria de seguir a la fuente sin que nadie lo hubiera pedido.
-      if (aggregation === (dataset?.aggregations[fieldName] ?? AGREGACION_POR_DEFECTO)) {
+      if (aggregation === (dataset?.aggregations[fieldName] ?? DEFAULT_AGGREGATION)) {
         delete resto[fieldName];
       } else {
         resto[fieldName] = aggregation;
@@ -563,7 +563,7 @@ function Datos({
             <RanuraDeEdicion
               key={ranura.id}
               ranura={ranura}
-              todas={ranuras}
+              todas={slots}
               item={item}
               elegidos={asignacion.get(ranura.id) ?? []}
               disponibles={dataset?.dimensiones ?? []}
@@ -581,7 +581,7 @@ function Datos({
             <RanuraDeEdicion
               key={ranura.id}
               ranura={ranura}
-              todas={ranuras}
+              todas={slots}
               item={item}
               elegidos={asignacion.get(ranura.id) ?? []}
               disponibles={dataset?.medidas ?? []}

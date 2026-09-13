@@ -1,6 +1,6 @@
 import type { QueryResult } from '@app/data-contracts';
 import { describe, expect, it } from 'vitest';
-import { desgloseDe, proyectarObjeto } from './proyeccion';
+import { breakdownOf, projectObject } from './projection';
 import type { ObjectInstance } from './types';
 
 /** Lo que se vigila aqui es que lo proyectado sea LO QUE EL OBJETO MUESTRA. */
@@ -35,9 +35,9 @@ const objectInstance = (parcial: Partial<ObjectInstance>): ObjectInstance => ({
   ...parcial,
 });
 
-describe('proyectarObjeto', () => {
+describe('projectObject', () => {
   it('una tarjeta KPI proyecta UNA fila, no las filas del dataset', () => {
-    const proyectado = proyectarObjeto(
+    const projected = projectObject(
       objectInstance({
         objectId: 'tarjeta-kpi',
         title: 'Casos pendientes',
@@ -47,12 +47,12 @@ describe('proyectarObjeto', () => {
       ['suma', 'suma'],
     );
 
-    expect(proyectado.columns.map((c) => c.name)).toEqual(['Indicador', 'CasosPendientes']);
-    expect(proyectado.rows).toEqual([['Casos pendientes', 65]]);
+    expect(projected.columns.map((c) => c.name)).toEqual(['Indicador', 'CasosPendientes']);
+    expect(projected.rows).toEqual([['Casos pendientes', 65]]);
   });
 
   it('una tarjeta con comparacion proyecta las dos medidas', () => {
-    const proyectado = proyectarObjeto(
+    const projected = projectObject(
       objectInstance({
         objectId: 'tarjeta-kpi',
         title: 'Ingresados vs pendientes',
@@ -62,25 +62,25 @@ describe('proyectarObjeto', () => {
       ['suma', 'suma'],
     );
 
-    expect(proyectado.rows).toEqual([['Ingresados vs pendientes', 650, 65]]);
+    expect(projected.rows).toEqual([['Ingresados vs pendientes', 650, 65]]);
   });
 
   it('un grafico de barras proyecta una fila por categoria, ya agregada', () => {
-    const proyectado = proyectarObjeto(objectInstance({ objectId: 'barras' }), datos, ['suma']);
+    const projected = projectObject(objectInstance({ objectId: 'barras' }), datos, ['suma']);
 
-    expect(proyectado.columns.map((c) => c.name)).toEqual([
+    expect(projected.columns.map((c) => c.name)).toEqual([
       'DimTribunal.Distrito',
       'CasosPendientes',
     ]);
     // Norte suma sus tres filas (10 + 5 + 20); el trimestre y la materia se agregaron.
-    expect(proyectado.rows).toEqual([
+    expect(projected.rows).toEqual([
       ['Norte', 35],
       ['Sur', 30],
     ]);
   });
 
   it('una tabla conserva una columna POR dimension, no la etiqueta compuesta', () => {
-    const proyectado = proyectarObjeto(
+    const projected = projectObject(
       objectInstance({
         objectId: 'tabla',
         binding: {
@@ -93,12 +93,12 @@ describe('proyectarObjeto', () => {
       ['suma', 'suma'],
     );
 
-    expect(proyectado.columns.map((c) => c.name)).toEqual([
+    expect(projected.columns.map((c) => c.name)).toEqual([
       'DimTribunal.Distrito',
       'DimTribunal.Materia',
       'CasosPendientes',
     ]);
-    expect(proyectado.rows).toEqual([
+    expect(projected.rows).toEqual([
       ['Norte', 'Penal', 15],
       ['Norte', 'Civil', 20],
       ['Sur', 'Penal', 30],
@@ -106,7 +106,7 @@ describe('proyectarObjeto', () => {
   });
 
   it('una matriz proyecta el cruce con sus totales, como se ve en pantalla', () => {
-    const proyectado = proyectarObjeto(
+    const projected = projectObject(
       objectInstance({
         objectId: 'matriz',
         binding: {
@@ -121,13 +121,13 @@ describe('proyectarObjeto', () => {
 
     // La esquina nombra SOLO el eje de filas. Antes decia «Distrito / Materia» —los dos ejes en
     // el rotulo de uno—, que es exactamente lo que una matriz no es.
-    expect(proyectado.columns.map((c) => c.name)).toEqual([
+    expect(projected.columns.map((c) => c.name)).toEqual([
       'DimTribunal.Distrito',
       'Penal',
       'Civil',
       'Total',
     ]);
-    expect(proyectado.rows).toEqual([
+    expect(projected.rows).toEqual([
       ['Norte', 15, 20, 35],
       ['Sur', 30, null, 30],
       ['Total', 45, 20, 65],
@@ -135,7 +135,7 @@ describe('proyectarObjeto', () => {
   });
 
   it('un segmentador proyecta sus opciones, que es lo unico que muestra', () => {
-    const proyectado = proyectarObjeto(
+    const projected = projectObject(
       objectInstance({
         objectId: 'segmentador',
         binding: { datasetId: 'casos', dimensions: [MATERIA], measures: [] },
@@ -144,34 +144,34 @@ describe('proyectarObjeto', () => {
       ['suma', 'suma'],
     );
 
-    expect(proyectado.columns.map((c) => c.name)).toEqual(['DimTribunal.Materia']);
-    expect(proyectado.rows).toEqual([['Civil'], ['Penal']]);
+    expect(projected.columns.map((c) => c.name)).toEqual(['DimTribunal.Materia']);
+    expect(projected.rows).toEqual([['Civil'], ['Penal']]);
   });
 
   it('conserva la procedencia y la marca de tiempo del dato (4.8)', () => {
-    const proyectado = proyectarObjeto(objectInstance({}), datos, ['suma']);
-    expect(proyectado.source).toBe('mock');
-    expect(proyectado.generatedAt).toBe('2026-03-01T10:00:00.000Z');
+    const projected = projectObject(objectInstance({}), datos, ['suma']);
+    expect(projected.source).toBe('mock');
+    expect(projected.generatedAt).toBe('2026-03-01T10:00:00.000Z');
   });
 
   it('un campo que ya no existe no rompe la proyeccion: la deja en cero', () => {
     // 4.2 pide marcar roto, no fallar en silencio ni reventar. Marcarlo es cosa de
     // validateBinding; aqui lo que importa es que proyectar siga siendo posible.
-    const proyectado = proyectarObjeto(
+    const projected = projectObject(
       objectInstance({ binding: { datasetId: 'casos', dimensions: [DISTRITO], measures: ['CampoRetirado'] } }),
       datos,
       ['suma', 'suma'],
     );
-    expect(proyectado.rows).toEqual([
+    expect(projected.rows).toEqual([
       ['Norte', 0],
       ['Sur', 0],
     ]);
   });
 });
 
-describe('desgloseDe', () => {
+describe('breakdownOf', () => {
   it('devuelve las filas de origen de una categoria, con toda su granularidad', () => {
-    const desglose = desgloseDe(datos, { 'DimTribunal.Distrito': 'Norte' });
+    const desglose = breakdownOf(datos, { 'DimTribunal.Distrito': 'Norte' });
 
     // Las tres filas de Norte, SIN agregar: es justo la granularidad que el objeto escondio.
     expect(desglose.rows).toHaveLength(3);
@@ -179,7 +179,7 @@ describe('desgloseDe', () => {
   });
 
   it('cruza varias dimensiones para desglosar una celda concreta', () => {
-    const desglose = desgloseDe(datos, {
+    const desglose = breakdownOf(datos, {
       'DimTribunal.Distrito': 'Norte',
       'DimTribunal.Materia': 'Penal',
     });
@@ -191,13 +191,13 @@ describe('desgloseDe', () => {
   });
 
   it('sin seleccion devuelve el dataset completo: el alcance de objeto', () => {
-    expect(desgloseDe(datos, {}).rows).toHaveLength(4);
+    expect(breakdownOf(datos, {}).rows).toHaveLength(4);
   });
 
   it('una dimension que el dataset ya no expone se ignora y amplia, nunca estrecha', () => {
     // Ocultar filas por un cambio de esquema haria creer que no existen. Se prefiere un
     // desglose mas amplio y honesto: el dataset ya viene filtrado por el ambito de quien mira.
-    const desglose = desgloseDe(datos, { 'DimTribunal.CampoRetirado': 'X' });
+    const desglose = breakdownOf(datos, { 'DimTribunal.CampoRetirado': 'X' });
     expect(desglose.rows).toHaveLength(4);
   });
 });

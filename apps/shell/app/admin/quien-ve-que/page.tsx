@@ -18,7 +18,7 @@ export default async function PaginaQuienVeQue() {
       <h2>Quien ve que</h2>
       <p className="texto-atenuado">
         Resuelve el ambito efectivo de una persona sobre un modulo y muestra que capa lo causo.
-        Sirve para depurar una configuracion ANTES de publicarla, no para descubrir el issue
+        Sirve para depurar una settings ANTES de publicarla, no para descubrir el issue
         after.
       </p>
       <QuienVeQue

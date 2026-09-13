@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { catalogoInicial } from '@app/ui-components';
+import { initialCatalog } from '@app/ui-components';
 import { ABRE_PRIMERO, CONTROL_DE_CLAVE } from '../src/components/editor/controles';
 import { entrarComo } from './sesion';
 
@@ -25,7 +25,7 @@ const nuevoModulo = async (page: Page, slug: string) => {
 };
 
 /** Los que van en la rejilla. Los complementos se adjuntan y tienen su propia pestana. */
-const COLOCABLES = catalogoInicial.filter((o) => !o.attachable);
+const COLOCABLES = initialCatalog.filter((o) => !o.attachable);
 
 test.beforeEach(async ({ page }) => {
   await entrarComo(page, 'u-admin');

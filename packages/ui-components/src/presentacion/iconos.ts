@@ -3,7 +3,7 @@
 export const TRAZOS_DE_ICONO = {
   // Cromo de la aplicacion.
   sandwich: 'M4 7h16M4 12h16M4 17h16',
-  cerrar: 'M6 6l12 12M18 6 6 18',
+  close: 'M6 6l12 12M18 6 6 18',
   'chevron-abajo': 'm7 10 5 5 5-5',
   // Acciones del modulo.
   marcador: 'M7 4h10a1 1 0 0 1 1 1v15l-6-3.5L6 20V5a1 1 0 0 1 1-1z',

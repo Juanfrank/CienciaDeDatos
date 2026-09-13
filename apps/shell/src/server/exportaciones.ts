@@ -9,7 +9,7 @@ import { describeProvenance } from '@app/module-model';
 import {
   describirRegla,
   formateadorDeMedida,
-  proyectarObjeto,
+  projectObject,
   type ObjectInstance,
 } from '@app/ui-components';
 import { cacheL2, objectRegistry } from './contexto';
@@ -59,13 +59,13 @@ export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) =
     if (!o.result || ES_CONTROL.has(instance.objectId) || o.problems.length > 0) return [];
 
     const categoria = objectRegistry.get(instance.objectId)?.category;
-    const proyectado = proyectarObjeto(instance, o.result, o.aggregations);
+    const projected = projectObject(instance, o.result, o.aggregations);
     const notas = notasDe(instance);
     return [
       {
         title: instance.title ?? instance.objectId,
-        result: proyectado,
-        textos: textosDe(instance, proyectado),
+        result: projected,
+        textos: textosDe(instance, projected),
         ...(notas.length > 0 ? { notas } : {}),
         isChart: categoria !== undefined && CATEGORIAS_DE_GRAFICO.has(categoria),
       },
@@ -124,11 +124,11 @@ export async function encolarExportacion(input: EncolarInput) {
 }
 
 /** Las mismas cifras, con el formato de la pantalla. */
-function textosDe(instance: ObjectInstance, proyectado: QueryResult): string[][] {
+function textosDe(instance: ObjectInstance, projected: QueryResult): string[][] {
   // Un formateador POR COLUMNA y no por celda: en una tabla larga son miles de llamadas, y el
   // formato depende de la medida, que es la columna.
-  const porColumna = proyectado.columns.map((c) => formateadorDeMedida(instance.presentacion, c.name));
-  return proyectado.rows.map((fila) =>
+  const porColumna = projected.columns.map((c) => formateadorDeMedida(instance.presentacion, c.name));
+  return projected.rows.map((fila) =>
     fila.map((celda, i) =>
       typeof celda === 'number' ? (porColumna[i] ?? String)(celda) : String(celda ?? ''),
     ),

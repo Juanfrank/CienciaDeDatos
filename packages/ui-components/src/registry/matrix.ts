@@ -1,5 +1,5 @@
 import type { Aggregation, QueryResult } from '@app/data-contracts';
-import { type Acumulador, acumular, cerrar, nuevoAcumulador } from './agregacion';
+import { type Acumulador, acumular, close, nuevoAcumulador } from './aggregation';
 import { fieldKey } from './viewModel';
 
 /** La matriz, con jerarquia de verdad. */
@@ -9,27 +9,27 @@ const SEP = '||';
 /** Separa la ruta de fila de la de columna dentro de la misma clave. */
 const CRUCE = '<>';
 
-export const rutaClave = (path: readonly string[]): string => path.join(SEP);
+export const pathKey = (path: readonly string[]): string => path.join(SEP);
 
-const claveDeCelda = (fila: readonly string[], column: readonly string[]): string =>
-  `${rutaClave(fila)}${CRUCE}${rutaClave(column)}`;
+const cellKey = (fila: readonly string[], column: readonly string[]): string =>
+  `${pathKey(fila)}${CRUCE}${pathKey(column)}`;
 
-export interface NodoDeMatriz {
+export interface MatrixNode {
   /** Etiquetas desde la raiz hasta este nodo, incluida la suya. */
   path: string[];
   etiqueta: string;
   /** 0 para el primer nivel. */
   nivel: number;
-  hijos: NodoDeMatriz[];
+  hijos: MatrixNode[];
 }
 
-export interface MatrizJerarquica {
-  dataRows: NodoDeMatriz[];
-  gridColumns: NodoDeMatriz[];
+export interface HierarchicalMatrix {
+  dataRows: MatrixNode[];
+  gridColumns: MatrixNode[];
   medidas: string[];
   /** Nombre de la dimension de cada nivel, para rotular la esquina y las cabeceras. */
-  nivelesDeFila: string[];
-  nivelesDeColumna: string[];
+  rowLevels: string[];
+  columnLevels: string[];
   /**
    * Valor de una combinacion. Rutas vacias son el total general.
    * `null` significa que esa combinacion no tiene filas de origen, que no es lo mismo que cero.
@@ -37,7 +37,7 @@ export interface MatrizJerarquica {
   valor(rutaFila: readonly string[], rutaColumna: readonly string[], medida: number): number | null;
 }
 
-function insertar(raiz: NodoDeMatriz[], labels: string[]): void {
+function insertar(raiz: MatrixNode[], labels: string[]): void {
   let nivel = raiz;
   const path: string[] = [];
   for (const [i, etiqueta] of labels.entries()) {
@@ -51,21 +51,21 @@ function insertar(raiz: NodoDeMatriz[], labels: string[]): void {
   }
 }
 
-export function construirMatriz(
+export function buildMatrix(
   result: QueryResult,
-  dimensionesDeFila: { table: string; field: string }[],
-  dimensionesDeColumna: { table: string; field: string }[],
+  rowDimensions: { table: string; field: string }[],
+  columnDimensions: { table: string; field: string }[],
   medidas: string[],
   aggregations: Aggregation[],
-): MatrizJerarquica {
+): HierarchicalMatrix {
   const indice = (d: { table: string; field: string }) =>
     result.columns.findIndex((c) => c.name === fieldKey(d));
-  const iFila = dimensionesDeFila.map(indice);
-  const iColumna = dimensionesDeColumna.map(indice);
+  const iFila = rowDimensions.map(indice);
+  const iColumna = columnDimensions.map(indice);
   const iMedida = medidas.map((m) => result.columns.findIndex((c) => c.name === m));
 
-  const dataRows: NodoDeMatriz[] = [];
-  const gridColumns: NodoDeMatriz[] = [];
+  const dataRows: MatrixNode[] = [];
+  const gridColumns: MatrixNode[] = [];
   const celdas = new Map<string, Acumulador[]>();
 
   const acumuladoresDe = (clave: string): Acumulador[] => {
@@ -78,18 +78,18 @@ export function construirMatriz(
   };
 
   for (const fila of result.rows) {
-    const etiquetasFila = iFila.map((i) => (i >= 0 ? String(fila[i]) : '(sin dato)'));
-    const etiquetasColumna = iColumna.map((i) => (i >= 0 ? String(fila[i]) : '(sin dato)'));
-    insertar(dataRows, etiquetasFila);
-    insertar(gridColumns, etiquetasColumna);
+    const labelRow = iFila.map((i) => (i >= 0 ? String(fila[i]) : '(sin dato)'));
+    const labelColumn = iColumna.map((i) => (i >= 0 ? String(fila[i]) : '(sin dato)'));
+    insertar(dataRows, labelRow);
+    insertar(gridColumns, labelColumn);
 
     /*
      * Cada fila de origen alimenta su celda Y la de todos sus niveles por encima.
      */
-    for (let f = 0; f <= etiquetasFila.length; f += 1) {
-      const prefijoFila = etiquetasFila.slice(0, f);
-      for (let c = 0; c <= etiquetasColumna.length; c += 1) {
-        const accs = acumuladoresDe(claveDeCelda(prefijoFila, etiquetasColumna.slice(0, c)));
+    for (let f = 0; f <= labelRow.length; f += 1) {
+      const prefijoFila = labelRow.slice(0, f);
+      for (let c = 0; c <= labelColumn.length; c += 1) {
+        const accs = acumuladoresDe(cellKey(prefijoFila, labelColumn.slice(0, c)));
         iMedida.forEach((column, m) => {
           const acc = accs[m];
           if (acc && column >= 0) acumular(acc, fila[column]);
@@ -102,25 +102,25 @@ export function construirMatriz(
     dataRows,
     gridColumns,
     medidas,
-    nivelesDeFila: dimensionesDeFila.map(fieldKey),
-    nivelesDeColumna: dimensionesDeColumna.map(fieldKey),
+    rowLevels: rowDimensions.map(fieldKey),
+    columnLevels: columnDimensions.map(fieldKey),
     valor(rutaFila, rutaColumna, medida) {
-      const acc = celdas.get(claveDeCelda(rutaFila, rutaColumna))?.[medida];
-      return acc ? cerrar(acc) : null;
+      const acc = celdas.get(cellKey(rutaFila, rutaColumna))?.[medida];
+      return acc ? close(acc) : null;
     },
   };
 }
 
 /** Las filas que se DIBUJAN, en orden, segun lo que este colapsado. */
-export function filasVisibles(
-  nodos: NodoDeMatriz[],
+export function visibleRows(
+  nodos: MatrixNode[],
   colapsados: ReadonlySet<string>,
-): NodoDeMatriz[] {
-  const salida: NodoDeMatriz[] = [];
-  const recorrer = (lista: NodoDeMatriz[]) => {
+): MatrixNode[] {
+  const salida: MatrixNode[] = [];
+  const recorrer = (lista: MatrixNode[]) => {
     for (const node of lista) {
       salida.push(node);
-      if (node.hijos.length > 0 && !colapsados.has(rutaClave(node.path))) recorrer(node.hijos);
+      if (node.hijos.length > 0 && !colapsados.has(pathKey(node.path))) recorrer(node.hijos);
     }
   };
   recorrer(nodos);
@@ -128,11 +128,11 @@ export function filasVisibles(
 }
 
 /** Las hojas de un arbol de columnas: las que llevan cifras. Un nodo colapsado cuenta como hoja. */
-export function leaves(nodos: NodoDeMatriz[], colapsados: ReadonlySet<string>): NodoDeMatriz[] {
-  const salida: NodoDeMatriz[] = [];
-  const recorrer = (lista: NodoDeMatriz[]) => {
+export function leaves(nodos: MatrixNode[], colapsados: ReadonlySet<string>): MatrixNode[] {
+  const salida: MatrixNode[] = [];
+  const recorrer = (lista: MatrixNode[]) => {
     for (const node of lista) {
-      if (node.hijos.length === 0 || colapsados.has(rutaClave(node.path))) salida.push(node);
+      if (node.hijos.length === 0 || colapsados.has(pathKey(node.path))) salida.push(node);
       else recorrer(node.hijos);
     }
   };
@@ -140,22 +140,22 @@ export function leaves(nodos: NodoDeMatriz[], colapsados: ReadonlySet<string>): 
   return salida;
 }
 
-export type Direccion = 'asc' | 'desc';
+export type Direction = 'asc' | 'desc';
 
 /** Ordena una lista de nodos entre HERMANOS, sin romper la jerarquia. */
-export function ordenarNodos(
-  nodos: NodoDeMatriz[],
-  compare: (a: NodoDeMatriz, b: NodoDeMatriz) => number,
-): NodoDeMatriz[] {
-  return [...nodos].sort(compare).map((n) => ({ ...n, hijos: ordenarNodos(n.hijos, compare) }));
+export function sortNodes(
+  nodos: MatrixNode[],
+  compare: (a: MatrixNode, b: MatrixNode) => number,
+): MatrixNode[] {
+  return [...nodos].sort(compare).map((n) => ({ ...n, hijos: sortNodes(n.hijos, compare) }));
 }
 
 /** Comparador de cifras: los huecos al final SIEMPRE, se ordene como se ordene. */
-export function compararValores(a: number | null, b: number | null, direccion: Direccion): number {
+export function compareValues(a: number | null, b: number | null, direction: Direction): number {
   if (a === null && b === null) return 0;
   // Un hueco no es «lo mas pequeño»: es que no hay cifra. Se queda abajo en las dos direcciones,
   // porque lo contrario llena la cabecera de filas vacias en cuanto se invierte el orden.
   if (a === null) return 1;
   if (b === null) return -1;
-  return direccion === 'asc' ? a - b : b - a;
+  return direction === 'asc' ? a - b : b - a;
 }

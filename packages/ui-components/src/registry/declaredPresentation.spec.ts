@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { optionsOf, type ChartOptions, type ChartKind } from '../charts/options';
 import type { CategoricalViewModel } from './viewModel';
-import { catalogoInicial } from './catalog';
-import { CLAVES_DE_PRESENTACION, type ClaveDePresentacion } from '../presentacion/contrato';
+import { initialCatalog } from './catalog';
+import { CLAVES_DE_PRESENTACION, type PresentationKey } from '../presentacion/contrato';
 
 /**
  * Lo que un objeto DECLARA admitir y lo que su dibujo HONRA tienen que ser lo mismo — 4.2 y 4.5.
@@ -18,7 +18,7 @@ const vm: CategoricalViewModel = {
   ],
 };
 
-const PALETA = {
+const PALETTE = {
   series: ['#c1', '#c2', '#c3', '#c4', '#c5', '#c6', '#c7', '#c8'],
   content: '#111111',
   textoAtenuado: '#555555',
@@ -27,10 +27,10 @@ const PALETA = {
   superficieElevada: '#eeeeee',
 };
 
-const BASE: ChartOptions = { vm, palette: PALETA, titulo: 'T', dimension: 'Tribunal' };
+const BASE: ChartOptions = { vm, palette: PALETTE, titulo: 'T', dimension: 'Tribunal' };
 
 /** DOS valores validos y distintos por clave. */
-const VALORES: Partial<Record<ClaveDePresentacion, unknown[]>> = {
+const VALUES: Partial<Record<PresentationKey, unknown[]>> = {
   leyenda: ['oculta', 'derecha'],
   etiquetasDeDato: [
     { mostrar: true, cellPosition: 'dentro' },
@@ -59,12 +59,12 @@ const VALORES: Partial<Record<ClaveDePresentacion, unknown[]>> = {
 };
 
 /** Claves que NO decide el constructor de opciones, y que por tanto esta sonda no puede ver. */
-const FUERA_DEL_DIBUJO: ClaveDePresentacion[] = CLAVES_DE_PRESENTACION.filter(
-  (c) => !(c in VALORES),
+const FUERA_DEL_DIBUJO: PresentationKey[] = CLAVES_DE_PRESENTACION.filter(
+  (c) => !(c in VALUES),
 );
 
 /** Que tipo de grafico dibuja cada objeto del catalogo. Los demas objetos no pasan por aqui. */
-const TIPO_DE_OBJETO: Record<string, ChartKind> = {
+const OBJECT_KIND: Record<string, ChartKind> = {
   barras: 'barras',
   'barras-horizontales': 'barras-horizontales',
   lineas: 'lineas',
@@ -80,10 +80,10 @@ const TIPO_DE_OBJETO: Record<string, ChartKind> = {
 };
 
 /** Lo que el dibujo lee pero el objeto NO declara, a proposito. */
-const EXCEPCIONES: { objeto: string; clave: ClaveDePresentacion; porque: string }[] = [
+const EXCEPCIONES: { objeto: string; clave: PresentationKey; porque: string }[] = [
   ...['pastel', 'dona', 'medidor', 'embudo', 'cascada', 'mapa-de-arbol'].map((objeto) => ({
     objeto,
-    clave: 'coloresDeSerie' as ClaveDePresentacion,
+    clave: 'coloresDeSerie' as PresentationKey,
     porque:
       'La paleta se remapea, pero estos objetos colorean por CATEGORIA y no por medida: una ' +
       'porcion, una etapa, un rectangulo. El control del panel lista una fila por medida, y aqui ' +
@@ -108,7 +108,7 @@ const EXCEPCIONES: { objeto: string; clave: ClaveDePresentacion; porque: string 
   },
   ...['dispersion', 'cascada'].map((objeto) => ({
     objeto,
-    clave: 'apilado' as ClaveDePresentacion,
+    clave: 'apilado' as PresentationKey,
     porque:
       'Aqui no se apila nada. La clave llega al eje de valor compartido, que anade el sufijo «%» ' +
       'cuando el apilado es al 100 %, y a nada mas. Declararla pondria un control que solo puede ' +
@@ -116,7 +116,7 @@ const EXCEPCIONES: { objeto: string; clave: ClaveDePresentacion; porque: string 
   })),
 ];
 
-const esExcepcion = (objeto: string, clave: ClaveDePresentacion) =>
+const esExcepcion = (objeto: string, clave: PresentationKey) =>
   EXCEPCIONES.some((e) => e.objeto === objeto && e.clave === clave);
 
 /** Los `formatter` se comparan LLAMANDOLOS, no por el texto de su fuente. */
@@ -141,9 +141,9 @@ const huella = (x: unknown): string =>
   });
 
 /** true si poner la clave cambia lo que se dibuja. */
-function honra(tipo: ChartKind, clave: ClaveDePresentacion): boolean {
+function honra(tipo: ChartKind, clave: PresentationKey): boolean {
   const sin = huella(optionsOf(tipo, BASE));
-  return (VALORES[clave] ?? []).some((valor) => {
+  return (VALUES[clave] ?? []).some((valor) => {
     try {
       return huella(optionsOf(tipo, { ...BASE, [clave]: valor } as ChartOptions)) !== sin;
     } catch {
@@ -153,25 +153,25 @@ function honra(tipo: ChartKind, clave: ClaveDePresentacion): boolean {
   });
 }
 
-const graficos = catalogoInicial.filter((o) => TIPO_DE_OBJETO[o.objectId]);
+const charts = initialCatalog.filter((o) => OBJECT_KIND[o.objectId]);
 const ultima = (objectId: string) => {
-  const o = catalogoInicial.find((d) => d.objectId === objectId);
+  const o = initialCatalog.find((d) => d.objectId === objectId);
   return o?.versions[o.versions.length - 1];
 };
 
 describe('lo que el objeto declara es lo que su dibujo honra', () => {
   it('la sonda cubre todos los graficos del catalogo', () => {
-    // Si manana se publica un objeto de tipo nuevo y nadie lo anade a `TIPO_DE_OBJETO`, esta
+    // Si manana se publica un objeto de tipo nuevo y nadie lo anade a `OBJECT_KIND`, esta
     // prueba pasaria por no mirarlo. Se cuenta para que eso falle.
-    expect(graficos.map((o) => o.objectId).sort()).toEqual(Object.keys(TIPO_DE_OBJETO).sort());
+    expect(charts.map((o) => o.objectId).sort()).toEqual(Object.keys(OBJECT_KIND).sort());
   });
 
-  for (const objeto of graficos) {
-    const tipo = TIPO_DE_OBJETO[objeto.objectId] as ChartKind;
+  for (const objeto of charts) {
+    const tipo = OBJECT_KIND[objeto.objectId] as ChartKind;
 
     it(`${objeto.objectId}: no honra en silencio nada que no ofrezca el editor`, () => {
       const declara = new Set(ultima(objeto.objectId)?.presentation ?? []);
-      const ocultas = (Object.keys(VALORES) as ClaveDePresentacion[]).filter(
+      const ocultas = (Object.keys(VALUES) as PresentationKey[]).filter(
         (c) => honra(tipo, c) && !declara.has(c) && !esExcepcion(objeto.objectId, c),
       );
 
@@ -192,7 +192,7 @@ describe('lo que el objeto declara es lo que su dibujo honra', () => {
 describe('las excepciones estan justificadas, no silenciadas', () => {
   it('cada excepcion nombra un objeto y una clave que existen', () => {
     for (const e of EXCEPCIONES) {
-      expect(TIPO_DE_OBJETO[e.objeto], e.objeto).toBeDefined();
+      expect(OBJECT_KIND[e.objeto], e.objeto).toBeDefined();
       expect(CLAVES_DE_PRESENTACION).toContain(e.clave);
     }
   });
@@ -210,7 +210,7 @@ describe('las excepciones estan justificadas, no silenciadas', () => {
      * declararla, la excepcion tiene que desaparecer con ella.
      */
     const sobrantes = EXCEPCIONES.filter((e) => {
-      const tipo = TIPO_DE_OBJETO[e.objeto] as ChartKind;
+      const tipo = OBJECT_KIND[e.objeto] as ChartKind;
       const declara = new Set(ultima(e.objeto)?.presentation ?? []);
       return !honra(tipo, e.clave) || declara.has(e.clave);
     });
@@ -221,22 +221,22 @@ describe('las excepciones estan justificadas, no silenciadas', () => {
 
 /** Y el resto del contrato, que no es de presentacion pero se olvida igual. */
 describe('la version vigente de cada objeto de datos esta completa', () => {
-  const conDatos = catalogoInicial.filter((o) => {
+  const withData = initialCatalog.filter((o) => {
     const v = o.versions[o.versions.length - 1];
     return v && !(v.dataContract.dimensions.max === 0 && v.dataContract.measures.max === 0);
   });
 
   it('hay objetos de datos que comprobar', () => {
-    expect(conDatos.length).toBeGreaterThan(10);
+    expect(withData.length).toBeGreaterThan(10);
   });
 
-  for (const objeto of conDatos) {
+  for (const objeto of withData) {
     const v = objeto.versions[objeto.versions.length - 1];
 
     it(`${objeto.objectId} ${v?.version}: declara pozos con nombre y ayuda de mapeo`, () => {
       // Se exige a la version VIGENTE y no a todas: una publicada no se toca (4.5), asi que lo
       // que se corrige entra en una version nueva, que es la que el editor ofrece.
-      expect(v?.dataContract.pozos, 'pozos').toBeDefined();
+      expect(v?.dataContract.wells, 'pozos').toBeDefined();
       expect(v?.dataContract.notes ?? '', 'notes').not.toBe('');
     });
   }

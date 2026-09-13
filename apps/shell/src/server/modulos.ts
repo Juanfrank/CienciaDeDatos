@@ -9,7 +9,7 @@ const TRIMESTRE = { table: 'DimTiempo', field: 'Trimestre' };
 const DATASET = 'casos-por-distrito-trimestre';
 
 /** El enlace de un objeto que no lee datos. */
-const SIN_DATOS = { datasetId: '', dimensions: [], measures: [] };
+const WITHOUT_DATA = { datasetId: '', dimensions: [], measures: [] };
 
 export const modulosDemo: ModuleDefinition[] = [
   {
@@ -99,7 +99,7 @@ export const modulosDemo: ModuleDefinition[] = [
               title: 'Filtros',
               binding: { datasetId: DATASET, dimensions: [MATERIA, DISTRITO], measures: [] },
               presentacion: { icono: 'filtro', acento: 'secundario' },
-              configuracion: {
+              settings: {
                 objectId: 'panel-de-filtros',
                 selectores: [
                   { fieldName: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Materia' },
@@ -155,7 +155,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 /*
                  * Materia y, dentro, trimestre. Cruzado por distrito.
                  */
-                ranuras: {
+                slots: {
                   filas: ['DimTribunal.Materia', 'DimTiempo.Trimestre'],
                   columnas: ['DimTribunal.Distrito'],
                   valores: ['CasosPendientes'],
@@ -361,8 +361,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'titulo-de-seccion',
               version: '1.0.0',
               title: 'Titulo de seccion',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
                   content: 'Texto, formas y separadores',
@@ -381,9 +381,9 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'cuadro-de-texto',
               version: '1.0.0',
               title: 'Nota metodologica',
-              binding: SIN_DATOS,
+              binding: WITHOUT_DATA,
               presentacion: { icono: 'content', acento: 'terciario' },
-              configuracion: {
+              settings: {
                 objectId: 'cuadro-de-texto',
                 cuadroDeTexto: {
                   parrafos: [
@@ -406,8 +406,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'forma',
               version: '1.0.0',
               title: 'Rectangulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'forma',
                 forma: {
                   forma: 'rectangulo',
@@ -427,8 +427,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'forma',
               version: '1.0.0',
               title: 'Circulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'forma',
                 forma: { forma: 'circulo', relleno: 'secundario', opacidad: 25 },
               },
@@ -442,8 +442,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'forma',
               version: '1.0.0',
               title: 'Triangulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'forma',
                 forma: { forma: 'triangulo', relleno: 'terciario', opacidad: 50 },
               },
@@ -457,8 +457,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'linea-divisoria',
               version: '1.0.0',
               title: 'Separador',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'linea-divisoria',
                 lineaDivisoria: { orientacion: 'horizontal', estilo: 'discontinua', grosor: 2, color: 'atenuado' },
               },
@@ -472,8 +472,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'titulo-de-seccion',
               version: '1.0.0',
               title: 'Titulo centrado',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
                   content: 'Conexiones',
@@ -509,8 +509,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'conexion',
               version: '1.0.0',
               title: 'Conexion',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'conexion',
                 conexion: {
                   desde: 'flujo-origen',
@@ -543,8 +543,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'linea-divisoria',
               version: '1.0.0',
               title: 'Separador vertical',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'linea-divisoria',
                 lineaDivisoria: { orientacion: 'vertical', estilo: 'solida', grosor: 2, color: 'primario' },
               },
@@ -558,8 +558,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'forma',
               version: '1.0.0',
               title: 'Flecha',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'forma',
                 forma: { forma: 'flecha', relleno: 'primario', opacidad: 75 },
               },
@@ -580,8 +580,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'titulo-de-seccion',
               version: '1.0.0',
               title: 'Titulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
                   content: 'Lo mismo, sin personalizar y personalizado',
@@ -631,7 +631,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 leyenda: 'derecha',
                 etiquetasDeDato: true,
                 ejes: { cuadricula: false, tituloY: 'Casos' },
-                orden: { por: 'valor', direccion: 'desc' },
+                orden: { por: 'valor', direction: 'desc' },
               },
             },
           },
@@ -671,8 +671,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'titulo-de-seccion',
               version: '1.0.0',
               title: 'Titulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
                   content: 'La misma medida en seis formas',
@@ -794,8 +794,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'titulo-de-seccion',
               version: '1.0.0',
               title: 'Titulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
                   content: 'La parte y la meta',
@@ -912,8 +912,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'titulo-de-seccion',
               version: '1.0.0',
               title: 'Titulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
                   content: 'Cuando una escala no alcanza',
@@ -939,7 +939,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 // Las ranuras se declaran: es lo que guarda el editor al arrastrar cada medida a
                 // su pozo. Sin ellas el reparto por omision es correcto pero no es EL que este
                 // ejemplo quiere ensenar.
-                ranuras: {
+                slots: {
                   'eje-x': ['DimTiempo.Trimestre'],
                   columnas: ['CasosIngresados', 'CasosResueltos'],
                   lineas: ['CasosPendientes'],
@@ -964,7 +964,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 datasetId: DATASET,
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
-                ranuras: {
+                slots: {
                   'eje-x': ['DimTiempo.Trimestre'],
                   columnas: ['CasosIngresados', 'CasosResueltos'],
                   lineas: ['CasosPendientes'],
@@ -1033,8 +1033,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'titulo-de-seccion',
               version: '1.0.0',
               title: 'Titulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
                   content: 'De donde sale y en que se reparte',
@@ -1057,7 +1057,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'Ordenado de mayor a menor: el embudo clasico',
                 leyenda: 'oculta',
-                orden: { por: 'valor', direccion: 'desc' },
+                orden: { por: 'valor', direction: 'desc' },
               },
             },
           },
@@ -1141,8 +1141,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'titulo-de-seccion',
               version: '1.0.0',
               title: 'Titulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
                   content: 'Una cifra contra algo',
@@ -1253,8 +1253,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'titulo-de-seccion',
               version: '1.0.0',
               title: 'Titulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
                   content: 'Que se rotula y que se lee al senalar',
@@ -1364,8 +1364,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'titulo-de-seccion',
               version: '1.0.0',
               title: 'Titulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
                   content: 'El mismo grafico, una vez por cada valor',
@@ -1388,7 +1388,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 datasetId: DATASET,
                 dimensions: [MATERIA, TRIMESTRE],
                 measures: ['CasosIngresados'],
-                ranuras: {
+                slots: {
                   multiplo: ['DimTribunal.Materia'],
                   'eje-x': ['DimTiempo.Trimestre'],
                   serie: [],
@@ -1414,7 +1414,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 datasetId: DATASET,
                 dimensions: [MATERIA, TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos'],
-                ranuras: {
+                slots: {
                   multiplo: ['DimTribunal.Materia'],
                   'eje-x': ['DimTiempo.Trimestre'],
                   'eje-y': ['CasosIngresados', 'CasosResueltos'],
@@ -1442,8 +1442,8 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'titulo-de-seccion',
               version: '1.0.0',
               title: 'Titulo',
-              binding: SIN_DATOS,
-              configuracion: {
+              binding: WITHOUT_DATA,
+              settings: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
                   content: 'Cuando el color lo decide el dato',
@@ -1565,7 +1565,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 datasetId: DATASET,
                 dimensions: [DISTRITO, TRIMESTRE],
                 measures: ['CasosPendientes'],
-                ranuras: {
+                slots: {
                   filas: ['DimTribunal.Distrito'],
                   columnas: ['DimTiempo.Trimestre'],
                   valores: ['CasosPendientes'],
@@ -1592,9 +1592,9 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'contenedor-simple',
               version: '1.0.0',
               title: 'Contenedor simple',
-              binding: SIN_DATOS,
+              binding: WITHOUT_DATA,
               presentacion: { icono: 'contenedor', subtitulo: 'Rejilla propia de seis columnas' },
-              configuracion: {
+              settings: {
                 objectId: 'contenedor-simple',
                 simple: { gridColumns: 6 },
                 panels: [
@@ -1621,8 +1621,8 @@ export const modulosDemo: ModuleDefinition[] = [
                           objectId: 'cuadro-de-texto',
                           version: '1.0.0',
                           title: 'Nota',
-                          binding: SIN_DATOS,
-                          configuracion: {
+                          binding: WITHOUT_DATA,
+                          settings: {
                             objectId: 'cuadro-de-texto',
                             cuadroDeTexto: { parrafos: [{ content: 'Un elemento y una visual, juntos.' }] },
                           },
@@ -1642,9 +1642,9 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'contenedor-desplazable',
               version: '1.0.0',
               title: 'Contenedor desplazable',
-              binding: SIN_DATOS,
+              binding: WITHOUT_DATA,
               presentacion: { icono: 'contenedor', subtitulo: 'Se desplaza solo en vertical' },
-              configuracion: {
+              settings: {
                 objectId: 'contenedor-desplazable',
                 desplazable: { eje: 'y', gridColumns: 4 },
                 panels: [
@@ -1681,9 +1681,9 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'contenedor-con-pestanas',
               version: '1.0.0',
               title: 'Contenedor con pestanas',
-              binding: SIN_DATOS,
+              binding: WITHOUT_DATA,
               presentacion: { icono: 'pestanas', subtitulo: 'Cada pestana con su propia disposicion' },
-              configuracion: {
+              settings: {
                 objectId: 'contenedor-con-pestanas',
                 pestanas: { gridColumns: 8, pestanaInicial: 'p1' },
                 panels: [
@@ -1752,9 +1752,9 @@ export const modulosDemo: ModuleDefinition[] = [
               objectId: 'contenedor-ampliable',
               version: '1.0.0',
               title: 'Contenedor ampliable',
-              binding: SIN_DATOS,
+              binding: WITHOUT_DATA,
               presentacion: { icono: 'expandir', subtitulo: 'La ventana tiene su propia rejilla' },
-              configuracion: {
+              settings: {
                 objectId: 'contenedor-ampliable',
                 ampliable: { gridColumns: 6, columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' },
                 panels: [

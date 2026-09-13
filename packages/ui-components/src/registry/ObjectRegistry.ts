@@ -144,7 +144,7 @@ export class ObjectRegistry {
     instances: ObjectInstance[],
     now: Date = new Date(),
   ): DeprecationWarning[] {
-    const avisos: DeprecationWarning[] = [];
+    const notices: DeprecationWarning[] = [];
 
     for (const objectInstance of instances) {
       const objeto = this.objects.get(objectInstance.objectId);
@@ -155,7 +155,7 @@ export class ObjectRegistry {
       const limite = new Date(deprecacion.removeAfter).getTime();
       const dias = Math.ceil((limite - now.getTime()) / 86_400_000);
 
-      avisos.push({
+      notices.push({
         instanceId: objectInstance.instanceId,
         objectId: objectInstance.objectId,
         version: objectInstance.version,
@@ -167,7 +167,7 @@ export class ObjectRegistry {
       });
     }
 
-    return avisos.sort((a, b) => a.daysRemaining - b.daysRemaining);
+    return notices.sort((a, b) => a.daysRemaining - b.daysRemaining);
   }
 
   private assertVersionIsPublishable(objectId: string, version: ObjectVersion): void {

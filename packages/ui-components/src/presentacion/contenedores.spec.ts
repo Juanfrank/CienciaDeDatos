@@ -21,7 +21,7 @@ const item = (id: string, x: number, y: number, w = 2, h = 2): ItemAnidado => ({
 });
 
 const con = (config: ContainerSettings, objectId = 'contenedor-simple') =>
-  validarContenedor('c1', { objectId, configuracion: config });
+  validarContenedor('c1', { objectId, settings: config });
 
 describe('paneles', () => {
   it('siempre hay al menos uno: un contenedor sin panel no tiene donde poner nada', () => {
@@ -72,7 +72,7 @@ describe('validarContenedor', () => {
   it('rechaza un contenedor con pestanas que solo tiene una', () => {
     const problems = validarContenedor('c1', {
       objectId: 'contenedor-con-pestanas',
-      configuracion: { panels: [{ panelId: 'p1', nombre: 'Sola', items: [] }] },
+      settings: { panels: [{ panelId: 'p1', nombre: 'Sola', items: [] }] },
     });
     expect(problems[0]?.issue).toContain('al menos dos');
   });
@@ -80,7 +80,7 @@ describe('validarContenedor', () => {
   it('rechaza dos paneles con el mismo id', () => {
     const problems = validarContenedor('c1', {
       objectId: 'contenedor-con-pestanas',
-      configuracion: {
+      settings: {
         panels: [
           { panelId: 'p1', nombre: 'A', items: [] },
           { panelId: 'p1', nombre: 'B', items: [] },
@@ -94,7 +94,7 @@ describe('validarContenedor', () => {
     const problems = validarContenedor('c1', {
       objectId: 'contenedor-desplazable',
       // Lo que este caso protege: que «ambos» no entre por la puerta de atras editando el JSON.
-      configuracion: { desplazable: { eje: 'ambos' as unknown as 'x' } },
+      settings: { desplazable: { eje: 'ambos' as unknown as 'x' } },
     });
     expect(problems[0]?.issue).toContain('nunca por los dos');
   });
@@ -104,7 +104,7 @@ describe('configuracion inicial', () => {
   it('el de pestanas nace con dos: con una nacería marcado como roto', () => {
     const config = configuracionInicial('contenedor-con-pestanas');
     expect(config && 'panels' in config ? config.panels : []).toHaveLength(2);
-    expect(validarContenedor('c1', { objectId: 'contenedor-con-pestanas', configuracion: config })).toEqual([]);
+    expect(validarContenedor('c1', { objectId: 'contenedor-con-pestanas', settings: config })).toEqual([]);
   });
 
   it('cada elemento nace con su configuracion, no vacio', () => {

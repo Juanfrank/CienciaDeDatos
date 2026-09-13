@@ -117,10 +117,10 @@ export interface ProblemaDeContenedor {
 /** Lo que un contenedor tiene que cumplir antes de guardarse. */
 export function validarContenedor(
   itemId: string,
-  instance: { objectId: string; configuracion?: unknown },
+  instance: { objectId: string; settings?: unknown },
 ): ProblemaDeContenedor[] {
   if (!esContenedor(instance.objectId)) return [];
-  const config = (instance.configuracion ?? {}) as ContainerSettings;
+  const config = (instance.settings ?? {}) as ContainerSettings;
   const problems: ProblemaDeContenedor[] = [];
   const gridColumns = columnasDe(instance.objectId, config);
 

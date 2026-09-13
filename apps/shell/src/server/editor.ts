@@ -1,8 +1,8 @@
 import type { Aggregation, GranoDeDataset } from '@app/data-contracts';
 import { defaultRegistry } from '@app/caching';
 import type {
-  ClaveDePresentacion,
-  FamiliaDeObjeto,
+  PresentationKey,
+  ObjectFamily,
   NombreDeIcono,
   ObjectCategory,
   PozoDeCampos,
@@ -21,15 +21,15 @@ export interface ObjetoDePaleta {
   /** Lo declara el objeto: la tienda y la tarjeta leen del mismo sitio. */
   icono: NombreDeIcono;
   /** A que pregunta responde. La paleta agrupa por esto; los elementos no la traen. */
-  family?: FamiliaDeObjeto;
+  family?: ObjectFamily;
   version: string;
   attachable: boolean;
   dimensiones: { min: number; max: number };
   medidas: { min: number; max: number };
   /** Claves de presentacion que ESTA version admite. El editor solo ofrece estas. */
-  presentacion: ClaveDePresentacion[];
+  presentacion: PresentationKey[];
   /** Ranuras con nombre. Vacio si el objeto no las declara: el editor usa las genericas. */
-  pozos: PozoDeCampos[];
+  wells: PozoDeCampos[];
   notas?: string;
 }
 
@@ -74,7 +74,7 @@ export async function paletaDelEditor(): Promise<PaletaDelEditor> {
       dimensiones: version.dataContract.dimensions,
       medidas: version.dataContract.measures,
       presentacion: version.presentation,
-      pozos: version.dataContract.pozos ?? [],
+      wells: version.dataContract.wells ?? [],
       ...(version.dataContract.notes ? { notas: version.dataContract.notes } : {}),
     };
   });

@@ -1,16 +1,16 @@
 import type { Aggregation, QueryResult } from '@app/data-contracts';
 import type { ObjectInstance } from './types';
-import { construirMatriz, filasVisibles, leaves } from './matriz';
+import { buildMatrix, visibleRows, leaves } from './matrix';
 import { aFieldRef } from '../presentacion/pozos';
 import { aggregateBy, fieldKey, toSlicerOptions } from './viewModel';
 
 /** Proyeccion tabular de un objeto — la forma de tabla de LO QUE EL OBJETO MUESTRA. */
 
-const columnaNumero = (name: string) => ({ name, type: 'number' });
-const columnaTexto = (name: string) => ({ name, type: 'string' });
+const columnNumber = (name: string) => ({ name, type: 'number' });
+const columnText = (name: string) => ({ name, type: 'string' });
 
 /** Etiqueta de la dimension (o dimensiones) que encabeza una proyeccion categorica. */
-const etiquetaDeDimensiones = (instance: ObjectInstance): string =>
+const dimensionsLabel = (instance: ObjectInstance): string =>
   instance.binding.dimensions.map(fieldKey).join(' / ') || 'Total';
 
 function mismaProcedencia(result: QueryResult, columns: QueryResult['columns'], rows: unknown[][]): QueryResult {
@@ -25,7 +25,7 @@ function mismaProcedencia(result: QueryResult, columns: QueryResult['columns'], 
  * formatos de exportacion resumen con el MISMO operador. Resolverlo aqui por segunda vez seria
  * abrir la puerta a que lo exportado y lo mostrado dieran cifras distintas.
  */
-export function proyectarObjeto(
+export function projectObject(
   instance: ObjectInstance,
   result: QueryResult,
   aggregations: Aggregation[],
@@ -41,7 +41,7 @@ export function proyectarObjeto(
       // operador de cada medida — que es exactamente lo que hace la tarjeta al dibujarse.
       const { rows } = aggregateBy(result, [], measures, aggregations);
       const valores = rows[0]?.values ?? measures.map(() => null);
-      const columns = [columnaTexto('Indicador'), ...measures.map(columnaNumero)];
+      const columns = [columnText('Indicador'), ...measures.map(columnNumber)];
       return mismaProcedencia(result, columns, [
         [instance.title ?? instance.objectId, ...valores],
       ]);
@@ -52,36 +52,36 @@ export function proyectarObjeto(
        * La misma matriz JERARQUICA que se dibuja, aplanada.
        */
       const nada = new Set<string>();
-      const deRanura = (id: string): string[] | undefined => instance.binding.ranuras?.[id];
+      const deRanura = (id: string): string[] | undefined => instance.binding.slots?.[id];
       const dimsFila = (deRanura('filas') ?? dimensions.slice(0, 1).map(fieldKey)).map(aFieldRef);
       const dimsColumna = (deRanura('columnas') ?? dimensions.slice(1, 2).map(fieldKey)).map(
         aFieldRef,
       );
       const medidas = deRanura('valores') ?? measures;
 
-      const vm = construirMatriz(result, dimsFila, dimsColumna, medidas, aggregations);
+      const vm = buildMatrix(result, dimsFila, dimsColumna, medidas, aggregations);
       const columnasHoja = leaves(vm.gridColumns, nada);
 
       const columns = [
-        columnaTexto(vm.nivelesDeFila.join(' / ') || etiquetaDeDimensiones(instance)),
+        columnText(vm.rowLevels.join(' / ') || dimensionsLabel(instance)),
         ...columnasHoja.flatMap((c) =>
-          medidas.map((m) => columnaNumero(medidas.length > 1 ? `${c.etiqueta} · ${m}` : c.etiqueta)),
+          medidas.map((m) => columnNumber(medidas.length > 1 ? `${c.etiqueta} · ${m}` : c.etiqueta)),
         ),
-        ...medidas.map((m) => columnaNumero(medidas.length > 1 ? `Total · ${m}` : 'Total')),
+        ...medidas.map((m) => columnNumber(medidas.length > 1 ? `Total · ${m}` : 'Total')),
       ];
 
-      const celdasDe = (path: readonly string[]) => [
+      const cellsOf = (path: readonly string[]) => [
         ...columnasHoja.flatMap((c) => medidas.map((_, i) => vm.valor(path, c.path, i))),
         ...medidas.map((_, i) => vm.valor(path, [], i)),
       ];
 
-      const rows: unknown[][] = filasVisibles(vm.dataRows, nada).map((node) => [
+      const rows: unknown[][] = visibleRows(vm.dataRows, nada).map((node) => [
         // La sangria del nivel viaja como texto: un CSV no tiene jerarquia, y sin ella las filas
         // de subtotal y las de detalle se leerian como si estuvieran al mismo nivel.
         `${'  '.repeat(node.nivel)}${node.etiqueta}`,
-        ...celdasDe(node.path),
+        ...cellsOf(node.path),
       ]);
-      rows.push(['Total', ...celdasDe([])]);
+      rows.push(['Total', ...cellsOf([])]);
       return mismaProcedencia(result, columns, rows);
     }
 
@@ -91,7 +91,7 @@ export function proyectarObjeto(
       const opciones = toSlicerOptions(result, dimension);
       return mismaProcedencia(
         result,
-        [columnaTexto(fieldKey(dimension))],
+        [columnText(fieldKey(dimension))],
         opciones.map((v) => [v]),
       );
     }
@@ -101,8 +101,8 @@ export function proyectarObjeto(
       // muestra, y una sola columna "Distrito / Materia" no se puede ordenar ni filtrar.
       const { rows } = aggregateBy(result, dimensions, measures, aggregations);
       const columns = [
-        ...dimensions.map((d) => columnaTexto(fieldKey(d))),
-        ...measures.map(columnaNumero),
+        ...dimensions.map((d) => columnText(fieldKey(d))),
+        ...measures.map(columnNumber),
       ];
       return mismaProcedencia(
         result,
@@ -115,8 +115,8 @@ export function proyectarObjeto(
       // Barras, lineas y cualquier objeto categorico futuro: una fila por categoria.
       const { rows } = aggregateBy(result, dimensions, measures, aggregations);
       const columns = [
-        columnaTexto(etiquetaDeDimensiones(instance)),
-        ...measures.map(columnaNumero),
+        columnText(dimensionsLabel(instance)),
+        ...measures.map(columnNumber),
       ];
       return mismaProcedencia(
         result,
@@ -131,7 +131,7 @@ export function proyectarObjeto(
  * Filas de ORIGEN detras de una categoria concreta del objeto — el alcance de subobjeto del
  * complemento de tabla de datos.
  */
-export function desgloseDe(
+export function breakdownOf(
   result: QueryResult,
   seleccion: Record<string, string>,
 ): QueryResult {

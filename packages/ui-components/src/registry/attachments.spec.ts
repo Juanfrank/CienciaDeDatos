@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ObjectRegistry } from './ObjectRegistry';
 import { attachmentOf, validateAttachments } from './attachments';
-import { catalogoInicial } from './catalog';
+import { initialCatalog } from './catalog';
 import type { ObjectInstance } from './types';
 
 /**
@@ -9,7 +9,7 @@ import type { ObjectInstance } from './types';
  * que eso deja abiertos, y que tienen que detectarse al GUARDAR y no al dibujar (4.2).
  */
 
-const registro = new ObjectRegistry(catalogoInicial);
+const registro = new ObjectRegistry(initialCatalog);
 const search = (objectId: string) => registro.get(objectId);
 
 const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };

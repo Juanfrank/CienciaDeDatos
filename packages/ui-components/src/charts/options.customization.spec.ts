@@ -102,9 +102,9 @@ describe('orden de las categorias', () => {
     const labels = (o: Parameters<typeof sortCategories>[1]) =>
       sortCategories(datos, o).points.map((p) => p.label);
     expect(labels({ por: 'categoria' })).toEqual(['a', 'b', 'c']);
-    expect(labels({ por: 'categoria', direccion: 'desc' })).toEqual(['c', 'b', 'a']);
+    expect(labels({ por: 'categoria', direction: 'desc' })).toEqual(['c', 'b', 'a']);
     expect(labels({ por: 'valor' })).toEqual(['c', 'b', 'a']);
-    expect(labels({ por: 'valor', direccion: 'desc' })).toEqual(['a', 'b', 'c']);
+    expect(labels({ por: 'valor', direction: 'desc' })).toEqual(['a', 'b', 'c']);
   });
 
   it('los huecos van al final, se ordene como se ordene', () => {
@@ -112,7 +112,7 @@ describe('orden de las categorias', () => {
     // Tratar `null` como cero lo mezclaria con las categorias que valen cero de verdad, y
     // «no se puede calcular» y «vale cero» son cosas distintas.
     expect(sortCategories(withHole, { por: 'valor' }).points.map((p) => p.label)).toEqual(['c', 'b', 'a']);
-    expect(sortCategories(withHole, { por: 'valor', direccion: 'desc' }).points.map((p) => p.label)).toEqual(['b', 'c', 'a']);
+    expect(sortCategories(withHole, { por: 'valor', direction: 'desc' }).points.map((p) => p.label)).toEqual(['b', 'c', 'a']);
   });
 
   it('no muta el modelo recibido', () => {

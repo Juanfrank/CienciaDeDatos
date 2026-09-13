@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { PRESENTACION_MINIMA } from '../presentacion/contrato';
 import { ObjectRegistry, ObjectRegistryError } from './ObjectRegistry';
-import { catalogoInicial } from './catalog';
+import { initialCatalog } from './catalog';
 import type { ObjectInstance, ObjectVersion, VisualObjectDefinition } from './types';
 
 const certificado = { testsPassed: true, reviewedBy: 'equipo-plataforma', reviewedAt: '2026-09-11' };
@@ -34,7 +34,7 @@ const objectInstance = (objectId: string, v: string): ObjectInstance => ({
 
 describe('catalogo inicial (4.2)', () => {
   it('registra los siete objetos prediseñados que nombra el documento', () => {
-    const registro = new ObjectRegistry(catalogoInicial);
+    const registro = new ObjectRegistry(initialCatalog);
     // Los siete que 4.2 enumera son los INDEPENDIENTES. Los complementos se cuentan aparte:
     // no son objetos que se coloquen en la rejilla y el documento no los pide.
     const independientes = registro.list().filter((o) => !o.attachable);
@@ -50,7 +50,7 @@ describe('catalogo inicial (4.2)', () => {
   });
 
   it('el panel de filtros agrupa hasta diez dimensiones y no mapea medidas', () => {
-    const registro = new ObjectRegistry(catalogoInicial);
+    const registro = new ObjectRegistry(initialCatalog);
     const version = registro.latest('panel-de-filtros');
     expect(version?.dataContract.dimensions).toEqual({ min: 1, max: 10 });
     // Un filtro que mapeara una medida pediria agregar algo para filtrar por ello, que es otra
@@ -59,7 +59,7 @@ describe('catalogo inicial (4.2)', () => {
   });
 
   it('los complementos se declaran adjuntables y en la categoria complemento', () => {
-    const registro = new ObjectRegistry(catalogoInicial);
+    const registro = new ObjectRegistry(initialCatalog);
     const complementos = registro.list().filter((o) => o.attachable);
 
     expect(complementos.map((o) => o.objectId).sort()).toEqual([
@@ -78,7 +78,7 @@ describe('catalogo inicial (4.2)', () => {
   });
 
   it('todas las versiones del catalogo traen changelog y certificacion', () => {
-    for (const objeto of catalogoInicial) {
+    for (const objeto of initialCatalog) {
       for (const v of objeto.versions) {
         expect(v.changelog.trim().length).toBeGreaterThan(0);
         expect(v.certification.testsPassed).toBe(true);
@@ -183,12 +183,12 @@ describe('politica de deprecacion (4.5)', () => {
   };
 
   it('avisa de forma ACTIVA a las instancias que usan una version deprecada', () => {
-    const avisos = conDeprecacion().findDeprecationWarnings(
+    const notices = conDeprecacion().findDeprecationWarnings(
       [objectInstance('barras', '1.0.0'), objectInstance('barras', '2.0.0')],
       new Date('2026-11-01'),
     );
-    expect(avisos).toHaveLength(1);
-    expect(avisos[0]).toMatchObject({
+    expect(notices).toHaveLength(1);
+    expect(notices[0]).toMatchObject({
       version: '1.0.0',
       replacedBy: '2.0.0',
       daysRemaining: 30,
@@ -197,12 +197,12 @@ describe('politica de deprecacion (4.5)', () => {
   });
 
   it('marca como vencida una instancia que paso la fecha limite', () => {
-    const avisos = conDeprecacion().findDeprecationWarnings(
+    const notices = conDeprecacion().findDeprecationWarnings(
       [objectInstance('barras', '1.0.0')],
       new Date('2027-01-15'),
     );
-    expect(avisos[0]?.expired).toBe(true);
-    expect(avisos[0]?.daysRemaining).toBeLessThan(0);
+    expect(notices[0]?.expired).toBe(true);
+    expect(notices[0]?.daysRemaining).toBeLessThan(0);
   });
 
   it('ordena los avisos por urgencia', () => {
@@ -214,11 +214,11 @@ describe('politica de deprecacion (4.5)', () => {
       replacedBy: '2.1.0',
       reason: 'Sustituida por 2.1.0.',
     });
-    const avisos = registro.findDeprecationWarnings(
+    const notices = registro.findDeprecationWarnings(
       [objectInstance('barras', '2.0.0'), objectInstance('barras', '1.0.0')],
       new Date('2026-11-01'),
     );
-    expect(avisos.map((a) => a.version)).toEqual(['1.0.0', '2.0.0']);
+    expect(notices.map((a) => a.version)).toEqual(['1.0.0', '2.0.0']);
   });
 
   it('rechaza un aviso que apunta a una version sustituta inexistente', () => {
@@ -234,7 +234,7 @@ describe('politica de deprecacion (4.5)', () => {
   });
 
   it('una instancia en una version sin deprecar no genera aviso', () => {
-    const avisos = conDeprecacion().findDeprecationWarnings([objectInstance('barras', '2.0.0')]);
-    expect(avisos).toEqual([]);
+    const notices = conDeprecacion().findDeprecationWarnings([objectInstance('barras', '2.0.0')]);
+    expect(notices).toEqual([]);
   });
 });

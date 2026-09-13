@@ -111,7 +111,7 @@ export type CriterioDeOrden = (typeof CRITERIOS_DE_ORDEN)[number];
 
 export interface OrdenDeCategorias {
   por?: CriterioDeOrden;
-  direccion?: 'asc' | 'desc';
+  direction?: 'asc' | 'desc';
 }
 
 /** Compatibilidad: la forma anterior del formato, que era del OBJETO y no de la medida. */
@@ -310,10 +310,10 @@ export const CLAVES_DE_PRESENTACION = [
   'medidor',
 ] as const satisfies readonly (keyof PresentacionDeObjeto)[];
 
-export type ClaveDePresentacion = keyof PresentacionDeObjeto;
+export type PresentationKey = keyof PresentacionDeObjeto;
 
 /** Las cinco que no son negociables. */
-export const PRESENTACION_MINIMA: ClaveDePresentacion[] = [
+export const PRESENTACION_MINIMA: PresentationKey[] = [
   'icono',
   'acento',
   'resaltado',
@@ -338,7 +338,7 @@ export const MAX_RADIO_INTERIOR = 80;
 /** Valida una presentacion contra lo que el objeto declara admitir. */
 export function validarPresentacion(
   presentacion: PresentacionDeObjeto | undefined,
-  admitidas: ClaveDePresentacion[],
+  admitidas: PresentationKey[],
 ): ProblemaDePresentacion[] {
   if (!presentacion) return [];
   const problems: ProblemaDePresentacion[] = [];

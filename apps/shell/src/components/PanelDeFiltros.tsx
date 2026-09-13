@@ -43,8 +43,8 @@ export function PanelDeFiltros({
     () =>
       selectoresEfectivos(
         instance,
-        instance.configuracion?.objectId === "panel-de-filtros"
-          ? instance.configuracion
+        instance.settings?.objectId === "panel-de-filtros"
+          ? instance.settings
           : undefined,
         fieldKinds,
       ),

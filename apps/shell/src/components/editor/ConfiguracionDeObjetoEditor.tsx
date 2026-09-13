@@ -153,10 +153,10 @@ export function ConfiguracionDeObjetoEditor({
   const poner = (parcial: ConfiguracionDeElemento | ContainerSettings) =>
     onCambiar((i) => ({
       ...i,
-      configuracion: { ...(i.configuracion ?? {}), ...parcial, objectId } as ObjectInstance['configuracion'],
+      settings: { ...(i.settings ?? {}), ...parcial, objectId } as ObjectInstance['settings'],
     }));
 
-  const conf = (instance.configuracion ?? {}) as ConfiguracionDeElemento & ContainerSettings;
+  const conf = (instance.settings ?? {}) as ConfiguracionDeElemento & ContainerSettings;
 
   if (objectId === 'cuadro-de-texto') {
     const parrafos = conf.cuadroDeTexto?.parrafos ?? [];

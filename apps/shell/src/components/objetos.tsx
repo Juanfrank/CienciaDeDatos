@@ -9,7 +9,7 @@ import {
   type RanuraDeCampos,
   type ChartKind,
   aFieldRef,
-  agregacionesPara,
+  aggregationsFor,
   gaugeScale,
   campoDeRanura,
   colorCondicional,
@@ -22,8 +22,8 @@ import {
   sortCategories,
   ranurasDe,
   formateadorDeMedida,
-  proyectarObjeto,
-  construirMatriz,
+  projectObject,
+  buildMatrix,
   toCategorical,
   toKpi,
   toSlicerOptions,
@@ -45,11 +45,11 @@ const formatearNumero = (n: number | null): string =>
   n === null ? '—' : new Intl.NumberFormat('es-DO').format(Math.round(n));
 
 /** Los campos de un objeto, LEIDOS POR RANURA. */
-function porRanura(instance: ObjectInstance, ranuras: RanuraDeCampos[] | undefined) {
-  if (!ranuras || ranuras.length === 0) return null;
+function porRanura(instance: ObjectInstance, slots: RanuraDeCampos[] | undefined) {
+  if (!slots || slots.length === 0) return null;
   return {
-    uno: (id: string) => campoDeRanura(instance, ranuras, id),
-    varios: (id: string) => ranurasDe(instance, ranuras).get(id) ?? [],
+    uno: (id: string) => campoDeRanura(instance, slots, id),
+    varios: (id: string) => ranurasDe(instance, slots).get(id) ?? [],
   };
 }
 
@@ -223,8 +223,8 @@ export function Marco({
   );
 }
 
-export function TarjetaKpi({ titulo, result, instance, ranuras, aggregations, iconoDelObjeto }: ObjetoProps) {
-  const r = porRanura(instance, ranuras);
+export function TarjetaKpi({ titulo, result, instance, slots, aggregations, iconoDelObjeto }: ObjetoProps) {
+  const r = porRanura(instance, slots);
   // El valor y la comparacion, en ese orden, salen de sus ranuras: con dos medidas mapeadas al
   // reves la tarjeta mostraba la comparacion como cifra principal.
   const medidas = r
@@ -234,7 +234,7 @@ export function TarjetaKpi({ titulo, result, instance, ranuras, aggregations, ic
     result,
     medidas,
     titulo,
-    agregacionesPara(medidas, instance.binding.measures, aggregations),
+    aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
   const delta = kpi.delta;
   const formatear = formateadorDeMedida(instance.presentacion, medidas[0]);
@@ -324,7 +324,7 @@ export function Barras({
   result,
   instance,
   onFiltrar,
-  ranuras,
+  slots,
   aggregations,
   horizontal,
   iconoDelObjeto,
@@ -332,7 +332,7 @@ export function Barras({
   /*
    * El eje X sale de SU ranura, no de la primera dimension.
    */
-  const r = porRanura(instance, ranuras);
+  const r = porRanura(instance, slots);
   const multiplo = r ? r.uno('multiplo') : undefined;
   const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
   const serie = r ? r.uno('serie') : fieldKeyDe(instance.binding.dimensions[1]);
@@ -352,7 +352,7 @@ export function Barras({
       result,
       dimensiones,
       medidas,
-      agregacionesPara(medidas, instance.binding.measures, aggregations),
+      aggregationsFor(medidas, instance.binding.measures, aggregations),
     ),
     instance.presentacion?.orden,
   );
@@ -442,13 +442,13 @@ export function Lineas({
   titulo,
   result,
   instance,
-  ranuras,
+  slots,
   aggregations,
   area,
   onFiltrar,
   iconoDelObjeto,
 }: ObjetoProps & { area?: boolean }) {
-  const r = porRanura(instance, ranuras);
+  const r = porRanura(instance, slots);
   const multiplo = r ? r.uno('multiplo') : undefined;
   const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
@@ -464,7 +464,7 @@ export function Lineas({
       result,
       dimensiones,
       medidas,
-      agregacionesPara(medidas, instance.binding.measures, aggregations),
+      aggregationsFor(medidas, instance.binding.measures, aggregations),
     ),
     instance.presentacion?.orden,
   );
@@ -729,12 +729,12 @@ export function Combinado({
   titulo,
   result,
   instance,
-  ranuras,
+  slots,
   aggregations,
   onFiltrar,
   iconoDelObjeto,
 }: ObjetoProps) {
-  const r = porRanura(instance, ranuras);
+  const r = porRanura(instance, slots);
   const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
   const deColumnas = r ? r.varios('columnas') : instance.binding.measures.slice(0, 1);
   const deLineas = r ? r.varios('lineas') : instance.binding.measures.slice(1);
@@ -746,7 +746,7 @@ export function Combinado({
       result,
       dimension ? [dimension] : [],
       medidas,
-      agregacionesPara(medidas, instance.binding.measures, aggregations),
+      aggregationsFor(medidas, instance.binding.measures, aggregations),
     ),
     instance.presentacion?.orden,
   );
@@ -821,12 +821,12 @@ export function Dispersion({
   titulo,
   result,
   instance,
-  ranuras,
+  slots,
   aggregations,
   onFiltrar,
   iconoDelObjeto,
 }: ObjetoProps) {
-  const r = porRanura(instance, ranuras);
+  const r = porRanura(instance, slots);
   const punto = r ? r.uno('punto') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r
     ? [r.uno('eje-x'), r.uno('eje-y'), r.uno('tamano')].filter((m): m is string => m !== undefined)
@@ -837,7 +837,7 @@ export function Dispersion({
     result,
     dimension ? [dimension] : [],
     medidas,
-    agregacionesPara(medidas, instance.binding.measures, aggregations),
+    aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
 
   return (
@@ -902,7 +902,7 @@ function UnaDimensionUnaMedida({
   titulo,
   result,
   instance,
-  ranuras,
+  slots,
   aggregations,
   onFiltrar,
   iconoDelObjeto,
@@ -914,7 +914,7 @@ function UnaDimensionUnaMedida({
   ranuraDeDimension: string;
   columnaExtra: { heading: string; celda: (valores: number[], i: number) => string };
 }) {
-  const r = porRanura(instance, ranuras);
+  const r = porRanura(instance, slots);
   const dim = r ? r.uno(ranuraDeDimension) : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('valor') : instance.binding.measures;
   const dimension = dim ? aFieldRef(dim) : undefined;
@@ -924,7 +924,7 @@ function UnaDimensionUnaMedida({
       result,
       dimension ? [dimension] : [],
       medidas,
-      agregacionesPara(medidas, instance.binding.measures, aggregations),
+      aggregationsFor(medidas, instance.binding.measures, aggregations),
     ),
     // El embudo NO admite `orden` en su presentacion; llega siempre `undefined` y el orden es el
     // del dataset, que es el del proceso. La cascada si lo admite.
@@ -1032,12 +1032,12 @@ export function MapaDeArbol({
   titulo,
   result,
   instance,
-  ranuras,
+  slots,
   aggregations,
   onFiltrar,
   iconoDelObjeto,
 }: ObjetoProps) {
-  const r = porRanura(instance, ranuras);
+  const r = porRanura(instance, slots);
   const grupo = r ? r.uno('grupo') : fieldKeyDe(instance.binding.dimensions[0]);
   const detalle = r ? r.uno('detalle') : fieldKeyDe(instance.binding.dimensions[1]);
   const medidas = r ? r.varios('valor') : instance.binding.measures;
@@ -1047,7 +1047,7 @@ export function MapaDeArbol({
     result,
     dimensiones,
     medidas,
-    agregacionesPara(medidas, instance.binding.measures, aggregations),
+    aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
   const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
   const principal = dimensiones[0];
@@ -1120,13 +1120,13 @@ export function Circular({
   titulo,
   result,
   instance,
-  ranuras,
+  slots,
   aggregations,
   onFiltrar,
   iconoDelObjeto,
   hole,
 }: ObjetoProps & { hole?: number }) {
-  const r = porRanura(instance, ranuras);
+  const r = porRanura(instance, slots);
   const categoria = r ? r.uno('categoria') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('valor') : instance.binding.measures;
   const dimension = categoria ? aFieldRef(categoria) : undefined;
@@ -1135,7 +1135,7 @@ export function Circular({
     result,
     dimension ? [dimension] : [],
     medidas,
-    agregacionesPara(medidas, instance.binding.measures, aggregations),
+    aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
   const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
 
@@ -1227,11 +1227,11 @@ export function Medidor({
   titulo,
   result,
   instance,
-  ranuras,
+  slots,
   aggregations,
   iconoDelObjeto,
 }: ObjetoProps) {
-  const r = porRanura(instance, ranuras);
+  const r = porRanura(instance, slots);
   const medidas = r
     ? [r.uno('valor'), r.uno('objetivo')].filter((m): m is string => m !== undefined)
     : instance.binding.measures;
@@ -1240,7 +1240,7 @@ export function Medidor({
     result,
     [],
     medidas,
-    agregacionesPara(medidas, instance.binding.measures, aggregations),
+    aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
   const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
   const punto = vm.points[0];
@@ -1313,7 +1313,7 @@ export function Tabla({ titulo, result, instance, aggregations, iconoDelObjeto }
   // filas sin agregar: un mapeo de dos dimensiones sobre un dataset con tres mostraba la tercera
   // y repetia cada combinacion. Es la misma funcion que usan la exportacion y el complemento de
   // tabla de datos, asi que lo que se ve y lo que se exporta no pueden separarse.
-  const proyectado = proyectarObjeto(instance, result, aggregations);
+  const projected = projectObject(instance, result, aggregations);
 
   return (
     <Marco
@@ -1329,7 +1329,7 @@ export function Tabla({ titulo, result, instance, aggregations, iconoDelObjeto }
         cubrir — casos y dias de resolucion salian iguales porque el formato era del objeto.
       */}
       <TablaOrdenable
-        proyectado={proyectado}
+        projected={projected}
         titulo={titulo}
         formatearColumna={(nombre) => formateadorDeMedida(instance.presentacion, nombre)}
         {...(instance.presentacion?.condicional
@@ -1340,8 +1340,8 @@ export function Tabla({ titulo, result, instance, aggregations, iconoDelObjeto }
   );
 }
 
-export function Matriz({ titulo, result, instance, ranuras, aggregations, iconoDelObjeto }: ObjetoProps) {
-  const r = porRanura(instance, ranuras);
+export function Matriz({ titulo, result, instance, slots, aggregations, iconoDelObjeto }: ObjetoProps) {
+  const r = porRanura(instance, slots);
   // Varios niveles por pozo: es lo que convierte el cruce plano en una jerarquia.
   const dimsFila = (r ? r.varios('filas') : instance.binding.dimensions.slice(0, 1).map(fieldKey))
     .map(aFieldRef);
@@ -1350,12 +1350,12 @@ export function Matriz({ titulo, result, instance, ranuras, aggregations, iconoD
   ).map(aFieldRef);
   const medidas = r ? r.varios('valores') : instance.binding.measures;
 
-  const vm = construirMatriz(
+  const vm = buildMatrix(
     result,
     dimsFila,
     dimsColumna,
     medidas,
-    agregacionesPara(medidas, instance.binding.measures, aggregations),
+    aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
 
   return (
@@ -1378,7 +1378,7 @@ export interface ObjetoProps {
   /** Con que operador se resume cada medida, alineado con `instance.binding.measures`. */
   aggregations: Aggregation[];
   /** Las ranuras que declara la version del objeto. */
-  ranuras?: RanuraDeCampos[];
+  slots?: RanuraDeCampos[];
   /** Filtrado cruzado (4.4): anade un filtro a la query string, no a un estado paralelo. */
   onFiltrar?: (fieldName: string, valor: string) => void;
   /** El icono que declara la version del objeto en el catalogo. */

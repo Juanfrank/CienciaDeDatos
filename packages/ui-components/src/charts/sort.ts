@@ -8,7 +8,7 @@ export function sortCategories(
 ): CategoricalViewModel {
   if (!orden?.por) return vm;
 
-  const descendente = orden.direccion === 'desc';
+  const descendente = orden.direction === 'desc';
   const signo = descendente ? -1 : 1;
 
   const points = [...vm.points].sort((a, b) => {

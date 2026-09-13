@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { QueryResult } from '@app/data-contracts';
-import { construirMatriz, filasVisibles, leaves, rutaClave } from './matriz';
+import { buildMatrix, visibleRows, leaves, pathKey } from './matrix';
 
 const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };
 const MATERIA = { table: 'DimTribunal', field: 'Materia' };
@@ -26,7 +26,7 @@ const datos: QueryResult = {
 };
 
 const matriz = (aggregation: 'suma' | 'promedio') =>
-  construirMatriz(datos, [DISTRITO, MATERIA], [TRIMESTRE], ['Dias'], [aggregation]);
+  buildMatrix(datos, [DISTRITO, MATERIA], [TRIMESTRE], ['Dias'], [aggregation]);
 
 describe('la jerarquia', () => {
   it('anida las filas en el orden en que se mapean', () => {
@@ -76,15 +76,15 @@ describe('plegar', () => {
     // «Penal» aparece dos veces y son nodos DISTINTOS: uno cuelga de Norte y otro de Sur. Por eso
     // nada puede identificarse por su etiqueta —ni una clave de React ni un `data-testid`—: la
     // ruta completa es lo unico unico.
-    expect(filasVisibles(m.dataRows, new Set()).map((f) => rutaClave(f.path))).toEqual([
+    expect(visibleRows(m.dataRows, new Set()).map((f) => pathKey(f.path))).toEqual([
       'Norte',
       'Norte||Penal',
       'Norte||Civil',
       'Sur',
       'Sur||Penal',
     ]);
-    const plegado = new Set([rutaClave(['Norte'])]);
-    expect(filasVisibles(m.dataRows, plegado).map((f) => rutaClave(f.path))).toEqual([
+    const plegado = new Set([pathKey(['Norte'])]);
+    expect(visibleRows(m.dataRows, plegado).map((f) => pathKey(f.path))).toEqual([
       'Norte',
       'Sur',
       'Sur||Penal',
@@ -92,13 +92,13 @@ describe('plegar', () => {
   });
 
   it('una columna plegada pasa a ser hoja: ensena su subtotal en vez de su detalle', () => {
-    const m = construirMatriz(datos, [DISTRITO], [MATERIA, TRIMESTRE], ['Dias'], ['suma']);
-    expect(leaves(m.gridColumns, new Set()).map((c) => rutaClave(c.path))).toEqual([
+    const m = buildMatrix(datos, [DISTRITO], [MATERIA, TRIMESTRE], ['Dias'], ['suma']);
+    expect(leaves(m.gridColumns, new Set()).map((c) => pathKey(c.path))).toEqual([
       'Penal||Q1',
       'Penal||Q2',
       'Civil||Q1',
     ]);
-    const plegada = new Set(['Penal']);
-    expect(leaves(m.gridColumns, plegada).map((c) => rutaClave(c.path))).toEqual(['Penal', 'Civil||Q1']);
+    const collapsed = new Set(['Penal']);
+    expect(leaves(m.gridColumns, collapsed).map((c) => pathKey(c.path))).toEqual(['Penal', 'Civil||Q1']);
   });
 });

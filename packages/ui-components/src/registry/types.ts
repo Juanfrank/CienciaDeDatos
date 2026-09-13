@@ -1,5 +1,5 @@
 import type { Aggregation, FieldRef } from '@app/data-contracts';
-import type { ClaveDePresentacion, PresentacionDeObjeto } from '../presentacion/contrato';
+import type { PresentationKey, PresentacionDeObjeto } from '../presentacion/contrato';
 import type { NombreDeIcono } from '../presentacion/iconos';
 import type { ContainerSettings, IdDeContenedor } from '../presentacion/contenedores';
 import type { ConfiguracionDeElemento, IdDeElemento } from '../presentacion/elementos';
@@ -30,7 +30,7 @@ export type ObjectCategory =
  * Distinta de `category`, que dice de que tipo es. La paleta agrupa por familia, de modo que
  * se elige por lo que se quiere contar y no por el nombre del objeto.
  */
-export const FAMILIAS_DE_OBJETO = [
+export const OBJECT_FAMILIES = [
   'comparacion',
   'evolucion',
   'proporcion',
@@ -40,7 +40,7 @@ export const FAMILIAS_DE_OBJETO = [
   'ubicacion',
   'control',
 ] as const;
-export type FamiliaDeObjeto = (typeof FAMILIAS_DE_OBJETO)[number];
+export type ObjectFamily = (typeof OBJECT_FAMILIES)[number];
 
 /**
  * Que necesita un objeto de un dataset para dibujarse.
@@ -58,7 +58,7 @@ export interface ObjectDataContract {
    * Opcional: sin ellas el editor usa los rotulos genericos de `pozosPorDefecto`. La suma de
    * los `max` de cada tipo debe cuadrar con el maximo del contrato; el catalogo lo comprueba.
    */
-  pozos?: RanuraDeCampos[];
+  wells?: RanuraDeCampos[];
 }
 
 export interface ObjectCertification {
@@ -95,7 +95,7 @@ export interface ObjectVersion {
    * El editor solo ofrece estas y la validacion rechaza el resto. Debe incluir
    * `PRESENTACION_MINIMA` entera.
    */
-  presentation: ClaveDePresentacion[];
+  presentation: PresentationKey[];
   deprecation?: DeprecationNotice;
 }
 
@@ -110,7 +110,7 @@ export interface VisualObjectDefinition {
    * A que pregunta responde. Obligatoria salvo en elementos, contenedores y complementos, que
    * no consumen datos; lo comprueba una prueba del catalogo.
    */
-  family?: FamiliaDeObjeto;
+  family?: ObjectFamily;
   /** true si el objeto se adjunta a otro en vez de ocupar una celda de la rejilla. */
   attachable?: boolean;
   versions: ObjectVersion[];
@@ -181,7 +181,7 @@ export interface ObjectInstance {
      * Opcional: sin el mapa el reparto se deduce del orden del array, que es como se guardaba
      * antes de que existiera.
      */
-    ranuras?: AsignacionDeRanuras;
+    slots?: AsignacionDeRanuras;
     /**
      * Agregacion por medida, solo cuando difiere de la que declara el esquema. Lo no dicho se
      * resuelve contra el esquema en cada lectura.
@@ -208,11 +208,11 @@ export interface ObjectInstance {
    * `presentacion` es como SE VE un objeto; esto es que HACE. Un icono es presentacion; que una
    * fecha se filtre con calendario o con rango no lo es.
    */
-  configuracion?: ConfiguracionDeObjeto;
+  settings?: ObjectSettings;
 }
 
 /** Configuracion especifica de un tipo de objeto. Anadir un tipo anade un miembro aqui. */
-export type ConfiguracionDeObjeto =
+export type ObjectSettings =
   | ({ objectId: 'panel-de-filtros' } & ConfiguracionDePanelDeFiltros)
   | ({ objectId: IdDeElemento } & ConfiguracionDeElemento)
   | ({ objectId: IdDeContenedor } & ContainerSettings);

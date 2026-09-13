@@ -20,7 +20,7 @@ export default async function PaginaAuditoria({
 
   return (
     <section>
-      <h2>Auditoria de configuracion</h2>
+      <h2>Auditoria de settings</h2>
 
       <p
         className={`aviso ${ampliaciones > 0 ? 'aviso--atencion' : 'aviso--ok'}`}

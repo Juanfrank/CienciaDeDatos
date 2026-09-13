@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { CLAVES_DE_PRESENTACION, catalogoInicial, type ClaveDePresentacion } from '@app/ui-components';
+import { CLAVES_DE_PRESENTACION, initialCatalog, type PresentationKey } from '@app/ui-components';
 import { CONTROL_DE_CLAVE } from '../components/editor/controles';
 
 /** Toda clave de presentacion que un objeto DECLARA tiene un control en el panel — 4.2. */
@@ -33,7 +33,7 @@ describe('el panel de Formato ofrece todo lo que el catalogo declara', () => {
      * un cuadro de texto ofreceria «Apilado» —opciones que su objeto no entiende y que la
      * validacion rechaza al guardar—.
      */
-    const SIEMPRE: ClaveDePresentacion[] = ['mostrarTitulo', 'colorDeResaltado', 'etiqueta'];
+    const SIEMPRE: PresentationKey[] = ['mostrarTitulo', 'colorDeResaltado', 'etiqueta'];
     const sinGuarda = CLAVES_DE_PRESENTACION.filter(
       (c) => !SIEMPRE.includes(c) && !PANEL.includes(`admite("${c}")`),
     );
@@ -43,7 +43,7 @@ describe('el panel de Formato ofrece todo lo que el catalogo declara', () => {
 });
 
 describe('y todo objeto colocable llega al panel con algo que configurar', () => {
-  const colocables = catalogoInicial.filter((o) => !o.attachable);
+  const colocables = initialCatalog.filter((o) => !o.attachable);
 
   it('hay objetos colocables que comprobar', () => {
     expect(colocables.length).toBeGreaterThan(20);

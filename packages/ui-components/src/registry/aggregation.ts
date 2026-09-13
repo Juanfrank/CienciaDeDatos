@@ -48,7 +48,7 @@ export function acumular(acc: Acumulador, valor: unknown): void {
 }
 
 /** Cierra el acumulador. */
-export function cerrar(acc: Acumulador): number | null {
+export function close(acc: Acumulador): number | null {
   switch (acc.aggregation) {
     case 'suma':
       return acc.suma;
@@ -71,32 +71,32 @@ export function cerrar(acc: Acumulador): number | null {
   }
 }
 
-/** Agregacion por defecto cuando el esquema no dice nada. Ver `agregacionesDe`. */
-export const AGREGACION_POR_DEFECTO: Aggregation = 'suma';
+/** Agregacion por defecto cuando el esquema no dice nada. Ver `aggregationsOf`. */
+export const DEFAULT_AGGREGATION: Aggregation = 'suma';
 
 /** Que operador usar para cada medida de un mapeo. */
-export function agregacionesDe(
+export function aggregationsOf(
   medidas: string[],
   declaradas: Map<string, Aggregation>,
   elegidas: Record<string, Aggregation> | undefined,
 ): Aggregation[] {
   return medidas.map(
-    (m) => elegidas?.[m] ?? declaradas.get(m) ?? AGREGACION_POR_DEFECTO,
+    (m) => elegidas?.[m] ?? declaradas.get(m) ?? DEFAULT_AGGREGATION,
   );
 }
 
 
 /** Reordena los operadores para una lista de medidas concreta. */
-export function agregacionesPara(
+export function aggregationsFor(
   medidas: string[],
   todas: string[],
   aggregations: Aggregation[],
 ): Aggregation[] {
-  return medidas.map((m) => aggregations[todas.indexOf(m)] ?? AGREGACION_POR_DEFECTO);
+  return medidas.map((m) => aggregations[todas.indexOf(m)] ?? DEFAULT_AGGREGATION);
 }
 
 /** Como se llama cada operador en pantalla. */
-export const ETIQUETA_DE_AGREGACION: Record<Aggregation, string> = {
+export const AGGREGATION_LABEL: Record<Aggregation, string> = {
   suma: 'Suma',
   promedio: 'Promedio',
   minimo: 'Minimo',
@@ -106,21 +106,21 @@ export const ETIQUETA_DE_AGREGACION: Record<Aggregation, string> = {
   ninguna: 'Sin resumir',
 };
 
-export interface ProblemaDeAgregacion {
+export interface AggregationProblem {
   medida: string;
   aggregation: Aggregation;
   issue: string;
 }
 
 /** La comprobacion que hace que el numero falso deje de ser alcanzable desde el editor. */
-export interface ContextoDeAgregacion {
+export interface AggregationContext {
   /** true si el objeto muestra menos dimensiones de las que trae el dataset. */
   colapsa: boolean;
   dataGrain: GranoDeDataset;
 }
 
 /** Que operadores se pueden aplicar AQUI. Es la unica regla, y de ella sale todo lo demas. */
-export function agregacionesPosibles(ctx: ContextoDeAgregacion): Aggregation[] {
+export function agregacionesPosibles(ctx: AggregationContext): Aggregation[] {
   if (!ctx.colapsa) return [...AGGREGATIONS];
   if (ctx.dataGrain === 'atomico') return AGGREGATIONS.filter((a) => a !== 'ninguna');
   return AGGREGATIONS.filter(esAditiva);
@@ -130,7 +130,7 @@ export function agregacionesPosibles(ctx: ContextoDeAgregacion): Aggregation[] {
 function porQueNoSePuede(
   medida: string,
   aggregation: Aggregation,
-  ctx: ContextoDeAgregacion,
+  ctx: AggregationContext,
 ): string | null {
   if (agregacionesPosibles(ctx).includes(aggregation)) return null;
 
@@ -151,12 +151,12 @@ function porQueNoSePuede(
 }
 
 /** Los operadores de un mapeo que no se pueden aplicar. */
-export function validarAgregacion(
-  input: ContextoDeAgregacion & { measures: string[]; aggregations: Aggregation[] },
-): ProblemaDeAgregacion[] {
-  const problems: ProblemaDeAgregacion[] = [];
+export function validateAggregation(
+  input: AggregationContext & { measures: string[]; aggregations: Aggregation[] },
+): AggregationProblem[] {
+  const problems: AggregationProblem[] = [];
   input.measures.forEach((medida, i) => {
-    const aggregation = input.aggregations[i] ?? AGREGACION_POR_DEFECTO;
+    const aggregation = input.aggregations[i] ?? DEFAULT_AGGREGATION;
     const issue = porQueNoSePuede(medida, aggregation, input);
     if (issue) problems.push({ medida, aggregation, issue });
   });

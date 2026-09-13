@@ -2,18 +2,18 @@
 
 import { useMemo, useState } from 'react';
 import {
-  type Direccion,
-  type MatrizJerarquica,
-  type NodoDeMatriz,
+  type Direction,
+  type HierarchicalMatrix,
+  type MatrixNode,
   type ObjectInstance,
-  compararValores,
+  compareValues,
   colorCondicional,
   estiloDeTexto,
-  filasVisibles,
+  visibleRows,
   formateadorDeMedida,
   leaves,
-  ordenarNodos,
-  rutaClave,
+  sortNodes,
+  pathKey,
   type ConditionalFormat,
 } from '@app/ui-components';
 import { Icono } from './iconos/Icono';
@@ -54,22 +54,22 @@ function CeldaDeCifra({
 
 /** Identifica una columna ordenable: la ruta de la hoja mas el indice de medida. */
 const claveDeOrden = (path: readonly string[], medida: number): string =>
-  `${rutaClave(path)}#${medida}`;
+  `${pathKey(path)}#${medida}`;
 
 export function TablaDeMatriz({
   vm,
   titulo,
   instance,
 }: {
-  vm: MatrizJerarquica;
+  vm: HierarchicalMatrix;
   titulo: string;
   instance: ObjectInstance;
 }) {
   const [plegadas, setPlegadas] = useState<ReadonlySet<string>>(new Set());
   const [plegadasColumna, setPlegadasColumna] = useState<ReadonlySet<string>>(new Set());
-  const [orden, setOrden] = useState<{ por: string | null; direccion: Direccion }>({
+  const [orden, setOrden] = useState<{ por: string | null; direction: Direction }>({
     por: null,
-    direccion: 'asc',
+    direction: 'asc',
   });
 
   // Un formateador por medida: la matriz puede llevar hasta cuatro, cada una con su formato.
@@ -88,16 +88,16 @@ export function TablaDeMatriz({
     const [rutaColumna = '', medida = '0'] = orden.por.split('#');
     const path = rutaColumna === '' ? [] : rutaColumna.split('||');
     const i = Number(medida);
-    return ordenarNodos(vm.dataRows, (a, b) =>
-      compararValores(vm.valor(a.path, path, i), vm.valor(b.path, path, i), orden.direccion),
+    return sortNodes(vm.dataRows, (a, b) =>
+      compareValues(vm.valor(a.path, path, i), vm.valor(b.path, path, i), orden.direction),
     );
   }, [vm, orden]);
 
-  const dataRows = useMemo(() => filasVisibles(arbol, plegadas), [arbol, plegadas]);
+  const dataRows = useMemo(() => visibleRows(arbol, plegadas), [arbol, plegadas]);
 
   const alOrdenarPor = (clave: string | null) =>
     setOrden((o) =>
-      o.por === clave ? { por: clave, direccion: o.direccion === 'asc' ? 'desc' : 'asc' } : { por: clave, direccion: 'asc' },
+      o.por === clave ? { por: clave, direction: o.direction === 'asc' ? 'desc' : 'asc' } : { por: clave, direction: 'asc' },
     );
 
   const heading = (clave: string | null, content: string, prueba: string) => {
@@ -113,14 +113,14 @@ export function TablaDeMatriz({
       >
         <span>{content}</span>
         <span className="tabla__flecha" aria-hidden="true">
-          {activo ? (orden.direccion === 'asc' ? '▲' : '▼') : '⇅'}
+          {activo ? (orden.direction === 'asc' ? '▲' : '▼') : '⇅'}
         </span>
       </button>
     );
   };
 
   const direccionAria = (clave: string | null) =>
-    orden.por === clave ? (orden.direccion === 'asc' ? 'ascending' : 'descending') : 'none';
+    orden.por === clave ? (orden.direction === 'asc' ? 'ascending' : 'descending') : 'none';
 
   const conMedida = (etiqueta: string, medida: string) =>
     vm.medidas.length > 1 ? `${etiqueta} · ${medida}` : etiqueta;
@@ -131,7 +131,7 @@ export function TablaDeMatriz({
         <thead>
           <tr>
             <th scope="col" aria-sort={direccionAria(null)} className="tabla__esquina">
-              {heading(null, vm.nivelesDeFila.join(' / ') || 'Total', 'matriz-ordenar-filas')}
+              {heading(null, vm.rowLevels.join(' / ') || 'Total', 'matriz-ordenar-filas')}
             </th>
             {gridColumns.map((column) =>
               vm.medidas.map((medida, i) => {
@@ -144,11 +144,11 @@ export function TablaDeMatriz({
                         <button
                           type="button"
                           className="tabla__plegar"
-                          aria-expanded={!plegadasColumna.has(rutaClave(column.path))}
+                          aria-expanded={!plegadasColumna.has(pathKey(column.path))}
                           aria-label={`Desplegar ${column.etiqueta}`}
-                          data-testid={`matriz-plegar-col-${rutaClave(column.path)}`}
+                          data-testid={`matriz-plegar-col-${pathKey(column.path)}`}
                           onClick={() =>
-                            setPlegadasColumna((c) => alternar(c, rutaClave(column.path)))
+                            setPlegadasColumna((c) => alternar(c, pathKey(column.path)))
                           }
                         >
                           <Icono nombre="chevron-abajo" tamano={12} />
@@ -157,7 +157,7 @@ export function TablaDeMatriz({
                       {heading(
                         clave,
                         conMedida(column.etiqueta || 'Total', medida),
-                        `matriz-ordenar-${rutaClave(column.path)}-${i}`,
+                        `matriz-ordenar-${pathKey(column.path)}-${i}`,
                       )}
                     </span>
                   </th>
@@ -174,14 +174,14 @@ export function TablaDeMatriz({
         <tbody>
           {dataRows.map((node) => (
             <FilaDeMatriz
-              key={rutaClave(node.path)}
+              key={pathKey(node.path)}
               node={node}
               vm={vm}
               gridColumns={gridColumns}
-              plegada={plegadas.has(rutaClave(node.path))}
+              collapsed={plegadas.has(pathKey(node.path))}
               formatear={formatear}
               {...(condicional ? { condicional } : {})}
-              onPlegar={() => setPlegadas((p) => alternar(p, rutaClave(node.path)))}
+              onPlegar={() => setPlegadas((p) => alternar(p, pathKey(node.path)))}
             />
           ))}
           <tr className="tabla__fila-total">
@@ -189,7 +189,7 @@ export function TablaDeMatriz({
             {gridColumns.map((column) =>
               vm.medidas.map((medida, i) => (
                 <CeldaDeCifra
-                  key={`${rutaClave(column.path)}-${medida}`}
+                  key={`${pathKey(column.path)}-${medida}`}
                   valor={vm.valor([], column.path, i)}
                   medida={medida}
                   formatear={formatear[i] ?? String}
@@ -219,22 +219,22 @@ function FilaDeMatriz({
   node,
   vm,
   gridColumns,
-  plegada,
+  collapsed,
   formatear,
   condicional,
   onPlegar,
 }: {
-  node: NodoDeMatriz;
-  vm: MatrizJerarquica;
-  gridColumns: NodoDeMatriz[];
-  plegada: boolean;
+  node: MatrixNode;
+  vm: HierarchicalMatrix;
+  gridColumns: MatrixNode[];
+  collapsed: boolean;
   formatear: ((n: number | null) => string)[];
   condicional?: ConditionalFormat;
   onPlegar: () => void;
 }) {
   const tieneHijos = node.hijos.length > 0;
   return (
-    <tr data-nivel={node.nivel} data-testid={`matriz-fila-${rutaClave(node.path)}`}>
+    <tr data-nivel={node.nivel} data-testid={`matriz-fila-${pathKey(node.path)}`}>
       {/*
         La sangria va en el `padding` y no con espacios: un lector de pantalla no los pronuncia, y
         el nivel viaja ademas en `data-nivel` y en `aria-expanded`, que es donde si se anuncia.
@@ -245,9 +245,9 @@ function FilaDeMatriz({
             <button
               type="button"
               className="tabla__plegar"
-              aria-expanded={!plegada}
-              aria-label={`${plegada ? 'Desplegar' : 'Plegar'} ${node.etiqueta}`}
-              data-testid={`matriz-plegar-${rutaClave(node.path)}`}
+              aria-expanded={!collapsed}
+              aria-label={`${collapsed ? 'Desplegar' : 'Plegar'} ${node.etiqueta}`}
+              data-testid={`matriz-plegar-${pathKey(node.path)}`}
               onClick={onPlegar}
             >
               <Icono nombre="chevron-abajo" tamano={12} />
@@ -261,7 +261,7 @@ function FilaDeMatriz({
       {gridColumns.map((column) =>
         vm.medidas.map((medida, i) => (
           <CeldaDeCifra
-            key={`${rutaClave(column.path)}-${medida}`}
+            key={`${pathKey(column.path)}-${medida}`}
             valor={vm.valor(node.path, column.path, i)}
             medida={medida}
             formatear={formatear[i] ?? String}

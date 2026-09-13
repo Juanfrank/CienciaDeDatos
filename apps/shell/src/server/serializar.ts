@@ -18,7 +18,7 @@ export interface ObjetoSerializado {
   result?: QueryResult;
   problems: BindingProblem[];
   /** Las ranuras que declara la version del objeto. */
-  ranuras?: RanuraDeCampos[];
+  slots?: RanuraDeCampos[];
   /** El icono que declara la VERSION del objeto. */
   icono?: NombreDeIcono;
   /** Con que operador se resume cada medida, alineado con `instance.binding.measures`. */
@@ -44,7 +44,7 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
     position: item.position,
     instance: item.instance,
     ...(objeto.result ? { result: objeto.result } : {}),
-    ...(ranurasDelObjeto(item.instance) ? { ranuras: ranurasDelObjeto(item.instance) } : {}),
+    ...(ranurasDelObjeto(item.instance) ? { slots: ranurasDelObjeto(item.instance) } : {}),
     ...(iconoDelObjeto(item.instance) ? { icono: iconoDelObjeto(item.instance) } : {}),
     problems: objeto.problems,
     aggregations: objeto.aggregations,
@@ -66,7 +66,7 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
 /** Las ranuras declaradas por la version que la instancia fija. */
 function ranurasDelObjeto(instance: ObjectInstance): RanuraDeCampos[] | undefined {
   try {
-    return objectRegistry.resolve(instance.objectId, instance.version).dataContract.pozos;
+    return objectRegistry.resolve(instance.objectId, instance.version).dataContract.wells;
   } catch {
     return undefined;
   }

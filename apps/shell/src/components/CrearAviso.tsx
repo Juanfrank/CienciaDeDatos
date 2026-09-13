@@ -61,7 +61,7 @@ export function CrearAviso({
     dialogo.current?.showModal();
   };
 
-  const cerrar = () => dialogo.current?.close();
+  const close = () => dialogo.current?.close();
 
   const guardar = async () => {
     setError('');
@@ -90,7 +90,7 @@ export function CrearAviso({
     }
 
     setNombre('');
-    cerrar();
+    close();
     router.push('/avisos');
   };
 
@@ -103,7 +103,7 @@ export function CrearAviso({
       <dialog ref={dialogo} className="emergente" aria-label="Crear un aviso" data-testid="dialogo-aviso">
         <div className="emergente__cabecera">
           <h2>Avisarme de este modulo</h2>
-          <button type="button" className="boton-enlace" onClick={cerrar} data-testid="aviso-cerrar">
+          <button type="button" className="boton-enlace" onClick={close} data-testid="aviso-cerrar">
             Cerrar
           </button>
         </div>

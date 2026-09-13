@@ -1,4 +1,4 @@
-import { PRESENTACION_MINIMA, type ClaveDePresentacion } from '../presentacion/contrato';
+import { PRESENTACION_MINIMA, type PresentationKey } from '../presentacion/contrato';
 import type { RanuraDeCampos } from '../presentacion/pozos';
 import type { ObjectCertification, VisualObjectDefinition } from './types';
 
@@ -11,23 +11,23 @@ const certificacionInicial: ObjectCertification = {
 };
 
 /** Lo que admite cualquier objeto, mas lo que anada el suyo. */
-const presenta = (...propias: ClaveDePresentacion[]): ClaveDePresentacion[] => [
+const presenta = (...propias: PresentationKey[]): PresentationKey[] => [
   ...PRESENTACION_MINIMA,
   ...propias,
 ];
 
 /** El contrato de un objeto que NO consume datos. */
-const SIN_DATOS = (notes: string): VisualObjectDefinition['versions'][number]['dataContract'] => ({
+const WITHOUT_DATA = (notes: string): VisualObjectDefinition['versions'][number]['dataContract'] => ({
   dimensions: { min: 0, max: 0 },
   measures: { min: 0, max: 0 },
   notes,
-  pozos: [],
+  wells: [],
 });
 
 const v1 = (
   changelog: string,
   dataContract: VisualObjectDefinition['versions'][number]['dataContract'],
-  presentation: ClaveDePresentacion[] = PRESENTACION_MINIMA,
+  presentation: PresentationKey[] = PRESENTACION_MINIMA,
 ) => ({
   version: '1.0.0',
   publishedAt: '2026-09-11',
@@ -38,7 +38,7 @@ const v1 = (
 });
 
 /** Los pozos de un grafico de barras, parametrizados por cuantas medidas admite la version. */
-const POZOS_DE_BARRAS = (medidas: number): RanuraDeCampos[] => [
+const BAR_WELLS = (medidas: number): RanuraDeCampos[] => [
   {
     id: 'eje-x',
     etiqueta: 'Eje X',
@@ -48,14 +48,14 @@ const POZOS_DE_BARRAS = (medidas: number): RanuraDeCampos[] => [
     // global dice «entre 1 y 2 dimensiones» y se cumple igual con la dimension en la serie, que es
     // justo el caso que no vale.
     min: 1,
-    ayuda: 'La dimension que reparte las barras.',
+    help: 'La dimension que reparte las barras.',
   },
   {
     id: 'serie',
     etiqueta: 'Serie',
     tipo: 'dimension',
     max: 1,
-    ayuda: 'Opcional. Agrupa las barras de cada categoria.',
+    help: 'Opcional. Agrupa las barras de cada categoria.',
   },
   {
     id: 'eje-y',
@@ -63,33 +63,33 @@ const POZOS_DE_BARRAS = (medidas: number): RanuraDeCampos[] => [
     tipo: 'medida',
     max: medidas,
     min: 1,
-    ayuda: medidas > 1 ? 'Una serie por medida.' : 'La cifra que mide el alto de la barra.',
+    help: medidas > 1 ? 'Una serie por medida.' : 'La cifra que mide el alto de la barra.',
   },
 ];
 
 /** El contrato de datos de la tarjeta KPI, compartido por sus dos versiones. */
 /** Lo que admite presentar una tabla o una matriz. El color por valor es aqui donde mas se usa. */
-const PRESENTACION_DE_TABLA = presenta('formato', 'formatos', 'condicional');
+const TABLE_PRESENTATION = presenta('formato', 'formatos', 'condicional');
 
-const CONTRATO_DE_KPI: VisualObjectDefinition['versions'][number]['dataContract'] = {
+const KPI_CONTRACT: VisualObjectDefinition['versions'][number]['dataContract'] = {
   dimensions: { min: 0, max: 1 },
   measures: { min: 1, max: 2 },
   notes: 'La primera medida es el valor; la segunda, opcional, es la comparacion.',
-  pozos: [
-    { id: 'valor', etiqueta: 'Valor', tipo: 'medida', max: 1, min: 1, ayuda: 'La cifra grande de la tarjeta.' },
+  wells: [
+    { id: 'valor', etiqueta: 'Valor', tipo: 'medida', max: 1, min: 1, help: 'La cifra grande de la tarjeta.' },
     {
       id: 'comparacion',
       etiqueta: 'Comparacion',
       tipo: 'medida',
       max: 1,
-      ayuda: 'Opcional. La variacion se calcula contra esta.',
+      help: 'Opcional. La variacion se calcula contra esta.',
     },
     {
       id: 'detalle',
       etiqueta: 'Detalle',
       tipo: 'dimension',
       max: 1,
-      ayuda: 'Opcional. Desglosa la cifra en la tabla de datos adjunta.',
+      help: 'Opcional. Desglosa la cifra en la tabla de datos adjunta.',
     },
   ],
 };
@@ -97,29 +97,29 @@ const CONTRATO_DE_KPI: VisualObjectDefinition['versions'][number]['dataContract'
 /*
  * Lo que un grafico deja personalizar, en un solo sitio.
  */
-const POZOS_DE_LINEAS: RanuraDeCampos[] = [
+const LINE_WELLS: RanuraDeCampos[] = [
   {
     id: 'eje-x',
     etiqueta: 'Eje X',
     tipo: 'dimension',
     max: 1,
     min: 1,
-    ayuda: 'La dimension ordenada sobre la que avanza la linea.',
+    help: 'La dimension ordenada sobre la que avanza la linea.',
   },
-  { id: 'eje-y', etiqueta: 'Eje Y', tipo: 'medida', max: 4, min: 1, ayuda: 'Una linea por medida.' },
+  { id: 'eje-y', etiqueta: 'Eje Y', tipo: 'medida', max: 4, min: 1, help: 'Una linea por medida.' },
 ];
 
 /** El pozo que reparte los pequenos multiplos. */
-const POZO_DE_MULTIPLO: RanuraDeCampos = {
+const MULTIPLE_WELL: RanuraDeCampos = {
   id: 'multiplo',
   etiqueta: 'Multiplos',
   tipo: 'dimension',
   max: 1,
-  ayuda: 'Opcional. Repite el grafico una vez por cada valor de esta dimension.',
+  help: 'Opcional. Repite el grafico una vez por cada valor de esta dimension.',
 };
 
 /** Lo que admite presentar un grafico que puede repetirse en paneles. */
-const PRESENTACION_DE_GRAFICO = presenta(
+const CHART_PRESENTATION = presenta(
   'formato',
   'formatos',
   'leyenda',
@@ -134,7 +134,7 @@ const PRESENTACION_DE_GRAFICO = presenta(
 );
 
 /** CONGELADA. Lo que admite presentar una version YA PUBLICADA no vuelve a crecer. */
-const PRESENTACION_DE_GRAFICO_CON_CONDICIONAL = presenta(
+const CONDITIONAL_PRESENTATION_CHART = presenta(
   'formato',
   'formatos',
   'leyenda',
@@ -150,20 +150,20 @@ const PRESENTACION_DE_GRAFICO_CON_CONDICIONAL = presenta(
 );
 
 /** El contrato de un combinado, compartido por sus versiones. */
-const CONTRATO_COMBINADO: VisualObjectDefinition['versions'][number]['dataContract'] = {
+const CONTRACT_COMBO: VisualObjectDefinition['versions'][number]['dataContract'] = {
   dimensions: { min: 1, max: 1 },
   measures: { min: 2, max: 6 },
   notes:
     'Las medidas del pozo Columnas se dibujan como barras; las del pozo Lineas, como ' +
     'linea. Con eje secundario, la linea se mide en la escala de la derecha.',
-  pozos: [
+  wells: [
     {
       id: 'eje-x',
       etiqueta: 'Eje X',
       tipo: 'dimension',
       max: 1,
       min: 1,
-      ayuda: 'La dimension que reparte las columnas.',
+      help: 'La dimension que reparte las columnas.',
     },
     {
       id: 'columnas',
@@ -171,7 +171,7 @@ const CONTRATO_COMBINADO: VisualObjectDefinition['versions'][number]['dataContra
       tipo: 'medida',
       max: 3,
       min: 1,
-      ayuda: 'Las medidas que se dibujan como barras.',
+      help: 'Las medidas que se dibujan como barras.',
     },
     {
       id: 'lineas',
@@ -179,7 +179,7 @@ const CONTRATO_COMBINADO: VisualObjectDefinition['versions'][number]['dataContra
       tipo: 'medida',
       max: 3,
       min: 1,
-      ayuda: 'Las medidas que se dibujan como linea.',
+      help: 'Las medidas que se dibujan como linea.',
     },
   ],
 };
@@ -199,20 +199,20 @@ const PRESENTACION_COMBINADA = presenta(
 );
 
 /** El contrato de la matriz jerarquica, compartido por 1.1.0 y 1.2.0. */
-const CONTRATO_DE_MATRIZ: VisualObjectDefinition['versions'][number]['dataContract'] = {
+const MATRIX_CONTRACT: VisualObjectDefinition['versions'][number]['dataContract'] = {
   dimensions: { min: 1, max: 5 },
   measures: { min: 1, max: 4 },
   notes:
     'Las dimensiones de fila anidan en el orden en que se mapean, y las de columna igual. ' +
     'Cada nivel trae su subtotal, calculado sobre las filas de origen.',
-  pozos: [
+  wells: [
     { id: 'filas', etiqueta: 'Filas', tipo: 'dimension', max: 3, min: 1 },
     {
       id: 'columnas',
       etiqueta: 'Columnas',
       tipo: 'dimension',
       max: 2,
-      ayuda: 'Opcional. Sin ninguna, la matriz es una tabla agrupada por sus filas.',
+      help: 'Opcional. Sin ninguna, la matriz es una tabla agrupada por sus filas.',
     },
     { id: 'valores', etiqueta: 'Valores', tipo: 'medida', max: 4, min: 1 },
   ],
@@ -227,25 +227,25 @@ const CONTRATO_DE_BARRAS_H: VisualObjectDefinition['versions'][number]['dataCont
   dimensions: { min: 1, max: 2 },
   measures: { min: 1, max: 4 },
   notes: 'Cada medida es una serie. La segunda dimension, si existe, agrupa las barras.',
-  pozos: POZOS_DE_BARRAS(4),
+  wells: BAR_WELLS(4),
 };
 
 /** Lo que un circular admite presentar. */
-const PRESENTACION_CIRCULAR = presenta('formato', 'formatos', 'leyenda', 'circular');
+const PIE_PRESENTATION = presenta('formato', 'formatos', 'leyenda', 'circular');
 
 /** El contrato de un circular, compartido por el pastel y la dona. */
-const CONTRATO_CIRCULAR: VisualObjectDefinition['versions'][number]['dataContract'] = {
+const PIE_CONTRACT: VisualObjectDefinition['versions'][number]['dataContract'] = {
   dimensions: { min: 1, max: 1 },
   measures: { min: 1, max: 1 },
   notes: 'Las porciones suman el total de la medida. Un valor nulo no se dibuja: no es cero.',
-  pozos: [
+  wells: [
     {
       id: 'categoria',
       etiqueta: 'Categoria',
       tipo: 'dimension',
       max: 1,
       min: 1,
-      ayuda: 'La dimension que reparte las porciones.',
+      help: 'La dimension que reparte las porciones.',
     },
     {
       id: 'valor',
@@ -253,12 +253,12 @@ const CONTRATO_CIRCULAR: VisualObjectDefinition['versions'][number]['dataContrac
       tipo: 'medida',
       max: 1,
       min: 1,
-      ayuda: 'El tamano de cada porcion.',
+      help: 'El tamano de cada porcion.',
     },
   ],
 };
 
-export const catalogoInicial: VisualObjectDefinition[] = [
+export const initialCatalog: VisualObjectDefinition[] = [
   {
     objectId: 'tarjeta-kpi',
     family: 'valor',
@@ -269,7 +269,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: valor agregado, etiqueta y variacion respecto del periodo anterior.',
-        CONTRATO_DE_KPI,
+        KPI_CONTRACT,
         // Una tarjeta es una cifra: el formato es lo que mas cambia de una a otra —casos enteros,
         // porcentajes con un decimal, importes compactos—. No tiene leyenda ni etiquetas de dato,
         // porque no tiene series ni puntos.
@@ -283,7 +283,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         publishedAt: '2026-09-13',
         changelog: 'Admite la etiqueta que acompana al valor, encima o debajo.',
         certification: certificacionInicial,
-        dataContract: CONTRATO_DE_KPI,
+        dataContract: KPI_CONTRACT,
         presentation: presenta('formato', 'formatos', 'etiqueta'),
       },
       /*
@@ -294,7 +294,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         publishedAt: '2026-09-13',
         changelog: 'Formato condicional: la cifra cambia de color segun su valor.',
         certification: certificacionInicial,
-        dataContract: CONTRATO_DE_KPI,
+        dataContract: KPI_CONTRACT,
         presentation: presenta('formato', 'formatos', 'etiqueta', 'condicional'),
       },
     ],
@@ -312,7 +312,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         {
           dimensions: { min: 0, max: 6 },
           measures: { min: 0, max: 10 },
-          pozos: [
+          wells: [
             { id: 'columnas-dim', etiqueta: 'Columnas de detalle', tipo: 'dimension', max: 6 },
             { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 10 },
           ],
@@ -332,7 +332,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         dataContract: {
           dimensions: { min: 0, max: 8 },
           measures: { min: 0, max: 12 },
-          pozos: [
+          wells: [
             { id: 'columnas-dim', etiqueta: 'Columnas de detalle', tipo: 'dimension', max: 8 },
             { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 12 },
           ],
@@ -348,12 +348,12 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         dataContract: {
           dimensions: { min: 0, max: 8 },
           measures: { min: 0, max: 12 },
-          pozos: [
+          wells: [
             { id: 'columnas-dim', etiqueta: 'Columnas de detalle', tipo: 'dimension', max: 8 },
             { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 12 },
           ],
         },
-        presentation: PRESENTACION_DE_TABLA,
+        presentation: TABLE_PRESENTATION,
       },
       /*
        * 1.3.0 — la ayuda de mapeo, que era lo unico que a la tabla le faltaba.
@@ -369,12 +369,12 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           notes:
             'Cada dimension es una columna de detalle y cada medida una columna de cifra. Sin ' +
             'ninguna dimension la tabla devuelve una sola fila con los totales.',
-          pozos: [
+          wells: [
             { id: 'columnas-dim', etiqueta: 'Columnas de detalle', tipo: 'dimension', max: 8 },
             { id: 'columnas-med', etiqueta: 'Columnas de cifra', tipo: 'medida', max: 12 },
           ],
         },
-        presentation: PRESENTACION_DE_TABLA,
+        presentation: TABLE_PRESENTATION,
       },
     ],
   },
@@ -397,7 +397,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 1, max: 2 },
           measures: { min: 1, max: 1 },
           notes: 'La segunda dimension, si existe, agrupa las barras por serie.',
-          pozos: POZOS_DE_BARRAS(1),
+          wells: BAR_WELLS(1),
         },
         presenta('formato', 'formatos', 'leyenda', 'etiquetasDeDato'),
       ),
@@ -415,7 +415,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           measures: { min: 1, max: 4 },
           notes:
             'Cada medida es una serie. La segunda dimension, si existe, agrupa las barras por serie.',
-          pozos: POZOS_DE_BARRAS(4),
+          wells: BAR_WELLS(4),
         },
         presentation: presenta('formato', 'formatos', 'leyenda', 'etiquetasDeDato'),
       },
@@ -433,9 +433,9 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           measures: { min: 1, max: 4 },
           notes:
             'Cada medida es una serie. La segunda dimension, si existe, agrupa las columnas por serie.',
-          pozos: POZOS_DE_BARRAS(4),
+          wells: BAR_WELLS(4),
         },
-        presentation: PRESENTACION_DE_GRAFICO,
+        presentation: CHART_PRESENTATION,
       },
       /*
        * 1.3.0 — pequenos multiplos.
@@ -451,9 +451,9 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           notes:
             'Cada medida es una serie. La dimension de multiplos, si existe, reparte el objeto en ' +
             'un panel por valor; la de serie agrupa las columnas dentro de cada panel.',
-          pozos: [...POZOS_DE_BARRAS(4), POZO_DE_MULTIPLO],
+          wells: [...BAR_WELLS(4), MULTIPLE_WELL],
         },
-        presentation: PRESENTACION_DE_GRAFICO,
+        presentation: CHART_PRESENTATION,
       },
       /*
        * 1.4.0 — formato condicional.
@@ -469,9 +469,9 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           notes:
             'Cada medida es una serie. La dimension de multiplos, si existe, reparte el objeto en ' +
             'un panel por valor; la de serie agrupa las columnas dentro de cada panel.',
-          pozos: [...POZOS_DE_BARRAS(4), POZO_DE_MULTIPLO],
+          wells: [...BAR_WELLS(4), MULTIPLE_WELL],
         },
-        presentation: PRESENTACION_DE_GRAFICO_CON_CONDICIONAL,
+        presentation: CONDITIONAL_PRESENTATION_CHART,
       },
     ],
   },
@@ -489,7 +489,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
       v1(
         'Version inicial: barras horizontales, hasta cuatro medidas, con apilado y 100 %.',
         CONTRATO_DE_BARRAS_H,
-        PRESENTACION_DE_GRAFICO,
+        CHART_PRESENTATION,
       ),
       /*
        * 1.1.0 — formato condicional, que las columnas tienen desde su 1.4.0.
@@ -500,7 +500,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         changelog: 'Formato condicional: el color de una barra puede depender de su valor.',
         certification: certificacionInicial,
         dataContract: CONTRATO_DE_BARRAS_H,
-        presentation: PRESENTACION_DE_GRAFICO_CON_CONDICIONAL,
+        presentation: CONDITIONAL_PRESENTATION_CHART,
       },
     ],
   },
@@ -517,8 +517,8 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: porciones ordenadas, etiquetas de detalle y tooltip con cifra y parte.',
-        CONTRATO_CIRCULAR,
-        PRESENTACION_CIRCULAR,
+        PIE_CONTRACT,
+        PIE_PRESENTATION,
       ),
     ],
   },
@@ -532,8 +532,8 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: anillo con hueco del 55 % y total en el centro.',
-        CONTRATO_CIRCULAR,
-        PRESENTACION_CIRCULAR,
+        PIE_CONTRACT,
+        PIE_PRESENTATION,
       ),
     ],
   },
@@ -553,21 +553,21 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           notes:
             'La primera medida es el valor; la segunda, opcional, es el objetivo. Sin dimensiones: ' +
             'un medidor dibuja UNA cifra, y repartirla por categorias es otro objeto.',
-          pozos: [
+          wells: [
             {
               id: 'valor',
               etiqueta: 'Valor',
               tipo: 'medida',
               max: 1,
               min: 1,
-              ayuda: 'La cifra que mueve la aguja.',
+              help: 'La cifra que mueve la aguja.',
             },
             {
               id: 'objetivo',
               etiqueta: 'Objetivo',
               tipo: 'medida',
               max: 1,
-              ayuda: 'Opcional. Si no se mapea, se puede fijar a mano en Formato.',
+              help: 'Opcional. Si no se mapea, se puede fijar a mano en Formato.',
             },
           ],
         },
@@ -588,7 +588,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: columnas y lineas por pozo, con eje secundario opcional.',
-        CONTRATO_COMBINADO,
+        CONTRACT_COMBO,
         PRESENTACION_COMBINADA,
       ),
       /*
@@ -599,7 +599,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         publishedAt: '2026-09-13',
         changelog: 'Las columnas se pueden apilar, tambien al 100 %.',
         certification: certificacionInicial,
-        dataContract: CONTRATO_COMBINADO,
+        dataContract: CONTRACT_COMBO,
         presentation: [...PRESENTACION_COMBINADA, 'apilado'],
       },
     ],
@@ -621,14 +621,14 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 1, max: 1 },
           measures: { min: 2, max: 3 },
           notes: 'Cada valor de la dimension es un punto. La tercera medida, si esta, es el tamano.',
-          pozos: [
+          wells: [
             {
               id: 'punto',
               etiqueta: 'Punto',
               tipo: 'dimension',
               max: 1,
               min: 1,
-              ayuda: 'Cada valor de esta dimension es un punto del grafico.',
+              help: 'Cada valor de esta dimension es un punto del grafico.',
             },
             {
               id: 'eje-x',
@@ -636,7 +636,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
               tipo: 'medida',
               max: 1,
               min: 1,
-              ayuda: 'La medida horizontal.',
+              help: 'La medida horizontal.',
             },
             {
               id: 'eje-y',
@@ -644,14 +644,14 @@ export const catalogoInicial: VisualObjectDefinition[] = [
               tipo: 'medida',
               max: 1,
               min: 1,
-              ayuda: 'La medida vertical.',
+              help: 'La medida vertical.',
             },
             {
               id: 'tamano',
               etiqueta: 'Tamano',
               tipo: 'medida',
               max: 1,
-              ayuda: 'Opcional. Reparte el diametro del punto entre un minimo y un maximo.',
+              help: 'Opcional. Reparte el diametro del punto entre un minimo y un maximo.',
             },
           ],
         },
@@ -676,14 +676,14 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 1, max: 1 },
           measures: { min: 1, max: 1 },
           notes: 'El orden de las etapas es el del dataset: ordenar por tamano destruiria el proceso.',
-          pozos: [
+          wells: [
             {
               id: 'etapa',
               etiqueta: 'Etapa',
               tipo: 'dimension',
               max: 1,
               min: 1,
-              ayuda: 'La dimension que ordena las etapas.',
+              help: 'La dimension que ordena las etapas.',
             },
             {
               id: 'valor',
@@ -691,7 +691,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
               tipo: 'medida',
               max: 1,
               min: 1,
-              ayuda: 'La cifra de cada etapa.',
+              help: 'La cifra de cada etapa.',
             },
           ],
         },
@@ -716,14 +716,14 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 1, max: 1 },
           measures: { min: 1, max: 1 },
           notes: 'Los valores se encadenan: cada barra empieza donde acabo la anterior.',
-          pozos: [
+          wells: [
             {
               id: 'categoria',
               etiqueta: 'Categoria',
               tipo: 'dimension',
               max: 1,
               min: 1,
-              ayuda: 'Lo que aporta cada barra.',
+              help: 'Lo que aporta cada barra.',
             },
             {
               id: 'valor',
@@ -731,7 +731,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
               tipo: 'medida',
               max: 1,
               min: 1,
-              ayuda: 'Cuanto suma o resta. Negativo baja.',
+              help: 'Cuanto suma o resta. Negativo baja.',
             },
           ],
         },
@@ -756,21 +756,21 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 1, max: 2 },
           measures: { min: 1, max: 1 },
           notes: 'Con dos dimensiones, la primera agrupa y la segunda reparte dentro de cada grupo.',
-          pozos: [
+          wells: [
             {
               id: 'grupo',
               etiqueta: 'Grupo',
               tipo: 'dimension',
               max: 1,
               min: 1,
-              ayuda: 'El primer nivel: cada valor es un bloque.',
+              help: 'El primer nivel: cada valor es un bloque.',
             },
             {
               id: 'detalle',
               etiqueta: 'Detalle',
               tipo: 'dimension',
               max: 1,
-              ayuda: 'Opcional. El segundo nivel, dentro de cada bloque.',
+              help: 'Opcional. El segundo nivel, dentro de cada bloque.',
             },
             {
               id: 'valor',
@@ -778,7 +778,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
               tipo: 'medida',
               max: 1,
               min: 1,
-              ayuda: 'El area de cada rectangulo.',
+              help: 'El area de cada rectangulo.',
             },
           ],
         },
@@ -800,9 +800,9 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 1, max: 1 },
           measures: { min: 1, max: 4 },
           notes: 'Apilada responde a «de que se compone ese total», que con lineas hay que sumar.',
-          pozos: POZOS_DE_LINEAS,
+          wells: LINE_WELLS,
         },
-        PRESENTACION_DE_GRAFICO,
+        CHART_PRESENTATION,
       ),
     ],
   },
@@ -819,7 +819,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         {
           dimensions: { min: 1, max: 1 },
           measures: { min: 1, max: 4 },
-          pozos: POZOS_DE_LINEAS,
+          wells: LINE_WELLS,
         },
         presenta('formato', 'formatos', 'leyenda', 'etiquetasDeDato'),
       ),
@@ -833,9 +833,9 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         dataContract: {
           dimensions: { min: 1, max: 1 },
           measures: { min: 1, max: 4 },
-          pozos: POZOS_DE_LINEAS,
+          wells: LINE_WELLS,
         },
-        presentation: PRESENTACION_DE_GRAFICO,
+        presentation: CHART_PRESENTATION,
       },
       /* 1.2.0 — pequenos multiplos, por lo mismo que en columnas. */
       {
@@ -847,9 +847,9 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 1, max: 2 },
           measures: { min: 1, max: 4 },
           notes: 'La dimension de multiplos reparte el objeto en un panel por valor.',
-          pozos: [...POZOS_DE_LINEAS, POZO_DE_MULTIPLO],
+          wells: [...LINE_WELLS, MULTIPLE_WELL],
         },
-        presentation: PRESENTACION_DE_GRAFICO,
+        presentation: CHART_PRESENTATION,
       },
     ],
   },
@@ -867,7 +867,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 2, max: 2 },
           measures: { min: 1, max: 1 },
           notes: 'La primera dimension va en filas; la segunda, en columnas.',
-          pozos: [
+          wells: [
             { id: 'filas', etiqueta: 'Filas', tipo: 'dimension', max: 1, min: 1 },
             { id: 'columnas', etiqueta: 'Columnas', tipo: 'dimension', max: 1, min: 1 },
             { id: 'valores', etiqueta: 'Valores', tipo: 'medida', max: 1, min: 1 },
@@ -885,7 +885,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           'Jerarquia en filas y columnas (hasta tres y dos niveles), varias medidas, subtotales ' +
           'por nivel, colapsar y expandir, y orden por cualquier encabezado.',
         certification: certificacionInicial,
-        dataContract: CONTRATO_DE_MATRIZ,
+        dataContract: MATRIX_CONTRACT,
         presentation: presenta('formato', 'formatos'),
       },
       /*
@@ -896,8 +896,8 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         publishedAt: '2026-09-13',
         changelog: 'Formato condicional: el color de una cifra puede depender de su valor.',
         certification: certificacionInicial,
-        dataContract: CONTRATO_DE_MATRIZ,
-        presentation: PRESENTACION_DE_TABLA,
+        dataContract: MATRIX_CONTRACT,
+        presentation: TABLE_PRESENTATION,
       },
     ],
   },
@@ -919,14 +919,14 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           notes:
             'Cada dimension lleva un selector. Sin configurar, se usa el que corresponde a su ' +
             'tipo. La seleccion vive en la query string (4.11), no en estado local.',
-          pozos: [
+          wells: [
             {
               id: 'filtros',
               etiqueta: 'Campos a filtrar',
               tipo: 'dimension',
               max: 10,
               min: 1,
-              ayuda: 'El tipo de selector de cada uno se elige en Formato.',
+              help: 'El tipo de selector de cada uno se elige en Formato.',
             },
           ],
         },
@@ -945,7 +945,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         dimensions: { min: 1, max: 1 },
         measures: { min: 0, max: 0 },
         notes: 'Su seleccion se refleja en la query string (4.11), no en estado local.',
-        pozos: [{ id: 'campo', etiqueta: 'Campo', tipo: 'dimension', max: 1, min: 1 }],
+        wells: [{ id: 'campo', etiqueta: 'Campo', tipo: 'dimension', max: 1, min: 1 }],
       }),
     ],
   },
@@ -1014,14 +1014,14 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           dimensions: { min: 1, max: 1 },
           measures: { min: 1, max: 1 },
           notes: 'La dimension debe ser una division territorial reconocida por la cartografia.',
-          pozos: [
+          wells: [
             {
               id: 'territorio',
               etiqueta: 'Territorio',
               tipo: 'dimension',
               max: 1,
               min: 1,
-              ayuda: 'La division territorial que colorea el mapa.',
+              help: 'La division territorial que colorea el mapa.',
             },
             {
               id: 'valor',
@@ -1029,7 +1029,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
               tipo: 'medida',
               max: 1,
               min: 1,
-              ayuda: 'La cifra que decide la intensidad del color.',
+              help: 'La cifra que decide la intensidad del color.',
             },
           ],
         },
@@ -1048,7 +1048,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: parrafos con negrita, cursiva, subrayado, alineacion y color.',
-        SIN_DATOS('Escribe texto. El enlace a un dataset llegara como intercalado de medidas.'),
+        WITHOUT_DATA('Escribe texto. El enlace a un dataset llegara como intercalado de medidas.'),
       ),
     ],
   },
@@ -1061,7 +1061,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: lineas configurables a izquierda, derecha, ambos lados, arriba o abajo.',
-        SIN_DATOS('Ocupa el ancho que se le de. Las lineas se reparten lo que sobra del texto.'),
+        WITHOUT_DATA('Ocupa el ancho que se le de. Las lineas se reparten lo que sobra del texto.'),
       ),
     ],
   },
@@ -1074,7 +1074,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: horizontal o vertical, con estilo, grosor y color.',
-        SIN_DATOS('Va en el hueco entre celdas: una fila de alto uno, o una columna de ancho uno.'),
+        WITHOUT_DATA('Va en el hueco entre celdas: una fila de alto uno, o una columna de ancho uno.'),
       ),
     ],
   },
@@ -1087,7 +1087,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: seis formas con relleno, trazo, opacidad, radio y texto interior.',
-        SIN_DATOS('El relleno y el trazo son roles del tema, no colores sueltos (4.3).'),
+        WITHOUT_DATA('El relleno y el trazo son roles del tema, no colores sueltos (4.3).'),
       ),
     ],
   },
@@ -1100,7 +1100,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: recto, en angulo o curvo, con extremos y rotulo.',
-        SIN_DATOS('Guarda los ids de los dos objetos, no coordenadas: sigue pegado al moverlos.'),
+        WITHOUT_DATA('Guarda los ids de los dos objetos, no coordenadas: sigue pegado al moverlos.'),
       ),
     ],
   },
@@ -1115,7 +1115,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     category: 'contenedor',
     versions: [
       v1('Version inicial: rejilla interna propia, con titulo, subtitulo e icono opcionales.',
-        SIN_DATOS('Los hijos se posicionan contra la rejilla del contenedor, no la del modulo.')),
+        WITHOUT_DATA('Los hijos se posicionan contra la rejilla del contenedor, no la del modulo.')),
     ],
   },
   {
@@ -1126,7 +1126,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     category: 'contenedor',
     versions: [
       v1('Version inicial: desplazamiento por un solo eje, configurable.',
-        SIN_DATOS('Dos barras a la vez convierten buscar contenido en un plano en vez de una linea.')),
+        WITHOUT_DATA('Dos barras a la vez convierten buscar contenido en un plano en vez de una linea.')),
     ],
   },
   {
@@ -1137,7 +1137,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     category: 'contenedor',
     versions: [
       v1('Version inicial: vista reducida en la rejilla y ventana ampliada independiente.',
-        SIN_DATOS('La rejilla de la ventana no es la de la tarjeta: caben otras cosas y de otra forma.')),
+        WITHOUT_DATA('La rejilla de la ventana no es la de la tarjeta: caben otras cosas y de otra forma.')),
     ],
   },
   {
@@ -1148,7 +1148,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     category: 'contenedor',
     versions: [
       v1('Version inicial: pestanas con disposicion independiente y tamano fijo del contenedor.',
-        SIN_DATOS('Cambiar de pestana no altera la posicion, las dimensiones ni el espacio ocupado.')),
+        WITHOUT_DATA('Cambiar de pestana no altera la posicion, las dimensiones ni el espacio ocupado.')),
     ],
   },
 ];

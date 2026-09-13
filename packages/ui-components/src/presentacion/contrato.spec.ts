@@ -1,18 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { catalogoInicial } from '../registry/catalog';
-import { FAMILIAS_DE_OBJETO } from '../registry/types';
+import { initialCatalog } from '../registry/catalog';
+import { OBJECT_FAMILIES } from '../registry/types';
 import { ICONOS_DE_OBJETO, NOMBRES_DE_ICONO, TRAZOS_DE_ICONO } from './iconos';
 import {
   CLAVES_DE_PRESENTACION,
   PRESENTACION_MINIMA,
   formateadorDe,
   validarPresentacion,
-  type ClaveDePresentacion,
+  type PresentationKey,
 } from './contrato';
 
 /** El estandar minimo, como prueba. */
 describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
-  const versiones = catalogoInicial.flatMap((o) =>
+  const versiones = initialCatalog.flatMap((o) =>
     o.versions.map((v) => ({ objectId: o.objectId, categoria: o.category, version: v })),
   );
 
@@ -42,7 +42,7 @@ describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
     // configuracion muerta que luego nadie se atreve a quitar por si acaso hace algo.
     for (const { categoria, version, objectId } of versiones) {
       const deGrafico = version.presentation.filter((c) =>
-        (['leyenda', 'etiquetasDeDato'] as ClaveDePresentacion[]).includes(c),
+        (['leyenda', 'etiquetasDeDato'] as PresentationKey[]).includes(c),
       );
       if (categoria !== 'grafico') {
         expect(deGrafico, `${objectId} no es un grafico`).toEqual([]);
@@ -52,7 +52,7 @@ describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
 });
 
 describe('validarPresentacion', () => {
-  const todas: ClaveDePresentacion[] = [
+  const todas: PresentationKey[] = [
     ...PRESENTACION_MINIMA,
     'formato',
     'leyenda',
@@ -143,8 +143,8 @@ describe('formateadorDe', () => {
 });
 
 describe('circular y medidor: lo que se rechaza al guardar', () => {
-  const conCircular: ClaveDePresentacion[] = [...PRESENTACION_MINIMA, 'circular'];
-  const conMedidor: ClaveDePresentacion[] = [...PRESENTACION_MINIMA, 'medidor'];
+  const conCircular: PresentationKey[] = [...PRESENTACION_MINIMA, 'circular'];
+  const conMedidor: PresentationKey[] = [...PRESENTACION_MINIMA, 'medidor'];
 
   it('un hueco fuera de rango no llega a guardarse', () => {
     // Por encima del limite no queda anillo: el grafico dejaria de decir nada sobre proporciones.
@@ -185,13 +185,13 @@ describe('los nombres del catalogo', () => {
      * distinguia, y elegir entre ellas era adivinar. Nada fallaba: un nombre repetido no rompe
      * nada, solo hace imposible elegir.
      */
-    const names = catalogoInicial.map((o) => o.name);
+    const names = initialCatalog.map((o) => o.name);
     const repetidos = names.filter((n, i) => names.indexOf(n) !== i);
     expect(repetidos).toEqual([]);
   });
 
   it('ni dos con el mismo identificador, que si es el contrato (4.5)', () => {
-    const ids = catalogoInicial.map((o) => o.objectId);
+    const ids = initialCatalog.map((o) => o.objectId);
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
@@ -211,7 +211,7 @@ describe('la familia de cada objeto', () => {
   const SIN_FAMILIA = new Set(['elemento', 'contenedor', 'complemento']);
 
   it('todo objeto que consume datos declara a que pregunta responde', () => {
-    for (const objeto of catalogoInicial) {
+    for (const objeto of initialCatalog) {
       if (SIN_FAMILIA.has(objeto.category)) continue;
       expect(objeto.family, `${objeto.objectId} no declara familia`).toBeDefined();
     }
@@ -220,16 +220,16 @@ describe('la familia de cada objeto', () => {
   it('y los que solo componen la pagina NO la declaran', () => {
     // Un cuadro de texto no responde a ninguna pregunta sobre los datos: ponerle «comparacion»
     // seria rellenar un campo para que no estuviera vacio.
-    for (const objeto of catalogoInicial) {
+    for (const objeto of initialCatalog) {
       if (!SIN_FAMILIA.has(objeto.category)) continue;
       expect(objeto.family, `${objeto.objectId} no deberia declarar familia`).toBeUndefined();
     }
   });
 
   it('todas las familias declaradas existen', () => {
-    for (const objeto of catalogoInicial) {
+    for (const objeto of initialCatalog) {
       if (objeto.family === undefined) continue;
-      expect(FAMILIAS_DE_OBJETO).toContain(objeto.family);
+      expect(OBJECT_FAMILIES).toContain(objeto.family);
     }
   });
 });

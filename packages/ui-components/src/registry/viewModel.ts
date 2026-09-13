@@ -1,5 +1,5 @@
 import type { Aggregation, QueryResult } from '@app/data-contracts';
-import { type Acumulador, acumular, cerrar, nuevoAcumulador } from './agregacion';
+import { type Acumulador, acumular, close, nuevoAcumulador } from './aggregation';
 import type { ObjectDataContract, ObjectInstance } from './types';
 
 /** Transformacion de un QueryResult en los datos que un objeto necesita para dibujarse. */
@@ -143,7 +143,7 @@ export function aggregateBy(
   }
 
   return {
-    rows: [...acumulado.values()].map((g) => ({ labels: g.labels, values: g.accs.map(cerrar) })),
+    rows: [...acumulado.values()].map((g) => ({ labels: g.labels, values: g.accs.map(close) })),
     aggregated: filasAgregadas > 0,
   };
 }
@@ -229,8 +229,8 @@ export function toMatrix(
   const dataRows: string[] = [];
   const gridColumns: string[] = [];
   const celdas = new Map<string, Acumulador>();
-  const totalDeFila = new Map<string, Acumulador>();
-  const totalDeColumna = new Map<string, Acumulador>();
+  const rowTotal = new Map<string, Acumulador>();
+  const columnTotal = new Map<string, Acumulador>();
   const general = nuevoAcumulador(aggregation);
 
   const enMapa = (mapa: Map<string, Acumulador>, clave: string): Acumulador => {
@@ -250,23 +250,23 @@ export function toMatrix(
     if (iMed < 0) continue;
     const valor = row[iMed];
     acumular(enMapa(celdas, `${f}${SEP}${c}`), valor);
-    acumular(enMapa(totalDeFila, f), valor);
-    acumular(enMapa(totalDeColumna, c), valor);
+    acumular(enMapa(rowTotal, f), valor);
+    acumular(enMapa(columnTotal, c), valor);
     acumular(general, valor);
   }
 
-  const cerrarDe = (mapa: Map<string, Acumulador>, clave: string): number | null => {
+  const closeOf = (mapa: Map<string, Acumulador>, clave: string): number | null => {
     const acc = mapa.get(clave);
-    return acc ? cerrar(acc) : null;
+    return acc ? close(acc) : null;
   };
 
   return {
     rowLabels: dataRows,
     columnLabels: gridColumns,
-    cells: dataRows.map((f) => gridColumns.map((c) => cerrarDe(celdas, `${f}${SEP}${c}`))),
-    rowTotals: dataRows.map((f) => cerrarDe(totalDeFila, f)),
-    columnTotals: gridColumns.map((c) => cerrarDe(totalDeColumna, c)),
-    grandTotal: result.rows.length === 0 || iMed < 0 ? null : cerrar(general),
+    cells: dataRows.map((f) => gridColumns.map((c) => closeOf(celdas, `${f}${SEP}${c}`))),
+    rowTotals: dataRows.map((f) => closeOf(rowTotal, f)),
+    columnTotals: gridColumns.map((c) => closeOf(columnTotal, c)),
+    grandTotal: result.rows.length === 0 || iMed < 0 ? null : close(general),
   };
 }
 

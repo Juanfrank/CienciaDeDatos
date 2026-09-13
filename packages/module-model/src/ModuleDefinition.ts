@@ -66,7 +66,7 @@ export function instancesOf(module: ModuleDefinition): ObjectInstance[] {
     instance,
     ...instanciasAnidadas(
       esContenedor(instance.objectId)
-        ? (instance.configuracion as ContainerSettings | undefined)
+        ? (instance.settings as ContainerSettings | undefined)
         : undefined,
     ).flatMap(recorrer),
   ];

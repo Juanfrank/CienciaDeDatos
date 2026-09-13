@@ -8,7 +8,7 @@ import {
 } from '@app/access-control';
 import { CachedDatasetReader } from '@app/caching';
 import { CacheMetrics } from '@app/observability';
-import { ObjectRegistry, catalogoInicial } from '@app/ui-components';
+import { ObjectRegistry, initialCatalog } from '@app/ui-components';
 import { cacheL1, cacheL2 } from './almacenCompartido';
 import { gobierno } from './gobierno';
 
@@ -19,7 +19,7 @@ import { gobierno } from './gobierno';
  */
 export { conectorActivo } from './configuracion';
 
-export const objectRegistry = new ObjectRegistry(catalogoInicial);
+export const objectRegistry = new ObjectRegistry(initialCatalog);
 
 // El store y su directorio viven en `almacenCompartido`, que no depende de nadie: ponerlos
 // aqui creaba un ciclo de importacion con el gobierno.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ObjectRegistry, catalogoInicial, type ObjectInstance } from '@app/ui-components';
+import { ObjectRegistry, initialCatalog, type ObjectInstance } from '@app/ui-components';
 import {
   datasetsConsumedBy,
   findPage,
@@ -54,7 +54,7 @@ const modulo = (items: GridItem[]): ModuleDefinition => ({
   updatedAt: '2026-09-11T08:00:00.000Z',
 });
 
-const registro = new ObjectRegistry(catalogoInicial);
+const registro = new ObjectRegistry(initialCatalog);
 const gridColumns = { casos: ['DimTribunal.Distrito', 'CasosPendientes'] };
 
 describe('rejilla (4.2)', () => {

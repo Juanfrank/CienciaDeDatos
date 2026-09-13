@@ -10,8 +10,8 @@ import type {
 export type BuscarDefinicion = (objectId: string) => VisualObjectDefinition | undefined;
 
 /** Un complemento de tabla con alcance de subobjeto necesita una dimension por la que desglosar. */
-function exigeDimension(adjunto: AttachedObjectInstance): boolean {
-  return adjunto.objectId === 'tabla-de-datos' && adjunto.scope === 'subobjeto';
+function exigeDimension(attachment: AttachedObjectInstance): boolean {
+  return attachment.objectId === 'tabla-de-datos' && attachment.scope === 'subobjeto';
 }
 
 export function validateAttachments(
@@ -33,21 +33,21 @@ export function validateAttachments(
 
   const vistos = new Set<string>();
 
-  for (const adjunto of instance.attachments ?? []) {
-    const definicion = search(adjunto.objectId);
+  for (const attachment of instance.attachments ?? []) {
+    const definicion = search(attachment.objectId);
 
     if (!definicion) {
       problems.push({
-        slot: adjunto.objectId,
+        slot: attachment.objectId,
         kind: 'campo-inexistente',
-        problem: `El complemento '${adjunto.objectId}' no existe en el repositorio de objetos.`,
+        problem: `El complemento '${attachment.objectId}' no existe en el repositorio de objetos.`,
       });
       continue;
     }
 
     if (!definicion.attachable) {
       problems.push({
-        slot: adjunto.objectId,
+        slot: attachment.objectId,
         kind: 'contrato-incumplido',
         problem:
           `'${definicion.name}' no es un complemento: es un objeto independiente y no puede ` +
@@ -57,18 +57,18 @@ export function validateAttachments(
 
     // Dos tooltips explicativos en el mismo objeto no significan nada, y dos tablas de datos
     // dejarian al anfitrion con dos iconos que abren lo mismo.
-    if (vistos.has(adjunto.objectId)) {
+    if (vistos.has(attachment.objectId)) {
       problems.push({
-        slot: adjunto.objectId,
+        slot: attachment.objectId,
         kind: 'contrato-incumplido',
         problem: `El objeto ya tiene adjunto un '${definicion.name}'. Solo se admite uno de cada tipo.`,
       });
     }
-    vistos.add(adjunto.objectId);
+    vistos.add(attachment.objectId);
 
-    if (exigeDimension(adjunto) && instance.binding.dimensions.length === 0) {
+    if (exigeDimension(attachment) && instance.binding.dimensions.length === 0) {
       problems.push({
-        slot: adjunto.objectId,
+        slot: attachment.objectId,
         kind: 'contrato-incumplido',
         problem:
           'El alcance de subobjeto desglosa por una categoria, y este objeto no mapea ninguna ' +

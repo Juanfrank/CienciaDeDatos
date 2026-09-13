@@ -5,7 +5,7 @@ export {
   validateAttachments,
   type BuscarDefinicion,
 } from './registry/attachments';
-export { catalogoInicial } from './registry/catalog';
+export { initialCatalog } from './registry/catalog';
 export {
   COMPARADORES,
   MAX_REGLAS,
@@ -34,7 +34,7 @@ export {
   formateadorDe,
   validarPresentacion,
   type AcentoDeObjeto,
-  type ClaveDePresentacion,
+  type PresentationKey,
   type FormatoNumerico,
   type FunnelComparison,
   type LabelSettings,
@@ -96,30 +96,30 @@ export {
   type NombreDeIcono,
 } from './presentacion/iconos';
 export {
-  AGREGACION_POR_DEFECTO,
-  ETIQUETA_DE_AGREGACION,
+  DEFAULT_AGGREGATION,
+  AGGREGATION_LABEL,
   acumular,
-  agregacionesDe,
-  agregacionesPara,
+  aggregationsOf,
+  aggregationsFor,
   agregacionesPosibles,
-  cerrar,
+  close,
   nuevoAcumulador,
-  validarAgregacion,
+  validateAggregation,
   type Acumulador,
-  type ContextoDeAgregacion,
-  type ProblemaDeAgregacion,
-} from './registry/agregacion';
+  type AggregationContext,
+  type AggregationProblem,
+} from './registry/aggregation';
 export {
-  compararValores,
-  construirMatriz,
-  filasVisibles,
+  compareValues,
+  buildMatrix,
+  visibleRows,
   leaves,
-  ordenarNodos,
-  rutaClave,
-  type Direccion,
-  type MatrizJerarquica,
-  type NodoDeMatriz,
-} from './registry/matriz';
+  sortNodes,
+  pathKey,
+  type Direction,
+  type HierarchicalMatrix,
+  type MatrixNode,
+} from './registry/matrix';
 export {
   ALINEACIONES,
   ALINEACIONES_VERTICALES,
@@ -150,7 +150,7 @@ export {
   type EtiquetaDeValor,
   type PosicionDeEtiqueta,
 } from './presentacion/contrato';
-export { desgloseDe, proyectarObjeto } from './registry/proyeccion';
+export { breakdownOf, projectObject } from './registry/projection';
 export {
   classifyBump,
   compareVersions,
@@ -161,13 +161,13 @@ export {
   type Semver,
   type VersionBump,
 } from './registry/semver';
-export { FAMILIAS_DE_OBJETO } from './registry/types';
+export { OBJECT_FAMILIES } from './registry/types';
 export type {
   AttachedObjectInstance,
   AttachmentScope,
   DeprecationNotice,
-  ConfiguracionDeObjeto,
-  FamiliaDeObjeto,
+  ObjectSettings,
+  ObjectFamily,
   ObjectCategory,
   ObjectCertification,
   ObjectDataContract,

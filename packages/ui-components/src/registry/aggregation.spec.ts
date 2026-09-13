@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { AGGREGATIONS, type QueryResult } from '@app/data-contracts';
 import {
-  agregacionesDe,
-  agregacionesPara,
+  aggregationsOf,
+  aggregationsFor,
   agregacionesPosibles,
-  validarAgregacion,
-} from './agregacion';
+  validateAggregation,
+} from './aggregation';
 import { aggregateBy, toKpi, toMatrix } from './viewModel';
 
 /** El fallo que estas pruebas fijan tenia un numero concreto. */
@@ -89,11 +89,11 @@ describe('«ninguna»: lo que la fuente ya calculo', () => {
 });
 
 describe('el conjunto vacio', () => {
-  const vacio = { ...casos, rows: [] };
+  const empty = { ...casos, rows: [] };
 
   it('la suma de cero filas es cero; el promedio de cero filas no existe', () => {
-    expect(toKpi(vacio, ['DiasResolucion'], 'x', ['suma']).value).toBe(0);
-    expect(toKpi(vacio, ['DiasResolucion'], 'x', ['promedio']).value).toBeNull();
+    expect(toKpi(empty, ['DiasResolucion'], 'x', ['suma']).value).toBe(0);
+    expect(toKpi(empty, ['DiasResolucion'], 'x', ['promedio']).value).toBeNull();
   });
 });
 
@@ -128,27 +128,27 @@ describe('los totales de una matriz salen de las filas de origen', () => {
 describe('de donde sale el operador de cada medida', () => {
   it('manda lo elegido en el pozo; si no, lo que declara el esquema; si no, suma', () => {
     const declaradas = new Map([['DiasResolucion', 'promedio' as const]]);
-    expect(agregacionesDe(['DiasResolucion'], declaradas, undefined)).toEqual(['promedio']);
-    expect(agregacionesDe(['DiasResolucion'], declaradas, { DiasResolucion: 'maximo' })).toEqual([
+    expect(aggregationsOf(['DiasResolucion'], declaradas, undefined)).toEqual(['promedio']);
+    expect(aggregationsOf(['DiasResolucion'], declaradas, { DiasResolucion: 'maximo' })).toEqual([
       'maximo',
     ]);
-    expect(agregacionesDe(['Otra'], declaradas, undefined)).toEqual(['suma']);
+    expect(aggregationsOf(['Otra'], declaradas, undefined)).toEqual(['suma']);
   });
 
   it('se reordena POR NOMBRE, porque los objetos consumen sus medidas por ranura', () => {
     // Una tarjeta pide primero la del pozo «valor» y luego la de «comparacion», que en el mapeo
     // pueden estar al reves. Casar por indice le daria a cada medida el operador de la otra.
     expect(
-      agregacionesPara(['B', 'A'], ['A', 'B'], ['suma', 'promedio']),
+      aggregationsFor(['B', 'A'], ['A', 'B'], ['suma', 'promedio']),
     ).toEqual(['promedio', 'suma']);
   });
 });
 
-describe('validarAgregacion: lo que no se puede guardar', () => {
+describe('validateAggregation: lo que no se puede guardar', () => {
   const base = { measures: ['DiasResolucion'], colapsa: true };
 
   it('un promedio sobre un dataset YA agrupado se rechaza', () => {
-    const problems = validarAgregacion({
+    const problems = validateAggregation({
       ...base,
       aggregations: ['promedio'],
       dataGrain: 'preagregado',
@@ -158,26 +158,26 @@ describe('validarAgregacion: lo que no se puede guardar', () => {
   });
 
   it('el mismo promedio sobre grano atomico se acepta', () => {
-    expect(validarAgregacion({ ...base, aggregations: ['promedio'], dataGrain: 'atomico' })).toEqual([]);
+    expect(validateAggregation({ ...base, aggregations: ['promedio'], dataGrain: 'atomico' })).toEqual([]);
   });
 
   it('las aditivas se aceptan sobre cualquier grano', () => {
     for (const aggregation of ['suma', 'minimo', 'maximo'] as const) {
       expect(
-        validarAgregacion({ ...base, aggregations: [aggregation], dataGrain: 'preagregado' }),
+        validateAggregation({ ...base, aggregations: [aggregation], dataGrain: 'preagregado' }),
       ).toEqual([]);
     }
   });
 
   it('una medida ya calculada por la fuente se rechaza en cuanto el objeto colapsa', () => {
     expect(
-      validarAgregacion({ ...base, aggregations: ['ninguna'], dataGrain: 'atomico' }),
+      validateAggregation({ ...base, aggregations: ['ninguna'], dataGrain: 'atomico' }),
     ).toHaveLength(1);
   });
 
   it('sin colapso no hay nada que comprobar: el objeto dibuja una fila por fila', () => {
     expect(
-      validarAgregacion({
+      validateAggregation({
         measures: ['DiasResolucion'],
         aggregations: ['ninguna'],
         colapsa: false,
@@ -218,7 +218,7 @@ describe('agregacionesPosibles: lo que el editor puede OFRECER', () => {
       for (const colapsa of [true, false]) {
         const posibles = agregacionesPosibles({ colapsa, dataGrain });
         for (const aggregation of AGGREGATIONS) {
-          const problems = validarAgregacion({
+          const problems = validateAggregation({
             measures: ['m'],
             aggregations: [aggregation],
             colapsa,

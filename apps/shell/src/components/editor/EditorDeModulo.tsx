@@ -129,7 +129,7 @@ export function EditorDeModulo({
           dimensions: (dataset?.dimensiones ?? []).slice(0, definicion.dimensiones.min).map(aFieldRef),
           measures: (dataset?.medidas ?? []).slice(0, definicion.medidas.min),
         },
-        ...(config ? { configuracion: config } : {}),
+        ...(config ? { settings: config } : {}),
       },
     };
 

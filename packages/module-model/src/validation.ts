@@ -3,10 +3,10 @@ import {
   type BindingProblem,
   type ObjectInstance,
   type ObjectRegistry,
-  agregacionesDe,
+  aggregationsOf,
   fieldKey,
   ranurasDelContrato,
-  validarAgregacion,
+  validateAggregation,
   validarPanelDeFiltros,
   validarPresentacion,
   validarRanuras,
@@ -80,7 +80,7 @@ function aggregationProblems(
   if (!info) return [];
 
   const declaradas = new Map(Object.entries(input.agregacionesDeclaradas ?? {}));
-  const aggregations = agregacionesDe(
+  const aggregations = aggregationsOf(
     instance.binding.measures,
     declaradas,
     instance.binding.aggregations,
@@ -90,7 +90,7 @@ function aggregationProblems(
   const mostradas = new Set(instance.binding.dimensions.map(fieldKey));
   const colapsa = info.dimensions.some((d) => !mostradas.has(d));
 
-  return validarAgregacion({
+  return validateAggregation({
     measures: instance.binding.measures,
     aggregations,
     colapsa,
@@ -198,8 +198,8 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         /*
          * Y la configuracion propia del tipo.
          */
-        ...(instance.configuracion?.objectId === 'panel-de-filtros'
-          ? validarPanelDeFiltros(instance, instance.configuracion, fieldKinds).map((p) => ({
+        ...(instance.settings?.objectId === 'panel-de-filtros'
+          ? validarPanelDeFiltros(instance, instance.settings, fieldKinds).map((p) => ({
               slot: `filtros.${p.fieldName}`,
               kind: 'contrato-incumplido' as const,
               problem: p.issue,

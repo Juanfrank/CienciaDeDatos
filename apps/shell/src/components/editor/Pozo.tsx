@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { AGGREGATIONS, type Aggregation } from '@app/data-contracts';
-import { ETIQUETA_DE_AGREGACION, type PozoDeCampos } from '@app/ui-components';
+import { AGGREGATION_LABEL, type PozoDeCampos } from '@app/ui-components';
 import { Icono } from '../iconos/Icono';
 import { Ayuda } from './Ayuda';
 
@@ -90,7 +90,7 @@ export function Pozo({
               <span className="visualmente-oculto">(obligatorio)</span>
             </>
           ) : null}
-          {pozo.ayuda ? <Ayuda content={pozo.ayuda} de={pozo.etiqueta} /> : null}
+          {pozo.help ? <Ayuda content={pozo.help} de={pozo.etiqueta} /> : null}
         </span>
         <span className="pozo__cupo" aria-hidden="true">
           {elegidos.length}/{pozo.max}
@@ -114,12 +114,12 @@ export function Pozo({
                     data-testid={`${prueba}-agregacion-${fieldName}`}
                     // El titulo es lo unico que dice el operador sin abrir el menu: para el raton
                     // al pasar por encima, y ahi no estorba a nada.
-                    title={`Se resume con ${ETIQUETA_DE_AGREGACION[agregacionDe(fieldName)].toLowerCase()}`}
+                    title={`Se resume con ${AGGREGATION_LABEL[agregacionDe(fieldName)].toLowerCase()}`}
                     onChange={(e) => onAgregacion(fieldName, e.target.value as Aggregation)}
                   >
                     {(posibles ?? AGGREGATIONS).map((a) => (
                       <option key={a} value={a}>
-                        {ETIQUETA_DE_AGREGACION[a]}
+                        {AGGREGATION_LABEL[a]}
                       </option>
                     ))}
                     {/*
@@ -130,7 +130,7 @@ export function Pozo({
                     */}
                     {posibles && !posibles.includes(agregacionDe(fieldName)) ? (
                       <option value={agregacionDe(fieldName)} disabled>
-                        {ETIQUETA_DE_AGREGACION[agregacionDe(fieldName)]} (no aplicable aqui)
+                        {AGGREGATION_LABEL[agregacionDe(fieldName)]} (no aplicable aqui)
                       </option>
                     ) : null}
                   </select>

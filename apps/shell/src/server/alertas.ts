@@ -10,7 +10,7 @@ import {
   type Subscription,
 } from '@app/alerts';
 import { POPULATOR_HEARTBEAT_KEY, type PopulatorHeartbeat } from '@app/observability';
-import { aggregateBy, agregacionesPara } from '@app/ui-components';
+import { aggregateBy, aggregationsFor } from '@app/ui-components';
 import { cacheL2 } from './contexto';
 import { cargarModulo } from './datos';
 import { colaExportaciones, encolarExportacion } from './exportaciones';
@@ -49,7 +49,7 @@ export async function observacionesDe(rule: AlertRule): Promise<Observacion[] | 
     objeto.result,
     dimensions,
     [rule.measure],
-    agregacionesPara([rule.measure], measures, objeto.aggregations),
+    aggregationsFor([rule.measure], measures, objeto.aggregations),
   );
 
   return rows

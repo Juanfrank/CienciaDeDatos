@@ -6,9 +6,9 @@ import { Icono } from './iconos/Icono';
 import {
   aggregateBy,
   attachmentOf,
-  desgloseDe,
+  breakdownOf,
   fieldKey,
-  proyectarObjeto,
+  projectObject,
   type ObjectInstance,
 } from '@app/ui-components';
 
@@ -146,7 +146,7 @@ export function TablaDeDatos({
     if (!abierto && el.open) el.close();
   }, [abierto]);
 
-  const cerrar = () => {
+  const close = () => {
     setAbierto(false);
     setSeleccion(null);
   };
@@ -160,8 +160,8 @@ export function TablaDeDatos({
   // Con alcance de objeto se muestran las filas de ORIGEN, sin agregar: lo interesante del
   // emergente es precisamente lo que el objeto no ensena. Con alcance de subobjeto, lo mismo
   // pero acotado a la categoria elegida.
-  const dataRows = seleccion ? desgloseDe(result, seleccion) : result;
-  const proyeccion = proyectarObjeto(instance, result, aggregations);
+  const dataRows = seleccion ? breakdownOf(result, seleccion) : result;
+  const proyeccion = projectObject(instance, result, aggregations);
 
   const etiquetaSeleccion = seleccion ? Object.values(seleccion).join(' / ') : null;
 
@@ -184,11 +184,11 @@ export function TablaDeDatos({
         aria-label={`Datos de origen de ${titulo}`}
         // Escape y el clic en el fondo cierran el dialogo nativo por su cuenta; sin esto el
         // estado de React se quedaria diciendo que sigue abierto.
-        onClose={cerrar}
+        onClose={close}
       >
         <div className="emergente__cabecera">
           <h2>Datos de source — {titulo}</h2>
-          <button type="button" className="boton-enlace" onClick={cerrar} data-testid="tabla-datos-cerrar">
+          <button type="button" className="boton-enlace" onClick={close} data-testid="tabla-datos-cerrar">
             Cerrar
           </button>
         </div>

@@ -53,7 +53,7 @@ export default async function AdminInicio() {
         </div>
 
         {recientes.length === 0 ? (
-          <p className="texto-atenuado">Sin cambios de configuracion registrados.</p>
+          <p className="texto-atenuado">Sin cambios de settings registrados.</p>
         ) : (
           <ul className="registro">
             {recientes.map((e, i) => (

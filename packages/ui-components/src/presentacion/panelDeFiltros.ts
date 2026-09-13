@@ -55,12 +55,12 @@ export interface ProblemaDeSelector {
 /** Valida los selectores contra las dimensiones mapeadas y sus tipos. */
 export function validarPanelDeFiltros(
   instance: ObjectInstance,
-  configuracion: ConfiguracionDePanelDeFiltros | undefined,
+  settings: ConfiguracionDePanelDeFiltros | undefined,
   fieldKinds: Record<string, string>,
 ): ProblemaDeSelector[] {
   const problems: ProblemaDeSelector[] = [];
   const dimensiones = instance.binding.dimensions.map(fieldKey);
-  const selectores = configuracion?.selectores ?? [];
+  const selectores = settings?.selectores ?? [];
 
   const vistos = new Set<string>();
   for (const selector of selectores) {
@@ -117,10 +117,10 @@ export interface SelectorEfectivo {
 
 export function selectoresEfectivos(
   instance: ObjectInstance,
-  configuracion: ConfiguracionDePanelDeFiltros | undefined,
+  settings: ConfiguracionDePanelDeFiltros | undefined,
   fieldKinds: Record<string, string>,
 ): SelectorEfectivo[] {
-  const porCampo = new Map(configuracion?.selectores.map((s) => [s.fieldName, s]) ?? []);
+  const porCampo = new Map(settings?.selectores.map((s) => [s.fieldName, s]) ?? []);
   return instance.binding.dimensions.map(fieldKey).map((fieldName) => {
     const configurado = porCampo.get(fieldName);
     return {

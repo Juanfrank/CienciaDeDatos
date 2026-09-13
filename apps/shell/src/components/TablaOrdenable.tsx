@@ -3,62 +3,62 @@
 import { useMemo, useState } from 'react';
 import type { QueryResult } from '@app/data-contracts';
 import {
-  type Direccion,
+  type Direction,
   type ConditionalFormat,
   colorCondicional,
-  compararValores,
+  compareValues,
   estiloDeTexto,
 } from '@app/ui-components';
 
 /** Una tabla que se ordena pulsando su encabezado. */
 
 /** Texto o cifra, cada uno con su comparacion. Mezclarlos ordena por la representacion, no por el valor. */
-const compare = (a: unknown, b: unknown, direccion: Direccion): number => {
+const compare = (a: unknown, b: unknown, direction: Direction): number => {
   if (typeof a === 'number' || typeof b === 'number') {
-    return compararValores(
+    return compareValues(
       typeof a === 'number' ? a : null,
       typeof b === 'number' ? b : null,
-      direccion,
+      direction,
     );
   }
   const cmp = String(a ?? '').localeCompare(String(b ?? ''), 'es');
-  return direccion === 'asc' ? cmp : -cmp;
+  return direction === 'asc' ? cmp : -cmp;
 };
 
 export function TablaOrdenable({
-  proyectado,
+  projected,
   titulo,
   formatearColumna,
   condicional,
 }: {
-  proyectado: QueryResult;
+  projected: QueryResult;
   titulo: string;
   /** Un formateador POR COLUMNA: cada medida puede tener el suyo. */
   formatearColumna: (nombre: string) => (n: number | null) => string;
   /** Reglas de color por valor. La celda que se sale es lo que se busca en una tabla. */
   condicional?: ConditionalFormat;
 }) {
-  const [orden, setOrden] = useState<{ column: number; direccion: Direccion } | null>(null);
+  const [orden, setOrden] = useState<{ column: number; direction: Direction } | null>(null);
 
   // Se resuelve una vez por columna y no por celda: en una tabla larga son miles de llamadas.
   const formateadores = useMemo(
-    () => proyectado.columns.map((c) => formatearColumna(c.name)),
-    [proyectado.columns, formatearColumna],
+    () => projected.columns.map((c) => formatearColumna(c.name)),
+    [projected.columns, formatearColumna],
   );
 
   const dataRows = useMemo(() => {
-    if (!orden) return proyectado.rows;
+    if (!orden) return projected.rows;
     // Copia antes de ordenar: `sort` muta, y `proyectado.rows` viene del servidor por referencia.
-    return [...proyectado.rows].sort((a, b) =>
-      compare(a[orden.column], b[orden.column], orden.direccion),
+    return [...projected.rows].sort((a, b) =>
+      compare(a[orden.column], b[orden.column], orden.direction),
     );
-  }, [proyectado.rows, orden]);
+  }, [projected.rows, orden]);
 
   const alPulsar = (column: number) =>
     setOrden((o) =>
       o?.column === column
-        ? { column, direccion: o.direccion === 'asc' ? 'desc' : 'asc' }
-        : { column, direccion: 'asc' },
+        ? { column, direction: o.direction === 'asc' ? 'desc' : 'asc' }
+        : { column, direction: 'asc' },
     );
 
   return (
@@ -66,7 +66,7 @@ export function TablaOrdenable({
       <table className="tabla" data-testid="tabla">
         <thead>
           <tr>
-            {proyectado.columns.map((c, i) => {
+            {projected.columns.map((c, i) => {
               const activa = orden?.column === i;
               return (
                 <th
@@ -74,7 +74,7 @@ export function TablaOrdenable({
                   scope="col"
                   // `aria-sort` es donde un lector de pantalla busca el estado del orden. Va en la
                   // celda y no en el boton: el criterio lo pide sobre el encabezado.
-                  aria-sort={activa ? (orden.direccion === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  aria-sort={activa ? (orden.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
                 >
                   <button
                     type="button"
@@ -84,7 +84,7 @@ export function TablaOrdenable({
                   >
                     <span>{c.name}</span>
                     <span className="tabla__flecha" aria-hidden="true">
-                      {activa ? (orden.direccion === 'asc' ? '▲' : '▼') : '⇅'}
+                      {activa ? (orden.direction === 'asc' ? '▲' : '▼') : '⇅'}
                     </span>
                   </button>
                 </th>
@@ -103,7 +103,7 @@ export function TablaOrdenable({
                  * por columna — en una tabla larga eso son miles de llamadas.
                  */
                 const color = esCifra
-                  ? colorCondicional(condicional, celda, proyectado.columns[j]?.name)
+                  ? colorCondicional(condicional, celda, projected.columns[j]?.name)
                   : undefined;
                 return (
                   <td

@@ -92,7 +92,7 @@ export function PaletaDeColores({
 
 export function EstiloDeTextoEditor({
   titulo,
-  ayuda,
+  help,
   estilo,
   conVertical = false,
   prueba,
@@ -100,7 +100,7 @@ export function EstiloDeTextoEditor({
   onCambiar,
 }: {
   titulo: string;
-  ayuda?: string;
+  help?: string;
   estilo: EstiloDeTexto;
   /** Solo donde hay alto que repartir. */
   conVertical?: boolean;
@@ -144,7 +144,7 @@ export function EstiloDeTextoEditor({
     <div className="estilo-texto" data-testid={prueba}>
       <p className="estilo-texto__rotulo">
         {titulo}
-        {ayuda ? <Ayuda content={ayuda} de={titulo} /> : null}
+        {help ? <Ayuda content={help} de={titulo} /> : null}
       </p>
 
       <div className="estilo-texto__fila" role="group" aria-label={`Estilo de ${titulo}`}>

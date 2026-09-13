@@ -58,7 +58,7 @@ export function ObjetoDeModulo({
   /*
    * Los elementos y los contenedores se resuelven ANTES de exigir `result`.
    */
-  const conf = objeto.instance.configuracion;
+  const conf = objeto.instance.settings;
 
   if (objeto.unresolvedObject || objeto.problems.length > 0) {
     return (
@@ -128,7 +128,7 @@ export function ObjetoDeModulo({
     // exportado resumieran distinto.
     aggregations: objeto.aggregations,
     // Las ranuras viajan con el objeto: sin ellas los renderizadores volverian a leer por posicion.
-    ...(objeto.ranuras ? { ranuras: objeto.ranuras } : {}),
+    ...(objeto.slots ? { slots: objeto.slots } : {}),
     // Y el icono, por lo mismo: el cliente no tiene el registro.
     ...(objeto.icono ? { iconoDelObjeto: objeto.icono } : {}),
     // Los objetos esperan un `onFiltrar`; sin filtrado cruzado se les pasa uno que no hace nada,

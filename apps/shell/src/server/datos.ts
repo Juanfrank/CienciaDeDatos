@@ -16,14 +16,14 @@ import {
 import {
   type BindingProblem,
   type ContainerSettings,
-  agregacionesDe,
+  aggregationsOf,
   esContenedor,
   noConsumeDatos,
   panelesDe,
   validarContenedor,
   fieldKey,
   ranurasDelContrato,
-  validarAgregacion,
+  validateAggregation,
   validarRanuras,
   validateBinding,
 } from '@app/ui-components';
@@ -110,7 +110,7 @@ async function leerObjetos(
      * Un objeto que no consume datos no consulta el cache.
      */
     if (noConsumeDatos(contrato)) {
-      const config = instance.configuracion;
+      const config = instance.settings;
       let panels: PanelCargado[] | undefined;
 
       if (esContenedor(instance.objectId)) {
@@ -172,7 +172,7 @@ async function leerObjetos(
     /*
      * Las ranuras se comprueban AQUI tambien, no solo en `validateModule`.
      */
-    const aggregations = agregacionesDe(
+    const aggregations = aggregationsOf(
       instance.binding.measures,
       declaradas,
       instance.binding.aggregations,
@@ -188,7 +188,7 @@ async function leerObjetos(
       /*
        * La agregacion se comprueba AQUI, en el camino de lectura, y no solo al guardar.
        */
-      ...validarAgregacion({
+      ...validateAggregation({
         measures: instance.binding.measures,
         aggregations,
         colapsa: colapsaElDataset(instance.binding.datasetId, instance.binding.dimensions),

@@ -191,7 +191,7 @@ export function Lienzo({
 
       {items.length === 0 ? (
         <p className="lienzo__vacio" data-testid="lienzo-vacio">
-          Este modulo esta vacio. Elija una visualizacion en el panel de la derecha.
+          Este modulo esta empty. Elija una visualizacion en el panel de la derecha.
         </p>
       ) : null}
     </div>

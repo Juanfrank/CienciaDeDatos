@@ -20,7 +20,7 @@ import {
   problemaDelPatron,
   selectoresEfectivos,
   type AcentoDeObjeto,
-  type ClaveDePresentacion,
+  type PresentationKey,
   type DestinoDeTexto,
   type EstiloDeTexto,
   type FormatoDeNumero,
@@ -50,14 +50,14 @@ export function Presentacion({
   onCambiar,
 }: {
   instance: ObjectInstance;
-  admitidas: ClaveDePresentacion[];
+  admitidas: PresentationKey[];
   /** Tipo de cada columna del dataset, para ofrecer los selectores que tienen sentido. */
   kinds: Record<string, string>;
   guardando: boolean;
   onCambiar: (cambio: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
   const p = instance.presentacion ?? {};
-  const admite = (clave: ClaveDePresentacion) => admitidas.includes(clave);
+  const admite = (clave: PresentationKey) => admitidas.includes(clave);
   const prueba = `pres-${instance.instanceId}`;
 
   const poner = (parcial: Partial<PresentacionDeObjeto>) =>
@@ -266,7 +266,7 @@ export function Presentacion({
               <EstiloDeTextoEditor
                 titulo="Estilo del valor"
                 conVertical={esTarjeta}
-                ayuda={
+                help={
                   esTarjeta
                     ? "La cifra grande. La alineacion vertical la coloca dentro del alto de la tarjeta."
                     : undefined
@@ -461,14 +461,14 @@ export function Presentacion({
 
               {p.orden?.por ? (
                 <label className="formulario__campo">
-                  <span>Direccion</span>
+                  <span>Direction</span>
                   <select
-                    value={p.orden.direccion ?? "asc"}
+                    value={p.orden.direction ?? "asc"}
                     disabled={guardando}
                     data-testid={`${prueba}-orden-direccion`}
                     onChange={(e) =>
                       poner({
-                        orden: { ...p.orden, direccion: e.target.value as "asc" | "desc" },
+                        orden: { ...p.orden, direction: e.target.value as "asc" | "desc" },
                       })
                     }
                   >
@@ -1074,24 +1074,24 @@ function SelectoresDelPanel({
   guardando: boolean;
   onCambiar: (cambio: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
-  const configuracion =
-    instance.configuracion?.objectId === "panel-de-filtros"
-      ? instance.configuracion
+  const settings =
+    instance.settings?.objectId === "panel-de-filtros"
+      ? instance.settings
       : undefined;
-  const efectivos = selectoresEfectivos(instance, configuracion, kinds);
+  const efectivos = selectoresEfectivos(instance, settings, kinds);
   const prueba = `selectores-${instance.instanceId}`;
 
   const ponerTipo = (fieldName: string, tipo: TipoDeSelector) =>
     onCambiar((i) => {
       const previos = (
-        i.configuracion?.objectId === "panel-de-filtros"
-          ? i.configuracion.selectores
+        i.settings?.objectId === "panel-de-filtros"
+          ? i.settings.selectores
           : []
       ).filter((s) => s.fieldName !== fieldName);
       const anterior = efectivos.find((s) => s.fieldName === fieldName);
       return {
         ...i,
-        configuracion: {
+        settings: {
           objectId: "panel-de-filtros",
           selectores: [
             ...previos,
@@ -1185,7 +1185,7 @@ function FormatoDeMedidas({
     <>
       <RenglonDeFormato
         titulo="General"
-        ayuda="Se aplica a toda medida que no tenga el suyo. Cambiarlo cambia todas a la vez."
+        help="Se aplica a toda medida que no tenga el suyo. Cambiarlo cambia todas a la vez."
         formato={formatos?.general ?? {}}
         prueba={`${prueba}-formato-general`}
         guardando={guardando}
@@ -1231,14 +1231,14 @@ function FormatoDeMedidas({
 /** Un renglon: el tipo y lo que ese tipo necesite. */
 function RenglonDeFormato({
   titulo,
-  ayuda,
+  help,
   formato,
   prueba,
   guardando,
   onCambiar,
 }: {
   titulo: string;
-  ayuda?: string;
+  help?: string;
   formato: FormatoDeNumero;
   prueba: string;
   guardando: boolean;
@@ -1254,7 +1254,7 @@ function RenglonDeFormato({
     <div className="estilo-texto" data-testid={prueba}>
       <p className="estilo-texto__rotulo">
         {titulo}
-        {ayuda ? <Ayuda content={ayuda} de={titulo} /> : null}
+        {help ? <Ayuda content={help} de={titulo} /> : null}
       </p>
 
       <label className="formulario__campo">
