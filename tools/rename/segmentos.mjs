@@ -26,15 +26,28 @@
 
 const ANTES_DE_EXPRESION = new Set(['(', ',', '=', ':', '[', '!', '&', '|', '?', '{', '}', ';']);
 
+/**
+ * Palabras tras las que una barra abre expresion regular y no division.
+ *
+ * `return /[",\n]/.test(x)` es lo normal en este repositorio, y mirando solo la puntuacion
+ * anterior la barra pasaba por division: entonces la comilla de dentro de la clase abria una
+ * cadena que se comia el resto de la linea, y el identificador de despues no se renombraba.
+ */
+const PALABRAS_ANTES = new Set([
+  'return', 'typeof', 'case', 'in', 'of', 'delete', 'void', 'instanceof', 'new', 'do', 'else',
+  'yield', 'await', 'throw',
+]);
+
 /** Si la barra en `i` abre una expresion regular y no es una division. */
 function abreExpresion(fuente, i) {
-  for (let j = i - 1; j >= 0; j--) {
-    const c = fuente[j];
-    if (c === ' ' || c === '\t') continue;
-    if (c === '\n') return true;
-    return ANTES_DE_EXPRESION.has(c);
-  }
-  return true;
+  let j = i - 1;
+  while (j >= 0 && (fuente[j] === ' ' || fuente[j] === '\t')) j--;
+  if (j < 0 || fuente[j] === '\n') return true;
+  if (ANTES_DE_EXPRESION.has(fuente[j])) return true;
+
+  let fin = j;
+  while (j >= 0 && /[A-Za-z_$]/.test(fuente[j])) j--;
+  return PALABRAS_ANTES.has(fuente.slice(j + 1, fin + 1));
 }
 
 /** El indice de la barra que cierra la expresion regular abierta en `i`, o -1. */

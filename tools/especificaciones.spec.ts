@@ -25,6 +25,7 @@ const CARPETAS = [
   'packages',
   'packages/data-contracts',
   'tools',
+  'tools/rename',
   'infra',
 ];
 
@@ -34,11 +35,11 @@ describe('cada carpeta declara sus reglas', () => {
       const path = join(raiz, carpeta, 'AGENTS.md');
       expect(existsSync(path), path).toBe(true);
 
-      const texto = readFileSync(path, 'utf8');
-      expect(texto.length, path).toBeGreaterThan(400);
+      const content = readFileSync(path, 'utf8');
+      expect(content.length, path).toBeGreaterThan(400);
       // La mitad util de una especificacion es la lista de lo prohibido: sin ella se lee como
       // una descripcion y no como un contrato.
-      expect(texto, path).toMatch(/Que NO hacer/);
+      expect(content, path).toMatch(/Que NO hacer/);
     });
   }
 
@@ -56,8 +57,8 @@ describe('cada carpeta declara sus reglas', () => {
 
   it('la especificacion general enumera los cuatro principios y como correr en local', () => {
     const general = readFileSync(join(raiz, 'AGENTS.md'), 'utf8');
-    for (const clave of ['principio', 'npm run verify', 'npm run poblar', 'Limites de dependencia']) {
-      expect(general.toLowerCase(), clave).toContain(clave.toLowerCase());
+    for (const cacheKey of ['principio', 'npm run verify', 'npm run poblar', 'Limites de dependencia']) {
+      expect(general.toLowerCase(), cacheKey).toContain(cacheKey.toLowerCase());
     }
   });
 });

@@ -20,6 +20,7 @@
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
+import { resolve } from 'node:path';
 import { segmentar, unir } from './segmentos.mjs';
 
 const GLOSARIO = JSON.parse(readFileSync('tools/rename/glosario.json', 'utf8'));
@@ -61,6 +62,17 @@ const PROTEGIDOS = new Set([
   'ejes', 'orden', 'apilado', 'circular', 'referencias', 'coloresDeSerie',
   'tooltip', 'multiplos', 'condicional',
 ]);
+
+/*
+ * Lo que esta lista NO cubre: los identificadores de RANURA.
+ *
+ * El id de una ranura es un contrato de cadena aunque se escriba como clave de objeto —el modulo
+ * guardado lleva `ranuras: { filas: [...] }` y el catalogo declara `{ id: 'filas' }`—, asi que
+ * renombrar solo la clave deja el objeto marcado como roto en pantalla. Protegerlos aqui seria
+ * demasiado: `filas` y `columnas` tambien nombran propiedades internas que si deben renombrarse.
+ * Lo comprueba `apps/shell/src/server/modulos.spec.ts`, que valida cada instancia guardada contra
+ * el contrato de su objeto y falla en segundos nombrando el modulo y el item.
+ */
 
 export function palabras(identificador) {
   return identificador
@@ -364,13 +376,14 @@ function aplicar(plan) {
    * `Record<ModoDeColor, …>` los lleva como claves de objeto y la union los lleva como literales:
    * renombrar solo uno de los dos lados no compila.
    */
-  const enCadena = { ...interfaz, ...compuestos, ...valores, ...rutas };
+  const enCadena = { ...interfaz, ...compuestos, ...valores };
   const enMarcado = { ...interfaz, ...compuestos, ...valores };
 
   const codigoCompleto = { ...identificadores, ...valores };
   const reCodigo = expresionDe(Object.keys(codigoCompleto));
   const reComentario = expresionDe(Object.keys(compuestos));
   const reCadena = expresionDe(Object.keys(enCadena));
+  const reRutas = expresionDe(Object.keys(rutas));
   const reMarcado = expresionDe(Object.keys(enMarcado));
 
   let tocados = 0;
@@ -391,9 +404,28 @@ function aplicar(plan) {
     } else {
       despues = unir(
         segmentar(antes).map((s) => {
-          const re = s.tipo === 'codigo' ? reCodigo : s.tipo === 'cadena' ? reCadena : reComentario;
-          const mapa =
-            s.tipo === 'codigo' ? codigoCompleto : s.tipo === 'cadena' ? enCadena : compuestos;
+          /*
+           * Las rutas de los archivos movidos se sustituyen SOLO en un especificador de modulo.
+           *
+           * Aplicandolas a toda cadena, mover `cola.ts` a `queue.ts` convertia la palabra `cola`
+           * en `queue` dentro del catalogo de mensajes en espanol: «La exportacion esta en
+           * queue». Una ruta solo es una ruta si empieza por `./` o `../`.
+           */
+          const esRuta = s.tipo === 'cadena' && /^['"`]\.{1,2}\//.test(s.texto);
+          const re = esRuta
+            ? reRutas
+            : s.tipo === 'codigo'
+              ? reCodigo
+              : s.tipo === 'cadena'
+                ? reCadena
+                : reComentario;
+          const mapa = esRuta
+            ? rutas
+            : s.tipo === 'codigo'
+              ? codigoCompleto
+              : s.tipo === 'cadena'
+                ? enCadena
+                : compuestos;
           if (!re) return s;
           return {
             ...s,
@@ -412,6 +444,34 @@ function aplicar(plan) {
     }
   }
   return { tocados, sustituciones };
+}
+
+/*
+ * Cada especificador relativo tiene que apuntar a un archivo que existe.
+ *
+ * El `tsc --noResolve` de mas abajo comprueba que lo escrito se ANALIZA, no que se resuelve: un
+ * `import './cola'` cuyo archivo ya se llama `queue.ts` pasa el analisis y revienta al ejecutar.
+ * Ocurre siempre que el movimiento y la sustitucion no van en la misma pasada —por ejemplo al
+ * repetir el renombrado sobre archivos ya movidos, donde no hay nada que mover y el mapa de
+ * rutas sale vacio—, y entonces las pruebas fallan por «Cannot find module» sin decir por que.
+ */
+const SUFIJOS = ['', '.ts', '.tsx', '.mts', '.d.ts', '.css', '.json', '/index.ts', '/index.tsx'];
+
+function especificadoresRotos() {
+  const rotos = [];
+  for (const ruta of rutasDe("'*.ts' '*.tsx' '*.mts'")) {
+    if (ruta.startsWith('tools/rename/')) continue;
+    const dir = ruta.split('/').slice(0, -1).join('/');
+    const fuente = readFileSync(ruta, 'utf8');
+    const re = /(?:from|import|require)\s*\(?\s*['"](\.{1,2}\/[^'"]*)['"]/g;
+    let m = re.exec(fuente);
+    while (m) {
+      const destino = resolve(dir, m[1]);
+      if (!SUFIJOS.some((s) => existsSync(destino + s))) rotos.push(`${ruta}: ${m[1]}`);
+      m = re.exec(fuente);
+    }
+  }
+  return rotos;
 }
 
 function moverArchivos(mapa) {
@@ -451,6 +511,13 @@ if (orden === '--proponer') {
     console.error('SINTAXIS ROTA tras aplicar:');
     console.error(rotos);
     process.exit(3);
+  }
+
+  const sinDestino = especificadoresRotos();
+  if (sinDestino.length > 0) {
+    console.error('IMPORTS SIN DESTINO tras aplicar:');
+    console.error(sinDestino.join('\n'));
+    process.exit(4);
   }
 } else if (orden === '--traducir') {
   console.log(traducir(argumento) ?? '(sin traduccion)');

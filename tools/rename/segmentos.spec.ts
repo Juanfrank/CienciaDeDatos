@@ -62,6 +62,17 @@ describe('segmentar', () => {
     ]);
   });
 
+  it('tras una palabra clave, la barra abre expresion regular', () => {
+    // `return /[",\n]/.test(x)`: mirando solo la puntuacion anterior, la barra pasaba por
+    // division, la comilla de dentro de la clase abria una cadena que se comia el resto de la
+    // linea, y el identificador de despues se quedaba sin renombrar.
+    expect(tipos('return /[",\\n]/.test(texto);')).toEqual([
+      'codigo:return ',
+      'cadena:/[",\\n]/',
+      'codigo:.test(texto);',
+    ]);
+  });
+
   it('una division no se confunde con una expresion regular', () => {
     expect(tipos('const r = a / b / c;')).toEqual(['codigo:const r = a / b / c;']);
   });
