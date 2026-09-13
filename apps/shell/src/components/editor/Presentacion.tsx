@@ -2,12 +2,14 @@
 
 import {
   ACENTOS,
+  COMPARACIONES_DE_EMBUDO,
   ETIQUETAS_CIRCULARES,
   ICONOS_DE_OBJETO,
   MAX_RADIO_INTERIOR,
   MODOS_DE_APILADO,
   MODOS_DE_LEYENDA,
   type CriterioDeOrden,
+  type ComparacionDeEmbudo,
   type EtiquetaCircular,
   type ModoDeApilado,
   POSICIONES_DE_ETIQUETA,
@@ -601,6 +603,53 @@ export function Presentacion({
         </Seccion>
       ) : null}
 
+      {admite("embudo") ? (
+        <Seccion titulo="Caida" nivel={2} prueba={`${prueba}-embudo`}>
+          <label className="formulario__campo">
+            <span>Que compara la etiqueta</span>
+            <select
+              value={p.embudo?.comparar ?? "primero"}
+              disabled={guardando}
+              data-testid={`${prueba}-comparar`}
+              onChange={(e) => poner({ embudo: { comparar: e.target.value as ComparacionDeEmbudo } })}
+            >
+              {COMPARACIONES_DE_EMBUDO.map((c) => (
+                <option key={c} value={c}>
+                  {ETIQUETA_DE_COMPARACION[c]}
+                </option>
+              ))}
+            </select>
+            {/*
+              Son dos preguntas distintas, no dos formas de decir lo mismo: «cuanto queda de lo
+              que entro» y «cuanto se pierde en ESTE paso». Con una sola, la otra hay que
+              calcularla de cabeza, que es lo que el objeto viene a evitar.
+            */}
+            <span className="campo__pista">
+              Las etapas nunca se reordenan: su orden es el del proceso.
+            </span>
+          </label>
+        </Seccion>
+      ) : null}
+
+      {admite("cascada") ? (
+        <Seccion titulo="Cascada" nivel={2} prueba={`${prueba}-cascada`}>
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.cascada?.mostrarTotal !== false}
+              disabled={guardando}
+              data-testid={`${prueba}-mostrar-total`}
+              onChange={(e) => poner({ cascada: { mostrarTotal: e.target.checked } })}
+            />{" "}
+            Barra final con el total
+          </label>
+          <span className="campo__pista">
+            El signo va SIEMPRE en la etiqueta: el color distingue subida de bajada, pero no puede
+            ser el unico medio de decirlo.
+          </span>
+        </Seccion>
+      ) : null}
+
       {admite("combinado") ? (
         <Seccion titulo="Ejes de valor" nivel={2} prueba={`${prueba}-combinado`}>
           <label className="editor__interruptor">
@@ -1080,6 +1129,12 @@ const ETIQUETA_DE_APILADO: Record<ModoDeApilado, string> = {
   ninguno: "Sin apilar (una al lado de otra)",
   apilado: "Apilado",
   porcentaje: "Apilado al 100 %",
+};
+
+const ETIQUETA_DE_COMPARACION: Record<ComparacionDeEmbudo, string> = {
+  primero: "Contra la primera etapa (cuanto queda)",
+  anterior: "Contra la etapa anterior (cuanto se pierde aqui)",
+  ninguna: "Sin comparar: solo la cifra",
 };
 
 const ETIQUETA_CIRCULAR: Record<EtiquetaCircular, string> = {

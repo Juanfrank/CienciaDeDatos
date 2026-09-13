@@ -97,6 +97,8 @@ export default function Lienzo({
         ...(presentacion?.circular ? { circular: presentacion.circular } : {}),
         ...(presentacion?.medidor ? { medidor: presentacion.medidor } : {}),
         ...(presentacion?.combinado ? { combinado: presentacion.combinado } : {}),
+        ...(presentacion?.embudo ? { embudo: presentacion.embudo } : {}),
+        ...(presentacion?.cascada ? { cascada: presentacion.cascada } : {}),
         ...(seriesDeColumna === undefined ? {} : { seriesDeColumna }),
         ...(formatear ? { formatear } : {}),
       }),

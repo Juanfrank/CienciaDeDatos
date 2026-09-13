@@ -1,7 +1,10 @@
 import {
   MAX_RADIO_INTERIOR,
   type ConfiguracionCircular,
+  type ComparacionDeEmbudo,
+  type ConfiguracionDeCascada,
   type ConfiguracionDeCombinado,
+  type ConfiguracionDeEmbudo,
   type ConfiguracionDeEjes,
   type ConfiguracionDeMedidor,
   type EtiquetaCircular,
@@ -54,6 +57,8 @@ export interface OpcionesDeGrafico {
   apilado?: ModoDeApilado;
   circular?: ConfiguracionCircular;
   combinado?: ConfiguracionDeCombinado;
+  embudo?: ConfiguracionDeEmbudo;
+  cascada?: ConfiguracionDeCascada;
   medidor?: ConfiguracionDeMedidor;
   /**
    * Cuantas series iniciales son columnas, en un combinado.
@@ -971,6 +976,318 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
 const TAMANO_MINIMO = 8;
 const TAMANO_MAXIMO = 42;
 
+/* ── Embudo ────────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Embudo — la caida entre etapas.
+ *
+ * No reordena POR SU CUENTA. Es la diferencia con un circular, y no es un detalle: las etapas de
+ * un proceso tienen un orden propio —«ingresado», «admitido», «fallado»— y ordenarlas por tamano
+ * lo destruiria. Que la segunda etapa sea mayor que la primera es una anomalia que hay que poder
+ * VER, no un error de dibujo que haya que esconder ordenando.
+ *
+ * Quien quiera el embudo clasico —de mayor a menor— lo pide en «Ordenar», como en cualquier otro
+ * objeto, y entonces el orden se aplica al MODELO antes de llegar aqui. Lo que no pasa es que se
+ * ordene solo.
+ */
+export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> {
+  const etapas = o.vm.points
+    .map((p) => ({ name: p.label, valor: p.values[0] }))
+    .filter((p): p is { name: string; valor: number } => p.valor !== null);
+
+  const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
+  const comparar: ComparacionDeEmbudo = o.embudo?.comparar ?? 'primero';
+  const primero = etapas[0]?.valor ?? 0;
+
+  /*
+   * El porcentaje se calcula sobre la etapa que toque, y con la division por cero cerrada.
+   *
+   * Una etapa de referencia en cero no da «caida infinita»: da una comparacion sin sentido, y la
+   * raya lo dice mejor que un numero inventado.
+   */
+  const parte = (valor: number, indice: number) => {
+    const base = comparar === 'anterior' ? (etapas[indice - 1]?.valor ?? valor) : primero;
+    if (base === 0) return '—';
+    return `${((valor / base) * 100).toFixed(1)} %`;
+  };
+
+  const { legend } = leyendaDe(o, etapas.length > 1);
+
+  return {
+    ...nucleo(o, etapas.length > 1),
+    legend,
+    tooltip: {
+      trigger: 'item' as const,
+      backgroundColor: o.paleta.superficieElevada,
+      borderWidth: 0,
+      textStyle: { color: o.paleta.texto },
+      extraCssText: 'box-shadow: none;',
+      formatter: (p: { name: string; value: number; dataIndex: number }) =>
+        [
+          p.name,
+          formatear(p.value),
+          comparar === 'ninguna'
+            ? ''
+            : `${comparar === 'anterior' ? 'De la etapa anterior' : 'De la primera etapa'}: ` +
+              parte(p.value, p.dataIndex),
+        ]
+          .filter(Boolean)
+          .join('<br/>'),
+    },
+    series: [
+      {
+        type: 'funnel',
+        name: o.vm.series[0] ?? o.titulo,
+        /*
+         * El embudo se estrecha a la IZQUIERDA del objeto y deja la derecha para las etiquetas.
+         *
+         * Centrado y con las etiquetas dentro, el texto cae sobre el relleno de la serie: un color
+         * que elige el tema y contra el que no hay par de contraste comprobado (4.3). En azul
+         * oscuro, «Q1: 29.4 %» quedaba casi ilegible. Fuera, el texto va sobre la superficie de la
+         * tarjeta, que es justo la pareja que el tema si garantiza.
+         */
+        left: '2%',
+        right: '42%',
+        /*
+         * Se reserva alto arriba y abajo, y NO se deja en cero.
+         *
+         * ECharts reparte el alto entre las etapas y dibuja cada trapecio hasta el borde del area.
+         * Con el area pegada al borde del objeto, la primera y la ultima quedaban cortadas por la
+         * mitad —con su etiqueta dentro— y parecia que faltaban etapas.
+         */
+        top: 12,
+        bottom: 12,
+        // `sort: 'none'` conserva el orden del modelo. Ver el comentario de cabecera.
+        sort: 'none' as const,
+        gap: 2,
+        minSize: '18%',
+        itemStyle: { borderColor: o.paleta.superficie, borderWidth: 2 },
+        label: {
+          show: true,
+          position: 'right' as const,
+          color: o.paleta.texto,
+          fontSize: 11,
+          formatter: (p: { name: string; value: number; dataIndex: number }) =>
+            comparar === 'ninguna'
+              ? `${p.name}: ${formatear(p.value)}`
+              : `${p.name}: ${parte(p.value, p.dataIndex)}`,
+        },
+        labelLine: { length: 12, lineStyle: { color: o.paleta.linea } },
+        data: etapas.map((e) => ({ name: e.name, value: e.valor })),
+        emphasis: { focus: 'self' },
+      },
+    ],
+  };
+}
+
+/* ── Cascada ───────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Cascada — de que se compone una diferencia.
+ *
+ * ECharts no tiene un tipo `waterfall`: se construye con DOS series de barras apiladas, una
+ * invisible que hace de zocalo y otra visible con la contribucion encima. Es la tecnica estandar,
+ * y lo que hay que cuidar es que el zocalo no aparezca en ningun sitio donde signifique algo: ni
+ * en la leyenda, ni en el tooltip, ni al pasar el raton.
+ *
+ * El color distingue subidas de bajadas, y por eso la etiqueta lleva SIEMPRE el signo: con el
+ * color como unico medio, una bajada y una subida serian indistinguibles al imprimir en gris o
+ * para quien no separa rojo y verde (WCAG 1.4.1).
+ */
+export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown> {
+  const puntos = o.vm.points.map((p) => ({ label: p.label, valor: p.values[0] ?? 0 }));
+  const conTotal = o.cascada?.mostrarTotal !== false;
+  const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
+
+  /*
+   * El zocalo de cada barra: donde acabo la anterior, o el suelo del tramo si el valor baja.
+   *
+   * Con valores negativos, la barra visible cuelga DESDE el acumulado anterior, asi que el zocalo
+   * es el acumulado ya restado. Sin esa distincion, una bajada se dibujaba hacia arriba.
+   */
+  const zocalos: number[] = [];
+  const alturas: number[] = [];
+  let acumulado = 0;
+  for (const { valor } of puntos) {
+    zocalos.push(valor >= 0 ? acumulado : acumulado + valor);
+    alturas.push(Math.abs(valor));
+    acumulado += valor;
+  }
+
+  const etiquetas = [...puntos.map((p) => p.label), ...(conTotal ? ['Total'] : [])];
+  if (conTotal) {
+    zocalos.push(0);
+    alturas.push(acumulado);
+  }
+
+  const colorDe = (indice: number) => {
+    if (conTotal && indice === puntos.length) return o.paleta.series[0] ?? o.paleta.texto;
+    const valor = puntos[indice]?.valor ?? 0;
+    // La subida usa el color principal de la paleta y la bajada el de contraste, que en el tema
+    // institucional son el azul y el rojo. Salen del tema, no se eligen aqui.
+    return (valor >= 0 ? o.paleta.series[0] : o.paleta.series[1]) ?? o.paleta.texto;
+  };
+
+  return {
+    ...base(o),
+    // La leyenda no dice nada util aqui —hay una sola medida— y ademas nombraria el zocalo.
+    legend: { show: false },
+    tooltip: {
+      trigger: 'axis' as const,
+      backgroundColor: o.paleta.superficieElevada,
+      borderWidth: 0,
+      textStyle: { color: o.paleta.texto },
+      extraCssText: 'box-shadow: none;',
+      formatter: (params: { name: string; dataIndex: number }[]) => {
+        const p = params[0];
+        if (!p) return '';
+        const esTotal = conTotal && p.dataIndex === puntos.length;
+        const valor = esTotal ? acumulado : (puntos[p.dataIndex]?.valor ?? 0);
+        const signo = esTotal || valor < 0 ? '' : '+';
+        return `${p.name}<br/>${signo}${formatear(valor)}`;
+      },
+    },
+    xAxis: { ...ejeCategoria(o), data: etiquetas },
+    yAxis: ejeValor(o),
+    series: [
+      {
+        // El zocalo: invisible, mudo y fuera de la leyenda. Solo empuja a la barra de arriba.
+        name: 'zocalo',
+        type: 'bar',
+        stack: 'cascada',
+        silent: true,
+        itemStyle: { color: 'transparent' },
+        emphasis: { itemStyle: { color: 'transparent' } },
+        data: zocalos,
+      },
+      {
+        name: o.vm.series[0] ?? o.titulo,
+        type: 'bar',
+        stack: 'cascada',
+        barMaxWidth: 56,
+        data: alturas.map((alto, i) => ({ value: alto, itemStyle: { color: colorDe(i) } })),
+        label: {
+          show: true,
+          position: 'top' as const,
+          color: o.paleta.texto,
+          fontSize: 11,
+          /*
+           * El SIGNO va en la etiqueta, siempre.
+           *
+           * El color ya distingue subida de bajada, pero el color no puede ser el unico medio de
+           * transmitir la informacion: impreso en gris, o para quien no separa rojo y verde, «+180»
+           * y «-180» serian la misma barra (WCAG 1.4.1).
+           */
+          formatter: (p: { dataIndex: number }) => {
+            const esTotal = conTotal && p.dataIndex === puntos.length;
+            const valor = esTotal ? acumulado : (puntos[p.dataIndex]?.valor ?? 0);
+            return `${esTotal || valor < 0 ? '' : '+'}${formatear(valor)}`;
+          },
+        },
+      },
+    ],
+  };
+}
+
+/* ── Mapa de arbol ─────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Mapa de arbol — la composicion cuando hay demasiadas partes para un circular.
+ *
+ * Un circular con veinte porciones no se puede leer: las pequenas se vuelven hilos sin sitio para
+ * su nombre. Un rectangulo, en cambio, sigue teniendo dos dimensiones donde escribir, y por eso
+ * este es el objeto de la composicion con muchas categorias.
+ *
+ * Con DOS dimensiones dibuja dos niveles: el primero agrupa y el segundo reparte dentro. Es la
+ * jerarquia, que es lo otro que un circular no puede hacer.
+ */
+export function opcionesDeMapaDeArbol(o: OpcionesDeGrafico): Record<string, unknown> {
+  const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
+
+  /*
+   * Las etiquetas del modelo vienen compuestas con « / » cuando hay dos dimensiones.
+   *
+   * Es lo que `toCategorical` hace para todos los objetos, y aqui es exactamente lo que hace
+   * falta deshacer: el primer trozo es el grupo y el segundo la hoja.
+   */
+  const raices = new Map<string, { name: string; value: number }[]>();
+  let jerarquico = false;
+  for (const punto of o.vm.points) {
+    const valor = punto.values[0];
+    // Un nulo no es un rectangulo de area cero: es «no hay respuesta», y no se dibuja.
+    if (valor === null || valor === undefined) continue;
+    const [grupo = punto.label, hoja] = punto.label.split(' / ');
+    if (hoja !== undefined) jerarquico = true;
+    const hijos = raices.get(grupo) ?? [];
+    hijos.push({ name: hoja ?? grupo, value: valor });
+    raices.set(grupo, hijos);
+  }
+
+  const datos = [...raices.entries()].map(([grupo, hijos]) =>
+    jerarquico ? { name: grupo, children: hijos } : { name: grupo, value: hijos[0]?.value ?? 0 },
+  );
+
+  return {
+    ...nucleo(o, false),
+    tooltip: {
+      trigger: 'item' as const,
+      backgroundColor: o.paleta.superficieElevada,
+      borderWidth: 0,
+      textStyle: { color: o.paleta.texto },
+      extraCssText: 'box-shadow: none;',
+      formatter: (p: { name: string; value: number }) => `${p.name}<br/>${formatear(p.value)}`,
+    },
+    series: [
+      {
+        type: 'treemap',
+        name: o.titulo,
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        /*
+         * Sin la barra de migas ni el zoom por rueda.
+         *
+         * Las dos convierten el objeto en un navegador con estado propio, y el estado de lo que se
+         * ve vive en la URL (4.11): un zoom que no esta en la direccion no se comparte ni se marca,
+         * y quien abriera el enlace veria otra cosa.
+         */
+        breadcrumb: { show: false },
+        roam: false,
+        nodeClick: false as const,
+        // Un solo nivel visible aunque haya dos: el segundo se dibuja DENTRO del primero, que es
+        // justo lo que hace legible la jerarquia sin tener que entrar en ella.
+        leafDepth: jerarquico ? 2 : 1,
+        itemStyle: { borderColor: o.paleta.superficie, borderWidth: 2, gapWidth: 2 },
+        label: {
+          show: true,
+          /*
+           * Aqui el blanco SI se fija a mano, y es la unica excepcion del repositorio.
+           *
+           * En un mapa de arbol el rectangulo ES el dato: no hay «fuera» donde poner la etiqueta,
+           * como si lo hay en un circular o un embudo. Y los ocho colores de serie del tema son
+           * saturados por construccion —la puerta de contraste lo comprueba—, asi que el blanco es
+           * el unico valor que contrasta con todos ellos. Un rol del tema pensado para texto sobre
+           * superficie no lo haria.
+           */
+          color: '#fff',
+          fontSize: 12,
+          formatter: (p: { name: string; value: number }) =>
+            o.etiquetasDeDato ? `${p.name}\n${formatear(p.value)}` : p.name,
+        },
+        upperLabel: jerarquico
+          ? { show: true, height: 22, color: '#fff', fontSize: 11 }
+          : { show: false },
+        levels: [
+          { itemStyle: { borderWidth: 0, gapWidth: 2 } },
+          { itemStyle: { borderWidth: 2, gapWidth: 1, borderColorSaturation: 0.5 } },
+        ],
+        data: datos,
+      },
+    ],
+  };
+}
+
 export type TipoDeGrafico =
   | 'barras'
   | 'lineas'
@@ -979,6 +1296,9 @@ export type TipoDeGrafico =
   | 'circular'
   | 'combinado'
   | 'dispersion'
+  | 'embudo'
+  | 'cascada'
+  | 'mapa-de-arbol'
   | 'medidor';
 
 const CONSTRUCTORES: Record<TipoDeGrafico, (o: OpcionesDeGrafico) => Record<string, unknown>> = {
@@ -989,6 +1309,9 @@ const CONSTRUCTORES: Record<TipoDeGrafico, (o: OpcionesDeGrafico) => Record<stri
   circular: opcionesDeCircular,
   combinado: opcionesDeCombinado,
   dispersion: opcionesDeDispersion,
+  embudo: opcionesDeEmbudo,
+  cascada: opcionesDeCascada,
+  'mapa-de-arbol': opcionesDeMapaDeArbol,
   medidor: opcionesDeMedidor,
 };
 

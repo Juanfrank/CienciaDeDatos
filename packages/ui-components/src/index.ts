@@ -17,6 +17,7 @@ export {
 export { catalogoInicial } from './registry/catalog';
 export {
   ACENTOS,
+  COMPARACIONES_DE_EMBUDO,
   ETIQUETAS_CIRCULARES,
   MAX_DECIMALES,
   MAX_RADIO_INTERIOR,
@@ -31,7 +32,11 @@ export {
   type AcentoDeObjeto,
   type ClaveDePresentacion,
   type FormatoNumerico,
+  type ComparacionDeEmbudo,
   type ConfiguracionCircular,
+  type ConfiguracionDeCascada,
+  type ConfiguracionDeCombinado,
+  type ConfiguracionDeEmbudo,
   type ConfiguracionDeEjes,
   type ConfiguracionDeMedidor,
   type CriterioDeOrden,

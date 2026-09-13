@@ -1070,6 +1070,114 @@ export const modulosDemo: ModuleDefinition[] = [
         ],
       },
       {
+        pageId: 'p-flujo',
+        slug: 'flujo',
+        name: 'Flujo y composicion',
+        items: [
+          {
+            id: 'flu-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'flu-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'titulo-de-seccion',
+                tituloDeSeccion: {
+                  texto: 'De donde sale y en que se reparte',
+                  posicionDelTexto: 'izquierda',
+                  linea: 'derecha',
+                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'flu-embudo',
+            position: { x: 0, y: 1, w: 4, h: 4 },
+            instance: {
+              instanceId: 'flu-embudo',
+              objectId: 'embudo',
+              version: '1.0.0',
+              title: 'Carga por trimestre',
+              binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosIngresados'] },
+              presentacion: {
+                subtitulo: 'Ordenado de mayor a menor: el embudo clasico',
+                leyenda: 'oculta',
+                orden: { por: 'valor', direccion: 'desc' },
+              },
+            },
+          },
+          {
+            id: 'flu-embudo-anterior',
+            position: { x: 4, y: 1, w: 4, h: 4 },
+            instance: {
+              instanceId: 'flu-embudo-anterior',
+              objectId: 'embudo',
+              version: '1.0.0',
+              title: 'Sin ordenar: el proceso tal cual',
+              binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosIngresados'] },
+              presentacion: {
+                // Una etapa mayor que la anterior ensancha el embudo en vez de estrecharlo. No es
+                // un fallo de dibujo: es la anomalia, y esconderla ordenando seria la version
+                // bonita de no contarla.
+                subtitulo: 'Una etapa que crece se ve, no se disimula',
+                leyenda: 'oculta',
+                embudo: { comparar: 'anterior' },
+              },
+            },
+          },
+          {
+            id: 'flu-arbol',
+            position: { x: 8, y: 1, w: 4, h: 4 },
+            instance: {
+              instanceId: 'flu-arbol',
+              objectId: 'mapa-de-arbol',
+              version: '1.0.0',
+              title: 'Pendientes por materia y trimestre',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [MATERIA, TRIMESTRE],
+                measures: ['CasosPendientes'],
+              },
+              presentacion: {
+                subtitulo: 'Dos niveles: la materia agrupa y el trimestre reparte',
+                etiquetasDeDato: true,
+              },
+            },
+          },
+          {
+            id: 'flu-cascada',
+            position: { x: 0, y: 5, w: 8, h: 4 },
+            instance: {
+              instanceId: 'flu-cascada',
+              objectId: 'cascada',
+              version: '1.0.0',
+              title: 'De que se compone el pendiente',
+              binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosPendientes'] },
+              presentacion: {
+                subtitulo: 'Cada barra empieza donde acabo la anterior',
+                ejes: { tituloY: 'Casos' },
+              },
+            },
+          },
+          {
+            id: 'flu-arbol-plano',
+            position: { x: 8, y: 5, w: 4, h: 4 },
+            instance: {
+              instanceId: 'flu-arbol-plano',
+              objectId: 'mapa-de-arbol',
+              version: '1.0.0',
+              title: 'Un solo nivel',
+              binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosIngresados'] },
+              presentacion: { subtitulo: 'Sin jerarquia, el area es la medida', etiquetasDeDato: true },
+            },
+          },
+        ],
+      },
+      {
         pageId: 'p-contenedores',
         slug: 'contenedores',
         name: 'Contenedores',

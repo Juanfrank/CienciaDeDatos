@@ -223,3 +223,107 @@ describe('dispersion', () => {
     expect(texto).toContain('Y: 8');
   });
 });
+
+const embudo = (
+  extra: Record<string, unknown> = {},
+  v = vm(['Casos'], [['Q1', 1000], ['Q2', 800], ['Q3', 400]]),
+) => opcionesDe('embudo', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+
+const cascada = (
+  extra: Record<string, unknown> = {},
+  v = vm(['Casos'], [['A', 100], ['B', -40], ['C', 30]]),
+) => opcionesDe('cascada', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+
+const arbol = (extra: Record<string, unknown> = {}, v = vm(['Casos'], [['Penal / Q1', 10]])) =>
+  opcionesDe('mapa-de-arbol', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+
+describe('embudo', () => {
+  it('NO reordena las etapas', () => {
+    /*
+     * Es la diferencia con un circular. Las etapas de un proceso tienen un orden propio, y que la
+     * segunda sea mayor que la primera es una anomalia que hay que poder VER.
+     */
+    expect(embudo().series[0].sort).toBe('none');
+    const o = embudo({}, vm(['Casos'], [['Q1', 100], ['Q2', 500]]));
+    expect(o.series[0].data.map((d: { name: string }) => d.name)).toEqual(['Q1', 'Q2']);
+  });
+
+  it('compara contra la primera etapa por defecto', () => {
+    const texto = embudo().series[0].label.formatter({ name: 'Q3', value: 400, dataIndex: 2 });
+    expect(texto).toContain('40.0 %');
+  });
+
+  it('y contra la anterior cuando se pide', () => {
+    // Dos preguntas distintas: «cuanto queda de lo que entro» y «cuanto se pierde en ESTE paso».
+    const o = embudo({ embudo: { comparar: 'anterior' } });
+    expect(o.series[0].label.formatter({ name: 'Q3', value: 400, dataIndex: 2 })).toContain('50.0 %');
+  });
+
+  it('una etapa de referencia en cero da raya, no una caida infinita', () => {
+    const o = embudo({ embudo: { comparar: 'anterior' } }, vm(['Casos'], [['Q1', 0], ['Q2', 50]]));
+    expect(o.series[0].label.formatter({ name: 'Q2', value: 50, dataIndex: 1 })).toContain('—');
+  });
+});
+
+describe('cascada', () => {
+  it('cada barra empieza donde acabo la anterior', () => {
+    const [zocalo, visible] = cascada().series;
+    // 100 sube desde 0; -40 cuelga desde 60; 30 sube desde 60. El total, desde cero.
+    expect(zocalo.data).toEqual([0, 60, 60, 0]);
+    expect(visible.data.map((d: { value: number }) => d.value)).toEqual([100, 40, 30, 90]);
+  });
+
+  it('el zocalo es invisible, mudo y no sale en la leyenda', () => {
+    const o = cascada();
+    expect(o.series[0].itemStyle.color).toBe('transparent');
+    expect(o.series[0].silent).toBe(true);
+    expect(o.legend.show).toBe(false);
+  });
+
+  it('el signo va SIEMPRE en la etiqueta, no solo en el color', () => {
+    /*
+     * WCAG 1.4.1: impreso en gris, o para quien no separa rojo y verde, «+40» y «-40» serian la
+     * misma barra si el color fuera lo unico que los distingue.
+     */
+    const etiqueta = cascada().series[1].label.formatter;
+    expect(etiqueta({ dataIndex: 0 })).toBe('+100');
+    expect(etiqueta({ dataIndex: 1 })).toBe('-40');
+    // El total no lleva signo: no es una contribucion, es a donde se llega.
+    expect(etiqueta({ dataIndex: 3 })).toBe('90');
+  });
+
+  it('sin la barra de total, la cascada acaba en la ultima contribucion', () => {
+    const o = cascada({ cascada: { mostrarTotal: false } });
+    expect(o.series[1].data).toHaveLength(3);
+    expect(o.xAxis.data).toEqual(['A', 'B', 'C']);
+  });
+});
+
+describe('mapa de arbol', () => {
+  it('con dos dimensiones dibuja dos niveles', () => {
+    const o = arbol({}, vm(['Casos'], [['Penal / Q1', 10], ['Penal / Q2', 5], ['Civil / Q1', 8]]));
+    expect(o.series[0].data).toHaveLength(2);
+    expect(o.series[0].data[0].children).toHaveLength(2);
+    expect(o.series[0].upperLabel.show).toBe(true);
+  });
+
+  it('con una sola, un nivel plano', () => {
+    const o = arbol({}, vm(['Casos'], [['Penal', 10], ['Civil', 8]]));
+    expect(o.series[0].data).toEqual([
+      { name: 'Penal', value: 10 },
+      { name: 'Civil', value: 8 },
+    ]);
+    expect(o.series[0].upperLabel.show).toBe(false);
+  });
+
+  it('un nulo no es un rectangulo de area cero: no se dibuja', () => {
+    const o = arbol({}, vm(['Casos'], [['Penal', 10], ['Civil', null]]));
+    expect(o.series[0].data).toHaveLength(1);
+  });
+
+  it('sin zoom ni migas: el estado de lo que se ve vive en la URL (4.11)', () => {
+    // Un zoom que no esta en la direccion no se comparte ni se marca.
+    expect(arbol().series[0].roam).toBe(false);
+    expect(arbol().series[0].breadcrumb.show).toBe(false);
+  });
+});

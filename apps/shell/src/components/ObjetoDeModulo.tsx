@@ -21,10 +21,13 @@ import {
   Area,
   Barras,
   BarrasHorizontales,
+  Cascada,
   Circular,
   Combinado,
   Dispersion,
   Dona,
+  Embudo,
+  MapaDeArbol,
   Lineas,
   Medidor,
   Matriz,
@@ -161,6 +164,12 @@ export function ObjetoDeModulo({
       return <Area {...props} />;
     case 'lineas':
       return <Lineas {...props} />;
+    case 'embudo':
+      return <Embudo {...props} />;
+    case 'cascada':
+      return <Cascada {...props} />;
+    case 'mapa-de-arbol':
+      return <MapaDeArbol {...props} />;
     case 'combinado':
       return <Combinado {...props} />;
     case 'dispersion':

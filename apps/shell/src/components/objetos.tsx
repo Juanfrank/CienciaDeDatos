@@ -714,6 +714,225 @@ export function Dispersion({
 }
 
 /**
+ * Embudo y cascada comparten la misma forma de datos: una dimension y una medida.
+ *
+ * Se escriben juntos porque el respaldo accesible tambien es el mismo salvo por la columna que
+ * explica la lectura —«de la primera etapa» o «acumulado»—, y esa columna es justo lo que hace
+ * que el camino accesible diga lo mismo que el dibujo en vez de una tabla de cifras sueltas.
+ */
+function UnaDimensionUnaMedida({
+  titulo,
+  result,
+  instance,
+  ranuras,
+  agregaciones,
+  onFiltrar,
+  iconoDelObjeto,
+  tipo,
+  ranuraDeDimension,
+  columnaExtra,
+}: ObjetoProps & {
+  tipo: 'embudo' | 'cascada';
+  ranuraDeDimension: string;
+  columnaExtra: { encabezado: string; celda: (valores: number[], i: number) => string };
+}) {
+  const r = porRanura(instance, ranuras);
+  const dim = r ? r.uno(ranuraDeDimension) : fieldKeyDe(instance.binding.dimensions[0]);
+  const medidas = r ? r.varios('valor') : instance.binding.measures;
+  const dimension = dim ? aFieldRef(dim) : undefined;
+
+  const vm = ordenarCategorias(
+    toCategorical(
+      result,
+      dimension ? [dimension] : [],
+      medidas,
+      agregacionesPara(medidas, instance.binding.measures, agregaciones),
+    ),
+    // El embudo NO admite `orden` en su presentacion; llega siempre `undefined` y el orden es el
+    // del dataset, que es el del proceso. La cascada si lo admite.
+    instance.presentacion?.orden,
+  );
+  const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
+  const valores = vm.points.map((p) => p.values[0] ?? 0);
+
+  return (
+    <Marco
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      agregaciones={agregaciones}
+      iconoDelObjeto={iconoDelObjeto}
+    >
+      <Grafico
+        instanceId={instance.instanceId}
+        tipo={tipo}
+        vm={vm}
+        titulo={titulo}
+        presentacion={instance.presentacion}
+        formatear={(valor) => formatear(valor)}
+        {...(dimension ? { dimension: fieldKey(dimension) } : {})}
+        {...(dimension && onFiltrar
+          ? { onSeleccionar: (c: string) => onFiltrar(fieldKey(dimension), c) }
+          : {})}
+      >
+        <div className="tabla-contenedor">
+          <table className="tabla" data-testid={tipo}>
+            <thead>
+              <tr>
+                <th scope="col">{dimension ? fieldKey(dimension) : 'Categoria'}</th>
+                <th scope="col" className="es-numero">
+                  {medidas[0] ?? 'Valor'}
+                </th>
+                <th scope="col" className="es-numero">
+                  {columnaExtra.encabezado}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {vm.points.map((punto, i) => (
+                <tr key={punto.label}>
+                  <th scope="row">
+                    {dimension && onFiltrar ? (
+                      <button
+                        type="button"
+                        className="boton-enlace"
+                        onClick={() => onFiltrar(fieldKey(dimension), punto.label)}
+                      >
+                        {punto.label}
+                      </button>
+                    ) : (
+                      punto.label
+                    )}
+                  </th>
+                  <td className="es-numero">{formatear(punto.values[0] ?? null)}</td>
+                  <td className="es-numero">{columnaExtra.celda(valores, i)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Grafico>
+    </Marco>
+  );
+}
+
+export function Embudo(props: ObjetoProps) {
+  const comparar = props.instance.presentacion?.embudo?.comparar ?? 'primero';
+  return (
+    <UnaDimensionUnaMedida
+      {...props}
+      tipo="embudo"
+      ranuraDeDimension="etapa"
+      columnaExtra={{
+        encabezado: comparar === 'anterior' ? 'De la anterior' : 'De la primera',
+        celda: (valores, i) => {
+          const base = comparar === 'anterior' ? (valores[i - 1] ?? valores[i]) : valores[0];
+          const valor = valores[i];
+          // Una etapa de referencia en cero no da «caida infinita»: da una comparacion sin
+          // sentido, y la raya lo dice mejor que un numero inventado.
+          if (base === undefined || base === 0 || valor === undefined) return '—';
+          return `${((valor / base) * 100).toFixed(1)} %`;
+        },
+      }}
+    />
+  );
+}
+
+export function Cascada(props: ObjetoProps) {
+  return (
+    <UnaDimensionUnaMedida
+      {...props}
+      tipo="cascada"
+      ranuraDeDimension="categoria"
+      columnaExtra={{
+        // El acumulado es lo que la cascada DIBUJA: sin esta columna, el respaldo seria una lista
+        // de contribuciones y la altura de cada barra —que es el acumulado— se perderia.
+        encabezado: 'Acumulado',
+        celda: (valores, i) => {
+          const hasta = valores.slice(0, i + 1).reduce((suma, v) => suma + v, 0);
+          return String(hasta);
+        },
+      }}
+    />
+  );
+}
+
+/**
+ * Mapa de arbol — una o dos dimensiones, una medida.
+ *
+ * El segundo nivel es opcional y por eso no se puede reutilizar el componente de arriba: con dos
+ * dimensiones el respaldo tiene una columna mas, y esa columna es la jerarquia.
+ */
+export function MapaDeArbol({
+  titulo,
+  result,
+  instance,
+  ranuras,
+  agregaciones,
+  onFiltrar,
+  iconoDelObjeto,
+}: ObjetoProps) {
+  const r = porRanura(instance, ranuras);
+  const grupo = r ? r.uno('grupo') : fieldKeyDe(instance.binding.dimensions[0]);
+  const detalle = r ? r.uno('detalle') : fieldKeyDe(instance.binding.dimensions[1]);
+  const medidas = r ? r.varios('valor') : instance.binding.measures;
+
+  const dimensiones = [grupo, detalle].filter((c): c is string => c !== undefined).map(aFieldRef);
+  const vm = toCategorical(
+    result,
+    dimensiones,
+    medidas,
+    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+  );
+  const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
+  const principal = dimensiones[0];
+
+  return (
+    <Marco
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      agregaciones={agregaciones}
+      iconoDelObjeto={iconoDelObjeto}
+    >
+      <Grafico
+        instanceId={instance.instanceId}
+        tipo="mapa-de-arbol"
+        vm={vm}
+        titulo={titulo}
+        presentacion={instance.presentacion}
+        formatear={(valor) => formatear(valor)}
+        {...(principal ? { dimension: fieldKey(principal) } : {})}
+        {...(principal && onFiltrar
+          ? { onSeleccionar: (c: string) => onFiltrar(fieldKey(principal), c) }
+          : {})}
+      >
+        <div className="tabla-contenedor">
+          <table className="tabla" data-testid="mapa-de-arbol">
+            <thead>
+              <tr>
+                <th scope="col">{principal ? fieldKey(principal) : 'Grupo'}</th>
+                <th scope="col" className="es-numero">
+                  {medidas[0] ?? 'Valor'}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {vm.points.map((punto) => (
+                <tr key={punto.label}>
+                  <th scope="row">{punto.label}</th>
+                  <td className="es-numero">{formatear(punto.values[0] ?? null)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Grafico>
+    </Marco>
+  );
+}
+
+/**
  * Circular — pastel y dona.
  *
  * El MISMO componente para los dos objetos del catalogo. Lo unico que los separa es el hueco del

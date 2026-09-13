@@ -567,6 +567,141 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     ],
   },
   {
+    /*
+     * Embudo — etapas de un proceso, en SU orden.
+     *
+     * Se parece a un circular en que reparte un total, y se comporta al reves en lo unico que
+     * importa: no reordena. Las etapas de un proceso tienen un orden propio, y que la segunda sea
+     * mayor que la primera es una anomalia que hay que poder ver.
+     */
+    objectId: 'embudo',
+    icono: 'embudo',
+    name: 'Grafico de embudo',
+    description: 'La caida entre etapas de un proceso, en el orden en que ocurren.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: etapas sin reordenar, con la caida contra la primera o la anterior.',
+        {
+          dimensions: { min: 1, max: 1 },
+          measures: { min: 1, max: 1 },
+          notes: 'El orden de las etapas es el del dataset: ordenar por tamano destruiria el proceso.',
+          pozos: [
+            {
+              id: 'etapa',
+              etiqueta: 'Etapa',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              ayuda: 'La dimension que ordena las etapas.',
+            },
+            {
+              id: 'valor',
+              etiqueta: 'Valor',
+              tipo: 'medida',
+              max: 1,
+              min: 1,
+              ayuda: 'La cifra de cada etapa.',
+            },
+          ],
+        },
+        presenta('formato', 'formatos', 'leyenda', 'orden', 'embudo'),
+      ),
+    ],
+  },
+  {
+    /*
+     * Cascada — de que se compone una diferencia.
+     *
+     * Cada barra empieza donde acabo la anterior, asi que lo que se ve es la CONTRIBUCION de cada
+     * categoria y no su magnitud. Es la unica forma de responder «por que el total subio» sin
+     * poner al lado una tabla de diferencias.
+     */
+    objectId: 'cascada',
+    icono: 'cascada',
+    name: 'Grafico de cascada',
+    description: 'Como cada categoria suma o resta hasta el total.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: contribuciones encadenadas, con signo en la etiqueta y total opcional.',
+        {
+          dimensions: { min: 1, max: 1 },
+          measures: { min: 1, max: 1 },
+          notes: 'Los valores se encadenan: cada barra empieza donde acabo la anterior.',
+          pozos: [
+            {
+              id: 'categoria',
+              etiqueta: 'Categoria',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              ayuda: 'Lo que aporta cada barra.',
+            },
+            {
+              id: 'valor',
+              etiqueta: 'Valor',
+              tipo: 'medida',
+              max: 1,
+              min: 1,
+              ayuda: 'Cuanto suma o resta. Negativo baja.',
+            },
+          ],
+        },
+        presenta('formato', 'formatos', 'ejes', 'orden', 'cascada'),
+      ),
+    ],
+  },
+  {
+    /*
+     * Mapa de arbol — la composicion cuando hay demasiadas partes para un circular.
+     *
+     * Un circular con veinte porciones no se puede leer: las pequenas se vuelven hilos sin sitio
+     * para su nombre. Un rectangulo sigue teniendo dos dimensiones donde escribir.
+     */
+    objectId: 'mapa-de-arbol',
+    icono: 'arbol',
+    name: 'Mapa de arbol',
+    description: 'Composicion con muchas categorias, y con jerarquia si hay dos dimensiones.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: uno o dos niveles, con el area proporcional a la medida.',
+        {
+          dimensions: { min: 1, max: 2 },
+          measures: { min: 1, max: 1 },
+          notes: 'Con dos dimensiones, la primera agrupa y la segunda reparte dentro de cada grupo.',
+          pozos: [
+            {
+              id: 'grupo',
+              etiqueta: 'Grupo',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              ayuda: 'El primer nivel: cada valor es un bloque.',
+            },
+            {
+              id: 'detalle',
+              etiqueta: 'Detalle',
+              tipo: 'dimension',
+              max: 1,
+              ayuda: 'Opcional. El segundo nivel, dentro de cada bloque.',
+            },
+            {
+              id: 'valor',
+              etiqueta: 'Valor',
+              tipo: 'medida',
+              max: 1,
+              min: 1,
+              ayuda: 'El area de cada rectangulo.',
+            },
+          ],
+        },
+        presenta('formato', 'formatos', 'etiquetasDeDato'),
+      ),
+    ],
+  },
+  {
     objectId: 'area',
     icono: 'area',
     name: 'Grafico de area',

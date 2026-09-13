@@ -159,6 +159,34 @@ export interface ConfiguracionDeCombinado {
   ejeSecundario?: boolean;
 }
 
+/**
+ * ---- Embudo ----
+ *
+ * Un embudo no mide magnitudes: mide CAIDA. Por eso lo que la etiqueta enseña por defecto no es
+ * la cifra sino contra que se compara, y hay dos comparaciones distintas que responden a dos
+ * preguntas distintas: «cuanto queda de lo que entro» (contra la primera etapa) y «cuanto se
+ * pierde en ESTE paso» (contra la anterior). Con una sola de las dos, la otra hay que calcularla
+ * de cabeza, que es justo lo que el objeto viene a evitar.
+ */
+export const COMPARACIONES_DE_EMBUDO = ['primero', 'anterior', 'ninguna'] as const;
+export type ComparacionDeEmbudo = (typeof COMPARACIONES_DE_EMBUDO)[number];
+
+export interface ConfiguracionDeEmbudo {
+  comparar?: ComparacionDeEmbudo;
+}
+
+/**
+ * ---- Cascada ----
+ *
+ * La cascada dibuja de que se compone una diferencia: cada barra empieza donde acabo la anterior,
+ * asi que lo que se ve es la CONTRIBUCION de cada categoria y no su magnitud. Es la unica forma
+ * de responder «por que el total subio» sin poner al lado una tabla de diferencias.
+ */
+export interface ConfiguracionDeCascada {
+  /** Una ultima barra, desde cero, con la suma. Encendida por defecto: es a donde lleva todo. */
+  mostrarTotal?: boolean;
+}
+
 export interface ConfiguracionDeMedidor {
   minimo?: number;
   maximo?: number;
@@ -349,6 +377,8 @@ export interface PresentacionDeObjeto {
   apilado?: ModoDeApilado;
   circular?: ConfiguracionCircular;
   combinado?: ConfiguracionDeCombinado;
+  embudo?: ConfiguracionDeEmbudo;
+  cascada?: ConfiguracionDeCascada;
   medidor?: ConfiguracionDeMedidor;
   /** Peso, estilo, alineacion y color de los textos del objeto. */
   textos?: TextosDeObjeto;
@@ -381,6 +411,8 @@ export const CLAVES_DE_PRESENTACION = [
   'apilado',
   'circular',
   'combinado',
+  'embudo',
+  'cascada',
   'medidor',
 ] as const satisfies readonly (keyof PresentacionDeObjeto)[];
 
@@ -551,6 +583,18 @@ export function validarPresentacion(
       });
     }
   }
+  if (
+    presentacion.embudo?.comparar !== undefined &&
+    !(COMPARACIONES_DE_EMBUDO as readonly string[]).includes(presentacion.embudo.comparar)
+  ) {
+    problemas.push({
+      clave: 'embudo.comparar',
+      problema:
+        `'${String(presentacion.embudo.comparar)}' no es una comparacion. ` +
+        `Use: ${COMPARACIONES_DE_EMBUDO.join(', ')}.`,
+    });
+  }
+
   if (
     circular?.etiquetas !== undefined &&
     !(ETIQUETAS_CIRCULARES as readonly string[]).includes(circular.etiquetas)
