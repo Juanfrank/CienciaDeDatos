@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { CATALOGOS, crearTraductor, es, formatearMensaje, LOCALES } from './index';
-import { negociarLocale, preferenciasDeCabecera } from './locales';
+import { CATALOGOS, createTranslator, es, formatMessage, LOCALES } from './index';
+import { negotiateLocale, headerPreferences } from './locales';
 
 /**
  * Los catalogos no pueden discrepar.
@@ -13,18 +13,18 @@ import { negociarLocale, preferenciasDeCabecera } from './locales';
 
 /** Los argumentos ICU de un mensaje, sin importar su tipo ni sus opciones. */
 function argumentosDe(mensaje: string): string[] {
-  const nombres = new Set<string>();
+  const names = new Set<string>();
   const re = /\{\s*([a-zA-Z0-9_]+)\s*(?:,|\})/g;
   let m = re.exec(mensaje);
   while (m) {
-    nombres.add(m[1] as string);
+    names.add(m[1] as string);
     m = re.exec(mensaje);
   }
-  return [...nombres].sort();
+  return [...names].sort();
 }
 
 describe('catalogos', () => {
-  const claves = Object.keys(es) as (keyof typeof es)[];
+  const keys = Object.keys(es) as (keyof typeof es)[];
 
   it('hay catalogo para cada idioma admitido', () => {
     expect(Object.keys(CATALOGOS).sort()).toEqual([...LOCALES].sort());
@@ -32,16 +32,16 @@ describe('catalogos', () => {
 
   for (const locale of LOCALES) {
     it(`${locale}: tiene exactamente las claves del catalogo de referencia`, () => {
-      expect(Object.keys(CATALOGOS[locale]).sort()).toEqual([...claves].sort());
+      expect(Object.keys(CATALOGOS[locale]).sort()).toEqual([...keys].sort());
     });
 
     it(`${locale}: ningun mensaje esta vacio`, () => {
-      const vacios = claves.filter((c) => CATALOGOS[locale][c].trim() === '');
+      const vacios = keys.filter((c) => CATALOGOS[locale][c].trim() === '');
       expect(vacios).toEqual([]);
     });
 
     it(`${locale}: cada mensaje usa los mismos argumentos que el de referencia`, () => {
-      const distintos = claves.filter(
+      const distintos = keys.filter(
         (c) =>
           argumentosDe(CATALOGOS[locale][c]).join(',') !== argumentosDe(es[c]).join(','),
       );
@@ -49,7 +49,7 @@ describe('catalogos', () => {
     });
 
     it(`${locale}: ningun mensaje deja un argumento sin cerrar`, () => {
-      const rotos = claves.filter((c) => {
+      const rotos = keys.filter((c) => {
         const content = CATALOGOS[locale][c];
         let profundidad = 0;
         for (const caracter of content) {
@@ -67,7 +67,7 @@ describe('catalogos', () => {
     // Una cadena que empieza o acaba en espacio solo tiene sentido pegada a otra, y eso no se
     // puede traducir: el orden de las palabras cambia entre idiomas.
     for (const locale of LOCALES) {
-      const fragmentos = claves.filter((c) => CATALOGOS[locale][c] !== CATALOGOS[locale][c].trim());
+      const fragmentos = keys.filter((c) => CATALOGOS[locale][c] !== CATALOGOS[locale][c].trim());
       expect(fragmentos, locale).toEqual([]);
     }
   });
@@ -75,73 +75,73 @@ describe('catalogos', () => {
 
 describe('formato ICU', () => {
   it('interpola por nombre', () => {
-    expect(formatearMensaje('Hola {quien}', { quien: 'Ana' })).toBe('Hola Ana');
+    expect(formatMessage('Hola {quien}', { quien: 'Ana' })).toBe('Hola Ana');
   });
 
   it('deja visible el argumento que no recibe valor', () => {
     // `undefined` en mitad de una frase parece un dato; `{total}` dice que falta un parametro.
-    expect(formatearMensaje('Van {total}')).toBe('Van {total}');
+    expect(formatMessage('Van {total}')).toBe('Van {total}');
   });
 
   it('elige la forma plural por idioma y sustituye la almohadilla', () => {
     const mensaje = '{n, plural, one {# panel} other {# paneles}}';
-    expect(formatearMensaje(mensaje, { n: 1 }, 'es')).toBe('1 panel');
-    expect(formatearMensaje(mensaje, { n: 4 }, 'es')).toBe('4 paneles');
+    expect(formatMessage(mensaje, { n: 1 }, 'es')).toBe('1 panel');
+    expect(formatMessage(mensaje, { n: 4 }, 'es')).toBe('4 paneles');
   });
 
   it('la forma exacta gana a la categoria', () => {
     const mensaje = '{n, plural, =0 {ninguno} one {uno} other {# de ellos}}';
-    expect(formatearMensaje(mensaje, { n: 0 })).toBe('ninguno');
-    expect(formatearMensaje(mensaje, { n: 7 })).toBe('7 de ellos');
+    expect(formatMessage(mensaje, { n: 0 })).toBe('ninguno');
+    expect(formatMessage(mensaje, { n: 7 })).toBe('7 de ellos');
   });
 
   it('anida argumentos dentro de una opcion', () => {
     const mensaje = '{n, plural, one {Falta {fieldName}} other {Faltan {n} campos}}';
-    expect(formatearMensaje(mensaje, { n: 1, fieldName: 'Distrito' })).toBe('Falta Distrito');
-    expect(formatearMensaje(mensaje, { n: 3, fieldName: 'Distrito' })).toBe('Faltan 3 campos');
+    expect(formatMessage(mensaje, { n: 1, fieldName: 'Distrito' })).toBe('Falta Distrito');
+    expect(formatMessage(mensaje, { n: 3, fieldName: 'Distrito' })).toBe('Faltan 3 campos');
   });
 
   it('selecciona por valor', () => {
     const mensaje = '{estado, select, roto {Roto} other {Correcto}}';
-    expect(formatearMensaje(mensaje, { estado: 'roto' })).toBe('Roto');
-    expect(formatearMensaje(mensaje, { estado: 'otro' })).toBe('Correcto');
+    expect(formatMessage(mensaje, { estado: 'roto' })).toBe('Roto');
+    expect(formatMessage(mensaje, { estado: 'otro' })).toBe('Correcto');
   });
 
   it('formatea numeros con las reglas del idioma', () => {
-    expect(formatearMensaje('{n, number}', { n: 2216 }, 'en')).toBe('2,216');
+    expect(formatMessage('{n, number}', { n: 2216 }, 'en')).toBe('2,216');
   });
 });
 
 describe('traductor', () => {
   it('devuelve el mensaje del idioma pedido', () => {
-    expect(crearTraductor('en')('accion.guardar')).toBe('Save');
-    expect(crearTraductor('es')('accion.guardar')).toBe('Guardar');
+    expect(createTranslator('en')('accion.guardar')).toBe('Save');
+    expect(createTranslator('es')('accion.guardar')).toBe('Guardar');
   });
 
   it('trae los formateadores de Intl atados al mismo idioma', () => {
-    const t = crearTraductor('en');
+    const t = createTranslator('en');
     expect(t.numero(2216)).toBe('2,216');
     expect(t.lista(['a', 'b', 'c'])).toBe('a, b, and c');
   });
 
   it('un idioma desconocido cae al de referencia en vez de romper', () => {
-    expect(crearTraductor('pt' as 'es')('accion.guardar')).toBe('Guardar');
+    expect(createTranslator('pt' as 'es')('accion.guardar')).toBe('Guardar');
   });
 });
 
 describe('negociacion de idioma', () => {
   it('compara por la subetiqueta primaria', () => {
-    expect(negociarLocale(['es-DO'])).toBe('es');
-    expect(negociarLocale(['en-US'])).toBe('en');
+    expect(negotiateLocale(['es-DO'])).toBe('es');
+    expect(negotiateLocale(['en-US'])).toBe('en');
   });
 
   it('cae al idioma de la aplicacion cuando ninguno coincide', () => {
-    expect(negociarLocale(['fr-FR', 'de'])).toBe('es');
-    expect(negociarLocale([])).toBe('es');
+    expect(negotiateLocale(['fr-FR', 'de'])).toBe('es');
+    expect(negotiateLocale([])).toBe('es');
   });
 
   it('ordena las preferencias de una cabecera por calidad', () => {
-    expect(preferenciasDeCabecera('fr;q=0.5,en;q=0.9,es;q=0.1')).toEqual(['en', 'fr', 'es']);
-    expect(negociarLocale(preferenciasDeCabecera('fr;q=0.5,en;q=0.9'))).toBe('en');
+    expect(headerPreferences('fr;q=0.5,en;q=0.9,es;q=0.1')).toEqual(['en', 'fr', 'es']);
+    expect(negotiateLocale(headerPreferences('fr;q=0.5,en;q=0.9'))).toBe('en');
   });
 });

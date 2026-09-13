@@ -28,7 +28,7 @@ import { ConfiguracionDeObjetoEditor } from './ConfiguracionDeObjetoEditor';
 import { Pestanas, type DefinicionDePestana } from './Pestanas';
 import { Pozo } from './Pozo';
 import { Presentacion } from './Presentacion';
-import type { ClaveDeMensaje } from '@app/i18n';
+import type { MessageKey } from '@app/i18n';
 import { useTraductor } from '../Idioma';
 import { ProveedorDeFiltro, Seccion } from './Seccion';
 
@@ -186,7 +186,7 @@ export function PanelLateral({
             */}
             <Seccion
               titulo="Tamano y posicion"
-              claves={['ancho', 'alto', 'columnas', 'filas', 'mover', 'rejilla', 'redimensionar']}
+              keys={['ancho', 'alto', 'columnas', 'filas', 'mover', 'rejilla', 'redimensionar']}
               prueba={`seccion-tamano-${seleccionado.id}`}
             >
               <Tamano item={seleccionado} guardando={guardando} onCambiar={onCambiar} />
@@ -341,13 +341,13 @@ function Tienda({
               return (
                 <Seccion
                   key={family}
-                  titulo={t(`familia.${family}` as ClaveDeMensaje)}
+                  titulo={t(`familia.${family}` as MessageKey)}
                   nivel={2}
                   prueba={`familia-${family}`}
                   /*
                    * Las claves son los objetos que la familia contiene EN ESTA busqueda.
                    */
-                  claves={dela.flatMap((o) => [o.name, o.description])}
+                  keys={dela.flatMap((o) => [o.name, o.description])}
                 >
                   <p className="tienda__familia-que">{que}</p>
                   <ListaDeObjetos

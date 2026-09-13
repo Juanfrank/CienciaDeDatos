@@ -274,8 +274,8 @@ describe('de punta a punta: poblar, leer y filtrar por ambito', () => {
     const este = await leerComo(usuarioBeto, equipoEste, 'casos-pendientes-este');
 
     // Una unica entrada de dataset en el cache (mas el latido).
-    const claves = (await l2.keys()).filter((k) => k.startsWith('ds:'));
-    expect(claves).toHaveLength(1);
+    const keys = (await l2.keys()).filter((k) => k.startsWith('ds:'));
+    expect(keys).toHaveLength(1);
 
     // Y cada equipo ve su subconjunto, distinto y correcto.
     const distritosDe = (r: typeof norte) =>

@@ -1,12 +1,12 @@
-import { es, type ClaveDeMensaje } from './catalogo/es';
-import { en } from './catalogo/en';
-import { formatearMensaje, type ParametrosDeMensaje } from './formato';
-import { LOCALE_POR_DEFECTO, type Locale } from './locales';
+import { es, type MessageKey } from './catalog/es';
+import { en } from './catalog/en';
+import { formatMessage, type MessageParameters } from './format';
+import { DEFAULT_LOCALE, type Locale } from './locales';
 
-const CATALOGOS: Record<Locale, Record<ClaveDeMensaje, string>> = { es, en };
+const CATALOGOS: Record<Locale, Record<MessageKey, string>> = { es, en };
 
-export type Traductor = {
-  (clave: ClaveDeMensaje, parametros?: ParametrosDeMensaje): string;
+export type Translator = {
+  (clave: MessageKey, parameters?: MessageParameters): string;
   locale: Locale;
   numero: (valor: number, opciones?: Intl.NumberFormatOptions) => string;
   fecha: (valor: Date | string | number, opciones?: Intl.DateTimeFormatOptions) => string;
@@ -24,11 +24,11 @@ export type Traductor = {
  * llamando a `toLocaleString()` sin argumento y el numero sale en el idioma del servidor, que en
  * produccion no es el de quien mira.
  */
-export function crearTraductor(locale: Locale = LOCALE_POR_DEFECTO): Traductor {
+export function createTranslator(locale: Locale = DEFAULT_LOCALE): Translator {
   const catalogo = CATALOGOS[locale] ?? es;
 
-  const t = ((clave: ClaveDeMensaje, parametros?: ParametrosDeMensaje) =>
-    formatearMensaje(catalogo[clave] ?? es[clave] ?? clave, parametros, locale)) as Traductor;
+  const t = ((clave: MessageKey, parameters?: MessageParameters) =>
+    formatMessage(catalogo[clave] ?? es[clave] ?? clave, parameters, locale)) as Translator;
 
   t.locale = locale;
   t.numero = (valor, opciones) => new Intl.NumberFormat(locale, opciones).format(valor);

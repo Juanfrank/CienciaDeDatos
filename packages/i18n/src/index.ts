@@ -10,13 +10,13 @@
  */
 export {
   LOCALES,
-  LOCALE_POR_DEFECTO,
-  esLocale,
-  negociarLocale,
-  preferenciasDeCabecera,
+  DEFAULT_LOCALE,
+  isLocale,
+  negotiateLocale,
+  headerPreferences,
   type Locale,
 } from './locales';
-export { formatearMensaje, type ParametrosDeMensaje } from './formato';
-export { es, type ClaveDeMensaje } from './catalogo/es';
-export { en } from './catalogo/en';
-export { CATALOGOS, crearTraductor, type Traductor } from './traductor';
+export { formatMessage, type MessageParameters } from './format';
+export { es, type MessageKey } from './catalog/es';
+export { en } from './catalog/en';
+export { CATALOGOS, createTranslator, type Translator } from './translator';

@@ -11,9 +11,9 @@ export const LOCALES = ['es', 'en'] as const;
 export type Locale = (typeof LOCALES)[number];
 
 /** El idioma en el que se escribe el catalogo y al que se cae cuando no hay nada mejor. */
-export const LOCALE_POR_DEFECTO: Locale = 'es';
+export const DEFAULT_LOCALE: Locale = 'es';
 
-export const esLocale = (valor: unknown): valor is Locale =>
+export const isLocale = (valor: unknown): valor is Locale =>
   typeof valor === 'string' && (LOCALES as readonly string[]).includes(valor);
 
 /**
@@ -22,22 +22,22 @@ export const esLocale = (valor: unknown): valor is Locale =>
  * Compara por la subetiqueta primaria, asi que `es-DO` y `es-ES` resuelven al mismo catalogo: uno
  * por region multiplicaria el trabajo de traduccion sin cambiar una sola cadena.
  */
-export function negociarLocale(preferencias: readonly string[]): Locale {
-  for (const preferencia of preferencias) {
+export function negotiateLocale(preferences: readonly string[]): Locale {
+  for (const preferencia of preferences) {
     const primaria = preferencia.trim().toLowerCase().split('-')[0];
-    if (esLocale(primaria)) return primaria;
+    if (isLocale(primaria)) return primaria;
   }
-  return LOCALE_POR_DEFECTO;
+  return DEFAULT_LOCALE;
 }
 
 /** Despieza una cabecera `Accept-Language` y la ordena por factor de calidad. */
-export function preferenciasDeCabecera(pageHeader: string | null | undefined): string[] {
+export function headerPreferences(pageHeader: string | null | undefined): string[] {
   if (!pageHeader) return [];
   return pageHeader
     .split(',')
     .map((parte) => {
-      const [etiqueta = '', ...parametros] = parte.split(';').map((p) => p.trim());
-      const q = parametros.find((p) => p.startsWith('q='));
+      const [etiqueta = '', ...parameters] = parte.split(';').map((p) => p.trim());
+      const q = parameters.find((p) => p.startsWith('q='));
       return { etiqueta, calidad: q ? Number(q.slice(2)) : 1 };
     })
     .filter((p) => p.etiqueta !== '' && Number.isFinite(p.calidad))

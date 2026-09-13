@@ -77,9 +77,9 @@ test.describe('configurable: lo que cada objeto declara sale en su panel', () =>
    */
   for (const objeto of COLOCABLES) {
     const version = objeto.versions[objeto.versions.length - 1];
-    const claves = version?.presentation ?? [];
+    const keys = version?.presentation ?? [];
 
-    test(`${objeto.objectId} — ${claves.length} claves`, async ({ page }) => {
+    test(`${objeto.objectId} — ${keys.length} claves`, async ({ page }) => {
       await nuevoModulo(page, `cfg-${objeto.objectId}-${Date.now()}`);
       await page.getByTestId(`anadir-${objeto.objectId}`).click();
 
@@ -93,7 +93,7 @@ test.describe('configurable: lo que cada objeto declara sale en su panel', () =>
       await expect(page.getByTestId(`pres-${item}`)).toBeVisible();
       await abrirSecciones(page);
 
-      for (const clave of claves) {
+      for (const clave of keys) {
         /*
          * Algunos controles solo aparecen despues de encender otro, y eso esta bien: el color del
          * resaltado no significa nada mientras no haya resaltado. Lo que se comprueba es que se

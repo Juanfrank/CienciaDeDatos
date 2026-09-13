@@ -23,7 +23,7 @@ export function Seccion({
   abierta = true,
   nivel = 1,
   prueba,
-  claves,
+  keys,
   children,
 }: {
   titulo: string;
@@ -32,7 +32,7 @@ export function Seccion({
   nivel?: 1 | 2;
   prueba?: string;
   /** Con que otras palabras se busca esta seccion. */
-  claves?: string[];
+  keys?: string[];
   children: React.ReactNode;
 }) {
   const filtro = normalizar(useContext(FiltroDeSecciones).trim());
@@ -48,7 +48,7 @@ export function Seccion({
   const coincide =
     filtro === '' ||
     normalizar(titulo).includes(filtro) ||
-    (claves ?? []).some((clave) => normalizar(clave).includes(filtro));
+    (keys ?? []).some((clave) => normalizar(clave).includes(filtro));
 
   if (!coincide) return null;
 

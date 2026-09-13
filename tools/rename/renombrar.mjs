@@ -238,6 +238,14 @@ function proponer(raiz) {
     const trozos = ruta.split('/');
     const nombre = trozos[trozos.length - 1];
     const [base, ...extension] = nombre.split('.');
+    /*
+     * Un archivo que se llama como un idioma NO es una palabra en espanol.
+     *
+     * `catalogo/es.ts` es el catalogo del espanol y `es` es su etiqueta BCP-47; el glosario lo
+     * leyo como el verbo y propuso `catalogo/is.ts`. Dos o tres letras no alcanzan para un
+     * nombre de archivo en este repositorio, asi que no hay nada que perder por saltarlos.
+     */
+    if (base.length <= 3) continue;
     const propuesto = traducir(base);
     if (propuesto) {
       archivos[ruta] = [...trozos.slice(0, -1), [propuesto, ...extension].join('.')].join('/');

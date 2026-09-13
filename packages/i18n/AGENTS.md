@@ -10,7 +10,7 @@ recorrer trescientos archivos buscando comillas.
 | `formato.ts` | Formateo ICU MessageFormat: interpolacion, numero, plural y select |
 | `catalogo/es.ts` | Catalogo de REFERENCIA. Se escribe primero |
 | `catalogo/en.ts` | Ingles. Atado por tipo al de referencia |
-| `traductor.ts` | `crearTraductor(locale)` y los formateadores de `Intl` |
+| `traductor.ts` | `createTranslator(locale)` y los formateadores de `Intl` |
 
 ## Reglas
 
@@ -23,7 +23,7 @@ recorrer trescientos archivos buscando comillas.
   argumento: sin idioma explicito sale el del servidor, que no es el de quien mira.
 - **La clave describe QUE dice el mensaje, no donde aparece.** Una cadena que se usa en dos
   pantallas tiene una clave, no dos.
-- **`en` es un `Record<ClaveDeMensaje, string>`**: una clave nueva en espanol no compila hasta
+- **`en` es un `Record<MessageKey, string>`**: una clave nueva en espanol no compila hasta
   que se traduce, y una que sobra tampoco.
 
 ## Que NO hacer

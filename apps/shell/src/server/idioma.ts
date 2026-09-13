@@ -1,10 +1,10 @@
 import { cookies } from 'next/headers';
 import {
-  LOCALE_POR_DEFECTO,
-  crearTraductor,
-  esLocale,
+  DEFAULT_LOCALE,
+  createTranslator,
+  isLocale,
   type Locale,
-  type Traductor,
+  type Translator,
 } from '@app/i18n';
 
 /**
@@ -21,11 +21,11 @@ import {
 export const COOKIE_DE_IDIOMA = 'idioma';
 
 export async function idioma(): Promise<Locale> {
-  const elegido = (await cookies()).get(COOKIE_DE_IDIOMA)?.value;
-  return esLocale(elegido) ? elegido : LOCALE_POR_DEFECTO;
+  const chosen = (await cookies()).get(COOKIE_DE_IDIOMA)?.value;
+  return isLocale(chosen) ? chosen : DEFAULT_LOCALE;
 }
 
 /** El traductor de la peticion en curso, para un componente de servidor. */
-export async function traductor(): Promise<Traductor> {
-  return crearTraductor(await idioma());
+export async function traductor(): Promise<Translator> {
+  return createTranslator(await idioma());
 }

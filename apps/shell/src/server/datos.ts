@@ -74,8 +74,8 @@ function sinFiltroPropio(
   filtros: Record<string, string | string[]>,
   propias: { table: string; field: string }[],
 ): Record<string, string | string[]> {
-  const claves = new Set(propias.map(fieldKey));
-  return Object.fromEntries(Object.entries(filtros).filter(([clave]) => !claves.has(clave)));
+  const keys = new Set(propias.map(fieldKey));
+  return Object.fromEntries(Object.entries(filtros).filter(([clave]) => !keys.has(clave)));
 }
 
 /** Lee los datos de una lista de objetos bajo UN ambito. */

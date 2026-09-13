@@ -357,7 +357,8 @@
     "evaluar",
     "acumular",
     "cerrar",
-    "partir"
+    "partir",
+    "crear"
   ],
   "_adjetivos": [
     "claro",
@@ -415,7 +416,8 @@
     "tipografico",
     "derivado",
     "derivada",
-    "mencionada"
+    "mencionada",
+    "defecto"
   ],
   "_singular": {
     "bars": "bar",
@@ -533,5 +535,15 @@
   "palabras": "words",
   "mencionada": "mentioned",
   "intencion": "intent",
-  "resolutor": "resolver"
+  "resolutor": "resolver",
+  "argumentos": "arguments",
+  "defecto": "default",
+  "mensaje": "message",
+  "mensajes": "messages",
+  "negociar": "negotiate",
+  "parametros": "parameters",
+  "preferencias": "preferences",
+  "traductor": "translator",
+  "locales": "locales",
+  "crear": "create"
 }

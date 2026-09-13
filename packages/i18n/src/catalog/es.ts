@@ -77,4 +77,4 @@ export const es = {
   'acceso.credencialesInvalidas': 'El correo o la contrasena no son correctos',
 } as const;
 
-export type ClaveDeMensaje = keyof typeof es;
+export type MessageKey = keyof typeof es;

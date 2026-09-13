@@ -44,7 +44,7 @@ export function EditorDeModulo({
 
   const pagina = modulo.pages[0];
   const items = pagina?.items ?? [];
-  const elegido = items.find((i) => i.id === seleccion) ?? null;
+  const chosen = items.find((i) => i.id === seleccion) ?? null;
 
   // Escape deselecciona, como en cualquier editor de bloques. Va en el documento y no en el
   // lienzo porque el foco suele estar en el panel cuando hace falta.
@@ -248,7 +248,7 @@ export function EditorDeModulo({
         <PanelLateral
           objetos={palette.objetos}
           datasets={palette.datasets}
-          seleccionado={elegido}
+          seleccionado={chosen}
           guardando={guardando}
           onAnadir={(objectId) => void anadir(objectId)}
           onCambiar={(itemId, cambio) => void cambiar(itemId, cambio)}

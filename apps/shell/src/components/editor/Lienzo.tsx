@@ -101,14 +101,14 @@ export function Lienzo({
 
         {items.map((item) => {
           const objeto = id.get(item.id);
-          const elegido = seleccion === item.id;
+          const chosen = seleccion === item.id;
           const arrastrando = enCurso?.itemId === item.id;
           return (
             <div
               key={item.id}
               className="lienzo__bloque"
               data-testid={`bloque-${item.id}`}
-              data-elegido={elegido ? 'si' : 'no'}
+              data-chosen={chosen ? 'si' : 'no'}
               data-arrastrando={arrastrando ? 'si' : 'no'}
               style={
                 {
@@ -173,7 +173,7 @@ export function Lienzo({
                 type="button"
                 className="lienzo__seleccionar"
                 data-testid={`elegir-${item.id}`}
-                aria-pressed={elegido}
+                aria-pressed={chosen}
                 // El nombre dice QUE es y DONDE esta: la rejilla se ve con los ojos, y quien no la
                 // ve necesita esa misma informacion dicha con palabras.
                 aria-label={`${item.instance.title ?? item.instance.objectId}, columna ${

@@ -45,7 +45,7 @@ export function ranurasDe(
     return declaradas;
   }
 
-  const claves = {
+  const keys = {
     dimension: instance.binding.dimensions.map(fieldKey),
     medida: [...instance.binding.measures],
   };
@@ -54,11 +54,11 @@ export function ranurasDe(
    * DOS pasadas: primero los minimos de cada ranura, y solo despues el resto hasta el maximo.
    */
   for (const ranura of ranuras) {
-    declaradas.set(ranura.id, claves[ranura.tipo].splice(0, ranura.min ?? 0));
+    declaradas.set(ranura.id, keys[ranura.tipo].splice(0, ranura.min ?? 0));
   }
   for (const ranura of ranuras) {
     const puestos = declaradas.get(ranura.id) ?? [];
-    puestos.push(...claves[ranura.tipo].splice(0, ranura.max - puestos.length));
+    puestos.push(...keys[ranura.tipo].splice(0, ranura.max - puestos.length));
   }
   return declaradas;
 }

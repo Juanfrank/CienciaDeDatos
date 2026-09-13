@@ -185,8 +185,8 @@ describe('los nombres del catalogo', () => {
      * distinguia, y elegir entre ellas era adivinar. Nada fallaba: un nombre repetido no rompe
      * nada, solo hace imposible elegir.
      */
-    const nombres = catalogoInicial.map((o) => o.name);
-    const repetidos = nombres.filter((n, i) => nombres.indexOf(n) !== i);
+    const names = catalogoInicial.map((o) => o.name);
+    const repetidos = names.filter((n, i) => names.indexOf(n) !== i);
     expect(repetidos).toEqual([]);
   });
 

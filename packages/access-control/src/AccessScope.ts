@@ -47,13 +47,13 @@ function restrictionFor(scope: AccessScope, key: string): ScopeRestriction | und
  * lado seguro:
  */
 export function intersect(a: AccessScope, b: AccessScope): AccessScope {
-  const claves = new Set([
+  const keys = new Set([
     ...a.restrictions.map((r) => dimensionKey(r.dimension)),
     ...b.restrictions.map((r) => dimensionKey(r.dimension)),
   ]);
 
   const restrictions: ScopeRestriction[] = [];
-  for (const clave of claves) {
+  for (const clave of keys) {
     const ra = restrictionFor(a, clave);
     const rb = restrictionFor(b, clave);
 

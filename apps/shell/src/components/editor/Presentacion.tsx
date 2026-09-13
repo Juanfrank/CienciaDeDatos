@@ -93,7 +93,7 @@ export function Presentacion({
   return (
     <div className="editor__presentacion" data-testid={prueba}>
       <Seccion
-          claves={['titulo', 'subtitulo', 'icono', 'cabecera', 'nombre', 'texto']}
+          keys={['titulo', 'subtitulo', 'icono', 'cabecera', 'nombre', 'texto']}
           titulo="Rotulo" nivel={2} prueba={`${prueba}-rotulo`}>
         <label className="editor__interruptor">
           <input
@@ -195,7 +195,7 @@ export function Presentacion({
 
       {admite("resaltado") || admite("acento") ? (
         <Seccion
-          claves={['resaltado', 'acento', 'color', 'linea', 'marco']}
+          keys={['resaltado', 'acento', 'color', 'linea', 'marco']}
           titulo="Borde" nivel={2} abierta={false} prueba={`${prueba}-borde`}>
           {admite("acento") ? (
             <label className="formulario__campo">
@@ -252,7 +252,7 @@ export function Presentacion({
 
       {hayMedida ? (
         <Seccion
-          claves={['formato', 'decimales', 'moneda', 'porcentaje', 'unidad', 'miles', 'cifra', 'numero', 'valor', 'etiqueta']}
+          keys={['formato', 'decimales', 'moneda', 'porcentaje', 'unidad', 'miles', 'cifra', 'numero', 'valor', 'etiqueta']}
           titulo="Medida" nivel={2} abierta={false} prueba={`${prueba}-medida`}>
           <FormatoDeMedidas
             instance={instance}
@@ -331,7 +331,7 @@ export function Presentacion({
 
       {hayGrafico ? (
         <Seccion
-          claves={['leyenda', 'etiquetas de dato', 'apilado', '100 %', 'orden', 'ordenar', 'cifra sobre la barra']}
+          keys={['leyenda', 'etiquetas de dato', 'apilado', '100 %', 'orden', 'ordenar', 'cifra sobre la barra']}
           titulo="Grafico" nivel={2} abierta={false} prueba={`${prueba}-grafico`}>
           {admite("leyenda") ? (
             <label className="formulario__campo">
@@ -484,7 +484,7 @@ export function Presentacion({
 
       {admite("multiplos") ? (
         <Seccion
-          claves={['paneles', 'repetir', 'por cada', 'escala comun', 'columnas']}
+          keys={['paneles', 'repetir', 'por cada', 'escala comun', 'columnas']}
           titulo="Multiplos" nivel={2} abierta={false} prueba={`${prueba}-multiplos`}>
           <p className="campo__pista">
             Ponga una dimension en el pozo «Multiplos», en la pestana Datos, y el objeto se repite
@@ -540,7 +540,7 @@ export function Presentacion({
 
       {admite("tooltip") ? (
         <Seccion
-          claves={['total', 'al senalar', 'globo', 'emergente']}
+          keys={['total', 'al senalar', 'globo', 'emergente']}
           titulo="Tooltip" nivel={2} abierta={false} prueba={`${prueba}-tooltip`}>
           <label className="editor__interruptor">
             <input
@@ -573,7 +573,7 @@ export function Presentacion({
 
       {admite("condicional") ? (
         <Seccion
-          claves={['condicional', 'regla', 'umbral', 'semaforo', 'alerta', 'rojo']}
+          keys={['condicional', 'regla', 'umbral', 'semaforo', 'alerta', 'rojo']}
           titulo="Color por valor" nivel={2} abierta={false} prueba={`${prueba}-condicional`}>
           <ReglasDeColor
             rules={p.condicional?.rules ?? []}
@@ -587,7 +587,7 @@ export function Presentacion({
 
       {admite("referencias") ? (
         <Seccion
-          claves={['meta', 'umbral', 'objetivo', 'promedio', 'raya', 'constante']}
+          keys={['meta', 'umbral', 'objetivo', 'promedio', 'raya', 'constante']}
           titulo="Lineas de referencia" nivel={2} abierta={false} prueba={`${prueba}-referencias`}>
           <LineasDeReferencia
             lineas={p.referencias ?? []}
@@ -600,7 +600,7 @@ export function Presentacion({
 
       {admite("coloresDeSerie") ? (
         <Seccion
-          claves={['paleta', 'color de serie', 'tema']}
+          keys={['paleta', 'color de serie', 'tema']}
           titulo="Colores de las series" nivel={2} abierta={false} prueba={`${prueba}-colores`}>
           {/*
             Se elige CUAL de los ocho colores del tema le toca a cada serie, no un color libre.
@@ -641,7 +641,7 @@ export function Presentacion({
 
       {admite("circular") ? (
         <Seccion
-          claves={['pastel', 'dona', 'hueco', 'anillo', 'circular', 'porcentaje', 'total en el centro']}
+          keys={['pastel', 'dona', 'hueco', 'anillo', 'circular', 'porcentaje', 'total en el centro']}
           titulo="Porciones" nivel={2} prueba={`${prueba}-circular`}>
           {/*
             El hueco es un DESLIZADOR y no una casilla «dona si/no».
@@ -717,7 +717,7 @@ export function Presentacion({
 
       {admite("medidor") ? (
         <Seccion
-          claves={['medidor', 'tacometro', 'aguja', 'minimo', 'maximo', 'objetivo']}
+          keys={['medidor', 'tacometro', 'aguja', 'minimo', 'maximo', 'objetivo']}
           titulo="Escala" nivel={2} prueba={`${prueba}-medidor`}>
           {/*
             Vacio NO es cero: vacio es «dedúcela».
@@ -802,7 +802,7 @@ export function Presentacion({
 
       {admite("embudo") ? (
         <Seccion
-          claves={['embudo', 'etapa', 'conversion', 'proceso']}
+          keys={['embudo', 'etapa', 'conversion', 'proceso']}
           titulo="Caida" nivel={2} prueba={`${prueba}-embudo`}>
           <label className="formulario__campo">
             <span>Que compara la etiqueta</span>
@@ -832,7 +832,7 @@ export function Presentacion({
 
       {admite("cascada") ? (
         <Seccion
-          claves={['contribucion', 'total', 'waterfall', 'signo']}
+          keys={['contribucion', 'total', 'waterfall', 'signo']}
           titulo="Cascada" nivel={2} prueba={`${prueba}-cascada`}>
           <label className="editor__interruptor">
             <input
@@ -853,7 +853,7 @@ export function Presentacion({
 
       {admite("combinado") ? (
         <Seccion
-          claves={['eje secundario', 'combinado', 'derecha', 'dos escalas']}
+          keys={['eje secundario', 'combinado', 'derecha', 'dos escalas']}
           titulo="Eje secundario" nivel={2} prueba={`${prueba}-combinado`}>
           <label className="editor__interruptor">
             <input
@@ -880,7 +880,7 @@ export function Presentacion({
 
       {admite("ejes") ? (
         <Seccion
-          claves={['eje', 'cuadricula', 'titulo del eje', 'empezar en cero', 'minimo', 'maximo', 'girar', 'rotar']}
+          keys={['eje', 'cuadricula', 'titulo del eje', 'empezar en cero', 'minimo', 'maximo', 'girar', 'rotar']}
           titulo="Ejes" nivel={2} abierta={false} prueba={`${prueba}-ejes`}>
           <label className="editor__interruptor">
             <input
@@ -1039,7 +1039,7 @@ export function Presentacion({
               de cada tres categorias sin decir que las demas siguen ahi. Girados se ven todas.
             */}
             <span className="campo__pista">
-              Con nombres largos, en horizontal el grafico esconde los que no caben.
+              Con names largos, en horizontal el grafico esconde los que no caben.
             </span>
           </label>
         </Seccion>
@@ -1047,7 +1047,7 @@ export function Presentacion({
 
       {instance.objectId === "panel-de-filtros" ? (
         <Seccion
-          claves={['filtro', 'panel de filtros', 'desplegable', 'fecha']}
+          keys={['filtro', 'panel de filtros', 'desplegable', 'fecha']}
           titulo="Selectores" nivel={2} prueba={`${prueba}-selectores`}>
           <SelectoresDelPanel
             instance={instance}

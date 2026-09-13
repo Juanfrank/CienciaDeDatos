@@ -1,14 +1,14 @@
-import type { ClaveDeMensaje } from './es';
+import type { MessageKey } from './es';
 
 /**
  * Catalogo en ingles.
  *
- * El tipo `Record<ClaveDeMensaje, string>` lo ata al de referencia: una clave nueva en espanol es
+ * El tipo `Record<MessageKey, string>` lo ata al de referencia: una clave nueva en espanol es
  * un error de compilacion aqui hasta que se traduce, y una clave que sobra tambien. Una prueba
  * comprueba ademas que los argumentos ICU de cada mensaje coinciden entre los dos idiomas, que es
  * lo que el tipo no puede ver.
  */
-export const en: Record<ClaveDeMensaje, string> = {
+export const en: Record<MessageKey, string> = {
   'app.nombre': 'Visualization layer',
   'app.institucion': 'Judiciary of the Dominican Republic',
 

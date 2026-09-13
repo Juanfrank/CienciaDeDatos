@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useMemo } from 'react';
-import { LOCALE_POR_DEFECTO, crearTraductor, type Locale, type Traductor } from '@app/i18n';
+import { DEFAULT_LOCALE, createTranslator, type Locale, type Translator } from '@app/i18n';
 
 /**
  * El traductor para los componentes de cliente.
@@ -10,7 +10,7 @@ import { LOCALE_POR_DEFECTO, crearTraductor, type Locale, type Traductor } from 
  * aqui: si el cliente lo resolviera por su cuenta, la primera pintura llegaria en un idioma y la
  * hidratacion en otro.
  */
-const Contexto = createContext<Locale>(LOCALE_POR_DEFECTO);
+const Contexto = createContext<Locale>(DEFAULT_LOCALE);
 
 export function ProveedorDeIdioma({
   locale,
@@ -22,7 +22,7 @@ export function ProveedorDeIdioma({
   return <Contexto.Provider value={locale}>{children}</Contexto.Provider>;
 }
 
-export function useTraductor(): Traductor {
+export function useTraductor(): Translator {
   const locale = useContext(Contexto);
-  return useMemo(() => crearTraductor(locale), [locale]);
+  return useMemo(() => createTranslator(locale), [locale]);
 }

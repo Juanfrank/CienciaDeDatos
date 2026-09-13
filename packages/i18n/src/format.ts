@@ -11,7 +11,7 @@
  * lo que obliga a rehacer el catalogo entero cuando entra el tercer idioma.
  */
 
-export type ParametrosDeMensaje = Record<string, string | number>;
+export type MessageParameters = Record<string, string | number>;
 
 /** Un `{...}` de nivel superior dentro de `texto`, a partir de `desde`. */
 function argumento(content: string, desde: number): { inicio: number; fin: number } | null {
@@ -47,9 +47,9 @@ function opciones(body: string): Map<string, string> {
  * cadena con `{total}` a la vista dice que falta un parametro, y `undefined` en mitad de una
  * frase parece un dato.
  */
-export function formatearMensaje(
+export function formatMessage(
   mensaje: string,
-  parametros: ParametrosDeMensaje = {},
+  parameters: MessageParameters = {},
   locale = 'es',
 ): string {
   let salida = '';
@@ -66,7 +66,7 @@ export function formatearMensaje(
     const interior = mensaje.slice(block.inicio + 1, block.fin);
     const [crudo = '', tipo, ...resto] = interior.split(',');
     const nombre = crudo.trim();
-    const valor = parametros[nombre];
+    const valor = parameters[nombre];
 
     if (valor === undefined) {
       salida += mensaje.slice(block.inicio, block.fin + 1);
@@ -81,12 +81,12 @@ export function formatearMensaje(
         const casos = opciones(body);
         const n = Number(valor);
         const categoria = new Intl.PluralRules(locale).select(n);
-        const elegido = casos.get(`=${n}`) ?? casos.get(categoria) ?? casos.get('other') ?? '';
-        salida += formatearMensaje(elegido.replaceAll('#', String(n)), parametros, locale);
+        const chosen = casos.get(`=${n}`) ?? casos.get(categoria) ?? casos.get('other') ?? '';
+        salida += formatMessage(chosen.replaceAll('#', String(n)), parameters, locale);
       } else if (clase === 'select') {
         const casos = opciones(body);
-        const elegido = casos.get(String(valor)) ?? casos.get('other') ?? '';
-        salida += formatearMensaje(elegido, parametros, locale);
+        const chosen = casos.get(String(valor)) ?? casos.get('other') ?? '';
+        salida += formatMessage(chosen, parameters, locale);
       } else {
         salida += String(valor);
       }
