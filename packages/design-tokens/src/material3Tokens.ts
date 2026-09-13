@@ -208,6 +208,21 @@ export function variablesMaterial(tema: TemaMaterial): Record<string, string> {
     vars[`--md-sys-typescale-${rol}-line-height`] = estilo.lineHeight;
     vars[`--md-sys-typescale-${rol}-weight`] = String(estilo.weight);
     vars[`--md-sys-typescale-${rol}-tracking`] = estilo.tracking;
+    /*
+     * Y el rol COMPLETO, valido como abreviatura `font:`.
+     *
+     * La hoja de estilo lo escribe en trece sitios —`font: var(--md-sys-typescale-title-large)`—
+     * y esta variable no existia: `font` con un valor vacio es una declaracion invalida, asi que
+     * el navegador la descartaba entera y esos trece rotulos se quedaban con el tamano heredado.
+     * No fallaba nada visible, que es por lo que duro: un titulo con el tamano del cuerpo parece
+     * una decision de diseno.
+     *
+     * El orden es el que exige la abreviatura: grosor, tamano/interlineado y familia. El
+     * interletrado NO va dentro —no forma parte de `font`— y quien lo necesite sigue teniendo
+     * `--md-sys-typescale-<rol>-tracking`.
+     */
+    vars[`--md-sys-typescale-${rol}`] =
+      `${estilo.weight} ${estilo.size}/${estilo.lineHeight} ${tema.font.sans}`;
   }
 
   for (const [nombre, valor] of Object.entries(tema.shape)) {

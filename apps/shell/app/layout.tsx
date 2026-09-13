@@ -1,14 +1,16 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
 import {
+  comoThemeTokens,
   defaultIdentity,
-  defaultTheme,
-  temaClaro,
+  temaPorModo,
   toCssVariables,
   variablesMaterial,
+  type ModoDeColor,
 } from '@app/design-tokens';
 import { Cabecera } from '../src/components/Cabecera';
 import { obtenerSesion } from '../src/server/sesion';
+import { modoDeColor } from '../src/server/tema';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -40,8 +42,16 @@ const montserrat = Montserrat({
  * sobre el que esta escrita la interfaz, y los del tema derivado, que todavia usan unas cuantas
  * hojas de estilo y el paquete de exportacion. Salen del mismo sitio, asi que no pueden
  * discrepar; los segundos desapareceran cuando no quede nadie leyendolos.
+ *
+ * Los DOS se calculan desde el MISMO modo. Emitir los roles de MD3 en oscuro y los derivados en
+ * claro —que es lo que pasaria dejando `defaultTheme` fijo aqui— daria una pagina oscura con
+ * texto pensado para fondo blanco: el fallo de contraste mas facil de introducir y el mas dificil
+ * de atribuir, porque cada juego de variables esta bien por separado.
  */
-const variables = { ...variablesMaterial(temaClaro), ...toCssVariables(defaultTheme) };
+function variablesDelTema(modo: ModoDeColor): Record<string, string> {
+  const tema = temaPorModo(modo);
+  return { ...variablesMaterial(tema), ...toCssVariables(comoThemeTokens(tema)) };
+}
 
 /**
  * Cromo comun a toda la aplicacion: documento, tema y cabecera.
@@ -55,11 +65,18 @@ const variables = { ...variablesMaterial(temaClaro), ...toCssVariables(defaultTh
  * lo que protege las paginas: cada una exige su sesion por su cuenta.
  */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const sesion = await obtenerSesion();
+  const [sesion, modo] = await Promise.all([obtenerSesion(), modoDeColor()]);
 
+  /*
+   * `colorScheme` no es decorativo: es lo que hace que el navegador dibuje en oscuro lo que no
+   * pinta la hoja de estilo —barras de desplazamiento, casillas, desplegables nativos— y lo que
+   * evita una casilla blanca sobre una tarjeta oscura, que ademas de feo es un fallo de contraste.
+   */
   return (
-    <html lang="es" className={montserrat.variable}>
-      <body style={variables as React.CSSProperties}>
+    <html lang="es" className={montserrat.variable} data-tema={modo}>
+      <body
+        style={{ ...variablesDelTema(modo), colorScheme: modo === 'oscuro' ? 'dark' : 'light' } as React.CSSProperties}
+      >
         {sesion ? <Cabecera sesion={sesion} /> : null}
         {children}
       </body>
