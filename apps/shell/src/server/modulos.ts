@@ -1290,6 +1290,117 @@ export const modulosDemo: ModuleDefinition[] = [
         ],
       },
       {
+        pageId: 'p-detalle',
+        slug: 'detalle',
+        name: 'Etiquetas y tooltip',
+        items: [
+          {
+            id: 'det-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'det-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'titulo-de-seccion',
+                tituloDeSeccion: {
+                  texto: 'Que se rotula y que se lee al senalar',
+                  posicionDelTexto: 'izquierda',
+                  linea: 'derecha',
+                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'det-extremos',
+            position: { x: 0, y: 1, w: 6, h: 4 },
+            instance: {
+              instanceId: 'det-extremos',
+              objectId: 'lineas',
+              version: '1.1.0',
+              title: 'Solo el maximo y el minimo',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos'],
+              },
+              presentacion: {
+                subtitulo: 'La tercera opcion entre «todas» y «ninguna»',
+                leyenda: 'abajo',
+                etiquetasDeDato: { mostrar: true, soloExtremos: true },
+                ejes: { tituloY: 'Casos' },
+              },
+            },
+          },
+          {
+            id: 'det-todas',
+            position: { x: 6, y: 1, w: 6, h: 4 },
+            instance: {
+              instanceId: 'det-todas',
+              objectId: 'lineas',
+              version: '1.1.0',
+              title: 'Lo mismo, con todas',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos'],
+              },
+              presentacion: {
+                subtitulo: 'Con cuatro categorias cabe; con veinte, no',
+                leyenda: 'abajo',
+                etiquetasDeDato: { mostrar: true, posicion: 'encima' },
+                ejes: { tituloY: 'Casos' },
+              },
+            },
+          },
+          {
+            id: 'det-rotado',
+            position: { x: 0, y: 5, w: 6, h: 4 },
+            instance: {
+              instanceId: 'det-rotado',
+              objectId: 'barras',
+              version: '1.2.0',
+              title: 'Rotulos girados',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [DISTRITO, MATERIA],
+                measures: ['CasosPendientes'],
+              },
+              presentacion: {
+                subtitulo: 'En horizontal, los que no caben se esconden sin avisar',
+                leyenda: 'oculta',
+                ejes: { tituloY: 'Casos', rotarX: 45 },
+              },
+            },
+          },
+          {
+            id: 'det-tooltip',
+            position: { x: 6, y: 5, w: 6, h: 4 },
+            instance: {
+              instanceId: 'det-tooltip',
+              objectId: 'barras',
+              version: '1.2.0',
+              title: 'Apilado con total en el tooltip',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
+              },
+              presentacion: {
+                subtitulo: 'Senale una columna: la suma ya no hay que hacerla de cabeza',
+                leyenda: 'abajo',
+                apilado: 'apilado',
+                tooltip: { total: true, ordenarPorValor: true },
+                ejes: { tituloY: 'Casos' },
+              },
+            },
+          },
+        ],
+      },
+      {
         pageId: 'p-contenedores',
         slug: 'contenedores',
         name: 'Contenedores',

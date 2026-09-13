@@ -12,7 +12,9 @@ import {
   type ComparacionDeEmbudo,
   type EtiquetaCircular,
   type ModoDeApilado,
+  POSICIONES_DE_DATO,
   POSICIONES_DE_ETIQUETA,
+  etiquetasNormalizadas,
   TIPOS_DE_FORMATO,
   TIPOS_DE_SELECTOR,
   problemaDelPatron,
@@ -24,6 +26,7 @@ import {
   type FormatoDeNumero,
   type FormatosDelObjeto,
   type ModoDeLeyenda,
+  type PosicionDeDato,
   type PosicionDeEtiqueta,
   type TipoDeFormato,
   type ObjectInstance,
@@ -109,6 +112,9 @@ export function Presentacion({
    * cifra: el valor y la etiqueta que lo acompana.
    */
   const hayMedida = admite("formato") || admite("formatos");
+  // La forma anterior era un booleano; se normaliza una vez aqui para que el panel no tenga que
+  // preguntarse en cada control cual de las dos formas le ha llegado.
+  const etiquetas = etiquetasNormalizadas(p.etiquetasDeDato);
   const hayGrafico =
     admite("leyenda") || admite("etiquetasDeDato") || admite("orden") || admite("apilado");
   const esTarjeta = instance.objectId === "tarjeta-kpi";
@@ -368,16 +374,67 @@ export function Presentacion({
           ) : null}
 
           {admite("etiquetasDeDato") ? (
-            <label className="editor__interruptor">
-              <input
-                type="checkbox"
-                checked={p.etiquetasDeDato === true}
-                disabled={guardando}
-                data-testid={`${prueba}-etiquetas`}
-                onChange={(e) => poner({ etiquetasDeDato: e.target.checked })}
-              />{" "}
-              Cifra sobre cada barra o punto
-            </label>
+            <>
+              <label className="editor__interruptor">
+                <input
+                  type="checkbox"
+                  checked={etiquetas.mostrar === true}
+                  disabled={guardando}
+                  data-testid={`${prueba}-etiquetas`}
+                  // Se guarda como objeto en cuanto se toca, aunque venga de la forma antigua:
+                  // asi la posicion y «solo los extremos» tienen donde vivir desde el primer clic.
+                  onChange={(e) => poner({ etiquetasDeDato: { mostrar: e.target.checked } })}
+                />{" "}
+                Cifra sobre cada barra o punto
+              </label>
+
+              {etiquetas.mostrar ? (
+                <>
+                  <label className="formulario__campo">
+                    <span>Donde</span>
+                    <select
+                      value={etiquetas.posicion ?? "auto"}
+                      disabled={guardando}
+                      data-testid={`${prueba}-posicion-dato`}
+                      onChange={(e) =>
+                        poner({
+                          etiquetasDeDato: {
+                            ...etiquetas,
+                            posicion: e.target.value as PosicionDeDato,
+                          },
+                        })
+                      }
+                    >
+                      {POSICIONES_DE_DATO.map((pos) => (
+                        <option key={pos} value={pos}>
+                          {ETIQUETA_DE_POSICION[pos]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  {/*
+                    Con veinte categorias, «todas» es una maranha y «ninguna» obliga a leer el eje
+                    punto por punto. El maximo y el minimo son los dos por los que se mira un
+                    grafico, y rotular solo esos dos es la tercera opcion que faltaba.
+                  */}
+                  <label className="editor__interruptor">
+                    <input
+                      type="checkbox"
+                      checked={etiquetas.soloExtremos === true}
+                      disabled={guardando}
+                      data-testid={`${prueba}-solo-extremos`}
+                      onChange={(e) =>
+                        poner({
+                          etiquetasDeDato: { ...etiquetas, soloExtremos: e.target.checked },
+                        })
+                      }
+                    />{" "}
+                    Solo el maximo y el minimo de cada serie
+                  </label>
+                </>
+              ) : null}
+            </>
           ) : null}
 
           {admite("apilado") ? (
@@ -444,6 +501,37 @@ export function Presentacion({
               ) : null}
             </>
           ) : null}
+        </Seccion>
+      ) : null}
+
+      {admite("tooltip") ? (
+        <Seccion titulo="Tooltip" nivel={2} abierta={false} prueba={`${prueba}-tooltip`}>
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.tooltip?.total === true}
+              disabled={guardando}
+              data-testid={`${prueba}-tooltip-total`}
+              onChange={(e) => poner({ tooltip: { ...p.tooltip, total: e.target.checked } })}
+            />{" "}
+            Anadir el total de la categoria
+          </label>
+          {/*
+            En un apilado es el dato que casi siempre falta: el grafico ensena los trozos y la
+            suma hay que hacerla de cabeza, justo cuando se esta comparando una categoria con otra.
+          */}
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.tooltip?.ordenarPorValor === true}
+              disabled={guardando}
+              data-testid={`${prueba}-tooltip-orden`}
+              onChange={(e) =>
+                poner({ tooltip: { ...p.tooltip, ordenarPorValor: e.target.checked } })
+              }
+            />{" "}
+            Ordenar las filas de mayor a menor
+          </label>
         </Seccion>
       ) : null}
 
@@ -859,6 +947,35 @@ export function Presentacion({
             Vacio = automatico. Fijarlos es lo que hace comparables dos objetos de la misma medida,
             y tambien la forma mas facil de exagerar una diferencia.
           </span>
+
+          <label className="formulario__campo">
+            <span>Girar los rotulos del eje de categorias</span>
+            <select
+              value={String(p.ejes?.rotarX ?? 0)}
+              disabled={guardando}
+              data-testid={`${prueba}-rotar-x`}
+              onChange={(e) =>
+                poner({
+                  ejes: {
+                    ...p.ejes,
+                    rotarX: e.target.value === "0" ? undefined : Number(e.target.value),
+                  },
+                })
+              }
+            >
+              <option value="0">Horizontales</option>
+              <option value="30">30 grados</option>
+              <option value="45">45 grados</option>
+              <option value="90">Verticales</option>
+            </select>
+            {/*
+              Sin girar, ECharts esconde los rotulos que no caben y el grafico acaba ensenando una
+              de cada tres categorias sin decir que las demas siguen ahi. Girados se ven todas.
+            */}
+            <span className="campo__pista">
+              Con nombres largos, en horizontal el grafico esconde los que no caben.
+            </span>
+          </label>
         </Seccion>
       ) : null}
 
@@ -1230,6 +1347,13 @@ const ETIQUETA_DE_APILADO: Record<ModoDeApilado, string> = {
 
 /** Los ocho colores de serie del tema, por indice. El tema los da; aqui solo se eligen. */
 const COLORES_DE_PALETA = [0, 1, 2, 3, 4, 5, 6, 7];
+
+const ETIQUETA_DE_POSICION: Record<PosicionDeDato, string> = {
+  auto: "Automatica (segun el tipo de grafico)",
+  encima: "Encima",
+  debajo: "Debajo",
+  dentro: "Dentro de la barra",
+};
 
 const ETIQUETA_DE_COMPARACION: Record<ComparacionDeEmbudo, string> = {
   primero: "Contra la primera etapa (cuanto queda)",

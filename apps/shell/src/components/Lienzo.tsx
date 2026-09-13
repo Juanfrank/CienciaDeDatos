@@ -91,7 +91,12 @@ export default function Lienzo({
         titulo,
         ...(dimension ? { dimension } : {}),
         ...(presentacion?.leyenda ? { leyenda: presentacion.leyenda } : {}),
-        ...(presentacion?.etiquetasDeDato ? { etiquetasDeDato: true } : {}),
+        // Se pasa TAL CUAL: la forma anterior era un booleano y la nueva es un objeto, y quien
+        // normaliza es el constructor de opciones, en una sola funcion pura.
+        ...(presentacion?.etiquetasDeDato === undefined
+          ? {}
+          : { etiquetasDeDato: presentacion.etiquetasDeDato }),
+        ...(presentacion?.tooltip ? { tooltip: presentacion.tooltip } : {}),
         ...(presentacion?.ejes ? { ejes: presentacion.ejes } : {}),
         ...(presentacion?.apilado ? { apilado: presentacion.apilado } : {}),
         ...(presentacion?.circular ? { circular: presentacion.circular } : {}),

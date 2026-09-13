@@ -251,3 +251,86 @@ describe('limites del eje y color por serie', () => {
     expect(o.color).toEqual(['#2', '#2']);
   });
 });
+
+describe('etiquetas de dato: las tres opciones, no dos', () => {
+  const conEtiquetas = (
+    valor: unknown,
+    v = vm(['A'], [['x', 10], ['y', 50], ['z', 30]]),
+  ) => opciones({ etiquetasDeDato: valor, formatear: (n: number) => `${n} c` }, v);
+
+  it('la forma anterior —un booleano— se sigue leyendo', () => {
+    // Un modulo publicado antes de esto lleva `etiquetasDeDato: true` y tiene que dibujarse igual.
+    expect(conEtiquetas(true).series[0].label.show).toBe(true);
+    expect(conEtiquetas(false).series[0].label.show).toBe(false);
+  });
+
+  it('solo los extremos rotula el maximo y el minimo, y calla el resto', () => {
+    const etiqueta = conEtiquetas({ soloExtremos: true }).series[0].label.formatter;
+    expect(etiqueta({ value: 50, dataIndex: 1 })).toBe('50 c');
+    expect(etiqueta({ value: 10, dataIndex: 0 })).toBe('10 c');
+    expect(etiqueta({ value: 30, dataIndex: 2 })).toBe('');
+  });
+
+  it('un nulo no compite por ser el minimo: no es un numero', () => {
+    const o = conEtiquetas({ soloExtremos: true }, vm(['A'], [['x', 10], ['y', null], ['z', 30]]));
+    const etiqueta = o.series[0].label.formatter;
+    expect(etiqueta({ value: 10, dataIndex: 0 })).toBe('10 c');
+    expect(etiqueta({ value: 30, dataIndex: 2 })).toBe('30 c');
+  });
+
+  it('la posicion elegida manda sobre la que el tipo de grafico propone', () => {
+    expect(conEtiquetas({ posicion: 'dentro' }).series[0].label.position).toBe('inside');
+    // `auto` deja la del tipo: encima en columnas.
+    expect(conEtiquetas({ posicion: 'auto' }).series[0].label.position).toBe('top');
+  });
+});
+
+describe('tooltip', () => {
+  const dos = vm(['A', 'B'], [['x', 10, 30]]);
+  const params = [
+    { name: 'x', seriesName: 'A', value: 10, dataIndex: 0 },
+    { name: 'x', seriesName: 'B', value: 30, dataIndex: 0 },
+  ];
+
+  it('sin nada que anadir se deja el de ECharts, que ya formatea igual', () => {
+    expect(opciones({}, dos).tooltip.formatter).toBeUndefined();
+  });
+
+  it('el total es la suma de las series de ESA categoria', () => {
+    const o = opciones({ tooltip: { total: true } }, dos);
+    expect(o.tooltip.formatter(params)).toContain('Total: 40');
+  });
+
+  it('y al 100 % el total sale del modelo, no del porcentaje', () => {
+    /*
+     * Al 100 % el valor que ECharts pasa es la parte, no la cifra: sumando eso, el total de toda
+     * categoria seria 100.
+     */
+    const o = opciones({ apilado: 'porcentaje', tooltip: { total: true } }, dos);
+    const texto = o.tooltip.formatter([
+      { name: 'x', seriesName: 'A', value: 25, dataIndex: 0 },
+      { name: 'x', seriesName: 'B', value: 75, dataIndex: 0 },
+    ]);
+    expect(texto).toContain('Total: 40');
+    expect(texto).toContain('25.0 %');
+  });
+
+  it('ordenar pone la serie mayor arriba', () => {
+    const o = opciones({ tooltip: { ordenarPorValor: true } }, dos);
+    const texto: string = o.tooltip.formatter(params);
+    expect(texto.indexOf('B:')).toBeLessThan(texto.indexOf('A:'));
+  });
+});
+
+describe('giro de los rotulos del eje', () => {
+  it('sin girar, ECharts esconde los que no caben', () => {
+    expect(opciones().xAxis.axisLabel.hideOverlap).toBe(true);
+    expect(opciones().xAxis.axisLabel.rotate).toBeUndefined();
+  });
+
+  it('girados, se dejan de esconder: quien los gira lo hace para verlos todos', () => {
+    const o = opciones({ ejes: { rotarX: 45 } });
+    expect(o.xAxis.axisLabel.rotate).toBe(45);
+    expect(o.xAxis.axisLabel.hideOverlap).toBe(false);
+  });
+});

@@ -1,6 +1,7 @@
 import {
   MAX_RADIO_INTERIOR,
   MAX_REFERENCIAS,
+  etiquetasNormalizadas,
   type ConfiguracionCircular,
   type ComparacionDeEmbudo,
   type ConfiguracionDeCascada,
@@ -9,7 +10,10 @@ import {
   type ConfiguracionDeEjes,
   type ConfiguracionDeMedidor,
   type EstiloDeReferencia,
+  type ConfiguracionDeEtiquetas,
+  type ConfiguracionDeTooltip,
   type EtiquetaCircular,
+  type EtiquetasDeDato,
   type LineaDeReferencia,
   type ModoDeApilado,
   type ModoDeLeyenda,
@@ -45,8 +49,9 @@ export interface OpcionesDeGrafico {
   /** Nombre de la dimension del eje, para el rotulo accesible. */
   dimension?: string;
   leyenda?: ModoDeLeyenda;
-  /** La cifra sobre cada barra o punto. */
-  etiquetasDeDato?: boolean;
+  /** La cifra sobre cada barra o punto. `true` es la forma anterior y se sigue admitiendo. */
+  etiquetasDeDato?: EtiquetasDeDato;
+  tooltip?: ConfiguracionDeTooltip;
   ejes?: ConfiguracionDeEjes;
   /**
    * Como formatear una cifra de la serie `s`.
@@ -119,19 +124,51 @@ function tooltipDe(o: OpcionesDeGrafico) {
     textStyle: { color: o.paleta.texto },
     extraCssText: 'box-shadow: none;',
   };
-  if (o.apilado !== 'porcentaje') return comun;
+
+  const porcentaje = o.apilado === 'porcentaje';
+  const conTotal = o.tooltip?.total === true;
+  const ordenar = o.tooltip?.ordenarPorValor === true;
+  // Sin nada que anadir, se deja el tooltip de ECharts: formatea igual y no cuesta nada.
+  if (!porcentaje && !conTotal && !ordenar) return comun;
 
   return {
     ...comun,
     formatter: (params: { name: string; seriesName: string; value: number; dataIndex: number }[]) => {
       const punto = params[0];
       if (!punto) return '';
+
+      /*
+       * Se vuelve al MODELO para cada fila, en vez de usar el valor que ECharts pasa.
+       *
+       * Al 100 % ese valor es el porcentaje, no la cifra, y el total de una categoria seria
+       * siempre 100. El modelo es de donde salieron los dos.
+       */
+      const crudoDe = (nombreDeSerie: string, i: number) =>
+        o.vm.points[i]?.values[o.vm.series.indexOf(nombreDeSerie)] ?? null;
+      const formatear = (n: number, serie: string) =>
+        o.formatear?.(n, o.vm.series.indexOf(serie)) ?? String(n);
+
       const filas = params.map((p) => {
-        const crudo = o.vm.points[p.dataIndex]?.values[o.vm.series.indexOf(p.seriesName)] ?? null;
-        const cifra = crudo === null ? '—' : (o.formatear?.(crudo, o.vm.series.indexOf(p.seriesName)) ?? String(crudo));
-        return `${p.seriesName}: ${p.value.toFixed(1)} % (${cifra})`;
+        const crudo = crudoDe(p.seriesName, p.dataIndex);
+        const cifra = crudo === null ? '—' : formatear(crudo, p.seriesName);
+        return {
+          orden: crudo ?? Number.NEGATIVE_INFINITY,
+          texto: porcentaje
+            ? `${p.seriesName}: ${p.value.toFixed(1)} % (${cifra})`
+            : `${p.seriesName}: ${cifra}`,
+        };
       });
-      return [punto.name, ...filas].join('<br/>');
+      // Los nulos quedan al final: no compiten por «el mayor», porque no son un numero.
+      if (ordenar) filas.sort((a, b) => b.orden - a.orden);
+
+      const lineas = [punto.name, ...filas.map((f) => f.texto)];
+      if (conTotal) {
+        const suma = params.reduce((total, p) => total + (crudoDe(p.seriesName, p.dataIndex) ?? 0), 0);
+        // El total usa el formato de la PRIMERA serie: es una suma de las medidas apiladas, que
+        // por construccion comparten unidad; usar otro dejaria «2,216» junto a «2216».
+        lineas.push(`Total: ${formatear(suma, o.vm.series[0] ?? '')}`);
+      }
+      return lineas.join('<br/>');
     },
   };
 }
@@ -338,6 +375,30 @@ function nucleo(o: OpcionesDeGrafico, conDecal: boolean) {
  * meterlos en el nucleo obligaria a los otros a borrarlos, y borrar una opcion que el padre puso
  * es justo la forma de que una de ellas se cuele algun dia.
  */
+/**
+ * Empuja hacia dentro las cifras de los puntos que TOCAN el borde.
+ *
+ * En una linea, `boundaryGap: false` pone el primer punto justo sobre el eje —que es lo correcto
+ * para una serie temporal— y su cifra, centrada encima, se dibujaba pisando el rotulo de la
+ * escala: «400312» donde deberia leerse «400» y «312».
+ *
+ * Ampliar el margen del area no sirve: con `containLabel`, ECharts lo recalcula para que quepan
+ * los rotulos y se come lo que se le anada. Lo que si funciona es mover ESA etiqueta, que es lo
+ * que `labelLayout` permite hacer sabiendo su indice. Solo se mueven la primera y la ultima: son
+ * las unicas que caen fuera del area.
+ */
+function desplazarEtiquetasDelBorde(o: OpcionesDeGrafico) {
+  if (etiquetasNormalizadas(o.etiquetasDeDato).mostrar !== true) return {};
+  const ultimo = o.vm.points.length - 1;
+  return {
+    labelLayout: (p: { dataIndex: number }) => {
+      if (p.dataIndex === 0) return { dx: 16 };
+      if (p.dataIndex === ultimo) return { dx: -16 };
+      return {};
+    },
+  };
+}
+
 function base(o: OpcionesDeGrafico) {
   const { legend, margen } = leyendaDe(o);
   return {
@@ -362,23 +423,74 @@ function base(o: OpcionesDeGrafico) {
  * —«2216»— mientras la tabla de datos adjunta dice «2,216 casos», y el mismo numero en la misma
  * tarjeta se leeria de dos formas.
  */
-const etiquetaDeSerie = (o: OpcionesDeGrafico, s: number, posicion: string) =>
-  o.etiquetasDeDato
-    ? {
-        show: true,
-        position: posicion,
-        color: o.paleta.texto,
-        fontSize: 11,
-        formatter: (p: { value: number }) =>
-          o.formatear ? o.formatear(p.value, s) : String(p.value),
-      }
-    : { show: false };
+const POSICION_ECHARTS: Record<string, string | undefined> = {
+  auto: undefined,
+  encima: 'top',
+  debajo: 'bottom',
+  dentro: 'inside',
+};
+
+/**
+ * Los indices del maximo y el minimo de una serie.
+ *
+ * Son los dos puntos por los que se mira un grafico, y con veinte categorias son los dos unicos
+ * que se pueden rotular sin que el resultado sea una maranha. Los nulos no compiten: «no hay
+ * respuesta» no es un minimo.
+ */
+function extremosDe(o: OpcionesDeGrafico, s: number): Set<number> {
+  let masAlto: number | undefined;
+  let masBajo: number | undefined;
+  o.vm.points.forEach((punto, i) => {
+    const valor = punto.values[s];
+    if (valor === null || valor === undefined) return;
+    if (masAlto === undefined || valor > (o.vm.points[masAlto]?.values[s] ?? 0)) masAlto = i;
+    if (masBajo === undefined || valor < (o.vm.points[masBajo]?.values[s] ?? 0)) masBajo = i;
+  });
+  return new Set([masAlto, masBajo].filter((i): i is number => i !== undefined));
+}
+
+const etiquetaDeSerie = (o: OpcionesDeGrafico, s: number, posicion: string) => {
+  const config: ConfiguracionDeEtiquetas = etiquetasNormalizadas(o.etiquetasDeDato);
+  if (config.mostrar !== true) return { show: false };
+
+  const elegida = POSICION_ECHARTS[config.posicion ?? 'auto'] ?? posicion;
+  const extremos = config.soloExtremos ? extremosDe(o, s) : undefined;
+
+  return {
+    show: true,
+    position: elegida,
+    color: o.paleta.texto,
+    fontSize: 11,
+    /*
+     * «Solo los extremos» se resuelve en el FORMATTER, devolviendo cadena vacia.
+     *
+     * La alternativa seria apagar la etiqueta punto a punto en los datos, y eso obliga a que cada
+     * constructor convierta su array de valores en un array de objetos: cuatro sitios donde el
+     * dato deja de ser un numero suelto, y cuatro oportunidades de que uno se quede atras.
+     */
+    formatter: (p: { value: number; dataIndex: number }) => {
+      if (extremos && !extremos.has(p.dataIndex)) return '';
+      return o.formatear ? o.formatear(p.value, s) : String(p.value);
+    },
+  };
+};
 
 const ejeCategoria = (o: OpcionesDeGrafico) => ({
   type: 'category' as const,
   show: o.ejes?.mostrarX !== false,
   data: o.vm.points.map((p) => p.label),
-  axisLabel: { color: o.paleta.textoAtenuado, hideOverlap: true },
+  axisLabel: {
+    color: o.paleta.textoAtenuado,
+    /*
+     * Girados, se dejan de esconder.
+     *
+     * `hideOverlap` es lo correcto con los rotulos en horizontal —solapados no se lee ninguno—
+     * pero esconde sin avisar: el grafico acaba ensenando una de cada tres categorias como si las
+     * demas no existieran. Quien gira los rotulos lo hace justamente para verlas todas.
+     */
+    hideOverlap: !o.ejes?.rotarX,
+    ...(o.ejes?.rotarX ? { rotate: o.ejes.rotarX } : {}),
+  },
   axisLine: { lineStyle: { color: o.paleta.linea } },
   axisTick: { show: false },
   /*
@@ -559,6 +671,7 @@ export function opcionesDeArea(o: OpcionesDeGrafico): Record<string, unknown> {
        */
       areaStyle: o.apilado && o.apilado !== 'ninguno' ? {} : { opacity: 0.25 },
       label: etiquetaDeSerie(o, s, 'top'),
+      ...desplazarEtiquetasDelBorde(o),
       ...(s === 0 ? referenciasDe(o) : {}),
       emphasis: { focus: 'series' },
     })),
@@ -580,6 +693,7 @@ export function opcionesDeLineas(o: OpcionesDeGrafico): Record<string, unknown> 
       symbolSize: 6,
       lineStyle: { width: 2 },
       label: etiquetaDeSerie(o, s, 'top'),
+      ...desplazarEtiquetasDelBorde(o),
       ...(s === 0 ? referenciasDe(o) : {}),
       emphasis: { focus: 'series' },
     })),

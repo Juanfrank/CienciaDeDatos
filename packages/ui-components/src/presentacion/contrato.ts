@@ -92,6 +92,14 @@ export interface ConfiguracionDeEjes {
    */
   minimoY?: number;
   maximoY?: number;
+  /**
+   * Cuanto se giran los rotulos del eje de categorias.
+   *
+   * Con nombres largos, ECharts esconde los que no caben —`hideOverlap`— y el grafico acaba
+   * enseñando una de cada tres categorias sin decir que las demas siguen ahi. Girarlos es lo que
+   * permite verlas todas; 0 es horizontal y 90 es vertical.
+   */
+  rotarX?: number;
 }
 
 /**
@@ -358,6 +366,56 @@ export function estiloDeTexto(estilo: EstiloDeTexto | undefined): Record<string,
   return css;
 }
 
+/**
+ * ---- Etiquetas de dato ----
+ *
+ * Era un interruptor: la cifra sobre cada barra, o nada. Con veinte categorias, «todas» es una
+ * maranha ilegible y «ninguna» obliga a leer el eje punto por punto; las dos opciones son malas y
+ * no habia una tercera.
+ *
+ * `soloExtremos` es esa tercera: rotula solo el maximo y el minimo de cada serie, que son los dos
+ * puntos por los que se mira un grafico. Y la posicion existe porque en una linea la cifra encima
+ * del punto choca con la serie de arriba, y debajo no.
+ */
+export const POSICIONES_DE_DATO = ['auto', 'encima', 'debajo', 'dentro'] as const;
+export type PosicionDeDato = (typeof POSICIONES_DE_DATO)[number];
+
+export interface ConfiguracionDeEtiquetas {
+  mostrar?: boolean;
+  posicion?: PosicionDeDato;
+  /** Solo el maximo y el minimo de cada serie. Con muchas categorias es la unica opcion legible. */
+  soloExtremos?: boolean;
+}
+
+/**
+ * La forma anterior era un `boolean`, y lo sigue siendo para lo ya guardado.
+ *
+ * Un modulo publicado antes de esto lleva `etiquetasDeDato: true`, y tiene que seguir
+ * dibujandose igual. Se normaliza al leer, en una funcion pura, en vez de migrar los datos: no
+ * hay script que acordarse de ejecutar ni dos formas conviviendo en el almacen.
+ */
+export type EtiquetasDeDato = boolean | ConfiguracionDeEtiquetas;
+
+export function etiquetasNormalizadas(valor: EtiquetasDeDato | undefined): ConfiguracionDeEtiquetas {
+  if (valor === undefined) return { mostrar: false };
+  if (typeof valor === 'boolean') return { mostrar: valor };
+  return { mostrar: true, ...valor };
+}
+
+/**
+ * ---- Tooltip ----
+ *
+ * Lo que se lee al senalar un punto. En un apilado, el dato que falta casi siempre es el TOTAL de
+ * la categoria: el grafico ensena los trozos y la suma hay que hacerla de cabeza, justo cuando se
+ * esta comparando una categoria con otra.
+ */
+export interface ConfiguracionDeTooltip {
+  /** Una ultima fila con la suma de las series de esa categoria. */
+  total?: boolean;
+  /** Ordenar las filas de mayor a menor en vez de por el orden de las series. */
+  ordenarPorValor?: boolean;
+}
+
 /** Donde va la etiqueta respecto del valor en una tarjeta. */
 export const POSICIONES_DE_ETIQUETA = ['encima', 'debajo'] as const;
 export type PosicionDeEtiqueta = (typeof POSICIONES_DE_ETIQUETA)[number];
@@ -407,8 +465,14 @@ export interface PresentacionDeObjeto {
    */
   formatos?: FormatosDelObjeto;
   leyenda?: ModoDeLeyenda;
-  /** La cifra encima de cada barra o punto, con el formato de SU medida. */
-  etiquetasDeDato?: boolean;
+  /**
+   * La cifra encima de cada barra o punto, con el formato de SU medida.
+   *
+   * `true`/`false` es la forma anterior y se sigue leyendo; la forma nueva anade posicion y el
+   * modo «solo los extremos».
+   */
+  etiquetasDeDato?: EtiquetasDeDato;
+  tooltip?: ConfiguracionDeTooltip;
   ejes?: ConfiguracionDeEjes;
   orden?: OrdenDeCategorias;
   apilado?: ModoDeApilado;
@@ -461,6 +525,7 @@ export const CLAVES_DE_PRESENTACION = [
   'combinado',
   'referencias',
   'coloresDeSerie',
+  'tooltip',
   'embudo',
   'cascada',
   'medidor',
@@ -640,6 +705,12 @@ export function validarPresentacion(
    * pasar el error y dibujaria un grafico que nadie pidio; 4.2 manda marcar.
    */
   const ejes = presentacion.ejes;
+  if (ejes?.rotarX !== undefined && (ejes.rotarX < -90 || ejes.rotarX > 90)) {
+    problemas.push({
+      clave: 'ejes.rotarX',
+      problema: `El giro va de -90 a 90 grados, y ${ejes.rotarX} no esta en ese rango.`,
+    });
+  }
   if (ejes?.minimoY !== undefined && ejes.maximoY !== undefined && ejes.minimoY >= ejes.maximoY) {
     problemas.push({
       clave: 'ejes.maximoY',

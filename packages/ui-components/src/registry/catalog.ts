@@ -154,6 +154,7 @@ const PRESENTACION_DE_GRAFICO = presenta(
   'apilado',
   'referencias',
   'coloresDeSerie',
+  'tooltip',
 );
 
 /**
@@ -516,6 +517,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           'combinado',
           'referencias',
           'coloresDeSerie',
+          'tooltip',
         ),
       ),
     ],
