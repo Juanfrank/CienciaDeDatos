@@ -34,7 +34,7 @@ test('el modo se pide con una cookie y llega al documento', async ({ page }) => 
    * la clase de prueba que aprueba por coincidencia.
    */
   await page.goto('/m/composicion/familia');
-  await expect(page.locator('html')).toHaveAttribute('data-tema', 'dark');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
   const fondo = await page.evaluate(() =>
     getComputedStyle(document.body).getPropertyValue('--md-sys-color-surface').trim(),
@@ -141,7 +141,7 @@ test.describe('el resto de la aplicacion en dark', () => {
     // El tema se aplica en el layout raiz, que envuelve tambien lo que se ve sin haber entrado:
     // si el modo dependiera de la sesion, esta pantalla saldria en claro.
     await page.goto('/restablecer');
-    await expect(page.locator('html')).toHaveAttribute('data-tema', 'dark');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.getByTestId('restablecer-enviar')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);

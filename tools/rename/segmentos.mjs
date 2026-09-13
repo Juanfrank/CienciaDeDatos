@@ -10,14 +10,50 @@
  *   comentario  solo los compuestos, que no se confunden con prosa
  *   cadena      solo lo que es un contrato de interfaz: testids y clases CSS
  *
- * El escaner es lo bastante fiel para este uso: reconoce comentarios de linea y de bloque,
- * comillas simples, dobles y plantillas —con sus interpolaciones, que vuelven a ser codigo— y
- * el escape con barra invertida. No distingue una expresion regular de una division, que es el
- * caso ambiguo clasico; no importa aqui, porque dentro de una expresion regular no hay
- * identificadores que renombrar.
+ * Reconoce comentarios de linea y de bloque, comillas simples, dobles y plantillas —con sus
+ * interpolaciones, que vuelven a ser codigo—, el escape con barra invertida y las EXPRESIONES
+ * REGULARES, que cuentan como cadena.
+ *
+ * Las expresiones regulares hacen falta: una prueba comprueba un mensaje con
+ * `/no existen en el esquema activo/`, y tratando eso como codigo el renombrado convirtio
+ * `esquema` en `scheme` dentro de la afirmacion, que paso a comprobar un texto que el servidor
+ * nunca dice. Distinguir una expresion regular de una division es el caso ambiguo clasico de
+ * JavaScript; se resuelve con la heuristica de siempre: tras `( , = : [ ! & | ? { } ;` o al
+ * principio de una linea, una barra abre expresion regular.
  */
 
 /** @typedef {{ tipo: 'codigo' | 'comentario' | 'cadena', texto: string }} Segmento */
+
+const ANTES_DE_EXPRESION = new Set(['(', ',', '=', ':', '[', '!', '&', '|', '?', '{', '}', ';']);
+
+/** Si la barra en `i` abre una expresion regular y no es una division. */
+function abreExpresion(fuente, i) {
+  for (let j = i - 1; j >= 0; j--) {
+    const c = fuente[j];
+    if (c === ' ' || c === '\t') continue;
+    if (c === '\n') return true;
+    return ANTES_DE_EXPRESION.has(c);
+  }
+  return true;
+}
+
+/** El indice de la barra que cierra la expresion regular abierta en `i`, o -1. */
+function finDeExpresion(fuente, i) {
+  let enClase = false;
+  for (let j = i + 1; j < fuente.length; j++) {
+    const c = fuente[j];
+    if (c === '\\') { j++; continue; }
+    if (c === '\n') return -1;
+    if (c === '[') enClase = true;
+    else if (c === ']') enClase = false;
+    else if (c === '/' && !enClase) {
+      let k = j + 1;
+      while (k < fuente.length && /[dgimsuvy]/.test(fuente[k])) k++;
+      return k - 1;
+    }
+  }
+  return -1;
+}
 
 /** @returns {Segmento[]} */
 export function segmentar(fuente) {
@@ -59,6 +95,15 @@ export function segmentar(fuente) {
         cerrar(i, 'cadena');
         i += 1;
         continue;
+      }
+      if (fuente[i] === '/' && abreExpresion(fuente, i)) {
+        const fin = finDeExpresion(fuente, i);
+        if (fin !== -1) {
+          cerrar(i, 'cadena');
+          i = fin + 1;
+          cerrar(i, 'codigo');
+          continue;
+        }
       }
       if (fuente[i] === '}' && plantillas.length > 0) {
         // Se cierra una interpolacion: se vuelve a la plantilla que la contenia.

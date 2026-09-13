@@ -51,6 +51,21 @@ describe('segmentar', () => {
     expect(unir(segmentar(fuente))).toBe(fuente);
   });
 
+  it('una expresion regular es cadena, no codigo', () => {
+    // Una prueba comprueba un mensaje con `/no existen en el esquema activo/`. Tratado como
+    // codigo, el renombrado convierte `esquema` en `scheme` dentro de la afirmacion, que pasa a
+    // comprobar un texto que el servidor nunca dice.
+    expect(tipos('expect(x).toMatch(/no existe el esquema/);')).toEqual([
+      'codigo:expect(x).toMatch(',
+      'cadena:/no existe el esquema/',
+      'codigo:);',
+    ]);
+  });
+
+  it('una division no se confunde con una expresion regular', () => {
+    expect(tipos('const r = a / b / c;')).toEqual(['codigo:const r = a / b / c;']);
+  });
+
   it('un comentario de bloque sin cerrar no se come el resto en silencio', () => {
     // Devuelve lo que hay, y sigue reconstruyendo: un archivo mal formado no debe corromperse.
     const fuente = 'const a = 1;\n/* sin cerrar';

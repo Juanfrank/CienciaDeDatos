@@ -29,6 +29,21 @@ const ADJETIVOS = new Set(GLOSARIO['_adjetivos']);
 const SINGULAR = GLOSARIO['_singular'];
 
 /**
+ * Palabras que no pueden ser un identificador.
+ *
+ * `nueva` traduce a `new`, y `const new = …` no es JavaScript. El traductor devuelve `null` en
+ * ese caso: el nombre se queda en espanol y se decide a mano, que es mejor que producir un
+ * archivo que ni siquiera se analiza.
+ */
+const RESERVADAS = new Set([
+  'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do',
+  'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'import',
+  'in', 'instanceof', 'new', 'null', 'return', 'super', 'switch', 'this', 'throw', 'true', 'try',
+  'typeof', 'var', 'void', 'while', 'with', 'yield', 'let', 'static', 'await', 'async',
+  'implements', 'interface', 'package', 'private', 'protected', 'public', 'arguments', 'eval',
+]);
+
+/**
  * Lo que NO se renombra, aunque este en espanol.
  *
  * Son valores que se SERIALIZAN: viven dentro de modulos ya publicados, dentro del cache o
@@ -125,7 +140,8 @@ export function traducir(identificador) {
   const planas = ordenadas.flatMap((p) => palabras(p));
   const atributivas = planas.map((p, i) => (i < planas.length - 1 ? (SINGULAR[p] ?? p) : p));
   const propuesto = recomponer(atributivas, estilo(identificador));
-  return propuesto === identificador ? null : propuesto;
+  if (propuesto === identificador) return null;
+  return RESERVADAS.has(propuesto) ? null : propuesto;
 }
 
 /* ── Extraccion ──────────────────────────────────────────────────────────────────────────── */
@@ -260,6 +276,29 @@ function proponer(raiz) {
   }
 
   /*
+   * El nombre de destino no puede EXISTIR YA en el repositorio.
+   *
+   * `porId` traduce a `id`, y en el archivo donde vivia habia un parametro `id`: el renombrado
+   * produjo `id.get(id)`, que compila —los dos son cadenas— y esta mal. El typecheck no lo ve y
+   * las pruebas tampoco, porque el mapa queda sin usar y el resultado es siempre nulo.
+   *
+   * Es la peor clase de fallo de este trabajo: silencioso. Por eso se comprueba contra todos los
+   * identificadores que ya existen, no solo contra los otros destinos propuestos.
+   */
+  const existentes = new Set();
+  for (const ruta of rutasDe("'*.ts' '*.tsx' '*.mts'")) {
+    if (ruta.startsWith('tools/rename/')) continue;
+    declaradosEn(readFileSync(ruta, 'utf8')).forEach((n) => existentes.add(n));
+  }
+  const ocupados = {};
+  for (const [viejo, nuevo] of Object.entries(identificadores)) {
+    if (existentes.has(nuevo)) {
+      ocupados[viejo] = nuevo;
+      delete identificadores[viejo];
+    }
+  }
+
+  /*
    * Dos nombres distintos no pueden acabar en el mismo.
    *
    * `tema` y `temaDe` traducen los dos a `theme`, y en el mismo ambito eso no compila. Se
@@ -282,6 +321,7 @@ function proponer(raiz) {
     interfaz,
     archivos,
     colisiones,
+    ocupados,
     ambiguos,
     sinGlosario: [...sinGlosario].sort(),
   };
@@ -393,6 +433,25 @@ if (orden === '--proponer') {
   const { tocados, sustituciones } = aplicar(plan);
   const movidos = moverArchivos(plan.archivos ?? {});
   console.log(`${sustituciones} sustituciones en ${tocados} archivos; ${movidos} archivos movidos`);
+
+  /*
+   * Se comprueba que lo escrito SIGUE SIENDO analizable.
+   *
+   * Un renombrado puede producir un archivo que no es JavaScript —una palabra reservada, un
+   * nombre que ya existia en ese ambito— y eso no lo ve el typecheck si nx replica un resultado
+   * cacheado. El analizador es barato y falla en el sitio, no tres pasos mas adelante.
+   */
+  const rotos = execSync(
+    "npx tsc --noEmit --allowJs false --skipLibCheck --module esnext --target es2022 " +
+      "--moduleResolution bundler --jsx preserve --noResolve $(git ls-files '*.ts' '*.tsx') " +
+      "2>&1 | grep -E 'error TS(1[0-9]{3}|2451)' | head -10 || true",
+    { shell: '/bin/bash' },
+  ).toString().trim();
+  if (rotos) {
+    console.error('SINTAXIS ROTA tras aplicar:');
+    console.error(rotos);
+    process.exit(3);
+  }
 } else if (orden === '--traducir') {
   console.log(traducir(argumento) ?? '(sin traduccion)');
 } else {

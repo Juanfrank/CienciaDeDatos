@@ -111,7 +111,7 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
       },
     });
     expect(respuesta.status()).toBe(422);
-    expect((await respuesta.json()).error).toMatch(/no existen en el scheme activo/);
+    expect((await respuesta.json()).error).toMatch(/no existen en el esquema activo/);
   });
 
   test('el editor solo ofrece dimensiones del esquema, no un campo de texto libre', async ({ page }) => {

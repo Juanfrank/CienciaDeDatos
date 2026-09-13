@@ -141,10 +141,10 @@ describe('LocalIdentityProvider (4.7.2)', () => {
 
     it('al cambiar la contraseña desplaza el historial y desbloquea la cuenta', async () => {
       const record = await crearCuenta({ failedAttempts: 4, lockedUntil: ahora + 1000 });
-      const new = await provider.setPassword(record, 'Audiencia#2027$Este');
-      expect(new.passwordHistory).toContain(record.passwordHash);
-      expect(new.failedAttempts).toBe(0);
-      expect(new.lockedUntil).toBeUndefined();
+      const updated = await provider.setPassword(record, 'Audiencia#2027$Este');
+      expect(updated.passwordHistory).toContain(record.passwordHash);
+      expect(updated.failedAttempts).toBe(0);
+      expect(updated.lockedUntil).toBeUndefined();
     });
   });
 
