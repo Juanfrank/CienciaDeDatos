@@ -150,28 +150,28 @@ describe('validarAgregacion: lo que no se puede guardar', () => {
   it('un promedio sobre un dataset YA agrupado se rechaza', () => {
     const problems = validarAgregacion({
       ...base,
-      agregaciones: ['promedio'],
-      grano: 'preagregado',
+      aggregations: ['promedio'],
+      dataGrain: 'preagregado',
     });
     expect(problems).toHaveLength(1);
-    expect(problems[0]?.problema).toMatch(/ya agrupado/);
+    expect(problems[0]?.issue).toMatch(/ya agrupado/);
   });
 
   it('el mismo promedio sobre grano atomico se acepta', () => {
-    expect(validarAgregacion({ ...base, agregaciones: ['promedio'], grano: 'atomico' })).toEqual([]);
+    expect(validarAgregacion({ ...base, aggregations: ['promedio'], dataGrain: 'atomico' })).toEqual([]);
   });
 
   it('las aditivas se aceptan sobre cualquier grano', () => {
     for (const aggregation of ['suma', 'minimo', 'maximo'] as const) {
       expect(
-        validarAgregacion({ ...base, agregaciones: [aggregation], grano: 'preagregado' }),
+        validarAgregacion({ ...base, aggregations: [aggregation], dataGrain: 'preagregado' }),
       ).toEqual([]);
     }
   });
 
   it('una medida ya calculada por la fuente se rechaza en cuanto el objeto colapsa', () => {
     expect(
-      validarAgregacion({ ...base, agregaciones: ['ninguna'], grano: 'atomico' }),
+      validarAgregacion({ ...base, aggregations: ['ninguna'], dataGrain: 'atomico' }),
     ).toHaveLength(1);
   });
 
@@ -179,9 +179,9 @@ describe('validarAgregacion: lo que no se puede guardar', () => {
     expect(
       validarAgregacion({
         measures: ['DiasResolucion'],
-        agregaciones: ['ninguna'],
+        aggregations: ['ninguna'],
         colapsa: false,
-        grano: 'preagregado',
+        dataGrain: 'preagregado',
       }),
     ).toEqual([]);
   });
@@ -194,7 +194,7 @@ describe('agregacionesPosibles: lo que el editor puede OFRECER', () => {
    * peor, al reves: prohibiendo en el desplegable algo que si se puede.
    */
   it('sobre grano preagregado solo ofrece las aditivas', () => {
-    expect(agregacionesPosibles({ colapsa: true, grano: 'preagregado' })).toEqual([
+    expect(agregacionesPosibles({ colapsa: true, dataGrain: 'preagregado' })).toEqual([
       'suma',
       'minimo',
       'maximo',
@@ -202,27 +202,27 @@ describe('agregacionesPosibles: lo que el editor puede OFRECER', () => {
   });
 
   it('sobre grano atomico ofrece todas menos «sin resumir»', () => {
-    const posibles = agregacionesPosibles({ colapsa: true, grano: 'atomico' });
+    const posibles = agregacionesPosibles({ colapsa: true, dataGrain: 'atomico' });
     expect(posibles).toContain('promedio');
     expect(posibles).toContain('recuento-distinto');
     expect(posibles).not.toContain('ninguna');
   });
 
   it('sin colapso las ofrece todas: el objeto no combina nada', () => {
-    expect(agregacionesPosibles({ colapsa: false, grano: 'preagregado' })).toHaveLength(7);
+    expect(agregacionesPosibles({ colapsa: false, dataGrain: 'preagregado' })).toHaveLength(7);
   });
 
   it('lo que NO se ofrece es exactamente lo que la validacion rechaza', () => {
     // La invariante que impide que las dos reglas se separen.
-    for (const grano of ['atomico', 'preagregado'] as const) {
+    for (const dataGrain of ['atomico', 'preagregado'] as const) {
       for (const colapsa of [true, false]) {
-        const posibles = agregacionesPosibles({ colapsa, grano });
+        const posibles = agregacionesPosibles({ colapsa, dataGrain });
         for (const aggregation of AGGREGATIONS) {
           const problems = validarAgregacion({
             measures: ['m'],
-            agregaciones: [aggregation],
+            aggregations: [aggregation],
             colapsa,
-            grano,
+            dataGrain,
           });
           expect(problems.length === 0).toBe(posibles.includes(aggregation));
         }

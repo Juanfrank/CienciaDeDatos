@@ -34,8 +34,8 @@ export interface HealthProbeInput {
 
 const PEOR: Record<HealthStatus, number> = { ok: 0, degradado: 1, caido: 2 };
 
-function peorDe(resultados: HealthCheckResult[]): HealthStatus {
-  return resultados.reduce<HealthStatus>(
+function peorDe(results: HealthCheckResult[]): HealthStatus {
+  return results.reduce<HealthStatus>(
     (peor, r) => (PEOR[r.status] > PEOR[peor] ? r.status : peor),
     'ok',
   );

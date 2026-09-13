@@ -27,7 +27,7 @@ const datos: QueryResult = {
   generatedAt: '2026-03-01T10:00:00.000Z',
 };
 
-const instancia = (parcial: Partial<ObjectInstance>): ObjectInstance => ({
+const objectInstance = (parcial: Partial<ObjectInstance>): ObjectInstance => ({
   instanceId: 'i1',
   objectId: 'barras',
   version: '1.0.0',
@@ -38,7 +38,7 @@ const instancia = (parcial: Partial<ObjectInstance>): ObjectInstance => ({
 describe('proyectarObjeto', () => {
   it('una tarjeta KPI proyecta UNA fila, no las filas del dataset', () => {
     const proyectado = proyectarObjeto(
-      instancia({
+      objectInstance({
         objectId: 'tarjeta-kpi',
         title: 'Casos pendientes',
         binding: { datasetId: 'casos', dimensions: [], measures: ['CasosPendientes'] },
@@ -53,7 +53,7 @@ describe('proyectarObjeto', () => {
 
   it('una tarjeta con comparacion proyecta las dos medidas', () => {
     const proyectado = proyectarObjeto(
-      instancia({
+      objectInstance({
         objectId: 'tarjeta-kpi',
         title: 'Ingresados vs pendientes',
         binding: { datasetId: 'casos', dimensions: [], measures: ['CasosIngresados', 'CasosPendientes'] },
@@ -66,7 +66,7 @@ describe('proyectarObjeto', () => {
   });
 
   it('un grafico de barras proyecta una fila por categoria, ya agregada', () => {
-    const proyectado = proyectarObjeto(instancia({ objectId: 'barras' }), datos, ['suma']);
+    const proyectado = proyectarObjeto(objectInstance({ objectId: 'barras' }), datos, ['suma']);
 
     expect(proyectado.columns.map((c) => c.name)).toEqual([
       'DimTribunal.Distrito',
@@ -81,7 +81,7 @@ describe('proyectarObjeto', () => {
 
   it('una tabla conserva una columna POR dimension, no la etiqueta compuesta', () => {
     const proyectado = proyectarObjeto(
-      instancia({
+      objectInstance({
         objectId: 'tabla',
         binding: {
           datasetId: 'casos',
@@ -107,7 +107,7 @@ describe('proyectarObjeto', () => {
 
   it('una matriz proyecta el cruce con sus totales, como se ve en pantalla', () => {
     const proyectado = proyectarObjeto(
-      instancia({
+      objectInstance({
         objectId: 'matriz',
         binding: {
           datasetId: 'casos',
@@ -136,7 +136,7 @@ describe('proyectarObjeto', () => {
 
   it('un segmentador proyecta sus opciones, que es lo unico que muestra', () => {
     const proyectado = proyectarObjeto(
-      instancia({
+      objectInstance({
         objectId: 'segmentador',
         binding: { datasetId: 'casos', dimensions: [MATERIA], measures: [] },
       }),
@@ -149,7 +149,7 @@ describe('proyectarObjeto', () => {
   });
 
   it('conserva la procedencia y la marca de tiempo del dato (4.8)', () => {
-    const proyectado = proyectarObjeto(instancia({}), datos, ['suma']);
+    const proyectado = proyectarObjeto(objectInstance({}), datos, ['suma']);
     expect(proyectado.source).toBe('mock');
     expect(proyectado.generatedAt).toBe('2026-03-01T10:00:00.000Z');
   });
@@ -158,7 +158,7 @@ describe('proyectarObjeto', () => {
     // 4.2 pide marcar roto, no fallar en silencio ni reventar. Marcarlo es cosa de
     // validateBinding; aqui lo que importa es que proyectar siga siendo posible.
     const proyectado = proyectarObjeto(
-      instancia({ binding: { datasetId: 'casos', dimensions: [DISTRITO], measures: ['CampoRetirado'] } }),
+      objectInstance({ binding: { datasetId: 'casos', dimensions: [DISTRITO], measures: ['CampoRetirado'] } }),
       datos,
       ['suma', 'suma'],
     );

@@ -1,7 +1,7 @@
 import type { ExportRequest } from './types';
 
 /** Encabezado comun a los cuatro formatos. */
-export interface Encabezado {
+export interface Heading {
   titulo: string;
   lineas: string[];
   /** Procedencia (4.6) como DATO, no solo como texto dentro de `lineas`. */
@@ -10,7 +10,7 @@ export interface Encabezado {
   autor: string;
 }
 
-export function construirEncabezado(request: ExportRequest): Encabezado {
+export function buildHeading(request: ExportRequest): Heading {
   const lineas: string[] = [request.provenance.label];
 
   if (request.generatedAt) {

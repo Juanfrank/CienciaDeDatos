@@ -59,7 +59,7 @@ export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) =
     if (!o.result || ES_CONTROL.has(instance.objectId) || o.problems.length > 0) return [];
 
     const categoria = objectRegistry.get(instance.objectId)?.category;
-    const proyectado = proyectarObjeto(instance, o.result, o.agregaciones);
+    const proyectado = proyectarObjeto(instance, o.result, o.aggregations);
     const notas = notasDe(instance);
     return [
       {
@@ -67,7 +67,7 @@ export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) =
         result: proyectado,
         textos: textosDe(instance, proyectado),
         ...(notas.length > 0 ? { notas } : {}),
-        esGrafico: categoria !== undefined && CATEGORIAS_DE_GRAFICO.has(categoria),
+        isChart: categoria !== undefined && CATEGORIAS_DE_GRAFICO.has(categoria),
       },
     ];
   });
@@ -77,9 +77,9 @@ export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) =
   // que quien reciba el archivo no lea "cero filas" como "no hay casos".
   const aplicados: Record<string, string[]> = {};
   const descartados: string[] = [];
-  for (const [campo, valores] of Object.entries(cargado.appliedFilters)) {
-    if (valores.length > 0) aplicados[campo] = valores;
-    else if (campo in request.appliedFilters) descartados.push(campo);
+  for (const [fieldName, valores] of Object.entries(cargado.appliedFilters)) {
+    if (valores.length > 0) aplicados[fieldName] = valores;
+    else if (fieldName in request.appliedFilters) descartados.push(fieldName);
   }
 
   return {
@@ -140,13 +140,13 @@ function notasDe(instance: ObjectInstance): string[] {
   const p = instance.presentacion;
   const notas: string[] = [];
 
-  for (const linea of p?.referencias ?? []) {
-    const nombre = linea.etiqueta ?? 'Referencia';
-    notas.push(`${nombre}: ${linea.valor}`);
+  for (const line of p?.referencias ?? []) {
+    const nombre = line.etiqueta ?? 'Referencia';
+    notas.push(`${nombre}: ${line.valor}`);
   }
-  for (const regla of p?.condicional?.reglas ?? []) {
-    const alcance = regla.medida ? `${regla.medida} ` : '';
-    notas.push(`Marcado en pantalla: ${alcance}${describirRegla(regla)}`);
+  for (const colorRule of p?.condicional?.rules ?? []) {
+    const alcance = colorRule.medida ? `${colorRule.medida} ` : '';
+    notas.push(`Marcado en pantalla: ${alcance}${describirRegla(colorRule)}`);
   }
   return notas;
 }

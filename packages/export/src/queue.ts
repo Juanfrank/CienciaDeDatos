@@ -4,7 +4,7 @@ import type { ExportJob, ExportRequest } from './types';
 
 /** Cola de exportaciones — seccion 5.3. */
 
-export const CLAVE_COLA = 'export:queue:pendientes';
+export const KEY_QUEUE = 'export:queue:pendientes';
 
 /** Un trabajo terminado deja de ser interesante bastante rapido; el artefacto ocupa sitio. */
 export const TTL_TRABAJO_MS = 60 * 60 * 1000;
@@ -51,8 +51,8 @@ export class StoreExportQueue implements IExportQueue {
     };
 
     await this.store.set(claveDeTrabajo(job.id), entrada(job, ahora));
-    const cola = await this.pendientes();
-    await this.store.set(CLAVE_COLA, entrada([...cola, job.id], ahora));
+    const queue = await this.pendientes();
+    await this.store.set(KEY_QUEUE, entrada([...queue, job.id], ahora));
     return job;
   }
 
@@ -62,16 +62,16 @@ export class StoreExportQueue implements IExportQueue {
   }
 
   async pendientes(): Promise<string[]> {
-    const entry = await this.store.get<string[]>(CLAVE_COLA);
+    const entry = await this.store.get<string[]>(KEY_QUEUE);
     return entry?.value ?? [];
   }
 
   async tomarSiguiente(ahora = this.now()): Promise<ExportJob | null> {
-    const cola = await this.pendientes();
-    if (cola.length === 0) return null;
+    const queue = await this.pendientes();
+    if (queue.length === 0) return null;
 
-    const [id, ...resto] = cola;
-    await this.store.set(CLAVE_COLA, entrada(resto, ahora));
+    const [id, ...resto] = queue;
+    await this.store.set(KEY_QUEUE, entrada(resto, ahora));
     if (!id) return null;
 
     const job = await this.consultar(id);

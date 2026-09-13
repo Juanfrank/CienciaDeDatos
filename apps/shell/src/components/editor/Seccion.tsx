@@ -12,8 +12,8 @@ export function ProveedorDeFiltro({ filtro, children }: { filtro: string; childr
 }
 
 /** Sin acentos y en minusculas: quien busca «grafico» tiene que encontrar «Gráfico». */
-const normalizar = (texto: string): string =>
-  texto
+const normalizar = (content: string): string =>
+  content
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');

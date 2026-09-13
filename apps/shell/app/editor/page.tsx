@@ -16,7 +16,7 @@ export default async function PaginaEditor() {
   const actor = await actorDe(sesion);
   const visibles = await modulosVisibles(actor);
 
-  const filas = await Promise.all(
+  const dataRows = await Promise.all(
     visibles.map(async (m) => ({
       moduleId: m.moduleId,
       slug: m.slug,
@@ -34,7 +34,7 @@ export default async function PaginaEditor() {
     <>
       <CabeceraDeEditor />
       <main className="editor__cuerpo">
-        <ListaDeModulos modulos={filas} role={actor.role} user={actor.userId} />
+        <ListaDeModulos modulos={dataRows} role={actor.role} user={actor.userId} />
       </main>
     </>
   );

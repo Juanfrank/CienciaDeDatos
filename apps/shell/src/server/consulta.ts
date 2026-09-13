@@ -51,16 +51,16 @@ export async function vocabularioDe(
     // modulo ve esas columnas en la tabla de origen y puede filtrar por ellas desde la URL, asi
     // que no poder preguntarlas seria una limitacion arbitraria. Los valores siguen saliendo de
     // filas YA filtradas por su ambito, que es lo que impide que esto revele nada.
-    for (const [indice, columna] of objeto.result.columns.entries()) {
-      if (columna.type === 'number') continue;
-      if (!dimensions.has(columna.name)) dimensions.set(columna.name, etiquetaDeDimension(columna.name));
+    for (const [indice, column] of objeto.result.columns.entries()) {
+      if (column.type === 'number') continue;
+      if (!dimensions.has(column.name)) dimensions.set(column.name, etiquetaDeDimension(column.name));
 
-      const conjunto = valores.get(columna.name) ?? new Set<string>();
+      const conjunto = valores.get(column.name) ?? new Set<string>();
       for (const fila of objeto.result.rows) {
         if (conjunto.size >= MAXIMO_VALORES) break;
         conjunto.add(String(fila[indice]));
       }
-      valores.set(columna.name, conjunto);
+      valores.set(column.name, conjunto);
     }
   }
 

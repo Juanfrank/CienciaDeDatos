@@ -30,7 +30,7 @@ export function Lienzo({
    * Dos filas de mas, siempre.
    */
   const filasUsadas = items.reduce((m, i) => Math.max(m, i.position.y + i.position.h), 0);
-  const filas = filasUsadas + 2;
+  const dataRows = filasUsadas + 2;
 
   const rejilla = useRef<HTMLDivElement>(null);
   const { enCurso, alEmpezar, alMover, alSoltar, alCancelar } = useArrastre({
@@ -55,11 +55,11 @@ export function Lienzo({
         style={
           {
             '--rejilla-columnas': GRID_COLUMNS,
-            '--rejilla-filas': filas,
+            '--rejilla-filas': dataRows,
             /*
              * Filas de alto FIJO, las mismas que el modulo publicado.
              */
-            gridTemplateRows: `repeat(${filas}, var(--alto-de-fila))`,
+            gridTemplateRows: `repeat(${dataRows}, var(--alto-de-fila))`,
           } as React.CSSProperties
         }
       >
@@ -69,7 +69,7 @@ export function Lienzo({
           La posicion de cada bloque se dice con palabras en el panel.
         */}
         <div className="lienzo__guias" aria-hidden="true">
-          {Array.from({ length: GRID_COLUMNS * filas }, (_, i) => (
+          {Array.from({ length: GRID_COLUMNS * dataRows }, (_, i) => (
             <span key={i} className="lienzo__guia" />
           ))}
         </div>

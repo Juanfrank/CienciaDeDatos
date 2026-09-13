@@ -1,21 +1,21 @@
 /** Exportacion — seccion 4.9, encolada como exige 5.3. */
 export { aExcel, aPdf } from './binarios';
 export {
-  CLAVE_COLA,
+  KEY_QUEUE,
   StoreExportQueue,
   TTL_TRABAJO_MS,
   type IExportQueue,
   type StoreExportQueueOptions,
-} from './cola';
+} from './queue';
 export {
-  construirDocumento,
-  paletaDe,
-  type DocumentoExportable,
+  buildDocument,
+  paletteOf,
+  type ExportableDocument,
   type HojaExportable,
-  type PaletaDeExportacion,
-} from './documento';
-export { construirEncabezado, type Encabezado } from './encabezado';
-export { aCsv, aSvg, escaparCsv } from './formatos';
+  type ExportPalette,
+} from './document';
+export { buildHeading, type Heading } from './heading';
+export { aCsv, aSvg, escaparCsv } from './formats';
 export {
   generarArtefacto,
   procesarPendientes,
@@ -25,7 +25,7 @@ export {
   type ResolverObjetos,
 } from './procesar';
 export {
-  FORMATOS,
+  FORMATS,
   TIPOS_MIME,
   claveDeTrabajo,
   nombreDeArchivo,

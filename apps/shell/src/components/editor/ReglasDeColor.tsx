@@ -20,29 +20,29 @@ const ETIQUETA_DE_COMPARADOR: Record<Comparador, string> = {
 };
 
 export function ReglasDeColor({
-  reglas,
+  rules,
   medidas,
   guardando,
   prueba,
   onCambiar,
 }: {
-  reglas: ReglaDeColor[];
+  rules: ReglaDeColor[];
   /** Las medidas mapeadas, para poder acotar una regla a una sola. */
   medidas: string[];
   guardando: boolean;
   prueba: string;
-  onCambiar: (reglas: ReglaDeColor[] | undefined) => void;
+  onCambiar: (rules: ReglaDeColor[] | undefined) => void;
 }) {
   const cambiar = (siguiente: ReglaDeColor[]) =>
     onCambiar(siguiente.length === 0 ? undefined : siguiente);
 
   const editar = (i: number, cambio: Partial<ReglaDeColor>) =>
-    cambiar(reglas.map((regla, j) => (i === j ? { ...regla, ...cambio } : regla)));
+    cambiar(rules.map((colorRule, j) => (i === j ? { ...colorRule, ...cambio } : colorRule)));
 
   const mover = (i: number, delta: number) => {
     const j = i + delta;
-    if (j < 0 || j >= reglas.length) return;
-    const siguiente = [...reglas];
+    if (j < 0 || j >= rules.length) return;
+    const siguiente = [...rules];
     const [sacada] = siguiente.splice(i, 1);
     if (sacada) siguiente.splice(j, 0, sacada);
     cambiar(siguiente);
@@ -50,20 +50,20 @@ export function ReglasDeColor({
 
   return (
     <>
-      {reglas.length > 1 ? (
+      {rules.length > 1 ? (
         <p className="campo__pista">
           Se aplica la PRIMERA que se cumple. Use las flechas para cambiar cual manda.
         </p>
       ) : null}
 
-      {reglas.map((regla, i) => (
+      {rules.map((colorRule, i) => (
         <fieldset key={i} className="referencia" data-testid={`${prueba}-regla-${i}`}>
           <legend className="referencia__titulo">Regla {i + 1}</legend>
 
           <label className="formulario__campo">
             <span>Se aplica a</span>
             <select
-              value={regla.medida ?? ""}
+              value={colorRule.medida ?? ""}
               disabled={guardando}
               data-testid={`${prueba}-medida-${i}`}
               onChange={(e) => editar(i, { medida: e.target.value || undefined })}
@@ -85,7 +85,7 @@ export function ReglasDeColor({
             <label className="formulario__campo">
               <span>Cuando el valor es</span>
               <select
-                value={regla.comparador}
+                value={colorRule.comparador}
                 disabled={guardando}
                 data-testid={`${prueba}-comparador-${i}`}
                 onChange={(e) => editar(i, { comparador: e.target.value as Comparador })}
@@ -98,10 +98,10 @@ export function ReglasDeColor({
               </select>
             </label>
             <label className="formulario__campo">
-              <span>{regla.comparador === "entre" ? "Desde" : "Valor"}</span>
+              <span>{colorRule.comparador === "entre" ? "Desde" : "Valor"}</span>
               <input
                 type="number"
-                defaultValue={regla.valor}
+                defaultValue={colorRule.valor}
                 disabled={guardando}
                 data-testid={`${prueba}-valor-${i}`}
                 onBlur={(e) => editar(i, { valor: Number(e.target.value) })}
@@ -109,12 +109,12 @@ export function ReglasDeColor({
             </label>
           </div>
 
-          {regla.comparador === "entre" ? (
+          {colorRule.comparador === "entre" ? (
             <label className="formulario__campo">
               <span>Hasta</span>
               <input
                 type="number"
-                defaultValue={regla.hasta ?? ""}
+                defaultValue={colorRule.hasta ?? ""}
                 disabled={guardando}
                 data-testid={`${prueba}-hasta-${i}`}
                 onBlur={(e) =>
@@ -129,7 +129,7 @@ export function ReglasDeColor({
           <div className="formulario__campo">
             <span>Color</span>
             <PaletaDeColores
-              valor={regla.color}
+              valor={colorRule.color}
               nombre={`la regla ${i + 1}`}
               prueba={`${prueba}-color-${i}`}
               onCambiar={(color) => editar(i, { color })}
@@ -149,7 +149,7 @@ export function ReglasDeColor({
             <button
               type="button"
               className="md-boton md-boton--texto"
-              disabled={guardando || i === reglas.length - 1}
+              disabled={guardando || i === rules.length - 1}
               data-testid={`${prueba}-bajar-${i}`}
               onClick={() => mover(i, 1)}
             >
@@ -160,7 +160,7 @@ export function ReglasDeColor({
               className="md-boton md-boton--texto"
               disabled={guardando}
               data-testid={`${prueba}-quitar-${i}`}
-              onClick={() => cambiar(reglas.filter((_, j) => j !== i))}
+              onClick={() => cambiar(rules.filter((_, j) => j !== i))}
             >
               Quitar
             </button>
@@ -168,19 +168,19 @@ export function ReglasDeColor({
         </fieldset>
       ))}
 
-      {reglas.length < MAX_REGLAS ? (
+      {rules.length < MAX_REGLAS ? (
         <button
           type="button"
           className="md-boton md-boton--contorno"
           disabled={guardando}
           data-testid={`${prueba}-anadir`}
-          onClick={() => cambiar([...reglas, { comparador: "mayor", valor: 0, color: "error" }])}
+          onClick={() => cambiar([...rules, { comparador: "mayor", valor: 0, color: "error" }])}
         >
-          Anadir regla de color
+          Anadir colorRule de color
         </button>
       ) : (
         <p className="campo__pista">
-          Cinco es el maximo: mas reglas dejan de ser excepciones y pasan a ser una scale, que es
+          Cinco es el maximo: mas rules dejan de ser excepciones y pasan a ser una scale, que es
           otra herramienta.
         </p>
       )}

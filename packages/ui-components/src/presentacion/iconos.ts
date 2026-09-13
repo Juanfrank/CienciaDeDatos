@@ -9,7 +9,7 @@ export const TRAZOS_DE_ICONO = {
   marcador: 'M7 4h10a1 1 0 0 1 1 1v15l-6-3.5L6 20V5a1 1 0 0 1 1-1z',
   exportar:
     'M12 4v10m0 0 3.5-3.5M12 14l-3.5-3.5M5 18v1.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V18',
-  aviso: 'M18 16.5V11a6 6 0 1 0-12 0v5.5L4.5 18h15zM10 21a2 2 0 0 0 4 0',
+  notice: 'M18 16.5V11a6 6 0 1 0-12 0v5.5L4.5 18h15zM10 21a2 2 0 0 0 4 0',
   incrustar: 'm9 18-6-6 6-6M15 6l6 6-6 6',
   vista: 'M12 12.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 20.5a7.5 7.5 0 0 1 15 0',
   ambito: 'M7 11V8a5 5 0 0 1 10 0v3M5.5 11h13a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1z',
@@ -41,9 +41,9 @@ export const TRAZOS_DE_ICONO = {
   tabla: 'M4 5h16v14H4zM4 10h16M4 15h16M10 5v14',
   filtro: 'M4 5h16l-6 7v6l-4 2v-8z',
   // Elementos: no miden nada, componen.
-  texto: 'M5 6V4h14v2M12 4v16M9 20h6',
+  content: 'M5 6V4h14v2M12 4v16M9 20h6',
   titulo: 'M4 7h16M4 12h9M4 17h13',
-  linea: 'M4 12h16',
+  line: 'M4 12h16',
   forma: 'M5 5h14v14H5z',
   conexion: 'M4 7h6v10h10M20 17l-3-3M20 17l-3 3',
   contenedor: 'M4 5h16v14H4zM4 9h16M9 9v10',

@@ -46,7 +46,7 @@ export function Grafico({
   children: React.ReactNode;
 }) {
   const [montado, setMontado] = useState(false);
-  const [paleta, setPaleta] = useState<PaletaDeGrafico | null>(null);
+  const [palette, setPaleta] = useState<PaletaDeGrafico | null>(null);
 
   /*
    * Los colores se leen de las variables CSS del tema, ya resueltas por el navegador.
@@ -60,9 +60,9 @@ export function Grafico({
 
     setPaleta({
       series: Array.from({ length: 8 }, (_, i) => v(`--md-sys-color-categorical-${i}`)),
-      texto: v('--md-sys-color-on-surface'),
+      content: v('--md-sys-color-on-surface'),
       textoAtenuado: v('--md-sys-color-on-surface-variant'),
-      linea: v('--md-sys-color-outline-variant'),
+      line: v('--md-sys-color-outline-variant'),
       superficie: v('--md-sys-color-surface'),
       superficieElevada: v('--md-sys-color-surface-container-high'),
     });
@@ -76,11 +76,11 @@ export function Grafico({
       data-testid={`grafico-${instanceId}`}
       data-montado={montado ? 'si' : 'no'}
     >
-      {paleta ? (
+      {palette ? (
         <Lienzo
           tipo={tipo}
           vm={vm}
-          paleta={paleta}
+          palette={palette}
           titulo={titulo}
           {...(dimension ? { dimension } : {})}
           {...(presentacion ? { presentacion } : {})}

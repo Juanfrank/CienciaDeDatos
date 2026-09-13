@@ -357,9 +357,9 @@ test.describe('cada transicion queda registrada (4.10.7)', () => {
     expect(publicado.ok()).toBe(true);
 
     const audit = await (await page.request.get('/api/admin/auditoria')).json();
-    const filas = (audit.eventos as { entityType: string; action: string; actorId: string }[])
+    const dataRows = (audit.eventos as { entityType: string; action: string; actorId: string }[])
       .filter((e) => e.entityType === 'module');
 
-    expect(filas.some((f) => f.action === 'publish' && f.actorId === 'u-admin')).toBe(true);
+    expect(dataRows.some((f) => f.action === 'publish' && f.actorId === 'u-admin')).toBe(true);
   });
 });

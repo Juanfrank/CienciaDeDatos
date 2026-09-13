@@ -98,7 +98,7 @@ export function CrearAviso({
 
   return (
     <>
-      <BotonDeIcono icono="aviso" etiqueta="Avisarme" data-testid="crear-aviso" onClick={abrir} />
+      <BotonDeIcono icono="notice" etiqueta="Avisarme" data-testid="crear-aviso" onClick={abrir} />
 
       <dialog ref={dialogo} className="emergente" aria-label="Crear un aviso" data-testid="dialogo-aviso">
         <div className="emergente__cabecera">

@@ -11,7 +11,7 @@ import {
   estiloDeTexto,
   filasVisibles,
   formateadorDeMedida,
-  hojas,
+  leaves,
   ordenarNodos,
   rutaClave,
   type FormatoCondicional,
@@ -77,30 +77,30 @@ export function TablaDeMatriz({
     () => vm.medidas.map((m) => formateadorDeMedida(instance.presentacion, m)),
     [vm.medidas, instance.presentacion],
   );
-  const columnas = useMemo(() => hojas(vm.columnas, plegadasColumna), [vm, plegadasColumna]);
+  const gridColumns = useMemo(() => leaves(vm.gridColumns, plegadasColumna), [vm, plegadasColumna]);
   const condicional = instance.presentacion?.condicional;
 
   /*
    * El orden se aplica ENTRE HERMANOS, no sobre la tabla entera.
    */
   const arbol = useMemo(() => {
-    if (orden.por === null) return vm.filas;
+    if (orden.por === null) return vm.dataRows;
     const [rutaColumna = '', medida = '0'] = orden.por.split('#');
     const path = rutaColumna === '' ? [] : rutaColumna.split('||');
     const i = Number(medida);
-    return ordenarNodos(vm.filas, (a, b) =>
+    return ordenarNodos(vm.dataRows, (a, b) =>
       compararValores(vm.valor(a.path, path, i), vm.valor(b.path, path, i), orden.direccion),
     );
   }, [vm, orden]);
 
-  const filas = useMemo(() => filasVisibles(arbol, plegadas), [arbol, plegadas]);
+  const dataRows = useMemo(() => filasVisibles(arbol, plegadas), [arbol, plegadas]);
 
   const alOrdenarPor = (clave: string | null) =>
     setOrden((o) =>
       o.por === clave ? { por: clave, direccion: o.direccion === 'asc' ? 'desc' : 'asc' } : { por: clave, direccion: 'asc' },
     );
 
-  const encabezado = (clave: string | null, texto: string, prueba: string) => {
+  const heading = (clave: string | null, content: string, prueba: string) => {
     const activo = orden.por === clave;
     return (
       <button
@@ -111,7 +111,7 @@ export function TablaDeMatriz({
         data-testid={prueba}
         onClick={() => alOrdenarPor(clave)}
       >
-        <span>{texto}</span>
+        <span>{content}</span>
         <span className="tabla__flecha" aria-hidden="true">
           {activo ? (orden.direccion === 'asc' ? '▲' : '▼') : '⇅'}
         </span>
@@ -131,12 +131,12 @@ export function TablaDeMatriz({
         <thead>
           <tr>
             <th scope="col" aria-sort={direccionAria(null)} className="tabla__esquina">
-              {encabezado(null, vm.nivelesDeFila.join(' / ') || 'Total', 'matriz-ordenar-filas')}
+              {heading(null, vm.nivelesDeFila.join(' / ') || 'Total', 'matriz-ordenar-filas')}
             </th>
-            {columnas.map((columna) =>
+            {gridColumns.map((column) =>
               vm.medidas.map((medida, i) => {
-                const clave = claveDeOrden(columna.path, i);
-                const plegable = columna.hijos.length > 0;
+                const clave = claveDeOrden(column.path, i);
+                const plegable = column.hijos.length > 0;
                 return (
                   <th key={clave} scope="col" aria-sort={direccionAria(clave)}>
                     <span className="tabla__encabezado">
@@ -144,20 +144,20 @@ export function TablaDeMatriz({
                         <button
                           type="button"
                           className="tabla__plegar"
-                          aria-expanded={!plegadasColumna.has(rutaClave(columna.path))}
-                          aria-label={`Desplegar ${columna.etiqueta}`}
-                          data-testid={`matriz-plegar-col-${rutaClave(columna.path)}`}
+                          aria-expanded={!plegadasColumna.has(rutaClave(column.path))}
+                          aria-label={`Desplegar ${column.etiqueta}`}
+                          data-testid={`matriz-plegar-col-${rutaClave(column.path)}`}
                           onClick={() =>
-                            setPlegadasColumna((c) => alternar(c, rutaClave(columna.path)))
+                            setPlegadasColumna((c) => alternar(c, rutaClave(column.path)))
                           }
                         >
                           <Icono nombre="chevron-abajo" tamano={12} />
                         </button>
                       ) : null}
-                      {encabezado(
+                      {heading(
                         clave,
-                        conMedida(columna.etiqueta || 'Total', medida),
-                        `matriz-ordenar-${rutaClave(columna.path)}-${i}`,
+                        conMedida(column.etiqueta || 'Total', medida),
+                        `matriz-ordenar-${rutaClave(column.path)}-${i}`,
                       )}
                     </span>
                   </th>
@@ -166,18 +166,18 @@ export function TablaDeMatriz({
             )}
             {vm.medidas.map((medida, i) => (
               <th key={`total-${medida}`} scope="col" aria-sort={direccionAria(claveDeOrden([], i))}>
-                {encabezado(claveDeOrden([], i), conMedida('Total', medida), `matriz-ordenar-total-${i}`)}
+                {heading(claveDeOrden([], i), conMedida('Total', medida), `matriz-ordenar-total-${i}`)}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {filas.map((node) => (
+          {dataRows.map((node) => (
             <FilaDeMatriz
               key={rutaClave(node.path)}
               node={node}
               vm={vm}
-              columnas={columnas}
+              gridColumns={gridColumns}
               plegada={plegadas.has(rutaClave(node.path))}
               formatear={formatear}
               {...(condicional ? { condicional } : {})}
@@ -186,11 +186,11 @@ export function TablaDeMatriz({
           ))}
           <tr className="tabla__fila-total">
             <th scope="row">Total</th>
-            {columnas.map((columna) =>
+            {gridColumns.map((column) =>
               vm.medidas.map((medida, i) => (
                 <CeldaDeCifra
-                  key={`${rutaClave(columna.path)}-${medida}`}
-                  valor={vm.valor([], columna.path, i)}
+                  key={`${rutaClave(column.path)}-${medida}`}
+                  valor={vm.valor([], column.path, i)}
                   medida={medida}
                   formatear={formatear[i] ?? String}
                   {...(condicional ? { condicional } : {})}
@@ -218,7 +218,7 @@ export function TablaDeMatriz({
 function FilaDeMatriz({
   node,
   vm,
-  columnas,
+  gridColumns,
   plegada,
   formatear,
   condicional,
@@ -226,7 +226,7 @@ function FilaDeMatriz({
 }: {
   node: NodoDeMatriz;
   vm: MatrizJerarquica;
-  columnas: NodoDeMatriz[];
+  gridColumns: NodoDeMatriz[];
   plegada: boolean;
   formatear: ((n: number | null) => string)[];
   condicional?: FormatoCondicional;
@@ -258,11 +258,11 @@ function FilaDeMatriz({
           {node.etiqueta}
         </span>
       </th>
-      {columnas.map((columna) =>
+      {gridColumns.map((column) =>
         vm.medidas.map((medida, i) => (
           <CeldaDeCifra
-            key={`${rutaClave(columna.path)}-${medida}`}
-            valor={vm.valor(node.path, columna.path, i)}
+            key={`${rutaClave(column.path)}-${medida}`}
+            valor={vm.valor(node.path, column.path, i)}
             medida={medida}
             formatear={formatear[i] ?? String}
             {...(condicional ? { condicional } : {})}

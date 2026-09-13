@@ -447,20 +447,20 @@ test.describe('el carril de administracion', () => {
   test('las cifras se reparten en una fila, no en cinco', async ({ page }) => {
     await page.setViewportSize({ width: 1400, height: 900 });
     await page.goto('/admin');
-    const filas = await page
+    const dataRows = await page
       .getByTestId('resumen-gobierno')
       .evaluate((el) => new Set([...el.children].map((c) => c.getBoundingClientRect().top)).size);
     // `.tarjetas` no tenia ninguna regla de disposicion: cinco cifras ocupaban cinco filas.
-    expect(filas).toBe(1);
+    expect(dataRows).toBe(1);
   });
 
   test('el registro dice quien, que y cuando, no identificadores crudos', async ({ page }) => {
     // Se provoca un cambio real para que haya algo que leer.
     await page.goto('/admin/equipos');
     await page.goto('/admin/auditoria');
-    const filas = page.locator('.registro__fila');
-    if ((await filas.count()) > 0) {
-      await expect(filas.first().locator('time')).toHaveAttribute('dateTime', /\d{4}-\d{2}-\d{2}/);
+    const dataRows = page.locator('.registro__fila');
+    if ((await dataRows.count()) > 0) {
+      await expect(dataRows.first().locator('time')).toHaveAttribute('dateTime', /\d{4}-\d{2}-\d{2}/);
     }
   });
 });

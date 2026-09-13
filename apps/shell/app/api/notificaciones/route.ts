@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sinLeer } from '@app/alerts';
+import { withoutRead } from '@app/alerts';
 import { notificaciones } from '../../../src/server/alertas';
 import { sinSesion } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/sesion';
@@ -11,7 +11,7 @@ export async function GET() {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();
   const lista = await notificaciones.list(sesion.userId);
-  return NextResponse.json({ notificaciones: lista, sinLeer: sinLeer(lista) });
+  return NextResponse.json({ notificaciones: lista, withoutRead: withoutRead(lista) });
 }
 
 export async function POST(request: Request) {
@@ -32,5 +32,5 @@ export async function POST(request: Request) {
   await notificaciones.markRead(sesion.userId, ids);
 
   const lista = await notificaciones.list(sesion.userId);
-  return NextResponse.json({ sinLeer: sinLeer(lista) });
+  return NextResponse.json({ withoutRead: withoutRead(lista) });
 }

@@ -49,7 +49,7 @@ export async function observacionesDe(rule: AlertRule): Promise<Observacion[] | 
     objeto.result,
     dimensions,
     [rule.measure],
-    agregacionesPara([rule.measure], measures, objeto.agregaciones),
+    agregacionesPara([rule.measure], measures, objeto.aggregations),
   );
 
   return rows
@@ -71,12 +71,12 @@ export interface ResultadoDeEvaluacion {
 
 /** Evalua todas las reglas activas y notifica solo las transiciones. */
 export async function evaluarAlertas(ahora = new Date()): Promise<ResultadoDeEvaluacion> {
-  const reglas = (await alertStore.listRules()).filter((r) => r.enabled);
+  const rules = (await alertStore.listRules()).filter((r) => r.enabled);
   let notificadas = 0;
   let omitidas = 0;
 
-  for (const regla of reglas) {
-    const observaciones = await observacionesDe(regla);
+  for (const colorRule of rules) {
+    const observaciones = await observacionesDe(colorRule);
 
     // Una regla que ya no se puede evaluar se deja INTACTA: ni dispara ni se resuelve. Marcarla
     // como resuelta mandaria un "ya no se cumple" que nadie podria comprobar.
@@ -85,9 +85,9 @@ export async function evaluarAlertas(ahora = new Date()): Promise<ResultadoDeEva
       continue;
     }
 
-    const previo = await alertStore.getState(regla.id);
-    const evaluacion = evaluarRegla(regla, observaciones, ahora, previo);
-    const { estado, notificacion } = decidirNotificacion(regla, evaluacion, previo, ahora);
+    const previo = await alertStore.getState(colorRule.id);
+    const evaluacion = evaluarRegla(colorRule, observaciones, ahora, previo);
+    const { estado, notificacion } = decidirNotificacion(colorRule, evaluacion, previo, ahora);
 
     await alertStore.saveState(estado);
 
@@ -97,7 +97,7 @@ export async function evaluarAlertas(ahora = new Date()): Promise<ResultadoDeEva
     }
   }
 
-  return { evaluadas: reglas.length - omitidas, notificadas, omitidas };
+  return { evaluadas: rules.length - omitidas, notificadas, omitidas };
 }
 
 /** Evalua solo si el job ha completado un ciclo NUEVO desde la ultima vez. */

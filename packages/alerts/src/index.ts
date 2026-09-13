@@ -15,12 +15,12 @@ export {
 export {
   InboxNotificationChannel,
   MAXIMO_POR_BANDEJA,
-  sinLeer,
+  withoutRead,
   type INotificationChannel,
 } from './notificaciones';
 export {
   CLAVE_ESTADOS,
-  CLAVE_REGLAS,
+  KEY_RULES,
   CLAVE_SUSCRIPCIONES,
   CLAVE_ULTIMO_LATIDO,
   claveBandeja,

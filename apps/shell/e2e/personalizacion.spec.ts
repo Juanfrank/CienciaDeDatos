@@ -130,10 +130,10 @@ test.describe('la distincion viaja al exportar (4.6)', () => {
       .toBe('lista');
 
     const descarga = await page.request.get(`/api/exportaciones/${id}/descarga`);
-    const texto = await descarga.text();
+    const content = await descarga.text();
 
-    expect(texto).toContain('Vista personalizada');
-    expect(texto).not.toContain('Vista institucional oficial');
+    expect(content).toContain('Vista personalizada');
+    expect(content).not.toContain('Vista institucional oficial');
     // Y el nombre del archivo tambien lo dice, para quien lo reciba por correo sin abrirlo.
     expect(descarga.headers()['content-disposition']).toContain('vista-personalizada');
 
@@ -152,8 +152,8 @@ test.describe('la distincion viaja al exportar (4.6)', () => {
       })
       .toBe('lista');
 
-    const texto = await (await page.request.get(`/api/exportaciones/${id}/descarga`)).text();
-    expect(texto).toContain('Vista institucional oficial');
+    const content = await (await page.request.get(`/api/exportaciones/${id}/descarga`)).text();
+    expect(content).toContain('Vista institucional oficial');
   });
 });
 

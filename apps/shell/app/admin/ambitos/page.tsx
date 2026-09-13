@@ -36,7 +36,7 @@ export default async function PaginaAmbitos() {
       <p className="texto-atenuado">
         Cada capa solo puede RESTRINGIR respecto de la anterior. Ampliar es posible, pero exige
         una justificacion explicita y queda registrada aparte: el valor por defecto de cualquier
-        combinacion de reglas es siempre "mas restrictivo o igual".
+        combinacion de rules es siempre "mas restrictivo o igual".
       </p>
       <EditorDeAmbito destinos={destinos} />
     </section>

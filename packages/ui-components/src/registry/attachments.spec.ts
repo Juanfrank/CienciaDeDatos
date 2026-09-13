@@ -10,11 +10,11 @@ import type { ObjectInstance } from './types';
  */
 
 const registro = new ObjectRegistry(catalogoInicial);
-const buscar = (objectId: string) => registro.get(objectId);
+const search = (objectId: string) => registro.get(objectId);
 
 const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };
 
-const instancia = (parcial: Partial<ObjectInstance> = {}): ObjectInstance => ({
+const objectInstance = (parcial: Partial<ObjectInstance> = {}): ObjectInstance => ({
   instanceId: 'i1',
   objectId: 'barras',
   version: '1.0.0',
@@ -25,13 +25,13 @@ const instancia = (parcial: Partial<ObjectInstance> = {}): ObjectInstance => ({
 describe('validateAttachments', () => {
   it('acepta un objeto con sus dos complementos bien configurados', () => {
     const problems = validateAttachments(
-      instancia({
+      objectInstance({
         attachments: [
           { instanceId: 'a1', objectId: 'tooltip-explicativo', version: '1.0.0', text: 'Que es esto.' },
           { instanceId: 'a2', objectId: 'tabla-de-datos', version: '1.0.0', scope: 'subobjeto' },
         ],
       }),
-      buscar,
+      search,
     );
 
     expect(problems).toEqual([]);
@@ -39,8 +39,8 @@ describe('validateAttachments', () => {
 
   it('rechaza colocar un complemento como objeto independiente de la rejilla', () => {
     const problems = validateAttachments(
-      instancia({ objectId: 'tooltip-explicativo', attachments: [] }),
-      buscar,
+      objectInstance({ objectId: 'tooltip-explicativo', attachments: [] }),
+      search,
     );
 
     expect(problems).toHaveLength(1);
@@ -49,13 +49,13 @@ describe('validateAttachments', () => {
 
   it('rechaza adjuntar un objeto que no es complemento', () => {
     const problems = validateAttachments(
-      instancia({
+      objectInstance({
         attachments: [
           // Un grafico de barras adjunto a otro grafico no es un complemento: es otro objeto.
           { instanceId: 'a1', objectId: 'barras', version: '1.0.0' } as never,
         ],
       }),
-      buscar,
+      search,
     );
 
     expect(problems[0]?.problem).toMatch(/no es un complemento/);
@@ -63,10 +63,10 @@ describe('validateAttachments', () => {
 
   it('rechaza un complemento que no existe en el repositorio', () => {
     const problems = validateAttachments(
-      instancia({
+      objectInstance({
         attachments: [{ instanceId: 'a1', objectId: 'tooltip-inventado', version: '1.0.0' } as never],
       }),
-      buscar,
+      search,
     );
 
     expect(problems[0]?.kind).toBe('campo-inexistente');
@@ -74,13 +74,13 @@ describe('validateAttachments', () => {
 
   it('rechaza dos complementos del mismo tipo en un mismo objeto', () => {
     const problems = validateAttachments(
-      instancia({
+      objectInstance({
         attachments: [
           { instanceId: 'a1', objectId: 'tooltip-explicativo', version: '1.0.0', text: 'Uno.' },
           { instanceId: 'a2', objectId: 'tooltip-explicativo', version: '1.0.0', text: 'Dos.' },
         ],
       }),
-      buscar,
+      search,
     );
 
     expect(problems[0]?.problem).toMatch(/Solo se admite uno de cada tipo/);
@@ -90,12 +90,12 @@ describe('validateAttachments', () => {
     // Una tarjeta KPI no tiene categorias: no hay subobjeto por el que desglosar, y ofrecerlo
     // daria un emergente que siempre muestra lo mismo que el alcance de objeto.
     const problems = validateAttachments(
-      instancia({
+      objectInstance({
         objectId: 'tarjeta-kpi',
         binding: { datasetId: 'casos', dimensions: [], measures: ['CasosPendientes'] },
         attachments: [{ instanceId: 'a1', objectId: 'tabla-de-datos', version: '1.0.0', scope: 'subobjeto' }],
       }),
-      buscar,
+      search,
     );
 
     expect(problems[0]?.problem).toMatch(/no hay subobjeto por el que desglosar/);
@@ -103,12 +103,12 @@ describe('validateAttachments', () => {
 
   it('acepta el alcance de objeto en una tarjeta sin dimensiones', () => {
     const problems = validateAttachments(
-      instancia({
+      objectInstance({
         objectId: 'tarjeta-kpi',
         binding: { datasetId: 'casos', dimensions: [], measures: ['CasosPendientes'] },
         attachments: [{ instanceId: 'a1', objectId: 'tabla-de-datos', version: '1.0.0', scope: 'objeto' }],
       }),
-      buscar,
+      search,
     );
 
     expect(problems).toEqual([]);
@@ -117,7 +117,7 @@ describe('validateAttachments', () => {
 
 describe('attachmentOf', () => {
   it('devuelve el complemento del tipo pedido, ya estrechado', () => {
-    const objeto = instancia({
+    const objeto = objectInstance({
       attachments: [
         { instanceId: 'a1', objectId: 'tooltip-explicativo', version: '1.0.0', text: 'Explicacion.' },
       ],
@@ -128,6 +128,6 @@ describe('attachmentOf', () => {
   });
 
   it('un objeto sin complementos no obliga a comprobar el array antes', () => {
-    expect(attachmentOf(instancia(), 'tooltip-explicativo')).toBeUndefined();
+    expect(attachmentOf(objectInstance(), 'tooltip-explicativo')).toBeUndefined();
   });
 });

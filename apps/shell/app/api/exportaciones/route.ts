@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { FORMATOS, type ExportFormat } from '@app/export';
+import { FORMATS, type ExportFormat } from '@app/export';
 import { encolarExportacion } from '../../../src/server/exportaciones';
 import { normalizarFiltros } from '../../../src/server/filtros';
 import { sinSesion } from '../../../src/server/respuestas';
@@ -20,9 +20,9 @@ export async function POST(request: Request) {
   }
 
   const formato = body['formato'];
-  if (typeof formato !== 'string' || !FORMATOS.includes(formato as ExportFormat)) {
+  if (typeof formato !== 'string' || !FORMATS.includes(formato as ExportFormat)) {
     return NextResponse.json(
-      { error: `Formato no admitido. Use uno de: ${FORMATOS.join(', ')}.` },
+      { error: `Formato no admitido. Use uno de: ${FORMATS.join(', ')}.` },
       { status: 400 },
     );
   }

@@ -16,7 +16,7 @@ import {
 export interface LienzoProps {
   tipo: TipoDeGrafico;
   vm: CategoricalViewModel;
-  paleta: PaletaDeGrafico;
+  palette: PaletaDeGrafico;
   titulo: string;
   dimension?: string;
   presentacion?: PresentacionDeObjeto;
@@ -32,7 +32,7 @@ export interface LienzoProps {
 export default function Lienzo({
   tipo,
   vm,
-  paleta,
+  palette,
   titulo,
   dimension,
   presentacion,
@@ -59,7 +59,7 @@ export default function Lienzo({
     () =>
       opcionesDe(tipo, {
         vm,
-        paleta,
+        palette,
         titulo,
         ...(dimension ? { dimension } : {}),
         ...(presentacion?.leyenda ? { leyenda: presentacion.leyenda } : {}),
@@ -84,7 +84,7 @@ export default function Lienzo({
       }),
     // `formatear` se redefine en cada render del padre, asi que NO entra en las dependencias: lo
     // que de verdad decide como se formatea es la presentacion, y esa si esta.
-    [tipo, vm, paleta, titulo, dimension, presentacion, seriesDeColumna],
+    [tipo, vm, palette, titulo, dimension, presentacion, seriesDeColumna],
   );
   const clave = useMemo(() => JSON.stringify(opciones), [opciones]);
   const porDefecto: 'canvas' | 'svg' = elementosDe(vm) >= UMBRAL_DE_ELEMENTOS ? 'canvas' : 'svg';
@@ -111,12 +111,12 @@ export default function Lienzo({
 
       const montar = (renderer: 'canvas' | 'svg') => {
         grafico.current?.dispose();
-        const instancia = echarts.init(node, null, { renderer });
-        instancia.setOption(opcionesVigentes.current);
-        instancia.on('click', (evento: { name?: string }) => {
+        const objectInstance = echarts.init(node, null, { renderer });
+        objectInstance.setOption(opcionesVigentes.current);
+        objectInstance.on('click', (evento: { name?: string }) => {
           if (evento.name) seleccionar.current?.(evento.name);
         });
-        grafico.current = instancia;
+        grafico.current = objectInstance;
       };
 
       montar(porDefecto);

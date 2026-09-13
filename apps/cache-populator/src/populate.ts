@@ -91,7 +91,7 @@ export async function populate(options: PopulateOptions): Promise<PopulateResult
     connectorReachable = false;
   }
 
-  const resultados: DatasetPopulationResult[] = [];
+  const results: DatasetPopulationResult[] = [];
   const skipped: string[] = [];
 
   for (const dataset of registry.datasets) {
@@ -107,7 +107,7 @@ export async function populate(options: PopulateOptions): Promise<PopulateResult
         : [{ ctx: contextoVacio }];
 
     for (const contexto of contextos) {
-      resultados.push(await populateOne(dataset, contexto, {
+      results.push(await populateOne(dataset, contexto, {
         connector,
         cacheStore,
         connectorKind,
@@ -118,14 +118,14 @@ export async function populate(options: PopulateOptions): Promise<PopulateResult
   }
 
   const finishedAt = now();
-  const todosOk = resultados.length > 0 && resultados.every((r) => r.outcome === 'ok');
+  const todosOk = results.length > 0 && results.every((r) => r.outcome === 'ok');
 
   const heartbeat: PopulatorHeartbeat = {
     startedAt: startedAt.toISOString(),
     finishedAt: finishedAt.toISOString(),
     connector: connectorKind,
     connectorReachable,
-    datasets: resultados,
+    datasets: results,
     ...(todosOk
       ? { lastFullSuccessAt: finishedAt.toISOString() }
       : previousHeartbeat?.lastFullSuccessAt

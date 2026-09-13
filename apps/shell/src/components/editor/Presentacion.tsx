@@ -284,26 +284,26 @@ export function Presentacion({
               <label className="formulario__campo">
                 <span>Texto</span>
                 <input
-                  defaultValue={p.etiqueta?.texto ?? ""}
+                  defaultValue={p.etiqueta?.content ?? ""}
                   maxLength={40}
                   disabled={guardando}
                   data-testid={`${prueba}-etiqueta-texto`}
                   onBlur={(e) =>
-                    poner({ etiqueta: { ...p.etiqueta, texto: e.target.value || undefined } })
+                    poner({ etiqueta: { ...p.etiqueta, content: e.target.value || undefined } })
                   }
                 />
               </label>
               <label className="formulario__campo">
                 <span>Posicion</span>
                 <select
-                  value={p.etiqueta?.posicion ?? "debajo"}
+                  value={p.etiqueta?.cellPosition ?? "debajo"}
                   disabled={guardando}
                   data-testid={`${prueba}-etiqueta-posicion`}
                   onChange={(e) =>
                     poner({
                       etiqueta: {
                         ...p.etiqueta,
-                        posicion: e.target.value as PosicionDeEtiqueta,
+                        cellPosition: e.target.value as PosicionDeEtiqueta,
                       },
                     })
                   }
@@ -371,14 +371,14 @@ export function Presentacion({
                   <label className="formulario__campo">
                     <span>Donde</span>
                     <select
-                      value={labels.posicion ?? "auto"}
+                      value={labels.cellPosition ?? "auto"}
                       disabled={guardando}
                       data-testid={`${prueba}-posicion-dato`}
                       onChange={(e) =>
                         poner({
                           etiquetasDeDato: {
                             ...labels,
-                            posicion: e.target.value as PosicionDeDato,
+                            cellPosition: e.target.value as PosicionDeDato,
                           },
                         })
                       }
@@ -494,14 +494,14 @@ export function Presentacion({
           <label className="formulario__campo">
             <span>Columnas</span>
             <select
-              value={String(p.multiplos?.columnas ?? 0)}
+              value={String(p.multiplos?.gridColumns ?? 0)}
               disabled={guardando}
               data-testid={`${prueba}-multiplos-columnas`}
               onChange={(e) =>
                 poner({
                   multiplos: {
                     ...p.multiplos,
-                    columnas: e.target.value === "0" ? undefined : Number(e.target.value),
+                    gridColumns: e.target.value === "0" ? undefined : Number(e.target.value),
                   },
                 })
               }
@@ -566,7 +566,7 @@ export function Presentacion({
                 poner({ tooltip: { ...p.tooltip, ordenarPorValor: e.target.checked } })
               }
             />{" "}
-            Ordenar las filas de mayor a menor
+            Ordenar las dataRows de mayor a menor
           </label>
         </Seccion>
       ) : null}
@@ -576,11 +576,11 @@ export function Presentacion({
           claves={['condicional', 'regla', 'umbral', 'semaforo', 'alerta', 'rojo']}
           titulo="Color por valor" nivel={2} abierta={false} prueba={`${prueba}-condicional`}>
           <ReglasDeColor
-            reglas={p.condicional?.reglas ?? []}
+            rules={p.condicional?.rules ?? []}
             medidas={instance.binding.measures}
             guardando={guardando}
             prueba={`${prueba}-cond`}
-            onCambiar={(reglas) => poner({ condicional: reglas ? { reglas } : undefined })}
+            onCambiar={(rules) => poner({ condicional: rules ? { rules } : undefined })}
           />
         </Seccion>
       ) : null}
@@ -872,7 +872,7 @@ export function Presentacion({
             del objeto— pero quien lo enciende tiene que leer que lo esta haciendo.
           */}
           <span className="campo__pista">
-            Con dos escalas, una linea por encima de las columnas puede valer la mitad. Rotule los
+            Con dos escalas, una line por encima de las gridColumns puede valer la mitad. Rotule los
             dos ejes en la seccion «Ejes» para que se pueda leer sin adivinar.
           </span>
         </Seccion>
@@ -1081,14 +1081,14 @@ function SelectoresDelPanel({
   const efectivos = selectoresEfectivos(instance, configuracion, tipos);
   const prueba = `selectores-${instance.instanceId}`;
 
-  const ponerTipo = (campo: string, tipo: TipoDeSelector) =>
+  const ponerTipo = (fieldName: string, tipo: TipoDeSelector) =>
     onCambiar((i) => {
       const previos = (
         i.configuracion?.objectId === "panel-de-filtros"
           ? i.configuracion.selectores
           : []
-      ).filter((s) => s.campo !== campo);
-      const anterior = efectivos.find((s) => s.campo === campo);
+      ).filter((s) => s.fieldName !== fieldName);
+      const anterior = efectivos.find((s) => s.fieldName === fieldName);
       return {
         ...i,
         configuracion: {
@@ -1096,7 +1096,7 @@ function SelectoresDelPanel({
           selectores: [
             ...previos,
             {
-              campo,
+              fieldName,
               tipo,
               ...(anterior?.etiqueta ? { etiqueta: anterior.etiqueta } : {}),
             },
@@ -1117,16 +1117,16 @@ function SelectoresDelPanel({
     <div className="editor__selectores" data-testid={prueba}>
       <p className="texto-atenuado">Como se filtra cada dimension</p>
       {efectivos.map((s) => {
-        const tipoDeColumna = tipos[s.campo] ?? "";
+        const tipoDeColumna = tipos[s.fieldName] ?? "";
         return (
-          <label key={s.campo} className="formulario__campo">
-            <span>{s.campo}</span>
+          <label key={s.fieldName} className="formulario__campo">
+            <span>{s.fieldName}</span>
             <select
               value={s.tipo}
               disabled={guardando}
-              data-testid={`${prueba}-${s.campo}`}
+              data-testid={`${prueba}-${s.fieldName}`}
               onChange={(e) =>
-                ponerTipo(s.campo, e.target.value as TipoDeSelector)
+                ponerTipo(s.fieldName, e.target.value as TipoDeSelector)
               }
             >
               {TIPOS_DE_SELECTOR.map((t) => (
@@ -1246,7 +1246,7 @@ function RenglonDeFormato({
 }) {
   const tipo = formato.tipo ?? "general";
   const cambiar = (parcial: Partial<FormatoDeNumero>) => onCambiar({ ...formato, ...parcial });
-  const problema = tipo === "personalizado" ? problemaDelPatron(formato.patron ?? "") : null;
+  const issue = tipo === "personalizado" ? problemaDelPatron(formato.patron ?? "") : null;
 
   return (
     // El renglon entero lleva identificador, como la paleta y el estilo de texto: preguntar si un
@@ -1254,7 +1254,7 @@ function RenglonDeFormato({
     <div className="estilo-texto" data-testid={prueba}>
       <p className="estilo-texto__rotulo">
         {titulo}
-        {ayuda ? <Ayuda texto={ayuda} de={titulo} /> : null}
+        {ayuda ? <Ayuda content={ayuda} de={titulo} /> : null}
       </p>
 
       <label className="formulario__campo">
@@ -1281,8 +1281,8 @@ function RenglonDeFormato({
             placeholder="#,##0.00"
             disabled={guardando}
             data-testid={`${prueba}-patron`}
-            aria-describedby={problema ? `${prueba}-patron-error` : undefined}
-            aria-invalid={problema ? true : undefined}
+            aria-describedby={issue ? `${prueba}-patron-error` : undefined}
+            aria-invalid={issue ? true : undefined}
             onBlur={(e) => cambiar({ patron: e.target.value })}
           />
           {/*
@@ -1290,9 +1290,9 @@ function RenglonDeFormato({
             mirando este campo, y mandarle a buscar el motivo arriba del todo es hacerle trabajar
             para descubrir algo que el editor ya sabe.
           */}
-          {problema ? (
+          {issue ? (
             <span className="campo__error" id={`${prueba}-patron-error`} role="alert">
-              {problema}
+              {issue}
             </span>
           ) : (
             <span className="campo__pista">

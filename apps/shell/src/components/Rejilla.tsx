@@ -25,9 +25,9 @@ export function Rejilla({
         const variables: Record<string, string> = {};
 
         for (const tamano of TAMANOS) {
-          const posicion = disposiciones[tamano].get(item.id) ?? item.position;
-          const alto = rowSpanForBreakpoint(posicion.h, tamano);
-          variables[`--col-${tamano}`] = `${posicion.x + 1} / span ${posicion.w}`;
+          const cellPosition = disposiciones[tamano].get(item.id) ?? item.position;
+          const alto = rowSpanForBreakpoint(cellPosition.h, tamano);
+          variables[`--col-${tamano}`] = `${cellPosition.x + 1} / span ${cellPosition.w}`;
           // `auto` deja que el contenido marque el alto: en una sola columna el alto guardado
           // solo produce cajas altas y medio vacias.
           variables[`--fila-${tamano}`] = alto === null ? 'auto' : `span ${alto}`;

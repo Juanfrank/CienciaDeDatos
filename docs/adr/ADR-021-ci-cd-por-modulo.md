@@ -34,7 +34,7 @@ el build»—. **Nadie lo leia.** El conector salia de `process.env`, que solo c
 
 ### Un puerto de configuracion, dos implementaciones
 
-`packages/config` define `FuenteDeConfiguracion` y lee una **instantanea completa**, no una bandera
+`packages/config` define `SettingsFont` y lee una **instantanea completa**, no una bandera
 por consulta: con una llamada por bandera, pintar un arbol de ocho modulos serian ocho viajes, y
 —mas importante— todas las decisiones de una misma peticion tienen que salir de la misma foto,
 para que el arbol y la ruta no discrepen si vence el TTL a mitad.
@@ -72,7 +72,7 @@ cerrara tambien la puerta de arreglarlo, habria que reencenderlo en produccion p
 
 ### Tres estados de salud, no dos
 
-`saludDe()` en `module-model` clasifica cada modulo:
+`healthOf()` en `module-model` clasifica cada modulo:
 
 - `ok` — nada roto.
 - `degradado` — algun objeto roto, el modulo abre. **Se despliega.**

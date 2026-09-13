@@ -11,13 +11,13 @@ const INTERVALO_MS = 5_000;
 
 export function Campana() {
   const pathname = usePathname();
-  const [sinLeer, setSinLeer] = useState(0);
+  const [withoutRead, setSinLeer] = useState(0);
 
   const consultar = useCallback(async () => {
     try {
       const r = await fetch('/api/notificaciones');
       if (!r.ok) return;
-      const { sinLeer: n } = (await r.json()) as { sinLeer: number };
+      const { withoutRead: n } = (await r.json()) as { withoutRead: number };
       setSinLeer(n);
     } catch {
       // Un sondeo fallido no es un error de la aplicacion: se reintenta en la vuelta siguiente.
@@ -36,14 +36,14 @@ export function Campana() {
     <Link href="/avisos" className="campana" data-testid="campana">
       <span aria-hidden="true">🔔</span>
       <span className="campana__texto">Avisos</span>
-      {sinLeer > 0 ? (
+      {withoutRead > 0 ? (
         <span className="campana__contador" data-testid="campana-contador">
-          {sinLeer}
+          {withoutRead}
         </span>
       ) : null}
       {/* El numero no basta: un lector de pantalla leeria "Avisos 3" sin decir de que. */}
       <span className="visualmente-oculto">
-        {sinLeer > 0 ? `${sinLeer} aviso(s) sin leer` : 'ningun aviso sin leer'}
+        {withoutRead > 0 ? `${withoutRead} aviso(s) sin leer` : 'ningun aviso sin leer'}
       </span>
     </Link>
   );

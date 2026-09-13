@@ -124,7 +124,7 @@ export function Marco({
   accion,
   instance,
   result,
-  agregaciones,
+  aggregations,
   iconoDelObjeto,
 }: {
   titulo: string;
@@ -135,7 +135,7 @@ export function Marco({
   instance?: ObjectInstance;
   result?: QueryResult;
   /** Para los complementos: la tabla de datos proyecta con los mismos operadores que el objeto. */
-  agregaciones?: Aggregation[];
+  aggregations?: Aggregation[];
   /** El que declara la version del objeto. La presentacion de la instancia lo anula. */
   iconoDelObjeto?: NombreDeIcono;
 }) {
@@ -198,7 +198,7 @@ export function Marco({
             instance={instance}
             result={result}
             titulo={titulo}
-            agregaciones={agregaciones ?? []}
+            aggregations={aggregations ?? []}
           />
         ) : null}
         {accion}
@@ -223,7 +223,7 @@ export function Marco({
   );
 }
 
-export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones, iconoDelObjeto }: ObjetoProps) {
+export function TarjetaKpi({ titulo, result, instance, ranuras, aggregations, iconoDelObjeto }: ObjetoProps) {
   const r = porRanura(instance, ranuras);
   // El valor y la comparacion, en ese orden, salen de sus ranuras: con dos medidas mapeadas al
   // reves la tarjeta mostraba la comparacion como cifra principal.
@@ -234,7 +234,7 @@ export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones, ic
     result,
     medidas,
     titulo,
-    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+    agregacionesPara(medidas, instance.binding.measures, aggregations),
   );
   const delta = kpi.delta;
   const formatear = formateadorDeMedida(instance.presentacion, medidas[0]);
@@ -243,15 +243,15 @@ export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones, ic
     kpi.value,
     medidas[0],
   );
-  const etiqueta = instance.presentacion?.etiqueta?.texto;
-  const posicionDeEtiqueta = instance.presentacion?.etiqueta?.posicion ?? 'debajo';
+  const etiqueta = instance.presentacion?.etiqueta?.content;
+  const posicionDeEtiqueta = instance.presentacion?.etiqueta?.cellPosition ?? 'debajo';
 
   return (
     <Marco
       titulo={titulo}
       instance={instance}
       result={result}
-      agregaciones={agregaciones}
+      aggregations={aggregations}
       iconoDelObjeto={iconoDelObjeto}
     >
       {/*
@@ -325,7 +325,7 @@ export function Barras({
   instance,
   onFiltrar,
   ranuras,
-  agregaciones,
+  aggregations,
   horizontal,
   iconoDelObjeto,
 }: ObjetoProps & { horizontal?: boolean }) {
@@ -352,7 +352,7 @@ export function Barras({
       result,
       dimensiones,
       medidas,
-      agregacionesPara(medidas, instance.binding.measures, agregaciones),
+      agregacionesPara(medidas, instance.binding.measures, aggregations),
     ),
     instance.presentacion?.orden,
   );
@@ -386,7 +386,7 @@ export function Barras({
           titulo={titulo}
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
-          columnas={columnasPara(particion.paneles.length, instance.presentacion?.multiplos?.columnas)}
+          gridColumns={columnasPara(particion.paneles.length, instance.presentacion?.multiplos?.gridColumns)}
           {...(onFiltrar ? { onFiltrar } : {})}
         />
       ) : (
@@ -443,7 +443,7 @@ export function Lineas({
   result,
   instance,
   ranuras,
-  agregaciones,
+  aggregations,
   area,
   onFiltrar,
   iconoDelObjeto,
@@ -464,7 +464,7 @@ export function Lineas({
       result,
       dimensiones,
       medidas,
-      agregacionesPara(medidas, instance.binding.measures, agregaciones),
+      agregacionesPara(medidas, instance.binding.measures, aggregations),
     ),
     instance.presentacion?.orden,
   );
@@ -477,7 +477,7 @@ export function Lineas({
       titulo={titulo}
       instance={instance}
       result={result}
-      agregaciones={agregaciones}
+      aggregations={aggregations}
       iconoDelObjeto={iconoDelObjeto}
     >
       {particion ? (
@@ -490,7 +490,7 @@ export function Lineas({
           titulo={titulo}
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
-          columnas={columnasPara(particion.paneles.length, instance.presentacion?.multiplos?.columnas)}
+          gridColumns={columnasPara(particion.paneles.length, instance.presentacion?.multiplos?.gridColumns)}
           {...(onFiltrar ? { onFiltrar } : {})}
         />
       ) : (
@@ -535,7 +535,7 @@ export function Lineas({
                 <tr key={punto.label}>
                   <CeldaDeCategoria
                     etiqueta={punto.label}
-                    {...(dimension ? { campo: fieldKey(dimension) } : {})}
+                    {...(dimension ? { fieldName: fieldKey(dimension) } : {})}
                     {...(onFiltrar ? { onFiltrar } : {})}
                   />
                   {vm.series.map((serie, s) => (
@@ -565,7 +565,7 @@ function Multiplos({
   formatear,
   seriesDeColumna,
   dimension,
-  columnas,
+  gridColumns,
   onFiltrar,
 }: {
   paneles: PanelDeMultiplo[];
@@ -578,15 +578,15 @@ function Multiplos({
   formatear: (valor: number, serie: number) => string;
   seriesDeColumna?: number;
   dimension?: string;
-  columnas: number;
+  gridColumns: number;
   /** Filtrar desde un panel filtra por la CATEGORIA DEL EJE, no por el valor del panel. */
-  onFiltrar?: (campo: string, valor: string) => void;
+  onFiltrar?: (fieldName: string, valor: string) => void;
 }) {
   return (
     <div
       className="multiplos"
       data-testid="multiplos"
-      style={{ '--multiplos-columnas': columnas } as React.CSSProperties}
+      style={{ '--multiplos-columnas': gridColumns } as React.CSSProperties}
     >
       {paneles.map((panel, i) => (
         <section key={panel.titulo} className="multiplos__panel">
@@ -636,7 +636,7 @@ function Multiplos({
                     <tr key={punto.label}>
                       <CeldaDeCategoria
                         etiqueta={punto.label}
-                        {...(dimension ? { campo: dimension } : {})}
+                        {...(dimension ? { fieldName: dimension } : {})}
                         {...(onFiltrar ? { onFiltrar } : {})}
                       />
                       {panel.vm.series.map((serie, sIdx) => (
@@ -688,18 +688,18 @@ function presentacionDePanel(
 function CeldaDeCategoria({
   etiqueta,
   valor,
-  campo,
+  fieldName,
   onFiltrar,
 }: {
   etiqueta: string;
   /** Lo que se manda al filtro, cuando no es lo mismo que se lee. */
   valor?: string;
   /** La dimension por la que se filtra. Sin ella el objeto no tiene por que ofrecer el gesto. */
-  campo?: string;
-  onFiltrar?: (campo: string, valor: string) => void;
+  fieldName?: string;
+  onFiltrar?: (fieldName: string, valor: string) => void;
 }) {
   const aFiltrar = valor ?? etiqueta;
-  if (!campo || !onFiltrar) return <th scope="row">{etiqueta}</th>;
+  if (!fieldName || !onFiltrar) return <th scope="row">{etiqueta}</th>;
   return (
     <th scope="row">
       <button
@@ -707,7 +707,7 @@ function CeldaDeCategoria({
         className="boton-enlace"
         data-testid={`filtrar-${aFiltrar}`}
         title={`Filtrar por ${aFiltrar}`}
-        onClick={() => onFiltrar(campo, aFiltrar)}
+        onClick={() => onFiltrar(fieldName, aFiltrar)}
       >
         {etiqueta}
       </button>
@@ -730,7 +730,7 @@ export function Combinado({
   result,
   instance,
   ranuras,
-  agregaciones,
+  aggregations,
   onFiltrar,
   iconoDelObjeto,
 }: ObjetoProps) {
@@ -746,7 +746,7 @@ export function Combinado({
       result,
       dimension ? [dimension] : [],
       medidas,
-      agregacionesPara(medidas, instance.binding.measures, agregaciones),
+      agregacionesPara(medidas, instance.binding.measures, aggregations),
     ),
     instance.presentacion?.orden,
   );
@@ -756,7 +756,7 @@ export function Combinado({
       titulo={titulo}
       instance={instance}
       result={result}
-      agregaciones={agregaciones}
+      aggregations={aggregations}
       iconoDelObjeto={iconoDelObjeto}
     >
       <Grafico
@@ -798,7 +798,7 @@ export function Combinado({
                 <tr key={punto.label}>
                   <CeldaDeCategoria
                     etiqueta={punto.label}
-                    {...(dimension ? { campo: fieldKey(dimension) } : {})}
+                    {...(dimension ? { fieldName: fieldKey(dimension) } : {})}
                     {...(onFiltrar ? { onFiltrar } : {})}
                   />
                   {vm.series.map((serie, s) => (
@@ -822,7 +822,7 @@ export function Dispersion({
   result,
   instance,
   ranuras,
-  agregaciones,
+  aggregations,
   onFiltrar,
   iconoDelObjeto,
 }: ObjetoProps) {
@@ -837,7 +837,7 @@ export function Dispersion({
     result,
     dimension ? [dimension] : [],
     medidas,
-    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+    agregacionesPara(medidas, instance.binding.measures, aggregations),
   );
 
   return (
@@ -845,7 +845,7 @@ export function Dispersion({
       titulo={titulo}
       instance={instance}
       result={result}
-      agregaciones={agregaciones}
+      aggregations={aggregations}
       iconoDelObjeto={iconoDelObjeto}
     >
       <Grafico
@@ -879,7 +879,7 @@ export function Dispersion({
                 <tr key={p.label}>
                   <CeldaDeCategoria
                     etiqueta={p.label}
-                    {...(dimension ? { campo: fieldKey(dimension) } : {})}
+                    {...(dimension ? { fieldName: fieldKey(dimension) } : {})}
                     {...(onFiltrar ? { onFiltrar } : {})}
                   />
                   {vm.series.map((serie, s) => (
@@ -903,7 +903,7 @@ function UnaDimensionUnaMedida({
   result,
   instance,
   ranuras,
-  agregaciones,
+  aggregations,
   onFiltrar,
   iconoDelObjeto,
   tipo,
@@ -912,7 +912,7 @@ function UnaDimensionUnaMedida({
 }: ObjetoProps & {
   tipo: 'embudo' | 'cascada';
   ranuraDeDimension: string;
-  columnaExtra: { encabezado: string; celda: (valores: number[], i: number) => string };
+  columnaExtra: { heading: string; celda: (valores: number[], i: number) => string };
 }) {
   const r = porRanura(instance, ranuras);
   const dim = r ? r.uno(ranuraDeDimension) : fieldKeyDe(instance.binding.dimensions[0]);
@@ -924,7 +924,7 @@ function UnaDimensionUnaMedida({
       result,
       dimension ? [dimension] : [],
       medidas,
-      agregacionesPara(medidas, instance.binding.measures, agregaciones),
+      agregacionesPara(medidas, instance.binding.measures, aggregations),
     ),
     // El embudo NO admite `orden` en su presentacion; llega siempre `undefined` y el orden es el
     // del dataset, que es el del proceso. La cascada si lo admite.
@@ -938,7 +938,7 @@ function UnaDimensionUnaMedida({
       titulo={titulo}
       instance={instance}
       result={result}
-      agregaciones={agregaciones}
+      aggregations={aggregations}
       iconoDelObjeto={iconoDelObjeto}
     >
       <Grafico
@@ -962,7 +962,7 @@ function UnaDimensionUnaMedida({
                   {medidas[0] ?? 'Valor'}
                 </th>
                 <th scope="col" className="es-numero">
-                  {columnaExtra.encabezado}
+                  {columnaExtra.heading}
                 </th>
               </tr>
             </thead>
@@ -971,7 +971,7 @@ function UnaDimensionUnaMedida({
                 <tr key={punto.label}>
                   <CeldaDeCategoria
                     etiqueta={punto.label}
-                    {...(dimension ? { campo: fieldKey(dimension) } : {})}
+                    {...(dimension ? { fieldName: fieldKey(dimension) } : {})}
                     {...(onFiltrar ? { onFiltrar } : {})}
                   />
                   <td className="es-numero">{formatear(punto.values[0] ?? null)}</td>
@@ -994,7 +994,7 @@ export function Embudo(props: ObjetoProps) {
       tipo="embudo"
       ranuraDeDimension="etapa"
       columnaExtra={{
-        encabezado: comparar === 'anterior' ? 'De la anterior' : 'De la primera',
+        heading: comparar === 'anterior' ? 'De la anterior' : 'De la primera',
         celda: (valores, i) => {
           const base = comparar === 'anterior' ? (valores[i - 1] ?? valores[i]) : valores[0];
           const valor = valores[i];
@@ -1017,7 +1017,7 @@ export function Cascada(props: ObjetoProps) {
       columnaExtra={{
         // El acumulado es lo que la cascada DIBUJA: sin esta columna, el respaldo seria una lista
         // de contribuciones y la altura de cada barra —que es el acumulado— se perderia.
-        encabezado: 'Acumulado',
+        heading: 'Acumulado',
         celda: (valores, i) => {
           const hasta = valores.slice(0, i + 1).reduce((suma, v) => suma + v, 0);
           return String(hasta);
@@ -1033,7 +1033,7 @@ export function MapaDeArbol({
   result,
   instance,
   ranuras,
-  agregaciones,
+  aggregations,
   onFiltrar,
   iconoDelObjeto,
 }: ObjetoProps) {
@@ -1047,7 +1047,7 @@ export function MapaDeArbol({
     result,
     dimensiones,
     medidas,
-    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+    agregacionesPara(medidas, instance.binding.measures, aggregations),
   );
   const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
   const principal = dimensiones[0];
@@ -1065,7 +1065,7 @@ export function MapaDeArbol({
       titulo={titulo}
       instance={instance}
       result={result}
-      agregaciones={agregaciones}
+      aggregations={aggregations}
       iconoDelObjeto={iconoDelObjeto}
     >
       <Grafico
@@ -1101,7 +1101,7 @@ export function MapaDeArbol({
                   <CeldaDeCategoria
                     etiqueta={punto.label}
                     valor={punto.label.split(' / ')[0] ?? punto.label}
-                    {...(principal ? { campo: fieldKey(principal) } : {})}
+                    {...(principal ? { fieldName: fieldKey(principal) } : {})}
                     {...(onFiltrar ? { onFiltrar } : {})}
                   />
                   <td className="es-numero">{formatear(punto.values[0] ?? null)}</td>
@@ -1121,7 +1121,7 @@ export function Circular({
   result,
   instance,
   ranuras,
-  agregaciones,
+  aggregations,
   onFiltrar,
   iconoDelObjeto,
   hueco,
@@ -1135,7 +1135,7 @@ export function Circular({
     result,
     dimension ? [dimension] : [],
     medidas,
-    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+    agregacionesPara(medidas, instance.binding.measures, aggregations),
   );
   const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
 
@@ -1160,7 +1160,7 @@ export function Circular({
       titulo={titulo}
       instance={instance}
       result={result}
-      agregaciones={agregaciones}
+      aggregations={aggregations}
       iconoDelObjeto={iconoDelObjeto}
     >
       <Grafico
@@ -1200,7 +1200,7 @@ export function Circular({
                 <tr key={punto.label}>
                   <CeldaDeCategoria
                     etiqueta={punto.label}
-                    {...(dimension ? { campo: fieldKey(dimension) } : {})}
+                    {...(dimension ? { fieldName: fieldKey(dimension) } : {})}
                     {...(onFiltrar ? { onFiltrar } : {})}
                   />
                   <td className="es-numero">{formatear(punto.valor)}</td>
@@ -1228,7 +1228,7 @@ export function Medidor({
   result,
   instance,
   ranuras,
-  agregaciones,
+  aggregations,
   iconoDelObjeto,
 }: ObjetoProps) {
   const r = porRanura(instance, ranuras);
@@ -1240,7 +1240,7 @@ export function Medidor({
     result,
     [],
     medidas,
-    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+    agregacionesPara(medidas, instance.binding.measures, aggregations),
   );
   const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
   const punto = vm.points[0];
@@ -1253,7 +1253,7 @@ export function Medidor({
       titulo={titulo}
       instance={instance}
       result={result}
-      agregaciones={agregaciones}
+      aggregations={aggregations}
       iconoDelObjeto={iconoDelObjeto}
     >
       <Grafico
@@ -1306,21 +1306,21 @@ export function Medidor({
   );
 }
 
-export function Tabla({ titulo, result, instance, agregaciones, iconoDelObjeto }: ObjetoProps) {
+export function Tabla({ titulo, result, instance, aggregations, iconoDelObjeto }: ObjetoProps) {
   // La tabla dibuja SU proyeccion, no el dataset en crudo.
   //
   // Antes pintaba todas las columnas del dataset, incluidas las que su mapeo no declara, y las
   // filas sin agregar: un mapeo de dos dimensiones sobre un dataset con tres mostraba la tercera
   // y repetia cada combinacion. Es la misma funcion que usan la exportacion y el complemento de
   // tabla de datos, asi que lo que se ve y lo que se exporta no pueden separarse.
-  const proyectado = proyectarObjeto(instance, result, agregaciones);
+  const proyectado = proyectarObjeto(instance, result, aggregations);
 
   return (
     <Marco
       titulo={titulo}
       instance={instance}
       result={result}
-      agregaciones={agregaciones}
+      aggregations={aggregations}
       iconoDelObjeto={iconoDelObjeto}
     >
       {/*
@@ -1340,7 +1340,7 @@ export function Tabla({ titulo, result, instance, agregaciones, iconoDelObjeto }
   );
 }
 
-export function Matriz({ titulo, result, instance, ranuras, agregaciones, iconoDelObjeto }: ObjetoProps) {
+export function Matriz({ titulo, result, instance, ranuras, aggregations, iconoDelObjeto }: ObjetoProps) {
   const r = porRanura(instance, ranuras);
   // Varios niveles por pozo: es lo que convierte el cruce plano en una jerarquia.
   const dimsFila = (r ? r.varios('filas') : instance.binding.dimensions.slice(0, 1).map(fieldKey))
@@ -1355,7 +1355,7 @@ export function Matriz({ titulo, result, instance, ranuras, agregaciones, iconoD
     dimsFila,
     dimsColumna,
     medidas,
-    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+    agregacionesPara(medidas, instance.binding.measures, aggregations),
   );
 
   return (
@@ -1363,7 +1363,7 @@ export function Matriz({ titulo, result, instance, ranuras, agregaciones, iconoD
       titulo={titulo}
       instance={instance}
       result={result}
-      agregaciones={agregaciones}
+      aggregations={aggregations}
       iconoDelObjeto={iconoDelObjeto}
     >
       <TablaDeMatriz vm={vm} titulo={titulo} instance={instance} />
@@ -1376,11 +1376,11 @@ export interface ObjetoProps {
   result: QueryResult;
   instance: ObjectInstance;
   /** Con que operador se resume cada medida, alineado con `instance.binding.measures`. */
-  agregaciones: Aggregation[];
+  aggregations: Aggregation[];
   /** Las ranuras que declara la version del objeto. */
   ranuras?: RanuraDeCampos[];
   /** Filtrado cruzado (4.4): anade un filtro a la query string, no a un estado paralelo. */
-  onFiltrar?: (campo: string, valor: string) => void;
+  onFiltrar?: (fieldName: string, valor: string) => void;
   /** El icono que declara la version del objeto en el catalogo. */
   iconoDelObjeto?: NombreDeIcono;
 }

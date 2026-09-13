@@ -15,7 +15,7 @@ import {
 } from '@app/module-model';
 import {
   type BindingProblem,
-  type ConfiguracionDeContenedor,
+  type ContainerSettings,
   agregacionesDe,
   esContenedor,
   noConsumeDatos,
@@ -42,7 +42,7 @@ export interface ObjetoCargado {
   /** Problemas de mapeo. Si hay alguno, el objeto se dibuja MARCADO COMO ROTO (4.2). */
   problems: BindingProblem[];
   /** Con que operador se resume cada medida, alineado con `binding.measures`. */
-  agregaciones: Aggregation[];
+  aggregations: Aggregation[];
   unresolvedObject?: string;
   /** Lo que hay dentro de un contenedor, ya cargado por el mismo camino que lo de fuera. */
   paneles?: PanelCargado[];
@@ -100,7 +100,7 @@ async function leerObjetos(
         item,
         readStatus: 'generating',
         problems: [],
-        agregaciones: [],
+        aggregations: [],
         unresolvedObject: error instanceof Error ? error.message : String(error),
       });
       continue;
@@ -115,7 +115,7 @@ async function leerObjetos(
 
       if (esContenedor(instance.objectId)) {
         paneles = [];
-        for (const panel of panelesDe(config as ConfiguracionDeContenedor | undefined)) {
+        for (const panel of panelesDe(config as ContainerSettings | undefined)) {
           const dentro = await leerObjetos(
             panel.items.map((i) => ({ id: i.id, instance: i.instance, position: i.position })),
             scope,
@@ -138,9 +138,9 @@ async function leerObjetos(
         problems: validarContenedor(item.id, instance).map((p) => ({
           slot: p.slot,
           kind: 'contrato-incumplido' as const,
-          problem: p.problema,
+          problem: p.issue,
         })),
-        agregaciones: [],
+        aggregations: [],
         ...(paneles ? { paneles } : {}),
       });
       continue;
@@ -164,39 +164,39 @@ async function leerObjetos(
     });
 
     if (lectura.status === 'generating' || !lectura.result) {
-      objetos.push({ item, readStatus: 'generating', problems: [], agregaciones: [] });
+      objetos.push({ item, readStatus: 'generating', problems: [], aggregations: [] });
       continue;
     }
 
-    const columnas = lectura.result.columns.map((c) => c.name);
+    const gridColumns = lectura.result.columns.map((c) => c.name);
     /*
      * Las ranuras se comprueban AQUI tambien, no solo en `validateModule`.
      */
-    const agregaciones = agregacionesDe(
+    const aggregations = agregacionesDe(
       instance.binding.measures,
       declaradas,
-      instance.binding.agregaciones,
+      instance.binding.aggregations,
     );
 
     const problems = [
-      ...validateBinding(instance, contrato, columnas),
+      ...validateBinding(instance, contrato, gridColumns),
       ...validarRanuras(instance, ranurasDelContrato(contrato)).map((p) => ({
         slot: `ranura.${p.ranura}`,
         kind: 'contrato-incumplido' as const,
-        problem: p.problema,
+        problem: p.issue,
       })),
       /*
        * La agregacion se comprueba AQUI, en el camino de lectura, y no solo al guardar.
        */
       ...validarAgregacion({
         measures: instance.binding.measures,
-        agregaciones,
+        aggregations,
         colapsa: colapsaElDataset(instance.binding.datasetId, instance.binding.dimensions),
-        grano: granoDe(instance.binding.datasetId),
+        dataGrain: granoDe(instance.binding.datasetId),
       }).map((p) => ({
         slot: `agregacion.${p.medida}`,
         kind: 'contrato-incumplido' as const,
-        problem: p.problema,
+        problem: p.issue,
       })),
     ];
 
@@ -212,7 +212,7 @@ async function leerObjetos(
       ...(lectura.generatedAt ? { generatedAt: lectura.generatedAt } : {}),
       ...(lectura.stale ? { stale: true } : {}),
       problems,
-      agregaciones,
+      aggregations,
     });
   }
 
@@ -404,17 +404,17 @@ const esquemaEnCache = async (): Promise<SchemaDescriptor | null> => {
 };
 
 function tipoEnEsquema(schema: SchemaDescriptor, clave: string): string {
-  const [tabla, campo] = clave.split('.');
+  const [tabla, fieldName] = clave.split('.');
   const encontrado = schema.tables
     .find((t) => t.name === tabla)
-    ?.fields.find((f) => f.name === campo);
+    ?.fields.find((f) => f.name === fieldName);
   return encontrado?.type ?? TIPO_DESCONOCIDO;
 }
 
 function campoExisteEnEsquema(schema: SchemaDescriptor, clave: string): boolean {
-  const [tabla, campo] = clave.split('.');
+  const [tabla, fieldName] = clave.split('.');
   return schema.tables.some(
-    (t) => t.name === tabla && t.fields.some((f) => f.name === campo && !f.isMeasure),
+    (t) => t.name === tabla && t.fields.some((f) => f.name === fieldName && !f.isMeasure),
   );
 }
 

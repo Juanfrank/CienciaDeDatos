@@ -1,6 +1,6 @@
 /** Valida cada modulo POR SEPARADO y emite el resultado — seccion 3.4. */
 import { writeFileSync } from 'node:fs';
-import { type ResumenDeSalud, type SaludDeModulo, saludDe } from '@app/module-model';
+import { type ResumenDeSalud, type ModuleHealth, healthOf } from '@app/module-model';
 import { diagnosticarDefinicion } from '../apps/shell/src/server/datos';
 import { modulos } from '../apps/shell/src/server/almacenModulos';
 
@@ -18,7 +18,7 @@ for (const modulo of lista) {
   try {
     // La clasificacion vive en `module-model`, no aqui: es una afirmacion sobre el dominio —
     // cuando un modulo se puede servir— y el panel de administracion la necesita igual.
-    const resumen = saludDe(await diagnosticarDefinicion(modulo));
+    const resumen = healthOf(await diagnosticarDefinicion(modulo));
     estados.push({ slug: modulo.slug, moduleId: modulo.moduleId, ...resumen });
   } catch (error) {
     /*
@@ -27,7 +27,7 @@ for (const modulo of lista) {
     estados.push({
       slug: modulo.slug,
       moduleId: modulo.moduleId,
-      salud: 'fallo',
+      health: 'fallo',
       problems: [error instanceof Error ? error.message : String(error)],
       objetos: { total: 0, rotos: 0 },
     });
@@ -37,13 +37,13 @@ for (const modulo of lista) {
 const informe = { generadoEn: new Date().toISOString(), modulos: estados };
 writeFileSync(destino, `${JSON.stringify(informe, null, 2)}\n`);
 
-const MARCA: Record<SaludDeModulo, string> = { ok: '✓', degradado: '~', fallo: '✗' };
+const MARCA: Record<ModuleHealth, string> = { ok: '✓', degradado: '~', fallo: '✗' };
 for (const e of estados) {
-  console.log(`${MARCA[e.salud]} ${e.slug}${e.problems.length ? ` — ${e.problems.join(' · ')}` : ''}`);
+  console.log(`${MARCA[e.health]} ${e.slug}${e.problems.length ? ` — ${e.problems.join(' · ')}` : ''}`);
 }
 
-const caidos = estados.filter((e) => e.salud === 'fallo');
-const degradados = estados.filter((e) => e.salud === 'degradado');
+const caidos = estados.filter((e) => e.health === 'fallo');
+const degradados = estados.filter((e) => e.health === 'degradado');
 console.log(
   `\n${estados.length - caidos.length - degradados.length} sanos · ${degradados.length} degradados · ` +
     `${caidos.length} caidos · informe en ${destino}`,

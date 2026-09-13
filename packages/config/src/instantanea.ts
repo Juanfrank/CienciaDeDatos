@@ -16,7 +16,7 @@ export const INSTANTANEA_VACIA: InstantaneaDeConfiguracion = {
 };
 
 /** De donde sale la configuracion. */
-export interface FuenteDeConfiguracion {
+export interface SettingsFont {
   nombre: string;
   leer(): Promise<InstantaneaDeConfiguracion>;
 }

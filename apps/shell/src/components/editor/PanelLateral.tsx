@@ -250,8 +250,8 @@ const FAMILIAS: { family: FamiliaDeObjeto; que: string }[] = [
 ];
 
 /** Sin acentos y en minusculas, como el buscador del panel de formato y por lo mismo. */
-const normalizar = (texto: string): string =>
-  texto
+const normalizar = (content: string): string =>
+  content
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
@@ -475,18 +475,18 @@ function Datos({
   /*
    * Poner y quitar van POR RANURA, no por indice.
    */
-  const poner = (ranuraId: string, campo: string) =>
-    cambiarInstancia((i) => conCampoEnRanura(i, ranuras, ranuraId, campo));
+  const poner = (ranuraId: string, fieldName: string) =>
+    cambiarInstancia((i) => conCampoEnRanura(i, ranuras, ranuraId, fieldName));
 
-  const quitar = (ranuraId: string, campo: string) =>
-    cambiarInstancia((i) => sinCampoEnRanura(i, ranuras, ranuraId, campo));
+  const quitar = (ranuraId: string, fieldName: string) =>
+    cambiarInstancia((i) => sinCampoEnRanura(i, ranuras, ranuraId, fieldName));
 
   /*
    * Como se resume cada medida.
    */
-  const agregacionDe = (campo: string): Aggregation =>
-    item.instance.binding.agregaciones?.[campo] ??
-    dataset?.agregaciones[campo] ??
+  const agregacionDe = (fieldName: string): Aggregation =>
+    item.instance.binding.aggregations?.[fieldName] ??
+    dataset?.aggregations[fieldName] ??
     AGREGACION_POR_DEFECTO;
 
   /*
@@ -496,27 +496,27 @@ function Datos({
     colapsa: (dataset?.dimensiones ?? []).some(
       (d) => !item.instance.binding.dimensions.map(fieldKey).includes(d),
     ),
-    grano: dataset?.grain ?? 'atomico',
+    dataGrain: dataset?.grain ?? 'atomico',
   });
 
-  const cambiarAgregacion = (campo: string, aggregation: Aggregation) =>
+  const cambiarAgregacion = (fieldName: string, aggregation: Aggregation) =>
     cambiarInstancia((i) => {
-      const resto = { ...(i.binding.agregaciones ?? {}) };
+      const resto = { ...(i.binding.aggregations ?? {}) };
       // Volver a la del esquema se guarda BORRANDO la anulacion, no copiando el mismo valor: si
       // se copiara, el modulo dejaria de seguir a la fuente sin que nadie lo hubiera pedido.
-      if (aggregation === (dataset?.agregaciones[campo] ?? AGREGACION_POR_DEFECTO)) {
-        delete resto[campo];
+      if (aggregation === (dataset?.aggregations[fieldName] ?? AGREGACION_POR_DEFECTO)) {
+        delete resto[fieldName];
       } else {
-        resto[campo] = aggregation;
+        resto[fieldName] = aggregation;
       }
       // Se reconstruye el binding SIN la clave, en vez de extenderlo: con un spread, quitar la
       // ultima anulacion habria dejado la del objeto anterior intacta — el `...i.binding` la
       // vuelve a traer y el `{ agregaciones }` condicional no llega a pisarla.
-      const { agregaciones: _previas, ...binding } = i.binding;
+      const { aggregations: _previas, ...binding } = i.binding;
       const quedan = Object.keys(resto).length > 0;
       return {
         ...i,
-        binding: quedan ? { ...binding, agregaciones: resto } : binding,
+        binding: quedan ? { ...binding, aggregations: resto } : binding,
       };
     });
 
@@ -637,10 +637,10 @@ function RanuraDeEdicion({
   elegidos: string[];
   disponibles: string[];
   guardando: boolean;
-  onAnadir: (ranuraId: string, campo: string) => void;
-  onQuitar: (ranuraId: string, campo: string) => void;
-  agregacionDe?: (campo: string) => Aggregation;
-  onAgregacion?: (campo: string, aggregation: Aggregation) => void;
+  onAnadir: (ranuraId: string, fieldName: string) => void;
+  onQuitar: (ranuraId: string, fieldName: string) => void;
+  agregacionDe?: (fieldName: string) => Aggregation;
+  onAgregacion?: (fieldName: string, aggregation: Aggregation) => void;
   posibles?: Aggregation[];
 }) {
   return (
@@ -654,8 +654,8 @@ function RanuraDeEdicion({
       // esta llena y apaga solo lo que corresponde: el `+`.
       guardando={guardando}
       lleno={!cabeEnRanura(item.instance, todas, ranura.id)}
-      onAnadir={(campo) => onAnadir(ranura.id, campo)}
-      onQuitar={(campo) => onQuitar(ranura.id, campo)}
+      onAnadir={(fieldName) => onAnadir(ranura.id, fieldName)}
+      onQuitar={(fieldName) => onQuitar(ranura.id, fieldName)}
       {...(agregacionDe ? { agregacionDe } : {})}
       {...(onAgregacion ? { onAgregacion } : {})}
       {...(posibles ? { posibles } : {})}
@@ -715,7 +715,7 @@ function Complementos({
     <>
       <p className="texto-atenuado panel-editor__nota">
         Acompanan a este objeto y no ocupan celda en la rejilla. Se dibujan como iconos en su
-        cabecera.
+        pageHeader.
       </p>
 
       <Seccion titulo="Puestos" prueba={`seccion-complementos-${item.id}`}>

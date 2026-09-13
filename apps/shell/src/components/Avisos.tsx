@@ -18,7 +18,7 @@ type ReglaConEstado = AlertRule & { estado: AlertState | null };
 
 export function Avisos() {
   const [bandeja, setBandeja] = useState<Notification[]>([]);
-  const [reglas, setReglas] = useState<ReglaConEstado[]>([]);
+  const [rules, setReglas] = useState<ReglaConEstado[]>([]);
   const [suscripciones, setSuscripciones] = useState<Subscription[]>([]);
 
   const recargar = useCallback(async () => {
@@ -39,12 +39,12 @@ export function Avisos() {
   // Abrir la bandeja es haberla leido. Un contador que sigue en rojo despues de mirar los
   // avisos ensena a la gente a ignorarlo.
   useEffect(() => {
-    const sinLeer = bandeja.filter((n) => !n.readAt).map((n) => n.id);
-    if (sinLeer.length === 0) return;
+    const withoutRead = bandeja.filter((n) => !n.readAt).map((n) => n.id);
+    if (withoutRead.length === 0) return;
     void fetch('/api/notificaciones', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ ids: sinLeer }),
+      body: JSON.stringify({ ids: withoutRead }),
     });
   }, [bandeja]);
 
@@ -92,13 +92,13 @@ export function Avisos() {
       )}
 
       <h2>Mis alertas</h2>
-      {reglas.length === 0 ? (
+      {rules.length === 0 ? (
         <p className="texto-atenuado">
           Ninguna. Se crean desde un objeto del modulo que se quiera vigilar.
         </p>
       ) : (
         <ul className="lista-simple" data-testid="lista-alertas">
-          {reglas.map((r) => (
+          {rules.map((r) => (
             <li key={r.id} className="regla" data-testid={`alerta-${r.name}`}>
               <span>
                 <strong>{r.name}</strong>

@@ -36,7 +36,7 @@ export default async function PaginaEditorDeModulo({
       objetosIniciales={(previa?.objetos ?? []).map(serializarObjeto)}
       diagnosticos={await diagnosticarDefinicion(modulo)}
       bloqueos={await bloqueosDePublicacion(modulo)}
-      paleta={await paletaDelEditor()}
+      palette={await paletaDelEditor()}
       editable={modulo.status === 'borrador' && modulo.ownerUserId === sesion.userId}
     />
   );

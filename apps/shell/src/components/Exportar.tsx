@@ -6,7 +6,7 @@ import { BotonDeIcono } from './iconos/BotonDeIcono';
 
 /** Exportar — seccion 4.9, encolado como exige 5.3. */
 
-const FORMATOS = [
+const FORMATS = [
   { valor: 'csv', etiqueta: 'CSV' },
   { valor: 'xlsx', etiqueta: 'Excel' },
   { valor: 'pdf', etiqueta: 'PDF' },
@@ -111,7 +111,7 @@ export function Exportar({
             value={formato}
             onChange={(e) => setFormato(e.target.value)}
           >
-            {FORMATOS.map((f) => (
+            {FORMATS.map((f) => (
               <option key={f.valor} value={f.valor}>
                 {f.etiqueta}
               </option>

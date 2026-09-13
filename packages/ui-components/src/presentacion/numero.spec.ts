@@ -128,8 +128,8 @@ describe('el formato es POR MEDIDA, con un general de respaldo', () => {
   it('el general es una REGLA que se consulta, no una copia', () => {
     // Cambiarlo cambia todas las que no se hayan tocado. Es lo que uno espera de «general», y no
     // pasaria si al crear cada medida se le hubiera copiado el valor.
-    const otro = { ...formatos, general: { tipo: 'decimal' as const } };
-    expect(formatoDeMedida(otro, 'CasosIngresados').tipo).toBe('decimal');
-    expect(formatoDeMedida(otro, 'DiasResolucion').decimales).toBe(1);
+    const other = { ...formatos, general: { tipo: 'decimal' as const } };
+    expect(formatoDeMedida(other, 'CasosIngresados').tipo).toBe('decimal');
+    expect(formatoDeMedida(other, 'DiasResolucion').decimales).toBe(1);
   });
 });

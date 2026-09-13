@@ -201,13 +201,13 @@ test.describe('la matriz, con jerarquia', () => {
   });
 
   test('pulsar un encabezado ordena, y lo anuncia en aria-sort', async ({ page }) => {
-    const encabezado = page.locator('th', { has: page.getByTestId('matriz-ordenar-total-0') });
-    await expect(encabezado).toHaveAttribute('aria-sort', 'none');
+    const heading = page.locator('th', { has: page.getByTestId('matriz-ordenar-total-0') });
+    await expect(heading).toHaveAttribute('aria-sort', 'none');
 
     await page.getByTestId('matriz-ordenar-total-0').click();
-    await expect(encabezado).toHaveAttribute('aria-sort', 'ascending');
+    await expect(heading).toHaveAttribute('aria-sort', 'ascending');
     await page.getByTestId('matriz-ordenar-total-0').click();
-    await expect(encabezado).toHaveAttribute('aria-sort', 'descending');
+    await expect(heading).toHaveAttribute('aria-sort', 'descending');
   });
 
   test('ordenar no rompe la jerarquia: los hijos siguen bajo su padre', async ({ page }) => {
@@ -334,19 +334,19 @@ test.describe('el filtrado cruzado llega a TODOS los objetos (4.4)', () => {
   const objetos = [
     // El respaldo de las columnas es una lista de barras, no una tabla: su boton es otro y por eso
     // lleva su propio identificador. Se comprueba igual, porque el gesto es el mismo.
-    { pagina: 'familia', respaldo: 'barras', boton: 'barra-Penal', campo: 'DimTribunal.Materia' },
-    { pagina: 'familia', respaldo: 'lineas', boton: 'filtrar-Q1', campo: 'DimTiempo.Trimestre' },
-    { pagina: 'proporcion', respaldo: 'circular', boton: 'filtrar-Penal', campo: 'DimTribunal.Materia' },
-    { pagina: 'relacion', respaldo: 'combinado', boton: 'filtrar-Q1', campo: 'DimTiempo.Trimestre' },
-    { pagina: 'relacion', respaldo: 'dispersion', boton: 'filtrar-Q1', campo: 'DimTiempo.Trimestre' },
-    { pagina: 'flujo', respaldo: 'embudo', boton: 'filtrar-Q1', campo: 'DimTiempo.Trimestre' },
-    { pagina: 'flujo', respaldo: 'cascada', boton: 'filtrar-Q1', campo: 'DimTiempo.Trimestre' },
+    { pagina: 'familia', respaldo: 'barras', boton: 'barra-Penal', fieldName: 'DimTribunal.Materia' },
+    { pagina: 'familia', respaldo: 'lineas', boton: 'filtrar-Q1', fieldName: 'DimTiempo.Trimestre' },
+    { pagina: 'proporcion', respaldo: 'circular', boton: 'filtrar-Penal', fieldName: 'DimTribunal.Materia' },
+    { pagina: 'relacion', respaldo: 'combinado', boton: 'filtrar-Q1', fieldName: 'DimTiempo.Trimestre' },
+    { pagina: 'relacion', respaldo: 'dispersion', boton: 'filtrar-Q1', fieldName: 'DimTiempo.Trimestre' },
+    { pagina: 'flujo', respaldo: 'embudo', boton: 'filtrar-Q1', fieldName: 'DimTiempo.Trimestre' },
+    { pagina: 'flujo', respaldo: 'cascada', boton: 'filtrar-Q1', fieldName: 'DimTiempo.Trimestre' },
     // El mapa de arbol rotula sus filas «Penal / Q1» y filtra por el GRUPO: filtrar la materia
     // por la etiqueta compuesta no encontraria nada y el modulo se vaciaria sin decir por que.
-    { pagina: 'flujo', respaldo: 'mapa-de-arbol', boton: 'filtrar-Penal', campo: 'DimTribunal.Materia' },
+    { pagina: 'flujo', respaldo: 'mapa-de-arbol', boton: 'filtrar-Penal', fieldName: 'DimTribunal.Materia' },
   ] as const;
 
-  for (const { pagina, respaldo, boton: testid, campo } of objetos) {
+  for (const { pagina, respaldo, boton: testid, fieldName } of objetos) {
     test(`${respaldo} filtra con el teclado, por su respaldo`, async ({ page }) => {
       await page.goto(`/m/composicion/${pagina}`);
 
@@ -365,7 +365,7 @@ test.describe('el filtrado cruzado llega a TODOS los objetos (4.4)', () => {
 
       // El punto del nombre del campo se escapa: `DimTiempo.Trimestre` como expresion regular
       // aceptaria cualquier caracter en su lugar.
-      await expect(page).toHaveURL(new RegExp(`${campo.replace('.', '\\.')}=`));
+      await expect(page).toHaveURL(new RegExp(`${fieldName.replace('.', '\\.')}=`));
     });
   }
 

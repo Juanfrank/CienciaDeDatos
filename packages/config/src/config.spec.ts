@@ -9,7 +9,7 @@ import {
   banderaDeModulo,
   moduloHabilitado,
   modulosApagados,
-  type FuenteDeConfiguracion,
+  type SettingsFont,
   type InstantaneaDeConfiguracion,
 } from './index';
 
@@ -19,9 +19,9 @@ const foto = (banderas: Record<string, boolean>, valores: Record<string, string>
   leidaEn: '2026-09-13T00:00:00.000Z',
 });
 
-const fuenteQue = (
+const sourceWhere = (
   respuestas: (() => Promise<InstantaneaDeConfiguracion>)[],
-): FuenteDeConfiguracion => {
+): SettingsFont => {
   let i = 0;
   return {
     nombre: 'prueba',
@@ -56,7 +56,7 @@ describe('resolutor: refresco', () => {
     let ahora = 0;
     const leer = vi.fn(async () => foto({}));
     const r = new ResolutorDeConfiguracion({
-      fuente: { nombre: 'p', leer },
+      source: { nombre: 'p', leer },
       ttlMs: 30_000,
       ahora: () => ahora,
     });
@@ -72,7 +72,7 @@ describe('resolutor: refresco', () => {
 
   it('diez lecturas a la vez hacen UN viaje, no diez', async () => {
     const leer = vi.fn(async () => foto({}));
-    const r = new ResolutorDeConfiguracion({ fuente: { nombre: 'p', leer } });
+    const r = new ResolutorDeConfiguracion({ source: { nombre: 'p', leer } });
     await Promise.all(Array.from({ length: 10 }, () => r.instantanea()));
     expect(leer).toHaveBeenCalledTimes(1);
   });
@@ -83,7 +83,7 @@ describe('resolutor: degradacion', () => {
     let ahora = 0;
     const apagado = foto({ [banderaDeModulo('malo')]: false });
     const r = new ResolutorDeConfiguracion({
-      fuente: fuenteQue([async () => apagado, async () => Promise.reject(new Error('502'))]),
+      source: sourceWhere([async () => apagado, async () => Promise.reject(new Error('502'))]),
       ttlMs: 1_000,
       ahora: () => ahora,
     });
@@ -100,7 +100,7 @@ describe('resolutor: degradacion', () => {
     const memoria = new InMemoryCacheStore({ ttlMs: 60_000 });
     const apagado = foto({ [banderaDeModulo('malo')]: false });
 
-    const before = new ResolutorDeConfiguracion({ fuente: fuenteQue([async () => apagado]), memoria });
+    const before = new ResolutorDeConfiguracion({ source: sourceWhere([async () => apagado]), memoria });
     await before.instantanea();
     // Se guarda fuera del camino de lectura; se espera un tick para que la escritura cuaje.
     await new Promise((r) => setTimeout(r, 0));
@@ -109,7 +109,7 @@ describe('resolutor: degradacion', () => {
     // Proceso nuevo, mismo almacen compartido, y la fuente sigue caida. Sin memoria persistida
     // esta instancia reencenderia lo apagado — y un reinicio es justo lo que pasa en una caida.
     const after = new ResolutorDeConfiguracion({
-      fuente: fuenteQue([async () => Promise.reject(new Error('caida'))]),
+      source: sourceWhere([async () => Promise.reject(new Error('caida'))]),
       memoria,
     });
     expect(moduloHabilitado(await after.instantanea(), 'malo')).toBe(false);
@@ -118,7 +118,7 @@ describe('resolutor: degradacion', () => {
   it('sin ninguna foto, ni fresca ni guardada, SE ABRE', async () => {
     const alFallar = vi.fn();
     const r = new ResolutorDeConfiguracion({
-      fuente: fuenteQue([async () => Promise.reject(new Error('primer arranque'))]),
+      source: sourceWhere([async () => Promise.reject(new Error('primer arranque'))]),
       alFallar,
     });
     // El estado por defecto de un modulo es encendido. Dejar el portal en blanco porque el
@@ -131,7 +131,7 @@ describe('resolutor: degradacion', () => {
   it('un fallo al guardar la memoria no tumba la lectura', async () => {
     const memoria = new InMemoryCacheStore({ ttlMs: 1_000 });
     vi.spyOn(memoria, 'set').mockRejectedValue(new Error('disco lleno'));
-    const r = new ResolutorDeConfiguracion({ fuente: fuenteQue([async () => foto({})]), memoria });
+    const r = new ResolutorDeConfiguracion({ source: sourceWhere([async () => foto({})]), memoria });
     await expect(r.instantanea()).resolves.toBeDefined();
   });
 });
@@ -155,7 +155,7 @@ describe('fuente de App Configuration', () => {
     ({ ok, status: 200, statusText: 'OK', json: async () => body }) as Response;
 
   it('separa banderas de valores y lee enabled', async () => {
-    const buscar = vi.fn(async () =>
+    const search = vi.fn(async () =>
       respuesta({
         items: [
           {
@@ -170,7 +170,7 @@ describe('fuente de App Configuration', () => {
     const f = await new AppConfiguration({
       endpoint: 'https://t.azconfig.io',
       obtenerToken: async () => 'tok',
-      buscar: buscar as unknown as typeof fetch,
+      search: search as unknown as typeof fetch,
     }).leer();
 
     expect(moduloHabilitado(f, 'casos-pendientes')).toBe(false);
@@ -179,7 +179,7 @@ describe('fuente de App Configuration', () => {
 
   it('sigue la paginacion', async () => {
     let llamada = 0;
-    const buscar = vi.fn(async () => {
+    const search = vi.fn(async () => {
       llamada += 1;
       return llamada === 1
         ? respuesta({
@@ -192,34 +192,34 @@ describe('fuente de App Configuration', () => {
     const f = await new AppConfiguration({
       endpoint: 'https://t.azconfig.io',
       obtenerToken: async () => 'tok',
-      buscar: buscar as unknown as typeof fetch,
+      search: search as unknown as typeof fetch,
     }).leer();
 
     // Quedarse en la primera pagina dejaria banderas fuera, y «ausente» significa encendido: un
     // modulo apagado volveria a servirse solo porque la tienda crecio.
     expect(modulosApagados(f)).toEqual(['a', 'b']);
-    expect(buscar).toHaveBeenCalledTimes(2);
+    expect(search).toHaveBeenCalledTimes(2);
   });
 
   it('una respuesta de error se propaga, para que el resolutor degrade', async () => {
-    const buscar = vi.fn(async () => ({ ok: false, status: 403, statusText: 'Forbidden' }) as Response);
+    const search = vi.fn(async () => ({ ok: false, status: 403, statusText: 'Forbidden' }) as Response);
     await expect(
       new AppConfiguration({
         endpoint: 'https://t.azconfig.io',
         obtenerToken: async () => 'tok',
-        buscar: buscar as unknown as typeof fetch,
+        search: search as unknown as typeof fetch,
       }).leer(),
     ).rejects.toThrow('403');
   });
 
   it('un JSON de bandera ilegible cuenta como ENCENDIDA', async () => {
-    const buscar = vi.fn(async () =>
+    const search = vi.fn(async () =>
       respuesta({ items: [{ key: '.appconfig.featureflag/modulo.x', value: 'no-es-json' }] }),
     );
     const f = await new AppConfiguration({
       endpoint: 'https://t.azconfig.io',
       obtenerToken: async () => 'tok',
-      buscar: buscar as unknown as typeof fetch,
+      search: search as unknown as typeof fetch,
     }).leer();
     // Apagar por no saber leer un valor convertiria un error de formato en una caida de modulo.
     expect(moduloHabilitado(f, 'x')).toBe(true);

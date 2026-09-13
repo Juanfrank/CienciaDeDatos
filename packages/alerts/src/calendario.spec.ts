@@ -23,7 +23,7 @@ const sub = (parcial: Partial<Subscription> = {}): Subscription => ({
 });
 
 /** Fechas locales, que es como se define la hora de entrega para quien la configura. */
-const local = (texto: string) => new Date(texto);
+const local = (content: string) => new Date(content);
 
 describe('debeEntregarse (diaria)', () => {
   it('no entrega antes de la hora programada', () => {

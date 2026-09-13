@@ -144,7 +144,7 @@ export function EstiloDeTextoEditor({
     <div className="estilo-texto" data-testid={prueba}>
       <p className="estilo-texto__rotulo">
         {titulo}
-        {ayuda ? <Ayuda texto={ayuda} de={titulo} /> : null}
+        {ayuda ? <Ayuda content={ayuda} de={titulo} /> : null}
       </p>
 
       <div className="estilo-texto__fila" role="group" aria-label={`Estilo de ${titulo}`}>

@@ -4,7 +4,7 @@ import type { QueryResult } from '@app/data-contracts';
 
 export type ExportFormat = 'csv' | 'xlsx' | 'pdf' | 'svg';
 
-export const FORMATOS: readonly ExportFormat[] = ['csv', 'xlsx', 'pdf', 'svg'];
+export const FORMATS: readonly ExportFormat[] = ['csv', 'xlsx', 'pdf', 'svg'];
 
 export const TIPOS_MIME: Record<ExportFormat, string> = {
   csv: 'text/csv; charset=utf-8',
@@ -52,7 +52,7 @@ export interface ExportableObject {
    * de exportacion no puede depender del repositorio de objetos (regla de limites) y tampoco
    * deberia: aqui solo hace falta saber cual de las hojas merece dibujarse como imagen.
    */
-  esGrafico?: boolean;
+  isChart?: boolean;
 }
 
 export interface ExportJob {

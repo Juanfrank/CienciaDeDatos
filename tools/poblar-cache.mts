@@ -4,18 +4,18 @@ import { FileCacheStore } from '@app/caching';
 import { runScheduledCycle } from '@app/cache-populator';
 
 const args = process.argv.slice(2);
-const leer = (bandera: string, pordefecto: string): string => {
+const read = (bandera: string, pordefecto: string): string => {
   const i = args.indexOf(bandera);
   return i >= 0 ? (args[i + 1] ?? pordefecto) : pordefecto;
 };
 
-const kind = leer('--connector', process.env.DATA_CONNECTOR ?? 'mock');
+const kind = read('--connector', process.env.DATA_CONNECTOR ?? 'mock');
 if (!isConnectorKind(kind)) {
   console.error(`Conector desconocido: '${kind}'. Use mock, sql o xmla.`);
   process.exit(1);
 }
 
-const directory = leer('--dir', process.env.CACHE_DIR ?? '.cache-datos');
+const directory = read('--dir', process.env.CACHE_DIR ?? '.cache-datos');
 
 // Cambiar de conector es UN valor de configuracion. Este archivo es el unico sitio donde se
 // decide, y ni el shell ni los objetos visuales cambian una linea (criterio 2.4).

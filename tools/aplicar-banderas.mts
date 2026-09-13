@@ -2,10 +2,10 @@
 import { readFileSync } from 'node:fs';
 import { DefaultAzureCredential } from '@azure/identity';
 import { banderaDeModulo } from '@app/config';
-import type { SaludDeModulo } from '@app/module-model';
+import type { ModuleHealth } from '@app/module-model';
 
 interface Informe {
-  modulos: { slug: string; salud: SaludDeModulo }[];
+  modulos: { slug: string; health: ModuleHealth }[];
 }
 
 const [, , rutaInforme, endpoint] = process.argv;
@@ -28,10 +28,10 @@ const cabeceras = {
 let cambiadas = 0;
 
 for (const modulo of informe.modulos) {
-  const nombre = banderaDeModulo(modulo.slug);
-  const clave = encodeURIComponent(`.appconfig.featureflag/${nombre}`);
-  const url = `${base}/kv/${clave}?api-version=2023-11-01`;
-  const debeEstarEncendido = modulo.salud !== 'fallo';
+  const label = banderaDeModulo(modulo.slug);
+  const cacheKey = encodeURIComponent(`.appconfig.featureflag/${label}`);
+  const url = `${base}/kv/${cacheKey}?api-version=2023-11-01`;
+  const debeEstarEncendido = modulo.health !== 'fallo';
 
   const actual = await fetch(url, { headers: { Authorization: cabeceras.Authorization } });
   if (actual.ok) {
@@ -56,7 +56,7 @@ for (const modulo of informe.modulos) {
     headers: cabeceras,
     body: JSON.stringify({
       value: JSON.stringify({
-        id: nombre,
+        id: label,
         description: `Modulo ${modulo.slug}`,
         enabled: debeEstarEncendido,
         conditions: { client_filters: [] },
@@ -65,7 +65,7 @@ for (const modulo of informe.modulos) {
     }),
   });
   if (!respuesta.ok) {
-    throw new Error(`No se pudo escribir ${nombre}: ${respuesta.status} ${respuesta.statusText}`);
+    throw new Error(`No se pudo escribir ${label}: ${respuesta.status} ${respuesta.statusText}`);
   }
 
   cambiadas += 1;

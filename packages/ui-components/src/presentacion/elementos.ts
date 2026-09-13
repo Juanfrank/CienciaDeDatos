@@ -6,7 +6,7 @@ import type { Alineacion, ColorDeTexto, EstiloDeTexto } from './contrato';
 
 /** Texto con formato, escrito a mano. */
 export interface ParrafoDeTexto {
-  texto: string;
+  content: string;
   estilo?: EstiloDeTexto;
   /** Nivel de encabezado. Sin el, es un parrafo corriente. */
   nivel?: 1 | 2 | 3;
@@ -19,7 +19,7 @@ export interface ConfiguracionDeCuadroDeTexto {
 }
 
 export const CUADRO_DE_TEXTO_POR_DEFECTO: ConfiguracionDeCuadroDeTexto = {
-  parrafos: [{ texto: 'Escriba aqui.' }],
+  parrafos: [{ content: 'Escriba aqui.' }],
 };
 
 /* ── Titulo de seccion ─────────────────────────────────────────────────────────────────────── */
@@ -39,17 +39,17 @@ export interface ConfiguracionDeLinea {
 }
 
 export interface ConfiguracionDeTituloDeSeccion {
-  texto: string;
+  content: string;
   /** Donde va el texto cuando las lineas no lo encierran. */
   posicionDelTexto?: Alineacion;
-  linea?: PosicionDeLinea;
+  line?: PosicionDeLinea;
   estiloDeLinea?: ConfiguracionDeLinea;
 }
 
 export const TITULO_DE_SECCION_POR_DEFECTO: ConfiguracionDeTituloDeSeccion = {
-  texto: 'Seccion',
+  content: 'Seccion',
   posicionDelTexto: 'izquierda',
-  linea: 'derecha',
+  line: 'derecha',
   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'atenuado' },
 };
 
@@ -86,7 +86,7 @@ export interface ConfiguracionDeForma {
   /** Radio de las esquinas, en pixeles. Solo para las formas que tienen esquinas. */
   radio?: number;
   /** Texto opcional dentro de la forma. */
-  texto?: string;
+  content?: string;
   estiloDeTexto?: EstiloDeTexto;
 }
 
@@ -116,7 +116,7 @@ export interface ConfiguracionDeConexion {
   extremoFinal?: Extremo;
   estiloDeLinea?: ConfiguracionDeLinea;
   /** Rotulo sobre el conector. */
-  texto?: string;
+  content?: string;
 }
 
 export const CONEXION_POR_DEFECTO: ConfiguracionDeConexion = {

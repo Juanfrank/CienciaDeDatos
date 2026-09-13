@@ -14,10 +14,10 @@ const OPERADORES: AlertOperator[] = ['mayor-que', 'menor-que', 'cambia-mas-de'];
 export async function GET() {
   const sesion = await obtenerSesion();
   if (!sesion) return sinSesion();
-  const reglas = await alertStore.listRules();
+  const rules = await alertStore.listRules();
 
   // Solo las propias. Una regla ajena revelaria que modulo vigila alguien y con que umbral.
-  const mias = reglas.filter((r) => r.ownerUserId === sesion.userId);
+  const mias = rules.filter((r) => r.ownerUserId === sesion.userId);
 
   const estados = await Promise.all(mias.map((r) => alertStore.getState(r.id)));
   return NextResponse.json({
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const regla: AlertRule = {
+  const colorRule: AlertRule = {
     id: crypto.randomUUID(),
     name: nombre,
     ownerUserId: sesion.userId,
@@ -86,8 +86,8 @@ export async function POST(request: Request) {
     createdAt: new Date().toISOString(),
   };
 
-  await alertStore.saveRule(regla);
-  return NextResponse.json({ alerta: regla }, { status: 201 });
+  await alertStore.saveRule(colorRule);
+  return NextResponse.json({ alerta: colorRule }, { status: 201 });
 }
 
 export async function DELETE(request: Request) {

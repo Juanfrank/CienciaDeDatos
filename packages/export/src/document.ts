@@ -1,28 +1,28 @@
 import { defaultTheme, type ThemeTokens } from '@app/design-tokens';
-import { construirEncabezado, type Encabezado } from './encabezado';
+import { buildHeading, type Heading } from './heading';
 import type { ExportRequest, ExportableObject } from './types';
 
 /** Documento exportable: QUE se exporta, decidido UNA sola vez. */
 
 /** Los colores con los que se dibuja un archivo exportado. */
-export interface PaletaDeExportacion {
-  texto: string;
+export interface ExportPalette {
+  content: string;
   textoAtenuado: string;
   superficie: string;
   borde: string;
   /** Color de la advertencia de vista personalizada (4.6). */
-  aviso: string;
+  notice: string;
   /** Series de datos, en el orden que fija la marca. */
   series: string[];
 }
 
-export function paletaDe(theme: ThemeTokens = defaultTheme): PaletaDeExportacion {
+export function paletteOf(theme: ThemeTokens = defaultTheme): ExportPalette {
   return {
-    texto: theme.color.text,
+    content: theme.color.text,
     textoAtenuado: theme.color.textMuted,
     superficie: theme.color.surface,
     borde: theme.color.border,
-    aviso: theme.color.warning,
+    notice: theme.color.warning,
     series: theme.color.categorical,
   };
 }
@@ -39,27 +39,27 @@ export interface HojaExportable {
 }
 
 /** El texto de una celda, para los formatos que se LEEN. */
-export function textoDeCelda(hoja: HojaExportable, fila: number, columna: number): string {
-  const formateado = hoja.textos?.[fila]?.[columna];
+export function cellText(hoja: HojaExportable, fila: number, column: number): string {
+  const formateado = hoja.textos?.[fila]?.[column];
   if (formateado !== undefined) return formateado;
-  return String(hoja.rows[fila]?.[columna] ?? '');
+  return String(hoja.rows[fila]?.[column] ?? '');
 }
 
-export interface DocumentoExportable {
-  encabezado: Encabezado;
-  hojas: HojaExportable[];
+export interface ExportableDocument {
+  heading: Heading;
+  leaves: HojaExportable[];
   /** Paleta institucional con la que dibujan los cuatro formatos. */
-  paleta: PaletaDeExportacion;
+  palette: ExportPalette;
   /** La hoja que debe dibujar un formato de una sola imagen. */
   grafico?: HojaExportable;
 }
 
-export function construirDocumento(
+export function buildDocument(
   objetos: ExportableObject[],
   request: ExportRequest,
   theme: ThemeTokens = defaultTheme,
-): DocumentoExportable {
-  const hojas: HojaExportable[] = objetos.map((o) => ({
+): ExportableDocument {
+  const leaves: HojaExportable[] = objetos.map((o) => ({
     title: o.title,
     columns: o.result.columns,
     rows: o.result.rows,
@@ -67,13 +67,13 @@ export function construirDocumento(
     ...(o.notas && o.notas.length > 0 ? { notas: o.notas } : {}),
   }));
 
-  const indiceGrafico = objetos.findIndex((o) => o.esGrafico);
-  const grafico = indiceGrafico >= 0 ? hojas[indiceGrafico] : undefined;
+  const indiceGrafico = objetos.findIndex((o) => o.isChart);
+  const grafico = indiceGrafico >= 0 ? leaves[indiceGrafico] : undefined;
 
   return {
-    encabezado: construirEncabezado(request),
-    hojas,
-    paleta: paletaDe(theme),
+    heading: buildHeading(request),
+    leaves,
+    palette: paletteOf(theme),
     ...(grafico ? { grafico } : {}),
   };
 }

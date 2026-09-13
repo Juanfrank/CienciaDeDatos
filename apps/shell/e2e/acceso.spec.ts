@@ -162,8 +162,8 @@ test.describe('la sesion emitida es la de quien entro', () => {
     expect(navegacion.equipoActivo).toBe('equipo-norte');
 
     const modulo = await (await page.request.get('/api/modulos/casos-pendientes')).json();
-    const filas = modulo.objetos[0].result.rows as unknown[][];
-    expect([...new Set(filas.map((f) => String(f[0])))]).toEqual(['Distrito Norte']);
+    const dataRows = modulo.objetos[0].result.rows as unknown[][];
+    expect([...new Set(dataRows.map((f) => String(f[0])))]).toEqual(['Distrito Norte']);
   });
 
   test('ya no se puede cambiar de persona sin autenticar', async ({ page }) => {

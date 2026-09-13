@@ -25,7 +25,7 @@ const objeto = (versions: ObjectVersion[]): VisualObjectDefinition => ({
   versions,
 });
 
-const instancia = (objectId: string, v: string): ObjectInstance => ({
+const objectInstance = (objectId: string, v: string): ObjectInstance => ({
   instanceId: `i-${objectId}-${v}`,
   objectId,
   version: v,
@@ -184,7 +184,7 @@ describe('politica de deprecacion (4.5)', () => {
 
   it('avisa de forma ACTIVA a las instancias que usan una version deprecada', () => {
     const avisos = conDeprecacion().findDeprecationWarnings(
-      [instancia('barras', '1.0.0'), instancia('barras', '2.0.0')],
+      [objectInstance('barras', '1.0.0'), objectInstance('barras', '2.0.0')],
       new Date('2026-11-01'),
     );
     expect(avisos).toHaveLength(1);
@@ -198,7 +198,7 @@ describe('politica de deprecacion (4.5)', () => {
 
   it('marca como vencida una instancia que paso la fecha limite', () => {
     const avisos = conDeprecacion().findDeprecationWarnings(
-      [instancia('barras', '1.0.0')],
+      [objectInstance('barras', '1.0.0')],
       new Date('2027-01-15'),
     );
     expect(avisos[0]?.expired).toBe(true);
@@ -215,7 +215,7 @@ describe('politica de deprecacion (4.5)', () => {
       reason: 'Sustituida por 2.1.0.',
     });
     const avisos = registro.findDeprecationWarnings(
-      [instancia('barras', '2.0.0'), instancia('barras', '1.0.0')],
+      [objectInstance('barras', '2.0.0'), objectInstance('barras', '1.0.0')],
       new Date('2026-11-01'),
     );
     expect(avisos.map((a) => a.version)).toEqual(['1.0.0', '2.0.0']);
@@ -234,7 +234,7 @@ describe('politica de deprecacion (4.5)', () => {
   });
 
   it('una instancia en una version sin deprecar no genera aviso', () => {
-    const avisos = conDeprecacion().findDeprecationWarnings([instancia('barras', '2.0.0')]);
+    const avisos = conDeprecacion().findDeprecationWarnings([objectInstance('barras', '2.0.0')]);
     expect(avisos).toEqual([]);
   });
 });

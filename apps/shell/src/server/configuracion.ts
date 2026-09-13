@@ -6,7 +6,7 @@ import {
   ResolutorDeConfiguracion,
   moduloHabilitado,
   modulosApagados,
-  type FuenteDeConfiguracion,
+  type SettingsFont,
 } from '@app/config';
 import { cacheL2 } from './almacenCompartido';
 
@@ -14,7 +14,7 @@ import { cacheL2 } from './almacenCompartido';
 
 const endpoint = process.env['APP_CONFIG_ENDPOINT'];
 
-function fuente(): FuenteDeConfiguracion {
+function source(): SettingsFont {
   if (!endpoint) return new ConfiguracionDeEntorno();
 
   // La credencial se construye una vez y se reutiliza: renueva el token por dentro, y crear una
@@ -35,7 +35,7 @@ const global = globalThis as typeof globalThis & { __config?: ResolutorDeConfigu
 
 function nuevoResolutor(): ResolutorDeConfiguracion {
   return new ResolutorDeConfiguracion({
-    fuente: fuente(),
+    source: source(),
     // La ultima foto buena se guarda en el almacen COMPARTIDO, no en memoria: si App
     // Configuration cae y una instancia se recicla, la nueva tiene que arrancar sabiendo que
     // modulos estaban apagados. Con memoria por proceso, los reencenderia.

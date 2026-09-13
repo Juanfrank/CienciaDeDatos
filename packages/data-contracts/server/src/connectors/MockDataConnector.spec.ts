@@ -27,14 +27,14 @@ describe('MockDataConnector', () => {
     const schema = await new MockDataConnector().getSchema();
     const campos = schema.tables.flatMap((t) => t.fields);
     expect(campos.length).toBeGreaterThan(0);
-    for (const campo of campos) {
+    for (const fieldName of campos) {
       // Lo que NO puede salir es lo que solo sirve para generar datos sinteticos: si un modulo
       // pudiera leer `sampleValues` o `range`, dependeria de algo que la fuente real no tiene.
       // Se comprueba asi y no con una lista cerrada de claves, que rechazaba cualquier campo
       // nuevo del contrato publico —`isKey` lo es— sin que hubiera ninguna fuga.
-      expect(campo).not.toHaveProperty('sampleValues');
-      expect(campo).not.toHaveProperty('range');
-      expect(campo).not.toHaveProperty('cardinality');
+      expect(fieldName).not.toHaveProperty('sampleValues');
+      expect(fieldName).not.toHaveProperty('range');
+      expect(fieldName).not.toHaveProperty('cardinality');
     }
     expect(schema.measures.map((m) => m.name)).toContain('CasosIngresados');
     // La agregacion SI es contrato publico: es lo que dice como resumir cada medida.

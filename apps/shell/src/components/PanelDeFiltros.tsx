@@ -14,8 +14,8 @@ import { Marco } from "./objetos";
 
 /** Panel de filtros — de 1 a 10 dimensiones en un solo objeto. */
 
-const DESDE = (campo: string) => `${campo}.desde`;
-const HASTA = (campo: string) => `${campo}.hasta`;
+const DESDE = (fieldName: string) => `${fieldName}.desde`;
+const HASTA = (fieldName: string) => `${fieldName}.hasta`;
 
 export function PanelDeFiltros({
   titulo,
@@ -34,7 +34,7 @@ export function PanelDeFiltros({
 
   // Los tipos salen de las columnas del propio resultado: es el mismo dato con el que se valido
   // en el servidor, asi que un selector de fecha aqui es un selector de fecha alli.
-  const tiposPorCampo = useMemo(
+  const fieldKinds = useMemo(
     () => Object.fromEntries(result.columns.map((c) => [c.name, c.type])),
     [result.columns],
   );
@@ -46,17 +46,17 @@ export function PanelDeFiltros({
         instance.configuracion?.objectId === "panel-de-filtros"
           ? instance.configuracion
           : undefined,
-        tiposPorCampo,
+        fieldKinds,
       ),
-    [instance, tiposPorCampo],
+    [instance, fieldKinds],
   );
 
   const puestos = selectores.filter((s) =>
     s.tipo === "calendario" || s.tipo === "rango-de-fechas"
-      ? searchParams.has(DESDE(s.campo)) ||
-        searchParams.has(HASTA(s.campo)) ||
-        searchParams.has(s.campo)
-      : valoresDe(s.campo).length > 0,
+      ? searchParams.has(DESDE(s.fieldName)) ||
+        searchParams.has(HASTA(s.fieldName)) ||
+        searchParams.has(s.fieldName)
+      : valoresDe(s.fieldName).length > 0,
   ).length;
 
   return (
@@ -82,26 +82,26 @@ export function PanelDeFiltros({
       >
         {selectores.map((selector) => (
           <SelectorDeCampo
-            key={selector.campo}
+            key={selector.fieldName}
             selector={selector}
-            opciones={opcionesDe(result, selector.campo)}
-            valores={valoresDe(selector.campo)}
-            desde={searchParams.get(DESDE(selector.campo)) ?? ""}
-            hasta={searchParams.get(HASTA(selector.campo)) ?? ""}
-            onAlternar={(valor) => alternar(selector.campo, valor)}
-            onFijar={(valor) => fijar(selector.campo, valor)}
+            opciones={opcionesDe(result, selector.fieldName)}
+            valores={valoresDe(selector.fieldName)}
+            desde={searchParams.get(DESDE(selector.fieldName)) ?? ""}
+            hasta={searchParams.get(HASTA(selector.fieldName)) ?? ""}
+            onAlternar={(valor) => alternar(selector.fieldName, valor)}
+            onFijar={(valor) => fijar(selector.fieldName, valor)}
             onFijarFecha={(cual, valor) =>
               fijar(
                 cual === "desde"
-                  ? DESDE(selector.campo)
-                  : HASTA(selector.campo),
+                  ? DESDE(selector.fieldName)
+                  : HASTA(selector.fieldName),
                 valor,
               )
             }
             onLimpiar={() => {
-              limpiarCampo(selector.campo);
-              limpiarCampo(DESDE(selector.campo));
-              limpiarCampo(HASTA(selector.campo));
+              limpiarCampo(selector.fieldName);
+              limpiarCampo(DESDE(selector.fieldName));
+              limpiarCampo(HASTA(selector.fieldName));
             }}
           />
         ))}
@@ -111,8 +111,8 @@ export function PanelDeFiltros({
 }
 
 /** Valores distintos de una columna, ordenados. Salen del dataset YA recortado por el ambito. */
-function opcionesDe(result: QueryResult, campo: string): string[] {
-  const [tabla, ...resto] = campo.split(".");
+function opcionesDe(result: QueryResult, fieldName: string): string[] {
+  const [tabla, ...resto] = fieldName.split(".");
   return toSlicerOptions(result, {
     table: tabla ?? "",
     field: resto.join("."),
@@ -142,7 +142,7 @@ function SelectorDeCampo({
 }) {
   const id = useId();
   const [busqueda, setBusqueda] = useState("");
-  const prueba = `filtro-${selector.campo}`;
+  const prueba = `filtro-${selector.fieldName}`;
 
   const filtradas = busqueda
     ? opciones.filter((o) => o.toLowerCase().includes(busqueda.toLowerCase()))

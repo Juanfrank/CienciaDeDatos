@@ -16,11 +16,11 @@ function exigeDimension(adjunto: AttachedObjectInstance): boolean {
 
 export function validateAttachments(
   instance: ObjectInstance,
-  buscar: BuscarDefinicion,
+  search: BuscarDefinicion,
 ): BindingProblem[] {
   const problems: BindingProblem[] = [];
 
-  const anfitrion = buscar(instance.objectId);
+  const anfitrion = search(instance.objectId);
   if (anfitrion?.attachable) {
     problems.push({
       slot: instance.objectId,
@@ -34,7 +34,7 @@ export function validateAttachments(
   const vistos = new Set<string>();
 
   for (const adjunto of instance.attachments ?? []) {
-    const definicion = buscar(adjunto.objectId);
+    const definicion = search(adjunto.objectId);
 
     if (!definicion) {
       problems.push({

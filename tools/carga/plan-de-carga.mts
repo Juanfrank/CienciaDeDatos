@@ -1,7 +1,7 @@
 /** Prueba de carga del camino de lectura — secciones 5.5 y 8.3. */
 
 interface Escenario {
-  nombre: string;
+  label: string;
   path: string;
   /** Peso relativo: cuantas veces aparece por vuelta. */
   peso: number;
@@ -9,14 +9,14 @@ interface Escenario {
 
 /** Perfil de uso. */
 export const ESCENARIOS: Escenario[] = [
-  { nombre: 'modulo completo', path: '/api/modulos/casos-pendientes', peso: 4 },
+  { label: 'modulo completo', path: '/api/modulos/casos-pendientes', peso: 4 },
   {
-    nombre: 'modulo filtrado',
+    label: 'modulo filtrado',
     path: '/api/modulos/casos-pendientes?DimTribunal.Materia=Penal',
     peso: 6,
   },
-  { nombre: 'navegacion', path: '/api/navegacion', peso: 2 },
-  { nombre: 'salud', path: '/health', peso: 1 },
+  { label: 'navegacion', path: '/api/navegacion', peso: 2 },
+  { label: 'salud', path: '/health', peso: 1 },
 ];
 
 interface Medicion {
@@ -51,14 +51,14 @@ async function trabajador(base: string, hasta: number, cookie: string, medicion:
 
 async function principal(): Promise<void> {
   const args = process.argv.slice(2);
-  const leer = (bandera: string, pordefecto: string): string => {
+  const read = (bandera: string, pordefecto: string): string => {
     const i = args.indexOf(bandera);
     return i >= 0 ? (args[i + 1] ?? pordefecto) : pordefecto;
   };
 
-  const base = leer('--url', 'http://localhost:4310').replace(/\/$/, '');
-  const concurrencia = Number(leer('--concurrencia', '20'));
-  const segundos = Number(leer('--segundos', '20'));
+  const base = read('--url', 'http://localhost:4310').replace(/\/$/, '');
+  const concurrencia = Number(read('--concurrencia', '20'));
+  const segundos = Number(read('--segundos', '20'));
 
   // Una sesion real: sin ella cada peticion emitiria una nueva y se mediria el alta de sesion,
   // no la lectura.

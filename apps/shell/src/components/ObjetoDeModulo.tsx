@@ -2,7 +2,7 @@
 
 import type { QueryResult } from '@app/data-contracts';
 import {
-  type ConfiguracionDeContenedor,
+  type ContainerSettings,
   type ConfiguracionDeElemento,
   fieldKey,
   toSlicerOptions,
@@ -51,7 +51,7 @@ export function ObjetoDeModulo({
 }: {
   objeto: ObjetoSerializado;
   /** Opcional a proposito: en la vista previa del editor no hay filtrado cruzado. */
-  onFiltrar?: (campo: string, valor: string) => void;
+  onFiltrar?: (fieldName: string, valor: string) => void;
 }) {
   const titulo = objeto.titulo;
 
@@ -97,7 +97,7 @@ export function ObjetoDeModulo({
       break;
   }
 
-  const contenedor = conf as (ConfiguracionDeContenedor & { objectId: string }) | undefined;
+  const contenedor = conf as (ContainerSettings & { objectId: string }) | undefined;
   const dibujarHijo = (hijo: ObjetoSerializado) => (
     <ObjetoDeModulo objeto={hijo} {...(onFiltrar ? { onFiltrar } : {})} />
   );
@@ -126,7 +126,7 @@ export function ObjetoDeModulo({
     // Los operadores de agregacion viajan con el objeto por el mismo motivo que las ranuras: el
     // cliente no tiene el esquema, y deducirlos aqui abriria la puerta a que lo dibujado y lo
     // exportado resumieran distinto.
-    agregaciones: objeto.agregaciones,
+    aggregations: objeto.aggregations,
     // Las ranuras viajan con el objeto: sin ellas los renderizadores volverian a leer por posicion.
     ...(objeto.ranuras ? { ranuras: objeto.ranuras } : {}),
     // Y el icono, por lo mismo: el cliente no tiene el registro.
@@ -182,7 +182,7 @@ export function ObjetoDeModulo({
       return (
         <Segmentador
           titulo={titulo}
-          campo={fieldKey(dimension)}
+          fieldName={fieldKey(dimension)}
           opciones={toSlicerOptions(result, dimension)}
           instance={objeto.instance}
           result={result}

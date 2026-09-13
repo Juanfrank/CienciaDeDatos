@@ -74,8 +74,8 @@ test.describe('ambito de acceso por equipo activo (4.10.4)', () => {
     expect(textoEste.length).toBeGreaterThan(0);
 
     const datos = await page.request.get('/api/modulos/casos-este').then((r) => r.json());
-    const filas = datos.objetos[0].result.rows as unknown[][];
-    const distritos = [...new Set(filas.map((f) => String(f[0])))];
+    const dataRows = datos.objetos[0].result.rows as unknown[][];
+    const distritos = [...new Set(dataRows.map((f) => String(f[0])))];
     expect(distritos).toEqual(['Distrito Este']);
   });
 
@@ -149,8 +149,8 @@ test.describe('estado de filtros en la URL (4.11)', () => {
     await entrarComo(page, 'u-ana');
     // El equipo Norte no puede ver el Distrito Este, lo pida la URL o no.
     await page.goto('/m/casos-pendientes?DimTribunal.Distrito=Distrito+Este');
-    const texto = await page.getByTestId('tabla').innerText();
-    expect(texto).not.toContain('Distrito Este');
+    const content = await page.getByTestId('tabla').innerText();
+    expect(content).not.toContain('Distrito Este');
   });
 
   test('un segmentador no se filtra a si mismo: se puede elegir un segundo valor', async ({ page }) => {
@@ -272,8 +272,8 @@ test.describe('marcadores (4.4)', () => {
       .then((r) => r.json());
 
     // El marcador pedia el Norte; el ambito de Beto no lo permite. No ve los datos de Ana.
-    const filas = datos.objetos.find((o: { result?: unknown }) => o.result)?.result.rows ?? [];
-    expect(filas).toHaveLength(0);
+    const dataRows = datos.objetos.find((o: { result?: unknown }) => o.result)?.result.rows ?? [];
+    expect(dataRows).toHaveLength(0);
   });
 });
 

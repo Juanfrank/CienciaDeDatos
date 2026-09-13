@@ -85,62 +85,62 @@ export interface MaterialScheme {
 export type ColorMode = 'light' | 'dark';
 
 /** Tonos de cada rol. La tabla de la especificacion, tal cual. */
-const TONOS: Record<keyof MaterialScheme, { paleta: keyof PaletasTonales; light: number; dark: number }> = {
-  primary: { paleta: 'primary', light: 40, dark: 80 },
-  onPrimary: { paleta: 'primary', light: 100, dark: 20 },
-  primaryContainer: { paleta: 'primary', light: 90, dark: 30 },
-  onPrimaryContainer: { paleta: 'primary', light: 10, dark: 90 },
+const TONOS: Record<keyof MaterialScheme, { palette: keyof PaletasTonales; light: number; dark: number }> = {
+  primary: { palette: 'primary', light: 40, dark: 80 },
+  onPrimary: { palette: 'primary', light: 100, dark: 20 },
+  primaryContainer: { palette: 'primary', light: 90, dark: 30 },
+  onPrimaryContainer: { palette: 'primary', light: 10, dark: 90 },
 
-  secondary: { paleta: 'secondary', light: 40, dark: 80 },
-  onSecondary: { paleta: 'secondary', light: 100, dark: 20 },
-  secondaryContainer: { paleta: 'secondary', light: 90, dark: 30 },
-  onSecondaryContainer: { paleta: 'secondary', light: 10, dark: 90 },
+  secondary: { palette: 'secondary', light: 40, dark: 80 },
+  onSecondary: { palette: 'secondary', light: 100, dark: 20 },
+  secondaryContainer: { palette: 'secondary', light: 90, dark: 30 },
+  onSecondaryContainer: { palette: 'secondary', light: 10, dark: 90 },
 
-  tertiary: { paleta: 'tertiary', light: 40, dark: 80 },
-  onTertiary: { paleta: 'tertiary', light: 100, dark: 20 },
-  tertiaryContainer: { paleta: 'tertiary', light: 90, dark: 30 },
-  onTertiaryContainer: { paleta: 'tertiary', light: 10, dark: 90 },
+  tertiary: { palette: 'tertiary', light: 40, dark: 80 },
+  onTertiary: { palette: 'tertiary', light: 100, dark: 20 },
+  tertiaryContainer: { palette: 'tertiary', light: 90, dark: 30 },
+  onTertiaryContainer: { palette: 'tertiary', light: 10, dark: 90 },
 
-  error: { paleta: 'error', light: 40, dark: 80 },
-  onError: { paleta: 'error', light: 100, dark: 20 },
-  errorContainer: { paleta: 'error', light: 90, dark: 30 },
-  onErrorContainer: { paleta: 'error', light: 10, dark: 90 },
+  error: { palette: 'error', light: 40, dark: 80 },
+  onError: { palette: 'error', light: 100, dark: 20 },
+  errorContainer: { palette: 'error', light: 90, dark: 30 },
+  onErrorContainer: { palette: 'error', light: 10, dark: 90 },
 
-  background: { paleta: 'neutral', light: 98, dark: 6 },
-  onBackground: { paleta: 'neutral', light: 10, dark: 90 },
-  surface: { paleta: 'neutral', light: 98, dark: 6 },
-  onSurface: { paleta: 'neutral', light: 10, dark: 90 },
-  surfaceVariant: { paleta: 'neutralVariant', light: 90, dark: 30 },
-  onSurfaceVariant: { paleta: 'neutralVariant', light: 30, dark: 80 },
+  background: { palette: 'neutral', light: 98, dark: 6 },
+  onBackground: { palette: 'neutral', light: 10, dark: 90 },
+  surface: { palette: 'neutral', light: 98, dark: 6 },
+  onSurface: { palette: 'neutral', light: 10, dark: 90 },
+  surfaceVariant: { palette: 'neutralVariant', light: 90, dark: 30 },
+  onSurfaceVariant: { palette: 'neutralVariant', light: 30, dark: 80 },
 
-  surfaceContainerLowest: { paleta: 'neutral', light: 100, dark: 4 },
-  surfaceContainerLow: { paleta: 'neutral', light: 96, dark: 10 },
-  surfaceContainer: { paleta: 'neutral', light: 94, dark: 12 },
-  surfaceContainerHigh: { paleta: 'neutral', light: 92, dark: 17 },
-  surfaceContainerHighest: { paleta: 'neutral', light: 90, dark: 22 },
-  surfaceDim: { paleta: 'neutral', light: 87, dark: 6 },
-  surfaceBright: { paleta: 'neutral', light: 98, dark: 24 },
+  surfaceContainerLowest: { palette: 'neutral', light: 100, dark: 4 },
+  surfaceContainerLow: { palette: 'neutral', light: 96, dark: 10 },
+  surfaceContainer: { palette: 'neutral', light: 94, dark: 12 },
+  surfaceContainerHigh: { palette: 'neutral', light: 92, dark: 17 },
+  surfaceContainerHighest: { palette: 'neutral', light: 90, dark: 22 },
+  surfaceDim: { palette: 'neutral', light: 87, dark: 6 },
+  surfaceBright: { palette: 'neutral', light: 98, dark: 24 },
 
-  outline: { paleta: 'neutralVariant', light: 50, dark: 60 },
-  outlineVariant: { paleta: 'neutralVariant', light: 80, dark: 30 },
+  outline: { palette: 'neutralVariant', light: 50, dark: 60 },
+  outlineVariant: { palette: 'neutralVariant', light: 80, dark: 30 },
 
-  inverseSurface: { paleta: 'neutral', light: 20, dark: 90 },
-  inverseOnSurface: { paleta: 'neutral', light: 95, dark: 20 },
-  inversePrimary: { paleta: 'primary', light: 80, dark: 40 },
+  inverseSurface: { palette: 'neutral', light: 20, dark: 90 },
+  inverseOnSurface: { palette: 'neutral', light: 95, dark: 20 },
+  inversePrimary: { palette: 'primary', light: 80, dark: 40 },
 
-  shadow: { paleta: 'neutral', light: 0, dark: 0 },
-  scrim: { paleta: 'neutral', light: 0, dark: 0 },
+  shadow: { palette: 'neutral', light: 0, dark: 0 },
+  scrim: { palette: 'neutral', light: 0, dark: 0 },
 };
 
 export function schemeFor(source: ThemeSource, mode: ColorMode): MaterialScheme {
   const palettes = palettesFor(source);
   const scheme = {} as MaterialScheme;
 
-  for (const [role, { paleta, light, dark }] of Object.entries(TONOS) as [
+  for (const [role, { palette, light, dark }] of Object.entries(TONOS) as [
     keyof MaterialScheme,
     (typeof TONOS)[keyof MaterialScheme],
   ][]) {
-    scheme[role] = hexFromArgb(palettes[paleta].tone(mode === 'light' ? light : dark));
+    scheme[role] = hexFromArgb(palettes[palette].tone(mode === 'light' ? light : dark));
   }
 
   return scheme;

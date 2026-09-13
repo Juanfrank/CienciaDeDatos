@@ -39,7 +39,7 @@ export {
   type DrillThroughTarget,
   type InteractionPattern,
   type InteractionPatternSpec,
-} from './interaccion';
+} from './interaction';
 
 export {
   TIPO_DESCONOCIDO,
@@ -53,4 +53,4 @@ export {
   type PublishBlocker,
   type ValidateModuleInput,
 } from './validation';
-export { saludDe, type ResumenDeSalud, type SaludDeModulo } from './salud';
+export { healthOf, type ResumenDeSalud, type SaludDeModulo } from './health';

@@ -18,7 +18,7 @@ const formatearCelda = (celda: unknown): string =>
   typeof celda === 'number' ? new Intl.NumberFormat('es-DO').format(celda) : String(celda ?? '');
 
 /** Tooltip explicativo. */
-export function TooltipExplicativo({ texto, titulo }: { texto: string; titulo: string }) {
+export function TooltipExplicativo({ content, titulo }: { content: string; titulo: string }) {
   const id = useId();
   const [visible, setVisible] = useState(false);
   const boton = useRef<HTMLButtonElement>(null);
@@ -114,7 +114,7 @@ export function TooltipExplicativo({ texto, titulo }: { texto: string; titulo: s
           data-testid={`tooltip-${titulo}`}
           style={sitio ? { top: `${sitio.top}px`, left: `${sitio.left}px` } : { visibility: 'hidden' }}
         >
-          {texto}
+          {content}
         </span>
       ) : null}
     </span>
@@ -127,13 +127,13 @@ export function TablaDeDatos({
   result,
   titulo,
   scope,
-  agregaciones,
+  aggregations,
 }: {
   instance: ObjectInstance;
   result: QueryResult;
   titulo: string;
   scope: 'objeto' | 'subobjeto';
-  agregaciones: Aggregation[];
+  aggregations: Aggregation[];
 }) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [abierto, setAbierto] = useState(false);
@@ -154,14 +154,14 @@ export function TablaDeDatos({
   const dimensiones = instance.binding.dimensions;
   const categorias =
     scope === 'subobjeto'
-      ? aggregateBy(result, dimensiones, instance.binding.measures, agregaciones).rows
+      ? aggregateBy(result, dimensiones, instance.binding.measures, aggregations).rows
       : [];
 
   // Con alcance de objeto se muestran las filas de ORIGEN, sin agregar: lo interesante del
   // emergente es precisamente lo que el objeto no ensena. Con alcance de subobjeto, lo mismo
   // pero acotado a la categoria elegida.
-  const filas = seleccion ? desgloseDe(result, seleccion) : result;
-  const proyeccion = proyectarObjeto(instance, result, agregaciones);
+  const dataRows = seleccion ? desgloseDe(result, seleccion) : result;
+  const proyeccion = proyectarObjeto(instance, result, aggregations);
 
   const etiquetaSeleccion = seleccion ? Object.values(seleccion).join(' / ') : null;
 
@@ -196,7 +196,7 @@ export function TablaDeDatos({
         {scope === 'subobjeto' && !seleccion ? (
           <>
             <p className="texto-atenuado">
-              Elija una categoria para ver las filas que hay detras de su cifra.
+              Elija una categoria para ver las dataRows que hay detras de su cifra.
             </p>
             <div className="tabla-contenedor" tabIndex={0} role="region" aria-label="Categorias">
               <table className="tabla">
@@ -234,7 +234,7 @@ export function TablaDeDatos({
                               )
                             }
                           >
-                            Ver filas
+                            Ver dataRows
                           </button>
                         </td>
                       </tr>
@@ -248,8 +248,8 @@ export function TablaDeDatos({
           <>
             <p className="texto-atenuado" data-testid="tabla-datos-resumen">
               {etiquetaSeleccion
-                ? `${filas.rows.length} fila(s) detras de ${etiquetaSeleccion}.`
-                : `${filas.rows.length} fila(s) de origen de este objeto.`}
+                ? `${dataRows.rows.length} fila(s) detras de ${etiquetaSeleccion}.`
+                : `${dataRows.rows.length} fila(s) de origen de este objeto.`}
             </p>
             {etiquetaSeleccion ? (
               <button
@@ -265,7 +265,7 @@ export function TablaDeDatos({
               <table className="tabla" data-testid="tabla-datos-filas">
                 <thead>
                   <tr>
-                    {filas.columns.map((c) => (
+                    {dataRows.columns.map((c) => (
                       <th key={c.name} scope="col">
                         {c.name}
                       </th>
@@ -273,7 +273,7 @@ export function TablaDeDatos({
                   </tr>
                 </thead>
                 <tbody>
-                  {filas.rows.map((fila, i) => (
+                  {dataRows.rows.map((fila, i) => (
                     <tr key={i}>
                       {fila.map((celda, j) => (
                         <td key={j} className={typeof celda === 'number' ? 'es-numero' : ''}>
@@ -297,12 +297,12 @@ export function Complementos({
   instance,
   result,
   titulo,
-  agregaciones,
+  aggregations,
 }: {
   instance: ObjectInstance;
   result: QueryResult;
   titulo: string;
-  agregaciones: Aggregation[];
+  aggregations: Aggregation[];
 }) {
   const tooltip = attachmentOf(instance, 'tooltip-explicativo');
   const tabla = attachmentOf(instance, 'tabla-de-datos');
@@ -311,14 +311,14 @@ export function Complementos({
 
   return (
     <span className="complementos">
-      {tooltip ? <TooltipExplicativo texto={tooltip.text} titulo={titulo} /> : null}
+      {tooltip ? <TooltipExplicativo content={tooltip.text} titulo={titulo} /> : null}
       {tabla ? (
         <TablaDeDatos
           instance={instance}
           result={result}
           titulo={titulo}
           scope={tabla.scope}
-          agregaciones={agregaciones}
+          aggregations={aggregations}
         />
       ) : null}
     </span>

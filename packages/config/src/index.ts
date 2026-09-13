@@ -4,7 +4,7 @@ export {
   banderaDeModulo,
   moduloHabilitado,
   modulosApagados,
-  type FuenteDeConfiguracion,
+  type SettingsFont,
   type InstantaneaDeConfiguracion,
 } from './instantanea';
 export {
@@ -12,4 +12,4 @@ export {
   ResolutorDeConfiguracion,
   type OpcionesDelResolutor,
 } from './Resolutor';
-export { AppConfiguration, ConfiguracionDeEntorno } from './fuentes';
+export { AppConfiguration, ConfiguracionDeEntorno } from './fonts';

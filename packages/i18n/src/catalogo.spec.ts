@@ -50,9 +50,9 @@ describe('catalogos', () => {
 
     it(`${locale}: ningun mensaje deja un argumento sin cerrar`, () => {
       const rotos = claves.filter((c) => {
-        const texto = CATALOGOS[locale][c];
+        const content = CATALOGOS[locale][c];
         let profundidad = 0;
-        for (const caracter of texto) {
+        for (const caracter of content) {
           if (caracter === '{') profundidad++;
           else if (caracter === '}') profundidad--;
           if (profundidad < 0) return true;
@@ -96,9 +96,9 @@ describe('formato ICU', () => {
   });
 
   it('anida argumentos dentro de una opcion', () => {
-    const mensaje = '{n, plural, one {Falta {campo}} other {Faltan {n} campos}}';
-    expect(formatearMensaje(mensaje, { n: 1, campo: 'Distrito' })).toBe('Falta Distrito');
-    expect(formatearMensaje(mensaje, { n: 3, campo: 'Distrito' })).toBe('Faltan 3 campos');
+    const mensaje = '{n, plural, one {Falta {fieldName}} other {Faltan {n} campos}}';
+    expect(formatearMensaje(mensaje, { n: 1, fieldName: 'Distrito' })).toBe('Falta Distrito');
+    expect(formatearMensaje(mensaje, { n: 3, fieldName: 'Distrito' })).toBe('Faltan 3 campos');
   });
 
   it('selecciona por valor', () => {

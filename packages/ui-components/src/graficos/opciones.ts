@@ -31,16 +31,16 @@ import type { CategoricalViewModel } from '../registry/viewModel';
 export interface PaletaDeGrafico {
   /** Ocho colores de serie, del tema institucional. */
   series: string[];
-  texto: string;
+  content: string;
   textoAtenuado: string;
-  linea: string;
+  line: string;
   superficie: string;
   superficieElevada: string;
 }
 
 export interface OpcionesDeGrafico {
   vm: CategoricalViewModel;
-  paleta: PaletaDeGrafico;
+  palette: PaletaDeGrafico;
   titulo: string;
   /** Nombre de la dimension del eje, para el rotulo accesible. */
   dimension?: string;
@@ -93,9 +93,9 @@ const pilaDe = (o: OpcionesDeGrafico) => (o.apilado && o.apilado !== 'ninguno' ?
 function tooltipDe(o: OpcionesDeGrafico) {
   const comun = {
     trigger: 'axis' as const,
-    backgroundColor: o.paleta.superficieElevada,
+    backgroundColor: o.palette.superficieElevada,
     borderWidth: 0,
-    textStyle: { color: o.paleta.texto },
+    textStyle: { color: o.palette.content },
     extraCssText: 'box-shadow: none;',
   };
 
@@ -119,20 +119,20 @@ function tooltipDe(o: OpcionesDeGrafico) {
       const formatear = (n: number, serie: string) =>
         o.formatear?.(n, o.vm.series.indexOf(serie)) ?? String(n);
 
-      const filas = params.map((p) => {
+      const dataRows = params.map((p) => {
         const crudo = crudoDe(p.seriesName, p.dataIndex);
         const cifra = crudo === null ? '—' : formatear(crudo, p.seriesName);
         return {
           orden: crudo ?? Number.NEGATIVE_INFINITY,
-          texto: porcentaje
+          content: porcentaje
             ? `${p.seriesName}: ${p.value.toFixed(1)} % (${cifra})`
             : `${p.seriesName}: ${cifra}`,
         };
       });
       // Los nulos quedan al final: no compiten por «el mayor», porque no son un numero.
-      if (ordenar) filas.sort((a, b) => b.orden - a.orden);
+      if (ordenar) dataRows.sort((a, b) => b.orden - a.orden);
 
-      const lineas = [punto.name, ...filas.map((f) => f.texto)];
+      const lineas = [punto.name, ...dataRows.map((f) => f.content)];
       if (conTotal) {
         const suma = params.reduce((total, p) => total + (crudoDe(p.seriesName, p.dataIndex) ?? 0), 0);
         // El total usa el formato de la PRIMERA serie: es una suma de las medidas apiladas, que
@@ -163,15 +163,15 @@ function leyendaDe(o: OpcionesDeGrafico, hayQueDistinguir = o.vm.series.length >
    * `type: 'scroll'` en TODAS las posiciones.
    */
   const comun = {
-    textStyle: { color: o.paleta.textoAtenuado },
+    textStyle: { color: o.palette.textoAtenuado },
     icon: 'roundRect' as const,
     type: 'scroll' as const,
-    pageIconColor: o.paleta.textoAtenuado,
-    pageTextStyle: { color: o.paleta.textoAtenuado },
+    pageIconColor: o.palette.textoAtenuado,
+    pageTextStyle: { color: o.palette.textoAtenuado },
   };
   const aLosLados = {
     ...comun,
-    textStyle: { color: o.paleta.textoAtenuado, width: 96, overflow: 'truncate' as const },
+    textStyle: { color: o.palette.textoAtenuado, width: 96, overflow: 'truncate' as const },
   };
   const lado = mode === 'auto' ? 'abajo' : mode;
 
@@ -221,12 +221,12 @@ function margenDe(o: OpcionesDeGrafico, deLaLeyenda: { top: number; bottom: numb
  * color llega igual a las barras, la leyenda, los decals y el tooltip. Una serie sin asignacion
  * conserva el color que le tocaba por orden.
  */
-function paletaDe(o: OpcionesDeGrafico): string[] {
+function paletteOf(o: OpcionesDeGrafico): string[] {
   const elegidos = o.coloresDeSerie;
-  if (!elegidos || elegidos.length === 0) return o.paleta.series;
-  return o.paleta.series.map((porOrden, s) => {
+  if (!elegidos || elegidos.length === 0) return o.palette.series;
+  return o.palette.series.map((porOrden, s) => {
     const indice = elegidos[s];
-    return indice === undefined ? porOrden : (o.paleta.series[indice] ?? porOrden);
+    return indice === undefined ? porOrden : (o.palette.series[indice] ?? porOrden);
   });
 }
 
@@ -252,18 +252,18 @@ function referenciasDe(o: OpcionesDeGrafico, horizontal = false) {
       symbol: 'none' as const,
       // `emphasis` apagado: sin esto, pasar cerca engorda la raya como si fuera seleccionable.
       emphasis: { disabled: true },
-      data: lineas.map((linea) => ({
-        [horizontal ? 'xAxis' : 'yAxis']: linea.valor,
+      data: lineas.map((line) => ({
+        [horizontal ? 'xAxis' : 'yAxis']: line.valor,
         lineStyle: {
-          color: colorDeRol(o, linea.color),
-          type: TRAZO_DE_REFERENCIA[linea.estilo ?? 'discontinua'],
+          color: colorDeRol(o, line.color),
+          type: TRAZO_DE_REFERENCIA[line.estilo ?? 'discontinua'],
           width: 2,
         },
         label: {
-          show: linea.etiqueta !== undefined && linea.etiqueta !== '',
-          formatter: linea.etiqueta ?? '',
+          show: line.etiqueta !== undefined && line.etiqueta !== '',
+          formatter: line.etiqueta ?? '',
           position: horizontal ? ('end' as const) : ('insideEndTop' as const),
-          color: colorDeRol(o, linea.color),
+          color: colorDeRol(o, line.color),
           fontSize: 11,
         },
       })),
@@ -280,13 +280,13 @@ function referenciasDe(o: OpcionesDeGrafico, horizontal = false) {
 function colorDeRol(o: OpcionesDeGrafico, color: LineaDeReferencia['color']): string {
   switch (color) {
     case 'primario':
-      return o.paleta.series[0] ?? o.paleta.texto;
+      return o.palette.series[0] ?? o.palette.content;
     case 'error':
-      return o.paleta.series[1] ?? o.paleta.texto;
+      return o.palette.series[1] ?? o.palette.content;
     case 'atenuado':
-      return o.paleta.textoAtenuado;
+      return o.palette.textoAtenuado;
     default:
-      return o.paleta.texto;
+      return o.palette.content;
   }
 }
 
@@ -304,10 +304,10 @@ function nucleo(o: OpcionesDeGrafico, conDecal: boolean) {
         },
       },
     },
-    color: paletaDe(o),
+    color: paletteOf(o),
     backgroundColor: 'transparent',
     animation: false,
-    textStyle: { color: o.paleta.texto },
+    textStyle: { color: o.palette.content },
   };
 }
 
@@ -365,17 +365,17 @@ function extremosDe(o: OpcionesDeGrafico, s: number): Set<number> {
   return new Set([masAlto, masBajo].filter((i): i is number => i !== undefined));
 }
 
-const etiquetaDeSerie = (o: OpcionesDeGrafico, s: number, posicion: string) => {
+const etiquetaDeSerie = (o: OpcionesDeGrafico, s: number, cellPosition: string) => {
   const config: ConfiguracionDeEtiquetas = etiquetasNormalizadas(o.etiquetasDeDato);
   if (config.mostrar !== true) return { show: false };
 
-  const elegida = POSICION_ECHARTS[config.posicion ?? 'auto'] ?? posicion;
+  const elegida = POSICION_ECHARTS[config.cellPosition ?? 'auto'] ?? cellPosition;
   const extremos = config.soloExtremos ? extremosDe(o, s) : undefined;
 
   return {
     show: true,
     position: elegida,
-    color: o.paleta.texto,
+    color: o.palette.content,
     fontSize: 11,
     /*
      * «Solo los extremos» se resuelve en el FORMATTER, devolviendo cadena vacia.
@@ -392,7 +392,7 @@ const ejeCategoria = (o: OpcionesDeGrafico) => ({
   show: o.ejes?.mostrarX !== false,
   data: o.vm.points.map((p) => p.label),
   axisLabel: {
-    color: o.paleta.textoAtenuado,
+    color: o.palette.textoAtenuado,
   /*
    * Girados, los rotulos se dejan de esconder.
    *
@@ -402,7 +402,7 @@ const ejeCategoria = (o: OpcionesDeGrafico) => ({
     hideOverlap: !o.ejes?.rotarX,
     ...(o.ejes?.rotarX ? { rotate: o.ejes.rotarX } : {}),
   },
-  axisLine: { lineStyle: { color: o.paleta.linea } },
+  axisLine: { lineStyle: { color: o.palette.line } },
   axisTick: { show: false },
   /*
    * El titulo del eje se pone A MANO o no se pone.
@@ -412,7 +412,7 @@ const ejeCategoria = (o: OpcionesDeGrafico) => ({
         name: o.ejes.tituloX,
         nameLocation: 'middle' as const,
         nameGap: 28,
-        nameTextStyle: { color: o.paleta.textoAtenuado },
+        nameTextStyle: { color: o.palette.textoAtenuado },
       }
     : {}),
   /*
@@ -434,12 +434,12 @@ const ejeValor = (o: OpcionesDeGrafico) => ({
         ...(o.ejes?.maximoY === undefined ? {} : { max: o.ejes.maximoY }),
       }),
   axisLabel: {
-    color: o.paleta.textoAtenuado,
+    color: o.palette.textoAtenuado,
     ...(o.apilado === 'porcentaje' ? { formatter: '{value} %' } : {}),
   },
   splitLine: {
     show: o.ejes?.cuadricula !== false,
-    lineStyle: { color: o.paleta.linea, type: 'dashed' as const },
+    lineStyle: { color: o.palette.line, type: 'dashed' as const },
   },
   /*
    * El eje empieza en cero salvo que alguien decida lo contrario.
@@ -458,7 +458,7 @@ const ejeValor = (o: OpcionesDeGrafico) => ({
         nameLocation: 'middle' as const,
         nameRotate: 90,
         nameGap: 44,
-        nameTextStyle: { color: o.paleta.textoAtenuado },
+        nameTextStyle: { color: o.palette.textoAtenuado },
       }
     : {}),
 });
@@ -472,7 +472,7 @@ const ejeValor = (o: OpcionesDeGrafico) => ({
  * y no sobre la parte, porque habla de casos y no de cuanto ocupa la barra.
  */
 function barrasConColor(o: OpcionesDeGrafico, datos: (number | null)[], s: number) {
-  if (!o.condicional || o.condicional.reglas.length === 0) return datos;
+  if (!o.condicional || o.condicional.rules.length === 0) return datos;
   const medida = o.vm.series[s];
 
   let alguna = false;
@@ -674,9 +674,9 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
     legend,
     tooltip: {
       trigger: 'item' as const,
-      backgroundColor: o.paleta.superficieElevada,
+      backgroundColor: o.palette.superficieElevada,
       borderWidth: 0,
-      textStyle: { color: o.paleta.texto },
+      textStyle: { color: o.palette.content },
       extraCssText: 'box-shadow: none;',
       // La cifra Y su parte del total: un porcentaje suelto no se puede auditar contra la tabla.
       formatter: (p: { name: string; value: number; percent: number }) =>
@@ -692,8 +692,8 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
             subtext: 'Total',
             left: 'center',
             top: 'center',
-            textStyle: { color: o.paleta.texto, fontSize: 20, fontWeight: 600 },
-            subtextStyle: { color: o.paleta.textoAtenuado, fontSize: 12 },
+            textStyle: { color: o.palette.content, fontSize: 20, fontWeight: 600 },
+            subtextStyle: { color: o.palette.textoAtenuado, fontSize: 12 },
           },
         }
       : {}),
@@ -713,13 +713,13 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
         // Sin reordenar por su cuenta: el orden ya se decidio arriba, y con `false` ECharts
         // respeta el del modelo, que es el mismo que ve la tabla de datos adjunta.
         avoidLabelOverlap: true,
-        itemStyle: { borderColor: o.paleta.superficie, borderWidth: 2 },
+        itemStyle: { borderColor: o.palette.superficie, borderWidth: 2 },
         label:
           mode === 'ninguna'
             ? { show: false }
             : {
                 show: true,
-                color: o.paleta.texto,
+                color: o.palette.content,
                 fontSize: 11,
                 formatter: etiquetaDePorcion(mode, formatear, total),
                 /*
@@ -730,7 +730,7 @@ export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown
                   ? { alignTo: 'edge' as const, edgeDistance: 2 }
                   : {}),
               },
-        labelLine: { show: mode !== 'ninguna', lineStyle: { color: o.paleta.linea } },
+        labelLine: { show: mode !== 'ninguna', lineStyle: { color: o.palette.line } },
         data: porciones,
         emphasis: { focus: 'self' },
       },
@@ -787,7 +787,7 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
 
   const { minimo, maximo } = escalaDelMedidor(m, valor, objetivo);
   const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
-  const color = o.paleta.series[0] ?? o.paleta.texto;
+  const color = o.palette.series[0] ?? o.palette.content;
 
   const anillo = {
     type: 'gauge' as const,
@@ -807,7 +807,7 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
         ...anillo,
         name: o.titulo,
         progress: { show: true, width: 16, itemStyle: { color } },
-        axisLine: { lineStyle: { width: 16, color: [[1, o.paleta.linea]] } },
+        axisLine: { lineStyle: { width: 16, color: [[1, o.palette.line]] } },
         pointer: { width: 5, length: '62%', itemStyle: { color } },
         anchor: { show: true, size: 12, itemStyle: { color } },
         axisTick: { show: false },
@@ -819,7 +819,7 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
         splitNumber: 1,
         axisLabel: {
           distance: -30,
-          color: o.paleta.textoAtenuado,
+          color: o.palette.textoAtenuado,
           fontSize: 11,
           formatter: (n: number) => formatear(n),
         },
@@ -832,7 +832,7 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
             : {
                 valueAnimation: false,
                 offsetCenter: [0, '32%'],
-                color: o.paleta.texto,
+                color: o.palette.content,
                 fontSize: 22,
                 fontWeight: 600,
                 formatter: (n: number) => (valor === null ? '—' : formatear(n)),
@@ -865,7 +865,7 @@ export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown>
                 width: 3,
                 length: '18%',
                 offsetCenter: [0, '-82%'],
-                itemStyle: { color: o.paleta.texto },
+                itemStyle: { color: o.palette.content },
               },
               silent: true,
               data: [{ value: objetivo }],
@@ -891,7 +891,7 @@ const ejeValorSecundario = (o: OpcionesDeGrafico) => ({
         nameLocation: 'middle' as const,
         nameRotate: 90,
         nameGap: 44,
-        nameTextStyle: { color: o.paleta.textoAtenuado },
+        nameTextStyle: { color: o.palette.textoAtenuado },
       }
     : { name: undefined }),
 });
@@ -903,7 +903,7 @@ const ejeValorSecundario = (o: OpcionesDeGrafico) => ({
  * `seriesDeColumna` es cuantas series iniciales son columnas; el resto son lineas.
  */
 export function opcionesDeCombinado(o: OpcionesDeGrafico): Record<string, unknown> {
-  const columnas = Math.min(Math.max(o.seriesDeColumna ?? 1, 0), o.vm.series.length);
+  const gridColumns = Math.min(Math.max(o.seriesDeColumna ?? 1, 0), o.vm.series.length);
   const dos = o.combinado?.ejeSecundario === true;
 
   return {
@@ -911,7 +911,7 @@ export function opcionesDeCombinado(o: OpcionesDeGrafico): Record<string, unknow
     xAxis: ejeCategoria(o),
     yAxis: dos ? [ejeValor(o), ejeValorSecundario(o)] : ejeValor(o),
     series: o.vm.series.map((nombre, s) => {
-      const esColumna = s < columnas;
+      const esColumna = s < gridColumns;
       return {
         name: nombre,
         type: esColumna ? 'bar' : 'line',
@@ -971,9 +971,9 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
     grid: { ...margenDe(o, { ...margen, top: margen.top + holgura }), containLabel: true },
     tooltip: {
       trigger: 'item' as const,
-      backgroundColor: o.paleta.superficieElevada,
+      backgroundColor: o.palette.superficieElevada,
       borderWidth: 0,
-      textStyle: { color: o.paleta.texto },
+      textStyle: { color: o.palette.content },
       extraCssText: 'box-shadow: none;',
       /*
        * El tooltip nombra las MEDIDAS, no «x» e «y»: en una dispersion no hay rotulo de categoria
@@ -981,11 +981,11 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
        */
       formatter: (p: { name: string; value: (number | null)[] }) => {
         const [x, y] = p.value;
-        const filas = [
+        const dataRows = [
           `${o.vm.series[0] ?? 'X'}: ${formatear(Number(x), 0)}`,
           `${o.vm.series[1] ?? 'Y'}: ${formatear(Number(y), 1)}`,
         ];
-        return [p.name, ...filas].join('<br/>');
+        return [p.name, ...dataRows].join('<br/>');
       },
     },
     xAxis: {
@@ -994,7 +994,7 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
       // obliga a seguirlo con el dedo hasta abajo.
       splitLine: {
         show: o.ejes?.cuadricula !== false,
-        lineStyle: { color: o.paleta.linea, type: 'dashed' as const },
+        lineStyle: { color: o.palette.line, type: 'dashed' as const },
       },
       show: o.ejes?.mostrarX !== false,
       /*
@@ -1007,7 +1007,7 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
             nameLocation: 'middle' as const,
             nameRotate: 0,
             nameGap: 28,
-            nameTextStyle: { color: o.paleta.textoAtenuado },
+            nameTextStyle: { color: o.palette.textoAtenuado },
           }
         : { name: undefined }),
     },
@@ -1035,7 +1035,7 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
           ? {
               show: true,
               position: 'top' as const,
-              color: o.paleta.texto,
+              color: o.palette.content,
               fontSize: 11,
               formatter: (p: { name: string }) => p.name,
             }
@@ -1085,9 +1085,9 @@ export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> 
     legend,
     tooltip: {
       trigger: 'item' as const,
-      backgroundColor: o.paleta.superficieElevada,
+      backgroundColor: o.palette.superficieElevada,
       borderWidth: 0,
-      textStyle: { color: o.paleta.texto },
+      textStyle: { color: o.palette.content },
       extraCssText: 'box-shadow: none;',
       formatter: (p: { name: string; value: number; dataIndex: number }) =>
         [
@@ -1123,18 +1123,18 @@ export function opcionesDeEmbudo(o: OpcionesDeGrafico): Record<string, unknown> 
         sort: 'none' as const,
         gap: 2,
         minSize: '18%',
-        itemStyle: { borderColor: o.paleta.superficie, borderWidth: 2 },
+        itemStyle: { borderColor: o.palette.superficie, borderWidth: 2 },
         label: {
           show: true,
           position: 'right' as const,
-          color: o.paleta.texto,
+          color: o.palette.content,
           fontSize: 11,
           formatter: (p: { name: string; value: number; dataIndex: number }) =>
             comparar === 'ninguna'
               ? `${p.name}: ${formatear(p.value)}`
               : `${p.name}: ${parte(p.value, p.dataIndex)}`,
         },
-        labelLine: { length: 12, lineStyle: { color: o.paleta.linea } },
+        labelLine: { length: 12, lineStyle: { color: o.palette.line } },
         data: etapas.map((e) => ({ name: e.name, value: e.valor })),
         emphasis: { focus: 'self' },
       },
@@ -1179,11 +1179,11 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
   }
 
   const colorDe = (indice: number) => {
-    if (conTotal && indice === puntos.length) return o.paleta.series[0] ?? o.paleta.texto;
+    if (conTotal && indice === puntos.length) return o.palette.series[0] ?? o.palette.content;
     const valor = puntos[indice]?.valor ?? 0;
     // La subida usa el color principal de la paleta y la bajada el de contraste, que en el tema
     // institucional son el azul y el rojo. Salen del tema, no se eligen aqui.
-    return (valor >= 0 ? o.paleta.series[0] : o.paleta.series[1]) ?? o.paleta.texto;
+    return (valor >= 0 ? o.palette.series[0] : o.palette.series[1]) ?? o.palette.content;
   };
 
   return {
@@ -1195,9 +1195,9 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
     legend: { show: false },
     tooltip: {
       trigger: 'axis' as const,
-      backgroundColor: o.paleta.superficieElevada,
+      backgroundColor: o.palette.superficieElevada,
       borderWidth: 0,
-      textStyle: { color: o.paleta.texto },
+      textStyle: { color: o.palette.content },
       extraCssText: 'box-shadow: none;',
       formatter: (params: { name: string; dataIndex: number }[]) => {
         const p = params[0];
@@ -1231,7 +1231,7 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
         label: {
           show: true,
           position: 'top' as const,
-          color: o.paleta.texto,
+          color: o.palette.content,
           fontSize: 11,
           /*
            * El signo va en la etiqueta, siempre: el color distingue subida de bajada, pero no
@@ -1284,9 +1284,9 @@ export function opcionesDeMapaDeArbol(o: OpcionesDeGrafico): Record<string, unkn
     ...nucleo(o, false),
     tooltip: {
       trigger: 'item' as const,
-      backgroundColor: o.paleta.superficieElevada,
+      backgroundColor: o.palette.superficieElevada,
       borderWidth: 0,
-      textStyle: { color: o.paleta.texto },
+      textStyle: { color: o.palette.content },
       extraCssText: 'box-shadow: none;',
       formatter: (p: { name: string; value: number }) => `${p.name}<br/>${formatear(p.value)}`,
     },
@@ -1308,7 +1308,7 @@ export function opcionesDeMapaDeArbol(o: OpcionesDeGrafico): Record<string, unkn
         // Un solo nivel visible aunque haya dos: el segundo se dibuja DENTRO del primero, que es
         // justo lo que hace legible la jerarquia sin tener que entrar en ella.
         leafDepth: jerarquico ? 2 : 1,
-        itemStyle: { borderColor: o.paleta.superficie, borderWidth: 2, gapWidth: 2 },
+        itemStyle: { borderColor: o.palette.superficie, borderWidth: 2, gapWidth: 2 },
         label: {
           show: true,
           /*

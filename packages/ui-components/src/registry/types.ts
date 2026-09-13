@@ -1,7 +1,7 @@
 import type { Aggregation, FieldRef } from '@app/data-contracts';
 import type { ClaveDePresentacion, PresentacionDeObjeto } from '../presentacion/contrato';
 import type { NombreDeIcono } from '../presentacion/iconos';
-import type { ConfiguracionDeContenedor, IdDeContenedor } from '../presentacion/contenedores';
+import type { ContainerSettings, IdDeContenedor } from '../presentacion/contenedores';
 import type { ConfiguracionDeElemento, IdDeElemento } from '../presentacion/elementos';
 import type { ConfiguracionDePanelDeFiltros } from '../presentacion/panelDeFiltros';
 import type { AsignacionDeRanuras, RanuraDeCampos } from '../presentacion/pozos';
@@ -186,7 +186,7 @@ export interface ObjectInstance {
      * Agregacion por medida, solo cuando difiere de la que declara el esquema. Lo no dicho se
      * resuelve contra el esquema en cada lectura.
      */
-    agregaciones?: Record<string, Aggregation>;
+    aggregations?: Record<string, Aggregation>;
   };
   /**
    * Objetos adjuntados a este, anidados: un complemento no existe sin su anfitrion ni le
@@ -215,7 +215,7 @@ export interface ObjectInstance {
 export type ConfiguracionDeObjeto =
   | ({ objectId: 'panel-de-filtros' } & ConfiguracionDePanelDeFiltros)
   | ({ objectId: IdDeElemento } & ConfiguracionDeElemento)
-  | ({ objectId: IdDeContenedor } & ConfiguracionDeContenedor);
+  | ({ objectId: IdDeContenedor } & ContainerSettings);
 
 /**
  * Si un objeto no necesita ningun dataset.

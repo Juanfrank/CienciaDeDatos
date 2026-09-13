@@ -7,7 +7,7 @@ import {
   validarPanelDeFiltros,
 } from './panelDeFiltros';
 
-const instancia = (dimensiones: string[]): ObjectInstance => ({
+const objectInstance = (dimensiones: string[]): ObjectInstance => ({
   instanceId: 'f1',
   objectId: 'panel-de-filtros',
   version: '1.0.0',
@@ -31,11 +31,11 @@ describe('validarPanelDeFiltros', () => {
   it('acepta un selector por cada dimension mapeada', () => {
     expect(
       validarPanelDeFiltros(
-        instancia(['DimTribunal.Materia', 'DimTiempo.Fecha']),
+        objectInstance(['DimTribunal.Materia', 'DimTiempo.Fecha']),
         {
           selectores: [
-            { campo: 'DimTribunal.Materia', tipo: 'pastillas' },
-            { campo: 'DimTiempo.Fecha', tipo: 'rango-de-fechas' },
+            { fieldName: 'DimTribunal.Materia', tipo: 'pastillas' },
+            { fieldName: 'DimTiempo.Fecha', tipo: 'rango-de-fechas' },
           ],
         },
         TIPOS,
@@ -44,39 +44,39 @@ describe('validarPanelDeFiltros', () => {
   });
 
   it('rechaza un selector sobre un campo que no esta mapeado', () => {
-    const [problema] = validarPanelDeFiltros(
-      instancia(['DimTribunal.Materia']),
-      { selectores: [{ campo: 'DimTribunal.Distrito', tipo: 'pastillas' }] },
+    const [issue] = validarPanelDeFiltros(
+      objectInstance(['DimTribunal.Materia']),
+      { selectores: [{ fieldName: 'DimTribunal.Distrito', tipo: 'pastillas' }] },
       TIPOS,
     );
-    expect(problema?.campo).toBe('DimTribunal.Distrito');
-    expect(problema?.problema).toContain('DimTribunal.Materia');
+    expect(issue?.fieldName).toBe('DimTribunal.Distrito');
+    expect(issue?.issue).toContain('DimTribunal.Materia');
   });
 
   it('rechaza dos selectores para la misma dimension', () => {
     const problems = validarPanelDeFiltros(
-      instancia(['DimTribunal.Materia']),
+      objectInstance(['DimTribunal.Materia']),
       {
         selectores: [
-          { campo: 'DimTribunal.Materia', tipo: 'pastillas' },
-          { campo: 'DimTribunal.Materia', tipo: 'lista' },
+          { fieldName: 'DimTribunal.Materia', tipo: 'pastillas' },
+          { fieldName: 'DimTribunal.Materia', tipo: 'lista' },
         ],
       },
       TIPOS,
     );
     expect(problems).toHaveLength(1);
-    expect(problems[0]?.problema).toContain('mas de un selector');
+    expect(problems[0]?.issue).toContain('mas de un selector');
   });
 
   it('rechaza un calendario sobre una dimension que no es fecha', () => {
     // Es el motivo por el que el TIPO de columna viaja hasta la validacion: sin el, esto se
     // descubriria al dibujar, con un selector de fecha sobre valores «Penal» y «Civil».
-    const [problema] = validarPanelDeFiltros(
-      instancia(['DimTribunal.Materia']),
-      { selectores: [{ campo: 'DimTribunal.Materia', tipo: 'calendario' }] },
+    const [issue] = validarPanelDeFiltros(
+      objectInstance(['DimTribunal.Materia']),
+      { selectores: [{ fieldName: 'DimTribunal.Materia', tipo: 'calendario' }] },
       TIPOS,
     );
-    expect(problema?.problema).toContain('necesita una dimension de fecha');
+    expect(issue?.issue).toContain('necesita una dimension de fecha');
   });
 
   it('SE ABSTIENE si el tipo de la columna es desconocido', () => {
@@ -84,24 +84,24 @@ describe('validarPanelDeFiltros', () => {
     // nada. Rechazar ahi bloquearia configuraciones correctas en un despliegue recien hecho.
     expect(
       validarPanelDeFiltros(
-        instancia(['DimTiempo.Fecha']),
-        { selectores: [{ campo: 'DimTiempo.Fecha', tipo: 'calendario' }] },
+        objectInstance(['DimTiempo.Fecha']),
+        { selectores: [{ fieldName: 'DimTiempo.Fecha', tipo: 'calendario' }] },
         {},
       ),
     ).toEqual([]);
   });
 
   it('rechaza un tipo de selector inventado', () => {
-    const [problema] = validarPanelDeFiltros(
-      instancia(['DimTribunal.Materia']),
-      { selectores: [{ campo: 'DimTribunal.Materia', tipo: 'rueda' as never }] },
+    const [issue] = validarPanelDeFiltros(
+      objectInstance(['DimTribunal.Materia']),
+      { selectores: [{ fieldName: 'DimTribunal.Materia', tipo: 'rueda' as never }] },
       TIPOS,
     );
-    expect(problema?.problema).toContain('no es un tipo de selector');
+    expect(issue?.issue).toContain('no es un tipo de selector');
   });
 
   it('un panel sin configurar no tiene problemas', () => {
-    expect(validarPanelDeFiltros(instancia(['DimTribunal.Materia']), undefined, TIPOS)).toEqual([]);
+    expect(validarPanelDeFiltros(objectInstance(['DimTribunal.Materia']), undefined, TIPOS)).toEqual([]);
   });
 });
 
@@ -110,25 +110,25 @@ describe('selectoresEfectivos', () => {
     // Lo importante de esta prueba: una dimension mapeada y no configurada seria una dimension
     // invisible, que es el peor fallo de un filtro — quien mira cree estar viendo el total.
     const efectivos = selectoresEfectivos(
-      instancia(['DimTribunal.Materia', 'DimTiempo.Fecha']),
-      { selectores: [{ campo: 'DimTribunal.Materia', tipo: 'desplegable' }] },
+      objectInstance(['DimTribunal.Materia', 'DimTiempo.Fecha']),
+      { selectores: [{ fieldName: 'DimTribunal.Materia', tipo: 'desplegable' }] },
       TIPOS,
     );
-    expect(efectivos.map((s) => [s.campo, s.tipo])).toEqual([
+    expect(efectivos.map((s) => [s.fieldName, s.tipo])).toEqual([
       ['DimTribunal.Materia', 'desplegable'],
       ['DimTiempo.Fecha', 'rango-de-fechas'],
     ]);
   });
 
   it('la etiqueta por defecto es el campo sin la tabla', () => {
-    const [uno] = selectoresEfectivos(instancia(['DimTribunal.Materia']), undefined, TIPOS);
+    const [uno] = selectoresEfectivos(objectInstance(['DimTribunal.Materia']), undefined, TIPOS);
     expect(uno?.etiqueta).toBe('Materia');
   });
 
   it('respeta la etiqueta configurada', () => {
     const [uno] = selectoresEfectivos(
-      instancia(['DimTribunal.Materia']),
-      { selectores: [{ campo: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Area' }] },
+      objectInstance(['DimTribunal.Materia']),
+      { selectores: [{ fieldName: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Area' }] },
       TIPOS,
     );
     expect(uno?.etiqueta).toBe('Area');
@@ -138,16 +138,16 @@ describe('selectoresEfectivos', () => {
     // El orden en pantalla lo decide el binding, que es lo que el editor reordena. Si mandara el
     // de la configuracion, mover una dimension no cambiaria nada y nadie sabria por que.
     const efectivos = selectoresEfectivos(
-      instancia(['DimTribunal.Materia', 'DimTribunal.Distrito']),
+      objectInstance(['DimTribunal.Materia', 'DimTribunal.Distrito']),
       {
         selectores: [
-          { campo: 'DimTribunal.Distrito', tipo: 'lista' },
-          { campo: 'DimTribunal.Materia', tipo: 'pastillas' },
+          { fieldName: 'DimTribunal.Distrito', tipo: 'lista' },
+          { fieldName: 'DimTribunal.Materia', tipo: 'pastillas' },
         ],
       },
       TIPOS,
     );
-    expect(efectivos.map((s) => s.campo)).toEqual([
+    expect(efectivos.map((s) => s.fieldName)).toEqual([
       'DimTribunal.Materia',
       'DimTribunal.Distrito',
     ]);

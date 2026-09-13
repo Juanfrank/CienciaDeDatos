@@ -197,10 +197,10 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     await page.getByTestId(`pres-${item}-multiplos-columnas`).selectOption('2');
     await guardado(page);
 
-    const columnas = await page
+    const gridColumns = await page
       .locator('.multiplos')
       .first()
       .evaluate((n) => getComputedStyle(n).gridTemplateColumns.split(' ').length);
-    expect(columnas).toBe(2);
+    expect(gridColumns).toBe(2);
   });
 });

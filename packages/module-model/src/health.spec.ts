@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { saludDe } from './salud';
+import { healthOf } from './health';
 import type { ModuleDiagnostics } from './validation';
 
 const diagnostico = (
@@ -22,32 +22,32 @@ const diagnostico = (
 
 describe('salud de un modulo', () => {
   it('sin nada roto, ok', () => {
-    expect(saludDe(diagnostico([{ roto: false }, { roto: false }])).salud).toBe('ok');
+    expect(healthOf(diagnostico([{ roto: false }, { roto: false }])).health).toBe('ok');
   });
 
   it('un objeto roto entre varios es DEGRADADO, no caido', () => {
     // Es la regla de 4.2: el objeto se marca y el resto sigue funcionando. Apagar el modulo
     // entero por un campo retirado seria incumplirla desde el despliegue.
-    const resumen = saludDe(diagnostico([{ roto: true }, { roto: false }]));
-    expect(resumen.salud).toBe('degradado');
+    const resumen = healthOf(diagnostico([{ roto: true }, { roto: false }]));
+    expect(resumen.health).toBe('degradado');
     expect(resumen.objetos).toEqual({ total: 2, rotos: 1 });
   });
 
   it('TODOS los objetos rotos es fallo: no queda resto que siga funcionando', () => {
-    expect(saludDe(diagnostico([{ roto: true }, { roto: true }])).salud).toBe('fallo');
+    expect(healthOf(diagnostico([{ roto: true }, { roto: true }])).health).toBe('fallo');
   });
 
   it('una disposicion invalida tumba el modulo aunque los objetos esten sanos', () => {
     // Dos bloques superpuestos no se pueden dibujar ni marcar: no hay donde ponerlos.
-    const resumen = saludDe(
+    const resumen = healthOf(
       diagnostico([{ roto: false }], [{ kind: 'solapamiento', itemIds: ['a', 'b'], problem: 'Se solapan.' }]),
     );
-    expect(resumen.salud).toBe('fallo');
+    expect(resumen.health).toBe('fallo');
     // El motivo de disposicion va PRIMERO: es el que explica por que se apaga.
     expect(resumen.problems[0]).toBe('Se solapan.');
   });
 
   it('un modulo sin objetos es fallo, no degradado', () => {
-    expect(saludDe(diagnostico([])).salud).toBe('fallo');
+    expect(healthOf(diagnostico([])).health).toBe('fallo');
   });
 });

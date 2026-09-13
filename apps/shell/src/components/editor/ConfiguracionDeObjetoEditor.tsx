@@ -10,7 +10,7 @@ import {
   POSICIONES_DE_LINEA,
   TRAZADOS,
   type Alineacion,
-  type ConfiguracionDeContenedor,
+  type ContainerSettings,
   type ConfiguracionDeElemento,
   type ConfiguracionDeLinea,
   type Eje,
@@ -74,24 +74,24 @@ const ETIQUETA_DE_ORIENTACION: Record<Orientacion, string> = {
 
 /** Estilo, grosor y color de una linea: el mismo control para las cuatro que hay. */
 function LineaEditor({
-  linea,
+  line,
   prueba,
   guardando,
   onCambiar,
 }: {
-  linea: ConfiguracionDeLinea | undefined;
+  line: ConfiguracionDeLinea | undefined;
   prueba: string;
   guardando: boolean;
-  onCambiar: (linea: ConfiguracionDeLinea) => void;
+  onCambiar: (line: ConfiguracionDeLinea) => void;
 }) {
-  const cambiar = (parcial: Partial<ConfiguracionDeLinea>) => onCambiar({ ...linea, ...parcial });
+  const cambiar = (parcial: Partial<ConfiguracionDeLinea>) => onCambiar({ ...line, ...parcial });
 
   return (
     <>
       <label className="formulario__campo">
-        <span>Estilo de linea</span>
+        <span>Estilo de line</span>
         <select
-          value={linea?.estilo ?? 'solida'}
+          value={line?.estilo ?? 'solida'}
           disabled={guardando}
           data-testid={`${prueba}-estilo`}
           onChange={(e) => cambiar({ estilo: e.target.value as EstiloDeLinea })}
@@ -107,7 +107,7 @@ function LineaEditor({
       <label className="formulario__campo">
         <span>Grosor</span>
         <select
-          value={String(linea?.grosor ?? 1)}
+          value={String(line?.grosor ?? 1)}
           disabled={guardando}
           data-testid={`${prueba}-grosor`}
           onChange={(e) => cambiar({ grosor: Number(e.target.value) })}
@@ -121,9 +121,9 @@ function LineaEditor({
       </label>
 
       <div className="formulario__campo">
-        <span>Color de linea</span>
+        <span>Color de line</span>
         <PaletaDeColores
-          valor={linea?.color ?? 'atenuado'}
+          valor={line?.color ?? 'atenuado'}
           nombre="la linea"
           prueba={`${prueba}-color`}
           onCambiar={(color) => cambiar({ color })}
@@ -150,13 +150,13 @@ export function ConfiguracionDeObjetoEditor({
   /*
    * Cada cambio funde sobre lo ya guardado y REPONE el `objectId`.
    */
-  const poner = (parcial: ConfiguracionDeElemento | ConfiguracionDeContenedor) =>
+  const poner = (parcial: ConfiguracionDeElemento | ContainerSettings) =>
     onCambiar((i) => ({
       ...i,
       configuracion: { ...(i.configuracion ?? {}), ...parcial, objectId } as ObjectInstance['configuracion'],
     }));
 
-  const conf = (instance.configuracion ?? {}) as ConfiguracionDeElemento & ConfiguracionDeContenedor;
+  const conf = (instance.configuracion ?? {}) as ConfiguracionDeElemento & ContainerSettings;
 
   if (objectId === 'cuadro-de-texto') {
     const parrafos = conf.cuadroDeTexto?.parrafos ?? [];
@@ -166,14 +166,14 @@ export function ConfiguracionDeObjetoEditor({
           <label key={i} className="formulario__campo">
             <span>Parrafo {i + 1}</span>
             <textarea
-              defaultValue={parrafo.texto}
+              defaultValue={parrafo.content}
               rows={3}
               disabled={guardando}
               data-testid={`${prueba}-parrafo-${i}`}
               onBlur={(e) =>
                 poner({
                   cuadroDeTexto: {
-                    parrafos: parrafos.map((p, j) => (j === i ? { ...p, texto: e.target.value } : p)),
+                    parrafos: parrafos.map((p, j) => (j === i ? { ...p, content: e.target.value } : p)),
                   },
                 })
               }
@@ -185,7 +185,7 @@ export function ConfiguracionDeObjetoEditor({
           className="boton-contorno"
           disabled={guardando}
           data-testid={`${prueba}-anadir-parrafo`}
-          onClick={() => poner({ cuadroDeTexto: { parrafos: [...parrafos, { texto: '' }] } })}
+          onClick={() => poner({ cuadroDeTexto: { parrafos: [...parrafos, { content: '' }] } })}
         >
           Anadir parrafo
         </button>
@@ -200,22 +200,22 @@ export function ConfiguracionDeObjetoEditor({
         <label className="formulario__campo">
           <span>Texto</span>
           <input
-            defaultValue={t?.texto ?? ''}
+            defaultValue={t?.content ?? ''}
             disabled={guardando}
             data-testid={`${prueba}-texto`}
-            onBlur={(e) => poner({ tituloDeSeccion: { ...t, texto: e.target.value } })}
+            onBlur={(e) => poner({ tituloDeSeccion: { ...t, content: e.target.value } })}
           />
         </label>
 
         <label className="formulario__campo">
-          <span>Posicion del texto</span>
+          <span>Posicion del content</span>
           <select
             value={t?.posicionDelTexto ?? 'izquierda'}
             disabled={guardando}
             data-testid={`${prueba}-posicion`}
             onChange={(e) =>
               poner({
-                tituloDeSeccion: { ...t, texto: t?.texto ?? '', posicionDelTexto: e.target.value as Alineacion },
+                tituloDeSeccion: { ...t, content: t?.content ?? '', posicionDelTexto: e.target.value as Alineacion },
               })
             }
           >
@@ -230,12 +230,12 @@ export function ConfiguracionDeObjetoEditor({
         <label className="formulario__campo">
           <span>Lineas</span>
           <select
-            value={t?.linea ?? 'ninguna'}
+            value={t?.line ?? 'ninguna'}
             disabled={guardando}
             data-testid={`${prueba}-linea`}
             onChange={(e) =>
               poner({
-                tituloDeSeccion: { ...t, texto: t?.texto ?? '', linea: e.target.value as PosicionDeLinea },
+                tituloDeSeccion: { ...t, content: t?.content ?? '', line: e.target.value as PosicionDeLinea },
               })
             }
           >
@@ -245,15 +245,15 @@ export function ConfiguracionDeObjetoEditor({
               </option>
             ))}
           </select>
-          <span className="campo__pista">Se reparten el ancho que sobre after del texto.</span>
+          <span className="campo__pista">Se reparten el ancho que sobre after del content.</span>
         </label>
 
         <LineaEditor
-          linea={t?.estiloDeLinea}
+          line={t?.estiloDeLinea}
           prueba={`${prueba}-l`}
           guardando={guardando}
           onCambiar={(estiloDeLinea) =>
-            poner({ tituloDeSeccion: { ...t, texto: t?.texto ?? '', estiloDeLinea } })
+            poner({ tituloDeSeccion: { ...t, content: t?.content ?? '', estiloDeLinea } })
           }
         />
       </Seccion>
@@ -282,10 +282,10 @@ export function ConfiguracionDeObjetoEditor({
           </select>
         </label>
         <LineaEditor
-          linea={l}
+          line={l}
           prueba={`${prueba}-l`}
           guardando={guardando}
-          onCambiar={(linea) => poner({ lineaDivisoria: { ...l, ...linea } })}
+          onCambiar={(line) => poner({ lineaDivisoria: { ...l, ...line } })}
         />
       </Seccion>
     );
@@ -342,12 +342,12 @@ export function ConfiguracionDeObjetoEditor({
         <label className="formulario__campo">
           <span>Texto dentro</span>
           <input
-            defaultValue={f?.texto ?? ''}
+            defaultValue={f?.content ?? ''}
             disabled={guardando}
             data-testid={`${prueba}-texto`}
             onBlur={(e) =>
               poner({
-                forma: { ...f, forma: f?.forma ?? 'rectangulo', texto: e.target.value || undefined },
+                forma: { ...f, forma: f?.forma ?? 'rectangulo', content: e.target.value || undefined },
               })
             }
           />
@@ -411,7 +411,7 @@ export function ConfiguracionDeObjetoEditor({
           Punta de flecha al final
         </label>
         <LineaEditor
-          linea={c?.estiloDeLinea}
+          line={c?.estiloDeLinea}
           prueba={`${prueba}-l`}
           guardando={guardando}
           onCambiar={(estiloDeLinea) => poner({ conexion: { ...c, estiloDeLinea } })}
@@ -423,24 +423,24 @@ export function ConfiguracionDeObjetoEditor({
   /* ── Contenedores ─────────────────────────────────────────────────────────────────────── */
 
   const paneles = panelesDe(conf);
-  const columnas =
-    conf.simple?.columnas ??
-    conf.desplazable?.columnas ??
-    conf.ampliable?.columnas ??
-    conf.pestanas?.columnas ??
+  const gridColumns =
+    conf.simple?.gridColumns ??
+    conf.desplazable?.gridColumns ??
+    conf.ampliable?.gridColumns ??
+    conf.pestanas?.gridColumns ??
     6;
 
   const ponerColumnas = (n: number) => {
     // Las columnas viven en el bloque del tipo, asi que cada uno pone las suyas. Se resuelve con
     // un mapa y no con cinco ifs sueltos para que anadir un contenedor no tenga que acordarse.
-    const block: Record<string, keyof ConfiguracionDeContenedor> = {
+    const block: Record<string, keyof ContainerSettings> = {
       'contenedor-simple': 'simple',
       'contenedor-desplazable': 'desplazable',
       'contenedor-ampliable': 'ampliable',
       'contenedor-con-pestanas': 'pestanas',
     };
     const clave = block[objectId] ?? 'simple';
-    poner({ [clave]: { ...(conf[clave] as object), columnas: n } } as ConfiguracionDeContenedor);
+    poner({ [clave]: { ...(conf[clave] as object), gridColumns: n } } as ContainerSettings);
   };
 
   return (
@@ -448,7 +448,7 @@ export function ConfiguracionDeObjetoEditor({
       <label className="formulario__campo">
         <span>Columnas internas</span>
         <select
-          value={String(columnas)}
+          value={String(gridColumns)}
           disabled={guardando}
           data-testid={`${prueba}-columnas`}
           onChange={(e) => ponerColumnas(Number(e.target.value))}
@@ -479,7 +479,7 @@ export function ConfiguracionDeObjetoEditor({
               </option>
             ))}
           </select>
-          <span className="campo__pista">Uno solo. El otro eje nunca se desplaza.</span>
+          <span className="campo__pista">Uno solo. El other eje nunca se desplaza.</span>
         </label>
       ) : null}
 

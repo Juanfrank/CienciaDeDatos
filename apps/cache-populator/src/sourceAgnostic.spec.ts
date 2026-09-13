@@ -96,8 +96,8 @@ describe('2.4 — ni apps/* ni ui-components conocen la fuente', () => {
   ];
 
   /** Quita comentarios antes de buscar. */
-  const sinComentarios = (texto: string): string =>
-    texto.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const sinComentarios = (content: string): string =>
+    content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
   const revisar = (relativo: string, excepciones: string[] = []) => {
     const archivos = recorrer(join(RAIZ, relativo)).filter(

@@ -1,8 +1,8 @@
 import type { ThemeTokens } from '@app/design-tokens';
 import { aExcel, aPdf } from './binarios';
-import { construirDocumento } from './documento';
-import { aCsv, aSvg } from './formatos';
-import type { IExportQueue } from './cola';
+import { buildDocument } from './document';
+import { aCsv, aSvg } from './formats';
+import type { IExportQueue } from './queue';
 import { TIPOS_MIME, nombreDeArchivo } from './types';
 import type { ExportJob, ExportRequest, ExportableObject } from './types';
 
@@ -44,23 +44,23 @@ export async function generarArtefacto(
 
   // El documento se construye UNA vez y los cuatro formatos parten de el. Ninguno decide que
   // objetos entran ni cual se dibuja como grafico: eso ya esta resuelto aqui arriba.
-  const documento = construirDocumento(objetos, request, options.theme);
+  const document = buildDocument(objetos, request, options.theme);
 
   let contenido: Buffer;
   switch (request.format) {
     case 'csv':
-      contenido = Buffer.from(aCsv(documento), 'utf8');
+      contenido = Buffer.from(aCsv(document), 'utf8');
       break;
     case 'xlsx':
-      contenido = await aExcel(documento);
+      contenido = await aExcel(document);
       break;
     case 'pdf':
-      contenido = await aPdf(documento);
+      contenido = await aPdf(document);
       break;
     case 'svg':
       // Un SVG es UNA imagen. `documento.grafico` ya eligio cual: el primer objeto marcado como
       // grafico, no el primero a secas.
-      contenido = Buffer.from(aSvg(documento), 'utf8');
+      contenido = Buffer.from(aSvg(document), 'utf8');
       break;
   }
 
@@ -79,7 +79,7 @@ export async function generarArtefacto(
  */
 export async function procesarTrabajo(
   job: ExportJob,
-  cola: IExportQueue,
+  queue: IExportQueue,
   resolver: ResolverObjetos,
   options: GenerarOptions = {},
 ): Promise<void> {
@@ -98,15 +98,15 @@ export async function procesarTrabajo(
         : {}),
     };
     const artefacto = await generarArtefacto(request, objetos, options);
-    await cola.completar(job.id, artefacto, options.ahora);
+    await queue.completar(job.id, artefacto, options.ahora);
   } catch (error) {
-    await cola.fallar(job.id, error instanceof Error ? error.message : String(error), options.ahora);
+    await queue.fallar(job.id, error instanceof Error ? error.message : String(error), options.ahora);
   }
 }
 
 /** Vacia la cola. Devuelve cuantos trabajos proceso. */
 export async function procesarPendientes(
-  cola: IExportQueue,
+  queue: IExportQueue,
   resolver: ResolverObjetos,
   options: GenerarOptions & { maximo?: number } = {},
 ): Promise<number> {
@@ -114,9 +114,9 @@ export async function procesarPendientes(
   let procesados = 0;
 
   while (procesados < maximo) {
-    const job = await cola.tomarSiguiente(options.ahora);
+    const job = await queue.tomarSiguiente(options.ahora);
     if (!job) break;
-    await procesarTrabajo(job, cola, resolver, options);
+    await procesarTrabajo(job, queue, resolver, options);
     procesados += 1;
   }
 

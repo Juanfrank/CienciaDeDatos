@@ -87,16 +87,16 @@ export function conCampoEnRanura(
   instance: ObjectInstance,
   ranuras: RanuraDeCampos[],
   ranuraId: string,
-  campo: string,
+  fieldName: string,
 ): ObjectInstance {
   const ranura = ranuras.find((r) => r.id === ranuraId);
   if (!ranura) return instance;
 
   const asignacion = ranurasDe(instance, ranuras);
   const actuales = asignacion.get(ranuraId) ?? [];
-  if (actuales.length >= ranura.max || actuales.includes(campo)) return instance;
+  if (actuales.length >= ranura.max || actuales.includes(fieldName)) return instance;
 
-  asignacion.set(ranuraId, [...actuales, campo]);
+  asignacion.set(ranuraId, [...actuales, fieldName]);
   return { ...instance, binding: { ...instance.binding, ...bindingDesdeRanuras(asignacion, ranuras) } };
 }
 
@@ -105,10 +105,10 @@ export function sinCampoEnRanura(
   instance: ObjectInstance,
   ranuras: RanuraDeCampos[],
   ranuraId: string,
-  campo: string,
+  fieldName: string,
 ): ObjectInstance {
   const asignacion = ranurasDe(instance, ranuras);
-  asignacion.set(ranuraId, (asignacion.get(ranuraId) ?? []).filter((c) => c !== campo));
+  asignacion.set(ranuraId, (asignacion.get(ranuraId) ?? []).filter((c) => c !== fieldName));
   return { ...instance, binding: { ...instance.binding, ...bindingDesdeRanuras(asignacion, ranuras) } };
 }
 
@@ -134,7 +134,7 @@ export function campoDeRanura(
 
 export interface ProblemaDeRanura {
   ranura: string;
-  problema: string;
+  issue: string;
 }
 
 /** Valida la asignacion contra lo que las ranuras declaran. */
@@ -152,7 +152,7 @@ export function validarRanuras(
     if (campos.length < minimo) {
       problems.push({
         ranura: ranura.id,
-        problema:
+        issue:
           `'${ranura.etiqueta}' necesita ${minimo} ${minimo === 1 ? 'campo' : 'campos'} y ` +
           `tiene ${campos.length}.`,
       });
@@ -160,13 +160,13 @@ export function validarRanuras(
     if (campos.length > ranura.max) {
       problems.push({
         ranura: ranura.id,
-        problema: `'${ranura.etiqueta}' admite ${ranura.max} y tiene ${campos.length}.`,
+        issue: `'${ranura.etiqueta}' admite ${ranura.max} y tiene ${campos.length}.`,
       });
     }
     if (new Set(campos).size !== campos.length) {
       problems.push({
         ranura: ranura.id,
-        problema: `'${ranura.etiqueta}' tiene el mismo campo dos veces.`,
+        issue: `'${ranura.etiqueta}' tiene el mismo campo dos veces.`,
       });
     }
   }
@@ -177,7 +177,7 @@ export function validarRanuras(
     if (!ranuras.some((r) => r.id === id) && (instance.binding.ranuras?.[id]?.length ?? 0) > 0) {
       problems.push({
         ranura: id,
-        problema: `Este objeto ya no tiene la ranura '${id}', y quedan campos asignados a ella.`,
+        issue: `Este objeto ya no tiene la ranura '${id}', y quedan campos asignados a ella.`,
       });
     }
   }

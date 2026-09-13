@@ -3,11 +3,11 @@ import { opcionesDe, type TipoDeGrafico } from './opciones';
 import { ordenarCategorias } from './orden';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
-const paleta = {
+const palette = {
   series: ['#1', '#2'],
-  texto: '#t',
+  content: '#t',
   textoAtenuado: '#ta',
-  linea: '#l',
+  line: '#l',
   superficie: '#s',
   superficieElevada: '#se',
 };
@@ -23,7 +23,7 @@ const vm = (series: string[], puntos: [string, ...(number | null)[]][]): Categor
  */
 /* eslint-disable @typescript-eslint/no-explicit-any -- ver el comentario de arriba */
 const opciones = (extra: Record<string, unknown> = {}, v = vm(['A'], [['x', 1]])) =>
-  opcionesDe('barras', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+  opcionesDe('barras', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 describe('leyenda', () => {
   it('auto la ensena solo con varias series', () => {
@@ -160,7 +160,7 @@ describe('lineas de referencia', () => {
     expect(conRef().series[0].markLine.data[0].yAxis).toBe(900);
     const horizontal = opcionesDe('barras-horizontales', {
       vm: vm(['A'], [['x', 1]]),
-      paleta,
+      palette,
       titulo: 'T',
       referencias: [{ valor: 900 }],
     }) as any;
@@ -204,7 +204,7 @@ describe('lineas de referencia', () => {
     for (const tipo of conEjes) {
       const o = opcionesDe(tipo, {
         vm: vm(['A', 'B'], [['x', 1, 2]]),
-        paleta,
+        palette,
         titulo: 'T',
         seriesDeColumna: 1,
         referencias: [{ valor: 5, etiqueta: 'Meta' }],
@@ -271,9 +271,9 @@ describe('etiquetas de dato: las tres opciones, no dos', () => {
   });
 
   it('la posicion elegida manda sobre la que el tipo de grafico propone', () => {
-    expect(conEtiquetas({ posicion: 'dentro' }).series[0].label.position).toBe('inside');
+    expect(conEtiquetas({ cellPosition: 'dentro' }).series[0].label.position).toBe('inside');
     // `auto` deja la del tipo: encima en columnas.
-    expect(conEtiquetas({ posicion: 'auto' }).series[0].label.position).toBe('top');
+    expect(conEtiquetas({ cellPosition: 'auto' }).series[0].label.position).toBe('top');
   });
 });
 
@@ -299,18 +299,18 @@ describe('tooltip', () => {
      * categoria seria 100.
      */
     const o = opciones({ apilado: 'porcentaje', tooltip: { total: true } }, dos);
-    const texto = o.tooltip.formatter([
+    const content = o.tooltip.formatter([
       { name: 'x', seriesName: 'A', value: 25, dataIndex: 0 },
       { name: 'x', seriesName: 'B', value: 75, dataIndex: 0 },
     ]);
-    expect(texto).toContain('Total: 40');
-    expect(texto).toContain('25.0 %');
+    expect(content).toContain('Total: 40');
+    expect(content).toContain('25.0 %');
   });
 
   it('ordenar pone la serie mayor arriba', () => {
     const o = opciones({ tooltip: { ordenarPorValor: true } }, dos);
-    const texto: string = o.tooltip.formatter(params);
-    expect(texto.indexOf('B:')).toBeLessThan(texto.indexOf('A:'));
+    const content: string = o.tooltip.formatter(params);
+    expect(content.indexOf('B:')).toBeLessThan(content.indexOf('A:'));
   });
 });
 

@@ -4,7 +4,7 @@ import { observacionesDe } from './alertas';
 
 /** La decision de seguridad de toda la funcion, probada donde se toma. */
 
-const regla = (parcial: Partial<AlertRule>): AlertRule => ({
+const colorRule = (parcial: Partial<AlertRule>): AlertRule => ({
   id: 'r-prueba',
   name: 'Prueba',
   ownerUserId: 'u-ana',
@@ -21,7 +21,7 @@ const regla = (parcial: Partial<AlertRule>): AlertRule => ({
 
 describe('observacionesDe: una alerta ve exactamente lo que ve su dueno', () => {
   it('las observaciones del equipo Norte solo alcanzan su distrito', async () => {
-    const observaciones = await observacionesDe(regla({}));
+    const observaciones = await observacionesDe(colorRule({}));
 
     expect(observaciones).not.toBeNull();
     expect(observaciones?.length).toBeGreaterThan(0);
@@ -29,9 +29,9 @@ describe('observacionesDe: una alerta ve exactamente lo que ve su dueno', () => 
   });
 
   it('la misma medida vista por otro equipo da otras cifras, no las del primero', async () => {
-    const norte = await observacionesDe(regla({}));
+    const norte = await observacionesDe(colorRule({}));
     const este = await observacionesDe(
-      regla({
+      colorRule({
         ownerUserId: 'u-beto',
         teamId: 'equipo-este',
         moduleSlug: 'casos-este',
@@ -49,9 +49,9 @@ describe('observacionesDe: una alerta ve exactamente lo que ve su dueno', () => 
   });
 
   it('los filtros de la regla acotan la observacion, como acotan la pantalla', async () => {
-    const withoutFilter = await observacionesDe(regla({}));
+    const withoutFilter = await observacionesDe(colorRule({}));
     const soloPenal = await observacionesDe(
-      regla({ filters: { 'DimTribunal.Materia': ['Penal'] } }),
+      colorRule({ filters: { 'DimTribunal.Materia': ['Penal'] } }),
     );
 
     const total = (obs: { value: number }[] | null) => (obs ?? []).reduce((t, o) => t + o.value, 0);
@@ -65,20 +65,20 @@ describe('una regla que ya no se puede evaluar se distingue de una que no dispar
     // 'estadisticas' existe en la organizacion general pero vive fuera de lo concedido al
     // equipo Norte. Devolver una lista vacia seria decir "ninguna categoria cumple", y eso
     // RESOLVERIA una alerta que en realidad ya no se puede evaluar.
-    expect(await observacionesDe(regla({ moduleSlug: 'estadisticas', instanceId: 'kpi-nacional' }))).toBeNull();
+    expect(await observacionesDe(colorRule({ moduleSlug: 'estadisticas', instanceId: 'kpi-nacional' }))).toBeNull();
   });
 
   it('devuelve null cuando el modulo ya no existe', async () => {
-    expect(await observacionesDe(regla({ moduleSlug: 'modulo-borrado' }))).toBeNull();
+    expect(await observacionesDe(colorRule({ moduleSlug: 'modulo-borrado' }))).toBeNull();
   });
 
   it('devuelve null cuando el objeto vigilado ya no esta en el modulo', async () => {
-    expect(await observacionesDe(regla({ instanceId: 'objeto-borrado' }))).toBeNull();
+    expect(await observacionesDe(colorRule({ instanceId: 'objeto-borrado' }))).toBeNull();
   });
 
   it('una lista vacia SI significa "no hay nada que cumpla", y eso resuelve la alerta', () => {
     // La distincion entre null y [] es lo que mantiene honesto el mensaje de "ya no se cumple".
-    const evaluacion = evaluarRegla(regla({}), [], new Date());
+    const evaluacion = evaluarRegla(colorRule({}), [], new Date());
     expect(evaluacion.triggered).toBe(false);
   });
 });
@@ -86,7 +86,7 @@ describe('una regla que ya no se puede evaluar se distingue de una que no dispar
 describe('la regla se evalua sobre lo que el objeto MUESTRA', () => {
   it('una tarjeta KPI sin dimensiones da una sola observacion, su total', async () => {
     const observaciones = await observacionesDe(
-      regla({ instanceId: 'kpi-pendientes', measure: 'CasosPendientes' }),
+      colorRule({ instanceId: 'kpi-pendientes', measure: 'CasosPendientes' }),
     );
 
     expect(observaciones).toHaveLength(1);
@@ -94,7 +94,7 @@ describe('la regla se evalua sobre lo que el objeto MUESTRA', () => {
   });
 
   it('un grafico da una observacion por categoria, ya agregada', async () => {
-    const observaciones = await observacionesDe(regla({}));
+    const observaciones = await observacionesDe(colorRule({}));
     // El dataset trae cuatro trimestres por combinacion; el grafico muestra una barra por
     // distrito. La alerta vigila la barra, no las filas.
     expect(observaciones).toHaveLength(1);

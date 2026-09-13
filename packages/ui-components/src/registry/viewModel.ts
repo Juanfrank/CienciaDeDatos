@@ -107,11 +107,11 @@ export function aggregateBy(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
   measures: string[],
-  agregaciones: Aggregation[],
+  aggregations: Aggregation[],
 ): AggregatedRows {
   const indiceDim = dimensions.map((d) => result.columns.findIndex((c) => c.name === fieldKey(d)));
   const indiceMed = measures.map((m) => result.columns.findIndex((c) => c.name === m));
-  const operador = (i: number): Aggregation => agregaciones[i] ?? 'suma';
+  const operador = (i: number): Aggregation => aggregations[i] ?? 'suma';
 
   const acumulado = new Map<string, { labels: string[]; accs: Acumulador[] }>();
   let filasAgregadas = 0;
@@ -136,9 +136,9 @@ export function aggregateBy(
     // Una medida que no esta entre las columnas no se acumula: su acumulador queda vacio y se
     // cierra a 0 o a null segun el operador, en vez de contar un cero por cada fila leida — que
     // habria hecho que un promedio sobre una columna ausente devolviera 0 en vez de nada.
-    for (const [i, columna] of indiceMed.entries()) {
+    for (const [i, column] of indiceMed.entries()) {
       const acc = grupo.accs[i];
-      if (acc && columna >= 0) acumular(acc, row[columna]);
+      if (acc && column >= 0) acumular(acc, row[column]);
     }
   }
 
@@ -153,9 +153,9 @@ export function toCategorical(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
   measures: string[],
-  agregaciones: Aggregation[],
+  aggregations: Aggregation[],
 ): CategoricalViewModel {
-  const { rows, aggregated } = aggregateBy(result, dimensions, measures, agregaciones);
+  const { rows, aggregated } = aggregateBy(result, dimensions, measures, aggregations);
 
   return {
     series: measures,
@@ -177,9 +177,9 @@ export function toKpi(
   result: QueryResult,
   measures: string[],
   label: string,
-  agregaciones: Aggregation[],
+  aggregations: Aggregation[],
 ): KpiViewModel {
-  const { rows } = aggregateBy(result, [], measures, agregaciones);
+  const { rows } = aggregateBy(result, [], measures, aggregations);
   const valores = rows[0]?.values ?? [];
 
   const presente = (nombre: string | undefined, i: number): number | null => {
@@ -226,8 +226,8 @@ export function toMatrix(
   const iCol = dimColumna ? result.columns.findIndex((c) => c.name === fieldKey(dimColumna)) : -1;
   const iMed = result.columns.findIndex((c) => c.name === measure);
 
-  const filas: string[] = [];
-  const columnas: string[] = [];
+  const dataRows: string[] = [];
+  const gridColumns: string[] = [];
   const celdas = new Map<string, Acumulador>();
   const totalDeFila = new Map<string, Acumulador>();
   const totalDeColumna = new Map<string, Acumulador>();
@@ -245,8 +245,8 @@ export function toMatrix(
   for (const row of result.rows) {
     const f = iFila >= 0 ? String(row[iFila]) : '(sin dato)';
     const c = iCol >= 0 ? String(row[iCol]) : '(sin dato)';
-    if (!filas.includes(f)) filas.push(f);
-    if (!columnas.includes(c)) columnas.push(c);
+    if (!dataRows.includes(f)) dataRows.push(f);
+    if (!gridColumns.includes(c)) gridColumns.push(c);
     if (iMed < 0) continue;
     const valor = row[iMed];
     acumular(enMapa(celdas, `${f}${SEP}${c}`), valor);
@@ -261,11 +261,11 @@ export function toMatrix(
   };
 
   return {
-    rowLabels: filas,
-    columnLabels: columnas,
-    cells: filas.map((f) => columnas.map((c) => cerrarDe(celdas, `${f}${SEP}${c}`))),
-    rowTotals: filas.map((f) => cerrarDe(totalDeFila, f)),
-    columnTotals: columnas.map((c) => cerrarDe(totalDeColumna, c)),
+    rowLabels: dataRows,
+    columnLabels: gridColumns,
+    cells: dataRows.map((f) => gridColumns.map((c) => cerrarDe(celdas, `${f}${SEP}${c}`))),
+    rowTotals: dataRows.map((f) => cerrarDe(totalDeFila, f)),
+    columnTotals: gridColumns.map((c) => cerrarDe(totalDeColumna, c)),
     grandTotal: result.rows.length === 0 || iMed < 0 ? null : cerrar(general),
   };
 }

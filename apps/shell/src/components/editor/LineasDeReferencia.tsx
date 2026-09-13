@@ -33,11 +33,11 @@ export function LineasDeReferencia({
     onCambiar(siguiente.length === 0 ? undefined : siguiente);
 
   const editar = (i: number, cambio: Partial<LineaDeReferencia>) =>
-    cambiar(lineas.map((linea, j) => (i === j ? { ...linea, ...cambio } : linea)));
+    cambiar(lineas.map((line, j) => (i === j ? { ...line, ...cambio } : line)));
 
   return (
     <>
-      {lineas.map((linea, i) => (
+      {lineas.map((line, i) => (
         <fieldset key={i} className="referencia" data-testid={`${prueba}-linea-${i}`}>
           <legend className="referencia__titulo">Linea {i + 1}</legend>
 
@@ -46,7 +46,7 @@ export function LineasDeReferencia({
               <span>Valor</span>
               <input
                 type="number"
-                defaultValue={linea.valor}
+                defaultValue={line.valor}
                 disabled={guardando}
                 data-testid={`${prueba}-valor-${i}`}
                 onBlur={(e) => editar(i, { valor: Number(e.target.value) })}
@@ -55,7 +55,7 @@ export function LineasDeReferencia({
             <label className="formulario__campo">
               <span>Rotulo</span>
               <input
-                defaultValue={linea.etiqueta ?? ""}
+                defaultValue={line.etiqueta ?? ""}
                 disabled={guardando}
                 data-testid={`${prueba}-etiqueta-${i}`}
                 onBlur={(e) => editar(i, { etiqueta: e.target.value || undefined })}
@@ -71,7 +71,7 @@ export function LineasDeReferencia({
           <label className="formulario__campo">
             <span>Trazo</span>
             <select
-              value={linea.estilo ?? "discontinua"}
+              value={line.estilo ?? "discontinua"}
               disabled={guardando}
               data-testid={`${prueba}-estilo-${i}`}
               onChange={(e) => editar(i, { estilo: e.target.value as EstiloDeReferencia })}
@@ -87,7 +87,7 @@ export function LineasDeReferencia({
           <div className="formulario__campo">
             <span>Color</span>
             <PaletaDeColores
-              valor={linea.color ?? "predeterminado"}
+              valor={line.color ?? "predeterminado"}
               nombre={`la linea ${i + 1}`}
               prueba={`${prueba}-color-${i}`}
               onCambiar={(color) =>
@@ -103,7 +103,7 @@ export function LineasDeReferencia({
             data-testid={`${prueba}-quitar-${i}`}
             onClick={() => cambiar(lineas.filter((_, j) => j !== i))}
           >
-            Quitar esta linea
+            Quitar esta line
           </button>
         </fieldset>
       ))}
@@ -116,7 +116,7 @@ export function LineasDeReferencia({
           data-testid={`${prueba}-anadir`}
           onClick={() => cambiar([...lineas, { valor: 0, estilo: "discontinua" }])}
         >
-          Anadir linea de referencia
+          Anadir line de referencia
         </button>
       ) : (
         <p className="campo__pista">

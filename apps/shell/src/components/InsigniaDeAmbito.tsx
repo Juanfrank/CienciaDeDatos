@@ -20,7 +20,7 @@ export function InsigniaDeAmbito({ restricciones }: { restricciones: [string, st
   if (restricciones.length === 0) return null;
 
   const detalle = restricciones
-    .map(([campo, valores]) => `${campo} = ${valores.join(', ')}`)
+    .map(([fieldName, valores]) => `${fieldName} = ${valores.join(', ')}`)
     .join(' · ');
 
   return (

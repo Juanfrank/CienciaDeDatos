@@ -72,7 +72,7 @@ export interface ValidateModuleInput {
   agregacionesDeclaradas?: Record<string, Aggregation>;
 }
 
-function problemasDeAgregacion(
+function aggregationProblems(
   instance: ObjectInstance,
   input: ValidateModuleInput,
 ): BindingProblem[] {
@@ -80,10 +80,10 @@ function problemasDeAgregacion(
   if (!info) return [];
 
   const declaradas = new Map(Object.entries(input.agregacionesDeclaradas ?? {}));
-  const agregaciones = agregacionesDe(
+  const aggregations = agregacionesDe(
     instance.binding.measures,
     declaradas,
-    instance.binding.agregaciones,
+    instance.binding.aggregations,
   );
   // Colapsa si el objeto muestra menos dimensiones de las que el dataset trae. Se compara por
   // conjunto y no por cantidad: tres dimensiones que no sean las tres del dataset tambien colapsan.
@@ -92,13 +92,13 @@ function problemasDeAgregacion(
 
   return validarAgregacion({
     measures: instance.binding.measures,
-    agregaciones,
+    aggregations,
     colapsa,
-    grano: info.grain,
+    dataGrain: info.grain,
   }).map((p) => ({
     slot: `agregacion.${p.medida}`,
     kind: 'contrato-incumplido' as const,
-    problem: p.problema,
+    problem: p.issue,
   }));
 }
 
@@ -144,12 +144,12 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
           ...validarPresentacion(instance.presentacion, version.presentation).map((p) => ({
             slot: `presentacion.${p.clave}`,
             kind: 'contrato-incumplido' as const,
-            problem: p.problema,
+            problem: p.issue,
           })),
           ...validarContenedor(item.id, instance).map((p) => ({
             slot: p.slot,
             kind: 'contrato-incumplido' as const,
-            problem: p.problema,
+            problem: p.issue,
           })),
         ];
         diagnostico.broken = diagnostico.bindingProblems.length > 0;
@@ -170,11 +170,11 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         items.push(diagnostico);
         continue;
       }
-      const columnas = columnasCrudas.map(normalizarColumna);
-      const tiposPorCampo = Object.fromEntries(columnas.map((c) => [c.name, c.type]));
+      const gridColumns = columnasCrudas.map(normalizarColumna);
+      const fieldKinds = Object.fromEntries(gridColumns.map((c) => [c.name, c.type]));
 
       diagnostico.bindingProblems = [
-        ...validateBinding(instance, contrato, columnas.map((c) => c.name)),
+        ...validateBinding(instance, contrato, gridColumns.map((c) => c.name)),
         // Los complementos se validan en el MISMO sitio que el mapeo, y no aparte: colocar un
         // complemento suelto en la rejilla es un error de configuracion como cualquier otro, y
         // tiene que bloquear la publicacion igual que un campo inexistente.
@@ -188,27 +188,27 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         ...validarRanuras(instance, ranurasDelContrato(contrato)).map((p) => ({
           slot: `ranura.${p.ranura}`,
           kind: 'contrato-incumplido' as const,
-          problem: p.problema,
+          problem: p.issue,
         })),
         ...validarPresentacion(instance.presentacion, version.presentation).map((p) => ({
           slot: `presentacion.${p.clave}`,
           kind: 'contrato-incumplido' as const,
-          problem: p.problema,
+          problem: p.issue,
         })),
         /*
          * Y la configuracion propia del tipo.
          */
         ...(instance.configuracion?.objectId === 'panel-de-filtros'
-          ? validarPanelDeFiltros(instance, instance.configuracion, tiposPorCampo).map((p) => ({
-              slot: `filtros.${p.campo}`,
+          ? validarPanelDeFiltros(instance, instance.configuracion, fieldKinds).map((p) => ({
+              slot: `filtros.${p.fieldName}`,
               kind: 'contrato-incumplido' as const,
-              problem: p.problema,
+              problem: p.issue,
             }))
           : []),
         /*
          * Y como se resume cada medida.
          */
-        ...problemasDeAgregacion(instance, input),
+        ...aggregationProblems(instance, input),
       ];
       diagnostico.broken = diagnostico.bindingProblems.length > 0;
       items.push(diagnostico);
@@ -244,8 +244,8 @@ export function findPublishBlockers(
     });
   }
 
-  for (const problema of diagnostics.layoutProblems) {
-    bloqueos.push({ reason: `disposicion-${problema.kind}`, detail: problema.problem });
+  for (const issue of diagnostics.layoutProblems) {
+    bloqueos.push({ reason: `disposicion-${issue.kind}`, detail: issue.problem });
   }
 
   for (const instanceId of expiredInstanceIds) {

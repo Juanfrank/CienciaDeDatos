@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Icono } from '../iconos/Icono';
 
 /** La explicacion de un control, detras de un icono. */
-export function Ayuda({ texto, de }: { texto: string; de: string }) {
+export function Ayuda({ content, de }: { content: string; de: string }) {
   const [abierto, setAbierto] = useState(false);
   const id = useId();
   const envoltorio = useRef<HTMLSpanElement>(null);
@@ -46,7 +46,7 @@ export function Ayuda({ texto, de }: { texto: string; de: string }) {
       </button>
       {abierto ? (
         <span className="ayuda__globo" id={id} role="tooltip">
-          {texto}
+          {content}
         </span>
       ) : null}
     </span>

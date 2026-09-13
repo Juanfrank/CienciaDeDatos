@@ -26,11 +26,11 @@ export function Pozo({
   guardando: boolean;
   /** Si la ranura ya no admite mas. */
   lleno?: boolean;
-  onAnadir: (campo: string) => void;
-  onQuitar: (campo: string) => void;
+  onAnadir: (fieldName: string) => void;
+  onQuitar: (fieldName: string) => void;
   /** Como se resume cada campo de este pozo, y como cambiarlo. */
-  agregacionDe?: (campo: string) => Aggregation;
-  onAgregacion?: (campo: string, aggregation: Aggregation) => void;
+  agregacionDe?: (fieldName: string) => Aggregation;
+  onAgregacion?: (fieldName: string, aggregation: Aggregation) => void;
   /** Los operadores que se pueden aplicar aqui, del grano del dataset y de si el objeto colapsa. */
   posibles?: Aggregation[];
   prueba: string;
@@ -90,7 +90,7 @@ export function Pozo({
               <span className="visualmente-oculto">(obligatorio)</span>
             </>
           ) : null}
-          {pozo.ayuda ? <Ayuda texto={pozo.ayuda} de={pozo.etiqueta} /> : null}
+          {pozo.ayuda ? <Ayuda content={pozo.ayuda} de={pozo.etiqueta} /> : null}
         </span>
         <span className="pozo__cupo" aria-hidden="true">
           {elegidos.length}/{pozo.max}
@@ -98,24 +98,24 @@ export function Pozo({
       </p>
 
       <ul className="pozo__chiclets" aria-labelledby={`${id}-etiqueta`}>
-        {elegidos.map((campo) => (
-          <li key={campo}>
-            <span className="chiclet" data-testid={`${prueba}-${campo}`}>
-              <span className="chiclet__nombre">{campo}</span>
+        {elegidos.map((fieldName) => (
+          <li key={fieldName}>
+            <span className="chiclet" data-testid={`${prueba}-${fieldName}`}>
+              <span className="chiclet__nombre">{fieldName}</span>
               {pozo.tipo === 'medida' && agregacionDe && onAgregacion ? (
                 /*
                  * Solo el chevron. El operador activo se ve AL ABRIR, no antes.
                  */
                 <label className="chiclet__agregacion">
-                  <span className="visualmente-oculto">Como se resume {campo}</span>
+                  <span className="visualmente-oculto">Como se resume {fieldName}</span>
                   <select
-                    value={agregacionDe(campo)}
+                    value={agregacionDe(fieldName)}
                     disabled={guardando}
-                    data-testid={`${prueba}-agregacion-${campo}`}
+                    data-testid={`${prueba}-agregacion-${fieldName}`}
                     // El titulo es lo unico que dice el operador sin abrir el menu: para el raton
                     // al pasar por encima, y ahi no estorba a nada.
-                    title={`Se resume con ${ETIQUETA_DE_AGREGACION[agregacionDe(campo)].toLowerCase()}`}
-                    onChange={(e) => onAgregacion(campo, e.target.value as Aggregation)}
+                    title={`Se resume con ${ETIQUETA_DE_AGREGACION[agregacionDe(fieldName)].toLowerCase()}`}
+                    onChange={(e) => onAgregacion(fieldName, e.target.value as Aggregation)}
                   >
                     {(posibles ?? AGGREGATIONS).map((a) => (
                       <option key={a} value={a}>
@@ -128,9 +128,9 @@ export function Pozo({
                       ofrece —va deshabilitado— pero tiene que estar, o el `select` mostraria otro
                       valor distinto del guardado y quien edita creeria que ya lo arreglo.
                     */}
-                    {posibles && !posibles.includes(agregacionDe(campo)) ? (
-                      <option value={agregacionDe(campo)} disabled>
-                        {ETIQUETA_DE_AGREGACION[agregacionDe(campo)]} (no aplicable aqui)
+                    {posibles && !posibles.includes(agregacionDe(fieldName)) ? (
+                      <option value={agregacionDe(fieldName)} disabled>
+                        {ETIQUETA_DE_AGREGACION[agregacionDe(fieldName)]} (no aplicable aqui)
                       </option>
                     ) : null}
                   </select>
@@ -142,10 +142,10 @@ export function Pozo({
                 className="chiclet__quitar"
                 // El nombre del campo va EN la etiqueta: con varios chiclets, diez botones que
                 // dicen «Quitar» no se distinguen entre si en una lista de enlaces.
-                aria-label={`Quitar ${campo} de ${pozo.etiqueta}`}
+                aria-label={`Quitar ${fieldName} de ${pozo.etiqueta}`}
                 disabled={guardando}
-                data-testid={`${prueba}-quitar-${campo}`}
-                onClick={() => onQuitar(campo)}
+                data-testid={`${prueba}-quitar-${fieldName}`}
+                onClick={() => onQuitar(fieldName)}
               >
                 <Icono nombre="cerrar" tamano={14} />
               </button>
@@ -196,10 +196,10 @@ export function Pozo({
             onChange={(e) => setBusqueda(e.target.value)}
           />
           <ul className="pozo__candidatos">
-            {candidatos.map((campo) => {
-              const puesto = elegidos.includes(campo);
+            {candidatos.map((fieldName) => {
+              const puesto = elegidos.includes(fieldName);
               return (
-                <li key={campo}>
+                <li key={fieldName}>
                   <label>
                     <input
                       type="checkbox"
@@ -207,16 +207,16 @@ export function Pozo({
                       // Lo que ya esta puesto se puede quitar desde aqui; lo que no cabe se ofrece
                       // apagado en vez de desaparecer, para que se vea que existe y por que no.
                       disabled={guardando || (!puesto && lleno)}
-                      data-testid={`${prueba}-opcion-${campo}`}
-                      onChange={() => (puesto ? onQuitar(campo) : onAnadir(campo))}
+                      data-testid={`${prueba}-opcion-${fieldName}`}
+                      onChange={() => (puesto ? onQuitar(fieldName) : onAnadir(fieldName))}
                     />
-                    {campo}
+                    {fieldName}
                   </label>
                 </li>
               );
             })}
             {candidatos.length === 0 ? (
-              <li className="texto-atenuado">Ningun campo coincide.</li>
+              <li className="texto-atenuado">Ningun fieldName coincide.</li>
             ) : null}
           </ul>
         </div>

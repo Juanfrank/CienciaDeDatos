@@ -1,5 +1,5 @@
 import {
-  type ConfiguracionDeContenedor,
+  type ContainerSettings,
   type ObjectInstance,
   esContenedor,
   instanciasAnidadas,
@@ -66,7 +66,7 @@ export function instancesOf(module: ModuleDefinition): ObjectInstance[] {
     instance,
     ...instanciasAnidadas(
       esContenedor(instance.objectId)
-        ? (instance.configuracion as ConfiguracionDeContenedor | undefined)
+        ? (instance.configuracion as ContainerSettings | undefined)
         : undefined,
     ).flatMap(recorrer),
   ];

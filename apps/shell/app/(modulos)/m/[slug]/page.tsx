@@ -53,11 +53,11 @@ export default async function PaginaModulo({
   // linea de "filtros aplicados" hace creer que el ambito es algo que uno se puso y se puede
   // quitar, cuando no lo es.
   const filtrosElegidos = Object.entries(filtrosDe(query)).map(
-    ([campo, valor]) => [campo, Array.isArray(valor) ? valor : [valor]] as const,
+    ([fieldName, valor]) => [fieldName, Array.isArray(valor) ? valor : [valor]] as const,
   );
-  const camposElegidos = new Set(filtrosElegidos.map(([campo]) => campo));
+  const camposElegidos = new Set(filtrosElegidos.map(([fieldName]) => fieldName));
   const restriccionesDeAmbito = Object.entries(cargado.appliedFilters).filter(
-    ([campo, valores]) => !camposElegidos.has(campo) && valores.length > 0,
+    ([fieldName, valores]) => !camposElegidos.has(fieldName) && valores.length > 0,
   );
 
   return (
@@ -76,7 +76,7 @@ export default async function PaginaModulo({
       {filtrosElegidos.length > 0 ? (
         <p className="filtros-activos" data-testid="filtros-activos">
           Filtros aplicados:{' '}
-          {filtrosElegidos.map(([campo, valores]) => `${campo} = ${valores.join(', ')}`).join(' · ')}
+          {filtrosElegidos.map(([fieldName, valores]) => `${fieldName} = ${valores.join(', ')}`).join(' · ')}
         </p>
       ) : null}
 

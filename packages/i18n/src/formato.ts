@@ -14,13 +14,13 @@
 export type ParametrosDeMensaje = Record<string, string | number>;
 
 /** Un `{...}` de nivel superior dentro de `texto`, a partir de `desde`. */
-function argumento(texto: string, desde: number): { inicio: number; fin: number } | null {
-  const inicio = texto.indexOf('{', desde);
+function argumento(content: string, desde: number): { inicio: number; fin: number } | null {
+  const inicio = content.indexOf('{', desde);
   if (inicio === -1) return null;
   let profundidad = 0;
-  for (let i = inicio; i < texto.length; i++) {
-    if (texto[i] === '{') profundidad++;
-    else if (texto[i] === '}' && --profundidad === 0) return { inicio, fin: i };
+  for (let i = inicio; i < content.length; i++) {
+    if (content[i] === '{') profundidad++;
+    else if (content[i] === '}' && --profundidad === 0) return { inicio, fin: i };
   }
   return null;
 }

@@ -1,9 +1,9 @@
 import { inflateSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { aExcel, aPdf } from './binarios';
-import { construirDocumento } from './documento';
-import { construirEncabezado } from './encabezado';
-import { aCsv, aSvg, escaparCsv } from './formatos';
+import { buildDocument } from './document';
+import { buildHeading } from './heading';
+import { aCsv, aSvg, escaparCsv } from './formats';
 import type { ExportRequest, ExportableObject } from './types';
 
 /**
@@ -26,7 +26,7 @@ const peticion = (parcial: Partial<ExportRequest> = {}): ExportRequest => ({
 });
 
 const doc = (objetos: ExportableObject[], request: ExportRequest) =>
-  construirDocumento(objetos, request);
+  buildDocument(objetos, request);
 
 const objeto: ExportableObject = {
   title: 'Casos por materia',
@@ -45,9 +45,9 @@ const objeto: ExportableObject = {
   },
 };
 
-describe('construirEncabezado', () => {
+describe('buildHeading', () => {
   it('lleva procedencia, filtros, marca de tiempo y quien exporta', () => {
-    const { titulo, lineas } = construirEncabezado(peticion());
+    const { titulo, lineas } = buildHeading(peticion());
     expect(titulo).toBe('Expedientes por materia');
     expect(lineas[0]).toBe('Vista institucional oficial');
     expect(lineas.join('\n')).toContain('hechos.materia = Penal');
@@ -56,16 +56,16 @@ describe('construirEncabezado', () => {
   });
 
   it('anota los filtros que el ambito descarto, nombrando la dimension y no el valor', () => {
-    const { lineas } = construirEncabezado(
+    const { lineas } = buildHeading(
       peticion({ appliedFilters: {}, outOfScopeFilters: ['DimTribunal.Distrito'] }),
     );
-    const texto = lineas.join('\n');
-    expect(texto).toContain('fuera de su ambito de acceso');
-    expect(texto).toContain('DimTribunal.Distrito');
+    const content = lineas.join('\n');
+    expect(content).toContain('fuera de su ambito de acceso');
+    expect(content).toContain('DimTribunal.Distrito');
   });
 
   it('omite la linea de filtros cuando no hay ninguno aplicado', () => {
-    const { lineas } = construirEncabezado(peticion({ appliedFilters: { 'hechos.materia': [] } }));
+    const { lineas } = buildHeading(peticion({ appliedFilters: { 'hechos.materia': [] } }));
     expect(lineas.some((l) => l.startsWith('Filtros:'))).toBe(false);
   });
 });
@@ -137,9 +137,9 @@ describe('aExcel', () => {
     expect(libro.worksheets.map((h) => h.name)).toEqual(['Procedencia', 'Casos por materia']);
 
     const portada = libro.getWorksheet('Procedencia');
-    const texto = (portada?.getColumn(1).values ?? []).join('\n');
-    expect(texto).toContain('Vista institucional oficial');
-    expect(texto).toContain('ana');
+    const content = (portada?.getColumn(1).values ?? []).join('\n');
+    expect(content).toContain('Vista institucional oficial');
+    expect(content).toContain('ana');
 
     const datos = libro.getWorksheet('Casos por materia');
     expect(datos?.getRow(1).values).toEqual([undefined, 'materia', 'casos']);
@@ -154,8 +154,8 @@ describe('aExcel', () => {
       ),
     );
     const libro = await abrirLibro(buffer);
-    const texto = (libro.getWorksheet('Procedencia')?.getColumn(1).values ?? []).join('\n');
-    expect(texto).toContain('VISTA PERSONALIZADA');
+    const content = (libro.getWorksheet('Procedencia')?.getColumn(1).values ?? []).join('\n');
+    expect(content).toContain('VISTA PERSONALIZADA');
   });
 
   it('recorta el nombre de hoja a lo que Excel admite', async () => {
@@ -186,7 +186,7 @@ describe('aPdf', () => {
       ),
     );
     // pdfkit comprime los flujos de contenido; se descomprimen para leer el texto.
-    expect(textoDePdf(buffer)).toContain('VISTA PERSONALIZADA');
+    expect(pdfText(buffer)).toContain('VISTA PERSONALIZADA');
   });
 
   it('reparte muchas filas en varias paginas', async () => {
@@ -198,7 +198,7 @@ describe('aPdf', () => {
       },
     };
     const buffer = await aPdf(doc([muchas], peticion({ format: 'pdf' })));
-    expect(paginasDePdf(buffer)).toBeGreaterThan(1);
+    expect(pdfPages(buffer)).toBeGreaterThan(1);
   });
 });
 
@@ -209,19 +209,19 @@ async function abrirLibro(buffer: Buffer) {
 }
 
 /** Texto legible de un PDF. */
-function textoDePdf(buffer: Buffer): string {
-  let texto = '';
-  const marca = Buffer.from('stream');
+function pdfText(buffer: Buffer): string {
+  let content = '';
+  const mark = Buffer.from('stream');
   let desde = 0;
 
   for (;;) {
-    const inicio = buffer.indexOf(marca, desde);
+    const inicio = buffer.indexOf(mark, desde);
     if (inicio === -1) break;
     const fin = buffer.indexOf(Buffer.from('endstream'), inicio);
     if (fin === -1) break;
     desde = fin + 1;
 
-    const crudo = buffer.subarray(inicio + marca.length, fin);
+    const crudo = buffer.subarray(inicio + mark.length, fin);
     const zlib = crudo.indexOf(0x78);
     if (zlib === -1) continue;
     let contenido: string;
@@ -234,15 +234,15 @@ function textoDePdf(buffer: Buffer): string {
     // Solo lo que va dentro de un operador de texto; el resto del flujo son coordenadas.
     for (const operador of contenido.match(/\[[^\]]*\]\s*TJ|<[0-9a-fA-F]*>\s*Tj/g) ?? []) {
       for (const trozo of operador.match(/<[0-9a-fA-F]*>/g) ?? []) {
-        texto += Buffer.from(trozo.slice(1, -1), 'hex').toString('latin1');
+        content += Buffer.from(trozo.slice(1, -1), 'hex').toString('latin1');
       }
     }
-    texto += '\n';
+    content += '\n';
   }
 
-  return texto;
+  return content;
 }
 
-function paginasDePdf(buffer: Buffer): number {
+function pdfPages(buffer: Buffer): number {
   return (buffer.toString('latin1').match(/\/Type\s*\/Page[^s]/g) ?? []).length;
 }

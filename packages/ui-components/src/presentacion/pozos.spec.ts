@@ -19,7 +19,7 @@ const RANURAS: RanuraDeCampos[] = [
   { id: 'eje-y', etiqueta: 'Eje Y', tipo: 'medida', max: 4, min: 1 },
 ];
 
-const instancia = (binding: Partial<ObjectInstance['binding']> = {}): ObjectInstance => ({
+const objectInstance = (binding: Partial<ObjectInstance['binding']> = {}): ObjectInstance => ({
   instanceId: 'i1',
   objectId: 'barras',
   version: '1.1.0',
@@ -32,7 +32,7 @@ describe('la ranura manda, no el orden', () => {
      * Es el caso que el reparto posicional no podia expresar: el primer campo caia siempre en la
      * primera ranura. Aqui el eje X se queda vacio y la medida va a su sitio.
      */
-    const puesta = conCampoEnRanura(instancia(), RANURAS, 'eje-y', 'CasosPendientes');
+    const puesta = conCampoEnRanura(objectInstance(), RANURAS, 'eje-y', 'CasosPendientes');
 
     expect(campoDeRanura(puesta, RANURAS, 'eje-x')).toBeUndefined();
     expect(campoDeRanura(puesta, RANURAS, 'eje-y')).toBe('CasosPendientes');
@@ -41,7 +41,7 @@ describe('la ranura manda, no el orden', () => {
   });
 
   it('SE PUEDE llenar solo la serie, con el eje X vacio', () => {
-    const puesta = conCampoEnRanura(instancia(), RANURAS, 'serie', 'DimTribunal.Materia');
+    const puesta = conCampoEnRanura(objectInstance(), RANURAS, 'serie', 'DimTribunal.Materia');
 
     expect(campoDeRanura(puesta, RANURAS, 'eje-x')).toBeUndefined();
     expect(campoDeRanura(puesta, RANURAS, 'serie')).toBe('DimTribunal.Materia');
@@ -53,7 +53,7 @@ describe('la ranura manda, no el orden', () => {
   it('los arrays derivados salen en el ORDEN DE DECLARACION de las ranuras', () => {
     // Es lo que hace que dos modulos con los mismos campos en las mismas ranuras produzcan la
     // misma consulta, y por tanto la misma clave de cache.
-    let i = instancia();
+    let i = objectInstance();
     i = conCampoEnRanura(i, RANURAS, 'serie', 'DimTribunal.Materia');
     i = conCampoEnRanura(i, RANURAS, 'eje-x', 'DimTribunal.Distrito');
 
@@ -64,7 +64,7 @@ describe('la ranura manda, no el orden', () => {
   });
 
   it('no admite mas de lo que la ranura declara, ni el mismo campo dos veces', () => {
-    let i = conCampoEnRanura(instancia(), RANURAS, 'eje-x', 'A');
+    let i = conCampoEnRanura(objectInstance(), RANURAS, 'eje-x', 'A');
     i = conCampoEnRanura(i, RANURAS, 'eje-x', 'B');
     expect(ranurasDe(i, RANURAS).get('eje-x')).toEqual(['A']);
 
@@ -74,7 +74,7 @@ describe('la ranura manda, no el orden', () => {
 
   it('quitar afecta a UNA ranura, no a todas', () => {
     // El mismo campo puede estar en dos ranuras; quitarlo de una no debe vaciar la otra.
-    let i = conCampoEnRanura(instancia(), RANURAS, 'eje-x', 'DimTiempo.Fecha');
+    let i = conCampoEnRanura(objectInstance(), RANURAS, 'eje-x', 'DimTiempo.Fecha');
     i = conCampoEnRanura(i, RANURAS, 'serie', 'DimTiempo.Fecha');
 
     const sin = sinCampoEnRanura(i, RANURAS, 'eje-x', 'DimTiempo.Fecha');
@@ -83,7 +83,7 @@ describe('la ranura manda, no el orden', () => {
   });
 
   it('cabeEnRanura respeta el cupo de cada una', () => {
-    const i = conCampoEnRanura(instancia(), RANURAS, 'eje-x', 'A');
+    const i = conCampoEnRanura(objectInstance(), RANURAS, 'eje-x', 'A');
     expect(cabeEnRanura(i, RANURAS, 'eje-x')).toBe(false);
     expect(cabeEnRanura(i, RANURAS, 'eje-y')).toBe(true);
     expect(cabeEnRanura(i, RANURAS, 'inventada')).toBe(false);
@@ -96,7 +96,7 @@ describe('compatibilidad con lo guardado antes', () => {
      * Todo lo guardado antes de este cambio. Sin esta deduccion, cada modulo existente apareceria
      * con las ranuras vacias y sus campos perdidos de vista.
      */
-    const antigua = instancia({
+    const antigua = objectInstance({
       dimensions: [
         { table: 'DimTribunal', field: 'Distrito' },
         { table: 'DimTribunal', field: 'Materia' },
@@ -110,7 +110,7 @@ describe('compatibilidad con lo guardado antes', () => {
   });
 
   it('el primer cambio sobre una instancia antigua la deja ya con mapa', () => {
-    const antigua = instancia({
+    const antigua = objectInstance({
       dimensions: [{ table: 'DimTribunal', field: 'Distrito' }],
       measures: [],
     });
@@ -125,7 +125,7 @@ describe('compatibilidad con lo guardado antes', () => {
 
   it('una asignacion guardada con mas campos de los que caben se recorta, no desborda', () => {
     // Pasa al bajar el cupo de una ranura entre versiones del objeto.
-    const i = instancia({ ranuras: { 'eje-x': ['A', 'B'] } });
+    const i = objectInstance({ ranuras: { 'eje-x': ['A', 'B'] } });
     expect(ranurasDe(i, RANURAS).get('eje-x')).toEqual(['A']);
   });
 
@@ -139,7 +139,7 @@ describe('compatibilidad con lo guardado antes', () => {
       { id: 'columnas', etiqueta: 'Columnas', tipo: 'medida', max: 3, min: 1 },
       { id: 'lineas', etiqueta: 'Lineas', tipo: 'medida', max: 3, min: 1 },
     ];
-    const i = instancia({ measures: ['A', 'B', 'C'] });
+    const i = objectInstance({ measures: ['A', 'B', 'C'] });
     const reparto = ranurasDe(i, dosPozos);
 
     expect(reparto.get('columnas')).toEqual(['A', 'C']);
@@ -152,7 +152,7 @@ describe('compatibilidad con lo guardado antes', () => {
       { id: 'columnas', etiqueta: 'Columnas', tipo: 'medida', max: 3, min: 1 },
       { id: 'lineas', etiqueta: 'Lineas', tipo: 'medida', max: 3, min: 1 },
     ];
-    const reparto = ranurasDe(instancia({ measures: ['A', 'B'] }), dosPozos);
+    const reparto = ranurasDe(objectInstance({ measures: ['A', 'B'] }), dosPozos);
     expect(reparto.get('columnas')).toEqual(['A']);
     expect(reparto.get('lineas')).toEqual(['B']);
   });
@@ -160,7 +160,7 @@ describe('compatibilidad con lo guardado antes', () => {
 
 describe('validarRanuras', () => {
   it('acepta una asignacion completa', () => {
-    let i = conCampoEnRanura(instancia(), RANURAS, 'eje-x', 'D');
+    let i = conCampoEnRanura(objectInstance(), RANURAS, 'eje-x', 'D');
     i = conCampoEnRanura(i, RANURAS, 'eje-y', 'M');
     expect(validarRanuras(i, RANURAS)).toEqual([]);
   });
@@ -170,18 +170,18 @@ describe('validarRanuras', () => {
      * El punto de todo esto. «Entre 1 y 2 dimensiones» se cumple igual con la dimension en la
      * serie, y ese grafico no se puede dibujar. Solo la ranura sabe cual de sus campos hace falta.
      */
-    let i = conCampoEnRanura(instancia(), RANURAS, 'serie', 'DimTribunal.Materia');
+    let i = conCampoEnRanura(objectInstance(), RANURAS, 'serie', 'DimTribunal.Materia');
     i = conCampoEnRanura(i, RANURAS, 'eje-y', 'M');
 
     const problems = validarRanuras(i, RANURAS);
     expect(problems.map((p) => p.ranura)).toEqual(['eje-x']);
-    expect(problems[0]?.problema).toContain('Eje X');
+    expect(problems[0]?.issue).toContain('Eje X');
   });
 
   it('avisa de campos asignados a una ranura que el objeto ya no tiene', () => {
     // Pasa al cambiar de version: sin el aviso, quedarian mapeados sin que el editor los muestre
     // ni nadie pueda quitarlos.
-    const i = instancia({
+    const i = objectInstance({
       ranuras: { 'eje-x': ['D'], 'eje-y': ['M'], 'ranura-vieja': ['Z'] },
     });
     const problems = validarRanuras(i, RANURAS);
@@ -189,7 +189,7 @@ describe('validarRanuras', () => {
   });
 
   it('sin ranuras declaradas no se valida nada', () => {
-    expect(validarRanuras(instancia(), [])).toEqual([]);
+    expect(validarRanuras(objectInstance(), [])).toEqual([]);
   });
 });
 

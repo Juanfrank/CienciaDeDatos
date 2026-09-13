@@ -20,20 +20,20 @@ const vm: CategoricalViewModel = {
 
 const PALETA = {
   series: ['#c1', '#c2', '#c3', '#c4', '#c5', '#c6', '#c7', '#c8'],
-  texto: '#111111',
+  content: '#111111',
   textoAtenuado: '#555555',
-  linea: '#999999',
+  line: '#999999',
   superficie: '#ffffff',
   superficieElevada: '#eeeeee',
 };
 
-const BASE: OpcionesDeGrafico = { vm, paleta: PALETA, titulo: 'T', dimension: 'Tribunal' };
+const BASE: OpcionesDeGrafico = { vm, palette: PALETA, titulo: 'T', dimension: 'Tribunal' };
 
 /** DOS valores validos y distintos por clave. */
 const VALORES: Partial<Record<ClaveDePresentacion, unknown[]>> = {
   leyenda: ['oculta', 'derecha'],
   etiquetasDeDato: [
-    { mostrar: true, posicion: 'dentro' },
+    { mostrar: true, cellPosition: 'dentro' },
     { mostrar: true, soloExtremos: true },
   ],
   tooltip: [{ total: true }, { ordenarPorValor: true }],
@@ -53,8 +53,8 @@ const VALORES: Partial<Record<ClaveDePresentacion, unknown[]>> = {
     [7, 0],
   ],
   condicional: [
-    { reglas: [{ medida: 'Casos', comparador: 'mayor', valor: 15, color: 'exito' }] },
-    { reglas: [{ medida: 'Dias', comparador: 'menor', valor: 5, color: 'peligro' }] },
+    { rules: [{ medida: 'Casos', comparador: 'mayor', valor: 15, color: 'exito' }] },
+    { rules: [{ medida: 'Dias', comparador: 'menor', valor: 5, color: 'peligro' }] },
   ],
 };
 

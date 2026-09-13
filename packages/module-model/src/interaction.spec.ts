@@ -5,7 +5,7 @@ import {
   bookmarkToUrl,
   captureBookmark,
   drillThroughUrl,
-} from './interaccion';
+} from './interaction';
 
 describe('catalogo de patrones de interaccion (4.4)', () => {
   it('declara los cuatro patrones soportados, de forma explicita y no arbitraria', () => {
@@ -118,7 +118,7 @@ describe('drill-through (4.4)', () => {
   it('la seleccion que origino el gesto sustituye el filtro de esa dimension', () => {
     // El gesto fue "ver el detalle de ESTE valor", no "anadir otro valor mas".
     const url = drillThroughUrl({ moduleSlug: 'audiencias' }, filtrosActuales, {
-      campo: 'DimTribunal.Materia',
+      fieldName: 'DimTribunal.Materia',
       valor: 'Civil',
     });
     expect(url).toContain('DimTribunal.Materia=Civil');

@@ -90,7 +90,7 @@ export interface Notification {
   readAt?: string;
 }
 
-export const CLAVE_REGLAS = 'alerts:rules';
+export const KEY_RULES = 'alerts:rules';
 export const CLAVE_ESTADOS = 'alerts:states';
 export const CLAVE_SUSCRIPCIONES = 'alerts:subscriptions';
 export const claveBandeja = (userId: string): string => `alerts:inbox:${userId}`;

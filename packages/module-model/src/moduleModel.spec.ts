@@ -25,7 +25,7 @@ import { findPublishBlockers, validateModule } from './validation';
 
 const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };
 
-const instancia = (
+const objectInstance = (
   id: string,
   objectId: string,
   version = '1.0.0',
@@ -39,7 +39,7 @@ const instancia = (
 
 const item = (id: string, objectId: string, position = { x: 0, y: 0, w: 6, h: 2 }): GridItem => ({
   id,
-  instance: instancia(id, objectId),
+  instance: objectInstance(id, objectId),
   position,
 });
 
@@ -55,7 +55,7 @@ const modulo = (items: GridItem[]): ModuleDefinition => ({
 });
 
 const registro = new ObjectRegistry(catalogoInicial);
-const columnas = { casos: ['DimTribunal.Distrito', 'CasosPendientes'] };
+const gridColumns = { casos: ['DimTribunal.Distrito', 'CasosPendientes'] };
 
 describe('rejilla (4.2)', () => {
   it('acepta una disposicion valida', () => {
@@ -182,7 +182,7 @@ describe('validateModule (4.2): marcar roto, no fallar en silencio', () => {
     const d = validateModule({
       module: modulo([item('a', 'barras')]),
       registry: registro,
-      columnsByDataset: columnas,
+      columnsByDataset: gridColumns,
     });
     expect(d.hasBrokenItems).toBe(false);
   });
@@ -193,7 +193,7 @@ describe('validateModule (4.2): marcar roto, no fallar en silencio', () => {
     if (!first) throw new Error('fixture inesperado');
     first.instance = { ...first.instance, version: '9.9.9' };
 
-    const d = validateModule({ module: roto, registry: registro, columnsByDataset: columnas });
+    const d = validateModule({ module: roto, registry: registro, columnsByDataset: gridColumns });
     expect(d.items[0]?.broken).toBe(true);
     expect(d.items[0]?.unresolvedObject).toMatch(/no tiene la version/);
   });
@@ -224,7 +224,7 @@ describe('validateModule (4.2): marcar roto, no fallar en silencio', () => {
         item('b', 'tabla', { x: 4, y: 0, w: 8, h: 2 }),
       ]),
       registry: registro,
-      columnsByDataset: columnas,
+      columnsByDataset: gridColumns,
     });
     expect(d.layoutProblems.some((p) => p.kind === 'solapamiento')).toBe(true);
   });
@@ -235,7 +235,7 @@ describe('puerta de publicacion institucional', () => {
     const d = validateModule({
       module: modulo([item('a', 'barras')]),
       registry: registro,
-      columnsByDataset: columnas,
+      columnsByDataset: gridColumns,
     });
     expect(findPublishBlockers(d)).toEqual([]);
   });
@@ -256,7 +256,7 @@ describe('puerta de publicacion institucional', () => {
     const d = validateModule({
       module: modulo([suelto]),
       registry: registro,
-      columnsByDataset: columnas,
+      columnsByDataset: gridColumns,
     });
 
     expect(findPublishBlockers(d)[0]?.reason).toBe('objeto-roto');
@@ -273,7 +273,7 @@ describe('puerta de publicacion institucional', () => {
     const d = validateModule({
       module: modulo([anfitrion]),
       registry: registro,
-      columnsByDataset: columnas,
+      columnsByDataset: gridColumns,
     });
     expect(findPublishBlockers(d)).toEqual([]);
   });
@@ -282,7 +282,7 @@ describe('puerta de publicacion institucional', () => {
     const d = validateModule({
       module: modulo([item('a', 'barras')]),
       registry: registro,
-      columnsByDataset: columnas,
+      columnsByDataset: gridColumns,
     });
     expect(findPublishBlockers(d, ['a'])[0]?.reason).toBe('version-vencida');
   });

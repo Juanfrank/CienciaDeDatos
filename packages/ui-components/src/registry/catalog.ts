@@ -1041,7 +1041,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
 
   {
     objectId: 'cuadro-de-texto',
-    icono: 'texto',
+    icono: 'content',
     name: 'Cuadro de texto',
     description: 'Texto con formato: notas, aclaraciones, contexto. No consume datos.',
     category: 'elemento',
@@ -1067,7 +1067,7 @@ export const catalogoInicial: VisualObjectDefinition[] = [
   },
   {
     objectId: 'linea-divisoria',
-    icono: 'linea',
+    icono: 'line',
     name: 'Linea divisoria',
     description: 'Una linea horizontal o vertical, para separar bloques.',
     category: 'elemento',

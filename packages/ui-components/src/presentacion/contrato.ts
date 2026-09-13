@@ -199,7 +199,7 @@ export type PosicionDeDato = (typeof POSICIONES_DE_DATO)[number];
 
 export interface ConfiguracionDeEtiquetas {
   mostrar?: boolean;
-  posicion?: PosicionDeDato;
+  cellPosition?: PosicionDeDato;
   /** Solo el maximo y el minimo de cada serie. Con muchas categorias es la unica opcion legible. */
   soloExtremos?: boolean;
 }
@@ -216,7 +216,7 @@ export function etiquetasNormalizadas(valor: EtiquetasDeDato | undefined): Confi
 /** ---- Tooltip ---- */
 /** ---- Pequenos multiplos ---- */
 export interface ConfiguracionDeMultiplos {
-  columnas?: number;
+  gridColumns?: number;
   mismaEscala?: boolean;
 }
 
@@ -233,8 +233,8 @@ export type PosicionDeEtiqueta = (typeof POSICIONES_DE_ETIQUETA)[number];
 
 /** La etiqueta que acompana al valor en una tarjeta. */
 export interface EtiquetaDeValor {
-  texto?: string;
-  posicion?: PosicionDeEtiqueta;
+  content?: string;
+  cellPosition?: PosicionDeEtiqueta;
 }
 
 export interface PresentacionDeObjeto {
@@ -326,7 +326,7 @@ export const PRESENTACION_MINIMA: ClaveDePresentacion[] = [
 
 export interface ProblemaDePresentacion {
   clave: string;
-  problema: string;
+  issue: string;
 }
 
 export const MAX_SUBTITULO = 80;
@@ -348,7 +348,7 @@ export function validarPresentacion(
     if (!admite.has(clave)) {
       problems.push({
         clave,
-        problema: `Este objeto no admite '${clave}'. Admite: ${admitidas.join(', ')}.`,
+        issue: `Este objeto no admite '${clave}'. Admite: ${admitidas.join(', ')}.`,
       });
     }
   }
@@ -356,7 +356,7 @@ export function validarPresentacion(
   if (presentacion.icono !== undefined && !esNombreDeIcono(presentacion.icono)) {
     problems.push({
       clave: 'icono',
-      problema: `'${String(presentacion.icono)}' no es un icono del catalogo.`,
+      issue: `'${String(presentacion.icono)}' no es un icono del catalogo.`,
     });
   }
 
@@ -366,7 +366,7 @@ export function validarPresentacion(
   ) {
     problems.push({
       clave: 'acento',
-      problema: `'${String(presentacion.acento)}' no es un acento. Use: ${ACENTOS.join(', ')}.`,
+      issue: `'${String(presentacion.acento)}' no es un acento. Use: ${ACENTOS.join(', ')}.`,
     });
   }
 
@@ -377,14 +377,14 @@ export function validarPresentacion(
     if (!(DESTINOS_DE_TEXTO as readonly string[]).includes(destino)) {
       problems.push({
         clave: `textos.${destino}`,
-        problema: `'${destino}' no es un texto configurable. Use: ${DESTINOS_DE_TEXTO.join(', ')}.`,
+        issue: `'${destino}' no es un texto configurable. Use: ${DESTINOS_DE_TEXTO.join(', ')}.`,
       });
       continue;
     }
     if (estilo.color !== undefined && !(COLORES_DE_TEXTO as readonly string[]).includes(estilo.color)) {
       problems.push({
         clave: `textos.${destino}.color`,
-        problema:
+        issue:
           `'${String(estilo.color)}' no es un color del tema. Use: ${COLORES_DE_TEXTO.join(', ')}. ` +
           `Un color suelto no tiene par de contraste comprobado y no sigue al tema dark (4.3).`,
       });
@@ -392,7 +392,7 @@ export function validarPresentacion(
     if (estilo.alineacion !== undefined && !(ALINEACIONES as readonly string[]).includes(estilo.alineacion)) {
       problems.push({
         clave: `textos.${destino}.alineacion`,
-        problema: `'${String(estilo.alineacion)}' no es una alineacion. Use: ${ALINEACIONES.join(', ')}.`,
+        issue: `'${String(estilo.alineacion)}' no es una alineacion. Use: ${ALINEACIONES.join(', ')}.`,
       });
     }
     if (
@@ -401,7 +401,7 @@ export function validarPresentacion(
     ) {
       problems.push({
         clave: `textos.${destino}.alineacionVertical`,
-        problema:
+        issue:
           `'${String(estilo.alineacionVertical)}' no es una alineacion vertical. ` +
           `Use: ${ALINEACIONES_VERTICALES.join(', ')}.`,
       });
@@ -420,22 +420,22 @@ export function validarPresentacion(
     if (formato.tipo !== undefined && !(TIPOS_DE_FORMATO as readonly string[]).includes(formato.tipo)) {
       problems.push({
         clave: `formatos.${nombre}.tipo`,
-        problema: `'${String(formato.tipo)}' no es un tipo de formato. Use: ${TIPOS_DE_FORMATO.join(', ')}.`,
+        issue: `'${String(formato.tipo)}' no es un tipo de formato. Use: ${TIPOS_DE_FORMATO.join(', ')}.`,
       });
     }
     if (formato.tipo === 'personalizado') {
-      const problema = formato.patron === undefined ? 'falta la cadena.' : problemaDelPatron(formato.patron);
-      if (problema) {
+      const issue = formato.patron === undefined ? 'falta la cadena.' : problemaDelPatron(formato.patron);
+      if (issue) {
         problems.push({
           clave: `formatos.${nombre}.patron`,
-          problema: `El formato personalizado de '${nombre}' ${problema}`,
+          issue: `El formato personalizado de '${nombre}' ${issue}`,
         });
       }
     }
     if (formato.decimales !== undefined && (formato.decimales < 0 || formato.decimales > 6)) {
       problems.push({
         clave: `formatos.${nombre}.decimales`,
-        problema:
+        issue:
           `${formato.decimales} decimales no se pueden mostrar. Entre 0 y 6: mas alla, la cifra ` +
           `deja de leerse y empieza a ser ruido de precision.`,
       });
@@ -447,7 +447,7 @@ export function validarPresentacion(
     if (circular.radioInterior < 0 || circular.radioInterior > MAX_RADIO_INTERIOR) {
       problems.push({
         clave: 'circular.radioInterior',
-        problema:
+        issue:
           `El hueco va de 0 a ${MAX_RADIO_INTERIOR} % del radio. Por encima no queda anillo que ` +
           `comparar: el grafico dejaria de decir nada sobre las proporciones.`,
       });
@@ -460,13 +460,13 @@ export function validarPresentacion(
   if (ejes?.rotarX !== undefined && (ejes.rotarX < -90 || ejes.rotarX > 90)) {
     problems.push({
       clave: 'ejes.rotarX',
-      problema: `El giro va de -90 a 90 grados, y ${ejes.rotarX} no esta en ese rango.`,
+      issue: `El giro va de -90 a 90 grados, y ${ejes.rotarX} no esta en ese rango.`,
     });
   }
   if (ejes?.minimoY !== undefined && ejes.maximoY !== undefined && ejes.minimoY >= ejes.maximoY) {
     problems.push({
       clave: 'ejes.maximoY',
-      problema: `El maximo del eje (${ejes.maximoY}) tiene que ser mayor que el minimo (${ejes.minimoY}).`,
+      issue: `El maximo del eje (${ejes.maximoY}) tiene que ser mayor que el minimo (${ejes.minimoY}).`,
     });
   }
 
@@ -474,74 +474,74 @@ export function validarPresentacion(
     if (presentacion.referencias.length > MAX_REFERENCIAS) {
       problems.push({
         clave: 'referencias',
-        problema:
+        issue:
           `${presentacion.referencias.length} lineas de referencia. El maximo es ` +
           `${MAX_REFERENCIAS}: mas rayas sobre un grafico dejan de ser referencias y pasan a ser ` +
           `una rejilla.`,
       });
     }
-    presentacion.referencias.forEach((linea, i) => {
-      if (!Number.isFinite(linea.valor)) {
+    presentacion.referencias.forEach((line, i) => {
+      if (!Number.isFinite(line.valor)) {
         problems.push({
           clave: `referencias.${i}.valor`,
-          problema: 'Una linea de referencia necesita un valor numerico: es donde se dibuja.',
+          issue: 'Una linea de referencia necesita un valor numerico: es donde se dibuja.',
         });
       }
-      if (linea.color !== undefined && !(COLORES_DE_TEXTO as readonly string[]).includes(linea.color)) {
+      if (line.color !== undefined && !(COLORES_DE_TEXTO as readonly string[]).includes(line.color)) {
         problems.push({
           clave: `referencias.${i}.color`,
-          problema: `'${String(linea.color)}' no es un color del tema. Use: ${COLORES_DE_TEXTO.join(', ')}.`,
+          issue: `'${String(line.color)}' no es un color del tema. Use: ${COLORES_DE_TEXTO.join(', ')}.`,
         });
       }
       if (
-        linea.estilo !== undefined &&
-        !(ESTILOS_DE_REFERENCIA as readonly string[]).includes(linea.estilo)
+        line.estilo !== undefined &&
+        !(ESTILOS_DE_REFERENCIA as readonly string[]).includes(line.estilo)
       ) {
         problems.push({
           clave: `referencias.${i}.estilo`,
-          problema: `'${String(linea.estilo)}' no es un estilo. Use: ${ESTILOS_DE_REFERENCIA.join(', ')}.`,
+          issue: `'${String(line.estilo)}' no es un estilo. Use: ${ESTILOS_DE_REFERENCIA.join(', ')}.`,
         });
       }
     });
   }
 
-  const reglas = presentacion.condicional?.reglas;
-  if (reglas !== undefined) {
-    if (reglas.length > MAX_REGLAS) {
+  const rules = presentacion.condicional?.rules;
+  if (rules !== undefined) {
+    if (rules.length > MAX_REGLAS) {
       problems.push({
         clave: 'condicional',
-        problema:
-          `${reglas.length} reglas de color. El maximo es ${MAX_REGLAS}: mas dejan de ser ` +
+        issue:
+          `${rules.length} reglas de color. El maximo es ${MAX_REGLAS}: mas dejan de ser ` +
           `excepciones y pasan a ser una escala, que es otra herramienta.`,
       });
     }
-    reglas.forEach((regla, i) => {
-      if (!(COMPARADORES as readonly string[]).includes(regla.comparador)) {
+    rules.forEach((colorRule, i) => {
+      if (!(COMPARADORES as readonly string[]).includes(colorRule.comparador)) {
         problems.push({
           clave: `condicional.${i}.comparador`,
-          problema: `'${String(regla.comparador)}' no es una comparacion. Use: ${COMPARADORES.join(', ')}.`,
+          issue: `'${String(colorRule.comparador)}' no es una comparacion. Use: ${COMPARADORES.join(', ')}.`,
         });
       }
-      if (!Number.isFinite(regla.valor)) {
+      if (!Number.isFinite(colorRule.valor)) {
         problems.push({
           clave: `condicional.${i}.valor`,
-          problema: 'Una regla necesita un numero con el que comparar.',
+          issue: 'Una regla necesita un numero con el que comparar.',
         });
       }
       /*
        * `entre` sin el otro extremo no es un rango incompleto: es una regla que NUNCA casa.
        * Guardarla dejaria un color en el panel que no se aplica nunca y nadie sabria por que.
        */
-      if (regla.comparador === 'entre' && regla.hasta === undefined) {
+      if (colorRule.comparador === 'entre' && colorRule.hasta === undefined) {
         problems.push({
           clave: `condicional.${i}.hasta`,
-          problema: 'La comparacion «entre» necesita los dos extremos; con uno solo no casa nunca.',
+          issue: 'La comparacion «entre» necesita los dos extremos; con uno solo no casa nunca.',
         });
       }
-      if (!(COLORES_DE_TEXTO as readonly string[]).includes(regla.color)) {
+      if (!(COLORES_DE_TEXTO as readonly string[]).includes(colorRule.color)) {
         problems.push({
           clave: `condicional.${i}.color`,
-          problema: `'${String(regla.color)}' no es un color del tema. Use: ${COLORES_DE_TEXTO.join(', ')}.`,
+          issue: `'${String(colorRule.color)}' no es un color del tema. Use: ${COLORES_DE_TEXTO.join(', ')}.`,
         });
       }
     });
@@ -551,7 +551,7 @@ export function validarPresentacion(
     if (!Number.isInteger(indice) || indice < 0 || indice > 7) {
       problems.push({
         clave: `coloresDeSerie.${i}`,
-        problema: `'${String(indice)}' no es un color de la paleta. La paleta del tema tiene ocho, de 0 a 7.`,
+        issue: `'${String(indice)}' no es un color de la paleta. La paleta del tema tiene ocho, de 0 a 7.`,
       });
     }
   }
@@ -562,7 +562,7 @@ export function validarPresentacion(
   ) {
     problems.push({
       clave: 'embudo.comparar',
-      problema:
+      issue:
         `'${String(presentacion.embudo.comparar)}' no es una comparacion. ` +
         `Use: ${COMPARACIONES_DE_EMBUDO.join(', ')}.`,
     });
@@ -574,7 +574,7 @@ export function validarPresentacion(
   ) {
     problems.push({
       clave: 'circular.etiquetas',
-      problema: `'${String(circular.labels)}' no es un modo. Use: ${ETIQUETAS_CIRCULARES.join(', ')}.`,
+      issue: `'${String(circular.labels)}' no es un modo. Use: ${ETIQUETAS_CIRCULARES.join(', ')}.`,
     });
   }
 
@@ -585,14 +585,14 @@ export function validarPresentacion(
   if (medidor?.minimo !== undefined && medidor.maximo !== undefined && medidor.minimo >= medidor.maximo) {
     problems.push({
       clave: 'medidor.maximo',
-      problema: `El maximo (${medidor.maximo}) tiene que ser mayor que el minimo (${medidor.minimo}).`,
+      issue: `El maximo (${medidor.maximo}) tiene que ser mayor que el minimo (${medidor.minimo}).`,
     });
   }
 
   if (presentacion.subtitulo !== undefined && presentacion.subtitulo.length > MAX_SUBTITULO) {
     problems.push({
       clave: 'subtitulo',
-      problema: `El subtitulo pasa de ${MAX_SUBTITULO} caracteres. Es una linea, no un parrafo.`,
+      issue: `El subtitulo pasa de ${MAX_SUBTITULO} caracteres. Es una linea, no un parrafo.`,
     });
   }
 
@@ -602,7 +602,7 @@ export function validarPresentacion(
   ) {
     problems.push({
       clave: 'leyenda',
-      problema: `'${String(presentacion.leyenda)}' no es un modo. Use: ${MODOS_DE_LEYENDA.join(', ')}.`,
+      issue: `'${String(presentacion.leyenda)}' no es un modo. Use: ${MODOS_DE_LEYENDA.join(', ')}.`,
     });
   }
 
@@ -610,13 +610,13 @@ export function validarPresentacion(
   if (decimales !== undefined && (!Number.isInteger(decimales) || decimales < 0 || decimales > MAX_DECIMALES)) {
     problems.push({
       clave: 'formato.decimales',
-      problema: `Los decimales van de 0 a ${MAX_DECIMALES}.`,
+      issue: `Los decimales van de 0 a ${MAX_DECIMALES}.`,
     });
   }
   if (unidad !== undefined && unidad.length > MAX_UNIDAD) {
     problems.push({
       clave: 'formato.unidad',
-      problema: `La unidad pasa de ${MAX_UNIDAD} caracteres. Es un sufijo, no una explicacion.`,
+      issue: `La unidad pasa de ${MAX_UNIDAD} caracteres. Es un sufijo, no una explicacion.`,
     });
   }
 

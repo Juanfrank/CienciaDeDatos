@@ -268,11 +268,11 @@ export async function dimensionesDisponibles(): Promise<
   if (!schema) return [];
   return schema.tables.flatMap((tabla) =>
     tabla.fields
-      .filter((campo) => !campo.isMeasure)
-      .map((campo) => ({
+      .filter((fieldName) => !fieldName.isMeasure)
+      .map((fieldName) => ({
         table: tabla.name,
-        field: campo.name,
-        key: `${tabla.name}.${campo.name}`,
+        field: fieldName.name,
+        key: `${tabla.name}.${fieldName.name}`,
       })),
   );
 }

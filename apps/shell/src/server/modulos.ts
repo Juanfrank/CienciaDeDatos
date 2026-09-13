@@ -102,8 +102,8 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'panel-de-filtros',
                 selectores: [
-                  { campo: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Materia' },
-                  { campo: 'DimTribunal.Distrito', tipo: 'desplegable', etiqueta: 'Distrito' },
+                  { fieldName: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Materia' },
+                  { fieldName: 'DimTribunal.Distrito', tipo: 'desplegable', etiqueta: 'Distrito' },
                 ],
               },
             },
@@ -365,9 +365,9 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
-                  texto: 'Texto, formas y separadores',
+                  content: 'Texto, formas y separadores',
                   posicionDelTexto: 'izquierda',
-                  linea: 'derecha',
+                  line: 'derecha',
                   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
                 },
               },
@@ -382,17 +382,17 @@ export const modulosDemo: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Nota metodologica',
               binding: SIN_DATOS,
-              presentacion: { icono: 'texto', acento: 'terciario' },
+              presentacion: { icono: 'content', acento: 'terciario' },
               configuracion: {
                 objectId: 'cuadro-de-texto',
                 cuadroDeTexto: {
                   parrafos: [
-                    { texto: 'Como leer este modulo', nivel: 1 },
+                    { content: 'Como leer este modulo', nivel: 1 },
                     {
-                      texto:
+                      content:
                         'Las cifras salen del dataset cacheado y estan filtradas por el ambito de quien mira.',
                     },
-                    { texto: 'Los elementos de esta pagina no leen datos: componen.', vineta: true },
+                    { content: 'Los elementos de esta pagina no leen datos: componen.', vineta: true },
                   ],
                 },
               },
@@ -414,7 +414,7 @@ export const modulosDemo: ModuleDefinition[] = [
                   relleno: 'primario',
                   opacidad: 12,
                   radio: 12,
-                  texto: 'Rectangulo',
+                  content: 'Rectangulo',
                 },
               },
             },
@@ -476,9 +476,9 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
-                  texto: 'Conexiones',
+                  content: 'Conexiones',
                   posicionDelTexto: 'centro',
-                  linea: 'ambos',
+                  line: 'ambos',
                   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'atenuado' },
                 },
               },
@@ -493,7 +493,7 @@ export const modulosDemo: ModuleDefinition[] = [
               version: '1.1.0',
               title: 'Ingresados',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosIngresados'] },
-              presentacion: { icono: 'expediente', etiqueta: { texto: 'en el periodo', posicion: 'debajo' } },
+              presentacion: { icono: 'expediente', etiqueta: { content: 'en el periodo', cellPosition: 'debajo' } },
             },
           },
           {
@@ -517,7 +517,7 @@ export const modulosDemo: ModuleDefinition[] = [
                   hasta: 'flujo-destino',
                   trazado: 'angulo',
                   extremoFinal: 'flecha',
-                  texto: 'se resuelven',
+                  content: 'se resuelven',
                   estiloDeLinea: { estilo: 'solida', grosor: 2, color: 'primario' },
                 },
               },
@@ -532,7 +532,7 @@ export const modulosDemo: ModuleDefinition[] = [
               version: '1.1.0',
               title: 'Resueltos',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosResueltos'] },
-              presentacion: { icono: 'balanza', acento: 'secundario', etiqueta: { texto: 'en el periodo', posicion: 'debajo' } },
+              presentacion: { icono: 'balanza', acento: 'secundario', etiqueta: { content: 'en el periodo', cellPosition: 'debajo' } },
             },
           },
           {
@@ -584,9 +584,9 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
-                  texto: 'Lo mismo, sin personalizar y personalizado',
+                  content: 'Lo mismo, sin personalizar y personalizado',
                   posicionDelTexto: 'izquierda',
-                  linea: 'derecha',
+                  line: 'derecha',
                   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
                 },
               },
@@ -675,9 +675,9 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
-                  texto: 'La misma medida en seis formas',
+                  content: 'La misma medida en seis formas',
                   posicionDelTexto: 'izquierda',
-                  linea: 'derecha',
+                  line: 'derecha',
                   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
                 },
               },
@@ -798,9 +798,9 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
-                  texto: 'La parte y la meta',
+                  content: 'La parte y la meta',
                   posicionDelTexto: 'izquierda',
-                  linea: 'derecha',
+                  line: 'derecha',
                   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
                 },
               },
@@ -916,9 +916,9 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
-                  texto: 'Cuando una escala no alcanza',
+                  content: 'Cuando una escala no alcanza',
                   posicionDelTexto: 'izquierda',
-                  linea: 'derecha',
+                  line: 'derecha',
                   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
                 },
               },
@@ -1037,9 +1037,9 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
-                  texto: 'De donde sale y en que se reparte',
+                  content: 'De donde sale y en que se reparte',
                   posicionDelTexto: 'izquierda',
-                  linea: 'derecha',
+                  line: 'derecha',
                   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
                 },
               },
@@ -1145,9 +1145,9 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
-                  texto: 'Una cifra contra algo',
+                  content: 'Una cifra contra algo',
                   posicionDelTexto: 'izquierda',
-                  linea: 'derecha',
+                  line: 'derecha',
                   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
                 },
               },
@@ -1257,9 +1257,9 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
-                  texto: 'Que se rotula y que se lee al senalar',
+                  content: 'Que se rotula y que se lee al senalar',
                   posicionDelTexto: 'izquierda',
-                  linea: 'derecha',
+                  line: 'derecha',
                   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
                 },
               },
@@ -1302,7 +1302,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'Con cuatro categorias cabe; con veinte, no',
                 leyenda: 'abajo',
-                etiquetasDeDato: { mostrar: true, posicion: 'encima' },
+                etiquetasDeDato: { mostrar: true, cellPosition: 'encima' },
                 ejes: { tituloY: 'Casos' },
               },
             },
@@ -1368,9 +1368,9 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
-                  texto: 'El mismo grafico, una vez por cada valor',
+                  content: 'El mismo grafico, una vez por cada valor',
                   posicionDelTexto: 'izquierda',
-                  linea: 'derecha',
+                  line: 'derecha',
                   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
                 },
               },
@@ -1423,7 +1423,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'Dos medidas por panel, en una sola configuracion',
                 leyenda: 'abajo',
-                multiplos: { columnas: 1 },
+                multiplos: { gridColumns: 1 },
               },
             },
           },
@@ -1446,9 +1446,9 @@ export const modulosDemo: ModuleDefinition[] = [
               configuracion: {
                 objectId: 'titulo-de-seccion',
                 tituloDeSeccion: {
-                  texto: 'Cuando el color lo decide el dato',
+                  content: 'Cuando el color lo decide el dato',
                   posicionDelTexto: 'izquierda',
-                  linea: 'derecha',
+                  line: 'derecha',
                   estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
                 },
               },
@@ -1465,8 +1465,8 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosPendientes'] },
               presentacion: {
                 subtitulo: 'Roja por encima de 2.000',
-                etiqueta: { texto: 'Al cierre del trimestre', posicion: 'debajo' },
-                condicional: { reglas: [{ comparador: 'mayor', valor: 2000, color: 'error' }] },
+                etiqueta: { content: 'Al cierre del trimestre', cellPosition: 'debajo' },
+                condicional: { rules: [{ comparador: 'mayor', valor: 2000, color: 'error' }] },
               },
             },
           },
@@ -1481,8 +1481,8 @@ export const modulosDemo: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosResueltos'] },
               presentacion: {
                 subtitulo: 'La misma regla, y esta no salta',
-                etiqueta: { texto: 'Al cierre del trimestre', posicion: 'debajo' },
-                condicional: { reglas: [{ comparador: 'menor', valor: 1000, color: 'error' }] },
+                etiqueta: { content: 'Al cierre del trimestre', cellPosition: 'debajo' },
+                condicional: { rules: [{ comparador: 'menor', valor: 1000, color: 'error' }] },
               },
             },
           },
@@ -1502,7 +1502,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'Tres reglas, evaluadas en orden',
                 condicional: {
-                  reglas: [
+                  rules: [
                     { medida: 'CasosPendientes', comparador: 'mayor', valor: 600, color: 'error' },
                     { medida: 'CasosPendientes', comparador: 'menor', valor: 400, color: 'terciario' },
                     { medida: 'CasosResueltos', comparador: 'mayor', valor: 900, color: 'primario' },
@@ -1526,7 +1526,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 etiquetasDeDato: { mostrar: true },
                 ejes: { tituloY: 'Casos' },
                 referencias: [{ valor: 600, etiqueta: 'Umbral', color: 'error' }],
-                condicional: { reglas: [{ comparador: 'mayor', valor: 600, color: 'error' }] },
+                condicional: { rules: [{ comparador: 'mayor', valor: 600, color: 'error' }] },
               },
             },
           },
@@ -1546,7 +1546,7 @@ export const modulosDemo: ModuleDefinition[] = [
                 subtitulo: 'La misma regla, en horizontal',
                 leyenda: 'oculta',
                 etiquetasDeDato: { mostrar: true },
-                condicional: { reglas: [{ comparador: 'mayor', valor: 600, color: 'error' }] },
+                condicional: { rules: [{ comparador: 'mayor', valor: 600, color: 'error' }] },
               },
             },
           },
@@ -1573,7 +1573,7 @@ export const modulosDemo: ModuleDefinition[] = [
               },
               presentacion: {
                 subtitulo: 'El color tambien llega a los subtotales',
-                condicional: { reglas: [{ comparador: 'mayor', valor: 300, color: 'error' }] },
+                condicional: { rules: [{ comparador: 'mayor', valor: 300, color: 'error' }] },
               },
             },
           },
@@ -1596,7 +1596,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: { icono: 'contenedor', subtitulo: 'Rejilla propia de seis columnas' },
               configuracion: {
                 objectId: 'contenedor-simple',
-                simple: { columnas: 6 },
+                simple: { gridColumns: 6 },
                 paneles: [
                   {
                     panelId: 'p1',
@@ -1624,7 +1624,7 @@ export const modulosDemo: ModuleDefinition[] = [
                           binding: SIN_DATOS,
                           configuracion: {
                             objectId: 'cuadro-de-texto',
-                            cuadroDeTexto: { parrafos: [{ texto: 'Un elemento y una visual, juntos.' }] },
+                            cuadroDeTexto: { parrafos: [{ content: 'Un elemento y una visual, juntos.' }] },
                           },
                         },
                       },
@@ -1646,7 +1646,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: { icono: 'contenedor', subtitulo: 'Se desplaza solo en vertical' },
               configuracion: {
                 objectId: 'contenedor-desplazable',
-                desplazable: { eje: 'y', columnas: 4 },
+                desplazable: { eje: 'y', gridColumns: 4 },
                 paneles: [
                   {
                     panelId: 'p1',
@@ -1685,7 +1685,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: { icono: 'pestanas', subtitulo: 'Cada pestana con su propia disposicion' },
               configuracion: {
                 objectId: 'contenedor-con-pestanas',
-                pestanas: { columnas: 8, pestanaInicial: 'p1' },
+                pestanas: { gridColumns: 8, pestanaInicial: 'p1' },
                 paneles: [
                   {
                     panelId: 'p1',
@@ -1756,7 +1756,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: { icono: 'expandir', subtitulo: 'La ventana tiene su propia rejilla' },
               configuracion: {
                 objectId: 'contenedor-ampliable',
-                ampliable: { columnas: 6, columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' },
+                ampliable: { gridColumns: 6, columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' },
                 paneles: [
                   {
                     panelId: 'p1',

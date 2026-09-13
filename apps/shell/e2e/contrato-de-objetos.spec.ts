@@ -20,11 +20,11 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
     await expect(page.locator('[data-testid^="bloque-obj-"]')).toHaveCount(1);
 
     const id = await page.locator('[data-testid^="bloque-obj-"]').first().getAttribute('data-testid');
-    const instancia = (id ?? '').replace('bloque-', '');
+    const objectInstance = (id ?? '').replace('bloque-', '');
 
     // La seccion vive en la pestana de Formato, que es donde se personaliza el objeto.
     await page.getByTestId('pestana-formato').click();
-    await expect(page.getByTestId(`pres-${instancia}-condicional`)).toBeVisible();
+    await expect(page.getByTestId(`pres-${objectInstance}-condicional`)).toBeVisible();
   });
 
   test('el combinado ofrece apilar sus columnas', async ({ page }) => {
@@ -38,14 +38,14 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
     await expect(page.locator('[data-testid^="bloque-obj-"]')).toHaveCount(1);
 
     const id = await page.locator('[data-testid^="bloque-obj-"]').first().getAttribute('data-testid');
-    const instancia = (id ?? '').replace('bloque-', '');
+    const objectInstance = (id ?? '').replace('bloque-', '');
 
     /*
      * Se busca el ajuste por su nombre, que es como se llega a el de verdad.
      */
     await page.getByTestId('pestana-formato').click();
     await page.getByTestId('buscar-ajuste').fill('apilado');
-    await expect(page.getByTestId(`pres-${instancia}-apilado`)).toBeVisible();
+    await expect(page.getByTestId(`pres-${objectInstance}-apilado`)).toBeVisible();
   });
 
   test('el mapa pide un Territorio y un Valor, no «dimension 1»', async ({ page }) => {
@@ -91,16 +91,16 @@ test.describe('la matriz colorea por valor', () => {
      */
     const celdas = await matriz.locator('td').evaluateAll((tds) =>
       tds.map((td) => ({
-        texto: td.textContent ?? '',
+        content: td.textContent ?? '',
         pintada: (td.getAttribute('style') ?? '').includes('--md-sys-color-error'),
       })),
     );
 
     expect(celdas.length).toBeGreaterThan(0);
-    for (const { texto, pintada } of celdas) {
-      const valor = Number(texto.replace(/[^0-9.-]/g, ''));
+    for (const { content, pintada } of celdas) {
+      const valor = Number(content.replace(/[^0-9.-]/g, ''));
       if (Number.isNaN(valor)) continue;
-      expect(pintada, `${texto} -> ${pintada ? 'pintada' : 'sin pintar'}`).toBe(valor > 300);
+      expect(pintada, `${content} -> ${pintada ? 'pintada' : 'sin pintar'}`).toBe(valor > 300);
     }
     expect(celdas.some((c) => c.pintada)).toBe(true);
   });
@@ -116,7 +116,7 @@ test.describe('la matriz colorea por valor', () => {
       .locator('td.es-total')
       .evaluateAll((tds) =>
         tds.map((td) => ({
-          texto: td.textContent ?? '',
+          content: td.textContent ?? '',
           pintada: (td.getAttribute('style') ?? '').includes('--md-sys-color-error'),
         })),
       );
@@ -124,10 +124,10 @@ test.describe('la matriz colorea por valor', () => {
     expect(totales.length).toBeGreaterThan(0);
     // La misma regla, aplicada a los subtotales: un subtotal es una cifra como cualquier otra, y
     // que el color se quedara en las celdas seria justo el fallo de escribirlas en cuatro sitios.
-    for (const { texto, pintada } of totales) {
-      const valor = Number(texto.replace(/[^0-9.-]/g, ''));
+    for (const { content, pintada } of totales) {
+      const valor = Number(content.replace(/[^0-9.-]/g, ''));
       if (Number.isNaN(valor)) continue;
-      expect(pintada, `total ${texto}`).toBe(valor > 300);
+      expect(pintada, `total ${content}`).toBe(valor > 300);
     }
     expect(totales.some((t) => t.pintada), 'ningun subtotal pintado').toBe(true);
   });

@@ -2,7 +2,7 @@
 
 import { useId, useState } from 'react';
 import {
-  type ConfiguracionDeContenedor,
+  type ContainerSettings,
   type Eje,
   COLUMNAS_INTERNAS_POR_DEFECTO,
   columnasDe,
@@ -16,11 +16,11 @@ import type { ObjetoSerializado, PanelSerializado } from '../server/serializar';
 /** La rejilla interna. La misma para los cinco: un contenedor es una rejilla con una cabecera. */
 function RejillaInterna({
   panel,
-  columnas,
+  gridColumns,
   dibujar,
 }: {
   panel: PanelSerializado | undefined;
-  columnas: number;
+  gridColumns: number;
   dibujar: (objeto: ObjetoSerializado) => React.ReactNode;
 }) {
   const items = panel?.objetos ?? [];
@@ -36,7 +36,7 @@ function RejillaInterna({
   return (
     <div
       className="contenedor__rejilla"
-      style={{ gridTemplateColumns: `repeat(${columnas}, minmax(0, 1fr))` }}
+      style={{ gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
     >
       {items.map((objeto) => (
         <div
@@ -57,7 +57,7 @@ function RejillaInterna({
 interface PropsDeContenedor {
   objeto: ObjetoSerializado;
   titulo: string;
-  config: ConfiguracionDeContenedor | undefined;
+  config: ContainerSettings | undefined;
   dibujar: (hijo: ObjetoSerializado) => React.ReactNode;
 }
 
@@ -69,7 +69,7 @@ export function ContenedorSimple({ objeto, titulo, config, dibujar }: PropsDeCon
       <div className="contenedor" data-testid="contenedor-simple">
         <RejillaInterna
           panel={objeto.paneles?.[0]}
-          columnas={columnasDe('contenedor-simple', config)}
+          gridColumns={columnasDe('contenedor-simple', config)}
           dibujar={dibujar}
         />
       </div>
@@ -82,7 +82,7 @@ export function ContenedorSimple({ objeto, titulo, config, dibujar }: PropsDeCon
 /** Se desplaza por UN eje. */
 export function ContenedorDesplazable({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
   const eje: Eje = config?.desplazable?.eje === 'x' ? 'x' : 'y';
-  const columnas = columnasDe('contenedor-desplazable', config);
+  const gridColumns = columnasDe('contenedor-desplazable', config);
 
   return (
     <Marco titulo={titulo} instance={objeto.instance}>
@@ -100,9 +100,9 @@ export function ContenedorDesplazable({ objeto, titulo, config, dibujar }: Props
           className="contenedor__pista"
           // En el eje X la pista mide lo que pidan sus columnas y no se comprime: si se repartiera
           // el ancho visible, no habria nada que desplazar y el contenedor no haria nada.
-          style={eje === 'x' ? { minWidth: `${columnas * 180}px` } : undefined}
+          style={eje === 'x' ? { minWidth: `${gridColumns * 180}px` } : undefined}
         >
-          <RejillaInterna panel={objeto.paneles?.[0]} columnas={columnas} dibujar={dibujar} />
+          <RejillaInterna panel={objeto.paneles?.[0]} gridColumns={gridColumns} dibujar={dibujar} />
         </div>
       </div>
     </Marco>
@@ -114,7 +114,7 @@ export function ContenedorDesplazable({ objeto, titulo, config, dibujar }: Props
 /** Ensena parte de su contenido y se amplia a una ventana con SU PROPIA rejilla. */
 export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
   const [ampliado, setAmpliado] = useState(false);
-  const columnas = columnasDe('contenedor-ampliable', config);
+  const gridColumns = columnasDe('contenedor-ampliable', config);
   const columnasAmpliado = Math.max(1, config?.ampliable?.columnasAmpliado ?? COLUMNAS_INTERNAS_POR_DEFECTO * 2);
 
   return (
@@ -136,7 +136,7 @@ export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDe
         }
       >
         <div className="contenedor" data-testid="contenedor-ampliable">
-          <RejillaInterna panel={objeto.paneles?.[0]} columnas={columnas} dibujar={dibujar} />
+          <RejillaInterna panel={objeto.paneles?.[0]} gridColumns={gridColumns} dibujar={dibujar} />
         </div>
       </Marco>
 
@@ -167,7 +167,7 @@ export function ContenedorAmpliable({ objeto, titulo, config, dibujar }: PropsDe
             <div className="contenedor contenedor--ampliado">
               <RejillaInterna
                 panel={objeto.paneles?.[0]}
-                columnas={columnasAmpliado}
+                gridColumns={columnasAmpliado}
                 dibujar={dibujar}
               />
             </div>
@@ -187,7 +187,7 @@ export function ContenedorConPestanas({ objeto, titulo, config, dibujar }: Props
   const [activa, setActiva] = useState(
     paneles.some((p) => p.panelId === inicial) ? (inicial as string) : (paneles[0]?.panelId ?? ''),
   );
-  const columnas = columnasDe('contenedor-con-pestanas', config);
+  const gridColumns = columnasDe('contenedor-con-pestanas', config);
   const id = useId();
 
   return (
@@ -231,7 +231,7 @@ export function ContenedorConPestanas({ objeto, titulo, config, dibujar }: Props
             className="contenedor__panel"
             hidden={activa !== panel.panelId}
           >
-            <RejillaInterna panel={panel} columnas={columnas} dibujar={dibujar} />
+            <RejillaInterna panel={panel} gridColumns={gridColumns} dibujar={dibujar} />
           </div>
         ))}
       </div>

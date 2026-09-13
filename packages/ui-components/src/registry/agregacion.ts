@@ -90,9 +90,9 @@ export function agregacionesDe(
 export function agregacionesPara(
   medidas: string[],
   todas: string[],
-  agregaciones: Aggregation[],
+  aggregations: Aggregation[],
 ): Aggregation[] {
-  return medidas.map((m) => agregaciones[todas.indexOf(m)] ?? AGREGACION_POR_DEFECTO);
+  return medidas.map((m) => aggregations[todas.indexOf(m)] ?? AGREGACION_POR_DEFECTO);
 }
 
 /** Como se llama cada operador en pantalla. */
@@ -109,20 +109,20 @@ export const ETIQUETA_DE_AGREGACION: Record<Aggregation, string> = {
 export interface ProblemaDeAgregacion {
   medida: string;
   aggregation: Aggregation;
-  problema: string;
+  issue: string;
 }
 
 /** La comprobacion que hace que el numero falso deje de ser alcanzable desde el editor. */
 export interface ContextoDeAgregacion {
   /** true si el objeto muestra menos dimensiones de las que trae el dataset. */
   colapsa: boolean;
-  grano: GranoDeDataset;
+  dataGrain: GranoDeDataset;
 }
 
 /** Que operadores se pueden aplicar AQUI. Es la unica regla, y de ella sale todo lo demas. */
 export function agregacionesPosibles(ctx: ContextoDeAgregacion): Aggregation[] {
   if (!ctx.colapsa) return [...AGGREGATIONS];
-  if (ctx.grano === 'atomico') return AGGREGATIONS.filter((a) => a !== 'ninguna');
+  if (ctx.dataGrain === 'atomico') return AGGREGATIONS.filter((a) => a !== 'ninguna');
   return AGGREGATIONS.filter(esAditiva);
 }
 
@@ -152,13 +152,13 @@ function porQueNoSePuede(
 
 /** Los operadores de un mapeo que no se pueden aplicar. */
 export function validarAgregacion(
-  input: ContextoDeAgregacion & { measures: string[]; agregaciones: Aggregation[] },
+  input: ContextoDeAgregacion & { measures: string[]; aggregations: Aggregation[] },
 ): ProblemaDeAgregacion[] {
   const problems: ProblemaDeAgregacion[] = [];
   input.measures.forEach((medida, i) => {
-    const aggregation = input.agregaciones[i] ?? AGREGACION_POR_DEFECTO;
-    const problema = porQueNoSePuede(medida, aggregation, input);
-    if (problema) problems.push({ medida, aggregation, problema });
+    const aggregation = input.aggregations[i] ?? AGREGACION_POR_DEFECTO;
+    const issue = porQueNoSePuede(medida, aggregation, input);
+    if (issue) problems.push({ medida, aggregation, issue });
   });
   return problems;
 }

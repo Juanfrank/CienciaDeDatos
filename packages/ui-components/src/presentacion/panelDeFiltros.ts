@@ -30,7 +30,7 @@ export const esTipoDeFecha = (tipo: string): boolean => TIPOS_DE_FECHA.has(tipo.
 
 export interface SelectorDeDimension {
   /** Clave de la dimension, `Tabla.Campo`. Tiene que ser una de las mapeadas en el binding. */
-  campo: string;
+  fieldName: string;
   tipo: TipoDeSelector;
   /** Rotulo. Sin el, se usa el nombre del campo. */
   etiqueta?: string;
@@ -48,15 +48,15 @@ export function selectorPorDefecto(tipoDeColumna: string): TipoDeSelector {
 }
 
 export interface ProblemaDeSelector {
-  campo: string;
-  problema: string;
+  fieldName: string;
+  issue: string;
 }
 
 /** Valida los selectores contra las dimensiones mapeadas y sus tipos. */
 export function validarPanelDeFiltros(
   instance: ObjectInstance,
   configuracion: ConfiguracionDePanelDeFiltros | undefined,
-  tiposPorCampo: Record<string, string>,
+  fieldKinds: Record<string, string>,
 ): ProblemaDeSelector[] {
   const problems: ProblemaDeSelector[] = [];
   const dimensiones = instance.binding.dimensions.map(fieldKey);
@@ -64,43 +64,43 @@ export function validarPanelDeFiltros(
 
   const vistos = new Set<string>();
   for (const selector of selectores) {
-    if (!dimensiones.includes(selector.campo)) {
+    if (!dimensiones.includes(selector.fieldName)) {
       problems.push({
-        campo: selector.campo,
-        problema:
-          `'${selector.campo}' no esta entre las dimensiones mapeadas de este panel. ` +
+        fieldName: selector.fieldName,
+        issue:
+          `'${selector.fieldName}' no esta entre las dimensiones mapeadas de este panel. ` +
           `Mapeadas: ${dimensiones.join(', ') || 'ninguna'}.`,
       });
       continue;
     }
 
-    if (vistos.has(selector.campo)) {
+    if (vistos.has(selector.fieldName)) {
       problems.push({
-        campo: selector.campo,
-        problema: `'${selector.campo}' tiene mas de un selector. Cada dimension lleva uno.`,
+        fieldName: selector.fieldName,
+        issue: `'${selector.fieldName}' tiene mas de un selector. Cada dimension lleva uno.`,
       });
     }
-    vistos.add(selector.campo);
+    vistos.add(selector.fieldName);
 
     if (!(TIPOS_DE_SELECTOR as readonly string[]).includes(selector.tipo)) {
       problems.push({
-        campo: selector.campo,
-        problema: `'${String(selector.tipo)}' no es un tipo de selector.`,
+        fieldName: selector.fieldName,
+        issue: `'${String(selector.tipo)}' no es un tipo de selector.`,
       });
       continue;
     }
 
-    const tipoDeColumna = tiposPorCampo[selector.campo];
+    const tipoDeColumna = fieldKinds[selector.fieldName];
     if (
       SELECTORES_DE_FECHA.includes(selector.tipo) &&
       tipoDeColumna !== undefined &&
       !esTipoDeFecha(tipoDeColumna)
     ) {
       problems.push({
-        campo: selector.campo,
-        problema:
+        fieldName: selector.fieldName,
+        issue:
           `El selector '${selector.tipo}' necesita una dimension de fecha, y ` +
-          `'${selector.campo}' es de tipo '${tipoDeColumna}'.`,
+          `'${selector.fieldName}' es de tipo '${tipoDeColumna}'.`,
       });
     }
   }
@@ -110,7 +110,7 @@ export function validarPanelDeFiltros(
 
 /** Los selectores efectivos: los configurados, mas uno por defecto para cada dimension sin el. */
 export interface SelectorEfectivo {
-  campo: string;
+  fieldName: string;
   tipo: TipoDeSelector;
   etiqueta: string;
 }
@@ -118,15 +118,15 @@ export interface SelectorEfectivo {
 export function selectoresEfectivos(
   instance: ObjectInstance,
   configuracion: ConfiguracionDePanelDeFiltros | undefined,
-  tiposPorCampo: Record<string, string>,
+  fieldKinds: Record<string, string>,
 ): SelectorEfectivo[] {
-  const porCampo = new Map(configuracion?.selectores.map((s) => [s.campo, s]) ?? []);
-  return instance.binding.dimensions.map(fieldKey).map((campo) => {
-    const configurado = porCampo.get(campo);
+  const porCampo = new Map(configuracion?.selectores.map((s) => [s.fieldName, s]) ?? []);
+  return instance.binding.dimensions.map(fieldKey).map((fieldName) => {
+    const configurado = porCampo.get(fieldName);
     return {
-      campo,
-      tipo: configurado?.tipo ?? selectorPorDefecto(tiposPorCampo[campo] ?? ''),
-      etiqueta: configurado?.etiqueta ?? campo.split('.').pop() ?? campo,
+      fieldName,
+      tipo: configurado?.tipo ?? selectorPorDefecto(fieldKinds[fieldName] ?? ''),
+      etiqueta: configurado?.etiqueta ?? fieldName.split('.').pop() ?? fieldName,
     };
   });
 }

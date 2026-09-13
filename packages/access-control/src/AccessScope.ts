@@ -150,10 +150,10 @@ export function filterResultByScope(result: QueryResult, scope: AccessScope): Qu
 
 /** Comprueba que un dataset puede hacer cumplir un ambito al momento de la lectura. */
 export function assertScopeIsEnforceable(result: QueryResult, scope: AccessScope): void {
-  const columnas = new Set(result.columns.map((c) => c.name));
+  const gridColumns = new Set(result.columns.map((c) => c.name));
   const faltantes = scope.restrictions
     .map((r) => dimensionKey(r.dimension))
-    .filter((clave) => !columnas.has(clave));
+    .filter((clave) => !gridColumns.has(clave));
 
   if (faltantes.length > 0) {
     throw new Error(

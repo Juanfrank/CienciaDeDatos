@@ -63,7 +63,7 @@ const SEP_DECIMAL = partesDeEjemplo.find((x) => x.type === 'decimal')?.value ?? 
 const RESERVADOS = new Set(['0', '#', '.', ',', '%', '\\', '"', ';']);
 
 /** Analiza UNA seccion del patron. */
-function analizar(texto: string): Seccion {
+function analizar(content: string): Seccion {
   const seccion: Seccion = {
     patron: '',
     enterosMin: 0,
@@ -75,11 +75,11 @@ function analizar(texto: string): Seccion {
   let enDecimales = false;
   let cifraPuesta = false;
 
-  for (let i = 0; i < texto.length; i += 1) {
-    const c = texto[i] ?? '';
+  for (let i = 0; i < content.length; i += 1) {
+    const c = content[i] ?? '';
     if (c === '\\') {
       // El siguiente va literal aunque sea reservado. Es como se escribe un «%» que no multiplica.
-      const siguiente = texto[i + 1];
+      const siguiente = content[i + 1];
       if (siguiente !== undefined) {
         seccion.patron += siguiente;
         i += 1;
@@ -87,9 +87,9 @@ function analizar(texto: string): Seccion {
       continue;
     }
     if (c === '"') {
-      const fin = texto.indexOf('"', i + 1);
-      seccion.patron += fin === -1 ? texto.slice(i + 1) : texto.slice(i + 1, fin);
-      i = fin === -1 ? texto.length : fin;
+      const fin = content.indexOf('"', i + 1);
+      seccion.patron += fin === -1 ? content.slice(i + 1) : content.slice(i + 1, fin);
+      i = fin === -1 ? content.length : fin;
       continue;
     }
     if (c === '.') {
@@ -103,8 +103,8 @@ function analizar(texto: string): Seccion {
     }
     if (c === ',') {
       // Solo cuenta como separador de millares entre marcadores de digito. Suelto, es un literal.
-      const before = texto[i - 1];
-      const after = texto[i + 1];
+      const before = content[i - 1];
+      const after = content[i + 1];
       if ((before === '0' || before === '#') && (after === '0' || after === '#')) {
         seccion.millares = true;
       } else {

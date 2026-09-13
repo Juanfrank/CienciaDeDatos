@@ -23,7 +23,7 @@ export function EditorDeAmbito({ destinos }: { destinos: DestinoDeAmbito[] }) {
   const [restricciones, setRestricciones] = useState<AccessScope['restrictions']>([]);
   const [justificacion, setJustificacion] = useState('');
   const [ampliacion, setAmpliacion] = useState<string[] | null>(null);
-  const [mensaje, setMensaje] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
+  const [mensaje, setMensaje] = useState<{ tipo: 'ok' | 'error'; content: string } | null>(null);
 
   const destino = destinos.find((d) => d.id === destinoId);
 
@@ -66,13 +66,13 @@ export function EditorDeAmbito({ destinos }: { destinos: DestinoDeAmbito[] }) {
       return;
     }
     if (!r.ok) {
-      setMensaje({ tipo: 'error', texto: respuesta.error ?? 'No se pudo guardar.' });
+      setMensaje({ tipo: 'error', content: respuesta.error ?? 'No se pudo guardar.' });
       return;
     }
 
     setAmpliacion(null);
     setJustificacion('');
-    setMensaje({ tipo: 'ok', texto: 'Ambito guardado.' });
+    setMensaje({ tipo: 'ok', content: 'Ambito guardado.' });
   };
 
   return (
@@ -175,7 +175,7 @@ export function EditorDeAmbito({ destinos }: { destinos: DestinoDeAmbito[] }) {
           role="status"
           data-testid="mensaje-ambito"
         >
-          {mensaje.texto}
+          {mensaje.content}
         </p>
       ) : null}
 

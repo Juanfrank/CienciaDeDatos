@@ -8,8 +8,8 @@ import type {
 /** Resolutor local y determinista. */
 
 /** Quita acentos y mayusculas: "penal" y "Penál" son la misma palabra para quien pregunta. */
-export function normalizar(texto: string): string {
-  return texto
+export function normalizar(content: string): string {
+  return content
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
@@ -32,18 +32,18 @@ const VACIAS = new Set(
 const PALABRAS_DESGLOSE = new Set(['por', 'segun', 'desglosado', 'desglose', 'cada', 'agrupado']);
 const PALABRAS_RANKING = new Set(['top', 'mayores', 'mayor', 'principales', 'primeros', 'ranking']);
 
-const tokenizar = (texto: string): string[] =>
-  normalizar(texto)
+const tokenizar = (content: string): string[] =>
+  normalizar(content)
     .replace(/[¿?¡!.,;:()"']/g, ' ')
     .split(/\s+/)
     .filter((t) => t.length > 0);
 
 /** Todas las secuencias de hasta `max` palabras, de la mas larga a la mas corta. */
-function ngramas(tokens: string[], max = 4): { texto: string; desde: number; hasta: number }[] {
-  const salida: { texto: string; desde: number; hasta: number }[] = [];
+function ngramas(tokens: string[], max = 4): { content: string; desde: number; hasta: number }[] {
+  const salida: { content: string; desde: number; hasta: number }[] = [];
   for (let n = Math.min(max, tokens.length); n >= 1; n--) {
     for (let i = 0; i + n <= tokens.length; i++) {
-      salida.push({ texto: tokens.slice(i, i + n).join(' '), desde: i, hasta: i + n - 1 });
+      salida.push({ content: tokens.slice(i, i + n).join(' '), desde: i, hasta: i + n - 1 });
     }
   }
   return salida;
@@ -68,7 +68,7 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
     for (const gram of ngramas(tokens)) {
       if (consumido.slice(gram.desde, gram.hasta + 1).some(Boolean)) continue;
 
-      const encontrado = this.buscar(gram.texto, vocabulario);
+      const encontrado = this.search(gram.content, vocabulario);
       if (!encontrado) continue;
 
       candidatos.push({ ...encontrado, desde: gram.desde, hasta: gram.hasta });
@@ -124,22 +124,22 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
     return n;
   }
 
-  private buscar(
-    texto: string,
+  private search(
+    content: string,
     vocabulario: Vocabulario,
   ): { tipo: Candidato['tipo']; clave: string; valor?: string } | undefined {
     for (const valor of vocabulario.values) {
-      if (normalizar(valor.valor) === texto) {
+      if (normalizar(valor.valor) === content) {
         return { tipo: 'valor', clave: valor.dimension, valor: valor.valor };
       }
     }
     for (const medida of vocabulario.measures) {
-      if (normalizar(medida.etiqueta) === texto || normalizar(medida.clave) === texto) {
+      if (normalizar(medida.etiqueta) === content || normalizar(medida.clave) === content) {
         return { tipo: 'measure', clave: medida.clave };
       }
     }
     for (const dim of vocabulario.dimensions) {
-      if (normalizar(dim.etiqueta) === texto || normalizar(dim.clave) === texto) {
+      if (normalizar(dim.etiqueta) === content || normalizar(dim.clave) === content) {
         return { tipo: 'dimension', clave: dim.clave };
       }
     }
@@ -180,8 +180,8 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
 /** URL que responde a la consulta — seccion 4.11. */
 export function urlDeConsulta(moduleSlug: string, consulta: ConsultaResuelta): string {
   const params = new URLSearchParams();
-  for (const [campo, valores] of Object.entries(consulta.filters)) {
-    for (const v of valores) params.append(campo, v);
+  for (const [fieldName, valores] of Object.entries(consulta.filters)) {
+    for (const v of valores) params.append(fieldName, v);
   }
   const cadena = params.toString();
   return cadena ? `/m/${moduleSlug}?${cadena}` : `/m/${moduleSlug}`;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { QueryResult } from '@app/data-contracts';
-import { construirMatriz, filasVisibles, hojas, rutaClave } from './matriz';
+import { construirMatriz, filasVisibles, leaves, rutaClave } from './matriz';
 
 const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };
 const MATERIA = { table: 'DimTribunal', field: 'Materia' };
@@ -31,14 +31,14 @@ const matriz = (aggregation: 'suma' | 'promedio') =>
 describe('la jerarquia', () => {
   it('anida las filas en el orden en que se mapean', () => {
     const m = matriz('suma');
-    expect(m.filas.map((f) => f.etiqueta)).toEqual(['Norte', 'Sur']);
-    expect(m.filas[0]?.hijos.map((h) => h.etiqueta)).toEqual(['Penal', 'Civil']);
-    expect(m.filas[0]?.hijos[0]?.path).toEqual(['Norte', 'Penal']);
+    expect(m.dataRows.map((f) => f.etiqueta)).toEqual(['Norte', 'Sur']);
+    expect(m.dataRows[0]?.hijos.map((h) => h.etiqueta)).toEqual(['Penal', 'Civil']);
+    expect(m.dataRows[0]?.hijos[0]?.path).toEqual(['Norte', 'Penal']);
   });
 
   it('las columnas tambien forman arbol, y sus hojas son las que llevan cifras', () => {
     const m = matriz('suma');
-    expect(hojas(m.columnas, new Set()).map((c) => c.etiqueta)).toEqual(['Q1', 'Q2']);
+    expect(leaves(m.gridColumns, new Set()).map((c) => c.etiqueta)).toEqual(['Q1', 'Q2']);
   });
 });
 
@@ -76,7 +76,7 @@ describe('plegar', () => {
     // «Penal» aparece dos veces y son nodos DISTINTOS: uno cuelga de Norte y otro de Sur. Por eso
     // nada puede identificarse por su etiqueta —ni una clave de React ni un `data-testid`—: la
     // ruta completa es lo unico unico.
-    expect(filasVisibles(m.filas, new Set()).map((f) => rutaClave(f.path))).toEqual([
+    expect(filasVisibles(m.dataRows, new Set()).map((f) => rutaClave(f.path))).toEqual([
       'Norte',
       'Norte||Penal',
       'Norte||Civil',
@@ -84,7 +84,7 @@ describe('plegar', () => {
       'Sur||Penal',
     ]);
     const plegado = new Set([rutaClave(['Norte'])]);
-    expect(filasVisibles(m.filas, plegado).map((f) => rutaClave(f.path))).toEqual([
+    expect(filasVisibles(m.dataRows, plegado).map((f) => rutaClave(f.path))).toEqual([
       'Norte',
       'Sur',
       'Sur||Penal',
@@ -93,12 +93,12 @@ describe('plegar', () => {
 
   it('una columna plegada pasa a ser hoja: ensena su subtotal en vez de su detalle', () => {
     const m = construirMatriz(datos, [DISTRITO], [MATERIA, TRIMESTRE], ['Dias'], ['suma']);
-    expect(hojas(m.columnas, new Set()).map((c) => rutaClave(c.path))).toEqual([
+    expect(leaves(m.gridColumns, new Set()).map((c) => rutaClave(c.path))).toEqual([
       'Penal||Q1',
       'Penal||Q2',
       'Civil||Q1',
     ]);
     const plegada = new Set(['Penal']);
-    expect(hojas(m.columnas, plegada).map((c) => rutaClave(c.path))).toEqual(['Penal', 'Civil||Q1']);
+    expect(leaves(m.gridColumns, plegada).map((c) => rutaClave(c.path))).toEqual(['Penal', 'Civil||Q1']);
   });
 });

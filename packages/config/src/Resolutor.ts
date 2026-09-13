@@ -1,7 +1,7 @@
 import type { ICacheStore } from '@app/caching';
 import {
   INSTANTANEA_VACIA,
-  type FuenteDeConfiguracion,
+  type SettingsFont,
   type InstantaneaDeConfiguracion,
 } from './instantanea';
 
@@ -10,7 +10,7 @@ import {
 export const CLAVE_ULTIMA_INSTANTANEA = 'config:ultima-instantanea';
 
 export interface OpcionesDelResolutor {
-  fuente: FuenteDeConfiguracion;
+  source: SettingsFont;
   /** Donde recordar la ultima foto buena. Sin el, la memoria dura lo que el proceso. */
   memoria?: ICacheStore;
   ttlMs?: number;
@@ -43,7 +43,7 @@ export class ResolutorDeConfiguracion {
 
   private async refrescar(): Promise<InstantaneaDeConfiguracion> {
     try {
-      const leida = await this.opciones.fuente.leer();
+      const leida = await this.opciones.source.leer();
       this.vigente = leida;
       this.leidaEnMs = this.ahora();
       // Se guarda DESPUES de servirla, y un fallo al guardar no tumba la lectura: la memoria es

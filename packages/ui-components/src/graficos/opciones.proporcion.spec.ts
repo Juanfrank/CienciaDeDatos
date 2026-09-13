@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { escalaBonita, opcionesDe } from './opciones';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
-const paleta = {
+const palette = {
   series: ['#1', '#2'],
-  texto: '#t',
+  content: '#t',
   textoAtenuado: '#ta',
-  linea: '#l',
+  line: '#l',
   superficie: '#s',
   superficieElevada: '#se',
 };
@@ -19,10 +19,10 @@ const vm = (series: string[], puntos: [string, ...(number | null)[]][]): Categor
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- se comprueba la forma que consume ECharts */
 const circular = (extra: Record<string, unknown> = {}, v = vm(['Casos'], [['A', 30], ['B', 70]])) =>
-  opcionesDe('circular', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+  opcionesDe('circular', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 const medidor = (extra: Record<string, unknown> = {}, v = vm(['Casos'], [['', 40, 100]])) =>
-  opcionesDe('medidor', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+  opcionesDe('medidor', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 describe('circular: pastel y dona', () => {
   it('el hueco del centro distingue un pastel de una dona, y nada mas', () => {
@@ -76,13 +76,13 @@ describe('circular: pastel y dona', () => {
   });
 
   it('el tooltip da la cifra Y la parte: un porcentaje suelto no se puede auditar', () => {
-    const texto = circular({ formatear: (n: number) => `${n} casos` }).tooltip.formatter({
+    const content = circular({ formatear: (n: number) => `${n} casos` }).tooltip.formatter({
       name: 'A',
       value: 30,
       percent: 30,
     });
-    expect(texto).toContain('30 casos');
-    expect(texto).toContain('30 %');
+    expect(content).toContain('30 casos');
+    expect(content).toContain('30 %');
   });
 });
 
@@ -142,12 +142,12 @@ describe('medidor', () => {
 const combinado = (
   extra: Record<string, unknown> = {},
   v = vm(['Ingresados', 'Resueltos', 'Pendientes'], [['Q1', 10, 8, 900]]),
-) => opcionesDe('combinado', { vm: v, paleta, titulo: 'T', seriesDeColumna: 2, ...extra }) as any;
+) => opcionesDe('combinado', { vm: v, palette, titulo: 'T', seriesDeColumna: 2, ...extra }) as any;
 
 const dispersion = (
   extra: Record<string, unknown> = {},
   v = vm(['X', 'Y', 'Tamano'], [['Q1', 10, 8, 4], ['Q2', 20, 16, 8]]),
-) => opcionesDe('dispersion', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+) => opcionesDe('dispersion', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 describe('combinado de columnas y lineas', () => {
   it('el mapeo decide la forma: las primeras son barras y el resto linea', () => {
@@ -221,25 +221,25 @@ describe('dispersion', () => {
 
   it('el tooltip nombra las medidas, no «x» e «y»', () => {
     // En una dispersion no hay rotulo de categoria en el eje que lo diga, como si lo hay en barras.
-    const texto = dispersion().tooltip.formatter({ name: 'Q1', value: [10, 8, 4] });
-    expect(texto).toContain('Q1');
-    expect(texto).toContain('X: 10');
-    expect(texto).toContain('Y: 8');
+    const content = dispersion().tooltip.formatter({ name: 'Q1', value: [10, 8, 4] });
+    expect(content).toContain('Q1');
+    expect(content).toContain('X: 10');
+    expect(content).toContain('Y: 8');
   });
 });
 
 const embudo = (
   extra: Record<string, unknown> = {},
   v = vm(['Casos'], [['Q1', 1000], ['Q2', 800], ['Q3', 400]]),
-) => opcionesDe('embudo', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+) => opcionesDe('embudo', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 const cascada = (
   extra: Record<string, unknown> = {},
   v = vm(['Casos'], [['A', 100], ['B', -40], ['C', 30]]),
-) => opcionesDe('cascada', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+) => opcionesDe('cascada', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 const arbol = (extra: Record<string, unknown> = {}, v = vm(['Casos'], [['Penal / Q1', 10]])) =>
-  opcionesDe('mapa-de-arbol', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+  opcionesDe('mapa-de-arbol', { vm: v, palette, titulo: 'T', ...extra }) as any;
 
 describe('embudo', () => {
   it('NO reordena las etapas', () => {
@@ -253,8 +253,8 @@ describe('embudo', () => {
   });
 
   it('compara contra la primera etapa por defecto', () => {
-    const texto = embudo().series[0].label.formatter({ name: 'Q3', value: 400, dataIndex: 2 });
-    expect(texto).toContain('40.0 %');
+    const content = embudo().series[0].label.formatter({ name: 'Q3', value: 400, dataIndex: 2 });
+    expect(content).toContain('40.0 %');
   });
 
   it('y contra la anterior cuando se pide', () => {

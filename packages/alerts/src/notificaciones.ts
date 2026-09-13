@@ -42,5 +42,5 @@ export class InboxNotificationChannel implements INotificationChannel {
   }
 }
 
-export const sinLeer = (notificaciones: Notification[]): number =>
+export const withoutRead = (notificaciones: Notification[]): number =>
   notificaciones.filter((n) => !n.readAt).length;

@@ -91,8 +91,8 @@ export function bookmarkToUrl(bookmark: Pick<Bookmark, 'moduleSlug' | 'pageSlug'
     : `/m/${bookmark.moduleSlug}`;
 
   const params = new URLSearchParams();
-  for (const [campo, valores] of Object.entries(bookmark.filters)) {
-    for (const valor of valores) params.append(campo, valor);
+  for (const [fieldName, valores] of Object.entries(bookmark.filters)) {
+    for (const valor of valores) params.append(fieldName, valor);
   }
 
   const cadena = params.toString();
@@ -152,18 +152,18 @@ export interface DrillThroughTarget {
 export function drillThroughUrl(
   target: DrillThroughTarget,
   filtrosActuales: Record<string, string[]>,
-  seleccion?: { campo: string; valor: string },
+  seleccion?: { fieldName: string; valor: string },
 ): string {
   const filters: Record<string, string[]> = {};
 
-  for (const [campo, valores] of Object.entries(filtrosActuales)) {
-    if (target.carryDimensions && !target.carryDimensions.includes(campo)) continue;
-    if (valores.length > 0) filters[campo] = valores;
+  for (const [fieldName, valores] of Object.entries(filtrosActuales)) {
+    if (target.carryDimensions && !target.carryDimensions.includes(fieldName)) continue;
+    if (valores.length > 0) filters[fieldName] = valores;
   }
 
   // La seleccion que origino el drill-through sustituye a lo que hubiera para esa dimension:
   // el gesto fue "ver el detalle de ESTE valor".
-  if (seleccion) filters[seleccion.campo] = [seleccion.valor];
+  if (seleccion) filters[seleccion.fieldName] = [seleccion.valor];
 
   return bookmarkToUrl({
     moduleSlug: target.moduleSlug,

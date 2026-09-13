@@ -98,8 +98,8 @@ export function layoutForBreakpoint<T extends { id: string; position: GridPositi
   items: T[],
   breakpoint: Breakpoint,
 ): (T & { position: GridPosition })[] {
-  const columnas = COLUMNS_BY_BREAKPOINT[breakpoint];
-  if (columnas === GRID_COLUMNS) return [...items];
+  const gridColumns = COLUMNS_BY_BREAKPOINT[breakpoint];
+  if (gridColumns === GRID_COLUMNS) return [...items];
 
   // Orden de lectura de la disposicion guardada: es lo que preserva la intencion de quien la
   // diseno cuando la rejilla se estrecha.
@@ -107,7 +107,7 @@ export function layoutForBreakpoint<T extends { id: string; position: GridPositi
     (a, b) => a.position.y - b.position.y || a.position.x - b.position.x,
   );
 
-  if (columnas === 1) {
+  if (gridColumns === 1) {
     return ordenados.map((item, i) => ({
       ...item,
       position: { x: 0, y: i, w: 1, h: item.position.h },
@@ -116,17 +116,17 @@ export function layoutForBreakpoint<T extends { id: string; position: GridPositi
 
   let x = 0;
   let y = 0;
-  let altoDeFila = 0;
+  let rowHeight = 0;
   return ordenados.map((item) => {
-    const w = Math.max(1, Math.min(columnas, Math.round((item.position.w / GRID_COLUMNS) * columnas)));
-    if (x + w > columnas) {
+    const w = Math.max(1, Math.min(gridColumns, Math.round((item.position.w / GRID_COLUMNS) * gridColumns)));
+    if (x + w > gridColumns) {
       x = 0;
-      y += altoDeFila;
-      altoDeFila = 0;
+      y += rowHeight;
+      rowHeight = 0;
     }
     const position: GridPosition = { x, y, w, h: item.position.h };
     x += w;
-    altoDeFila = Math.max(altoDeFila, item.position.h);
+    rowHeight = Math.max(rowHeight, item.position.h);
     return { ...item, position };
   });
 }

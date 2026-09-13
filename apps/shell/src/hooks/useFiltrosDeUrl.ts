@@ -10,7 +10,7 @@ export function useFiltrosDeUrl() {
   const searchParams = useSearchParams();
 
   const valoresDe = useCallback(
-    (campo: string): string[] => searchParams.getAll(campo),
+    (fieldName: string): string[] => searchParams.getAll(fieldName),
     [searchParams],
   );
 
@@ -37,14 +37,14 @@ export function useFiltrosDeUrl() {
   );
 
   const alternar = useCallback(
-    (campo: string, valor: string) => {
+    (fieldName: string, valor: string) => {
       aplicar((params) => {
-        const actuales = params.getAll(campo);
-        params.delete(campo);
+        const actuales = params.getAll(fieldName);
+        params.delete(fieldName);
         const siguientes = actuales.includes(valor)
           ? actuales.filter((v) => v !== valor)
           : [...actuales, valor];
-        for (const v of siguientes) params.append(campo, v);
+        for (const v of siguientes) params.append(fieldName, v);
       });
     },
     [aplicar],
@@ -52,18 +52,18 @@ export function useFiltrosDeUrl() {
 
   /** Deja el campo con UN valor, o lo quita si el valor es vacio. */
   const fijar = useCallback(
-    (campo: string, valor: string) => {
+    (fieldName: string, valor: string) => {
       aplicar((params) => {
-        params.delete(campo);
-        if (valor !== '') params.append(campo, valor);
+        params.delete(fieldName);
+        if (valor !== '') params.append(fieldName, valor);
       });
     },
     [aplicar],
   );
 
   const limpiarCampo = useCallback(
-    (campo: string) => {
-      aplicar((params) => params.delete(campo));
+    (fieldName: string) => {
+      aplicar((params) => params.delete(fieldName));
     },
     [aplicar],
   );
@@ -79,8 +79,8 @@ export function useFiltrosDeUrl() {
   const navegarA = useCallback(
     (path: string, filtros?: Record<string, string[]>) => {
       const params = new URLSearchParams();
-      for (const [campo, valores] of Object.entries(filtros ?? {})) {
-        for (const v of valores) params.append(campo, v);
+      for (const [fieldName, valores] of Object.entries(filtros ?? {})) {
+        for (const v of valores) params.append(fieldName, v);
       }
       const cadena = params.toString();
       // push, no replace: esto si es navegacion y debe poder deshacerse con "atras".

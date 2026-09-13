@@ -125,8 +125,8 @@ export function describirCondicion(rule: AlertRule): string {
 export function enlaceDe(rule: Pick<AlertRule, 'moduleSlug' | 'pageSlug' | 'filters'>): string {
   const base = rule.pageSlug ? `/m/${rule.moduleSlug}/${rule.pageSlug}` : `/m/${rule.moduleSlug}`;
   const params = new URLSearchParams();
-  for (const [campo, valores] of Object.entries(rule.filters)) {
-    for (const v of valores) params.append(campo, v);
+  for (const [fieldName, valores] of Object.entries(rule.filters)) {
+    for (const v of valores) params.append(fieldName, v);
   }
   const cadena = params.toString();
   return cadena ? `${base}?${cadena}` : base;

@@ -88,9 +88,9 @@ test.describe('tabla de datos con alcance de subobjeto', () => {
     );
 
     // Las filas desglosadas son SOLO las de esa categoria, con su granularidad completa.
-    const filas = emergente.getByTestId('tabla-datos-filas');
-    await expect(filas).toContainText('Distrito Norte');
-    await expect(filas).not.toContainText('Distrito Este');
+    const dataRows = emergente.getByTestId('tabla-datos-filas');
+    await expect(dataRows).toContainText('Distrito Norte');
+    await expect(dataRows).not.toContainText('Distrito Este');
   });
 
   test('se puede volver a las categorias sin cerrar el emergente', async ({ page }) => {
@@ -112,15 +112,15 @@ test.describe('un complemento no amplia lo que se puede ver (principio 5)', () =
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('tabla-datos-abrir-Casos pendientes').click();
-    const filas = page.getByTestId('tabla-datos-Casos pendientes').getByTestId('tabla-datos-filas');
+    const dataRows = page.getByTestId('tabla-datos-Casos pendientes').getByTestId('tabla-datos-filas');
 
     // El emergente lee el mismo dataset que el objeto, que llego al navegador ya filtrado en el
     // servidor. La restriccion por la que se aserta es la de DISTRITO y no la de materia: las
     // pruebas del panel de administracion corren antes en la misma sesion de servidor y amplian
     // deliberadamente el ambito de materia del equipo Norte, asi que asertar sobre ella seria
     // asertar sobre lo que otra prueba acaba de cambiar.
-    await expect(filas).toContainText('Distrito Norte');
-    await expect(filas).not.toContainText('Distrito Este');
+    await expect(dataRows).toContainText('Distrito Norte');
+    await expect(dataRows).not.toContainText('Distrito Este');
   });
 
   test('un filtro activo tambien acota el emergente: ensena lo que se esta viendo', async ({
@@ -130,11 +130,11 @@ test.describe('un complemento no amplia lo que se puede ver (principio 5)', () =
     await page.goto('/m/casos-pendientes?DimTribunal.Materia=Penal');
 
     await page.getByTestId('tabla-datos-abrir-Casos pendientes').click();
-    const filas = page.getByTestId('tabla-datos-Casos pendientes').getByTestId('tabla-datos-filas');
+    const dataRows = page.getByTestId('tabla-datos-Casos pendientes').getByTestId('tabla-datos-filas');
 
-    await expect(filas).toContainText('Penal');
-    await expect(filas).not.toContainText('Civil');
-    await expect(filas).not.toContainText('Distrito Este');
+    await expect(dataRows).toContainText('Penal');
+    await expect(dataRows).not.toContainText('Civil');
+    await expect(dataRows).not.toContainText('Distrito Este');
   });
 });
 

@@ -77,9 +77,9 @@ describe('validarPresentacion', () => {
   });
 
   it('rechaza una clave que el objeto no admite, y dice cuales admite', () => {
-    const [problema] = validarPresentacion({ leyenda: 'abajo' }, PRESENTACION_MINIMA);
-    expect(problema?.clave).toBe('leyenda');
-    expect(problema?.problema).toContain('icono');
+    const [issue] = validarPresentacion({ leyenda: 'abajo' }, PRESENTACION_MINIMA);
+    expect(issue?.clave).toBe('leyenda');
+    expect(issue?.issue).toContain('icono');
   });
 
   it('rechaza un icono que no esta en el catalogo', () => {

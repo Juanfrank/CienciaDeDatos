@@ -22,7 +22,7 @@ export interface ObjetoSerializado {
   /** El icono que declara la VERSION del objeto. */
   icono?: NombreDeIcono;
   /** Con que operador se resume cada medida, alineado con `instance.binding.measures`. */
-  agregaciones: Aggregation[];
+  aggregations: Aggregation[];
   unresolvedObject?: string;
   generatedAt?: string;
   stale?: boolean;
@@ -47,7 +47,7 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
     ...(ranurasDelObjeto(item.instance) ? { ranuras: ranurasDelObjeto(item.instance) } : {}),
     ...(iconoDelObjeto(item.instance) ? { icono: iconoDelObjeto(item.instance) } : {}),
     problems: objeto.problems,
-    agregaciones: objeto.agregaciones,
+    aggregations: objeto.aggregations,
     ...(objeto.unresolvedObject ? { unresolvedObject: objeto.unresolvedObject } : {}),
     ...(objeto.generatedAt ? { generatedAt: objeto.generatedAt } : {}),
     ...(objeto.stale ? { stale: true } : {}),

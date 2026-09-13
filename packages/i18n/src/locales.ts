@@ -31,9 +31,9 @@ export function negociarLocale(preferencias: readonly string[]): Locale {
 }
 
 /** Despieza una cabecera `Accept-Language` y la ordena por factor de calidad. */
-export function preferenciasDeCabecera(cabecera: string | null | undefined): string[] {
-  if (!cabecera) return [];
-  return cabecera
+export function preferenciasDeCabecera(pageHeader: string | null | undefined): string[] {
+  if (!pageHeader) return [];
+  return pageHeader
     .split(',')
     .map((parte) => {
       const [etiqueta = '', ...parametros] = parte.split(';').map((p) => p.trim());

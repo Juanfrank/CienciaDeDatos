@@ -8,14 +8,14 @@ import { Marco } from "./objetos";
 /** Segmentador — seccion 4.2, con su seleccion reflejada en la URL (4.11). */
 export function Segmentador({
   titulo,
-  campo,
+  fieldName,
   opciones,
   instance,
   result,
   iconoDelObjeto,
 }: {
   titulo: string;
-  campo: string;
+  fieldName: string;
   opciones: string[];
   /** Se pasan para que un segmentador pueda llevar complementos como cualquier otro objeto. */
   instance?: ObjectInstance;
@@ -24,7 +24,7 @@ export function Segmentador({
   iconoDelObjeto?: NombreDeIcono;
 }) {
   const { valoresDe, alternar, limpiarCampo } = useFiltrosDeUrl();
-  const seleccionados = valoresDe(campo);
+  const seleccionados = valoresDe(fieldName);
 
   return (
     <Marco
@@ -37,7 +37,7 @@ export function Segmentador({
           <button
             type="button"
             className="boton-enlace"
-            onClick={() => limpiarCampo(campo)}
+            onClick={() => limpiarCampo(fieldName)}
           >
             Limpiar
           </button>
@@ -54,7 +54,7 @@ export function Segmentador({
                 className={`md-chip ${activo ? "md-chip--seleccionado" : ""}`}
                 aria-pressed={activo}
                 data-testid={`segmentador-${opcion}`}
-                onClick={() => alternar(campo, opcion)}
+                onClick={() => alternar(fieldName, opcion)}
               >
                 {opcion}
               </button>

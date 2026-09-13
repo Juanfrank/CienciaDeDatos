@@ -146,9 +146,9 @@ export class ObjectRegistry {
   ): DeprecationWarning[] {
     const avisos: DeprecationWarning[] = [];
 
-    for (const instancia of instances) {
-      const objeto = this.objects.get(instancia.objectId);
-      const version = objeto?.versions.find((v) => v.version === instancia.version);
+    for (const objectInstance of instances) {
+      const objeto = this.objects.get(objectInstance.objectId);
+      const version = objeto?.versions.find((v) => v.version === objectInstance.version);
       const deprecacion = version?.deprecation;
       if (!objeto || !version || !deprecacion) continue;
 
@@ -156,9 +156,9 @@ export class ObjectRegistry {
       const dias = Math.ceil((limite - now.getTime()) / 86_400_000);
 
       avisos.push({
-        instanceId: instancia.instanceId,
-        objectId: instancia.objectId,
-        version: instancia.version,
+        instanceId: objectInstance.instanceId,
+        objectId: objectInstance.objectId,
+        version: objectInstance.version,
         removeAfter: deprecacion.removeAfter,
         ...(deprecacion.replacedBy ? { replacedBy: deprecacion.replacedBy } : {}),
         reason: deprecacion.reason,

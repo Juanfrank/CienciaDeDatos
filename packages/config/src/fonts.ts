@@ -1,14 +1,14 @@
 import {
   CLAVE_CONECTOR,
   banderaDeModulo,
-  type FuenteDeConfiguracion,
+  type SettingsFont,
   type InstantaneaDeConfiguracion,
 } from './instantanea';
 
 /* ── Entorno: desarrollo, pruebas y el arranque sin Azure ─────────────────────────────────── */
 
 /** La configuracion que sale de variables de entorno. */
-export class ConfiguracionDeEntorno implements FuenteDeConfiguracion {
+export class ConfiguracionDeEntorno implements SettingsFont {
   readonly nombre = 'entorno';
 
   constructor(private readonly entorno: NodeJS.ProcessEnv = process.env) {}
@@ -47,18 +47,18 @@ export interface OpcionesDeAppConfiguration {
   obtenerToken: () => Promise<string>;
   /** Etiqueta de App Configuration, si se separan entornos por etiqueta. */
   etiqueta?: string;
-  buscar?: typeof fetch;
+  search?: typeof fetch;
 }
 
 /** Lee la instantanea de Azure App Configuration por su API REST. */
-export class AppConfiguration implements FuenteDeConfiguracion {
+export class AppConfiguration implements SettingsFont {
   readonly nombre = 'app-configuration';
 
   constructor(private readonly opciones: OpcionesDeAppConfiguration) {}
 
   async leer(): Promise<InstantaneaDeConfiguracion> {
     const token = await this.opciones.obtenerToken();
-    const buscar = this.opciones.buscar ?? fetch;
+    const search = this.opciones.search ?? fetch;
     const banderas: Record<string, boolean> = {};
     const valores: Record<string, string> = {};
 
@@ -71,7 +71,7 @@ export class AppConfiguration implements FuenteDeConfiguracion {
     // Paginada: una tienda con muchas claves devuelve `@nextLink`, y quedarse en la primera
     // pagina dejaria banderas fuera — que se leerian como «ausente», o sea encendido.
     while (url) {
-      const respuesta = await buscar(url, {
+      const respuesta = await search(url, {
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
       });
       if (!respuesta.ok) {

@@ -1,7 +1,7 @@
 import type { CacheEntry, ICacheStore } from '@app/caching';
 import {
   CLAVE_ESTADOS,
-  CLAVE_REGLAS,
+  KEY_RULES,
   CLAVE_SUSCRIPCIONES,
   CLAVE_ULTIMO_LATIDO,
   type AlertRule,
@@ -42,22 +42,22 @@ export class StoreAlertRepository implements IAlertStore {
   }
 
   async listRules(): Promise<AlertRule[]> {
-    return this.leer<AlertRule>(CLAVE_REGLAS);
+    return this.leer<AlertRule>(KEY_RULES);
   }
 
   async saveRule(rule: AlertRule): Promise<void> {
-    const reglas = await this.listRules();
-    const sinEsta = reglas.filter((r) => r.id !== rule.id);
-    await this.store.set(CLAVE_REGLAS, entrada([...sinEsta, rule]));
+    const rules = await this.listRules();
+    const sinEsta = rules.filter((r) => r.id !== rule.id);
+    await this.store.set(KEY_RULES, entrada([...sinEsta, rule]));
   }
 
   /** Borrar exige el dueno, no solo el id. */
   async deleteRule(id: string, ownerUserId: string): Promise<boolean> {
-    const reglas = await this.listRules();
-    const objetivo = reglas.find((r) => r.id === id);
+    const rules = await this.listRules();
+    const objetivo = rules.find((r) => r.id === id);
     if (!objetivo || objetivo.ownerUserId !== ownerUserId) return false;
 
-    await this.store.set(CLAVE_REGLAS, entrada(reglas.filter((r) => r.id !== id)));
+    await this.store.set(KEY_RULES, entrada(rules.filter((r) => r.id !== id)));
     await this.store.delete(`${CLAVE_ESTADOS}:${id}`);
     return true;
   }

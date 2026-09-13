@@ -42,7 +42,7 @@ const scale = buildScopeLookup(
   [],
 );
 
-const filas: NavNodeRow[] = [
+const dataRows: NavNodeRow[] = [
   { id: 'raiz', type: 'folder', name: 'Institucional', icon: null, parentId: null, orderIndex: 0, moduleId: null, slug: null, deletedAt: null, scopeId: null },
   { id: 'regional', type: 'folder', name: 'Regional', icon: null, parentId: 'raiz', orderIndex: 0, moduleId: null, slug: null, deletedAt: null, scopeId: 'sc-regional' },
   { id: 'norte', type: 'folder', name: 'Norte', icon: null, parentId: 'regional', orderIndex: 1, moduleId: null, slug: null, deletedAt: null, scopeId: 'sc-norte' },
@@ -52,7 +52,7 @@ const filas: NavNodeRow[] = [
 
 describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
   it('reconstruye la jerarquia completa a cualquier profundidad', () => {
-    const arbol = buildNavTree(filas, scale);
+    const arbol = buildNavTree(dataRows, scale);
     const raiz = arbol[0];
     if (raiz?.type !== 'folder') throw new Error('se esperaba carpeta');
     const regional = raiz.children[0];
@@ -62,7 +62,7 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
   });
 
   it('respeta orderIndex entre hermanos, no el orden de las filas', () => {
-    const arbol = buildNavTree(filas, scale);
+    const arbol = buildNavTree(dataRows, scale);
     const raiz = arbol[0];
     if (raiz?.type !== 'folder') throw new Error('se esperaba carpeta');
     const regional = raiz.children[0];
@@ -72,7 +72,7 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
   });
 
   it('adjunta el ambito de la carpeta desde el indice de ambitos', () => {
-    const arbol = buildNavTree(filas, scale);
+    const arbol = buildNavTree(dataRows, scale);
     const raiz = arbol[0];
     if (raiz?.type !== 'folder') throw new Error('se esperaba carpeta');
     const regional = raiz.children[0];
@@ -81,7 +81,7 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
   });
 
   it('mapea las hojas de modulo con su slug e icono', () => {
-    const arbol = buildNavTree(filas, scale);
+    const arbol = buildNavTree(dataRows, scale);
     const raiz = arbol[0];
     if (raiz?.type !== 'folder') throw new Error('se esperaba carpeta');
     const regional = raiz.children[0];
@@ -96,7 +96,7 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
   });
 
   it('excluye del arbol vigente lo que esta en papelera (4.1)', () => {
-    const conPapelera = filas.map((f) =>
+    const conPapelera = dataRows.map((f) =>
       f.id === 'm-casos' ? { ...f, deletedAt: new Date('2026-09-01') } : f,
     );
     const arbol = buildNavTree(conPapelera, scale);
@@ -105,7 +105,7 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
 
   it('un nodo cuyo ancestro esta en papelera NO se cuelga de la raiz', () => {
     // Colgarlo en la raiz lo sacaria de una carpeta restrictiva y ampliaria su ambito.
-    const conPapelera = filas.map((f) =>
+    const conPapelera = dataRows.map((f) =>
       f.id === 'norte' ? { ...f, deletedAt: new Date('2026-09-01') } : f,
     );
     const arbol = buildNavTree(conPapelera, scale);
@@ -113,7 +113,7 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
   });
 
   it('el arbol reconstruido resuelve el mismo ambito que el dominio espera', () => {
-    const arbol = buildNavTree(filas, scale);
+    const arbol = buildNavTree(dataRows, scale);
     const equipo = toTeam(
       { id: 't1', name: 'Equipo', defaultScopeId: 'sc-materia', assignedPackageId: null },
       [{ teamId: 't1', nodeId: 'regional' }],
@@ -267,8 +267,8 @@ describe('coherencia entre schema.prisma y las formas de fila', () => {
 
   it('los campos de NavNodeRow existen en el modelo NavNode', () => {
     const block = schema.split('model NavNode {')[1]?.split('}')[0] ?? '';
-    for (const campo of ['type', 'name', 'icon', 'parentId', 'orderIndex', 'moduleId', 'slug', 'deletedAt', 'scopeId']) {
-      expect(block).toContain(campo);
+    for (const fieldName of ['type', 'name', 'icon', 'parentId', 'orderIndex', 'moduleId', 'slug', 'deletedAt', 'scopeId']) {
+      expect(block).toContain(fieldName);
     }
   });
 

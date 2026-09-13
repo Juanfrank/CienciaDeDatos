@@ -45,7 +45,7 @@ export type Eje = (typeof EJES)[number];
 
 export interface ConfiguracionDeContenedorSimple {
   /** Columnas de la rejilla interna. Menos que las doce de fuera, porque el ancho tambien es menor. */
-  columnas?: number;
+  gridColumns?: number;
 }
 
 export interface ConfiguracionDeContenedorDesplazable extends ConfiguracionDeContenedorSimple {
@@ -65,7 +65,7 @@ export interface ConfiguracionDeContenedorConPestanas extends ConfiguracionDeCon
   pestanaInicial?: string;
 }
 
-export interface ConfiguracionDeContenedor {
+export interface ContainerSettings {
   /**
    * El contenido. Una lista de paneles para TODOS los tipos; los que no tienen pestanas usan el
    * primero.
@@ -97,13 +97,13 @@ export const PANEL_VACIO = (n = 1): PanelDeContenedor => ({
 });
 
 /** Los paneles de un contenedor, siempre al menos uno. */
-export function panelesDe(config: ConfiguracionDeContenedor | undefined): PanelDeContenedor[] {
+export function panelesDe(config: ContainerSettings | undefined): PanelDeContenedor[] {
   const paneles = config?.paneles ?? [];
   return paneles.length > 0 ? paneles : [PANEL_VACIO()];
 }
 
 /** Todas las instancias anidadas de un contenedor, para los avisos de deprecacion y la validacion. */
-export function instanciasAnidadas(config: ConfiguracionDeContenedor | undefined): ObjectInstance[] {
+export function instanciasAnidadas(config: ContainerSettings | undefined): ObjectInstance[] {
   return panelesDe(config).flatMap((p) => p.items.map((i) => i.instance));
 }
 
@@ -111,7 +111,7 @@ export function instanciasAnidadas(config: ConfiguracionDeContenedor | undefined
 
 export interface ProblemaDeContenedor {
   slot: string;
-  problema: string;
+  issue: string;
 }
 
 /** Lo que un contenedor tiene que cumplir antes de guardarse. */
@@ -120,15 +120,15 @@ export function validarContenedor(
   instance: { objectId: string; configuracion?: unknown },
 ): ProblemaDeContenedor[] {
   if (!esContenedor(instance.objectId)) return [];
-  const config = (instance.configuracion ?? {}) as ConfiguracionDeContenedor;
+  const config = (instance.configuracion ?? {}) as ContainerSettings;
   const problems: ProblemaDeContenedor[] = [];
-  const columnas = columnasDe(instance.objectId, config);
+  const gridColumns = columnasDe(instance.objectId, config);
 
   const paneles = config.paneles ?? [];
   if (instance.objectId === 'contenedor-con-pestanas' && paneles.length < 2) {
     problems.push({
       slot: `contenedor.${itemId}`,
-      problema:
+      issue:
         'Un contenedor con pestanas necesita al menos dos. Con una sola, la barra de pestanas ' +
         'ocupa sitio sin ofrecer a donde ir: eso es un contenedor simple.',
     });
@@ -139,7 +139,7 @@ export function validarContenedor(
     if (ids.has(panel.panelId)) {
       problems.push({
         slot: `contenedor.${itemId}.${panel.panelId}`,
-        problema: `Hay dos paneles con el id '${panel.panelId}'. El id identifica a cual se cambia.`,
+        issue: `Hay dos paneles con el id '${panel.panelId}'. El id identifica a cual se cambia.`,
       });
     }
     ids.add(panel.panelId);
@@ -148,13 +148,13 @@ export function validarContenedor(
       if (item.position.w < 1 || item.position.h < 1) {
         problems.push({
           slot: `contenedor.${itemId}.${item.id}`,
-          problema: 'Un objeto de ancho o alto cero no se puede ver ni seleccionar.',
+          issue: 'Un objeto de ancho o alto cero no se puede ver ni seleccionar.',
         });
       }
-      if (item.position.x < 0 || item.position.x + item.position.w > columnas) {
+      if (item.position.x < 0 || item.position.x + item.position.w > gridColumns) {
         problems.push({
           slot: `contenedor.${itemId}.${item.id}`,
-          problema: `Se sale de las ${columnas} columnas del contenedor.`,
+          issue: `Se sale de las ${gridColumns} columnas del contenedor.`,
         });
       }
     }
@@ -166,7 +166,7 @@ export function validarContenedor(
         if (a && b && seSolapanEnRejilla(a.position, b.position)) {
           problems.push({
             slot: `contenedor.${itemId}.${a.id}`,
-            problema: `Se solapa con '${b.id}' dentro del contenedor.`,
+            issue: `Se solapa con '${b.id}' dentro del contenedor.`,
           });
         }
       }
@@ -178,7 +178,7 @@ export function validarContenedor(
     if (eje !== undefined && !(EJES as readonly string[]).includes(eje)) {
       problems.push({
         slot: `contenedor.${itemId}`,
-        problema: `'${String(eje)}' no es un eje. Se desplaza por X o por Y, nunca por los dos.`,
+        issue: `'${String(eje)}' no es un eje. Se desplaza por X o por Y, nunca por los dos.`,
       });
     }
   }
@@ -190,12 +190,12 @@ export const seSolapanEnRejilla = (a: PosicionEnRejilla, b: PosicionEnRejilla): 
   a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
 /** Las columnas de la rejilla interna de un contenedor, sea cual sea su tipo. */
-export function columnasDe(objectId: string, config: ConfiguracionDeContenedor | undefined): number {
+export function columnasDe(objectId: string, config: ContainerSettings | undefined): number {
   const propia =
-    config?.simple?.columnas ??
-    config?.desplazable?.columnas ??
-    config?.ampliable?.columnas ??
-    config?.pestanas?.columnas;
+    config?.simple?.gridColumns ??
+    config?.desplazable?.gridColumns ??
+    config?.ampliable?.gridColumns ??
+    config?.pestanas?.gridColumns;
   return Math.max(1, Math.round(propia ?? COLUMNAS_INTERNAS_POR_DEFECTO));
 }
 
@@ -205,7 +205,7 @@ export function columnasDe(objectId: string, config: ConfiguracionDeContenedor |
 export function configuracionInicial(
   objectId: string,
 ):
-  | ({ objectId: IdDeContenedor } & ConfiguracionDeContenedor)
+  | ({ objectId: IdDeContenedor } & ContainerSettings)
   | ({ objectId: IdDeElemento } & ConfiguracionDeElemento)
   | undefined {
   if (esElemento(objectId)) {

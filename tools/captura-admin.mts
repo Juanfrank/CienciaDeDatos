@@ -23,7 +23,7 @@ await pagina.request.post(`${base}/api/admin/ambitos`, {
   },
 });
 
-for (const [path, nombre] of [
+for (const [path, label] of [
   ['/admin', 'inicio'],
   ['/admin/arbol', 'arbol'],
   ['/admin/ambitos', 'ambitos'],
@@ -31,7 +31,7 @@ for (const [path, nombre] of [
 ] as const) {
   await pagina.goto(`${base}${path}`);
   await pagina.waitForLoadState('networkidle');
-  await pagina.screenshot({ path: `${salida}-${nombre}.png`, fullPage: true });
+  await pagina.screenshot({ path: `${salida}-${label}.png`, fullPage: true });
 }
 
 // "Quien ve que" necesita una consulta antes de tener algo que mostrar.

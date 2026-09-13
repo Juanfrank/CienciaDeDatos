@@ -27,9 +27,9 @@ export function applyPersonalization(
     items: page.items
       .filter((item) => !ocultos.has(item.id))
       .map((item) => {
-        const posicion = personalization.positionOverrides[item.id];
+        const cellPosition = personalization.positionOverrides[item.id];
         // El binding se copia tal cual: la personalizacion no puede tocarlo.
-        return posicion ? { ...item, position: posicion } : item;
+        return cellPosition ? { ...item, position: cellPosition } : item;
       }),
   }));
 
@@ -44,7 +44,7 @@ export function applyPersonalization(
 /** Comprueba que una personalizacion no intenta alterar la logica de calculo. */
 export function assertPersonalizationIsPresentationOnly(raw: Record<string, unknown>): void {
   const prohibidos = ['binding', 'measures', 'dimensions', 'datasetId', 'version', 'objectId'];
-  const encontrados = prohibidos.filter((campo) => campo in raw);
+  const encontrados = prohibidos.filter((fieldName) => fieldName in raw);
   if (encontrados.length > 0) {
     throw new Error(
       `Una personalizacion no puede alterar ${encontrados.join(', ')}: la personalizacion se ` +

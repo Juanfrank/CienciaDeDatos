@@ -16,31 +16,31 @@ export interface ReglaDeColor {
 }
 
 export interface FormatoCondicional {
-  reglas: ReglaDeColor[];
+  rules: ReglaDeColor[];
 }
 
 /** Mas de cinco reglas sobre un objeto dejan de ser excepciones y pasan a ser una escala. */
 export const MAX_REGLAS = 5;
 
-function cumple(regla: ReglaDeColor, valor: number): boolean {
-  switch (regla.comparador) {
+function cumple(colorRule: ReglaDeColor, valor: number): boolean {
+  switch (colorRule.comparador) {
     case 'mayor':
-      return valor > regla.valor;
+      return valor > colorRule.valor;
     case 'mayor-o-igual':
-      return valor >= regla.valor;
+      return valor >= colorRule.valor;
     case 'menor':
-      return valor < regla.valor;
+      return valor < colorRule.valor;
     case 'menor-o-igual':
-      return valor <= regla.valor;
+      return valor <= colorRule.valor;
     case 'igual':
-      return valor === regla.valor;
+      return valor === colorRule.valor;
     case 'entre':
       // Los dos extremos entran. Y se ordenan: «entre 90 y 30» es el mismo rango que «entre 30 y
       // 90», y rechazarlo por el orden en que alguien escribio dos numeros no ayuda a nadie.
       return (
-        regla.hasta !== undefined &&
-        valor >= Math.min(regla.valor, regla.hasta) &&
-        valor <= Math.max(regla.valor, regla.hasta)
+        colorRule.hasta !== undefined &&
+        valor >= Math.min(colorRule.valor, colorRule.hasta) &&
+        valor <= Math.max(colorRule.valor, colorRule.hasta)
       );
     default:
       return false;
@@ -55,15 +55,15 @@ export function colorCondicional(
 ): ColorDeTexto | undefined {
   if (!condicional || valor === null || valor === undefined) return undefined;
 
-  for (const regla of condicional.reglas.slice(0, MAX_REGLAS)) {
-    if (regla.medida !== undefined && regla.medida !== medida) continue;
-    if (cumple(regla, valor)) return regla.color;
+  for (const colorRule of condicional.rules.slice(0, MAX_REGLAS)) {
+    if (colorRule.medida !== undefined && colorRule.medida !== medida) continue;
+    if (cumple(colorRule, valor)) return colorRule.color;
   }
   return undefined;
 }
 
 /** Texto legible de una regla, para el panel y para el respaldo accesible. */
-export function describirRegla(regla: ReglaDeColor): string {
+export function describirRegla(colorRule: ReglaDeColor): string {
   const nombre: Record<Comparador, string> = {
     mayor: 'mayor que',
     'mayor-o-igual': 'mayor o igual que',
@@ -73,6 +73,6 @@ export function describirRegla(regla: ReglaDeColor): string {
     entre: 'entre',
   };
   const rango =
-    regla.comparador === 'entre' ? `${regla.valor} y ${regla.hasta ?? regla.valor}` : String(regla.valor);
-  return `${nombre[regla.comparador]} ${rango}`;
+    colorRule.comparador === 'entre' ? `${colorRule.valor} y ${colorRule.hasta ?? colorRule.valor}` : String(colorRule.valor);
+  return `${nombre[colorRule.comparador]} ${rango}`;
 }

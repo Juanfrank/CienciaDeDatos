@@ -28,7 +28,7 @@ export async function GET() {
     {
       ...informe,
       /** Metricas del camino de lectura (8.3), ACUMULADAS POR ESTA INSTANCIA. */
-      cache: { instancia: process.pid, ...metricasDeCache.resumen() },
+      cache: { objectInstance: process.pid, ...metricasDeCache.resumen() },
     },
     { status: informe.status === 'caido' ? 503 : 200 },
   );

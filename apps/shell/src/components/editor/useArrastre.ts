@@ -113,11 +113,11 @@ export function useArrastre({
       } else {
         // Al redimensionar lo que se arrastra es el borde de ABAJO; el de arriba no se mueve.
         const abajo = lineaDeFila(o.pistas, o.inicial.y + o.inicial.h) + arrastradoY;
-        const linea = lineaMasCercana(o.pistas, abajo, tope);
+        const line = lineaMasCercana(o.pistas, abajo, tope);
         destino = {
           ...o.inicial,
           w: acotar(o.inicial.w + dx, 1, GRID_COLUMNS - o.inicial.x),
-          h: Math.max(1, linea - o.inicial.y),
+          h: Math.max(1, line - o.inicial.y),
         };
       }
 

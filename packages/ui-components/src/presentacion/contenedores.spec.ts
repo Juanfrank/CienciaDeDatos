@@ -7,7 +7,7 @@ import {
   seSolapanEnRejilla,
   validarContenedor,
 } from './contenedores';
-import type { ConfiguracionDeContenedor, ItemAnidado } from './contenedores';
+import type { ContainerSettings, ItemAnidado } from './contenedores';
 
 const item = (id: string, x: number, y: number, w = 2, h = 2): ItemAnidado => ({
   id,
@@ -20,7 +20,7 @@ const item = (id: string, x: number, y: number, w = 2, h = 2): ItemAnidado => ({
   },
 });
 
-const con = (config: ConfiguracionDeContenedor, objectId = 'contenedor-simple') =>
+const con = (config: ContainerSettings, objectId = 'contenedor-simple') =>
   validarContenedor('c1', { objectId, configuracion: config });
 
 describe('paneles', () => {
@@ -30,7 +30,7 @@ describe('paneles', () => {
   });
 
   it('recoge las instancias de TODOS los paneles, no solo la visible', () => {
-    const config: ConfiguracionDeContenedor = {
+    const config: ContainerSettings = {
       paneles: [
         { panelId: 'p1', nombre: 'Uno', items: [item('a', 0, 0)] },
         { panelId: 'p2', nombre: 'Dos', items: [item('b', 0, 0)] },
@@ -52,7 +52,7 @@ describe('validarContenedor', () => {
       paneles: [{ panelId: 'p1', nombre: '', items: [item('a', 0, 0), item('b', 1, 1)] }],
     });
     expect(problems).toHaveLength(1);
-    expect(problems[0]?.problema).toContain('solapa');
+    expect(problems[0]?.issue).toContain('solapa');
   });
 
   it('acepta dos hijos que se tocan sin pisarse', () => {
@@ -63,10 +63,10 @@ describe('validarContenedor', () => {
 
   it('rechaza un hijo que se sale de las columnas del contenedor', () => {
     const problems = con({
-      simple: { columnas: 3 },
+      simple: { gridColumns: 3 },
       paneles: [{ panelId: 'p1', nombre: '', items: [item('a', 2, 0, 2)] }],
     });
-    expect(problems[0]?.problema).toContain('3 columnas');
+    expect(problems[0]?.issue).toContain('3 columnas');
   });
 
   it('rechaza un contenedor con pestanas que solo tiene una', () => {
@@ -74,7 +74,7 @@ describe('validarContenedor', () => {
       objectId: 'contenedor-con-pestanas',
       configuracion: { paneles: [{ panelId: 'p1', nombre: 'Sola', items: [] }] },
     });
-    expect(problems[0]?.problema).toContain('al menos dos');
+    expect(problems[0]?.issue).toContain('al menos dos');
   });
 
   it('rechaza dos paneles con el mismo id', () => {
@@ -87,7 +87,7 @@ describe('validarContenedor', () => {
         ],
       },
     });
-    expect(problems.some((p) => p.problema.includes("id 'p1'"))).toBe(true);
+    expect(problems.some((p) => p.issue.includes("id 'p1'"))).toBe(true);
   });
 
   it('rechaza un eje que no es X ni Y', () => {
@@ -96,7 +96,7 @@ describe('validarContenedor', () => {
       // Lo que este caso protege: que «ambos» no entre por la puerta de atras editando el JSON.
       configuracion: { desplazable: { eje: 'ambos' as unknown as 'x' } },
     });
-    expect(problems[0]?.problema).toContain('nunca por los dos');
+    expect(problems[0]?.issue).toContain('nunca por los dos');
   });
 });
 
@@ -120,12 +120,12 @@ describe('configuracion inicial', () => {
 
 describe('columnasDe', () => {
   it('lee las columnas del bloque del tipo que sea', () => {
-    expect(columnasDe('contenedor-desplazable', { desplazable: { columnas: 4 } })).toBe(4);
+    expect(columnasDe('contenedor-desplazable', { desplazable: { gridColumns: 4 } })).toBe(4);
     expect(columnasDe('contenedor-simple', undefined)).toBe(6);
   });
 
   it('nunca devuelve cero: una rejilla de cero columnas no coloca nada', () => {
-    expect(columnasDe('contenedor-simple', { simple: { columnas: 0 } })).toBe(1);
+    expect(columnasDe('contenedor-simple', { simple: { gridColumns: 0 } })).toBe(1);
   });
 });
 

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { FORMATOS, type ExportFormat } from '@app/export';
+import { FORMATS, type ExportFormat } from '@app/export';
 import type { Cadence, Subscription } from '@app/alerts';
 import { alertStore } from '../../../src/server/alertas';
 import { actorDe, moduloServiblePorSlug } from '../../../src/server/cicloDeVida';
@@ -39,9 +39,9 @@ export async function POST(request: Request) {
   const hora = Number(body['hora'] ?? 8);
 
   if (!nombre) return NextResponse.json({ error: 'Falta el nombre.' }, { status: 400 });
-  if (!FORMATOS.includes(formato)) {
+  if (!FORMATS.includes(formato)) {
     return NextResponse.json(
-      { error: `Formato no admitido. Use uno de: ${FORMATOS.join(', ')}.` },
+      { error: `Formato no admitido. Use uno de: ${FORMATS.join(', ')}.` },
       { status: 400 },
     );
   }

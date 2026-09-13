@@ -38,7 +38,7 @@ export function TablaOrdenable({
   /** Reglas de color por valor. La celda que se sale es lo que se busca en una tabla. */
   condicional?: FormatoCondicional;
 }) {
-  const [orden, setOrden] = useState<{ columna: number; direccion: Direccion } | null>(null);
+  const [orden, setOrden] = useState<{ column: number; direccion: Direccion } | null>(null);
 
   // Se resuelve una vez por columna y no por celda: en una tabla larga son miles de llamadas.
   const formateadores = useMemo(
@@ -46,19 +46,19 @@ export function TablaOrdenable({
     [proyectado.columns, formatearColumna],
   );
 
-  const filas = useMemo(() => {
+  const dataRows = useMemo(() => {
     if (!orden) return proyectado.rows;
     // Copia antes de ordenar: `sort` muta, y `proyectado.rows` viene del servidor por referencia.
     return [...proyectado.rows].sort((a, b) =>
-      comparar(a[orden.columna], b[orden.columna], orden.direccion),
+      comparar(a[orden.column], b[orden.column], orden.direccion),
     );
   }, [proyectado.rows, orden]);
 
-  const alPulsar = (columna: number) =>
+  const alPulsar = (column: number) =>
     setOrden((o) =>
-      o?.columna === columna
-        ? { columna, direccion: o.direccion === 'asc' ? 'desc' : 'asc' }
-        : { columna, direccion: 'asc' },
+      o?.column === column
+        ? { column, direccion: o.direccion === 'asc' ? 'desc' : 'asc' }
+        : { column, direccion: 'asc' },
     );
 
   return (
@@ -67,7 +67,7 @@ export function TablaOrdenable({
         <thead>
           <tr>
             {proyectado.columns.map((c, i) => {
-              const activa = orden?.columna === i;
+              const activa = orden?.column === i;
               return (
                 <th
                   key={c.name}
@@ -93,7 +93,7 @@ export function TablaOrdenable({
           </tr>
         </thead>
         <tbody>
-          {filas.map((fila, i) => (
+          {dataRows.map((fila, i) => (
             <tr key={i}>
               {fila.map((celda, j) => {
                 const esCifra = typeof celda === 'number';

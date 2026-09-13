@@ -318,16 +318,16 @@ describe('cada transicion queda en la auditoria', () => {
     });
 
     // `listarAuditoria` devuelve lo mas reciente primero; aqui interesa el orden del recorrido.
-    const filas = (await listarAuditoria())
+    const dataRows = (await listarAuditoria())
       .filter((e) => e.entityId === modulo.moduleId)
       .reverse();
-    expect(filas.map((f) => f.action)).toEqual(['create', 'update', 'submit', 'publish', 'withdraw']);
+    expect(dataRows.map((f) => f.action)).toEqual(['create', 'update', 'submit', 'publish', 'withdraw']);
 
-    const publicacion = filas.find((f) => f.action === 'publish');
+    const publicacion = dataRows.find((f) => f.action === 'publish');
     expect(publicacion?.actorId).toBe('u-admin');
 
     // La retirada lleva motivo: es lo que explica a los equipos que lo usaban por que desaparecio.
-    expect(filas.find((f) => f.action === 'withdraw')?.justification).toContain('calculo');
+    expect(dataRows.find((f) => f.action === 'withdraw')?.justification).toContain('calculo');
   });
 });
 

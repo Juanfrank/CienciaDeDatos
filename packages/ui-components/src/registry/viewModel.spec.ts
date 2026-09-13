@@ -29,7 +29,7 @@ const resultado: QueryResult = {
 };
 
 describe('validateBinding (4.2)', () => {
-  const instancia = (dimensions: typeof resultado.columns extends never ? never : { table: string; field: string }[], measures: string[]): ObjectInstance => ({
+  const objectInstance = (dimensions: typeof resultado.columns extends never ? never : { table: string; field: string }[], measures: string[]): ObjectInstance => ({
     instanceId: 'i1',
     objectId: 'barras',
     version: '1.0.0',
@@ -37,17 +37,17 @@ describe('validateBinding (4.2)', () => {
   });
 
   const contrato = { dimensions: { min: 1, max: 1 }, measures: { min: 1, max: 1 } };
-  const columnas = resultado.columns.map((c) => c.name);
+  const gridColumns = resultado.columns.map((c) => c.name);
 
   it('un mapeo correcto no reporta problemas', () => {
-    expect(validateBinding(instancia([DISTRITO], ['CasosPendientes']), contrato, columnas)).toEqual([]);
+    expect(validateBinding(objectInstance([DISTRITO], ['CasosPendientes']), contrato, gridColumns)).toEqual([]);
   });
 
   it('marca roto un campo que ya no existe, en vez de fallar en silencio', () => {
     const problems = validateBinding(
-      instancia([{ table: 'DimTribunal', field: 'CampoBorrado' }], ['CasosPendientes']),
+      objectInstance([{ table: 'DimTribunal', field: 'CampoBorrado' }], ['CasosPendientes']),
       contrato,
-      columnas,
+      gridColumns,
     );
     expect(problems).toHaveLength(1);
     expect(problems[0]).toMatchObject({
@@ -58,18 +58,18 @@ describe('validateBinding (4.2)', () => {
 
   it('marca rota una medida que ya no existe', () => {
     const problems = validateBinding(
-      instancia([DISTRITO], ['MedidaBorrada']),
+      objectInstance([DISTRITO], ['MedidaBorrada']),
       contrato,
-      columnas,
+      gridColumns,
     );
     expect(problems[0]?.kind).toBe('campo-inexistente');
   });
 
   it('distingue el incumplimiento de contrato del campo inexistente', () => {
     const problems = validateBinding(
-      instancia([DISTRITO, MATERIA], ['CasosPendientes']),
+      objectInstance([DISTRITO, MATERIA], ['CasosPendientes']),
       contrato,
-      columnas,
+      gridColumns,
     );
     expect(problems[0]?.kind).toBe('contrato-incumplido');
     expect(problems[0]?.problem).toMatch(/admite entre 1 y 1 dimensiones/);
@@ -77,9 +77,9 @@ describe('validateBinding (4.2)', () => {
 
   it('devuelve TODOS los problemas, para poder señalarlos de una vez en el editor', () => {
     const problems = validateBinding(
-      instancia([{ table: 'X', field: 'Y' }, MATERIA], ['Inexistente']),
+      objectInstance([{ table: 'X', field: 'Y' }, MATERIA], ['Inexistente']),
       contrato,
-      columnas,
+      gridColumns,
     );
     expect(problems.length).toBeGreaterThanOrEqual(3);
   });

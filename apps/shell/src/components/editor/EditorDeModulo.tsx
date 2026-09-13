@@ -23,14 +23,14 @@ export function EditorDeModulo({
   objetosIniciales,
   diagnosticos,
   bloqueos,
-  paleta,
+  palette,
   editable,
 }: {
   inicial: ModuleDefinition;
   objetosIniciales: ObjetoSerializado[];
   diagnosticos: ModuleDiagnostics;
   bloqueos: PublishBlocker[];
-  paleta: PaletaDelEditor;
+  palette: PaletaDelEditor;
   editable: boolean;
 }) {
   const router = useRouter();
@@ -96,14 +96,14 @@ export function EditorDeModulo({
     modulo.pages.map((p, i) => (i === 0 ? { ...p, items: nuevos } : p));
 
   const anadir = async (objectId: string) => {
-    const definicion = paleta.objetos.find((o) => o.objectId === objectId);
+    const definicion = palette.objetos.find((o) => o.objectId === objectId);
     if (!definicion) return;
     /*
      * Un elemento o un contenedor no necesita dataset, y por eso no se exige uno.
      */
     const config = configuracionInicial(objectId);
     const sinDatos = definicion.dimensiones.max === 0 && definicion.medidas.max === 0;
-    const dataset = paleta.datasets[0];
+    const dataset = palette.datasets[0];
     if (!sinDatos && !dataset) return;
 
     const id = `obj-${crypto.randomUUID().slice(0, 8)}`;
@@ -246,8 +246,8 @@ export function EditorDeModulo({
 
       {editable ? (
         <PanelLateral
-          objetos={paleta.objetos}
-          datasets={paleta.datasets}
+          objetos={palette.objetos}
+          datasets={palette.datasets}
           seleccionado={elegido}
           guardando={guardando}
           onAnadir={(objectId) => void anadir(objectId)}

@@ -1,6 +1,6 @@
 import type { Aggregation, QueryResult } from '@app/data-contracts';
 import type { ObjectInstance } from './types';
-import { construirMatriz, filasVisibles, hojas } from './matriz';
+import { construirMatriz, filasVisibles, leaves } from './matriz';
 import { aFieldRef } from '../presentacion/pozos';
 import { aggregateBy, fieldKey, toSlicerOptions } from './viewModel';
 
@@ -28,7 +28,7 @@ function mismaProcedencia(result: QueryResult, columns: QueryResult['columns'], 
 export function proyectarObjeto(
   instance: ObjectInstance,
   result: QueryResult,
-  agregaciones: Aggregation[],
+  aggregations: Aggregation[],
 ): QueryResult {
   const { dimensions, measures } = instance.binding;
 
@@ -39,7 +39,7 @@ export function proyectarObjeto(
       //
       // Agregar sin ninguna dimension colapsa todo el dataset en una sola fila, resumida con el
       // operador de cada medida — que es exactamente lo que hace la tarjeta al dibujarse.
-      const { rows } = aggregateBy(result, [], measures, agregaciones);
+      const { rows } = aggregateBy(result, [], measures, aggregations);
       const valores = rows[0]?.values ?? measures.map(() => null);
       const columns = [columnaTexto('Indicador'), ...measures.map(columnaNumero)];
       return mismaProcedencia(result, columns, [
@@ -59,8 +59,8 @@ export function proyectarObjeto(
       );
       const medidas = deRanura('valores') ?? measures;
 
-      const vm = construirMatriz(result, dimsFila, dimsColumna, medidas, agregaciones);
-      const columnasHoja = hojas(vm.columnas, nada);
+      const vm = construirMatriz(result, dimsFila, dimsColumna, medidas, aggregations);
+      const columnasHoja = leaves(vm.gridColumns, nada);
 
       const columns = [
         columnaTexto(vm.nivelesDeFila.join(' / ') || etiquetaDeDimensiones(instance)),
@@ -75,7 +75,7 @@ export function proyectarObjeto(
         ...medidas.map((_, i) => vm.valor(path, [], i)),
       ];
 
-      const rows: unknown[][] = filasVisibles(vm.filas, nada).map((node) => [
+      const rows: unknown[][] = filasVisibles(vm.dataRows, nada).map((node) => [
         // La sangria del nivel viaja como texto: un CSV no tiene jerarquia, y sin ella las filas
         // de subtotal y las de detalle se leerian como si estuvieran al mismo nivel.
         `${'  '.repeat(node.nivel)}${node.etiqueta}`,
@@ -99,7 +99,7 @@ export function proyectarObjeto(
     case 'tabla': {
       // La tabla conserva una columna por dimension, no la etiqueta compuesta: es lo que
       // muestra, y una sola columna "Distrito / Materia" no se puede ordenar ni filtrar.
-      const { rows } = aggregateBy(result, dimensions, measures, agregaciones);
+      const { rows } = aggregateBy(result, dimensions, measures, aggregations);
       const columns = [
         ...dimensions.map((d) => columnaTexto(fieldKey(d))),
         ...measures.map(columnaNumero),
@@ -113,7 +113,7 @@ export function proyectarObjeto(
 
     default: {
       // Barras, lineas y cualquier objeto categorico futuro: una fila por categoria.
-      const { rows } = aggregateBy(result, dimensions, measures, agregaciones);
+      const { rows } = aggregateBy(result, dimensions, measures, aggregations);
       const columns = [
         columnaTexto(etiquetaDeDimensiones(instance)),
         ...measures.map(columnaNumero),

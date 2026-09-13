@@ -123,9 +123,9 @@ test.describe('la rejilla es visible y se maneja', () => {
       const first = Number(estilo.gridRowStart) - 1;
       const alto = Number(estilo.gridRowEnd.replace('span ', ''));
       const celdas = Array.from(document.querySelectorAll('.lienzo__guia')) as HTMLElement[];
-      const columnas = 12;
+      const gridColumns = 12;
       const caja = el.getBoundingClientRect();
-      const enColumna1 = (fila: number) => celdas[fila * columnas]?.getBoundingClientRect();
+      const enColumna1 = (fila: number) => celdas[fila * gridColumns]?.getBoundingClientRect();
       return {
         alto,
         arribaBloque: Math.round(caja.top),
@@ -158,10 +158,10 @@ test.describe('la rejilla es visible y se maneja', () => {
     await expect(page.getByTestId(`posicion-${id}`)).toContainText('Columna 2–8 de 12');
 
     // Y la posicion que se anuncia es la que el bloque ocupa de verdad en la rejilla.
-    const columna = await page
+    const column = await page
       .getByTestId(`bloque-${id}`)
       .evaluate((el) => getComputedStyle(el).gridColumnStart);
-    expect(columna).toBe('2');
+    expect(column).toBe('2');
   });
 
   test('los botones de borde se apagan en el borde, no guardan algo invalido', async ({ page }) => {
@@ -194,10 +194,10 @@ test.describe('la rejilla es visible y se maneja', () => {
     await page.getByTestId('anadir-barras').click();
     await guardado(page);
 
-    const filas = await page
+    const dataRows = await page
       .locator('[data-testid^="bloque-obj-"]')
       .evaluateAll((els) => els.map((e) => getComputedStyle(e).gridRowStart));
-    expect(filas).toEqual(['1', '1']);
+    expect(dataRows).toEqual(['1', '1']);
   });
 });
 
@@ -756,8 +756,8 @@ test.describe('como se resume cada medida', () => {
      * No es cosmetico: el mismo mapeo con otro operador es otra cifra. La suma de 1 200 casos es
      * ordenes de magnitud mayor que su promedio.
      */
-    const aNumero = (texto: string) =>
-      Number(texto.replace(/[^0-9.,]/g, '').replace(/,/g, ''));
+    const aNumero = (content: string) =>
+      Number(content.replace(/[^0-9.,]/g, '').replace(/,/g, ''));
     expect(sumado).not.toBe(promediado);
     expect(aNumero(sumado)).toBeGreaterThan(aNumero(promediado));
   });
@@ -838,7 +838,7 @@ test.describe('como se resume cada medida', () => {
       const { modulo } = await (await fetch(url)).json();
       for (const pagina of modulo.pages) {
         for (const it of pagina.items) {
-          if (it.id === itemId) it.instance.binding.agregaciones = { CasosIngresados: 'promedio' };
+          if (it.id === itemId) it.instance.binding.aggregations = { CasosIngresados: 'promedio' };
         }
       }
       await fetch(url, {
@@ -923,9 +923,9 @@ test.describe('estilo de texto y paleta', () => {
     await guardado(page);
     await page.getByTestId('pestana-formato').click();
 
-    const paleta = page.getByRole('radiogroup', { name: /Color de Estilo del titulo/ });
-    await expect(paleta).toBeVisible();
-    await expect(paleta.getByRole('radio')).toHaveCount(6);
+    const palette = page.getByRole('radiogroup', { name: /Color de Estilo del titulo/ });
+    await expect(palette).toBeVisible();
+    await expect(palette.getByRole('radio')).toHaveCount(6);
     // Nada de `input[type=color]`: ahi es donde entraria el color suelto.
     await expect(page.locator('input[type="color"]')).toHaveCount(0);
   });

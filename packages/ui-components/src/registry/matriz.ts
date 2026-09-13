@@ -11,8 +11,8 @@ const CRUCE = '<>';
 
 export const rutaClave = (path: readonly string[]): string => path.join(SEP);
 
-const claveDeCelda = (fila: readonly string[], columna: readonly string[]): string =>
-  `${rutaClave(fila)}${CRUCE}${rutaClave(columna)}`;
+const claveDeCelda = (fila: readonly string[], column: readonly string[]): string =>
+  `${rutaClave(fila)}${CRUCE}${rutaClave(column)}`;
 
 export interface NodoDeMatriz {
   /** Etiquetas desde la raiz hasta este nodo, incluida la suya. */
@@ -24,8 +24,8 @@ export interface NodoDeMatriz {
 }
 
 export interface MatrizJerarquica {
-  filas: NodoDeMatriz[];
-  columnas: NodoDeMatriz[];
+  dataRows: NodoDeMatriz[];
+  gridColumns: NodoDeMatriz[];
   medidas: string[];
   /** Nombre de la dimension de cada nivel, para rotular la esquina y las cabeceras. */
   nivelesDeFila: string[];
@@ -56,7 +56,7 @@ export function construirMatriz(
   dimensionesDeFila: { table: string; field: string }[],
   dimensionesDeColumna: { table: string; field: string }[],
   medidas: string[],
-  agregaciones: Aggregation[],
+  aggregations: Aggregation[],
 ): MatrizJerarquica {
   const indice = (d: { table: string; field: string }) =>
     result.columns.findIndex((c) => c.name === fieldKey(d));
@@ -64,14 +64,14 @@ export function construirMatriz(
   const iColumna = dimensionesDeColumna.map(indice);
   const iMedida = medidas.map((m) => result.columns.findIndex((c) => c.name === m));
 
-  const filas: NodoDeMatriz[] = [];
-  const columnas: NodoDeMatriz[] = [];
+  const dataRows: NodoDeMatriz[] = [];
+  const gridColumns: NodoDeMatriz[] = [];
   const celdas = new Map<string, Acumulador[]>();
 
   const acumuladoresDe = (clave: string): Acumulador[] => {
     let accs = celdas.get(clave);
     if (!accs) {
-      accs = medidas.map((_, i) => nuevoAcumulador(agregaciones[i] ?? 'suma'));
+      accs = medidas.map((_, i) => nuevoAcumulador(aggregations[i] ?? 'suma'));
       celdas.set(clave, accs);
     }
     return accs;
@@ -80,8 +80,8 @@ export function construirMatriz(
   for (const fila of result.rows) {
     const etiquetasFila = iFila.map((i) => (i >= 0 ? String(fila[i]) : '(sin dato)'));
     const etiquetasColumna = iColumna.map((i) => (i >= 0 ? String(fila[i]) : '(sin dato)'));
-    insertar(filas, etiquetasFila);
-    insertar(columnas, etiquetasColumna);
+    insertar(dataRows, etiquetasFila);
+    insertar(gridColumns, etiquetasColumna);
 
     /*
      * Cada fila de origen alimenta su celda Y la de todos sus niveles por encima.
@@ -90,17 +90,17 @@ export function construirMatriz(
       const prefijoFila = etiquetasFila.slice(0, f);
       for (let c = 0; c <= etiquetasColumna.length; c += 1) {
         const accs = acumuladoresDe(claveDeCelda(prefijoFila, etiquetasColumna.slice(0, c)));
-        iMedida.forEach((columna, m) => {
+        iMedida.forEach((column, m) => {
           const acc = accs[m];
-          if (acc && columna >= 0) acumular(acc, fila[columna]);
+          if (acc && column >= 0) acumular(acc, fila[column]);
         });
       }
     }
   }
 
   return {
-    filas,
-    columnas,
+    dataRows,
+    gridColumns,
     medidas,
     nivelesDeFila: dimensionesDeFila.map(fieldKey),
     nivelesDeColumna: dimensionesDeColumna.map(fieldKey),
@@ -128,7 +128,7 @@ export function filasVisibles(
 }
 
 /** Las hojas de un arbol de columnas: las que llevan cifras. Un nodo colapsado cuenta como hoja. */
-export function hojas(nodos: NodoDeMatriz[], colapsados: ReadonlySet<string>): NodoDeMatriz[] {
+export function leaves(nodos: NodoDeMatriz[], colapsados: ReadonlySet<string>): NodoDeMatriz[] {
   const salida: NodoDeMatriz[] = [];
   const recorrer = (lista: NodoDeMatriz[]) => {
     for (const node of lista) {

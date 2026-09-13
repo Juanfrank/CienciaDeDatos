@@ -30,8 +30,8 @@ const VARIABLE: Record<ColorDeTexto, string> = {
 const colorDe = (color: ColorDeTexto | undefined): string => VARIABLE[color ?? 'atenuado'];
 
 /** El borde CSS de una linea, en un solo sitio: las cuatro que hay deben verse iguales. */
-const bordeDe = (linea: ConfiguracionDeLinea | undefined): string =>
-  `${grosorValido(linea?.grosor)}px ${trazoDeLinea(linea?.estilo)} ${colorDe(linea?.color)}`;
+const bordeDe = (line: ConfiguracionDeLinea | undefined): string =>
+  `${grosorValido(line?.grosor)}px ${trazoDeLinea(line?.estilo)} ${colorDe(line?.color)}`;
 
 /* ── Cuadro de texto ───────────────────────────────────────────────────────────────────────── */
 
@@ -45,7 +45,7 @@ export function CuadroDeTexto({ config }: { config: ConfiguracionDeCuadroDeTexto
         if (p.vineta) {
           return (
             <ul key={i} className="cuadro-texto__lista">
-              <li style={estilo}>{p.texto}</li>
+              <li style={estilo}>{p.content}</li>
             </ul>
           );
         }
@@ -56,13 +56,13 @@ export function CuadroDeTexto({ config }: { config: ConfiguracionDeCuadroDeTexto
           const Etiqueta = (['h4', 'h5', 'h6'] as const)[p.nivel - 1] ?? 'h4';
           return (
             <Etiqueta key={i} className="cuadro-texto__titulo" style={estilo}>
-              {p.texto}
+              {p.content}
             </Etiqueta>
           );
         }
         return (
           <p key={i} style={estilo}>
-            {p.texto}
+            {p.content}
           </p>
         );
       })}
@@ -74,25 +74,25 @@ export function CuadroDeTexto({ config }: { config: ConfiguracionDeCuadroDeTexto
 
 /** Un titulo que encabeza un grupo, con lineas que se reparten lo que sobra. */
 export function TituloDeSeccion({ config }: { config: ConfiguracionDeTituloDeSeccion | undefined }) {
-  const linea = config?.linea ?? 'ninguna';
+  const line = config?.line ?? 'ninguna';
   const borde = bordeDe(config?.estiloDeLinea);
   const raya = <span className="titulo-seccion__linea" style={{ borderTopWidth: 0, borderTop: borde }} />;
 
-  const horizontal = linea === 'izquierda' || linea === 'derecha' || linea === 'ambos';
+  const horizontal = line === 'izquierda' || line === 'derecha' || line === 'ambos';
 
   return (
     <div
       className="titulo-seccion"
       data-testid="titulo-de-seccion"
-      data-posicion={config?.posicionDelTexto ?? 'izquierda'}
+      data-cellPosition={config?.posicionDelTexto ?? 'izquierda'}
       style={{
-        ...(linea === 'arriba' ? { borderTop: borde, paddingTop: 'var(--space-sm)' } : {}),
-        ...(linea === 'abajo' ? { borderBottom: borde, paddingBottom: 'var(--space-sm)' } : {}),
+        ...(line === 'arriba' ? { borderTop: borde, paddingTop: 'var(--space-sm)' } : {}),
+        ...(line === 'abajo' ? { borderBottom: borde, paddingBottom: 'var(--space-sm)' } : {}),
       }}
     >
-      {horizontal && (linea === 'izquierda' || linea === 'ambos') ? raya : null}
-      <h3 className="titulo-seccion__texto">{config?.texto ?? ''}</h3>
-      {horizontal && (linea === 'derecha' || linea === 'ambos') ? raya : null}
+      {horizontal && (line === 'izquierda' || line === 'ambos') ? raya : null}
+      <h3 className="titulo-seccion__texto">{config?.content ?? ''}</h3>
+      {horizontal && (line === 'derecha' || line === 'ambos') ? raya : null}
     </div>
   );
 }
@@ -150,9 +150,9 @@ export function FormaBasica({ config }: { config: ConfiguracionDeForma | undefin
            */
         }}
       />
-      {config?.texto ? (
+      {config?.content ? (
         <span className="forma__texto" style={estiloDeTexto(config.estiloDeTexto)}>
-          {config.texto}
+          {config.content}
         </span>
       ) : null}
     </div>
@@ -211,7 +211,7 @@ export function Conexion({
         {...(config?.extremoFinal === 'flecha' ? { markerEnd: `url(#${id})` } : {})}
         {...(config?.extremoInicial === 'flecha' ? { markerStart: `url(#${id})` } : {})}
       />
-      {config?.texto ? (
+      {config?.content ? (
         <text
           className="conexion__texto"
           // Los parentesis importan: `a ?? 0 + b` agrupa como `a ?? (0 + b)`, asi que el rotulo
@@ -221,7 +221,7 @@ export function Conexion({
           textAnchor="middle"
           fill={color}
         >
-          {config.texto}
+          {config.content}
         </text>
       ) : null}
     </svg>
