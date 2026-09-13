@@ -1155,13 +1155,13 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
        * Es lo unico que ata cada numero a lo que mide: en una dispersion no hay rotulo de
        * categoria en el eje que lo diga, como si lo hay en unas barras.
        */
-      formatter: (p: { data: (number | string)[] }) => {
-        const [x, y, , etiqueta] = p.data;
+      formatter: (p: { name: string; value: (number | null)[] }) => {
+        const [x, y] = p.value;
         const filas = [
           `${o.vm.series[0] ?? 'X'}: ${formatear(Number(x), 0)}`,
           `${o.vm.series[1] ?? 'Y'}: ${formatear(Number(y), 1)}`,
         ];
-        return [String(etiqueta), ...filas].join('<br/>');
+        return [p.name, ...filas].join('<br/>');
       },
     },
     xAxis: {
@@ -1195,11 +1195,19 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
       {
         type: 'scatter',
         name: o.titulo,
-        // El cuarto elemento es la etiqueta del punto: viaja con el dato para que el tooltip y la
-        // etiqueta la tengan sin volver a buscarla por indice.
-        data: o.vm.points.map((p) => [p.values[0], p.values[1], p.values[2] ?? null, p.label]),
+        /*
+         * Cada punto es un OBJETO con `name`, no un array suelto.
+         *
+         * Como array, ECharts no tiene de donde sacar el nombre del punto: el evento de clic
+         * llega con `name` vacio y el filtrado cruzado no hace nada. Se veia el gesto —el cursor
+         * cambia, el punto se resalta— y no pasaba nada, que es peor que no ofrecerlo.
+         */
+        data: o.vm.points.map((p) => ({
+          name: p.label,
+          value: [p.values[0], p.values[1], p.values[2] ?? null],
+        })),
         symbolSize: conTamano
-          ? (valores: (number | string)[]) =>
+          ? (valores: (number | null)[]) =>
               TAMANO_MINIMO +
               (Number(valores[2] ?? 0) / maxTamano) * (TAMANO_MAXIMO - TAMANO_MINIMO)
           : 12,
@@ -1211,7 +1219,7 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
               position: 'top' as const,
               color: o.paleta.texto,
               fontSize: 11,
-              formatter: (p: { data: (number | string)[] }) => String(p.data[3]),
+              formatter: (p: { name: string }) => p.name,
             }
           : { show: false },
         emphasis: { focus: 'self' },

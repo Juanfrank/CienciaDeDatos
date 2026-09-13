@@ -192,8 +192,12 @@ describe('dispersion', () => {
     expect(o.xAxis.type).toBe('value');
     expect(o.yAxis.type).toBe('value');
     expect(o.series[0].data).toHaveLength(2);
-    // La etiqueta viaja CON el dato: el tooltip la tiene sin volver a buscarla por indice.
-    expect(o.series[0].data[0]).toEqual([10, 8, 4, 'Q1']);
+    /*
+     * Cada punto es un OBJETO con `name`, no un array suelto: como array, el evento de clic de
+     * ECharts llega con el nombre vacio y el filtrado cruzado no hace nada. Se veia el gesto y no
+     * pasaba nada, que es peor que no ofrecerlo.
+     */
+    expect(o.series[0].data[0]).toEqual({ name: 'Q1', value: [10, 8, 4] });
   });
 
   it('la tercera medida reparte el diametro entre un minimo y un maximo', () => {
@@ -217,7 +221,7 @@ describe('dispersion', () => {
 
   it('el tooltip nombra las medidas, no «x» e «y»', () => {
     // En una dispersion no hay rotulo de categoria en el eje que lo diga, como si lo hay en barras.
-    const texto = dispersion().tooltip.formatter({ data: [10, 8, 4, 'Q1'] });
+    const texto = dispersion().tooltip.formatter({ name: 'Q1', value: [10, 8, 4] });
     expect(texto).toContain('Q1');
     expect(texto).toContain('X: 10');
     expect(texto).toContain('Y: 8');

@@ -353,3 +353,79 @@ test.describe('lo que cuesta una pagina llena de graficos', () => {
     expect(peticiones.length).toBeLessThanOrEqual(2);
   });
 });
+
+test.describe('el filtrado cruzado llega a TODOS los objetos (4.4)', () => {
+  /*
+   * Esta tabla existe porque el gesto estaba a medias y de formas distintas en cada objeto: el
+   * combinado y el mapa de arbol filtraban con el raton y no con el teclado, la dispersion al
+   * reves, y las lineas y los multiplos de ninguna de las dos maneras. Ninguna prueba fallaba:
+   * cada objeto tenia la mitad que alguien se acordo de cablear.
+   *
+   * Se recorren TODOS, y las dos vias. Un objeto que solo filtre con el raton deja sin la
+   * capacidad a quien navega con teclado, y un `<canvas>` no tiene nada dentro que el tabulador
+   * alcance.
+   */
+  const objetos = [
+    // El respaldo de las columnas es una lista de barras, no una tabla: su boton es otro y por eso
+    // lleva su propio identificador. Se comprueba igual, porque el gesto es el mismo.
+    { pagina: 'familia', respaldo: 'barras', boton: 'barra-Penal', campo: 'DimTribunal.Materia' },
+    { pagina: 'familia', respaldo: 'lineas', boton: 'filtrar-Q1', campo: 'DimTiempo.Trimestre' },
+    { pagina: 'proporcion', respaldo: 'circular', boton: 'filtrar-Penal', campo: 'DimTribunal.Materia' },
+    { pagina: 'relacion', respaldo: 'combinado', boton: 'filtrar-Q1', campo: 'DimTiempo.Trimestre' },
+    { pagina: 'relacion', respaldo: 'dispersion', boton: 'filtrar-Q1', campo: 'DimTiempo.Trimestre' },
+    { pagina: 'flujo', respaldo: 'embudo', boton: 'filtrar-Q1', campo: 'DimTiempo.Trimestre' },
+    { pagina: 'flujo', respaldo: 'cascada', boton: 'filtrar-Q1', campo: 'DimTiempo.Trimestre' },
+    // El mapa de arbol rotula sus filas «Penal / Q1» y filtra por el GRUPO: filtrar la materia
+    // por la etiqueta compuesta no encontraria nada y el modulo se vaciaria sin decir por que.
+    { pagina: 'flujo', respaldo: 'mapa-de-arbol', boton: 'filtrar-Penal', campo: 'DimTribunal.Materia' },
+  ] as const;
+
+  for (const { pagina, respaldo, boton: testid, campo } of objetos) {
+    test(`${respaldo} filtra con el teclado, por su respaldo`, async ({ page }) => {
+      await page.goto(`/m/composicion/${pagina}`);
+
+      /*
+       * `.first()` tambien en el boton: un mapa de arbol de dos niveles tiene una fila por
+       * combinacion, y las cuatro de la materia «Penal» filtran por lo mismo. Que compartan
+       * identificador es correcto —hacen lo mismo—, pero obliga a acotar aqui.
+       */
+      const boton = page.getByTestId(respaldo).first().getByTestId(testid).first();
+      await expect(boton).toBeAttached();
+
+      // Al recibir el foco se muestra: un control invisible que recibe el foco desorienta mas
+      // que uno que no existe.
+      await boton.focus();
+      await boton.press('Enter');
+
+      // El punto del nombre del campo se escapa: `DimTiempo.Trimestre` como expresion regular
+      // aceptaria cualquier caracter en su lugar.
+      await expect(page).toHaveURL(new RegExp(`${campo.replace('.', '\\.')}=`));
+    });
+  }
+
+  test('y en un multiplo se filtra por la categoria del eje, no por el panel', async ({ page }) => {
+    /*
+     * Es lo que se ha pulsado. Filtrar ademas por la dimension que reparte los paneles seria
+     * hacer dos cosas con un gesto: quien pulsa «Q1» dentro del panel «Penal» para ver el resto
+     * del modulo en Q1 se encontraria tambien con Penal puesto sin haberlo pedido.
+     */
+    await page.goto('/m/composicion/multiplos');
+
+    const boton = page.getByTestId('multiplos').first().getByTestId('filtrar-Q1').first();
+    await boton.focus();
+    await boton.press('Enter');
+
+    await expect(page).toHaveURL(/DimTiempo\.Trimestre=Q1/);
+    await expect(page).not.toHaveURL(/DimTribunal\.Materia=/);
+  });
+
+  test('un medidor NO ofrece el gesto: no tiene dimension por la que filtrar', async ({ page }) => {
+    // Ofrecerlo y que no hiciera nada seria peor que no ofrecerlo, que es justo lo que pasaba en
+    // la dispersion: el punto se resaltaba al pulsarlo y no ocurria nada.
+    await page.goto('/m/composicion/proporcion');
+
+    const medidor = page.getByTestId('medidor').first();
+    await expect(medidor).toBeAttached();
+    await expect(medidor.locator('button')).toHaveCount(0);
+  });
+});

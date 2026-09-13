@@ -450,6 +450,7 @@ export function Barras({
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
           columnas={columnasPara(particion.paneles.length, instance.presentacion?.multiplos?.columnas)}
+          {...(onFiltrar ? { onFiltrar } : {})}
         />
       ) : (
       <Grafico
@@ -507,6 +508,7 @@ export function Lineas({
   ranuras,
   agregaciones,
   area,
+  onFiltrar,
   iconoDelObjeto,
 }: ObjetoProps & { area?: boolean }) {
   const r = porRanura(instance, ranuras);
@@ -552,8 +554,16 @@ export function Lineas({
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
           columnas={columnasPara(particion.paneles.length, instance.presentacion?.multiplos?.columnas)}
+          {...(onFiltrar ? { onFiltrar } : {})}
         />
       ) : (
+      /*
+       * Una linea tambien FILTRA.
+       *
+       * No lo hacia, y no habia motivo: pulsar el punto de un trimestre para ver el resto del
+       * modulo en ese trimestre es exactamente lo que pide 4.4. La capacidad estaba en las
+       * columnas y no aqui solo porque nadie la cableo.
+       */
       <Grafico
         instanceId={instance.instanceId}
         tipo={area ? 'area' : 'lineas'}
@@ -564,6 +574,9 @@ export function Lineas({
           formateadorDeMedida(instance.presentacion, medidas[serie] ?? '')(valor)
         }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
+        {...(dimension && onFiltrar
+          ? { onSeleccionar: (categoria: string) => onFiltrar(fieldKey(dimension), categoria) }
+          : {})}
       >
         {/*
           El respaldo de una linea es una TABLA, no un dibujo.
@@ -587,7 +600,11 @@ export function Lineas({
             <tbody>
               {vm.points.map((punto) => (
                 <tr key={punto.label}>
-                  <th scope="row">{punto.label}</th>
+                  <CeldaDeCategoria
+                    etiqueta={punto.label}
+                    {...(dimension ? { campo: fieldKey(dimension) } : {})}
+                    {...(onFiltrar ? { onFiltrar } : {})}
+                  />
                   {vm.series.map((serie, s) => (
                     <td key={serie} className="es-numero">
                       {formatearNumero(punto.values[s] ?? null)}
@@ -626,6 +643,7 @@ function Multiplos({
   seriesDeColumna,
   dimension,
   columnas,
+  onFiltrar,
 }: {
   paneles: PanelDeMultiplo[];
   /** Cuantos valores de la dimension no caben en el limite. Se dicen; no se ocultan. */
@@ -638,6 +656,14 @@ function Multiplos({
   seriesDeColumna?: number;
   dimension?: string;
   columnas: number;
+  /**
+   * Filtrar desde un panel filtra por la CATEGORIA DEL EJE, no por el valor del panel.
+   *
+   * Es lo que se ha pulsado. Filtrar ademas por la dimension que reparte los paneles seria hacer
+   * dos cosas con un gesto, y quien pulsa la barra «Q1» dentro del panel «Penal» para ver el
+   * resto del modulo en Q1 se encontraria tambien con Penal puesto sin haberlo pedido.
+   */
+  onFiltrar?: (campo: string, valor: string) => void;
 }) {
   return (
     <div
@@ -673,6 +699,9 @@ function Multiplos({
             formatear={formatear}
             {...(seriesDeColumna === undefined ? {} : { seriesDeColumna })}
             {...(dimension ? { dimension } : {})}
+            {...(dimension && onFiltrar
+              ? { onSeleccionar: (categoria: string) => onFiltrar(dimension, categoria) }
+              : {})}
           >
             {/* El nombre lleva el del PANEL: con el del objeto, los seis respaldos de una
                 tarjeta de multiplos se anunciarian con el mismo rotulo y no habria forma de
@@ -692,7 +721,11 @@ function Multiplos({
                 <tbody>
                   {panel.vm.points.map((punto) => (
                     <tr key={punto.label}>
-                      <th scope="row">{punto.label}</th>
+                      <CeldaDeCategoria
+                        etiqueta={punto.label}
+                        {...(dimension ? { campo: dimension } : {})}
+                        {...(onFiltrar ? { onFiltrar } : {})}
+                      />
                       {panel.vm.series.map((serie, sIdx) => (
                         <td key={serie} className="es-numero">
                           {formatearNumero(punto.values[sIdx] ?? null)}
@@ -746,6 +779,55 @@ function presentacionDePanel(
    * que usa el medidor, y por el mismo motivo: una escala tiene que caer en numeros redondos.
    */
   return { ...presentacion, ejes: { ...presentacion?.ejes, maximoY: escalaBonita(maximo) } };
+}
+
+/**
+ * La celda de categoria del respaldo, que ademas FILTRA.
+ *
+ * El filtrado cruzado de 4.4 tiene que existir tambien para quien navega con teclado: un
+ * `<canvas>` no tiene nada dentro que el tabulador alcance, asi que si el gesto solo vive en el
+ * lienzo, la capacidad desaparece para esa persona. El respaldo es donde vive su version.
+ *
+ * Se factoriza porque estaba escrito a mano en unos objetos y OLVIDADO en otros: el combinado y
+ * el mapa de arbol filtraban con el raton y no con el teclado, y las lineas no filtraban de
+ * ninguna de las dos formas. Con un componente, un objeto nuevo lo trae; escribiendo el `<th>` a
+ * mano se vuelve a olvidar.
+ */
+function CeldaDeCategoria({
+  etiqueta,
+  valor,
+  campo,
+  onFiltrar,
+}: {
+  etiqueta: string;
+  /**
+   * Lo que se manda al filtro, cuando no es lo mismo que se lee.
+   *
+   * Un mapa de arbol de dos niveles rotula sus filas «Penal / Q1» —la etiqueta compuesta que
+   * `toCategorical` produce— y filtrarlo por eso buscaria una materia llamada «Penal / Q1», que
+   * no existe: el filtro no encontraria nada y quien lo pulsara veria el modulo vaciarse sin
+   * entender por que.
+   */
+  valor?: string;
+  /** La dimension por la que se filtra. Sin ella el objeto no tiene por que ofrecer el gesto. */
+  campo?: string;
+  onFiltrar?: (campo: string, valor: string) => void;
+}) {
+  const aFiltrar = valor ?? etiqueta;
+  if (!campo || !onFiltrar) return <th scope="row">{etiqueta}</th>;
+  return (
+    <th scope="row">
+      <button
+        type="button"
+        className="boton-enlace"
+        data-testid={`filtrar-${aFiltrar}`}
+        title={`Filtrar por ${aFiltrar}`}
+        onClick={() => onFiltrar(campo, aFiltrar)}
+      >
+        {etiqueta}
+      </button>
+    </th>
+  );
 }
 
 /**
@@ -846,7 +928,11 @@ export function Combinado({
             <tbody>
               {vm.points.map((punto) => (
                 <tr key={punto.label}>
-                  <th scope="row">{punto.label}</th>
+                  <CeldaDeCategoria
+                    etiqueta={punto.label}
+                    {...(dimension ? { campo: fieldKey(dimension) } : {})}
+                    {...(onFiltrar ? { onFiltrar } : {})}
+                  />
                   {vm.series.map((serie, s) => (
                     <td key={serie} className="es-numero">
                       {formateadorDeMedida(instance.presentacion, serie)(punto.values[s] ?? null)}
@@ -910,6 +996,9 @@ export function Dispersion({
           formateadorDeMedida(instance.presentacion, medidas[serie] ?? '')(valor)
         }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
+        {...(dimension && onFiltrar
+          ? { onSeleccionar: (c: string) => onFiltrar(fieldKey(dimension), c) }
+          : {})}
       >
         <TablaDeRespaldo nombre={titulo}>
           <table className="tabla" data-testid="dispersion">
@@ -926,19 +1015,11 @@ export function Dispersion({
             <tbody>
               {vm.points.map((p) => (
                 <tr key={p.label}>
-                  <th scope="row">
-                    {dimension && onFiltrar ? (
-                      <button
-                        type="button"
-                        className="boton-enlace"
-                        onClick={() => onFiltrar(fieldKey(dimension), p.label)}
-                      >
-                        {p.label}
-                      </button>
-                    ) : (
-                      p.label
-                    )}
-                  </th>
+                  <CeldaDeCategoria
+                    etiqueta={p.label}
+                    {...(dimension ? { campo: fieldKey(dimension) } : {})}
+                    {...(onFiltrar ? { onFiltrar } : {})}
+                  />
                   {vm.series.map((serie, s) => (
                     <td key={serie} className="es-numero">
                       {formateadorDeMedida(instance.presentacion, serie)(p.values[s] ?? null)}
@@ -1032,19 +1113,11 @@ function UnaDimensionUnaMedida({
             <tbody>
               {vm.points.map((punto, i) => (
                 <tr key={punto.label}>
-                  <th scope="row">
-                    {dimension && onFiltrar ? (
-                      <button
-                        type="button"
-                        className="boton-enlace"
-                        onClick={() => onFiltrar(fieldKey(dimension), punto.label)}
-                      >
-                        {punto.label}
-                      </button>
-                    ) : (
-                      punto.label
-                    )}
-                  </th>
+                  <CeldaDeCategoria
+                    etiqueta={punto.label}
+                    {...(dimension ? { campo: fieldKey(dimension) } : {})}
+                    {...(onFiltrar ? { onFiltrar } : {})}
+                  />
                   <td className="es-numero">{formatear(punto.values[0] ?? null)}</td>
                   <td className="es-numero">{columnaExtra.celda(valores, i)}</td>
                 </tr>
@@ -1128,6 +1201,18 @@ export function MapaDeArbol({
   const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
   const principal = dimensiones[0];
 
+  /*
+   * El nombre que ECharts entrega al pulsar, convertido en un valor de la PRIMERA dimension.
+   *
+   * Con dos niveles, pulsar un rectangulo interior entrega el nombre de la hoja —«Q1»— y filtrar
+   * la materia por «Q1» no encuentra nada: el modulo se vaciaria sin decir por que. Se busca a
+   * que grupo pertenece esa hoja en el propio modelo, que es donde esta la respuesta.
+   */
+  const grupoDe = (nodo: string): string => {
+    const conEseNombre = vm.points.find((p) => p.label === nodo || p.label.endsWith(` / ${nodo}`));
+    return conEseNombre?.label.split(' / ')[0] ?? nodo;
+  };
+
   return (
     <Marco
       titulo={titulo}
@@ -1145,7 +1230,7 @@ export function MapaDeArbol({
         formatear={(valor) => formatear(valor)}
         {...(principal ? { dimension: fieldKey(principal) } : {})}
         {...(principal && onFiltrar
-          ? { onSeleccionar: (c: string) => onFiltrar(fieldKey(principal), c) }
+          ? { onSeleccionar: (nodo: string) => onFiltrar(fieldKey(principal), grupoDe(nodo)) }
           : {})}
       >
         <TablaDeRespaldo nombre={titulo}>
@@ -1161,7 +1246,17 @@ export function MapaDeArbol({
             <tbody>
               {vm.points.map((punto) => (
                 <tr key={punto.label}>
-                  <th scope="row">{punto.label}</th>
+                  {/*
+                    El rectangulo filtra con el raton y esta celda con el teclado. Faltaba la
+                    segunda, que es la unica que existe para quien no puede pulsar un area de un
+                    `<canvas>`.
+                  */}
+                  <CeldaDeCategoria
+                    etiqueta={punto.label}
+                    valor={punto.label.split(' / ')[0] ?? punto.label}
+                    {...(principal ? { campo: fieldKey(principal) } : {})}
+                    {...(onFiltrar ? { onFiltrar } : {})}
+                  />
                   <td className="es-numero">{formatear(punto.values[0] ?? null)}</td>
                 </tr>
               ))}
@@ -1266,19 +1361,11 @@ export function Circular({
             <tbody>
               {valores.map((punto) => (
                 <tr key={punto.label}>
-                  <th scope="row">
-                    {dimension && onFiltrar ? (
-                      <button
-                        type="button"
-                        className="boton-enlace"
-                        onClick={() => onFiltrar(fieldKey(dimension), punto.label)}
-                      >
-                        {punto.label}
-                      </button>
-                    ) : (
-                      punto.label
-                    )}
-                  </th>
+                  <CeldaDeCategoria
+                    etiqueta={punto.label}
+                    {...(dimension ? { campo: fieldKey(dimension) } : {})}
+                    {...(onFiltrar ? { onFiltrar } : {})}
+                  />
                   <td className="es-numero">{formatear(punto.valor)}</td>
                   <td className="es-numero">
                     {total === 0 ? '—' : `${((punto.valor / total) * 100).toFixed(1)} %`}
