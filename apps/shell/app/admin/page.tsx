@@ -1,53 +1,72 @@
 import Link from 'next/link';
 import { contarAmpliaciones, listarAuditoria } from '../../src/server/auditoria';
 import { getManagedTree, listTeams, listUsers } from '../../src/server/contexto';
+import { EventoDeAuditoria } from '../../src/components/admin/EventoDeAuditoria';
+import { Icono, type NombreDeIcono } from '../../src/components/iconos/Icono';
 
 export const dynamic = 'force-dynamic';
 
-/** Resumen del estado de gobierno. */
+/**
+ * Inicio del panel — el estado del gobierno de un vistazo.
+ *
+ * Cada cifra ES un enlace a donde se actua sobre ella. Antes eran cinco numeros muertos: se leia
+ * «2 en papelera» y habia que buscar en el carril donde esta la papelera. Una cifra que informa de
+ * un problema y no lleva a el obliga a un paso que el panel ya sabia dar.
+ */
 export default async function AdminInicio() {
-  const arbol = await getManagedTree();
-  const equipos = await listTeams();
-  const ampliaciones = await contarAmpliaciones();
-  const recientes = (await listarAuditoria()).slice(0, 5);
+  const [arbol, equipos, personas, ampliaciones, recientes] = await Promise.all([
+    getManagedTree(),
+    listTeams(),
+    listUsers(),
+    contarAmpliaciones(),
+    listarAuditoria().then((e) => e.slice(0, 6)),
+  ]);
 
   const contarNodos = (nodos: typeof arbol.nodes): number =>
     nodos.reduce((n, nodo) => n + 1 + (nodo.type === 'folder' ? contarNodos(nodo.children) : 0), 0);
 
   return (
     <div className="admin-inicio">
-      <div className="tarjetas">
-        <Resumen etiqueta="Nodos en la organizacion general" valor={contarNodos(arbol.nodes)} />
-        <Resumen etiqueta="En papelera" valor={arbol.trash.length} />
-        <Resumen etiqueta="Equipos" valor={equipos.length} />
-        <Resumen etiqueta="Personas" valor={(await listUsers()).length} />
+      <div className="tarjetas" data-testid="resumen-gobierno">
+        <Resumen
+          etiqueta="Nodos en la organizacion"
+          valor={contarNodos(arbol.nodes)}
+          href="/admin/arbol"
+          icono="carpeta"
+        />
+        <Resumen etiqueta="En papelera" valor={arbol.trash.length} href="/admin/arbol" icono="carpeta" />
+        <Resumen etiqueta="Equipos" valor={equipos.length} href="/admin/equipos" icono="personas" />
+        <Resumen etiqueta="Personas" valor={personas.length} href="/admin/equipos" icono="personas" />
         <Resumen
           etiqueta="Ampliaciones de ambito vigentes"
           valor={ampliaciones}
-          // Deberia tender a cero. Un numero creciente es señal de gobierno de RLS
-          // deteriorandose (seccion 7), asi que se destaca cuando deja de ser cero.
+          href="/admin/auditoria?filtro=ampliaciones"
+          icono="ambito"
+          // Deberia tender a cero. Un numero creciente es señal de que el gobierno de RLS se
+          // relaja por acumulacion de excepciones (§7), asi que se destaca al dejar de ser cero.
           alerta={ampliaciones > 0}
           testId="ampliaciones-vigentes"
+          nota={ampliaciones === 0 ? 'Es el valor deseable.' : 'Revise si siguen justificadas.'}
         />
       </div>
 
-      <section>
-        <h2>Ultimos cambios</h2>
+      <section className="admin-inicio__registro">
+        <div className="admin-inicio__registro-cabecera">
+          <h2>Ultimos cambios</h2>
+          <Link href="/admin/auditoria" className="boton-enlace">
+            Ver el registro completo
+          </Link>
+        </div>
+
         {recientes.length === 0 ? (
           <p className="texto-atenuado">Sin cambios de configuracion registrados.</p>
         ) : (
-          <ul className="lista-simple">
+          <ul className="registro">
             {recientes.map((e, i) => (
-              <li key={i}>
-                <code>{e.entityType}</code> · {e.action} · {e.entityId}
-                {e.isScopeExpansion ? <span className="insignia insignia--error">Ampliacion</span> : null}
-              </li>
+              <EventoDeAuditoria key={`${e.timestamp}-${i}`} evento={e} />
             ))}
           </ul>
         )}
-        <Link href="/admin/auditoria" className="boton-enlace">
-          Ver el registro completo
-        </Link>
       </section>
     </div>
   );
@@ -56,18 +75,32 @@ export default async function AdminInicio() {
 function Resumen({
   etiqueta,
   valor,
+  href,
+  icono,
+  nota,
   alerta,
   testId,
 }: {
   etiqueta: string;
   valor: number;
+  href: string;
+  icono: NombreDeIcono;
+  nota?: string;
   alerta?: boolean;
   testId?: string;
 }) {
   return (
-    <div className={`tarjeta ${alerta ? 'tarjeta--alerta' : ''}`} {...(testId ? { 'data-testid': testId } : {})}>
-      <p className="tarjeta__valor">{valor}</p>
-      <p className="tarjeta__etiqueta">{etiqueta}</p>
-    </div>
+    <Link
+      href={href}
+      className={`tarjeta tarjeta--enlace ${alerta ? 'tarjeta--alerta' : ''}`}
+      {...(testId ? { 'data-testid': testId } : {})}
+    >
+      <span className="tarjeta__icono" aria-hidden="true">
+        <Icono nombre={icono} tamano={18} />
+      </span>
+      <span className="tarjeta__valor">{valor}</span>
+      <span className="tarjeta__etiqueta">{etiqueta}</span>
+      {nota ? <span className="tarjeta__nota">{nota}</span> : null}
+    </Link>
   );
 }

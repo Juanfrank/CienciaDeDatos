@@ -839,10 +839,92 @@ input[type='radio'] {
 }
 .objeto--generandose { outline: 1px dashed var(--md-sys-color-outline); outline-offset: -1px; }
 
-.tarjeta { padding: var(--space-md); }
+/*
+ * Cinco cifras en una fila, no en cinco.
+ *
+ * `.tarjetas` no tenia ninguna regla, asi que las tarjetas caian como bloques a todo lo ancho y el
+ * resumen del gobierno ocupaba media pantalla para decir cinco numeros. `auto-fit` con un minimo
+ * las reparte solas y las apila cuando de verdad no caben.
+ */
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-md);
+}
 .tarjeta--alerta { background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); }
 .tarjeta__valor { margin: 0; }
 .tarjeta__etiqueta { margin: 0; color: var(--md-sys-color-on-surface-variant); }
+.tarjeta__nota { font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); }
+.tarjeta__icono { color: var(--md-sys-color-on-surface-variant); }
+.tarjeta--alerta .tarjeta__etiqueta,
+.tarjeta--alerta .tarjeta__nota,
+.tarjeta--alerta .tarjeta__icono { color: inherit; }
+
+/*
+ * La cifra ES el enlace a donde se actua sobre ella.
+ *
+ * Antes eran numeros muertos: se leia «2 en papelera» y habia que buscar en el carril donde esta
+ * la papelera. Una cifra que informa de un problema y no lleva a el obliga a un paso que el panel
+ * ya sabia dar.
+ */
+.tarjeta--enlace {
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.tarjeta--enlace:hover { box-shadow: var(--md-sys-elevation-2); }
+
+/* ── Registro de auditoria ────────────────────────────────────────────────────────────────── */
+
+.registro { list-style: none; margin: 0; padding: 0; }
+.registro__fila {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+.registro__cuando {
+  flex-shrink: 0;
+  width: 8.5rem;
+  font: var(--md-sys-typescale-body-small);
+  color: var(--md-sys-color-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+.registro__que { flex: 1; min-width: 14rem; }
+.registro__que code {
+  padding: 1px 5px;
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  background: var(--md-sys-color-surface-container-high);
+}
+/* El motivo baja a su propia linea: es una frase, no un dato de la fila. */
+.registro__motivo {
+  flex-basis: 100%;
+  padding-left: 8.5rem;
+  font: var(--md-sys-typescale-body-small);
+  color: var(--md-sys-color-on-surface-variant);
+  font-style: italic;
+}
+/* Una ampliacion se distingue por la insignia Y por el filo: el color no puede ir solo (1.4.1). */
+.registro__fila[data-ampliacion='si'] { border-left: 3px solid var(--md-sys-color-error); padding-left: var(--space-sm); }
+
+.admin-inicio__registro-cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+.admin-inicio__registro-cabecera h2 { margin: 0 0 var(--space-sm); }
 
 .equipo { margin-bottom: var(--space-sm); }
 .equipo__detalle { padding: 0 var(--space-md) var(--space-md); }
@@ -1682,6 +1764,16 @@ th[aria-sort='descending'] .tabla__flecha {
  * ------------------------------------------------------------------ */
 
 .admin { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.admin__ruta { display: flex; align-items: baseline; gap: var(--space-sm); min-width: 0; flex-wrap: wrap; }
+.admin__ruta h1 { margin: 0; }
+.admin__ruta h1 a { color: inherit; text-decoration: none; }
+.admin__ruta h1 a:hover { text-decoration: underline; }
+.admin__ruta-sep { color: var(--md-sys-color-outline); }
+.admin__ruta-actual {
+  font: var(--md-sys-typescale-title-medium);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
 .admin__cabecera {
   display: flex;
   align-items: center;
@@ -1693,8 +1785,27 @@ th[aria-sort='descending'] .tabla__flecha {
 }
 .admin__cuerpo { display: flex; flex: 1; min-width: 0; min-height: 0; }
 .admin__nav ul { list-style: none; margin: 0; padding: 0; }
+
+/*
+ * Grupos, no una lista plana de siete.
+ *
+ * Siete elementos indistinguibles superan lo que alguien recorre de un vistazo, y ademas mezclaban
+ * tres momentos distintos: ordenar la institucion, dar acceso, y comprobar que quedo bien.
+ */
+.admin__grupo + .admin__grupo { margin-top: var(--space-lg); }
+.admin__grupo-titulo {
+  margin: 0 0 var(--space-xs);
+  padding: 0 var(--space-md);
+  font: var(--md-sys-typescale-label-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
 .admin__nav a {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--md-sys-shape-corner-full);
   text-decoration: none;
@@ -1715,8 +1826,27 @@ th[aria-sort='descending'] .tabla__flecha {
   z-index: -1;
 }
 .admin__nav a:hover::before { opacity: var(--md-sys-state-hover-opacity); }
-.admin__nav-label { display: block; color: var(--md-sys-color-on-surface); }
-.admin__nav-desc { display: block; color: var(--md-sys-color-on-surface-variant); }
+.admin__nav-label { flex: 1; min-width: 0; color: var(--md-sys-color-on-surface); }
+.admin__nav a svg { flex-shrink: 0; color: var(--md-sys-color-on-surface-variant); }
+.admin__nav a[aria-current='page'] svg { color: var(--md-sys-color-on-secondary-container); }
+
+/*
+ * El indicador: un numero solo donde pide accion.
+ *
+ * `error-container` y no `primary`: no es una cuenta de actividad, es algo que alguien tiene que
+ * mirar. Y el numero nunca va solo — el texto para lectores dice de que son, porque «3» junto a
+ * «Auditoria» no significa nada por si mismo (1.4.1).
+ */
+.admin__nav-indicador {
+  flex-shrink: 0;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+  font: var(--md-sys-typescale-label-small);
+  text-align: center;
+}
 
 /*
  * Seccion actual del carril.
@@ -1728,6 +1858,22 @@ th[aria-sort='descending'] .tabla__flecha {
  */
 .admin__nav a[aria-current='page'] {
   background: var(--md-sys-color-secondary-container);
+}
+/*
+ * Ademas del relleno, una barra pegada al borde.
+ *
+ * El relleno dice cual esta activa; la barra dice DONDE esta dentro del carril, que es lo que se
+ * ve de reojo sin leer. Es el mismo recurso que el arbol de modulos.
+ */
+.admin__nav a[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--md-sys-color-primary);
 }
 .admin__nav a[aria-current='page'] .admin__nav-label {
   color: var(--md-sys-color-on-secondary-container);

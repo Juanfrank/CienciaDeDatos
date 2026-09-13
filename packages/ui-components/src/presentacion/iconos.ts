@@ -26,6 +26,12 @@ export const TRAZOS_DE_ICONO = {
   // Complementos.
   informacion: 'M12 11v5M12 7.6v.4',
   datos: 'M4.5 5.5h15v13h-15zM4.5 10h15M4.5 14.5h15M10 5.5v13',
+  // Secciones de administracion. Cada una necesita una silueta distinta: el icono es lo que
+  // permite volver a un sitio conocido sin releer siete rotulos parecidos.
+  carpeta: 'M4 6h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z',
+  paquete: 'M12 3 21 7.5v9L12 21 3 16.5v-9zM3 7.5 12 12l9-4.5M12 12v9',
+  llave: 'M14 10a4 4 0 1 1-3.9 5H8v2H6v2H3v-3l7.1-7.1A4 4 0 0 1 14 10zM16 13v.01',
+  registro: 'M6 4h9l4 4v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM15 4v4h4M8 12h8M8 16h5',
   // Contenedores y ampliacion.
   expandir: 'M4 9V4h5M20 15v5h-5M4 4l6 6M20 20l-6-6',
   // Tipos de objeto. Sirven de icono por defecto de cada uno.

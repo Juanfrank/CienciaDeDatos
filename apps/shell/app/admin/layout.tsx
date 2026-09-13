@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ID_LATERAL } from '../../src/components/NavegacionPlegable';
-import { EnlaceDeSeccion } from '../../src/components/admin/EnlaceDeSeccion';
+import { CarrilDeAdmin, SeccionActual } from '../../src/components/admin/CarrilDeAdmin';
 import { esAdministrador } from '../../src/server/admin';
+import { indicadoresDeAdmin } from '../../src/server/admin';
 import { exigirSesionDePagina } from '../../src/server/sesion';
 
 /**
@@ -14,16 +15,6 @@ import { exigirSesionDePagina } from '../../src/server/sesion';
  * La comprobacion de permiso se hace aqui y ademas en cada handler de /api/admin. Dos veces a
  * proposito: esta evita que se dibuje la pagina, la otra evita que sirva de algo saltarsela.
  */
-const SECCIONES = [
-  { href: '/admin/arbol', label: 'Organizacion general', desc: 'Carpetas, modulos y papelera' },
-  { href: '/admin/equipos', label: 'Equipos y membresia', desc: 'Accesos y roles' },
-  { href: '/admin/paquetes', label: 'Paquetes visuales', desc: 'Reagrupacion por audiencia' },
-  { href: '/admin/ambitos', label: 'Ambitos de acceso', desc: 'RLS de negocio' },
-  { href: '/admin/quien-ve-que', label: 'Quien ve que', desc: 'Auditar antes de publicar' },
-  { href: '/admin/cuentas', label: 'Cuentas locales', desc: 'La excepcion, no la via por defecto' },
-  { href: '/admin/auditoria', label: 'Auditoria', desc: 'Cambios y excepciones' },
-];
-
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const sesion = await exigirSesionDePagina();
 
@@ -39,11 +30,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="admin">
       <header className="admin__cabecera">
-        <div>
-          <h1>Administracion</h1>
-          <p className="texto-atenuado">
-            Superficie de gestion, separada de los modulos de negocio
-          </p>
+        {/*
+          La cabecera dice DONDE se esta, no por que existe el panel.
+          Decia «superficie de gestion, separada de los modulos de negocio», que es la
+          justificacion del contrato — util una vez, inutil las demas. Con el nombre de la seccion
+          al lado, la pagina sigue orientando aunque el carril este plegado, que es como arranca en
+          pantalla estrecha.
+        */}
+        <div className="admin__ruta">
+          <h1>
+            <Link href="/admin">Administracion</Link>
+          </h1>
+          <SeccionActual />
         </div>
         <Link href="/" className="boton-contorno" data-testid="volver-a-modulos">
           Volver a los modulos
@@ -51,20 +49,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </header>
 
       <div className="admin__cuerpo">
-        <nav
-          className="admin__nav"
-          id={ID_LATERAL}
-          aria-label="Secciones de administracion"
-        >
-          <ul>
-            {SECCIONES.map((s) => (
-              <li key={s.href}>
-                <EnlaceDeSeccion href={s.href} label={s.label} desc={s.desc} />
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <main className="admin__principal">{children}</main>
+        <CarrilDeAdmin id={ID_LATERAL} indicadores={await indicadoresDeAdmin()} />
+        <main className="admin__principal" id="contenido-admin" tabIndex={-1}>
+          {children}
+        </main>
       </div>
     </div>
   );

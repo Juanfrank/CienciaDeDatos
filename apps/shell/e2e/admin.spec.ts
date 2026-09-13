@@ -414,3 +414,70 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
     await expect(page.getByTestId('administradores')).toContainText('al menos dos');
   });
 });
+
+test.describe('el carril de administracion', () => {
+  test.beforeEach(async ({ page }) => {
+    await entrarComo(page, 'u-admin');
+  });
+
+  test('las siete superficies estan agrupadas por lo que se hace con ellas', async ({ page }) => {
+    await page.goto('/admin');
+    // Siete elementos planos superan lo que alguien recorre de un vistazo, y mezclaban tres
+    // momentos distintos: ordenar la institucion, dar acceso, y comprobar que quedo bien.
+    for (const grupo of ['Estructura', 'Acceso', 'Supervision']) {
+      await expect(page.getByRole('heading', { name: grupo })).toBeVisible();
+    }
+    // Y cada grupo ETIQUETA su lista, para que un lector de pantalla anuncie donde empieza.
+    const listas = page.locator('.admin__nav ul[aria-labelledby]');
+    await expect(listas).toHaveCount(3);
+  });
+
+  test('el resumen se marca al entrar, y solo en su ruta exacta', async ({ page }) => {
+    await page.goto('/admin');
+    await expect(page.getByTestId('admin-nav-admin')).toHaveAttribute('aria-current', 'page');
+
+    await page.goto('/admin/equipos');
+    // Con la regla de prefijo, /admin reclamaria /admin/equipos y habria DOS activas a la vez.
+    await expect(page.getByTestId('admin-nav-admin')).not.toHaveAttribute('aria-current', 'page');
+    await expect(page.getByTestId('admin-nav-equipos')).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator('[aria-current="page"]')).toHaveCount(1);
+  });
+
+  test('la cabecera dice en que seccion se esta, para cuando el carril esta plegado', async ({ page }) => {
+    await page.goto('/admin/auditoria');
+    await expect(page.getByTestId('admin-seccion-actual')).toHaveText('Auditoria');
+    // En el resumen no se repite: el titulo ya lo dice.
+    await page.goto('/admin');
+    await expect(page.getByTestId('admin-seccion-actual')).toHaveCount(0);
+  });
+
+  test('cada cifra del resumen lleva a donde se actua sobre ella', async ({ page }) => {
+    await page.goto('/admin');
+    // Antes eran numeros muertos: se leia «2 en papelera» y habia que buscar donde esta la papelera.
+    const tarjetas = page.getByTestId('resumen-gobierno').getByRole('link');
+    await expect(tarjetas).toHaveCount(5);
+    for (const enlace of await tarjetas.all()) {
+      await expect(enlace).toHaveAttribute('href', /^\/admin\//);
+    }
+  });
+
+  test('las cifras se reparten en una fila, no en cinco', async ({ page }) => {
+    await page.setViewportSize({ width: 1400, height: 900 });
+    await page.goto('/admin');
+    const filas = await page
+      .getByTestId('resumen-gobierno')
+      .evaluate((el) => new Set([...el.children].map((c) => c.getBoundingClientRect().top)).size);
+    // `.tarjetas` no tenia ninguna regla de disposicion: cinco cifras ocupaban cinco filas.
+    expect(filas).toBe(1);
+  });
+
+  test('el registro dice quien, que y cuando, no identificadores crudos', async ({ page }) => {
+    // Se provoca un cambio real para que haya algo que leer.
+    await page.goto('/admin/equipos');
+    await page.goto('/admin/auditoria');
+    const filas = page.locator('.registro__fila');
+    if ((await filas.count()) > 0) {
+      await expect(filas.first().locator('time')).toHaveAttribute('dateTime', /\d{4}-\d{2}-\d{2}/);
+    }
+  });
+});

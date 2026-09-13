@@ -1,4 +1,6 @@
 import type { SchemaDescriptor } from '@app/data-contracts';
+import { getManagedTree } from './contexto';
+import { contarAmpliaciones } from './auditoria';
 import {
   type AccessScope,
   type AppRole,
@@ -547,4 +549,20 @@ export async function quienVeQue(userId: string, teamId: string, moduleId: strin
     noVeNada: resolucion.deniesEverything,
     existeEnElArbol: resolucion.moduleExistsInGeneralTree,
   };
+}
+
+/**
+ * Los numeros que el carril de administracion muestra junto a dos secciones.
+ *
+ * Se cuentan AQUI, en el servidor y una sola vez por navegacion, y viajan al carril como props.
+ * El carril se dibuja en las siete paginas del panel: pedirlos desde el cliente serian dos
+ * peticiones mas en cada una para pintar dos numeros que ya estaban a mano.
+ *
+ * Solo dos, y las dos piden accion: las ampliaciones de ambito deberian tender a cero (§7), y lo
+ * que hay en la papelera espera a que alguien lo restaure o lo tire. Un indicador en cada seccion
+ * los volveria a todos invisibles.
+ */
+export async function indicadoresDeAdmin(): Promise<{ ampliaciones: number; papelera: number }> {
+  const [ampliaciones, arbol] = await Promise.all([contarAmpliaciones(), getManagedTree()]);
+  return { ampliaciones, papelera: arbol.trash.length };
 }
