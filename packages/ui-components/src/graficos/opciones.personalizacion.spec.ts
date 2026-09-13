@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { opcionesDe } from './opciones';
+import { opcionesDe, type TipoDeGrafico } from './opciones';
 import { ordenarCategorias } from './orden';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
@@ -139,5 +139,115 @@ describe('el margen reserva sitio para lo que vive fuera del area de dibujo', ()
     const soloLeyenda = opciones({ leyenda: 'izquierda' });
     const ambos = opciones({ leyenda: 'izquierda', ejes: { tituloY: 'Casos' } });
     expect(ambos.grid.left).toBeGreaterThan(soloLeyenda.grid.left);
+  });
+});
+
+describe('lineas de referencia', () => {
+  const conRef = (extra: Record<string, unknown> = {}, v = vm(['A'], [['x', 1]])) =>
+    opciones({ referencias: [{ valor: 900, etiqueta: 'Meta' }], ...extra }, v);
+
+  it('cuelgan de la PRIMERA serie, no de una serie propia', () => {
+    /*
+     * Una serie propia apareceria en la leyenda y en el tooltip como si fuera un dato mas, y una
+     * meta no es un dato medido. Y en una serie cualquiera desapareceria al ocultar esa medida
+     * desde la leyenda.
+     */
+    const o = conRef({}, vm(['A', 'B'], [['x', 1, 2]]));
+    expect(o.series[0].markLine.data).toHaveLength(1);
+    expect(o.series[1].markLine).toBeUndefined();
+  });
+
+  it('se anclan al eje de VALORES, que cambia con la orientacion', () => {
+    // En unas barras horizontales el eje de valores es el X: anclarlas siempre al Y dibujaria la
+    // meta atravesada.
+    expect(conRef().series[0].markLine.data[0].yAxis).toBe(900);
+    const horizontal = opcionesDe('barras-horizontales', {
+      vm: vm(['A'], [['x', 1]]),
+      paleta,
+      titulo: 'T',
+      referencias: [{ valor: 900 }],
+    }) as any;
+    expect(horizontal.series[0].markLine.data[0].xAxis).toBe(900);
+  });
+
+  it('no responden al raton: una meta no se consulta, se mira', () => {
+    expect(conRef().series[0].markLine.silent).toBe(true);
+    expect(conRef().series[0].markLine.symbol).toBe('none');
+  });
+
+  it('sin rotulo, la raya se dibuja pero no escribe nada', () => {
+    const o = opciones({ referencias: [{ valor: 900 }] });
+    expect(o.series[0].markLine.data[0].label.show).toBe(false);
+  });
+
+  it('se recortan al maximo: mas de tres dejan de ser referencias', () => {
+    const o = opciones({
+      referencias: [{ valor: 1 }, { valor: 2 }, { valor: 3 }, { valor: 4 }],
+    });
+    expect(o.series[0].markLine.data).toHaveLength(3);
+  });
+
+  it('sin referencias no se anade nada a la serie', () => {
+    expect(opciones().series[0].markLine).toBeUndefined();
+  });
+
+  it('llegan a TODOS los tipos que las declaran, no solo a las columnas', () => {
+    /*
+     * Esta prueba existe porque faltaron en las lineas.
+     *
+     * Cada constructor arma sus series por su cuenta —es lo que les permite diferenciarse— y eso
+     * significa que anadir algo transversal hay que hacerlo en cada uno. Con una prueba por tipo
+     * suelto, el que falta no falla: simplemente no tiene prueba. Recorriendo la lista, el tipo
+     * nuevo que se olvide de las referencias aparece aqui.
+     */
+    const conEjes: TipoDeGrafico[] = [
+      'barras',
+      'barras-horizontales',
+      'lineas',
+      'area',
+      'combinado',
+      'cascada',
+      'dispersion',
+    ];
+    for (const tipo of conEjes) {
+      const o = opcionesDe(tipo, {
+        vm: vm(['A', 'B'], [['x', 1, 2]]),
+        paleta,
+        titulo: 'T',
+        seriesDeColumna: 1,
+        referencias: [{ valor: 5, etiqueta: 'Meta' }],
+      }) as any;
+      const conMarca = o.series.filter((s: { markLine?: unknown }) => s.markLine !== undefined);
+      expect(conMarca, tipo).toHaveLength(1);
+    }
+  });
+});
+
+describe('limites del eje y color por serie', () => {
+  it('los limites escritos a mano mandan sobre el automatico', () => {
+    const o = opciones({ ejes: { minimoY: 100, maximoY: 500 } });
+    expect(o.yAxis.min).toBe(100);
+    expect(o.yAxis.max).toBe(500);
+  });
+
+  it('pero el 100 % los impone: el eje va de 0 a 100 porque eso es lo que mide', () => {
+    // Dejar cambiarlos produciria un «100 %» que no llega al borde.
+    const o = opciones({ apilado: 'porcentaje', ejes: { minimoY: 40, maximoY: 60 } });
+    expect(o.yAxis.min).toBe(0);
+    expect(o.yAxis.max).toBe(100);
+  });
+
+  it('el color por serie PERMUTA la paleta, para que llegue tambien a la leyenda', () => {
+    /*
+     * Escribiendo `itemStyle.color` en cada serie, la barra cambiaba de color y la muestra de la
+     * leyenda se quedaba con el de antes.
+     */
+    const o = opciones({ coloresDeSerie: [1, 0] }, vm(['A', 'B'], [['x', 1, 2]]));
+    expect(o.color).toEqual(['#2', '#1']);
+  });
+
+  it('una serie sin asignacion se queda con el color que le tocaba por orden', () => {
+    const o = opciones({ coloresDeSerie: [1] }, vm(['A', 'B'], [['x', 1, 2]]));
+    expect(o.color).toEqual(['#2', '#2']);
   });
 });

@@ -80,7 +80,44 @@ export interface ConfiguracionDeEjes {
    * el comportamiento por omision.
    */
   desdeCero?: boolean;
+  /**
+   * Los limites del eje de valores, a mano.
+   *
+   * Es la otra mitad de `desdeCero`, y la que de verdad hace falta para comparar dos objetos
+   * entre si: dos graficos de la misma medida con escalas distintas se leen como si dijeran cosas
+   * distintas aunque digan lo mismo. Fijar los dos limites es lo que los hace comparables.
+   *
+   * Tambien es la forma mas facil de mentir con un grafico —un eje de 40 a 60 convierte dos
+   * puntos de diferencia en el triple—, y por eso se escribe a mano y no se sugiere.
+   */
+  minimoY?: number;
+  maximoY?: number;
 }
+
+/**
+ * ---- Lineas de referencia ----
+ *
+ * La meta, el promedio, el umbral. Es lo que convierte una serie de cifras en una respuesta:
+ * «1.063 casos» no dice nada solo, y «1.063 sobre una meta de 900» si.
+ *
+ * Hoy, sin esto, la unica forma de poner una meta en un grafico es anadir una medida constante al
+ * dataset, que es inventarse una columna para dibujar una raya.
+ *
+ * El color es un ROL del tema, como en todo lo demas. Y la etiqueta es opcional pero recomendada:
+ * una raya sin rotulo obliga a adivinar que significa.
+ */
+export const ESTILOS_DE_REFERENCIA = ['solida', 'discontinua', 'punteada'] as const;
+export type EstiloDeReferencia = (typeof ESTILOS_DE_REFERENCIA)[number];
+
+export interface LineaDeReferencia {
+  valor: number;
+  etiqueta?: string;
+  color?: ColorDeTexto;
+  estilo?: EstiloDeReferencia;
+}
+
+/** Mas de tres rayas sobre un grafico dejan de ser referencias y pasan a ser una rejilla. */
+export const MAX_REFERENCIAS = 3;
 
 /**
  * Como se apilan las series.
@@ -377,6 +414,17 @@ export interface PresentacionDeObjeto {
   apilado?: ModoDeApilado;
   circular?: ConfiguracionCircular;
   combinado?: ConfiguracionDeCombinado;
+  /** La meta, el promedio, el umbral: hasta tres rayas sobre el area de dibujo. */
+  referencias?: LineaDeReferencia[];
+  /**
+   * Que color de la paleta usa cada serie, por indice.
+   *
+   * Indices y no colores, por lo mismo que el acento es un rol: un color suelto no tiene par de
+   * contraste comprobado ni sigue al tema oscuro. Lo que se elige es CUAL de los ocho colores ya
+   * comprobados le toca a cada serie, que es lo que resuelve el caso real —«resueltos en verde y
+   * pendientes en rojo, como en el resto del informe»— sin salirse del sistema.
+   */
+  coloresDeSerie?: number[];
   embudo?: ConfiguracionDeEmbudo;
   cascada?: ConfiguracionDeCascada;
   medidor?: ConfiguracionDeMedidor;
@@ -411,6 +459,8 @@ export const CLAVES_DE_PRESENTACION = [
   'apilado',
   'circular',
   'combinado',
+  'referencias',
+  'coloresDeSerie',
   'embudo',
   'cascada',
   'medidor',
@@ -583,6 +633,64 @@ export function validarPresentacion(
       });
     }
   }
+  /*
+   * Un maximo por debajo del minimo no es un rango: es una escala del reves.
+   *
+   * Se rechaza al guardar y no se «arregla» intercambiandolos al dibujar. Intercambiarlos dejaria
+   * pasar el error y dibujaria un grafico que nadie pidio; 4.2 manda marcar.
+   */
+  const ejes = presentacion.ejes;
+  if (ejes?.minimoY !== undefined && ejes.maximoY !== undefined && ejes.minimoY >= ejes.maximoY) {
+    problemas.push({
+      clave: 'ejes.maximoY',
+      problema: `El maximo del eje (${ejes.maximoY}) tiene que ser mayor que el minimo (${ejes.minimoY}).`,
+    });
+  }
+
+  if (presentacion.referencias !== undefined) {
+    if (presentacion.referencias.length > MAX_REFERENCIAS) {
+      problemas.push({
+        clave: 'referencias',
+        problema:
+          `${presentacion.referencias.length} lineas de referencia. El maximo es ` +
+          `${MAX_REFERENCIAS}: mas rayas sobre un grafico dejan de ser referencias y pasan a ser ` +
+          `una rejilla.`,
+      });
+    }
+    presentacion.referencias.forEach((linea, i) => {
+      if (!Number.isFinite(linea.valor)) {
+        problemas.push({
+          clave: `referencias.${i}.valor`,
+          problema: 'Una linea de referencia necesita un valor numerico: es donde se dibuja.',
+        });
+      }
+      if (linea.color !== undefined && !(COLORES_DE_TEXTO as readonly string[]).includes(linea.color)) {
+        problemas.push({
+          clave: `referencias.${i}.color`,
+          problema: `'${String(linea.color)}' no es un color del tema. Use: ${COLORES_DE_TEXTO.join(', ')}.`,
+        });
+      }
+      if (
+        linea.estilo !== undefined &&
+        !(ESTILOS_DE_REFERENCIA as readonly string[]).includes(linea.estilo)
+      ) {
+        problemas.push({
+          clave: `referencias.${i}.estilo`,
+          problema: `'${String(linea.estilo)}' no es un estilo. Use: ${ESTILOS_DE_REFERENCIA.join(', ')}.`,
+        });
+      }
+    });
+  }
+
+  for (const [i, indice] of (presentacion.coloresDeSerie ?? []).entries()) {
+    if (!Number.isInteger(indice) || indice < 0 || indice > 7) {
+      problemas.push({
+        clave: `coloresDeSerie.${i}`,
+        problema: `'${String(indice)}' no es un color de la paleta. La paleta del tema tiene ocho, de 0 a 7.`,
+      });
+    }
+  }
+
   if (
     presentacion.embudo?.comparar !== undefined &&
     !(COMPARACIONES_DE_EMBUDO as readonly string[]).includes(presentacion.embudo.comparar)

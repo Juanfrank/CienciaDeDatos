@@ -1,5 +1,6 @@
 import {
   MAX_RADIO_INTERIOR,
+  MAX_REFERENCIAS,
   type ConfiguracionCircular,
   type ComparacionDeEmbudo,
   type ConfiguracionDeCascada,
@@ -7,7 +8,9 @@ import {
   type ConfiguracionDeEmbudo,
   type ConfiguracionDeEjes,
   type ConfiguracionDeMedidor,
+  type EstiloDeReferencia,
   type EtiquetaCircular,
+  type LineaDeReferencia,
   type ModoDeApilado,
   type ModoDeLeyenda,
 } from '../presentacion/contrato';
@@ -57,6 +60,8 @@ export interface OpcionesDeGrafico {
   apilado?: ModoDeApilado;
   circular?: ConfiguracionCircular;
   combinado?: ConfiguracionDeCombinado;
+  referencias?: LineaDeReferencia[];
+  coloresDeSerie?: number[];
   embudo?: ConfiguracionDeEmbudo;
   cascada?: ConfiguracionDeCascada;
   medidor?: ConfiguracionDeMedidor;
@@ -220,6 +225,90 @@ function margenDe(o: OpcionesDeGrafico, deLaLeyenda: { top: number; bottom: numb
   };
 }
 
+/**
+ * La paleta, con los colores que cada serie tenga asignados.
+ *
+ * Se permuta el array que ECharts consume en vez de escribir `itemStyle.color` en cada serie: asi
+ * el color llega igual a las barras, a la leyenda, a los decals y al tooltip, sin que ninguno de
+ * los cuatro pueda quedarse con el de antes. Una serie sin asignacion se queda con el color que
+ * le tocaba por orden.
+ */
+function paletaDe(o: OpcionesDeGrafico): string[] {
+  const elegidos = o.coloresDeSerie;
+  if (!elegidos || elegidos.length === 0) return o.paleta.series;
+  return o.paleta.series.map((porOrden, s) => {
+    const indice = elegidos[s];
+    return indice === undefined ? porOrden : (o.paleta.series[indice] ?? porOrden);
+  });
+}
+
+const TRAZO_DE_REFERENCIA: Record<EstiloDeReferencia, 'solid' | 'dashed' | 'dotted'> = {
+  solida: 'solid',
+  discontinua: 'dashed',
+  punteada: 'dotted',
+};
+
+/**
+ * Las lineas de referencia, como `markLine` de la PRIMERA serie.
+ *
+ * Van en una serie y no en una serie propia porque una serie propia aparaceria en la leyenda y en
+ * el tooltip como si fuera un dato mas, y una meta no es un dato medido. `silent: true` por lo
+ * mismo: la raya no responde al raton.
+ *
+ * El eje al que se anclan depende de la orientacion, y eso lo decide quien construye: en unas
+ * barras horizontales el eje de valores es el X, y anclarlas siempre al Y dibujaria la meta
+ * atravesada.
+ */
+function referenciasDe(o: OpcionesDeGrafico, horizontal = false) {
+  const lineas = (o.referencias ?? []).slice(0, MAX_REFERENCIAS);
+  if (lineas.length === 0) return {};
+
+  return {
+    markLine: {
+      silent: true,
+      symbol: 'none' as const,
+      // `emphasis` apagado: sin esto, pasar cerca engorda la raya como si fuera seleccionable.
+      emphasis: { disabled: true },
+      data: lineas.map((linea) => ({
+        [horizontal ? 'xAxis' : 'yAxis']: linea.valor,
+        lineStyle: {
+          color: colorDeRol(o, linea.color),
+          type: TRAZO_DE_REFERENCIA[linea.estilo ?? 'discontinua'],
+          width: 2,
+        },
+        label: {
+          show: linea.etiqueta !== undefined && linea.etiqueta !== '',
+          formatter: linea.etiqueta ?? '',
+          position: horizontal ? ('end' as const) : ('insideEndTop' as const),
+          color: colorDeRol(o, linea.color),
+          fontSize: 11,
+        },
+      })),
+    },
+  };
+}
+
+/**
+ * Un rol del tema a un color concreto, dentro del grafico.
+ *
+ * El grafico no tiene acceso a las variables CSS —es una funcion pura— asi que trabaja con lo que
+ * la paleta le pasa. `primario` y `error` son los dos roles que ya vienen resueltos en ella (el
+ * primer color de serie y el segundo, que en el tema institucional son el azul y el rojo); el
+ * resto cae al color de texto, que siempre contrasta con la superficie.
+ */
+function colorDeRol(o: OpcionesDeGrafico, color: LineaDeReferencia['color']): string {
+  switch (color) {
+    case 'primario':
+      return o.paleta.series[0] ?? o.paleta.texto;
+    case 'error':
+      return o.paleta.series[1] ?? o.paleta.texto;
+    case 'atenuado':
+      return o.paleta.textoAtenuado;
+    default:
+      return o.paleta.texto;
+  }
+}
+
 function nucleo(o: OpcionesDeGrafico, conDecal: boolean) {
   return {
     aria: {
@@ -234,7 +323,7 @@ function nucleo(o: OpcionesDeGrafico, conDecal: boolean) {
         },
       },
     },
-    color: o.paleta.series,
+    color: paletaDe(o),
     backgroundColor: 'transparent',
     animation: false,
     textStyle: { color: o.paleta.texto },
@@ -319,9 +408,19 @@ const ejeCategoria = (o: OpcionesDeGrafico) => ({
 const ejeValor = (o: OpcionesDeGrafico) => ({
   type: 'value' as const,
   show: o.ejes?.mostrarY !== false,
-  // Al 100 % el eje va de 0 a 100 y con el simbolo puesto: sin el, la escala parece de unidades
-  // y el grafico se lee como si midiera casos.
-  ...(o.apilado === 'porcentaje' ? { max: 100, min: 0 } : {}),
+  /*
+   * Los limites, en orden de quien manda.
+   *
+   * El 100 % los impone: el eje va de 0 a 100 porque eso es lo que el grafico mide, y dejar que
+   * alguien lo cambie produciria un «100 %» que no llega al borde. Fuera de ahi manda lo que se
+   * haya escrito a mano, y si no hay nada, ECharts.
+   */
+  ...(o.apilado === 'porcentaje'
+    ? { max: 100, min: 0 }
+    : {
+        ...(o.ejes?.minimoY === undefined ? {} : { min: o.ejes.minimoY }),
+        ...(o.ejes?.maximoY === undefined ? {} : { max: o.ejes.maximoY }),
+      }),
   axisLabel: {
     color: o.paleta.textoAtenuado,
     ...(o.apilado === 'porcentaje' ? { formatter: '{value} %' } : {}),
@@ -383,6 +482,9 @@ function seriesDeBarras(o: OpcionesDeGrafico, horizontal: boolean) {
     barMaxWidth: 48,
     // Apilada, la cifra va DENTRO del segmento: encima se dibujaria sobre el segmento siguiente.
     label: etiquetaDeSerie(o, s, apilada ? 'inside' : horizontal ? 'right' : 'top'),
+    // Las referencias cuelgan de la PRIMERA serie: son del grafico, no de una medida, y en una
+    // serie cualquiera desaparecerian al ocultar esa medida desde la leyenda.
+    ...(s === 0 ? referenciasDe(o, horizontal) : {}),
     emphasis: { focus: 'series' },
   }));
 }
@@ -457,6 +559,7 @@ export function opcionesDeArea(o: OpcionesDeGrafico): Record<string, unknown> {
        */
       areaStyle: o.apilado && o.apilado !== 'ninguno' ? {} : { opacity: 0.25 },
       label: etiquetaDeSerie(o, s, 'top'),
+      ...(s === 0 ? referenciasDe(o) : {}),
       emphasis: { focus: 'series' },
     })),
   };
@@ -477,6 +580,7 @@ export function opcionesDeLineas(o: OpcionesDeGrafico): Record<string, unknown> 
       symbolSize: 6,
       lineStyle: { width: 2 },
       label: etiquetaDeSerie(o, s, 'top'),
+      ...(s === 0 ? referenciasDe(o) : {}),
       emphasis: { focus: 'series' },
     })),
   };
@@ -852,7 +956,8 @@ export function opcionesDeCombinado(o: OpcionesDeGrafico): Record<string, unknow
                */
               z: 3,
             }),
-        label: etiquetaDeSerie(o, s, esColumna ? 'top' : 'top'),
+        label: etiquetaDeSerie(o, s, 'top'),
+        ...(s === 0 ? referenciasDe(o) : {}),
         emphasis: { focus: 'series' },
       };
     }),
@@ -957,6 +1062,7 @@ export function opcionesDeDispersion(o: OpcionesDeGrafico): Record<string, unkno
               (Number(valores[2] ?? 0) / maxTamano) * (TAMANO_MAXIMO - TAMANO_MINIMO)
           : 12,
         itemStyle: { opacity: 0.8 },
+        ...referenciasDe(o),
         label: o.etiquetasDeDato
           ? {
               show: true,
@@ -1165,6 +1271,7 @@ export function opcionesDeCascada(o: OpcionesDeGrafico): Record<string, unknown>
         type: 'bar',
         stack: 'cascada',
         barMaxWidth: 56,
+        ...referenciasDe(o),
         data: alturas.map((alto, i) => ({ value: alto, itemStyle: { color: colorDe(i) } })),
         label: {
           show: true,

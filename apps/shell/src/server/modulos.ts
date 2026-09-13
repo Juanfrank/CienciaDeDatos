@@ -1178,6 +1178,118 @@ export const modulosDemo: ModuleDefinition[] = [
         ],
       },
       {
+        pageId: 'p-referencia',
+        slug: 'referencia',
+        name: 'Metas y escalas',
+        items: [
+          {
+            id: 'ref-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'ref-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'titulo-de-seccion',
+                tituloDeSeccion: {
+                  texto: 'Una cifra contra algo',
+                  posicionDelTexto: 'izquierda',
+                  linea: 'derecha',
+                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'ref-meta',
+            position: { x: 0, y: 1, w: 6, h: 4 },
+            instance: {
+              instanceId: 'ref-meta',
+              objectId: 'barras',
+              version: '1.2.0',
+              title: 'Resueltos por trimestre, contra la meta',
+              binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosResueltos'] },
+              presentacion: {
+                subtitulo: 'La raya es lo que convierte la cifra en respuesta',
+                leyenda: 'oculta',
+                etiquetasDeDato: true,
+                ejes: { tituloY: 'Casos' },
+                referencias: [
+                  { valor: 900, etiqueta: 'Meta trimestral', color: 'error', estilo: 'discontinua' },
+                ],
+              },
+            },
+          },
+          {
+            id: 'ref-banda',
+            position: { x: 6, y: 1, w: 6, h: 4 },
+            instance: {
+              instanceId: 'ref-banda',
+              objectId: 'lineas',
+              version: '1.1.0',
+              title: 'Con tres referencias y escala fija',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos'],
+              },
+              presentacion: {
+                subtitulo: 'Minimo y maximo a mano: comparable con el de al lado',
+                leyenda: 'abajo',
+                // Los mismos limites en los dos objetos: dos graficos de la misma medida con
+                // escalas distintas se leen como si dijeran cosas distintas.
+                ejes: { tituloY: 'Casos', minimoY: 0, maximoY: 2400 },
+                referencias: [
+                  { valor: 600, etiqueta: 'Minimo', color: 'atenuado', estilo: 'punteada' },
+                  { valor: 1200, etiqueta: 'Meta', color: 'error' },
+                  { valor: 1800, etiqueta: 'Tope', color: 'primario', estilo: 'solida' },
+                ],
+              },
+            },
+          },
+          {
+            id: 'ref-colores',
+            position: { x: 0, y: 5, w: 6, h: 4 },
+            instance: {
+              instanceId: 'ref-colores',
+              objectId: 'barras',
+              version: '1.2.0',
+              title: 'Colores elegidos por serie',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
+              },
+              presentacion: {
+                subtitulo: 'Del tema, no libres: se elige cual de los ocho le toca a cada una',
+                leyenda: 'abajo',
+                coloresDeSerie: [3, 2, 1],
+              },
+            },
+          },
+          {
+            id: 'ref-misma-escala',
+            position: { x: 6, y: 5, w: 6, h: 4 },
+            instance: {
+              instanceId: 'ref-misma-escala',
+              objectId: 'barras',
+              version: '1.2.0',
+              title: 'La misma medida, la misma escala',
+              binding: { datasetId: DATASET, dimensions: [MATERIA], measures: ['CasosResueltos'] },
+              presentacion: {
+                subtitulo: 'Por materia, con el mismo 0-2400 que el de al lado',
+                leyenda: 'oculta',
+                etiquetasDeDato: true,
+                ejes: { tituloY: 'Casos', minimoY: 0, maximoY: 2400 },
+                referencias: [{ valor: 1200, etiqueta: 'Meta', color: 'error' }],
+              },
+            },
+          },
+        ],
+      },
+      {
         pageId: 'p-contenedores',
         slug: 'contenedores',
         name: 'Contenedores',

@@ -18,6 +18,8 @@ export { catalogoInicial } from './registry/catalog';
 export {
   ACENTOS,
   COMPARACIONES_DE_EMBUDO,
+  ESTILOS_DE_REFERENCIA,
+  MAX_REFERENCIAS,
   ETIQUETAS_CIRCULARES,
   MAX_DECIMALES,
   MAX_RADIO_INTERIOR,
@@ -33,6 +35,8 @@ export {
   type ClaveDePresentacion,
   type FormatoNumerico,
   type ComparacionDeEmbudo,
+  type EstiloDeReferencia,
+  type LineaDeReferencia,
   type ConfiguracionCircular,
   type ConfiguracionDeCascada,
   type ConfiguracionDeCombinado,

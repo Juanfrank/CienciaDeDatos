@@ -1,0 +1,139 @@
+"use client";
+
+import {
+  ESTILOS_DE_REFERENCIA,
+  MAX_REFERENCIAS,
+  type EstiloDeReferencia,
+  type LineaDeReferencia,
+} from "@app/ui-components";
+import { PaletaDeColores } from "./EstiloDeTextoEditor";
+
+/**
+ * Editor de lineas de referencia — la meta, el promedio, el umbral.
+ *
+ * Es lo que convierte una serie de cifras en una respuesta: «1.063 casos» no dice nada solo, y
+ * «1.063 sobre una meta de 900» si. Hoy, sin esto, la unica forma de poner una meta en un grafico
+ * era anadir una medida constante al dataset, o sea inventarse una columna para dibujar una raya.
+ *
+ * La lista se edita ENTERA en cada cambio y no por indices sueltos: son como mucho tres, y un
+ * editor por indice invita a estados intermedios —una linea a medio crear— que luego hay que
+ * validar. Aqui una linea existe o no existe.
+ */
+
+const ETIQUETA_DE_ESTILO: Record<EstiloDeReferencia, string> = {
+  solida: "Continua",
+  discontinua: "Discontinua",
+  punteada: "Punteada",
+};
+
+export function LineasDeReferencia({
+  lineas,
+  guardando,
+  prueba,
+  onCambiar,
+}: {
+  lineas: LineaDeReferencia[];
+  guardando: boolean;
+  prueba: string;
+  onCambiar: (lineas: LineaDeReferencia[] | undefined) => void;
+}) {
+  // Una lista vacia se guarda como `undefined`: «sin lineas» y «una lista de cero lineas» son lo
+  // mismo para quien dibuja, y dejar el array vacio ensuciaria la presentacion guardada.
+  const cambiar = (siguiente: LineaDeReferencia[]) =>
+    onCambiar(siguiente.length === 0 ? undefined : siguiente);
+
+  const editar = (i: number, cambio: Partial<LineaDeReferencia>) =>
+    cambiar(lineas.map((linea, j) => (i === j ? { ...linea, ...cambio } : linea)));
+
+  return (
+    <>
+      {lineas.map((linea, i) => (
+        <fieldset key={i} className="referencia" data-testid={`${prueba}-linea-${i}`}>
+          <legend className="referencia__titulo">Linea {i + 1}</legend>
+
+          <div className="formulario__pareja">
+            <label className="formulario__campo">
+              <span>Valor</span>
+              <input
+                type="number"
+                defaultValue={linea.valor}
+                disabled={guardando}
+                data-testid={`${prueba}-valor-${i}`}
+                onBlur={(e) => editar(i, { valor: Number(e.target.value) })}
+              />
+            </label>
+            <label className="formulario__campo">
+              <span>Rotulo</span>
+              <input
+                defaultValue={linea.etiqueta ?? ""}
+                disabled={guardando}
+                data-testid={`${prueba}-etiqueta-${i}`}
+                onBlur={(e) => editar(i, { etiqueta: e.target.value || undefined })}
+              />
+            </label>
+          </div>
+          {/*
+            Una raya sin rotulo obliga a adivinar que significa. No se impone —a veces el titulo
+            del objeto ya lo dice— pero se recomienda donde se escribe.
+          */}
+          <span className="campo__pista">Sin rotulo, la raya no dice que representa.</span>
+
+          <label className="formulario__campo">
+            <span>Trazo</span>
+            <select
+              value={linea.estilo ?? "discontinua"}
+              disabled={guardando}
+              data-testid={`${prueba}-estilo-${i}`}
+              onChange={(e) => editar(i, { estilo: e.target.value as EstiloDeReferencia })}
+            >
+              {ESTILOS_DE_REFERENCIA.map((estilo) => (
+                <option key={estilo} value={estilo}>
+                  {ETIQUETA_DE_ESTILO[estilo]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="formulario__campo">
+            <span>Color</span>
+            <PaletaDeColores
+              valor={linea.color ?? "predeterminado"}
+              nombre={`la linea ${i + 1}`}
+              prueba={`${prueba}-color-${i}`}
+              onCambiar={(color) =>
+                editar(i, { color: color === "predeterminado" ? undefined : color })
+              }
+            />
+          </div>
+
+          <button
+            type="button"
+            className="md-boton md-boton--texto"
+            disabled={guardando}
+            data-testid={`${prueba}-quitar-${i}`}
+            onClick={() => cambiar(lineas.filter((_, j) => j !== i))}
+          >
+            Quitar esta linea
+          </button>
+        </fieldset>
+      ))}
+
+      {lineas.length < MAX_REFERENCIAS ? (
+        <button
+          type="button"
+          className="md-boton md-boton--contorno"
+          disabled={guardando}
+          data-testid={`${prueba}-anadir`}
+          onClick={() => cambiar([...lineas, { valor: 0, estilo: "discontinua" }])}
+        >
+          Anadir linea de referencia
+        </button>
+      ) : (
+        <p className="campo__pista">
+          Tres es el maximo: mas rayas sobre un grafico dejan de ser referencias y pasan a ser una
+          rejilla.
+        </p>
+      )}
+    </>
+  );
+}

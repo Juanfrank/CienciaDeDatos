@@ -803,6 +803,28 @@ input[type='radio'] {
   font-weight: 600;
 }
 
+/*
+ * Una linea de referencia, como grupo.
+ *
+ * `fieldset` y no un `div`: las tres o cuatro entradas de una linea son UN control compuesto, y
+ * su `legend` es lo que hace que un lector de pantalla anuncie «Linea 2, Valor» en vez de
+ * «Valor» tres veces seguidas sin forma de saber a cual pertenece.
+ */
+.referencia {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+}
+.referencia__titulo {
+  padding: 0 4px;
+  font-size: var(--md-sys-typescale-label-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
 /* Dos campos numericos cortos en una fila: un minimo y un maximo se leen juntos o no se leen. */
 .formulario__pareja { display: flex; gap: 8px; }
 .formulario__pareja > * { flex: 1; min-width: 0; }

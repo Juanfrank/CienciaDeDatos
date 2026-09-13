@@ -34,6 +34,7 @@ import {
 import { Icono } from "../iconos/Icono";
 import { Ayuda } from "./Ayuda";
 import { EstiloDeTextoEditor, PaletaDeColores } from "./EstiloDeTextoEditor";
+import { LineasDeReferencia } from "./LineasDeReferencia";
 import { Seccion } from "./Seccion";
 
 /**
@@ -446,6 +447,56 @@ export function Presentacion({
         </Seccion>
       ) : null}
 
+      {admite("referencias") ? (
+        <Seccion titulo="Lineas de referencia" nivel={2} abierta={false} prueba={`${prueba}-referencias`}>
+          <LineasDeReferencia
+            lineas={p.referencias ?? []}
+            guardando={guardando}
+            prueba={`${prueba}-ref`}
+            onCambiar={(referencias) => poner({ referencias })}
+          />
+        </Seccion>
+      ) : null}
+
+      {admite("coloresDeSerie") ? (
+        <Seccion titulo="Colores de las series" nivel={2} abierta={false} prueba={`${prueba}-colores`}>
+          {/*
+            Se elige CUAL de los ocho colores del tema le toca a cada serie, no un color libre.
+            Un color suelto no tiene par de contraste comprobado ni sigue al tema oscuro; esto
+            resuelve el caso real —«resueltos en verde, como en el resto del informe»— sin salirse
+            del sistema.
+          */}
+          {instance.binding.measures.length === 0 ? (
+            <p className="campo__pista">Mapee al menos una medida para poder darle color.</p>
+          ) : (
+            instance.binding.measures.map((medida, s) => (
+              <label key={medida} className="formulario__campo">
+                <span>{medida}</span>
+                <select
+                  value={p.coloresDeSerie?.[s] ?? s}
+                  disabled={guardando}
+                  data-testid={`${prueba}-color-serie-${s}`}
+                  onChange={(e) => {
+                    const siguiente = [...(p.coloresDeSerie ?? [])];
+                    while (siguiente.length < instance.binding.measures.length) {
+                      siguiente.push(siguiente.length);
+                    }
+                    siguiente[s] = Number(e.target.value);
+                    poner({ coloresDeSerie: siguiente });
+                  }}
+                >
+                  {COLORES_DE_PALETA.map((n) => (
+                    <option key={n} value={n}>
+                      Color {n + 1}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))
+          )}
+        </Seccion>
+      ) : null}
+
       {admite("circular") ? (
         <Seccion titulo="Porciones" nivel={2} prueba={`${prueba}-circular`}>
           {/*
@@ -762,6 +813,52 @@ export function Presentacion({
             Un eje que no empieza en cero hace que una diferencia del 2 % parezca el triple.
             Apagarlo deberia ser una decision, no el comportamiento por omision.
           </p>
+
+          {/*
+            Vacio NO es cero: vacio es «que lo decida la escala».
+            `Number("")` da 0, asi que sin distinguir la cadena vacia, borrar el campo dejaria el
+            eje clavado en cero en vez de devolverlo a automatico.
+          */}
+          <div className="formulario__pareja">
+            <label className="formulario__campo">
+              <span>Minimo del eje</span>
+              <input
+                type="number"
+                defaultValue={p.ejes?.minimoY ?? ""}
+                disabled={guardando}
+                data-testid={`${prueba}-minimo-y`}
+                onBlur={(e) =>
+                  poner({
+                    ejes: {
+                      ...p.ejes,
+                      minimoY: e.target.value === "" ? undefined : Number(e.target.value),
+                    },
+                  })
+                }
+              />
+            </label>
+            <label className="formulario__campo">
+              <span>Maximo del eje</span>
+              <input
+                type="number"
+                defaultValue={p.ejes?.maximoY ?? ""}
+                disabled={guardando}
+                data-testid={`${prueba}-maximo-y`}
+                onBlur={(e) =>
+                  poner({
+                    ejes: {
+                      ...p.ejes,
+                      maximoY: e.target.value === "" ? undefined : Number(e.target.value),
+                    },
+                  })
+                }
+              />
+            </label>
+          </div>
+          <span className="campo__pista">
+            Vacio = automatico. Fijarlos es lo que hace comparables dos objetos de la misma medida,
+            y tambien la forma mas facil de exagerar una diferencia.
+          </span>
         </Seccion>
       ) : null}
 
@@ -1130,6 +1227,9 @@ const ETIQUETA_DE_APILADO: Record<ModoDeApilado, string> = {
   apilado: "Apilado",
   porcentaje: "Apilado al 100 %",
 };
+
+/** Los ocho colores de serie del tema, por indice. El tema los da; aqui solo se eligen. */
+const COLORES_DE_PALETA = [0, 1, 2, 3, 4, 5, 6, 7];
 
 const ETIQUETA_DE_COMPARACION: Record<ComparacionDeEmbudo, string> = {
   primero: "Contra la primera etapa (cuanto queda)",
