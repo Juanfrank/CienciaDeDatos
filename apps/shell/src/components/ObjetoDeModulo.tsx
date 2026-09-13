@@ -21,7 +21,10 @@ import {
   Area,
   Barras,
   BarrasHorizontales,
+  Circular,
+  Dona,
   Lineas,
+  Medidor,
   Matriz,
   ObjetoGenerandose,
   ObjetoNoDisponible,
@@ -156,6 +159,12 @@ export function ObjetoDeModulo({
       return <Area {...props} />;
     case 'lineas':
       return <Lineas {...props} />;
+    case 'pastel':
+      return <Circular {...props} />;
+    case 'dona':
+      return <Dona {...props} />;
+    case 'medidor':
+      return <Medidor {...props} />;
     case 'tabla':
       return <Tabla {...props} />;
     case 'matriz':

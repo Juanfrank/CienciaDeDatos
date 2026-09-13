@@ -831,6 +831,124 @@ export const modulosDemo: ModuleDefinition[] = [
         ],
       },
       {
+        pageId: 'p-proporcion',
+        slug: 'proporcion',
+        name: 'Proporcion y meta',
+        items: [
+          {
+            id: 'pr-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'pr-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'titulo-de-seccion',
+                tituloDeSeccion: {
+                  texto: 'La parte y la meta',
+                  posicionDelTexto: 'izquierda',
+                  linea: 'derecha',
+                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'pr-pastel',
+            position: { x: 0, y: 1, w: 4, h: 4 },
+            instance: {
+              instanceId: 'pr-pastel',
+              objectId: 'pastel',
+              version: '1.0.0',
+              title: 'Reparto por materia',
+              binding: { datasetId: DATASET, dimensions: [MATERIA], measures: ['CasosPendientes'] },
+              presentacion: {
+                subtitulo: 'Cuanto pesa cada materia',
+                leyenda: 'abajo',
+                circular: { etiquetas: 'porcentaje' },
+              },
+            },
+          },
+          {
+            id: 'pr-dona',
+            position: { x: 4, y: 1, w: 4, h: 4 },
+            instance: {
+              instanceId: 'pr-dona',
+              objectId: 'dona',
+              version: '1.0.0',
+              title: 'Lo mismo, con el total',
+              binding: { datasetId: DATASET, dimensions: [MATERIA], measures: ['CasosPendientes'] },
+              presentacion: {
+                subtitulo: 'El hueco deja sitio a la cifra',
+                leyenda: 'abajo',
+                circular: { totalEnElCentro: true, etiquetas: 'porcentaje' },
+              },
+            },
+          },
+          {
+            id: 'pr-dona-distrito',
+            position: { x: 8, y: 1, w: 4, h: 4 },
+            instance: {
+              instanceId: 'pr-dona-distrito',
+              objectId: 'dona',
+              version: '1.0.0',
+              title: 'Pendientes por trimestre',
+              binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosPendientes'] },
+              presentacion: {
+                subtitulo: 'Etiquetas con nombre y parte',
+                leyenda: 'oculta',
+                circular: { radioInterior: 40, etiquetas: 'categoria-porcentaje' },
+              },
+            },
+          },
+          {
+            id: 'pr-medidor',
+            position: { x: 0, y: 5, w: 4, h: 4 },
+            instance: {
+              instanceId: 'pr-medidor',
+              objectId: 'medidor',
+              version: '1.0.0',
+              title: 'Resueltos frente a ingresados',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [],
+                measures: ['CasosResueltos', 'CasosIngresados'],
+              },
+              presentacion: { subtitulo: 'El objetivo sale del dataset' },
+            },
+          },
+          {
+            id: 'pr-medidor-meta',
+            position: { x: 4, y: 5, w: 4, h: 4 },
+            instance: {
+              instanceId: 'pr-medidor-meta',
+              objectId: 'medidor',
+              version: '1.0.0',
+              title: 'Pendientes contra el tope',
+              binding: { datasetId: DATASET, dimensions: [], measures: ['CasosPendientes'] },
+              presentacion: {
+                subtitulo: 'Escala fija: dos capturas se pueden comparar',
+                medidor: { minimo: 0, maximo: 3000, objetivo: 2000 },
+              },
+            },
+          },
+          {
+            id: 'pr-medidor-sin-meta',
+            position: { x: 8, y: 5, w: 4, h: 4 },
+            instance: {
+              instanceId: 'pr-medidor-sin-meta',
+              objectId: 'medidor',
+              version: '1.0.0',
+              title: 'Ingresados, sin meta',
+              binding: { datasetId: DATASET, dimensions: [], measures: ['CasosIngresados'] },
+              presentacion: { subtitulo: 'Sin objetivo no hay marca; la escala se deduce' },
+            },
+          },
+        ],
+      },
+      {
         pageId: 'p-contenedores',
         slug: 'contenedores',
         name: 'Contenedores',

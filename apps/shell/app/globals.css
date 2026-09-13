@@ -779,6 +779,34 @@ input[type='radio'] {
 .objeto[data-resaltado='si'] > .objeto__cuerpo:first-child { padding-top: calc(var(--space-md) + 4px); }
 
 /* La tarjeta: valor y etiqueta como un bloque, para poder alinearlo en vertical. */
+/*
+ * El respaldo del medidor: tres cifras, no una tabla.
+ *
+ * Valor, objetivo y diferencia no son filas de nada — son la lectura completa de la aguja — y
+ * una `<dl>` dice exactamente eso: cada rotulo con su cifra. Una tabla de una sola fila
+ * obligaria a un lector de pantalla a anunciar encabezados de columna que no separan nada.
+ */
+.medidor-respaldo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+}
+.medidor-respaldo > div { display: flex; flex-direction: column; gap: 2px; }
+.medidor-respaldo dt {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.medidor-respaldo dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* Dos campos numericos cortos en una fila: un minimo y un maximo se leen juntos o no se leen. */
+.formulario__pareja { display: flex; gap: 8px; }
+.formulario__pareja > * { flex: 1; min-width: 0; }
+
 .kpi { display: flex; flex-direction: column; min-height: 0; }
 .kpi__etiqueta {
   margin: 0;

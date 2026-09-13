@@ -2,10 +2,13 @@
 
 import {
   ACENTOS,
+  ETIQUETAS_CIRCULARES,
   ICONOS_DE_OBJETO,
+  MAX_RADIO_INTERIOR,
   MODOS_DE_APILADO,
   MODOS_DE_LEYENDA,
   type CriterioDeOrden,
+  type EtiquetaCircular,
   type ModoDeApilado,
   POSICIONES_DE_ETIQUETA,
   TIPOS_DE_FORMATO,
@@ -438,6 +441,163 @@ export function Presentacion({
               ) : null}
             </>
           ) : null}
+        </Seccion>
+      ) : null}
+
+      {admite("circular") ? (
+        <Seccion titulo="Porciones" nivel={2} prueba={`${prueba}-circular`}>
+          {/*
+            El hueco es un DESLIZADOR y no una casilla «dona si/no».
+            Entre un pastel y una dona no hay dos estados sino un canje continuo: cuanto mas
+            hueco, menos area para comparar porciones y mas sitio para la cifra del centro.
+            Con dos posiciones, ese canje se toma sin verlo.
+          */}
+          <label className="formulario__campo">
+            <span>Hueco del centro: {p.circular?.radioInterior ?? 0} %</span>
+            <input
+              type="range"
+              min={0}
+              max={MAX_RADIO_INTERIOR}
+              step={5}
+              value={p.circular?.radioInterior ?? 0}
+              disabled={guardando}
+              data-testid={`${prueba}-hueco`}
+              onChange={(e) =>
+                poner({ circular: { ...p.circular, radioInterior: Number(e.target.value) } })
+              }
+            />
+            <span className="campo__pista">0 % es un pastel; 55 % es una dona.</span>
+          </label>
+
+          <label className="formulario__campo">
+            <span>Etiquetas sobre las porciones</span>
+            <select
+              value={p.circular?.etiquetas ?? "porcentaje"}
+              disabled={guardando}
+              data-testid={`${prueba}-etiquetas-circular`}
+              onChange={(e) =>
+                poner({
+                  circular: { ...p.circular, etiquetas: e.target.value as EtiquetaCircular },
+                })
+              }
+            >
+              {ETIQUETAS_CIRCULARES.map((m) => (
+                <option key={m} value={m}>
+                  {ETIQUETA_CIRCULAR[m]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.circular?.ordenar !== false}
+              disabled={guardando}
+              data-testid={`${prueba}-ordenar-porciones`}
+              onChange={(e) => poner({ circular: { ...p.circular, ordenar: e.target.checked } })}
+            />{" "}
+            Ordenar de mayor a menor
+          </label>
+
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.circular?.totalEnElCentro === true}
+              disabled={guardando || (p.circular?.radioInterior ?? 0) === 0}
+              data-testid={`${prueba}-total-centro`}
+              onChange={(e) =>
+                poner({ circular: { ...p.circular, totalEnElCentro: e.target.checked } })
+              }
+            />{" "}
+            Total en el centro
+          </label>
+          {(p.circular?.radioInterior ?? 0) === 0 ? (
+            <p className="campo__pista">Sin hueco no hay centro donde escribir el total.</p>
+          ) : null}
+        </Seccion>
+      ) : null}
+
+      {admite("medidor") ? (
+        <Seccion titulo="Escala" nivel={2} prueba={`${prueba}-medidor`}>
+          {/*
+            Vacio NO es cero: vacio es «dedúcela».
+            Un `Number("")` da 0 y dejaria el maximo en cero, o sea la aguja siempre al tope. Se
+            distingue la cadena vacia antes de convertir, y por eso el estado es `undefined`.
+          */}
+          <div className="formulario__pareja">
+            <label className="formulario__campo">
+              <span>Minimo</span>
+              <input
+                type="number"
+                defaultValue={p.medidor?.minimo ?? ""}
+                disabled={guardando}
+                data-testid={`${prueba}-minimo`}
+                onBlur={(e) =>
+                  poner({
+                    medidor: {
+                      ...p.medidor,
+                      minimo: e.target.value === "" ? undefined : Number(e.target.value),
+                    },
+                  })
+                }
+              />
+            </label>
+            <label className="formulario__campo">
+              <span>Maximo</span>
+              <input
+                type="number"
+                defaultValue={p.medidor?.maximo ?? ""}
+                disabled={guardando}
+                data-testid={`${prueba}-maximo`}
+                onBlur={(e) =>
+                  poner({
+                    medidor: {
+                      ...p.medidor,
+                      maximo: e.target.value === "" ? undefined : Number(e.target.value),
+                    },
+                  })
+                }
+              />
+            </label>
+          </div>
+          <span className="campo__pista">
+            Vacio = se deduce de los datos, redondeando a una escala estable. Fijarla es lo que
+            permite comparar dos capturas del mismo medidor.
+          </span>
+
+          <label className="formulario__campo">
+            <span>Objetivo</span>
+            <input
+              type="number"
+              defaultValue={p.medidor?.objetivo ?? ""}
+              disabled={guardando}
+              data-testid={`${prueba}-objetivo`}
+              onBlur={(e) =>
+                poner({
+                  medidor: {
+                    ...p.medidor,
+                    objetivo: e.target.value === "" ? undefined : Number(e.target.value),
+                  },
+                })
+              }
+            />
+            <span className="campo__pista">
+              Solo se usa si el mapeo no trae una medida de objetivo: un dato se actualiza y un
+              numero escrito aqui no.
+            </span>
+          </label>
+
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.medidor?.mostrarValor !== false}
+              disabled={guardando}
+              data-testid={`${prueba}-mostrar-valor`}
+              onChange={(e) => poner({ medidor: { ...p.medidor, mostrarValor: e.target.checked } })}
+            />{" "}
+            Mostrar la cifra bajo la aguja
+          </label>
         </Seccion>
       ) : null}
 
@@ -882,6 +1042,14 @@ const ETIQUETA_DE_APILADO: Record<ModoDeApilado, string> = {
   ninguno: "Sin apilar (una al lado de otra)",
   apilado: "Apilado",
   porcentaje: "Apilado al 100 %",
+};
+
+const ETIQUETA_CIRCULAR: Record<EtiquetaCircular, string> = {
+  ninguna: "Sin etiquetas",
+  categoria: "Nombre de la categoria",
+  valor: "Cifra",
+  porcentaje: "Porcentaje",
+  "categoria-porcentaje": "Nombre y porcentaje",
 };
 
 const ETIQUETA_DE_LEYENDA: Record<ModoDeLeyenda, string> = {

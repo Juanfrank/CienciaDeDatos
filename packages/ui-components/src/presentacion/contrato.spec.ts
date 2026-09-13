@@ -147,6 +147,41 @@ describe('formateadorDe', () => {
   });
 });
 
+describe('circular y medidor: lo que se rechaza al guardar', () => {
+  const conCircular: ClaveDePresentacion[] = [...PRESENTACION_MINIMA, 'circular'];
+  const conMedidor: ClaveDePresentacion[] = [...PRESENTACION_MINIMA, 'medidor'];
+
+  it('un hueco fuera de rango no llega a guardarse', () => {
+    // Por encima del limite no queda anillo: el grafico dejaria de decir nada sobre proporciones.
+    expect(validarPresentacion({ circular: { radioInterior: 95 } }, conCircular)).toHaveLength(1);
+    expect(validarPresentacion({ circular: { radioInterior: 55 } }, conCircular)).toEqual([]);
+  });
+
+  it('un modo de etiqueta inventado se rechaza', () => {
+    const problemas = validarPresentacion(
+      { circular: { etiquetas: 'ambos' as never } },
+      conCircular,
+    );
+    expect(problemas[0]?.clave).toBe('circular.etiquetas');
+  });
+
+  it('un minimo por encima del maximo se rechaza, no se intercambia', () => {
+    /*
+     * Intercambiarlos al dibujar dejaria pasar el error y pintaria una aguja que nadie pidio.
+     * 4.2 manda marcar el mapeo que no cuadra, no arreglarlo por dentro.
+     */
+    const problemas = validarPresentacion({ medidor: { minimo: 100, maximo: 10 } }, conMedidor);
+    expect(problemas[0]?.clave).toBe('medidor.maximo');
+    expect(validarPresentacion({ medidor: { minimo: 0, maximo: 3000 } }, conMedidor)).toEqual([]);
+  });
+
+  it('un objeto que no las admite las rechaza', () => {
+    // Una tabla no tiene porciones ni aguja: la clave sobra y el editor tiene que decirlo.
+    expect(validarPresentacion({ circular: { radioInterior: 10 } }, PRESENTACION_MINIMA)).toHaveLength(1);
+    expect(validarPresentacion({ medidor: { maximo: 10 } }, PRESENTACION_MINIMA)).toHaveLength(1);
+  });
+});
+
 describe('el catalogo de iconos', () => {
   it('todos los ofrecidos para un objeto existen', () => {
     for (const nombre of ICONOS_DE_OBJETO) expect(NOMBRES_DE_ICONO).toContain(nombre);

@@ -1,4 +1,12 @@
-import type { ConfiguracionDeEjes, ModoDeApilado, ModoDeLeyenda } from '../presentacion/contrato';
+import {
+  MAX_RADIO_INTERIOR,
+  type ConfiguracionCircular,
+  type ConfiguracionDeEjes,
+  type ConfiguracionDeMedidor,
+  type EtiquetaCircular,
+  type ModoDeApilado,
+  type ModoDeLeyenda,
+} from '../presentacion/contrato';
 import type { CategoricalViewModel } from '../registry/viewModel';
 
 /**
@@ -43,6 +51,8 @@ export interface OpcionesDeGrafico {
    */
   formatear?: (valor: number, serie: number) => string;
   apilado?: ModoDeApilado;
+  circular?: ConfiguracionCircular;
+  medidor?: ConfiguracionDeMedidor;
 }
 
 /* ── Apilado ──────────────────────────────────────────────────────────────────────────────── */
@@ -115,8 +125,8 @@ function tooltipDe(o: OpcionesDeGrafico) {
  * rotulos del eje pero NO la leyenda — sin reservar, se dibuja encima de los nombres de las
  * categorias y quedan ilegibles los dos.
  */
-function leyendaDe(o: OpcionesDeGrafico) {
-  const varias = o.vm.series.length > 1;
+function leyendaDe(o: OpcionesDeGrafico, hayQueDistinguir = o.vm.series.length > 1) {
+  const varias = hayQueDistinguir;
   const modo: ModoDeLeyenda = o.leyenda ?? 'auto';
   const visible = modo === 'auto' ? varias : modo !== 'oculta';
   if (!visible) return { legend: { show: false }, margen: { bottom: 8, left: 8, right: 16, top: 24 } };
@@ -196,13 +206,11 @@ function margenDe(o: OpcionesDeGrafico, deLaLeyenda: { top: number; bottom: numb
   };
 }
 
-function base(o: OpcionesDeGrafico) {
-  const variasSeries = o.vm.series.length > 1;
-  const { legend, margen } = leyendaDe(o);
+function nucleo(o: OpcionesDeGrafico, conDecal: boolean) {
   return {
     aria: {
       enabled: true,
-      decal: { show: variasSeries },
+      decal: { show: conDecal },
       label: {
         enabled: true,
         general: {
@@ -216,6 +224,21 @@ function base(o: OpcionesDeGrafico) {
     backgroundColor: 'transparent',
     animation: false,
     textStyle: { color: o.paleta.texto },
+  };
+}
+
+/**
+ * Lo comun a los graficos CON ejes.
+ *
+ * El nucleo —aria, colores, animacion— lo comparten todos, tambien los que no tienen rejilla
+ * (circular y medidor). Lo que separa a estos es exactamente la rejilla y un tooltip por eje:
+ * meterlos en el nucleo obligaria a los otros a borrarlos, y borrar una opcion que el padre puso
+ * es justo la forma de que una de ellas se cuele algun dia.
+ */
+function base(o: OpcionesDeGrafico) {
+  const { legend, margen } = leyendaDe(o);
+  return {
+    ...nucleo(o, o.vm.series.length > 1),
     /*
      * El margen inferior reserva sitio para la leyenda cuando la hay.
      *
@@ -445,13 +468,325 @@ export function opcionesDeLineas(o: OpcionesDeGrafico): Record<string, unknown> 
   };
 }
 
-export type TipoDeGrafico = 'barras' | 'lineas' | 'barras-horizontales' | 'area';
+/* ── Circular: pastel y dona ──────────────────────────────────────────────────────────────── */
+
+/**
+ * Las porciones que se dibujan.
+ *
+ * Un valor NULO se DESCARTA, no se dibuja como cero. `null` significa «no hay respuesta» —una
+ * medida ya calculada por la fuente que el objeto colapso—, y una porcion de tamano cero afirma
+ * que esa categoria no aporto nada, que es una afirmacion distinta y probablemente falsa. En un
+ * circular la consecuencia es peor que en una barra: el total del que todo lo demas es porcentaje
+ * cambiaria segun lo que se invente aqui.
+ */
+function porcionesDe(o: OpcionesDeGrafico): { name: string; value: number }[] {
+  const porciones = o.vm.points
+    .map((p) => ({ name: p.label, valor: p.values[0] ?? null }))
+    .filter((p): p is { name: string; valor: number } => p.valor !== null)
+    .map((p) => ({ name: p.name, value: p.valor }));
+
+  // Ordenadas de mayor a menor por defecto: dos areas parecidas solo se distinguen si estan una
+  // al lado de la otra, y ese es justo el caso en el que un circular se lee mal.
+  return o.circular?.ordenar === false ? porciones : [...porciones].sort((a, b) => b.value - a.value);
+}
+
+/**
+ * La etiqueta de una porcion, con el porcentaje calculado AQUI y no con el `{d}` de ECharts.
+ *
+ * `{d}` sale con dos decimales —«47.61 %»— y esos cuatro caracteres de mas son justo los que no
+ * caben en una tarjeta estrecha: ECharts los recortaba a «47....», que se lee como un fallo de
+ * dibujo. Un decimal dice lo mismo y cabe.
+ */
+const etiquetaDePorcion = (
+  modo: EtiquetaCircular,
+  formatear: (n: number) => string,
+  total: number,
+) => {
+  const parte = (valor: number) => (total === 0 ? '—' : `${((valor / total) * 100).toFixed(1)} %`);
+  return (p: { name: string; value: number }) => {
+    switch (modo) {
+      case 'categoria':
+        return p.name;
+      case 'valor':
+        return formatear(p.value);
+      case 'porcentaje':
+        return parte(p.value);
+      case 'categoria-porcentaje':
+        return `${p.name}: ${parte(p.value)}`;
+      default:
+        return '';
+    }
+  };
+};
+
+/** Cuanto circulo queda, segun lo que ocupe la etiqueta que vive fuera de el. */
+const RADIO_EXTERIOR: Record<EtiquetaCircular, string> = {
+  ninguna: '72%',
+  porcentaje: '62%',
+  valor: '62%',
+  categoria: '54%',
+  'categoria-porcentaje': '50%',
+};
+
+/**
+ * Pastel y dona — la proporcion, no la magnitud.
+ *
+ * Es el mismo constructor para los dos objetos del catalogo, y el hueco del centro es una
+ * propiedad y no un objeto aparte: el contrato de datos es identico, asi que pasar de pastel a
+ * dona no puede costar la configuracion entera. Que en el catalogo esten los dos por separado es
+ * cosa de la PALETA —quien busca «dona» tiene que encontrarla por su nombre—, no del dibujo.
+ *
+ * Solo lee la PRIMERA medida. Un circular con dos medidas no es un circular: son dos, y el
+ * contrato lo dice con `measures: { max: 1 }` en vez de dejar que el render elija en silencio.
+ */
+export function opcionesDeCircular(o: OpcionesDeGrafico): Record<string, unknown> {
+  const c = o.circular ?? {};
+  const hueco = Math.min(Math.max(c.radioInterior ?? 0, 0), MAX_RADIO_INTERIOR);
+  const porciones = porcionesDe(o);
+  const total = porciones.reduce((suma, p) => suma + p.value, 0);
+  const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
+  const modo: EtiquetaCircular = c.etiquetas ?? 'porcentaje';
+
+  /*
+   * Aqui la leyenda distingue CATEGORIAS, no series.
+   *
+   * `auto` mira cuantas series hay y en un circular siempre hay una, asi que se ocultaba siempre
+   * —y sin leyenda, un pastel es una rueda de colores sin nombre—. Lo que hay que distinguir es
+   * cada porcion, y eso es lo que se le pasa.
+   */
+  const { legend } = leyendaDe(o, porciones.length > 1);
+
+  return {
+    ...nucleo(o, porciones.length > 1),
+    legend,
+    tooltip: {
+      trigger: 'item' as const,
+      backgroundColor: o.paleta.superficieElevada,
+      borderWidth: 0,
+      textStyle: { color: o.paleta.texto },
+      extraCssText: 'box-shadow: none;',
+      // La cifra Y su parte del total: un porcentaje suelto no se puede auditar contra la tabla.
+      formatter: (p: { name: string; value: number; percent: number }) =>
+        `${p.name}<br/>${formatear(p.value)} (${p.percent} %)`,
+    },
+    /*
+     * El total en el centro, solo si hay centro.
+     *
+     * Con hueco cero la cifra caeria encima de las porciones y taparia justo lo que el grafico
+     * dibuja. No es una preferencia: sin anillo no hay hueco donde escribir.
+     */
+    ...(c.totalEnElCentro && hueco > 0
+      ? {
+          title: {
+            text: formatear(total),
+            subtext: 'Total',
+            left: 'center',
+            top: 'center',
+            textStyle: { color: o.paleta.texto, fontSize: 20, fontWeight: 600 },
+            subtextStyle: { color: o.paleta.textoAtenuado, fontSize: 12 },
+          },
+        }
+      : {}),
+    series: [
+      {
+        type: 'pie',
+        name: o.vm.series[0] ?? o.titulo,
+        /*
+         * El radio exterior deja sitio a las etiquetas, que viven FUERA del circulo.
+         *
+         * Fuera y no dentro porque dentro habria que escribir sobre el color de la serie, y ese
+         * color lo elige el tema: no hay par de contraste comprobado contra el, que es justo la
+         * garantia que 4.3 no deja romper. Fuera, el texto va sobre la superficie de la tarjeta,
+         * donde el contraste si esta comprobado.
+         *
+         * Y por eso el radio depende de LO QUE DIGA la etiqueta: «52.6 %» ocupa seis caracteres y
+         * «Q3: 31.4 %» casi el doble. Con un radio fijo, el modo que lleva el nombre se recortaba
+         * a «Q3: 31....», que no se lee como un nombre largo sino como un fallo de dibujo.
+         */
+        radius: [`${hueco}%`, RADIO_EXTERIOR[modo]],
+        center: ['50%', '50%'],
+        // Sin reordenar por su cuenta: el orden ya se decidio arriba, y con `false` ECharts
+        // respeta el del modelo, que es el mismo que ve la tabla de datos adjunta.
+        avoidLabelOverlap: true,
+        itemStyle: { borderColor: o.paleta.superficie, borderWidth: 2 },
+        label:
+          modo === 'ninguna'
+            ? { show: false }
+            : {
+                show: true,
+                color: o.paleta.texto,
+                fontSize: 11,
+                formatter: etiquetaDePorcion(modo, formatear, total),
+                /*
+                 * Las etiquetas largas se alinean al BORDE de la tarjeta, no a la porcion.
+                 *
+                 * Con el radio ya reducido, «Q2: 25.4 %» seguia recortandose a la izquierda: cada
+                 * etiqueta arranca donde acaba su linea guia y ahi ya no queda ancho. Alineadas al
+                 * borde, todas empiezan en el mismo sitio —el maximo disponible— y ECharts estira
+                 * la guia hasta ellas.
+                 */
+                ...(modo === 'categoria' || modo === 'categoria-porcentaje'
+                  ? { alignTo: 'edge' as const, edgeDistance: 2 }
+                  : {}),
+              },
+        labelLine: { show: modo !== 'ninguna', lineStyle: { color: o.paleta.linea } },
+        data: porciones,
+        emphasis: { focus: 'self' },
+      },
+    ],
+  };
+}
+
+/* ── Medidor (tacometro) ───────────────────────────────────────────────────────────────────── */
+
+/**
+ * El siguiente numero «redondo» por encima de `n`.
+ *
+ * La escala de un medidor no puede salir del maximo de los datos: con 2.216 casos el arco
+ * terminaria en 2.216, y manana con 2.220 terminaria en 2.220 — la misma aguja en el mismo sitio
+ * para dos cifras distintas, y dos capturas que no se pueden comparar. Redondeando hacia arriba a
+ * 1, 2, 2,5 o 5 por decada, la escala solo cambia cuando la magnitud cambia de verdad.
+ */
+export function escalaBonita(n: number): number {
+  if (!Number.isFinite(n) || n <= 0) return 1;
+  const decada = 10 ** Math.floor(Math.log10(n));
+  for (const paso of [1, 2, 2.5, 5, 10]) {
+    if (n <= paso * decada) return paso * decada;
+  }
+  return 10 * decada;
+}
+
+/**
+ * Medidor — una cifra contra su meta.
+ *
+ * Responde a «cuanto llevamos de lo que teniamos que hacer», que es lo que un KPI no dice: la
+ * tarjeta da el numero y la variacion contra el periodo anterior, pero no contra el OBJETIVO.
+ *
+ * El objetivo puede venir del dataset (la segunda medida) o fijarse a mano en la presentacion. La
+ * medida manda: si el mapeo trae una, es la que se dibuja, porque un numero escrito en la
+ * configuracion no se actualiza y el del dataset si.
+ */
+export function opcionesDeMedidor(o: OpcionesDeGrafico): Record<string, unknown> {
+  const m = o.medidor ?? {};
+  const punto = o.vm.points[0];
+  const valor = punto?.values[0] ?? null;
+  const objetivo = punto?.values[1] ?? m.objetivo ?? null;
+
+  const minimo = m.minimo ?? 0;
+  const maximo =
+    m.maximo ?? escalaBonita(Math.max(valor ?? 0, objetivo ?? 0, minimo + 1) * 1.1);
+  const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
+  const color = o.paleta.series[0] ?? o.paleta.texto;
+
+  const anillo = {
+    type: 'gauge' as const,
+    min: minimo,
+    max: maximo,
+    startAngle: 210,
+    endAngle: -30,
+    center: ['50%', '58%'],
+    radius: '92%',
+  };
+
+  return {
+    ...nucleo(o, false),
+    tooltip: { show: false },
+    series: [
+      {
+        ...anillo,
+        name: o.titulo,
+        progress: { show: true, width: 16, itemStyle: { color } },
+        axisLine: { lineStyle: { width: 16, color: [[1, o.paleta.linea]] } },
+        pointer: { width: 5, length: '62%', itemStyle: { color } },
+        anchor: { show: true, size: 12, itemStyle: { color } },
+        axisTick: { show: false },
+        splitLine: { show: false },
+        /*
+         * Solo los extremos van rotulados.
+         *
+         * `splitNumber: 1` deja dos marcas —el minimo y el maximo— y esas son las que hacen que el
+         * angulo signifique algo. Con la escala entera rotulada, en una tarjeta de dos filas los
+         * numeros se pisan entre si y no se lee ninguno.
+         */
+        splitNumber: 1,
+        axisLabel: {
+          distance: -30,
+          color: o.paleta.textoAtenuado,
+          fontSize: 11,
+          formatter: (n: number) => formatear(n),
+        },
+        /*
+         * La cifra, debajo de la aguja.
+         *
+         * Un angulo no es un numero: sin esto, «a poco mas de la mitad» es todo lo que el objeto
+         * comunica, y la cifra exacta habria que ir a buscarla a otro sitio.
+         */
+        detail:
+          m.mostrarValor === false
+            ? { show: false }
+            : {
+                valueAnimation: false,
+                offsetCenter: [0, '32%'],
+                color: o.paleta.texto,
+                fontSize: 22,
+                fontWeight: 600,
+                formatter: (n: number) => (valor === null ? '—' : formatear(n)),
+              },
+        title: { show: false },
+        data: [{ value: valor ?? minimo }],
+      },
+      /*
+       * El objetivo, como una marca sobre el arco y no como una segunda aguja.
+       *
+       * Es una serie aparte con SOLO su puntero: una raya fina en el angulo de la meta. Dibujarlo
+       * como un segundo `data` de la misma serie pondria dos agujas iguales y no habria forma de
+       * saber cual es el valor y cual la meta — que es exactamente el tipo de ambiguedad que
+       * 1.4.1 no admite resolver solo con el color.
+       */
+      ...(objetivo === null
+        ? []
+        : [
+            {
+              ...anillo,
+              name: 'Objetivo',
+              progress: { show: false },
+              axisLine: { show: false },
+              axisTick: { show: false },
+              splitLine: { show: false },
+              axisLabel: { show: false },
+              detail: { show: false },
+              title: { show: false },
+              anchor: { show: false },
+              pointer: {
+                icon: 'rect',
+                width: 3,
+                length: '18%',
+                offsetCenter: [0, '-82%'],
+                itemStyle: { color: o.paleta.texto },
+              },
+              silent: true,
+              data: [{ value: objetivo }],
+            },
+          ]),
+    ],
+  };
+}
+
+export type TipoDeGrafico =
+  | 'barras'
+  | 'lineas'
+  | 'barras-horizontales'
+  | 'area'
+  | 'circular'
+  | 'medidor';
 
 const CONSTRUCTORES: Record<TipoDeGrafico, (o: OpcionesDeGrafico) => Record<string, unknown>> = {
   barras: opcionesDeBarras,
   'barras-horizontales': opcionesDeBarrasHorizontales,
   lineas: opcionesDeLineas,
   area: opcionesDeArea,
+  circular: opcionesDeCircular,
+  medidor: opcionesDeMedidor,
 };
 
 /**

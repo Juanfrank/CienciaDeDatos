@@ -154,6 +154,47 @@ const PRESENTACION_DE_GRAFICO = presenta(
   'apilado',
 );
 
+/**
+ * Lo que un circular admite presentar.
+ *
+ * NO lleva `ejes`, `apilado` ni `orden`: no tiene ejes, no apila nada, y su orden lo decide
+ * `circular.ordenar` —de mayor a menor o el del modelo— que es una pregunta distinta de «por
+ * categoria o por valor». Declararlas para no pensarlo dejaria opciones en el panel que no hacen
+ * nada, que es de donde venimos.
+ */
+const PRESENTACION_CIRCULAR = presenta('formato', 'formatos', 'leyenda', 'circular');
+
+/**
+ * El contrato de un circular, compartido por el pastel y la dona.
+ *
+ * UNA dimension y UNA medida. Es la limitacion que hace que el objeto signifique algo: las
+ * porciones tienen que sumar un total, y dos medidas no suman nada en comun. El resto de
+ * herramientas lo permite y el resultado es un grafico que no se puede leer.
+ */
+const CONTRATO_CIRCULAR: VisualObjectDefinition['versions'][number]['dataContract'] = {
+  dimensions: { min: 1, max: 1 },
+  measures: { min: 1, max: 1 },
+  notes: 'Las porciones suman el total de la medida. Un valor nulo no se dibuja: no es cero.',
+  pozos: [
+    {
+      id: 'categoria',
+      etiqueta: 'Categoria',
+      tipo: 'dimension',
+      max: 1,
+      min: 1,
+      ayuda: 'La dimension que reparte las porciones.',
+    },
+    {
+      id: 'valor',
+      etiqueta: 'Valor',
+      tipo: 'medida',
+      max: 1,
+      min: 1,
+      ayuda: 'El tamano de cada porcion.',
+    },
+  ],
+};
+
 export const catalogoInicial: VisualObjectDefinition[] = [
   {
     objectId: 'tarjeta-kpi',
@@ -337,6 +378,80 @@ export const catalogoInicial: VisualObjectDefinition[] = [
           pozos: POZOS_DE_BARRAS(4),
         },
         PRESENTACION_DE_GRAFICO,
+      ),
+    ],
+  },
+  {
+    /*
+     * Pastel y dona son DOS entradas del catalogo y UN solo dibujo.
+     *
+     * El contrato de datos es identico y el hueco del centro es una propiedad de presentacion, asi
+     * que pasar de uno a otro no cuesta la configuracion. Estan los dos por separado porque la
+     * paleta es como se encuentran los objetos: quien busca «dona» la busca por su nombre, y
+     * esconderla dentro del pastel como una casilla significa que no existe para quien no sepa ya
+     * que esta ahi.
+     */
+    objectId: 'pastel',
+    icono: 'pastel',
+    name: 'Grafico circular (pastel)',
+    description: 'La parte que representa cada categoria sobre el total.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: porciones ordenadas, etiquetas de detalle y tooltip con cifra y parte.',
+        CONTRATO_CIRCULAR,
+        PRESENTACION_CIRCULAR,
+      ),
+    ],
+  },
+  {
+    objectId: 'dona',
+    icono: 'dona',
+    name: 'Grafico de anillos (dona)',
+    description: 'Lo mismo que el circular, con el total en el centro.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: anillo con hueco del 55 % y total en el centro.',
+        CONTRATO_CIRCULAR,
+        PRESENTACION_CIRCULAR,
+      ),
+    ],
+  },
+  {
+    objectId: 'medidor',
+    icono: 'medidor',
+    name: 'Medidor (tacometro)',
+    description: 'Una cifra contra su meta, sobre una escala fija.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: aguja, marca de objetivo y escala fija o deducida.',
+        {
+          dimensions: { min: 0, max: 0 },
+          measures: { min: 1, max: 2 },
+          notes:
+            'La primera medida es el valor; la segunda, opcional, es el objetivo. Sin dimensiones: ' +
+            'un medidor dibuja UNA cifra, y repartirla por categorias es otro objeto.',
+          pozos: [
+            {
+              id: 'valor',
+              etiqueta: 'Valor',
+              tipo: 'medida',
+              max: 1,
+              min: 1,
+              ayuda: 'La cifra que mueve la aguja.',
+            },
+            {
+              id: 'objetivo',
+              etiqueta: 'Objetivo',
+              tipo: 'medida',
+              max: 1,
+              ayuda: 'Opcional. Si no se mapea, se puede fijar a mano en Formato.',
+            },
+          ],
+        },
+        presenta('formato', 'formatos', 'medidor'),
       ),
     ],
   },

@@ -1,0 +1,139 @@
+import { describe, expect, it } from 'vitest';
+import { escalaBonita, opcionesDe } from './opciones';
+import type { CategoricalViewModel } from '../registry/viewModel';
+
+const paleta = {
+  series: ['#1', '#2'],
+  texto: '#t',
+  textoAtenuado: '#ta',
+  linea: '#l',
+  superficie: '#s',
+  superficieElevada: '#se',
+};
+
+const vm = (series: string[], puntos: [string, ...(number | null)[]][]): CategoricalViewModel => ({
+  series,
+  points: puntos.map(([label, ...values]) => ({ label, values })),
+  aggregated: false,
+});
+
+/* eslint-disable @typescript-eslint/no-explicit-any -- se comprueba la forma que consume ECharts */
+const circular = (extra: Record<string, unknown> = {}, v = vm(['Casos'], [['A', 30], ['B', 70]])) =>
+  opcionesDe('circular', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+
+const medidor = (extra: Record<string, unknown> = {}, v = vm(['Casos'], [['', 40, 100]])) =>
+  opcionesDe('medidor', { vm: v, paleta, titulo: 'T', ...extra }) as any;
+
+describe('circular: pastel y dona', () => {
+  it('el hueco del centro distingue un pastel de una dona, y nada mas', () => {
+    expect(circular().series[0].radius[0]).toBe('0%');
+    expect(circular({ circular: { radioInterior: 55 } }).series[0].radius[0]).toBe('55%');
+  });
+
+  it('el hueco se acota: por encima del limite no queda anillo que comparar', () => {
+    expect(circular({ circular: { radioInterior: 300 } }).series[0].radius[0]).toBe('80%');
+    expect(circular({ circular: { radioInterior: -20 } }).series[0].radius[0]).toBe('0%');
+  });
+
+  it('ordena las porciones de mayor a menor por defecto', () => {
+    // Dos areas parecidas solo se distinguen si estan una al lado de la otra.
+    expect(circular().series[0].data.map((d: { name: string }) => d.name)).toEqual(['B', 'A']);
+    expect(
+      circular({ circular: { ordenar: false } }).series[0].data.map((d: { name: string }) => d.name),
+    ).toEqual(['A', 'B']);
+  });
+
+  it('un valor nulo NO se dibuja como cero: se descarta', () => {
+    /*
+     * Es lo que mas importa de todo el objeto. `null` es «no hay respuesta»; una porcion de
+     * tamano cero AFIRMA que esa categoria no aporto nada. Y ademas el nulo cambiaria el total
+     * del que todas las demas porciones son porcentaje.
+     */
+    const o = circular({}, vm(['Casos'], [['A', 30], ['B', null], ['C', 70]]));
+    expect(o.series[0].data.map((d: { name: string }) => d.name)).toEqual(['C', 'A']);
+  });
+
+  it('la leyenda nombra CATEGORIAS, asi que auto la ensena con una sola serie', () => {
+    // `auto` mira cuantas series hay y en un circular siempre hay una: sin esto, un pastel salia
+    // siempre como una rueda de colores sin nombre.
+    expect(circular().legend.show).not.toBe(false);
+    // Con una sola porcion no hay nada que distinguir.
+    expect(circular({}, vm(['Casos'], [['A', 30]])).legend.show).toBe(false);
+  });
+
+  it('el total en el centro solo se dibuja si hay centro donde ponerlo', () => {
+    expect(circular({ circular: { totalEnElCentro: true } }).title).toBeUndefined();
+    const conHueco = circular({ circular: { totalEnElCentro: true, radioInterior: 55 } });
+    expect(conHueco.title.text).toBe('100');
+  });
+
+  it('el total del centro usa el formateador de la medida', () => {
+    const o = circular({
+      circular: { totalEnElCentro: true, radioInterior: 55 },
+      formatear: (n: number) => `${n} casos`,
+    });
+    expect(o.title.text).toBe('100 casos');
+  });
+
+  it('el tooltip da la cifra Y la parte: un porcentaje suelto no se puede auditar', () => {
+    const texto = circular({ formatear: (n: number) => `${n} casos` }).tooltip.formatter({
+      name: 'A',
+      value: 30,
+      percent: 30,
+    });
+    expect(texto).toContain('30 casos');
+    expect(texto).toContain('30 %');
+  });
+});
+
+describe('medidor', () => {
+  it('la escala se redondea hacia arriba a un numero estable', () => {
+    /*
+     * Con el maximo pegado a los datos, 2.216 y 2.220 dibujan la misma aguja en el mismo sitio y
+     * dos capturas dejan de ser comparables.
+     */
+    expect(escalaBonita(2216)).toBe(2500);
+    expect(escalaBonita(1)).toBe(1);
+    expect(escalaBonita(11)).toBe(20);
+    expect(escalaBonita(0)).toBe(1);
+    expect(escalaBonita(-5)).toBe(1);
+  });
+
+  it('el minimo y el maximo fijados mandan sobre lo deducido', () => {
+    const o = medidor({ medidor: { minimo: 10, maximo: 500 } });
+    expect(o.series[0].min).toBe(10);
+    expect(o.series[0].max).toBe(500);
+  });
+
+  it('la segunda medida es el objetivo y se dibuja como marca, no como segunda aguja', () => {
+    const o = medidor();
+    expect(o.series).toHaveLength(2);
+    expect(o.series[1].data[0].value).toBe(100);
+    expect(o.series[1].pointer.icon).toBe('rect');
+    // La marca no responde al raton: no es un dato que se consulte, es una referencia.
+    expect(o.series[1].silent).toBe(true);
+  });
+
+  it('sin objetivo no hay marca', () => {
+    expect(medidor({}, vm(['Casos'], [['', 40]])).series).toHaveLength(1);
+  });
+
+  it('el objetivo del dataset manda sobre el escrito a mano', () => {
+    // Un numero de la configuracion no se actualiza; el del dataset si.
+    expect(medidor({ medidor: { objetivo: 7 } }).series[1].data[0].value).toBe(100);
+    expect(
+      medidor({ medidor: { objetivo: 7 } }, vm(['Casos'], [['', 40]])).series[1].data[0].value,
+    ).toBe(7);
+  });
+
+  it('un valor nulo se dibuja como raya y no como cero', () => {
+    const o = medidor({}, vm(['Casos'], [['', null, 100]]));
+    expect(o.series[0].detail.formatter(0)).toBe('—');
+  });
+
+  it('solo rotula los extremos de la escala', () => {
+    // Con la escala entera rotulada, en una tarjeta de dos filas los numeros se pisan.
+    expect(medidor().series[0].splitNumber).toBe(1);
+    expect(medidor().series[0].splitLine.show).toBe(false);
+  });
+});

@@ -89,6 +89,67 @@ export interface ConfiguracionDeEjes {
 export const MODOS_DE_APILADO = ['ninguno', 'apilado', 'porcentaje'] as const;
 export type ModoDeApilado = (typeof MODOS_DE_APILADO)[number];
 
+/**
+ * ---- Circular: pastel y dona ----
+ *
+ * Lo que una herramienta de informes llama «etiquetas de detalle». Sin ellas, un pastel obliga a
+ * ir del color al rotulo de la leyenda y volver, para cada porcion; con la etiqueta puesta sobre
+ * la porcion, se lee de una vez.
+ *
+ * `porcentaje` es el modo por defecto y no es un capricho: la razon de existir de un circular es
+ * la PROPORCION —cuanto pesa cada parte del total— y la cifra absoluta ya la da mejor cualquier
+ * grafico de barras. Quien quiera las dos, tiene `categoria-porcentaje`.
+ */
+export const ETIQUETAS_CIRCULARES = [
+  'ninguna',
+  'categoria',
+  'valor',
+  'porcentaje',
+  'categoria-porcentaje',
+] as const;
+export type EtiquetaCircular = (typeof ETIQUETAS_CIRCULARES)[number];
+
+export interface ConfiguracionCircular {
+  /**
+   * El hueco del centro, en porcentaje del radio. 0 es un pastel; 55 es una dona.
+   *
+   * Es una MEDIDA y no un interruptor «dona si/no» porque el hueco tiene una consecuencia real:
+   * cuanto mas grande, menos area queda para comparar porciones —que es lo unico que un circular
+   * hace bien— y mas sitio hay para la cifra del centro. Quien lo sube esta cambiando ese canje,
+   * y conviene que lo vea como lo que es.
+   */
+  radioInterior?: number;
+  etiquetas?: EtiquetaCircular;
+  /** Ordenar las porciones de mayor a menor. Encendido por defecto: es como se compara un area. */
+  ordenar?: boolean;
+  /** El total en el centro de la dona. Solo se dibuja si hay hueco donde ponerlo. */
+  totalEnElCentro?: boolean;
+}
+
+/**
+ * ---- Medidor (tacometro) ----
+ *
+ * La aguja necesita un minimo y un maximo: sin ellos no hay escala y el angulo no significa nada.
+ * Se pueden fijar a mano o dejar que se deduzcan; lo que NO se puede es que el objeto invente una
+ * escala distinta cada vez que llegan datos nuevos, porque entonces la misma cifra se dibuja en
+ * dos sitios distintos y la comparacion entre dos capturas deja de valer. Por eso, cuando no se
+ * fijan, se deducen del objetivo y del valor de forma estable y se ROTULAN en los extremos.
+ */
+export interface ConfiguracionDeMedidor {
+  minimo?: number;
+  maximo?: number;
+  /**
+   * El objetivo, cuando es un numero fijo y no una medida del dataset.
+   *
+   * La medida manda sobre esto: si el mapeo trae un objetivo, es el que se dibuja. Este existe
+   * para la meta que no esta en ningun dato —«90 dias»— y que hoy obligaria a inventarse una
+   * columna para poder pintarla.
+   */
+  objetivo?: number;
+  /** Mostrar la cifra bajo la aguja. Encendida por defecto: un angulo no es un numero. */
+  mostrarValor?: boolean;
+}
+
 /** Por que se ordenan las categorias del eje. Power BI lo llama «ordenar eje». */
 export const CRITERIOS_DE_ORDEN = ['categoria', 'valor'] as const;
 export type CriterioDeOrden = (typeof CRITERIOS_DE_ORDEN)[number];
@@ -262,6 +323,8 @@ export interface PresentacionDeObjeto {
   ejes?: ConfiguracionDeEjes;
   orden?: OrdenDeCategorias;
   apilado?: ModoDeApilado;
+  circular?: ConfiguracionCircular;
+  medidor?: ConfiguracionDeMedidor;
   /** Peso, estilo, alineacion y color de los textos del objeto. */
   textos?: TextosDeObjeto;
 }
@@ -291,6 +354,8 @@ export const CLAVES_DE_PRESENTACION = [
   'ejes',
   'orden',
   'apilado',
+  'circular',
+  'medidor',
 ] as const satisfies readonly (keyof PresentacionDeObjeto)[];
 
 export type ClaveDePresentacion = keyof PresentacionDeObjeto;
@@ -326,6 +391,8 @@ export interface ProblemaDePresentacion {
 export const MAX_SUBTITULO = 80;
 export const MAX_UNIDAD = 8;
 export const MAX_DECIMALES = 4;
+/** El hueco maximo de una dona. Por encima queda un hilo, no un anillo que se pueda comparar. */
+export const MAX_RADIO_INTERIOR = 80;
 
 /**
  * Valida una presentacion contra lo que el objeto declara admitir.
@@ -445,6 +512,41 @@ export function validarPresentacion(
           `deja de leerse y empieza a ser ruido de precision.`,
       });
     }
+  }
+
+  const circular = presentacion.circular;
+  if (circular?.radioInterior !== undefined) {
+    if (circular.radioInterior < 0 || circular.radioInterior > MAX_RADIO_INTERIOR) {
+      problemas.push({
+        clave: 'circular.radioInterior',
+        problema:
+          `El hueco va de 0 a ${MAX_RADIO_INTERIOR} % del radio. Por encima no queda anillo que ` +
+          `comparar: el grafico dejaria de decir nada sobre las proporciones.`,
+      });
+    }
+  }
+  if (
+    circular?.etiquetas !== undefined &&
+    !(ETIQUETAS_CIRCULARES as readonly string[]).includes(circular.etiquetas)
+  ) {
+    problemas.push({
+      clave: 'circular.etiquetas',
+      problema: `'${String(circular.etiquetas)}' no es un modo. Use: ${ETIQUETAS_CIRCULARES.join(', ')}.`,
+    });
+  }
+
+  /*
+   * Un minimo por encima del maximo no es un rango: es una escala del reves.
+   *
+   * Se rechaza aqui, al guardar, y no se «arregla» al dibujar intercambiandolos. Intercambiarlos
+   * dejaria pasar el error y dibujaria una aguja que no es la que nadie pidio; 4.2 manda marcar.
+   */
+  const medidor = presentacion.medidor;
+  if (medidor?.minimo !== undefined && medidor.maximo !== undefined && medidor.minimo >= medidor.maximo) {
+    problemas.push({
+      clave: 'medidor.maximo',
+      problema: `El maximo (${medidor.maximo}) tiene que ser mayor que el minimo (${medidor.minimo}).`,
+    });
   }
 
   if (presentacion.subtitulo !== undefined && presentacion.subtitulo.length > MAX_SUBTITULO) {

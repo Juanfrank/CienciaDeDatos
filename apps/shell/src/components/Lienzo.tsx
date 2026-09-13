@@ -91,6 +91,8 @@ export default function Lienzo({
         ...(presentacion?.etiquetasDeDato ? { etiquetasDeDato: true } : {}),
         ...(presentacion?.ejes ? { ejes: presentacion.ejes } : {}),
         ...(presentacion?.apilado ? { apilado: presentacion.apilado } : {}),
+        ...(presentacion?.circular ? { circular: presentacion.circular } : {}),
+        ...(presentacion?.medidor ? { medidor: presentacion.medidor } : {}),
         ...(formatear ? { formatear } : {}),
       }),
     // `formatear` se redefine en cada render del padre, asi que NO entra en las dependencias: lo
@@ -101,14 +103,20 @@ export default function Lienzo({
   const porDefecto: 'canvas' | 'svg' = elementosDe(vm) >= UMBRAL_DE_ELEMENTOS ? 'canvas' : 'svg';
 
   /*
-   * Las opciones tambien viajan por referencia, por el mismo motivo que los callbacks.
+   * Las opciones viajan por referencia, y se le entrega a ECharts el OBJETO, no la cadena.
    *
-   * El efecto de creacion las lee UNA vez, al montar; los cambios posteriores los aplica el
-   * segundo efecto con `setOption`, que es lo que ECharts ofrece precisamente para no tener que
-   * rehacer el grafico cuando solo cambian los datos.
+   * Antes se montaba con `JSON.parse(clave)`, y eso borraba en silencio todos los `formatter`
+   * —que son funciones y `JSON.stringify` los omite—. La consecuencia no se veia como un fallo:
+   * el grafico salia entero y con datos correctos, solo que la cifra sobre cada barra aparecia
+   * en crudo —«2216»— mientras la tabla de datos adjunta decia «2,216», y el tooltip del 100 %
+   * nunca enseno la cifra original. Las pruebas unitarias no podian encontrarlo porque llaman al
+   * constructor de opciones directamente, donde la funcion si esta.
+   *
+   * La cadena sigue existiendo, pero solo como CLAVE para saber si algo cambio: comparar por
+   * contenido es lo que evita rehacer el grafico en cada render del padre.
    */
-  const opcionesVigentes = useRef(clave);
-  opcionesVigentes.current = clave;
+  const opcionesVigentes = useRef(opciones);
+  opcionesVigentes.current = opciones;
 
   // Creacion y destruccion: una sola vez mientras el tipo de renderizador no cambie.
   useEffect(() => {
@@ -127,7 +135,7 @@ export default function Lienzo({
       const montar = (renderer: 'canvas' | 'svg') => {
         grafico.current?.dispose();
         const instancia = echarts.init(nodo, null, { renderer });
-        instancia.setOption(JSON.parse(opcionesVigentes.current) as Record<string, unknown>);
+        instancia.setOption(opcionesVigentes.current);
         instancia.on('click', (evento: { name?: string }) => {
           if (evento.name) seleccionar.current?.(evento.name);
         });
@@ -155,9 +163,15 @@ export default function Lienzo({
     };
   }, [porDefecto]);
 
-  // Cambios de datos: se aplican sobre el grafico vivo.
+  /*
+   * Cambios de datos: se aplican sobre el grafico vivo.
+   *
+   * Depende de `clave` —la comparacion por contenido— y lee `opcionesVigentes`, que es el objeto
+   * con sus funciones intactas. Depender del objeto seria no memorizar nada, y pasar la cadena
+   * volveria a perder los formateadores.
+   */
   useEffect(() => {
-    grafico.current?.setOption(JSON.parse(clave) as Record<string, unknown>, true);
+    grafico.current?.setOption(opcionesVigentes.current, true);
   }, [clave]);
 
   return <div ref={contenedor} className="grafico__lienzo" data-testid="grafico-lienzo" />;

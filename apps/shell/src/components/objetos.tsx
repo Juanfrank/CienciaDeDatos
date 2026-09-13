@@ -328,6 +328,14 @@ export function TarjetaKpi({ titulo, result, instance, ranuras, agregaciones, ic
  * Lo unico que cambia es que tipo de grafico se pide, y por eso `Barras` recibe la orientacion en
  * vez de existir dos componentes con el mismo cuerpo copiado.
  */
+/**
+ * El hueco de una dona recien puesta, en porcentaje del radio.
+ *
+ * 55 deja anillo de sobra para comparar porciones y hueco suficiente para el total. Es el valor
+ * por defecto del objeto, no un limite: el panel lo mueve entre 0 y 80.
+ */
+const HUECO_DE_DONA = 55;
+
 export function BarrasHorizontales(props: ObjetoProps) {
   return <Barras {...props} horizontal />;
 }
@@ -514,6 +522,206 @@ export function Lineas({
             </tbody>
           </table>
         </div>
+      </Grafico>
+    </Marco>
+  );
+}
+
+/**
+ * Circular — pastel y dona.
+ *
+ * El MISMO componente para los dos objetos del catalogo. Lo unico que los separa es el hueco del
+ * centro, que es presentacion: `dona` se publica con un valor por defecto y `pastel` sin el, y
+ * cualquiera de los dos se puede mover al otro extremo desde el panel sin perder nada.
+ */
+export function Circular({
+  titulo,
+  result,
+  instance,
+  ranuras,
+  agregaciones,
+  onFiltrar,
+  iconoDelObjeto,
+  hueco,
+}: ObjetoProps & { hueco?: number }) {
+  const r = porRanura(instance, ranuras);
+  const categoria = r ? r.uno('categoria') : fieldKeyDe(instance.binding.dimensions[0]);
+  const medidas = r ? r.varios('valor') : instance.binding.measures;
+  const dimension = categoria ? aFieldRef(categoria) : undefined;
+
+  const vm = toCategorical(
+    result,
+    dimension ? [dimension] : [],
+    medidas,
+    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+  );
+  const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
+
+  /*
+   * El hueco por defecto del objeto, que la presentacion anula.
+   *
+   * `dona` llega con 55 y `pastel` sin nada; lo que el editor ponga manda sobre los dos. Sin este
+   * `??`, una dona recien puesta en el lienzo saldria como un pastel hasta que alguien abriera el
+   * panel — o sea, el objeto no seria lo que su nombre dice.
+   */
+  const circular = {
+    ...(hueco === undefined ? {} : { radioInterior: hueco }),
+    ...instance.presentacion?.circular,
+  };
+  const presentacion = { ...instance.presentacion, circular };
+
+  // El total se calcula sobre lo que de verdad se dibuja: los nulos no entran, igual que en el
+  // grafico. Si entraran como cero, el porcentaje del respaldo no cuadraria con el del dibujo.
+  const valores = vm.points
+    .map((p) => ({ label: p.label, valor: p.values[0] }))
+    .filter((p): p is { label: string; valor: number } => p.valor !== null);
+  const total = valores.reduce((suma, p) => suma + p.valor, 0);
+
+  return (
+    <Marco
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      agregaciones={agregaciones}
+      iconoDelObjeto={iconoDelObjeto}
+    >
+      <Grafico
+        instanceId={instance.instanceId}
+        tipo="circular"
+        vm={vm}
+        titulo={titulo}
+        presentacion={presentacion}
+        formatear={(valor) => formatear(valor)}
+        {...(dimension ? { dimension: fieldKey(dimension) } : {})}
+        {...(dimension && onFiltrar
+          ? { onSeleccionar: (c: string) => onFiltrar(fieldKey(dimension), c) }
+          : {})}
+      >
+        {/*
+          El respaldo lleva la cifra Y su parte del total.
+          
+          Es lo que el dibujo comunica: la porcion es el porcentaje. Un respaldo con solo las
+          cifras obligaria a dividir de cabeza para leer lo mismo que el grafico ensena de un
+          vistazo, y entonces el camino accesible diria menos que el otro.
+        */}
+        <div className="tabla-contenedor">
+          <table className="tabla" data-testid="circular">
+            <thead>
+              <tr>
+                <th scope="col">{dimension ? fieldKey(dimension) : 'Categoria'}</th>
+                <th scope="col" className="es-numero">
+                  {medidas[0] ?? 'Valor'}
+                </th>
+                <th scope="col" className="es-numero">
+                  Parte
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {valores.map((punto) => (
+                <tr key={punto.label}>
+                  <th scope="row">
+                    {dimension && onFiltrar ? (
+                      <button
+                        type="button"
+                        className="boton-enlace"
+                        onClick={() => onFiltrar(fieldKey(dimension), punto.label)}
+                      >
+                        {punto.label}
+                      </button>
+                    ) : (
+                      punto.label
+                    )}
+                  </th>
+                  <td className="es-numero">{formatear(punto.valor)}</td>
+                  <td className="es-numero">
+                    {total === 0 ? '—' : `${((punto.valor / total) * 100).toFixed(1)} %`}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Grafico>
+    </Marco>
+  );
+}
+
+/** La dona es el circular con hueco. Nada mas: mismo contrato, mismo dibujo, mismo respaldo. */
+export function Dona(props: ObjetoProps) {
+  return <Circular {...props} hueco={HUECO_DE_DONA} />;
+}
+
+/**
+ * Medidor — una cifra contra su meta.
+ *
+ * Sin dimensiones: `toCategorical` con la lista vacia devuelve UN punto con las dos medidas, que
+ * es exactamente lo que la aguja necesita. No hace falta un modelo de vista aparte.
+ */
+export function Medidor({
+  titulo,
+  result,
+  instance,
+  ranuras,
+  agregaciones,
+  iconoDelObjeto,
+}: ObjetoProps) {
+  const r = porRanura(instance, ranuras);
+  const medidas = r
+    ? [r.uno('valor'), r.uno('objetivo')].filter((m): m is string => m !== undefined)
+    : instance.binding.measures;
+
+  const vm = toCategorical(
+    result,
+    [],
+    medidas,
+    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+  );
+  const formatear = formateadorDeMedida(instance.presentacion, medidas[0] ?? '');
+  const punto = vm.points[0];
+  const valor = punto?.values[0] ?? null;
+  const objetivo = punto?.values[1] ?? instance.presentacion?.medidor?.objetivo ?? null;
+
+  return (
+    <Marco
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      agregaciones={agregaciones}
+      iconoDelObjeto={iconoDelObjeto}
+    >
+      <Grafico
+        instanceId={instance.instanceId}
+        tipo="medidor"
+        vm={vm}
+        titulo={titulo}
+        presentacion={instance.presentacion}
+        formatear={(v) => formatear(v)}
+      >
+        {/*
+          El respaldo dice cuanto falta, no solo cuanto hay.
+          
+          Es lo que la aguja contra la marca ensena de un vistazo y lo que un lector de pantalla
+          no puede deducir de dos cifras sueltas.
+        */}
+        <dl className="medidor-respaldo" data-testid="medidor">
+          <div>
+            <dt>{medidas[0] ?? 'Valor'}</dt>
+            <dd>{formatear(valor)}</dd>
+          </div>
+          {objetivo === null ? null : (
+            <>
+              <div>
+                <dt>Objetivo</dt>
+                <dd>{formatear(objetivo)}</dd>
+              </div>
+              <div>
+                <dt>Diferencia</dt>
+                <dd>{valor === null ? '—' : formatear(valor - objetivo)}</dd>
+              </div>
+            </>
+          )}
+        </dl>
       </Grafico>
     </Marco>
   );

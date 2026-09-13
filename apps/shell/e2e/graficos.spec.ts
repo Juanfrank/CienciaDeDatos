@@ -262,3 +262,50 @@ test.describe('la tabla se ordena por su encabezado', () => {
     expect(primeraColumna.length).toBeGreaterThan(0);
   });
 });
+
+/**
+ * Lo que ECharts dibuja de VERDAD, no lo que el constructor de opciones devuelve.
+ *
+ * Es la distincion que hizo falta aprender por las malas. Las pruebas unitarias llaman al
+ * constructor y ven el `formatter` ahi, tal cual se escribio; el camino real pasaba las opciones
+ * por `JSON.stringify` para compararlas por contenido y luego montaba el grafico con el
+ * resultado — y `JSON.stringify` omite las funciones. Asi que TODOS los formateadores se perdian
+ * entre el constructor y ECharts, en silencio y sin romper nada: el grafico salia entero, con
+ * datos correctos, y solo las cifras aparecian en crudo.
+ *
+ * Estas dos comprobaciones existen para que ese hueco no se pueda reabrir. Leen el SVG, donde el
+ * texto es un nodo del documento: con pocos elementos el renderizador por defecto es SVG, que es
+ * justo lo que permite comprobarlo sin mirar pixeles.
+ */
+test.describe('los formateadores llegan hasta el dibujo', () => {
+  test('la cifra sobre la barra dice lo MISMO que el respaldo de la misma tarjeta', async ({
+    page,
+  }) => {
+    await page.goto('/m/composicion/familia');
+
+    const grafico = page.getByTestId('grafico-f-barras');
+    await expect(grafico).toHaveAttribute('data-montado', 'si');
+
+    /*
+     * Se compara con el respaldo y no con una cifra escrita aqui.
+     *
+     * La regla que importa no es «pone 2,216»: es que el dibujo y el camino accesible de la MISMA
+     * tarjeta digan el mismo numero de la misma forma. Escrita con una cifra fija, la prueba
+     * dependeria ademas del ambito de quien la ejecuta.
+     */
+    const delRespaldo = (await grafico.locator('.barras__valor').first().innerText()).trim();
+    expect(delRespaldo).toMatch(/\d/);
+    await expect(grafico.locator('svg text').filter({ hasText: delRespaldo })).not.toHaveCount(0);
+  });
+
+  test('y la cifra del medidor, donde ademas es la unica que se ve', async ({ page }) => {
+    await page.goto('/m/composicion/proporcion');
+
+    const medidor = page.getByTestId('grafico-pr-medidor-meta');
+    await expect(medidor).toHaveAttribute('data-montado', 'si');
+
+    const delRespaldo = (await medidor.locator('.medidor-respaldo dd').first().innerText()).trim();
+    expect(delRespaldo).toMatch(/\d/);
+    await expect(medidor.locator('svg text').filter({ hasText: delRespaldo })).not.toHaveCount(0);
+  });
+});
