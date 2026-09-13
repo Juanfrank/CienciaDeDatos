@@ -2,7 +2,12 @@
 
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useState } from 'react';
-import type { CategoricalViewModel, PaletaDeGrafico, TipoDeGrafico } from '@app/ui-components';
+import type {
+  CategoricalViewModel,
+  PaletaDeGrafico,
+  PresentacionDeObjeto,
+  TipoDeGrafico,
+} from '@app/ui-components';
 
 /**
  * Un grafico: el lienzo de ECharts MAS el respaldo en DOM.
@@ -33,6 +38,8 @@ export function Grafico({
   vm,
   titulo,
   dimension,
+  presentacion,
+  formatear,
   onSeleccionar,
   children,
 }: {
@@ -42,6 +49,10 @@ export function Grafico({
   vm: CategoricalViewModel;
   titulo: string;
   dimension?: string;
+  /** Leyenda, etiquetas de dato, ejes y orden — lo que el editor configura. */
+  presentacion?: PresentacionDeObjeto;
+  /** Formatea una cifra de la serie `s` con el formato de SU medida. */
+  formatear?: (valor: number, serie: number) => string;
   onSeleccionar?: (categoria: string) => void;
   /** El respaldo: las barras en HTML, con sus botones. */
   children: React.ReactNode;
@@ -92,6 +103,8 @@ export function Grafico({
           paleta={paleta}
           titulo={titulo}
           {...(dimension ? { dimension } : {})}
+          {...(presentacion ? { presentacion } : {})}
+          {...(formatear ? { formatear } : {})}
           {...(onSeleccionar ? { onSeleccionar } : {})}
           onMontado={alMontar}
         />

@@ -37,8 +37,51 @@ import {
 export const ACENTOS = ['primario', 'secundario', 'terciario', 'neutro'] as const;
 export type AcentoDeObjeto = (typeof ACENTOS)[number];
 
-export const MODOS_DE_LEYENDA = ['auto', 'siempre', 'nunca'] as const;
+/**
+ * Donde va la leyenda, no solo si esta.
+ *
+ * Eran tres modos —`auto`, `siempre`, `nunca`— y ninguno llegaba al grafico: se podian elegir en
+ * el editor y no hacian absolutamente nada. Ahora ademas se elige el lado, que es lo que resuelve
+ * el caso real: con seis series y un objeto ancho y bajo, la leyenda abajo se come el grafico, y
+ * a la derecha no.
+ *
+ * `auto` la ensena solo cuando hay mas de una serie, que es cuando distingue algo.
+ */
+export const MODOS_DE_LEYENDA = ['auto', 'oculta', 'arriba', 'abajo', 'izquierda', 'derecha'] as const;
 export type ModoDeLeyenda = (typeof MODOS_DE_LEYENDA)[number];
+
+/**
+ * Los ejes, como en cualquier herramienta de informes.
+ *
+ * Lo que falta cuando no se puede tocar un eje: un grafico de porcentajes con el eje entre 40 y
+ * 60 exagera diferencias de dos puntos, y uno de importes sin titulo obliga a adivinar si son
+ * pesos o miles. Las dos cosas se resuelven aqui y no en el titulo del objeto.
+ */
+export interface ConfiguracionDeEjes {
+  mostrarX?: boolean;
+  mostrarY?: boolean;
+  tituloX?: string;
+  tituloY?: string;
+  /** Las lineas horizontales de fondo. Con pocas barras estorban mas que ayudan. */
+  cuadricula?: boolean;
+  /**
+   * Empezar el eje de valores en cero.
+   *
+   * Encendido por defecto, y a proposito: un eje que empieza donde le conviene a los datos hace
+   * que una diferencia del 2 % parezca el triple. Apagarlo es una decision que alguien toma, no
+   * el comportamiento por omision.
+   */
+  desdeCero?: boolean;
+}
+
+/** Por que se ordenan las categorias del eje. Power BI lo llama «ordenar eje». */
+export const CRITERIOS_DE_ORDEN = ['categoria', 'valor'] as const;
+export type CriterioDeOrden = (typeof CRITERIOS_DE_ORDEN)[number];
+
+export interface OrdenDeCategorias {
+  por?: CriterioDeOrden;
+  direccion?: 'asc' | 'desc';
+}
 
 /**
  * Compatibilidad: la forma anterior del formato, que era del OBJETO y no de la medida.
@@ -199,8 +242,10 @@ export interface PresentacionDeObjeto {
    */
   formatos?: FormatosDelObjeto;
   leyenda?: ModoDeLeyenda;
-  /** La cifra encima de cada barra o punto. */
+  /** La cifra encima de cada barra o punto, con el formato de SU medida. */
   etiquetasDeDato?: boolean;
+  ejes?: ConfiguracionDeEjes;
+  orden?: OrdenDeCategorias;
   /** Peso, estilo, alineacion y color de los textos del objeto. */
   textos?: TextosDeObjeto;
 }
@@ -227,6 +272,8 @@ export const CLAVES_DE_PRESENTACION = [
   'formatos',
   'leyenda',
   'etiquetasDeDato',
+  'ejes',
+  'orden',
 ] as const satisfies readonly (keyof PresentacionDeObjeto)[];
 
 export type ClaveDePresentacion = keyof PresentacionDeObjeto;

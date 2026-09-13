@@ -20,6 +20,7 @@ export {
   MAX_DECIMALES,
   MAX_SUBTITULO,
   MAX_UNIDAD,
+  CRITERIOS_DE_ORDEN,
   MODOS_DE_LEYENDA,
   PRESENTACION_MINIMA,
   formateadorDe,
@@ -27,7 +28,10 @@ export {
   type AcentoDeObjeto,
   type ClaveDePresentacion,
   type FormatoNumerico,
+  type ConfiguracionDeEjes,
+  type CriterioDeOrden,
   type ModoDeLeyenda,
+  type OrdenDeCategorias,
   type PresentacionDeObjeto,
   type ProblemaDePresentacion,
 } from './presentacion/contrato';
@@ -223,6 +227,7 @@ export {
   type KpiViewModel,
   type MatrixViewModel,
 } from './registry/viewModel';
+export { ordenarCategorias } from './graficos/orden';
 export {
   UMBRAL_DE_ELEMENTOS,
   elementosDe,

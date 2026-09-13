@@ -4,6 +4,7 @@ import {
   ACENTOS,
   ICONOS_DE_OBJETO,
   MODOS_DE_LEYENDA,
+  type CriterioDeOrden,
   POSICIONES_DE_ETIQUETA,
   TIPOS_DE_FORMATO,
   TIPOS_DE_SELECTOR,
@@ -100,7 +101,7 @@ export function Presentacion({
    * cifra: el valor y la etiqueta que lo acompana.
    */
   const hayMedida = admite("formato") || admite("formatos");
-  const hayGrafico = admite("leyenda") || admite("etiquetasDeDato");
+  const hayGrafico = admite("leyenda") || admite("etiquetasDeDato") || admite("orden");
   const esTarjeta = instance.objectId === "tarjeta-kpi";
   const mostrarTitulo = p.mostrarTitulo !== false;
 
@@ -350,7 +351,7 @@ export function Presentacion({
               >
                 {MODOS_DE_LEYENDA.map((m) => (
                   <option key={m} value={m}>
-                    {m}
+                    {ETIQUETA_DE_LEYENDA[m]}
                   </option>
                 ))}
               </select>
@@ -366,9 +367,130 @@ export function Presentacion({
                 data-testid={`${prueba}-etiquetas`}
                 onChange={(e) => poner({ etiquetasDeDato: e.target.checked })}
               />{" "}
-              Cifra sobre cada barra
+              Cifra sobre cada barra o punto
             </label>
           ) : null}
+
+          {admite("orden") ? (
+            <>
+              <label className="formulario__campo">
+                <span>Ordenar el eje por</span>
+                <select
+                  value={p.orden?.por ?? "ninguno"}
+                  disabled={guardando}
+                  data-testid={`${prueba}-orden-por`}
+                  onChange={(e) =>
+                    poner({
+                      orden:
+                        e.target.value === "ninguno"
+                          ? undefined
+                          : { ...p.orden, por: e.target.value as CriterioDeOrden },
+                    })
+                  }
+                >
+                  <option value="ninguno">El orden del dataset</option>
+                  <option value="categoria">Nombre de la categoria</option>
+                  <option value="valor">Valor de la primera medida</option>
+                </select>
+              </label>
+
+              {p.orden?.por ? (
+                <label className="formulario__campo">
+                  <span>Direccion</span>
+                  <select
+                    value={p.orden.direccion ?? "asc"}
+                    disabled={guardando}
+                    data-testid={`${prueba}-orden-direccion`}
+                    onChange={(e) =>
+                      poner({
+                        orden: { ...p.orden, direccion: e.target.value as "asc" | "desc" },
+                      })
+                    }
+                  >
+                    <option value="asc">Ascendente</option>
+                    <option value="desc">Descendente</option>
+                  </select>
+                </label>
+              ) : null}
+            </>
+          ) : null}
+        </Seccion>
+      ) : null}
+
+      {admite("ejes") ? (
+        <Seccion titulo="Ejes" nivel={2} abierta={false} prueba={`${prueba}-ejes`}>
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.ejes?.mostrarX !== false}
+              disabled={guardando}
+              data-testid={`${prueba}-eje-x`}
+              onChange={(e) => poner({ ejes: { ...p.ejes, mostrarX: e.target.checked } })}
+            />{" "}
+            Mostrar el eje de categorias
+          </label>
+
+          <label className="formulario__campo">
+            <span>Titulo del eje de categorias</span>
+            <input
+              defaultValue={p.ejes?.tituloX ?? ""}
+              disabled={guardando}
+              data-testid={`${prueba}-titulo-x`}
+              onBlur={(e) => poner({ ejes: { ...p.ejes, tituloX: e.target.value || undefined } })}
+            />
+            {/*
+              Se escribe a mano y no sale del nombre del campo: `DimTribunal.Distrito` en un
+              objeto de 400 px se recortaba a una letra suelta al borde del grafico.
+            */}
+            <span className="campo__pista">Vacio = sin titulo.</span>
+          </label>
+
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.ejes?.mostrarY !== false}
+              disabled={guardando}
+              data-testid={`${prueba}-eje-y`}
+              onChange={(e) => poner({ ejes: { ...p.ejes, mostrarY: e.target.checked } })}
+            />{" "}
+            Mostrar el eje de valores
+          </label>
+
+          <label className="formulario__campo">
+            <span>Titulo del eje de valores</span>
+            <input
+              defaultValue={p.ejes?.tituloY ?? ""}
+              disabled={guardando}
+              data-testid={`${prueba}-titulo-y`}
+              onBlur={(e) => poner({ ejes: { ...p.ejes, tituloY: e.target.value || undefined } })}
+            />
+          </label>
+
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.ejes?.cuadricula !== false}
+              disabled={guardando}
+              data-testid={`${prueba}-cuadricula`}
+              onChange={(e) => poner({ ejes: { ...p.ejes, cuadricula: e.target.checked } })}
+            />{" "}
+            Lineas de cuadricula
+          </label>
+
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.ejes?.desdeCero !== false}
+              disabled={guardando}
+              data-testid={`${prueba}-desde-cero`}
+              onChange={(e) => poner({ ejes: { ...p.ejes, desdeCero: e.target.checked } })}
+            />{" "}
+            Empezar en cero
+          </label>
+          <p className="campo__pista">
+            Un eje que no empieza en cero hace que una diferencia del 2 % parezca el triple.
+            Apagarlo deberia ser una decision, no el comportamiento por omision.
+          </p>
         </Seccion>
       ) : null}
 
@@ -730,6 +852,15 @@ const DECIMALES_POR_DEFECTO: Record<TipoDeFormato, number> = {
   porcentaje: 1,
   moneda: 2,
   personalizado: 0,
+};
+
+const ETIQUETA_DE_LEYENDA: Record<ModoDeLeyenda, string> = {
+  auto: "Automatica (solo con varias series)",
+  oculta: "Oculta",
+  arriba: "Arriba",
+  abajo: "Abajo",
+  izquierda: "A la izquierda",
+  derecha: "A la derecha",
 };
 
 const ETIQUETA_DE_TIPO: Record<TipoDeFormato, string> = {

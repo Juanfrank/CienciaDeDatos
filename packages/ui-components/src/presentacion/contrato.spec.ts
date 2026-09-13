@@ -73,7 +73,7 @@ describe('validarPresentacion', () => {
           resaltado: true,
           subtitulo: 'Cierre del trimestre',
           formato: { decimales: 1, unidad: '%' },
-          leyenda: 'nunca',
+          leyenda: 'oculta',
           etiquetasDeDato: true,
         },
         todas,
@@ -82,7 +82,7 @@ describe('validarPresentacion', () => {
   });
 
   it('rechaza una clave que el objeto no admite, y dice cuales admite', () => {
-    const [problema] = validarPresentacion({ leyenda: 'siempre' }, PRESENTACION_MINIMA);
+    const [problema] = validarPresentacion({ leyenda: 'abajo' }, PRESENTACION_MINIMA);
     expect(problema?.clave).toBe('leyenda');
     expect(problema?.problema).toContain('icono');
   });

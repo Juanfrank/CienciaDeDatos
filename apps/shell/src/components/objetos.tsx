@@ -10,6 +10,7 @@ import {
   campoDeRanura,
   estiloDeTexto,
   fieldKey,
+  ordenarCategorias,
   ranurasDe,
   formateadorDeMedida,
   proyectarObjeto,
@@ -334,11 +335,21 @@ export function Barras({ titulo, result, instance, onFiltrar, ranuras, agregacio
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
 
   const dimensiones = [ejeX, serie].filter((c): c is string => c !== undefined).map(aFieldRef);
-  const vm = toCategorical(
-    result,
-    dimensiones,
-    medidas,
-    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+  /*
+   * El orden se aplica al MODELO, antes de repartirlo.
+   *
+   * El grafico y su respaldo en HTML se dibujan los dos desde este mismo `vm`. Ordenando dentro de
+   * ECharts, el grafico saldria de mayor a menor y el respaldo en el orden del dataset — dos
+   * lecturas distintas de la misma tarjeta, y la que discrepa seria justo la accesible.
+   */
+  const vm = ordenarCategorias(
+    toCategorical(
+      result,
+      dimensiones,
+      medidas,
+      agregacionesPara(medidas, instance.binding.measures, agregaciones),
+    ),
+    instance.presentacion?.orden,
   );
   // Los huecos no entran en el maximo: `Math.max` con un null lo convierte en 0, y con todos los
   // valores en hueco daria 0 y todas las barras a escala completa.
@@ -360,6 +371,12 @@ export function Barras({ titulo, result, instance, onFiltrar, ranuras, agregacio
         tipo="barras"
         vm={vm}
         titulo={titulo}
+        presentacion={instance.presentacion}
+        // Un formateador POR MEDIDA, el mismo que usa la tabla de datos adjunta: sin esto, la
+        // cifra sobre la barra y la de la tabla dirian el mismo numero de dos formas distintas.
+        formatear={(valor, serie) =>
+          formateadorDeMedida(instance.presentacion, medidas[serie] ?? '')(valor)
+        }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
         {...(dimension && onFiltrar
           ? { onSeleccionar: (categoria: string) => onFiltrar(fieldKey(dimension), categoria) }
@@ -402,11 +419,14 @@ export function Lineas({ titulo, result, instance, ranuras, agregaciones }: Obje
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
 
   const dimension = ejeX ? aFieldRef(ejeX) : undefined;
-  const vm = toCategorical(
-    result,
-    dimension ? [dimension] : [],
-    medidas,
-    agregacionesPara(medidas, instance.binding.measures, agregaciones),
+  const vm = ordenarCategorias(
+    toCategorical(
+      result,
+      dimension ? [dimension] : [],
+      medidas,
+      agregacionesPara(medidas, instance.binding.measures, agregaciones),
+    ),
+    instance.presentacion?.orden,
   );
 
   return (
@@ -416,6 +436,10 @@ export function Lineas({ titulo, result, instance, ranuras, agregaciones }: Obje
         tipo="lineas"
         vm={vm}
         titulo={titulo}
+        presentacion={instance.presentacion}
+        formatear={(valor, serie) =>
+          formateadorDeMedida(instance.presentacion, medidas[serie] ?? '')(valor)
+        }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
       >
         {/*

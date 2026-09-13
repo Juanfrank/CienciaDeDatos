@@ -125,6 +125,27 @@ const CONTRATO_DE_KPI: VisualObjectDefinition['versions'][number]['dataContract'
   ],
 };
 
+/*
+ * Lo que un grafico deja personalizar, en un solo sitio.
+ *
+ * Se factoriza porque las versiones nuevas de columnas y lineas declaran exactamente lo mismo, y
+ * con la lista escrita cuatro veces anadir una clave significaria acordarse de cuatro sitios —
+ * que es como `etiqueta` acabo dibujandose en una tarjeta que no la declaraba.
+ */
+const POZOS_DE_LINEAS: RanuraDeCampos[] = [
+  {
+    id: 'eje-x',
+    etiqueta: 'Eje X',
+    tipo: 'dimension',
+    max: 1,
+    min: 1,
+    ayuda: 'La dimension ordenada sobre la que avanza la linea.',
+  },
+  { id: 'eje-y', etiqueta: 'Eje Y', tipo: 'medida', max: 4, min: 1, ayuda: 'Una linea por medida.' },
+];
+
+const PRESENTACION_DE_GRAFICO = presenta('formato', 'formatos', 'leyenda', 'etiquetasDeDato', 'ejes', 'orden');
+
 export const catalogoInicial: VisualObjectDefinition[] = [
   {
     objectId: 'tarjeta-kpi',
@@ -256,6 +277,29 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         },
         presentation: presenta('formato', 'formatos', 'leyenda', 'etiquetasDeDato'),
       },
+      /*
+       * 1.2.0 — la personalizacion que se configuraba y no llegaba al grafico.
+       *
+       * `leyenda` y `etiquetasDeDato` se podian elegir en el editor desde F5.10 y NO se aplicaban:
+       * el panel las guardaba y el constructor de opciones no las leia. Aqui se cablean, y de paso
+       * entra lo que faltaba para que un grafico sea configurable de verdad — posicion de la
+       * leyenda, titulos y visibilidad de los ejes, cuadricula, empezar en cero, y orden del eje.
+       */
+      {
+        version: '1.2.0',
+        publishedAt: '2026-09-13',
+        changelog:
+          'Leyenda con posicion, etiquetas de dato formateadas, ejes configurables y orden del eje.',
+        certification: certificacionInicial,
+        dataContract: {
+          dimensions: { min: 1, max: 2 },
+          measures: { min: 1, max: 4 },
+          notes:
+            'Cada medida es una serie. La segunda dimension, si existe, agrupa las columnas por serie.',
+          pozos: POZOS_DE_BARRAS(4),
+        },
+        presentation: PRESENTACION_DE_GRAFICO,
+      },
     ],
   },
   {
@@ -269,27 +313,24 @@ export const catalogoInicial: VisualObjectDefinition[] = [
         {
           dimensions: { min: 1, max: 1 },
           measures: { min: 1, max: 4 },
-          pozos: [
-            {
-              id: 'eje-x',
-              etiqueta: 'Eje X',
-              tipo: 'dimension',
-              max: 1,
-              min: 1,
-              ayuda: 'La dimension ordenada sobre la que avanza la linea.',
-            },
-            {
-              id: 'eje-y',
-              etiqueta: 'Eje Y',
-              tipo: 'medida',
-              max: 4,
-              min: 1,
-              ayuda: 'Una linea por medida.',
-            },
-          ],
+          pozos: POZOS_DE_LINEAS,
         },
         presenta('formato', 'formatos', 'leyenda', 'etiquetasDeDato'),
       ),
+      /* 1.1.0 — la misma personalizacion que columnas, por el mismo motivo. */
+      {
+        version: '1.1.0',
+        publishedAt: '2026-09-13',
+        changelog:
+          'Leyenda con posicion, etiquetas de dato formateadas, ejes configurables y orden del eje.',
+        certification: certificacionInicial,
+        dataContract: {
+          dimensions: { min: 1, max: 1 },
+          measures: { min: 1, max: 4 },
+          pozos: POZOS_DE_LINEAS,
+        },
+        presentation: PRESENTACION_DE_GRAFICO,
+      },
     ],
   },
   {

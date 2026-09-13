@@ -617,6 +617,97 @@ export const modulosDemo: ModuleDefinition[] = [
         ],
       },
       {
+        pageId: 'p-graficos',
+        slug: 'graficos',
+        name: 'Graficos',
+        items: [
+          {
+            id: 'g-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'g-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo',
+              binding: SIN_DATOS,
+              configuracion: {
+                objectId: 'titulo-de-seccion',
+                tituloDeSeccion: {
+                  texto: 'Lo mismo, sin personalizar y personalizado',
+                  posicionDelTexto: 'izquierda',
+                  linea: 'derecha',
+                  estiloDeLinea: { estilo: 'solida', grosor: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'g-crudo',
+            position: { x: 0, y: 1, w: 6, h: 4 },
+            instance: {
+              instanceId: 'g-crudo',
+              objectId: 'barras',
+              version: '1.2.0',
+              title: 'Por defecto',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [MATERIA],
+                measures: ['CasosIngresados', 'CasosResueltos'],
+              },
+              presentacion: { subtitulo: 'Sin tocar nada' },
+            },
+          },
+          {
+            id: 'g-vestido',
+            position: { x: 6, y: 1, w: 6, h: 4 },
+            instance: {
+              instanceId: 'g-vestido',
+              objectId: 'barras',
+              version: '1.2.0',
+              title: 'Personalizado',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [MATERIA],
+                measures: ['CasosIngresados', 'CasosResueltos'],
+              },
+              /*
+               * Todo lo que este bloque configura se podia elegir en el editor y no llegaba al
+               * grafico: la leyenda y las etiquetas se guardaban y el constructor de opciones no
+               * las leia. Sirve de comprobacion en vivo de que ahora si.
+               */
+              presentacion: {
+                subtitulo: 'Leyenda a la derecha, cifras, sin cuadricula, ordenado por valor',
+                leyenda: 'derecha',
+                etiquetasDeDato: true,
+                ejes: { cuadricula: false, tituloY: 'Casos' },
+                orden: { por: 'valor', direccion: 'desc' },
+              },
+            },
+          },
+          {
+            id: 'g-lineas',
+            position: { x: 0, y: 5, w: 12, h: 4 },
+            instance: {
+              instanceId: 'g-lineas',
+              objectId: 'lineas',
+              version: '1.1.0',
+              title: 'Evolucion por trimestre',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
+              },
+              presentacion: {
+                subtitulo: 'Leyenda arriba y cifra sobre cada punto',
+                leyenda: 'arriba',
+                etiquetasDeDato: true,
+                ejes: { tituloY: 'Casos' },
+              },
+            },
+          },
+        ],
+      },
+      {
         pageId: 'p-contenedores',
         slug: 'contenedores',
         name: 'Contenedores',
