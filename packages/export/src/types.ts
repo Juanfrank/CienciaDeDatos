@@ -76,6 +76,27 @@ export interface ExportableObject {
   title: string;
   result: QueryResult;
   /**
+   * Las mismas filas, con cada cifra YA formateada como se ve en pantalla.
+   *
+   * Viaja aparte de `result` y no en su lugar porque los cuatro formatos no quieren lo mismo: un
+   * CSV o un XLSX con «2,216» es un dato roto —quien lo abra en Excel no puede sumarlo— y un PDF
+   * con «2216» es un documento que contradice a la pantalla de la que salio. Numeros donde se va
+   * a calcular; texto donde se va a leer.
+   *
+   * Lo formatea quien cablea, que conoce la presentacion del objeto. Este paquete no puede
+   * depender del repositorio de objetos (regla de limites) y tampoco deberia: aqui solo hace
+   * falta saber que texto poner en cada celda.
+   */
+  textos?: string[][];
+  /**
+   * Lo que el objeto dice ADEMAS de sus cifras: la meta, el umbral, la regla de color.
+   *
+   * Sin esto, un PDF ensena una tabla donde una cifra estaba en rojo en pantalla y aqui no, sin
+   * decir por que; y un grafico exportado pierde la raya de la meta, que suele ser la mitad del
+   * mensaje. Van como texto porque un CSV no tiene donde dibujarlas y un lector tampoco.
+   */
+  notas?: string[];
+  /**
    * true si el objeto es un grafico. Lo decide quien cablea, que conoce el catalogo; el paquete
    * de exportacion no puede depender del repositorio de objetos (regla de limites) y tampoco
    * deberia: aqui solo hace falta saber cual de las hojas merece dibujarse como imagen.

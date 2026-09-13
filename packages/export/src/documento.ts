@@ -51,7 +51,25 @@ export function paletaDe(theme: ThemeTokens = defaultTheme): PaletaDeExportacion
 export interface HojaExportable {
   title: string;
   columns: { name: string; type: string }[];
+  /** Los valores, sin formatear. Es lo que va al CSV y al XLSX, donde un numero debe ser numero. */
   rows: unknown[][];
+  /** Los mismos valores como se ven en pantalla. Es lo que va al PDF y al SVG. */
+  textos?: string[][];
+  /** Metas, umbrales y reglas de color, en texto. */
+  notas?: string[];
+}
+
+/**
+ * El texto de una celda, para los formatos que se LEEN.
+ *
+ * Cae al valor crudo cuando no hay texto formateado —un objeto que no declara presentacion, o una
+ * fila mas larga de lo previsto—: es preferible una cifra sin formato a una celda vacia, que se
+ * leeria como «no hay dato».
+ */
+export function textoDeCelda(hoja: HojaExportable, fila: number, columna: number): string {
+  const formateado = hoja.textos?.[fila]?.[columna];
+  if (formateado !== undefined) return formateado;
+  return String(hoja.rows[fila]?.[columna] ?? '');
 }
 
 export interface DocumentoExportable {
@@ -78,6 +96,8 @@ export function construirDocumento(
     title: o.title,
     columns: o.result.columns,
     rows: o.result.rows,
+    ...(o.textos ? { textos: o.textos } : {}),
+    ...(o.notas && o.notas.length > 0 ? { notas: o.notas } : {}),
   }));
 
   const indiceGrafico = objetos.findIndex((o) => o.esGrafico);

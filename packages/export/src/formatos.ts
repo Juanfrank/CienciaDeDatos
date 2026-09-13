@@ -1,4 +1,4 @@
-import type { DocumentoExportable, HojaExportable } from './documento';
+import { textoDeCelda, type DocumentoExportable, type HojaExportable } from './documento';
 
 /**
  * Formatos de texto: CSV y SVG.
@@ -31,9 +31,19 @@ export function aCsv(documento: DocumentoExportable): string {
   for (const hoja of hojas) {
     if (hojas.length > 1) lineas.push(`# ${hoja.title}`);
     lineas.push(hoja.columns.map((c) => escaparCsv(c.name)).join(','));
+    /*
+     * El CSV lleva los VALORES, no los textos formateados.
+     *
+     * Un CSV con «2,216» es un dato roto: quien lo abra en una hoja de calculo no puede sumarlo,
+     * y la coma ademas parte la celda. Es la diferencia con el PDF, que se lee y por eso lleva el
+     * texto de la pantalla.
+     */
     for (const fila of hoja.rows) {
       lineas.push(fila.map(escaparCsv).join(','));
     }
+    // Las notas, como comentario: un CSV no tiene donde dibujar una meta, pero quien lo reciba
+    // tiene que poder saber contra que se leian esas cifras.
+    for (const nota of hoja.notas ?? []) lineas.push(`# ${nota}`);
     lineas.push('');
   }
 
@@ -70,6 +80,9 @@ export function aSvg(documento: DocumentoExportable): string {
   );
   const filas = hoja.rows.slice(0, 20);
   const valores = filas.map((f) => Number(f[indiceValor]) || 0);
+  // La cifra sobre la barra, con el formato de la pantalla. Lo demas ya se hizo en el lienzo:
+  // aqui pasaba lo mismo que pasaba alli, y por el mismo motivo — nadie habia pasado el formato.
+  const textos = filas.map((_, i) => textoDeCelda(hoja, i, indiceValor));
   const maximo = Math.max(1, ...valores);
 
   const anchoBarra = 40;
@@ -78,7 +91,10 @@ export function aSvg(documento: DocumentoExportable): string {
   const margenSup = 40 + encabezado.lineas.length * 14;
   const altoGrafico = 220;
   const ancho = Math.max(400, margenIzq + filas.length * (anchoBarra + separacion) + 40);
-  const alto = margenSup + altoGrafico + 80;
+  const notas = hoja.notas ?? [];
+  // Se reserva alto para las notas: escritas sobre el area de dibujo taparian las barras, y
+  // fuera del `viewBox` no se verian en absoluto.
+  const alto = margenSup + altoGrafico + 80 + notas.length * 14;
 
   const barras = filas
     .map((fila, i) => {
@@ -89,7 +105,7 @@ export function aSvg(documento: DocumentoExportable): string {
       const color = paleta.series[i % paleta.series.length] ?? paleta.texto;
       return [
         `<rect x="${x}" y="${y.toFixed(1)}" width="${anchoBarra}" height="${altoBarra.toFixed(1)}" fill="${color}" />`,
-        `<text x="${x + anchoBarra / 2}" y="${(y - 6).toFixed(1)}" text-anchor="middle" font-size="11" fill="${paleta.texto}">${valor}</text>`,
+        `<text x="${x + anchoBarra / 2}" y="${(y - 6).toFixed(1)}" text-anchor="middle" font-size="11" fill="${paleta.texto}">${escaparXml(textos[i] ?? String(valor))}</text>`,
         `<text x="${x + anchoBarra / 2}" y="${margenSup + altoGrafico + 16}" text-anchor="middle" font-size="10" fill="${paleta.textoAtenuado}">${escaparXml(String(fila[0] ?? ''))}</text>`,
       ].join('');
     })
@@ -109,6 +125,10 @@ export function aSvg(documento: DocumentoExportable): string {
     metadatos,
     `<line x1="${margenIzq - 8}" y1="${margenSup + altoGrafico}" x2="${ancho - 20}" y2="${margenSup + altoGrafico}" stroke="${paleta.borde}" />`,
     barras,
+    ...notas.map(
+      (nota, i) =>
+        `<text x="16" y="${margenSup + altoGrafico + 60 + i * 14}" font-size="10" fill="${paleta.textoAtenuado}">${escaparXml(nota)}</text>`,
+    ),
     '</svg>',
   ].join('');
 }

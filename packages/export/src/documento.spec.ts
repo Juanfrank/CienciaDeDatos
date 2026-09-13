@@ -1,7 +1,7 @@
 import { defaultTheme, temaClaro } from '@app/design-tokens';
 import { describe, expect, it } from 'vitest';
-import { construirDocumento } from './documento';
-import { aSvg } from './formatos';
+import { construirDocumento, paletaDe, textoDeCelda, type HojaExportable } from './documento';
+import { aCsv, aSvg } from './formatos';
 import type { ExportRequest, ExportableObject } from './types';
 
 /**
@@ -119,5 +119,65 @@ describe('la marca institucional llega al archivo exportado', () => {
       color: { ...defaultTheme.color, categorical: ['#123456', '#654321'] },
     };
     expect(aSvg(construirDocumento([barras], peticion, otro))).toContain('fill="#123456"');
+  });
+});
+
+describe('lo que se lee y lo que se calcula no son lo mismo', () => {
+  const hoja = (): HojaExportable => ({
+    title: 'Casos',
+    columns: [
+      { name: 'Trimestre', type: 'string' },
+      { name: 'CasosPendientes', type: 'number' },
+    ],
+    rows: [['Q1', 2216]],
+    textos: [['Q1', '2,216 casos']],
+    notas: ['Meta: 900'],
+  });
+
+  it('el texto de una celda es el de la pantalla', () => {
+    expect(textoDeCelda(hoja(), 0, 1)).toBe('2,216 casos');
+  });
+
+  it('sin texto formateado cae al valor, no a una celda vacia', () => {
+    /*
+     * Una celda vacia se leeria como «no hay dato», que es una afirmacion distinta de «este
+     * objeto no declara formato».
+     */
+    const sinTextos: HojaExportable = { ...hoja(), textos: undefined as unknown as string[][] };
+    expect(textoDeCelda(sinTextos, 0, 1)).toBe('2216');
+  });
+
+  it('el CSV lleva el VALOR, no el texto: un CSV se calcula, no se lee', () => {
+    /*
+     * «2,216» en un CSV es un dato roto: quien lo abra en una hoja de calculo no puede sumarlo, y
+     * la coma ademas parte la celda.
+     */
+    const csv = aCsv({
+      encabezado: { titulo: 'T', lineas: [], personalizada: false, autor: 'u-admin' },
+      hojas: [hoja()],
+      paleta: paletaDe(),
+    });
+    expect(csv).toContain('2216');
+    expect(csv).not.toContain('"2,216 casos"');
+  });
+
+  it('y aun asi el CSV no pierde la meta: va como comentario', () => {
+    const csv = aCsv({
+      encabezado: { titulo: 'T', lineas: [], personalizada: false, autor: 'u-admin' },
+      hojas: [hoja()],
+      paleta: paletaDe(),
+    });
+    expect(csv).toContain('# Meta: 900');
+  });
+
+  it('el SVG dibuja la cifra formateada y escribe las notas', () => {
+    const svg = aSvg({
+      encabezado: { titulo: 'T', lineas: [], personalizada: false, autor: 'u-admin' },
+      hojas: [hoja()],
+      paleta: paletaDe(),
+      grafico: hoja(),
+    });
+    expect(svg).toContain('2,216 casos');
+    expect(svg).toContain('Meta: 900');
   });
 });

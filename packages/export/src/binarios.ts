@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
 import { Workbook } from 'exceljs';
-import type { DocumentoExportable, HojaExportable, PaletaDeExportacion } from './documento';
+import { textoDeCelda, type DocumentoExportable, type HojaExportable, type PaletaDeExportacion } from './documento';
 
 /**
  * Formatos binarios: Excel y PDF.
@@ -108,6 +108,17 @@ export function aPdf(documento: DocumentoExportable): Promise<Buffer> {
       doc.font('Helvetica-Bold').fontSize(11).fillColor(paleta.texto).text(hoja.title);
       doc.moveDown(0.3);
       dibujarTabla(doc, hoja, paleta);
+
+      /*
+       * Las notas, DEBAJO de su tabla.
+       *
+       * Es donde explican algo: la meta contra la que hay que leer las cifras de arriba y la
+       * regla por la que en pantalla una de ellas estaba en rojo. Sin ellas, el PDF ensena los
+       * numeros y se calla la mitad del mensaje.
+       */
+      for (const nota of hoja.notas ?? []) {
+        doc.font('Helvetica-Oblique').fontSize(7).fillColor(paleta.textoAtenuado).text(nota);
+      }
       doc.moveDown(1);
     }
 
@@ -167,7 +178,7 @@ function dibujarTabla(
   cabecera();
 
   doc.font('Helvetica').fontSize(8).fillColor(paleta.texto);
-  for (const fila of hoja.rows) {
+  hoja.rows.forEach((_, f) => {
     if (doc.y + altoFila > limiteInferior) {
       doc.addPage();
       cabecera();
@@ -175,12 +186,14 @@ function dibujarTabla(
     }
     const y = doc.y;
     columnas.forEach((_, i) => {
-      doc.text(String(fila[i] ?? ''), MARGEN + i * anchoColumna, y, {
+      // El texto formateado, no el valor: un PDF que dice «2216» contradice a la pantalla de la
+      // que salio, donde ponia «2,216 casos».
+      doc.text(textoDeCelda(hoja, f, i), MARGEN + i * anchoColumna, y, {
         width: anchoColumna - 4,
         ellipsis: true,
         lineBreak: false,
       });
     });
     doc.y = y + altoFila;
-  }
+  });
 }

@@ -289,3 +289,85 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
     expect(csv).not.toContain('Civil');
   });
 });
+
+test.describe('lo exportado dice lo mismo que la pantalla', () => {
+  /*
+   * Es la misma clase de defecto que hubo en el lienzo, en el otro extremo del sistema: todo lo
+   * que se anadio a la presentacion —el formato de la cifra, la meta, la regla de color— se veia
+   * en pantalla y no llegaba al archivo. Un PDF que circula por correo diciendo «2216» donde la
+   * pantalla decia «2,216» contradice al objeto del que salio.
+   */
+  test('el CSV lleva el NUMERO, porque un CSV se calcula', async ({ page }) => {
+    const estado = await exportar(page, {
+      modulo: 'composicion',
+      pagina: 'condicional',
+      formato: 'csv',
+    });
+    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+
+    /*
+     * Se comprueba la INVARIANTE, no una cifra concreta.
+     *
+     * Las cifras del archivo dependen del ambito de quien exporta, y el ambito de esta sesion
+     * cambia segun que otras pruebas hayan corrido antes: fijar «2216» hacia que la prueba pasara
+     * aislada y fallara en la suite. Lo que siempre tiene que ser cierto es que ninguna cifra
+     * llegue formateada.
+     *
+     * Y se mira por celda y no como subcadena: en un CSV, dos celdas contiguas con 2 y 216
+     * producen literalmente «2,216» en el texto del archivo.
+     */
+    const celdas = csv
+      .split(/\r?\n/)
+      .filter((l) => !l.startsWith('#') && l !== '')
+      .flatMap((l) => l.split(','));
+
+    // Hay cifras de cuatro digitos o mas, que son las que llevarian separador en pantalla...
+    expect(celdas.some((c) => /^\d{4,}$/.test(c))).toBe(true);
+    // ...y ninguna viene entre comillas con separador, que es como el escapador emitiria el texto
+    // formateado. Con el, quien abra el archivo en una hoja de calculo no puede sumar la columna.
+    expect(csv).not.toMatch(/"\d{1,3}(,\d{3})+"/);
+  });
+
+  test('y aun asi no pierde la meta ni la regla: van como comentario', async ({ page }) => {
+    const estado = await exportar(page, {
+      modulo: 'composicion',
+      pagina: 'condicional',
+      formato: 'csv',
+    });
+    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+
+    // En pantalla son una raya y una barra roja; en un CSV no hay donde dibujarlas, pero quien
+    // reciba el archivo tiene que poder saber contra que se leian esas cifras.
+    expect(csv).toContain('# Umbral: 600');
+    expect(csv).toContain('# Marcado en pantalla: mayor que 600');
+  });
+
+  test('el SVG dibuja la cifra con el formato de la pantalla', async ({ page }) => {
+    // Aqui si va formateada, porque un SVG se LEE: es una imagen que acaba en una presentacion o
+    // en un correo, no una columna que alguien vaya a sumar.
+    const estado = await exportar(page, {
+      modulo: 'composicion',
+      pagina: 'familia',
+      formato: 'svg',
+    });
+    const svg = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+
+    // Con separador de millares, como en pantalla. Sin el formateador saldria «1888».
+    expect(svg).toMatch(/>\d{1,3},\d{3}</);
+  });
+
+  test('y el SVG tampoco pierde la meta: va escrita bajo el grafico', async ({ page }) => {
+    /*
+     * En pantalla la meta es una raya sobre las barras. Fuera del `viewBox` no se veria, y encima
+     * del area de dibujo taparia las barras: por eso se le reserva alto debajo.
+     */
+    const estado = await exportar(page, {
+      modulo: 'composicion',
+      pagina: 'referencia',
+      formato: 'svg',
+    });
+    const svg = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+
+    expect(svg).toContain('Meta trimestral: 900');
+  });
+});

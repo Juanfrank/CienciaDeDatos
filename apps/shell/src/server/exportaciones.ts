@@ -1,3 +1,4 @@
+import type { QueryResult } from '@app/data-contracts';
 import {
   StoreExportQueue,
   type ExportRequest,
@@ -5,7 +6,12 @@ import {
   type ResolverObjetos,
 } from '@app/export';
 import { describeProvenance } from '@app/module-model';
-import { proyectarObjeto } from '@app/ui-components';
+import {
+  describirRegla,
+  formateadorDeMedida,
+  proyectarObjeto,
+  type ObjectInstance,
+} from '@app/ui-components';
 import { cacheL2, objectRegistry } from './contexto';
 import { cargarModulo } from './datos';
 import { moduloServibleParaUsuario } from './cicloDeVida';
@@ -65,10 +71,14 @@ export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) =
     if (!o.result || ES_CONTROL.has(instance.objectId) || o.problems.length > 0) return [];
 
     const categoria = objectRegistry.get(instance.objectId)?.category;
+    const proyectado = proyectarObjeto(instance, o.result, o.agregaciones);
+    const notas = notasDe(instance);
     return [
       {
         title: instance.title ?? instance.objectId,
-        result: proyectarObjeto(instance, o.result, o.agregaciones),
+        result: proyectado,
+        textos: textosDe(instance, proyectado),
+        ...(notas.length > 0 ? { notas } : {}),
         esGrafico: categoria !== undefined && CATEGORIAS_DE_GRAFICO.has(categoria),
       },
     ];
@@ -123,4 +133,47 @@ export async function encolarExportacion(input: EncolarInput) {
   };
 
   return colaExportaciones.encolar(request);
+}
+
+/**
+ * Las mismas cifras, con el formato de la pantalla.
+ *
+ * Es la unica forma de que un PDF no contradiga al objeto del que salio. Se calcula aqui —en el
+ * shell— y no en el paquete de exportacion porque el formato vive en la presentacion de la
+ * instancia, y ese paquete no puede depender del repositorio de objetos.
+ *
+ * Las columnas de dimension se dejan tal cual: formatear un nombre de distrito no significa nada,
+ * y `formateadorDeMedida` solo sabe de numeros.
+ */
+function textosDe(instance: ObjectInstance, proyectado: QueryResult): string[][] {
+  // Un formateador POR COLUMNA y no por celda: en una tabla larga son miles de llamadas, y el
+  // formato depende de la medida, que es la columna.
+  const porColumna = proyectado.columns.map((c) => formateadorDeMedida(instance.presentacion, c.name));
+  return proyectado.rows.map((fila) =>
+    fila.map((celda, i) =>
+      typeof celda === 'number' ? (porColumna[i] ?? String)(celda) : String(celda ?? ''),
+    ),
+  );
+}
+
+/**
+ * Lo que el objeto dice ademas de sus cifras.
+ *
+ * Una meta y una regla de color son parte del mensaje, no decoracion: en pantalla se ven como una
+ * raya y como una cifra en rojo, y en un archivo hay que escribirlas o se pierden. Un PDF con una
+ * tabla donde no se ve por que una cifra estaba marcada es peor que uno que lo explica.
+ */
+function notasDe(instance: ObjectInstance): string[] {
+  const p = instance.presentacion;
+  const notas: string[] = [];
+
+  for (const linea of p?.referencias ?? []) {
+    const nombre = linea.etiqueta ?? 'Referencia';
+    notas.push(`${nombre}: ${linea.valor}`);
+  }
+  for (const regla of p?.condicional?.reglas ?? []) {
+    const alcance = regla.medida ? `${regla.medida} ` : '';
+    notas.push(`Marcado en pantalla: ${alcance}${describirRegla(regla)}`);
+  }
+  return notas;
 }
