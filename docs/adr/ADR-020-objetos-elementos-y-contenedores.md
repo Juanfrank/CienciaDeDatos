@@ -19,7 +19,7 @@ la unica unidad de composicion era la celda de la rejilla.
 Dos familias nuevas de objetos, publicadas en el MISMO catalogo versionado que los graficos:
 
 - **Elementos** — cuadro de texto, titulo de seccion, linea divisoria, formas y conexiones.
-- **Contenedores** — simple, desplazable, lateral, ampliable y con pestanas.
+- **Contenedores** — simple, desplazable, ampliable y con pestanas.
 
 ### Se publican como objetos, no como un mecanismo aparte
 
@@ -53,9 +53,7 @@ podrian acabar dando cifras distintas.
 1. **Un solo eje de desplazamiento.** El tipo `Eje` es `'x' | 'y'`; «ambos» no existe. El eje que
    no se eligio queda en `overflow: hidden` explicito y no en `auto`, porque con `auto` la segunda
    barra apareceria sola en cuanto un filtro alargara el contenido.
-2. **Un contenedor lateral por lado y modulo.** Sale de la rejilla principal, asi que dos anclados
-   al mismo borde se taparian y no hay una segunda posicion para el segundo.
-3. **Cambiar de pestana no cambia el contenedor.** Ni posicion, ni dimensiones, ni espacio
+2. **Cambiar de pestana no cambia el contenedor.** Ni posicion, ni dimensiones, ni espacio
    ocupado. Los paneles inactivos se ocultan en lugar de desmontarse, y el alto lo sigue mandando
    la rejilla.
 
@@ -74,3 +72,17 @@ mover un extremo deja la flecha apuntando al aire. Asi sigue pegado por construc
   dos cajas, y se prueba sin navegador.
 - Las conexiones se configuran escribiendo el id de cada extremo. Es la limitacion honesta de esta
   version: el editor de configuracion no conoce los demas objetos del modulo.
+
+## Revision — se retira el contenedor lateral
+
+Se publico y se retiro sin llegar a usarse. Dos motivos, y el segundo es el que decide:
+
+- **Se solapaba con un carril que ya existe.** La aplicacion ya tiene dos carriles de pantalla
+  completa —el arbol de navegacion a la izquierda y el panel de objetos del editor a la derecha—
+  y un objeto anclado a un borde competia con ellos por el mismo sitio y el mismo gesto.
+- **Era el unico objeto que salia de la rejilla.** Todo lo demas ocupa celdas y se valida contra
+  la disposicion; este no, y por eso necesitaba su propia regla («uno por lado») que ninguna otra
+  cosa necesita. Una excepcion estructural para un objeto es cara de mantener.
+
+De paso desaparece una colision que estaba latente: sus estilos usaban `.lateral`, que es la clase
+del arbol de navegacion desde mucho antes.

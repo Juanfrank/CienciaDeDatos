@@ -72,9 +72,6 @@ export interface PanelDeContenedor {
 export const EJES = ['x', 'y'] as const;
 export type Eje = (typeof EJES)[number];
 
-export const LADOS = ['arriba', 'abajo', 'izquierda', 'derecha'] as const;
-export type Lado = (typeof LADOS)[number];
-
 /* ── Configuracion por tipo ────────────────────────────────────────────────────────────────── */
 
 export interface ConfiguracionDeContenedorSimple {
@@ -84,22 +81,6 @@ export interface ConfiguracionDeContenedorSimple {
 
 export interface ConfiguracionDeContenedorDesplazable extends ConfiguracionDeContenedorSimple {
   eje?: Eje;
-}
-
-/**
- * Contenedor lateral: un panel desplegable anclado a un lado del modulo.
- *
- * Puede salirse de la rejilla principal — de eso se trata: un panel de contexto que no robe
- * espacio a los datos mientras esta plegado. Como sale de la rejilla, hay COMO MUCHO UNO POR LADO
- * en cada modulo: dos paneles anclados al mismo borde se taparian, y no hay una segunda posicion
- * donde poner el segundo. La validacion lo comprueba; no es una convencion que haya que recordar.
- */
-export interface ConfiguracionDeContenedorLateral extends ConfiguracionDeContenedorSimple {
-  lado?: Lado;
-  /** Tamano desplegado, en pixeles sobre el eje que corresponda al lado. */
-  tamano?: number;
-  /** Si arranca desplegado. Plegado por defecto: un panel abierto tapa el modulo al entrar. */
-  inicialmenteAbierto?: boolean;
 }
 
 /**
@@ -129,7 +110,6 @@ export interface ConfiguracionDeContenedor {
   paneles?: PanelDeContenedor[];
   simple?: ConfiguracionDeContenedorSimple;
   desplazable?: ConfiguracionDeContenedorDesplazable;
-  lateral?: ConfiguracionDeContenedorLateral;
   ampliable?: ConfiguracionDeContenedorAmpliable;
   pestanas?: ConfiguracionDeContenedorConPestanas;
 }
@@ -137,7 +117,6 @@ export interface ConfiguracionDeContenedor {
 export const CONTENEDORES = [
   'contenedor-simple',
   'contenedor-desplazable',
-  'contenedor-lateral',
   'contenedor-ampliable',
   'contenedor-con-pestanas',
 ] as const;
@@ -163,37 +142,6 @@ export function panelesDe(config: ConfiguracionDeContenedor | undefined): PanelD
 /** Todas las instancias anidadas de un contenedor, para los avisos de deprecacion y la validacion. */
 export function instanciasAnidadas(config: ConfiguracionDeContenedor | undefined): ObjectInstance[] {
   return panelesDe(config).flatMap((p) => p.items.map((i) => i.instance));
-}
-
-/* ── La regla del lado unico ───────────────────────────────────────────────────────────────── */
-
-export interface LadoOcupado {
-  lado: Lado;
-  itemIds: string[];
-}
-
-/**
- * Que lados llevan mas de un contenedor lateral.
- *
- * Se devuelve la lista y no un booleano porque el editor tiene que poder DECIR cual es el lado en
- * conflicto y que dos objetos lo comparten. Un «no se puede» sin el que ni el por que obliga a
- * adivinar cual de los dos paneles sobra.
- */
-export function ladosDuplicados(
-  laterales: readonly { id: string; lado: Lado }[],
-): LadoOcupado[] {
-  const porLado = new Map<Lado, string[]>();
-  for (const l of laterales) {
-    porLado.set(l.lado, [...(porLado.get(l.lado) ?? []), l.id]);
-  }
-  return [...porLado.entries()]
-    .filter(([, ids]) => ids.length > 1)
-    .map(([lado, itemIds]) => ({ lado, itemIds }));
-}
-
-/** El lado libre mas cercano, para colocar un lateral nuevo sin pedirselo a nadie. */
-export function ladoLibre(ocupados: readonly Lado[]): Lado | null {
-  return LADOS.find((l) => !ocupados.includes(l)) ?? null;
 }
 
 /* ── Validacion ────────────────────────────────────────────────────────────────────────────── */
@@ -294,7 +242,6 @@ export function columnasDe(objectId: string, config: ConfiguracionDeContenedor |
   const propia =
     config?.simple?.columnas ??
     config?.desplazable?.columnas ??
-    config?.lateral?.columnas ??
     config?.ampliable?.columnas ??
     config?.pestanas?.columnas;
   return Math.max(1, Math.round(propia ?? COLUMNAS_INTERNAS_POR_DEFECTO));
@@ -343,8 +290,6 @@ export function configuracionInicial(
   switch (objectId) {
     case 'contenedor-desplazable':
       return { objectId, paneles, desplazable: { eje: 'y' } };
-    case 'contenedor-lateral':
-      return { objectId, paneles, lateral: { lado: 'derecha', tamano: 280 } };
     case 'contenedor-ampliable':
       return { objectId, paneles, ampliable: { columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' } };
     case 'contenedor-con-pestanas':

@@ -4,7 +4,6 @@ import { useId, useState } from 'react';
 import {
   type ConfiguracionDeContenedor,
   type Eje,
-  type Lado,
   COLUMNAS_INTERNAS_POR_DEFECTO,
   columnasDe,
 } from '@app/ui-components';
@@ -124,63 +123,6 @@ export function ContenedorDesplazable({ objeto, titulo, config, dibujar }: Props
         </div>
       </div>
     </Marco>
-  );
-}
-
-/* ── Lateral ───────────────────────────────────────────────────────────────────────────────── */
-
-const ICONO_DE_LADO: Record<Lado, 'chevron-abajo'> = {
-  arriba: 'chevron-abajo',
-  abajo: 'chevron-abajo',
-  izquierda: 'chevron-abajo',
-  derecha: 'chevron-abajo',
-};
-
-/**
- * Un panel anclado a un borde del modulo, que puede salirse de la rejilla.
- *
- * Plegado por defecto: un panel abierto al entrar tapa lo que la persona venia a ver. La rotacion
- * del icono dice hacia donde se abre, y el `aria-expanded` dice si lo esta — el icono solo no
- * puede ser el unico portador del estado (1.4.1).
- */
-export function ContenedorLateral({ objeto, titulo, config, dibujar }: PropsDeContenedor) {
-  const lado: Lado = config?.lateral?.lado ?? 'derecha';
-  const [abierto, setAbierto] = useState(config?.lateral?.inicialmenteAbierto === true);
-  const tamano = Math.max(120, config?.lateral?.tamano ?? 280);
-  const id = useId();
-  const horizontal = lado === 'izquierda' || lado === 'derecha';
-
-  return (
-    <div className="lateral" data-testid="contenedor-lateral" data-lado={lado} data-abierto={abierto ? 'si' : 'no'}>
-      <button
-        type="button"
-        className="lateral__tirador"
-        aria-expanded={abierto}
-        aria-controls={id}
-        data-testid="lateral-tirador"
-        onClick={() => setAbierto((a) => !a)}
-      >
-        <Icono nombre={ICONO_DE_LADO[lado]} tamano={14} />
-        <span>{titulo}</span>
-      </button>
-
-      <div
-        id={id}
-        className="lateral__panel"
-        // `hidden` y no `display: none` por CSS: asi el contenido plegado tampoco esta en el orden
-        // de tabulacion ni lo lee un lector de pantalla, que es lo que «plegado» significa.
-        hidden={!abierto}
-        style={horizontal ? { width: tamano } : { height: tamano }}
-      >
-        <div className="contenedor contenedor--lateral">
-          <RejillaInterna
-            panel={objeto.paneles?.[0]}
-            columnas={columnasDe('contenedor-lateral', config)}
-            dibujar={dibujar}
-          />
-        </div>
-      </div>
-    </div>
   );
 }
 

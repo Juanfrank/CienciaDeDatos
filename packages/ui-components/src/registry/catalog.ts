@@ -513,16 +513,6 @@ export const catalogoInicial: VisualObjectDefinition[] = [
     ],
   },
   {
-    objectId: 'contenedor-lateral',
-    name: 'Contenedor lateral',
-    description: 'Panel desplegable anclado a un borde del modulo. Como mucho uno por lado.',
-    category: 'contenedor',
-    versions: [
-      v1('Version inicial: anclaje arriba, abajo, izquierda o derecha, plegable.',
-        SIN_DATOS('Puede salirse de la rejilla principal; por eso solo cabe uno en cada borde.')),
-    ],
-  },
-  {
     objectId: 'contenedor-ampliable',
     name: 'Contenedor ampliable',
     description: 'Ensena parte de su contenido y se amplia a una ventana con su propia rejilla.',

@@ -13,6 +13,7 @@ import { findFreeSlot } from '@app/module-model';
 import { configuracionInicial } from '@app/ui-components';
 import type { PaletaDelEditor } from '../../server/editor';
 import type { ObjetoSerializado } from '../../server/serializar';
+import { CabeceraDeEditor } from './CabeceraDeEditor';
 import { Lienzo } from './Lienzo';
 import { PanelLateral } from './PanelLateral';
 
@@ -175,8 +176,23 @@ export function EditorDeModulo({
     await guardar(conItems(items.filter((i) => i.id !== itemId)));
   };
 
+  /*
+   * Dos columnas de pantalla completa: el taller a la izquierda y el carril de objetos a la
+   * derecha, los dos desde justo debajo del banner hasta el fondo.
+   *
+   * El panel estaba dentro del banco de trabajo, con el margen del `main` a su derecha y flotando
+   * a media altura con `position: sticky`. Sacarlo a este nivel es lo que le permite pegarse al
+   * borde: un carril no se puede construir desde dentro de una caja con padding, por mucho
+   * `sticky` que se le ponga.
+   *
+   * La cabecera de la ruta —«Editor de modulos»— tambien va dentro de la columna izquierda, por
+   * el mismo motivo: encima de las dos habria cortado el carril por arriba.
+   */
   return (
-    <section className="editor" data-guardando={guardando ? 'si' : 'no'}>
+    <div className="taller">
+      <div className="taller__obra">
+        <CabeceraDeEditor />
+        <section className="editor" data-guardando={guardando ? 'si' : 'no'}>
       <header className="editor__cabecera">
         <div>
           <h2>{modulo.name}</h2>
@@ -237,18 +253,6 @@ export function EditorDeModulo({
             void cambiar(itemId, (i) => ({ ...i, position }))
           }
         />
-
-        {editable ? (
-          <PanelLateral
-            objetos={paleta.objetos}
-            datasets={paleta.datasets}
-            seleccionado={elegido}
-            guardando={guardando}
-            onAnadir={(objectId) => void anadir(objectId)}
-            onCambiar={(itemId, cambio) => void cambiar(itemId, cambio)}
-            onQuitar={(itemId) => void quitar(itemId)}
-          />
-        ) : null}
       </div>
 
       {/*
@@ -274,7 +278,21 @@ export function EditorDeModulo({
           </ul>
         </div>
       ) : null}
-    </section>
+        </section>
+      </div>
+
+      {editable ? (
+        <PanelLateral
+          objetos={paleta.objetos}
+          datasets={paleta.datasets}
+          seleccionado={elegido}
+          guardando={guardando}
+          onAnadir={(objectId) => void anadir(objectId)}
+          onCambiar={(itemId, cambio) => void cambiar(itemId, cambio)}
+          onQuitar={(itemId) => void quitar(itemId)}
+        />
+      ) : null}
+    </div>
   );
 }
 

@@ -35,6 +35,8 @@ export default async function PaginaEditorDeModulo({
     teamId: sesion.activeTeamId,
   });
 
+  // El editor monta sus dos columnas por su cuenta —taller y carril de objetos—, asi que la
+  // pagina no lo envuelve en un `main` con padding: eso volveria a separar el carril del borde.
   return (
     <EditorDeModulo
       inicial={modulo}

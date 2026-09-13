@@ -93,7 +93,6 @@ test.describe('contenedores', () => {
     await expect(page.getByTestId('contenedor-simple')).toBeVisible();
     await expect(page.getByTestId('contenedor-desplazable')).toBeVisible();
     await expect(page.getByTestId('contenedor-con-pestanas')).toBeVisible();
-    await expect(page.getByTestId('contenedor-lateral')).toBeVisible();
     await expect(page.getByTestId('contenedor-ampliable')).toBeVisible();
     // Lo de dentro se lee por el MISMO camino que lo de fuera: si no, la cifra no estaria aqui.
     await expect(page.getByTestId('contenedor-simple').getByTestId('tabla')).toHaveCount(0);
@@ -170,15 +169,6 @@ test.describe('contenedores', () => {
     await expect(page.getByTestId('ampliado')).toHaveCount(0);
   });
 
-  test('el lateral arranca plegado o abierto segun se configuro, y alterna', async ({ page }) => {
-    await page.goto('/m/composicion/contenedores');
-    const tirador = page.getByTestId('lateral-tirador');
-    await expect(tirador).toHaveAttribute('aria-expanded', 'true');
-    await tirador.click();
-    await expect(tirador).toHaveAttribute('aria-expanded', 'false');
-    // Plegado no es solo invisible: tampoco esta en el orden de tabulacion ni lo lee un lector.
-    await expect(page.getByTestId('contenedor-lateral').locator('.lateral__panel')).toBeHidden();
-  });
 });
 
 test.describe('la seccion Objetos del editor', () => {
@@ -220,5 +210,81 @@ test.describe('la seccion Objetos del editor', () => {
     // cero pozos, una pantalla donde no hay nada que hacer.
     await expect(page.getByTestId('pestana-datos')).toBeDisabled();
     await expect(page.getByTestId('pestana-formato')).toHaveAttribute('aria-selected', 'true');
+  });
+});
+
+test.describe('los dos carriles de pantalla', () => {
+  /**
+   * La caja de un elemento frente al banner y a la ventana.
+   *
+   * Se mide contra el banner REAL y no contra un numero escrito aqui: el alto de la cabecera
+   * depende de la tipografia y de si el nombre del equipo cabe en una linea, asi que una
+   * constante habria hecho pasar la prueba en una pantalla y fallar en otra.
+   */
+  const medir = (page: import('@playwright/test').Page, selector: string) =>
+    page.evaluate((sel) => {
+      const banner = document.querySelector('.cabecera');
+      const carril = document.querySelector(sel);
+      if (!banner || !carril) return null;
+      const b = banner.getBoundingClientRect();
+      const c = carril.getBoundingClientRect();
+      return {
+        arriba: Math.round(c.top),
+        bajoElBanner: Math.round(b.bottom),
+        abajo: Math.round(c.bottom),
+        izquierda: Math.round(c.left),
+        derecha: Math.round(c.right),
+        ventanaAlto: window.innerHeight,
+        ventanaAncho: window.innerWidth,
+      };
+    }, selector);
+
+  test('el arbol de navegacion ocupa todo el lado izquierdo bajo el banner', async ({ page }) => {
+    await page.setViewportSize({ width: 1400, height: 900 });
+    // Un modulo largo: es el caso que fallaba. El carril media lo que midiera el contenido de al
+    // lado, asi que en un modulo corto se quedaba a media pantalla y en uno largo se pasaba.
+    await page.goto('/m/composicion/contenedores');
+    const c = await medir(page, '.lateral');
+    expect(c).not.toBeNull();
+    expect(c?.izquierda).toBe(0);
+    expect(c?.arriba).toBe(c?.bajoElBanner);
+    expect(c?.abajo).toBe(c?.ventanaAlto);
+  });
+
+  test('el panel de objetos ocupa todo el lado derecho bajo el banner', async ({ page }) => {
+    await page.setViewportSize({ width: 1400, height: 900 });
+    const slug = `carril-${Date.now().toString(36)}`;
+    await page.goto('/editor');
+    await page.getByTestId('nuevo-modulo-nombre').fill('Carriles');
+    await page.getByTestId('nuevo-modulo-slug').fill(slug);
+    await page.getByTestId('crear-modulo').click();
+    await expect(page.getByTestId(`fila-${slug}`)).toBeVisible();
+    await page.goto(`/editor/${slug}`);
+
+    const c = await medir(page, '.panel-editor');
+    expect(c).not.toBeNull();
+    expect(c?.derecha).toBe(c?.ventanaAncho);
+    expect(c?.arriba).toBe(c?.bajoElBanner);
+    expect(c?.abajo).toBe(c?.ventanaAlto);
+  });
+
+  test('el taller se desplaza por dentro: el carril no se mueve con el', async ({ page }) => {
+    await page.setViewportSize({ width: 1400, height: 700 });
+    const slug = `scroll-${Date.now().toString(36)}`;
+    await page.goto('/editor');
+    await page.getByTestId('nuevo-modulo-nombre').fill('Desplazar');
+    await page.getByTestId('nuevo-modulo-slug').fill(slug);
+    await page.getByTestId('crear-modulo').click();
+    await expect(page.getByTestId(`fila-${slug}`)).toBeVisible();
+    await page.goto(`/editor/${slug}`);
+
+    const antes = await medir(page, '.panel-editor');
+    await page.locator('.taller__obra').evaluate((el) => el.scrollBy(0, 400));
+    await page.waitForTimeout(200);
+    const despues = await medir(page, '.panel-editor');
+    // Es la razon de que el carril sea hermano de la columna que se desplaza y no viva dentro de
+    // ella: con `sticky` dentro, bajar por el lienzo lo arrastraba unos pixeles antes de fijarlo.
+    expect(despues?.arriba).toBe(antes?.arriba);
+    expect(despues?.abajo).toBe(antes?.abajo);
   });
 });

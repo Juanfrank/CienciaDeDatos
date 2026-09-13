@@ -5,7 +5,6 @@ import {
   EJES,
   ESTILOS_DE_LINEA,
   FORMAS,
-  LADOS,
   ORIENTACIONES,
   PANEL_VACIO,
   POSICIONES_DE_LINEA,
@@ -17,7 +16,6 @@ import {
   type Eje,
   type EstiloDeLinea,
   type Forma,
-  type Lado,
   type ObjectInstance,
   type Orientacion,
   type PosicionDeLinea,
@@ -62,13 +60,6 @@ const ETIQUETA_DE_FORMA: Record<Forma, string> = {
   circulo: 'Circulo',
   rombo: 'Rombo',
   flecha: 'Flecha',
-};
-
-const ETIQUETA_DE_LADO: Record<Lado, string> = {
-  arriba: 'Arriba',
-  abajo: 'Abajo',
-  izquierda: 'Izquierda',
-  derecha: 'Derecha',
 };
 
 const ETIQUETA_DE_EJE: Record<Eje, string> = { x: 'Horizontal (X)', y: 'Vertical (Y)' };
@@ -448,7 +439,6 @@ export function ConfiguracionDeObjetoEditor({
   const columnas =
     conf.simple?.columnas ??
     conf.desplazable?.columnas ??
-    conf.lateral?.columnas ??
     conf.ampliable?.columnas ??
     conf.pestanas?.columnas ??
     6;
@@ -459,7 +449,6 @@ export function ConfiguracionDeObjetoEditor({
     const bloque: Record<string, keyof ConfiguracionDeContenedor> = {
       'contenedor-simple': 'simple',
       'contenedor-desplazable': 'desplazable',
-      'contenedor-lateral': 'lateral',
       'contenedor-ampliable': 'ampliable',
       'contenedor-con-pestanas': 'pestanas',
     };
@@ -505,39 +494,6 @@ export function ConfiguracionDeObjetoEditor({
           </select>
           <span className="campo__pista">Uno solo. El otro eje nunca se desplaza.</span>
         </label>
-      ) : null}
-
-      {objectId === 'contenedor-lateral' ? (
-        <>
-          <label className="formulario__campo">
-            <span>Lado</span>
-            <select
-              value={conf.lateral?.lado ?? 'derecha'}
-              disabled={guardando}
-              data-testid={`${prueba}-lado`}
-              onChange={(e) => poner({ lateral: { ...conf.lateral, lado: e.target.value as Lado } })}
-            >
-              {LADOS.map((l) => (
-                <option key={l} value={l}>
-                  {ETIQUETA_DE_LADO[l]}
-                </option>
-              ))}
-            </select>
-            <span className="campo__pista">Como mucho un contenedor lateral por lado y modulo.</span>
-          </label>
-          <label className="editor__interruptor">
-            <input
-              type="checkbox"
-              checked={conf.lateral?.inicialmenteAbierto === true}
-              disabled={guardando}
-              data-testid={`${prueba}-abierto`}
-              onChange={(e) =>
-                poner({ lateral: { ...conf.lateral, inicialmenteAbierto: e.target.checked } })
-              }
-            />{' '}
-            Abierto al entrar
-          </label>
-        </>
       ) : null}
 
       {objectId === 'contenedor-ampliable' ? (

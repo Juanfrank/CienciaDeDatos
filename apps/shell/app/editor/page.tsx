@@ -4,6 +4,7 @@ import {
   modulosVisibles,
 } from '../../src/server/cicloDeVida';
 import { exigirSesionDePagina } from '../../src/server/sesion';
+import { CabeceraDeEditor } from '../../src/components/editor/CabeceraDeEditor';
 import { ListaDeModulos } from '../../src/components/editor/ListaDeModulos';
 
 export const dynamic = 'force-dynamic';
@@ -35,5 +36,12 @@ export default async function PaginaEditor() {
     })),
   );
 
-  return <ListaDeModulos modulos={filas} rol={actor.role} usuario={actor.userId} />;
+  return (
+    <>
+      <CabeceraDeEditor />
+      <main className="editor__cuerpo">
+        <ListaDeModulos modulos={filas} rol={actor.role} usuario={actor.userId} />
+      </main>
+    </>
+  );
 }

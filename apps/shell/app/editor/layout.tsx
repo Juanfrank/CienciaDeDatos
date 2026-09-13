@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { can } from '@app/access-control';
 import { actorDe } from '../../src/server/cicloDeVida';
@@ -13,6 +12,11 @@ import { exigirSesionDePagina } from '../../src/server/sesion';
  *
  * Como en el panel, la comprobacion se hace aqui Y en cada handler de la API. Esta evita dibujar
  * la pantalla; la otra evita que sirva de algo saltarsela.
+ *
+ * El layout ya NO dibuja la cabecera. La pagina del editor de un modulo monta dos columnas —el
+ * taller y el carril de objetos— y la cabecera va dentro de la izquierda: encabeza lo que se esta
+ * construyendo, no el panel. Dibujarla aqui la habria dejado por encima de las dos, y entonces el
+ * carril no podria llegar hasta debajo del banner.
  */
 export default async function EditorLayout({ children }: { children: React.ReactNode }) {
   const sesion = await exigirSesionDePagina();
@@ -22,21 +26,5 @@ export default async function EditorLayout({ children }: { children: React.React
     redirect('/editor-sin-permiso');
   }
 
-  return (
-    <div className="admin">
-      <header className="admin__cabecera">
-        <div>
-          <h1>Editor de modulos</h1>
-          <p className="texto-atenuado">
-            Objetos prediseñados enlazados a datasets certificados, nunca a una consulta escrita a
-            mano
-          </p>
-        </div>
-        <Link href="/" className="boton-contorno" data-testid="volver-a-modulos">
-          Volver a los modulos
-        </Link>
-      </header>
-      <main className="editor__cuerpo">{children}</main>
-    </div>
-  );
+  return <div className="admin">{children}</div>;
 }

@@ -712,7 +712,7 @@ export const modulosDemo: ModuleDefinition[] = [
           },
           {
             id: 'cont-pestanas',
-            position: { x: 0, y: 4, w: 8, h: 5 },
+            position: { x: 0, y: 4, w: 12, h: 5 },
             instance: {
               instanceId: 'cont-pestanas',
               objectId: 'contenedor-con-pestanas',
@@ -722,7 +722,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: { icono: 'pestanas', subtitulo: 'Cada pestana con su propia disposicion' },
               configuracion: {
                 objectId: 'contenedor-con-pestanas',
-                pestanas: { columnas: 6, pestanaInicial: 'p1' },
+                pestanas: { columnas: 8, pestanaInicial: 'p1' },
                 paneles: [
                   {
                     panelId: 'p1',
@@ -730,7 +730,7 @@ export const modulosDemo: ModuleDefinition[] = [
                     items: [
                       {
                         id: 'cp-barras',
-                        position: { x: 0, y: 0, w: 6, h: 4 },
+                        position: { x: 0, y: 0, w: 8, h: 4 },
                         instance: {
                           instanceId: 'cp-barras',
                           objectId: 'barras',
@@ -762,7 +762,7 @@ export const modulosDemo: ModuleDefinition[] = [
                       },
                       {
                         id: 'cp-matriz',
-                        position: { x: 2, y: 0, w: 4, h: 4 },
+                        position: { x: 2, y: 0, w: 6, h: 4 },
                         instance: {
                           instanceId: 'cp-matriz',
                           objectId: 'matriz',
@@ -772,49 +772,6 @@ export const modulosDemo: ModuleDefinition[] = [
                             datasetId: DATASET,
                             dimensions: [MATERIA, TRIMESTRE],
                             measures: ['CasosPendientes'],
-                          },
-                        },
-                      },
-                    ],
-                  },
-                ],
-              },
-            },
-          },
-          {
-            id: 'cont-lateral',
-            position: { x: 8, y: 4, w: 4, h: 5 },
-            instance: {
-              instanceId: 'cont-lateral',
-              objectId: 'contenedor-lateral',
-              version: '1.0.0',
-              title: 'Panel lateral',
-              binding: SIN_DATOS,
-              configuracion: {
-                objectId: 'contenedor-lateral',
-                lateral: { lado: 'derecha', tamano: 260, columnas: 2, inicialmenteAbierto: true },
-                paneles: [
-                  {
-                    panelId: 'p1',
-                    nombre: 'Contexto',
-                    items: [
-                      {
-                        id: 'cl-texto',
-                        position: { x: 0, y: 0, w: 2, h: 3 },
-                        instance: {
-                          instanceId: 'cl-texto',
-                          objectId: 'cuadro-de-texto',
-                          version: '1.0.0',
-                          title: 'Contexto',
-                          binding: SIN_DATOS,
-                          configuracion: {
-                            objectId: 'cuadro-de-texto',
-                            cuadroDeTexto: {
-                              parrafos: [
-                                { texto: 'Se ancla a un borde y puede salirse de la rejilla.' },
-                                { texto: 'Como mucho uno por lado y modulo.', vineta: true },
-                              ],
-                            },
                           },
                         },
                       },

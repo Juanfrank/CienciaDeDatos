@@ -28,6 +28,29 @@
 
 body {
   margin: 0;
+  /*
+   * El documento es una columna de alto completo: banner arriba, y debajo la region que llena
+   * lo que queda.
+   *
+   * Sin esto, `flex: 1` sobre `.cuerpo` no tenia contra que crecer —el alto del body lo ponia su
+   * contenido— y los dos carriles de pantalla, el arbol de navegacion y el panel de objetos,
+   * llegaban hasta donde llegara el contenido de al lado y no hasta el fondo. En un modulo corto
+   * eso dejaba el carril flotando a media pantalla.
+   *
+   * `100dvh` y no `100vh`: en un movil con la barra del navegador retraible, `vh` mide la
+   * ventana MAXIMA, asi que la pagina sobresale por debajo justo la altura de la barra.
+   *
+   * Alto EXACTO y no minimo. Con `min-height`, la columna crece con lo que traiga dentro, asi que
+   * el carril —que solo pide «todo el alto disponible»— acababa midiendo lo que midiera el modulo
+   * de al lado: en uno largo se iba muy por debajo del fondo de la ventana. Fijandolo, lo que
+   * sobra se desplaza DENTRO de su region y los carriles se quedan quietos.
+   *
+   * Las paginas que no montan carriles —acceso, avisos, restablecer— no se rompen: su contenido
+   * desborda esta caja y el desplazamiento lo toma el documento, como siempre.
+   */
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
   font-family: var(--md-ref-typeface-plain);
   font-size: var(--md-sys-typescale-body-large-size);
   line-height: var(--md-sys-typescale-body-large-line-height);
@@ -943,7 +966,7 @@ input[type='radio'] {
 .selector-equipo__campo { margin-bottom: 0; }
 .selector-equipo select { min-height: 40px; }
 
-.cuerpo { display: flex; flex: 1; min-width: 0; }
+.cuerpo { display: flex; flex: 1; min-width: 0; min-height: 0; }
 
 /*
  * Carril de navegacion de MD3, CON superficie propia.
@@ -959,6 +982,13 @@ input[type='radio'] {
   padding: var(--space-md) var(--space-sm);
   background: var(--md-sys-color-surface-container);
   align-self: stretch;
+  /*
+   * El carril llega al fondo, y es EL quien se desplaza si su arbol no cabe — no la pagina.
+   * Con la pagina desplazandose, bajar a un modulo del final del arbol se llevaba consigo la
+   * cabecera y el modulo que se estaba mirando.
+   */
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /*
@@ -1081,7 +1111,14 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   color: var(--md-sys-color-on-secondary-container);
 }
 
-.principal { flex: 1; padding: var(--space-lg); min-width: 0; }
+.principal {
+  flex: 1;
+  padding: var(--space-lg);
+  min-width: 0;
+  /* El contenido se desplaza dentro de su region, para que el carril de al lado no se mueva. */
+  min-height: 0;
+  overflow-y: auto;
+}
 
 /*
  * El nombre del modulo.
@@ -1644,7 +1681,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * Panel de administracion y editor                                    *
  * ------------------------------------------------------------------ */
 
-.admin { min-height: 100vh; display: flex; flex-direction: column; }
+.admin { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .admin__cabecera {
   display: flex;
   align-items: center;
@@ -1654,7 +1691,7 @@ th[aria-sort='descending'] .tabla__flecha {
   background: var(--md-sys-color-surface-container);
   flex-wrap: wrap;
 }
-.admin__cuerpo { display: flex; flex: 1; min-width: 0; }
+.admin__cuerpo { display: flex; flex: 1; min-width: 0; min-height: 0; }
 .admin__nav ul { list-style: none; margin: 0; padding: 0; }
 .admin__nav a {
   display: block;
@@ -1699,7 +1736,7 @@ th[aria-sort='descending'] .tabla__flecha {
 .admin__nav a[aria-current='page'] .admin__nav-desc {
   color: var(--md-sys-color-on-secondary-container);
 }
-.admin__principal { flex: 1; padding: var(--space-lg); min-width: 0; }
+.admin__principal { flex: 1; padding: var(--space-lg); min-width: 0; min-height: 0; overflow-y: auto; }
 .admin__principal h2 { margin-bottom: var(--space-xs); }
 .admin__principal h3 { margin: var(--space-lg) 0 var(--space-xs); }
 .admin__principal h4 { margin: var(--space-md) 0 var(--space-xs); }
@@ -1713,7 +1750,30 @@ th[aria-sort='descending'] .tabla__flecha {
  * esta construyendo podria estar usando. El tope se conserva donde tenia sentido —la lista— con
  * `.editor__lista`.
  */
-.editor__cuerpo { flex: 1; padding: var(--space-lg); min-width: 0; }
+/*
+ * El taller: dos columnas de pantalla completa.
+ *
+ * La izquierda es lo que se construye y se desplaza sola; la derecha es el carril de objetos,
+ * pegado al borde y sin desplazamiento propio de pagina. Que la pagina no se desplace entera es
+ * lo que mantiene el carril quieto mientras se recorre un modulo largo.
+ */
+.taller {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.taller__obra {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.taller__obra > .editor { padding: var(--space-lg); }
+
+.editor__cuerpo { flex: 1; padding: var(--space-lg); min-width: 0; min-height: 0; overflow-y: auto; }
 .editor__lista { max-width: 1100px; }
 .editor__cuerpo h2 { margin-bottom: var(--space-md); }
 .editor__crear {
@@ -1987,10 +2047,16 @@ th[aria-sort='descending'] .tabla__flecha {
   align-self: stretch;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   background: var(--md-sys-color-surface-container-lowest);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--md-sys-shape-corner-medium);
-  box-shadow: var(--md-sys-elevation-1);
+  /*
+   * Carril, no tarjeta: solo el borde que lo separa del taller.
+   *
+   * Llevaba contorno completo, esquinas redondeadas y sombra porque flotaba dentro del banco de
+   * trabajo. Pegado al borde de la pantalla, un contorno cerrado dibuja una caja con tres lados
+   * contra el vacio y las esquinas dejan ver el fondo por los huecos.
+   */
+  border-left: 1px solid var(--md-sys-color-outline-variant);
   overflow: hidden;
 }
 .panel-editor__barra {
@@ -2077,11 +2143,15 @@ th[aria-sort='descending'] .tabla__flecha {
  * `calc(100vh - 7rem)` reserva lo que ocupan las dos cabeceras; no es exacto ni falta que lo sea:
  * es el alto por debajo del cual empieza a desplazarse.
  */
-.panel-editor {
-  position: sticky;
-  top: var(--space-md);
-  max-height: calc(100vh - 7rem);
-}
+/*
+ * Sin `sticky` ni `max-height` calculado a ojo.
+ *
+ * Los dos existian para simular un carril desde dentro de una caja que se desplazaba: `sticky` lo
+ * dejaba flotando y `calc(100vh - 7rem)` adivinaba lo que median el banner y la cabecera —un
+ * numero que dejaba de ser cierto en cuanto cualquiera de los dos cambiaba de alto, y que en
+ * movil, con la barra del navegador, no lo era nunca—. Ahora el carril es un hermano de la
+ * columna que se desplaza, asi que su alto lo reparte el flex y no hay nada que adivinar.
+ */
 .panel-editor__cuerpo {
   flex: 1;
   min-height: 0;
@@ -3324,48 +3394,6 @@ th[aria-sort='descending'] .tabla__flecha {
 .contenedor--desplazable[data-eje='x'] .contenedor__rejilla { grid-auto-flow: column; }
 .contenedor__pista { display: flex; min-height: 0; }
 .contenedor__pista > .contenedor__rejilla { flex: 1; }
-
-/* El lateral sale de la rejilla: por eso solo cabe uno en cada borde. */
-.lateral {
-  display: flex;
-  height: 100%;
-  min-height: 0;
-  gap: var(--space-sm);
-  background: var(--md-sys-color-surface-container);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--md-sys-shape-corner-medium);
-  padding: var(--space-sm);
-}
-.lateral[data-lado='arriba'],
-.lateral[data-lado='abajo'] { flex-direction: column; }
-/* El tirador mide lo que mide su texto. Estirado de arriba abajo parecia una barra de color. */
-.lateral > * { align-self: flex-start; }
-.lateral[data-lado='arriba'] > *,
-.lateral[data-lado='abajo'] > * { align-self: stretch; }
-.lateral[data-lado='abajo'],
-.lateral[data-lado='derecha'] { flex-direction: row-reverse; }
-.lateral[data-lado='abajo'] { flex-direction: column-reverse; }
-.lateral__tirador {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-sm);
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
-  border: none;
-  border-radius: var(--md-sys-shape-corner-full);
-  font: var(--md-sys-typescale-label-large);
-  cursor: pointer;
-  white-space: nowrap;
-}
-.lateral__tirador svg { transition: transform 120ms ease; }
-.lateral[data-abierto='si'] .lateral__tirador svg { transform: rotate(180deg); }
-.lateral__panel { min-width: 0; min-height: 0; overflow: auto; display: flex; align-self: stretch; }
-/*
- * `display: flex` gana al `display: none` que el navegador aplica a `[hidden]`, asi que sin esto
- * el panel plegado se seguia viendo — y, peor, seguia en el orden de tabulacion.
- */
-.lateral__panel[hidden] { display: none; }
 
 /* La ventana ampliada: rejilla propia, y cierre explicito. */
 .ampliado {

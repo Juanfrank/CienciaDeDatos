@@ -11,7 +11,6 @@ import {
   ContenedorAmpliable,
   ContenedorConPestanas,
   ContenedorDesplazable,
-  ContenedorLateral,
   ContenedorSimple,
 } from './contenedores';
 import { CuadroDeTexto, FormaBasica, LineaDivisoria, TituloDeSeccion } from './elementos';
@@ -112,8 +111,6 @@ export function ObjetoDeModulo({
       return <ContenedorSimple {...propsDeContenedor} />;
     case 'contenedor-desplazable':
       return <ContenedorDesplazable {...propsDeContenedor} />;
-    case 'contenedor-lateral':
-      return <ContenedorLateral {...propsDeContenedor} />;
     case 'contenedor-ampliable':
       return <ContenedorAmpliable {...propsDeContenedor} />;
     case 'contenedor-con-pestanas':

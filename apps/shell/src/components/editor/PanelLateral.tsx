@@ -63,7 +63,6 @@ const ICONO_DE_TIPO: Record<string, NombreDeIcono> = {
   conexion: 'conexion',
   'contenedor-simple': 'contenedor',
   'contenedor-desplazable': 'contenedor',
-  'contenedor-lateral': 'contenedor',
   'contenedor-ampliable': 'expandir',
   'contenedor-con-pestanas': 'pestanas',
 };

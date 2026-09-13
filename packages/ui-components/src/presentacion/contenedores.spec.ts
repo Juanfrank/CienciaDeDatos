@@ -3,8 +3,6 @@ import {
   columnasDe,
   configuracionInicial,
   instanciasAnidadas,
-  ladoLibre,
-  ladosDuplicados,
   panelesDe,
   seSolapanEnRejilla,
   validarContenedor,
@@ -102,26 +100,6 @@ describe('validarContenedor', () => {
   });
 });
 
-describe('un lateral por lado', () => {
-  it('senala el lado compartido y QUIENES lo comparten', () => {
-    const dup = ladosDuplicados([
-      { id: 'a', lado: 'derecha' },
-      { id: 'b', lado: 'derecha' },
-      { id: 'c', lado: 'izquierda' },
-    ]);
-    expect(dup).toEqual([{ lado: 'derecha', itemIds: ['a', 'b'] }]);
-  });
-
-  it('no se queja cuando cada uno esta en su borde', () => {
-    expect(ladosDuplicados([{ id: 'a', lado: 'arriba' }, { id: 'b', lado: 'abajo' }])).toEqual([]);
-  });
-
-  it('ofrece el primer borde libre, y nada cuando los cuatro estan ocupados', () => {
-    expect(ladoLibre(['arriba'])).toBe('abajo');
-    expect(ladoLibre(['arriba', 'abajo', 'izquierda', 'derecha'])).toBeNull();
-  });
-});
-
 describe('configuracion inicial', () => {
   it('el de pestanas nace con dos: con una nacería marcado como roto', () => {
     const config = configuracionInicial('contenedor-con-pestanas');
@@ -142,7 +120,7 @@ describe('configuracion inicial', () => {
 
 describe('columnasDe', () => {
   it('lee las columnas del bloque del tipo que sea', () => {
-    expect(columnasDe('contenedor-lateral', { lateral: { columnas: 4 } })).toBe(4);
+    expect(columnasDe('contenedor-desplazable', { desplazable: { columnas: 4 } })).toBe(4);
     expect(columnasDe('contenedor-simple', undefined)).toBe(6);
   });
 
