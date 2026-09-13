@@ -25,6 +25,17 @@ interface Medicion {
   latenciasMs: number[];
 }
 
+/** Lo que el script lee de `/health`. Solo los contadores de cache, que es lo que compara. */
+interface Salud {
+  cache: {
+    total: number;
+    desdeL1: number;
+    desdeL2: number;
+    generandose: number;
+    degradados: number;
+  };
+}
+
 const percentil = (valores: number[], p: number): number => {
   if (valores.length === 0) return 0;
   const ordenadas = [...valores].sort((a, b) => a - b);
@@ -69,7 +80,7 @@ async function principal(): Promise<void> {
   });
   const cookie = (alta.headers.get('set-cookie') ?? '').split(';')[0] ?? '';
 
-  const before = await (await fetch(`${base}/health`, { headers: { cookie } })).json();
+  const before = (await (await fetch(`${base}/health`, { headers: { cookie } })).json()) as Salud;
 
   const medicion: Medicion = { ok: 0, fallos: 0, latenciasMs: [] };
   const hasta = Date.now() + segundos * 1000;
@@ -77,7 +88,7 @@ async function principal(): Promise<void> {
     Array.from({ length: concurrencia }, () => trabajador(base, hasta, cookie, medicion)),
   );
 
-  const after = await (await fetch(`${base}/health`, { headers: { cookie } })).json();
+  const after = (await (await fetch(`${base}/health`, { headers: { cookie } })).json()) as Salud;
   const total = medicion.ok + medicion.fallos;
 
   console.log('');

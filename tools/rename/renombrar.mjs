@@ -21,7 +21,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { resolve } from 'node:path';
-import { segmentar, unir } from './segmentos.mjs';
+import { segmentar, segmentarJsx, unir } from './segmentos.mjs';
 
 const GLOSARIO = JSON.parse(readFileSync('tools/rename/glosario.json', 'utf8'));
 const ENLACES = new Set(['de', 'del', 'en', 'por', 'con', 'a', 'y', 'que', 'para', 'un', 'una']);
@@ -192,7 +192,7 @@ const DECLARACIONES = [
 
 function declaradosEn(fuente) {
   const nombres = new Set();
-  const codigo = segmentar(fuente)
+  const codigo = segmentarJsx(fuente)
     .filter((s) => s.tipo === 'codigo')
     .map((s) => s.texto)
     .join('\n');
@@ -472,7 +472,9 @@ function aplicar(plan) {
         : antes;
     } else {
       despues = unir(
-        segmentar(antes).map((s) => {
+        segmentarJsx(antes).map((s) => {
+          // La prosa visible de un JSX no se toca: no hay ningun identificador dentro.
+          if (s.tipo === 'prosa') return s;
           /*
            * Las rutas de los archivos movidos se sustituyen SOLO en un especificador de modulo.
            *

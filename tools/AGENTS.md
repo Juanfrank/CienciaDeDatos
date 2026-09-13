@@ -5,7 +5,7 @@ Scripts que no forman parte de la aplicacion. `project.json` los declara como el
 
 | Comando | Que hace |
 |---|---|
-| `nx run verificacion:typecheck` | `tsc -b` sobre todas las referencias |
+| `nx run verificacion:typecheck` | `tsc -b` sobre las referencias Y `tsc -p apps/shell` aparte |
 | `nx run verificacion:limites` | Comprueba que la regla de limites sigue rechazando el fixture |
 | `nx run verificacion:esquema` | Valida el esquema Prisma |
 | `nx run verificacion:infra` | Compila Bicep tratando toda advertencia como error |
@@ -20,9 +20,15 @@ Scripts que no forman parte de la aplicacion. `project.json` los declara como el
   ignora en silencio, y eso ya paso una vez.
 - **Cada target declara sus entradas y salidas.** Sin salidas declaradas, un acierto de cache
   deja el directorio sin construir y la verificacion siguiente mide algo viejo.
+- **El shell se comprueba APARTE.** El `tsconfig.json` de la raiz excluye `apps/shell/**`, porque
+  Next necesita sus propias opciones, y `next.config.mjs` lleva `ignoreBuildErrors: true`. Entre
+  las dos cosas, la aplicacion mas grande del repositorio estuvo sin comprobar: `tsc -b` la
+  saltaba y `next build` tampoco miraba. Por eso el target invoca dos veces al compilador.
 
 ## Que NO hacer
 
 - No anadir un script de verificacion como script suelto de npm: no se cachea ni entra en
   `affected`.
 - No poner en un YAML de CI una variable que el target necesita para correr en local.
+- No quitar la segunda invocacion del compilador del target `typecheck` ni dar por hecho que
+  `tsc -b` cubre `apps/shell`: no lo cubre.

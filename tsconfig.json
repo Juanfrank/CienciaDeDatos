@@ -6,7 +6,9 @@
   "include": [
     "apps/**/*.ts",
     "packages/**/*.ts",
-    "tools/**/*.ts"
+    "tools/**/*.ts",
+    "tools/**/*.mts",
+    "*.mts"
   ],
   "exclude": [
     "node_modules",

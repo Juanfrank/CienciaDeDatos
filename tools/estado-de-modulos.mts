@@ -1,17 +1,17 @@
 /** Valida cada modulo POR SEPARADO y emite el resultado — seccion 3.4. */
 import { writeFileSync } from 'node:fs';
-import { type ResumenDeSalud, type ModuleHealth, healthOf } from '@app/module-model';
-import { diagnosticarDefinicion } from '../apps/shell/src/server/datos';
-import { modulos } from '../apps/shell/src/server/almacenModulos';
+import { type HealthSummary, type ModuleHealth, healthOf } from '@app/module-model';
+import { diagnosticarDefinicion } from '../apps/shell/src/server/data';
+import { modules } from '../apps/shell/src/server/almacenModulos';
 
-interface EstadoDeModulo extends ResumenDeSalud {
+interface EstadoDeModulo extends HealthSummary {
   slug: string;
   moduleId: string;
 }
 
 const destino = process.argv[2] ?? 'estado-de-modulos.json';
 
-const lista = await modulos.list();
+const lista = await modules.list();
 const estados: EstadoDeModulo[] = [];
 
 for (const modulo of lista) {
@@ -34,7 +34,7 @@ for (const modulo of lista) {
   }
 }
 
-const informe = { generadoEn: new Date().toISOString(), modulos: estados };
+const informe = { generadoEn: new Date().toISOString(), modules: estados };
 writeFileSync(destino, `${JSON.stringify(informe, null, 2)}\n`);
 
 const MARCA: Record<ModuleHealth, string> = { ok: '✓', degradado: '~', fallo: '✗' };

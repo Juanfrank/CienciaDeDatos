@@ -22,7 +22,7 @@
  * principio de una linea, una barra abre expresion regular.
  */
 
-/** @typedef {{ tipo: 'codigo' | 'comentario' | 'cadena', texto: string }} Segmento */
+/** @typedef {{ tipo: 'codigo' | 'comentario' | 'cadena' | 'prosa', texto: string }} Segmento */
 
 const ANTES_DE_EXPRESION = new Set(['(', ',', '=', ':', '[', '!', '&', '|', '?', '{', '}', ';']);
 
@@ -155,3 +155,42 @@ export function segmentar(fuente) {
 
 /** Vuelve a unir los segmentos. `unir(segmentar(x)) === x` para cualquier `x`. */
 export const unir = (segmentos) => segmentos.map((s) => s.texto).join('');
+
+/**
+ * El TEXTO de JSX es prosa visible, no codigo.
+ *
+ * `<h1>Editor de modulos</h1>` no lleva ningun identificador: son palabras que lee una persona.
+ * Para el escaner, en cambio, estan en zona de codigo, asi que `modulos` se renombro y la interfaz
+ * paso a decir «Editor de modules». Ocurrio en cincuenta y cuatro sitios antes de verse, porque
+ * no rompe la compilacion ni ninguna prueba: la aplicacion sigue funcionando, solo que medio
+ * escrita en ingles.
+ *
+ * Se reconoce lo que hay entre `>` o `}` y el `<` siguiente, sin llaves ni signos de operacion.
+ * El `}` hace falta porque el texto suele venir tras una interpolacion: `{n} modulos visibles`.
+ * Un falso positivo solo hace que algo NO se renombre, que es el lado seguro del error.
+ *
+ * El unico que hacia falta descartar es el generico: `}\n\nexport const x: Record<` abre en la
+ * llave que cierra una funcion y cierra en el `<` del generico. Ninguna frase en pantalla lleva
+ * una palabra reservada de JavaScript, asi que basta con eso para distinguirlos.
+ */
+const PALABRA_DE_CODIGO =
+  /\b(?:export|import|const|let|var|return|function|default|case|typeof|interface|type|class|extends|async|await|new|delete)\b/;
+const TEXTO_JSX = /([>}])([^<>{}=;()[\]`]*[A-Za-zÀ-ÿ][^<>{}=;()[\]`]*)(<)/g;
+
+/** Como `segmentar`, pero marcando como `prosa` el texto visible de un JSX. */
+export function segmentarJsx(fuente) {
+  return segmentar(fuente).flatMap((s) => {
+    if (s.tipo !== 'codigo') return s;
+    const trozos = [];
+    let ultimo = 0;
+    for (const m of s.texto.matchAll(TEXTO_JSX)) {
+      if (PALABRA_DE_CODIGO.test(m[2])) continue;
+      const inicio = m.index + m[1].length;
+      trozos.push({ tipo: 'codigo', texto: s.texto.slice(ultimo, inicio) });
+      trozos.push({ tipo: 'prosa', texto: m[2] });
+      ultimo = inicio + m[2].length;
+    }
+    trozos.push({ tipo: 'codigo', texto: s.texto.slice(ultimo) });
+    return trozos.filter((t) => t.texto !== '');
+  });
+}

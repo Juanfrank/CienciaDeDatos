@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error -- herramienta en JavaScript, sin tipos.
-import { segmentar, unir } from './segmentos.mjs';
+import { segmentar, segmentarJsx, unir } from './segmentos.mjs';
 
 /**
  * El escaner que separa codigo, comentario y cadena.
@@ -81,5 +81,43 @@ describe('segmentar', () => {
     // Devuelve lo que hay, y sigue reconstruyendo: un archivo mal formado no debe corromperse.
     const fuente = 'const a = 1;\n/* sin cerrar';
     expect(unir(segmentar(fuente))).toBe(fuente);
+  });
+});
+
+describe('segmentarJsx', () => {
+  const zonas = (fuente: string) =>
+    (segmentarJsx(fuente) as { tipo: string; texto: string }[]).map((s) => `${s.tipo}:${s.texto}`);
+
+  it('el texto visible de un JSX es prosa, no codigo', () => {
+    // `<h1>Editor de modulos</h1>`: tratado como codigo, el renombrado dejo la cabecera del
+    // editor diciendo «Editor de modules».
+    expect(zonas('<h1>Editor de modulos</h1>')).toEqual([
+      'codigo:<h1>',
+      'prosa:Editor de modulos',
+      'codigo:</h1>',
+    ]);
+  });
+
+  it('el texto que sigue a una interpolacion tambien es prosa', () => {
+    expect(zonas('<p>{n} modulos visibles</p>')).toEqual([
+      'codigo:<p>{n}',
+      'prosa: modulos visibles',
+      'codigo:</p>',
+    ]);
+  });
+
+  it('un generico no se confunde con texto', () => {
+    // `}` cierra la funcion y `<` abre el generico: entre medias no hay nada que leer.
+    const fuente = 'function f() {}\nexport const m: Record<string, number> = {};';
+    expect(zonas(fuente)).toEqual([`codigo:${fuente}`]);
+  });
+
+  it('una comparacion no se confunde con texto', () => {
+    expect(zonas('const b = a > uno;')).toEqual(['codigo:const b = a > uno;']);
+  });
+
+  it('reconstruye la fuente exactamente', () => {
+    const fuente = '<div className="x">\n  Texto con {dato} dentro\n</div>';
+    expect(unir(segmentarJsx(fuente))).toBe(fuente);
   });
 });

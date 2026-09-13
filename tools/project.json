@@ -11,7 +11,7 @@
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc -b --pretty"
+        "command": "tsc -b --pretty && tsc -p apps/shell/tsconfig.json --noEmit --pretty"
       },
       "inputs": [
         "{workspaceRoot}/tsconfig.base.json",

@@ -5,7 +5,7 @@ import { banderaDeModulo } from '@app/config';
 import type { ModuleHealth } from '@app/module-model';
 
 interface Informe {
-  modulos: { slug: string; health: ModuleHealth }[];
+  modules: { slug: string; health: ModuleHealth }[];
 }
 
 const [, , rutaInforme, endpoint] = process.argv;
@@ -27,7 +27,7 @@ const cabeceras = {
 
 let cambiadas = 0;
 
-for (const modulo of informe.modulos) {
+for (const modulo of informe.modules) {
   const label = banderaDeModulo(modulo.slug);
   const cacheKey = encodeURIComponent(`.appconfig.featureflag/${label}`);
   const url = `${base}/kv/${cacheKey}?api-version=2023-11-01`;
