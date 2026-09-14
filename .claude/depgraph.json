@@ -2,7 +2,7 @@
  "files": [
   {
    "path": "eslint.config.mjs",
-   "hash": "5a6023d5a8e41d418fc9a72aa4eb2dd73c33a1cb52bbbe703867f55f62b0022f",
+   "hash": "8cdba54a396dd59c51c03fb4fc8aa4c1e462851543d480094bb9972d9f5f4e6e",
    "imports": [
     "@nx/eslint-plugin"
    ],
@@ -9525,10 +9525,41 @@
    ]
   },
   {
-   "path": "tools/texto-visible.spec.ts",
-   "hash": "5c208f65e992f39bf5e73a58b71b34daac85fdaeb946070ab5b8c2ef9e806a1d",
+   "path": "tools/coherencia/rutas.spec.ts",
+   "hash": "31d6e962da536e821a44ef92e48180e4e2634d851820b99204bb43601ffbca83",
    "imports": [
-    "./rename/segmentos.mjs",
+    "node:child_process",
+    "node:fs",
+    "node:path",
+    "vitest"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "node:child_process",
+     "resolved": null
+    },
+    {
+     "module": "node:fs",
+     "resolved": null
+    },
+    {
+     "module": "node:path",
+     "resolved": null
+    },
+    {
+     "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "tools/coherencia/interfaz.spec.ts",
+   "hash": "9d2dfb06e1943c0d28960612b330fa783690a9cd417636dedd93eb3ad73a6fb0",
+   "imports": [
+    "@app/ui-components",
     "node:child_process",
     "node:fs",
     "vitest"
@@ -9538,7 +9569,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./rename/segmentos.mjs",
+     "module": "@app/ui-components",
      "resolved": null
     },
     {
@@ -9556,35 +9587,10 @@
    ]
   },
   {
-   "path": "tools/especificaciones.spec.ts",
-   "hash": "00f4bdb9fac8d8cfacaf5c6ccf0b0aa168c6bc5de2f853a44a8840d7b41b1540",
+   "path": "tools/coherencia/documentacion.spec.ts",
+   "hash": "cc97cc2de317853c17cb72032f3027f6532277dd0d2d4c87d393aeb5ebab96e2",
    "imports": [
-    "node:fs",
-    "node:path",
-    "vitest"
-   ],
-   "defines": [],
-   "exports": [],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "node:fs",
-     "resolved": null
-    },
-    {
-     "module": "node:path",
-     "resolved": null
-    },
-    {
-     "module": "vitest",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "tools/referencias-md.spec.ts",
-   "hash": "b68c0291ec093d4822a2cdf3162511b5b9b55dc81ba13a6b58729644b9bb472a",
-   "imports": [
+    "../rename/segmentos.mjs",
     "node:child_process",
     "node:fs",
     "node:path",
@@ -9594,6 +9600,10 @@
    "exports": [],
    "references": [],
    "import_edges": [
+    {
+     "module": "../rename/segmentos.mjs",
+     "resolved": null
+    },
     {
      "module": "node:child_process",
      "resolved": null
@@ -9698,6 +9708,53 @@
     },
     {
      "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "tools/rename/detect.mjs",
+   "hash": "d6e94a13720aec9048aa069520eee984b798a81dd8f696d3f061bacf71b618d9",
+   "imports": [
+    "node:child_process",
+    "node:fs"
+   ],
+   "defines": [
+    {
+     "name": "classify",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "findAll",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "splitWords",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "translate",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "classify",
+    "findAll",
+    "splitWords",
+    "translate"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "node:child_process",
+     "resolved": null
+    },
+    {
+     "module": "node:fs",
      "resolved": null
     }
    ]
@@ -13756,32 +13813,6 @@
    ]
   },
   {
-   "path": "apps/shell/src/server/atributos-de-datos.spec.ts",
-   "hash": "a80e85459265977154b2044e0aee3a1ebe102218366345f34502505ae8ed5dc2",
-   "imports": [
-    "node:fs",
-    "node:path",
-    "vitest"
-   ],
-   "defines": [],
-   "exports": [],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "node:fs",
-     "resolved": null
-    },
-    {
-     "module": "node:path",
-     "resolved": null
-    },
-    {
-     "module": "vitest",
-     "resolved": null
-    }
-   ]
-  },
-  {
    "path": "apps/shell/src/server/incrustacion.spec.ts",
    "hash": "6e753f1b5b4cc8b628564922793bde357aba4d6667bcf03033bce30a97e80b8f",
    "imports": [
@@ -13794,32 +13825,6 @@
    "import_edges": [
     {
      "module": "./incrustacion",
-     "resolved": null
-    },
-    {
-     "module": "vitest",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/src/server/rutas.spec.ts",
-   "hash": "3278d2ea4dda096a2b03b55da8dc158ef6da0fe371a0f2fdb08e239e4ed24676",
-   "imports": [
-    "node:fs",
-    "node:path",
-    "vitest"
-   ],
-   "defines": [],
-   "exports": [],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "node:fs",
-     "resolved": null
-    },
-    {
-     "module": "node:path",
      "resolved": null
     },
     {
@@ -14741,37 +14746,6 @@
     },
     {
      "module": "node:path",
-     "resolved": null
-    },
-    {
-     "module": "vitest",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/src/server/identificadores-de-prueba.spec.ts",
-   "hash": "19c9ba8ed5cc233a51697a4cbe4f084e7f5d4acb612c40abcb06f3a3d95d0fb1",
-   "imports": [
-    "./context",
-    "node:child_process",
-    "node:fs",
-    "vitest"
-   ],
-   "defines": [],
-   "exports": [],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "./context",
-     "resolved": null
-    },
-    {
-     "module": "node:child_process",
-     "resolved": null
-    },
-    {
-     "module": "node:fs",
      "resolved": null
     },
     {
@@ -17617,7 +17591,7 @@
   },
   {
    "path": "apps/shell/e2e/shell.spec.ts",
-   "hash": "c758cc1440067e9046c7f8f73c2d98b216743c347893dbc2ad869175992c9cfc",
+   "hash": "7acac62f580d31a8ae830f1a696441112f03f0a14a93331afe9711bc6813ae5d",
    "imports": [
     "./session",
     "@playwright/test"
@@ -17997,5 +17971,5 @@
    ]
   }
  ],
- "file_count": 361
+ "file_count": 359
 }
