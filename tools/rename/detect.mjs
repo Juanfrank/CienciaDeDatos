@@ -175,6 +175,16 @@ const WORDS = /[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+/g;
 const DECLARATIONS =
   /\b(?:const|let|var|function|class|interface|type|enum)\s+([A-Za-z_$][\w$]*)|\b([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{/g;
 
+/**
+ * Las PROPIEDADES tambien son identificadores.
+ *
+ * `definicion?.dimensiones ?? { min: 0, max: 0 }` no declara nada: son la firma de una interfaz y
+ * la clave de un objeto. Se escapaban enteras del recuento —167 nombres distintos en 478 sitios—
+ * porque solo se miraban las declaraciones, y son lo que mas se lee al usar una libreria desde
+ * fuera.
+ */
+const PROPERTIES = /^\s{2,}([a-z][A-Za-z0-9_$]*)\??\s*:/gm;
+
 /** Las palabras espanolas de un identificador, separadas de los falsos amigos. */
 export function classify(name) {
   const spanish = [];
@@ -266,7 +276,7 @@ export function findAll(prefix = "") {
       ].map((match) => match[1]),
     );
     const seen = new Set();
-    for (const match of source.matchAll(DECLARATIONS)) {
+    for (const match of [...source.matchAll(DECLARATIONS), ...source.matchAll(PROPERTIES)]) {
       const name = match[1] ?? match[2];
       if (!name || seen.has(name)) continue;
       seen.add(name);

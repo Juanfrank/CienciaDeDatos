@@ -11,6 +11,20 @@ como adiciones y jamas como rupturas.
 
 ## [Sin publicar]
 
+### Seguridad
+- El webhook de refresco de datasets RECHAZA cuando `WEBHOOK_SECRET` no esta configurado, en vez
+  de dejar pasar. Antes, sin la variable puesta, cualquiera podia invalidar entradas del cache.
+  La comparacion del secreto pasa a ser de tiempo constante.
+- Cabeceras en toda respuesta: `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
+  y, solo en produccion, `Strict-Transport-Security`.
+
+### Corregido
+- El inicio de sesion no funcionaba: la ruta leia `correo` y `codigo` cuando el formulario ya
+  mandaba `mail` y `code`.
+- Cuatro frases se leian en ingles en la interfaz: «Su role aqui», «limita esta view a», «Data de
+  source» y «Tab 1». Tambien `(all)` en el desplegable del panel de filtros.
+- El panel lateral no se plegaba: el selector del CSS esperaba un atributo con otro nombre.
+
 ### Anadido
 - Licencia de uso interno sin redistribucion, aviso de componentes de terceros y
   declaracion de autoria.

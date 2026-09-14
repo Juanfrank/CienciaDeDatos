@@ -8,6 +8,28 @@ definicion entera en cada cambio" si lo es.
 
 ---
 
+## 0. Cumplido desde la ultima revision
+
+Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "creido hecho".
+
+- **Arrastrar y soltar en el editor de modulos** (era 2.1). Asa para mover y esquina para
+  redimensionar, con la condicion que se le puso: los dos gestos pasan por la MISMA funcion que
+  los botones, asi que no hay dos caminos que puedan divergir. Lo comprueban
+  `arrastrar el asa mueve el bloque de columna`, `arrastrar la esquina cambia el ancho` y
+  `el arrastre pasa por el MISMO camino que los botones`, en `apps/shell/e2e/canvas.spec.ts`.
+- **Adjuntar complementos desde el editor** (era 2.4). `se puede adjuntar un tooltip desde el
+  editor`, en el mismo archivo. Ya no hay que escribirlos en la definicion a mano.
+- **Tema oscuro encendido** (era 2.6). Lo elige la cookie `tema` (`apps/shell/src/server/theme.ts`)
+  y `apps/shell/e2e/dark-contrast.spec.ts` recorre con axe las paginas de modulo, el editor, el
+  panel de administracion y la pantalla de restablecer EN OSCURO: dieciseis pruebas, ninguna
+  infraccion. Era justo la condicion que se puso para encenderlo —«un tema dark a medias es peor
+  que no tenerlo»—, y se cumple.
+
+**2.2 sigue pendiente** aunque dependia de 2.1: el reposicionamiento existe en el editor, no en
+el dialogo «Mi vista» de la personalizacion.
+
+---
+
 ## 1. Bloqueado por el entorno
 
 No hay nada que decidir: falta un servicio que este entorno no tiene. El diseno esta hecho y el
@@ -77,21 +99,11 @@ cuenta concreta. Vive en Front Door o en App Service, no en el codigo de la apli
 
 Nada las bloquea. Estan aqui porque se identificaron y no se hicieron.
 
-### 2.1 Arrastrar y soltar en el editor de modulos
-
-El editor coloca los objetos apilados y permite quitarlos, pero no reposicionarlos. El arrastre
-lo pide 4.2 para el editor y 4.10.8 para el arbol; en el arbol ya estan los dos gestos —arrastre
-y botones— sobre la misma operacion. Falta el equivalente en la rejilla.
-
-**Con la misma condicion que en el arbol**: arrastrar y soltar por si solo es inaccesible por
-teclado y con lector de pantalla, y 4.9 dice que la accesibilidad no se pospone. Los dos gestos,
-sobre la misma funcion.
-
 ### 2.2 Reposicionamiento en la personalizacion (4.6)
 
 `UserPersonalization` admite `positionOverrides` y `columnOrder`, y `applyPersonalization` los
 aplica. El dialogo "Mi vista" solo ofrece ocultar y mostrar. El modelo esta; falta el gesto, y
-depende de 2.1 para no hacer dos veces el mismo trabajo.
+ya no depende de nada: el gesto existe en el editor (seccion 0) y falta portarlo aqui.
 
 ### 2.3 El editor reescribe la definicion entera en cada cambio
 
@@ -100,29 +112,12 @@ editando el mismo borrador se pisarian —hoy no ocurre porque un borrador es de
 y el dia que haya modulos grandes sera caro. La forma correcta es una operacion por cambio, como
 `applyTreeOperation` en el arbol.
 
-### 2.4 Objetos adjuntables en el editor
-
-`tooltip-explicativo` y `tabla-de-datos` se validan, se dibujan y se exportan, y se pueden
-declarar en la definicion de un modulo. El editor todavia no ofrece adjuntarlos: hay que
-escribirlos en la definicion.
-
 ### 2.5 Paginas multiples en el editor
 
 Un modulo admite varias paginas —el modelo, la validacion y el ruteo `/m/{slug}/{pagina}` estan
 hechos— y el editor solo edita la primera.
 
 ---
-
-### 2.6 Encender el tema dark
-
-Los tokens del esquema dark de Material Design 3 **existen y estan verificados**: se generan
-igual que los del light y la prueba de contraste recorre los dos modos entero, los 54 pares de
-rol. Lo que no esta hecho es aplicarlos.
-
-Encenderlos es una media query —`prefers-color-scheme: dark` redefiniendo las variables— mas una
-pasada de revision de cada pantalla en ese modo. Se deja pendiente a proposito: las pruebas de
-accesibilidad que hoy pasan lo hacen sobre el light, y un tema dark a medias es peor que no
-tenerlo.
 
 ### 2.7 Mas tipos de visualizacion sobre ECharts
 
@@ -169,7 +164,69 @@ Para devolverlo hace falta, por este orden:
    vocabulario tiene que seguir saliendo de lo que quien pregunta ya puede ver, porque ahi esta
    lo que impide que la pregunta se convierta en una puerta trasera al ambito.
 
-Encenderlo es cambiar la constante y quitar el `.skip` del bloque de pruebas.
+Encenderlo es cambiar la constante. Las pruebas de navegador que lo ejercitaban estaban saltadas
+y se retiraron: una prueba que no corre se desincroniza en silencio y hay que reescribirla igual
+el dia que se reactive. Viven en el historial de git.
+
+
+### 2.10 El texto visible sale del componente, no del catalogo
+
+`AGENTS.md` lo pone entre las reglas que no se negocian y dice que lo garantiza una prueba. No
+habia tal prueba, y la regla lleva incumpliendose casi entera: **53 claves en el catalogo de
+`@app/i18n` contra 322 cadenas escritas dentro de 56 componentes**. Solo tres archivos importan el
+traductor.
+
+No es cosmetico. Mientras el texto viva en el componente, la aplicacion no puede cambiar de
+idioma —que es lo que el propio paquete existe para permitir—, cada cadena repetida en dos
+pantallas puede discrepar, y nada impide que una palabra en ingles se cuele donde una persona la
+lea. Ha pasado cinco veces durante el renombrado.
+
+Hoy hay un trinquete: `tools/coherencia/i18n.spec.ts` cuenta las cadenas sueltas y falla si suben
+de 322. El numero solo puede bajar, y quien migre una cadena baja el tope en el mismo commit.
+
+Migrar de golpe es un cambio grande y mecanico. El orden sensato es por pantalla, empezando por
+las que mas acumulan: `Presentation.tsx` (55), `EditorObjectSettings.tsx` (22), `SidebarPanel.tsx`
+(17), `ModuleList.tsx` (15).
+
+### 2.11 Las propiedades siguen en espanol
+
+El renombrado al ingles cubrio declaraciones, archivos, clases CSS e identificadores de prueba.
+Se dejo fuera, sin darse cuenta, la clase mas leida desde fuera: **las propiedades**. Son 167
+nombres distintos en 478 sitios —`definicion.dimensiones`, `instancia.presentacion`, `objeto.
+titulo`—, y hasta ahora el detector ni siquiera las miraba porque solo buscaba declaraciones.
+
+Ahora `node tools/rename/detect.mjs` las cuenta. Renombrarlas NO es equivalente a lo ya hecho: la
+definicion de un modulo se guarda como JSON en el almacen, asi que las claves estan en disco. Un
+renombrado sin migracion deja de leer los modulos ya guardados.
+
+Hace falta, por ese orden:
+
+1. Una migracion que lea la forma vieja y escriba la nueva, con su prueba sobre un fixture real.
+2. El renombrado, paquete a paquete, como los anteriores.
+3. Una guarda que compare las claves del JSON guardado con las del tipo, que es el contrato que
+   hoy no ata nadie.
+
+### 2.12 Politica de contenido (CSP) completa
+
+El middleware pone ya `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` y, en
+produccion, `Strict-Transport-Security`. Falta la CSP de verdad —`default-src 'self'`—, que es la
+que haria CUMPLIR el principio 1 en vez de solo comprobarlo con una prueba de navegador.
+
+No se hizo ahora porque no es un cambio sin riesgo: ya existe una CSP parcial para el enmarcado
+(`frame-ancestors`, en `embedding.ts`) con la que habria que fusionarla, y Next necesita `nonce`
+por peticion para sus scripts de hidratacion. Una CSP mal puesta no avisa: deja la pagina en
+blanco.
+
+### 2.13 `exceljs` arrastra un `uuid` con aviso de seguridad
+
+`npm audit` reporta dos avisos moderados, los dos del mismo sitio: `exceljs` depende de una
+version de `uuid` sin comprobacion de limites del buffer. `npm audit fix --force` baja `exceljs`
+a la 3.4.0, que es un cambio de API.
+
+El alcance real aqui es pequeno —el `uuid` afectado se usa al escribir un libro, con datos que ya
+pasaron por la proyeccion, y el fallo necesita que quien llama pase un buffer propio—, pero el
+aviso se queda hasta que `exceljs` publique una version con el `uuid` corregido o se cambie de
+libreria para el formato Excel.
 
 ---
 
