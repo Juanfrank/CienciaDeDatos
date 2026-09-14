@@ -1,5 +1,5 @@
-import { expect, test } from './instancia';
-import { entrarComo } from './session';
+import { expect, test } from './instance';
+import { asLogin } from './session';
 
 /** Personalizar un objeto SIN escribir codigo — secciones 4.2 y 4.3. */
 
@@ -11,13 +11,13 @@ const guardado = async (page: Pagina) => {
 };
 
 /** El id del objeto recien colocado, leido del BLOQUE del lienzo. */
-const idDelPrimerBloque = async (page: Pagina): Promise<string> => {
+const blockFirstId = async (page: Pagina): Promise<string> => {
   const testid = await page.locator('[data-testid^="block-obj-"]').first().getAttribute('data-testid');
   return (testid ?? '').replace('block-', '');
 };
 
 /** Abre una subseccion del panel por su testid. */
-const abrir = async (page: Pagina, prueba: string) => {
+const open = async (page: Pagina, prueba: string) => {
   const section = page.getByTestId(prueba);
   if (await section.evaluate((el) => !(el as HTMLDetailsElement).open)) {
     // `> summary` y no `summary`: «Medida» contiene subsecciones —Valor, Etiqueta, el formato de
@@ -37,19 +37,19 @@ const createModule = async (page: Pagina, slug: string) => {
 
 test.describe('el editor configura como se ve un objeto', () => {
   test('icono, acento, resaltado, subtitulo y formato llegan al modulo', async ({ page }) => {
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     await createModule(page, 'pers-kpi');
 
     await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
-    const id = await idDelPrimerBloque(page);
+    const id = await blockFirstId(page);
     await page.getByTestId('tab-formato').click();
 
     await page.getByTestId(`pres-${id}-icono`).selectOption('balanza');
     await guardado(page);
     // El acento y el resaltado viven ahora en «Borde», que es lo que dibuja el limite de la
     // tarjeta. Antes estaban mezclados con el rotulo, que es otra cosa.
-    await abrir(page, `pres-${id}-borde`);
+    await open(page, `pres-${id}-borde`);
     await page.getByTestId(`pres-${id}-acento`).selectOption('terciario');
     await guardado(page);
     // `.click()` y no `.check()`: el editor no es optimista — la casilla no cambia hasta que el
@@ -61,7 +61,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await page.getByTestId(`pres-${id}-subtitulo`).blur();
     await guardado(page);
     // La unidad esta en el renglon GENERAL del formato, dentro de «Medida».
-    await abrir(page, `pres-${id}-medida`);
+    await open(page, `pres-${id}-medida`);
     await page.getByTestId(`pres-${id}-formato-general-unidad`).fill('casos');
     await page.getByTestId(`pres-${id}-formato-general-unidad`).blur();
     await guardado(page);
@@ -73,10 +73,10 @@ test.describe('el editor configura como se ve un objeto', () => {
     await page.getByTestId('tab-formato').click();
     await expect(page.getByTestId(`pres-${id}-icono`)).toHaveValue('balanza');
     await expect(page.getByTestId(`pres-${id}-subtitulo`)).toHaveValue('Al cierre');
-    await abrir(page, `pres-${id}-borde`);
+    await open(page, `pres-${id}-borde`);
     await expect(page.getByTestId(`pres-${id}-acento`)).toHaveValue('terciario');
     await expect(page.getByTestId(`pres-${id}-resaltado`)).toBeChecked();
-    await abrir(page, `pres-${id}-medida`);
+    await open(page, `pres-${id}-medida`);
     await expect(page.getByTestId(`pres-${id}-formato-general-unidad`)).toHaveValue('casos');
   });
 
@@ -84,7 +84,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     /*
      * La otra mitad, sobre un modulo publicado.
      */
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     const card = page.locator('.objeto').first();
@@ -102,12 +102,12 @@ test.describe('el editor configura como se ve un objeto', () => {
   test('el editor NO ofrece lo que el objeto no admite', async ({ page }) => {
     // Una tabla con `leyenda` guardaria una opcion que no dibuja nada. El contrato dice que
     // claves admite cada objeto y el editor solo puede ofrecer esas.
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     await createModule(page, 'pers-tabla');
 
     await page.getByTestId('add-tabla').click();
     await guardado(page);
-    const id = await idDelPrimerBloque(page);
+    const id = await blockFirstId(page);
     await page.getByTestId('tab-formato').click();
 
     await expect(page.getByTestId(`pres-${id}-icono`)).toBeVisible();
@@ -123,11 +123,11 @@ test.describe('el editor configura como se ve un objeto', () => {
     /*
      * El limite de 4.3, comprobado en la interfaz.
      */
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     await createModule(page, 'pers-cerrado');
     await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
-    const id = await idDelPrimerBloque(page);
+    const id = await blockFirstId(page);
     await page.getByTestId('tab-formato').click();
 
     for (const control of ['icono', 'acento']) {
@@ -139,12 +139,12 @@ test.describe('el editor configura como se ve un objeto', () => {
   });
 
   test('el panel de filtros deja elegir el selector de cada dimension', async ({ page }) => {
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     await createModule(page, 'pers-panel');
 
     await page.getByTestId('add-panel-de-filtros').click();
     await guardado(page);
-    const id = await idDelPrimerBloque(page);
+    const id = await blockFirstId(page);
 
     // Se anade una segunda dimension desde su pozo: tiene que aparecer su fila de selector sola.
     await page.getByTestId(`well-${id}-filtros-anadir`).click();
@@ -153,7 +153,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await expect(page.getByTestId(`well-${id}-filtros`)).toContainText('DimTribunal.Materia');
 
     await page.getByTestId('tab-formato').click();
-    await abrir(page, `pres-${id}-selectores`);
+    await open(page, `pres-${id}-selectores`);
     await expect(page.getByTestId(`selectores-${id}-DimTribunal.Materia`)).toBeVisible();
 
     await page.getByTestId(`selectores-${id}-DimTribunal.Materia`).selectOption('desplegable');
@@ -167,7 +167,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await page.reload();
     await page.getByTestId(`select-${id}`).click();
     await page.getByTestId('tab-formato').click();
-    await abrir(page, `pres-${id}-selectores`);
+    await open(page, `pres-${id}-selectores`);
     await expect(page.getByTestId(`selectores-${id}-DimTribunal.Materia`)).toHaveValue(
       'desplegable',
     );
@@ -181,13 +181,13 @@ test.describe('el editor configura como se ve un objeto', () => {
   }) => {
     // Esconderlo dejaria a quien edita preguntandose por que el calendario existe en otro panel
     // y no en este. Deshabilitado con su motivo, la respuesta esta donde surge la pregunta.
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     await createModule(page, 'pers-fecha');
     await page.getByTestId('add-panel-de-filtros').click();
     await guardado(page);
-    const id = await idDelPrimerBloque(page);
+    const id = await blockFirstId(page);
     await page.getByTestId('tab-formato').click();
-    await abrir(page, `pres-${id}-selectores`);
+    await open(page, `pres-${id}-selectores`);
 
     const opcion = page
       .getByTestId(`selectores-${id}-DimTribunal.Distrito`)

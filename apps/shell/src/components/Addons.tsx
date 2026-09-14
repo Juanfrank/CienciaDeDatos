@@ -26,11 +26,11 @@ export function TooltipExplicativo({ content, titulo }: { content: string; titul
 
   useEffect(() => {
     if (!visible) return;
-    const alPulsar = (e: KeyboardEvent) => {
+    const clickTo = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setVisible(false);
     };
-    document.addEventListener('keydown', alPulsar);
-    return () => document.removeEventListener('keydown', alPulsar);
+    document.addEventListener('keydown', clickTo);
+    return () => document.removeEventListener('keydown', clickTo);
   }, [visible]);
 
   /*
@@ -61,15 +61,15 @@ export function TooltipExplicativo({ content, titulo }: { content: string; titul
 
       const derecha = box.right + hole;
       const izquierda = box.left - hole - ancho;
-      const cabeDerecha = derecha + ancho <= window.innerWidth;
-      const cabeIzquierda = izquierda >= 0;
+      const rightFits = derecha + ancho <= window.innerWidth;
+      const leftFits = izquierda >= 0;
 
-      if (cabeDerecha && cabeIzquierda) {
+      if (rightFits && leftFits) {
         const elegida = tapa(derecha) <= tapa(izquierda) ? derecha : izquierda;
         setSitio({ top: icono.top, left: elegida });
-      } else if (cabeDerecha) {
+      } else if (rightFits) {
         setSitio({ top: icono.top, left: derecha });
-      } else if (cabeIzquierda) {
+      } else if (leftFits) {
         setSitio({ top: icono.top, left: izquierda });
       } else {
         // Sin sitio a los lados: debajo de la tarjeta entera, no encima de su contenido.
@@ -163,7 +163,7 @@ export function DataTable({
   const dataRows = selection ? breakdownOf(result, selection) : result;
   const projection = projectObject(instance, result, aggregations);
 
-  const etiquetaSeleccion = selection ? Object.values(selection).join(' / ') : null;
+  const selectionLabel = selection ? Object.values(selection).join(' / ') : null;
 
   return (
     <>
@@ -247,11 +247,11 @@ export function DataTable({
         ) : (
           <>
             <p className="muted-text" data-testid="data-table-resumen">
-              {etiquetaSeleccion
-                ? `${dataRows.rows.length} fila(s) detras de ${etiquetaSeleccion}.`
+              {selectionLabel
+                ? `${dataRows.rows.length} fila(s) detras de ${selectionLabel}.`
                 : `${dataRows.rows.length} fila(s) de origen de este objeto.`}
             </p>
-            {etiquetaSeleccion ? (
+            {selectionLabel ? (
               <button
                 type="button"
                 className="boton-enlace"

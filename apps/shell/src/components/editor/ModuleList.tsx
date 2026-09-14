@@ -14,7 +14,7 @@ export interface ModuleRow {
   status: "borrador" | "pendiente-de-aprobacion" | "publicado";
   version: number;
   autor: string | null;
-  propio: boolean;
+  own: boolean;
   objetos: number;
   locks: PublishBlocker[];
 }
@@ -85,7 +85,7 @@ export function ModuleList({
     }
   };
 
-  const transicion = async (
+  const transition = async (
     fila: ModuleRow,
     cual: "enviar" | "publicar" | "devolver",
   ) => {
@@ -99,7 +99,7 @@ export function ModuleList({
 
     await pedir(`/api/modulos/${fila.slug}/estado`, {
       method: "POST",
-      body: JSON.stringify({ transicion: cual, ...(motivo ? { motivo } : {}) }),
+      body: JSON.stringify({ transition: cual, ...(motivo ? { motivo } : {}) }),
     });
   };
 
@@ -181,14 +181,14 @@ export function ModuleList({
                 // Las mismas tres condiciones que deciden cada boton, reunidas: una celda sin
                 // ninguna accion muestra una raya, no un hueco. Un hueco en la ultima columna se
                 // lee como algo que falta por cargar.
-                const puedeEnviar =
+                const sendCan =
                   m.status === "borrador" && m.autor === user;
-                const puedePublicar =
+                const publishCan =
                   m.status === "pendiente-de-aprobacion" && isAdmin;
-                const puedeDevolver =
+                const revertCan =
                   m.status !== "borrador" && (isAdmin || m.autor === user);
                 const withoutActions =
-                  !puedeEnviar && !puedePublicar && !puedeDevolver;
+                  !sendCan && !publishCan && !revertCan;
                 return (
                   <tr key={m.moduleId} data-testid={`row-${m.slug}`}>
                     <th scope="row">
@@ -221,37 +221,37 @@ export function ModuleList({
                     <td>{m.objetos}</td>
                     <td>
                       <div className="editor__actions">
-                        {puedeEnviar ? (
+                        {sendCan ? (
                           <button
                             type="button"
                             className="boton-enlace"
                             data-testid={`send-${m.slug}`}
                             disabled={trabajando || m.locks.length > 0}
-                            onClick={() => void transicion(m, "enviar")}
+                            onClick={() => void transition(m, "enviar")}
                           >
                             Enviar a aprobacion
                           </button>
                         ) : null}
 
-                        {puedePublicar ? (
+                        {publishCan ? (
                           <button
                             type="button"
                             className="pastilla"
                             data-testid={`publish-${m.slug}`}
                             disabled={trabajando || m.locks.length > 0}
-                            onClick={() => void transicion(m, "publicar")}
+                            onClick={() => void transition(m, "publicar")}
                           >
                             Publicar
                           </button>
                         ) : null}
 
-                        {puedeDevolver ? (
+                        {revertCan ? (
                           <button
                             type="button"
                             className="boton-enlace"
                             data-testid={`revert-${m.slug}`}
                             disabled={trabajando}
-                            onClick={() => void transicion(m, "devolver")}
+                            onClick={() => void transition(m, "devolver")}
                           >
                             {m.status === "publicado"
                               ? "Retirar"

@@ -50,13 +50,13 @@ describe('observacionesDe: una alerta ve exactamente lo que ve su dueno', () => 
 
   it('los filtros de la regla acotan la observacion, como acotan la pantalla', async () => {
     const withoutFilter = await observacionesDe(colorRule({}));
-    const soloPenal = await observacionesDe(
+    const onlyPenal = await observacionesDe(
       colorRule({ filters: { 'DimTribunal.Materia': ['Penal'] } }),
     );
 
     const total = (obs: { value: number }[] | null) => (obs ?? []).reduce((t, o) => t + o.value, 0);
-    expect(total(soloPenal)).toBeLessThan(total(withoutFilter));
-    expect(total(soloPenal)).toBeGreaterThan(0);
+    expect(total(onlyPenal)).toBeLessThan(total(withoutFilter));
+    expect(total(onlyPenal)).toBeGreaterThan(0);
   });
 });
 

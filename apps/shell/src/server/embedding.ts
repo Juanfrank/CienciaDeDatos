@@ -1,10 +1,10 @@
 /** Incorporacion en otros portales — seccion 4.9. */
 
 /** Cabecera que deniega el enmarcado por completo. Es el valor por defecto de toda la aplicacion. */
-export const SIN_ENMARCADO = "frame-ancestors 'none'";
+export const WITHOUT_FRAMED = "frame-ancestors 'none'";
 
 /** Origen exacto sobre https, con puerto opcional. */
-const ORIGEN_EXACTO = /^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*(:\d+)?$/i;
+const EXACT_SOURCE = /^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*(:\d+)?$/i;
 
 export function parsearOrigenes(valor: string | undefined): string[] {
   if (!valor) return [];
@@ -13,7 +13,7 @@ export function parsearOrigenes(valor: string | undefined): string[] {
     .split(',')
     .map((o) => o.trim())
     .filter((o) => o.length > 0)
-    .filter((o) => ORIGEN_EXACTO.test(o) || o === "'self'");
+    .filter((o) => EXACT_SOURCE.test(o) || o === "'self'");
 }
 
 /** Entradas descartadas por no tener la forma exigida, para poder avisar en vez de callar. */
@@ -27,33 +27,33 @@ export function origenesDescartados(valor: string | undefined): string[] {
 }
 
 /** Politica de enmarcado para una ruta. */
-export function politicaDeEnmarcado(path: string, origenes: string[]): string {
-  if (!esRutaIncrustable(path)) return SIN_ENMARCADO;
-  if (origenes.length === 0) return SIN_ENMARCADO;
+export function framedPolicy(path: string, origenes: string[]): string {
+  if (!isEmbeddablePath(path)) return WITHOUT_FRAMED;
+  if (origenes.length === 0) return WITHOUT_FRAMED;
   return `frame-ancestors ${origenes.join(' ')}`;
 }
 
-export const PREFIJO_INCRUSTACION = '/incrustar';
+export const EMBEDDING_PREFIX = '/incrustar';
 
-export function esRutaIncrustable(path: string): boolean {
-  return path === PREFIJO_INCRUSTACION || path.startsWith(`${PREFIJO_INCRUSTACION}/`);
+export function isEmbeddablePath(path: string): boolean {
+  return path === EMBEDDING_PREFIX || path.startsWith(`${EMBEDDING_PREFIX}/`);
 }
 
-export interface CabecerasDeEnmarcado {
+export interface FramedHeaders {
   'content-security-policy': string;
   /** `X-Frame-Options` solo se pone donde se deniega. */
   'x-frame-options'?: string;
 }
 
-export function cabecerasDeEnmarcado(path: string, origenes: string[]): CabecerasDeEnmarcado {
-  const politica = politicaDeEnmarcado(path, origenes);
-  return politica === SIN_ENMARCADO
+export function framedHeaders(path: string, origenes: string[]): FramedHeaders {
+  const politica = framedPolicy(path, origenes);
+  return politica === WITHOUT_FRAMED
     ? { 'content-security-policy': politica, 'x-frame-options': 'DENY' }
     : { 'content-security-policy': politica };
 }
 
 /** Codigo que el portal anfitrion pega en su pagina. */
-export function codigoDeIncrustacion(baseUrl: string, path: string, titulo: string): string {
+export function embeddingCode(baseUrl: string, path: string, titulo: string): string {
   const url = `${baseUrl.replace(/\/$/, '')}${path}`;
   return [
     `<iframe src="${url}"`,

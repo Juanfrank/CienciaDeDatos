@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PasswordResetError } from '@app/auth';
-import { restablecimientos } from '../../../src/server/identity';
+import { resets } from '../../../src/server/identity';
 
 export const runtime = 'nodejs';
 
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    await restablecimientos.redeem({
+    await resets.redeem({
       resetId,
       token: code,
       newPassword: clave,

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { queryUrl } from '@app/nl-query';
 import { resolverPregunta } from '../../../src/server/query';
 import { withoutSession } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/session';
+import { sessionGet } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 
@@ -11,7 +11,7 @@ const MAX = 300;
 
 /** Resuelve una pregunta en lenguaje natural — seccion 4.9. */
 export async function POST(request: Request) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   let body: Record<string, unknown>;

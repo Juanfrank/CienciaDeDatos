@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
 import { FORMATS, type ExportFormat } from '@app/export';
-import { encolarExportacion } from '../../../src/server/exports';
-import { normalizarFiltros } from '../../../src/server/filters';
+import { exportEnqueue } from '../../../src/server/exports';
+import { filtersNormalize } from '../../../src/server/filters';
 import { withoutSession } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/session';
+import { sessionGet } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 
 /** Encola una exportacion (4.9, encolada por 5.3). */
 export async function POST(request: Request) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   let body: Record<string, unknown>;
@@ -33,9 +33,9 @@ export async function POST(request: Request) {
   }
 
   const pageSlug = typeof body['pagina'] === 'string' ? body['pagina'] : undefined;
-  const filtros = normalizarFiltros(body['filtros']);
+  const filtros = filtersNormalize(body['filtros']);
 
-  const job = await encolarExportacion({
+  const job = await exportEnqueue({
     moduleSlug,
     ...(pageSlug ? { pageSlug } : {}),
     format: formato as ExportFormat,

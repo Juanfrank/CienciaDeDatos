@@ -1,24 +1,24 @@
 import { NextResponse } from 'next/server';
-import { actorDe, moduloServiblePorSlug } from '../../../../../src/server/cicloDeVida';
+import { actorDe, slugServableModule } from '../../../../../src/server/cicloDeVida';
 import {
-  PersonalizacionInvalidaError,
-  descartarPersonalizacion,
+  PersonalizationInvalidError,
+  personalizationDiscard,
   savePersonalization,
   readPersonalization,
 } from '../../../../../src/server/personalization';
 import { withoutSession } from '../../../../../src/server/respuestas';
-import { obtenerSesion } from '../../../../../src/server/session';
+import { sessionGet } from '../../../../../src/server/session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /** Vista personalizada de una persona sobre un modulo — seccion 4.6. */
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   const { slug } = await params;
-  const modulo = await moduloServiblePorSlug(slug, await actorDe(sesion));
+  const modulo = await slugServableModule(slug, await actorDe(sesion));
   if (!modulo) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
   const personalizacion = await readPersonalization(sesion.userId, modulo.moduleId);
@@ -35,11 +35,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   const { slug } = await params;
-  const modulo = await moduloServiblePorSlug(slug, await actorDe(sesion));
+  const modulo = await slugServableModule(slug, await actorDe(sesion));
   if (!modulo) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
   let body: Record<string, unknown>;
@@ -62,7 +62,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
     });
     return NextResponse.json({ personalizada: true, ocultos: personalizacion.hiddenItemIds });
   } catch (error) {
-    if (error instanceof PersonalizacionInvalidaError) {
+    if (error instanceof PersonalizationInvalidError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
     // `assertPersonalizationIsPresentationOnly` lanza un Error normal con su propio mensaje, que
@@ -76,13 +76,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
 
 /** Descarta la personalizacion y devuelve a la vista institucional oficial. */
 export async function DELETE(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   const { slug } = await params;
-  const modulo = await moduloServiblePorSlug(slug, await actorDe(sesion));
+  const modulo = await slugServableModule(slug, await actorDe(sesion));
   if (!modulo) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
-  await descartarPersonalizacion(sesion.userId, modulo.moduleId);
+  await personalizationDiscard(sesion.userId, modulo.moduleId);
   return NextResponse.json({ personalizada: false, ocultos: [] });
 }

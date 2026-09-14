@@ -13,7 +13,7 @@ import {
 
 /** Monta un grafico de Apache ECharts sobre un contenedor. */
 
-export interface LienzoProps {
+export interface PropsCanvas {
   tipo: ChartKind;
   vm: CategoricalViewModel;
   palette: ChartPalette;
@@ -40,7 +40,7 @@ export default function Canvas({
   columnSeries,
   onSeleccionar,
   onMontado,
-}: LienzoProps) {
+}: PropsCanvas) {
   const contenedor = useRef<HTMLDivElement>(null);
   const grafico = useRef<import('echarts').ECharts | null>(null);
 
@@ -92,8 +92,8 @@ export default function Canvas({
   /*
    * Las opciones viajan por referencia, y se le entrega a ECharts el OBJETO, no la cadena.
    */
-  const opcionesVigentes = useRef(opciones);
-  opcionesVigentes.current = opciones;
+  const activeOptions = useRef(opciones);
+  activeOptions.current = opciones;
 
   // Creacion y destruccion: una sola vez mientras el tipo de renderizador no cambie.
   useEffect(() => {
@@ -102,8 +102,8 @@ export default function Canvas({
 
     let cancelado = false;
     let observador: ResizeObserver | null = null;
-    let paraImprimir: MediaQueryList | null = null;
-    let alImprimir: ((e: MediaQueryListEvent) => void) | null = null;
+    let print: MediaQueryList | null = null;
+    let printTo: ((e: MediaQueryListEvent) => void) | null = null;
 
     void (async () => {
       const echarts = await import('echarts');
@@ -112,7 +112,7 @@ export default function Canvas({
       const montar = (renderer: 'canvas' | 'svg') => {
         grafico.current?.dispose();
         const objectInstance = echarts.init(node, null, { renderer });
-        objectInstance.setOption(opcionesVigentes.current);
+        objectInstance.setOption(activeOptions.current);
         objectInstance.on('click', (evento: { name?: string }) => {
           if (evento.name) select.current?.(evento.name);
         });
@@ -126,15 +126,15 @@ export default function Canvas({
       observador.observe(node);
 
       // Al imprimir se rehace en SVG, y se vuelve al de pantalla al terminar.
-      paraImprimir = window.matchMedia('print');
-      alImprimir = (e) => montar(e.matches ? 'svg' : porDefecto);
-      paraImprimir.addEventListener('change', alImprimir);
+      print = window.matchMedia('print');
+      printTo = (e) => montar(e.matches ? 'svg' : porDefecto);
+      print.addEventListener('change', printTo);
     })();
 
     return () => {
       cancelado = true;
       observador?.disconnect();
-      if (paraImprimir && alImprimir) paraImprimir.removeEventListener('change', alImprimir);
+      if (print && printTo) print.removeEventListener('change', printTo);
       grafico.current?.dispose();
       grafico.current = null;
     };
@@ -144,7 +144,7 @@ export default function Canvas({
    * Cambios de datos: se aplican sobre el grafico vivo.
    */
   useEffect(() => {
-    grafico.current?.setOption(opcionesVigentes.current, true);
+    grafico.current?.setOption(activeOptions.current, true);
   }, [clave]);
 
   return <div ref={contenedor} className="chart__canvas" data-testid="canvas-chart" />;

@@ -150,7 +150,7 @@ export function EditorObjectSettings({
   /*
    * Cada cambio funde sobre lo ya guardado y REPONE el `objectId`.
    */
-  const poner = (parcial: ElementSettings | ContainerSettings) =>
+  const set = (parcial: ElementSettings | ContainerSettings) =>
     onCambiar((i) => ({
       ...i,
       settings: { ...(i.settings ?? {}), ...parcial, objectId } as ObjectInstance['settings'],
@@ -171,7 +171,7 @@ export function EditorObjectSettings({
               disabled={saving}
               data-testid={`${prueba}-parrafo-${i}`}
               onBlur={(e) =>
-                poner({
+                set({
                   textBox: {
                     parrafos: parrafos.map((p, j) => (j === i ? { ...p, content: e.target.value } : p)),
                   },
@@ -185,7 +185,7 @@ export function EditorObjectSettings({
           className="boton-contorno"
           disabled={saving}
           data-testid={`${prueba}-anadir-parrafo`}
-          onClick={() => poner({ textBox: { parrafos: [...parrafos, { content: '' }] } })}
+          onClick={() => set({ textBox: { parrafos: [...parrafos, { content: '' }] } })}
         >
           Anadir parrafo
         </button>
@@ -203,7 +203,7 @@ export function EditorObjectSettings({
             defaultValue={t?.content ?? ''}
             disabled={saving}
             data-testid={`${prueba}-texto`}
-            onBlur={(e) => poner({ sectionTitle: { ...t, content: e.target.value } })}
+            onBlur={(e) => set({ sectionTitle: { ...t, content: e.target.value } })}
           />
         </label>
 
@@ -214,7 +214,7 @@ export function EditorObjectSettings({
             disabled={saving}
             data-testid={`${prueba}-posicion`}
             onChange={(e) =>
-              poner({
+              set({
                 sectionTitle: { ...t, content: t?.content ?? '', textPosition: e.target.value as Alignment },
               })
             }
@@ -234,7 +234,7 @@ export function EditorObjectSettings({
             disabled={saving}
             data-testid={`${prueba}-linea`}
             onChange={(e) =>
-              poner({
+              set({
                 sectionTitle: { ...t, content: t?.content ?? '', line: e.target.value as LinePosition },
               })
             }
@@ -253,7 +253,7 @@ export function EditorObjectSettings({
           prueba={`${prueba}-l`}
           saving={saving}
           onCambiar={(estiloDeLinea) =>
-            poner({ sectionTitle: { ...t, content: t?.content ?? '', estiloDeLinea } })
+            set({ sectionTitle: { ...t, content: t?.content ?? '', estiloDeLinea } })
           }
         />
       </Section>
@@ -271,7 +271,7 @@ export function EditorObjectSettings({
             disabled={saving}
             data-testid={`${prueba}-orientacion`}
             onChange={(e) =>
-              poner({ lineDivider: { ...l, orientation: e.target.value as Orientation } })
+              set({ lineDivider: { ...l, orientation: e.target.value as Orientation } })
             }
           >
             {ORIENTACIONES.map((o) => (
@@ -285,7 +285,7 @@ export function EditorObjectSettings({
           line={l}
           prueba={`${prueba}-l`}
           saving={saving}
-          onCambiar={(line) => poner({ lineDivider: { ...l, ...line } })}
+          onCambiar={(line) => set({ lineDivider: { ...l, ...line } })}
         />
       </Section>
     );
@@ -301,7 +301,7 @@ export function EditorObjectSettings({
             value={f?.forma ?? 'rectangulo'}
             disabled={saving}
             data-testid={`${prueba}-forma`}
-            onChange={(e) => poner({ forma: { ...f, forma: e.target.value as Shape } })}
+            onChange={(e) => set({ forma: { ...f, forma: e.target.value as Shape } })}
           >
             {SHAPES.map((v) => (
               <option key={v} value={v}>
@@ -317,7 +317,7 @@ export function EditorObjectSettings({
             valor={f?.relleno ?? 'primario'}
             nombre="el relleno"
             prueba={`${prueba}-relleno`}
-            onCambiar={(relleno) => poner({ forma: { ...f, forma: f?.forma ?? 'rectangulo', relleno } })}
+            onCambiar={(relleno) => set({ forma: { ...f, forma: f?.forma ?? 'rectangulo', relleno } })}
           />
         </div>
 
@@ -328,7 +328,7 @@ export function EditorObjectSettings({
             disabled={saving}
             data-testid={`${prueba}-opacidad`}
             onChange={(e) =>
-              poner({ forma: { ...f, forma: f?.forma ?? 'rectangulo', opacidad: Number(e.target.value) } })
+              set({ forma: { ...f, forma: f?.forma ?? 'rectangulo', opacidad: Number(e.target.value) } })
             }
           >
             {[12, 25, 50, 75, 100].map((o) => (
@@ -346,7 +346,7 @@ export function EditorObjectSettings({
             disabled={saving}
             data-testid={`${prueba}-texto`}
             onBlur={(e) =>
-              poner({
+              set({
                 forma: { ...f, forma: f?.forma ?? 'rectangulo', content: e.target.value || undefined },
               })
             }
@@ -371,7 +371,7 @@ export function EditorObjectSettings({
             defaultValue={c?.desde ?? ''}
             disabled={saving}
             data-testid={`${prueba}-desde`}
-            onBlur={(e) => poner({ conexion: { ...c, desde: e.target.value || undefined } })}
+            onBlur={(e) => set({ conexion: { ...c, desde: e.target.value || undefined } })}
           />
         </label>
         <label className="form__field">
@@ -380,7 +380,7 @@ export function EditorObjectSettings({
             defaultValue={c?.hasta ?? ''}
             disabled={saving}
             data-testid={`${prueba}-hasta`}
-            onBlur={(e) => poner({ conexion: { ...c, hasta: e.target.value || undefined } })}
+            onBlur={(e) => set({ conexion: { ...c, hasta: e.target.value || undefined } })}
           />
         </label>
         <label className="form__field">
@@ -389,7 +389,7 @@ export function EditorObjectSettings({
             value={c?.dash ?? 'angulo'}
             disabled={saving}
             data-testid={`${prueba}-trazado`}
-            onChange={(e) => poner({ conexion: { ...c, dash: e.target.value as Dash } })}
+            onChange={(e) => set({ conexion: { ...c, dash: e.target.value as Dash } })}
           >
             {TRAZADOS.map((t) => (
               <option key={t} value={t}>
@@ -405,7 +405,7 @@ export function EditorObjectSettings({
             disabled={saving}
             data-testid={`${prueba}-flecha`}
             onChange={(e) =>
-              poner({ conexion: { ...c, finalEnd: e.target.checked ? 'flecha' : 'ninguno' } })
+              set({ conexion: { ...c, finalEnd: e.target.checked ? 'flecha' : 'ninguno' } })
             }
           />{' '}
           Punta de flecha al final
@@ -414,7 +414,7 @@ export function EditorObjectSettings({
           line={c?.estiloDeLinea}
           prueba={`${prueba}-l`}
           saving={saving}
-          onCambiar={(estiloDeLinea) => poner({ conexion: { ...c, estiloDeLinea } })}
+          onCambiar={(estiloDeLinea) => set({ conexion: { ...c, estiloDeLinea } })}
         />
       </Section>
     );
@@ -430,7 +430,7 @@ export function EditorObjectSettings({
     conf.tabs?.gridColumns ??
     6;
 
-  const ponerColumnas = (n: number) => {
+  const columnSet = (n: number) => {
     // Las columnas viven en el bloque del tipo, asi que cada uno pone las suyas. Se resuelve con
     // un mapa y no con cinco ifs sueltos para que anadir un contenedor no tenga que acordarse.
     const block: Record<string, keyof ContainerSettings> = {
@@ -440,7 +440,7 @@ export function EditorObjectSettings({
       'contenedor-con-pestanas': 'tabs',
     };
     const clave = block[objectId] ?? 'simple';
-    poner({ [clave]: { ...(conf[clave] as object), gridColumns: n } } as ContainerSettings);
+    set({ [clave]: { ...(conf[clave] as object), gridColumns: n } } as ContainerSettings);
   };
 
   return (
@@ -451,7 +451,7 @@ export function EditorObjectSettings({
           value={String(gridColumns)}
           disabled={saving}
           data-testid={`${prueba}-columnas`}
-          onChange={(e) => ponerColumnas(Number(e.target.value))}
+          onChange={(e) => columnSet(Number(e.target.value))}
         >
           {[2, 3, 4, 6, 8, 12].map((c) => (
             <option key={c} value={c}>
@@ -470,7 +470,7 @@ export function EditorObjectSettings({
             disabled={saving}
             data-testid={`${prueba}-eje`}
             onChange={(e) =>
-              poner({ scrollable: { ...conf.scrollable, axis: e.target.value as Axis } })
+              set({ scrollable: { ...conf.scrollable, axis: e.target.value as Axis } })
             }
           >
             {AXES.map((e) => (
@@ -491,7 +491,7 @@ export function EditorObjectSettings({
             disabled={saving}
             data-testid={`${prueba}-columnas-ampliado`}
             onChange={(e) =>
-              poner({ expandable: { ...conf.expandable, expandedColumns: Number(e.target.value) } })
+              set({ expandable: { ...conf.expandable, expandedColumns: Number(e.target.value) } })
             }
           >
             {[6, 8, 12, 16].map((c) => (
@@ -513,7 +513,7 @@ export function EditorObjectSettings({
                 disabled={saving}
                 data-testid={`${prueba}-pestana-${panel.panelId}`}
                 onBlur={(e) =>
-                  poner({
+                  set({
                     panels: panels.map((p) =>
                       p.panelId === panel.panelId ? { ...p, nombre: e.target.value } : p,
                     ),
@@ -527,7 +527,7 @@ export function EditorObjectSettings({
             className="boton-contorno"
             disabled={saving}
             data-testid={`${prueba}-anadir-pestana`}
-            onClick={() => poner({ panels: [...panels, EMPTY_PANEL(panels.length + 1)] })}
+            onClick={() => set({ panels: [...panels, EMPTY_PANEL(panels.length + 1)] })}
           >
             Anadir pestana
           </button>

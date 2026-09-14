@@ -1,5 +1,5 @@
 /** Normalizacion de filtros que llegan en el cuerpo de una peticion. */
-export function normalizarFiltros(valor: unknown): Record<string, string[]> {
+export function filtersNormalize(valor: unknown): Record<string, string[]> {
   if (typeof valor !== 'object' || valor === null) return {};
 
   const salida: Record<string, string[]> = {};

@@ -37,8 +37,8 @@ export function measureFormat(
   medida: string | undefined,
 ): NumberFormat {
   if (!formatos) return {};
-  const propio = medida ? formatos.porMedida?.[medida] : undefined;
-  return propio ?? formatos.general ?? {};
+  const own = medida ? formatos.porMedida?.[medida] : undefined;
+  return own ?? formatos.general ?? {};
 }
 
 /** Una seccion ya analizada: el esqueleto literal y cuanto relleno pide la cifra. */

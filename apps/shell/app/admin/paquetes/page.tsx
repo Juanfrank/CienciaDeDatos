@@ -1,12 +1,12 @@
 import { getGeneralTree, listTeams } from '../../../src/server/context';
-import { gobierno } from '../../../src/server/gobierno';
+import { governance } from '../../../src/server/governance';
 import { buildNavigationView } from '@app/access-control';
 
 export const dynamic = 'force-dynamic';
 
 /** Paquetes visuales — secciones 4.1.3 y 4.10.6. */
-export default async function PaginaPaquetes() {
-  const paquetes = await gobierno.listPackages();
+export default async function PackagesPage() {
+  const paquetes = await governance.listPackages();
   const generalTree = await getGeneralTree();
   const equipos = await listTeams();
 

@@ -22,7 +22,7 @@ export function puertosDe(indice: number): { principal: number; segunda: number 
 }
 
 export const test = base.extend<
-  { origen: string; otraInstancia: string },
+  { origen: string; instanceOther: string },
   { puertos: { principal: number; segunda: number } }
 >({
   puertos: [
@@ -50,7 +50,7 @@ export const test = base.extend<
   },
 
   /** La SEGUNDA instancia del mismo worker, que lee y escribe el mismo almacen. */
-  otraInstancia: async ({ puertos }, use) => {
+  instanceOther: async ({ puertos }, use) => {
     await use(`http://localhost:${puertos.segunda}`);
   },
 });

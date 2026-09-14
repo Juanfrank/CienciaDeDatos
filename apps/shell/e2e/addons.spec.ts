@@ -1,16 +1,16 @@
-import { expect, test } from './instancia';
-import { entrarComo } from './session';
+import { expect, test } from './instance';
+import { asLogin } from './session';
 
 /** Objetos adjuntados: tooltip explicativo y tabla de datos emergente. */
 
 /** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-ana');
+  await asLogin(page, 'u-ana');
 });
 
 test.describe('tooltip explicativo', () => {
   test('aparece al posar el puntero y explica el objeto entero', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     const tooltip = page.getByTestId('tooltip-Pendientes por distrito');
@@ -24,7 +24,7 @@ test.describe('tooltip explicativo', () => {
   test('aparece tambien al enfocar con teclado y se cierra con Escape (WCAG 1.4.13)', async ({
     page,
   }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('icon-tooltip-Casos pendientes').focus();
@@ -35,7 +35,7 @@ test.describe('tooltip explicativo', () => {
   });
 
   test('el icono queda descrito por el tooltip mientras esta visible', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     const icono = page.getByTestId('icon-tooltip-Casos pendientes');
@@ -48,7 +48,7 @@ test.describe('tooltip explicativo', () => {
 
 test.describe('tabla de datos con alcance de objeto', () => {
   test('muestra las filas de origen del objeto, sin agregar', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('data-table-abrir-Casos pendientes').click();
@@ -62,7 +62,7 @@ test.describe('tabla de datos con alcance de objeto', () => {
   });
 
   test('se cierra con Escape, como cualquier dialogo modal', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('data-table-abrir-Casos pendientes').click();
@@ -75,7 +75,7 @@ test.describe('tabla de datos con alcance de objeto', () => {
 
 test.describe('tabla de datos con alcance de subobjeto', () => {
   test('lista las categorias y desglosa las filas detras de una cifra concreta', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('data-table-abrir-Pendientes por distrito').click();
@@ -94,7 +94,7 @@ test.describe('tabla de datos con alcance de subobjeto', () => {
   });
 
   test('se puede volver a las categorias sin cerrar el emergente', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('data-table-abrir-Pendientes por distrito').click();
@@ -108,7 +108,7 @@ test.describe('tabla de datos con alcance de subobjeto', () => {
 
 test.describe('un complemento no amplia lo que se puede ver (principio 5)', () => {
   test('el desglose solo alcanza las filas del ambito de quien mira', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('data-table-abrir-Casos pendientes').click();
@@ -126,7 +126,7 @@ test.describe('un complemento no amplia lo que se puede ver (principio 5)', () =
   test('un filtro activo tambien acota el emergente: ensena lo que se esta viendo', async ({
     page,
   }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes?DimTribunal.Materia=Penal');
 
     await page.getByTestId('data-table-abrir-Casos pendientes').click();

@@ -4,11 +4,11 @@ import {
   AdminError,
   administradores,
   deleteTeam,
-  cambiarMembresia,
+  membershipChange,
   saveTeam,
 } from '../../../../src/server/admin';
 import { listTeams, listUsers } from '../../../../src/server/context';
-import { gobierno } from '../../../../src/server/gobierno';
+import { governance } from '../../../../src/server/governance';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,7 +18,7 @@ export async function GET() {
   return withAdmin(async () => ({
     equipos: await listTeams(),
     usuarios: (await listUsers()).map((u) => u.userId),
-    paquetes: (await gobierno.listPackages()).map((p) => ({ id: p.id, name: p.name })),
+    paquetes: (await governance.listPackages()).map((p) => ({ id: p.id, name: p.name })),
     // Quienes administran ahora mismo. La emergencia que describe el procedimiento de acceso de
     // emergencia ocurre porque habia menos de dos, y eso no se ve en ningun sitio.
     administradores: await administradores(),
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
           throw new AdminError('Faltan teamId y userId.', 400);
         }
         return {
-          equipo: await cambiarMembresia(actor, body.teamId, body.userId, body.role ?? null),
+          equipo: await membershipChange(actor, body.teamId, body.userId, body.role ?? null),
         };
       }
       case 'borrar': {

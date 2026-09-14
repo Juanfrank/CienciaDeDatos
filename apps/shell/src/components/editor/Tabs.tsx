@@ -5,7 +5,7 @@ import { Icon, type IconName } from '../icons/Icon';
 
 /** La barra de pestanas del panel, con paginado. */
 
-export interface DefinicionDePestana<T extends string> {
+export interface TabDefinition<T extends string> {
   id: T;
   etiqueta: string;
   icono: IconName;
@@ -17,7 +17,7 @@ export function Tabs<T extends string>({
   activa,
   onElegir,
 }: {
-  tabs: DefinicionDePestana<T>[];
+  tabs: TabDefinition<T>[];
   activa: T;
   onElegir: (id: T) => void;
 }) {
@@ -49,7 +49,7 @@ export function Tabs<T extends string>({
     el.scrollBy({ left: signo * Math.max(80, el.clientWidth * 0.6), behavior: 'smooth' });
   };
 
-  const alPulsarTecla = (e: React.KeyboardEvent) => {
+  const toClickKeystroke = (e: React.KeyboardEvent) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     e.preventDefault();
     const possible = tabs.filter((p) => p.habilitada);
@@ -78,7 +78,7 @@ export function Tabs<T extends string>({
         aria-label="Herramientas del editor"
         ref={rail}
         onScroll={resize}
-        onKeyDown={alPulsarTecla}
+        onKeyDown={toClickKeystroke}
       >
         {tabs.map((p) => (
           <button

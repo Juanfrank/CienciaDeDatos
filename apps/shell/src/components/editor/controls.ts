@@ -1,7 +1,7 @@
 import type { PresentationKey } from '@app/ui-components';
 
 /** Que testid identifica el control de cada clave. */
-export const CONTROL_DE_CLAVE: Record<PresentationKey, string> = {
+export const KEY_CONTROL: Record<PresentationKey, string> = {
   icono: 'icono',
   acento: 'acento',
   resaltado: 'resaltado',
@@ -31,6 +31,6 @@ export const CONTROL_DE_CLAVE: Record<PresentationKey, string> = {
 };
 
 /** Controles que solo aparecen despues de encender otro. */
-export const ABRE_PRIMERO: Partial<Record<PresentationKey, string>> = {
+export const FIRST_OPENS: Partial<Record<PresentationKey, string>> = {
   colorDeResaltado: 'resaltado',
 };

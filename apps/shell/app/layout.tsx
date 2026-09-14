@@ -9,8 +9,8 @@ import {
   type ColorMode,
 } from '@app/design-tokens';
 import { Header } from '../src/components/Header';
-import { ProveedorDeIdioma } from '../src/components/Locale';
-import { obtenerSesion } from '../src/server/session';
+import { LocaleProvider } from '../src/components/Locale';
+import { sessionGet } from '../src/server/session';
 import { idioma } from '../src/server/locale';
 import { colorMode } from '../src/server/theme';
 import './globals.css';
@@ -37,7 +37,7 @@ function themeVariables(mode: ColorMode): Record<string, string> {
 
 /** Cromo comun a toda la aplicacion: documento, tema y cabecera. */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [sesion, mode, locale] = await Promise.all([obtenerSesion(), colorMode(), idioma()]);
+  const [sesion, mode, locale] = await Promise.all([sessionGet(), colorMode(), idioma()]);
 
   /*
    * `colorScheme` no es decorativo: es lo que hace que el navegador dibuje en oscuro lo que no
@@ -49,10 +49,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body
         style={{ ...themeVariables(mode), colorScheme: mode === 'dark' ? 'dark' : 'light' } as React.CSSProperties}
       >
-        <ProveedorDeIdioma locale={locale}>
+        <LocaleProvider locale={locale}>
           {sesion ? <Header sesion={sesion} /> : null}
           {children}
-        </ProveedorDeIdioma>
+        </LocaleProvider>
       </body>
     </html>
   );

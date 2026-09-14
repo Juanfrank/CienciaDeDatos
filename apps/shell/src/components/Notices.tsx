@@ -17,7 +17,7 @@ import { kindLabel } from './Bell';
 type StatusRule = AlertRule & { estado: AlertState | null };
 
 export function Notices() {
-  const [bandeja, setBandeja] = useState<Notification[]>([]);
+  const [inbox, setBandeja] = useState<Notification[]>([]);
   const [rules, setReglas] = useState<StatusRule[]>([]);
   const [suscripciones, setSuscripciones] = useState<Subscription[]>([]);
 
@@ -39,14 +39,14 @@ export function Notices() {
   // Abrir la bandeja es haberla leido. Un contador que sigue en rojo despues de mirar los
   // avisos ensena a la gente a ignorarlo.
   useEffect(() => {
-    const withoutRead = bandeja.filter((n) => !n.readAt).map((n) => n.id);
+    const withoutRead = inbox.filter((n) => !n.readAt).map((n) => n.id);
     if (withoutRead.length === 0) return;
     void fetch('/api/notificaciones', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ ids: withoutRead }),
     });
-  }, [bandeja]);
+  }, [inbox]);
 
   const borrar = async (tipo: 'alertas' | 'suscripciones', id: string) => {
     await fetch(`/api/${tipo}?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
@@ -58,14 +58,14 @@ export function Notices() {
       <h1>Avisos</h1>
 
       <h2>Bandeja</h2>
-      {bandeja.length === 0 ? (
+      {inbox.length === 0 ? (
         <p className="muted-text" data-testid="bandeja-vacia">
           No hay avisos. Los de una alerta llegan cuando su condicion empieza a cumplirse, y
           tambien cuando deja de cumplirse.
         </p>
       ) : (
         <ul className="simple-list" data-testid="bandeja">
-          {bandeja.map((n) => (
+          {inbox.map((n) => (
             <li
               key={n.id}
               className={`aviso ${n.readAt ? '' : 'notice-without-read'}`}

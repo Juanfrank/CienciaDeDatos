@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import { FORMATS, type ExportFormat } from '@app/export';
 import type { Cadence, Subscription } from '@app/alerts';
 import { alertStore } from '../../../src/server/alerts';
-import { actorDe, moduloServiblePorSlug } from '../../../src/server/cicloDeVida';
+import { actorDe, slugServableModule } from '../../../src/server/cicloDeVida';
 import { withoutSession } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/session';
-import { normalizarFiltros } from '../../../src/server/filters';
+import { sessionGet } from '../../../src/server/session';
+import { filtersNormalize } from '../../../src/server/filters';
 
 export const runtime = 'nodejs';
 
@@ -13,7 +13,7 @@ const CADENCIAS: Cadence[] = ['diaria', 'semanal', 'mensual'];
 
 /** Suscripciones: entrega programada de una vista (4.9). */
 export async function GET() {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
   const todas = await alertStore.listSubscriptions();
   return NextResponse.json({
@@ -22,7 +22,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   let body: Record<string, unknown>;
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'La hora debe estar entre 0 y 23.' }, { status: 400 });
   }
 
-  const module = await moduloServiblePorSlug(moduleSlug, await actorDe(sesion));
+  const module = await slugServableModule(moduleSlug, await actorDe(sesion));
   if (!module) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
   const suscripcion: Subscription = {
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     teamId: sesion.activeTeamId,
     moduleSlug: module.slug,
     ...(typeof body['pagina'] === 'string' ? { pageSlug: body['pagina'] } : {}),
-    filters: normalizarFiltros(body['filtros']),
+    filters: filtersNormalize(body['filtros']),
     format: formato,
     cadence: cadencia,
     hour: hora,
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   const id = new URL(request.url).searchParams.get('id');

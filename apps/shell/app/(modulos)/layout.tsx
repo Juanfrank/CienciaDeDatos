@@ -2,11 +2,11 @@ import { NavigationTree } from '../../src/components/NavigationTree';
 import { CollapsibleNavigation } from '../../src/components/CollapsibleNavigation';
 import { navigationOf } from '../../src/server/cicloDeVida';
 import { findTeam, roleOf, teamsOf } from '../../src/server/context';
-import { exigirSesionDePagina } from '../../src/server/session';
+import { pageSessionRequire } from '../../src/server/session';
 
 /** Disposicion de los modulos de negocio. */
-export default async function ModulosLayout({ children }: { children: React.ReactNode }) {
-  const sesion = await exigirSesionDePagina();
+export default async function LayoutModules({ children }: { children: React.ReactNode }) {
+  const sesion = await pageSessionRequire();
   const equipo = await findTeam(sesion.activeTeamId);
   const navigation = await navigationOf(sesion);
 

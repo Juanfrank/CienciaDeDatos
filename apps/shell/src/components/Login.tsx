@@ -5,14 +5,14 @@ import { useState } from 'react';
 
 /** Pantalla de inicio de sesion — seccion 4.7. */
 export function Login({
-  azureAdDisponible,
+  azureAdAvailable,
   identity,
 }: {
-  azureAdDisponible: boolean;
+  azureAdAvailable: boolean;
   identity: { name: string; emblem: { src: string; width: number; height: number } };
 }) {
   const router = useRouter();
-  const [correo, setCorreo] = useState('');
+  const [mail, setCorreo] = useState('');
   const [clave, setClave] = useState('');
   const [code, setCodigo] = useState('');
   const [pideCodigo, setPideCodigo] = useState(false);
@@ -26,7 +26,7 @@ export function Login({
       const r = await fetch('/api/acceso', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ correo, clave, ...(code ? { code } : {}) }),
+        body: JSON.stringify({ mail, clave, ...(code ? { code } : {}) }),
       });
 
       if (r.ok) {
@@ -81,7 +81,7 @@ export function Login({
           onClick={() => void conAzureAd()}
         >
           Continuar con Azure AD
-          {azureAdDisponible ? '' : ' (no configurado en este entorno)'}
+          {azureAdAvailable ? '' : ' (no configurado en este entorno)'}
         </button>
 
         <p className="login__separador">
@@ -94,7 +94,7 @@ export function Login({
             id="correo"
             type="email"
             autoComplete="username"
-            value={correo}
+            value={mail}
             data-testid="acceso-correo"
             onChange={(e) => setCorreo(e.target.value)}
           />
@@ -136,7 +136,7 @@ export function Login({
         </button>
 
         <p className="muted-text">
-          Las cuentas locales exigen un second factor. Si olvido su contrasena, un Administrador
+          Las accounts locales exigen un second factor. Si olvido su contrasena, un Administrador
           inicia el restablecimiento y le entrega un code de un solo uso; con el, entre en{' '}
           <a href="/restablecer" data-testid="enlace-restablecer">
             restablecer contrasena

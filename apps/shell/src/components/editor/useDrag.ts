@@ -7,12 +7,12 @@ import { useCallback, useRef, useState } from 'react';
 
 export type DragMode = 'mover' | 'redimensionar';
 
-export interface ArrastreEnCurso {
+export interface ProgressDrag {
   itemId: string;
   mode: DragMode;
   /** Donde caeria si se soltara ahora. */
   destino: GridPosition;
-  valido: boolean;
+  valid: boolean;
 }
 
 interface Source {
@@ -47,7 +47,7 @@ function rowLine(p: Pistas, i: number): number {
 }
 
 /** La linea de rejilla mas cercana a `px`. */
-function lineaMasCercana(p: Pistas, px: number, maximo: number): number {
+function lineMoreNearest(p: Pistas, px: number, maximo: number): number {
   let mejor = 0;
   let distancia = Infinity;
   for (let f = 0; f <= maximo; f += 1) {
@@ -66,15 +66,15 @@ const acotar = (valor: number, minimo: number, maximo: number) =>
 function resizeGrid(rejilla: HTMLElement): { ancho: number; hole: number; pistas: Pistas } {
   const box = rejilla.getBoundingClientRect();
   const style = getComputedStyle(rejilla);
-  const huecoX = parseFloat(style.columnGap || '0') || 0;
+  const xHole = parseFloat(style.columnGap || '0') || 0;
   const huecoY = parseFloat(style.rowGap || '0') || 0;
   const altos = style.gridTemplateRows
     .split(' ')
     .map((v) => parseFloat(v))
     .filter((v) => Number.isFinite(v) && v > 0);
   return {
-    ancho: (box.width - huecoX * (GRID_COLUMNS - 1)) / GRID_COLUMNS,
-    hole: huecoX,
+    ancho: (box.width - xHole * (GRID_COLUMNS - 1)) / GRID_COLUMNS,
+    hole: xHole,
     // Si por lo que sea no hay pistas resueltas, una fila del minimo: se extrapola desde ella y el
     // arrastre sigue funcionando en vez de pegarse a la primera fila.
     pistas: { altos: altos.length ? altos : [56], hole: huecoY },
@@ -90,11 +90,11 @@ export function useDrag({
   rejilla: React.RefObject<HTMLDivElement | null>;
   onSoltar: (itemId: string, position: GridPosition) => void;
 }) {
-  const [enCurso, setEnCurso] = useState<ArrastreEnCurso | null>(null);
+  const [enCurso, setEnCurso] = useState<ProgressDrag | null>(null);
   const source = useRef<Source | null>(null);
 
   const calcular = useCallback(
-    (o: Source, clienteX: number, clienteY: number): ArrastreEnCurso => {
+    (o: Source, clienteX: number, clienteY: number): ProgressDrag => {
       const dx = Math.round((clienteX - o.x) / (o.cellWidth + o.hole));
       const arrastradoY = clienteY - o.y;
       // Hasta cuatro filas por debajo de las dibujadas: al soltar, la rejilla crece sola.
@@ -108,12 +108,12 @@ export function useDrag({
           ...o.initial,
           x: acotar(o.initial.x + dx, 0, GRID_COLUMNS - o.initial.w),
           // Sin tope por abajo: la rejilla crece, y el editor anade filas libres al final.
-          y: lineaMasCercana(o.pistas, arriba, tope),
+          y: lineMoreNearest(o.pistas, arriba, tope),
         };
       } else {
         // Al redimensionar lo que se arrastra es el borde de ABAJO; el de arriba no se mueve.
         const abajo = rowLine(o.pistas, o.initial.y + o.initial.h) + arrastradoY;
-        const line = lineaMasCercana(o.pistas, abajo, tope);
+        const line = lineMoreNearest(o.pistas, abajo, tope);
         destino = {
           ...o.initial,
           w: acotar(o.initial.w + dx, 1, GRID_COLUMNS - o.initial.x),
@@ -121,10 +121,10 @@ export function useDrag({
         };
       }
 
-      const valido = !items.some(
+      const valid = !items.some(
         (i) => i.id !== o.itemId && overlapItself(i.position, destino),
       );
-      return { itemId: o.itemId, mode: o.mode, destino, valido };
+      return { itemId: o.itemId, mode: o.mode, destino, valid };
     },
     [items],
   );
@@ -152,12 +152,12 @@ export function useDrag({
         hole: medida.hole,
         pistas: medida.pistas,
       };
-      setEnCurso({ itemId: item.id, mode, destino: item.position, valido: true });
+      setEnCurso({ itemId: item.id, mode, destino: item.position, valid: true });
     },
     [rejilla],
   );
 
-  const alMover = useCallback(
+  const moveTo = useCallback(
     (e: React.PointerEvent) => {
       const o = source.current;
       if (!o) return;
@@ -183,7 +183,7 @@ export function useDrag({
         final.destino.y === o.initial.y &&
         final.destino.w === o.initial.w &&
         final.destino.h === o.initial.h;
-      if (!final.valido || igual) return;
+      if (!final.valid || igual) return;
 
       onSoltar(o.itemId, final.destino);
     },
@@ -195,5 +195,5 @@ export function useDrag({
     setEnCurso(null);
   }, []);
 
-  return { enCurso, alEmpezar, alMover, alSoltar, alCancelar };
+  return { enCurso, alEmpezar, moveTo, alSoltar, alCancelar };
 }

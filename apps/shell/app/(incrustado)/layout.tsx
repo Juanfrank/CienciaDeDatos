@@ -1,7 +1,7 @@
 import { defaultIdentity } from '@app/design-tokens';
 
 /** Disposicion de una vista incrustada — seccion 4.9. */
-export default function IncrustadoLayout({ children }: { children: React.ReactNode }) {
+export default function LayoutEmbedded({ children }: { children: React.ReactNode }) {
   return (
     <div className="incrustado">
       <header className="embedded__header">

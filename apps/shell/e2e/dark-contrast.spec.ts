@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from './instancia';
-import { entrarComo } from './session';
+import { expect, test, type Page } from './instance';
+import { asLogin } from './session';
 
 /** Contraste con el TEMA OSCURO — secciones 4.3 y 4.9. */
 
@@ -21,7 +21,7 @@ async function infracciones(page: Page): Promise<string[]> {
 }
 
 test.beforeEach(async ({ page, origen }) => {
-  await entrarComo(page, 'u-ana');
+  await asLogin(page, 'u-ana');
   await enOscuro(page, origen);
 });
 
@@ -127,7 +127,7 @@ test.describe('el resto de la aplicacion en tema oscuro', () => {
   });
 
   test('el panel de administracion', async ({ page, origen }) => {
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     await enOscuro(page, origen);
     await page.goto('/admin/arbol');
     await expect(page.locator('h1')).toBeVisible();

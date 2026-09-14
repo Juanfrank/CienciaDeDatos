@@ -1,10 +1,10 @@
-import { expect, test } from './instancia';
-import { entrarComo } from './session';
+import { expect, test } from './instance';
+import { asLogin } from './session';
 
 /** Elementos y contenedores. */
 
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-admin');
+  await asLogin(page, 'u-admin');
 });
 
 test.describe('elementos (no leen datos)', () => {
@@ -143,16 +143,16 @@ test.describe('contenedores', () => {
 
     const ventana = page.getByTestId('ampliado');
     await expect(ventana).toBeVisible();
-    const columnasFuera = await page
+    const outsideColumns = await page
       .getByTestId('contenedor-ampliable')
       .locator('.container__grid')
       .first()
       .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
-    const columnasDentro = await ventana
+    const insideColumns = await ventana
       .locator('.container__grid')
       .first()
       .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
-    expect(columnasDentro).toBeGreaterThan(columnasFuera);
+    expect(insideColumns).toBeGreaterThan(outsideColumns);
 
     // El cierre es un control, no «pulsar fuera»: quien navega con teclado se quedaria dentro.
     await page.getByTestId('cerrar-ampliado').click();

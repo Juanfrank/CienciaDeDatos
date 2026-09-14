@@ -10,11 +10,11 @@ export function ScopeBadge({ restricciones }: { restricciones: [string, string[]
 
   useEffect(() => {
     if (!visible) return;
-    const alPulsar = (e: KeyboardEvent) => {
+    const clickTo = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setVisible(false);
     };
-    document.addEventListener('keydown', alPulsar);
-    return () => document.removeEventListener('keydown', alPulsar);
+    document.addEventListener('keydown', clickTo);
+    return () => document.removeEventListener('keydown', clickTo);
   }, [visible]);
 
   if (restricciones.length === 0) return null;

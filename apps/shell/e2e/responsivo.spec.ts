@@ -1,22 +1,22 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from './instancia';
-import { entrarComo } from './session';
+import { expect, test } from './instance';
+import { asLogin } from './session';
 
 /** Diseño responsivo y movil — seccion 4.9. */
 
-const MOVIL = { width: 390, height: 844 };
+const MOBILE = { width: 390, height: 844 };
 const TABLETA = { width: 820, height: 1180 };
 const ESCRITORIO = { width: 1280, height: 900 };
 
 /** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-ana');
+  await asLogin(page, 'u-ana');
 });
 
 test.describe('la disposicion se adapta al ancho', () => {
   test('en escritorio los objetos se reparten en la rejilla de doce columnas', async ({ page }) => {
     await page.setViewportSize(ESCRITORIO);
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     // Las dos tarjetas de arriba comparten fila: tienen la misma coordenada vertical.
@@ -27,8 +27,8 @@ test.describe('la disposicion se adapta al ancho', () => {
   });
 
   test('en movil todo se apila en una sola columna', async ({ page }) => {
-    await page.setViewportSize(MOVIL);
-    await entrarComo(page, 'u-ana');
+    await page.setViewportSize(MOBILE);
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     const cajas = await page.locator('.grid__cell').evaluateAll((celdas) =>
@@ -57,7 +57,7 @@ test.describe('la disposicion se adapta al ancho', () => {
     // espaciado mayores, el mismo objeto —igual de lleno— paso a medir 317 y la prueba fallo
     // sin que nada se hubiera roto. Un umbral absoluto sobre una medida de pantalla envejece
     // con el primer cambio de diseno.
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
 
     const cell = () =>
       page.locator('.grid__cell').filter({ hasText: 'Pendientes por distrito' });
@@ -70,7 +70,7 @@ test.describe('la disposicion se adapta al ancho', () => {
       'en escritorio la celda ocupa las filas que se guardaron',
     ).toContain('span');
 
-    await page.setViewportSize(MOVIL);
+    await page.setViewportSize(MOBILE);
     await page.goto('/m/casos-pendientes');
 
     // En una sola columna la celda pasa a `auto`: la altura la pone lo que hay dentro.
@@ -81,8 +81,8 @@ test.describe('la disposicion se adapta al ancho', () => {
     // no puede tener es hueco sobrante, que era el defecto original.
     const sobrante = await cell().evaluate((el) => {
       const alto = el.getBoundingClientRect().height;
-      const contenido = [...el.children].reduce((total, hijo) => {
-        const box = hijo.getBoundingClientRect();
+      const contenido = [...el.children].reduce((total, child) => {
+        const box = child.getBoundingClientRect();
         return total + box.height;
       }, 0);
       return alto - contenido;
@@ -95,10 +95,10 @@ test.describe('la disposicion se adapta al ancho', () => {
   }) => {
     // Con JavaScript desactivado la pagina tiene que salir ya dispuesta para movil: antes se
     // medía la ventana al montar y se pintaba primero la disposicion de escritorio.
-    const contexto = await browser.newContext({ viewport: MOVIL, javaScriptEnabled: false });
+    const contexto = await browser.newContext({ viewport: MOBILE, javaScriptEnabled: false });
     const pagina = await contexto.newPage();
     // Contexto nuevo: no hereda la sesion del beforeEach, que va contra otro contexto.
-    await entrarComo(pagina, 'u-ana');
+    await asLogin(pagina, 'u-ana');
     await pagina.goto('/m/casos-pendientes');
 
     const anchos = await pagina.locator('.grid__cell').evaluateAll((celdas) =>
@@ -111,8 +111,8 @@ test.describe('la disposicion se adapta al ancho', () => {
 
 test.describe('la navegacion no se interpone en un movil', () => {
   test('en movil el arbol viene plegado y el modulo esta arriba del todo', async ({ page }) => {
-    await page.setViewportSize(MOVIL);
-    await entrarComo(page, 'u-ana');
+    await page.setViewportSize(MOBILE);
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await expect(page.getByTestId('abrir-navegacion')).toBeVisible();
@@ -120,12 +120,12 @@ test.describe('la navegacion no se interpone en un movil', () => {
 
     // Lo que se venia a ver tiene que estar a la vista sin desplazarse.
     const titulo = await page.getByTestId('module-title').boundingBox();
-    expect(titulo?.y ?? 9999).toBeLessThan(MOVIL.height);
+    expect(titulo?.y ?? 9999).toBeLessThan(MOBILE.height);
   });
 
   test('al desplegarlo aparece el arbol completo y se puede navegar', async ({ page }) => {
-    await page.setViewportSize(MOVIL);
-    await entrarComo(page, 'u-ana');
+    await page.setViewportSize(MOBILE);
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('abrir-navegacion').click();
@@ -139,7 +139,7 @@ test.describe('la navegacion no se interpone en un movil', () => {
     // El ancho ya no decide si SE PUEDE plegar, solo como empieza. El boton esta a cualquier
     // ancho, porque en una pantalla ancha tambien hay motivos para querer el modulo entero.
     await page.setViewportSize(ESCRITORIO);
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     const button = page.getByTestId('abrir-navegacion');
@@ -156,7 +156,7 @@ test.describe('la navegacion no se interpone en un movil', () => {
     // cruzar el umbral para que llegue uno. Se veia como un boton que no funciona, porque el
     // panel volvia solo unas decimas despues.
     await page.setViewportSize(ESCRITORIO);
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('abrir-navegacion').click();
@@ -169,7 +169,7 @@ test.describe('la navegacion no se interpone en un movil', () => {
 
   test('en tableta tambien se mantiene visible', async ({ page }) => {
     await page.setViewportSize(TABLETA);
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await expect(page.getByTestId('nav-audiencias')).toBeVisible();
   });
@@ -177,7 +177,7 @@ test.describe('la navegacion no se interpone en un movil', () => {
 
 test.describe('nada se sale de la pantalla', () => {
   for (const [nombre, tamano] of [
-    ['movil', MOVIL],
+    ['movil', MOBILE],
     ['tableta', TABLETA],
   ] as const) {
     test(`en ${nombre} no hay desplazamiento horizontal de pagina`, async ({ page }) => {
@@ -188,7 +188,7 @@ test.describe('nada se sale de la pantalla', () => {
       // el editor —que llego despues— desbordaba por la columna de acciones de su tabla sin que
       // nada lo detectara. Una lista es mas facil de ampliar que de recordar.
       await page.setViewportSize(tamano);
-      await entrarComo(page, 'u-ana');
+      await asLogin(page, 'u-ana');
 
       for (const path of ['/m/casos-pendientes', '/editor', '/avisos']) {
         await page.goto(path);
@@ -201,8 +201,8 @@ test.describe('nada se sale de la pantalla', () => {
   }
 
   test('la tabla ancha se desplaza dentro de su region, no arrastra la pagina', async ({ page }) => {
-    await page.setViewportSize(MOVIL);
-    await entrarComo(page, 'u-ana');
+    await page.setViewportSize(MOBILE);
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     const contenedor = page.locator('.container-table').last();
@@ -211,8 +211,8 @@ test.describe('nada se sale de la pantalla', () => {
   });
 
   test('la tabla del editor tambien se desplaza dentro de su region', async ({ page }) => {
-    await page.setViewportSize(MOVIL);
-    await entrarComo(page, 'u-ana');
+    await page.setViewportSize(MOBILE);
+    await asLogin(page, 'u-ana');
     await page.goto('/editor');
 
     const contenedor = page.locator('.table-container-data').first();
@@ -220,8 +220,8 @@ test.describe('nada se sale de la pantalla', () => {
   });
 
   test('el panel de administracion tampoco desborda en movil', async ({ page }) => {
-    await page.setViewportSize(MOVIL);
-    await entrarComo(page, 'u-admin');
+    await page.setViewportSize(MOBILE);
+    await asLogin(page, 'u-admin');
     await page.goto('/admin/equipos');
 
     const overflows = await page.evaluate(
@@ -235,8 +235,8 @@ test.describe('accesibilidad en movil (4.9)', () => {
   test('un modulo en movil no tiene infracciones WCAG 2.1 AA', async ({ page }) => {
     // La accesibilidad se comprueba TAMBIEN a este ancho: al plegar y reordenar aparecen
     // problemas que no existen en escritorio.
-    await page.setViewportSize(MOVIL);
-    await entrarComo(page, 'u-ana');
+    await page.setViewportSize(MOBILE);
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     const { violations } = await new AxeBuilder({ page })
@@ -246,8 +246,8 @@ test.describe('accesibilidad en movil (4.9)', () => {
   });
 
   test('el arbol plegado se abre con teclado y anuncia su estado', async ({ page }) => {
-    await page.setViewportSize(MOVIL);
-    await entrarComo(page, 'u-ana');
+    await page.setViewportSize(MOBILE);
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     const button = page.getByTestId('abrir-navegacion');
@@ -284,8 +284,8 @@ test.describe('las paginas de objetos nuevos, en un movil', () => {
 
   for (const slug of paginas) {
     test(`/${slug} no desborda a lo ancho`, async ({ page }) => {
-      await page.setViewportSize(MOVIL);
-      await entrarComo(page, 'u-ana');
+      await page.setViewportSize(MOBILE);
+      await asLogin(page, 'u-ana');
       await page.goto(`/m/composicion/${slug}`);
       await expect(page.locator('.grafico').first()).toHaveAttribute('data-montado', 'si');
 
@@ -301,7 +301,7 @@ test.describe('las paginas de objetos nuevos, en un movil', () => {
       const maxWidth = await page.locator('.objeto').evaluateAll((nodos) =>
         Math.max(0, ...nodos.map((n) => n.getBoundingClientRect().right)),
       );
-      expect(maxWidth).toBeLessThanOrEqual(MOVIL.width + 1);
+      expect(maxWidth).toBeLessThanOrEqual(MOBILE.width + 1);
     });
   }
 
@@ -311,8 +311,8 @@ test.describe('las paginas de objetos nuevos, en un movil', () => {
      * ancho hay. En un movil, dos columnas dejan cada panel en 170 px: un grafico donde no cabe
      * ni el rotulo del eje.
      */
-    await page.setViewportSize(MOVIL);
-    await entrarComo(page, 'u-ana');
+    await page.setViewportSize(MOBILE);
+    await asLogin(page, 'u-ana');
     await page.goto('/m/composicion/multiplos');
     await expect(page.locator('.grafico').first()).toHaveAttribute('data-montado', 'si');
 

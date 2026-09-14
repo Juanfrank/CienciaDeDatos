@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { AlertOperator, AlertRule } from '@app/alerts';
 import { alertStore } from '../../../src/server/alerts';
-import { normalizarFiltros } from '../../../src/server/filters';
-import { actorDe, moduloServiblePorSlug } from '../../../src/server/cicloDeVida';
+import { filtersNormalize } from '../../../src/server/filters';
+import { actorDe, slugServableModule } from '../../../src/server/cicloDeVida';
 import { withoutSession } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/session';
+import { sessionGet } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 
@@ -12,21 +12,21 @@ const OPERADORES: AlertOperator[] = ['mayor-que', 'menor-que', 'cambia-mas-de'];
 
 /** Reglas de alerta (4.9). */
 export async function GET() {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
   const rules = await alertStore.listRules();
 
   // Solo las propias. Una regla ajena revelaria que modulo vigila alguien y con que umbral.
   const mias = rules.filter((r) => r.ownerUserId === sesion.userId);
 
-  const estados = await Promise.all(mias.map((r) => alertStore.getState(r.id)));
+  const states = await Promise.all(mias.map((r) => alertStore.getState(r.id)));
   return NextResponse.json({
-    alertas: mias.map((r, i) => ({ ...r, estado: estados[i] ?? null })),
+    alertas: mias.map((r, i) => ({ ...r, estado: states[i] ?? null })),
   });
 }
 
 export async function POST(request: Request) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   let body: Record<string, unknown>;
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'El umbral debe ser un numero.' }, { status: 400 });
   }
 
-  const module = await moduloServiblePorSlug(moduleSlug, await actorDe(sesion));
+  const module = await slugServableModule(moduleSlug, await actorDe(sesion));
   if (!module) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
   // El objeto y la medida se validan contra la definicion del modulo, no se aceptan a ciegas:
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     instanceId,
     measure,
     condition: { operator, threshold },
-    filters: normalizarFiltros(body['filtros']),
+    filters: filtersNormalize(body['filtros']),
     enabled: true,
     createdAt: new Date().toISOString(),
   };
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   const id = new URL(request.url).searchParams.get('id');

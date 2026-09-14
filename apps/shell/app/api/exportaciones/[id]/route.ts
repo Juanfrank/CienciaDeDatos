@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { queueExports } from '../../../../src/server/exports';
 import { withoutSession } from '../../../../src/server/respuestas';
-import { obtenerSesion } from '../../../../src/server/session';
+import { sessionGet } from '../../../../src/server/session';
 
 export const runtime = 'nodejs';
 
 /** Estado de una exportacion — el "estado de progreso consultable" que pide 5.3. */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   const { id } = await params;
@@ -23,7 +23,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     id: job.id,
     estado: job.status,
     formato: job.request.format,
-    creada: job.createdAt,
+    created: job.createdAt,
     terminada: job.finishedAt,
     error: job.error,
     ...(job.artifact

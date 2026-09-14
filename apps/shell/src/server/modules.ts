@@ -1,5 +1,5 @@
 import type { ModuleDefinition } from '@app/module-model';
-import { modules } from './almacenModulos';
+import { modules } from './moduleStore';
 
 /** Definiciones de modulo de arranque. */
 
@@ -11,7 +11,7 @@ const DATASET = 'casos-por-distrito-trimestre';
 /** El enlace de un objeto que no lee datos. */
 const WITHOUT_DATA = { datasetId: '', dimensions: [], measures: [] };
 
-export const modulosDemo: ModuleDefinition[] = [
+export const demoModules: ModuleDefinition[] = [
   {
     moduleId: 'casos-pendientes',
     slug: 'casos-pendientes',

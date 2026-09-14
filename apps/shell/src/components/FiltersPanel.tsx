@@ -148,7 +148,7 @@ function FieldPicker({
     ? opciones.filter((o) => o.toLowerCase().includes(busqueda.toLowerCase()))
     : opciones;
 
-  const hayAlgo = valores.length > 0 || desde !== "" || hasta !== "";
+  const somethingHas = valores.length > 0 || desde !== "" || hasta !== "";
 
   return (
     <fieldset
@@ -158,7 +158,7 @@ function FieldPicker({
     >
       <legend className="filters-panel__label">
         {picker.etiqueta}
-        {hayAlgo ? (
+        {somethingHas ? (
           <button
             type="button"
             className="boton-enlace filters-panel__clear"

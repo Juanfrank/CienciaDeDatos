@@ -15,7 +15,7 @@ Construye un modulo sin escribir codigo (4.2). Cuatro pestanas, cada una con una
   `admite("<clave>")`, y `controls.ts` mapea cada clave de presentacion a su identificador de
   prueba. Anadir una clave sin control falla en `format-panel.spec.ts`.
 - **Las secciones son `<details>`**, con el estado inicial en `abierta` y el filtro del buscador
-  por contexto (`ProveedorDeFiltro`). Un `<details>` es no controlado: si hay que abrirlo desde
+  por contexto (`FilterProvider`). Un `<details>` es no controlado: si hay que abrirlo desde
   React cuando el usuario ya lo toco, hay que escribir `open` en el DOM por referencia.
 - **Los campos de texto confirman al perder el foco**, no en cada pulsacion.
 - **Un objeto recien colocado llega ya mapeado** a la primera medida del dataset.
@@ -23,6 +23,6 @@ Construye un modulo sin escribir codigo (4.2). Cuatro pestanas, cada una con una
 ## Que NO hacer
 
 - No anadir un control que la validacion vaya a rechazar al guardar.
-- No poner un `ProveedorDeFiltro` envolviendo secciones cuyo titulo no case con lo que se busca:
+- No poner un `FilterProvider` envolviendo secciones cuyo titulo no case con lo que se busca:
   desapareceran al filtrar.
 - No usar `check()` de Playwright sobre una casilla que dispara guardado: pulsa y afirma despues.

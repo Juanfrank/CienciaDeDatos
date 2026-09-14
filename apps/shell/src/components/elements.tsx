@@ -127,7 +127,7 @@ const RECORTE: Partial<Record<Shape, string>> = {
   flecha: 'polygon(0% 30%, 60% 30%, 60% 0%, 100% 50%, 60% 100%, 60% 70%, 0% 70%)',
 };
 
-export function FormaBasica({ config }: { config: ShapeSettings | undefined }) {
+export function BasicShape({ config }: { config: ShapeSettings | undefined }) {
   const forma = config?.forma ?? 'rectangulo';
   // Un cuadrado y un circulo se dibujan con lado igual al MENOR de los dos ejes, no estirados a la
   // celda: estirarlos los convierte en un rectangulo y una elipse, que son otra cosa.

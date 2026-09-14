@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { PRESENTATION_KEYS, initialCatalog, type PresentationKey } from '@app/ui-components';
-import { CONTROL_DE_CLAVE } from '../components/editor/controls';
+import { KEY_CONTROL } from '../components/editor/controls';
 
 /** Toda clave de presentacion que un objeto DECLARA tiene un control en el panel — 4.2. */
 
@@ -15,13 +15,13 @@ describe('el panel de Formato ofrece todo lo que el catalogo declara', () => {
   it('la tabla de controles cubre TODAS las claves, sin sobrar ninguna', () => {
     // Si manana se anade una clave de presentacion y nadie la mapea, esta prueba lo dice antes de
     // que el control «se quede para luego» y nadie vuelva a acordarse.
-    expect(Object.keys(CONTROL_DE_CLAVE).sort()).toEqual([...PRESENTATION_KEYS].sort());
+    expect(Object.keys(KEY_CONTROL).sort()).toEqual([...PRESENTATION_KEYS].sort());
   });
 
   for (const clave of PRESENTATION_KEYS) {
     it(`${clave}: tiene un control con su identificador de prueba`, () => {
       expect(PANEL, `falta el testid de ${clave}`).toContain(
-        `${CONTROL_DE_CLAVE[clave]}\`}`,
+        `${KEY_CONTROL[clave]}\`}`,
       );
     });
   }
@@ -34,11 +34,11 @@ describe('el panel de Formato ofrece todo lo que el catalogo declara', () => {
      * validacion rechaza al guardar—.
      */
     const SIEMPRE: PresentationKey[] = ['mostrarTitulo', 'colorDeResaltado', 'etiqueta'];
-    const sinGuarda = PRESENTATION_KEYS.filter(
+    const withoutGuard = PRESENTATION_KEYS.filter(
       (c) => !SIEMPRE.includes(c) && !PANEL.includes(`admite("${c}")`),
     );
 
-    expect(sinGuarda).toEqual([]);
+    expect(withoutGuard).toEqual([]);
   });
 });
 
@@ -53,7 +53,7 @@ describe('y todo objeto colocable llega al panel con algo que configurar', () =>
     const version = objeto.versions[objeto.versions.length - 1];
 
     it(`${objeto.objectId}: sus claves declaradas tienen control`, () => {
-      const sinControl = (version?.presentation ?? []).filter((c) => !CONTROL_DE_CLAVE[c]);
+      const sinControl = (version?.presentation ?? []).filter((c) => !KEY_CONTROL[c]);
       expect(sinControl).toEqual([]);
     });
   }

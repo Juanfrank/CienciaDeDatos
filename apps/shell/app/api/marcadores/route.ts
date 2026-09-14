@@ -1,22 +1,22 @@
 import { NextResponse } from 'next/server';
 import { captureBookmark } from '@app/module-model';
-import { deleteBookmark, saveBookmark, listarMarcadores } from '../../../src/server/bookmarks';
+import { deleteBookmark, saveBookmark, bookmarksList } from '../../../src/server/bookmarks';
 import { withoutSession } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/session';
+import { sessionGet } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /** Marcadores visibles: los propios y los compartidos con el equipo activo (4.4). */
 export async function GET() {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
-  return NextResponse.json({ bookmarks: await listarMarcadores(sesion.userId, sesion.activeTeamId) });
+  return NextResponse.json({ bookmarks: await bookmarksList(sesion.userId, sesion.activeTeamId) });
 }
 
 /** Guarda el estado de filtros actual como marcador. */
 export async function POST(request: Request) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
   const body = (await request.json()) as {
     name?: string;
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Se requiere id.' }, { status: 400 });

@@ -7,24 +7,24 @@ import {
 } from '@app/access-control';
 import {
   AdminError,
-  ExpansionSinJustificarError,
+  ExpansionWithoutJustifyError,
   assertAdmin,
-  cambiarMembresia,
-  dimensionesAmpliadas,
-  ejecutarOperacionDeArbol,
-  esAdministrador,
+  membershipChange,
+  expandedDimensions,
+  treeOperationRun,
+  isAdministrator,
   saveScope,
   saveTeam,
   previsualizarMovimiento,
   seesWhoWhere,
-  rolMasAltoDe,
-  UltimoAdministradorError,
+  roleMoreHeightOf,
+  LastAdministratorError,
   administradores,
   deleteTeam,
 } from './admin';
-import { contarAmpliaciones, clearAudit, listarAuditoria } from './audit';
-import { gobierno } from './gobierno';
-import type { SesionShell } from './session';
+import { expansionsCount, clearAudit, auditList } from './audit';
+import { governance } from './governance';
+import type { ShellSession } from './session';
 
 const { DIM_DISTRITO, DIM_MATERIA, scope } = gobiernoFixtures;
 
@@ -32,7 +32,7 @@ const admin = { userId: 'u-admin', role: 'administrador' as const };
 const visor = { userId: 'u-beto', role: 'visor' as const };
 const colaborador = { userId: 'u-ana', role: 'colaborador' as const };
 
-const sesion = (userId: string): SesionShell => ({
+const sesion = (userId: string): ShellSession => ({
   sessionId: 's',
   userId,
   activeTeamId: 'equipo-norte',
@@ -41,34 +41,34 @@ const sesion = (userId: string): SesionShell => ({
 
 /** Equipo del almacen, o fallo explicito. Evita aserciones non-null en cada prueba. */
 const teamOf = async (id: string) => {
-  const equipo = await gobierno.getTeam(id);
+  const equipo = await governance.getTeam(id);
   if (!equipo) throw new Error(`fixture inesperado: falta el equipo ${id}`);
   return equipo;
 };
 
 beforeEach(async () => {
-  await gobierno.reset();
+  await governance.reset();
   await clearAudit();
 });
 
 describe('almacen de gobierno', () => {
   it('siembra desde seedData', async () => {
-    expect((await gobierno.listTeams()).map((t) => t.id).sort()).toEqual(['equipo-este', 'equipo-norte']);
-    expect((await gobierno.getTree()).nodes.length).toBeGreaterThan(0);
+    expect((await governance.listTeams()).map((t) => t.id).sort()).toEqual(['equipo-este', 'equipo-norte']);
+    expect((await governance.getTree()).nodes.length).toBeGreaterThan(0);
   });
 
   it('las escrituras se reflejan en lecturas posteriores', async () => {
-    const equipo = await gobierno.getTeam('equipo-norte');
+    const equipo = await governance.getTeam('equipo-norte');
     if (!equipo) throw new Error('fixture inesperado');
-    await gobierno.upsertTeam({ ...equipo, name: 'Renombrado' });
-    expect((await gobierno.getTeam('equipo-norte'))?.name).toBe('Renombrado');
+    await governance.upsertTeam({ ...equipo, name: 'Renombrado' });
+    expect((await governance.getTeam('equipo-norte'))?.name).toBe('Renombrado');
   });
 
   it('devuelve copias: quien lee no puede mutar el almacen por accidente', async () => {
-    const equipo = await gobierno.getTeam('equipo-norte');
+    const equipo = await governance.getTeam('equipo-norte');
     if (!equipo) throw new Error('fixture inesperado');
     equipo.name = 'Mutado por fuera';
-    expect((await gobierno.getTeam('equipo-norte'))?.name).not.toBe('Mutado por fuera');
+    expect((await governance.getTeam('equipo-norte'))?.name).not.toBe('Mutado por fuera');
   });
 });
 
@@ -91,15 +91,15 @@ describe('assertAdmin: la comprobacion vive en el backend (criterio de la seccio
   });
 
   it('el rol se toma del mas alto entre sus equipos: administrar no es por equipo', async () => {
-    expect(await rolMasAltoDe('u-admin')).toBe('administrador');
-    expect(await rolMasAltoDe('u-ana')).toBe('colaborador');
-    expect(await rolMasAltoDe('u-beto')).toBe('visor');
-    expect(await esAdministrador('u-beto')).toBe(false);
+    expect(await roleMoreHeightOf('u-admin')).toBe('administrador');
+    expect(await roleMoreHeightOf('u-ana')).toBe('colaborador');
+    expect(await roleMoreHeightOf('u-beto')).toBe('visor');
+    expect(await isAdministrator('u-beto')).toBe(false);
   });
 });
 
 describe('la puerta de ampliacion de ambito (4.10.4)', () => {
-  const teamScope = async () => (await gobierno.getTeam('equipo-norte'))?.defaultScope;
+  const teamScope = async () => (await governance.getTeam('equipo-norte'))?.defaultScope;
 
   it('restringir mas no exige justificacion', async () => {
     const guardado = await saveScope({
@@ -119,11 +119,11 @@ describe('la puerta de ampliacion de ambito (4.10.4)', () => {
         destino: { tipo: 'equipo', teamId: 'equipo-norte' },
         scope: scope(DIM_MATERIA, 'Penal', 'Civil', 'Laboral'),
       });
-      expect.unreachable('se esperaba ExpansionSinJustificarError');
+      expect.unreachable('se esperaba ExpansionWithoutJustifyError');
     } catch (error) {
-      expect(error).toBeInstanceOf(ExpansionSinJustificarError);
+      expect(error).toBeInstanceOf(ExpansionWithoutJustifyError);
       expect((error as AdminError).status).toBe(422);
-      expect((error as ExpansionSinJustificarError).dimensiones[0]).toContain('Laboral');
+      expect((error as ExpansionWithoutJustifyError).dimensiones[0]).toContain('Laboral');
     }
   });
 
@@ -134,7 +134,7 @@ describe('la puerta de ampliacion de ambito (4.10.4)', () => {
         destino: { tipo: 'equipo', teamId: 'equipo-norte' },
         scope: { restrictions: [] },
       }),
-    ).rejects.toThrow(ExpansionSinJustificarError);
+    ).rejects.toThrow(ExpansionWithoutJustifyError);
   });
 
   it('con justificacion se guarda, marcada como excepcion y con su autor', async () => {
@@ -158,7 +158,7 @@ describe('la puerta de ampliacion de ambito (4.10.4)', () => {
       }),
     ).rejects.toThrow();
     expect(JSON.stringify(teamScope())).toBe(before);
-    expect(await listarAuditoria()).toHaveLength(0);
+    expect(await auditList()).toHaveLength(0);
   });
 
   it('un Colaborador no puede configurar ambitos', async () => {
@@ -171,11 +171,11 @@ describe('la puerta de ampliacion de ambito (4.10.4)', () => {
     ).rejects.toThrow(/no puede 'configurar-ambitos'/);
   });
 
-  it('dimensionesAmpliadas nombra exactamente que se amplia', async () => {
+  it('expandedDimensions nombra exactamente que se amplia', async () => {
     expect(
-      dimensionesAmpliadas(scope(DIM_DISTRITO, 'Norte'), scope(DIM_DISTRITO, 'Norte', 'Este')),
+      expandedDimensions(scope(DIM_DISTRITO, 'Norte'), scope(DIM_DISTRITO, 'Norte', 'Este')),
     ).toEqual(['DimTribunal.Distrito (+Este)']);
-    expect(dimensionesAmpliadas(scope(DIM_DISTRITO, 'Norte'), { restrictions: [] })).toEqual([
+    expect(expandedDimensions(scope(DIM_DISTRITO, 'Norte'), { restrictions: [] })).toEqual([
       'DimTribunal.Distrito (deja de estar restringida)',
     ]);
   });
@@ -195,11 +195,11 @@ describe('la puerta de auditoria (seccion 7)', () => {
       justificacion: 'Se reincorpora materia civil por resolucion',
     });
 
-    expect(await listarAuditoria()).toHaveLength(2);
-    const ampliaciones = await listarAuditoria({ soloAmpliaciones: true });
+    expect(await auditList()).toHaveLength(2);
+    const ampliaciones = await auditList({ onlyExpansions: true });
     expect(ampliaciones).toHaveLength(1);
     expect(ampliaciones[0]?.justification).toMatch(/resolucion/);
-    expect(await contarAmpliaciones()).toBe(1);
+    expect(await expansionsCount()).toBe(1);
   });
 
   it('guarda el estado anterior y el nuevo: no es sobrescritura silenciosa (4.10.7)', async () => {
@@ -208,13 +208,13 @@ describe('la puerta de auditoria (seccion 7)', () => {
       destino: { tipo: 'equipo', teamId: 'equipo-norte' },
       scope: scope(DIM_MATERIA, 'Penal'),
     });
-    const evento = (await listarAuditoria())[0];
+    const evento = (await auditList())[0];
     expect(evento?.before).toBeDefined();
     expect(evento?.after).toBeDefined();
   });
 
   it('el registro se puede filtrar por tipo de entidad y por autor', async () => {
-    const equipo = await gobierno.getTeam('equipo-norte');
+    const equipo = await governance.getTeam('equipo-norte');
     if (!equipo) throw new Error('fixture inesperado');
     await saveTeam(admin, { ...equipo, name: 'Norte renombrado' });
     await saveScope({
@@ -223,9 +223,9 @@ describe('la puerta de auditoria (seccion 7)', () => {
       scope: scope(DIM_MATERIA, 'Penal'),
     });
 
-    expect(await listarAuditoria({ entityType: 'team' })).toHaveLength(1);
-    expect(await listarAuditoria({ entityType: 'scope' })).toHaveLength(1);
-    expect(await listarAuditoria({ actorId: 'otro' })).toHaveLength(0);
+    expect(await auditList({ entityType: 'team' })).toHaveLength(1);
+    expect(await auditList({ entityType: 'scope' })).toHaveLength(1);
+    expect(await auditList({ actorId: 'otro' })).toHaveLength(0);
   });
 });
 
@@ -235,12 +235,12 @@ describe('editar el ambito de una carpeta cambia lo que contiene', () => {
       user: { userId: 'u-ana' },
       activeTeam: await teamOf('equipo-norte'),
       moduleId: 'casos-pendientes',
-      generalTree: (await gobierno.getTree()).nodes,
+      generalTree: (await governance.getTree()).nodes,
     });
-    const distritoAntes = before.scope.restrictions.find(
+    const beforeDistrito = before.scope.restrictions.find(
       (r) => dimensionKey(r.dimension) === dimensionKey(DIM_DISTRITO),
     );
-    expect(distritoAntes?.allowedValues).toEqual(['Distrito Norte']);
+    expect(beforeDistrito?.allowedValues).toEqual(['Distrito Norte']);
 
     // Se restringe aun mas la carpeta que lo contiene: de Norte a nada.
     await saveScope({
@@ -253,7 +253,7 @@ describe('editar el ambito de una carpeta cambia lo que contiene', () => {
       user: { userId: 'u-ana' },
       activeTeam: await teamOf('equipo-norte'),
       moduleId: 'casos-pendientes',
-      generalTree: (await gobierno.getTree()).nodes,
+      generalTree: (await governance.getTree()).nodes,
     });
     expect(after.deniesEverything).toBe(true);
   });
@@ -264,8 +264,8 @@ describe('previsualizar un movimiento antes de confirmarlo (4.1.2)', () => {
     const previo = await previsualizarMovimiento('nodo-m-audiencias', 'nodo-este');
     expect(previo.moduleIds).toEqual(['audiencias']);
     expect(previo.cambiaElAmbito).toBe(true);
-    expect(previo.scopeAntes?.restrictions[0]?.allowedValues).toEqual(['Distrito Norte']);
-    expect(previo.scopeDespues?.restrictions[0]?.allowedValues).toEqual(['Distrito Este']);
+    expect(previo.beforeScope?.restrictions[0]?.allowedValues).toEqual(['Distrito Norte']);
+    expect(previo.afterScope?.restrictions[0]?.allowedValues).toEqual(['Distrito Este']);
   });
 
   it('mover dentro de la misma carpeta no cambia el ambito', async () => {
@@ -275,22 +275,22 @@ describe('previsualizar un movimiento antes de confirmarlo (4.1.2)', () => {
 
 describe('operaciones de arbol desde el panel', () => {
   it('un movimiento se persiste y queda auditado como tal', async () => {
-    await ejecutarOperacionDeArbol(admin, {
+    await treeOperationRun(admin, {
       type: 'mover',
       nodeId: 'nodo-m-audiencias',
       newParentId: 'nodo-este',
     });
 
-    const movimientos = await listarAuditoria({ soloMovimientos: true });
-    expect(movimientos).toHaveLength(1);
-    expect(movimientos[0]?.entityId).toBe('nodo-m-audiencias');
+    const moves = await auditList({ onlyMoves: true });
+    expect(moves).toHaveLength(1);
+    expect(moves[0]?.entityId).toBe('nodo-m-audiencias');
 
     // Y el arbol persistido refleja el cambio.
     const resuelto = resolveEffectiveScope({
       user: { userId: 'u-ana' },
       activeTeam: await teamOf('equipo-norte'),
       moduleId: 'audiencias',
-      generalTree: (await gobierno.getTree()).nodes,
+      generalTree: (await governance.getTree()).nodes,
     });
     const distrito = resuelto.scope.restrictions.find(
       (r) => dimensionKey(r.dimension) === dimensionKey(DIM_DISTRITO),
@@ -300,23 +300,23 @@ describe('operaciones de arbol desde el panel', () => {
 
   it('un Visor no puede operar sobre el arbol', async () => {
     await expect(
-      ejecutarOperacionDeArbol(visor, { type: 'renombrar', nodeId: 'nodo-norte', name: 'X' }),
+      treeOperationRun(visor, { type: 'renombrar', nodeId: 'nodo-norte', name: 'X' }),
     ).rejects.toThrow(AdminError);
   });
 });
 
 describe('membresia (4.10.2)', () => {
   it('anade y quita personas de un equipo, con auditoria', async () => {
-    const conBeto = await cambiarMembresia(admin, 'equipo-norte', 'u-beto', 'visor');
+    const conBeto = await membershipChange(admin, 'equipo-norte', 'u-beto', 'visor');
     expect(conBeto.members.some((m) => m.userId === 'u-beto')).toBe(true);
 
-    const sinBeto = await cambiarMembresia(admin, 'equipo-norte', 'u-beto', null);
+    const sinBeto = await membershipChange(admin, 'equipo-norte', 'u-beto', null);
     expect(sinBeto.members.some((m) => m.userId === 'u-beto')).toBe(false);
-    expect(await listarAuditoria({ entityType: 'membership' })).toHaveLength(2);
+    expect(await auditList({ entityType: 'membership' })).toHaveLength(2);
   });
 
   it('un Colaborador no puede gestionar roles', async () => {
-    await expect(cambiarMembresia(colaborador, 'equipo-norte', 'u-beto', 'visor')).rejects.toThrow(
+    await expect(membershipChange(colaborador, 'equipo-norte', 'u-beto', 'visor')).rejects.toThrow(
       /no puede 'gestionar-usuarios-y-roles'/,
     );
   });
@@ -340,7 +340,7 @@ describe('quien ve que (4.10.8)', () => {
 
   it('distingue "no tiene acceso" de "tiene acceso pero no ve filas"', async () => {
     const withoutGrant = await seesWhoWhere('u-ana', 'equipo-norte', 'estadisticas');
-    expect(withoutGrant.existeEnElArbol).toBe(true);
+    expect(withoutGrant.treeTheExists).toBe(true);
     expect(withoutGrant.tieneAcceso).toBe(false);
   });
 
@@ -363,27 +363,27 @@ describe('la institucion no se puede quedar sin Administrador (4.10.1)', () => {
    */
   it('un Administrador no puede retirarse el rol a si mismo', async () => {
     await expect(
-      cambiarMembresia(admin, 'equipo-norte', 'u-admin', null),
-    ).rejects.toBeInstanceOf(UltimoAdministradorError);
+      membershipChange(admin, 'equipo-norte', 'u-admin', null),
+    ).rejects.toBeInstanceOf(LastAdministratorError);
 
     // Y sigue administrando: la escritura no llego a ocurrir.
-    expect(await esAdministrador('u-admin')).toBe(true);
+    expect(await isAdministrator('u-admin')).toBe(true);
   });
 
   it('tampoco degradarse a Colaborador', async () => {
     await expect(
-      cambiarMembresia(admin, 'equipo-norte', 'u-admin', 'colaborador'),
-    ).rejects.toBeInstanceOf(UltimoAdministradorError);
+      membershipChange(admin, 'equipo-norte', 'u-admin', 'colaborador'),
+    ).rejects.toBeInstanceOf(LastAdministratorError);
   });
 
   it('el error es 409 y no 403: el permiso lo tiene, el problema es el resultado', async () => {
-    const fallo = await cambiarMembresia(admin, 'equipo-norte', 'u-admin', null).catch(
+    const fallo = await membershipChange(admin, 'equipo-norte', 'u-admin', null).catch(
       (e: unknown) => e,
     );
 
-    expect((fallo as UltimoAdministradorError).status).toBe(409);
+    expect((fallo as LastAdministratorError).status).toBe(409);
     // El mensaje nombra a quien administra, para que se sepa a quien hay que nombrar antes.
-    expect((fallo as UltimoAdministradorError).message).toContain('u-admin');
+    expect((fallo as LastAdministratorError).message).toContain('u-admin');
   });
 
   it('guardar el equipo entero con la membresia reescrita tampoco cuela', async () => {
@@ -396,31 +396,31 @@ describe('la institucion no se puede quedar sin Administrador (4.10.1)', () => {
         ...equipo,
         members: equipo.members.filter((m) => m.userId !== 'u-admin'),
       }),
-    ).rejects.toBeInstanceOf(UltimoAdministradorError);
+    ).rejects.toBeInstanceOf(LastAdministratorError);
 
-    expect(await esAdministrador('u-admin')).toBe(true);
+    expect(await isAdministrator('u-admin')).toBe(true);
   });
 
   it('borrar el equipo donde estaba el ultimo Administrador tampoco', async () => {
     await expect(deleteTeam(admin, 'equipo-norte')).rejects.toBeInstanceOf(
-      UltimoAdministradorError,
+      LastAdministratorError,
     );
-    expect((await gobierno.getTeam('equipo-norte'))).toBeDefined();
+    expect((await governance.getTeam('equipo-norte'))).toBeDefined();
   });
 
   it('con otro Administrador nombrado antes, el cambio pasa', async () => {
-    await cambiarMembresia(admin, 'equipo-este', 'u-ana', 'administrador');
+    await membershipChange(admin, 'equipo-este', 'u-ana', 'administrador');
 
     // Ahora si: u-admin puede retirarse, porque Ana administra.
-    await cambiarMembresia(admin, 'equipo-norte', 'u-admin', 'colaborador');
+    await membershipChange(admin, 'equipo-norte', 'u-admin', 'colaborador');
 
-    expect(await esAdministrador('u-admin')).toBe(false);
-    expect(await esAdministrador('u-ana')).toBe(true);
+    expect(await isAdministrator('u-admin')).toBe(false);
+    expect(await isAdministrator('u-ana')).toBe(true);
   });
 
   it('quienes administran se pueden consultar, para poder verlo antes de tocar nada', async () => {
     expect(await administradores()).toEqual(['u-admin']);
-    await cambiarMembresia(admin, 'equipo-este', 'u-ana', 'administrador');
+    await membershipChange(admin, 'equipo-este', 'u-ana', 'administrador');
     expect(await administradores()).toEqual(['u-admin', 'u-ana']);
   });
 });
@@ -428,10 +428,10 @@ describe('la institucion no se puede quedar sin Administrador (4.10.1)', () => {
 describe('borrar un equipo deja rastro', () => {
   it('emite un evento de auditoria, que antes no emitia', async () => {
     // Se nombra un segundo Administrador para poder borrar el equipo del primero.
-    await cambiarMembresia(admin, 'equipo-este', 'u-ana', 'administrador');
+    await membershipChange(admin, 'equipo-este', 'u-ana', 'administrador');
     await deleteTeam(admin, 'equipo-norte');
 
-    const evento = (await listarAuditoria()).find(
+    const evento = (await auditList()).find(
       (e) => e.entityType === 'team' && e.entityId === 'equipo-norte' && e.action === 'delete',
     );
 

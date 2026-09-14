@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import {
   actorDe,
-  devolverABorrador,
-  enviarAAprobacion,
-  moduloVisiblePorSlug,
+  revertDraft,
+  sendApproval,
+  visibleModuleSlug,
   publicar,
 } from '../../../../../src/server/cicloDeVida';
-import { respuestaDeError, withoutSession } from '../../../../../src/server/respuestas';
-import { obtenerSesion } from '../../../../../src/server/session';
+import { errorResponse, withoutSession } from '../../../../../src/server/respuestas';
+import { sessionGet } from '../../../../../src/server/session';
 
 export const runtime = 'nodejs';
 
@@ -16,12 +16,12 @@ const TRANSICIONES = ['enviar', 'publicar', 'devolver'] as const;
 type Transition = (typeof TRANSICIONES)[number];
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   const { slug } = await params;
   const actor = await actorDe(sesion);
-  const existente = await moduloVisiblePorSlug(slug, actor);
+  const existente = await visibleModuleSlug(slug, actor);
   if (!existente) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
   let body: Record<string, unknown>;
@@ -31,8 +31,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     return NextResponse.json({ error: 'Cuerpo invalido.' }, { status: 400 });
   }
 
-  const transicion = body['transicion'];
-  if (typeof transicion !== 'string' || !TRANSICIONES.includes(transicion as Transition)) {
+  const transition = body['transition'];
+  if (typeof transition !== 'string' || !TRANSICIONES.includes(transition as Transition)) {
     return NextResponse.json(
       { error: `Transicion no admitida. Use una de: ${TRANSICIONES.join(', ')}.` },
       { status: 400 },
@@ -47,14 +47,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
 
   try {
     const modulo =
-      transicion === 'enviar'
-        ? await enviarAAprobacion(entrada)
-        : transicion === 'publicar'
+      transition === 'enviar'
+        ? await sendApproval(entrada)
+        : transition === 'publicar'
           ? await publicar(entrada)
-          : await devolverABorrador(entrada);
+          : await revertDraft(entrada);
 
     return NextResponse.json({ modulo });
   } catch (error) {
-    return respuestaDeError(error);
+    return errorResponse(error);
   }
 }

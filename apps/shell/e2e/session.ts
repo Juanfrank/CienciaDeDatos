@@ -1,18 +1,18 @@
 import { expect, type Page } from '@playwright/test';
 import {
-  CLAVE_DEMO,
+  DEMO_KEY,
   SECRETO_TOTP_DEMO,
-  codigoTotpDe,
-  usuarioACorreo,
-} from '../src/server/credencialesDemo';
+  totpCodeOf,
+  mailUser,
+} from '../src/server/demoCredentials';
 
 /** Inicio de sesion de verdad para las pruebas de navegador. */
-export async function entrarComo(page: Page, userId: string, base = ''): Promise<void> {
+export async function asLogin(page: Page, userId: string, base = ''): Promise<void> {
   const respuesta = await page.request.post(`${base}/api/acceso`, {
     data: {
-      correo: usuarioACorreo(userId),
-      clave: CLAVE_DEMO,
-      code: codigoTotpDe(SECRETO_TOTP_DEMO),
+      mail: mailUser(userId),
+      clave: DEMO_KEY,
+      code: totpCodeOf(SECRETO_TOTP_DEMO),
     },
   });
 

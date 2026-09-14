@@ -1,11 +1,11 @@
-import { ScopeEditor, type DestinoDeAmbito } from '../../../src/components/admin/ScopeEditor';
+import { ScopeEditor, type ScopeTarget } from '../../../src/components/admin/ScopeEditor';
 import { getGeneralTree, listTeams } from '../../../src/server/context';
 import type { NavNode } from '@app/access-control';
 
 export const dynamic = 'force-dynamic';
 
 /** Carpetas del arbol, que son las que pueden llevar ambito propio (4.10.6). */
-function carpetas(nodos: NavNode[], acumulado: DestinoDeAmbito[] = []): DestinoDeAmbito[] {
+function carpetas(nodos: NavNode[], acumulado: ScopeTarget[] = []): ScopeTarget[] {
   for (const node of nodos) {
     if (node.type !== 'folder') continue;
     acumulado.push({
@@ -20,7 +20,7 @@ function carpetas(nodos: NavNode[], acumulado: DestinoDeAmbito[] = []): DestinoD
 }
 
 export default async function ScopesPage() {
-  const destinos: DestinoDeAmbito[] = [
+  const targets: ScopeTarget[] = [
     ...(await listTeams()).map((t) => ({
       tipo: 'equipo' as const,
       id: t.id,
@@ -38,7 +38,7 @@ export default async function ScopesPage() {
         una justificacion explicita y queda registrada aparte: el valor por defecto de cualquier
         combinacion de reglas es siempre "mas restrictivo o igual".
       </p>
-      <ScopeEditor destinos={destinos} />
+      <ScopeEditor targets={targets} />
     </section>
   );
 }

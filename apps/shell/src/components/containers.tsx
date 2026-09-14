@@ -9,19 +9,19 @@ import {
 } from '@app/ui-components';
 import { Icon } from './icons/Icon';
 import { Frame } from './objects';
-import type { ObjetoSerializado, PanelSerializado } from '../server/serializar';
+import type { SerializedObject, SerializedPanel } from '../server/serialize';
 
 /** Los contenedores: objetos que llevan otros objetos dentro. */
 
 /** La rejilla interna. La misma para los cinco: un contenedor es una rejilla con una cabecera. */
-function RejillaInterna({
+function InternalGrid({
   panel,
   gridColumns,
   draw,
 }: {
-  panel: PanelSerializado | undefined;
+  panel: SerializedPanel | undefined;
   gridColumns: number;
-  draw: (objeto: ObjetoSerializado) => React.ReactNode;
+  draw: (objeto: SerializedObject) => React.ReactNode;
 }) {
   const items = panel?.objetos ?? [];
 
@@ -54,20 +54,20 @@ function RejillaInterna({
   );
 }
 
-interface PropsDeContenedor {
-  objeto: ObjetoSerializado;
+interface ContainerProps {
+  objeto: SerializedObject;
   titulo: string;
   config: ContainerSettings | undefined;
-  draw: (hijo: ObjetoSerializado) => React.ReactNode;
+  draw: (child: SerializedObject) => React.ReactNode;
 }
 
 /* ── Simple ────────────────────────────────────────────────────────────────────────────────── */
 
-export function SimpleContainer({ objeto, titulo, config, draw }: PropsDeContenedor) {
+export function SimpleContainer({ objeto, titulo, config, draw }: ContainerProps) {
   return (
     <Frame titulo={titulo} instance={objeto.instance}>
       <div className="contenedor" data-testid="contenedor-simple">
-        <RejillaInterna
+        <InternalGrid
           panel={objeto.panels?.[0]}
           gridColumns={columnsOf('contenedor-simple', config)}
           draw={draw}
@@ -80,7 +80,7 @@ export function SimpleContainer({ objeto, titulo, config, draw }: PropsDeContene
 /* ── Desplazable ───────────────────────────────────────────────────────────────────────────── */
 
 /** Se desplaza por UN eje. */
-export function ScrollableContainer({ objeto, titulo, config, draw }: PropsDeContenedor) {
+export function ScrollableContainer({ objeto, titulo, config, draw }: ContainerProps) {
   const axis: Axis = config?.scrollable?.axis === 'x' ? 'x' : 'y';
   const gridColumns = columnsOf('contenedor-desplazable', config);
 
@@ -102,7 +102,7 @@ export function ScrollableContainer({ objeto, titulo, config, draw }: PropsDeCon
           // el ancho visible, no habria nada que desplazar y el contenedor no haria nada.
           style={axis === 'x' ? { minWidth: `${gridColumns * 180}px` } : undefined}
         >
-          <RejillaInterna panel={objeto.panels?.[0]} gridColumns={gridColumns} draw={draw} />
+          <InternalGrid panel={objeto.panels?.[0]} gridColumns={gridColumns} draw={draw} />
         </div>
       </div>
     </Frame>
@@ -112,7 +112,7 @@ export function ScrollableContainer({ objeto, titulo, config, draw }: PropsDeCon
 /* ── Ampliable ─────────────────────────────────────────────────────────────────────────────── */
 
 /** Ensena parte de su contenido y se amplia a una ventana con SU PROPIA rejilla. */
-export function ExpandableContainer({ objeto, titulo, config, draw }: PropsDeContenedor) {
+export function ExpandableContainer({ objeto, titulo, config, draw }: ContainerProps) {
   const [ampliado, setAmpliado] = useState(false);
   const gridColumns = columnsOf('contenedor-ampliable', config);
   const expandedColumns = Math.max(1, config?.expandable?.expandedColumns ?? DEFAULT_COLUMN_INTERNAL * 2);
@@ -136,7 +136,7 @@ export function ExpandableContainer({ objeto, titulo, config, draw }: PropsDeCon
         }
       >
         <div className="contenedor" data-testid="contenedor-ampliable">
-          <RejillaInterna panel={objeto.panels?.[0]} gridColumns={gridColumns} draw={draw} />
+          <InternalGrid panel={objeto.panels?.[0]} gridColumns={gridColumns} draw={draw} />
         </div>
       </Frame>
 
@@ -165,7 +165,7 @@ export function ExpandableContainer({ objeto, titulo, config, draw }: PropsDeCon
               </button>
             </div>
             <div className="contenedor contenedor--ampliado">
-              <RejillaInterna
+              <InternalGrid
                 panel={objeto.panels?.[0]}
                 gridColumns={expandedColumns}
                 draw={draw}
@@ -181,7 +181,7 @@ export function ExpandableContainer({ objeto, titulo, config, draw }: PropsDeCon
 /* ── Con pestanas ──────────────────────────────────────────────────────────────────────────── */
 
 /** Varias pestanas, cada una con su contenido y su disposicion. */
-export function TabContainer({ objeto, titulo, config, draw }: PropsDeContenedor) {
+export function TabContainer({ objeto, titulo, config, draw }: ContainerProps) {
   const panels = objeto.panels ?? [];
   const initial = config?.tabs?.initialTab;
   const [activa, setActiva] = useState(
@@ -231,7 +231,7 @@ export function TabContainer({ objeto, titulo, config, draw }: PropsDeContenedor
             className="container__panel"
             hidden={activa !== panel.panelId}
           >
-            <RejillaInterna panel={panel} gridColumns={gridColumns} draw={draw} />
+            <InternalGrid panel={panel} gridColumns={gridColumns} draw={draw} />
           </div>
         ))}
       </div>

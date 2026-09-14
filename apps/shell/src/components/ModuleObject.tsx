@@ -13,14 +13,14 @@ import {
   ScrollableContainer,
   SimpleContainer,
 } from './containers';
-import { TextBox, FormaBasica, DividerLine, SectionTitle } from './elements';
+import { TextBox, BasicShape, DividerLine, SectionTitle } from './elements';
 import { GridConnection } from './GridConnection';
 import { FiltersPanel } from './FiltersPanel';
 import { Slicer } from './Slicer';
 import {
   Area,
   Bars,
-  BarrasHorizontales,
+  HorizontalBars,
   Waterfall,
   Pie,
   Combo,
@@ -31,25 +31,25 @@ import {
   Lines,
   Gauge,
   Matrix,
-  ObjetoGenerandose,
-  ObjetoNoDisponible,
-  ObjetoRoto,
+  GeneratingObject,
+  ObjectNotAvailable,
+  BrokenObject,
   Frame,
   Table,
   KpiCard,
 } from './objects';
-import type { ObjetoSerializado } from '../server/serializar';
+import type { SerializedObject } from '../server/serialize';
 
 /** Que componente dibuja cada instancia. */
 
 /** Filtrado cruzado apagado: el objeto recibe siempre la funcion, y esta no hace nada. */
-const SIN_FILTRADO = (): undefined => undefined;
+const WITHOUT_FILTERED = (): undefined => undefined;
 
 export function ModuleObject({
   objeto,
   onFiltrar,
 }: {
-  objeto: ObjetoSerializado;
+  objeto: SerializedObject;
   /** Opcional a proposito: en la vista previa del editor no hay filtrado cruzado. */
   onFiltrar?: (fieldName: string, valor: string) => void;
 }) {
@@ -62,7 +62,7 @@ export function ModuleObject({
 
   if (objeto.unresolvedObject || objeto.problems.length > 0) {
     return (
-      <ObjetoRoto
+      <BrokenObject
         titulo={titulo}
         problems={objeto.problems}
         {...(objeto.unresolvedObject ? { unresolvedObject: objeto.unresolvedObject } : {})}
@@ -90,7 +90,7 @@ export function ModuleObject({
     case 'linea-divisoria':
       return <DividerLine config={elemento?.lineDivider} />;
     case 'forma':
-      return <FormaBasica config={elemento?.forma} />;
+      return <BasicShape config={elemento?.forma} />;
     case 'conexion':
       return <GridConnection config={elemento?.conexion} />;
     default:
@@ -98,25 +98,25 @@ export function ModuleObject({
   }
 
   const contenedor = conf as (ContainerSettings & { objectId: string }) | undefined;
-  const dibujarHijo = (hijo: ObjetoSerializado) => (
-    <ModuleObject objeto={hijo} {...(onFiltrar ? { onFiltrar } : {})} />
+  const drawChild = (child: SerializedObject) => (
+    <ModuleObject objeto={child} {...(onFiltrar ? { onFiltrar } : {})} />
   );
-  const propsDeContenedor = { objeto, titulo, config: contenedor, draw: dibujarHijo };
+  const containerProps = { objeto, titulo, config: contenedor, draw: drawChild };
 
   switch (objeto.instance.objectId) {
     case 'contenedor-simple':
-      return <SimpleContainer {...propsDeContenedor} />;
+      return <SimpleContainer {...containerProps} />;
     case 'contenedor-desplazable':
-      return <ScrollableContainer {...propsDeContenedor} />;
+      return <ScrollableContainer {...containerProps} />;
     case 'contenedor-ampliable':
-      return <ExpandableContainer {...propsDeContenedor} />;
+      return <ExpandableContainer {...containerProps} />;
     case 'contenedor-con-pestanas':
-      return <TabContainer {...propsDeContenedor} />;
+      return <TabContainer {...containerProps} />;
     default:
       break;
   }
 
-  if (!objeto.result) return <ObjetoGenerandose titulo={titulo} />;
+  if (!objeto.result) return <GeneratingObject titulo={titulo} />;
 
   const result = objeto.result as QueryResult;
   const props = {
@@ -133,7 +133,7 @@ export function ModuleObject({
     ...(objeto.icono ? { objectIcon: objeto.icono } : {}),
     // Los objetos esperan un `onFiltrar`; sin filtrado cruzado se les pasa uno que no hace nada,
     // y ellos deciden no ofrecer el gesto por su cuenta cuando no hay dimension.
-    onFiltrar: onFiltrar ?? SIN_FILTRADO,
+    onFiltrar: onFiltrar ?? WITHOUT_FILTERED,
   };
 
   switch (objeto.instance.objectId) {
@@ -142,7 +142,7 @@ export function ModuleObject({
     case 'barras':
       return <Bars {...props} />;
     case 'barras-horizontales':
-      return <BarrasHorizontales {...props} />;
+      return <HorizontalBars {...props} />;
     case 'area':
       return <Area {...props} />;
     case 'lineas':
@@ -178,7 +178,7 @@ export function ModuleObject({
       );
     case 'segmentador': {
       const dimension = objeto.instance.binding.dimensions[0];
-      if (!dimension) return <ObjetoRoto titulo={titulo} problems={[]} />;
+      if (!dimension) return <BrokenObject titulo={titulo} problems={[]} />;
       return (
         <Slicer
           titulo={titulo}
@@ -191,6 +191,6 @@ export function ModuleObject({
       );
     }
     default:
-      return <ObjetoNoDisponible titulo={titulo} objectId={objeto.instance.objectId} />;
+      return <ObjectNotAvailable titulo={titulo} objectId={objeto.instance.objectId} />;
   }
 }

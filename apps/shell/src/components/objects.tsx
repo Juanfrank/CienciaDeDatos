@@ -48,13 +48,13 @@ const formatNumber = (n: number | null): string =>
 function porRanura(instance: ObjectInstance, slots: FieldSlot[] | undefined) {
   if (!slots || slots.length === 0) return null;
   return {
-    uno: (id: string) => slotField(instance, slots, id),
+    one: (id: string) => slotField(instance, slots, id),
     varios: (id: string) => slotsOf(instance, slots).get(id) ?? [],
   };
 }
 
 /** La variable del tema de cada rol, para la linea de resaltado. */
-const VARIABLE_DE_RESALTADO: Record<string, string> = {
+const HIGHLIGHT_VARIABLE: Record<string, string> = {
   primario: 'var(--md-sys-color-primary)',
   secundario: 'var(--md-sys-color-secondary)',
   terciario: 'var(--md-sys-color-tertiary)',
@@ -64,7 +64,7 @@ const VARIABLE_DE_RESALTADO: Record<string, string> = {
 
 /** Icono por defecto de cada tipo, cuando la instancia no elige otro. */
 /** Un objeto cuyo mapeo ya no se puede resolver se dibuja MARCADO, nunca omitido (4.2). */
-export function ObjetoRoto({
+export function BrokenObject({
   titulo,
   problems,
   unresolvedObject,
@@ -97,7 +97,7 @@ export function ObjetoRoto({
 }
 
 /** Estado explicito de 6.3: el dato aun no esta. Nunca un error, nunca una consulta a la fuente. */
-export function ObjetoGenerandose({ titulo }: { titulo: string }) {
+export function GeneratingObject({ titulo }: { titulo: string }) {
   return (
     <div className="objeto objeto--generandose" data-testid="objeto-generandose">
       <div className="object__header">
@@ -161,7 +161,7 @@ export function Frame({
       // una clase porque el valor sale de un rol del tema, no de un conjunto de estados.
       style={
         presentacion?.colorDeResaltado
-          ? ({ '--color-de-resaltado': VARIABLE_DE_RESALTADO[presentacion.colorDeResaltado] } as React.CSSProperties)
+          ? ({ '--color-de-resaltado': HIGHLIGHT_VARIABLE[presentacion.colorDeResaltado] } as React.CSSProperties)
           : undefined
       }
     >
@@ -223,12 +223,12 @@ export function Frame({
   );
 }
 
-export function KpiCard({ titulo, result, instance, slots, aggregations, objectIcon }: ObjetoProps) {
+export function KpiCard({ titulo, result, instance, slots, aggregations, objectIcon }: PropsObject) {
   const r = porRanura(instance, slots);
   // El valor y la comparacion, en ese orden, salen de sus ranuras: con dos medidas mapeadas al
   // reves la tarjeta mostraba la comparacion como cifra principal.
   const medidas = r
-    ? [r.uno('valor'), r.uno('comparacion')].filter((m): m is string => m !== undefined)
+    ? [r.one('valor'), r.one('comparacion')].filter((m): m is string => m !== undefined)
     : instance.binding.measures;
   const kpi = toKpi(
     result,
@@ -311,11 +311,11 @@ export function KpiCard({ titulo, result, instance, slots, aggregations, objectI
 /** El hueco de una dona recien puesta, en porcentaje del radio. */
 const DONUT_HOLE = 55;
 
-export function BarrasHorizontales(props: ObjetoProps) {
+export function HorizontalBars(props: PropsObject) {
   return <Bars {...props} horizontal />;
 }
 
-export function Area(props: ObjetoProps) {
+export function Area(props: PropsObject) {
   return <Lines {...props} area />;
 }
 
@@ -328,14 +328,14 @@ export function Bars({
   aggregations,
   horizontal,
   objectIcon,
-}: ObjetoProps & { horizontal?: boolean }) {
+}: PropsObject & { horizontal?: boolean }) {
   /*
    * El eje X sale de SU ranura, no de la primera dimension.
    */
   const r = porRanura(instance, slots);
-  const multiple = r ? r.uno('multiplo') : undefined;
-  const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
-  const serie = r ? r.uno('serie') : fieldKeyDe(instance.binding.dimensions[1]);
+  const multiple = r ? r.one('multiplo') : undefined;
+  const ejeX = r ? r.one('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
+  const serie = r ? r.one('serie') : fieldKeyDe(instance.binding.dimensions[1]);
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
 
   /*
@@ -447,10 +447,10 @@ export function Lines({
   area,
   onFiltrar,
   objectIcon,
-}: ObjetoProps & { area?: boolean }) {
+}: PropsObject & { area?: boolean }) {
   const r = porRanura(instance, slots);
-  const multiple = r ? r.uno('multiplo') : undefined;
-  const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
+  const multiple = r ? r.one('multiplo') : undefined;
+  const ejeX = r ? r.one('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('eje-y') : instance.binding.measures;
 
   const dimension = ejeX ? aFieldRef(ejeX) : undefined;
@@ -733,9 +733,9 @@ export function Combo({
   aggregations,
   onFiltrar,
   objectIcon,
-}: ObjetoProps) {
+}: PropsObject) {
   const r = porRanura(instance, slots);
-  const ejeX = r ? r.uno('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
+  const ejeX = r ? r.one('eje-x') : fieldKeyDe(instance.binding.dimensions[0]);
   const deColumnas = r ? r.varios('columnas') : instance.binding.measures.slice(0, 1);
   const lines = r ? r.varios('lineas') : instance.binding.measures.slice(1);
   const medidas = [...deColumnas, ...lines];
@@ -825,11 +825,11 @@ export function Scatter({
   aggregations,
   onFiltrar,
   objectIcon,
-}: ObjetoProps) {
+}: PropsObject) {
   const r = porRanura(instance, slots);
-  const punto = r ? r.uno('punto') : fieldKeyDe(instance.binding.dimensions[0]);
+  const punto = r ? r.one('punto') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r
-    ? [r.uno('eje-x'), r.uno('eje-y'), r.uno('tamano')].filter((m): m is string => m !== undefined)
+    ? [r.one('eje-x'), r.one('eje-y'), r.one('tamano')].filter((m): m is string => m !== undefined)
     : instance.binding.measures;
 
   const dimension = punto ? aFieldRef(punto) : undefined;
@@ -909,13 +909,13 @@ function MeasureDimension({
   tipo,
   dimensionSlot,
   columnaExtra,
-}: ObjetoProps & {
+}: PropsObject & {
   tipo: 'embudo' | 'cascada';
   dimensionSlot: string;
   columnaExtra: { heading: string; cell: (valores: number[], i: number) => string };
 }) {
   const r = porRanura(instance, slots);
-  const dim = r ? r.uno(dimensionSlot) : fieldKeyDe(instance.binding.dimensions[0]);
+  const dim = r ? r.one(dimensionSlot) : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('valor') : instance.binding.measures;
   const dimension = dim ? aFieldRef(dim) : undefined;
 
@@ -986,7 +986,7 @@ function MeasureDimension({
   );
 }
 
-export function Funnel(props: ObjetoProps) {
+export function Funnel(props: PropsObject) {
   const compare = props.instance.presentacion?.embudo?.compare ?? 'primero';
   return (
     <MeasureDimension
@@ -1008,7 +1008,7 @@ export function Funnel(props: ObjetoProps) {
   );
 }
 
-export function Waterfall(props: ObjetoProps) {
+export function Waterfall(props: PropsObject) {
   return (
     <MeasureDimension
       {...props}
@@ -1036,10 +1036,10 @@ export function TreeMap({
   aggregations,
   onFiltrar,
   objectIcon,
-}: ObjetoProps) {
+}: PropsObject) {
   const r = porRanura(instance, slots);
-  const grupo = r ? r.uno('grupo') : fieldKeyDe(instance.binding.dimensions[0]);
-  const detalle = r ? r.uno('detalle') : fieldKeyDe(instance.binding.dimensions[1]);
+  const grupo = r ? r.one('grupo') : fieldKeyDe(instance.binding.dimensions[0]);
+  const detalle = r ? r.one('detalle') : fieldKeyDe(instance.binding.dimensions[1]);
   const medidas = r ? r.varios('valor') : instance.binding.measures;
 
   const dimensiones = [grupo, detalle].filter((c): c is string => c !== undefined).map(aFieldRef);
@@ -1056,8 +1056,8 @@ export function TreeMap({
    * El nombre que ECharts entrega al pulsar, convertido en un valor de la PRIMERA dimension.
    */
   const grupoDe = (node: string): string => {
-    const conEseNombre = vm.points.find((p) => p.label === node || p.label.endsWith(` / ${node}`));
-    return conEseNombre?.label.split(' / ')[0] ?? node;
+    const withNameThat = vm.points.find((p) => p.label === node || p.label.endsWith(` / ${node}`));
+    return withNameThat?.label.split(' / ')[0] ?? node;
   };
 
   return (
@@ -1125,9 +1125,9 @@ export function Pie({
   onFiltrar,
   objectIcon,
   hole,
-}: ObjetoProps & { hole?: number }) {
+}: PropsObject & { hole?: number }) {
   const r = porRanura(instance, slots);
-  const categoria = r ? r.uno('categoria') : fieldKeyDe(instance.binding.dimensions[0]);
+  const categoria = r ? r.one('categoria') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('valor') : instance.binding.measures;
   const dimension = categoria ? aFieldRef(categoria) : undefined;
 
@@ -1218,7 +1218,7 @@ export function Pie({
 }
 
 /** La dona es el circular con hueco. Nada mas: mismo contrato, mismo dibujo, mismo respaldo. */
-export function Donut(props: ObjetoProps) {
+export function Donut(props: PropsObject) {
   return <Pie {...props} hole={DONUT_HOLE} />;
 }
 
@@ -1230,10 +1230,10 @@ export function Gauge({
   slots,
   aggregations,
   objectIcon,
-}: ObjetoProps) {
+}: PropsObject) {
   const r = porRanura(instance, slots);
   const medidas = r
-    ? [r.uno('valor'), r.uno('objetivo')].filter((m): m is string => m !== undefined)
+    ? [r.one('valor'), r.one('objetivo')].filter((m): m is string => m !== undefined)
     : instance.binding.measures;
 
   const vm = toCategorical(
@@ -1306,7 +1306,7 @@ export function Gauge({
   );
 }
 
-export function Table({ titulo, result, instance, aggregations, objectIcon }: ObjetoProps) {
+export function Table({ titulo, result, instance, aggregations, objectIcon }: PropsObject) {
   // La tabla dibuja SU proyeccion, no el dataset en crudo.
   //
   // Antes pintaba todas las columnas del dataset, incluidas las que su mapeo no declara, y las
@@ -1340,7 +1340,7 @@ export function Table({ titulo, result, instance, aggregations, objectIcon }: Ob
   );
 }
 
-export function Matrix({ titulo, result, instance, slots, aggregations, objectIcon }: ObjetoProps) {
+export function Matrix({ titulo, result, instance, slots, aggregations, objectIcon }: PropsObject) {
   const r = porRanura(instance, slots);
   // Varios niveles por pozo: es lo que convierte el cruce plano en una jerarquia.
   const rowDims = (r ? r.varios('filas') : instance.binding.dimensions.slice(0, 1).map(fieldKey))
@@ -1371,7 +1371,7 @@ export function Matrix({ titulo, result, instance, slots, aggregations, objectIc
   );
 }
 
-export interface ObjetoProps {
+export interface PropsObject {
   titulo: string;
   result: QueryResult;
   instance: ObjectInstance;
@@ -1390,7 +1390,7 @@ const fieldKeyDe = (ref: { table: string; field: string } | undefined): string |
   ref ? fieldKey(ref) : undefined;
 
 /** Objeto declarado en el catalogo pero sin render disponible todavia (el mapa). */
-export function ObjetoNoDisponible({ titulo, objectId }: { titulo: string; objectId: string }) {
+export function ObjectNotAvailable({ titulo, objectId }: { titulo: string; objectId: string }) {
   return (
     <div className="objeto objeto--no-disponible">
       <div className="object__header">

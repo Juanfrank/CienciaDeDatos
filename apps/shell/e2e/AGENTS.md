@@ -9,7 +9,7 @@ Visor reciba 403 pidiendo `/admin` a mano, y que la aplicacion escale a mas de u
 | `accesibilidad.spec.ts` | axe sobre cada pagina, teclado, foco visible |
 | `dark-contrast.spec.ts` | Las mismas paginas con el tema oscuro puesto |
 | `canvas.spec.ts`, `charts.spec.ts` | El editor y el dibujo de cada tipo |
-| `editor-completo.spec.ts` | Todo objeto del catalogo se coloca y se configura |
+| `full-editor.spec.ts` | Todo objeto del catalogo se coloca y se configura |
 | `object-contract.spec.ts` | Lo que el catalogo declara llega al panel |
 | `responsivo.spec.ts` | 390, 820 y 1280 px |
 | `admin.spec.ts`, `shell.spec.ts` | Gobierno, acceso, filtros, marcadores |

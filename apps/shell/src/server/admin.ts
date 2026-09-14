@@ -1,6 +1,6 @@
 import type { SchemaDescriptor } from '@app/data-contracts';
 import { getManagedTree } from './context';
-import { contarAmpliaciones } from './audit';
+import { expansionsCount } from './audit';
 import {
   type AccessScope,
   type AppRole,
@@ -28,9 +28,9 @@ import {
 } from '@app/access-control';
 import { SCHEMA_CACHE_KEY } from '@app/caching';
 import { cacheL2, getGeneralTree } from './context';
-import { gobierno } from './gobierno';
-import { registrarCambio, registrarEventoDeArbol } from './audit';
-import type { SesionShell } from './session';
+import { governance } from './governance';
+import { changeRecord, treeEventRecord } from './audit';
+import type { ShellSession } from './session';
 
 /** Servicio del panel de administracion — seccion 4.10.8. */
 
@@ -46,8 +46,8 @@ export class AdminError extends Error {
 }
 
 /** Rol de aplicacion mas alto que una persona tiene en CUALQUIERA de sus equipos. */
-export async function rolMasAltoDe(userId: string): Promise<AppRole> {
-  const equipos = await gobierno.listTeams();
+export async function roleMoreHeightOf(userId: string): Promise<AppRole> {
+  const equipos = await governance.listTeams();
   const roles = equipos.flatMap((t) =>
     t.members.filter((m) => m.userId === userId).map((m) => m.role),
   );
@@ -57,13 +57,13 @@ export async function rolMasAltoDe(userId: string): Promise<AppRole> {
 }
 
 /** Guardian de todas las rutas del panel. */
-export async function assertAdmin(sesion: SesionShell | null): Promise<Actor> {
+export async function assertAdmin(sesion: ShellSession | null): Promise<Actor> {
   // Sin sesion es 401, no 403: "no se quien eres" y "se quien eres y no puedes" son respuestas
   // distintas, y devolver 403 a quien no ha entrado le hace buscar un permiso que le falta
   // cuando lo que le falta es la sesion.
   if (!sesion) throw new AdminError('Se requiere iniciar sesion.', 401);
 
-  const role = await rolMasAltoDe(sesion.userId);
+  const role = await roleMoreHeightOf(sesion.userId);
   try {
     assertCan(role, 'ver-panel-auditoria');
   } catch (error) {
@@ -75,8 +75,8 @@ export async function assertAdmin(sesion: SesionShell | null): Promise<Actor> {
   return { userId: sesion.userId, role };
 }
 
-export async function esAdministrador(userId: string): Promise<boolean> {
-  return await rolMasAltoDe(userId) === 'administrador';
+export async function isAdministrator(userId: string): Promise<boolean> {
+  return await roleMoreHeightOf(userId) === 'administrador';
 }
 
 // ---------------------------------------------------------------------------
@@ -84,24 +84,24 @@ export async function esAdministrador(userId: string): Promise<boolean> {
 // ---------------------------------------------------------------------------
 
 /** Aplica una operacion sobre la organizacion general y la persiste. */
-export async function ejecutarOperacionDeArbol(actor: Actor, op: TreeOperation): Promise<ManagedTree> {
-  const resultado = applyTreeOperation(await gobierno.getTree(), op, actor);
+export async function treeOperationRun(actor: Actor, op: TreeOperation): Promise<ManagedTree> {
+  const resultado = applyTreeOperation(await governance.getTree(), op, actor);
 
   if (!resultado.ok) {
     if ('denial' in resultado) throw new AdminError(resultado.denial.reason, 403, resultado.denial);
     throw new AdminError(resultado.error, 400);
   }
 
-  await gobierno.setTree(resultado.tree);
-  for (const evento of resultado.audit) await registrarEventoDeArbol(evento);
+  await governance.setTree(resultado.tree);
+  for (const evento of resultado.audit) await treeEventRecord(evento);
   return resultado.tree;
 }
 
 /** Previsualiza el efecto de un movimiento ANTES de confirmarlo. */
 export interface PrevisualizacionDeMovimiento {
   moduleIds: string[];
-  scopeAntes?: AccessScope;
-  scopeDespues?: AccessScope;
+  beforeScope?: AccessScope;
+  afterScope?: AccessScope;
   cambiaElAmbito: boolean;
 }
 
@@ -109,33 +109,33 @@ export async function previsualizarMovimiento(
   nodeId: string,
   newParentId: string | null,
 ): Promise<PrevisualizacionDeMovimiento> {
-  const arbol = await gobierno.getTree();
+  const arbol = await governance.getTree();
   const node = findNode(arbol.nodes, nodeId);
   if (!node) throw new AdminError(`El nodo '${nodeId}' no existe.`, 404);
 
-  const padreActual = encontrarPadre(arbol.nodes, nodeId);
+  const padreActual = parentFind(arbol.nodes, nodeId);
   const destino = newParentId === null ? null : findNode(arbol.nodes, newParentId);
   if (newParentId !== null && (!destino || !isFolder(destino))) {
     throw new AdminError(`La carpeta destino '${newParentId}' no existe.`, 404);
   }
 
-  const scopeAntes = padreActual?.scope;
-  const scopeDespues = destino && isFolder(destino) ? destino.scope : undefined;
+  const beforeScope = padreActual?.scope;
+  const afterScope = destino && isFolder(destino) ? destino.scope : undefined;
 
   return {
     moduleIds: collectModuleIds(node),
-    ...(scopeAntes ? { scopeAntes } : {}),
-    ...(scopeDespues ? { scopeDespues } : {}),
-    cambiaElAmbito: JSON.stringify(scopeAntes ?? null) !== JSON.stringify(scopeDespues ?? null),
+    ...(beforeScope ? { beforeScope } : {}),
+    ...(afterScope ? { afterScope } : {}),
+    cambiaElAmbito: JSON.stringify(beforeScope ?? null) !== JSON.stringify(afterScope ?? null),
   };
 }
 
 /** Carpeta que contiene directamente a un nodo, o undefined si esta en la raiz. */
-function encontrarPadre(nodes: NavNode[], nodeId: string): FolderNode | undefined {
+function parentFind(nodes: NavNode[], nodeId: string): FolderNode | undefined {
   for (const node of nodes) {
     if (!isFolder(node)) continue;
     if (node.children.some((h) => h.id === nodeId)) return node;
-    const dentro = encontrarPadre(node.children, nodeId);
+    const dentro = parentFind(node.children, nodeId);
     if (dentro) return dentro;
   }
   return undefined;
@@ -145,7 +145,7 @@ function encontrarPadre(nodes: NavNode[], nodeId: string): FolderNode | undefine
 // Ambitos (4.10.3) — aqui vive la puerta de ampliacion
 // ---------------------------------------------------------------------------
 
-export interface GuardarAmbitoInput {
+export interface SaveScopeInput {
   actor: Actor;
   /** Que se esta editando: una carpeta del arbol, o el ambito general de un equipo. */
   destino: { tipo: 'carpeta'; nodeId: string } | { tipo: 'equipo'; teamId: string };
@@ -154,7 +154,7 @@ export interface GuardarAmbitoInput {
   justificacion?: string;
 }
 
-export class ExpansionSinJustificarError extends AdminError {
+export class ExpansionWithoutJustifyError extends AdminError {
   constructor(readonly dimensiones: string[]) {
     super(
       `El ambito propuesto AMPLIA el acceso en: ${dimensiones.join(', ')}. Una ampliacion exige ` +
@@ -162,12 +162,12 @@ export class ExpansionSinJustificarError extends AdminError {
       422,
       { dimensiones },
     );
-    this.name = 'ExpansionSinJustificarError';
+    this.name = 'ExpansionWithoutJustifyError';
   }
 }
 
 /** Dimensiones en las que `propuesto` permite algo que `actual` no permitia. */
-export function dimensionesAmpliadas(actual: AccessScope, propuesto: AccessScope): string[] {
+export function expandedDimensions(actual: AccessScope, propuesto: AccessScope): string[] {
   const ampliadas: string[] = [];
   for (const restriccion of actual.restrictions) {
     const clave = dimensionKey(restriccion.dimension);
@@ -184,16 +184,16 @@ export function dimensionesAmpliadas(actual: AccessScope, propuesto: AccessScope
 }
 
 /** Guarda un ambito, cerrando la puerta que hasta ahora estaba abierta. */
-export async function saveScope(input: GuardarAmbitoInput): Promise<AccessScope> {
+export async function saveScope(input: SaveScopeInput): Promise<AccessScope> {
   const { actor, destino, scope, justificacion } = input;
   assertCan(actor.role, 'configurar-ambitos');
 
-  const actual = await ambitoActual(destino);
+  const actual = await currentScope(destino);
   const amplia = wouldExpand(actual, scope);
   const motivo = justificacion?.trim() ?? '';
 
   if (amplia && !motivo) {
-    throw new ExpansionSinJustificarError(dimensionesAmpliadas(actual, scope));
+    throw new ExpansionWithoutJustifyError(expandedDimensions(actual, scope));
   }
 
   const guardado: AccessScope = amplia
@@ -207,9 +207,9 @@ export async function saveScope(input: GuardarAmbitoInput): Promise<AccessScope>
       }
     : { restrictions: scope.restrictions };
 
-  await aplicarAmbito(destino, guardado);
+  await applyScope(destino, guardado);
 
-  await registrarCambio({
+  await changeRecord({
     actorId: actor.userId,
     entityType: 'scope',
     entityId: destino.tipo === 'carpeta' ? destino.nodeId : destino.teamId,
@@ -223,28 +223,28 @@ export async function saveScope(input: GuardarAmbitoInput): Promise<AccessScope>
   return guardado;
 }
 
-async function ambitoActual(destino: GuardarAmbitoInput['destino']): Promise<AccessScope> {
+async function currentScope(destino: SaveScopeInput['destino']): Promise<AccessScope> {
   if (destino.tipo === 'equipo') {
-    return (await gobierno.getTeam(destino.teamId))?.defaultScope ?? { restrictions: [] };
+    return (await governance.getTeam(destino.teamId))?.defaultScope ?? { restrictions: [] };
   }
-  const node = findNode((await gobierno.getTree()).nodes, destino.nodeId);
+  const node = findNode((await governance.getTree()).nodes, destino.nodeId);
   if (!node || !isFolder(node)) throw new AdminError(`La carpeta '${destino.nodeId}' no existe.`, 404);
   return node.scope ?? { restrictions: [] };
 }
 
-async function aplicarAmbito(destino: GuardarAmbitoInput['destino'], scope: AccessScope): Promise<void> {
+async function applyScope(destino: SaveScopeInput['destino'], scope: AccessScope): Promise<void> {
   if (destino.tipo === 'equipo') {
-    const equipo = await gobierno.getTeam(destino.teamId);
+    const equipo = await governance.getTeam(destino.teamId);
     if (!equipo) throw new AdminError(`El equipo '${destino.teamId}' no existe.`, 404);
-    await escribirEquipo({ ...equipo, defaultScope: scope });
+    await writeTeam({ ...equipo, defaultScope: scope });
     return;
   }
 
-  const arbol = await gobierno.getTree();
+  const arbol = await governance.getTree();
   const node = findNode(arbol.nodes, destino.nodeId);
   if (!node || !isFolder(node)) throw new AdminError(`La carpeta '${destino.nodeId}' no existe.`, 404);
   node.scope = scope;
-  await gobierno.setTree(arbol);
+  await governance.setTree(arbol);
 }
 
 // ---------------------------------------------------------------------------
@@ -261,7 +261,7 @@ export async function activeScheme(): Promise<SchemaDescriptor | null> {
 }
 
 /** Dimensiones seleccionables en el editor de ambitos. Nunca texto libre. */
-export async function dimensionesDisponibles(): Promise<
+export async function availableDimensions(): Promise<
   { table: string; field: string; key: string }[]
 > {
   const schema = await activeScheme();
@@ -279,7 +279,7 @@ export async function dimensionesDisponibles(): Promise<
 
 /** Rechaza un ambito que referencie dimensiones que no existen en el esquema activo. */
 export async function validateDimensions(scope: AccessScope): Promise<string[]> {
-  const available = new Set((await dimensionesDisponibles()).map((d) => d.key));
+  const available = new Set((await availableDimensions()).map((d) => d.key));
   if (available.size === 0) return [];
   return scope.restrictions
     .map((r) => dimensionKey(r.dimension))
@@ -291,29 +291,29 @@ export async function validateDimensions(scope: AccessScope): Promise<string[]> 
 // ---------------------------------------------------------------------------
 
 /** Error de la comprobacion del ultimo Administrador. */
-export class UltimoAdministradorError extends AdminError {
+export class LastAdministratorError extends AdminError {
   constructor(readonly denegacion: LastAdministratorDenial) {
     super(denegacion.reason, 409, denegacion);
-    this.name = 'UltimoAdministradorError';
+    this.name = 'LastAdministratorError';
   }
 }
 
 /** UNICO camino por el que este servicio escribe equipos. */
-async function escribirEquipo(equipo: Team): Promise<void> {
-  const before = await gobierno.listTeams();
+async function writeTeam(equipo: Team): Promise<void> {
+  const before = await governance.listTeams();
   const after = [...before.filter((t) => t.id !== equipo.id), equipo];
 
   const denegacion = wouldLeaveNoAdministrator(before, after);
-  if (denegacion) throw new UltimoAdministradorError(denegacion);
+  if (denegacion) throw new LastAdministratorError(denegacion);
 
-  await gobierno.upsertTeam(equipo);
+  await governance.upsertTeam(equipo);
 }
 
 /** Borrado de un equipo, con la misma comprobacion. */
 export async function deleteTeam(actor: Actor, teamId: string): Promise<void> {
   assertCan(actor.role, 'gestionar-equipos');
 
-  const before = await gobierno.listTeams();
+  const before = await governance.listTeams();
   const equipo = before.find((t) => t.id === teamId);
   if (!equipo) throw new AdminError(`El equipo '${teamId}' no existe.`, 404);
 
@@ -321,10 +321,10 @@ export async function deleteTeam(actor: Actor, teamId: string): Promise<void> {
     before,
     before.filter((t) => t.id !== teamId),
   );
-  if (denegacion) throw new UltimoAdministradorError(denegacion);
+  if (denegacion) throw new LastAdministratorError(denegacion);
 
-  await gobierno.deleteTeam(teamId);
-  await registrarCambio({
+  await governance.deleteTeam(teamId);
+  await changeRecord({
     actorId: actor.userId,
     entityType: 'team',
     entityId: teamId,
@@ -335,15 +335,15 @@ export async function deleteTeam(actor: Actor, teamId: string): Promise<void> {
 
 /** Quienes administran ahora mismo. La superficie de equipos lo muestra (4.10.1). */
 export async function administradores(): Promise<string[]> {
-  return administratorsOf(await gobierno.listTeams());
+  return administratorsOf(await governance.listTeams());
 }
 
 export async function saveTeam(actor: Actor, equipo: Team): Promise<Team> {
   assertCan(actor.role, 'gestionar-equipos');
-  const anterior = await gobierno.getTeam(equipo.id);
-  await escribirEquipo(equipo);
+  const anterior = await governance.getTeam(equipo.id);
+  await writeTeam(equipo);
 
-  await registrarCambio({
+  await changeRecord({
     actorId: actor.userId,
     entityType: 'team',
     entityId: equipo.id,
@@ -355,25 +355,25 @@ export async function saveTeam(actor: Actor, equipo: Team): Promise<Team> {
   return equipo;
 }
 
-export async function cambiarMembresia(
+export async function membershipChange(
   actor: Actor,
   teamId: string,
   userId: string,
   role: AppRole | null,
 ): Promise<Team> {
   assertCan(actor.role, 'gestionar-usuarios-y-roles');
-  const equipo = await gobierno.getTeam(teamId);
+  const equipo = await governance.getTeam(teamId);
   if (!equipo) throw new AdminError(`El equipo '${teamId}' no existe.`, 404);
 
   const before = { ...equipo };
-  const sinPersona = equipo.members.filter((m) => m.userId !== userId);
+  const withoutPerson = equipo.members.filter((m) => m.userId !== userId);
   const actualizado: Team = {
     ...equipo,
-    members: role === null ? sinPersona : [...sinPersona, { userId, role }],
+    members: role === null ? withoutPerson : [...withoutPerson, { userId, role }],
   };
 
-  await escribirEquipo(actualizado);
-  await registrarCambio({
+  await writeTeam(actualizado);
+  await changeRecord({
     actorId: actor.userId,
     entityType: 'membership',
     entityId: `${teamId}/${userId}`,
@@ -385,22 +385,22 @@ export async function cambiarMembresia(
   return actualizado;
 }
 
-export interface ValidacionDePaquete {
+export interface PackageValidation {
   pkg: ModulePackage;
   /** Nodos que el paquete referencia pero la audiencia destino no tiene concedidos. */
   noMostrables: { teamId: string; moduleId: string; reason: string }[];
 }
 
 /** Guarda un paquete y comprueba, contra CADA equipo que lo usa, que no cuela accesos. */
-export async function savePackage(actor: Actor, pkg: ModulePackage): Promise<ValidacionDePaquete> {
+export async function savePackage(actor: Actor, pkg: ModulePackage): Promise<PackageValidation> {
   assertCan(actor.role, 'gestionar-paquetes-visuales');
-  const anterior = await gobierno.getPackage(pkg.id);
-  await gobierno.upsertPackage(pkg);
+  const anterior = await governance.getPackage(pkg.id);
+  await governance.upsertPackage(pkg);
 
   const generalTree = await getGeneralTree();
-  const noMostrables: ValidacionDePaquete['noMostrables'] = [];
+  const noMostrables: PackageValidation['noMostrables'] = [];
 
-  for (const equipo of await gobierno.listTeams()) {
+  for (const equipo of await governance.listTeams()) {
     if (equipo.assignedPackageId !== pkg.id) continue;
     const view = buildNavigationView({ generalTree, team: equipo, pkg });
     for (const colgante of view.dangling) {
@@ -412,7 +412,7 @@ export async function savePackage(actor: Actor, pkg: ModulePackage): Promise<Val
     }
   }
 
-  await registrarCambio({
+  await changeRecord({
     actorId: actor.userId,
     entityType: 'package',
     entityId: pkg.id,
@@ -439,15 +439,15 @@ export interface SeesWhoWhere {
   pasos: { capa: string; source: string; amplio: boolean; resultado: AccessScope }[];
   usoAmpliacion: boolean;
   noVeNada: boolean;
-  existeEnElArbol: boolean;
+  treeTheExists: boolean;
 }
 
 /** Resuelve "quien ve que" para un usuario y un modulo. */
 export async function seesWhoWhere(userId: string, teamId: string, moduleId: string): Promise<SeesWhoWhere> {
-  const equipo = await gobierno.getTeam(teamId);
+  const equipo = await governance.getTeam(teamId);
   if (!equipo) throw new AdminError(`El equipo '${teamId}' no existe.`, 404);
 
-  const user = await gobierno.getUser(userId) ?? { userId };
+  const user = await governance.getUser(userId) ?? { userId };
   const generalTree = await getGeneralTree();
   const resolucion = resolveEffectiveScope({
     user: user,
@@ -470,12 +470,12 @@ export async function seesWhoWhere(userId: string, teamId: string, moduleId: str
     })),
     usoAmpliacion: resolucion.usedAuthorizedExpansion,
     noVeNada: resolucion.deniesEverything,
-    existeEnElArbol: resolucion.moduleExistsInGeneralTree,
+    treeTheExists: resolucion.moduleExistsInGeneralTree,
   };
 }
 
 /** Los numeros que el carril de administracion muestra junto a dos secciones. */
 export async function indicadoresDeAdmin(): Promise<{ ampliaciones: number; papelera: number }> {
-  const [ampliaciones, arbol] = await Promise.all([contarAmpliaciones(), getManagedTree()]);
+  const [ampliaciones, arbol] = await Promise.all([expansionsCount(), getManagedTree()]);
   return { ampliaciones, papelera: arbol.trash.length };
 }

@@ -1,12 +1,12 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from './instancia';
-import { entrarComo } from './session';
+import { expect, test } from './instance';
+import { asLogin } from './session';
 
 /** Incorporacion en otros portales — seccion 4.9. */
 
 /** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-ana');
+  await asLogin(page, 'u-ana');
 });
 
 test.describe('politica de enmarcado', () => {
@@ -30,7 +30,7 @@ test.describe('politica de enmarcado', () => {
 
 test.describe('la vista incrustada aplica el mismo ambito', () => {
   test('muestra los datos del equipo de QUIEN MIRA, no del que la incrusto', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/incrustar/m/casos-pendientes');
     await expect(page.getByTestId('module-title')).toHaveText('Casos pendientes');
     await expect(page.getByTestId('tabla')).toContainText('Distrito Norte');
@@ -38,7 +38,7 @@ test.describe('la vista incrustada aplica el mismo ambito', () => {
   });
 
   test('un modulo no concedido al equipo tampoco se incrusta', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     // 'estadisticas' vive fuera de lo concedido al equipo Norte. La ruta de incrustacion no
     // puede ser el atajo que se salta esa comprobacion.
     const respuesta = await page.goto('/incrustar/m/estadisticas');
@@ -46,7 +46,7 @@ test.describe('la vista incrustada aplica el mismo ambito', () => {
   });
 
   test('un filtro fuera del ambito no amplia lo incrustado', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/incrustar/m/casos-pendientes?DimTribunal.Distrito=Distrito+Este');
     await expect(page.getByTestId('tabla')).not.toContainText('Distrito Este');
   });
@@ -54,7 +54,7 @@ test.describe('la vista incrustada aplica el mismo ambito', () => {
 
 test.describe('la vista incrustada conserva lo que la hace interpretable', () => {
   test('lleva procedencia (4.6), frescura (4.8) e identidad institucional', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/incrustar/m/casos-pendientes');
 
     // Dentro de otro portal es donde mas falta hacen: quien mira ya no tiene alrededor la
@@ -65,7 +65,7 @@ test.describe('la vista incrustada conserva lo que la hace interpretable', () =>
   });
 
   test('no lleva los controles que sacan de la vista', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/incrustar/m/casos-pendientes');
 
     for (const control of ['exportar', 'create-notice', 'incrustar']) {
@@ -77,20 +77,20 @@ test.describe('la vista incrustada conserva lo que la hace interpretable', () =>
 
   test('el enlace de vuelta abre en pestana nueva', async ({ page }) => {
     // Navegar en el mismo marco dejaria la aplicacion entera metida en un hueco del portal.
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/incrustar/m/casos-pendientes');
     await expect(page.getByTestId('see-completo')).toHaveAttribute('target', '_blank');
   });
 
   test('el filtrado cruzado sigue funcionando dentro del marco', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/incrustar/m/casos-pendientes');
     await page.getByTestId('slicer-Penal').click();
     await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
   });
 
   test('no tiene infracciones WCAG 2.1 AA', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/incrustar/m/casos-pendientes');
 
     const { violations } = await new AxeBuilder({ page })
@@ -102,7 +102,7 @@ test.describe('la vista incrustada conserva lo que la hace interpretable', () =>
 
 test.describe('el codigo de incrustacion se copia desde la vista', () => {
   test('lleva la URL de incrustacion con los filtros de delante', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes?DimTribunal.Materia=Penal');
 
     await page.getByTestId('incrustar').click();
@@ -116,7 +116,7 @@ test.describe('el codigo de incrustacion se copia desde la vista', () => {
   test('avisa de que la vista incrustada NO es publica', async ({ page }) => {
     // Quien pega el codigo espera que funcione para cualquier visitante del portal. Decirlo
     // aqui evita que se descubra en produccion y se pida "un modo publico" para arreglarlo.
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('incrustar').click();
 

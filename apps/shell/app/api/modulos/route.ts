@@ -1,19 +1,19 @@
 import { NextResponse } from 'next/server';
 import {
   actorDe,
-  bloqueosDePublicacion,
-  crearBorrador,
+  publicationLocks,
+  createDraft,
   visibleModules,
 } from '../../../src/server/cicloDeVida';
-import { respuestaDeError, withoutSession } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/session';
+import { errorResponse, withoutSession } from '../../../src/server/respuestas';
+import { sessionGet } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /** Modulos del editor — secciones 4.1 y 4.2. */
 export async function GET() {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   const actor = await actorDe(sesion);
@@ -29,18 +29,18 @@ export async function GET() {
         status: m.status,
         version: m.version,
         autor: m.ownerUserId ?? null,
-        propio: m.ownerUserId === actor.userId,
+        own: m.ownerUserId === actor.userId,
         updatedAt: m.updatedAt,
         // Los bloqueos viajan con la lista para que la interfaz pueda deshabilitar "Enviar a
         // aprobacion" y decir por que, en vez de ofrecer un boton que siempre falla.
-        locks: m.status === 'publicado' ? [] : await bloqueosDePublicacion(m),
+        locks: m.status === 'publicado' ? [] : await publicationLocks(m),
       })),
     ),
   });
 }
 
 export async function POST(request: Request) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   let body: Record<string, unknown>;
@@ -51,13 +51,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const modulo = await crearBorrador({
+    const modulo = await createDraft({
       actor: await actorDe(sesion),
       name: typeof body['nombre'] === 'string' ? body['nombre'] : '',
       slug: typeof body['slug'] === 'string' ? body['slug'] : '',
     });
     return NextResponse.json({ modulo }, { status: 201 });
   } catch (error) {
-    return respuestaDeError(error);
+    return errorResponse(error);
   }
 }

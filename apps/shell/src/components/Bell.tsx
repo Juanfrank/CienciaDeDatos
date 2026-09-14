@@ -7,7 +7,7 @@ import type { Notification } from '@app/alerts';
 
 /** Campana de notificaciones. */
 
-const INTERVALO_MS = 5_000;
+const MS_INTERVAL = 5_000;
 
 export function Bell() {
   const pathname = usePathname();
@@ -26,7 +26,7 @@ export function Bell() {
 
   useEffect(() => {
     void consultar();
-    const t = setInterval(() => void consultar(), INTERVALO_MS);
+    const t = setInterval(() => void consultar(), MS_INTERVAL);
     return () => clearInterval(t);
     // Se reconsulta al navegar: entrar en la pagina de avisos y leerlos tiene que bajar el
     // contador sin esperar a la siguiente vuelta del temporizador.

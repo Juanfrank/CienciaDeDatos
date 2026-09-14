@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { AuthenticatedPrincipal } from '@app/auth';
-import { unlockAccount, sesiones } from './identity';
-import { almacenDeCredenciales } from './identity';
+import { unlockAccount, sessions } from './identity';
+import { credentialsStore } from './identity';
 
 /** Cableado de identidad en el shell — seccion 4.7. */
 
@@ -16,37 +16,37 @@ const principal = (userId: string): AuthenticatedPrincipal => ({
 
 describe('revocar todas las sesiones de una persona', () => {
   it('cierra las suyas y no toca las de nadie mas', async () => {
-    const suya = await sesiones.issue(principal('u-revocable'), 'equipo-norte');
-    const otra = await sesiones.issue(principal('u-revocable'), 'equipo-norte');
-    const ajena = await sesiones.issue(principal('u-intacto'), 'equipo-norte');
+    const suya = await sessions.issue(principal('u-revocable'), 'equipo-norte');
+    const otra = await sessions.issue(principal('u-revocable'), 'equipo-norte');
+    const ajena = await sessions.issue(principal('u-intacto'), 'equipo-norte');
 
-    await sesiones.revokeAllFor('u-revocable');
+    await sessions.revokeAllFor('u-revocable');
 
     // Cambiar la credencial sin esto deja dentro a quien ya entro con la anterior, que es
     // exactamente de quien uno se quiere deshacer al restablecerla (4.7.2).
-    expect(await sesiones.resolve(suya.sessionId)).toBeNull();
-    expect(await sesiones.resolve(otra.sessionId)).toBeNull();
-    expect(await sesiones.resolve(ajena.sessionId)).not.toBeNull();
+    expect(await sessions.resolve(suya.sessionId)).toBeNull();
+    expect(await sessions.resolve(otra.sessionId)).toBeNull();
+    expect(await sessions.resolve(ajena.sessionId)).not.toBeNull();
 
-    await sesiones.revoke(ajena.sessionId);
+    await sessions.revoke(ajena.sessionId);
   });
 
   it('revocar una sola no deja rastro en el indice de la persona', async () => {
-    const first = await sesiones.issue(principal('u-indice'), 'equipo-norte');
-    const segunda = await sesiones.issue(principal('u-indice'), 'equipo-norte');
+    const first = await sessions.issue(principal('u-indice'), 'equipo-norte');
+    const segunda = await sessions.issue(principal('u-indice'), 'equipo-norte');
 
-    await sesiones.revoke(first.sessionId);
-    await sesiones.revokeAllFor('u-indice');
+    await sessions.revoke(first.sessionId);
+    await sessions.revokeAllFor('u-indice');
 
     // Si el indice conservara la primera, `deleteAllFor` intentaria borrar una clave que ya no
     // existe. No es un error, pero el indice crecería sin limite en una sesion larga.
-    expect(await sesiones.resolve(segunda.sessionId)).toBeNull();
+    expect(await sessions.resolve(segunda.sessionId)).toBeNull();
   });
 });
 
 describe('desbloquear una cuenta', () => {
   beforeEach(async () => {
-    await almacenDeCredenciales.save({
+    await credentialsStore.save({
       userId: 'u-bloqueado',
       email: 'u-bloqueado@poderjudicial.gob.do',
       passwordHash: '$argon2id$no-importa',
@@ -58,11 +58,11 @@ describe('desbloquear una cuenta', () => {
   });
 
   it('pone el contador a cero y quita el bloqueo, SIN tocar la contrasena', async () => {
-    const before = await almacenDeCredenciales.findByEmail('u-bloqueado@poderjudicial.gob.do');
+    const before = await credentialsStore.findByEmail('u-bloqueado@poderjudicial.gob.do');
 
     expect(await unlockAccount('u-bloqueado@poderjudicial.gob.do')).toBe(true);
 
-    const after = await almacenDeCredenciales.findByEmail('u-bloqueado@poderjudicial.gob.do');
+    const after = await credentialsStore.findByEmail('u-bloqueado@poderjudicial.gob.do');
     expect(after?.lockedUntil).toBeUndefined();
     expect(after?.failedAttempts).toBe(0);
     // Quien se equivoco de dedos y ya recuerda su contrasena no necesita una nueva.

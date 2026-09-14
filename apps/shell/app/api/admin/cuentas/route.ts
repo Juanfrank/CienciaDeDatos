@@ -1,13 +1,13 @@
 import { withAdmin } from '../guardia';
 import { AdminError } from '../../../../src/server/admin';
 import {
-  CORREO_DISPONIBLE,
+  AVAILABLE_MAIL,
   canalDeRestablecimiento,
-  cuentasLocales,
+  localesAccounts,
   unlockAccount,
-  restablecimientos,
+  resets,
 } from '../../../../src/server/identity';
-import { registrarCambio } from '../../../../src/server/audit';
+import { changeRecord } from '../../../../src/server/audit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -15,9 +15,9 @@ export const dynamic = 'force-dynamic';
 /** Cuentas locales — seccion 4.7.2. */
 export async function GET() {
   return withAdmin(async () => ({
-    cuentas: await cuentasLocales(),
+    accounts: await localesAccounts(),
     canal: canalDeRestablecimiento.name,
-    correoDisponible: CORREO_DISPONIBLE,
+    availableMail: AVAILABLE_MAIL,
   }));
 }
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       const desbloqueada = await unlockAccount(body.email);
       if (!desbloqueada) throw new AdminError('No hay ninguna cuenta local con ese correo.', 404);
 
-      await registrarCambio({
+      await changeRecord({
         actorId: actor.userId,
         entityType: 'role',
         entityId: body.email,
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     }
 
     if (body.accion === 'restablecer') {
-      const emitido = await restablecimientos.issue(body.email, actor.userId);
+      const emitido = await resets.issue(body.email, actor.userId);
       if (!emitido) throw new AdminError('No hay ninguna cuenta local con ese correo.', 404);
 
       const entregado = await canalDeRestablecimiento.deliver({
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
         issued: emitido,
       });
 
-      await registrarCambio({
+      await changeRecord({
         actorId: actor.userId,
         entityType: 'role',
         entityId: body.email,

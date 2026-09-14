@@ -1,11 +1,11 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from './instancia';
-import { entrarComo } from './session';
+import { expect, test } from './instance';
+import { asLogin } from './session';
 
 /** Panel de filtros — objeto de categoria `filtro` con varias dimensiones. */
 
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-ana');
+  await asLogin(page, 'u-ana');
 });
 
 test.describe('agrupa varias dimensiones en un solo objeto', () => {

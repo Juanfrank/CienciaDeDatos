@@ -1,5 +1,5 @@
-import { expect, test, type Page } from './instancia';
-import { entrarComo } from './session';
+import { expect, test, type Page } from './instance';
+import { asLogin } from './session';
 
 /** Exportacion — seccion 4.9, encolada como exige 5.3. */
 
@@ -25,19 +25,19 @@ async function exportar(page: Page, body: Record<string, unknown>): Promise<Esta
 }
 
 /** El archivo de un trabajo que la prueba espera terminado; falla si no lo esta. */
-function archivoDe(estado: EstadoExportacion): NonNullable<EstadoExportacion['archivo']> {
+function fileOf(estado: EstadoExportacion): NonNullable<EstadoExportacion['archivo']> {
   expect(estado.archivo).toBeDefined();
   return estado.archivo as NonNullable<EstadoExportacion['archivo']>;
 }
 
 /** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-ana');
+  await asLogin(page, 'u-ana');
 });
 
 test.describe('la exportacion se despacha a una cola (5.3)', () => {
   test('encolar responde 202 con un identificador, no con el archivo', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const respuesta = await page.request.post('/api/exportaciones', {
       data: { modulo: 'casos-pendientes', formato: 'csv' },
     });
@@ -52,16 +52,16 @@ test.describe('la exportacion se despacha a una cola (5.3)', () => {
   });
 
   test('el estado avanza hasta lista y entonces aparece la descarga', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'csv' });
 
     expect(estado.estado).toBe('lista');
-    expect(archivoDe(estado).nombre).toMatch(/^casos-pendientes-\d{4}-\d{2}-\d{2}\.csv$/);
-    expect(archivoDe(estado).bytes).toBeGreaterThan(0);
+    expect(fileOf(estado).nombre).toMatch(/^casos-pendientes-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(fileOf(estado).bytes).toBeGreaterThan(0);
   });
 
   test('un formato desconocido se rechaza antes de encolar nada', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const respuesta = await page.request.post('/api/exportaciones', {
       data: { modulo: 'casos-pendientes', formato: 'docx' },
     });
@@ -71,10 +71,10 @@ test.describe('la exportacion se despacha a una cola (5.3)', () => {
 
 test.describe('el archivo sale filtrado por el ambito de quien exporta (principio 5)', () => {
   test('el CSV del equipo Norte no contiene datos del Este', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'csv' });
 
-    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+    const csv = await (await page.request.get(fileOf(estado).descargarEn)).text();
     expect(csv).toContain('Distrito Norte');
     expect(csv).not.toContain('Distrito Este');
   });
@@ -82,14 +82,14 @@ test.describe('el archivo sale filtrado por el ambito de quien exporta (principi
   test('un filtro de la URL fuera del ambito no amplia el archivo ni se anuncia como aplicado', async ({
     page,
   }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const estado = await exportar(page, {
       modulo: 'casos-pendientes',
       formato: 'csv',
       filtros: { 'DimTribunal.Distrito': ['Distrito Este'] },
     });
 
-    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+    const csv = await (await page.request.get(fileOf(estado).descargarEn)).text();
     // Ni una fila del Este, ni un encabezado que diga que el archivo esta filtrado por el Este:
     // un archivo vacio que anuncia ese filtro se leeria como "no hay casos en el Este".
     expect(csv).not.toContain('Distrito Este');
@@ -98,7 +98,7 @@ test.describe('el archivo sale filtrado por el ambito de quien exporta (principi
   });
 
   test('no se puede exportar un modulo que el equipo no tiene concedido', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     // 'estadisticas' existe, pero vive fuera de la carpeta concedida al equipo Norte. Encolar
     // se admite —el modulo existe— pero el trabajo tiene que fallar al resolver, no generar.
     const estado = await exportar(page, { modulo: 'estadisticas', formato: 'csv' });
@@ -109,9 +109,9 @@ test.describe('el archivo sale filtrado por el ambito de quien exporta (principi
 
 test.describe('cada objeto exporta LO QUE MUESTRA, no el dataset entero', () => {
   test('la tarjeta KPI exporta una fila y el grafico una por categoria', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'csv' });
-    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+    const csv = await (await page.request.get(fileOf(estado).descargarEn)).text();
 
     const bloques = new Map(
       csv
@@ -135,9 +135,9 @@ test.describe('cada objeto exporta LO QUE MUESTRA, no el dataset entero', () => 
   });
 
   test('dos objetos distintos ya no producen la misma tabla repetida', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'csv' });
-    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+    const csv = await (await page.request.get(fileOf(estado).descargarEn)).text();
 
     // Era el defecto: cinco objetos sobre el mismo dataset volcaban cinco veces lo mismo.
     const cabeceras = csv.split('\r\n').filter((l) => l.startsWith('DimTribunal.Distrito,'));
@@ -145,9 +145,9 @@ test.describe('cada objeto exporta LO QUE MUESTRA, no el dataset entero', () => 
   });
 
   test('la imagen dibuja el primer GRAFICO, no la primera celda del modulo', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'svg' });
-    const svg = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+    const svg = await (await page.request.get(fileOf(estado).descargarEn)).text();
 
     // La primera celda del modulo es una tarjeta KPI. Antes salia un grafico de barras de un
     // solo numero con la etiqueta repetida; ahora sale el grafico de verdad.
@@ -158,21 +158,21 @@ test.describe('cada objeto exporta LO QUE MUESTRA, no el dataset entero', () => 
 
 test.describe('la procedencia de la vista sobrevive a la exportacion (4.6)', () => {
   test('el CSV lleva la etiqueta de vista institucional y los filtros aplicados', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const estado = await exportar(page, {
       modulo: 'casos-pendientes',
       formato: 'csv',
       filtros: { 'DimTribunal.Materia': ['Penal'] },
     });
 
-    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+    const csv = await (await page.request.get(fileOf(estado).descargarEn)).text();
     expect(csv).toContain('Vista institucional oficial');
     expect(csv).toContain('DimTribunal.Materia = Penal');
     expect(csv).toContain('u-ana');
   });
 
   test('una vista personalizada se marca tambien en el nombre del archivo', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
 
     // La procedencia ya NO se declara en la peticion: la decide el servidor mirando si esta
     // persona tiene personalizacion de este modulo. Antes esta prueba enviaba
@@ -185,8 +185,8 @@ test.describe('la procedencia de la vista sobrevive a la exportacion (4.6)', () 
     try {
       const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'csv' });
 
-      expect(archivoDe(estado).nombre).toContain('-vista-personalizada');
-      const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+      expect(fileOf(estado).nombre).toContain('-vista-personalizada');
+      const csv = await (await page.request.get(fileOf(estado).descargarEn)).text();
       expect(csv).toContain('no es la vista institucional oficial');
       // Y lo que se oculto no aparece en el archivo: se exporta lo que se ve.
       expect(csv).not.toContain('Ingresados vs resueltos');
@@ -203,11 +203,11 @@ test.describe('los cuatro formatos salen con contenido valido', () => {
     ['svg', '<svg ', 'image/svg+xml'],
   ] as const) {
     test(`${formato} se descarga con su tipo y su firma`, async ({ page }) => {
-      await entrarComo(page, 'u-ana');
+      await asLogin(page, 'u-ana');
       const estado = await exportar(page, { modulo: 'casos-pendientes', formato });
       expect(estado.estado).toBe('lista');
 
-      const descarga = await page.request.get(archivoDe(estado).descargarEn);
+      const descarga = await page.request.get(fileOf(estado).descargarEn);
       expect(descarga.headers()['content-type']).toContain(tipo);
       expect(descarga.headers()['content-disposition']).toContain(`filename="casos-pendientes-`);
       // Los datos exportados no se guardan en ningun intermediario.
@@ -221,22 +221,22 @@ test.describe('los cuatro formatos salen con contenido valido', () => {
 
 test.describe('un archivo exportado no es alcanzable por otra persona', () => {
   test('consultar y descargar la exportacion de otro responde 404', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'csv' });
     const statusPath = `/api/exportaciones/${estado.id}`;
-    const rutaArchivo = archivoDe(estado).descargarEn;
+    const filePath = fileOf(estado).descargarEn;
 
     // La misma URL de descarga, con otra sesion. Se responde 404 y no 403: decir "prohibido"
     // confirmaria que ese identificador existe y que alguien exporto ese modulo.
-    await entrarComo(page, 'u-beto');
+    await asLogin(page, 'u-beto');
     expect((await page.request.get(statusPath)).status()).toBe(404);
-    expect((await page.request.get(rutaArchivo)).status()).toBe(404);
+    expect((await page.request.get(filePath)).status()).toBe(404);
   });
 });
 
 test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => {
   test('pulsar Generar muestra el estado y luego el enlace de descarga', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('abrir-exportar').click();
@@ -254,7 +254,7 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
   test('cerrar el panel no se lleva por delante el estado ni la descarga', async ({ page }) => {
     // Una exportacion tarda, y lo normal es cerrar el panel mientras tanto. Si la region viva
     // viviera dentro, el anuncio de «lista» se perderia justo para quien depende de el.
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('abrir-exportar').click();
@@ -267,7 +267,7 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
   });
 
   test('exporta lo que se ve: el filtro elegido viaja al archivo', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('slicer-Penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
@@ -297,7 +297,7 @@ test.describe('lo exportado dice lo mismo que la pantalla', () => {
       pagina: 'condicional',
       formato: 'csv',
     });
-    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+    const csv = await (await page.request.get(fileOf(estado).descargarEn)).text();
 
     /*
      * Se comprueba la INVARIANTE, no una cifra concreta.
@@ -320,7 +320,7 @@ test.describe('lo exportado dice lo mismo que la pantalla', () => {
       pagina: 'condicional',
       formato: 'csv',
     });
-    const csv = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+    const csv = await (await page.request.get(fileOf(estado).descargarEn)).text();
 
     // En pantalla son una raya y una barra roja; en un CSV no hay donde dibujarlas, pero quien
     // reciba el archivo tiene que poder saber contra que se leian esas cifras.
@@ -336,7 +336,7 @@ test.describe('lo exportado dice lo mismo que la pantalla', () => {
       pagina: 'familia',
       formato: 'svg',
     });
-    const svg = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+    const svg = await (await page.request.get(fileOf(estado).descargarEn)).text();
 
     // Con separador de millares, como en pantalla. Sin el formateador saldria «1888».
     expect(svg).toMatch(/>\d{1,3},\d{3}</);
@@ -352,7 +352,7 @@ test.describe('lo exportado dice lo mismo que la pantalla', () => {
       pagina: 'referencia',
       formato: 'svg',
     });
-    const svg = await (await page.request.get(archivoDe(estado).descargarEn)).text();
+    const svg = await (await page.request.get(fileOf(estado).descargarEn)).text();
 
     expect(svg).toContain('Meta trimestral: 900');
   });

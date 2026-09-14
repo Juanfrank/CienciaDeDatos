@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { cabecerasDeEnmarcado, parsearOrigenes } from './src/server/incrustacion';
+import { framedHeaders, parsearOrigenes } from './src/server/embedding';
 
 /** Politica de enmarcado de toda la aplicacion — seccion 4.9. */
 export function middleware(request: NextRequest) {
@@ -7,7 +7,7 @@ export function middleware(request: NextRequest) {
   const origenes = parsearOrigenes(process.env['EMBED_ALLOWED_ORIGINS']);
 
   for (const [clave, valor] of Object.entries(
-    cabecerasDeEnmarcado(request.nextUrl.pathname, origenes),
+    framedHeaders(request.nextUrl.pathname, origenes),
   )) {
     if (valor) respuesta.headers.set(clave, valor);
   }

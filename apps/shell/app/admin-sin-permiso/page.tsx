@@ -1,5 +1,5 @@
 /** Pagina de acceso denegado al panel. */
-export default function SinPermiso() {
+export default function WithoutPermission() {
   return (
     <div className="vacio" data-testid="sin-permiso">
       <h1>Sin permiso</h1>

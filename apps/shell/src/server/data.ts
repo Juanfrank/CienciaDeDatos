@@ -31,7 +31,7 @@ import { cacheL2, datasetReader, findTeam, getGeneralTree, objectRegistry, scope
 
 /** Carga de un modulo para una persona concreta. */
 
-export interface ObjetoCargado {
+export interface LoadedObject {
   item: GridItem;
   /** Resultado ya filtrado por el ambito de quien mira. Ausente si el objeto esta roto. */
   result?: QueryResult;
@@ -45,20 +45,20 @@ export interface ObjetoCargado {
   aggregations: Aggregation[];
   unresolvedObject?: string;
   /** Lo que hay dentro de un contenedor, ya cargado por el mismo camino que lo de fuera. */
-  panels?: PanelCargado[];
+  panels?: LoadedPanel[];
 }
 
 /** Un panel de contenedor con sus objetos ya cargados. Un contenedor sin pestanas tiene uno. */
-export interface PanelCargado {
+export interface LoadedPanel {
   panelId: string;
   nombre: string;
-  objetos: ObjetoCargado[];
+  objetos: LoadedObject[];
 }
 
-export interface ModuloCargado {
+export interface LoadedModule {
   module: ModuleDefinition;
   pageSlug: string;
-  objetos: ObjetoCargado[];
+  objetos: LoadedObject[];
   /** Filtros efectivamente aplicados, tras intersecar los de la URL con el ambito. */
   appliedFilters: Record<string, string[]>;
   /** Marca de tiempo del dato mas antiguo servido, para mostrarla en el modulo (4.8). */
@@ -83,8 +83,8 @@ async function readObjects(
   items: GridItem[],
   scope: AccessScope,
   requestedFilters: Record<string, string | string[]>,
-): Promise<{ objetos: ObjetoCargado[]; masAntiguo?: string; degraded: boolean }> {
-  const objetos: ObjetoCargado[] = [];
+): Promise<{ objetos: LoadedObject[]; masAntiguo?: string; degraded: boolean }> {
+  const objetos: LoadedObject[] = [];
   let masAntiguo: string | undefined;
   let degraded = false;
   const declared = await declaredAggregations();
@@ -111,7 +111,7 @@ async function readObjects(
      */
     if (notConsumesData(contrato)) {
       const config = instance.settings;
-      let panels: PanelCargado[] | undefined;
+      let panels: LoadedPanel[] | undefined;
 
       if (isContainer(instance.objectId)) {
         panels = [];
@@ -152,7 +152,7 @@ async function readObjects(
     // Quitar su propio filtro NO debilita el aislamiento: el ambito se aplica dentro del lector
     // (filterResultByScope), de forma independiente de estos filtros, asi que un segmentador
     // sigue sin poder ofrecer valores fuera del alcance de quien mira.
-    const filtrosParaEsteObjeto =
+    const objectEsteFilters =
       instance.objectId === 'segmentador'
         ? ownWithoutFilter(requestedFilters, instance.binding.dimensions)
         : requestedFilters;
@@ -160,7 +160,7 @@ async function readObjects(
     const lectura = await datasetReader.read({
       datasetId: instance.binding.datasetId,
       scope,
-      requestedFilters: filtrosParaEsteObjeto,
+      requestedFilters: objectEsteFilters,
     });
 
     if (lectura.status === 'generating' || !lectura.result) {
@@ -220,7 +220,7 @@ async function readObjects(
   return { objetos, ...(masAntiguo ? { masAntiguo } : {}), degraded };
 }
 
-export async function cargarModulo(input: {
+export async function moduleLoad(input: {
   module: ModuleDefinition;
   pageSlug?: string;
   userId: string;
@@ -229,7 +229,7 @@ export async function cargarModulo(input: {
   requestedFilters: Record<string, string | string[]>;
   /** Personalizacion de esta persona para este modulo, si la hay (4.6). */
   personalization?: UserPersonalization | undefined;
-}): Promise<ModuloCargado | null> {
+}): Promise<LoadedModule | null> {
   const { userId, teamId, requestedFilters } = input;
 
   // La personalizacion se aplica ANTES de resolver la pagina: puede haber ocultado objetos, y
@@ -270,7 +270,7 @@ export async function cargarModulo(input: {
 }
 
 /** Diagnosticos del modulo para el editor, con las columnas realmente presentes en el cache. */
-export async function diagnosticarModulo(module: ModuleDefinition, userId: string, teamId: string) {
+export async function moduleDiagnose(module: ModuleDefinition, userId: string, teamId: string) {
   const resolucion = await scopeFor(userId, teamId, module.moduleId);
   if (!resolucion) return null;
 
@@ -294,13 +294,13 @@ export async function diagnosticarModulo(module: ModuleDefinition, userId: strin
 }
 
 /** Diagnosticos para el EDITOR, sin ambito de por medio. */
-export async function diagnosticarDefinicion(module: ModuleDefinition) {
+export async function definitionDiagnose(module: ModuleDefinition) {
   const columnsByDataset: Record<string, AvailableColumn[]> = {};
 
   const datasets = new Set(datasetsConsumedBy(module));
 
   for (const datasetId of datasets) {
-    columnsByDataset[datasetId] = await columnasDisponiblesDe(datasetId);
+    columnsByDataset[datasetId] = await availableColumnsOf(datasetId);
   }
 
   return validateModule({
@@ -315,7 +315,7 @@ export async function diagnosticarDefinicion(module: ModuleDefinition) {
 /**
  * Columnas que un dataset ofrece HOY: lo que declara el registro y el esquema sigue reconociendo.
  */
-export async function columnasDisponiblesDe(datasetId: string): Promise<AvailableColumn[]> {
+export async function availableColumnsOf(datasetId: string): Promise<AvailableColumn[]> {
   let declarado;
   try {
     declarado = getDataset(datasetId);
@@ -338,7 +338,7 @@ export async function columnasDisponiblesDe(datasetId: string): Promise<Availabl
 
   return [
     ...dimensiones
-      .filter((clave) => campoExisteEnEsquema(schema, clave))
+      .filter((clave) => schemeExistsField(schema, clave))
       .map((name) => ({ name, type: schemeKind(schema, name) })),
     ...medidas
       .filter((medida) => schema.measures.some((m) => m.name === medida))
@@ -411,7 +411,7 @@ function schemeKind(schema: SchemaDescriptor, clave: string): string {
   return encontrado?.type ?? UNKNOWN_KIND;
 }
 
-function campoExisteEnEsquema(schema: SchemaDescriptor, clave: string): boolean {
+function schemeExistsField(schema: SchemaDescriptor, clave: string): boolean {
   const [tabla, fieldName] = clave.split('.');
   return schema.tables.some(
     (t) => t.name === tabla && t.fields.some((f) => f.name === fieldName && !f.isMeasure),
@@ -419,12 +419,12 @@ function campoExisteEnEsquema(schema: SchemaDescriptor, clave: string): boolean 
 }
 
 /** Vista previa de un BORRADOR, para el editor. */
-export async function vistaPreviaDelBorrador(input: {
+export async function draftPreviousView(input: {
   module: ModuleDefinition;
   pageSlug?: string;
   userId: string;
   teamId: string;
-}): Promise<{ objetos: ObjetoCargado[]; pageSlug: string } | null> {
+}): Promise<{ objetos: LoadedObject[]; pageSlug: string } | null> {
   const page = findPage(input.module, input.pageSlug);
   if (!page) return null;
 

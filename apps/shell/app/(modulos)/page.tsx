@@ -1,21 +1,21 @@
 import { redirect } from 'next/navigation';
 import { isModule, type NavNode } from '@app/access-control';
 import { navigationOf } from '../../src/server/cicloDeVida';
-import { exigirSesionDePagina } from '../../src/server/session';
+import { pageSessionRequire } from '../../src/server/session';
 
 /** Primer modulo accesible del arbol visible, o null si el equipo no tiene ninguno. */
-function primerModulo(nodos: NavNode[]): string | null {
+function moduleFirst(nodos: NavNode[]): string | null {
   for (const node of nodos) {
     if (isModule(node)) return node.moduleRef.slug;
-    const dentro = primerModulo(node.children);
+    const dentro = moduleFirst(node.children);
     if (dentro) return dentro;
   }
   return null;
 }
 
-export default async function Inicio() {
-  const sesion = await exigirSesionDePagina();
-  const slug = primerModulo((await navigationOf(sesion)).tree);
+export default async function Home() {
+  const sesion = await pageSessionRequire();
+  const slug = moduleFirst((await navigationOf(sesion)).tree);
 
   if (slug) redirect(`/m/${slug}`);
 

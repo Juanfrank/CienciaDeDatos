@@ -10,14 +10,14 @@ import { CachedDatasetReader } from '@app/caching';
 import { CacheMetrics } from '@app/observability';
 import { ObjectRegistry, initialCatalog } from '@app/ui-components';
 import { cacheL1, cacheL2 } from './almacenCompartido';
-import { gobierno } from './gobierno';
+import { governance } from './governance';
 
 /** Contexto de servidor del shell. */
 
 /*
  * El conector activo lo resuelve ahora `settings.ts` contra App Configuration (2.2).
  */
-export { conectorActivo } from './settings';
+export { activeConnector } from './settings';
 
 export const objectRegistry = new ObjectRegistry(initialCatalog);
 
@@ -43,45 +43,45 @@ export const datasetReader = new CachedDatasetReader({
 
 /** Organizacion general vigente (4.1.1). */
 export async function getGeneralTree(): Promise<NavNode[]> {
-  return (await gobierno.getTree()).nodes;
+  return (await governance.getTree()).nodes;
 }
 
 export async function getManagedTree(): Promise<ManagedTree> {
-  return gobierno.getTree();
+  return governance.getTree();
 }
 
 export async function listTeams(): Promise<Team[]> {
-  return gobierno.listTeams();
+  return governance.listTeams();
 }
 
 export async function findTeam(teamId: string): Promise<Team | undefined> {
-  return gobierno.getTeam(teamId);
+  return governance.getTeam(teamId);
 }
 
 export async function listUsers(): Promise<GovernedUser[]> {
-  return gobierno.listUsers();
+  return governance.listUsers();
 }
 
 export async function findUser(userId: string): Promise<GovernedUser | undefined> {
-  return gobierno.getUser(userId);
+  return governance.getUser(userId);
 }
 
 /** Equipos a los que pertenece una persona, para el selector de espacio de trabajo (4.10.2). */
 export async function teamsOf(userId: string): Promise<Team[]> {
-  return (await gobierno.listTeams()).filter((t) => t.members.some((m) => m.userId === userId));
+  return (await governance.listTeams()).filter((t) => t.members.some((m) => m.userId === userId));
 }
 
 export async function roleOf(userId: string, teamId: string): Promise<string> {
-  const equipo = await gobierno.getTeam(teamId);
+  const equipo = await governance.getTeam(teamId);
   return equipo?.members.find((m) => m.userId === userId)?.role ?? 'visor';
 }
 
 /** Vista de navegacion de una persona con un equipo activo dado. */
 export async function navigationFor(teamId: string) {
-  const team = await gobierno.getTeam(teamId);
+  const team = await governance.getTeam(teamId);
   if (!team) return { tree: [], fromPackage: false, dangling: [] };
 
-  const pkg = team.assignedPackageId ? await gobierno.getPackage(team.assignedPackageId) : undefined;
+  const pkg = team.assignedPackageId ? await governance.getPackage(team.assignedPackageId) : undefined;
   return buildNavigationView({
     generalTree: await getGeneralTree(),
     team,
@@ -91,8 +91,8 @@ export async function navigationFor(teamId: string) {
 
 /** Ambito efectivo para un modulo, con el equipo ACTIVO (nunca la union de todos). */
 export async function scopeFor(userId: string, teamId: string, moduleId: string) {
-  const user = (await gobierno.getUser(userId)) ?? { userId };
-  const team = await gobierno.getTeam(teamId);
+  const user = (await governance.getUser(userId)) ?? { userId };
+  const team = await governance.getTeam(teamId);
   if (!team) return null;
   return resolveEffectiveScope({
     user,

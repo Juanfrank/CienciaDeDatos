@@ -30,7 +30,7 @@ describe('que modo se pide', () => {
 /** Toda variable CSS que la hoja de estilo LEE tiene que existir en los dos modos. */
 describe('el tema cubre todas las variables que la hoja de estilo usa', () => {
   const css = readFileSync(join(process.cwd(), 'apps/shell/app/globals.css'), 'utf8');
-  const usadas = new Set([...css.matchAll(/var\(\s*(--[a-z0-9-]+)/g)].map((m) => m[1] as string));
+  const used = new Set([...css.matchAll(/var\(\s*(--[a-z0-9-]+)/g)].map((m) => m[1] as string));
   const definidasEnCss = new Set(
     [...css.matchAll(/^\s*(--[a-z0-9-]+)\s*:/gm)].map((m) => m[1] as string),
   );
@@ -59,7 +59,7 @@ describe('el tema cubre todas las variables que la hoja de estilo usa', () => {
   for (const mode of ['light', 'dark'] as ColorMode[]) {
     it(`${mode}: ninguna variable leida se queda sin valor`, () => {
       const emitted = emittedIn(mode);
-      const orphans = [...usadas].filter(
+      const orphans = [...used].filter(
         (v) => !definidasEnCss.has(v) && !emitted.has(v) && !DE_COMPONENTE.includes(v),
       );
 

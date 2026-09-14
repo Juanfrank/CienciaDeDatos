@@ -10,7 +10,7 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
   const dialogo = useRef<HTMLDialogElement>(null);
   const [copiado, setCopiado] = useState(false);
 
-  const construirCodigo = (): string => {
+  const buildCode = (): string => {
     const params = new URLSearchParams(searchParams.toString());
     if (pageSlug) params.set('pagina', pageSlug);
     const cadena = params.toString();
@@ -26,8 +26,8 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
 
   const [code, setCodigo] = useState('');
 
-  const abrir = () => {
-    setCodigo(construirCodigo());
+  const open = () => {
+    setCodigo(buildCode());
     setCopiado(false);
     dialogo.current?.showModal();
   };
@@ -45,7 +45,7 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
 
   return (
     <>
-      <IconButton icono="embed" etiqueta="Incrustar" data-testid="incrustar" onClick={abrir} />
+      <IconButton icono="embed" etiqueta="Incrustar" data-testid="incrustar" onClick={open} />
 
       <dialog ref={dialogo} className="emergente" aria-label="Codigo de incrustacion" data-testid="dialogo-incrustar">
         <div className="popover__header">

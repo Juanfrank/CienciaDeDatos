@@ -1,7 +1,7 @@
 import { ResolvedorLocal, type ResolvedQuery, type Vocabulary } from '@app/nl-query';
 import { fieldKey } from '@app/ui-components';
-import { cargarModulo } from './data';
-import { moduloServibleParaUsuario } from './cicloDeVida';
+import { moduleLoad } from './data';
+import { userServableModule } from './cicloDeVida';
 
 /** Cableado de la consulta en lenguaje natural (4.9). */
 
@@ -18,17 +18,17 @@ export async function vocabularyOf(
   userId: string,
   teamId: string,
 ): Promise<Vocabulary | null> {
-  const module = await moduloServibleParaUsuario(moduleSlug, userId);
+  const module = await userServableModule(moduleSlug, userId);
   if (!module) return null;
 
-  const cargado = await cargarModulo({ module, userId, teamId, requestedFilters: {} });
-  if (!cargado) return null;
+  const loaded = await moduleLoad({ module, userId, teamId, requestedFilters: {} });
+  if (!loaded) return null;
 
   const measures = new Map<string, string>();
   const dimensions = new Map<string, string>();
   const valores = new Map<string, Set<string>>();
 
-  for (const objeto of cargado.objetos) {
+  for (const objeto of loaded.objetos) {
     const { binding, title } = objeto.item.instance;
 
     for (const medida of binding.measures) {

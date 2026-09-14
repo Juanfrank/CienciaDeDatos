@@ -16,7 +16,7 @@ const OPERADORES: { valor: AlertOperator; etiqueta: string }[] = [
 
 const CADENCIAS: Cadence[] = ['diaria', 'semanal', 'mensual'];
 
-export interface ObjetoVigilable {
+export interface WatchableObject {
   instanceId: string;
   titulo: string;
   measures: string[];
@@ -30,7 +30,7 @@ export function CreateNotice({
   moduleSlug: string;
   pageSlug?: string;
   /** Objetos del modulo que mapean alguna medida. Un segmentador no se puede vigilar. */
-  vigilables: ObjetoVigilable[];
+  vigilables: WatchableObject[];
 }) {
   const router = useRouter();
   const { searchParams } = useUrlFilters();
@@ -56,7 +56,7 @@ export function CreateNotice({
     return filtros;
   };
 
-  const abrir = () => {
+  const open = () => {
     setError('');
     dialogo.current?.showModal();
   };
@@ -98,7 +98,7 @@ export function CreateNotice({
 
   return (
     <>
-      <IconButton icono="notice" etiqueta="Avisarme" data-testid="create-notice" onClick={abrir} />
+      <IconButton icono="notice" etiqueta="Avisarme" data-testid="create-notice" onClick={open} />
 
       <dialog ref={dialogo} className="emergente" aria-label="Crear un aviso" data-testid="dialogo-aviso">
         <div className="popover__header">

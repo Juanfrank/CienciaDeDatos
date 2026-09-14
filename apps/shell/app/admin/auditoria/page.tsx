@@ -1,4 +1,4 @@
-import { contarAmpliaciones, listarAuditoria } from '../../../src/server/audit';
+import { expansionsCount, auditList } from '../../../src/server/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,14 +9,14 @@ export default async function AuditPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const query = await searchParams;
-  const soloAmpliaciones = query['soloAmpliaciones'] === '1';
-  const soloMovimientos = query['soloMovimientos'] === '1';
+  const onlyExpansions = query['onlyExpansions'] === '1';
+  const onlyMoves = query['onlyMoves'] === '1';
 
-  const eventos = await listarAuditoria({
-    ...(soloAmpliaciones ? { soloAmpliaciones: true } : {}),
-    ...(soloMovimientos ? { soloMovimientos: true } : {}),
+  const eventos = await auditList({
+    ...(onlyExpansions ? { onlyExpansions: true } : {}),
+    ...(onlyMoves ? { onlyMoves: true } : {}),
   });
-  const ampliaciones = await contarAmpliaciones();
+  const ampliaciones = await expansionsCount();
 
   return (
     <section>
@@ -34,10 +34,10 @@ export default async function AuditPage({
 
       <nav className="audit-filters" aria-label="Filtros del registro">
         <a href="/admin/auditoria" data-testid="all-filter">Todos</a>
-        <a href="/admin/auditoria?soloAmpliaciones=1" data-testid="filtro-ampliaciones">
+        <a href="/admin/auditoria?onlyExpansions=1" data-testid="filtro-ampliaciones">
           Solo ampliaciones
         </a>
-        <a href="/admin/auditoria?soloMovimientos=1" data-testid="filtro-movimientos">
+        <a href="/admin/auditoria?onlyMoves=1" data-testid="filtro-movimientos">
           Solo movimientos
         </a>
       </nav>

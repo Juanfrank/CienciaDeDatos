@@ -60,7 +60,7 @@ export function Presentation({
   const admite = (clave: PresentationKey) => admitidas.includes(clave);
   const prueba = `pres-${instance.instanceId}`;
 
-  const poner = (parcial: Partial<ObjectPresentation>) =>
+  const set = (parcial: Partial<ObjectPresentation>) =>
     onCambiar((i) => ({
       ...i,
       presentacion: { ...i.presentacion, ...parcial },
@@ -69,7 +69,7 @@ export function Presentation({
   /*
    * El estilo de un texto se funde con lo que ya hubiera de los OTROS textos.
    */
-  const ponerTexto = (destino: TextTarget, style: TextStyle) =>
+  const textSet = (destino: TextTarget, style: TextStyle) =>
     onCambiar((i) => ({
       ...i,
       presentacion: {
@@ -81,11 +81,11 @@ export function Presentation({
   /*
    * Subsecciones, no una tira de veinte controles.
    */
-  const hayMedida = admite("formato") || admite("formatos");
+  const measureHas = admite("formato") || admite("formatos");
   // La forma anterior era un booleano; se normaliza una vez aqui para que el panel no tenga que
   // preguntarse en cada control cual de las dos formas le ha llegado.
   const labels = normalizedLabels(p.etiquetasDeDato);
-  const hayGrafico =
+  const chartHas =
     admite("leyenda") || admite("etiquetasDeDato") || admite("orden") || admite("apilado");
   const isCard = instance.objectId === "tarjeta-kpi";
   const mostrarTitulo = p.mostrarTitulo !== false;
@@ -101,7 +101,7 @@ export function Presentation({
             checked={mostrarTitulo}
             disabled={saving}
             data-testid={`${prueba}-mostrar-titulo`}
-            onChange={(e) => poner({ mostrarTitulo: e.target.checked })}
+            onChange={(e) => set({ mostrarTitulo: e.target.checked })}
           />{" "}
           Mostrar titulo
         </label>
@@ -128,7 +128,7 @@ export function Presentation({
             style={p.textos?.titulo ?? {}}
             prueba={`${prueba}-texto-titulo`}
             saving={saving || !mostrarTitulo}
-            onCambiar={(style) => ponerTexto("titulo", style)}
+            onCambiar={(style) => textSet("titulo", style)}
           />
         ) : null}
 
@@ -140,7 +140,7 @@ export function Presentation({
               maxLength={80}
               disabled={saving}
               data-testid={`${prueba}-subtitulo`}
-              onBlur={(e) => poner({ subtitulo: e.target.value || undefined })}
+              onBlur={(e) => set({ subtitulo: e.target.value || undefined })}
             />
           </label>
         ) : null}
@@ -151,7 +151,7 @@ export function Presentation({
             style={p.textos?.subtitulo ?? {}}
             prueba={`${prueba}-texto-subtitulo`}
             saving={saving}
-            onCambiar={(style) => ponerTexto("subtitulo", style)}
+            onCambiar={(style) => textSet("subtitulo", style)}
           />
         ) : null}
 
@@ -162,7 +162,7 @@ export function Presentation({
               checked={p.mostrarIcono !== false}
               disabled={saving}
               data-testid={`${prueba}-mostrar-icono`}
-              onChange={(e) => poner({ mostrarIcono: e.target.checked })}
+              onChange={(e) => set({ mostrarIcono: e.target.checked })}
             />{" "}
             Mostrar icono
           </label>
@@ -178,7 +178,7 @@ export function Presentation({
                 disabled={saving || p.mostrarIcono === false}
                 data-testid={`${prueba}-icono`}
                 onChange={(e) =>
-                  poner({ icono: (e.target.value || undefined) as IconName | undefined })
+                  set({ icono: (e.target.value || undefined) as IconName | undefined })
                 }
               >
                 <option value="">(el de su tipo)</option>
@@ -204,7 +204,7 @@ export function Presentation({
                 value={p.acento ?? "primario"}
                 disabled={saving}
                 data-testid={`${prueba}-acento`}
-                onChange={(e) => poner({ acento: e.target.value as ObjectAccent })}
+                onChange={(e) => set({ acento: e.target.value as ObjectAccent })}
               >
                 {ACCENTS.map((a) => (
                   <option key={a} value={a}>
@@ -223,7 +223,7 @@ export function Presentation({
                   checked={p.resaltado === true}
                   disabled={saving}
                   data-testid={`${prueba}-resaltado`}
-                  onChange={(e) => poner({ resaltado: e.target.checked })}
+                  onChange={(e) => set({ resaltado: e.target.checked })}
                 />{" "}
                 Linea de resaltado
               </label>
@@ -240,7 +240,7 @@ export function Presentation({
                     nombre="la linea de resaltado"
                     prueba={`${prueba}-color-resaltado`}
                     onCambiar={(color) =>
-                      poner({ colorDeResaltado: color === "predeterminado" ? undefined : color })
+                      set({ colorDeResaltado: color === "predeterminado" ? undefined : color })
                     }
                   />
                 </div>
@@ -250,7 +250,7 @@ export function Presentation({
         </Section>
       ) : null}
 
-      {hayMedida ? (
+      {measureHas ? (
         <Section
           keys={['formato', 'decimales', 'moneda', 'porcentaje', 'unidad', 'miles', 'cifra', 'numero', 'valor', 'etiqueta']}
           titulo="Medida" nivel={2} abierta={false} prueba={`${prueba}-medida`}>
@@ -274,7 +274,7 @@ export function Presentation({
                 style={p.textos?.valor ?? {}}
                 prueba={`${prueba}-texto-valor`}
                 saving={saving}
-                onCambiar={(style) => ponerTexto("valor", style)}
+                onCambiar={(style) => textSet("valor", style)}
               />
             ) : null}
           </Section>
@@ -289,7 +289,7 @@ export function Presentation({
                   disabled={saving}
                   data-testid={`${prueba}-etiqueta-texto`}
                   onBlur={(e) =>
-                    poner({ etiqueta: { ...p.etiqueta, content: e.target.value || undefined } })
+                    set({ etiqueta: { ...p.etiqueta, content: e.target.value || undefined } })
                   }
                 />
               </label>
@@ -300,7 +300,7 @@ export function Presentation({
                   disabled={saving}
                   data-testid={`${prueba}-etiqueta-posicion`}
                   onChange={(e) =>
-                    poner({
+                    set({
                       etiqueta: {
                         ...p.etiqueta,
                         cellPosition: e.target.value as LabelPosition,
@@ -321,7 +321,7 @@ export function Presentation({
                   style={p.textos?.etiqueta ?? {}}
                   prueba={`${prueba}-texto-etiqueta`}
                   saving={saving}
-                  onCambiar={(style) => ponerTexto("etiqueta", style)}
+                  onCambiar={(style) => textSet("etiqueta", style)}
                 />
               ) : null}
             </Section>
@@ -329,7 +329,7 @@ export function Presentation({
         </Section>
       ) : null}
 
-      {hayGrafico ? (
+      {chartHas ? (
         <Section
           keys={['leyenda', 'etiquetas de dato', 'apilado', '100 %', 'orden', 'ordenar', 'cifra sobre la barra']}
           titulo="Grafico" nivel={2} abierta={false} prueba={`${prueba}-grafico`}>
@@ -340,7 +340,7 @@ export function Presentation({
                 value={p.leyenda ?? "auto"}
                 disabled={saving}
                 data-testid={`${prueba}-leyenda`}
-                onChange={(e) => poner({ leyenda: e.target.value as LegendMode })}
+                onChange={(e) => set({ leyenda: e.target.value as LegendMode })}
               >
                 {LEGEND_MODES.map((m) => (
                   <option key={m} value={m}>
@@ -361,7 +361,7 @@ export function Presentation({
                   data-testid={`${prueba}-etiquetas`}
                   // Se guarda como objeto en cuanto se toca, aunque venga de la forma antigua:
                   // asi la posicion y «solo los extremos» tienen donde vivir desde el primer clic.
-                  onChange={(e) => poner({ etiquetasDeDato: { mostrar: e.target.checked } })}
+                  onChange={(e) => set({ etiquetasDeDato: { mostrar: e.target.checked } })}
                 />{" "}
                 Cifra sobre cada barra o punto
               </label>
@@ -375,7 +375,7 @@ export function Presentation({
                       disabled={saving}
                       data-testid={`${prueba}-posicion-dato`}
                       onChange={(e) =>
-                        poner({
+                        set({
                           etiquetasDeDato: {
                             ...labels,
                             cellPosition: e.target.value as DatumPosition,
@@ -403,7 +403,7 @@ export function Presentation({
                       disabled={saving}
                       data-testid={`${prueba}-solo-extremos`}
                       onChange={(e) =>
-                        poner({
+                        set({
                           etiquetasDeDato: { ...labels, onlyEnds: e.target.checked },
                         })
                       }
@@ -422,7 +422,7 @@ export function Presentation({
                 value={p.apilado ?? "ninguno"}
                 disabled={saving}
                 data-testid={`${prueba}-apilado`}
-                onChange={(e) => poner({ apilado: e.target.value as StackingMode })}
+                onChange={(e) => set({ apilado: e.target.value as StackingMode })}
               >
                 {STACKING_MODES.map((m) => (
                   <option key={m} value={m}>
@@ -445,7 +445,7 @@ export function Presentation({
                   disabled={saving}
                   data-testid={`${prueba}-orden-por`}
                   onChange={(e) =>
-                    poner({
+                    set({
                       orden:
                         e.target.value === "ninguno"
                           ? undefined
@@ -467,7 +467,7 @@ export function Presentation({
                     disabled={saving}
                     data-testid={`${prueba}-orden-direccion`}
                     onChange={(e) =>
-                      poner({
+                      set({
                         orden: { ...p.orden, direction: e.target.value as "asc" | "desc" },
                       })
                     }
@@ -498,7 +498,7 @@ export function Presentation({
               disabled={saving}
               data-testid={`${prueba}-multiplos-columnas`}
               onChange={(e) =>
-                poner({
+                set({
                   multiplos: {
                     ...p.multiplos,
                     gridColumns: e.target.value === "0" ? undefined : Number(e.target.value),
@@ -526,7 +526,7 @@ export function Presentation({
               disabled={saving}
               data-testid={`${prueba}-misma-escala`}
               onChange={(e) =>
-                poner({ multiplos: { ...p.multiplos, sameScale: e.target.checked } })
+                set({ multiplos: { ...p.multiplos, sameScale: e.target.checked } })
               }
             />{" "}
             Misma escala en todos los paneles
@@ -548,7 +548,7 @@ export function Presentation({
               checked={p.tooltip?.total === true}
               disabled={saving}
               data-testid={`${prueba}-tooltip-total`}
-              onChange={(e) => poner({ tooltip: { ...p.tooltip, total: e.target.checked } })}
+              onChange={(e) => set({ tooltip: { ...p.tooltip, total: e.target.checked } })}
             />{" "}
             Anadir el total de la categoria
           </label>
@@ -563,7 +563,7 @@ export function Presentation({
               disabled={saving}
               data-testid={`${prueba}-tooltip-orden`}
               onChange={(e) =>
-                poner({ tooltip: { ...p.tooltip, sortValue: e.target.checked } })
+                set({ tooltip: { ...p.tooltip, sortValue: e.target.checked } })
               }
             />{" "}
             Ordenar las dataRows de mayor a menor
@@ -580,7 +580,7 @@ export function Presentation({
             medidas={instance.binding.measures}
             saving={saving}
             prueba={`${prueba}-cond`}
-            onCambiar={(rules) => poner({ condicional: rules ? { rules } : undefined })}
+            onCambiar={(rules) => set({ condicional: rules ? { rules } : undefined })}
           />
         </Section>
       ) : null}
@@ -593,7 +593,7 @@ export function Presentation({
             lineas={p.referencias ?? []}
             saving={saving}
             prueba={`${prueba}-ref`}
-            onCambiar={(referencias) => poner({ referencias })}
+            onCambiar={(referencias) => set({ referencias })}
           />
         </Section>
       ) : null}
@@ -624,7 +624,7 @@ export function Presentation({
                       siguiente.push(siguiente.length);
                     }
                     siguiente[s] = Number(e.target.value);
-                    poner({ coloresDeSerie: siguiente });
+                    set({ coloresDeSerie: siguiente });
                   }}
                 >
                   {PALETTE_COLORS.map((n) => (
@@ -660,7 +660,7 @@ export function Presentation({
               disabled={saving}
               data-testid={`${prueba}-hueco`}
               onChange={(e) =>
-                poner({ circular: { ...p.circular, radioInterior: Number(e.target.value) } })
+                set({ circular: { ...p.circular, radioInterior: Number(e.target.value) } })
               }
             />
             <span className="field__pista">0 % es un pastel; 55 % es una dona.</span>
@@ -673,7 +673,7 @@ export function Presentation({
               disabled={saving}
               data-testid={`${prueba}-etiquetas-circular`}
               onChange={(e) =>
-                poner({
+                set({
                   circular: { ...p.circular, labels: e.target.value as PieLabel },
                 })
               }
@@ -692,7 +692,7 @@ export function Presentation({
               checked={p.circular?.ordenar !== false}
               disabled={saving}
               data-testid={`${prueba}-ordenar-porciones`}
-              onChange={(e) => poner({ circular: { ...p.circular, ordenar: e.target.checked } })}
+              onChange={(e) => set({ circular: { ...p.circular, ordenar: e.target.checked } })}
             />{" "}
             Ordenar de mayor a menor
           </label>
@@ -704,7 +704,7 @@ export function Presentation({
               disabled={saving || (p.circular?.radioInterior ?? 0) === 0}
               data-testid={`${prueba}-total-centro`}
               onChange={(e) =>
-                poner({ circular: { ...p.circular, totalEnElCentro: e.target.checked } })
+                set({ circular: { ...p.circular, totalEnElCentro: e.target.checked } })
               }
             />{" "}
             Total en el centro
@@ -733,7 +733,7 @@ export function Presentation({
                 disabled={saving}
                 data-testid={`${prueba}-minimo`}
                 onBlur={(e) =>
-                  poner({
+                  set({
                     medidor: {
                       ...p.medidor,
                       minimo: e.target.value === "" ? undefined : Number(e.target.value),
@@ -750,7 +750,7 @@ export function Presentation({
                 disabled={saving}
                 data-testid={`${prueba}-maximo`}
                 onBlur={(e) =>
-                  poner({
+                  set({
                     medidor: {
                       ...p.medidor,
                       maximo: e.target.value === "" ? undefined : Number(e.target.value),
@@ -773,7 +773,7 @@ export function Presentation({
               disabled={saving}
               data-testid={`${prueba}-objetivo`}
               onBlur={(e) =>
-                poner({
+                set({
                   medidor: {
                     ...p.medidor,
                     objetivo: e.target.value === "" ? undefined : Number(e.target.value),
@@ -793,7 +793,7 @@ export function Presentation({
               checked={p.medidor?.showValue !== false}
               disabled={saving}
               data-testid={`${prueba}-mostrar-valor`}
-              onChange={(e) => poner({ medidor: { ...p.medidor, showValue: e.target.checked } })}
+              onChange={(e) => set({ medidor: { ...p.medidor, showValue: e.target.checked } })}
             />{" "}
             Mostrar la cifra bajo la aguja
           </label>
@@ -810,7 +810,7 @@ export function Presentation({
               value={p.embudo?.compare ?? "primero"}
               disabled={saving}
               data-testid={`${prueba}-comparar`}
-              onChange={(e) => poner({ embudo: { compare: e.target.value as FunnelComparison } })}
+              onChange={(e) => set({ embudo: { compare: e.target.value as FunnelComparison } })}
             >
               {FUNNEL_COMPARISONS.map((c) => (
                 <option key={c} value={c}>
@@ -840,7 +840,7 @@ export function Presentation({
               checked={p.cascada?.showTotal !== false}
               disabled={saving}
               data-testid={`${prueba}-mostrar-total`}
-              onChange={(e) => poner({ cascada: { showTotal: e.target.checked } })}
+              onChange={(e) => set({ cascada: { showTotal: e.target.checked } })}
             />{" "}
             Barra final con el total
           </label>
@@ -861,7 +861,7 @@ export function Presentation({
               checked={p.combinado?.axisSecondary === true}
               disabled={saving}
               data-testid={`${prueba}-eje-secundario`}
-              onChange={(e) => poner({ combinado: { axisSecondary: e.target.checked } })}
+              onChange={(e) => set({ combinado: { axisSecondary: e.target.checked } })}
             />{" "}
             Medir las lineas en un eje aparte, a la derecha
           </label>
@@ -888,7 +888,7 @@ export function Presentation({
               checked={p.ejes?.showX !== false}
               disabled={saving}
               data-testid={`${prueba}-eje-x`}
-              onChange={(e) => poner({ ejes: { ...p.ejes, showX: e.target.checked } })}
+              onChange={(e) => set({ ejes: { ...p.ejes, showX: e.target.checked } })}
             />{" "}
             Mostrar el eje de categorias
           </label>
@@ -899,7 +899,7 @@ export function Presentation({
               defaultValue={p.ejes?.xTitle ?? ""}
               disabled={saving}
               data-testid={`${prueba}-titulo-x`}
-              onBlur={(e) => poner({ ejes: { ...p.ejes, xTitle: e.target.value || undefined } })}
+              onBlur={(e) => set({ ejes: { ...p.ejes, xTitle: e.target.value || undefined } })}
             />
             {/*
               Se escribe a mano y no sale del nombre del campo: `DimTribunal.Distrito` en un
@@ -915,7 +915,7 @@ export function Presentation({
                 defaultValue={p.ejes?.tituloY2 ?? ""}
                 disabled={saving}
                 data-testid={`${prueba}-titulo-y2`}
-                onBlur={(e) => poner({ ejes: { ...p.ejes, tituloY2: e.target.value || undefined } })}
+                onBlur={(e) => set({ ejes: { ...p.ejes, tituloY2: e.target.value || undefined } })}
               />
               <span className="field__pista">El que mide las lineas.</span>
             </label>
@@ -927,7 +927,7 @@ export function Presentation({
               checked={p.ejes?.mostrarY !== false}
               disabled={saving}
               data-testid={`${prueba}-eje-y`}
-              onChange={(e) => poner({ ejes: { ...p.ejes, mostrarY: e.target.checked } })}
+              onChange={(e) => set({ ejes: { ...p.ejes, mostrarY: e.target.checked } })}
             />{" "}
             Mostrar el eje de valores
           </label>
@@ -938,7 +938,7 @@ export function Presentation({
               defaultValue={p.ejes?.tituloY ?? ""}
               disabled={saving}
               data-testid={`${prueba}-titulo-y`}
-              onBlur={(e) => poner({ ejes: { ...p.ejes, tituloY: e.target.value || undefined } })}
+              onBlur={(e) => set({ ejes: { ...p.ejes, tituloY: e.target.value || undefined } })}
             />
           </label>
 
@@ -948,7 +948,7 @@ export function Presentation({
               checked={p.ejes?.gridlines !== false}
               disabled={saving}
               data-testid={`${prueba}-cuadricula`}
-              onChange={(e) => poner({ ejes: { ...p.ejes, gridlines: e.target.checked } })}
+              onChange={(e) => set({ ejes: { ...p.ejes, gridlines: e.target.checked } })}
             />{" "}
             Lineas de cuadricula
           </label>
@@ -959,7 +959,7 @@ export function Presentation({
               checked={p.ejes?.desdeCero !== false}
               disabled={saving}
               data-testid={`${prueba}-desde-cero`}
-              onChange={(e) => poner({ ejes: { ...p.ejes, desdeCero: e.target.checked } })}
+              onChange={(e) => set({ ejes: { ...p.ejes, desdeCero: e.target.checked } })}
             />{" "}
             Empezar en cero
           </label>
@@ -982,7 +982,7 @@ export function Presentation({
                 disabled={saving}
                 data-testid={`${prueba}-minimo-y`}
                 onBlur={(e) =>
-                  poner({
+                  set({
                     ejes: {
                       ...p.ejes,
                       minimoY: e.target.value === "" ? undefined : Number(e.target.value),
@@ -999,7 +999,7 @@ export function Presentation({
                 disabled={saving}
                 data-testid={`${prueba}-maximo-y`}
                 onBlur={(e) =>
-                  poner({
+                  set({
                     ejes: {
                       ...p.ejes,
                       maximoY: e.target.value === "" ? undefined : Number(e.target.value),
@@ -1021,7 +1021,7 @@ export function Presentation({
               disabled={saving}
               data-testid={`${prueba}-rotar-x`}
               onChange={(e) =>
-                poner({
+                set({
                   ejes: {
                     ...p.ejes,
                     rotateX: e.target.value === "0" ? undefined : Number(e.target.value),
@@ -1081,7 +1081,7 @@ function PanelPickers({
   const effective = effectivePickers(instance, settings, kinds);
   const prueba = `selectores-${instance.instanceId}`;
 
-  const ponerTipo = (fieldName: string, tipo: PickerKind) =>
+  const kindSet = (fieldName: string, tipo: PickerKind) =>
     onCambiar((i) => {
       const previos = (
         i.settings?.objectId === "panel-de-filtros"
@@ -1126,7 +1126,7 @@ function PanelPickers({
               disabled={saving}
               data-testid={`${prueba}-${s.fieldName}`}
               onChange={(e) =>
-                ponerTipo(s.fieldName, e.target.value as PickerKind)
+                kindSet(s.fieldName, e.target.value as PickerKind)
               }
             >
               {PICKER_KINDS.map((t) => (
@@ -1166,34 +1166,34 @@ function MeasureFormat({
   const formatos = instance.presentacion?.formatos;
   const medidas = instance.binding.measures;
 
-  const ponerFormatos = (siguiente: ObjectFormats) =>
+  const formatSet = (siguiente: ObjectFormats) =>
     onCambiar((i) => ({ ...i, presentacion: { ...i.presentacion, formatos: siguiente } }));
 
-  const ponerGeneral = (formato: NumberFormat) =>
-    ponerFormatos({ ...formatos, general: formato });
+  const generalSet = (formato: NumberFormat) =>
+    formatSet({ ...formatos, general: formato });
 
-  const ponerMedida = (medida: string, formato: NumberFormat | undefined) => {
+  const measureSet = (medida: string, formato: NumberFormat | undefined) => {
     const porMedida = { ...(formatos?.porMedida ?? {}) };
     // Quitar la excepcion se guarda BORRANDO la clave, no copiando el general: si se copiara, la
     // medida dejaria de seguir al general sin que nadie lo hubiera pedido.
     if (formato) porMedida[medida] = formato;
     else delete porMedida[medida];
-    ponerFormatos({ ...formatos, porMedida });
+    formatSet({ ...formatos, porMedida });
   };
 
   return (
     <>
-      <RenglonDeFormato
+      <FormatRow
         titulo="General"
         help="Se aplica a toda medida que no tenga el suyo. Cambiarlo cambia todas a la vez."
         formato={formatos?.general ?? {}}
         prueba={`${prueba}-formato-general`}
         saving={saving}
-        onCambiar={ponerGeneral}
+        onCambiar={generalSet}
       />
 
       {medidas.map((medida) => {
-        const propio = formatos?.porMedida?.[medida];
+        const own = formatos?.porMedida?.[medida];
         return (
           <Section
             key={medida}
@@ -1205,20 +1205,20 @@ function MeasureFormat({
             <label className="editor__interruptor">
               <input
                 type="checkbox"
-                checked={propio !== undefined}
+                checked={own !== undefined}
                 disabled={saving}
                 data-testid={`${prueba}-excepcion-${medida}`}
-                onChange={(e) => ponerMedida(medida, e.target.checked ? { tipo: "general" } : undefined)}
+                onChange={(e) => measureSet(medida, e.target.checked ? { tipo: "general" } : undefined)}
               />{" "}
               Formato propio
             </label>
-            {propio ? (
-              <RenglonDeFormato
+            {own ? (
+              <FormatRow
                 titulo={`Formato de ${medida}`}
-                formato={propio}
+                formato={own}
                 prueba={`${prueba}-formato-m-${medida}`}
                 saving={saving}
-                onCambiar={(formato) => ponerMedida(medida, formato)}
+                onCambiar={(formato) => measureSet(medida, formato)}
               />
             ) : null}
           </Section>
@@ -1229,7 +1229,7 @@ function MeasureFormat({
 }
 
 /** Un renglon: el tipo y lo que ese tipo necesite. */
-function RenglonDeFormato({
+function FormatRow({
   titulo,
   help,
   formato,

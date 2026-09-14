@@ -7,12 +7,12 @@ import type { ManagedTree, NavNode, TreeOperation } from '@app/access-control';
 
 interface Previsualizacion {
   moduleIds: string[];
-  scopeAntes?: { restrictions: { dimension: { table: string; field: string }; allowedValues: string[] }[] };
-  scopeDespues?: { restrictions: { dimension: { table: string; field: string }; allowedValues: string[] }[] };
+  beforeScope?: { restrictions: { dimension: { table: string; field: string }; allowedValues: string[] }[] };
+  afterScope?: { restrictions: { dimension: { table: string; field: string }; allowedValues: string[] }[] };
   cambiaElAmbito: boolean;
 }
 
-const describirAmbito = (scope: Previsualizacion['scopeAntes']): string => {
+const scopeDescribe = (scope: Previsualizacion['beforeScope']): string => {
   if (!scope || scope.restrictions.length === 0) return 'sin restriccion propia';
   return scope.restrictions
     .map((r) => `${r.dimension.table}.${r.dimension.field} = ${r.allowedValues.join(', ') || '(nada)'}`)
@@ -21,7 +21,7 @@ const describirAmbito = (scope: Previsualizacion['scopeAntes']): string => {
 
 export function TreeEditor({ initial }: { initial: ManagedTree }) {
   const [arbol, setArbol] = useState<ManagedTree>(initial);
-  const [seleccionado, setSeleccionado] = useState<string | null>(null);
+  const [selected, setSeleccionado] = useState<string | null>(null);
   const [pendiente, setPendiente] = useState<{ op: TreeOperation; previo: Previsualizacion } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,9 +80,9 @@ export function TreeEditor({ initial }: { initial: ManagedTree }) {
             <code>{pendiente.previo.moduleIds.join(', ')}</code>
           </p>
           <p className="muted-text">
-            Antes: {describirAmbito(pendiente.previo.scopeAntes)}
+            Antes: {scopeDescribe(pendiente.previo.beforeScope)}
             <br />
-            Despues: {describirAmbito(pendiente.previo.scopeDespues)}
+            Despues: {scopeDescribe(pendiente.previo.afterScope)}
           </p>
           <div className="notice__actions">
             <button
@@ -104,7 +104,7 @@ export function TreeEditor({ initial }: { initial: ManagedTree }) {
 
       <Nodes
         nodos={arbol.nodes}
-        seleccionado={seleccionado}
+        selected={selected}
         onSeleccionar={setSeleccionado}
         onMover={pedirMovimiento}
         onOperacion={enviar}
@@ -150,7 +150,7 @@ function recogerCarpetas(nodos: NavNode[], acumulado: { id: string; name: string
 
 function Nodes({
   nodos,
-  seleccionado,
+  selected,
   onSeleccionar,
   onMover,
   onOperacion,
@@ -158,7 +158,7 @@ function Nodes({
   nivel = 0,
 }: {
   nodos: NavNode[];
-  seleccionado: string | null;
+  selected: string | null;
   onSeleccionar: (id: string) => void;
   onMover: (nodeId: string, newParentId: string | null) => void;
   onOperacion: (op: TreeOperation) => Promise<boolean>;
@@ -170,7 +170,7 @@ function Nodes({
       {nodos.map((node) => {
         const nombre = node.type === 'folder' ? node.name : node.moduleRef.name;
         const esCarpeta = node.type === 'folder';
-        const activo = seleccionado === node.id;
+        const activo = selected === node.id;
 
         return (
           <li key={node.id}>
@@ -262,7 +262,7 @@ function Nodes({
             {esCarpeta ? (
               <Nodes
                 nodos={node.children}
-                seleccionado={seleccionado}
+                selected={selected}
                 onSeleccionar={onSeleccionar}
                 onMover={onMover}
                 onOperacion={onOperacion}

@@ -54,7 +54,7 @@ export function Reset() {
           <h1>Contrasena restablecida</h1>
           <p className="muted-text">
             Ya puede iniciar sesion con la contrasena new y su code de verificacion. Las
-            sesiones que estuvieran abiertas con la anterior se han cerrado.
+            sessions que estuvieran abiertas con la anterior se han cerrado.
           </p>
           <button
             type="button"

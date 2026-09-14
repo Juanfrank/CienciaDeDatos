@@ -11,15 +11,15 @@ export function Help({ content, de }: { content: string; de: string }) {
 
   useEffect(() => {
     if (!abierto) return;
-    const alPulsarTecla = (e: KeyboardEvent) => {
+    const toClickKeystroke = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       // En captura y cortando la propagacion: el editor tiene su propio Escape, que deselecciona
       // el objeto. Sin esto, cerrar una ayuda vaciaria ademas el panel entero.
       e.stopImmediatePropagation();
       setAbierto(false);
     };
-    document.addEventListener('keydown', alPulsarTecla, true);
-    return () => document.removeEventListener('keydown', alPulsarTecla, true);
+    document.addEventListener('keydown', toClickKeystroke, true);
+    return () => document.removeEventListener('keydown', toClickKeystroke, true);
   }, [abierto]);
 
   return (

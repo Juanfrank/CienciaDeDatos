@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { contractSlots, validatePresentation, validateSlots } from '@app/ui-components';
 import { objectRegistry } from './context';
-import { modulosDemo } from './modules';
+import { demoModules } from './modules';
 
 /**
  * Las ranuras que un modulo guardado usa tienen que existir en el contrato de su objeto.
@@ -13,7 +13,7 @@ import { modulosDemo } from './modules';
  * pantalla. Aqui se ve en segundos, no tras ocho minutos de navegador.
  */
 describe('ranuras de los modulos de demostracion', () => {
-  const instancias = modulosDemo.flatMap((m) =>
+  const instancias = demoModules.flatMap((m) =>
     m.pages.flatMap((p) =>
       p.items.map((i) => ({ modulo: m.slug, item: i.id, instance: i.instance })),
     ),
@@ -27,8 +27,8 @@ describe('ranuras de los modulos de demostracion', () => {
     it(`${modulo}/${item}: cada ranura asignada existe en el contrato`, () => {
       const contrato = objectRegistry.resolve(instance.objectId, instance.version).dataContract;
       const declared = contractSlots(contrato).map((r) => r.id);
-      const usadas = Object.keys(instance.binding.slots ?? {});
-      expect(usadas.filter((r) => !declared.includes(r))).toEqual([]);
+      const used = Object.keys(instance.binding.slots ?? {});
+      expect(used.filter((r) => !declared.includes(r))).toEqual([]);
     });
 
     it(`${modulo}/${item}: las ranuras cumplen minimos y maximos`, () => {

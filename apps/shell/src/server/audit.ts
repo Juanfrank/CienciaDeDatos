@@ -1,13 +1,13 @@
 import type { ConfigChangeLog } from '@app/observability';
 import { assertConfigChangeIsAuditable } from '@app/observability';
 import type { TreeAuditEvent } from '@app/access-control';
-import { KEY_AUDIT, escribir, readList } from './almacenCompartido';
+import { KEY_AUDIT, write, readList } from './almacenCompartido';
 
 /** Registro de auditoria de configuracion — secciones 4.10.7 y 7. */
 /** Los eventos viven en el almacen COMPARTIDO. */
-const leerEventos = (): Promise<ConfigChangeLog[]> => readList<ConfigChangeLog>(KEY_AUDIT);
+const readEvents = (): Promise<ConfigChangeLog[]> => readList<ConfigChangeLog>(KEY_AUDIT);
 
-export interface RegistrarCambioInput {
+export interface RecordChangeInput {
   actorId: string;
   entityType: ConfigChangeLog['entityType'];
   entityId: string;
@@ -19,7 +19,7 @@ export interface RegistrarCambioInput {
 }
 
 /** Registra un cambio de configuracion. */
-export async function registrarCambio(input: RegistrarCambioInput): Promise<ConfigChangeLog> {
+export async function changeRecord(input: RecordChangeInput): Promise<ConfigChangeLog> {
   const evento: ConfigChangeLog = {
     kind: 'config-change',
     timestamp: new Date().toISOString(),
@@ -34,17 +34,17 @@ export async function registrarCambio(input: RegistrarCambioInput): Promise<Conf
   };
 
   assertConfigChangeIsAuditable(evento);
-  await escribir(KEY_AUDIT, [...(await leerEventos()), evento]);
+  await write(KEY_AUDIT, [...(await readEvents()), evento]);
   return evento;
 }
 
 /** Traduce un evento de dominio del arbol al formato del log de configuracion. */
-export async function registrarEventoDeArbol(evento: TreeAuditEvent): Promise<ConfigChangeLog> {
-  return registrarCambio({
+export async function treeEventRecord(evento: TreeAuditEvent): Promise<ConfigChangeLog> {
+  return changeRecord({
     actorId: evento.actorId,
     entityType: 'nav-node',
     entityId: evento.nodeId,
-    action: evento.action === 'mover' ? 'move' : mapearAccion(evento.action),
+    action: evento.action === 'mover' ? 'move' : actionMap(evento.action),
     ...(evento.scopeBefore ? { before: evento.scopeBefore } : {}),
     ...(evento.scopeAfter ? { after: evento.scopeAfter } : {}),
     // Un movimiento NO es una ampliacion por si mismo: puede restringir igual que ampliar. Lo
@@ -53,7 +53,7 @@ export async function registrarEventoDeArbol(evento: TreeAuditEvent): Promise<Co
   });
 }
 
-function mapearAccion(accion: TreeAuditEvent['action']): ConfigChangeLog['action'] {
+function actionMap(accion: TreeAuditEvent['action']): ConfigChangeLog['action'] {
   switch (accion) {
     case 'crear-carpeta':
     case 'create-module':
@@ -71,28 +71,28 @@ export interface FilterAudit {
   entityType?: ConfigChangeLog['entityType'];
   actorId?: string;
   /** Solo ampliaciones de ambito. Es la vista que el documento pide destacar (seccion 7). */
-  soloAmpliaciones?: boolean;
+  onlyExpansions?: boolean;
   /** Solo movimientos en la organizacion general (4.1.2). */
-  soloMovimientos?: boolean;
+  onlyMoves?: boolean;
 }
 
 /** Registro filtrable, mas reciente primero. */
-export async function listarAuditoria(filtro: FilterAudit = {}): Promise<ConfigChangeLog[]> {
-  return (await leerEventos())
+export async function auditList(filtro: FilterAudit = {}): Promise<ConfigChangeLog[]> {
+  return (await readEvents())
     .filter((e) => !filtro.entityType || e.entityType === filtro.entityType)
     .filter((e) => !filtro.actorId || e.actorId === filtro.actorId)
-    .filter((e) => !filtro.soloAmpliaciones || e.isScopeExpansion)
-    .filter((e) => !filtro.soloMovimientos || e.action === 'move')
+    .filter((e) => !filtro.onlyExpansions || e.isScopeExpansion)
+    .filter((e) => !filtro.onlyMoves || e.action === 'move')
     .slice()
     .reverse();
 }
 
 /** Numero de ampliaciones de ambito vigentes. */
-export async function contarAmpliaciones(): Promise<number> {
-  return (await leerEventos()).filter((e) => e.isScopeExpansion).length;
+export async function expansionsCount(): Promise<number> {
+  return (await readEvents()).filter((e) => e.isScopeExpansion).length;
 }
 
 /** Solo para pruebas. */
 export async function clearAudit(): Promise<void> {
-  await escribir(KEY_AUDIT, []);
+  await write(KEY_AUDIT, []);
 }

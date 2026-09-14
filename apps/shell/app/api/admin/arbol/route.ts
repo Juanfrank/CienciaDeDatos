@@ -1,6 +1,6 @@
 import { withAdmin } from '../guardia';
 import {
-  ejecutarOperacionDeArbol,
+  treeOperationRun,
   previsualizarMovimiento,
 } from '../../../../src/server/admin';
 import { getManagedTree } from '../../../../src/server/context';
@@ -26,5 +26,5 @@ export async function POST(request: Request) {
     return withAdmin(async () => await previsualizarMovimiento(body.nodeId, body.newParentId));
   }
 
-  return withAdmin(async (actor) => ({ arbol: await ejecutarOperacionDeArbol(actor, body) }));
+  return withAdmin(async (actor) => ({ arbol: await treeOperationRun(actor, body) }));
 }

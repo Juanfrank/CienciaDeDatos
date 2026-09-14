@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from './instancia';
-import { entrarComo } from './session';
+import { expect, test, type Page } from './instance';
+import { asLogin } from './session';
 
 /**
  * Accesibilidad — seccion 4.9, "no opcional, no se pospone", y criterio de la seccion 9:
@@ -21,12 +21,12 @@ async function infracciones(page: Page): Promise<string[]> {
 
 /** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-ana');
+  await asLogin(page, 'u-ana');
 });
 
 test.describe('paginas de modulo', () => {
   test('un modulo con sus objetos no tiene infracciones WCAG 2.1 AA', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await expect(page.getByTestId('tabla')).toBeVisible();
 
@@ -36,7 +36,7 @@ test.describe('paginas de modulo', () => {
   test('con filtros activos y objetos rotos tampoco', async ({ page }) => {
     // 'audiencias' contiene un objeto marcado como roto: el aviso de error tambien tiene que
     // ser accesible, que es justo cuando mas falta hace.
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/audiencias?DimTribunal.Materia=Penal');
     await expect(page.getByTestId('objeto-roto')).toBeVisible();
 
@@ -44,7 +44,7 @@ test.describe('paginas de modulo', () => {
   });
 
   test('con un tooltip explicativo abierto tampoco hay infracciones', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('icon-tooltip-Pendientes por distrito').hover();
     await expect(page.getByTestId('tooltip-Pendientes por distrito')).toBeVisible();
@@ -53,7 +53,7 @@ test.describe('paginas de modulo', () => {
   });
 
   test('el emergente de datos de origen es accesible, con el foco dentro', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('data-table-abrir-Pendientes por distrito').click();
     await expect(page.getByTestId('data-table-Pendientes por distrito')).toBeVisible();
@@ -69,7 +69,7 @@ test.describe('paginas de modulo', () => {
   });
 
   test('el estado de una exportacion en curso es accesible', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('abrir-exportar').click();
     await page.getByTestId('exportar').click();
@@ -91,7 +91,7 @@ test.describe('panel de administracion (4.10.8)', () => {
     '/admin/auditoria',
   ]) {
     test(`${path} no tiene infracciones WCAG 2.1 AA`, async ({ page }) => {
-      await entrarComo(page, 'u-admin');
+      await asLogin(page, 'u-admin');
       await page.goto(path);
       await expect(page.locator('h1')).toBeVisible();
 
@@ -111,7 +111,7 @@ test.describe('restablecimiento de contrasena (4.7.2)', () => {
 
 test.describe('personalizacion (4.6)', () => {
   test('el dialogo de Mi vista es accesible, con sus casillas etiquetadas', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('my-view').click();
     await expect(page.getByTestId('dialogo-my-view')).toBeVisible();
@@ -122,7 +122,7 @@ test.describe('personalizacion (4.6)', () => {
 
 test.describe('editor de modulos (4.2)', () => {
   test('la lista y el editor de un modulo no tienen infracciones WCAG 2.1 AA', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
 
     // Con un modulo de verdad dentro: un editor vacio no dibuja ni la paleta ni los campos de
     // mapeo, que es justo donde estaria el problema de accesibilidad si lo hubiera.
@@ -146,7 +146,7 @@ test.describe('editor de modulos (4.2)', () => {
   });
 
   test('la pantalla de sin permiso tampoco', async ({ page }) => {
-    await entrarComo(page, 'u-beto');
+    await asLogin(page, 'u-beto');
     await page.goto('/editor');
     await expect(page.getByTestId('sin-permiso-editor')).toBeVisible();
     expect(await infracciones(page)).toEqual([]);
@@ -155,7 +155,7 @@ test.describe('editor de modulos (4.2)', () => {
 
 test.describe('avisos (4.9)', () => {
   test('la bandeja de avisos no tiene infracciones WCAG 2.1 AA', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/avisos');
     await expect(page.getByRole('heading', { name: 'Avisos' })).toBeVisible();
 
@@ -165,7 +165,7 @@ test.describe('avisos (4.9)', () => {
   test('el dialogo para crear un aviso es accesible, con sus campos etiquetados', async ({
     page,
   }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('create-notice').click();
     await expect(page.getByTestId('dialogo-aviso')).toBeVisible();
@@ -177,7 +177,7 @@ test.describe('avisos (4.9)', () => {
     page,
   }) => {
     // "Avisos 3" no dice de que. El numero es para la vista; el texto, para quien no la usa.
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await expect(page.getByTestId('campana')).toContainText(/aviso\(s\) sin leer|ningun aviso sin leer/);
   });
@@ -185,7 +185,7 @@ test.describe('avisos (4.9)', () => {
 
 test.describe('paginas de estado', () => {
   test('la pagina de sin permiso es accesible', async ({ page }) => {
-    await entrarComo(page, 'u-beto');
+    await asLogin(page, 'u-beto');
     await page.goto('/admin-sin-permiso');
     expect(await infracciones(page)).toEqual([]);
   });
@@ -200,7 +200,7 @@ test.describe('navegacion solo con teclado', () => {
   test('se llega a la navegacion, a un segmentador y a exportar sin tocar el raton', async ({
     page,
   }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     // Se recorre el orden de tabulacion y se comprueba que los controles clave estan en el.
@@ -223,7 +223,7 @@ test.describe('navegacion solo con teclado', () => {
   test('el foco se VE: un control alcanzable sin indicador es inservible de hecho', async ({
     page,
   }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     // El foco se lleva con el teclado, no con .focus(): :focus-visible no se activa cuando el
@@ -245,7 +245,7 @@ test.describe('navegacion solo con teclado', () => {
   }) => {
     // Una region con desplazamiento que no recibe foco deja su contenido fuera de alcance para
     // quien no usa raton. axe lo marca como scrollable-region-focusable.
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     const contenedor = page.locator('.container-table').first();
@@ -257,7 +257,7 @@ test.describe('navegacion solo con teclado', () => {
   test('un segmentador se activa con Enter y con Espacio, no solo con el raton', async ({
     page,
   }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('slicer-Penal').focus();
@@ -290,7 +290,7 @@ test.describe('los objetos anadidos en los ultimos lotes', () => {
 
   for (const [slug, que] of paginas) {
     test(`/${slug} — ${que} — no tiene infracciones WCAG 2.1 AA`, async ({ page }) => {
-      await entrarComo(page, 'u-ana');
+      await asLogin(page, 'u-ana');
       await page.goto(`/m/composicion/${slug}`);
       // Se espera a que ECharts monte: el lienzo anade su capa `aria` y sus patrones al dibujar,
       // y analizar antes seria analizar una pagina que todavia no es la que se ve.
@@ -308,7 +308,7 @@ test.describe('los objetos anadidos en los ultimos lotes', () => {
      * lector de pantalla pueda recorrer. Cada objeto nuevo trae el suyo, y la comprobacion es que
      * SIGUE en el documento despues de que ECharts monte encima.
      */
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/composicion/flujo');
 
     for (const testid of ['embudo', 'cascada', 'mapa-de-arbol']) {
@@ -323,7 +323,7 @@ test.describe('los objetos anadidos en los ultimos lotes', () => {
   test('los paneles de un multiplo se recorren por sus encabezados', async ({ page }) => {
     // Es como se navega con lector de pantalla una tarjeta con varios graficos dentro: sin
     // encabezados, los seis paneles son un unico bloque sin estructura.
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/composicion/multiplos');
 
     const titulos = page.locator('.multiples__title');

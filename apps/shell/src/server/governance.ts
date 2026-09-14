@@ -1,4 +1,4 @@
-import { CLAVE_GOBIERNO, escribir, leer } from './almacenCompartido';
+import { GOVERNANCE_KEY, write, leer } from './almacenCompartido';
 import type {
   GovernedUser,
   ManagedTree,
@@ -43,7 +43,7 @@ export interface GovernanceStore {
 }
 
 /** Instantanea completa del gobierno, tal como viaja al almacen compartido. */
-export interface InstantaneaDeGobierno {
+export interface GovernanceSnapshot {
   tree: ManagedTree;
   teams: Team[];
   users: GovernedUser[];
@@ -75,8 +75,8 @@ const clonar = <T>(valor: T): T => JSON.parse(JSON.stringify(valor)) as T;
 
 /** Adaptador sobre el almacen compartido. */
 export class StoreGovernanceRepository implements GovernanceStore {
-  private async snapshot(): Promise<InstantaneaDeGobierno> {
-    const guardada = await leer<InstantaneaDeGobierno>(CLAVE_GOBIERNO);
+  private async snapshot(): Promise<GovernanceSnapshot> {
+    const guardada = await leer<GovernanceSnapshot>(GOVERNANCE_KEY);
     // Sin nada guardado todavia se devuelve el estado sembrado SIN persistirlo. Escribir al
     // leer metia una escritura en el camino de lectura —el mas concurrido— y, con varias
     // peticiones a la vez, varias escrituras simultaneas de la misma clave. El seed es
@@ -84,8 +84,8 @@ export class StoreGovernanceRepository implements GovernanceStore {
     return guardada ?? initialStatus();
   }
 
-  private async guardar(change: (actual: InstantaneaDeGobierno) => InstantaneaDeGobierno): Promise<void> {
-    await escribir(CLAVE_GOBIERNO, change(await this.snapshot()));
+  private async guardar(change: (actual: GovernanceSnapshot) => GovernanceSnapshot): Promise<void> {
+    await write(GOVERNANCE_KEY, change(await this.snapshot()));
   }
 
   async getTree(): Promise<ManagedTree> {
@@ -108,14 +108,14 @@ export class StoreGovernanceRepository implements GovernanceStore {
     }));
   }
   async deleteTeam(teamId: string): Promise<boolean> {
-    const existe = (await this.getTeam(teamId)) !== undefined;
-    if (existe) {
+    const exists = (await this.getTeam(teamId)) !== undefined;
+    if (exists) {
       await this.guardar((actual) => ({
         ...actual,
         teams: actual.teams.filter((t) => t.id !== teamId),
       }));
     }
-    return existe;
+    return exists;
   }
 
   async listPackages(): Promise<ModulePackage[]> {
@@ -131,8 +131,8 @@ export class StoreGovernanceRepository implements GovernanceStore {
     }));
   }
   async deletePackage(packageId: string): Promise<boolean> {
-    const existe = (await this.getPackage(packageId)) !== undefined;
-    if (!existe) return false;
+    const exists = (await this.getPackage(packageId)) !== undefined;
+    if (!exists) return false;
 
     await this.guardar((actual) => ({
       ...actual,
@@ -164,9 +164,9 @@ export class StoreGovernanceRepository implements GovernanceStore {
 
   /** Solo para pruebas: devuelve el almacen a su estado sembrado. */
   async reset(): Promise<void> {
-    await escribir(CLAVE_GOBIERNO, initialStatus());
+    await write(GOVERNANCE_KEY, initialStatus());
   }
 }
 
 /** Almacen de gobierno en uso. */
-export const gobierno = new StoreGovernanceRepository();
+export const governance = new StoreGovernanceRepository();

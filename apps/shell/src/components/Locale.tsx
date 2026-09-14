@@ -12,7 +12,7 @@ import { DEFAULT_LOCALE, createTranslator, type Locale, type Translator } from '
  */
 const Context = createContext<Locale>(DEFAULT_LOCALE);
 
-export function ProveedorDeIdioma({
+export function LocaleProvider({
   locale,
   children,
 }: {

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { cargarModulo } from '../../../../src/server/data';
-import { actorDe, moduloServiblePorSlug } from '../../../../src/server/cicloDeVida';
+import { moduleLoad } from '../../../../src/server/data';
+import { actorDe, slugServableModule } from '../../../../src/server/cicloDeVida';
 import { readPersonalization } from '../../../../src/server/personalization';
-import { serializarObjeto } from '../../../../src/server/serializar';
+import { objectSerialize } from '../../../../src/server/serialize';
 import { withoutSession } from '../../../../src/server/respuestas';
-import { obtenerSesion } from '../../../../src/server/session';
+import { sessionGet } from '../../../../src/server/session';
 
 export const runtime = 'nodejs';
 
@@ -13,12 +13,12 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   const { slug } = await params;
   // Por slug pero filtrando por estado: un borrador ajeno no se sirve aunque se pida a mano.
-  const module = await moduloServiblePorSlug(slug, await actorDe(sesion));
+  const module = await slugServableModule(slug, await actorDe(sesion));
   if (!module) {
     return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
   }
@@ -30,7 +30,7 @@ export async function GET(
     requestedFilters[clave] = valores.length > 1 ? valores : (valores[0] ?? '');
   }
 
-  const cargado = await cargarModulo({
+  const loaded = await moduleLoad({
     module,
     personalization: await readPersonalization(sesion.userId, module.moduleId),
     userId: sesion.userId,
@@ -38,16 +38,16 @@ export async function GET(
     requestedFilters,
   });
 
-  if (!cargado) {
+  if (!loaded) {
     return NextResponse.json({ error: 'Pagina no encontrada.' }, { status: 404 });
   }
 
   return NextResponse.json({
     modulo: { slug: module.slug, name: module.name, version: module.version },
-    pagina: cargado.pageSlug,
-    generatedAt: cargado.generatedAt,
-    degradado: cargado.degraded,
-    filtrosAplicados: cargado.appliedFilters,
-    objetos: cargado.objetos.map(serializarObjeto),
+    pagina: loaded.pageSlug,
+    generatedAt: loaded.generatedAt,
+    degradado: loaded.degraded,
+    filtrosAplicados: loaded.appliedFilters,
+    objetos: loaded.objetos.map(objectSerialize),
   });
 }

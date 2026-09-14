@@ -8,7 +8,7 @@ import { Icon } from './icons/Icon';
 /** Pliega y despliega el panel lateral desde la cabecera. */
 
 /** El mismo ancho que la media query del CSS. Si uno cambia, el otro tambien. */
-export const CONSULTA_MOVIL = '(max-width: 640px)';
+export const MOBILE_QUERY = '(max-width: 640px)';
 
 export function ToggleSidebar() {
   const path = usePathname();
@@ -24,7 +24,7 @@ export function ToggleSidebar() {
   }, [path]);
 
   useEffect(() => {
-    const consulta = window.matchMedia(CONSULTA_MOVIL);
+    const consulta = window.matchMedia(MOBILE_QUERY);
 
     // El estado inicial depende del ancho, que en el servidor no se conoce. En movil el panel
     // ocupaba toda la parte de arriba y habia que pasar por el entero antes de llegar al modulo
@@ -35,9 +35,9 @@ export function ToggleSidebar() {
     };
 
     apply(consulta.matches);
-    const alCambiar = (e: MediaQueryListEvent) => apply(e.matches);
-    consulta.addEventListener('change', alCambiar);
-    return () => consulta.removeEventListener('change', alCambiar);
+    const changeTo = (e: MediaQueryListEvent) => apply(e.matches);
+    consulta.addEventListener('change', changeTo);
+    return () => consulta.removeEventListener('change', changeTo);
   }, []);
 
   useEffect(() => {

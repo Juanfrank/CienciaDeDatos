@@ -32,7 +32,7 @@ export function ReferenceLines({
   const cambiar = (siguiente: ReferenceLine[]) =>
     onCambiar(siguiente.length === 0 ? undefined : siguiente);
 
-  const editar = (i: number, change: Partial<ReferenceLine>) =>
+  const edit = (i: number, change: Partial<ReferenceLine>) =>
     cambiar(lineas.map((line, j) => (i === j ? { ...line, ...change } : line)));
 
   return (
@@ -49,7 +49,7 @@ export function ReferenceLines({
                 defaultValue={line.valor}
                 disabled={saving}
                 data-testid={`${prueba}-valor-${i}`}
-                onBlur={(e) => editar(i, { valor: Number(e.target.value) })}
+                onBlur={(e) => edit(i, { valor: Number(e.target.value) })}
               />
             </label>
             <label className="form__field">
@@ -58,7 +58,7 @@ export function ReferenceLines({
                 defaultValue={line.etiqueta ?? ""}
                 disabled={saving}
                 data-testid={`${prueba}-etiqueta-${i}`}
-                onBlur={(e) => editar(i, { etiqueta: e.target.value || undefined })}
+                onBlur={(e) => edit(i, { etiqueta: e.target.value || undefined })}
               />
             </label>
           </div>
@@ -74,7 +74,7 @@ export function ReferenceLines({
               value={line.style ?? "discontinua"}
               disabled={saving}
               data-testid={`${prueba}-estilo-${i}`}
-              onChange={(e) => editar(i, { style: e.target.value as ReferenceStyle })}
+              onChange={(e) => edit(i, { style: e.target.value as ReferenceStyle })}
             >
               {REFERENCE_STYLES.map((style) => (
                 <option key={style} value={style}>
@@ -91,7 +91,7 @@ export function ReferenceLines({
               nombre={`la linea ${i + 1}`}
               prueba={`${prueba}-color-${i}`}
               onCambiar={(color) =>
-                editar(i, { color: color === "predeterminado" ? undefined : color })
+                edit(i, { color: color === "predeterminado" ? undefined : color })
               }
             />
           </div>

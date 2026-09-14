@@ -19,11 +19,11 @@ function source(): SettingsFont {
 
   // La credencial se construye una vez y se reutiliza: renueva el token por dentro, y crear una
   // por lectura descartaria esa cache y pediria token a AAD cada treinta segundos.
-  const credencial = new DefaultAzureCredential();
+  const credential = new DefaultAzureCredential();
   return new AppConfiguration({
     endpoint,
     tokenGet: async () => {
-      const token = await credencial.getToken('https://azconfig.io/.default');
+      const token = await credential.getToken('https://azconfig.io/.default');
       if (!token) throw new Error('Sin token para App Configuration');
       return token.token;
     },
@@ -56,17 +56,17 @@ export async function moduloEncendido(slug: string): Promise<boolean> {
 }
 
 /** Los apagados, para que el panel de administracion pueda DECIR cuales y por que falta uno. */
-export async function slugsApagados(): Promise<string[]> {
+export async function disabledSlugs(): Promise<string[]> {
   return disabledModules(await resolutor().snapshot());
 }
 
 /** El conector activo (2.2). */
-export async function conectorActivo(): Promise<string> {
+export async function activeConnector(): Promise<string> {
   const snapshot = await resolutor().snapshot();
   return snapshot.valores[CONNECTOR_KEY] ?? 'mock';
 }
 
 /** Descarta el resolutor vigente. */
-export function reiniciarConfiguracion(): void {
+export function settingsRestart(): void {
   delete global.__config;
 }

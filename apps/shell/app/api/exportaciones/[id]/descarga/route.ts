@@ -1,12 +1,12 @@
 import { queueExports } from '../../../../../src/server/exports';
 import { withoutSession } from '../../../../../src/server/respuestas';
-import { obtenerSesion } from '../../../../../src/server/session';
+import { sessionGet } from '../../../../../src/server/session';
 
 export const runtime = 'nodejs';
 
 /** Descarga del artefacto ya generado. */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   const { id } = await params;

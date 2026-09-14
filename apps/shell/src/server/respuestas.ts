@@ -6,7 +6,7 @@ export const withoutSession = (): NextResponse =>
   NextResponse.json({ error: 'Se requiere iniciar sesion.' }, { status: 401 });
 
 /** Traduce un error del ciclo de vida a HTTP. */
-export function respuestaDeError(error: unknown): NextResponse {
+export function errorResponse(error: unknown): NextResponse {
   if (error instanceof CicloDeVidaError) {
     return NextResponse.json(
       { error: error.message, detalle: error.detail },

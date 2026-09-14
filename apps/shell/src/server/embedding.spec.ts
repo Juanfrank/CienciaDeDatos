@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
-  PREFIJO_INCRUSTACION,
-  SIN_ENMARCADO,
-  cabecerasDeEnmarcado,
-  codigoDeIncrustacion,
-  esRutaIncrustable,
+  EMBEDDING_PREFIX,
+  WITHOUT_FRAMED,
+  framedHeaders,
+  embeddingCode,
+  isEmbeddablePath,
   origenesDescartados,
   parsearOrigenes,
-  politicaDeEnmarcado,
-} from './incrustacion';
+  framedPolicy,
+} from './embedding';
 
 /**
  * La incrustacion se decide con dos reglas y las dos importan: quien puede enmarcarnos, y que
@@ -47,17 +47,17 @@ describe('parsearOrigenes', () => {
   });
 });
 
-describe('politicaDeEnmarcado', () => {
+describe('framedPolicy', () => {
   const origenes = ['https://portal.ejemplo.do'];
 
   it('deniega el enmarcado en cualquier ruta que no sea de incrustacion', () => {
     for (const path of ['/', '/m/casos', '/admin', '/admin/equipos', '/avisos', '/api/alertas']) {
-      expect(politicaDeEnmarcado(path, origenes)).toBe(SIN_ENMARCADO);
+      expect(framedPolicy(path, origenes)).toBe(WITHOUT_FRAMED);
     }
   });
 
   it('permite enmarcar la ruta de incrustacion desde los origenes configurados', () => {
-    expect(politicaDeEnmarcado('/incrustar/m/casos', origenes)).toBe(
+    expect(framedPolicy('/incrustar/m/casos', origenes)).toBe(
       'frame-ancestors https://portal.ejemplo.do',
     );
   });
@@ -65,34 +65,34 @@ describe('politicaDeEnmarcado', () => {
   it('SIN lista configurada la ruta de incrustacion tambien deniega', () => {
     // Falla cerrado a proposito: una configuracion olvidada tiene que dejar la aplicacion sin
     // incrustar, nunca incrustable por cualquiera.
-    expect(politicaDeEnmarcado('/incrustar/m/casos', [])).toBe(SIN_ENMARCADO);
+    expect(framedPolicy('/incrustar/m/casos', [])).toBe(WITHOUT_FRAMED);
   });
 
   it('una ruta que solo empieza parecido no cuenta como incrustable', () => {
-    expect(esRutaIncrustable('/incrustaciones-falsas')).toBe(false);
-    expect(esRutaIncrustable(PREFIJO_INCRUSTACION)).toBe(true);
-    expect(esRutaIncrustable('/incrustar/m/casos')).toBe(true);
+    expect(isEmbeddablePath('/incrustaciones-falsas')).toBe(false);
+    expect(isEmbeddablePath(EMBEDDING_PREFIX)).toBe(true);
+    expect(isEmbeddablePath('/incrustar/m/casos')).toBe(true);
   });
 });
 
-describe('cabecerasDeEnmarcado', () => {
+describe('framedHeaders', () => {
   it('donde se deniega, acompana con X-Frame-Options', () => {
-    const cabeceras = cabecerasDeEnmarcado('/admin', ['https://portal.ejemplo.do']);
-    expect(cabeceras['content-security-policy']).toBe(SIN_ENMARCADO);
+    const cabeceras = framedHeaders('/admin', ['https://portal.ejemplo.do']);
+    expect(cabeceras['content-security-policy']).toBe(WITHOUT_FRAMED);
     expect(cabeceras['x-frame-options']).toBe('DENY');
   });
 
   it('donde se permite, NO se emite X-Frame-Options', () => {
     // La cabecera antigua no admite lista de origenes —ALLOW-FROM se retiro— asi que ponerla
     // bloquearia la incrustacion en los navegadores que le dan prioridad.
-    const cabeceras = cabecerasDeEnmarcado('/incrustar/m/casos', ['https://portal.ejemplo.do']);
+    const cabeceras = framedHeaders('/incrustar/m/casos', ['https://portal.ejemplo.do']);
     expect(cabeceras['x-frame-options']).toBeUndefined();
   });
 });
 
-describe('codigoDeIncrustacion', () => {
+describe('embeddingCode', () => {
   it('produce un iframe sin permisos de navegador', () => {
-    const code = codigoDeIncrustacion('https://capa.ejemplo.do/', '/incrustar/m/casos', 'Casos');
+    const code = embeddingCode('https://capa.ejemplo.do/', '/incrustar/m/casos', 'Casos');
     expect(code).toContain('src="https://capa.ejemplo.do/incrustar/m/casos"');
     // El iframe no usa camara, micro ni ubicacion: declararlo evita que el portal anfitrion se
     // los conceda sin querer.
@@ -100,7 +100,7 @@ describe('codigoDeIncrustacion', () => {
   });
 
   it('escapa las comillas del titulo, que viene del nombre del modulo', () => {
-    const code = codigoDeIncrustacion('https://x.do', '/incrustar/m/a', 'Casos "especiales"');
+    const code = embeddingCode('https://x.do', '/incrustar/m/a', 'Casos "especiales"');
     expect(code).toContain('title="Casos &quot;especiales&quot;"');
   });
 });

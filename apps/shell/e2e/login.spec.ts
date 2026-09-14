@@ -1,18 +1,18 @@
-import { expect, test } from './instancia';
+import { expect, test } from './instance';
 import {
-  CLAVE_DEMO,
+  DEMO_KEY,
   SECRETO_TOTP_DEMO,
-  codigoTotpDe,
-  usuarioACorreo,
-} from '../src/server/credencialesDemo';
-import { entrarComo } from './session';
+  totpCodeOf,
+  mailUser,
+} from '../src/server/demoCredentials';
+import { asLogin } from './session';
 
 /** Autenticacion de punta a punta — seccion 4.7 y criterios de la seccion 9. */
 
-const CORREO = usuarioACorreo('u-ana');
+const MAIL = mailUser('u-ana');
 
 /** Un correo distinto por prueba: el bloqueo es por cuenta y se pegarian entre ellas. */
-const correoNuevo = () => `inexistente-${Date.now()}-${Math.random().toString(36).slice(2)}@poderjudicial.gob.do`;
+const newMail = () => `inexistente-${Date.now()}-${Math.random().toString(36).slice(2)}@poderjudicial.gob.do`;
 
 test.describe('sin sesion no se entra (criterio de la seccion 9)', () => {
   test('una pagina lleva a la pantalla de acceso, no a los datos', async ({ page }) => {
@@ -81,7 +81,7 @@ test.describe('sin sesion no se entra (criterio de la seccion 9)', () => {
 test.describe('el segundo factor es obligatorio en las cuentas locales (4.7.2)', () => {
   test('con la contrasena correcta y sin codigo, la respuesta es 428 y no hay sesion', async ({ page }) => {
     const respuesta = await page.request.post('/api/acceso', {
-      data: { correo: CORREO, clave: CLAVE_DEMO },
+      data: { mail: MAIL, clave: DEMO_KEY },
     });
 
     expect(respuesta.status()).toBe(428);
@@ -92,7 +92,7 @@ test.describe('el segundo factor es obligatorio en las cuentas locales (4.7.2)',
 
   test('un codigo equivocado no entra aunque la contrasena sea correcta', async ({ page }) => {
     const respuesta = await page.request.post('/api/acceso', {
-      data: { correo: CORREO, clave: CLAVE_DEMO, code: '000000' },
+      data: { mail: MAIL, clave: DEMO_KEY, code: '000000' },
     });
     expect(respuesta.status()).toBe(401);
     expect((await respuesta.json()).motivo).toBe('mfa-invalido');
@@ -104,8 +104,8 @@ test.describe('el segundo factor es obligatorio en las cuentas locales (4.7.2)',
     // la contrasena era correcta.
     await expect(page.getByTestId('acceso-codigo')).toHaveCount(0);
 
-    await page.getByTestId('acceso-correo').fill(CORREO);
-    await page.getByTestId('key-login').fill(CLAVE_DEMO);
+    await page.getByTestId('acceso-correo').fill(MAIL);
+    await page.getByTestId('key-login').fill(DEMO_KEY);
     await page.getByTestId('acceso-entrar').click();
 
     await expect(page.getByTestId('acceso-codigo')).toBeVisible();
@@ -116,10 +116,10 @@ test.describe('el segundo factor es obligatorio en las cuentas locales (4.7.2)',
 test.describe('la pantalla de acceso no informa a quien tantea', () => {
   test('cuenta inexistente y contrasena incorrecta dan el MISMO mensaje', async ({ page }) => {
     const inexistente = await page.request.post('/api/acceso', {
-      data: { correo: correoNuevo(), clave: CLAVE_DEMO },
+      data: { mail: newMail(), clave: DEMO_KEY },
     });
     const equivocada = await page.request.post('/api/acceso', {
-      data: { correo: CORREO, clave: 'Esta-no-es-2026!' },
+      data: { mail: MAIL, clave: 'Esta-no-es-2026!' },
     });
 
     expect(inexistente.status()).toBe(401);
@@ -133,12 +133,12 @@ test.describe('la pantalla de acceso no informa a quien tantea', () => {
     // Cuenta reservada para esto. El bloqueo dura un minuto y vive en el almacen compartido:
     // usar una cuenta real dejaria sin sesion a todas las pruebas que corren despues, y el
     // sintoma —"no se pudo iniciar sesion"— no apuntaria a esta prueba.
-    const correo = usuarioACorreo('u-sin-equipo');
+    const mail = mailUser('u-sin-equipo');
 
     let last = '';
     for (let i = 0; i < 6; i += 1) {
       const r = await page.request.post('/api/acceso', {
-        data: { correo, clave: `Mal-${i}-2026!` },
+        data: { mail, clave: `Mal-${i}-2026!` },
       });
       last = (await r.json()).motivo as string;
     }
@@ -147,16 +147,16 @@ test.describe('la pantalla de acceso no informa a quien tantea', () => {
 
     // Y estando bloqueada, la contrasena CORRECTA tampoco entra: si entrara, el bloqueo solo
     // frenaria a quien se equivoca, no a quien acierta al final.
-    const conLaBuena = await page.request.post('/api/acceso', {
-      data: { correo, clave: CLAVE_DEMO, code: codigoTotpDe(SECRETO_TOTP_DEMO) },
+    const withGoodThe = await page.request.post('/api/acceso', {
+      data: { mail, clave: DEMO_KEY, code: totpCodeOf(SECRETO_TOTP_DEMO) },
     });
-    expect((await conLaBuena.json()).motivo).toBe('cuenta-bloqueada');
+    expect((await withGoodThe.json()).motivo).toBe('cuenta-bloqueada');
   });
 });
 
 test.describe('la sesion emitida es la de quien entro', () => {
   test('entrar da acceso a los datos de SU equipo, no a los de otro', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
 
     const navigation = await (await page.request.get('/api/navegacion')).json();
     expect(navigation.equipoActivo).toBe('equipo-norte');
@@ -167,7 +167,7 @@ test.describe('la sesion emitida es la de quien entro', () => {
   });
 
   test('ya no se puede cambiar de persona sin autenticar', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
 
     // Esta era la puerta de atras del entorno de demostracion: un desplegable que cambiaba de
     // identidad. La ruta ya no acepta userId, y lo que hay que comprobar es que ignorarlo no
@@ -183,7 +183,7 @@ test.describe('la sesion emitida es la de quien entro', () => {
   });
 
   test('cerrar sesion REVOCA, no solo borra la cookie', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const cookie = (await page.context().cookies()).find((c) => c.name === 'sesion');
     expect(cookie).toBeDefined();
 
@@ -224,7 +224,7 @@ test.describe('Azure AD se declara, no se simula', () => {
 
 test.describe('con sesion, la pantalla de acceso no se queda en medio', () => {
   test('quien ya entro va a la aplicacion', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/acceso');
     await expect(page).toHaveURL(/\/m\//);
   });

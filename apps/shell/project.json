@@ -55,6 +55,29 @@
       "dependsOn": [
         "build"
       ]
+    },
+    "e2e-catalogo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "playwright test --config playwright.config.mts --project=catalogo"
+      },
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "{projectRoot}/e2e/**/*",
+        "{workspaceRoot}/playwright.config.mts",
+        "{workspaceRoot}/tools/poblar-cache.mts",
+        "{workspaceRoot}/packages/ui-components/src/**",
+        "{workspaceRoot}/packages/design-tokens/src/**",
+        "{workspaceRoot}/packages/module-model/src/**",
+        "{workspaceRoot}/apps/modules/**",
+        "{workspaceRoot}/apps/shell/app/globals.css"
+      ],
+      "outputs": [
+        "{workspaceRoot}/test-results"
+      ],
+      "cache": true
     }
   }
 }

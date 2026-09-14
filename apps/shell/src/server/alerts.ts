@@ -12,9 +12,9 @@ import {
 import { POPULATOR_HEARTBEAT_KEY, type PopulatorHeartbeat } from '@app/observability';
 import { aggregateBy, aggregationsFor } from '@app/ui-components';
 import { cacheL2 } from './context';
-import { cargarModulo } from './data';
-import { queueExports, encolarExportacion } from './exports';
-import { moduloServibleParaUsuario } from './cicloDeVida';
+import { moduleLoad } from './data';
+import { queueExports, exportEnqueue } from './exports';
+import { userServableModule } from './cicloDeVida';
 
 /** Cableado de alertas y suscripciones (4.9). */
 
@@ -25,19 +25,19 @@ const nuevoId = (): string => crypto.randomUUID();
 
 /** Observaciones del objeto que vigila una regla. */
 export async function observacionesDe(rule: AlertRule): Promise<Observacion[] | null> {
-  const module = await moduloServibleParaUsuario(rule.moduleSlug, rule.ownerUserId);
+  const module = await userServableModule(rule.moduleSlug, rule.ownerUserId);
   if (!module) return null;
 
-  const cargado = await cargarModulo({
+  const loaded = await moduleLoad({
     module,
     ...(rule.pageSlug ? { pageSlug: rule.pageSlug } : {}),
     userId: rule.ownerUserId,
     teamId: rule.teamId,
     requestedFilters: rule.filters,
   });
-  if (!cargado) return null;
+  if (!loaded) return null;
 
-  const objeto = cargado.objetos.find((o) => o.item.instance.instanceId === rule.instanceId);
+  const objeto = loaded.objetos.find((o) => o.item.instance.instanceId === rule.instanceId);
   if (!objeto?.result || objeto.problems.length > 0) return null;
 
   const { dimensions, measures } = objeto.item.instance.binding;
@@ -63,14 +63,14 @@ export async function observacionesDe(rule: AlertRule): Promise<Observacion[] | 
     }));
 }
 
-export interface ResultadoDeEvaluacion {
+export interface EvaluationResult {
   evaluadas: number;
   notificadas: number;
   omitidas: number;
 }
 
 /** Evalua todas las reglas activas y notifica solo las transiciones. */
-export async function evaluarAlertas(ahora = new Date()): Promise<ResultadoDeEvaluacion> {
+export async function evaluateAlerts(ahora = new Date()): Promise<EvaluationResult> {
   const rules = (await alertStore.listRules()).filter((r) => r.enabled);
   let notificadas = 0;
   let omitidas = 0;
@@ -101,7 +101,7 @@ export async function evaluarAlertas(ahora = new Date()): Promise<ResultadoDeEva
 }
 
 /** Evalua solo si el job ha completado un ciclo NUEVO desde la ultima vez. */
-export async function evaluarSiHayDatoNuevo(ahora = new Date()): Promise<ResultadoDeEvaluacion | null> {
+export async function evaluateIfHasDatumNew(ahora = new Date()): Promise<EvaluationResult | null> {
   const latido = await cacheL2.get<PopulatorHeartbeat>(POPULATOR_HEARTBEAT_KEY);
   const finishedAt = latido?.value.finishedAt;
   if (!finishedAt) return null;
@@ -113,29 +113,29 @@ export async function evaluarSiHayDatoNuevo(ahora = new Date()): Promise<Resulta
   // reintenta en bucle: la proxima poblacion traera un latido nuevo y otra oportunidad. Repetir
   // un ciclo que falla es como se llena una bandeja de avisos duplicados.
   await alertStore.setLastHeartbeat(finishedAt);
-  return evaluarAlertas(ahora);
+  return evaluateAlerts(ahora);
 }
 
-export interface ResultadoDeSuscripciones {
+export interface SubscriptionsResult {
   encoladas: number;
   entregadas: number;
 }
 
 /** Atiende las suscripciones: encola lo que toca y entrega lo que ya esta listo. */
-export async function atenderSuscripciones(ahora = new Date()): Promise<ResultadoDeSuscripciones> {
+export async function subscriptionsServe(ahora = new Date()): Promise<SubscriptionsResult> {
   const suscripciones = await alertStore.listSubscriptions();
   let encoladas = 0;
   let entregadas = 0;
 
   for (const sub of suscripciones) {
     if (sub.pendingJobId) {
-      if (await entregarSiEstaListo(sub, ahora)) entregadas += 1;
+      if (await deliverIfThisReady(sub, ahora)) entregadas += 1;
       continue;
     }
 
     if (!deliverMust(sub, ahora)) continue;
 
-    const job = await encolarExportacion({
+    const job = await exportEnqueue({
       moduleSlug: sub.moduleSlug,
       ...(sub.pageSlug ? { pageSlug: sub.pageSlug } : {}),
       format: sub.format,
@@ -147,7 +147,7 @@ export async function atenderSuscripciones(ahora = new Date()): Promise<Resultad
     if (!job) {
       // El modulo ya no existe. Se avisa en vez de callar: una suscripcion que deja de llegar
       // sin decir nada se interpreta como que no hay novedades.
-      await notificaciones.send(avisoDeFallo(sub, 'El modulo ya no existe.', ahora, nuevoId()));
+      await notificaciones.send(failureNotice(sub, 'El modulo ya no existe.', ahora, nuevoId()));
       await alertStore.saveSubscription({ ...sub, enabled: false });
       continue;
     }
@@ -159,7 +159,7 @@ export async function atenderSuscripciones(ahora = new Date()): Promise<Resultad
   return { encoladas, entregadas };
 }
 
-async function entregarSiEstaListo(sub: Subscription, ahora: Date): Promise<boolean> {
+async function deliverIfThisReady(sub: Subscription, ahora: Date): Promise<boolean> {
   const job = sub.pendingJobId ? await queueExports.consultar(sub.pendingJobId) : null;
 
   // El trabajo caduco del store antes de que nadie lo recogiera: se suelta el pendiente para
@@ -173,7 +173,7 @@ async function entregarSiEstaListo(sub: Subscription, ahora: Date): Promise<bool
 
   if (job.status === 'fallida' || !job.artifact) {
     await notificaciones.send(
-      avisoDeFallo(sub, job.error ?? 'No se pudo generar el archivo.', ahora, nuevoId()),
+      failureNotice(sub, job.error ?? 'No se pudo generar el archivo.', ahora, nuevoId()),
     );
   } else {
     await notificaciones.send({
@@ -195,7 +195,7 @@ async function entregarSiEstaListo(sub: Subscription, ahora: Date): Promise<bool
   return true;
 }
 
-function avisoDeFallo(sub: Subscription, motivo: string, ahora: Date, id: string): Notification {
+function failureNotice(sub: Subscription, motivo: string, ahora: Date, id: string): Notification {
   return {
     id,
     recipientUserId: sub.ownerUserId,

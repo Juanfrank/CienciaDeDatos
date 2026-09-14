@@ -12,7 +12,7 @@ import type {
 import { findFreeSlot } from '@app/module-model';
 import { initialSettings } from '@app/ui-components';
 import type { EditorPalette } from '../../server/editor';
-import type { ObjetoSerializado } from '../../server/serializar';
+import type { SerializedObject } from '../../server/serialize';
 import { EditorHeader } from './EditorHeader';
 import { Canvas } from './Canvas';
 import { SidebarPanel } from './SidebarPanel';
@@ -27,7 +27,7 @@ export function ModuleEditor({
   editable,
 }: {
   initial: ModuleDefinition;
-  objetosIniciales: ObjetoSerializado[];
+  objetosIniciales: SerializedObject[];
   diagnosticos: ModuleDiagnostics;
   locks: PublishBlocker[];
   palette: EditorPalette;
@@ -49,11 +49,11 @@ export function ModuleEditor({
   // Escape deselecciona, como en cualquier editor de bloques. Va en el documento y no en el
   // lienzo porque el foco suele estar en el panel cuando hace falta.
   useEffect(() => {
-    const alPulsar = (e: KeyboardEvent) => {
+    const clickTo = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setSeleccion(null);
     };
-    document.addEventListener('keydown', alPulsar);
-    return () => document.removeEventListener('keydown', alPulsar);
+    document.addEventListener('keydown', clickTo);
+    return () => document.removeEventListener('keydown', clickTo);
   }, []);
 
   const guardar = useCallback(
@@ -78,7 +78,7 @@ export function ModuleEditor({
           modulo: ModuleDefinition;
           diagnosticos: ModuleDiagnostics;
           locks: PublishBlocker[];
-          objetos: ObjetoSerializado[];
+          objetos: SerializedObject[];
         };
         setModulo(body.modulo);
         setDiag(body.diagnosticos);
@@ -248,7 +248,7 @@ export function ModuleEditor({
         <SidebarPanel
           objetos={palette.objetos}
           datasets={palette.datasets}
-          seleccionado={chosen}
+          selected={chosen}
           saving={saving}
           onAnadir={(objectId) => void add(objectId)}
           onCambiar={(itemId, change) => void cambiar(itemId, change)}

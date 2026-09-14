@@ -20,7 +20,7 @@ export function AdminRail({ indicadores, id }: { indicadores: Indicadores; id: s
     <nav className="admin__nav" id={id} aria-label="Secciones de administracion">
       <ul className="admin__grupo">
         <li>
-          <EnlaceDeSeccion section={RESUMEN} activo={actual?.href === RESUMEN.href} cuenta={0} />
+          <SectionLink section={RESUMEN} activo={actual?.href === RESUMEN.href} cuenta={0} />
         </li>
       </ul>
 
@@ -37,7 +37,7 @@ export function AdminRail({ indicadores, id }: { indicadores: Indicadores; id: s
           <ul aria-labelledby={`grupo-${grupo.id}`}>
             {grupo.sections.map((s) => (
               <li key={s.href}>
-                <EnlaceDeSeccion
+                <SectionLink
                   section={s}
                   activo={actual?.href === s.href}
                   cuenta={s.indicador ? indicadores[s.indicador] : 0}
@@ -51,7 +51,7 @@ export function AdminRail({ indicadores, id }: { indicadores: Indicadores; id: s
   );
 }
 
-function EnlaceDeSeccion({
+function SectionLink({
   section,
   activo,
   cuenta,
@@ -90,7 +90,7 @@ function EnlaceDeSeccion({
 }
 
 /** El nombre de la seccion actual, en la cabecera. */
-export function SeccionActual() {
+export function CurrentSection() {
   const section = sectionOf(usePathname());
   // En el resumen no se anade nada: «Administracion / Resumen» repite lo que el titulo ya dice.
   if (!section || section.href === RESUMEN.href) return null;

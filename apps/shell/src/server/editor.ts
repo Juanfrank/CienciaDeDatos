@@ -9,7 +9,7 @@ import type {
 } from '@app/ui-components';
 import { fieldKey } from '@app/ui-components';
 import { objectRegistry } from './context';
-import { declaredAggregations, columnasDisponiblesDe } from './data';
+import { declaredAggregations, availableColumnsOf } from './data';
 
 /** Paleta del editor de modulos — seccion 4.2. */
 
@@ -86,7 +86,7 @@ export async function editorPalette(): Promise<EditorPalette> {
      * Un MAPA de nombre a tipo, no un conjunto de nombres.
      */
     const available = new Map(
-      (await columnasDisponiblesDe(declarado.datasetId)).map((c) => [c.name, c.type]),
+      (await availableColumnsOf(declarado.datasetId)).map((c) => [c.name, c.type]),
     );
     datasets.push({
       datasetId: declarado.datasetId,

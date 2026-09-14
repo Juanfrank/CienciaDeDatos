@@ -1,5 +1,5 @@
-import { expect, test } from './instancia';
-import { entrarComo } from './session';
+import { expect, test } from './instance';
+import { asLogin } from './session';
 
 /** Personalizacion por usuario — seccion 4.6. */
 
@@ -7,13 +7,13 @@ const MODULE = 'casos-pendientes';
 const OCULTABLE = 'kpi-ingresados';
 
 /** Deja el modulo sin personalizacion para esta persona. Las pruebas comparten el almacen. */
-async function sinPersonalizar(page: import('@playwright/test').Page): Promise<void> {
+async function withoutCustomize(page: import('@playwright/test').Page): Promise<void> {
   await page.request.delete(`/api/modulos/${MODULE}/vista`);
 }
 
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-ana');
-  await sinPersonalizar(page);
+  await asLogin(page, 'u-ana');
+  await withoutCustomize(page);
 });
 
 test.describe('la vista se distingue de la institucional (4.6)', () => {
@@ -34,7 +34,7 @@ test.describe('la vista se distingue de la institucional (4.6)', () => {
     // Y el objeto deja de dibujarse: lo que no esta en la vista no se lee ni viaja al navegador.
     await expect(page.getByTestId(`cell-${OCULTABLE}`)).toHaveCount(0);
 
-    await sinPersonalizar(page);
+    await withoutCustomize(page);
   });
 
   test('siempre hay camino de vuelta a la vista oficial', async ({ page }) => {
@@ -55,13 +55,13 @@ test.describe('la personalizacion es de quien la hace', () => {
     await page.request.put(`/api/modulos/${MODULE}/vista`, { data: { ocultos: [OCULTABLE] } });
 
     // Beto no tiene concedido casos-pendientes; se comprueba con u-admin, que si lo tiene.
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     await page.goto(`/m/${MODULE}`);
     await expect(page.getByTestId('procedencia')).toContainText('institucional oficial');
     await expect(page.getByTestId(`cell-${OCULTABLE}`)).toBeVisible();
 
-    await entrarComo(page, 'u-ana');
-    await sinPersonalizar(page);
+    await asLogin(page, 'u-ana');
+    await withoutCustomize(page);
   });
 
   test('no hay parametro con el que pedir la vista de otro', async ({ page }) => {
@@ -71,12 +71,12 @@ test.describe('la personalizacion es de quien la hace', () => {
     });
     expect(respuesta.ok()).toBe(true);
 
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     const suya = await (await page.request.get(`/api/modulos/${MODULE}/vista`)).json();
     expect(suya.personalizada).toBe(false);
 
-    await entrarComo(page, 'u-ana');
-    await sinPersonalizar(page);
+    await asLogin(page, 'u-ana');
+    await withoutCustomize(page);
   });
 });
 
@@ -137,7 +137,7 @@ test.describe('la distincion viaja al exportar (4.6)', () => {
     // Y el nombre del archivo tambien lo dice, para quien lo reciba por correo sin abrirlo.
     expect(descarga.headers()['content-disposition']).toContain('vista-personalizada');
 
-    await sinPersonalizar(page);
+    await withoutCustomize(page);
   });
 
   test('el archivo de la vista oficial se anuncia como tal', async ({ page }) => {
@@ -158,18 +158,18 @@ test.describe('la distincion viaja al exportar (4.6)', () => {
 });
 
 test.describe('la personalizacion sobrevive al cambio de instancia (seccion 9)', () => {
-  test('lo guardado en una instancia se ve desde la otra', async ({ page, otraInstancia }) => {
+  test('lo guardado en una instancia se ve desde la otra', async ({ page, instanceOther }) => {
     await page.request.put(`/api/modulos/${MODULE}/vista`, { data: { ocultos: [OCULTABLE] } });
 
     const cookies = await page.context().cookies();
     const sesion = cookies.find((c) => c.name === 'sesion');
-    const respuesta = await page.request.get(`${otraInstancia}/api/modulos/${MODULE}/vista`, {
+    const respuesta = await page.request.get(`${instanceOther}/api/modulos/${MODULE}/vista`, {
       headers: { cookie: `sesion=${sesion?.value ?? ''}` },
     });
 
     expect(respuesta.status()).toBe(200);
     expect((await respuesta.json()).ocultos).toEqual([OCULTABLE]);
 
-    await sinPersonalizar(page);
+    await withoutCustomize(page);
   });
 });

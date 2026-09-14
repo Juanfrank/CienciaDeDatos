@@ -121,17 +121,17 @@ describe('effectivePickers', () => {
   });
 
   it('la etiqueta por defecto es el campo sin la tabla', () => {
-    const [uno] = effectivePickers(objectInstance(['DimTribunal.Materia']), undefined, KINDS);
-    expect(uno?.etiqueta).toBe('Materia');
+    const [one] = effectivePickers(objectInstance(['DimTribunal.Materia']), undefined, KINDS);
+    expect(one?.etiqueta).toBe('Materia');
   });
 
   it('respeta la etiqueta configurada', () => {
-    const [uno] = effectivePickers(
+    const [one] = effectivePickers(
       objectInstance(['DimTribunal.Materia']),
       { pickers: [{ fieldName: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Area' }] },
       KINDS,
     );
-    expect(uno?.etiqueta).toBe('Area');
+    expect(one?.etiqueta).toBe('Area');
   });
 
   it('mantiene el ORDEN del mapeo, no el de la configuracion', () => {

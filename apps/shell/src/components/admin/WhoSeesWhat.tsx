@@ -12,7 +12,7 @@ interface Paso {
 
 interface Result {
   tieneAcceso: boolean;
-  existeEnElArbol: boolean;
+  treeTheExists: boolean;
   noVeNada: boolean;
   usoAmpliacion: boolean;
   scope: Paso['resultado'];
@@ -91,7 +91,7 @@ export function SeesWhoWhere({
         <div className="sees-who-where__result" data-testid="qvq-resultado">
           {!resultado.tieneAcceso ? (
             <p className="aviso notice-error" data-testid="qvq-sin-acceso">
-              {resultado.existeEnElArbol
+              {resultado.treeTheExists
                 ? 'Este equipo NO tiene concedido este modulo. El ambito es irrelevante: no lo ve.'
                 : 'Este modulo no existe en la organizacion general.'}
             </p>

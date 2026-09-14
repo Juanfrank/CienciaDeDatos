@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
 import { describeProvenance } from '@app/module-model';
 import { readPersonalization } from '../../../../src/server/personalization';
-import { cargarModulo } from '../../../../src/server/data';
-import { actorDe, moduloServiblePorSlug } from '../../../../src/server/cicloDeVida';
-import { serializarObjeto } from '../../../../src/server/serializar';
-import { exigirSesionDePagina } from '../../../../src/server/session';
+import { moduleLoad } from '../../../../src/server/data';
+import { actorDe, slugServableModule } from '../../../../src/server/cicloDeVida';
+import { objectSerialize } from '../../../../src/server/serialize';
+import { pageSessionRequire } from '../../../../src/server/session';
 import { ModuleView } from '../../../../src/components/ModuleView';
 import { ScopeBadge } from '../../../../src/components/ScopeBadge';
 import { ProvenanceBadge } from '../../../../src/components/ProvenanceBadge';
@@ -34,11 +34,11 @@ export default async function PaginaModulo({
   const { slug, page } = await params;
   const query = await searchParams;
 
-  const sesion = await exigirSesionDePagina();
+  const sesion = await pageSessionRequire();
 
-  const module = await moduloServiblePorSlug(slug, await actorDe(sesion));
+  const module = await slugServableModule(slug, await actorDe(sesion));
   if (!module) notFound();
-  const cargado = await cargarModulo({
+  const loaded = await moduleLoad({
     module,
     personalization: await readPersonalization(sesion.userId, module.moduleId),
     ...(page ? { pageSlug: page } : {}),
@@ -47,7 +47,7 @@ export default async function PaginaModulo({
     requestedFilters: filtersOf(query),
   });
 
-  if (!cargado) notFound();
+  if (!loaded) notFound();
 
   // Se distingue lo que la persona ELIGIO de lo que su AMBITO le impone. Mezclarlos en una sola
   // linea de "filtros aplicados" hace creer que el ambito es algo que uno se puso y se puede
@@ -56,7 +56,7 @@ export default async function PaginaModulo({
     ([fieldName, valor]) => [fieldName, Array.isArray(valor) ? valor : [valor]] as const,
   );
   const chosenFields = new Set(chosenFilters.map(([fieldName]) => fieldName));
-  const restriccionesDeAmbito = Object.entries(cargado.appliedFilters).filter(
+  const scopeRestrictions = Object.entries(loaded.appliedFilters).filter(
     ([fieldName, valores]) => !chosenFields.has(fieldName) && valores.length > 0,
   );
 
@@ -65,10 +65,10 @@ export default async function PaginaModulo({
       <header className="module__header">
         <h1 data-testid="module-title">{module.name}</h1>
         <p className="muted-text" data-testid="frescura">
-          {cargado.generatedAt
-            ? `Datos actualizados el ${new Date(cargado.generatedAt).toLocaleString('es-DO')}`
+          {loaded.generatedAt
+            ? `Datos actualizados el ${new Date(loaded.generatedAt).toLocaleString('es-DO')}`
             : 'Sin datos poblados todavia'}
-          {cargado.degraded ? ' — sirviendo el ultimo dato valido conocido' : ''}
+          {loaded.degraded ? ' — sirviendo el ultimo dato valido conocido' : ''}
         </p>
 
       </header>
@@ -81,16 +81,16 @@ export default async function PaginaModulo({
       ) : null}
 
       <ModuleView
-        objetos={cargado.objetos.map(serializarObjeto)}
-        provenance={describeProvenance(cargado.isPersonalized)}
+        objetos={loaded.objetos.map(objectSerialize)}
+        provenance={describeProvenance(loaded.isPersonalized)}
         insignias={
           <>
-            <ProvenanceBadge provenance={describeProvenance(cargado.isPersonalized)} />
-            <ScopeBadge restricciones={restriccionesDeAmbito} />
+            <ProvenanceBadge provenance={describeProvenance(loaded.isPersonalized)} />
+            <ScopeBadge restricciones={scopeRestrictions} />
           </>
         }
         moduleSlug={module.slug}
-        pageSlug={cargado.pageSlug}
+        pageSlug={loaded.pageSlug}
       />
     </article>
   );

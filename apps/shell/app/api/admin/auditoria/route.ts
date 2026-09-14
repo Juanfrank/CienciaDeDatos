@@ -1,6 +1,6 @@
 import type { ConfigChangeLog } from '@app/observability';
 import { withAdmin } from '../guardia';
-import { contarAmpliaciones, listarAuditoria } from '../../../../src/server/audit';
+import { expansionsCount, auditList } from '../../../../src/server/audit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,12 +11,12 @@ export async function GET(request: Request) {
   const entityType = url.searchParams.get('entityType');
 
   return withAdmin(async () => ({
-    eventos: await listarAuditoria({
+    eventos: await auditList({
       ...(entityType ? { entityType: entityType as ConfigChangeLog['entityType'] } : {}),
-      ...(url.searchParams.get('soloAmpliaciones') === '1' ? { soloAmpliaciones: true } : {}),
-      ...(url.searchParams.get('soloMovimientos') === '1' ? { soloMovimientos: true } : {}),
+      ...(url.searchParams.get('onlyExpansions') === '1' ? { onlyExpansions: true } : {}),
+      ...(url.searchParams.get('onlyMoves') === '1' ? { onlyMoves: true } : {}),
       ...(url.searchParams.get('actorId') ? { actorId: url.searchParams.get('actorId') as string } : {}),
     }),
-    ampliacionesVigentes: await contarAmpliaciones(),
+    activeExpansions: await expansionsCount(),
   }));
 }

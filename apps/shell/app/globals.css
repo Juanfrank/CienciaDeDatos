@@ -2322,7 +2322,7 @@ th[aria-sort='descending'] .table__flecha {
   font-weight: var(--md-sys-typescale-label-medium-weight);
   pointer-events: none;
 }
-.canvas__sombra[data-valido='no'] {
+.canvas__sombra[data-valid='no'] {
   border-color: var(--md-sys-color-error);
   background: color-mix(in srgb, var(--md-sys-color-error) 10%, transparent);
   color: var(--md-sys-color-error);

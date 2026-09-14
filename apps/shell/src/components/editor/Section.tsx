@@ -7,7 +7,7 @@ import { createContext, useContext, useEffect, useRef } from 'react';
 /** El filtro del buscador, por CONTEXTO y no por props. */
 const SectionsFilter = createContext('');
 
-export function ProveedorDeFiltro({ filtro, children }: { filtro: string; children: React.ReactNode }) {
+export function FilterProvider({ filtro, children }: { filtro: string; children: React.ReactNode }) {
   return <SectionsFilter.Provider value={filtro}>{children}</SectionsFilter.Provider>;
 }
 

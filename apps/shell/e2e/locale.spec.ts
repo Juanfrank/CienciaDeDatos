@@ -1,5 +1,5 @@
-import { expect, test, type Page } from './instancia';
-import { entrarComo } from './session';
+import { expect, test, type Page } from './instance';
+import { asLogin } from './session';
 
 /**
  * El idioma de la interfaz.
@@ -24,7 +24,7 @@ const newModule = async (page: Page, slug: string) => {
 };
 
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-admin');
+  await asLogin(page, 'u-admin');
 });
 
 test('el documento declara el idioma que esta usando', async ({ page, origen }) => {
@@ -49,7 +49,7 @@ test('la cabecera del navegador NO cambia el idioma por su cuenta', async ({ bro
    */
   const contexto = await browser.newContext({ locale: 'en-US' });
   const pagina = await contexto.newPage();
-  await entrarComo(pagina, 'u-admin');
+  await asLogin(pagina, 'u-admin');
   await pagina.goto('/m/casos-pendientes');
 
   await expect(pagina.locator('html')).toHaveAttribute('lang', 'es');

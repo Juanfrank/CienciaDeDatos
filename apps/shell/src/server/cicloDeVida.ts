@@ -13,14 +13,14 @@ import {
   type PublishBlocker,
   findPublishBlockers,
 } from '@app/module-model';
-import { rolMasAltoDe } from './admin';
+import { roleMoreHeightOf } from './admin';
 import { navigationFor } from './context';
-import { registrarCambio, registrarEventoDeArbol } from './audit';
-import { gobierno } from './gobierno';
-import { moduloEncendido, slugsApagados } from './settings';
-import { modules } from './almacenModulos';
-import { diagnosticarDefinicion } from './data';
-import type { SesionShell } from './session';
+import { changeRecord, treeEventRecord } from './audit';
+import { governance } from './governance';
+import { moduloEncendido, disabledSlugs } from './settings';
+import { modules } from './moduleStore';
+import { definitionDiagnose } from './data';
+import type { ShellSession } from './session';
 
 /** Ciclo de vida de un modulo — seccion 4.1. */
 
@@ -35,30 +35,30 @@ export class CicloDeVidaError extends Error {
   }
 }
 
-export interface ActorDeModulo {
+export interface ModuleActor {
   userId: string;
   role: AppRole;
 }
 
 /** Visibilidad por estado — la parte de 4.1 con consecuencias de seguridad. */
-export function puedeVer(module: ModuleDefinition, actor: ActorDeModulo): boolean {
+export function seeCan(module: ModuleDefinition, actor: ModuleActor): boolean {
   if (module.status === 'publicado') return true;
   if (module.ownerUserId === actor.userId) return true;
   return module.status === 'pendiente-de-aprobacion' && actor.role === 'administrador';
 }
 
 /** Modulos que este actor puede ver, ya filtrados por estado. */
-export async function visibleModules(actor: ActorDeModulo): Promise<ModuleDefinition[]> {
-  return (await modules.list()).filter((m) => puedeVer(m, actor));
+export async function visibleModules(actor: ModuleActor): Promise<ModuleDefinition[]> {
+  return (await modules.list()).filter((m) => seeCan(m, actor));
 }
 
 /** Solo el autor de un borrador lo edita. Tampoco un Administrador. */
-function exigirAutoria(module: ModuleDefinition, actor: ActorDeModulo): void {
+function authorshipRequire(module: ModuleDefinition, actor: ModuleActor): void {
   if (module.ownerUserId === actor.userId) return;
   throw new CicloDeVidaError('Ese borrador es de otra persona.', 403);
 }
 
-function permiso(actor: ActorDeModulo, capacidad: Parameters<typeof assertCan>[1]): void {
+function permission(actor: ModuleActor, capacidad: Parameters<typeof assertCan>[1]): void {
   try {
     assertCan(actor.role, capacidad);
   } catch (error) {
@@ -80,7 +80,7 @@ const TRANSICIONES: Record<ModuleStatus, ModuleStatus[]> = {
   publicado: ['borrador'],
 };
 
-function exigirTransicion(desde: ModuleStatus, hasta: ModuleStatus): void {
+function transitionRequire(desde: ModuleStatus, hasta: ModuleStatus): void {
   if (!TRANSICIONES[desde].includes(hasta)) {
     throw new CicloDeVidaError(
       `No se puede pasar de '${desde}' a '${hasta}'. Desde '${desde}' solo cabe: ` +
@@ -92,14 +92,14 @@ function exigirTransicion(desde: ModuleStatus, hasta: ModuleStatus): void {
 
 const ahora = (): string => new Date().toISOString();
 
-export interface CrearBorradorInput {
-  actor: ActorDeModulo;
+export interface CreateDraftInput {
+  actor: ModuleActor;
   name: string;
   slug: string;
 }
 
-export async function crearBorrador(input: CrearBorradorInput): Promise<ModuleDefinition> {
-  permiso(input.actor, 'crear-editar-modulos-borrador');
+export async function createDraft(input: CreateDraftInput): Promise<ModuleDefinition> {
+  permission(input.actor, 'crear-editar-modulos-borrador');
 
   const slug = input.slug.trim().toLowerCase();
   const name = input.name.trim();
@@ -130,7 +130,7 @@ export async function crearBorrador(input: CrearBorradorInput): Promise<ModuleDe
   };
 
   await modules.save(modulo);
-  await registrarCambio({
+  await changeRecord({
     actorId: input.actor.userId,
     entityType: 'module',
     entityId: modulo.moduleId,
@@ -141,15 +141,15 @@ export async function crearBorrador(input: CrearBorradorInput): Promise<ModuleDe
   return modulo;
 }
 
-export interface GuardarBorradorInput {
-  actor: ActorDeModulo;
+export interface SaveDraftInput {
+  actor: ModuleActor;
   moduleId: string;
   cambios: Partial<Pick<ModuleDefinition, 'name' | 'icon' | 'pages'>>;
 }
 
 /** Guarda cambios en un borrador. */
-export async function guardarBorrador(input: GuardarBorradorInput): Promise<ModuleDefinition> {
-  permiso(input.actor, 'crear-editar-modulos-borrador');
+export async function saveDraft(input: SaveDraftInput): Promise<ModuleDefinition> {
+  permission(input.actor, 'crear-editar-modulos-borrador');
 
   const modulo = await modules.get(input.moduleId);
   if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
@@ -164,7 +164,7 @@ export async function guardarBorrador(input: GuardarBorradorInput): Promise<Modu
     );
   }
 
-  exigirAutoria(modulo, input.actor);
+  authorshipRequire(modulo, input.actor);
 
   const actualizado: ModuleDefinition = {
     ...modulo,
@@ -175,7 +175,7 @@ export async function guardarBorrador(input: GuardarBorradorInput): Promise<Modu
   };
 
   await modules.save(actualizado);
-  await registrarCambio({
+  await changeRecord({
     actorId: input.actor.userId,
     entityType: 'module',
     entityId: modulo.moduleId,
@@ -188,29 +188,29 @@ export async function guardarBorrador(input: GuardarBorradorInput): Promise<Modu
 }
 
 /** Diagnostico del modulo tal como lo veria el editor. */
-export async function bloqueosDePublicacion(module: ModuleDefinition): Promise<PublishBlocker[]> {
-  return findPublishBlockers(await diagnosticarDefinicion(module));
+export async function publicationLocks(module: ModuleDefinition): Promise<PublishBlocker[]> {
+  return findPublishBlockers(await definitionDiagnose(module));
 }
 
-export interface TransicionInput {
-  actor: ActorDeModulo;
+export interface InputTransition {
+  actor: ModuleActor;
   moduleId: string;
   /** Obligatoria al devolver a borrador o retirar: sin motivo, nadie sabe que arreglar. */
   motivo?: string;
 }
 
 /** borrador -> pendiente-de-aprobacion. Lo hace el autor: es una propuesta, no una publicacion. */
-export async function enviarAAprobacion(input: TransicionInput): Promise<ModuleDefinition> {
-  permiso(input.actor, 'crear-editar-modulos-borrador');
+export async function sendApproval(input: InputTransition): Promise<ModuleDefinition> {
+  permission(input.actor, 'crear-editar-modulos-borrador');
 
   const modulo = await modules.get(input.moduleId);
   if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
-  exigirAutoria(modulo, input.actor);
-  exigirTransicion(modulo.status, 'pendiente-de-aprobacion');
+  authorshipRequire(modulo, input.actor);
+  transitionRequire(modulo.status, 'pendiente-de-aprobacion');
 
   // Se comprueba YA, no solo al publicar. Mandar a revisar algo roto gasta el tiempo de quien
   // revisa en encontrar lo que la maquina sabe decir sola.
-  const locks = await bloqueosDePublicacion(modulo);
+  const locks = await publicationLocks(modulo);
   if (locks.length > 0) {
     throw new CicloDeVidaError(
       'El modulo tiene problemas que impiden proponerlo para publicacion.',
@@ -221,7 +221,7 @@ export async function enviarAAprobacion(input: TransicionInput): Promise<ModuleD
 
   const actualizado = { ...modulo, status: 'pendiente-de-aprobacion' as const, updatedAt: ahora() };
   await modules.save(actualizado);
-  await registrarCambio({
+  await changeRecord({
     actorId: input.actor.userId,
     entityType: 'module',
     entityId: modulo.moduleId,
@@ -234,14 +234,14 @@ export async function enviarAAprobacion(input: TransicionInput): Promise<ModuleD
 }
 
 /** pendiente-de-aprobacion -> publicado. Solo un Administrador, y solo sin bloqueos. */
-export async function publicar(input: TransicionInput): Promise<ModuleDefinition> {
-  permiso(input.actor, 'publicar-modulo-institucional');
+export async function publicar(input: InputTransition): Promise<ModuleDefinition> {
+  permission(input.actor, 'publicar-modulo-institucional');
 
   const modulo = await modules.get(input.moduleId);
   if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
-  exigirTransicion(modulo.status, 'publicado');
+  transitionRequire(modulo.status, 'publicado');
 
-  const locks = await bloqueosDePublicacion(modulo);
+  const locks = await publicationLocks(modulo);
   if (locks.length > 0) {
     throw new CicloDeVidaError(
       'El modulo no se puede publicar con problemas sin resolver.',
@@ -263,8 +263,8 @@ export async function publicar(input: TransicionInput): Promise<ModuleDefinition
   delete actualizado.ownerUserId;
 
   await modules.save(actualizado);
-  await colgarDelArbolSiFalta(actualizado, input.actor);
-  await registrarCambio({
+  await missingIfTreeAttach(actualizado, input.actor);
+  await changeRecord({
     actorId: input.actor.userId,
     entityType: 'module',
     entityId: modulo.moduleId,
@@ -277,11 +277,11 @@ export async function publicar(input: TransicionInput): Promise<ModuleDefinition
 }
 
 /** Al publicar, el modulo tiene que existir en la ORGANIZACION GENERAL. */
-async function colgarDelArbolSiFalta(
+async function missingIfTreeAttach(
   module: ModuleDefinition,
-  actor: ActorDeModulo,
+  actor: ModuleActor,
 ): Promise<void> {
-  const arbol = await gobierno.getTree();
+  const arbol = await governance.getTree();
   if (findModulePath(arbol.nodes, module.moduleId) !== null) return;
 
   const resultado = applyTreeOperation(
@@ -308,15 +308,15 @@ async function colgarDelArbolSiFalta(
     );
   }
 
-  await gobierno.setTree(resultado.tree);
-  for (const evento of resultado.audit) await registrarEventoDeArbol(evento);
+  await governance.setTree(resultado.tree);
+  for (const evento of resultado.audit) await treeEventRecord(evento);
 }
 
 /** Vuelta a borrador: rechazo de una propuesta, o retirada de algo publicado. */
-export async function devolverABorrador(input: TransicionInput): Promise<ModuleDefinition> {
+export async function revertDraft(input: InputTransition): Promise<ModuleDefinition> {
   const modulo = await modules.get(input.moduleId);
   if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
-  exigirTransicion(modulo.status, 'borrador');
+  transitionRequire(modulo.status, 'borrador');
 
   const motivo = input.motivo?.trim();
   if (!motivo) {
@@ -329,11 +329,11 @@ export async function devolverABorrador(input: TransicionInput): Promise<ModuleD
   // Retirar algo PUBLICADO afecta a todos los equipos que lo ven, asi que es de Administrador.
   // Retirar la propia propuesta, en cambio, lo puede hacer quien la hizo.
   if (modulo.status === 'publicado') {
-    permiso(input.actor, 'publicar-modulo-institucional');
+    permission(input.actor, 'publicar-modulo-institucional');
   } else {
     // Rechazar una propuesta es cosa de quien aprueba; retirarla, de quien la hizo.
-    if (input.actor.role !== 'administrador') exigirAutoria(modulo, input.actor);
-    permiso(input.actor, 'crear-editar-modulos-borrador');
+    if (input.actor.role !== 'administrador') authorshipRequire(modulo, input.actor);
+    permission(input.actor, 'crear-editar-modulos-borrador');
   }
 
   const actualizado: ModuleDefinition = {
@@ -346,7 +346,7 @@ export async function devolverABorrador(input: TransicionInput): Promise<ModuleD
   };
 
   await modules.save(actualizado);
-  await registrarCambio({
+  await changeRecord({
     actorId: input.actor.userId,
     entityType: 'module',
     entityId: modulo.moduleId,
@@ -360,8 +360,8 @@ export async function devolverABorrador(input: TransicionInput): Promise<ModuleD
 }
 
 /** Borrado definitivo: solo Administrador, y solo de lo que no esta publicado. */
-export async function deleteModule(input: TransicionInput): Promise<void> {
-  permiso(input.actor, 'borrar-definitivamente');
+export async function deleteModule(input: InputTransition): Promise<void> {
+  permission(input.actor, 'borrar-definitivamente');
 
   const modulo = await modules.get(input.moduleId);
   if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
@@ -374,7 +374,7 @@ export async function deleteModule(input: TransicionInput): Promise<void> {
   }
 
   await modules.remove(input.moduleId);
-  await registrarCambio({
+  await changeRecord({
     actorId: input.actor.userId,
     entityType: 'module',
     entityId: modulo.moduleId,
@@ -384,34 +384,34 @@ export async function deleteModule(input: TransicionInput): Promise<void> {
 }
 
 /** El modulo de un slug, SOLO si este actor puede verlo. */
-export async function moduloVisiblePorSlug(
+export async function visibleModuleSlug(
   slug: string,
-  actor: ActorDeModulo,
+  actor: ModuleActor,
 ): Promise<ModuleDefinition | undefined> {
   const modulo = await modules.bySlug(slug);
   if (!modulo) return undefined;
-  return puedeVer(modulo, actor) ? modulo : undefined;
+  return seeCan(modulo, actor) ? modulo : undefined;
 }
 
 /** Visible Y ENCENDIDO — la puerta de los caminos que SIRVEN un modulo (3.4). */
-export async function moduloServiblePorSlug(
+export async function slugServableModule(
   slug: string,
-  actor: ActorDeModulo,
+  actor: ModuleActor,
 ): Promise<ModuleDefinition | undefined> {
-  const modulo = await moduloVisiblePorSlug(slug, actor);
+  const modulo = await visibleModuleSlug(slug, actor);
   if (!modulo) return undefined;
   return (await moduloEncendido(modulo.slug)) ? modulo : undefined;
 }
 
 /** Poda del arbol de navegacion por estado del modulo. */
-export async function podarPorEstado(nodos: NavNode[], actor: ActorDeModulo): Promise<NavNode[]> {
+export async function statusPrune(nodos: NavNode[], actor: ModuleActor): Promise<NavNode[]> {
   const definiciones = new Map((await modules.list()).map((m) => [m.moduleId, m]));
   /*
    * Los apagados se leen UNA VEZ para todo el arbol.
    */
-  const disabled = new Set(await slugsApagados());
+  const disabled = new Set(await disabledSlugs());
 
-  const podar = (lista: NavNode[]): NavNode[] =>
+  const prune = (lista: NavNode[]): NavNode[] =>
     lista.flatMap((node): NavNode[] => {
       if (isModule(node)) {
         const definicion = definiciones.get(node.moduleRef.moduleId);
@@ -420,39 +420,39 @@ export async function podarPorEstado(nodos: NavNode[], actor: ActorDeModulo): Pr
         // mensaje. Ocultarlo aqui haria desaparecer el sintoma sin arreglar la causa.
         if (!definicion) return [node];
         if (disabled.has(definicion.slug)) return [];
-        return puedeVer(definicion, actor) ? [node] : [];
+        return seeCan(definicion, actor) ? [node] : [];
       }
 
-      const hijos = podar(node.children);
+      const hijos = prune(node.children);
       return hijos.length > 0 ? [{ ...node, children: hijos }] : [];
     });
 
-  return podar(nodos);
+  return prune(nodos);
 }
 
 /** Actor a partir de la sesion. */
-export async function actorDe(sesion: SesionShell): Promise<ActorDeModulo> {
-  return { userId: sesion.userId, role: await rolMasAltoDe(sesion.userId) };
+export async function actorDe(sesion: ShellSession): Promise<ModuleActor> {
+  return { userId: sesion.userId, role: await roleMoreHeightOf(sesion.userId) };
 }
 
 /** Navegacion de una sesion: lo concedido al equipo activo Y publicado. */
-export async function navigationOf(sesion: SesionShell) {
+export async function navigationOf(sesion: ShellSession) {
   const view = await navigationFor(sesion.activeTeamId);
-  return { ...view, tree: await podarPorEstado(view.tree, await actorDe(sesion)) };
+  return { ...view, tree: await statusPrune(view.tree, await actorDe(sesion)) };
 }
 
-/** Como `moduloVisiblePorSlug`, resolviendo el rol a partir del usuario. */
+/** Como `visibleModuleSlug`, resolviendo el rol a partir del usuario. */
 export async function visibleModuleUser(
   slug: string,
   userId: string,
 ): Promise<ModuleDefinition | undefined> {
-  return moduloVisiblePorSlug(slug, { userId, role: await rolMasAltoDe(userId) });
+  return visibleModuleSlug(slug, { userId, role: await roleMoreHeightOf(userId) });
 }
 
-/** Como `moduloServiblePorSlug`, resolviendo el rol a partir del usuario. */
-export async function moduloServibleParaUsuario(
+/** Como `slugServableModule`, resolviendo el rol a partir del usuario. */
+export async function userServableModule(
   slug: string,
   userId: string,
 ): Promise<ModuleDefinition | undefined> {
-  return moduloServiblePorSlug(slug, { userId, role: await rolMasAltoDe(userId) });
+  return slugServableModule(slug, { userId, role: await roleMoreHeightOf(userId) });
 }

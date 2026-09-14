@@ -1,7 +1,7 @@
-import { expect, test, type Page } from './instancia';
+import { expect, test, type Page } from './instance';
 import { initialCatalog } from '@app/ui-components';
-import { ABRE_PRIMERO, CONTROL_DE_CLAVE } from '../src/components/editor/controls';
-import { entrarComo } from './session';
+import { FIRST_OPENS, KEY_CONTROL } from '../src/components/editor/controls';
+import { asLogin } from './session';
 
 /** Todo objeto del catalogo se COLOCA y se CONFIGURA desde el editor — seccion 4.2. */
 
@@ -9,7 +9,7 @@ const guardado = async (page: Page) =>
   expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
 
 /** Despliega todas las secciones del panel. */
-const abrirSecciones = async (page: Page) => {
+const openSections = async (page: Page) => {
   await page
     .locator('.editor-panel details')
     .evaluateAll((nodos) => nodos.forEach((n) => ((n as HTMLDetailsElement).open = true)));
@@ -28,7 +28,7 @@ const newModule = async (page: Page, slug: string) => {
 const COLOCABLES = initialCatalog.filter((o) => !o.attachable);
 
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-admin');
+  await asLogin(page, 'u-admin');
 });
 
 test.describe('colocable: el catalogo entero entra por la paleta', () => {
@@ -91,7 +91,7 @@ test.describe('configurable: lo que cada objeto declara sale en su panel', () =>
 
       await page.getByTestId('tab-formato').click();
       await expect(page.getByTestId(`pres-${item}`)).toBeVisible();
-      await abrirSecciones(page);
+      await openSections(page);
 
       for (const clave of keys) {
         /*
@@ -99,7 +99,7 @@ test.describe('configurable: lo que cada objeto declara sale en su panel', () =>
          * resaltado no significa nada mientras no haya resaltado. Lo que se comprueba es que se
          * PUEDE llegar a el, no que este siempre dibujado.
          */
-        const interruptor = ABRE_PRIMERO[clave];
+        const interruptor = FIRST_OPENS[clave];
         if (interruptor) {
           /*
            * Se espera al guardado ANTES de pulsar, y se afirma el estado despues.
@@ -109,11 +109,11 @@ test.describe('configurable: lo que cada objeto declara sale en su panel', () =>
           await casilla.click();
           await expect(casilla).toBeChecked();
           // Encender el interruptor dibuja controles nuevos, y alguno trae su propia seccion.
-          await abrirSecciones(page);
+          await openSections(page);
         }
 
         await expect(
-          page.getByTestId(`pres-${item}-${CONTROL_DE_CLAVE[clave]}`),
+          page.getByTestId(`pres-${item}-${KEY_CONTROL[clave]}`),
           `${objeto.objectId} declara '${clave}' y el panel no lo ofrece`,
         ).toBeAttached();
       }
@@ -139,7 +139,7 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     // El objeto llega ya mapeado a la primera medida del dataset: colocar algo que no dibuja nada
     // seria empezar por una tarjeta vacia. Aqui solo hace falta la escala.
     await page.getByTestId('tab-formato').click();
-    await abrirSecciones(page);
+    await openSections(page);
     // La escala deducida se ve antes de tocar nada: el respaldo la dice siempre.
     const fallback = page.getByTestId('medidor').first();
     await expect(fallback).toContainText('Escala');
@@ -163,7 +163,7 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     const item = (id ?? '').replace('block-', '');
 
     await page.getByTestId('tab-formato').click();
-    await abrirSecciones(page);
+    await openSections(page);
     const compare = page.getByTestId(`pres-${item}-comparar`);
     await expect(compare).toBeVisible();
 
@@ -193,7 +193,7 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     await expect(page.locator('.multiples__panel').first()).toBeVisible();
 
     await page.getByTestId('tab-formato').click();
-    await abrirSecciones(page);
+    await openSections(page);
     await page.getByTestId(`pres-${item}-multiplos-columnas`).selectOption('2');
     await guardado(page);
 

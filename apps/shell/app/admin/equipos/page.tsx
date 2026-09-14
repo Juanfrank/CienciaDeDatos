@@ -1,7 +1,7 @@
 import { TeamEditor } from '../../../src/components/admin/TeamEditor';
 import { administradores } from '../../../src/server/admin';
 import { getGeneralTree, listTeams, listUsers } from '../../../src/server/context';
-import { gobierno } from '../../../src/server/gobierno';
+import { governance } from '../../../src/server/governance';
 import type { NavNode } from '@app/access-control';
 
 export const dynamic = 'force-dynamic';
@@ -33,7 +33,7 @@ export default async function TeamPage() {
         equipos={await listTeams()}
         nodos={aplanar(await getGeneralTree())}
         usuarios={(await listUsers()).map((u) => u.userId)}
-        paquetes={(await gobierno.listPackages()).map((p) => ({ id: p.id, name: p.name }))}
+        paquetes={(await governance.listPackages()).map((p) => ({ id: p.id, name: p.name }))}
       />
     </section>
   );

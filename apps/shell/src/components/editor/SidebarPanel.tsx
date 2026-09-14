@@ -25,12 +25,12 @@ import {
 import type { PaletteDataset, PaletteObject } from '../../server/editor';
 import { Icon } from '../icons/Icon';
 import { EditorObjectSettings } from './EditorObjectSettings';
-import { Tabs, type DefinicionDePestana } from './Tabs';
+import { Tabs, type TabDefinition } from './Tabs';
 import { Well } from './Well';
 import { Presentation } from './Presentation';
 import type { MessageKey } from '@app/i18n';
 import { useTranslator } from '../Locale';
-import { ProveedorDeFiltro, Section } from './Section';
+import { FilterProvider, Section } from './Section';
 
 /** El panel del editor: la tienda y el banco de trabajo, en uno. */
 
@@ -39,7 +39,7 @@ type Tab = 'objetos' | 'datos' | 'formato' | 'complementos';
 export function SidebarPanel({
   objetos,
   datasets,
-  seleccionado,
+  selected,
   saving,
   onAnadir,
   onCambiar,
@@ -47,7 +47,7 @@ export function SidebarPanel({
 }: {
   objetos: PaletteObject[];
   datasets: PaletteDataset[];
-  seleccionado: GridItem | null;
+  selected: GridItem | null;
   saving: boolean;
   onAnadir: (objectId: string) => void;
   onCambiar: (itemId: string, change: (item: GridItem) => GridItem) => void;
@@ -60,46 +60,46 @@ export function SidebarPanel({
   /*
    * Al elegir un objeto, el panel salta a «Datos».
    */
-  const idSeleccionado = seleccionado?.id ?? null;
-  const objetoSeleccionado = seleccionado?.instance.objectId ?? null;
+  const selectedId = selected?.id ?? null;
+  const selectedObject = selected?.instance.objectId ?? null;
   useEffect(() => {
-    if (!idSeleccionado) {
+    if (!selectedId) {
       setPestana('objetos');
       return;
     }
     // Lo que no lee datos salta a «Formato»: es su primera pestana util, y mandarlo a una
     // deshabilitada dejaria el panel en blanco justo despues de colocar algo.
-    const withoutData = objetoSeleccionado !== null && (isElement(objetoSeleccionado) || isContainer(objetoSeleccionado));
+    const withoutData = selectedObject !== null && (isElement(selectedObject) || isContainer(selectedObject));
     setPestana(withoutData ? 'formato' : 'datos');
-  }, [idSeleccionado, objetoSeleccionado]);
+  }, [selectedId, selectedObject]);
 
-  const hayObjeto = seleccionado !== null;
-  const definicion = seleccionado
-    ? objetos.find((o) => o.objectId === seleccionado.instance.objectId)
+  const objectHas = selected !== null;
+  const definicion = selected
+    ? objetos.find((o) => o.objectId === selected.instance.objectId)
     : undefined;
-  const dataset = seleccionado
-    ? datasets.find((d) => d.datasetId === seleccionado.instance.binding.datasetId)
+  const dataset = selected
+    ? datasets.find((d) => d.datasetId === selected.instance.binding.datasetId)
     : undefined;
 
   /*
    * «Datos» se deshabilita para lo que no consume datos.
    */
-  const consumeDatos = (definicion?.dimensiones.max ?? 0) > 0 || (definicion?.medidas.max ?? 0) > 0;
+  const dataConsumes = (definicion?.dimensiones.max ?? 0) > 0 || (definicion?.medidas.max ?? 0) > 0;
 
-  const TABS: DefinicionDePestana<Tab>[] = [
+  const TABS: TabDefinition<Tab>[] = [
     { id: 'objetos', etiqueta: t('editor.pestana.objetos'), icono: 'barras', habilitada: true },
     {
       id: 'datos',
       etiqueta: t('editor.pestana.datos'),
       icono: 'tabla',
-      habilitada: hayObjeto && consumeDatos,
+      habilitada: objectHas && dataConsumes,
     },
-    { id: 'formato', etiqueta: t('editor.pestana.formato'), icono: 'indicador', habilitada: hayObjeto },
+    { id: 'formato', etiqueta: t('editor.pestana.formato'), icono: 'indicador', habilitada: objectHas },
     {
       id: 'complementos',
       etiqueta: t('editor.pestana.complementos'),
       icono: 'informacion',
-      habilitada: hayObjeto,
+      habilitada: objectHas,
     },
   ];
 
@@ -118,9 +118,9 @@ export function SidebarPanel({
           <Palette objetos={objetos} saving={saving} onAnadir={onAnadir} />
         ) : null}
 
-        {pestana === 'datos' && seleccionado ? (
+        {pestana === 'datos' && selected ? (
           <Data
-            item={seleccionado}
+            item={selected}
             definicion={definicion}
             datasets={datasets}
             saving={saving}
@@ -129,7 +129,7 @@ export function SidebarPanel({
           />
         ) : null}
 
-        {pestana === 'formato' && seleccionado ? (
+        {pestana === 'formato' && selected ? (
           <div className="editor__format">
             {/*
               El buscador, PRIMERO y para la pestana ENTERA.
@@ -155,24 +155,24 @@ export function SidebarPanel({
               />
             </label>
 
-            <ProveedorDeFiltro filtro={filtro}>
+            <FilterProvider filtro={filtro}>
             {/* `Presentacion` ya trae sus propias subsecciones: envolverlo en otra repetiria el
                 rotulo «Presentacion» dos veces seguidas. */}
             <EditorObjectSettings
-              instance={seleccionado.instance}
+              instance={selected.instance}
               saving={saving}
               onCambiar={(change) =>
-                onCambiar(seleccionado.id, (i) => ({ ...i, instance: change(i.instance) }))
+                onCambiar(selected.id, (i) => ({ ...i, instance: change(i.instance) }))
               }
             />
 
             <Presentation
-              instance={seleccionado.instance}
+              instance={selected.instance}
               admitidas={definicion?.presentacion ?? []}
               kinds={dataset?.kinds ?? {}}
               saving={saving}
               onCambiar={(change) =>
-                onCambiar(seleccionado.id, (i) => ({ ...i, instance: change(i.instance) }))
+                onCambiar(selected.id, (i) => ({ ...i, instance: change(i.instance) }))
               }
             />
 
@@ -187,11 +187,11 @@ export function SidebarPanel({
             <Section
               titulo="Tamano y posicion"
               keys={['ancho', 'alto', 'columnas', 'filas', 'mover', 'rejilla', 'redimensionar']}
-              prueba={`section-size-${seleccionado.id}`}
+              prueba={`section-size-${selected.id}`}
             >
-              <Size item={seleccionado} saving={saving} onCambiar={onCambiar} />
+              <Size item={selected} saving={saving} onCambiar={onCambiar} />
             </Section>
-            </ProveedorDeFiltro>
+            </FilterProvider>
 
             {/*
               Una busqueda sin resultados no puede dejar la pestana en blanco.
@@ -216,9 +216,9 @@ export function SidebarPanel({
           </div>
         ) : null}
 
-        {pestana === 'complementos' && seleccionado ? (
+        {pestana === 'complementos' && selected ? (
           <Addons
-            item={seleccionado}
+            item={selected}
             objetos={objetos}
             saving={saving}
             onCambiar={onCambiar}
@@ -334,7 +334,7 @@ function Palette({
             Formato, y va aqui dentro y no envolviendo la tienda entera: fuera, «Visualizaciones»
             y «Elementos» desapareceran al buscar «barras», porque sus titulos no coinciden.
           */}
-          <ProveedorDeFiltro filtro={busqueda}>
+          <FilterProvider filtro={busqueda}>
             {FAMILIES.map(({ family, que }) => {
               const dela = withData.filter((o) => o.family === family);
               if (dela.length === 0) return null;
@@ -360,7 +360,7 @@ function Palette({
                 </Section>
               );
             })}
-          </ProveedorDeFiltro>
+          </FilterProvider>
         </Section>
       ) : null}
 
@@ -456,7 +456,7 @@ function Data({
   onQuitar: (itemId: string) => void;
 }) {
   const dataset = datasets.find((d) => d.datasetId === item.instance.binding.datasetId);
-  const cambiarInstancia = (change: (i: ObjectInstance) => ObjectInstance) =>
+  const instanceChange = (change: (i: ObjectInstance) => ObjectInstance) =>
     onCambiar(item.id, (it) => ({ ...it, instance: change(it.instance) }));
 
   const declared = definicion?.wells ?? [];
@@ -475,11 +475,11 @@ function Data({
   /*
    * Poner y quitar van POR RANURA, no por indice.
    */
-  const poner = (slotId: string, fieldName: string) =>
-    cambiarInstancia((i) => withSlotField(i, slots, slotId, fieldName));
+  const set = (slotId: string, fieldName: string) =>
+    instanceChange((i) => withSlotField(i, slots, slotId, fieldName));
 
   const remove = (slotId: string, fieldName: string) =>
-    cambiarInstancia((i) => slotFieldWithout(i, slots, slotId, fieldName));
+    instanceChange((i) => slotFieldWithout(i, slots, slotId, fieldName));
 
   /*
    * Como se resume cada medida.
@@ -499,8 +499,8 @@ function Data({
     dataGrain: dataset?.grain ?? 'atomico',
   });
 
-  const cambiarAgregacion = (fieldName: string, aggregation: Aggregation) =>
-    cambiarInstancia((i) => {
+  const aggregationChange = (fieldName: string, aggregation: Aggregation) =>
+    instanceChange((i) => {
       const resto = { ...(i.binding.aggregations ?? {}) };
       // Volver a la del esquema se guarda BORRANDO la anulacion, no copiando el mismo valor: si
       // se copiara, el modulo dejaria de seguir a la fuente sin que nadie lo hubiera pedido.
@@ -529,7 +529,7 @@ function Data({
             defaultValue={item.instance.title}
             disabled={saving}
             data-testid={`title-${item.id}`}
-            onBlur={(e) => cambiarInstancia((i) => ({ ...i, title: e.target.value }))}
+            onBlur={(e) => instanceChange((i) => ({ ...i, title: e.target.value }))}
           />
         </label>
 
@@ -540,7 +540,7 @@ function Data({
             disabled={saving}
             data-testid={`dataset-${item.id}`}
             onChange={(e) =>
-              cambiarInstancia((i) => ({
+              instanceChange((i) => ({
                 ...i,
                 // Al cambiar de dataset se limpia el mapeo: los campos del anterior no existen en
                 // el nuevo, y conservarlos dejaria el objeto roto sin que nadie hiciera nada mal.
@@ -560,7 +560,7 @@ function Data({
       {deDimension.length > 0 ? (
         <Section titulo="Campos" prueba={`section-fields-${item.id}`}>
           {deDimension.map((ranura) => (
-            <RanuraDeEdicion
+            <EditSlot
               key={ranura.id}
               ranura={ranura}
               todas={slots}
@@ -568,7 +568,7 @@ function Data({
               elegidos={assignment.get(ranura.id) ?? []}
               available={dataset?.dimensiones ?? []}
               saving={saving}
-              onAnadir={poner}
+              onAnadir={set}
               onQuitar={remove}
             />
           ))}
@@ -578,7 +578,7 @@ function Data({
       {deMedida.length > 0 ? (
         <Section titulo="Cifras" prueba={`section-measures-${item.id}`}>
           {deMedida.map((ranura) => (
-            <RanuraDeEdicion
+            <EditSlot
               key={ranura.id}
               ranura={ranura}
               todas={slots}
@@ -586,10 +586,10 @@ function Data({
               elegidos={assignment.get(ranura.id) ?? []}
               available={dataset?.medidas ?? []}
               saving={saving}
-              onAnadir={poner}
+              onAnadir={set}
               onQuitar={remove}
               aggregationOf={aggregationOf}
-              onAgregacion={cambiarAgregacion}
+              onAgregacion={aggregationChange}
               possible={possible}
             />
           ))}
@@ -617,7 +617,7 @@ function Data({
 }
 
 /** Un `Pozo` atado a su ranura: traduce el callback generico a «esta ranura». */
-function RanuraDeEdicion({
+function EditSlot({
   ranura,
   todas,
   item,
@@ -845,7 +845,7 @@ function Size({
       position: { ...it.position, h: Math.max(1, it.position.h + dh) },
     }));
 
-  const enElBorde = item.position.x + item.position.w >= GRID_COLUMNS;
+  const borderThe = item.position.x + item.position.w >= GRID_COLUMNS;
 
   return (
     <>
@@ -855,9 +855,9 @@ function Size({
       </p>
       <div className="editor-panel__pasos">
         <Paso etiqueta="Menos ancho" prueba={`narrow-${item.id}`} desactivado={saving || item.position.w <= 1} onPulsar={() => mover(0, -1)} />
-        <Paso etiqueta="Mas ancho" prueba={`widen-${item.id}`} desactivado={saving || enElBorde} onPulsar={() => mover(0, 1)} />
+        <Paso etiqueta="Mas ancho" prueba={`widen-${item.id}`} desactivado={saving || borderThe} onPulsar={() => mover(0, 1)} />
         <Paso etiqueta="Mover a la izquierda" prueba={`left-${item.id}`} desactivado={saving || item.position.x <= 0} onPulsar={() => mover(-1, 0)} />
-        <Paso etiqueta="Mover a la derecha" prueba={`right-${item.id}`} desactivado={saving || enElBorde} onPulsar={() => mover(1, 0)} />
+        <Paso etiqueta="Mover a la derecha" prueba={`right-${item.id}`} desactivado={saving || borderThe} onPulsar={() => mover(1, 0)} />
         <Paso etiqueta="Menos alto" prueba={`down-${item.id}`} desactivado={saving || item.position.h <= 1} onPulsar={() => alto(-1)} />
         <Paso etiqueta="Mas alto" prueba={`up-${item.id}`} desactivado={saving} onPulsar={() => alto(1)} />
       </div>

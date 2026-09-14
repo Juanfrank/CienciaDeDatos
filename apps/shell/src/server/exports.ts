@@ -13,8 +13,8 @@ import {
   type ObjectInstance,
 } from '@app/ui-components';
 import { cacheL2, objectRegistry } from './context';
-import { cargarModulo } from './data';
-import { moduloServibleParaUsuario } from './cicloDeVida';
+import { moduleLoad } from './data';
+import { userServableModule } from './cicloDeVida';
 import { readPersonalization } from './personalization';
 
 /** Cableado de la exportacion en el shell (4.9 con la restriccion de 5.3). */
@@ -27,11 +27,11 @@ const ES_CONTROL = new Set(['segmentador']);
 /** Categorias del catalogo que merecen dibujarse como imagen al exportar en SVG. */
 const CHART_CATEGORIES = new Set(['grafico', 'mapa']);
 
-export const resolverObjetos: ResolverObjects = async (request: ExportRequest) => {
-  const module = await moduloServibleParaUsuario(request.moduleSlug, request.requestedBy);
+export const resolverObjects: ResolverObjects = async (request: ExportRequest) => {
+  const module = await userServableModule(request.moduleSlug, request.requestedBy);
   if (!module) throw new Error(`El modulo '${request.moduleSlug}' ya no existe.`);
 
-  const cargado = await cargarModulo({
+  const loaded = await moduleLoad({
     module,
     ...(request.pageSlug ? { pageSlug: request.pageSlug } : {}),
     // La exportacion sale de lo que la persona VE: si oculto un objeto, no aparece en el
@@ -43,9 +43,9 @@ export const resolverObjetos: ResolverObjects = async (request: ExportRequest) =
     requestedFilters: request.appliedFilters,
   });
 
-  // `cargarModulo` devuelve null tanto si la pagina no existe como si el equipo no tiene
+  // `moduleLoad` devuelve null tanto si la pagina no existe como si el equipo no tiene
   // concedido el modulo. Se responde igual en los dos casos, sin revelar cual (4.11).
-  if (!cargado) throw new Error('El modulo no esta disponible para este equipo.');
+  if (!loaded) throw new Error('El modulo no esta disponible para este equipo.');
 
   // Un objeto sin resultado (todavia generandose) o marcado como roto no se exporta: un archivo
   // con una tabla vacia y sin explicacion es peor que un archivo sin esa tabla.
@@ -54,7 +54,7 @@ export const resolverObjetos: ResolverObjects = async (request: ExportRequest) =
   // el dataset en crudo hacia que un modulo con cinco objetos sobre un mismo dataset produjera
   // cinco veces la misma tabla, y que una tarjeta KPI —que muestra un numero— exportara las
   // filas completas.
-  const objetos: ExportableObject[] = cargado.objetos.flatMap((o) => {
+  const objetos: ExportableObject[] = loaded.objetos.flatMap((o) => {
     const { instance } = o.item;
     if (!o.result || ES_CONTROL.has(instance.objectId) || o.problems.length > 0) return [];
 
@@ -77,7 +77,7 @@ export const resolverObjetos: ResolverObjects = async (request: ExportRequest) =
   // que quien reciba el archivo no lea "cero filas" como "no hay casos".
   const aplicados: Record<string, string[]> = {};
   const descartados: string[] = [];
-  for (const [fieldName, valores] of Object.entries(cargado.appliedFilters)) {
+  for (const [fieldName, valores] of Object.entries(loaded.appliedFilters)) {
     if (valores.length > 0) aplicados[fieldName] = valores;
     else if (fieldName in request.appliedFilters) descartados.push(fieldName);
   }
@@ -86,11 +86,11 @@ export const resolverObjetos: ResolverObjects = async (request: ExportRequest) =
     objetos,
     appliedFilters: aplicados,
     ...(descartados.length > 0 ? { outOfScopeFilters: descartados } : {}),
-    ...(cargado.generatedAt ? { generatedAt: cargado.generatedAt } : {}),
+    ...(loaded.generatedAt ? { generatedAt: loaded.generatedAt } : {}),
   };
 };
 
-export interface EncolarInput {
+export interface InputEnqueue {
   moduleSlug: string;
   pageSlug?: string;
   format: ExportRequest['format'];
@@ -99,8 +99,8 @@ export interface EncolarInput {
   appliedFilters: Record<string, string[]>;
 }
 
-export async function encolarExportacion(input: EncolarInput) {
-  const module = await moduloServibleParaUsuario(input.moduleSlug, input.userId);
+export async function exportEnqueue(input: InputEnqueue) {
+  const module = await userServableModule(input.moduleSlug, input.userId);
   if (!module) return null;
 
   const request: ExportRequest = {

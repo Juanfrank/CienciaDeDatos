@@ -1,12 +1,12 @@
-import { expect, test } from './instancia';
-import { entrarComo } from './session';
+import { expect, test } from './instance';
+import { asLogin } from './session';
 
 /** Editor de modulos y ciclo de vida — secciones 4.1, 4.2 y criterios de la seccion 9. */
 
-const nuevoSlug = (prefijo: string) => `${prefijo}-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
+const newSlug = (prefijo: string) => `${prefijo}-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
 
 /** Crea un borrador con un objeto valido, por API, que es lo que hace la interfaz. */
-async function borradorConObjeto(
+async function objectDraft(
   page: import('@playwright/test').Page,
   slug: string,
 ): Promise<void> {
@@ -51,26 +51,26 @@ async function borradorConObjeto(
 
 test.describe('quien entra al editor (4.10.1)', () => {
   test('un Visor no ve el enlace y la API le responde 403', async ({ page }) => {
-    await entrarComo(page, 'u-beto');
+    await asLogin(page, 'u-beto');
     await page.goto('/');
     await expect(page.getByTestId('enlace-editor')).toHaveCount(0);
 
     // Lo que importa no es el enlace ausente: crear modulos a mano tampoco debe funcionar.
     const respuesta = await page.request.post('/api/modulos', {
-      data: { nombre: 'Intento', slug: nuevoSlug('intento-visor') },
+      data: { nombre: 'Intento', slug: newSlug('intento-visor') },
     });
     expect(respuesta.status()).toBe(403);
   });
 
   test('un Visor que pide la pagina no ve el editor', async ({ page }) => {
-    await entrarComo(page, 'u-beto');
+    await asLogin(page, 'u-beto');
     await page.goto('/editor');
     await expect(page.getByTestId('sin-permiso-editor')).toBeVisible();
     await expect(page.getByTestId('module-list')).toHaveCount(0);
   });
 
   test('un Colaborador si entra', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/');
     await expect(page.getByTestId('enlace-editor')).toBeVisible();
     await page.goto('/editor');
@@ -80,8 +80,8 @@ test.describe('quien entra al editor (4.10.1)', () => {
 
 test.describe('un modulo se construye con objetos prediseñados, no con consultas (4.2)', () => {
   test('crear un borrador y colocarle un objeto desde el catalogo', async ({ page }) => {
-    const slug = nuevoSlug('construido');
-    await entrarComo(page, 'u-ana');
+    const slug = newSlug('construido');
+    await asLogin(page, 'u-ana');
     await page.goto('/editor');
 
     await page.getByTestId('new-module-name').fill(`Modulo ${slug}`);
@@ -109,9 +109,9 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
   });
 
   test('los complementos no se pueden colocar sueltos en la rejilla', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
-    const slug = nuevoSlug('sin-complementos');
-    await borradorConObjeto(page, slug);
+    await asLogin(page, 'u-ana');
+    const slug = newSlug('sin-complementos');
+    await objectDraft(page, slug);
     await page.goto(`/editor/${slug}`);
 
     // 'tooltip-explicativo' y 'tabla-de-datos' son adjuntables: acompañan a otro objeto. La
@@ -123,9 +123,9 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
   test('un objeto con un campo inexistente se marca ROTO y el modulo se sigue editando', async ({
     page,
   }) => {
-    await entrarComo(page, 'u-ana');
-    const slug = nuevoSlug('roto');
-    await borradorConObjeto(page, slug);
+    await asLogin(page, 'u-ana');
+    const slug = newSlug('roto');
+    await objectDraft(page, slug);
 
     // Se rompe el mapeo por API, como si la fuente hubiera retirado el campo.
     const actual = await (await page.request.get(`/api/modulos/${slug}/edicion`)).json();
@@ -148,9 +148,9 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
 
 test.describe('borrador -> pendiente -> publicado (4.1)', () => {
   test('un Colaborador propone y un Administrador publica', async ({ page }) => {
-    const slug = nuevoSlug('flujo');
-    await entrarComo(page, 'u-ana');
-    await borradorConObjeto(page, slug);
+    const slug = newSlug('flujo');
+    await asLogin(page, 'u-ana');
+    await objectDraft(page, slug);
 
     await page.goto('/editor');
     await page.getByTestId(`send-${slug}`).click();
@@ -159,19 +159,19 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
     // Ana no puede publicar lo que ella misma propuso.
     await expect(page.getByTestId(`publish-${slug}`)).toHaveCount(0);
     const intento = await page.request.post(`/api/modulos/${slug}/estado`, {
-      data: { transicion: 'publicar' },
+      data: { transition: 'publicar' },
     });
     expect(intento.status()).toBe(403);
 
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     await page.goto('/editor');
     await page.getByTestId(`publish-${slug}`).click();
     await expect(page.getByTestId(`row-${slug}`)).toContainText('Publicado');
   });
 
   test('un modulo con problemas no se puede proponer', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
-    const slug = nuevoSlug('con-problemas');
+    await asLogin(page, 'u-ana');
+    const slug = newSlug('con-problemas');
     await page.request.post('/api/modulos', { data: { nombre: 'Vacio', slug } });
 
     // Sin objetos no hay nada roto, asi que se rompe uno a proposito.
@@ -192,7 +192,7 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
     await page.request.put(`/api/modulos/${slug}/edicion`, { data: { paginas: actual.modulo.pages } });
 
     const respuesta = await page.request.post(`/api/modulos/${slug}/estado`, {
-      data: { transicion: 'enviar' },
+      data: { transition: 'enviar' },
     });
     expect(respuesta.status()).toBe(422);
 
@@ -210,12 +210,12 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
   });
 
   test('no se puede saltar la aprobacion', async ({ page }) => {
-    await entrarComo(page, 'u-admin');
-    const slug = nuevoSlug('sin-escalas');
-    await borradorConObjeto(page, slug);
+    await asLogin(page, 'u-admin');
+    const slug = newSlug('sin-escalas');
+    await objectDraft(page, slug);
 
     const respuesta = await page.request.post(`/api/modulos/${slug}/estado`, {
-      data: { transicion: 'publicar' },
+      data: { transition: 'publicar' },
     });
     expect(respuesta.status()).toBe(409);
   });
@@ -223,11 +223,11 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
 
 test.describe('un borrador es personal (criterio de la seccion 9)', () => {
   test('no se ve desde otra cuenta, ni por la lista ni por URL directa', async ({ page }) => {
-    const slug = nuevoSlug('personal');
-    await entrarComo(page, 'u-ana');
-    await borradorConObjeto(page, slug);
+    const slug = newSlug('personal');
+    await asLogin(page, 'u-ana');
+    await objectDraft(page, slug);
 
-    await entrarComo(page, 'u-beto');
+    await asLogin(page, 'u-beto');
     // Un Visor ni siquiera entra al editor; lo que se comprueba es la API, que es donde
     // importa, y la pagina del modulo.
     expect((await page.request.get(`/api/modulos/${slug}/edicion`)).status()).toBe(404);
@@ -236,27 +236,27 @@ test.describe('un borrador es personal (criterio de la seccion 9)', () => {
   });
 
   test('ni un Administrador ve el borrador ajeno', async ({ page }) => {
-    const slug = nuevoSlug('ni-admin');
-    await entrarComo(page, 'u-ana');
-    await borradorConObjeto(page, slug);
+    const slug = newSlug('ni-admin');
+    await asLogin(page, 'u-ana');
+    await objectDraft(page, slug);
 
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     expect((await page.request.get(`/api/modulos/${slug}/edicion`)).status()).toBe(404);
 
     // Cuando se propone, si: revisar a ciegas no es revisar.
-    await entrarComo(page, 'u-ana');
-    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transicion: 'enviar' } });
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-ana');
+    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transition: 'enviar' } });
+    await asLogin(page, 'u-admin');
     expect((await page.request.get(`/api/modulos/${slug}/edicion`)).status()).toBe(200);
   });
 
   test('otro Colaborador no puede reescribirlo', async ({ page }) => {
-    const slug = nuevoSlug('ajeno');
-    await entrarComo(page, 'u-ana');
-    await borradorConObjeto(page, slug);
+    const slug = newSlug('ajeno');
+    await asLogin(page, 'u-ana');
+    await objectDraft(page, slug);
 
     // u-admin tiene el permiso general de editar borradores y aun asi no puede tocar este.
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     const respuesta = await page.request.put(`/api/modulos/${slug}/edicion`, {
       data: { nombre: 'Reescrito' },
     });
@@ -268,15 +268,15 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
   test('publicar lo cuelga de la organizacion general, y conceder el nodo lo hace visible', async ({
     page,
   }) => {
-    const slug = nuevoSlug('retirado');
-    await entrarComo(page, 'u-ana');
-    await borradorConObjeto(page, slug);
+    const slug = newSlug('retirado');
+    await asLogin(page, 'u-ana');
+    await objectDraft(page, slug);
     const detalle = await (await page.request.get(`/api/modulos/${slug}/edicion`)).json();
     const moduleId = detalle.modulo.moduleId as string;
-    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transicion: 'enviar' } });
+    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transition: 'enviar' } });
 
-    await entrarComo(page, 'u-admin');
-    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transicion: 'publicar' } });
+    await asLogin(page, 'u-admin');
+    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transition: 'publicar' } });
 
     // Publicar lo cuelga en la RAIZ del arbol, que es el sitio mas restrictivo: existe en la
     // organizacion general y todavia no esta concedido a ningun equipo. Que publicar no conceda
@@ -286,11 +286,11 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
     };
     expect(arbol.nodes.some((n) => n.id === `nodo-${moduleId}`)).toBe(true);
 
-    await entrarComo(page, 'u-beto');
+    await asLogin(page, 'u-beto');
     expect((await page.request.get(`/api/modulos/${slug}`)).status()).toBe(404);
 
     // Se concede el nodo al equipo de Beto y entonces si lo ve.
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     const equipos = await (await page.request.get('/api/admin/equipos')).json();
     const esteTeam = (equipos.equipos as { id: string; grantedNodes: string[] }[]).find(
       (e) => e.id === 'equipo-este',
@@ -306,23 +306,23 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
         },
       });
 
-      await entrarComo(page, 'u-beto');
+      await asLogin(page, 'u-beto');
       expect((await page.request.get(`/api/modulos/${slug}`)).status()).toBe(200);
 
       // Y al retirarlo deja de servir, aunque el nodo siga concedido: el estado manda.
-      await entrarComo(page, 'u-admin');
+      await asLogin(page, 'u-admin');
       const retirada = await page.request.post(`/api/modulos/${slug}/estado`, {
-        data: { transicion: 'devolver', motivo: 'La medida esta mal calculada.' },
+        data: { transition: 'devolver', motivo: 'La medida esta mal calculada.' },
       });
       expect(retirada.ok(), await retirada.text()).toBe(true);
 
-      await entrarComo(page, 'u-beto');
+      await asLogin(page, 'u-beto');
       expect((await page.request.get(`/api/modulos/${slug}`)).status()).toBe(404);
       const navigation = await (await page.request.get('/api/navegacion')).json();
       expect(JSON.stringify(navigation.arbol)).not.toContain(slug);
     } finally {
       // Se devuelve el equipo a su estado: las demas pruebas asumen lo que el seed concede.
-      await entrarComo(page, 'u-admin');
+      await asLogin(page, 'u-admin');
       await page.request.post('/api/admin/equipos', {
         data: { accion: 'guardar', equipo: { ...esteTeam, grantedNodes: concedidosOriginales } },
       });
@@ -330,14 +330,14 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
   });
 
   test('retirar exige motivo', async ({ page }) => {
-    const slug = nuevoSlug('sin-motivo');
-    await entrarComo(page, 'u-ana');
-    await borradorConObjeto(page, slug);
-    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transicion: 'enviar' } });
+    const slug = newSlug('sin-motivo');
+    await asLogin(page, 'u-ana');
+    await objectDraft(page, slug);
+    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transition: 'enviar' } });
 
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     const respuesta = await page.request.post(`/api/modulos/${slug}/estado`, {
-      data: { transicion: 'devolver' },
+      data: { transition: 'devolver' },
     });
     expect(respuesta.status()).toBe(400);
   });
@@ -345,14 +345,14 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
 
 test.describe('cada transicion queda registrada (4.10.7)', () => {
   test('el panel de auditoria muestra la publicacion y quien la aprobo', async ({ page }) => {
-    const slug = nuevoSlug('auditado');
-    await entrarComo(page, 'u-ana');
-    await borradorConObjeto(page, slug);
-    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transicion: 'enviar' } });
+    const slug = newSlug('auditado');
+    await asLogin(page, 'u-ana');
+    await objectDraft(page, slug);
+    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transition: 'enviar' } });
 
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     const publicado = await page.request.post(`/api/modulos/${slug}/estado`, {
-      data: { transicion: 'publicar' },
+      data: { transition: 'publicar' },
     });
     expect(publicado.ok()).toBe(true);
 

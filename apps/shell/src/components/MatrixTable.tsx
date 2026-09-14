@@ -95,7 +95,7 @@ export function MatrixTable({
 
   const dataRows = useMemo(() => visibleRows(arbol, plegadas), [arbol, plegadas]);
 
-  const alOrdenarPor = (clave: string | null) =>
+  const sortToBy = (clave: string | null) =>
     setOrden((o) =>
       o.por === clave ? { por: clave, direction: o.direction === 'asc' ? 'desc' : 'asc' } : { por: clave, direction: 'asc' },
     );
@@ -109,7 +109,7 @@ export function MatrixTable({
         // El estado del orden se anuncia con `aria-sort` en la celda, que es donde un lector de
         // pantalla lo busca; aqui basta con que el boton diga que hace.
         data-testid={prueba}
-        onClick={() => alOrdenarPor(clave)}
+        onClick={() => sortToBy(clave)}
       >
         <span>{content}</span>
         <span className="table__flecha" aria-hidden="true">

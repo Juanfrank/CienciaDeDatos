@@ -1,10 +1,10 @@
-import { CORREO_DISPONIBLE, canalDeRestablecimiento, cuentasLocales } from '../../../src/server/identity';
-import { CuentasLocales } from '../../../src/components/admin/LocalAccounts';
+import { AVAILABLE_MAIL, canalDeRestablecimiento, localesAccounts } from '../../../src/server/identity';
+import { LocalesAccounts } from '../../../src/components/admin/LocalAccounts';
 
 export const dynamic = 'force-dynamic';
 
 /** Cuentas locales — seccion 4.7.2. */
-export default async function PaginaCuentas() {
+export default async function AccountsPage() {
   return (
     <section>
       <h2>Cuentas locales</h2>
@@ -15,10 +15,10 @@ export default async function PaginaCuentas() {
         factor obligatorio y se auditan aparte.
       </p>
 
-      <CuentasLocales
-        cuentas={await cuentasLocales()}
+      <LocalesAccounts
+        accounts={await localesAccounts()}
         canal={canalDeRestablecimiento.name}
-        correoDisponible={CORREO_DISPONIBLE}
+        availableMail={AVAILABLE_MAIL}
       />
     </section>
   );

@@ -7,10 +7,10 @@ import type {
   FieldSlot,
 } from '@app/ui-components';
 import { objectRegistry } from './context';
-import type { ObjetoCargado } from './data';
+import type { LoadedObject } from './data';
 
 /** Forma que cruza del servidor al cliente. */
-export interface ObjetoSerializado {
+export interface SerializedObject {
   itemId: string;
   titulo: string;
   position: GridPosition;
@@ -27,16 +27,16 @@ export interface ObjetoSerializado {
   generatedAt?: string;
   stale?: boolean;
   /** El contenido de un contenedor, ya serializado. */
-  panels?: PanelSerializado[];
+  panels?: SerializedPanel[];
 }
 
-export interface PanelSerializado {
+export interface SerializedPanel {
   panelId: string;
   nombre: string;
-  objetos: ObjetoSerializado[];
+  objetos: SerializedObject[];
 }
 
-export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
+export function objectSerialize(objeto: LoadedObject): SerializedObject {
   const { item } = objeto;
   return {
     itemId: item.id,
@@ -56,7 +56,7 @@ export function serializarObjeto(objeto: ObjetoCargado): ObjetoSerializado {
           panels: objeto.panels.map((panel) => ({
             panelId: panel.panelId,
             nombre: panel.nombre,
-            objetos: panel.objetos.map(serializarObjeto),
+            objetos: panel.objetos.map(objectSerialize),
           })),
         }
       : {}),

@@ -7,10 +7,10 @@ exportaciones.
 |---|---|
 | `session.ts`, `identity.ts` | Sesion, credenciales locales y TOTP |
 | `data.ts` | Lectura del cache y recorte por ambito. Es el unico camino a los datos |
-| `context.ts`, `gobierno.ts` | Arbol, equipos, paquetes y usuarios |
+| `context.ts`, `governance.ts` | Arbol, equipos, paquetes y usuarios |
 | `admin.ts` | `assertAdmin`, la guarda de todas las rutas de administracion |
 | `audit.ts` | Registro de cambios de configuracion |
-| `modules.ts`, `almacenModulos.ts`, `cicloDeVida.ts` | Definicion, almacen y estados de un modulo |
+| `modules.ts`, `moduleStore.ts`, `cicloDeVida.ts` | Definicion, almacen y estados de un modulo |
 | `editor.ts` | Lo que el panel del editor necesita saber del catalogo |
 | `exports.ts`, `worker.ts` | Documento exportable y cola |
 | `theme.ts` | Modo de color pedido por cookie |

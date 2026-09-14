@@ -2,20 +2,20 @@ import { NextResponse } from 'next/server';
 import { withoutRead } from '@app/alerts';
 import { notificaciones } from '../../../src/server/alerts';
 import { withoutSession } from '../../../src/server/respuestas';
-import { obtenerSesion } from '../../../src/server/session';
+import { sessionGet } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 
 /** Bandeja de notificaciones. */
 export async function GET() {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
   const lista = await notificaciones.list(sesion.userId);
   return NextResponse.json({ notificaciones: lista, withoutRead: withoutRead(lista) });
 }
 
 export async function POST(request: Request) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   let body: { ids?: unknown };

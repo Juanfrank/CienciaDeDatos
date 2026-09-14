@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { GridItem, ModuleDefinition } from '@app/module-model';
 import { applyPersonalization } from '@app/module-model';
 import {
-  PersonalizacionInvalidaError,
-  descartarPersonalizacion,
+  PersonalizationInvalidError,
+  personalizationDiscard,
   savePersonalization,
   readPersonalization,
 } from './personalization';
@@ -36,8 +36,8 @@ const modulo: ModuleDefinition = {
 };
 
 beforeEach(async () => {
-  await descartarPersonalizacion('u-ana', modulo.moduleId);
-  await descartarPersonalizacion('u-beto', modulo.moduleId);
+  await personalizationDiscard('u-ana', modulo.moduleId);
+  await personalizationDiscard('u-beto', modulo.moduleId);
 });
 
 describe('guardar y leer', () => {
@@ -51,7 +51,7 @@ describe('guardar y leer', () => {
 
   it('descartarla devuelve a la vista institucional', async () => {
     await savePersonalization({ userId: 'u-ana', module: modulo, hiddenItemIds: ['dos'] });
-    await descartarPersonalizacion('u-ana', modulo.moduleId);
+    await personalizationDiscard('u-ana', modulo.moduleId);
 
     expect(await readPersonalization('u-ana', modulo.moduleId)).toBeUndefined();
     // Y la definicion institucional nunca se toco: sigue con sus tres objetos.
@@ -63,7 +63,7 @@ describe('lo que una personalizacion NO puede hacer (4.6)', () => {
   it('no puede nombrar un objeto que el modulo no tiene', async () => {
     await expect(
       savePersonalization({ userId: 'u-ana', module: modulo, hiddenItemIds: ['inventado'] }),
-    ).rejects.toBeInstanceOf(PersonalizacionInvalidaError);
+    ).rejects.toBeInstanceOf(PersonalizationInvalidError);
   });
 
   it('no puede ocultarlo todo: una pantalla vacia parece una averia', async () => {
@@ -73,7 +73,7 @@ describe('lo que una personalizacion NO puede hacer (4.6)', () => {
         module: modulo,
         hiddenItemIds: ['uno', 'dos', 'tres'],
       }),
-    ).rejects.toBeInstanceOf(PersonalizacionInvalidaError);
+    ).rejects.toBeInstanceOf(PersonalizationInvalidError);
   });
 
   it('no puede tocar la logica de calculo, aunque lo intente por el cuerpo crudo', async () => {

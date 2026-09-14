@@ -1,5 +1,5 @@
-import { expect, test, type Page } from './instancia';
-import { entrarComo } from './session';
+import { expect, test, type Page } from './instance';
+import { asLogin } from './session';
 
 /**
  * Criterio de la seccion 9: "la aplicacion escala a mas de una instancia sin perdida de sesion
@@ -16,15 +16,15 @@ async function withSameSession(page: Page): Promise<Record<string, string>> {
 
 /** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-ana');
+  await asLogin(page, 'u-ana');
 });
 
 test.describe('la sesion sobrevive al cambio de instancia', () => {
-  test('la segunda instancia reconoce la sesion abierta en la primera', async ({ page, otraInstancia }) => {
-    await entrarComo(page, 'u-beto');
+  test('la segunda instancia reconoce la sesion abierta en la primera', async ({ page, instanceOther }) => {
+    await asLogin(page, 'u-beto');
 
     const cabeceras = await withSameSession(page);
-    const respuesta = await page.request.get(`${otraInstancia}/api/navegacion`, { headers: cabeceras });
+    const respuesta = await page.request.get(`${instanceOther}/api/navegacion`, { headers: cabeceras });
 
     expect(respuesta.status()).toBe(200);
     const body = (await respuesta.json()) as { equipoActivo?: string };
@@ -33,12 +33,12 @@ test.describe('la sesion sobrevive al cambio de instancia', () => {
     expect(body.equipoActivo).toBe('equipo-este');
   });
 
-  test('cambiar de equipo en una instancia se ve en la otra, sin cerrar sesion', async ({ page, otraInstancia }) => {
-    await entrarComo(page, 'u-ana');
+  test('cambiar de equipo en una instancia se ve en la otra, sin cerrar sesion', async ({ page, instanceOther }) => {
+    await asLogin(page, 'u-ana');
     const cabeceras = await withSameSession(page);
 
     // El cambio se hace contra la SEGUNDA instancia y se comprueba en la primera.
-    await page.request.post(`${otraInstancia}/api/sesion/equipo-activo`, {
+    await page.request.post(`${instanceOther}/api/sesion/equipo-activo`, {
       headers: cabeceras,
       data: { teamId: 'equipo-este' },
     });
@@ -51,8 +51,8 @@ test.describe('la sesion sobrevive al cambio de instancia', () => {
 });
 
 test.describe('la personalizacion no se queda en una instancia', () => {
-  test('un marcador guardado en una instancia se lista desde la otra', async ({ page, otraInstancia }) => {
-    await entrarComo(page, 'u-ana');
+  test('un marcador guardado en una instancia se lista desde la otra', async ({ page, instanceOther }) => {
+    await asLogin(page, 'u-ana');
     const cabeceras = await withSameSession(page);
 
     const nombre = `marcador-multiinstancia-${Date.now()}`;
@@ -65,23 +65,23 @@ test.describe('la personalizacion no se queda en una instancia', () => {
       },
     });
 
-    const desdeLaOtra = (await (
-      await page.request.get(`${otraInstancia}/api/marcadores`, { headers: cabeceras })
+    const fromTheOther = (await (
+      await page.request.get(`${instanceOther}/api/marcadores`, { headers: cabeceras })
     ).json()) as { bookmarks: { name: string }[] };
 
-    expect(desdeLaOtra.bookmarks.map((m) => m.name)).toContain(nombre);
+    expect(fromTheOther.bookmarks.map((m) => m.name)).toContain(nombre);
   });
 });
 
 test.describe('el gobierno es el mismo en las dos instancias', () => {
-  test('un cambio del Administrador en una se aplica en la otra', async ({ page, otraInstancia }) => {
+  test('un cambio del Administrador en una se aplica en la otra', async ({ page, instanceOther }) => {
     // Es lo grave de un gobierno por proceso: no perder configuracion, sino que una instancia
     // siga sirviendo datos con los permisos anteriores al cambio.
     //
     // Se crea y se borra un equipo DE USAR Y TIRAR en vez de renombrar uno sembrado: el almacen
     // persiste entre pruebas, y tocar el equipo Norte dejaba fallando a las de otros archivos
     // que asertan sobre su nombre. Un estado compartido de verdad obliga a limpiar de verdad.
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     const cabeceras = await withSameSession(page);
 
     const id = `equipo-multiinstancia-${Date.now()}`;
@@ -100,23 +100,23 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
       });
       expect(guardado.status()).toBe(200);
 
-      const desdeLaOtra = (await (
-        await page.request.get(`${otraInstancia}/api/admin/equipos`, { headers: cabeceras })
+      const fromTheOther = (await (
+        await page.request.get(`${instanceOther}/api/admin/equipos`, { headers: cabeceras })
       ).json()) as { equipos: { id: string; name: string }[] };
 
-      expect(desdeLaOtra.equipos.map((e) => e.id)).toContain(id);
+      expect(fromTheOther.equipos.map((e) => e.id)).toContain(id);
     } finally {
       await page.request.post('/api/admin/equipos', { data: { accion: 'borrar', teamId: id } });
     }
   });
 
-  test('la auditoria de la otra instancia incluye ese mismo cambio', async ({ page, otraInstancia }) => {
+  test('la auditoria de la otra instancia incluye ese mismo cambio', async ({ page, instanceOther }) => {
     // Un registro de auditoria por instancia no es un registro de auditoria.
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     const cabeceras = await withSameSession(page);
 
     const before = (await (
-      await page.request.get(`${otraInstancia}/api/admin/auditoria`, { headers: cabeceras })
+      await page.request.get(`${instanceOther}/api/admin/auditoria`, { headers: cabeceras })
     ).json()) as { eventos: unknown[] };
 
     // De usar y tirar, por lo mismo: la auditoria solo tiene que crecer, no importa con que.
@@ -136,7 +136,7 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
     });
 
     const after = (await (
-      await page.request.get(`${otraInstancia}/api/admin/auditoria`, { headers: cabeceras })
+      await page.request.get(`${instanceOther}/api/admin/auditoria`, { headers: cabeceras })
     ).json()) as { eventos: unknown[] };
 
     expect(after.eventos.length).toBeGreaterThan(before.eventos.length);
@@ -145,17 +145,17 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
 });
 
 test.describe('las dos instancias sirven el mismo dato del cache', () => {
-  test('un modulo se ve igual en las dos', async ({ page, otraInstancia }) => {
+  test('un modulo se ve igual en las dos', async ({ page, instanceOther }) => {
     // Criterio de la seccion 9: dos modulos distintos —aqui, dos instancias— leen de la misma
     // entrada de cache, sin consultas redundantes a la fuente.
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const cabeceras = await withSameSession(page);
 
     const aqui = (await (await page.request.get('/api/modulos/casos-pendientes')).json()) as {
       generatedAt?: string;
     };
     const alla = (await (
-      await page.request.get(`${otraInstancia}/api/modulos/casos-pendientes`, { headers: cabeceras })
+      await page.request.get(`${instanceOther}/api/modulos/casos-pendientes`, { headers: cabeceras })
     ).json()) as { generatedAt?: string };
 
     expect(alla.generatedAt).toBe(aqui.generatedAt);

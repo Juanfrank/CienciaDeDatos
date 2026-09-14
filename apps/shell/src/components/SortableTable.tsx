@@ -54,7 +54,7 @@ export function SortableTable({
     );
   }, [projected.rows, orden]);
 
-  const alPulsar = (column: number) =>
+  const clickTo = (column: number) =>
     setOrden((o) =>
       o?.column === column
         ? { column, direction: o.direction === 'asc' ? 'desc' : 'asc' }
@@ -80,7 +80,7 @@ export function SortableTable({
                     type="button"
                     className="table__sort"
                     data-testid={`sort-${c.name}`}
-                    onClick={() => alPulsar(i)}
+                    onClick={() => clickTo(i)}
                   >
                     <span>{c.name}</span>
                     <span className="table__flecha" aria-hidden="true">

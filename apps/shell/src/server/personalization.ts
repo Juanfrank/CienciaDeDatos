@@ -3,7 +3,7 @@ import {
   type UserPersonalization,
   assertPersonalizationIsPresentationOnly,
 } from '@app/module-model';
-import { borrar, escribir, leer } from './almacenCompartido';
+import { borrar, write, leer } from './almacenCompartido';
 
 /** Personalizacion por usuario final — seccion 4.6. */
 
@@ -17,14 +17,14 @@ export async function readPersonalization(
   return leer<UserPersonalization>(clave(userId, moduleId));
 }
 
-export class PersonalizacionInvalidaError extends Error {
+export class PersonalizationInvalidError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'PersonalizacionInvalidaError';
+    this.name = 'PersonalizationInvalidError';
   }
 }
 
-export interface GuardarPersonalizacionInput {
+export interface SavePersonalizationInput {
   userId: string;
   module: ModuleDefinition;
   hiddenItemIds: string[];
@@ -35,7 +35,7 @@ export interface GuardarPersonalizacionInput {
 }
 
 export async function savePersonalization(
-  input: GuardarPersonalizacionInput,
+  input: SavePersonalizationInput,
 ): Promise<UserPersonalization> {
   if (input.crudo) assertPersonalizationIsPresentationOnly(input.crudo);
 
@@ -46,7 +46,7 @@ export async function savePersonalization(
   const existentes = new Set(input.module.pages.flatMap((p) => p.items.map((i) => i.id)));
   const desconocidos = input.hiddenItemIds.filter((id) => !existentes.has(id));
   if (desconocidos.length > 0) {
-    throw new PersonalizacionInvalidaError(
+    throw new PersonalizationInvalidError(
       `Estos objetos no existen en el modulo: ${desconocidos.join(', ')}.`,
     );
   }
@@ -54,7 +54,7 @@ export async function savePersonalization(
   // Ocultarlo TODO deja una pagina en blanco que parece una averia. Se rechaza con un mensaje
   // que dice que hacer, en vez de guardar un estado del que cuesta salir.
   if (existentes.size > 0 && input.hiddenItemIds.length >= existentes.size) {
-    throw new PersonalizacionInvalidaError(
+    throw new PersonalizationInvalidError(
       'No se pueden ocultar todos los objetos: la vista quedaria vacia. Si no quiere ver este ' +
         'modulo, deje de abrirlo; para volver a la vista oficial, descarte su personalizacion.',
     );
@@ -69,11 +69,11 @@ export async function savePersonalization(
     updatedAt: new Date().toISOString(),
   };
 
-  await escribir(clave(input.userId, input.module.moduleId), personalizacion);
+  await write(clave(input.userId, input.module.moduleId), personalizacion);
   return personalizacion;
 }
 
 /** Descarta la personalizacion y devuelve a la vista institucional. */
-export async function descartarPersonalizacion(userId: string, moduleId: string): Promise<void> {
+export async function personalizationDiscard(userId: string, moduleId: string): Promise<void> {
   await borrar(clave(userId, moduleId));
 }

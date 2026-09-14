@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { teamsOf } from '../../../../src/server/context';
 import { withoutSession } from '../../../../src/server/respuestas';
-import { cambiarEquipoActivo, obtenerSesion } from '../../../../src/server/session';
+import { activeChangeTeam, sessionGet } from '../../../../src/server/session';
 
 export const runtime = 'nodejs';
 
 /** Cambio de equipo activo (4.10.2). */
 export async function POST(request: Request) {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) return withoutSession();
 
   const body = (await request.json()) as { teamId?: string };
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No pertenece a ese equipo.' }, { status: 403 });
   }
 
-  const actualizada = await cambiarEquipoActivo(sesion.sessionId, body.teamId);
+  const actualizada = await activeChangeTeam(sesion.sessionId, body.teamId);
   if (!actualizada) return withoutSession();
 
   // La cookie no cambia: el identificador de sesion es el mismo y el equipo activo vive del lado

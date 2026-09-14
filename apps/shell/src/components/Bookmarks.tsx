@@ -49,14 +49,14 @@ export function Bookmarks({
     router.refresh();
   };
 
-  const deEsteModulo = bookmarks.filter((m) => m.moduleSlug === moduleSlug);
+  const moduleEste = bookmarks.filter((m) => m.moduleSlug === moduleSlug);
 
   return (
     <div className="marcadores">
       <IconButton
         icono="marcador"
         etiqueta="Marcadores"
-        contador={deEsteModulo.length}
+        contador={moduleEste.length}
         presionado={abierto}
         data-testid="abrir-marcadores"
         onClick={() => setAbierto((v) => !v)}
@@ -80,11 +80,11 @@ export function Bookmarks({
             </button>
           </div>
 
-          {deEsteModulo.length === 0 ? (
+          {moduleEste.length === 0 ? (
             <p className="muted-text">Sin marcadores en este modulo.</p>
           ) : (
             <ul className="bookmarks__list">
-              {deEsteModulo.map((m) => (
+              {moduleEste.map((m) => (
                 <li key={m.id}>
                   <Link href={bookmarkToUrl(m)} data-testid={`bookmark-${m.name}`}>
                     {m.name}

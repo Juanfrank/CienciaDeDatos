@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { contarAmpliaciones, listarAuditoria } from '../../src/server/audit';
+import { expansionsCount, auditList } from '../../src/server/audit';
 import { getManagedTree, listTeams, listUsers } from '../../src/server/context';
 import { AuditEvent } from '../../src/components/admin/AuditEvent';
 import { Icon, type IconName } from '../../src/components/icons/Icon';
@@ -7,24 +7,24 @@ import { Icon, type IconName } from '../../src/components/icons/Icon';
 export const dynamic = 'force-dynamic';
 
 /** Inicio del panel — el estado del gobierno de un vistazo. */
-export default async function AdminInicio() {
+export default async function HomeAdmin() {
   const [arbol, equipos, personas, ampliaciones, recientes] = await Promise.all([
     getManagedTree(),
     listTeams(),
     listUsers(),
-    contarAmpliaciones(),
-    listarAuditoria().then((e) => e.slice(0, 6)),
+    expansionsCount(),
+    auditList().then((e) => e.slice(0, 6)),
   ]);
 
-  const contarNodos = (nodos: typeof arbol.nodes): number =>
-    nodos.reduce((n, node) => n + 1 + (node.type === 'folder' ? contarNodos(node.children) : 0), 0);
+  const nodesCount = (nodos: typeof arbol.nodes): number =>
+    nodos.reduce((n, node) => n + 1 + (node.type === 'folder' ? nodesCount(node.children) : 0), 0);
 
   return (
     <div className="admin-inicio">
       <div className="tarjetas" data-testid="resumen-gobierno">
         <Resumen
           etiqueta="Nodos en la organizacion"
-          valor={contarNodos(arbol.nodes)}
+          valor={nodesCount(arbol.nodes)}
           href="/admin/arbol"
           icono="carpeta"
         />

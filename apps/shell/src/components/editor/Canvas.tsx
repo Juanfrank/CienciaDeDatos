@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { GRID_COLUMNS, type GridItem, type GridPosition } from '@app/module-model';
 import { ModuleObject } from '../ModuleObject';
-import type { ObjetoSerializado } from '../../server/serializar';
+import type { SerializedObject } from '../../server/serialize';
 import { Icon } from '../icons/Icon';
 import { useDrag } from './useDrag';
 
@@ -17,7 +17,7 @@ export function Canvas({
   onColocar,
 }: {
   items: GridItem[];
-  objetos: ObjetoSerializado[];
+  objetos: SerializedObject[];
   selection: string | null;
   /** Sin permiso de edicion no hay asas: el lienzo se mira, no se reordena. */
   editable: boolean;
@@ -29,11 +29,11 @@ export function Canvas({
   /*
    * Dos filas de mas, siempre.
    */
-  const filasUsadas = items.reduce((m, i) => Math.max(m, i.position.y + i.position.h), 0);
-  const dataRows = filasUsadas + 2;
+  const usedRows = items.reduce((m, i) => Math.max(m, i.position.y + i.position.h), 0);
+  const dataRows = usedRows + 2;
 
   const rejilla = useRef<HTMLDivElement>(null);
-  const { enCurso, alEmpezar, alMover, alSoltar, alCancelar } = useDrag({
+  const { enCurso, alEmpezar, moveTo, alSoltar, alCancelar } = useDrag({
     items,
     rejilla,
     onSoltar: onColocar,
@@ -82,7 +82,7 @@ export function Canvas({
         {enCurso ? (
           <div
             className="canvas__sombra"
-            data-valido={enCurso.valido ? 'si' : 'no'}
+            data-valid={enCurso.valid ? 'si' : 'no'}
             data-testid="sombra-de-arrastre"
             aria-hidden="true"
             style={
@@ -94,7 +94,7 @@ export function Canvas({
           >
             <span>
               {enCurso.destino.w}×{enCurso.destino.h}
-              {enCurso.valido ? '' : ' · ocupado'}
+              {enCurso.valid ? '' : ' · ocupado'}
             </span>
           </div>
         ) : null}
@@ -148,7 +148,7 @@ export function Canvas({
                     // de arrastrar deseleccionaba el bloque que se acababa de mover.
                     onClick={(e) => e.stopPropagation()}
                     onPointerDown={(e) => alEmpezar(e, item, 'mover')}
-                    onPointerMove={alMover}
+                    onPointerMove={moveTo}
                     onPointerUp={alSoltar}
                     onPointerCancel={alCancelar}
                   >
@@ -162,7 +162,7 @@ export function Canvas({
                     data-testid={`resize-handle-${item.id}`}
                     onClick={(e) => e.stopPropagation()}
                     onPointerDown={(e) => alEmpezar(e, item, 'redimensionar')}
-                    onPointerMove={alMover}
+                    onPointerMove={moveTo}
                     onPointerUp={alSoltar}
                     onPointerCancel={alCancelar}
                   />

@@ -1,9 +1,9 @@
-import { expect, test, type Page } from './instancia';
-import { entrarComo } from './session';
+import { expect, test, type Page } from './instance';
+import { asLogin } from './session';
 
 /** Alertas y suscripciones basadas en datos (4.9). */
 
-interface AlertaCreada {
+interface CreatedAlert {
   id: string;
   teamId: string;
   ownerUserId: string;
@@ -14,7 +14,7 @@ async function createAlert(page: Page, datos: Record<string, unknown>) {
   const r = await page.request.post('/api/alertas', { data: datos });
   return {
     estado: r.status(),
-    body: (await r.json()) as { alerta?: AlertaCreada; error?: string },
+    body: (await r.json()) as { alerta?: CreatedAlert; error?: string },
   };
 }
 
@@ -30,7 +30,7 @@ async function clear(page: Page) {
 
 /** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-ana');
+  await asLogin(page, 'u-ana');
 });
 
 test.describe('reglas de alerta', () => {
@@ -39,7 +39,7 @@ test.describe('reglas de alerta', () => {
   });
 
   test('se crea sobre un objeto y una medida del modulo', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const { estado, body } = await createAlert(page, {
       nombre: 'Pendientes altos',
       modulo: 'casos-pendientes',
@@ -57,7 +57,7 @@ test.describe('reglas de alerta', () => {
   });
 
   test('rechaza una medida que el objeto no mapea', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     // Una regla sobre una medida inexistente no dispararia nunca y nadie sabria por que.
     const { estado } = await createAlert(page, {
       nombre: 'Inventada',
@@ -71,7 +71,7 @@ test.describe('reglas de alerta', () => {
   });
 
   test('rechaza un objeto que no esta en el modulo', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const { estado } = await createAlert(page, {
       nombre: 'Inventada',
       modulo: 'casos-pendientes',
@@ -84,7 +84,7 @@ test.describe('reglas de alerta', () => {
   });
 
   test('rechaza un operador desconocido', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const { estado } = await createAlert(page, {
       nombre: 'Rara',
       modulo: 'casos-pendientes',
@@ -99,7 +99,7 @@ test.describe('reglas de alerta', () => {
 
 test.describe('una regla es privada de quien la creo', () => {
   test('no aparece en la lista de otra persona ni se puede borrar', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const { body } = await createAlert(page, {
       nombre: 'Solo de Ana',
       modulo: 'casos-pendientes',
@@ -110,7 +110,7 @@ test.describe('una regla es privada de quien la creo', () => {
     });
     const id = body.alerta?.id ?? '';
 
-    await entrarComo(page, 'u-beto');
+    await asLogin(page, 'u-beto');
     const lista = (await (await page.request.get('/api/alertas')).json()) as {
       alertas: { id: string }[];
     };
@@ -120,19 +120,19 @@ test.describe('una regla es privada de quien la creo', () => {
     // Borrarla responde 404 y no 403: decir "prohibido" confirmaria que ese id existe.
     expect((await page.request.delete(`/api/alertas?id=${id}`)).status()).toBe(404);
 
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     expect((await page.request.delete(`/api/alertas?id=${id}`)).status()).toBe(200);
   });
 });
 
 test.describe('la bandeja es de quien pide, sin parametro que manipular', () => {
   test('cada persona ve su propia bandeja', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const deAna = (await (await page.request.get('/api/notificaciones')).json()) as {
       notificaciones: unknown[];
     };
 
-    await entrarComo(page, 'u-beto');
+    await asLogin(page, 'u-beto');
     const deBeto = (await (await page.request.get('/api/notificaciones')).json()) as {
       notificaciones: unknown[];
     };
@@ -150,7 +150,7 @@ test.describe('suscripciones', () => {
   });
 
   test('se crea con cadencia y formato, y queda listada', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const r = await page.request.post('/api/suscripciones', {
       data: {
         nombre: 'Casos cada lunes',
@@ -171,7 +171,7 @@ test.describe('suscripciones', () => {
   });
 
   test('rechaza una hora fuera de rango y una cadencia desconocida', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     const common = { nombre: 'X', modulo: 'casos-pendientes', formato: 'pdf' };
 
     expect(
@@ -189,7 +189,7 @@ test.describe('interfaz', () => {
   });
 
   test('se crea una alerta desde el modulo que se esta viendo', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('create-notice').click();
@@ -205,7 +205,7 @@ test.describe('interfaz', () => {
   });
 
   test('un segmentador no se ofrece como objeto vigilable', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('create-notice').click();
 
@@ -216,7 +216,7 @@ test.describe('interfaz', () => {
   });
 
   test('la regla captura los filtros de la URL: la URL es el estado (4.11)', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes?DimTribunal.Materia=Penal');
 
     await page.getByTestId('create-notice').click();
@@ -228,12 +228,12 @@ test.describe('interfaz', () => {
     const lista = (await (await page.request.get('/api/alertas')).json()) as {
       alertas: { name: string; filters: Record<string, string[]> }[];
     };
-    const creada = lista.alertas.find((a) => a.name === 'Solo penal');
-    expect(creada?.filters['DimTribunal.Materia']).toEqual(['Penal']);
+    const created = lista.alertas.find((a) => a.name === 'Solo penal');
+    expect(created?.filters['DimTribunal.Materia']).toEqual(['Penal']);
   });
 
   test('se crea una suscripcion desde el mismo dialogo', async ({ page }) => {
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('create-notice').click();

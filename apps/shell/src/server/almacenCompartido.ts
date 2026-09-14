@@ -23,7 +23,7 @@ export async function leer<T>(clave: string): Promise<T | undefined> {
   return entrada?.value ?? undefined;
 }
 
-export async function escribir<T>(clave: string, valor: T): Promise<void> {
+export async function write<T>(clave: string, valor: T): Promise<void> {
   await store.set(clave, { value: valor, generatedAt: new Date().toISOString() });
 }
 
@@ -32,7 +32,7 @@ export async function borrar(clave: string): Promise<void> {
 }
 
 /** Claves del estado de aplicacion. Agrupadas aqui para verlas todas de una vez. */
-export const CLAVE_GOBIERNO = 'app:gobierno';
+export const GOVERNANCE_KEY = 'app:gobierno';
 export const KEY_BOOKMARKS = 'app:marcadores';
 export const KEY_AUDIT = 'app:auditoria';
 

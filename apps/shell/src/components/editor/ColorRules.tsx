@@ -36,7 +36,7 @@ export function ColorRules({
   const cambiar = (siguiente: ColorRule[]) =>
     onCambiar(siguiente.length === 0 ? undefined : siguiente);
 
-  const editar = (i: number, change: Partial<ColorRule>) =>
+  const edit = (i: number, change: Partial<ColorRule>) =>
     cambiar(rules.map((colorRule, j) => (i === j ? { ...colorRule, ...change } : colorRule)));
 
   const mover = (i: number, delta: number) => {
@@ -66,7 +66,7 @@ export function ColorRules({
               value={colorRule.medida ?? ""}
               disabled={saving}
               data-testid={`${prueba}-medida-${i}`}
-              onChange={(e) => editar(i, { medida: e.target.value || undefined })}
+              onChange={(e) => edit(i, { medida: e.target.value || undefined })}
             >
               <option value="">Todas las medidas</option>
               {medidas.map((medida) => (
@@ -88,7 +88,7 @@ export function ColorRules({
                 value={colorRule.comparator}
                 disabled={saving}
                 data-testid={`${prueba}-comparador-${i}`}
-                onChange={(e) => editar(i, { comparator: e.target.value as Comparator })}
+                onChange={(e) => edit(i, { comparator: e.target.value as Comparator })}
               >
                 {COMPARATORS.map((c) => (
                   <option key={c} value={c}>
@@ -104,7 +104,7 @@ export function ColorRules({
                 defaultValue={colorRule.valor}
                 disabled={saving}
                 data-testid={`${prueba}-valor-${i}`}
-                onBlur={(e) => editar(i, { valor: Number(e.target.value) })}
+                onBlur={(e) => edit(i, { valor: Number(e.target.value) })}
               />
             </label>
           </div>
@@ -118,7 +118,7 @@ export function ColorRules({
                 disabled={saving}
                 data-testid={`${prueba}-hasta-${i}`}
                 onBlur={(e) =>
-                  editar(i, { hasta: e.target.value === "" ? undefined : Number(e.target.value) })
+                  edit(i, { hasta: e.target.value === "" ? undefined : Number(e.target.value) })
                 }
               />
               {/* Sin el otro extremo la regla no casa nunca, y se rechaza al guardar. */}
@@ -132,7 +132,7 @@ export function ColorRules({
               valor={colorRule.color}
               nombre={`la regla ${i + 1}`}
               prueba={`${prueba}-color-${i}`}
-              onCambiar={(color) => editar(i, { color })}
+              onCambiar={(color) => edit(i, { color })}
             />
           </div>
 

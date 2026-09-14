@@ -1,21 +1,21 @@
 import Link from 'next/link';
 import { defaultIdentity } from '@app/design-tokens';
 import { can } from '@app/access-control';
-import { esAdministrador, rolMasAltoDe } from '../server/admin';
+import { isAdministrator, roleMoreHeightOf } from '../server/admin';
 import { findTeam } from '../server/context';
-import type { SesionShell } from '../server/session';
+import type { ShellSession } from '../server/session';
 import { ToggleSidebar } from './ToggleSidebar';
 import { Bell } from './Bell';
 import { CloseSession } from './CloseSession';
 
 /** Cromo de cabecera de la aplicacion. */
-export async function Header({ sesion }: { sesion: SesionShell }) {
+export async function Header({ sesion }: { sesion: ShellSession }) {
   const equipo = await findTeam(sesion.activeTeamId);
 
   // El enlace solo se dibuja para quien puede usarlo. Ocultarlo no protege nada —eso lo hace el
   // guardian del backend— pero no tiene sentido ofrecer una puerta cerrada.
-  const puedeAdministrar = await esAdministrador(sesion.userId);
-  const puedeEditar = can(await rolMasAltoDe(sesion.userId), 'crear-editar-modulos-borrador');
+  const manageCan = await isAdministrator(sesion.userId);
+  const editCan = can(await roleMoreHeightOf(sesion.userId), 'crear-editar-modulos-borrador');
 
   return (
     <header className="cabecera">
@@ -46,12 +46,12 @@ export async function Header({ sesion }: { sesion: SesionShell }) {
 
       <div className="header__actions">
         <Bell />
-        {puedeEditar ? (
+        {editCan ? (
           <Link href="/editor" className="boton-enlace" data-testid="enlace-editor">
             Editor
           </Link>
         ) : null}
-        {puedeAdministrar ? (
+        {manageCan ? (
           <Link href="/admin" className="boton-enlace" data-testid="enlace-admin">
             Administracion
           </Link>

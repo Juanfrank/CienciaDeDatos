@@ -10,22 +10,22 @@ interface Dimension {
   key: string;
 }
 
-export interface DestinoDeAmbito {
+export interface ScopeTarget {
   tipo: 'carpeta' | 'equipo';
   id: string;
   nombre: string;
   scope: AccessScope;
 }
 
-export function ScopeEditor({ destinos }: { destinos: DestinoDeAmbito[] }) {
+export function ScopeEditor({ targets }: { targets: ScopeTarget[] }) {
   const [dimensiones, setDimensiones] = useState<Dimension[]>([]);
-  const [destinoId, setDestinoId] = useState(destinos[0]?.id ?? '');
+  const [destinoId, setDestinoId] = useState(targets[0]?.id ?? '');
   const [restricciones, setRestricciones] = useState<AccessScope['restrictions']>([]);
   const [justificacion, setJustificacion] = useState('');
   const [ampliacion, setAmpliacion] = useState<string[] | null>(null);
   const [mensaje, setMensaje] = useState<{ tipo: 'ok' | 'error'; content: string } | null>(null);
 
-  const destino = destinos.find((d) => d.id === destinoId);
+  const destino = targets.find((d) => d.id === destinoId);
 
   useEffect(() => {
     void fetch('/api/admin/esquema')
@@ -84,7 +84,7 @@ export function ScopeEditor({ destinos }: { destinos: DestinoDeAmbito[] }) {
           data-testid="selector-destino-ambito"
           onChange={(e) => setDestinoId(e.target.value)}
         >
-          {destinos.map((d) => (
+          {targets.map((d) => (
             <option key={d.id} value={d.id}>
               {d.tipo === 'carpeta' ? 'Carpeta' : 'Equipo'}: {d.nombre}
             </option>

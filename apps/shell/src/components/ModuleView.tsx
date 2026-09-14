@@ -1,7 +1,7 @@
 'use client';
 
 import { useUrlFilters } from '../hooks/useUrlFilters';
-import { CreateNotice, type ObjetoVigilable } from './CreateNotice';
+import { CreateNotice, type WatchableObject } from './CreateNotice';
 import { Export } from './Export';
 import { Embed } from './Embed';
 import { ProvenanceBadge } from './ProvenanceBadge';
@@ -10,7 +10,7 @@ import { Bookmarks } from './Bookmarks';
 import { MyView } from './MyView';
 import { ModuleObject } from './ModuleObject';
 import { Grid } from './Grid';
-import type { ObjetoSerializado } from '../server/serializar';
+import type { SerializedObject } from '../server/serialize';
 
 /** Interruptor de la consulta en lenguaje natural (4.9). */
 const VISIBLE_QUERY = false;
@@ -24,7 +24,7 @@ export function ModuleView({
   pageSlug,
   embedded = false,
 }: {
-  objetos: ObjetoSerializado[];
+  objetos: SerializedObject[];
   provenance: { isPersonalized: boolean; label: string };
   /** Las insignias de procedencia y ambito, ya renderizadas en el servidor. */
   insignias?: React.ReactNode;
@@ -33,14 +33,14 @@ export function ModuleView({
   /** true cuando la vista se dibuja dentro del portal de otra institucion (4.9). */
   embedded?: boolean;
 }) {
-  const { toggle, limpiarTodo, searchParams } = useUrlFilters();
-  const hayFiltros = [...searchParams.keys()].length > 0;
+  const { toggle, clearAll, searchParams } = useUrlFilters();
+  const filtersHas = [...searchParams.keys()].length > 0;
 
   const items = objetos.map((o) => ({ id: o.itemId, position: o.position }));
 
   // Solo se puede vigilar lo que tiene una cifra. Un segmentador mapea dimensiones y ninguna
   // medida: ofrecerlo daria una alerta que no puede dispararse nunca.
-  const vigilables: ObjetoVigilable[] = objetos
+  const vigilables: WatchableObject[] = objetos
     .filter((o) => o.instance.binding.measures.length > 0 && o.result)
     .map((o) => ({
       instanceId: o.instance.instanceId,
@@ -90,12 +90,12 @@ export function ModuleView({
             <Embed moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
           </div>
 
-          {hayFiltros ? (
+          {filtersHas ? (
             <button
               type="button"
               className="boton-enlace module-bar__clear"
               data-testid="clear-filters"
-              onClick={limpiarTodo}
+              onClick={clearAll}
             >
               Limpiar todos los filtros
             </button>

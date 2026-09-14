@@ -19,7 +19,7 @@ export function MyView({
   const [error, setError] = useState('');
   const [trabajando, setTrabajando] = useState(false);
 
-  const abrir = async () => {
+  const open = async () => {
     setError('');
     const r = await fetch(`/api/modulos/${moduleSlug}/vista`);
     if (!r.ok) return;
@@ -52,7 +52,7 @@ export function MyView({
     }
   };
 
-  const descartar = async () => {
+  const discard = async () => {
     setError('');
     setTrabajando(true);
     try {
@@ -71,7 +71,7 @@ export function MyView({
         etiqueta="Mi vista"
         presionado={personalizada}
         data-testid="my-view"
-        onClick={() => void abrir()}
+        onClick={() => void open()}
       />
 
       <dialog ref={dialogo} className="emergente" aria-label="Mi vista" data-testid="dialogo-my-view">
@@ -137,7 +137,7 @@ export function MyView({
               className="boton-enlace"
               data-testid="my-view-descartar"
               disabled={trabajando}
-              onClick={() => void descartar()}
+              onClick={() => void discard()}
             >
               Volver a la vista institucional
             </button>

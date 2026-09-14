@@ -18,10 +18,10 @@ import {
  * Es la misma decision que en el modo de color, y por el mismo motivo. Encender la negociacion
  * automatica es cambiar esta funcion, y lo que lo habilita es haber traducido el catalogo entero.
  */
-export const COOKIE_DE_IDIOMA = 'idioma';
+export const LOCALE_COOKIE = 'idioma';
 
 export async function idioma(): Promise<Locale> {
-  const chosen = (await cookies()).get(COOKIE_DE_IDIOMA)?.value;
+  const chosen = (await cookies()).get(LOCALE_COOKIE)?.value;
   return isLocale(chosen) ? chosen : DEFAULT_LOCALE;
 }
 

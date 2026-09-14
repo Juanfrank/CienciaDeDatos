@@ -1,16 +1,16 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { SIDEBAR_ID } from '../../src/components/CollapsibleNavigation';
-import { AdminRail, SeccionActual } from '../../src/components/admin/AdminRail';
-import { esAdministrador } from '../../src/server/admin';
+import { AdminRail, CurrentSection } from '../../src/components/admin/AdminRail';
+import { isAdministrator } from '../../src/server/admin';
 import { indicadoresDeAdmin } from '../../src/server/admin';
-import { exigirSesionDePagina } from '../../src/server/session';
+import { pageSessionRequire } from '../../src/server/session';
 
 /** Panel de administracion — seccion 4.10.8. */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const sesion = await exigirSesionDePagina();
+  const sesion = await pageSessionRequire();
 
-  if (!(await esAdministrador(sesion.userId))) {
+  if (!(await isAdministrator(sesion.userId))) {
     // Sin permiso no se dibuja nada del panel. Se redirige a una ruta FUERA de este layout,
     // porque redirigir a una ruta de dentro entraria en bucle.
     //
@@ -33,7 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <h1>
             <Link href="/admin">Administracion</Link>
           </h1>
-          <SeccionActual />
+          <CurrentSection />
         </div>
         <Link href="/" className="boton-contorno" data-testid="volver-a-modulos">
           Volver a los modulos

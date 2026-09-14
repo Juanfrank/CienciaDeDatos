@@ -1,11 +1,11 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from './instancia';
-import { entrarComo } from './session';
+import { expect, test } from './instance';
+import { asLogin } from './session';
 
 /** Galeria de objetos sobre Apache ECharts — seccion 4.2 y accesibilidad de 4.9. */
 
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-ana');
+  await asLogin(page, 'u-ana');
 });
 
 test.describe('el grafico monta sobre el respaldo, no en su lugar', () => {
@@ -25,7 +25,7 @@ test.describe('el grafico monta sobre el respaldo, no en su lugar', () => {
   test('SIN JavaScript se ve el respaldo, con sus barras y sus cifras', async ({ browser }) => {
     const contexto = await browser.newContext({ javaScriptEnabled: false });
     const pagina = await contexto.newPage();
-    await entrarComo(pagina, 'u-ana');
+    await asLogin(pagina, 'u-ana');
     await pagina.goto('/m/casos-pendientes');
 
     // Sin JavaScript ECharts no monta, y la pagina sigue sirviendo: el objeto no queda en blanco.
@@ -78,12 +78,12 @@ test.describe('el color no es el unico medio de distinguir (WCAG 1.4.1)', () => 
     // `aria.decal.show` en las opciones. Con varias series, el patron es lo unico que separa una
     // de otra al imprimir en gris o para quien no distingue ciertos colores.
     await page.goto('/m/casos-pendientes');
-    const conVariasSeries = page.getByTestId('chart-barras-flujo');
-    await expect(conVariasSeries).toHaveAttribute('data-montado', 'si');
+    const withSeriesSeveral = page.getByTestId('chart-barras-flujo');
+    await expect(withSeriesSeveral).toHaveAttribute('data-montado', 'si');
 
     // Con pocos elementos el renderizador es SVG, y los patrones son <pattern> de verdad.
     await expect
-      .poll(() => conVariasSeries.locator('.chart__canvas pattern').count())
+      .poll(() => withSeriesSeveral.locator('.chart__canvas pattern').count())
       .toBeGreaterThan(0);
   });
 
@@ -111,11 +111,11 @@ test.describe('el color no es el unico medio de distinguir (WCAG 1.4.1)', () => 
     );
     expect(primaria).toMatch(/^#[0-9a-f]{6}$/i);
 
-    const usaElTema = await page.evaluate((color) => {
+    const usesTheTheme = await page.evaluate((color) => {
       const nodos = [...document.querySelectorAll('.chart__canvas [fill]')];
       return nodos.some((n) => (n.getAttribute('fill') ?? '').toLowerCase() === color.toLowerCase());
     }, primaria);
-    expect(usaElTema).toBe(true);
+    expect(usesTheTheme).toBe(true);
   });
 });
 
@@ -157,14 +157,14 @@ test.describe('accesibilidad del grafico', () => {
 
 test.describe('la matriz, con jerarquia', () => {
   test.beforeEach(async ({ page }) => {
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     await page.goto('/m/casos-pendientes');
   });
 
   /*
    * Nada se busca por su etiqueta.
    */
-  const rutaDelPrimerPadre = async (page: import('@playwright/test').Page): Promise<string> => {
+  const parentFirstPath = async (page: import('@playwright/test').Page): Promise<string> => {
     const button = page.locator('[data-testid^="matrix-collapse"]').first();
     const id = (await button.getAttribute('data-testid')) ?? '';
     return id.replace('matrix-collapse-', '');
@@ -176,18 +176,18 @@ test.describe('la matriz, con jerarquia', () => {
 
   test('el subtotal de un padre es la suma de sus hijos', async ({ page }) => {
     await expect(page.getByTestId('matriz')).toBeVisible();
-    const padre = await rutaDelPrimerPadre(page);
+    const padre = await parentFirstPath(page);
 
     const hijos = await page.locator(`[data-testid^="matrix-row-${padre}||"]`).all();
     expect(hijos.length).toBeGreaterThan(1);
 
     let suma = 0;
-    for (const hijo of hijos) suma += await totalOf(hijo);
+    for (const child of hijos) suma += await totalOf(child);
     expect(await totalOf(page.getByTestId(`matrix-row-${padre}`))).toBe(suma);
   });
 
   test('plegar esconde los hijos y deja el subtotal del padre', async ({ page }) => {
-    const padre = await rutaDelPrimerPadre(page);
+    const padre = await parentFirstPath(page);
     const before = await page.locator('[data-testid^="matrix-row"]').count();
 
     await page.getByTestId(`matrix-collapse-${padre}`).click();
@@ -213,7 +213,7 @@ test.describe('la matriz, con jerarquia', () => {
   test('ordenar no rompe la jerarquia: los hijos siguen bajo su padre', async ({ page }) => {
     // Ordenar la tabla entera por una columna repartiria los hijos de un grupo entre otros grupos.
     // Se ordena cada nivel por separado, asi que el padre sigue trayendo a los suyos detras.
-    const padre = await rutaDelPrimerPadre(page);
+    const padre = await parentFirstPath(page);
     const hijos = await page.locator(`[data-testid^="matrix-row-${padre}||"]`).count();
 
     await page.getByTestId('matrix-sort-total-0').click();
@@ -230,7 +230,7 @@ test.describe('la tabla se ordena por su encabezado', () => {
      * existia: un encabezado que no responde ensena que la tabla no se ordena, y quien lo prueba
      * una vez no lo vuelve a intentar.
      */
-    await entrarComo(page, 'u-admin');
+    await asLogin(page, 'u-admin');
     await page.goto('/m/casos-pendientes');
     const tabla = page.getByTestId('tabla').first();
     await expect(tabla).toBeVisible();

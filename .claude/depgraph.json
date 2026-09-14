@@ -18,7 +18,7 @@
   },
   {
    "path": "packages/access-control/src/index.ts",
-   "hash": "f84ce9e5f76da7be34940022ed3b29c9a1b7012f5feea7b5732f754437afe6cc",
+   "hash": "d0d158899559193e9d36f67fdd5dcb7089eb8a6bff27e7c4c13d92dcac8ead88",
    "imports": [],
    "defines": [
     {
@@ -407,10 +407,10 @@
   },
   {
    "path": "packages/access-control/src/AccessScope.spec.ts",
-   "hash": "884423157b88629b802ace75752dd3d821adec63161c2c0e2c17486dc8633ae2",
+   "hash": "4c40452c0e5d190c7cecd70229bc5a8d48f8ae7d98e37fa482be94ca181887fc",
    "imports": [
     "./AccessScope",
-    "./__fixtures__/gobierno",
+    "./__fixtures__/governance",
     "@app/data-contracts",
     "vitest"
    ],
@@ -423,7 +423,7 @@
      "resolved": null
     },
     {
-     "module": "./__fixtures__/gobierno",
+     "module": "./__fixtures__/governance",
      "resolved": null
     },
     {
@@ -438,12 +438,12 @@
   },
   {
    "path": "packages/access-control/src/navigation.spec.ts",
-   "hash": "c277fd5776349889dc0510878ec6a50e6f4bfe4d8efa21eba9d4dddf43eaa6f5",
+   "hash": "80665fc61b3d59a6d98b97a58ae44afb855d5ae52c5446173ffcac2aef6aad73",
    "imports": [
     "./ModulePackage",
     "./NavigationTree",
     "./Team",
-    "./__fixtures__/gobierno",
+    "./__fixtures__/governance",
     "./navigation",
     "vitest"
    ],
@@ -464,7 +464,7 @@
      "resolved": null
     },
     {
-     "module": "./__fixtures__/gobierno",
+     "module": "./__fixtures__/governance",
      "resolved": null
     },
     {
@@ -537,7 +537,7 @@
   },
   {
    "path": "packages/access-control/src/treeOperations.ts",
-   "hash": "6b90e36c9028220446d79a6c48be4c7af28212c88043125c79ef6cf56155f763",
+   "hash": "bba1699a77aa39155e4a13a073c4d433f471e6a7a5a22c94f8118e8bb3ea43d6",
    "imports": [
     "./AccessScope",
     "./NavigationTree",
@@ -588,7 +588,7 @@
   },
   {
    "path": "packages/access-control/src/lastAdministrator.spec.ts",
-   "hash": "c721b6f88212eccde59a38e7a632466d7d3a2c2e92f81f8a4512e771ac9031d1",
+   "hash": "331ba7a9eecbd9c55323700a054ea8e96196de8ea5e30103e4a21a0ad329b5f4",
    "imports": [
     "./index",
     "vitest"
@@ -671,12 +671,12 @@
   },
   {
    "path": "packages/access-control/src/resolveEffectiveScope.spec.ts",
-   "hash": "6e747afc10d21036597f53aef3711c0261f5f1f80caefde4ab5e935031e081dc",
+   "hash": "56203e85b96eb336a5a19b23b001ad43758275242d38832257eed6b0780aaf83",
    "imports": [
     "./AccessScope",
     "./NavigationTree",
     "./Team",
-    "./__fixtures__/gobierno",
+    "./__fixtures__/governance",
     "./resolveEffectiveScope",
     "vitest"
    ],
@@ -697,7 +697,7 @@
      "resolved": null
     },
     {
-     "module": "./__fixtures__/gobierno",
+     "module": "./__fixtures__/governance",
      "resolved": null
     },
     {
@@ -712,7 +712,7 @@
   },
   {
    "path": "packages/access-control/src/lastAdministrator.ts",
-   "hash": "359ce8b6c5cb1846b9b5d34139c5af542e578c60c60ab6a370dcbd13c674c247",
+   "hash": "320d3f897807d1409d27415db740efadd72bf3f8a9958999a7ea7b696530ce4f",
    "imports": [
     "./Team"
    ],
@@ -742,11 +742,11 @@
   },
   {
    "path": "packages/access-control/src/treeOperations.spec.ts",
-   "hash": "205f7aa7779ddefc9597cc6710e07963e4cb82eac4a15a91460420db8da519c1",
+   "hash": "1a8770129149a4a6c0b6b0725308190e0a0b276055b7b16d741338bc4ef15492",
    "imports": [
     "./AccessScope",
     "./NavigationTree",
-    "./__fixtures__/gobierno",
+    "./__fixtures__/governance",
     "./resolveEffectiveScope",
     "./treeOperations",
     "vitest"
@@ -764,7 +764,7 @@
      "resolved": null
     },
     {
-     "module": "./__fixtures__/gobierno",
+     "module": "./__fixtures__/governance",
      "resolved": null
     },
     {
@@ -783,7 +783,7 @@
   },
   {
    "path": "packages/access-control/src/NavigationTree.ts",
-   "hash": "617a0813f82f788fb1e535cb1f3c61865bb684a5bd4b4869419b1d4f10c76375",
+   "hash": "7994a63396eb505fbac19142b08e1c221c0932be64872977e32d3d93fe264f50",
    "imports": [
     "./AccessScope",
     "@app/data-contracts"
@@ -864,7 +864,7 @@
   },
   {
    "path": "packages/access-control/src/permissions.ts",
-   "hash": "6b39ce500ed31078ccb8d6cdc0a1aa9080bde51a8683c6d8ad12da72198ce82d",
+   "hash": "b44f2a202fe2bdc449f10c4d103942524aa72fa767f991dffc4dbe502cd6d181",
    "imports": [
     "./Team"
    ],
@@ -912,7 +912,7 @@
   },
   {
    "path": "packages/access-control/src/AccessScope.ts",
-   "hash": "e39ba4f60c4af1de49216faec2cbe83427cea111213228fc051b6ed1feb7b094",
+   "hash": "b22c72bea30bee790c92c1e72660e3e07e996b90851117a89d4ef79e7fec0066",
    "imports": [
     "@app/data-contracts"
    ],
@@ -1035,8 +1035,8 @@
    ]
   },
   {
-   "path": "packages/access-control/src/__fixtures__/gobierno.ts",
-   "hash": "2cf03c232c23304af5cd072b6c9d7f8df6d5145508fe52259a3f3fea475ff5eb",
+   "path": "packages/access-control/src/__fixtures__/governance.ts",
+   "hash": "732603250c80fad1f045633482b8cd069956c1dafb61cfa4b7e6a5d3113cfda4",
    "imports": [
     "../AccessScope",
     "../ModulePackage",
@@ -1055,12 +1055,17 @@
      "type": "export"
     },
     {
-     "name": "equipoEste",
+     "name": "anaUser",
      "line": null,
      "type": "export"
     },
     {
-     "name": "equipoNorte",
+     "name": "betoUser",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "esteTeam",
      "line": null,
      "type": "export"
     },
@@ -1075,7 +1080,12 @@
      "type": "export"
     },
     {
-     "name": "paqueteReagrupado",
+     "name": "norteTeam",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "regroupedPackage",
      "line": null,
      "type": "export"
     },
@@ -1083,29 +1093,19 @@
      "name": "scope",
      "line": null,
      "type": "export"
-    },
-    {
-     "name": "usuarioAna",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "usuarioBeto",
-     "line": null,
-     "type": "export"
     }
    ],
    "exports": [
     "DIM_DISTRITO",
     "DIM_MATERIA",
-    "equipoEste",
-    "equipoNorte",
+    "anaUser",
+    "betoUser",
+    "esteTeam",
     "expandingScope",
     "generalTree",
-    "paqueteReagrupado",
-    "scope",
-    "usuarioAna",
-    "usuarioBeto"
+    "norteTeam",
+    "regroupedPackage",
+    "scope"
    ],
    "references": [],
    "import_edges": [
@@ -1217,7 +1217,7 @@
   },
   {
    "path": "packages/identity-db/src/mappers.ts",
-   "hash": "54b2c9ab08156ef6ee396c3d24dd8e85fa4049f2d911f5673d5a56b19cf93520",
+   "hash": "716220d901d5a4dce947445f298fcd1766fa8cf5063ec9f22c2fe4e3c54139fb",
    "imports": [
     "./rows",
     "@app/access-control"
@@ -1419,7 +1419,7 @@
   },
   {
    "path": "packages/identity-db/src/mappers.spec.ts",
-   "hash": "f4a8c1d3ae7e790b9037b8de84108d7beb3ed93eeef03c55e18cf186e283c0fe",
+   "hash": "c324a6d6332137c5c7247327e419c9c7e83b4d94a13b7afadff34435ce2792f1",
    "imports": [
     "./mappers",
     "./rows",
@@ -1455,7 +1455,7 @@
   },
   {
    "path": "packages/identity-db/src/seedData.spec.ts",
-   "hash": "af3a24ac952392aa76ae1aa0ac0ef045cac7c1582e2d8c87cde5fbd774b98d99",
+   "hash": "dcd2c940f5f32844146d2fa96953886f50bbf6a5997ef42cdce0fe6c2634779b",
    "imports": [
     "./mappers",
     "./seedData",
@@ -1495,7 +1495,7 @@
   },
   {
    "path": "packages/config/src/index.ts",
-   "hash": "03de757a6e2e43b0e126cb84f484b1bbffd3b32c23cf56d3c2437341b1908cd5",
+   "hash": "74cfa5d7bd7d3501ea49ce59b1ffd7fa93c750f5731407692a35b9a493c5edf0",
    "imports": [],
    "defines": [
     {
@@ -1504,52 +1504,47 @@
      "type": "export"
     },
     {
-     "name": "CLAVE_CONECTOR",
+     "name": "CONNECTOR_KEY",
      "line": null,
      "type": "export"
     },
     {
-     "name": "CLAVE_ULTIMA_INSTANTANEA",
+     "name": "EMPTY_SNAPSHOT",
      "line": null,
      "type": "export"
     },
     {
-     "name": "ConfiguracionDeEntorno",
+     "name": "EnvironmentSettings",
      "line": null,
      "type": "export"
     },
     {
-     "name": "INSTANTANEA_VACIA",
+     "name": "LAST_KEY_SNAPSHOT",
      "line": null,
      "type": "export"
     },
     {
-     "name": "ResolutorDeConfiguracion",
+     "name": "SettingsResolver",
      "line": null,
      "type": "export"
     },
     {
-     "name": "banderaDeModulo",
+     "name": "disabledModules",
      "line": null,
      "type": "export"
     },
     {
-     "name": "moduloHabilitado",
+     "name": "enabledModule",
      "line": null,
      "type": "export"
     },
     {
-     "name": "modulosApagados",
+     "name": "moduleFlag",
      "line": null,
      "type": "export"
     },
     {
-     "name": "type InstantaneaDeConfiguracion",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "type OpcionesDelResolutor",
+     "name": "type ResolverOptions",
      "line": null,
      "type": "export"
     },
@@ -1557,104 +1552,33 @@
      "name": "type SettingsFont",
      "line": null,
      "type": "export"
+    },
+    {
+     "name": "type SettingsSnapshot",
+     "line": null,
+     "type": "export"
     }
    ],
    "exports": [
     "AppConfiguration",
-    "CLAVE_CONECTOR",
-    "CLAVE_ULTIMA_INSTANTANEA",
-    "ConfiguracionDeEntorno",
-    "INSTANTANEA_VACIA",
-    "ResolutorDeConfiguracion",
-    "banderaDeModulo",
-    "moduloHabilitado",
-    "modulosApagados",
-    "type InstantaneaDeConfiguracion",
-    "type OpcionesDelResolutor",
-    "type SettingsFont"
+    "CONNECTOR_KEY",
+    "EMPTY_SNAPSHOT",
+    "EnvironmentSettings",
+    "LAST_KEY_SNAPSHOT",
+    "SettingsResolver",
+    "disabledModules",
+    "enabledModule",
+    "moduleFlag",
+    "type ResolverOptions",
+    "type SettingsFont",
+    "type SettingsSnapshot"
    ],
    "references": [],
    "import_edges": []
-  },
-  {
-   "path": "packages/config/src/instantanea.ts",
-   "hash": "6b9603093d82ac25d22df0f0ec4a840184851a874582e2e521d34243aa9eed75",
-   "imports": [],
-   "defines": [
-    {
-     "name": "CLAVE_CONECTOR",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "INSTANTANEA_VACIA",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "banderaDeModulo",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "moduloHabilitado",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "modulosApagados",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "CLAVE_CONECTOR",
-    "INSTANTANEA_VACIA",
-    "banderaDeModulo",
-    "moduloHabilitado",
-    "modulosApagados"
-   ],
-   "references": [],
-   "import_edges": []
-  },
-  {
-   "path": "packages/config/src/Resolutor.ts",
-   "hash": "150e4315b9e8585aeb849f1b563aa77bd1d9fbec2a9694debde498e3c98564a4",
-   "imports": [
-    "./instantanea",
-    "@app/caching"
-   ],
-   "defines": [
-    {
-     "name": "CLAVE_ULTIMA_INSTANTANEA",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "ResolutorDeConfiguracion",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "CLAVE_ULTIMA_INSTANTANEA",
-    "ResolutorDeConfiguracion"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "./instantanea",
-     "resolved": null
-    },
-    {
-     "module": "@app/caching",
-     "resolved": null
-    }
-   ]
   },
   {
    "path": "packages/config/src/config.spec.ts",
-   "hash": "363f9f5341a9ff03d62900868de0bbda1de5180caa698bd289aeb7eb307e153d",
+   "hash": "5270c99cf06cf429e716849a1256ee49a59c9e33ece50a7a1d7004a502ef9c83",
    "imports": [
     "./index",
     "@app/caching",
@@ -1680,9 +1604,9 @@
   },
   {
    "path": "packages/config/src/fonts.ts",
-   "hash": "5aee5732ff485da04edea87a12b35b26fcfe24ac2ff467ec66ae613751de04a0",
+   "hash": "d16dc3a2d15fd6ad9f12d2ce40d6d00fc39757be807961bc61816c896da15338",
    "imports": [
-    "./instantanea"
+    "./snapshot"
    ],
    "defines": [
     {
@@ -1691,19 +1615,95 @@
      "type": "export"
     },
     {
-     "name": "ConfiguracionDeEntorno",
+     "name": "EnvironmentSettings",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
     "AppConfiguration",
-    "ConfiguracionDeEntorno"
+    "EnvironmentSettings"
    ],
    "references": [],
    "import_edges": [
     {
-     "module": "./instantanea",
+     "module": "./snapshot",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "packages/config/src/snapshot.ts",
+   "hash": "39db9ab633cbab663c8c4481d3389a0d0f156af8e879e7243da6db76acf2e220",
+   "imports": [],
+   "defines": [
+    {
+     "name": "CONNECTOR_KEY",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "EMPTY_SNAPSHOT",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "disabledModules",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "enabledModule",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "moduleFlag",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "CONNECTOR_KEY",
+    "EMPTY_SNAPSHOT",
+    "disabledModules",
+    "enabledModule",
+    "moduleFlag"
+   ],
+   "references": [],
+   "import_edges": []
+  },
+  {
+   "path": "packages/config/src/Resolver.ts",
+   "hash": "12de85095fe3325c2ca85b6f19e801a051108ae92a13355ab6dc0de6ceb905de",
+   "imports": [
+    "./snapshot",
+    "@app/caching"
+   ],
+   "defines": [
+    {
+     "name": "LAST_KEY_SNAPSHOT",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "SettingsResolver",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "LAST_KEY_SNAPSHOT",
+    "SettingsResolver"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./snapshot",
+     "resolved": null
+    },
+    {
+     "module": "@app/caching",
      "resolved": null
     }
    ]
@@ -1736,7 +1736,7 @@
   },
   {
    "path": "packages/module-model/src/index.ts",
-   "hash": "7a29fbe25442c66d75216f0af2d8ef033d8c81a2835c50200c3c50c0ef55eb2d",
+   "hash": "5bd0618917acc7be5f5b7ec4db48be38a17eba1315fc672a548ff49236bc61bf",
    "imports": [],
    "defines": [
     {
@@ -1750,12 +1750,12 @@
      "type": "export"
     },
     {
-     "name": "PATRONES_DE_INTERACCION",
+     "name": "INTERACTION_PATTERNS",
      "line": null,
      "type": "export"
     },
     {
-     "name": "TIPO_DESCONOCIDO",
+     "name": "UNKNOWN_KIND",
      "line": null,
      "type": "export"
     },
@@ -1776,6 +1776,11 @@
     },
     {
      "name": "captureBookmark",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "columnNormalize",
      "line": null,
      "type": "export"
     },
@@ -1835,7 +1840,7 @@
      "type": "export"
     },
     {
-     "name": "normalizarColumna",
+     "name": "overlapItself",
      "line": null,
      "type": "export"
     },
@@ -1850,7 +1855,7 @@
      "type": "export"
     },
     {
-     "name": "seSolapan",
+     "name": "type AvailableColumn",
      "line": null,
      "type": "export"
     },
@@ -1861,11 +1866,6 @@
     },
     {
      "name": "type Breakpoint",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "type ColumnaDisponible",
      "line": null,
      "type": "export"
     },
@@ -1973,12 +1973,13 @@
    "exports": [
     "COLUMNS_BY_BREAKPOINT",
     "GRID_COLUMNS",
-    "PATRONES_DE_INTERACCION",
-    "TIPO_DESCONOCIDO",
+    "INTERACTION_PATTERNS",
+    "UNKNOWN_KIND",
     "applyPersonalization",
     "assertPersonalizationIsPresentationOnly",
     "bookmarkToUrl",
     "captureBookmark",
+    "columnNormalize",
     "datasetsConsumedBy",
     "describeProvenance",
     "drillThroughUrl",
@@ -1990,13 +1991,12 @@
     "layoutForBreakpoint",
     "layoutsForAllBreakpoints",
     "moduleUrl",
-    "normalizarColumna",
+    "overlapItself",
     "readingOrder",
     "rowSpanForBreakpoint",
-    "seSolapan",
+    "type AvailableColumn",
     "type Bookmark",
     "type Breakpoint",
-    "type ColumnaDisponible",
     "type DatasetInfo",
     "type DrillThroughTarget",
     "type GridItem",
@@ -2047,7 +2047,7 @@
   },
   {
    "path": "packages/module-model/src/validation.ts",
-   "hash": "d34226196ead9167fa408406eb0a08a524fd2e0981188e4ae5c551d5f2c63d8a",
+   "hash": "97f916d7deb7eca4d96e58b08ca6c9333ac3b431984fdd6dc181f1d969b496e1",
    "imports": [
     "./ModuleDefinition",
     "./grid",
@@ -2056,17 +2056,17 @@
    ],
    "defines": [
     {
-     "name": "TIPO_DESCONOCIDO",
+     "name": "UNKNOWN_KIND",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "columnNormalize",
      "line": null,
      "type": "export"
     },
     {
      "name": "findPublishBlockers",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "normalizarColumna",
      "line": null,
      "type": "export"
     },
@@ -2077,9 +2077,9 @@
     }
    ],
    "exports": [
-    "TIPO_DESCONOCIDO",
+    "UNKNOWN_KIND",
+    "columnNormalize",
     "findPublishBlockers",
-    "normalizarColumna",
     "validateModule"
    ],
    "references": [],
@@ -2104,7 +2104,7 @@
   },
   {
    "path": "packages/module-model/src/moduleModel.spec.ts",
-   "hash": "9f4cd3190ef8b3181b79243166d50b7ba49c9a336a57afe1a0330d0d0b9d9d4b",
+   "hash": "68eccb9a35ba7fdd39e8e8ba4f2d1dd18aa5905bc2c51c33a6efbdea65870ab7",
    "imports": [
     "./ModuleDefinition",
     "./grid",
@@ -2192,7 +2192,7 @@
   },
   {
    "path": "packages/module-model/src/personalization.ts",
-   "hash": "b2157990972ba6fc780e12f861cd5b9e833ae3b298bcac60007793cd06dd1147",
+   "hash": "3ebc5929830d09305b57dcac8c8bdcbbba1433c6375647b3b4d03aa8e2526ed5",
    "imports": [
     "./ModuleDefinition",
     "./grid"
@@ -2233,11 +2233,11 @@
   },
   {
    "path": "packages/module-model/src/interaction.ts",
-   "hash": "e8f0f47e1aad82a27643b0bce5166971bc2fd515ed4ee4960a0e897034076f1b",
+   "hash": "ac74c18fef182c79fd21f788c95738a76179950ffd916930ac713f26b85ef311",
    "imports": [],
    "defines": [
     {
-     "name": "PATRONES_DE_INTERACCION",
+     "name": "INTERACTION_PATTERNS",
      "line": null,
      "type": "export"
     },
@@ -2258,7 +2258,7 @@
     }
    ],
    "exports": [
-    "PATRONES_DE_INTERACCION",
+    "INTERACTION_PATTERNS",
     "bookmarkToUrl",
     "captureBookmark",
     "drillThroughUrl"
@@ -2268,7 +2268,7 @@
   },
   {
    "path": "packages/module-model/src/interaction.spec.ts",
-   "hash": "fcce4e890feb5383e205679ba445ecd5d897ed41c6079a9f0ec40af9fdd676ee",
+   "hash": "dfbf2e73088c5b0425b1e47281ff1cf5cf1144b8fe909bc574d8a61bb989dd09",
    "imports": [
     "./interaction",
     "vitest"
@@ -2289,7 +2289,7 @@
   },
   {
    "path": "packages/module-model/src/grid.ts",
-   "hash": "69cfa95409f13daef7fbf5792e12d38125ad26af39ac013aef36b606e266e4b7",
+   "hash": "79e208a21101fe5efe7f5287547831e010aaf7237113fdf14d91109326582f84",
    "imports": [],
    "defines": [
     {
@@ -2318,17 +2318,17 @@
      "type": "export"
     },
     {
+     "name": "overlapItself",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "readingOrder",
      "line": null,
      "type": "export"
     },
     {
      "name": "rowSpanForBreakpoint",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "seSolapan",
      "line": null,
      "type": "export"
     },
@@ -2344,9 +2344,9 @@
     "findFreeSlot",
     "layoutForBreakpoint",
     "layoutsForAllBreakpoints",
+    "overlapItself",
     "readingOrder",
     "rowSpanForBreakpoint",
-    "seSolapan",
     "validateLayout"
    ],
    "references": [],
@@ -2354,7 +2354,7 @@
   },
   {
    "path": "packages/auth/src/index.ts",
-   "hash": "f31074ae993ae817754e61f78bc78677b3c0ded5e53faf823e9d19756eaf8624",
+   "hash": "b37b42cf66f709af6eaec9eb46186a76a03980e5f566ee8413e10165a5f152df",
    "imports": [],
    "defines": [
     {
@@ -2364,11 +2364,6 @@
     },
     {
      "name": "AzureAdIdentityProvider",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "CorreoInstitucionalNoDisponible",
      "line": null,
      "type": "export"
     },
@@ -2399,6 +2394,11 @@
     },
     {
      "name": "InMemorySessionStore",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "InstitutionalMailNotAvailable",
      "line": null,
      "type": "export"
     },
@@ -2571,13 +2571,13 @@
    "exports": [
     "AuthenticationError",
     "AzureAdIdentityProvider",
-    "CorreoInstitucionalNoDisponible",
     "DEFAULT_LOCKOUT_POLICY",
     "DEFAULT_PASSWORD_POLICY",
     "DEFAULT_RESET_TTL_MS",
     "InMemoryAuditLog",
     "InMemoryLocalIdentityStore",
     "InMemorySessionStore",
+    "InstitutionalMailNotAvailable",
     "LocalIdentityProvider",
     "PasswordResetError",
     "PasswordResetService",
@@ -2617,7 +2617,7 @@
   },
   {
    "path": "packages/auth/src/passwordPolicy.ts",
-   "hash": "898cf8d9121d655e17bba67969ee555c51555ca99fb97a11383a112dc3fb5009",
+   "hash": "e3e0115e00c75add330500dace1521d5fc44aaf53183fbb965b99ae971cd5346",
    "imports": [],
    "defines": [
     {
@@ -2759,7 +2759,7 @@
   },
   {
    "path": "packages/auth/src/passwordReset.ts",
-   "hash": "321311cc1c981a3deb60611df000d13c6aac758c8878559d02673613b6600638",
+   "hash": "9d783e180f8215718123b096a41db28784a36cdc410053429bcd64b7f4b6c9a5",
    "imports": [
     "./passwordPolicy",
     "./stores",
@@ -2768,12 +2768,12 @@
    ],
    "defines": [
     {
-     "name": "CorreoInstitucionalNoDisponible",
+     "name": "DEFAULT_RESET_TTL_MS",
      "line": null,
      "type": "export"
     },
     {
-     "name": "DEFAULT_RESET_TTL_MS",
+     "name": "InstitutionalMailNotAvailable",
      "line": null,
      "type": "export"
     },
@@ -2789,8 +2789,8 @@
     }
    ],
    "exports": [
-    "CorreoInstitucionalNoDisponible",
     "DEFAULT_RESET_TTL_MS",
+    "InstitutionalMailNotAvailable",
     "PasswordResetError",
     "PasswordResetService"
    ],
@@ -2839,7 +2839,7 @@
   },
   {
    "path": "packages/auth/src/auth.spec.ts",
-   "hash": "6e4d5289105d56973248674470b18456900f14bd6f86d6f385131e642844853a",
+   "hash": "bbf46313c659cd93fc399a6f9011bf1635c09b75df0f0fb75d4ff361ef2bd544",
    "imports": [
     "./AzureAdIdentityProvider",
     "./IIdentityProvider",
@@ -2885,7 +2885,7 @@
   },
   {
    "path": "packages/auth/src/passwordReset.spec.ts",
-   "hash": "58ffa0f175d9f7ccaad198cfb575fa7559a7d9f67fc93428e3735554e365c810",
+   "hash": "166d3d8b0c4a10014faecb014ee4d82702b2b32627306dddbb30e7d37acdb9d0",
    "imports": [
     "./passwordReset",
     "./stores",
@@ -2952,7 +2952,7 @@
   },
   {
    "path": "packages/observability/src/health.spec.ts",
-   "hash": "de18d62614b2786fec50a400d639bd67bad1fdbf4c15ac5887cf810858531a54",
+   "hash": "27225307286a188c5f139398b9c63ab9f1531f878a9cdd245138498301452f8d",
    "imports": [
     "./auditEvents",
     "./health",
@@ -3126,7 +3126,7 @@
   },
   {
    "path": "packages/observability/src/health.ts",
-   "hash": "e8a3e45f047b60a29b7aa5877a3980b196d10788723419c2b0981db9a61f667c",
+   "hash": "8193c58fc894570784c4e6d4b8486b8f9dfa2dbb77896b6495b0fe00aedd0fa2",
    "imports": [
     "./heartbeat"
    ],
@@ -3150,7 +3150,7 @@
   },
   {
    "path": "packages/observability/src/heartbeat.ts",
-   "hash": "eaa1470c9cc88a894227ba0bbeb6023a13fbebef99d21cdf8d5abe5cd40adfb2",
+   "hash": "e41705ca603917175739a3d6baa20c7332b0880f5a0dedf09a6ada683bfd960d",
    "imports": [
     "@app/data-contracts"
    ],
@@ -3180,7 +3180,7 @@
   },
   {
    "path": "packages/observability/src/cacheMetrics.ts",
-   "hash": "5f12cbb2e6b23ce7382c5d1b38a479cabd090a02e1452dbdd62b968ce0b5fd07",
+   "hash": "4bb2577d77748053643965da7f736c1a0d68bd55e903e1e49c069074db99927f",
    "imports": [],
    "defines": [
     {
@@ -3197,7 +3197,7 @@
   },
   {
    "path": "packages/observability/src/cacheMetrics.spec.ts",
-   "hash": "5145c36b1cbc5b760dd481fce0dba311303cabaeeeffc32bf51a13b63d9254de",
+   "hash": "2d8158f82644a2c42690ef836648c4803db0f0e510c18f2dfbd0de7ed930a9b6",
    "imports": [
     "./cacheMetrics",
     "vitest"
@@ -3218,7 +3218,7 @@
   },
   {
    "path": "packages/export/src/formats.spec.ts",
-   "hash": "d175dc8d85d66036b92aa949d0f8b178b16a41951adf1cfcabdc38002c9ac1b8",
+   "hash": "5d7c3bb15a0e02b4b3672df1d3e47e885e739a884aed98cc0ffc60a66d008dd4",
    "imports": [
     "./binarios",
     "./document",
@@ -3263,8 +3263,69 @@
    ]
   },
   {
+   "path": "packages/export/src/process.ts",
+   "hash": "51d789c60c8564517d71c079b8ec56335139850c6b066d9326627862a630c07f",
+   "imports": [
+    "./binarios",
+    "./document",
+    "./formats",
+    "./queue",
+    "./types",
+    "@app/design-tokens"
+   ],
+   "defines": [
+    {
+     "name": "generarArtefacto",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "jobProcess",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "pendientesProcess",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "generarArtefacto",
+    "jobProcess",
+    "pendientesProcess"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./binarios",
+     "resolved": null
+    },
+    {
+     "module": "./document",
+     "resolved": null
+    },
+    {
+     "module": "./formats",
+     "resolved": null
+    },
+    {
+     "module": "./queue",
+     "resolved": null
+    },
+    {
+     "module": "./types",
+     "resolved": null
+    },
+    {
+     "module": "@app/design-tokens",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "packages/export/src/index.ts",
-   "hash": "33a712d2f572ba80b3146c11a444da59554bd8b1b82d5204226edd7471effbf3",
+   "hash": "f0d8f4d4b0d098ba48847fe98c848a24bbf7b866ee7851157b5d98130ee86d82",
    "imports": [],
    "defines": [
     {
@@ -3278,17 +3339,17 @@
      "type": "export"
     },
     {
+     "name": "MIME_KINDS",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "StoreExportQueue",
      "line": null,
      "type": "export"
     },
     {
-     "name": "TIPOS_MIME",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "TTL_TRABAJO_MS",
+     "name": "TTL_JOB_MS",
      "line": null,
      "type": "export"
     },
@@ -3323,12 +3384,12 @@
      "type": "export"
     },
     {
-     "name": "claveDeTrabajo",
+     "name": "escaparCsv",
      "line": null,
      "type": "export"
     },
     {
-     "name": "escaparCsv",
+     "name": "fileName",
      "line": null,
      "type": "export"
     },
@@ -3338,7 +3399,12 @@
      "type": "export"
     },
     {
-     "name": "nombreDeArchivo",
+     "name": "jobKey",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "jobProcess",
      "line": null,
      "type": "export"
     },
@@ -3348,12 +3414,7 @@
      "type": "export"
     },
     {
-     "name": "procesarPendientes",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "procesarTrabajo",
+     "name": "pendientesProcess",
      "line": null,
      "type": "export"
     },
@@ -3403,6 +3464,11 @@
      "type": "export"
     },
     {
+     "name": "type ExportableSheet",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "type GenerarOptions",
      "line": null,
      "type": "export"
@@ -3413,17 +3479,12 @@
      "type": "export"
     },
     {
-     "name": "type HojaExportable",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "type IExportQueue",
      "line": null,
      "type": "export"
     },
     {
-     "name": "type ResolverObjetos",
+     "name": "type ResolverObjects",
      "line": null,
      "type": "export"
     },
@@ -3436,22 +3497,22 @@
    "exports": [
     "FORMATS",
     "KEY_QUEUE",
+    "MIME_KINDS",
     "StoreExportQueue",
-    "TIPOS_MIME",
-    "TTL_TRABAJO_MS",
+    "TTL_JOB_MS",
     "aCsv",
     "aExcel",
     "aPdf",
     "aSvg",
     "buildDocument",
     "buildHeading",
-    "claveDeTrabajo",
     "escaparCsv",
+    "fileName",
     "generarArtefacto",
-    "nombreDeArchivo",
+    "jobKey",
+    "jobProcess",
     "paletteOf",
-    "procesarPendientes",
-    "procesarTrabajo",
+    "pendientesProcess",
     "type ArtefactoGenerado",
     "type ExportFormat",
     "type ExportJob",
@@ -3461,11 +3522,11 @@
     "type ExportStatus",
     "type ExportableDocument",
     "type ExportableObject",
+    "type ExportableSheet",
     "type GenerarOptions",
     "type Heading",
-    "type HojaExportable",
     "type IExportQueue",
-    "type ResolverObjetos",
+    "type ResolverObjects",
     "type StoreExportQueueOptions"
    ],
    "references": [],
@@ -3473,7 +3534,7 @@
   },
   {
    "path": "packages/export/src/document.spec.ts",
-   "hash": "d0e0886cd0cb67c26c83e58c5d9ee610cd14dd6df08a67672f79323c1f832bf6",
+   "hash": "b924b111d7bd6fd092e94836b7fbd18c5dcea252eb4f04de20f855f2a3b62be8",
    "imports": [
     "./document",
     "./formats",
@@ -3509,7 +3570,7 @@
   },
   {
    "path": "packages/export/src/document.ts",
-   "hash": "1f1c44a6487ed6ba35884999c407e59c87e719911e48c62e96a94f78340a0eb0",
+   "hash": "3d7e116420f2bf3edf1c34224ba197e82df823e8bcc41a8fe692c278bedbe9bf",
    "imports": [
     "./heading",
     "./types",
@@ -3555,7 +3616,7 @@
   },
   {
    "path": "packages/export/src/queue.ts",
-   "hash": "42b437b78bee7b8ee5911764deb25d32c3cf1266c69dc9f6cebeba1678903f01",
+   "hash": "882c1763770b3e667f5972a472e9902bdc290e485f0248f8bc9cd2a1aacf78fd",
    "imports": [
     "./types",
     "@app/caching"
@@ -3572,7 +3633,7 @@
      "type": "export"
     },
     {
-     "name": "TTL_TRABAJO_MS",
+     "name": "TTL_JOB_MS",
      "line": null,
      "type": "export"
     }
@@ -3580,7 +3641,7 @@
    "exports": [
     "KEY_QUEUE",
     "StoreExportQueue",
-    "TTL_TRABAJO_MS"
+    "TTL_JOB_MS"
    ],
    "references": [],
    "import_edges": [
@@ -3596,7 +3657,7 @@
   },
   {
    "path": "packages/export/src/binarios.ts",
-   "hash": "9b6a84a78eb0fae1befcfd033da8cbe01ff8e674fada95e6b74c2f8272a58b1a",
+   "hash": "f8ca7a7141d931d0bc45e0eca11cc5c13f2d80a19ae74502f6eca8726b5cd2e2",
    "imports": [
     "./document",
     "exceljs",
@@ -3636,7 +3697,7 @@
   },
   {
    "path": "packages/export/src/formats.ts",
-   "hash": "dd0d2037426e2e284f2bc6055f2197c4a94d011ca90e58be5f04638dfc2f41d0",
+   "hash": "601446c112486528ab8d880e1204e9a9647e5b862da32312bd06c0ccdfa1828f",
    "imports": [
     "./document"
    ],
@@ -3695,69 +3756,8 @@
    ]
   },
   {
-   "path": "packages/export/src/procesar.ts",
-   "hash": "3c4fb8a0f8819e3963cf750cbb5c50114b46d69d41a401b65d2e0e9da045c285",
-   "imports": [
-    "./binarios",
-    "./document",
-    "./formats",
-    "./queue",
-    "./types",
-    "@app/design-tokens"
-   ],
-   "defines": [
-    {
-     "name": "generarArtefacto",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "procesarPendientes",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "procesarTrabajo",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "generarArtefacto",
-    "procesarPendientes",
-    "procesarTrabajo"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "./binarios",
-     "resolved": null
-    },
-    {
-     "module": "./document",
-     "resolved": null
-    },
-    {
-     "module": "./formats",
-     "resolved": null
-    },
-    {
-     "module": "./queue",
-     "resolved": null
-    },
-    {
-     "module": "./types",
-     "resolved": null
-    },
-    {
-     "module": "@app/design-tokens",
-     "resolved": null
-    }
-   ]
-  },
-  {
    "path": "packages/export/src/types.ts",
-   "hash": "fd2b95b97df94c282cea83938bd7fe797a4b61fe4fe6ef62cda27ba4e049c7ed",
+   "hash": "0ef62ef28a23f127139df649e5b351035b345326bba1f9e9340d64a5cb771e23",
    "imports": [
     "@app/data-contracts"
    ],
@@ -3768,26 +3768,26 @@
      "type": "export"
     },
     {
-     "name": "TIPOS_MIME",
+     "name": "MIME_KINDS",
      "line": null,
      "type": "export"
     },
     {
-     "name": "claveDeTrabajo",
+     "name": "fileName",
      "line": null,
      "type": "export"
     },
     {
-     "name": "nombreDeArchivo",
+     "name": "jobKey",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
     "FORMATS",
-    "TIPOS_MIME",
-    "claveDeTrabajo",
-    "nombreDeArchivo"
+    "MIME_KINDS",
+    "fileName",
+    "jobKey"
    ],
    "references": [],
    "import_edges": [
@@ -3799,9 +3799,9 @@
   },
   {
    "path": "packages/export/src/queue.spec.ts",
-   "hash": "7456b61a44aa38acdc040899fe8eb869cd3147bbd735442e8e8cee9015b3c8eb",
+   "hash": "d9ba3942f669009400d091daec0f072df4f4748a4b6c14d7e1e268313eb3410d",
    "imports": [
-    "./procesar",
+    "./process",
     "./queue",
     "./types",
     "@app/caching",
@@ -3812,7 +3812,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./procesar",
+     "module": "./process",
      "resolved": null
     },
     {
@@ -3923,7 +3923,7 @@
   },
   {
    "path": "packages/design-tokens/src/index.ts",
-   "hash": "940dce6761737735cdd0732dc8a47b0c3b0d7b5a2f19d61fc4b594400454d0d9",
+   "hash": "d20e508060c7628878d0f0cbe5c5dc21f88bda0d110bfb736ff2867551b4688e",
    "imports": [],
    "defines": [
     {
@@ -4107,11 +4107,6 @@
      "type": "export"
     },
     {
-     "name": "type PaletasTonales",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "type TextSize",
      "line": null,
      "type": "export"
@@ -4128,6 +4123,11 @@
     },
     {
      "name": "type ThemeTokens",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "type TonalPalettes",
      "line": null,
      "type": "export"
     },
@@ -4189,11 +4189,11 @@
     "type MaterialTheme",
     "type OverridableToken",
     "type OverrideProblem",
-    "type PaletasTonales",
     "type TextSize",
     "type ThemeOverrides",
     "type ThemeSource",
     "type ThemeTokens",
+    "type TonalPalettes",
     "type TypographicRole",
     "type TypographicStyle",
     "type WcagLevel",
@@ -4303,7 +4303,7 @@
   },
   {
    "path": "packages/design-tokens/src/material3.ts",
-   "hash": "ccacb9fda8a0a94cd852665575126802876fac0edff47f430e08d2b649186fb4",
+   "hash": "613267cd45e1b6d2e7fb7657bc6b9373974d241fa13301ab8bb40bfe4cf03cbc",
    "imports": [
     "@material/material-color-utilities"
    ],
@@ -4502,48 +4502,12 @@
    "import_edges": []
   },
   {
-   "path": "packages/alerts/src/evaluar.spec.ts",
-   "hash": "889799a38ddd844f4ab9f6d44bbc19c16172d270ccd161feefd8b1003443da38",
-   "imports": [
-    "./evaluar",
-    "./types",
-    "vitest"
-   ],
-   "defines": [],
-   "exports": [],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "./evaluar",
-     "resolved": null
-    },
-    {
-     "module": "./types",
-     "resolved": null
-    },
-    {
-     "module": "vitest",
-     "resolved": null
-    }
-   ]
-  },
-  {
    "path": "packages/alerts/src/index.ts",
-   "hash": "2bbec4c1117b70008522bed503c52c0d54e281ca6e9c642171170cdeb3687df7",
+   "hash": "d0f69737d8d5bfde3bf9fccaec8b5eeb7f9dc464d610029080710d8c93c56c2e",
    "imports": [],
    "defines": [
     {
-     "name": "CLAVE_ESTADOS",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "CLAVE_SUSCRIPCIONES",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "CLAVE_ULTIMO_LATIDO",
+     "name": "INBOX_MAX",
      "line": null,
      "type": "export"
     },
@@ -4558,7 +4522,17 @@
      "type": "export"
     },
     {
-     "name": "MAXIMO_POR_BANDEJA",
+     "name": "LAST_KEY_HEARTBEAT",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "STATES_KEY",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "SUBSCRIPTIONS_KEY",
      "line": null,
      "type": "export"
     },
@@ -4568,12 +4542,12 @@
      "type": "export"
     },
     {
-     "name": "claveBandeja",
+     "name": "cadenceDescribe",
      "line": null,
      "type": "export"
     },
     {
-     "name": "debeEntregarse",
+     "name": "conditionDescribe",
      "line": null,
      "type": "export"
     },
@@ -4583,32 +4557,32 @@
      "type": "export"
     },
     {
-     "name": "describirCadencia",
+     "name": "deliverMust",
      "line": null,
      "type": "export"
     },
     {
-     "name": "describirCondicion",
+     "name": "evaluateRule",
      "line": null,
      "type": "export"
     },
     {
-     "name": "enlaceDe",
+     "name": "inboxKey",
      "line": null,
      "type": "export"
     },
     {
-     "name": "evaluarRegla",
+     "name": "linkOf",
      "line": null,
      "type": "export"
     },
     {
-     "name": "inicioDelPeriodo",
+     "name": "messageOf",
      "line": null,
      "type": "export"
     },
     {
-     "name": "mensajeDe",
+     "name": "periodHome",
      "line": null,
      "type": "export"
     },
@@ -4673,7 +4647,7 @@
      "type": "export"
     },
     {
-     "name": "type Transicion",
+     "name": "type Transition",
      "line": null,
      "type": "export"
     },
@@ -4684,22 +4658,22 @@
     }
    ],
    "exports": [
-    "CLAVE_ESTADOS",
-    "CLAVE_SUSCRIPCIONES",
-    "CLAVE_ULTIMO_LATIDO",
+    "INBOX_MAX",
     "InboxNotificationChannel",
     "KEY_RULES",
-    "MAXIMO_POR_BANDEJA",
+    "LAST_KEY_HEARTBEAT",
+    "STATES_KEY",
+    "SUBSCRIPTIONS_KEY",
     "StoreAlertRepository",
-    "claveBandeja",
-    "debeEntregarse",
+    "cadenceDescribe",
+    "conditionDescribe",
     "decidirNotificacion",
-    "describirCadencia",
-    "describirCondicion",
-    "enlaceDe",
-    "evaluarRegla",
-    "inicioDelPeriodo",
-    "mensajeDe",
+    "deliverMust",
+    "evaluateRule",
+    "inboxKey",
+    "linkOf",
+    "messageOf",
+    "periodHome",
     "type AlertCondition",
     "type AlertEvaluation",
     "type AlertOperator",
@@ -4712,39 +4686,51 @@
     "type NotificationKind",
     "type Observacion",
     "type Subscription",
-    "type Transicion",
+    "type Transition",
     "withoutRead"
    ],
    "references": [],
    "import_edges": []
   },
   {
-   "path": "packages/alerts/src/calendario.ts",
-   "hash": "a93a83fa10f873b44d8f33e55f702095cefc87aabf7e7ba9faf736289f79e243",
+   "path": "packages/alerts/src/evaluate.ts",
+   "hash": "86ec5894b50150544a00addc6b71b5def0a0a0fcc36d4fcf295b3a47e85bcda5",
    "imports": [
     "./types"
    ],
    "defines": [
     {
-     "name": "debeEntregarse",
+     "name": "conditionDescribe",
      "line": null,
      "type": "export"
     },
     {
-     "name": "describirCadencia",
+     "name": "decidirNotificacion",
      "line": null,
      "type": "export"
     },
     {
-     "name": "inicioDelPeriodo",
+     "name": "evaluateRule",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "linkOf",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "messageOf",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "debeEntregarse",
-    "describirCadencia",
-    "inicioDelPeriodo"
+    "conditionDescribe",
+    "decidirNotificacion",
+    "evaluateRule",
+    "linkOf",
+    "messageOf"
    ],
    "references": [],
    "import_edges": [
@@ -4755,49 +4741,70 @@
    ]
   },
   {
-   "path": "packages/alerts/src/notificaciones.ts",
-   "hash": "4192bc1d819566c1ac78e25c1da01185766cb00cd36c0e5fd3ab96a8784e1872",
+   "path": "packages/alerts/src/evaluate.spec.ts",
+   "hash": "21d98530573786b7baa9545f092f778664e7361dfb0a1947d6a266b6774172ec",
    "imports": [
+    "./evaluate",
     "./types",
-    "@app/caching"
+    "vitest"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./evaluate",
+     "resolved": null
+    },
+    {
+     "module": "./types",
+     "resolved": null
+    },
+    {
+     "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "packages/alerts/src/calendario.ts",
+   "hash": "33fb748c5cb158e729617ebd5fad1236b74566c0010130116ebe8c6680671fcf",
+   "imports": [
+    "./types"
    ],
    "defines": [
     {
-     "name": "InboxNotificationChannel",
+     "name": "cadenceDescribe",
      "line": null,
      "type": "export"
     },
     {
-     "name": "MAXIMO_POR_BANDEJA",
+     "name": "deliverMust",
      "line": null,
      "type": "export"
     },
     {
-     "name": "withoutRead",
+     "name": "periodHome",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "InboxNotificationChannel",
-    "MAXIMO_POR_BANDEJA",
-    "withoutRead"
+    "cadenceDescribe",
+    "deliverMust",
+    "periodHome"
    ],
    "references": [],
    "import_edges": [
     {
      "module": "./types",
      "resolved": null
-    },
-    {
-     "module": "@app/caching",
-     "resolved": null
     }
    ]
   },
   {
-   "path": "packages/alerts/src/almacen.ts",
-   "hash": "bd893a83bd70d60ed456363784b54e49bbc68de367bb35688aaaeb852eafb74f",
+   "path": "packages/alerts/src/store.ts",
+   "hash": "c07bb2f51880ab1732140d44f7a0f5cbaf224514de90c7273102f11c0ed41557",
    "imports": [
     "./types",
     "@app/caching"
@@ -4825,8 +4832,49 @@
    ]
   },
   {
+   "path": "packages/alerts/src/notificaciones.ts",
+   "hash": "dfb9de4903f3aae92b616616ac8154014044fe41613e8ca5061912f6158ec9a2",
+   "imports": [
+    "./types",
+    "@app/caching"
+   ],
+   "defines": [
+    {
+     "name": "INBOX_MAX",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "InboxNotificationChannel",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "withoutRead",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "INBOX_MAX",
+    "InboxNotificationChannel",
+    "withoutRead"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./types",
+     "resolved": null
+    },
+    {
+     "module": "@app/caching",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "packages/alerts/src/calendario.spec.ts",
-   "hash": "1a45d08c9d12f698da66bc49e8729acebc50a73ee20fceeb765dfcf00824a625",
+   "hash": "a75b4a27ee5551c072a2ae6ba61c4159a56fe1924613e5ee2356d1e8df78a0b1",
    "imports": [
     "./calendario",
     "./types",
@@ -4851,97 +4899,49 @@
    ]
   },
   {
-   "path": "packages/alerts/src/evaluar.ts",
-   "hash": "ba805829b22d9ead351aa0a74f2304063ae542e8fa360b0daa92ae977de5293c",
-   "imports": [
-    "./types"
-   ],
-   "defines": [
-    {
-     "name": "decidirNotificacion",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "describirCondicion",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "enlaceDe",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "evaluarRegla",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "mensajeDe",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "decidirNotificacion",
-    "describirCondicion",
-    "enlaceDe",
-    "evaluarRegla",
-    "mensajeDe"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "./types",
-     "resolved": null
-    }
-   ]
-  },
-  {
    "path": "packages/alerts/src/types.ts",
-   "hash": "4a6b8b669af634ddb348069c8dc3051c0d5d6c54b624aae9698c416737735ee4",
+   "hash": "59f748a549c2c2fc82a36cf90262d161537b6fa7d7bef6a006bd18b8aaa720df",
    "imports": [],
    "defines": [
-    {
-     "name": "CLAVE_ESTADOS",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "CLAVE_SUSCRIPCIONES",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "CLAVE_ULTIMO_LATIDO",
-     "line": null,
-     "type": "export"
-    },
     {
      "name": "KEY_RULES",
      "line": null,
      "type": "export"
     },
     {
-     "name": "claveBandeja",
+     "name": "LAST_KEY_HEARTBEAT",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "STATES_KEY",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "SUBSCRIPTIONS_KEY",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "inboxKey",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "CLAVE_ESTADOS",
-    "CLAVE_SUSCRIPCIONES",
-    "CLAVE_ULTIMO_LATIDO",
     "KEY_RULES",
-    "claveBandeja"
+    "LAST_KEY_HEARTBEAT",
+    "STATES_KEY",
+    "SUBSCRIPTIONS_KEY",
+    "inboxKey"
    ],
    "references": [],
    "import_edges": []
   },
   {
    "path": "packages/ui-components/src/index.ts",
-   "hash": "75968f29b08f2641c4663bfb883ba999c96c55729fe927bf6e41ac66778443d0",
+   "hash": "5d7e7afe50e6f1fc041ab7a5b38833bff9b29d840005227d631e3cb37a497697",
    "imports": [],
    "defines": [
     {
@@ -4965,7 +4965,7 @@
      "type": "export"
     },
     {
-     "name": "COLUMNAS_INTERNAS_POR_DEFECTO",
+     "name": "CIRCULAR_LABELS",
      "line": null,
      "type": "export"
     },
@@ -5000,6 +5000,11 @@
      "type": "export"
     },
     {
+     "name": "DEFAULT_COLUMN_INTERNAL",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "DEFAULT_CONNECTION",
      "line": null,
      "type": "export"
@@ -5016,11 +5021,6 @@
     },
     {
      "name": "DEFAULT_TITLE_SECTION",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "DESTINOS_DE_TEXTO",
      "line": null,
      "type": "export"
     },
@@ -5045,11 +5045,6 @@
      "type": "export"
     },
     {
-     "name": "ETIQUETAS_CIRCULARES",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "FORMAT_KINDS",
      "line": null,
      "type": "export"
@@ -5061,6 +5056,11 @@
     },
     {
      "name": "ICON_NAMES",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "ICON_STROKES",
      "line": null,
      "type": "export"
     },
@@ -5115,6 +5115,11 @@
      "type": "export"
     },
     {
+     "name": "MIN_PRESENTATION",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "OBJECT_FAMILIES",
      "line": null,
      "type": "export"
@@ -5150,11 +5155,6 @@
      "type": "export"
     },
     {
-     "name": "PRESENTACION_MINIMA",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "PRESENTATION_KEYS",
      "line": null,
      "type": "export"
@@ -5185,12 +5185,12 @@
      "type": "export"
     },
     {
-     "name": "TRAZADOS",
+     "name": "TEXT_TARGETS",
      "line": null,
      "type": "export"
     },
     {
-     "name": "TRAZOS_DE_ICONO",
+     "name": "TRAZADOS",
      "line": null,
      "type": "export"
     },
@@ -5230,11 +5230,6 @@
      "type": "export"
     },
     {
-     "name": "agregacionesPosibles",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "attachmentOf",
      "line": null,
      "type": "export"
@@ -5245,7 +5240,7 @@
      "type": "export"
     },
     {
-     "name": "bindingDesdeRanuras",
+     "name": "bindingFromSlots",
      "line": null,
      "type": "export"
     },
@@ -5256,11 +5251,6 @@
     },
     {
      "name": "buildMatrix",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "cabeEnRanura",
      "line": null,
      "type": "export"
     },
@@ -5320,7 +5310,7 @@
      "type": "export"
     },
     {
-     "name": "describirRegla",
+     "name": "effectivePickers",
      "line": null,
      "type": "export"
     },
@@ -5331,11 +5321,6 @@
     },
     {
      "name": "estiloDeTexto",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "etiquetasNormalizadas",
      "line": null,
      "type": "export"
     },
@@ -5365,7 +5350,7 @@
      "type": "export"
     },
     {
-     "name": "grosorValido",
+     "name": "gridOverlapItself",
      "line": null,
      "type": "export"
     },
@@ -5440,17 +5425,22 @@
      "type": "export"
     },
     {
+     "name": "newAccumulator",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "niceScale",
      "line": null,
      "type": "export"
     },
     {
-     "name": "noConsumeDatos",
+     "name": "normalizedLabels",
      "line": null,
      "type": "export"
     },
     {
-     "name": "nuevoAcumulador",
+     "name": "notConsumesData",
      "line": null,
      "type": "export"
     },
@@ -5485,12 +5475,17 @@
      "type": "export"
     },
     {
+     "name": "patternProblem",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "pieOptions",
      "line": null,
      "type": "export"
     },
     {
-     "name": "problemaDelPatron",
+     "name": "possibleAggregations",
      "line": null,
      "type": "export"
     },
@@ -5500,12 +5495,7 @@
      "type": "export"
     },
     {
-     "name": "seSolapanEnRejilla",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "selectoresEfectivos",
+     "name": "ruleDescribe",
      "line": null,
      "type": "export"
     },
@@ -5516,6 +5506,11 @@
     },
     {
      "name": "slotFieldWithout",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "slotFits",
      "line": null,
      "type": "export"
     },
@@ -5565,7 +5560,7 @@
      "type": "export"
     },
     {
-     "name": "type Acumulador",
+     "name": "type Accumulator",
      "line": null,
      "type": "export"
     },
@@ -5595,11 +5590,6 @@
      "type": "export"
     },
     {
-     "name": "type AsignacionDeRanuras",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "type Axis",
      "line": null,
      "type": "export"
@@ -5611,11 +5601,6 @@
     },
     {
      "name": "type BindingProblem",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "type BuscarDefinicion",
      "line": null,
      "type": "export"
     },
@@ -5715,11 +5700,6 @@
      "type": "export"
     },
     {
-     "name": "type DestinoDeTexto",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "type DimensionPicker",
      "line": null,
      "type": "export"
@@ -5775,11 +5755,6 @@
      "type": "export"
     },
     {
-     "name": "type FormatoNumerico",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "type FunnelComparison",
      "line": null,
      "type": "export"
@@ -5801,11 +5776,6 @@
     },
     {
      "name": "type IconName",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "type ItemAnidado",
      "line": null,
      "type": "export"
     },
@@ -5865,7 +5835,17 @@
      "type": "export"
     },
     {
+     "name": "type NestedItem",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "type NumberFormat",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "type NumericFormat",
      "line": null,
      "type": "export"
     },
@@ -5955,6 +5935,11 @@
      "type": "export"
     },
     {
+     "name": "type SearchDefinition",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "type SectionTitleSettings",
      "line": null,
      "type": "export"
@@ -5981,6 +5966,11 @@
     },
     {
      "name": "type SimpleSettingsContainer",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "type SlotAssignment",
      "line": null,
      "type": "export"
     },
@@ -6025,6 +6015,11 @@
      "type": "export"
     },
     {
+     "name": "type TextTarget",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "type TooltipSettings",
      "line": null,
      "type": "export"
@@ -6046,6 +6041,11 @@
     },
     {
      "name": "type WaterfallSettings",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "validThickness",
      "line": null,
      "type": "export"
     },
@@ -6100,26 +6100,26 @@
     "AGGREGATION_LABEL",
     "ALIGNMENTS",
     "AXES",
-    "COLUMNAS_INTERNAS_POR_DEFECTO",
+    "CIRCULAR_LABELS",
     "COMPARATORS",
     "CONTAINERS",
     "DATE_PICKERS",
     "DATUM_POSITIONS",
     "DEFAULT_AGGREGATION",
     "DEFAULT_BOX_TEXT",
+    "DEFAULT_COLUMN_INTERNAL",
     "DEFAULT_CONNECTION",
     "DEFAULT_LINE_DIVIDER",
     "DEFAULT_SHAPE",
     "DEFAULT_TITLE_SECTION",
-    "DESTINOS_DE_TEXTO",
     "ELEMENTS",
     "ELEMENT_THRESHOLD",
     "EMPTY_PANEL",
     "ENDS",
-    "ETIQUETAS_CIRCULARES",
     "FORMAT_KINDS",
     "FUNNEL_COMPARISONS",
     "ICON_NAMES",
+    "ICON_STROKES",
     "LABEL_POSITIONS",
     "LEGEND_MODES",
     "LINE_POSITIONS",
@@ -6130,6 +6130,7 @@
     "MAX_RULES",
     "MAX_SUBTITLE",
     "MAX_UNIT",
+    "MIN_PRESENTATION",
     "OBJECT_FAMILIES",
     "OBJECT_ICONS",
     "ORIENTACIONES",
@@ -6137,15 +6138,14 @@
     "ObjectRegistryError",
     "PANEL_DIMENSIONS_MAX",
     "PICKER_KINDS",
-    "PRESENTACION_MINIMA",
     "PRESENTATION_KEYS",
     "REFERENCE_STYLES",
     "SHAPES",
     "SORT_CRITERIA",
     "STACKING_MODES",
     "TEXT_COLORS",
+    "TEXT_TARGETS",
     "TRAZADOS",
-    "TRAZOS_DE_ICONO",
     "VERTICAL_ALIGNMENTS",
     "WITHOUT_CARD",
     "aFieldRef",
@@ -6153,13 +6153,11 @@
     "aggregateBy",
     "aggregationsFor",
     "aggregationsOf",
-    "agregacionesPosibles",
     "attachmentOf",
     "barOptions",
-    "bindingDesdeRanuras",
+    "bindingFromSlots",
     "breakdownOf",
     "buildMatrix",
-    "cabeEnRanura",
     "classifyBump",
     "close",
     "columnsFor",
@@ -6171,16 +6169,15 @@
     "dateKindIs",
     "defaultPicker",
     "defaultSlots",
-    "describirRegla",
+    "effectivePickers",
     "elementsOf",
     "estiloDeTexto",
-    "etiquetasNormalizadas",
     "fieldKey",
     "formatVersion",
     "formatterOf",
     "gaugeOptions",
     "gaugeScale",
-    "grosorValido",
+    "gridOverlapItself",
     "iconNameIs",
     "initialCatalog",
     "initialSettings",
@@ -6195,22 +6192,24 @@
     "measureFormat",
     "measureFormatter",
     "nestedInstances",
+    "newAccumulator",
     "niceScale",
-    "noConsumeDatos",
-    "nuevoAcumulador",
+    "normalizedLabels",
+    "notConsumesData",
     "numberFormatAs",
     "numberFormatter",
     "optionsOf",
     "panelsOf",
     "parseVersion",
     "pathKey",
+    "patternProblem",
     "pieOptions",
-    "problemaDelPatron",
+    "possibleAggregations",
     "projectObject",
-    "seSolapanEnRejilla",
-    "selectoresEfectivos",
+    "ruleDescribe",
     "slotField",
     "slotFieldWithout",
+    "slotFits",
     "slotsOf",
     "sortCategories",
     "sortNodes",
@@ -6220,17 +6219,15 @@
     "toMatrix",
     "toSlicerOptions",
     "trazar",
-    "type Acumulador",
+    "type Accumulator",
     "type AggregatedRow",
     "type AggregatedRows",
     "type AggregationContext",
     "type AggregationProblem",
     "type Alignment",
-    "type AsignacionDeRanuras",
     "type Axis",
     "type AxisSettings",
     "type BindingProblem",
-    "type BuscarDefinicion",
     "type CategoricalViewModel",
     "type CategoryPoint",
     "type CategorySort",
@@ -6250,7 +6247,6 @@
     "type DatumLabels",
     "type DatumPosition",
     "type DeprecationWarning",
-    "type DestinoDeTexto",
     "type DimensionPicker",
     "type Direction",
     "type DividerLineSettings",
@@ -6262,13 +6258,11 @@
     "type FieldWell",
     "type FiltersPanelSettings",
     "type FormatKind",
-    "type FormatoNumerico",
     "type FunnelComparison",
     "type FunnelSettings",
     "type GaugeSettings",
     "type HierarchicalMatrix",
     "type IconName",
-    "type ItemAnidado",
     "type KpiViewModel",
     "type LabelPosition",
     "type LabelSettings",
@@ -6280,7 +6274,9 @@
     "type MatrixViewModel",
     "type MultiplePanel",
     "type MultipleSettings",
+    "type NestedItem",
     "type NumberFormat",
+    "type NumericFormat",
     "type ObjectAccent",
     "type ObjectBox",
     "type ObjectFormats",
@@ -6298,12 +6294,14 @@
     "type ReferenceLine",
     "type ReferenceStyle",
     "type ScrollableSettingsContainer",
+    "type SearchDefinition",
     "type SectionTitleSettings",
     "type SelectorEfectivo",
     "type Semver",
     "type Shape",
     "type ShapeSettings",
     "type SimpleSettingsContainer",
+    "type SlotAssignment",
     "type SlotProblem",
     "type SortCriterion",
     "type StackingMode",
@@ -6312,11 +6310,13 @@
     "type TextColor",
     "type TextParagraph",
     "type TextStyle",
+    "type TextTarget",
     "type TooltipSettings",
     "type ValueLabel",
     "type VersionBump",
     "type VerticalAlignment",
     "type WaterfallSettings",
+    "validThickness",
     "validateAggregation",
     "validateAttachments",
     "validateBinding",
@@ -6332,7 +6332,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/wells.ts",
-   "hash": "c49488b0253417df6deea7f18e7191cf42ad63443dcf6a6aaf88086e4d92e200",
+   "hash": "36fc3b334127d2f822343003224a50511e0c750a3ce868c0bd5aef78aa3b32c2",
    "imports": [
     "../registry/types",
     "../registry/viewModel",
@@ -6345,12 +6345,7 @@
      "type": "export"
     },
     {
-     "name": "bindingDesdeRanuras",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "cabeEnRanura",
+     "name": "bindingFromSlots",
      "line": null,
      "type": "export"
     },
@@ -6375,6 +6370,11 @@
      "type": "export"
     },
     {
+     "name": "slotFits",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "slotsOf",
      "line": null,
      "type": "export"
@@ -6392,12 +6392,12 @@
    ],
    "exports": [
     "aFieldRef",
-    "bindingDesdeRanuras",
-    "cabeEnRanura",
+    "bindingFromSlots",
     "contractSlots",
     "defaultSlots",
     "slotField",
     "slotFieldWithout",
+    "slotFits",
     "slotsOf",
     "validateSlots",
     "withSlotField"
@@ -6420,7 +6420,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/filtersPanel.spec.ts",
-   "hash": "4a88a9826361264d6df48f88376b4307920c53736578d024767545907ff63c55",
+   "hash": "8b655f2072f7ee66b4774fb2d8b7c8074057e7837b250e0813f9df81ea21c82c",
    "imports": [
     "../registry/types",
     "./filtersPanel",
@@ -6446,7 +6446,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/number.spec.ts",
-   "hash": "cfe85b7884e36410e946b7db2399a8a31bc2eff447278a01d144259a0d07c5c2",
+   "hash": "eb0444de70f667614ff43ce2a3e6430a403cf0891f96250bfe4f96d111ded9f4",
    "imports": [
     "./number",
     "vitest"
@@ -6484,7 +6484,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/wells.spec.ts",
-   "hash": "c08dc1f635b33f8ef351d841f61cb05fa9bd46063ff2ade41f50ac055751ec11",
+   "hash": "56412823d17a81dde55912317e7b52f11e9c1c83a4483075f77b01b4e3c35d49",
    "imports": [
     "../registry/catalog",
     "../registry/types",
@@ -6515,7 +6515,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/contract.spec.ts",
-   "hash": "796f6b00c4a83a2f61b931575209b0adecaa5be4f0a079bb03b1808b130b858b",
+   "hash": "dbf959ce3253047f8edef2a096b3fd80a04a6277bcf9aa9c4242b4c87c064209",
    "imports": [
     "../registry/catalog",
     "../registry/types",
@@ -6551,7 +6551,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/elements.ts",
-   "hash": "688b406d6e8549393311d2e12f73bc80727a785b0695d070b96376b01edb400b",
+   "hash": "f297beecc87f41e552caadea6149a0d3d9344e945ef0bc0a7027ae05c52de8ac",
    "imports": [
     "./contract"
    ],
@@ -6622,17 +6622,17 @@
      "type": "export"
     },
     {
-     "name": "grosorValido",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "isElement",
      "line": null,
      "type": "export"
     },
     {
      "name": "lineStroke",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "validThickness",
      "line": null,
      "type": "export"
     }
@@ -6651,9 +6651,9 @@
     "SHAPES",
     "TRAZADOS",
     "WITHOUT_CARD",
-    "grosorValido",
     "isElement",
-    "lineStroke"
+    "lineStroke",
+    "validThickness"
    ],
    "references": [],
    "import_edges": [
@@ -6665,7 +6665,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/conditional.spec.ts",
-   "hash": "5f6f909377c9cbd97fb4e83cf0d9a3d3a74c95195046188be427dbb9e65e3d74",
+   "hash": "d380b8c228ac80224247a76b2613f35007f7c9b8148bb99c645b273dd8bca450",
    "imports": [
     "./conditional",
     "vitest"
@@ -6686,7 +6686,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/icons.ts",
-   "hash": "9dc3f419f301acc92b5c68186d652d8a939fc01b8d431f69e32dd2fd984ed52f",
+   "hash": "0fa7bb8cf9249335dd1d67ba8a3971d11a8181d80c1d5218fd7eb8867fedf510",
    "imports": [],
    "defines": [
     {
@@ -6695,12 +6695,12 @@
      "type": "export"
     },
     {
-     "name": "OBJECT_ICONS",
+     "name": "ICON_STROKES",
      "line": null,
      "type": "export"
     },
     {
-     "name": "TRAZOS_DE_ICONO",
+     "name": "OBJECT_ICONS",
      "line": null,
      "type": "export"
     },
@@ -6712,8 +6712,8 @@
    ],
    "exports": [
     "ICON_NAMES",
+    "ICON_STROKES",
     "OBJECT_ICONS",
-    "TRAZOS_DE_ICONO",
     "iconNameIs"
    ],
    "references": [],
@@ -6721,7 +6721,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/contract.ts",
-   "hash": "16603bd9dc47e17d163bf94feca1e56faa24c823c99628f0e9ccc921e411cca5",
+   "hash": "eb518f134ac4970faa0b6be7261c7f4209eff2331527706ad25365710dca8f64",
    "imports": [
     "./conditional",
     "./icons",
@@ -6739,17 +6739,12 @@
      "type": "export"
     },
     {
+     "name": "CIRCULAR_LABELS",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "DATUM_POSITIONS",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "DESTINOS_DE_TEXTO",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "ETIQUETAS_CIRCULARES",
      "line": null,
      "type": "export"
     },
@@ -6794,7 +6789,7 @@
      "type": "export"
     },
     {
-     "name": "PRESENTACION_MINIMA",
+     "name": "MIN_PRESENTATION",
      "line": null,
      "type": "export"
     },
@@ -6824,6 +6819,11 @@
      "type": "export"
     },
     {
+     "name": "TEXT_TARGETS",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "VERTICAL_ALIGNMENTS",
      "line": null,
      "type": "export"
@@ -6834,17 +6834,17 @@
      "type": "export"
     },
     {
-     "name": "etiquetasNormalizadas",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "formatterOf",
      "line": null,
      "type": "export"
     },
     {
      "name": "measureFormatter",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "normalizedLabels",
      "line": null,
      "type": "export"
     },
@@ -6862,9 +6862,8 @@
    "exports": [
     "ACCENTS",
     "ALIGNMENTS",
+    "CIRCULAR_LABELS",
     "DATUM_POSITIONS",
-    "DESTINOS_DE_TEXTO",
-    "ETIQUETAS_CIRCULARES",
     "FUNNEL_COMPARISONS",
     "LABEL_POSITIONS",
     "LEGEND_MODES",
@@ -6873,17 +6872,18 @@
     "MAX_REFERENCES",
     "MAX_SUBTITLE",
     "MAX_UNIT",
-    "PRESENTACION_MINIMA",
+    "MIN_PRESENTATION",
     "PRESENTATION_KEYS",
     "REFERENCE_STYLES",
     "SORT_CRITERIA",
     "STACKING_MODES",
     "TEXT_COLORS",
+    "TEXT_TARGETS",
     "VERTICAL_ALIGNMENTS",
     "estiloDeTexto",
-    "etiquetasNormalizadas",
     "formatterOf",
     "measureFormatter",
+    "normalizedLabels",
     "numberFormatAs",
     "validatePresentation"
    ],
@@ -6926,7 +6926,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/conditional.ts",
-   "hash": "7dd72bfc88d59acd0e9a5df8d494f9593f28bce125fd4890a6d1f134d80162db",
+   "hash": "8bb0b0786dc71b30f0a2d2013789660d5a8d2874c032603994f7c84289751e1a",
    "imports": [
     "./contract"
    ],
@@ -6947,7 +6947,7 @@
      "type": "export"
     },
     {
-     "name": "describirRegla",
+     "name": "ruleDescribe",
      "line": null,
      "type": "export"
     }
@@ -6956,7 +6956,7 @@
     "COMPARATORS",
     "MAX_RULES",
     "conditionalColor",
-    "describirRegla"
+    "ruleDescribe"
    ],
    "references": [],
    "import_edges": [
@@ -6968,7 +6968,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/filtersPanel.ts",
-   "hash": "3527aa41a72d8c55261809e74ed4840272419b5f40bacd0810aecb470a2e6685",
+   "hash": "c72e8913e7f938ec138517263f6850eb2323e28bed6be94ed016851abe37a4b6",
    "imports": [
     "../registry/types",
     "../registry/viewModel"
@@ -7000,7 +7000,7 @@
      "type": "export"
     },
     {
-     "name": "selectoresEfectivos",
+     "name": "effectivePickers",
      "line": null,
      "type": "export"
     },
@@ -7016,7 +7016,7 @@
     "PICKER_KINDS",
     "dateKindIs",
     "defaultPicker",
-    "selectoresEfectivos",
+    "effectivePickers",
     "validatePanelFilters"
    ],
    "references": [],
@@ -7033,7 +7033,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/containers.spec.ts",
-   "hash": "1fd812b8bb0a0cdb64e1bfebf3cfc0e06b42a675b8a341b7302abaf93b686a38",
+   "hash": "12385455a7c82c722038208cab882fad3e26ebd8774d260dec39ce5de9f1f5df",
    "imports": [
     "./containers",
     "vitest"
@@ -7054,7 +7054,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/number.ts",
-   "hash": "60fb0d4d3281f69aae0368501a104bdc53b1782ec5b44c6a7f93848af7283903",
+   "hash": "98392b2beb0fa388c3bc6c6727c1ab20319516dcdf9382d435298f48b61bfc50",
    "imports": [],
    "defines": [
     {
@@ -7063,7 +7063,7 @@
      "type": "export"
     },
     {
-     "name": "PatronInvalidoError",
+     "name": "PatternInvalidError",
      "line": null,
      "type": "export"
     },
@@ -7078,24 +7078,24 @@
      "type": "export"
     },
     {
-     "name": "problemaDelPatron",
+     "name": "patternProblem",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
     "FORMAT_KINDS",
-    "PatronInvalidoError",
+    "PatternInvalidError",
     "measureFormat",
     "numberFormatter",
-    "problemaDelPatron"
+    "patternProblem"
    ],
    "references": [],
    "import_edges": []
   },
   {
    "path": "packages/ui-components/src/presentation/containers.ts",
-   "hash": "213c3d9ab46ec585829d2bcec92d3100b25181003d84804c0db511664f405ec0",
+   "hash": "f517b5062e424833fcbf6aae8873f2e9032247132b8cdbcf0ebe9dbc20346bb3",
    "imports": [
     "../registry/types",
     "./elements"
@@ -7107,12 +7107,12 @@
      "type": "export"
     },
     {
-     "name": "COLUMNAS_INTERNAS_POR_DEFECTO",
+     "name": "CONTAINERS",
      "line": null,
      "type": "export"
     },
     {
-     "name": "CONTAINERS",
+     "name": "DEFAULT_COLUMN_INTERNAL",
      "line": null,
      "type": "export"
     },
@@ -7123,6 +7123,11 @@
     },
     {
      "name": "columnsOf",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "gridOverlapItself",
      "line": null,
      "type": "export"
     },
@@ -7147,11 +7152,6 @@
      "type": "export"
     },
     {
-     "name": "seSolapanEnRejilla",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "validateContainer",
      "line": null,
      "type": "export"
@@ -7159,15 +7159,15 @@
    ],
    "exports": [
     "AXES",
-    "COLUMNAS_INTERNAS_POR_DEFECTO",
     "CONTAINERS",
+    "DEFAULT_COLUMN_INTERNAL",
     "EMPTY_PANEL",
     "columnsOf",
+    "gridOverlapItself",
     "initialSettings",
     "isContainer",
     "nestedInstances",
     "panelsOf",
-    "seSolapanEnRejilla",
     "validateContainer"
    ],
    "references": [],
@@ -7184,7 +7184,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/catalog.ts",
-   "hash": "ef0c95a891374b7c67791309ebfcd68ea43db4a9b102f706c6e31eed628521f1",
+   "hash": "5e90002f02171e9df5a1d2021ed036b20c30f15d01051b91487072ffc3774878",
    "imports": [
     "../presentation/contract",
     "../presentation/wells",
@@ -7218,7 +7218,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/matrix.ts",
-   "hash": "c3770e260df15edaeea5342574b572c9f69dbcf013ad6a036f3729671b565f11",
+   "hash": "c72cababfb63e387e9789fe30865714211066a07586999cf05abb57ec6f91da6",
    "imports": [
     "./aggregation",
     "./viewModel",
@@ -7282,7 +7282,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/attachments.ts",
-   "hash": "cfa882477f026d325c1c916ea6991f03db3e1e36a8f4b445126caff6378474a3",
+   "hash": "cafb7ecb96f60ade1d6ca90c2b94f9160be1e73455703ada7db9f1c2380683b3",
    "imports": [
     "./types",
     "./viewModel"
@@ -7317,7 +7317,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/declaredPresentation.spec.ts",
-   "hash": "2cfcb35964d191d6e1a5cdb8e4cc59ad371a1b7cc2c1f2eff6ce09be10b8d800",
+   "hash": "00500820ae57d4d8b8190ac1f51a4099fedb16b072ff3762b4756779e6870b7d",
    "imports": [
     "../charts/options",
     "../presentation/contract",
@@ -7353,7 +7353,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/viewModel.spec.ts",
-   "hash": "a2c241060c33606e213b0fc9d3d3f159f10449b2ddc169b6f5beea2a0a3a3a7e",
+   "hash": "4e55d868c994b70899de830535f000ec7a777f7ede278b52ae0733e8715b2466",
    "imports": [
     "./types",
     "./viewModel",
@@ -7384,7 +7384,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/aggregation.ts",
-   "hash": "261c17309ce783f008aba0736639443cb430b468bf5269a1a22c80973d555c80",
+   "hash": "fcfc499391bdbe1723033a7f0866103783b5260d629feefc66a5b80cbf82b85b",
    "imports": [
     "@app/data-contracts"
    ],
@@ -7415,17 +7415,17 @@
      "type": "export"
     },
     {
-     "name": "agregacionesPosibles",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "close",
      "line": null,
      "type": "export"
     },
     {
-     "name": "nuevoAcumulador",
+     "name": "newAccumulator",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "possibleAggregations",
      "line": null,
      "type": "export"
     },
@@ -7441,9 +7441,9 @@
     "acumular",
     "aggregationsFor",
     "aggregationsOf",
-    "agregacionesPosibles",
     "close",
-    "nuevoAcumulador",
+    "newAccumulator",
+    "possibleAggregations",
     "validateAggregation"
    ],
    "references": [],
@@ -7518,7 +7518,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/projection.ts",
-   "hash": "2c7c8e6a42134346a958d27b7d0ac492c3427f123d3e13afabb37fa94d3240a8",
+   "hash": "ad0d3c3a8365e32a45ae58f402d2f1b3037ea0427228bfc617569bbbedec55a3",
    "imports": [
     "../presentation/wells",
     "./matrix",
@@ -7568,7 +7568,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/semver.ts",
-   "hash": "67d7153e679e69ea498667ef80448676d42b2564422a7b9a5b591d27d1740cca",
+   "hash": "9204aede01e79a7b680c9350e0d1d72fbfd1fc1b10741fb350066afcb5740973",
    "imports": [],
    "defines": [
     {
@@ -7650,7 +7650,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/ObjectRegistry.spec.ts",
-   "hash": "c9ecd195b50d64fd7a73fee6d0debfb723e55bcbc0cf9ff2814b5fe3e029c821",
+   "hash": "23720570e8ac842d41b61eef57644985dc979584d238706490b9a90f6c8330af",
    "imports": [
     "../presentation/contract",
     "./ObjectRegistry",
@@ -7717,7 +7717,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/aggregation.spec.ts",
-   "hash": "51d94d4a77c2949a81dce240d825c25f635474d9307bdbe544f4ed98d227c188",
+   "hash": "8015bc6f0c8c7711e34ba9c2091b795d401a9887493751a40b70246c83da027a",
    "imports": [
     "./aggregation",
     "./viewModel",
@@ -7748,7 +7748,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/viewModel.ts",
-   "hash": "08b518cff92b624f96ec731f608df28e93eb6c492cd42913130fc177a8510192",
+   "hash": "e6c3395454e0eb9c5012401ae54383bfbc2b8dac4aa4ff7a7b2808b3171473a8",
    "imports": [
     "./aggregation",
     "./types",
@@ -7818,7 +7818,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/types.ts",
-   "hash": "7d36998773d03f0b24a61350f473449cbe2091cc6c80a6ce59f1395f81cfeb3d",
+   "hash": "14f7e948ba2b4f7aae86ad2f4b269629e77e7f476e8f9cfdb827d2583f2b71f9",
    "imports": [
     "../presentation/containers",
     "../presentation/contract",
@@ -7835,14 +7835,14 @@
      "type": "export"
     },
     {
-     "name": "noConsumeDatos",
+     "name": "notConsumesData",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
     "OBJECT_FAMILIES",
-    "noConsumeDatos"
+    "notConsumesData"
    ],
    "references": [],
    "import_edges": [
@@ -7946,7 +7946,7 @@
   },
   {
    "path": "packages/ui-components/src/charts/options.ts",
-   "hash": "8709dbac5a5c32a34e493e11e41bb2cf002bf90573d954925dce97f4f91ccb1d",
+   "hash": "6f894f47abd72d4ac2f80114da2f57ee034d40ae4fe246717875a668edfdadfd",
    "imports": [
     "../presentation/conditional",
     "../presentation/contract",
@@ -7994,17 +7994,17 @@
      "type": "export"
     },
     {
+     "name": "horizontalBarOptions",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "lineOptions",
      "line": null,
      "type": "export"
     },
     {
      "name": "niceScale",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "opcionesDeBarrasHorizontales",
      "line": null,
      "type": "export"
     },
@@ -8043,9 +8043,9 @@
     "funnelOptions",
     "gaugeOptions",
     "gaugeScale",
+    "horizontalBarOptions",
     "lineOptions",
     "niceScale",
-    "opcionesDeBarrasHorizontales",
     "optionsOf",
     "pieOptions",
     "scatterOptions",
@@ -8070,7 +8070,7 @@
   },
   {
    "path": "packages/ui-components/src/charts/options.customization.spec.ts",
-   "hash": "8a2b3e240a9714bb3e12d1c6efc1540b01fab9795fe8821a8829a2a8e65035ca",
+   "hash": "a7c3336d22670170df62c1df8a70020c9939fd619ade4d4fd040e3ef53ad06b4",
    "imports": [
     "../registry/viewModel",
     "./options",
@@ -8440,7 +8440,7 @@
   },
   {
    "path": "packages/caching/src/CachedDatasetReader.spec.ts",
-   "hash": "eb7a01fb721d772819896b3d9b2850228408482bba3cd65201855c5bbfc0b189",
+   "hash": "3a91b8b3e518c17c14a104e7841ee6caf2701222b41670666f7aebabe16dc31a",
    "imports": [
     "./CachedDatasetReader",
     "./ICacheStore",
@@ -8583,7 +8583,7 @@
   },
   {
    "path": "packages/caching/src/datasetRegistry.ts",
-   "hash": "b6222458ca00bb61d0210621c3f76cf440820bacc25045f429dfa09933a34415",
+   "hash": "fbd35e8a44106e1932e44886d794140949f64cb31150af737c6a997062e03d8a",
    "imports": [
     "../datasets/registry.json",
     "./cacheKey",
@@ -8646,7 +8646,7 @@
   },
   {
    "path": "packages/caching/src/InMemoryCacheStore.ts",
-   "hash": "3491d7527b51f0f3d755c968b7b92f55901380d2c293111991f3931714e85122",
+   "hash": "03724520dffcadebd86786301a2c8f2349dde4a9329db5c63c5baf6e2e94657c",
    "imports": [
     "./ICacheStore"
    ],
@@ -8691,7 +8691,7 @@
   },
   {
    "path": "packages/caching/src/FileCacheStore.ts",
-   "hash": "e241b3c851dfbbc50eec038bc763956e89bcecacf560a9d282e66cf2ecc8d6da",
+   "hash": "54fc58a01972e235ffdf72233bffed76172c50fbe1c7ad22e7661ad71f50949d",
    "imports": [
     "./ICacheStore",
     "node:fs/promises",
@@ -8820,7 +8820,7 @@
   },
   {
    "path": "packages/i18n/src/format.ts",
-   "hash": "a8a9236e11bf6beff713ccecaf3c5915f0c3de3f4d58ca5105dcca8983c9078f",
+   "hash": "18d05bc7467aa442cce645de616e47e132d8e4f8d9c1dd19c19868a46c55740b",
    "imports": [],
    "defines": [
     {
@@ -8837,7 +8837,7 @@
   },
   {
    "path": "packages/i18n/src/catalog.spec.ts",
-   "hash": "2d4c037944f31ee64eb0301e0717679427f223f33e6a1e2a7c8be6a2144ab415",
+   "hash": "fe93c18eb21d79693bbd6ea3cb77eb883901a035a57a00e42fa31c98379acc2a",
    "imports": [
     "./index",
     "./locales",
@@ -8990,7 +8990,7 @@
   },
   {
    "path": "packages/nl-query/src/index.ts",
-   "hash": "c2e16d740ea1c2df064ec04791d300fd25d66747b1ae0b49281cd500612d8565",
+   "hash": "d90a0a42564d817e370364fca85f7fe4b064e933b35f4737cb51b948264b82e1",
    "imports": [],
    "defines": [
     {
@@ -9019,7 +9019,7 @@
   },
   {
    "path": "packages/nl-query/src/resolver.ts",
-   "hash": "69a9092e2dc346f7091435262efa5685a36b26fbe2964e97bce9229653777c61",
+   "hash": "ca47449ecb17b0b40c2a0976d9fff9e4b41ef2375487685f68ac8ba7dabfb11b",
    "imports": [
     "./types"
    ],
@@ -9081,7 +9081,7 @@
   },
   {
    "path": "packages/nl-query/src/types.ts",
-   "hash": "0a93c6f910d0eceb7b64eef9d7a0c721d7042869708786f0ac55074b0f1f7da4",
+   "hash": "6f29368e1bd8f26c679088d909c4ab64090d14d1b9b0d988daf60b2cb923c412",
    "imports": [],
    "defines": [],
    "exports": [],
@@ -9090,16 +9090,16 @@
   },
   {
    "path": "packages/data-contracts/types/src/index.ts",
-   "hash": "9fe02302158cfe5ecca1d6895837cacbe28f59f204e455c6a663181a74c35067",
+   "hash": "2794fa6e50dd870e672dca10ca5cee088b62816e8f66588087c0963a23d43b06",
    "imports": [],
    "defines": [
     {
-     "name": "AGGREGATIONS",
+     "name": "ADDITIVE_AGGREGATIONS",
      "line": null,
      "type": "export"
     },
     {
-     "name": "AGREGACIONES_ADITIVAS",
+     "name": "AGGREGATIONS",
      "line": null,
      "type": "export"
     },
@@ -9115,8 +9115,8 @@
     }
    ],
    "exports": [
+    "ADDITIVE_AGGREGATIONS",
     "AGGREGATIONS",
-    "AGREGACIONES_ADITIVAS",
     "esAditiva",
     "isAggregation"
    ],
@@ -9125,16 +9125,16 @@
   },
   {
    "path": "packages/data-contracts/types/src/IDataConnector.ts",
-   "hash": "574d5d3a17633a59a000995e3ad02c4808d1dc38f1818de105387bcb86b2c74d",
+   "hash": "44cc6c2cb26490389f73ff4c3c55bbb4ea18ebbad93ad4d85a199f262dcf7bdc",
    "imports": [],
    "defines": [
     {
-     "name": "AGGREGATIONS",
+     "name": "ADDITIVE_AGGREGATIONS",
      "line": null,
      "type": "export"
     },
     {
-     "name": "AGREGACIONES_ADITIVAS",
+     "name": "AGGREGATIONS",
      "line": null,
      "type": "export"
     },
@@ -9150,8 +9150,8 @@
     }
    ],
    "exports": [
+    "ADDITIVE_AGGREGATIONS",
     "AGGREGATIONS",
-    "AGREGACIONES_ADITIVAS",
     "esAditiva",
     "isAggregation"
    ],
@@ -9279,7 +9279,7 @@
   },
   {
    "path": "packages/data-contracts/server/src/createDataConnector.spec.ts",
-   "hash": "936b1a8eb731cd1f4bf042856dd7eccf9928da97d10d87df98f531b9b78a81ca",
+   "hash": "bb656d1a27982dfd7b8b5a27b289ce4c9de1bf9b38e2ec7e654850df27abcb3b",
    "imports": [
     "./connectors/MockDataConnector",
     "./connectors/SqlDataConnector",
@@ -9437,7 +9437,7 @@
   },
   {
    "path": "packages/data-contracts/server/src/connectors/MockDataConnector.spec.ts",
-   "hash": "7bb47d6fa73d5d0b1cb73884fad697a917f85a866271ef61bde6c98f732c48a1",
+   "hash": "b723daf72003111e637a6a1ea7b49d08a56aecfaaac0fbe90ea5220e1398be3e",
    "imports": [
     "./MockDataConnector",
     "@app/data-contracts",
@@ -9463,7 +9463,7 @@
   },
   {
    "path": "packages/data-contracts/server/src/connectors/MockDataConnector.ts",
-   "hash": "4a37b49843e65c9627f79111c9cbec3812c7b5e6d8b00fbef1f6ec7947a6330f",
+   "hash": "b4d0188e0ed3152646827d425758bf17f74be62a7e7ffef1a81ff30423c07a66",
    "imports": [
     "../../schema/mock-schema.json",
     "../mockSchemaFile",
@@ -9557,7 +9557,7 @@
   },
   {
    "path": "tools/coherencia/interfaz.spec.ts",
-   "hash": "9d2dfb06e1943c0d28960612b330fa783690a9cd417636dedd93eb3ad73a6fb0",
+   "hash": "39246d840c961fd20c5fee22b08b07383a8787e2700fefcc3c9546b6d61b719f",
    "imports": [
     "@app/ui-components",
     "node:child_process",
@@ -9587,8 +9587,34 @@
    ]
   },
   {
+   "path": "tools/coherencia/api.spec.ts",
+   "hash": "d09aee57dffe722587cc4df52a682352dd52da86e6702a06273f5d32c099d606",
+   "imports": [
+    "node:child_process",
+    "node:fs",
+    "vitest"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "node:child_process",
+     "resolved": null
+    },
+    {
+     "module": "node:fs",
+     "resolved": null
+    },
+    {
+     "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "tools/coherencia/documentacion.spec.ts",
-   "hash": "cc97cc2de317853c17cb72032f3027f6532277dd0d2d4c87d393aeb5ebab96e2",
+   "hash": "bf1e61ce672eb76c2cbc7dd2cbe71a8bd857e9b7771dec8c236424bd3f28e7ef",
    "imports": [
     "../rename/segmentos.mjs",
     "node:child_process",
@@ -9714,12 +9740,28 @@
   },
   {
    "path": "tools/rename/detect.mjs",
-   "hash": "d6e94a13720aec9048aa069520eee984b798a81dd8f696d3f061bacf71b618d9",
+   "hash": "fc9a6502e318de63b1e0dbeaf907d19bcc4658d13c1fab0977a3687ae33ec72e",
    "imports": [
+    "./renombrar.mjs",
     "node:child_process",
     "node:fs"
    ],
    "defines": [
+    {
+     "name": "DOMAIN",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "FALSE_FRIENDS",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "SHARED",
+     "line": null,
+     "type": "export"
+    },
     {
      "name": "classify",
      "line": null,
@@ -9731,24 +9773,25 @@
      "type": "export"
     },
     {
-     "name": "splitWords",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "translate",
+     "name": "unknownWords",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
+    "DOMAIN",
+    "FALSE_FRIENDS",
+    "SHARED",
     "classify",
     "findAll",
-    "splitWords",
-    "translate"
+    "unknownWords"
    ],
    "references": [],
    "import_edges": [
+    {
+     "module": "./renombrar.mjs",
+     "resolved": null
+    },
     {
      "module": "node:child_process",
      "resolved": null
@@ -9782,7 +9825,7 @@
   },
   {
    "path": "tools/rename/segmentos.mjs",
-   "hash": "d654f0fb78f2e4b84de0a4fc4d8f5cc9c724b1237a79a49c90f3c55698a31762",
+   "hash": "8f983b39069cceee2fd2400af768dbb27bb1970e0ac1aaaa8a2998dc66697667",
    "imports": [],
    "defines": [
     {
@@ -9897,19 +9940,19 @@
   },
   {
    "path": "apps/modules/modulo-ejemplo/src/__boundary-fixture__/forbidden-import.ts",
-   "hash": "1e4811b688c98ab3e219bfd9bd9e8735943feae286c22f74863edf249c123892",
+   "hash": "665b634585316e74a44f65ef2d80bfa2b4e3ed3a28e9b0890c312986b091814b",
    "imports": [
     "@app/data-contracts-server"
    ],
    "defines": [
     {
-     "name": "conectorProhibido",
+     "name": "forbiddenConnector",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "conectorProhibido"
+    "forbiddenConnector"
    ],
    "references": [],
    "import_edges": [
@@ -10010,7 +10053,7 @@
   },
   {
    "path": "apps/cache-populator/src/populate.spec.ts",
-   "hash": "de155a799c84a22260856256d3c93a805dd749534aaae2bb4f83c82fae4e7348",
+   "hash": "79143638e19dab8a6fca87e2484ef5e6ff950f994f5b7f96ba65c4b642c42529",
    "imports": [
     "./populate",
     "./runCycle",
@@ -10071,7 +10114,7 @@
   },
   {
    "path": "apps/cache-populator/src/sourceAgnostic.spec.ts",
-   "hash": "c8e8af6983e7d6c397aae0f34480efb6e86cdfab36a34deb8c60d8aab4f9ea70",
+   "hash": "a9c6756f60e7524cc86cb8d9ac3bc8b0970d8dadf64a46c15469f87bdae81d41",
    "imports": [
     "./populate",
     "@app/caching",
@@ -10112,7 +10155,7 @@
   },
   {
    "path": "apps/cache-populator/src/runCycle.ts",
-   "hash": "e857f6bca5c4aa0360bf5aec020634de2e71241f8097edda70b6eb6e97d5c175",
+   "hash": "cafb0c1df0631e55db9a14bf0c64d82b9807967e26cd72df774016f164135fcf",
    "imports": [
     "./populate",
     "./schedule",
@@ -10191,7 +10234,7 @@
   },
   {
    "path": "apps/cache-populator/src/populate.ts",
-   "hash": "4ffff9f996afbf272a27b3a72977594147c6cd7a783aa0fe0663bc235299b9d9",
+   "hash": "b8c55e36160cecf8123fa6bc8eec248055cb07d36e60d48fa71a65c6d0af9271",
    "imports": [
     "@app/caching",
     "@app/data-contracts",
@@ -10425,7 +10468,7 @@
   },
   {
    "path": "apps/shell/src/components/Addons.tsx",
-   "hash": "969907a43913066a590e22a91b86f055093c80f83f5a774e99e4c0def8f06f74",
+   "hash": "c4dc16ba2a25d9e5827643b875c4d029cad9b454f39e8e477dca5586c1c8c044",
    "imports": [
     "./icons/Icon",
     "@app/data-contracts",
@@ -10476,7 +10519,7 @@
   },
   {
    "path": "apps/shell/src/components/Reset.tsx",
-   "hash": "4b172178d5d867e85a8e2fa780d29f029d7842347caa8ba503dd499f713254f5",
+   "hash": "d0819a35af9605a316e118c47697a3f507f3f9b6c011d6a817230a4e1dda30d3",
    "imports": [
     "next/navigation",
     "react"
@@ -10563,7 +10606,7 @@
   },
   {
    "path": "apps/shell/src/components/Login.tsx",
-   "hash": "ed81a52aed84839a1df796a514f5d528de413361884724e057910585b484df4c",
+   "hash": "1bbd5ceeb2d227a3640a1dbd682e0f090c424cd7c6eba61e70a42c1d58c234e4",
    "imports": [
     "next/navigation",
     "react"
@@ -10626,7 +10669,7 @@
   },
   {
    "path": "apps/shell/src/components/elements.tsx",
-   "hash": "58d825f95a226d1e85293cfe307f6a8f4fc84bdad72110492a638bf6a26386ac",
+   "hash": "5562c393dd726310a513cc5112c6001f18f991efd751e284d6b7206a69df101d",
    "imports": [
     "@app/ui-components"
    ],
@@ -11122,7 +11165,7 @@
   },
   {
    "path": "apps/shell/src/components/CreateNotice.tsx",
-   "hash": "86fb5be117be273943079fc8c9720c766146f948dfbbb1d49b54ef1d1e0285b3",
+   "hash": "9ec787ff5d38cf96c09580f4dfa455cb9db8e718cab15a1083ae646da79533e6",
    "imports": [
     "../hooks/useUrlFilters",
     "./icons/IconButton",
@@ -11234,7 +11277,7 @@
   },
   {
    "path": "apps/shell/src/components/Embed.tsx",
-   "hash": "512c3c6dd977519e8f946df826d394c0be762ae2920527b31c68022c43b8dd24",
+   "hash": "df67b90e87e222eb56e706f74845d3348423e618e09937d924ab7c7271904edf",
    "imports": [
     "../hooks/useUrlFilters",
     "./icons/IconButton",
@@ -11332,7 +11375,7 @@
   },
   {
    "path": "apps/shell/src/components/Notices.tsx",
-   "hash": "d518844e0b4c510420b3547cf4d8fe665312094c0fa0eb4facec2164be860ead",
+   "hash": "79a64f936a9f9c6a4e1b6d52acaf6c9cd6dd8e1b6cc273e0a33ab7ce582dab0d",
    "imports": [
     "./Bell",
     "@app/alerts",
@@ -11371,7 +11414,7 @@
   },
   {
    "path": "apps/shell/src/components/FiltersPanel.tsx",
-   "hash": "7de69975642c660d3e8305b5adc316f36c58ac51fdb1e2791dbc835922915323",
+   "hash": "9e7c017057ebb8acb5ec6d831a7d41bb28747795a3f3e1bb6816bfe5f53ff1a9",
    "imports": [
     "../hooks/useUrlFilters",
     "./objects",
@@ -11415,7 +11458,7 @@
   },
   {
    "path": "apps/shell/src/components/objects.tsx",
-   "hash": "00975e34d4cf1c0dffaaab3fef0fd2da4dc14f95ad2a86bdd541f15274b3e63e",
+   "hash": "9b575f4f5e01ea194f1f6954ffb9c2ceaca941cba9c8df8141bb80386a1615f4",
    "imports": [
     "../hooks/useOverflows",
     "./Addons",
@@ -11599,7 +11642,7 @@
   },
   {
    "path": "apps/shell/src/components/containers.tsx",
-   "hash": "aeebade9295e67ac90fdf367415a802040b7aff64e9e41d1418ee32dee0b2ee0",
+   "hash": "1be1be8887f7e45d6c2551661e963de212331c1aee441dd4cddf7d97c0c16299",
    "imports": [
     "../server/serializar",
     "./icons/Icon",
@@ -11740,7 +11783,7 @@
   },
   {
    "path": "apps/shell/src/components/ToggleSidebar.tsx",
-   "hash": "c2bade64edaebed4fcfb54510e53c241b89e59cf7059745bbae57155700fdbf4",
+   "hash": "b43aaebc3c407c33b4e8e167b4604b4121c4f16cef50a065665bc771358ff7ee",
    "imports": [
     "./CollapsibleNavigation",
     "./icons/Icon",
@@ -11785,7 +11828,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Well.tsx",
-   "hash": "ec4ac04d34ef5925a92e1a8bba57dd8e26e39ac8b85b077f46eff625ca41fc72",
+   "hash": "68fce6b2d0a24b07cd35a46bd1ed017118773ce8fc70dbf73034170d908b4bfb",
    "imports": [
     "../icons/Icon",
     "./Help",
@@ -11882,7 +11925,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/ModuleEditor.tsx",
-   "hash": "5a3f8fa7b24fdbf8a1c776de20a6ed483240ec55c8f60637819b9283e948dd03",
+   "hash": "1a0ae3337f0cf06bba88d51761419a4a79d854c634a3367314d529a9eb901ab0",
    "imports": [
     "../../server/editor",
     "../../server/serializar",
@@ -11951,7 +11994,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Tabs.tsx",
-   "hash": "faa933e7b8139416847eb892a4dc66d56216391145fdd716e371fca748915d43",
+   "hash": "4ad5c51781e1cf0bb1271532fc2a91d2fdcf283f6e46a173b2c18f2be9ae309f",
    "imports": [
     "../icons/Icon",
     "react"
@@ -12010,7 +12053,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/SidebarPanel.tsx",
-   "hash": "ceceb513aaa965931de0232d65e54677baabced3d3e8a7ce03eab51d9ac7e9e8",
+   "hash": "f5ca8ef9fe89a5c311926e74569680a0c9b4ad097d5d2cc6ef47e51040b3d544",
    "imports": [
     "../../server/editor",
     "../Locale",
@@ -12094,7 +12137,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/ColorRules.tsx",
-   "hash": "3d7b3be006119af4f39d56f3705f6fe534e28bc32627703736e0c1da8487c9a8",
+   "hash": "11b6be506c7f3b1f3648540bf177ed7fdca4e46851a052f816de6a3ef287f984",
    "imports": [
     "./EditorTextStyle",
     "@app/ui-components"
@@ -12153,7 +12196,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Canvas.tsx",
-   "hash": "b7c4b1e1ee79d1cc5b782751b6ba4b94c24a1a5cc5640fced1c2e2b72bc9ca61",
+   "hash": "4a06aa441e78dc76c777a246b354d5965c44dad3f3d8c10aeca5a25e50eaeae5",
    "imports": [
     "../../server/serializar",
     "../ModuleObject",
@@ -12241,7 +12284,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Presentation.tsx",
-   "hash": "04f347eeb87c823df9d69c5d0ccf733cd47c6c45bb46c0e806d2768d41964f2b",
+   "hash": "4d80798f47382a35c4b233e34b474c0eb2f82538f96a372f153842da713eb0da",
    "imports": [
     "../icons/Icon",
     "./ColorRules",
@@ -12295,7 +12338,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/useDrag.ts",
-   "hash": "af99bd4319c29d10e9f64f32b3568ccdeb75da2a4b7fb43f9a8b521efda9632f",
+   "hash": "1d70ec09ab81d18c33354b974001367aaba5d376701f419995ad648df5808587",
    "imports": [
     "@app/module-model",
     "react"
@@ -12324,7 +12367,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/EditorObjectSettings.tsx",
-   "hash": "834896044240e804b1e583dbe0342c82a22852c5824af292e5a484ede53594f8",
+   "hash": "88d806e0967d7b5c2c8f02fb7a04f44cba04b943d02995836f1d481505fe2f7c",
    "imports": [
     "./EditorTextStyle",
     "./Section",
@@ -12393,7 +12436,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/ReferenceLines.tsx",
-   "hash": "6649c0d0bcaac79b38f76346efdf19516706506fbba7e9686ee98f72f4a31e29",
+   "hash": "16c49966f92b957064a6a76f85858b46b4b2d87ed136dc86335a60e6d2941fc4",
    "imports": [
     "./EditorTextStyle",
     "@app/ui-components"
@@ -12422,7 +12465,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/WhoSeesWhat.tsx",
-   "hash": "440c02aea3db4ffc65d72954b5859c67950fd5082da7f778172c248a1faca4a5",
+   "hash": "f644442a3c1c557645d8718aa0e8d43d5122017419f4c3ac1b15a230088c0ddb",
    "imports": [
     "react"
    ],
@@ -12504,7 +12547,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/LocalAccounts.tsx",
-   "hash": "53db0f4f652d7dc08ccc07aa549e8bc339926c9072d4cd01037a653323ff42b0",
+   "hash": "fa14a6bbbedf58cfa4e7614571a3f266bc65c8561216be7f9ce3118bda186b25",
    "imports": [
     "../../server/identity",
     "next/navigation",
@@ -12689,7 +12732,7 @@
   },
   {
    "path": "apps/shell/src/components/icons/Icon.tsx",
-   "hash": "60e30b06d9832d8e4e294c17ba6ab0af31f4597c9514b72ce51fd15802bee68d",
+   "hash": "ca7f6b705b209e02e26979ab3a3d215ade01b54488b2c74fc40ae0d71700554e",
    "imports": [
     "@app/ui-components"
    ],
@@ -12928,7 +12971,7 @@
   },
   {
    "path": "apps/shell/src/server/worker.ts",
-   "hash": "5479cb288c6fee859e3cde10f68a2bde416a09ee678468136835cff9d89e0e82",
+   "hash": "9e8aa42c7d1c1860fa04d420e920271db25725e65180f414894770c96462cae2",
    "imports": [
     "./alerts",
     "./exports",
@@ -12962,7 +13005,7 @@
   },
   {
    "path": "apps/shell/src/server/cicloDeVida.ts",
-   "hash": "be03146e9c136bc6fc97b83ffcd1b6abf166f2fd1d11001c720fc1b71a21bd02",
+   "hash": "12236feb817fcca2cb79f3b80d14a21c7e8f2358b6ace82f8248fd42df442f29",
    "imports": [
     "./admin",
     "./almacenModulos",
@@ -13186,7 +13229,7 @@
   },
   {
    "path": "apps/shell/src/server/settings.ts",
-   "hash": "e76002bdf2620347bbd305d16192b673269b30e38037438d562e8409d2233d4b",
+   "hash": "6c699e1384dafa67714bf9bf19b7d34e25ec5947f6a60954739a97b79792ca2e",
    "imports": [
     "./almacenCompartido",
     "@app/config",
@@ -13238,7 +13281,7 @@
   },
   {
    "path": "apps/shell/src/server/admin.ts",
-   "hash": "6f1f018a68a3a3f6e5f7d8fcadd06649780dbe9d4f8552c7a9b83e54159c6c26",
+   "hash": "9d914242a71f017e00134fe17e32dfd412f87a5dff8268aa45751147dc7bbb5d",
    "imports": [
     "./audit",
     "./context",
@@ -13452,7 +13495,7 @@
   },
   {
    "path": "apps/shell/src/server/query.ts",
-   "hash": "e5023454b91bd455894b904d01ed219c719b754e64a85d4d643407b02ea6a5c4",
+   "hash": "74deaf7bbd5537d33fc061f0b31a5732d7a4475f8008dc1e49a14b4f8ff1275c",
    "imports": [
     "./cicloDeVida",
     "./data",
@@ -13497,7 +13540,7 @@
   },
   {
    "path": "apps/shell/src/server/editor.ts",
-   "hash": "fe9f429486a917e4aa4ce7822ca406cf61246534a9f0fbde7fca8a9c624b52cd",
+   "hash": "46f7b229e0dac6a5caff737cb0b65b72077856c1aee903a1784c06423920cc24",
    "imports": [
     "./context",
     "./data",
@@ -13783,7 +13826,7 @@
   },
   {
    "path": "apps/shell/src/server/modules.spec.ts",
-   "hash": "10a73f18d54c45b594df0f66e06618ab9e0743df17859ef797790c1a20bcdd30",
+   "hash": "7b241407cdddf3e075287ce947445e0f16ae5855738f6fca486c97681e5a50bc",
    "imports": [
     "./context",
     "./modules",
@@ -13814,7 +13857,7 @@
   },
   {
    "path": "apps/shell/src/server/incrustacion.spec.ts",
-   "hash": "6e753f1b5b4cc8b628564922793bde357aba4d6667bcf03033bce30a97e80b8f",
+   "hash": "0d4712b2c91975fffefce24b03a84bfdd17ef5c52398e6b6b67d8dd7e9415df1",
    "imports": [
     "./incrustacion",
     "vitest"
@@ -13835,7 +13878,7 @@
   },
   {
    "path": "apps/shell/src/server/bookmarks.spec.ts",
-   "hash": "ede7f9969946214f8647b8fa269badb6c8ea7f9d0b00a8c72a0d4aa6e598f09b",
+   "hash": "ad78b4fcf475668d9e119331c52cd0dcd2041d580d5817fdaddec4b696e41076",
    "imports": [
     "@app/access-control",
     "@app/module-model",
@@ -13897,7 +13940,7 @@
   },
   {
    "path": "apps/shell/src/server/exports.ts",
-   "hash": "72a06833933e26f6c861cf6e97a8ca54b9893d87d23d3471fb07d719f076c927",
+   "hash": "639600d4d22b796c66effcf3e4b9020a34b7f25a676f9499828c1b66e6ea7529",
    "imports": [
     "./cicloDeVida",
     "./context",
@@ -13968,7 +14011,7 @@
   },
   {
    "path": "apps/shell/src/server/alerts.ts",
-   "hash": "c063ec31660eea589a8c90a36c24cd7814072de7bdfdd4f3fe8b8ccd267fc16a",
+   "hash": "8f28369aabb44cd32a8dec9ae78eeb257610a63ef8484577867bd269fbfa5d94",
    "imports": [
     "./cicloDeVida",
     "./context",
@@ -14273,7 +14316,7 @@
   },
   {
    "path": "apps/shell/src/server/modules.ts",
-   "hash": "d00c956eec5200b84ec3dab1a78bd46bae74fc3089c43aee04975b64850007d5",
+   "hash": "97626964fada07f0d0ced91cc4c1bb5902eb35a18f3e881b08f7e640c4ee0198",
    "imports": [
     "./almacenModulos",
     "@app/module-model"
@@ -14314,7 +14357,7 @@
   },
   {
    "path": "apps/shell/src/server/data.ts",
-   "hash": "cd99b78631876e45834ee3604776c55a57af9a55d82da7ba08f1cf1bf7f079e6",
+   "hash": "048316c75d7d03078e007a3423769aaee1ddac11eb381c5b97b316be8f7de954",
    "imports": [
     "./context",
     "@app/access-control",
@@ -14325,17 +14368,17 @@
    ],
    "defines": [
     {
-     "name": "agregacionesDeclaradas",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "cargarModulo",
      "line": null,
      "type": "export"
     },
     {
      "name": "columnasDisponiblesDe",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "declaredAggregations",
      "line": null,
      "type": "export"
     },
@@ -14356,9 +14399,9 @@
     }
    ],
    "exports": [
-    "agregacionesDeclaradas",
     "cargarModulo",
     "columnasDisponiblesDe",
+    "declaredAggregations",
     "diagnosticarDefinicion",
     "diagnosticarModulo",
     "vistaPreviaDelBorrador"
@@ -14467,7 +14510,7 @@
   },
   {
    "path": "apps/shell/src/server/identity.ts",
-   "hash": "ddd2c0c59013b70bd5fbafa661e20c82c791728afbc521ccbf07c56913dc0341",
+   "hash": "05e38e565bdf3d4454a1c066a4726e94a0c1095c52920c4840faad9a705e4cf5",
    "imports": [
     "./almacenCompartido",
     "./credencialesDemo",
@@ -14607,7 +14650,7 @@
   },
   {
    "path": "apps/shell/src/server/cicloDeVida.spec.ts",
-   "hash": "2d58eb81d1974136b298099b2b1a41cb04f6d5053bc5d57bbe0360c273aa60cf",
+   "hash": "1a3f5ab89f08beaee475ebfdd66f00f76dd77df6c26d4c936355a54d05146cd9",
    "imports": [
     "./almacenCompartido",
     "./almacenModulos",
@@ -14653,7 +14696,7 @@
   },
   {
    "path": "apps/shell/src/server/alerts.spec.ts",
-   "hash": "3c6594b280359677a7e786aa39c05f79699aca137de67af443e895aed744f80c",
+   "hash": "19f90e919711c4bccb034979690dc6dc0035557499d0db8462bdceb86b378a3f",
    "imports": [
     "./alerts",
     "@app/alerts",
@@ -14679,7 +14722,7 @@
   },
   {
    "path": "apps/shell/src/server/gobierno.ts",
-   "hash": "1187cd6226148d08ec40753cb81524a61e46e94b8ea86f712f714c39741defef",
+   "hash": "b5da685d38dd72b4a719f5bebd9aec15cb298b04c51b7ca3164f5b9b06299d02",
    "imports": [
     "./almacenCompartido",
     "@app/access-control",
@@ -14856,7 +14899,7 @@
   },
   {
    "path": "apps/shell/src/hooks/useUrlFilters.ts",
-   "hash": "81d21864763350219c3bcafbcc08a2ef8d5ef9a36a2f6a618f10b102b25b4a53",
+   "hash": "c94311edec7c30980140d61e346858c62f3d7b008156f2b4a045f15f9e4fbb1e",
    "imports": [
     "next/navigation",
     "react"
@@ -15586,7 +15629,7 @@
   },
   {
    "path": "apps/shell/app/api/restablecer/route.ts",
-   "hash": "4f174b229b2717e381af7b08d2a92d4ea06c6d80ec4b9a9d93e8a339a21e4502",
+   "hash": "6a7144731182c8162dba6f79baba68981512abb99dfacbc24a167f0159b348af",
    "imports": [
     "../../../src/server/identity",
     "@app/auth",
@@ -15984,7 +16027,7 @@
   },
   {
    "path": "apps/shell/app/api/admin/cuentas/route.ts",
-   "hash": "99009ebf2a7165616f09a2d2079fc7abd78bcb4c5f53bcd0bfc53c084cd34fd9",
+   "hash": "0c639ba2abcc016ee778b9b842b37467050ed2b0aaf828b949f9eac8167daf4e",
    "imports": [
     "../../../../src/server/admin",
     "../../../../src/server/audit",
@@ -16544,7 +16587,7 @@
   },
   {
    "path": "apps/shell/app/api/modulos/[slug]/estado/route.ts",
-   "hash": "b79d8ce2d8a92c35ab3e81f06f34106bb3ea0221e82b38631a24390f07557384",
+   "hash": "af7e2bf7e60fd00405e1d9f5770a7c6573d0ccda56bc6d8e1018cddd747b64da",
    "imports": [
     "../../../../../src/server/cicloDeVida",
     "../../../../../src/server/respuestas",
@@ -16711,7 +16754,7 @@
   },
   {
    "path": "apps/shell/app/api/acceso/route.ts",
-   "hash": "02b2b47ddf295cc30ed1c2f8863b4fa3e2674c8eadd75a8f79c20ffd255146a5",
+   "hash": "05080c1b64cb1f06574d1bbbf5c9ed4e1a51f24cc907ef40a49c644de731d696",
    "imports": [
     "../../../src/server/context",
     "../../../src/server/identity",
@@ -17394,152 +17437,156 @@
   },
   {
    "path": "apps/shell/e2e/locale.spec.ts",
-   "hash": "684f4bbf93a09cd30cbbd2392becc1838500fb8b567197fc93560d4f28be3000",
+   "hash": "c742dd0263d8f36e7e8168c96aa5d3de9c3b4d2ef50de5c157729aaebb8dbc85",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/addons.spec.ts",
-   "hash": "1173e9510862174db913bf94c050febf63766a656f8e93278e025c48d1d88f09",
+   "hash": "998e377e3e4e32cf4d5492b098b3e92a70a7efdfa3984e5f578e5236f80b669d",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/exportacion.spec.ts",
-   "hash": "0caf03b54df95e5baff417d262b0ce0d2f588527a86962ed8e33c3ce07c90f61",
+   "hash": "57d1fad4a5dddda18bce8de7e689522fa45f52e36dc896c67d497300aeecff63",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/canvas.spec.ts",
-   "hash": "3fa681f641cd9784fa47323d8a16b0d9fc6c2091e419044b57a1e172ccb0df09",
+   "hash": "598c7bbc36be2e9390248c649c62f5de3d355fe5cb8d1058e921ec828577d599",
    "imports": [
+    "./instancia",
     "./session",
-    "@axe-core/playwright",
-    "@playwright/test"
+    "@axe-core/playwright"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
+     "module": "./instancia",
+     "resolved": null
+    },
+    {
      "module": "./session",
      "resolved": null
     },
     {
      "module": "@axe-core/playwright",
-     "resolved": null
-    },
-    {
-     "module": "@playwright/test",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/multiinstancia.spec.ts",
-   "hash": "13c7601ea236531ee594fad2b3f908aab65681adb30cb5104fe355b2383571b5",
+   "hash": "86d01656bc8dd01c1586e03cdbfcdfa14b917b97e76417eeeea5c3e730cf0117",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/charts.spec.ts",
-   "hash": "b126897a10ae69b517174337c8f7317bffe92011e5fb1b0dc7653f0aec698f5e",
+   "hash": "807c89b85a6e93fb1eebfaf1a1864e8d8e848c80c7886dd1d680ff52b733c3c2",
    "imports": [
+    "./instancia",
     "./session",
-    "@axe-core/playwright",
-    "@playwright/test"
+    "@axe-core/playwright"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
+     "module": "./instancia",
+     "resolved": null
+    },
+    {
      "module": "./session",
      "resolved": null
     },
     {
      "module": "@axe-core/playwright",
-     "resolved": null
-    },
-    {
-     "module": "@playwright/test",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/responsivo.spec.ts",
-   "hash": "336f01dc07904ba1d73c57e52912fbeb9ec82a0b9881a3d2fe41fb390d86c9b5",
+   "hash": "1e1e8a4122bd63056048c1c57b5f7af12be7c78e1a43a5f3229ab52b78e21238",
    "imports": [
+    "./instancia",
     "./session",
-    "@axe-core/playwright",
-    "@playwright/test"
+    "@axe-core/playwright"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
+    {
+     "module": "./instancia",
+     "resolved": null
+    },
     {
      "module": "./session",
      "resolved": null
@@ -17547,16 +17594,12 @@
     {
      "module": "@axe-core/playwright",
      "resolved": null
-    },
-    {
-     "module": "@playwright/test",
-     "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/session.ts",
-   "hash": "ed873b0a07f2cf7df97a8bdde8cc115b2557bbabe9b7a5722bb36e868a15a0d8",
+   "hash": "4fa3417da560c8c87915b19f48f6aaf234646d19ab8f4c4c657b56b276e65a58",
    "imports": [
     "../src/server/credencialesDemo",
     "@playwright/test"
@@ -17591,131 +17634,135 @@
   },
   {
    "path": "apps/shell/e2e/shell.spec.ts",
-   "hash": "7acac62f580d31a8ae830f1a696441112f03f0a14a93331afe9711bc6813ae5d",
+   "hash": "13ccea9b8fef6e972ce5e0381e78f0bd8eb693d0fca8a5fc0c24925e7fdfdb1d",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/dark-contrast.spec.ts",
-   "hash": "1d4ae39e14de78ee2a1df5acbee25e811fa5a8b1d6cdf16f3269d527b3b0d342",
+   "hash": "dcfaef3899e1d6b12e28c3695cd57ac0a0c72b509103d819a8fc796b401a228d",
    "imports": [
+    "./instancia",
     "./session",
-    "@axe-core/playwright",
-    "@playwright/test"
+    "@axe-core/playwright"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
+     "module": "./instancia",
+     "resolved": null
+    },
+    {
      "module": "./session",
      "resolved": null
     },
     {
      "module": "@axe-core/playwright",
-     "resolved": null
-    },
-    {
-     "module": "@playwright/test",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/notices.spec.ts",
-   "hash": "bb60f448b88e55a4f977d101c883158d24e22aa70e67ed541e07b08c4560969c",
+   "hash": "7c9caf17e55a2853d8af59c18b5c7f27bb1711ab1bd48720e3d429943d101c35",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/object-personalization.spec.ts",
-   "hash": "63825e202b47672d48f75580187df79929c6159ec705a73238a697c1433c2f6e",
+   "hash": "205c83a15cce213fe9c95150e58ee5f745700a7feea7fd5737ea35d1c3a234cf",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/incrustacion.spec.ts",
-   "hash": "006de2094604712a676d832e61931c3deaecfa6935e68da21816903f30a44533",
+   "hash": "9e154f3042b939ea881603421890cfa097fa67d84c8980fc38646aa918cc4d77",
    "imports": [
+    "./instancia",
     "./session",
-    "@axe-core/playwright",
-    "@playwright/test"
+    "@axe-core/playwright"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
+     "module": "./instancia",
+     "resolved": null
+    },
+    {
      "module": "./session",
      "resolved": null
     },
     {
      "module": "@axe-core/playwright",
-     "resolved": null
-    },
-    {
-     "module": "@playwright/test",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/query.spec.ts",
-   "hash": "1533aa94bf8f5f1c541e38df242fabf1b449f6d82514595c13cfafe10acf1cca",
+   "hash": "28c455c1708095e8e68fc800059e4af5677eb268b98e7abb37ef8db28fd7fd43",
    "imports": [
+    "./instancia",
     "./session",
-    "@axe-core/playwright",
-    "@playwright/test"
+    "@axe-core/playwright"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
+    {
+     "module": "./instancia",
+     "resolved": null
+    },
     {
      "module": "./session",
      "resolved": null
@@ -17723,7 +17770,45 @@
     {
      "module": "@axe-core/playwright",
      "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/e2e/instancia.ts",
+   "hash": "93f8a590aabf42dcf4b675a7a8513710f0131ac48663c36e490b0e6b5ae50774",
+   "imports": [
+    "@playwright/test"
+   ],
+   "defines": [
+    {
+     "name": "PUERTO_BASE",
+     "line": null,
+     "type": "export"
     },
+    {
+     "name": "expect",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "puertosDe",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "test",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "PUERTO_BASE",
+    "expect",
+    "puertosDe",
+    "test"
+   ],
+   "references": [],
+   "import_edges": [
     {
      "module": "@playwright/test",
      "resolved": null
@@ -17732,16 +17817,20 @@
   },
   {
    "path": "apps/shell/e2e/accesibilidad.spec.ts",
-   "hash": "fc79f56ea4a737981ebf4553744d5874936337479a444f280a479d92d5c27821",
+   "hash": "c4fb39f4c8a6a289d1d65287d01ee9614ce132ead7824270f95d0943a63ab3c0",
    "imports": [
+    "./instancia",
     "./session",
-    "@axe-core/playwright",
-    "@playwright/test"
+    "@axe-core/playwright"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
+    {
+     "module": "./instancia",
+     "resolved": null
+    },
     {
      "module": "./session",
      "resolved": null
@@ -17749,21 +17838,17 @@
     {
      "module": "@axe-core/playwright",
      "resolved": null
-    },
-    {
-     "module": "@playwright/test",
-     "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/editor-completo.spec.ts",
-   "hash": "3248dc9d2ea3e1ba3a266fa90aa5a3e0697c716348a5789047202f137e6d84bf",
+   "hash": "dcdbccb5e8c923e8792b6880638efbce3f50f804d8792962a32fbf16b302ffe8",
    "imports": [
     "../src/components/editor/controls",
+    "./instancia",
     "./session",
-    "@app/ui-components",
-    "@playwright/test"
+    "@app/ui-components"
    ],
    "defines": [],
    "exports": [],
@@ -17774,47 +17859,47 @@
      "resolved": null
     },
     {
+     "module": "./instancia",
+     "resolved": null
+    },
+    {
      "module": "./session",
      "resolved": null
     },
     {
      "module": "@app/ui-components",
      "resolved": null
-    },
-    {
-     "module": "@playwright/test",
-     "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/object-contract.spec.ts",
-   "hash": "3b3e82950157a6d1920a50127338084f5cf26ae67c6aa82c06dadae9fc196965",
+   "hash": "93582cc2ce0dd0bb109054e3433439ad0b069ca4b6c9a565df1de81abd112c69",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/login.spec.ts",
-   "hash": "6cca264096e371b464ccd340a54e225f0e4b3b4305725e79f323ee81e9188fad",
+   "hash": "2df30ecd6161b999c0caa0140427ae2f7742dfd86f62434a907f3e37d2c43145",
    "imports": [
     "../src/server/credencialesDemo",
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
@@ -17825,64 +17910,64 @@
      "resolved": null
     },
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/personalization.spec.ts",
-   "hash": "c02c159482f2d664f0070fd8d0b61f28211bd299ccd4f4a197453fa283f91e32",
+   "hash": "29317667f4784ee779f9e03c0259ddb77fe9b586d352f7da9c9262986dccfeba",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/objects.spec.ts",
-   "hash": "8c1a91edcabbdbf139ded3baaf77a4d516060b16d0d2d53c93126bc3282a02ed",
+   "hash": "7a30a3c2ca057073db3827ac5b9b016005b14254d7386df06ec11b6d8f0ec8b5",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/cuentas.spec.ts",
-   "hash": "c09ba37d4c6de0e40186cf3d3c65fd68c7e2c44e3c40deb7b0fd29b9916423ef",
+   "hash": "ec9986553e4b7c4b3884728be5f64f417cfbf668beb3ce0b47406b22ab78f088",
    "imports": [
     "../src/server/credencialesDemo",
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
@@ -17893,69 +17978,73 @@
      "resolved": null
     },
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/admin.spec.ts",
-   "hash": "eafcc12b9ab41d05324de9060d9a83c87e032caadcea6c8ebf02002149362312",
+   "hash": "9fbff02d95e137b9ee21298ed22bb9c01e21172db5cc2ad36de0419afcf124d8",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/editor.spec.ts",
-   "hash": "3a45305205dad8899d6192281a6a04d9bacdc86a1fdac3a5af08fdf35fe8f5da",
+   "hash": "40f75a2320d0b9e0c8acc1fdf1cab802d82bbce821cf89cddbb8640f56f84973",
    "imports": [
-    "./session",
-    "@playwright/test"
+    "./instancia",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./session",
+     "module": "./instancia",
      "resolved": null
     },
     {
-     "module": "@playwright/test",
+     "module": "./session",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/filters.spec.ts",
-   "hash": "787e1fb1845ae1434cf986c661fe8d62028a53ae691d0fd9da08fafc45773587",
+   "hash": "e71828ed17d52b3a04f2ab2a3c8bf42f1ddcd8c4764a61012cc65216c1e004e2",
    "imports": [
+    "./instancia",
     "./session",
-    "@axe-core/playwright",
-    "@playwright/test"
+    "@axe-core/playwright"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
+    {
+     "module": "./instancia",
+     "resolved": null
+    },
     {
      "module": "./session",
      "resolved": null
@@ -17963,13 +18052,9 @@
     {
      "module": "@axe-core/playwright",
      "resolved": null
-    },
-    {
-     "module": "@playwright/test",
-     "resolved": null
     }
    ]
   }
  ],
- "file_count": 359
+ "file_count": 361
 }

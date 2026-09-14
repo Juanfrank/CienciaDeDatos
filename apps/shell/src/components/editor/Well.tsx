@@ -49,20 +49,20 @@ export function Well({
    */
   useEffect(() => {
     if (!abierto) return;
-    const alPulsarTecla = (e: KeyboardEvent) => {
+    const toClickKeystroke = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       e.stopImmediatePropagation();
       setAbierto(false);
       disparador.current?.focus();
     };
-    const alPulsarFuera = (e: MouseEvent) => {
+    const toClickOutside = (e: MouseEvent) => {
       if (!contenedor.current?.contains(e.target as Node)) setAbierto(false);
     };
-    document.addEventListener('keydown', alPulsarTecla, true);
-    document.addEventListener('mousedown', alPulsarFuera);
+    document.addEventListener('keydown', toClickKeystroke, true);
+    document.addEventListener('mousedown', toClickOutside);
     return () => {
-      document.removeEventListener('keydown', alPulsarTecla, true);
-      document.removeEventListener('mousedown', alPulsarFuera);
+      document.removeEventListener('keydown', toClickKeystroke, true);
+      document.removeEventListener('mousedown', toClickOutside);
     };
   }, [abierto]);
 

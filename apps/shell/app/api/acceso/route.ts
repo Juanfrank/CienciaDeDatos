@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { AuthenticationError } from '@app/auth';
 import {
-  AZURE_AD_DISPONIBLE,
+  AZURE_AD_AVAILABLE,
   asegurarCredenciales,
-  proveedorLocal,
-  sesiones,
+  localProvider,
+  sessions,
 } from '../../../src/server/identity';
 import { teamsOf } from '../../../src/server/context';
-import { COOKIE_SESION, closeSession, obtenerSesion } from '../../../src/server/session';
+import { SESSION_COOKIE, closeSession, sessionGet } from '../../../src/server/session';
 
 export const runtime = 'nodejs';
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     // un inicio de sesion que pareceria funcionar.
     return NextResponse.json(
       {
-        error: AZURE_AD_DISPONIBLE
+        error: AZURE_AD_AVAILABLE
           ? 'El inicio de sesion con Azure AD todavia no esta habilitado en este entorno.'
           : 'Azure AD no esta configurado en este entorno. Use credenciales locales.',
       },
@@ -43,19 +43,19 @@ export async function POST(request: Request) {
     );
   }
 
-  const correo = typeof body['correo'] === 'string' ? body['correo'].trim() : '';
+  const mail = typeof body['correo'] === 'string' ? body['correo'].trim() : '';
   const clave = typeof body['clave'] === 'string' ? body['clave'] : '';
   const code = typeof body['code'] === 'string' ? body['code'].trim() : undefined;
 
-  if (!correo || !clave) {
+  if (!mail || !clave) {
     return NextResponse.json({ error: 'Faltan el correo o la contrasena.' }, { status: 400 });
   }
 
   await asegurarCredenciales();
 
   try {
-    const principal = await proveedorLocal().authenticate({
-      email: correo,
+    const principal = await localProvider().authenticate({
+      email: mail,
       password: clave,
       ...(code ? { totpCode: code } : {}),
       // La IP se registra en la auditoria de login; en App Service llega por esta cabecera.
@@ -75,14 +75,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const sesion = await sesiones.issue(principal, primero.id);
+    const sesion = await sessions.issue(principal, primero.id);
 
     const respuesta = NextResponse.json({
       userId: principal.userId,
       equipoActivo: sesion.activeTeamId,
       proveedor: principal.authProvider,
     });
-    respuesta.cookies.set(COOKIE_SESION, sesion.sessionId, {
+    respuesta.cookies.set(SESSION_COOKIE, sesion.sessionId, {
       httpOnly: true,
       sameSite: 'lax',
       path: '/',
@@ -104,10 +104,10 @@ export async function POST(request: Request) {
 
 /** Cierre de sesion: se revoca la fila y se retira la cookie. */
 export async function DELETE() {
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (sesion) await closeSession(sesion.sessionId);
 
   const respuesta = NextResponse.json({ cerrada: true });
-  respuesta.cookies.delete(COOKIE_SESION);
+  respuesta.cookies.delete(SESSION_COOKIE);
   return respuesta;
 }

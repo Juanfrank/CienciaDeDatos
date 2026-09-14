@@ -68,7 +68,7 @@ export function useUrlFilters() {
     [apply],
   );
 
-  const limpiarTodo = useCallback(() => {
+  const clearAll = useCallback(() => {
     // Tambien deja constancia de lo pedido: si no, un gesto inmediatamente posterior partiria de
     // los filtros que se acaban de quitar y los devolveria.
     pedido.current = '';
@@ -89,5 +89,5 @@ export function useUrlFilters() {
     [router],
   );
 
-  return { valuesOf, toggle, fijar, clearField, limpiarTodo, navegarA, searchParams };
+  return { valuesOf, toggle, fijar, clearField, clearAll, navegarA, searchParams };
 }

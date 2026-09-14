@@ -5,7 +5,7 @@ import { bookmarkToUrl, captureBookmark, drillThroughUrl } from '@app/module-mod
 /** Composicion de marcadores y drill-through con el ambito de acceso. */
 const { DIM_DISTRITO, scope } = gobiernoFixtures;
 
-const marcadorDeAna = captureBookmark({
+const anaBookmark = captureBookmark({
   id: 'm1',
   name: 'Mi distrito',
   ownerUserId: 'ana',
@@ -16,23 +16,23 @@ const marcadorDeAna = captureBookmark({
 
 describe('un marcador compartido se filtra segun QUIEN LO ABRE (criterio de la seccion 9)', () => {
   it('alguien de otro ambito no ve los datos del creador', () => {
-    const ambitoDeBeto = scope(DIM_DISTRITO, 'Distrito Este');
-    const effective = intersectRequestedFilters(ambitoDeBeto, marcadorDeAna.filters);
+    const betoScope = scope(DIM_DISTRITO, 'Distrito Este');
+    const effective = intersectRequestedFilters(betoScope, anaBookmark.filters);
     // El marcador pedia el Norte; el ambito de Beto no lo permite.
     expect(effective[dimensionKey(DIM_DISTRITO)]).toEqual([]);
   });
 
   it('quien comparte el ambito si ve lo mismo', () => {
     const sameScope = scope(DIM_DISTRITO, 'Distrito Norte');
-    expect(intersectRequestedFilters(sameScope, marcadorDeAna.filters)).toEqual({
+    expect(intersectRequestedFilters(sameScope, anaBookmark.filters)).toEqual({
       'DimTribunal.Distrito': ['Distrito Norte'],
     });
   });
 
   it('el marcador guarda filtros, no el ambito de quien lo creo', () => {
     // Si guardara el ambito, abrirlo desde otro equipo aplicaria el ambito ajeno.
-    expect(JSON.stringify(marcadorDeAna)).not.toContain('restrictions');
-    expect(bookmarkToUrl(marcadorDeAna)).toContain('Distrito+Norte');
+    expect(JSON.stringify(anaBookmark)).not.toContain('restrictions');
+    expect(bookmarkToUrl(anaBookmark)).toContain('Distrito+Norte');
   });
 });
 
@@ -46,7 +46,7 @@ describe('drill-through intersecta con el ambito de quien LLEGA', () => {
     const pedidos: Record<string, string[]> = {};
     for (const clave of new Set(params.keys())) pedidos[clave] = params.getAll(clave);
 
-    const ambitoDeQuienLlega = scope(DIM_DISTRITO, 'Distrito Este');
-    expect(intersectRequestedFilters(ambitoDeQuienLlega, pedidos)[dimensionKey(DIM_DISTRITO)]).toEqual([]);
+    const arrivesWhoScope = scope(DIM_DISTRITO, 'Distrito Este');
+    expect(intersectRequestedFilters(arrivesWhoScope, pedidos)[dimensionKey(DIM_DISTRITO)]).toEqual([]);
   });
 });

@@ -1,14 +1,14 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { describeProvenance } from '@app/module-model';
-import { cargarModulo } from '../../../../../src/server/data';
-import { actorDe, moduloServiblePorSlug } from '../../../../../src/server/cicloDeVida';
-import { serializarObjeto } from '../../../../../src/server/serializar';
-import { obtenerSesion } from '../../../../../src/server/session';
+import { moduleLoad } from '../../../../../src/server/data';
+import { actorDe, slugServableModule } from '../../../../../src/server/cicloDeVida';
+import { objectSerialize } from '../../../../../src/server/serialize';
+import { sessionGet } from '../../../../../src/server/session';
 import { ModuleView } from '../../../../../src/components/ModuleView';
 
 /** Modulo incrustado en otro portal — seccion 4.9. */
-export default async function PaginaIncrustada({
+export default async function EmbeddedPage({
   params,
   searchParams,
 }: {
@@ -27,7 +27,7 @@ export default async function PaginaIncrustada({
   // de otro portal: un formulario de contrasena dibujado ahi dentro es indistinguible de uno
   // falso incrustado por el anfitrion, y ensena a la gente a escribir su clave dentro de un marco
   // ajeno. Se dice que hace falta entrar, con un enlace que abre la aplicacion en otra pestana.
-  const sesion = await obtenerSesion();
+  const sesion = await sessionGet();
   if (!sesion) {
     return (
       <div className="vacio">
@@ -45,10 +45,10 @@ export default async function PaginaIncrustada({
 
   // Se resuelve DESPUES de la sesion, y filtrando por estado: incrustar no puede ser el atajo
   // que sirva un borrador ajeno.
-  const module = await moduloServiblePorSlug(slug, await actorDe(sesion));
+  const module = await slugServableModule(slug, await actorDe(sesion));
   if (!module) notFound();
 
-  const cargado = await cargarModulo({
+  const loaded = await moduleLoad({
     module,
     ...(typeof query['pagina'] === 'string' ? { pageSlug: query['pagina'] } : {}),
     userId: sesion.userId,
@@ -56,24 +56,24 @@ export default async function PaginaIncrustada({
     requestedFilters: filtros,
   });
 
-  if (!cargado) notFound();
+  if (!loaded) notFound();
 
   return (
     <article className="modulo">
       <header className="module__header">
         <h1 data-testid="module-title">{module.name}</h1>
         <p className="muted-text" data-testid="frescura">
-          {cargado.generatedAt
-            ? `Datos actualizados el ${new Date(cargado.generatedAt).toLocaleString('es-DO')}`
+          {loaded.generatedAt
+            ? `Datos actualizados el ${new Date(loaded.generatedAt).toLocaleString('es-DO')}`
             : 'Sin datos poblados todavia'}
         </p>
       </header>
 
       <ModuleView
-        objetos={cargado.objetos.map(serializarObjeto)}
+        objetos={loaded.objetos.map(objectSerialize)}
         provenance={describeProvenance(false)}
         moduleSlug={module.slug}
-        pageSlug={cargado.pageSlug}
+        pageSlug={loaded.pageSlug}
         embedded
       />
 

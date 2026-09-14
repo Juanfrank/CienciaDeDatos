@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from './instancia';
-import { entrarComo } from './session';
+import { expect, test, type Page } from './instance';
+import { asLogin } from './session';
 
 /** El lienzo del editor — seccion 4.2, con la accesibilidad de 4.9. */
 
@@ -25,7 +25,7 @@ const blockId = async (page: Page): Promise<string> => {
 };
 
 test.beforeEach(async ({ page }) => {
-  await entrarComo(page, 'u-admin');
+  await asLogin(page, 'u-admin');
 });
 
 test.describe('se edita el modulo, no un formulario', () => {
@@ -433,7 +433,7 @@ test.describe('arrastrar y redimensionar', () => {
   const arrastrar = async (
     page: Page,
     prueba: string,
-    celdasX: number,
+    xCells: number,
     celdasY: number,
   ) => {
     const handle = await page.getByTestId(prueba).boundingBox();
@@ -445,13 +445,13 @@ test.describe('arrastrar y redimensionar', () => {
     const cellWidth = (rejilla.width - 16 * 11) / 12 + 16;
     const cellHeight = 56 + 16;
 
-    const desdeX = handle.x + handle.width / 2;
+    const xFrom = handle.x + handle.width / 2;
     const desdeY = handle.y + handle.height / 2;
-    await page.mouse.move(desdeX, desdeY);
+    await page.mouse.move(xFrom, desdeY);
     await page.mouse.down();
     for (let paso = 1; paso <= 4; paso += 1) {
       await page.mouse.move(
-        desdeX + (celdasX * cellWidth * paso) / 4,
+        xFrom + (xCells * cellWidth * paso) / 4,
         desdeY + (celdasY * cellHeight * paso) / 4,
       );
     }
@@ -537,7 +537,7 @@ test.describe('arrastrar y redimensionar', () => {
 
   test('sin permiso de edicion no hay asas', async ({ page }) => {
     // Un modulo publicado se mira. Las asas solo aparecen donde el panel tambien aparece.
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/editor/casos-pendientes');
     await expect(page.getByTestId('editor-solo-lectura')).toBeVisible();
     await expect(page.locator('.canvas__handle')).toHaveCount(0);
@@ -612,7 +612,7 @@ test.describe('las ranuras mandan, no el orden', () => {
      * El seed se escribio con el modelo posicional. Sin la deduccion por orden, cada modulo ya
      * publicado apareceria con las ranuras vacias y sus campos perdidos de vista.
      */
-    await entrarComo(page, 'u-ana');
+    await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await expect(page.getByTestId('value-kpi').first()).not.toHaveText('0');

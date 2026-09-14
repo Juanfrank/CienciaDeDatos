@@ -2,17 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { EstadoDeCuentaLocal } from "../../server/identity";
+import type { LocalAccountStatus } from "../../server/identity";
 
 /** Cuentas locales y sus dos vias de recuperacion — seccion 4.7.2. */
-export function CuentasLocales({
-  cuentas,
+export function LocalesAccounts({
+  accounts,
   canal,
-  correoDisponible,
+  availableMail,
 }: {
-  cuentas: EstadoDeCuentaLocal[];
+  accounts: LocalAccountStatus[];
   canal: string;
-  correoDisponible: boolean;
+  availableMail: boolean;
 }) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -66,12 +66,12 @@ export function CuentasLocales({
     <>
       <p
         className={
-          correoDisponible ? "aviso notice-ok" : "aviso notice-atencion"
+          availableMail ? "aviso notice-ok" : "aviso notice-atencion"
         }
         data-testid="canal-restablecimiento"
       >
         Canal de entrega del token: <strong>{canal}</strong>.{" "}
-        {correoDisponible
+        {availableMail
           ? "El token se envia al correo verificado de la cuenta."
           : "Sin correo institucional configurado, el restablecimiento es MEDIADO: el codigo se " +
             "muestra aqui y usted lo entrega a la persona por una via en la que haya verificado " +
@@ -103,7 +103,7 @@ export function CuentasLocales({
           <p className="muted-text">
             La persona entra en /restablecer con estos dos datos y elige su
             contrasena new. Al hacerlo se le desbloquea la cuenta y se cierran
-            sus sesiones abiertas.
+            sus sessions abiertas.
           </p>
         </div>
       ) : null}
@@ -111,8 +111,8 @@ export function CuentasLocales({
       <div className="table-container-data">
         <table className="data-table" data-testid="tabla-cuentas">
           <caption className="muted-text">
-            {cuentas.length} cuenta{cuentas.length === 1 ? "" : "s"} local
-            {cuentas.length === 1 ? "" : "es"} en el sistema
+            {accounts.length} cuenta{accounts.length === 1 ? "" : "s"} local
+            {accounts.length === 1 ? "" : "es"} en el sistema
           </caption>
           <thead>
             <tr>
@@ -123,7 +123,7 @@ export function CuentasLocales({
             </tr>
           </thead>
           <tbody>
-            {cuentas.map((c) => (
+            {accounts.map((c) => (
               <tr key={c.userId} data-testid={`account-${c.userId}`}>
                 <th scope="row">
                   {c.userId}
