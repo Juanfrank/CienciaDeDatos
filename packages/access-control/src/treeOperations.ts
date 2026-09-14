@@ -352,9 +352,9 @@ export function applyTreeOperation(
 
 /** Advierte si la profundidad dificulta la navegacion (4.1.1). No bloquea: avisa. */
 export function depthWarning(tree: ManagedTree, umbral = 4): string | null {
-  const profundidad = (nodes: NavNode[]): number =>
-    nodes.reduce((max, n) => Math.max(max, isFolder(n) ? 1 + profundidad(n.children) : 1), 0);
-  const d = profundidad(tree.nodes);
+  const depth = (nodes: NavNode[]): number =>
+    nodes.reduce((max, n) => Math.max(max, isFolder(n) ? 1 + depth(n.children) : 1), 0);
+  const d = depth(tree.nodes);
   return d > umbral
     ? `El arbol tiene ${d} niveles de profundidad. Por encima de ${umbral} la navegacion se vuelve dificil de seguir.`
     : null;

@@ -27,7 +27,7 @@ export interface Vocabulary {
 
 export type Intent = 'total' | 'desglose' | 'ranking';
 
-export interface ConsultaResuelta {
+export interface ResolvedQuery {
   /** Que se entendio. Vacio si no se entendio nada reconocible. */
   intent: Intent;
   measure?: string;
@@ -46,5 +46,5 @@ export interface ConsultaResuelta {
 
 /** Puerto del resolutor. */
 export interface INaturalLanguageResolver {
-  resolver(pregunta: string, vocabulary: Vocabulary): ConsultaResuelta;
+  resolver(pregunta: string, vocabulary: Vocabulary): ResolvedQuery;
 }

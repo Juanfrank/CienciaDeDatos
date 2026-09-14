@@ -1,4 +1,4 @@
-import type { Aggregation, GranoDeDataset } from '@app/data-contracts';
+import type { Aggregation, DatasetGrain } from '@app/data-contracts';
 import { defaultRegistry } from '@app/caching';
 import type {
   PresentationKey,
@@ -43,7 +43,7 @@ export interface PaletteDataset {
   kinds: Record<string, string>;
   /** Como declara el esquema que se resume cada medida, y a que grano quedaron las filas. */
   aggregations: Record<string, Aggregation>;
-  grain: GranoDeDataset;
+  grain: DatasetGrain;
 }
 
 export interface EditorPalette {
@@ -80,7 +80,7 @@ export async function editorPalette(): Promise<EditorPalette> {
   });
 
   const datasets: PaletteDataset[] = [];
-  const declaradas = await agregacionesDeclaradas();
+  const declared = await agregacionesDeclaradas();
   for (const declarado of defaultRegistry.datasets) {
     /*
      * Un MAPA de nombre a tipo, no un conjunto de nombres.
@@ -96,7 +96,7 @@ export async function editorPalette(): Promise<EditorPalette> {
       kinds: Object.fromEntries(disponibles),
       aggregations: Object.fromEntries(
         (declarado.query.measures ?? [])
-          .map((m) => [m, declaradas.get(m)] as const)
+          .map((m) => [m, declared.get(m)] as const)
           .filter((par): par is [string, Aggregation] => par[1] !== undefined),
       ),
       grain: declarado.grain,

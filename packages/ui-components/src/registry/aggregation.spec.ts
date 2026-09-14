@@ -127,12 +127,12 @@ describe('los totales de una matriz salen de las filas de origen', () => {
 
 describe('de donde sale el operador de cada medida', () => {
   it('manda lo elegido en el pozo; si no, lo que declara el esquema; si no, suma', () => {
-    const declaradas = new Map([['DiasResolucion', 'promedio' as const]]);
-    expect(aggregationsOf(['DiasResolucion'], declaradas, undefined)).toEqual(['promedio']);
-    expect(aggregationsOf(['DiasResolucion'], declaradas, { DiasResolucion: 'maximo' })).toEqual([
+    const declared = new Map([['DiasResolucion', 'promedio' as const]]);
+    expect(aggregationsOf(['DiasResolucion'], declared, undefined)).toEqual(['promedio']);
+    expect(aggregationsOf(['DiasResolucion'], declared, { DiasResolucion: 'maximo' })).toEqual([
       'maximo',
     ]);
-    expect(aggregationsOf(['Otra'], declaradas, undefined)).toEqual(['suma']);
+    expect(aggregationsOf(['Otra'], declared, undefined)).toEqual(['suma']);
   });
 
   it('se reordena POR NOMBRE, porque los objetos consumen sus medidas por ranura', () => {

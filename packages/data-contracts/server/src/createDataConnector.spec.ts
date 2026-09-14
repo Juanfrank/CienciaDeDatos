@@ -16,12 +16,12 @@ describe('createDataConnector', () => {
   });
 
   it('los tres conectores satisfacen el mismo contrato', () => {
-    const conectores = [
+    const connectors = [
       createDataConnector({ kind: 'mock' }),
       createDataConnector({ kind: 'sql', sql: { server: 's', database: 'd' } }),
       createDataConnector({ kind: 'xmla', xmla: { endpoint: 'e', catalog: 'c' } }),
     ];
-    for (const conector of conectores) {
+    for (const conector of connectors) {
       expect(typeof conector.testConnection).toBe('function');
       expect(typeof conector.getSchema).toBe('function');
       expect(typeof conector.query).toBe('function');

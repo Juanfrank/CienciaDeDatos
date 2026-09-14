@@ -459,10 +459,10 @@ function Data({
   const cambiarInstancia = (cambio: (i: ObjectInstance) => ObjectInstance) =>
     onCambiar(item.id, (it) => ({ ...it, instance: cambio(it.instance) }));
 
-  const declaradas = definicion?.wells ?? [];
+  const declared = definicion?.wells ?? [];
   const slots =
-    declaradas.length > 0
-      ? declaradas
+    declared.length > 0
+      ? declared
       : defaultSlots({
           dimensions: definicion?.dimensiones ?? { min: 0, max: 0 },
           measures: definicion?.medidas ?? { min: 0, max: 0 },

@@ -64,15 +64,15 @@ export function isAggregation(valor: unknown): valor is Aggregation {
 }
 
 /** Las que se pueden volver a aplicar sobre un resultado YA agrupado sin mentir. */
-export const AGREGACIONES_ADITIVAS: readonly Aggregation[] = ['suma', 'minimo', 'maximo'];
+export const ADDITIVE_AGGREGATIONS: readonly Aggregation[] = ['suma', 'minimo', 'maximo'];
 
 export function esAditiva(aggregation: Aggregation): boolean {
-  return AGREGACIONES_ADITIVAS.includes(aggregation);
+  return ADDITIVE_AGGREGATIONS.includes(aggregation);
 }
 
 /** Descriptor de esquema de la fuente activa. */
 /** A que grano quedan las filas de un dataset cacheado. */
-export type GranoDeDataset = 'atomico' | 'preagregado';
+export type DatasetGrain = 'atomico' | 'preagregado';
 
 export interface SchemaField {
   name: string;

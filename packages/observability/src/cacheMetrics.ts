@@ -15,7 +15,7 @@ export interface LecturaDeCache {
 export interface ResumenDeCache {
   total: number;
   aciertos: number;
-  generandose: number;
+  generating: number;
   desdeL1: number;
   desdeL2: number;
   degradados: number;
@@ -27,7 +27,7 @@ export interface ResumenDeCache {
 export class CacheMetrics {
   private total = 0;
   private aciertos = 0;
-  private generandose = 0;
+  private generating = 0;
   private desdeL1 = 0;
   private desdeL2 = 0;
   private degradados = 0;
@@ -37,7 +37,7 @@ export class CacheMetrics {
     this.total += 1;
 
     if (lectura.status === 'generating') {
-      this.generandose += 1;
+      this.generating += 1;
       // Una lectura sin dato no cuenta como acierto ni tiene procedencia ni antiguedad: sumarla
       // a cualquiera de las otras cifras las volveria mentira.
       return;
@@ -56,7 +56,7 @@ export class CacheMetrics {
     return {
       total: this.total,
       aciertos: this.aciertos,
-      generandose: this.generandose,
+      generating: this.generating,
       desdeL1: this.desdeL1,
       desdeL2: this.desdeL2,
       degradados: this.degradados,
@@ -69,7 +69,7 @@ export class CacheMetrics {
   reiniciar(): void {
     this.total = 0;
     this.aciertos = 0;
-    this.generandose = 0;
+    this.generating = 0;
     this.desdeL1 = 0;
     this.desdeL2 = 0;
     this.degradados = 0;

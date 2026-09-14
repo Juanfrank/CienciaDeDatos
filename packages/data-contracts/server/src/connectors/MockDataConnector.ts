@@ -162,8 +162,8 @@ export class MockDataConnector implements IDataConnector {
   private buildDimensionRows(dimensions: FieldRef[]): unknown[][] {
     if (dimensions.length === 0) return [[]];
 
-    const iClave = dimensions.findIndex((d) => this.fieldFor(d)?.isKey);
-    if (iClave >= 0) return this.buildFactRows(dimensions, iClave);
+    const keyI = dimensions.findIndex((d) => this.fieldFor(d)?.isKey);
+    if (keyI >= 0) return this.buildFactRows(dimensions, keyI);
 
     let rows: unknown[][] = [[]];
     for (const dim of dimensions) {
@@ -181,8 +181,8 @@ export class MockDataConnector implements IDataConnector {
   }
 
   /** Un hecho por fila, con sus dimensiones repartidas de forma determinista a partir de la clave. */
-  private buildFactRows(dimensions: FieldRef[], iClave: number): unknown[][] {
-    const clave = dimensions[iClave];
+  private buildFactRows(dimensions: FieldRef[], keyI: number): unknown[][] {
+    const clave = dimensions[keyI];
     if (!clave) return [];
     const definicion = this.fieldFor(clave);
     const total = Math.min(definicion?.cardinality ?? 500, this.maxRows);
@@ -193,7 +193,7 @@ export class MockDataConnector implements IDataConnector {
       const id = `${prefijo}-${String(i + 1).padStart(6, '0')}`;
       rows.push(
         dimensions.map((dim, j) => {
-          if (j === iClave) return id;
+          if (j === keyI) return id;
           const values = this.sampleValuesFor(dim);
           if (values.length === 0) return '(sin dato)';
           // Derivado de la semilla, del nombre de la dimension y del id: el mismo hecho cae

@@ -58,7 +58,7 @@ test.describe('elementos (no leen datos)', () => {
         const ra = a.getBoundingClientRect();
         const rb = b.getBoundingClientRect();
         return {
-          inicio: [Number(x0), Number(y0)],
+          home: [Number(x0), Number(y0)],
           fin,
           derechaDeA: ra.right - base.left,
           izquierdaDeB: rb.left - base.left,
@@ -68,7 +68,7 @@ test.describe('elementos (no leen datos)', () => {
 
     const before = await resize();
     expect(before).not.toBeNull();
-    expect(Math.abs((before?.inicio[0] ?? 0) - (before?.derechaDeA ?? 0))).toBeLessThan(2);
+    expect(Math.abs((before?.home[0] ?? 0) - (before?.derechaDeA ?? 0))).toBeLessThan(2);
     expect(Math.abs((before?.fin[0] ?? 0) - (before?.izquierdaDeB ?? 0))).toBeLessThan(2);
 
     // Y sigue pegado tras redimensionar: es la propiedad que distingue un conector de una raya
@@ -76,7 +76,7 @@ test.describe('elementos (no leen datos)', () => {
     await page.setViewportSize({ width: 1100, height: 900 });
     await page.waitForTimeout(400);
     const after = await resize();
-    expect(Math.abs((after?.inicio[0] ?? 0) - (after?.derechaDeA ?? 0))).toBeLessThan(2);
+    expect(Math.abs((after?.home[0] ?? 0) - (after?.derechaDeA ?? 0))).toBeLessThan(2);
     expect(after?.fin[0]).not.toBe(before?.fin[0]);
   });
 });

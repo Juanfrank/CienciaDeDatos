@@ -292,17 +292,17 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
     // Se concede el nodo al equipo de Beto y entonces si lo ve.
     await entrarComo(page, 'u-admin');
     const equipos = await (await page.request.get('/api/admin/equipos')).json();
-    const equipoEste = (equipos.equipos as { id: string; grantedNodes: string[] }[]).find(
+    const esteTeam = (equipos.equipos as { id: string; grantedNodes: string[] }[]).find(
       (e) => e.id === 'equipo-este',
     );
-    if (!equipoEste) throw new Error('fixture inesperado');
-    const concedidosOriginales = [...equipoEste.grantedNodes];
+    if (!esteTeam) throw new Error('fixture inesperado');
+    const concedidosOriginales = [...esteTeam.grantedNodes];
 
     try {
       await page.request.post('/api/admin/equipos', {
         data: {
           accion: 'guardar',
-          equipo: { ...equipoEste, grantedNodes: [...concedidosOriginales, `nodo-${moduleId}`] },
+          equipo: { ...esteTeam, grantedNodes: [...concedidosOriginales, `nodo-${moduleId}`] },
         },
       });
 
@@ -324,7 +324,7 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
       // Se devuelve el equipo a su estado: las demas pruebas asumen lo que el seed concede.
       await entrarComo(page, 'u-admin');
       await page.request.post('/api/admin/equipos', {
-        data: { accion: 'guardar', equipo: { ...equipoEste, grantedNodes: concedidosOriginales } },
+        data: { accion: 'guardar', equipo: { ...esteTeam, grantedNodes: concedidosOriginales } },
       });
     }
   });

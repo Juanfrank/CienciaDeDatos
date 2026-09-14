@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { dimensionKey } from './AccessScope';
-import { DIM_DISTRITO, DIM_MATERIA, generalTree, equipoNorte, scope, usuarioAna } from './__fixtures__/gobierno';
+import { DIM_DISTRITO, DIM_MATERIA, generalTree, norteTeam, scope, anaUser } from './__fixtures__/gobierno';
 import { findNode, isFolder, type NavNode } from './NavigationTree';
 import { resolveEffectiveScope } from './resolveEffectiveScope';
 import {
@@ -23,8 +23,8 @@ const esperarOk = (r: ReturnType<typeof applyTreeOperation>) => {
 
 const valuesOf = (t: ManagedTree, moduleId: string, dim: { table: string; field: string }) =>
   resolveEffectiveScope({
-    user: usuarioAna,
-    activeTeam: equipoNorte,
+    user: anaUser,
+    activeTeam: norteTeam,
     moduleId,
     generalTree: t.nodes,
   }).scope.restrictions.find((r) => dimensionKey(r.dimension) === dimensionKey(dim))?.allowedValues;

@@ -3,7 +3,7 @@ import { Hct, TonalPalette, argbFromHex, hexFromArgb } from '@material/material-
 /** Sistema de color de Material Design 3 — seccion 4.3. */
 
 /** Los seis roles de paleta de MD3. */
-export interface PaletasTonales {
+export interface TonalPalettes {
   primary: TonalPalette;
   secondary: TonalPalette;
   tertiary: TonalPalette;
@@ -24,7 +24,7 @@ export interface ThemeSource {
 /** Croma de las paletas derivadas. */
 const CROMA = { secondary: 18, neutral: 8, neutralVariant: 16 } as const;
 
-export function palettesFor(source: ThemeSource): PaletasTonales {
+export function palettesFor(source: ThemeSource): TonalPalettes {
   const primario = Hct.fromInt(argbFromHex(source.primario));
   const acento = Hct.fromInt(argbFromHex(source.acento));
   // El matiz de los neutros sale del GRIS de la norma, no del primario. Ver `neutro`.
@@ -85,7 +85,7 @@ export interface MaterialScheme {
 export type ColorMode = 'light' | 'dark';
 
 /** Tonos de cada rol. La tabla de la especificacion, tal cual. */
-const TONOS: Record<keyof MaterialScheme, { palette: keyof PaletasTonales; light: number; dark: number }> = {
+const TONOS: Record<keyof MaterialScheme, { palette: keyof TonalPalettes; light: number; dark: number }> = {
   primary: { palette: 'primary', light: 40, dark: 80 },
   onPrimary: { palette: 'primary', light: 100, dark: 20 },
   primaryContainer: { palette: 'primary', light: 90, dark: 30 },

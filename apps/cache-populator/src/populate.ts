@@ -118,7 +118,7 @@ export async function populate(options: PopulateOptions): Promise<PopulateResult
   }
 
   const finishedAt = now();
-  const todosOk = results.length > 0 && results.every((r) => r.outcome === 'ok');
+  const allOk = results.length > 0 && results.every((r) => r.outcome === 'ok');
 
   const heartbeat: PopulatorHeartbeat = {
     startedAt: startedAt.toISOString(),
@@ -126,7 +126,7 @@ export async function populate(options: PopulateOptions): Promise<PopulateResult
     connector: connectorKind,
     connectorReachable,
     datasets: results,
-    ...(todosOk
+    ...(allOk
       ? { lastFullSuccessAt: finishedAt.toISOString() }
       : previousHeartbeat?.lastFullSuccessAt
         ? { lastFullSuccessAt: previousHeartbeat.lastFullSuccessAt }
@@ -153,7 +153,7 @@ async function populateOne(
     now: () => Date;
   },
 ): Promise<DatasetPopulationResult> {
-  const inicio = Date.now();
+  const home = Date.now();
 
   try {
     const resultado = await deps.connector.query(dataset.query, contexto.ctx);
@@ -171,7 +171,7 @@ async function populateOne(
       generatedAt: resultado.generatedAt,
     });
 
-    const durationMs = Date.now() - inicio;
+    const durationMs = Date.now() - home;
     deps.onQueryLog({
       kind: 'governed-query',
       timestamp: deps.now().toISOString(),
@@ -186,7 +186,7 @@ async function populateOne(
 
     return { datasetId: dataset.datasetId, outcome: 'ok', rowCount: resultado.rows.length, durationMs };
   } catch (error) {
-    const durationMs = Date.now() - inicio;
+    const durationMs = Date.now() - home;
     const mensaje = error instanceof Error ? error.message : String(error);
 
     // NO se borra la entrada anterior. El cache conserva la ultima version valida y la persona

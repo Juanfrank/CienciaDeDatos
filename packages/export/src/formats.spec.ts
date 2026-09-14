@@ -215,13 +215,13 @@ function pdfText(buffer: Buffer): string {
   let desde = 0;
 
   for (;;) {
-    const inicio = buffer.indexOf(mark, desde);
-    if (inicio === -1) break;
-    const fin = buffer.indexOf(Buffer.from('endstream'), inicio);
+    const home = buffer.indexOf(mark, desde);
+    if (home === -1) break;
+    const fin = buffer.indexOf(Buffer.from('endstream'), home);
     if (fin === -1) break;
     desde = fin + 1;
 
-    const crudo = buffer.subarray(inicio + mark.length, fin);
+    const crudo = buffer.subarray(home + mark.length, fin);
     const zlib = crudo.indexOf(0x78);
     if (zlib === -1) continue;
     let contenido: string;

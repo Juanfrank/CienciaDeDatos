@@ -26,9 +26,9 @@ describe('ranuras de los modulos de demostracion', () => {
   for (const { modulo, item, instance } of instancias) {
     it(`${modulo}/${item}: cada ranura asignada existe en el contrato`, () => {
       const contrato = objectRegistry.resolve(instance.objectId, instance.version).dataContract;
-      const declaradas = contractSlots(contrato).map((r) => r.id);
+      const declared = contractSlots(contrato).map((r) => r.id);
       const usadas = Object.keys(instance.binding.slots ?? {});
-      expect(usadas.filter((r) => !declaradas.includes(r))).toEqual([]);
+      expect(usadas.filter((r) => !declared.includes(r))).toEqual([]);
     });
 
     it(`${modulo}/${item}: las ranuras cumplen minimos y maximos`, () => {

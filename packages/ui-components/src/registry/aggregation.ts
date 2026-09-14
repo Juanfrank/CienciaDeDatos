@@ -1,4 +1,4 @@
-import { AGGREGATIONS, type Aggregation, type GranoDeDataset, esAditiva } from '@app/data-contracts';
+import { AGGREGATIONS, type Aggregation, type DatasetGrain, esAditiva } from '@app/data-contracts';
 
 /** Como se resume una columna. UN solo acumulador para toda la aplicacion. */
 
@@ -77,11 +77,11 @@ export const DEFAULT_AGGREGATION: Aggregation = 'suma';
 /** Que operador usar para cada medida de un mapeo. */
 export function aggregationsOf(
   medidas: string[],
-  declaradas: Map<string, Aggregation>,
+  declared: Map<string, Aggregation>,
   elegidas: Record<string, Aggregation> | undefined,
 ): Aggregation[] {
   return medidas.map(
-    (m) => elegidas?.[m] ?? declaradas.get(m) ?? DEFAULT_AGGREGATION,
+    (m) => elegidas?.[m] ?? declared.get(m) ?? DEFAULT_AGGREGATION,
   );
 }
 
@@ -116,7 +116,7 @@ export interface AggregationProblem {
 export interface AggregationContext {
   /** true si el objeto muestra menos dimensiones de las que trae el dataset. */
   colapsa: boolean;
-  dataGrain: GranoDeDataset;
+  dataGrain: DatasetGrain;
 }
 
 /** Que operadores se pueden aplicar AQUI. Es la unica regla, y de ella sale todo lo demas. */

@@ -12,7 +12,7 @@ import { negotiateLocale, headerPreferences } from './locales';
  */
 
 /** Los argumentos ICU de un mensaje, sin importar su tipo ni sus opciones. */
-function argumentosDe(mensaje: string): string[] {
+function argumentsOf(mensaje: string): string[] {
   const names = new Set<string>();
   const re = /\{\s*([a-zA-Z0-9_]+)\s*(?:,|\})/g;
   let m = re.exec(mensaje);
@@ -43,7 +43,7 @@ describe('catalogos', () => {
     it(`${locale}: cada mensaje usa los mismos argumentos que el de referencia`, () => {
       const distintos = keys.filter(
         (c) =>
-          argumentosDe(CATALOGOS[locale][c]).join(',') !== argumentosDe(es[c]).join(','),
+          argumentsOf(CATALOGOS[locale][c]).join(',') !== argumentsOf(es[c]).join(','),
       );
       expect(distintos).toEqual([]);
     });
@@ -51,13 +51,13 @@ describe('catalogos', () => {
     it(`${locale}: ningun mensaje deja un argumento sin cerrar`, () => {
       const rotos = keys.filter((c) => {
         const content = CATALOGOS[locale][c];
-        let profundidad = 0;
+        let depth = 0;
         for (const caracter of content) {
-          if (caracter === '{') profundidad++;
-          else if (caracter === '}') profundidad--;
-          if (profundidad < 0) return true;
+          if (caracter === '{') depth++;
+          else if (caracter === '}') depth--;
+          if (depth < 0) return true;
         }
-        return profundidad !== 0;
+        return depth !== 0;
       });
       expect(rotos).toEqual([]);
     });

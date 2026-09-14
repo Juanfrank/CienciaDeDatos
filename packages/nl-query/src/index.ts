@@ -1,7 +1,7 @@
 /** Consulta en lenguaje natural — seccion 4.9. */
 export { ResolvedorLocal, normalizar, queryUrl } from './resolver';
 export type {
-  ConsultaResuelta,
+  ResolvedQuery,
   INaturalLanguageResolver,
   Intent,
   VocabularyTerm,

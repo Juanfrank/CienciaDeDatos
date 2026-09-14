@@ -1,4 +1,4 @@
-import { ResolvedorLocal, type ConsultaResuelta, type Vocabulary } from '@app/nl-query';
+import { ResolvedorLocal, type ResolvedQuery, type Vocabulary } from '@app/nl-query';
 import { fieldKey } from '@app/ui-components';
 import { cargarModulo } from './data';
 import { moduloServibleParaUsuario } from './cicloDeVida';
@@ -79,7 +79,7 @@ export async function resolverPregunta(
   moduleSlug: string,
   userId: string,
   teamId: string,
-): Promise<{ consulta: ConsultaResuelta; vocabulary: Vocabulary } | null> {
+): Promise<{ consulta: ResolvedQuery; vocabulary: Vocabulary } | null> {
   const vocabulary = await vocabularyOf(moduleSlug, userId, teamId);
   if (!vocabulary) return null;
 

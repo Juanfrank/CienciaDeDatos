@@ -258,13 +258,13 @@ test.describe('paquetes visuales (4.10.6)', () => {
       },
     });
 
-    const equipoEste = await page.request
+    const esteTeam = await page.request
       .get('/api/admin/equipos')
       .then((r) => r.json())
       .then((c) => c.equipos.find((t: { id: string }) => t.id === 'equipo-este'));
 
     await page.request.post('/api/admin/equipos', {
-      data: { accion: 'guardar', equipo: { ...equipoEste, assignedPackageId: 'pkg-prueba' } },
+      data: { accion: 'guardar', equipo: { ...esteTeam, assignedPackageId: 'pkg-prueba' } },
     });
 
     // El panel lo señala explicitamente en vez de ocultarlo sin aviso.

@@ -31,7 +31,7 @@ export {
   type MaterialScheme,
   type ColorMode,
   type ThemeSource,
-  type PaletasTonales,
+  type TonalPalettes,
 } from './material3';
 export {
   ELEVATION,

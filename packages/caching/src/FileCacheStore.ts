@@ -72,11 +72,11 @@ export class FileCacheStore implements ICacheStore {
   /** Invalidacion dirigida (6.5): borra solo lo afectado, no vacia todo el cache. */
   async deleteByPrefix(prefix: string): Promise<void> {
     try {
-      const archivos = await readdir(this.directory).catch((error: NodeJS.ErrnoException) => {
+      const files = await readdir(this.directory).catch((error: NodeJS.ErrnoException) => {
         if (error.code === 'ENOENT') return [] as string[];
         throw error;
       });
-      for (const archivo of archivos) {
+      for (const archivo of files) {
         if (!archivo.endsWith('.json')) continue;
         if (decodeKey(archivo).startsWith(prefix)) {
           await rm(join(this.directory, archivo), { force: true });
@@ -89,10 +89,10 @@ export class FileCacheStore implements ICacheStore {
 
   /** Claves presentes. Solo para diagnostico y pruebas. */
   async keys(): Promise<string[]> {
-    const archivos = await readdir(this.directory).catch((error: NodeJS.ErrnoException) => {
+    const files = await readdir(this.directory).catch((error: NodeJS.ErrnoException) => {
       if (error.code === 'ENOENT') return [] as string[];
       throw error;
     });
-    return archivos.filter((a) => a.endsWith('.json')).map(decodeKey).sort();
+    return files.filter((a) => a.endsWith('.json')).map(decodeKey).sort();
   }
 }

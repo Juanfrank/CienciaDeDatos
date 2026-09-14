@@ -1,4 +1,4 @@
-import type { Aggregation, GranoDeDataset, QueryResult, SchemaDescriptor } from '@app/data-contracts';
+import type { Aggregation, DatasetGrain, QueryResult, SchemaDescriptor } from '@app/data-contracts';
 import { canTeamAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
 import { SCHEMA_CACHE_KEY, type ReadResult, getDataset } from '@app/caching';
 import {
@@ -87,7 +87,7 @@ async function readObjects(
   const objetos: ObjetoCargado[] = [];
   let masAntiguo: string | undefined;
   let degraded = false;
-  const declaradas = await agregacionesDeclaradas();
+  const declared = await agregacionesDeclaradas();
 
   for (const item of items) {
     const { instance } = item;
@@ -174,7 +174,7 @@ async function readObjects(
      */
     const aggregations = aggregationsOf(
       instance.binding.measures,
-      declaradas,
+      declared,
       instance.binding.aggregations,
     );
 
@@ -368,7 +368,7 @@ function infoDeDatasets(ids: Iterable<string>): Record<string, DatasetInfo> {
 }
 
 /** El grano declarado de un dataset, y si el objeto lo colapsa. */
-function grainOf(datasetId: string): GranoDeDataset {
+function grainOf(datasetId: string): DatasetGrain {
   try {
     return getDataset(datasetId).grain;
   } catch {
@@ -379,14 +379,14 @@ function grainOf(datasetId: string): GranoDeDataset {
 }
 
 function colapsaElDataset(datasetId: string, dimensiones: { table: string; field: string }[]): boolean {
-  let declaradas: string[];
+  let declared: string[];
   try {
-    declaradas = (getDataset(datasetId).query.dimensions ?? []).map(fieldKey);
+    declared = (getDataset(datasetId).query.dimensions ?? []).map(fieldKey);
   } catch {
     return false;
   }
   const mostradas = new Set(dimensiones.map(fieldKey));
-  return declaradas.some((d) => !mostradas.has(d));
+  return declared.some((d) => !mostradas.has(d));
 }
 
 /** Que operador declara el esquema para cada medida. */

@@ -1,4 +1,4 @@
-import type { FieldRef, GranoDeDataset, QueryRequest } from '@app/data-contracts';
+import type { FieldRef, DatasetGrain, QueryRequest } from '@app/data-contracts';
 import { dimensionKey } from '@app/access-control';
 import type { SecurityBinding } from './cacheKey';
 import registryFile from '../datasets/registry.json' with { type: 'json' };
@@ -16,7 +16,7 @@ export interface CacheableDataset {
    * correcto»: es un intercambio entre tamaño y que se puede preguntar luego. Lo que no vale es
    * no haberlo decidido, que es como un promedio acaba sumandose.
    */
-  grain: GranoDeDataset;
+  grain: DatasetGrain;
   grainRationale: string;
   /** Recurrencia por dominio de datos (6.4): minutos o horas segun la frescura que exija. */
   recurrence: string;
@@ -118,9 +118,9 @@ export function validateRegistry(registry: DatasetRegistry = defaultRegistry): R
     // La comprobacion que evita una fuga: si el dataset se comparte entre ambitos, tiene que
     // traer como columna toda dimension por la que alguien pueda quedar restringido.
     if (d.securityBinding === 'none' && d.scopeDimensions?.length) {
-      const declaradas = new Set((d.query.dimensions ?? []).map(dimensionKey));
+      const declared = new Set((d.query.dimensions ?? []).map(dimensionKey));
       for (const dim of d.scopeDimensions) {
-        if (!declaradas.has(dimensionKey(dim))) {
+        if (!declared.has(dimensionKey(dim))) {
           problems.push({
             datasetId: d.datasetId,
             problem:

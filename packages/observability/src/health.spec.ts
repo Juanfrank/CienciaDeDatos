@@ -128,7 +128,7 @@ describe('summarizeHeartbeat', () => {
           ],
         }),
       ),
-    ).toEqual({ total: 3, fallidos: 2, todosOk: false });
+    ).toEqual({ total: 3, fallidos: 2, allOk: false });
   });
 });
 

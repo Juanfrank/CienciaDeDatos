@@ -1,4 +1,4 @@
-import type { Aggregation, GranoDeDataset } from '@app/data-contracts';
+import type { Aggregation, DatasetGrain } from '@app/data-contracts';
 import {
   type BindingProblem,
   type ObjectInstance,
@@ -53,7 +53,7 @@ export const normalizarColumna = (c: ColumnaDisponible | string): ColumnaDisponi
 
 /** Lo que hay que saber de un dataset, ademas de sus columnas, para validar la agregacion. */
 export interface DatasetInfo {
-  grain: GranoDeDataset;
+  grain: DatasetGrain;
   /** Las dimensiones que el dataset trae, en clave `Tabla.Campo`. */
   dimensions: string[];
 }
@@ -79,10 +79,10 @@ function aggregationProblems(
   const info = input.datasets?.[instance.binding.datasetId];
   if (!info) return [];
 
-  const declaradas = new Map(Object.entries(input.agregacionesDeclaradas ?? {}));
+  const declared = new Map(Object.entries(input.agregacionesDeclaradas ?? {}));
   const aggregations = aggregationsOf(
     instance.binding.measures,
-    declaradas,
+    declared,
     instance.binding.aggregations,
   );
   // Colapsa si el objeto muestra menos dimensiones de las que el dataset trae. Se compara por

@@ -1,5 +1,5 @@
 import type {
-  ConsultaResuelta,
+  ResolvedQuery,
   INaturalLanguageResolver,
   Intent,
   Vocabulary,
@@ -30,7 +30,7 @@ const VACIAS = new Set(
 );
 
 const WORDS_BREAKDOWN = new Set(['por', 'segun', 'desglosado', 'desglose', 'cada', 'agrupado']);
-const PALABRAS_RANKING = new Set(['top', 'mayores', 'mayor', 'principales', 'primeros', 'ranking']);
+const RANKING_WORDS = new Set(['top', 'mayores', 'mayor', 'principales', 'primeros', 'ranking']);
 
 const tokenizar = (content: string): string[] =>
   normalizar(content)
@@ -58,7 +58,7 @@ interface Candidato {
 }
 
 export class ResolvedorLocal implements INaturalLanguageResolver {
-  resolver(pregunta: string, vocabulary: Vocabulary): ConsultaResuelta {
+  resolver(pregunta: string, vocabulary: Vocabulary): ResolvedQuery {
     const tokens = tokenizar(pregunta);
     const consumido = new Array<boolean>(tokens.length).fill(false);
     const candidatos: Candidato[] = [];
@@ -86,7 +86,7 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
 
     const restantes = tokens.filter((t, i) => !consumido[i]);
     const words = new Set(restantes);
-    const intent: Intent = [...words].some((p) => PALABRAS_RANKING.has(p))
+    const intent: Intent = [...words].some((p) => RANKING_WORDS.has(p))
       ? 'ranking'
       : [...words].some((p) => WORDS_BREAKDOWN.has(p)) && mentionedDimension
         ? 'desglose'
@@ -101,7 +101,7 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
       (t) =>
         !VACIAS.has(t) &&
         !WORDS_BREAKDOWN.has(t) &&
-        !PALABRAS_RANKING.has(t) &&
+        !RANKING_WORDS.has(t) &&
         !/^\d+$/.test(t),
     );
 
@@ -153,14 +153,14 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
     filtros: Record<string, string[]>,
     intent: Intent,
   ): string {
-    const nombreDe = (clave: string, lista: Vocabulary['measures']) =>
+    const nameOf = (clave: string, lista: Vocabulary['measures']) =>
       lista.find((t) => t.clave === clave)?.etiqueta ?? clave;
 
     const partes: string[] = [];
-    if (measure) partes.push(nombreDe(measure, vocabulary.measures));
+    if (measure) partes.push(nameOf(measure, vocabulary.measures));
     if (groupBy) {
       partes.push(
-        `${intent === 'ranking' ? 'ordenado por' : 'por'} ${nombreDe(groupBy, vocabulary.dimensions)}`,
+        `${intent === 'ranking' ? 'ordenado por' : 'por'} ${nameOf(groupBy, vocabulary.dimensions)}`,
       );
     }
 
@@ -168,7 +168,7 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
     if (entradas.length > 0) {
       partes.push(
         `filtrado a ${entradas
-          .map(([d, v]) => `${nombreDe(d, vocabulary.dimensions)} = ${v.join(', ')}`)
+          .map(([d, v]) => `${nameOf(d, vocabulary.dimensions)} = ${v.join(', ')}`)
           .join(' y ')}`,
       );
     }
@@ -178,7 +178,7 @@ export class ResolvedorLocal implements INaturalLanguageResolver {
 }
 
 /** URL que responde a la consulta — seccion 4.11. */
-export function queryUrl(moduleSlug: string, consulta: ConsultaResuelta): string {
+export function queryUrl(moduleSlug: string, consulta: ResolvedQuery): string {
   const params = new URLSearchParams();
   for (const [fieldName, valores] of Object.entries(consulta.filters)) {
     for (const v of valores) params.append(fieldName, v);

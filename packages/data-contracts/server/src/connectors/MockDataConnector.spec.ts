@@ -9,7 +9,7 @@ const ctx = (securityContext: QueryContext['securityContext'] = {}): QueryContex
   securityContext,
 });
 
-const distritoYMedida: QueryRequest = {
+const measureDistrito: QueryRequest = {
   dimensions: [{ table: 'DimTribunal', field: 'Distrito' }],
   measures: ['CasosIngresados'],
 };
@@ -42,26 +42,26 @@ describe('MockDataConnector', () => {
   });
 
   it('genera datos deterministas: misma semilla, mismos valores', async () => {
-    const a = await new MockDataConnector({ seed: 42 }).query(distritoYMedida, ctx());
-    const b = await new MockDataConnector({ seed: 42 }).query(distritoYMedida, ctx());
+    const a = await new MockDataConnector({ seed: 42 }).query(measureDistrito, ctx());
+    const b = await new MockDataConnector({ seed: 42 }).query(measureDistrito, ctx());
     expect(a.rows).toEqual(b.rows);
   });
 
   it('cambia los valores al cambiar la semilla', async () => {
-    const a = await new MockDataConnector({ seed: 1 }).query(distritoYMedida, ctx());
-    const b = await new MockDataConnector({ seed: 2 }).query(distritoYMedida, ctx());
+    const a = await new MockDataConnector({ seed: 1 }).query(measureDistrito, ctx());
+    const b = await new MockDataConnector({ seed: 2 }).query(measureDistrito, ctx());
     expect(a.rows).not.toEqual(b.rows);
   });
 
   it('marca la procedencia como mock', async () => {
-    const res = await new MockDataConnector().query(distritoYMedida, ctx());
+    const res = await new MockDataConnector().query(measureDistrito, ctx());
     expect(res.source).toBe('mock');
     expect(() => new Date(res.generatedAt).toISOString()).not.toThrow();
   });
 
   it('aplica filtros de QueryRequest sobre las dimensiones', async () => {
     const res = await new MockDataConnector().query(
-      { ...distritoYMedida, filters: { 'DimTribunal.Distrito': ['Distrito Norte'] } },
+      { ...measureDistrito, filters: { 'DimTribunal.Distrito': ['Distrito Norte'] } },
       ctx(),
     );
     expect(res.rows).toHaveLength(1);
@@ -70,7 +70,7 @@ describe('MockDataConnector', () => {
 
   it('respeta topN y orderBy', async () => {
     const res = await new MockDataConnector().query(
-      { ...distritoYMedida, orderBy: [{ field: 'CasosIngresados', direction: 'desc' }], topN: 2 },
+      { ...measureDistrito, orderBy: [{ field: 'CasosIngresados', direction: 'desc' }], topN: 2 },
       ctx(),
     );
     expect(res.rows).toHaveLength(2);
@@ -96,7 +96,7 @@ describe('MockDataConnector', () => {
   describe('interaccion con RLS (seccion 6.6)', () => {
     it('con nativeRls=false devuelve el superconjunto, para que el dataset se pueda compartir entre equipos', async () => {
       const conector = new MockDataConnector({ capabilities: { nativeRls: false } });
-      const res = await conector.query(distritoYMedida, ctx({ 'DimTribunal.Distrito': ['Distrito Norte'] }));
+      const res = await conector.query(measureDistrito, ctx({ 'DimTribunal.Distrito': ['Distrito Norte'] }));
       // El securityContext NO recorta el resultado: el ambito lo aplica la aplicacion
       // (4.10.4) despues de leer del cache.
       expect(res.rows.length).toBeGreaterThan(1);
@@ -104,15 +104,15 @@ describe('MockDataConnector', () => {
 
     it('con nativeRls=true la fuente filtra, y el dataset queda ligado a un contexto de seguridad', async () => {
       const conector = new MockDataConnector({ capabilities: { nativeRls: true } });
-      const res = await conector.query(distritoYMedida, ctx({ 'DimTribunal.Distrito': ['Distrito Norte'] }));
+      const res = await conector.query(measureDistrito, ctx({ 'DimTribunal.Distrito': ['Distrito Norte'] }));
       expect(res.rows).toHaveLength(1);
       expect(res.rows[0]?.[0]).toBe('Distrito Norte');
     });
 
     it('dos contextos de seguridad distintos producen resultados distintos con nativeRls=true', async () => {
       const conector = new MockDataConnector({ capabilities: { nativeRls: true } });
-      const norte = await conector.query(distritoYMedida, ctx({ 'DimTribunal.Distrito': ['Distrito Norte'] }));
-      const este = await conector.query(distritoYMedida, ctx({ 'DimTribunal.Distrito': ['Distrito Este'] }));
+      const norte = await conector.query(measureDistrito, ctx({ 'DimTribunal.Distrito': ['Distrito Norte'] }));
+      const este = await conector.query(measureDistrito, ctx({ 'DimTribunal.Distrito': ['Distrito Este'] }));
       expect(norte.rows).not.toEqual(este.rows);
     });
   });

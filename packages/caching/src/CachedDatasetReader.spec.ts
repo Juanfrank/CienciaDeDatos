@@ -6,7 +6,7 @@ import { CacheStoreUnavailableError, type CacheEntry, type ICacheStore } from '.
 import { InMemoryCacheStore } from './InMemoryCacheStore';
 import type { CacheableDataset, DatasetRegistry } from './datasetRegistry';
 
-const { generalTree, equipoEste, equipoNorte, usuarioAna, usuarioBeto } = gobiernoFixtures;
+const { generalTree, esteTeam, norteTeam, anaUser, betoUser } = gobiernoFixtures;
 
 /** Dataset compartido: se cachea sin filtro de ambito y se filtra al leer (6.6). */
 const datasetCasos: CacheableDataset = {
@@ -80,7 +80,7 @@ class FakeL2 implements ICacheStore {
   }
 }
 
-const scopeOf = (user: typeof usuarioAna, team: typeof equipoNorte, moduleId: string) =>
+const scopeOf = (user: typeof anaUser, team: typeof norteTeam, moduleId: string) =>
   resolveEffectiveScope({ user, activeTeam: team, moduleId, generalTree: generalTree }).scope;
 
 describe('CachedDatasetReader', () => {
@@ -106,7 +106,7 @@ describe('CachedDatasetReader', () => {
     it('sin entrada en ninguna capa devuelve "generandose", no un error ni una consulta', async () => {
       const r = await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-norte'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-norte'),
       });
       expect(r.status).toBe('generating');
       expect(r.result).toBeUndefined();
@@ -116,13 +116,13 @@ describe('CachedDatasetReader', () => {
       await sembrar();
       const first = await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-norte'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-norte'),
       });
       expect(first.servedFrom).toBe('l2');
 
       const segunda = await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-norte'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-norte'),
       });
       expect(segunda.servedFrom).toBe('l1');
       // L1 evita el segundo round-trip al Storage Account.
@@ -133,7 +133,7 @@ describe('CachedDatasetReader', () => {
       await sembrar();
       const r = await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-norte'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-norte'),
       });
       expect(r.generatedAt).toBe('2026-09-11T08:00:00.000Z');
     });
@@ -145,11 +145,11 @@ describe('CachedDatasetReader', () => {
 
       const norte = await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-norte'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-norte'),
       });
       const este = await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioBeto, equipoEste, 'casos-pendientes-este'),
+        scope: scopeOf(betoUser, esteTeam, 'casos-pendientes-este'),
       });
 
       // Una sola escritura de poblacion satisface ambas lecturas: no hay entradas redundantes.
@@ -168,11 +168,11 @@ describe('CachedDatasetReader', () => {
       await sembrar();
       await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-norte'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-norte'),
       });
       await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-este'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-este'),
       });
       expect(l2.map.size).toBe(1);
       expect(eventos.every((e) => e.key === eventos[0]?.key)).toBe(true);
@@ -184,7 +184,7 @@ describe('CachedDatasetReader', () => {
       await sembrar();
       const r = await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioBeto, equipoEste, 'casos-pendientes-este'),
+        scope: scopeOf(betoUser, esteTeam, 'casos-pendientes-este'),
         requestedFilters: { 'DimTribunal.Materia': 'Penal' },
       });
       expect(r.result?.rows).toEqual([['Distrito Este', 'Penal', 20]]);
@@ -195,7 +195,7 @@ describe('CachedDatasetReader', () => {
       // Alguien del equipo Este abre una URL filtrada al Distrito Norte.
       const r = await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioBeto, equipoEste, 'casos-pendientes-este'),
+        scope: scopeOf(betoUser, esteTeam, 'casos-pendientes-este'),
         requestedFilters: { 'DimTribunal.Distrito': 'Distrito Norte' },
       });
       expect(r.result?.rows).toEqual([]);
@@ -208,7 +208,7 @@ describe('CachedDatasetReader', () => {
       await sembrar();
       await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-norte'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-norte'),
       });
 
       // Cae L2 y ademas vence el TTL de L1.
@@ -217,7 +217,7 @@ describe('CachedDatasetReader', () => {
 
       const r = await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-norte'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-norte'),
       });
 
       expect(r.status).toBe('degraded');
@@ -232,7 +232,7 @@ describe('CachedDatasetReader', () => {
       l2.available = false;
       const r = await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-norte'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-norte'),
       });
       expect(r.status).toBe('generating');
     });
@@ -243,7 +243,7 @@ describe('CachedDatasetReader', () => {
       await sembrar();
       await reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-norte'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-norte'),
       });
       expect(eventos[0]).toMatchObject({ datasetId: 'casos', status: 'ok', servedFrom: 'l2', stale: false });
       expect(typeof eventos[0]?.ageMs).toBe('number');
@@ -265,7 +265,7 @@ describe('CachedDatasetReader', () => {
     await expect(
       reader.read({
         datasetId: 'casos',
-        scope: scopeOf(usuarioAna, equipoNorte, 'casos-pendientes-norte'),
+        scope: scopeOf(anaUser, norteTeam, 'casos-pendientes-norte'),
       }),
     ).rejects.toThrow(/no expone la\(s\) dimension\(es\)/);
   });

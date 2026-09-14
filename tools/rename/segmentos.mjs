@@ -174,7 +174,7 @@ export const unir = (segmentos) => segmentos.map((s) => s.texto).join('');
  * una palabra reservada de JavaScript, asi que basta con eso para distinguirlos.
  */
 const PALABRA_DE_CODIGO =
-  /\b(?:export|import|const|let|var|return|function|default|case|typeof|interface|type|class|extends|async|await|new|delete)\b/;
+  /\b(?:export|import|const|let|var|return|function|default|case|typeof|interface|type|class|extends|async|await|new|delete|as|satisfies|keyof|instanceof|implements)\b/;
 const TEXTO_JSX = /([>}])([^<>{}=;()[\]`]*[A-Za-zÀ-ÿ][^<>{}=;()[\]`]*)(<)/g;
 
 /** Como `segmentar`, pero marcando como `prosa` el texto visible de un JSX. */

@@ -16,7 +16,7 @@ import { POPULATOR_HEARTBEAT_KEY, type GovernedQueryLog, buildHealthReport } fro
 import { populate, refreshSchema, repopulateTargeted } from './populate';
 import { runScheduledCycle } from './runCycle';
 
-const { generalTree, equipoEste, equipoNorte, usuarioAna, usuarioBeto } = gobiernoFixtures;
+const { generalTree, esteTeam, norteTeam, anaUser, betoUser } = gobiernoFixtures;
 
 const registry: DatasetRegistry = {
   datasets: [
@@ -249,7 +249,7 @@ describe('de punta a punta: poblar, leer y filtrar por ambito', () => {
     await rm(directorio, { recursive: true, force: true });
   });
 
-  const readAs = async (user: typeof usuarioAna, team: typeof equipoNorte, moduleId: string) => {
+  const readAs = async (user: typeof anaUser, team: typeof norteTeam, moduleId: string) => {
     const reader = new CachedDatasetReader({
       l1: new InMemoryCacheStore({ ttlMs: 1000 }),
       l2,
@@ -262,7 +262,7 @@ describe('de punta a punta: poblar, leer y filtrar por ambito', () => {
   it('el cache escrito por el job es legible por el camino de lectura, en otro proceso', async () => {
     // FileCacheStore existe justamente por esto: job y servidor son procesos distintos.
     await populate({ connector: new MockDataConnector(), cacheStore: l2, registry, connectorKind: 'mock' });
-    const r = await readAs(usuarioAna, equipoNorte, 'casos-pendientes-norte');
+    const r = await readAs(anaUser, norteTeam, 'casos-pendientes-norte');
     expect(r.status).toBe('ok');
     expect(r.result?.rows.length).toBeGreaterThan(0);
   });
@@ -270,8 +270,8 @@ describe('de punta a punta: poblar, leer y filtrar por ambito', () => {
   it('una sola escritura del job satisface a DOS equipos con ambitos distintos', async () => {
     await populate({ connector: new MockDataConnector(), cacheStore: l2, registry, connectorKind: 'mock' });
 
-    const norte = await readAs(usuarioAna, equipoNorte, 'casos-pendientes-norte');
-    const este = await readAs(usuarioBeto, equipoEste, 'casos-pendientes-este');
+    const norte = await readAs(anaUser, norteTeam, 'casos-pendientes-norte');
+    const este = await readAs(betoUser, esteTeam, 'casos-pendientes-este');
 
     // Una unica entrada de dataset en el cache (mas el latido).
     const keys = (await l2.keys()).filter((k) => k.startsWith('ds:'));
@@ -285,7 +285,7 @@ describe('de punta a punta: poblar, leer y filtrar por ambito', () => {
   });
 
   it('sin poblar, el camino de lectura dice "generandose" y nunca consulta la fuente', async () => {
-    const r = await readAs(usuarioAna, equipoNorte, 'casos-pendientes-norte');
+    const r = await readAs(anaUser, norteTeam, 'casos-pendientes-norte');
     expect(r.status).toBe('generating');
   });
 

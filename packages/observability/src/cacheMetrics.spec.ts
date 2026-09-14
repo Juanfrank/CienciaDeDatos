@@ -11,7 +11,7 @@ describe('CacheMetrics', () => {
     m.registrar({ datasetId: 'd', status: 'generating', stale: false });
 
     const r = m.resumen();
-    expect(r).toMatchObject({ total: 1, aciertos: 0, generandose: 1, desdeL1: 0, desdeL2: 0 });
+    expect(r).toMatchObject({ total: 1, aciertos: 0, generating: 1, desdeL1: 0, desdeL2: 0 });
     expect(r.tasaDeAcierto).toBe(0);
   });
 

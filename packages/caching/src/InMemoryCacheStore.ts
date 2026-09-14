@@ -46,8 +46,8 @@ export class InMemoryCacheStore implements ICacheStore {
 
   async set<T>(key: string, entry: CacheEntry<T>): Promise<void> {
     if (this.map.size >= this.maxEntries && !this.map.has(key)) {
-      const masAntigua = this.map.keys().next();
-      if (!masAntigua.done) this.map.delete(masAntigua.value);
+      const oldMore = this.map.keys().next();
+      if (!oldMore.done) this.map.delete(oldMore.value);
     }
     this.map.set(key, { entry: entry as CacheEntry<unknown>, storedAt: this.now() });
   }

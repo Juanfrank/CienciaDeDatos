@@ -230,10 +230,10 @@ export function Connection({
 
 /** Una curva suave por los mismos puntos que usaria el trazado en angulo. */
 function curva(puntos: [number, number][]): string {
-  const [inicio, ...resto] = puntos;
-  if (!inicio) return '';
+  const [home, ...resto] = puntos;
+  if (!home) return '';
   const fin = resto[resto.length - 1];
   if (!fin) return '';
-  const control = resto[0] ?? inicio;
-  return `M ${inicio[0]} ${inicio[1]} Q ${control[0]} ${control[1]} ${fin[0]} ${fin[1]}`;
+  const control = resto[0] ?? home;
+  return `M ${home[0]} ${home[1]} Q ${control[0]} ${control[1]} ${fin[0]} ${fin[1]}`;
 }

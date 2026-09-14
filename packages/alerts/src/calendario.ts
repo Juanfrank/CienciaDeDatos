@@ -22,9 +22,9 @@ export function debeEntregarse(sub: Subscription, ahora: Date): boolean {
   // Con un archivo ya en cola no se encola otro: dos vueltas seguidas entregarian dos veces.
   if (sub.pendingJobId) return false;
 
-  const inicio = inicioDelPeriodo(sub.cadence, ahora);
+  const home = inicioDelPeriodo(sub.cadence, ahora);
 
-  const programada = new Date(inicio);
+  const programada = new Date(home);
   if (sub.cadence === 'semanal' && sub.weekday !== undefined) {
     programada.setDate(programada.getDate() + sub.weekday);
   }

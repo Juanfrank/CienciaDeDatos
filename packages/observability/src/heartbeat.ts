@@ -32,8 +32,8 @@ export interface PopulatorHeartbeat {
 export function summarizeHeartbeat(hb: PopulatorHeartbeat): {
   total: number;
   fallidos: number;
-  todosOk: boolean;
+  allOk: boolean;
 } {
   const fallidos = hb.datasets.filter((d) => d.outcome === 'fallo').length;
-  return { total: hb.datasets.length, fallidos, todosOk: fallidos === 0 };
+  return { total: hb.datasets.length, fallidos, allOk: fallidos === 0 };
 }

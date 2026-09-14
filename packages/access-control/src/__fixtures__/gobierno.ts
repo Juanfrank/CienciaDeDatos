@@ -70,7 +70,7 @@ export const generalTree: NavNode[] = [
 ];
 
 /** Equipo con acceso a toda la carpeta Regional y restringido por materia. */
-export const equipoNorte: Team = {
+export const norteTeam: Team = {
   id: 'equipo-norte',
   name: 'Equipo Distrito Norte',
   grantedNodes: ['carpeta-regional'],
@@ -83,7 +83,7 @@ export const equipoNorte: Team = {
 };
 
 /** Equipo con acceso solo a la carpeta del Distrito Este, sin restriccion propia de materia. */
-export const equipoEste: Team = {
+export const esteTeam: Team = {
   id: 'equipo-este',
   name: 'Equipo Distrito Este',
   grantedNodes: ['carpeta-este'],
@@ -92,8 +92,8 @@ export const equipoEste: Team = {
   moduleScopeOverrides: {},
 };
 
-export const usuarioAna: GovernedUser = { userId: 'ana' };
-export const usuarioBeto: GovernedUser = { userId: 'beto' };
+export const anaUser: GovernedUser = { userId: 'ana' };
+export const betoUser: GovernedUser = { userId: 'beto' };
 
 /**
  * Paquete visual que reagrupa los mismos modulos bajo otra carpeta y en otro orden, e
@@ -111,7 +111,7 @@ export const paqueteReagrupado: ModulePackage = {
       children: [
         modulo('audiencias-norte', 'audiencias-norte', 'Audiencias'),
         modulo('casos-pendientes-norte', 'casos-pendientes-norte', 'Pendientes'),
-        // No concedido a equipoNorte: vive fuera de carpeta-regional.
+        // No concedido a norteTeam: vive fuera de carpeta-regional.
         modulo('estadisticas-nacionales', 'estadisticas-nacionales', 'Nacionales'),
       ],
     },

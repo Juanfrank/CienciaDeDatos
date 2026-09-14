@@ -82,11 +82,11 @@ export function buildHealthReport(input: HealthProbeInput): HealthReport {
 
     checks.push({
       name: 'job-de-poblacion',
-      status: edad > maxAge ? 'degradado' : resumen.todosOk ? 'ok' : 'degradado',
+      status: edad > maxAge ? 'degradado' : resumen.allOk ? 'ok' : 'degradado',
       detail:
         edad > maxAge
           ? `Ultima ejecucion hace ${Math.round(edad / 60000)} min, por encima del umbral.`
-          : resumen.todosOk
+          : resumen.allOk
             ? `${resumen.total} datasets poblados sin fallo.`
             : `${resumen.fallidos} de ${resumen.total} datasets fallaron; se conserva la version anterior.`,
     });

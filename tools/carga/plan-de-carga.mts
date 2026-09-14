@@ -31,7 +31,7 @@ interface Salud {
     total: number;
     desdeL1: number;
     desdeL2: number;
-    generandose: number;
+    generating: number;
     degradados: number;
   };
 }
@@ -47,10 +47,10 @@ async function trabajador(base: string, hasta: number, cookie: string, medicion:
 
   while (Date.now() < hasta) {
     const path = rutas[Math.floor(Math.random() * rutas.length)] ?? rutas[0] ?? '/health';
-    const inicio = performance.now();
+    const home = performance.now();
     try {
       const r = await fetch(`${base}${path}`, { headers: { cookie } });
-      medicion.latenciasMs.push(performance.now() - inicio);
+      medicion.latenciasMs.push(performance.now() - home);
       if (r.ok) medicion.ok += 1;
       else medicion.fallos += 1;
       await r.arrayBuffer();
@@ -104,7 +104,7 @@ async function principal(): Promise<void> {
   console.log(`  lecturas:      ${after.cache.total - before.cache.total}`);
   console.log(`  desde L1:      ${after.cache.desdeL1 - before.cache.desdeL1}`);
   console.log(`  desde L2:      ${after.cache.desdeL2 - before.cache.desdeL2}`);
-  console.log(`  sin poblar:    ${after.cache.generandose - before.cache.generandose}`);
+  console.log(`  sin poblar:    ${after.cache.generating - before.cache.generating}`);
   console.log(`  degradadas:    ${after.cache.degradados - before.cache.degradados}`);
   console.log('');
   console.log('Recordatorio: estos numeros NO fijan umbrales de autoscale. Ver');

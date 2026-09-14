@@ -100,13 +100,13 @@ describe('2.4 — ni apps/* ni ui-components conocen la fuente', () => {
     content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
   const revisar = (relativo: string, excepciones: string[] = []) => {
-    const archivos = recorrer(join(RAIZ, relativo)).filter(
+    const files = recorrer(join(RAIZ, relativo)).filter(
       (f) => !excepciones.some((e) => f.includes(e)),
     );
-    expect(archivos.length).toBeGreaterThan(0);
+    expect(files.length).toBeGreaterThan(0);
 
     const hallazgos: string[] = [];
-    for (const archivo of archivos) {
+    for (const archivo of files) {
       const codigo = sinComentarios(readFileSync(archivo, 'utf8'));
       for (const term of PROHIBIDOS) {
         if (codigo.includes(term)) {

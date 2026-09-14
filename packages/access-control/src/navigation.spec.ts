@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   generalTree,
-  equipoEste,
-  equipoNorte,
+  esteTeam,
+  norteTeam,
   paqueteReagrupado,
 } from './__fixtures__/gobierno';
 import type { ModulePackage } from './ModulePackage';
@@ -19,7 +19,7 @@ const visibleModules = (tree: NavNode[]): string[] => tree.flatMap(collectModule
 
 describe('conceder una carpeta concede todo su contenido (4.10.6)', () => {
   it('conceder carpeta-regional da acceso a los modulos de sus subcarpetas', () => {
-    expect([...accessibleModuleIds(generalTree, equipoNorte)].sort()).toEqual([
+    expect([...accessibleModuleIds(generalTree, norteTeam)].sort()).toEqual([
       'audiencias-norte',
       'casos-pendientes-norte',
       'casos-pendientes-este',
@@ -27,15 +27,15 @@ describe('conceder una carpeta concede todo su contenido (4.10.6)', () => {
   });
 
   it('no concede lo que vive fuera de la carpeta concedida', () => {
-    expect(canTeamAccessModule(generalTree, equipoNorte, 'estadisticas-nacionales')).toBe(false);
+    expect(canTeamAccessModule(generalTree, norteTeam, 'estadisticas-nacionales')).toBe(false);
   });
 
   it('conceder una subcarpeta concede solo esa rama', () => {
-    expect([...accessibleModuleIds(generalTree, equipoEste)]).toEqual(['casos-pendientes-este']);
+    expect([...accessibleModuleIds(generalTree, esteTeam)]).toEqual(['casos-pendientes-este']);
   });
 
   it('señala al Administrador los nodos concedidos que ya no existen', () => {
-    const equipo: Team = { ...equipoNorte, grantedNodes: ['carpeta-regional', 'carpeta-borrada'] };
+    const equipo: Team = { ...norteTeam, grantedNodes: ['carpeta-regional', 'carpeta-borrada'] };
     expect(findDanglingGrants(generalTree, equipo)).toEqual(['carpeta-borrada']);
     // Y aun asi el acceso se resuelve con lo que si existe: falla cerrado, no rompe.
     expect(canTeamAccessModule(generalTree, equipo, 'audiencias-norte')).toBe(true);
@@ -44,7 +44,7 @@ describe('conceder una carpeta concede todo su contenido (4.10.6)', () => {
 
 describe('sin paquete asignado: organizacion general podada', () => {
   it('muestra la estructura real, limitada a lo concedido', () => {
-    const view = buildNavigationView({ generalTree: generalTree, team: equipoNorte });
+    const view = buildNavigationView({ generalTree: generalTree, team: norteTeam });
     expect(view.fromPackage).toBe(false);
     expect(visibleModules(view.tree)).toEqual([
       'audiencias-norte',
@@ -56,7 +56,7 @@ describe('sin paquete asignado: organizacion general podada', () => {
   });
 
   it('no muestra carpetas que quedan sin contenido accesible', () => {
-    const view = buildNavigationView({ generalTree: generalTree, team: equipoEste });
+    const view = buildNavigationView({ generalTree: generalTree, team: esteTeam });
     const nombresDeCarpeta = (nodes: NavNode[]): string[] =>
       nodes.flatMap((n) => (isFolder(n) ? [n.name, ...nombresDeCarpeta(n.children)] : []));
     expect(nombresDeCarpeta(view.tree)).not.toContain('Distrito Norte');
@@ -67,7 +67,7 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
   it('reagrupa y reordena los modulos concedidos', () => {
     const view = buildNavigationView({
       generalTree: generalTree,
-      team: equipoNorte,
+      team: norteTeam,
       pkg: paqueteReagrupado,
     });
     expect(view.fromPackage).toBe(true);
@@ -81,7 +81,7 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
   it('NO muestra un modulo que el paquete incluye pero el equipo no tiene concedido', () => {
     const view = buildNavigationView({
       generalTree: generalTree,
-      team: equipoNorte,
+      team: norteTeam,
       pkg: paqueteReagrupado,
     });
     expect(visibleModules(view.tree)).not.toContain('estadisticas-nacionales');
@@ -90,7 +90,7 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
   it('reporta explicitamente al Administrador el nodo que no pudo mostrar', () => {
     const view = buildNavigationView({
       generalTree: generalTree,
-      team: equipoNorte,
+      team: norteTeam,
       pkg: paqueteReagrupado,
     });
     expect(view.dangling).toEqual([
@@ -117,7 +117,7 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
         },
       ],
     };
-    const view = buildNavigationView({ generalTree: generalTree, team: equipoNorte, pkg });
+    const view = buildNavigationView({ generalTree: generalTree, team: norteTeam, pkg });
     expect(view.dangling[0]?.reason).toBe('no-existe-en-organizacion-general');
   });
 
@@ -146,8 +146,8 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
       ],
     };
 
-    const v1 = buildNavigationView({ generalTree: generalTree, team: equipoNorte, pkg: plano });
-    const v2 = buildNavigationView({ generalTree: generalTree, team: equipoNorte, pkg: agrupado });
+    const v1 = buildNavigationView({ generalTree: generalTree, team: norteTeam, pkg: plano });
+    const v2 = buildNavigationView({ generalTree: generalTree, team: norteTeam, pkg: agrupado });
 
     // Misma coleccion de modulos accesibles, presentada de dos formas distintas.
     expect(visibleModules(v1.tree)).toEqual(visibleModules(v2.tree));
@@ -158,7 +158,7 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
   it('un paquete vacio de contenido accesible no deja carpetas visuales huerfanas', () => {
     const view = buildNavigationView({
       generalTree: generalTree,
-      team: equipoEste,
+      team: esteTeam,
       pkg: paqueteReagrupado,
     });
     expect(view.tree).toEqual([]);

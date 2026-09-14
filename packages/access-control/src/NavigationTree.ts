@@ -72,8 +72,8 @@ export function collectModuleIds(node: NavNode): string[] {
 export function maxDepth(tree: NavNode[]): number {
   let max = 0;
   for (const node of tree) {
-    const profundidad = isFolder(node) ? 1 + maxDepth(node.children) : 1;
-    if (profundidad > max) max = profundidad;
+    const depth = isFolder(node) ? 1 + maxDepth(node.children) : 1;
+    if (depth > max) max = depth;
   }
   return max;
 }

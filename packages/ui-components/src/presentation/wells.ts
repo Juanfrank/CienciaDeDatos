@@ -33,16 +33,16 @@ export function slotsOf(
   instance: ObjectInstance,
   slots: FieldSlot[],
 ): Map<string, string[]> {
-  const declaradas = new Map<string, string[]>(slots.map((r) => [r.id, []]));
+  const declared = new Map<string, string[]>(slots.map((r) => [r.id, []]));
   const guardadas = instance.binding.slots;
 
   if (guardadas) {
     for (const ranura of slots) {
       // Se filtra contra el maximo: una asignacion guardada con mas campos de los que la ranura
       // admite —porque el objeto cambio de version— no puede desbordar en silencio.
-      declaradas.set(ranura.id, (guardadas[ranura.id] ?? []).slice(0, ranura.max));
+      declared.set(ranura.id, (guardadas[ranura.id] ?? []).slice(0, ranura.max));
     }
-    return declaradas;
+    return declared;
   }
 
   const keys = {
@@ -54,13 +54,13 @@ export function slotsOf(
    * DOS pasadas: primero los minimos de cada ranura, y solo despues el resto hasta el maximo.
    */
   for (const ranura of slots) {
-    declaradas.set(ranura.id, keys[ranura.tipo].splice(0, ranura.min ?? 0));
+    declared.set(ranura.id, keys[ranura.tipo].splice(0, ranura.min ?? 0));
   }
   for (const ranura of slots) {
-    const puestos = declaradas.get(ranura.id) ?? [];
+    const puestos = declared.get(ranura.id) ?? [];
     puestos.push(...keys[ranura.tipo].splice(0, ranura.max - puestos.length));
   }
-  return declaradas;
+  return declared;
 }
 
 /** Los arrays que consumen el lector, la validacion y la proyeccion. */
