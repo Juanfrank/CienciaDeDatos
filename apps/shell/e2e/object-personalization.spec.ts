@@ -5,9 +5,16 @@ import { asLogin } from './session';
 
 type Pagina = import('@playwright/test').Page;
 
-/** Espera a que el editor termine de guardar. */
-const guardado = async (page: Pagina) => {
+/**
+ * Espera a que el editor este AL DIA: ni guardando ni dibujando.
+ *
+ * Dibujar dejo de ser un efecto secundario de guardar, asi que hay dos esperas distintas. Mirar
+ * solo `data-saving` deja la prueba leyendo el lienzo anterior — y con el guardado explicito ese
+ * atributo es casi siempre «no», con lo que la espera no esperaba nada.
+ */
+const alDia = async (page: Pagina) => {
   await expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
+  await expect(page.locator('.editor')).toHaveAttribute('data-drawing', 'no');
 };
 
 /** El id del objeto recien colocado, leido del BLOQUE del lienzo. */
@@ -41,31 +48,37 @@ test.describe('el editor configura como se ve un objeto', () => {
     await createModule(page, 'pers-kpi');
 
     await page.getByTestId('add-tarjeta-kpi').click();
-    await guardado(page);
+    await alDia(page);
     const id = await blockFirstId(page);
     await page.getByTestId('tab-formato').click();
 
     await page.getByTestId(`pres-${id}-icono`).selectOption('balanza');
-    await guardado(page);
+    await alDia(page);
     // El acento y el resaltado viven ahora en «Borde», que es lo que dibuja el limite de la
     // tarjeta. Antes estaban mezclados con el rotulo, que es otra cosa.
     await open(page, `pres-${id}-borde`);
     await page.getByTestId(`pres-${id}-acento`).selectOption('terciario');
-    await guardado(page);
-    // `.click()` y no `.check()`: el editor no es optimista — la casilla no cambia hasta que el
-    // servidor devuelve el modulo guardado, y `.check()` exige que el estado cambie en el acto.
+    await alDia(page);
+    // `.click()` y no `.check()`. Hoy la casilla si cambia en el acto —el borrador vive en el
+    // editor—, pero `.check()` seguiria siendo la herramienta equivocada: afirma un estado final
+    // en vez de ejercer el gesto, y lo que se prueba aqui es que el gesto llegue al modulo.
     await page.getByTestId(`pres-${id}-resaltado`).click();
-    await guardado(page);
+    await alDia(page);
     await expect(page.getByTestId(`pres-${id}-resaltado`)).toBeChecked();
     await page.getByTestId(`pres-${id}-subtitulo`).fill('Al cierre');
     await page.getByTestId(`pres-${id}-subtitulo`).blur();
-    await guardado(page);
+    await alDia(page);
     // La unidad esta en el renglon GENERAL del formato, dentro de «Medida».
     await open(page, `pres-${id}-medida`);
     await page.getByTestId(`pres-${id}-formato-general-unidad`).fill('casos');
     await page.getByTestId(`pres-${id}-formato-general-unidad`).blur();
-    await guardado(page);
+    await alDia(page);
     await expect(page.getByTestId('editor-without-locks')).toBeVisible();
+
+    // Se guarda a proposito: el editor ya no lo hace solo, y lo que esta prueba comprueba es que
+    // lo elegido llegue al MODULO, no que se vea en pantalla mientras se elige.
+    await page.getByTestId('guardar-borrador').click();
+    await alDia(page);
 
     // Se recarga: lo elegido tiene que venir del servidor, no del estado del componente.
     await page.reload();
@@ -106,7 +119,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await createModule(page, 'pers-tabla');
 
     await page.getByTestId('add-tabla').click();
-    await guardado(page);
+    await alDia(page);
     const id = await blockFirstId(page);
     await page.getByTestId('tab-formato').click();
 
@@ -126,7 +139,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await asLogin(page, 'u-admin');
     await createModule(page, 'pers-cerrado');
     await page.getByTestId('add-tarjeta-kpi').click();
-    await guardado(page);
+    await alDia(page);
     const id = await blockFirstId(page);
     await page.getByTestId('tab-formato').click();
 
@@ -143,13 +156,13 @@ test.describe('el editor configura como se ve un objeto', () => {
     await createModule(page, 'pers-panel');
 
     await page.getByTestId('add-panel-de-filtros').click();
-    await guardado(page);
+    await alDia(page);
     const id = await blockFirstId(page);
 
     // Se anade una segunda dimension desde su pozo: tiene que aparecer su fila de selector sola.
     await page.getByTestId(`well-${id}-filtros-anadir`).click();
     await page.getByTestId(`well-${id}-filtros-opcion-DimTribunal.Materia`).click();
-    await guardado(page);
+    await alDia(page);
     await expect(page.getByTestId(`well-${id}-filtros`)).toContainText('DimTribunal.Materia');
 
     await page.getByTestId('tab-formato').click();
@@ -157,13 +170,16 @@ test.describe('el editor configura como se ve un objeto', () => {
     await expect(page.getByTestId(`selectores-${id}-DimTribunal.Materia`)).toBeVisible();
 
     await page.getByTestId(`selectores-${id}-DimTribunal.Materia`).selectOption('desplegable');
-    await guardado(page);
+    await alDia(page);
     await expect(page.getByTestId('editor-without-locks')).toBeVisible();
 
     // El borrador no se abre en /m/ —no esta publicado ni concedido—, asi que lo que se
-    // comprueba aqui es que la eleccion sobrevive al servidor.
+    // comprueba aqui es que la eleccion sobrevive al servidor. Se guarda a proposito: el editor
+    // ya no lo hace solo.
     // Tras recargar no hay nada elegido, asi que hay que volver a elegir el bloque. Que el desplegable se DIBUJE lo
     // cubre `filtros.spec.ts` sobre el panel del modulo publicado.
+    await page.getByTestId('guardar-borrador').click();
+    await alDia(page);
     await page.reload();
     await page.getByTestId(`select-${id}`).click();
     await page.getByTestId('tab-formato').click();
@@ -184,7 +200,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await asLogin(page, 'u-admin');
     await createModule(page, 'pers-fecha');
     await page.getByTestId('add-panel-de-filtros').click();
-    await guardado(page);
+    await alDia(page);
     const id = await blockFirstId(page);
     await page.getByTestId('tab-formato').click();
     await open(page, `pres-${id}-selectores`);

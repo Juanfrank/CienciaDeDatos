@@ -403,6 +403,15 @@ export const es = {
   'admin.bump.new': 'Nuevo, en su valor por defecto: {claves}.',
   'admin.bump.dropped': 'La version nueva ya no admite: {claves}.',
   'admin.bump.failed': 'No se pudo subir.',
+  // Editor: guardar, descartar y enviar explicitos — seccion 4.2.
+  'editor.saving': 'Guardando…',
+  'editor.unsaved': 'Sin guardar',
+  'editor.saved': 'Guardado',
+  'editor.saveDraft': 'Guardar borrador',
+  'editor.discard': 'Descartar',
+  'editor.submit': 'Enviar a aprobacion',
+  'editor.approve': 'Aprobar y publicar',
+  'editor.backToList': 'Volver a la lista',
 } as const;
 
 export type MessageKey = keyof typeof es;

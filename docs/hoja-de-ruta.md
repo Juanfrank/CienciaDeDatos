@@ -65,6 +65,19 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   siempre. Lo que tapaba: las dos pantallas de auditoria mostraban `u-admin` donde deberia ir un
   nombre. Arreglado en las dos, y la prueba ahora provoca el cambio y comprueba las cuatro
   columnas sin condicion.
+- **El editor guarda cuando alguien se lo pide (4.2).** Cada gesto —anadir un objeto, mapear un
+  campo, mover una caja— escribia en el almacen, y el lienzo se dibujaba con lo que devolvia esa
+  escritura: el dibujo era un efecto secundario de guardar. Con eso no habia forma de probar una
+  idea y desecharla, porque lo probado ya estaba guardado y «descartar» significaba deshacer a
+  mano. Ahora el borrador vive en el editor y hay tres botones: guardar borrador, descartar y
+  enviar a aprobacion — mas «aprobar y publicar» para quien puede, que va fuera de la puerta de
+  edicion porque quien revisa una propuesta no la esta editando.
+  Separar las dos cosas exigio poder dibujar sin escribir: `POST /api/modules/<slug>/preview`
+  devuelve diagnosticos, cerraduras y objetos sin tocar el almacen. Y exigio que el editor diga
+  cuando esta al dia y no solo cuando guarda: `data-drawing` existe porque, con el guardado
+  explicito, `data-saving` es casi siempre «no» y las pruebas que lo miraban dejaron de esperar
+  nada. Ahora hay una prueba de lo que antes no se podia ni escribir: que lo NO guardado no
+  sobreviva.
 - **Los recursos, en tabla, con su uso real y su vuelta atras (4.5, 4.10.8).** La lista de
   tarjetas se lee bien de una en una y mal de quince en quince: para comparar «que version corre
   cada uno» habia que recorrerla con el dedo. Ahora es una tabla con acciones por fila —editar,

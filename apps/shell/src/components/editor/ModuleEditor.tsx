@@ -16,6 +16,7 @@ import type { SerializedObject } from '../../server/serialize';
 import { EditorHeader } from './EditorHeader';
 import { Canvas } from './Canvas';
 import { SidebarPanel } from './SidebarPanel';
+import { useTranslator } from '../Locale';
 
 /** Editor de un modulo — seccion 4.2. */
 export function ModuleEditor({
@@ -25,6 +26,7 @@ export function ModuleEditor({
   locks,
   palette,
   editable,
+  puedePublicar,
 }: {
   initial: ModuleDefinition;
   objetosIniciales: SerializedObject[];
@@ -32,8 +34,11 @@ export function ModuleEditor({
   locks: PublishBlocker[];
   palette: EditorPalette;
   editable: boolean;
+  /** Si quien mira puede aprobar. Lo decide el servidor, no el componente. */
+  puedePublicar: boolean;
 }) {
   const router = useRouter();
+  const t = useTranslator();
   const [modulo, setModulo] = useState(initial);
   const [objetos, setObjetos] = useState(objetosIniciales);
   const [diag, setDiag] = useState(diagnosticos);
@@ -41,8 +46,23 @@ export function ModuleEditor({
   const [selection, setSeleccion] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [saving, setGuardando] = useState(false);
+  const [dibujando, setDibujando] = useState(false);
 
-  const pagina = modulo.pages[0];
+  /*
+   * El borrador VIVE aqui, no en el servidor.
+   *
+   * Antes cada gesto —anadir un objeto, mapear un campo, mover una caja— escribia en el almacen.
+   * Con eso no habia forma de probar una idea y desecharla: lo probado ya estaba guardado, y
+   * «descartar» significaba deshacer a mano lo que uno acababa de hacer. Ahora el editor guarda
+   * cuando alguien lo pide, y hasta entonces lo tocado es suyo.
+   *
+   * `paginas` es lo que se esta editando; `modulo.pages` es lo ultimo guardado. La diferencia
+   * entre las dos es lo que se pierde al descartar, y es lo que el boton dice que se va a perder.
+   */
+  const [paginas, setPaginas] = useState<ModuleDefinition['pages']>(modulo.pages);
+  const sucio = JSON.stringify(paginas) !== JSON.stringify(modulo.pages);
+
+  const pagina = paginas[0];
   const items = pagina?.items ?? [];
   const chosen = items.find((i) => i.id === selection) ?? null;
 
@@ -56,15 +76,56 @@ export function ModuleEditor({
     return () => document.removeEventListener('keydown', clickTo);
   }, []);
 
+  /**
+   * Dibuja lo que hay en el borrador, sin guardarlo.
+   *
+   * El lienzo se dibujaba con lo que devolvia el guardado: el dibujo era un efecto secundario de
+   * escribir. Separadas las dos cosas, hace falta pedir el dibujo aparte — y esa llamada no
+   * escribe nada, asi que puede correr en cada cambio sin que nadie pierda nada.
+   */
+  const dibujar = useCallback(
+    async (cuales: ModuleDefinition['pages']) => {
+      setDibujando(true);
+      try {
+        const r = await fetch(`/api/modules/${modulo.slug}/preview`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ paginas: cuales }),
+        });
+        if (!r.ok) return;
+        const body = (await r.json()) as {
+          diagnosticos: ModuleDiagnostics;
+          locks: PublishBlocker[];
+          objetos: SerializedObject[];
+        };
+        setDiag(body.diagnosticos);
+        setBloq(body.locks);
+        setObjetos(body.objetos);
+      } finally {
+        setDibujando(false);
+      }
+    },
+    [modulo.slug],
+  );
+
+  /** Cambia el borrador y redibuja. No escribe. */
+  const editar = useCallback(
+    (cuales: ModuleDefinition['pages']) => {
+      setPaginas(cuales);
+      void dibujar(cuales);
+    },
+    [dibujar],
+  );
+
   const guardar = useCallback(
-    async (paginas: ModuleDefinition['pages']) => {
+    async (cuales: ModuleDefinition['pages']) => {
       setError('');
       setGuardando(true);
       try {
         const r = await fetch(`/api/modules/${modulo.slug}/edit`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ paginas }),
+          body: JSON.stringify({ paginas: cuales }),
         });
         if (!r.ok) {
           /*
@@ -81,6 +142,7 @@ export function ModuleEditor({
           objetos: SerializedObject[];
         };
         setModulo(body.modulo);
+        setPaginas(body.modulo.pages);
         setDiag(body.diagnosticos);
         setBloq(body.locks);
         setObjetos(body.objetos);
@@ -93,7 +155,7 @@ export function ModuleEditor({
   );
 
   const conItems = (nuevos: GridItem[]): ModuleDefinition['pages'] =>
-    modulo.pages.map((p, i) => (i === 0 ? { ...p, items: nuevos } : p));
+    paginas.map((p, i) => (i === 0 ? { ...p, items: nuevos } : p));
 
   const add = async (objectId: string) => {
     const definicion = palette.objetos.find((o) => o.objectId === objectId);
@@ -138,18 +200,62 @@ export function ModuleEditor({
       },
     };
 
-    await guardar(conItems([...items, nuevo]));
+    editar(conItems([...items, nuevo]));
     // Lo recien puesto queda elegido: es lo que se va a configurar a continuacion.
     setSeleccion(id);
   };
 
   const cambiar = async (itemId: string, change: (item: GridItem) => GridItem) => {
-    await guardar(conItems(items.map((i) => (i.id === itemId ? change(i) : i))));
+    editar(conItems(items.map((i) => (i.id === itemId ? change(i) : i))));
   };
 
   const remove = async (itemId: string) => {
     setSeleccion(null);
-    await guardar(conItems(items.filter((i) => i.id !== itemId)));
+    editar(conItems(items.filter((i) => i.id !== itemId)));
+  };
+
+  /** Devuelve el borrador a lo ultimo guardado. Lo tocado desde entonces se pierde. */
+  const descartar = () => {
+    setSeleccion(null);
+    setError('');
+    setPaginas(modulo.pages);
+    void dibujar(modulo.pages);
+  };
+
+  /** Guarda y, acto seguido, pide la transicion. Enviar algo sin guardar enviaria lo viejo. */
+  const transicion = async (cual: 'enviar' | 'publicar') => {
+    setError('');
+    setGuardando(true);
+    try {
+      if (sucio) {
+        const guardado = await fetch(`/api/modules/${modulo.slug}/edit`, {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ paginas }),
+        });
+        if (!guardado.ok) {
+          const body = (await guardado.json().catch(() => ({}))) as { error?: string };
+          setError(body.error ?? 'No se pudo guardar antes de enviar.');
+          return;
+        }
+      }
+      const r = await fetch(`/api/modules/${modulo.slug}/status`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ transition: cual }),
+      });
+      if (!r.ok) {
+        const body = (await r.json().catch(() => ({}))) as { error?: string };
+        setError(body.error ?? `No se pudo ${cual}.`);
+        return;
+      }
+      const body = (await r.json()) as { modulo: ModuleDefinition };
+      setModulo(body.modulo);
+      setPaginas(body.modulo.pages);
+      router.refresh();
+    } finally {
+      setGuardando(false);
+    }
   };
 
   /*
@@ -160,7 +266,16 @@ export function ModuleEditor({
     <div className="taller">
       <div className="taller__obra">
         <EditorHeader />
-        <section className="editor" data-saving={saving ? 'si' : 'no'}>
+        <section
+          className="editor"
+          data-saving={saving ? 'si' : 'no'}
+          /*
+            `data-drawing` existe porque dibujar dejo de ser un efecto secundario de guardar.
+            Antes bastaba con `data-saving` para saber que el servidor habia contestado; ahora hay
+            dos esperas distintas, y una prueba que solo mire la de guardar lee el lienzo viejo.
+          */
+          data-drawing={dibujando ? 'si' : 'no'}
+        >
       <header className="editor__header">
         <div>
           <h2>{modulo.name}</h2>
@@ -172,11 +287,69 @@ export function ModuleEditor({
           </p>
         </div>
         <div className="editor__actions-header">
+          {/*
+            El estado dice si hay algo sin guardar, no si se esta guardando.
+            «Guardando…» aparecia y desaparecia solo, y con el guardado automatico era lo unico
+            que informaba. Ahora la pregunta que importa es otra: ¿lo que veo esta guardado?
+          */}
           <p className="editor__status" role="status" aria-live="polite" data-testid="status-editor">
-            {saving ? 'Guardando…' : ''}
+            {saving ? t('editor.saving') : sucio ? t('editor.unsaved') : t('editor.saved')}
           </p>
+
+          {/* Guardar y descartar son de quien EDITA. */}
+          {editable ? (
+            <>
+              <button
+                type="button"
+                className="pastilla"
+                disabled={saving || !sucio}
+                data-testid="guardar-borrador"
+                onClick={() => void guardar(paginas)}
+              >
+                {t('editor.saveDraft')}
+              </button>
+              <button
+                type="button"
+                className="boton-contorno"
+                disabled={saving || !sucio}
+                data-testid="descartar-borrador"
+                onClick={descartar}
+              >
+                {t('editor.discard')}
+              </button>
+              {modulo.status === 'borrador' ? (
+                <button
+                  type="button"
+                  className="pastilla"
+                  disabled={saving || bloq.length > 0}
+                  data-testid="enviar-aprobacion"
+                  onClick={() => void transicion('enviar')}
+                >
+                  {t('editor.submit')}
+                </button>
+              ) : null}
+            </>
+          ) : null}
+
+          {/*
+            Aprobar es de quien APRUEBA, y por eso va fuera del gate de edicion: quien revisa una
+            propuesta no la esta editando —no es suya— y aun asi tiene que poder publicarla desde
+            la pantalla donde la esta mirando.
+          */}
+          {modulo.status === 'pendiente-de-aprobacion' && puedePublicar ? (
+            <button
+              type="button"
+              className="pastilla"
+              disabled={saving || bloq.length > 0}
+              data-testid="aprobar-modulo"
+              onClick={() => void transicion('publicar')}
+            >
+              {t('editor.approve')}
+            </button>
+          ) : null}
+
           <Link href="/editor" className="boton-contorno">
-            Volver a la lista
+            {t('editor.backToList')}
           </Link>
         </div>
       </header>

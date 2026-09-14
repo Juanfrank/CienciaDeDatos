@@ -5,8 +5,17 @@ import { asLogin, newModule } from './session';
 
 /** Todo objeto del catalogo se COLOCA y se CONFIGURA desde el editor — seccion 4.2. */
 
-const guardado = async (page: Page) =>
-  expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
+/**
+ * Espera a que el editor este AL DIA: ni guardando ni dibujando.
+ *
+ * Dibujar dejo de ser un efecto secundario de guardar, asi que hay dos esperas distintas. Mirar
+ * solo `data-saving` deja la prueba leyendo el lienzo anterior — y con el guardado explicito ese
+ * atributo es casi siempre «no», con lo que la espera no esperaba nada.
+ */
+const alDia = async (page: Page) => {
+  await expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
+  await expect(page.locator('.editor')).toHaveAttribute('data-drawing', 'no');
+};
 
 /** Despliega todas las secciones del panel. */
 const openSections = async (page: Page) => {
@@ -43,7 +52,7 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
       ).toHaveCount(i + 1);
     }
 
-    await guardado(page);
+    await alDia(page);
   });
 
   test('y lo colocado sobrevive a recargar: se guardo de verdad', async ({ page }) => {
@@ -53,15 +62,49 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
     await newModule(page, slug);
 
     await page.getByTestId('add-embudo').click();
-    // Se espera al guardado ANTES del segundo: la paleta se deshabilita mientras el editor
-    // guarda, que es lo correcto, y pulsar sin esperar solo funciona si la maquina va sobrada.
-    await guardado(page);
+    await alDia(page);
     await page.getByTestId('tab-objetos').click();
     await page.getByTestId('add-mapa-de-arbol').click();
-    await guardado(page);
+    await alDia(page);
+
+    // El editor ya no guarda solo, y eso es justo lo que esta prueba distingue: hasta aqui los
+    // dos objetos estan DIBUJADOS y no guardados.
+    await page.getByTestId('guardar-borrador').click();
+    await alDia(page);
 
     await page.goto(`/editor/${slug}`);
     await expect(page.locator('[data-testid^="block"]')).toHaveCount(2);
+  });
+
+  /*
+   * La otra mitad de lo mismo, que antes no se podia ni escribir: sin guardar, no queda nada.
+   *
+   * Con el guardado automatico «descartar» no existia — lo probado ya estaba escrito, y deshacer
+   * era rehacer a mano. Es la razon de que el guardado explicito valga la pena, asi que se
+   * comprueba.
+   */
+  test('y lo NO guardado no sobrevive: descartar y recargar lo confirman', async ({ page }) => {
+    const slug = `descarta-${Date.now()}`;
+    await newModule(page, slug);
+
+    await page.getByTestId('add-embudo').click();
+    await alDia(page);
+    await page.getByTestId('guardar-borrador').click();
+    await alDia(page);
+
+    // Un segundo objeto que NO se guarda.
+    await page.getByTestId('tab-objetos').click();
+    await page.getByTestId('add-mapa-de-arbol').click();
+    await alDia(page);
+    await expect(page.locator('[data-testid^="block"]')).toHaveCount(2);
+
+    await page.getByTestId('descartar-borrador').click();
+    await alDia(page);
+    await expect(page.locator('[data-testid^="block"]')).toHaveCount(1);
+
+    // Y al volver sigue habiendo uno: lo descartado no llego nunca al almacen.
+    await page.goto(`/editor/${slug}`);
+    await expect(page.locator('[data-testid^="block"]')).toHaveCount(1);
   });
 });
 
@@ -98,7 +141,7 @@ test.describe('configurable: lo que cada objeto declara sale en su panel @catalo
           /*
            * Se espera al guardado ANTES de pulsar, y se afirma el estado despues.
            */
-          await guardado(page);
+          await alDia(page);
           const casilla = page.getByTestId(`pres-${item}-${interruptor}`);
           await casilla.click();
           await expect(casilla).toBeChecked();
@@ -126,7 +169,7 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
   }) => {
     await newModule(page, `usar-medidor-${Date.now()}`);
     await page.getByTestId('add-medidor').click();
-    await guardado(page);
+    await alDia(page);
     const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
     const item = (id ?? '').replace('block-', '');
 
@@ -143,7 +186,7 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
      */
     await page.getByTestId(`pres-${item}-maximo`).fill('5000');
     await page.getByTestId(`pres-${item}-maximo`).blur();
-    await guardado(page);
+    await alDia(page);
 
     // El respaldo accesible dice la escala con palabras: es lo que lee quien no ve la aguja, y es
     // donde se comprueba sin abrir el canvas. Sale de la misma funcion que el dibujo.
@@ -162,18 +205,18 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     await expect(compare).toBeVisible();
 
     await compare.selectOption('anterior');
-    await guardado(page);
+    await alDia(page);
     await expect(page.getByTestId('embudo').first()).toContainText('De la anterior');
 
     await compare.selectOption('primero');
-    await guardado(page);
+    await alDia(page);
     await expect(page.getByTestId('embudo').first()).toContainText('De la primera');
   });
 
   test('los multiplos: elegir dos columnas desde el panel reparte los paneles', async ({ page }) => {
     await newModule(page, `usar-multiplos-${Date.now()}`);
     await page.getByTestId('add-barras').click();
-    await guardado(page);
+    await alDia(page);
     const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
     const item = (id ?? '').replace('block-', '');
 
@@ -181,7 +224,7 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     await page.getByTestId('tab-datos').click();
     await page.getByTestId(`well-${item}-multiplo-anadir`).click();
     await page.getByTestId(`well-${item}-multiplo-opcion-DimTribunal.Materia`).click();
-    await guardado(page);
+    await alDia(page);
 
     // Sin tocar nada mas, el objeto ya se parte en paneles: el pozo es lo que lo decide.
     await expect(page.locator('.multiples__panel').first()).toBeVisible();
@@ -189,7 +232,7 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     await page.getByTestId('tab-formato').click();
     await openSections(page);
     await page.getByTestId(`pres-${item}-multiplos-columnas`).selectOption('2');
-    await guardado(page);
+    await alDia(page);
 
     const gridColumns = await page
       .locator('.multiplos')

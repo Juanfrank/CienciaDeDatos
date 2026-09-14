@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { can } from '@app/access-control';
 import { actorDe, publicationLocks, visibleModuleSlug } from '../../../src/server/cicloDeVida';
 import { definitionDiagnose, draftPreviousView } from '../../../src/server/data';
 import { objectSerialize } from '../../../src/server/serialize';
@@ -38,6 +39,7 @@ export default async function ModuleEditorPage({
       locks={await publicationLocks(modulo)}
       palette={await editorPalette()}
       editable={modulo.status === 'borrador' && modulo.ownerUserId === sesion.userId}
+      puedePublicar={can((await actorDe(sesion)).role, 'publicar-modulo-institucional')}
     />
   );
 }

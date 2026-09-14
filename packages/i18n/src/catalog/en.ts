@@ -407,4 +407,14 @@ export const en: Record<MessageKey, string> = {
   'admin.bump.new': 'New, at its default value: {claves}.',
   'admin.bump.dropped': 'The new version no longer supports: {claves}.',
   'admin.bump.failed': 'Could not bump.',
+
+  // Editor: explicit save, discard and submit — section 4.2.
+  'editor.saving': 'Saving…',
+  'editor.unsaved': 'Unsaved',
+  'editor.saved': 'Saved',
+  'editor.saveDraft': 'Save draft',
+  'editor.discard': 'Discard',
+  'editor.submit': 'Submit for approval',
+  'editor.approve': 'Approve and publish',
+  'editor.backToList': 'Back to the list',
 };
