@@ -11,17 +11,114 @@ import { negotiateLocale, headerPreferences } from './locales';
  * al compilar ni al dibujar.
  */
 
-/** Los argumentos ICU de un mensaje, sin importar su tipo ni sus opciones. */
+/**
+ * Los argumentos ICU de un mensaje, sin importar su tipo ni sus opciones.
+ *
+ * No se puede hacer con una expresion regular, y hacerlo asi dio un falso positivo real: una rama
+ * de plural de UNA palabra —`=0 {ninguno}`— es indistinguible de `{ninguno}`, un argumento. El
+ * mensaje espanol tenia `=0 {ninguno}` y el ingles `=0 {none}`, y la prueba denuncio que los dos
+ * catalogos usaban argumentos distintos. Con dos palabras en la rama el fallo no aparecia, asi
+ * que llevaba ahi desde el primer plural y solo saltaba segun como estuviera redactada la rama.
+ *
+ * Se recorre contando llaves: un `{` abre un marcador, lo que va hasta la primera coma es el
+ * nombre, y si el tipo es `plural`, `select` o `selectordinal` lo que sigue es una lista de
+ * `etiqueta {cuerpo}` donde la etiqueta NO es un argumento y el cuerpo si puede llevarlos.
+ */
 function argumentsOf(mensaje: string): string[] {
   const names = new Set<string>();
-  const re = /\{\s*([a-zA-Z0-9_]+)\s*(?:,|\})/g;
-  let m = re.exec(mensaje);
-  while (m) {
-    names.add(m[1] as string);
-    m = re.exec(mensaje);
-  }
+  marcadores(mensaje, names);
   return [...names].sort();
 }
+
+/** Indice de la llave que cierra la que empieza en `desde`, o -1 si no cierra. */
+function cierre(texto: string, desde: number): number {
+  let profundidad = 0;
+  for (let i = desde; i < texto.length; i++) {
+    if (texto[i] === '{') profundidad++;
+    else if (texto[i] === '}' && --profundidad === 0) return i;
+  }
+  return -1;
+}
+
+/** Los marcadores `{...}` de un trozo de mensaje, con sus nombres. */
+function marcadores(texto: string, names: Set<string>): void {
+  let i = 0;
+  while (i < texto.length) {
+    if (texto[i] !== '{') {
+      i++;
+      continue;
+    }
+    const fin = cierre(texto, i);
+    if (fin === -1) return;
+
+    const dentro = texto.slice(i + 1, fin);
+    const primeraComa = dentro.indexOf(',');
+    const nombre = (primeraComa === -1 ? dentro : dentro.slice(0, primeraComa)).trim();
+    if (/^[a-zA-Z0-9_]+$/.test(nombre)) names.add(nombre);
+
+    const segundaComa = primeraComa === -1 ? -1 : dentro.indexOf(',', primeraComa + 1);
+    const tipo =
+      primeraComa === -1
+        ? ''
+        : dentro.slice(primeraComa + 1, segundaComa === -1 ? undefined : segundaComa).trim();
+    if ((tipo === 'plural' || tipo === 'select' || tipo === 'selectordinal') && segundaComa !== -1) {
+      ramas(dentro.slice(segundaComa + 1), names);
+    }
+
+    i = fin + 1;
+  }
+}
+
+/** Los cuerpos de las ramas de un plural o un select, sin contar sus etiquetas. */
+function ramas(texto: string, names: Set<string>): void {
+  let i = 0;
+  while (i < texto.length) {
+    if (texto[i] !== '{') {
+      i++;
+      continue;
+    }
+    const fin = cierre(texto, i);
+    if (fin === -1) return;
+    marcadores(texto.slice(i + 1, fin), names);
+    i = fin + 1;
+  }
+}
+
+/*
+ * La extraccion de argumentos tiene ahora bastante logica como para necesitar sus propias
+ * pruebas: es lo que decide si los dos catalogos discrepan, y una que se equivoque hace ruido o,
+ * peor, calla.
+ */
+describe('argumentsOf', () => {
+  it('encuentra un argumento suelto y uno con tipo', () => {
+    expect(argumentsOf('Hola {nombre}, van {n, number} casos')).toEqual(['n', 'nombre']);
+  });
+
+  it('NO confunde una rama de plural de una palabra con un argumento', () => {
+    // El falso positivo que lo motivo: `=0 {ninguno}` frente a `=0 {none}`.
+    expect(argumentsOf('{n, plural, =0 {ninguno} one {# modulo} other {# modulos}}')).toEqual(['n']);
+    expect(argumentsOf('{n, plural, =0 {none} one {# module} other {# modules}}')).toEqual(['n']);
+  });
+
+  it('si encuentra los argumentos que van DENTRO de una rama', () => {
+    // Es el caso por el que no vale con ignorar todo lo que hay tras el `plural`: un argumento
+    // que solo aparece en una rama sigue siendo un argumento del mensaje.
+    expect(argumentsOf('{n, plural, one {un caso de {materia}} other {# casos}}')).toEqual([
+      'materia',
+      'n',
+    ]);
+  });
+
+  it('aguanta un select y un plural anidados', () => {
+    expect(
+      argumentsOf('{genero, select, otro {{n, plural, one {# persona} other {# personas}}}}'),
+    ).toEqual(['genero', 'n']);
+  });
+
+  it('no inventa nada con un mensaje sin argumentos', () => {
+    expect(argumentsOf('Guardar borrador')).toEqual([]);
+  });
+});
 
 describe('catalogos', () => {
   const keys = Object.keys(es) as (keyof typeof es)[];

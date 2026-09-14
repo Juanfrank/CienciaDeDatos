@@ -200,6 +200,29 @@ export const es = {
   'admin.modules.loose': 'Sin colocar ({n})',
   'admin.modules.loose.intro':
     'Todavia no cuelgan de ninguna carpeta. Un modulo entra en la organizacion general al publicarse; hasta entonces solo lo ve quien lo edita.',
+  // Paquetes visuales — seccion 4.1.3.
+  'admin.packages.title': 'Paquetes visuales',
+  'admin.packages.intro':
+    'Un paquete reagrupa, renombra y reordena lo que una audiencia YA puede ver. Es una vista, no un permiso: la resolucion de ambito nunca consulta un paquete, solo la organizacion general.',
+  'admin.packages.add': 'Crear un paquete',
+  'admin.packages.edit': 'Editar',
+  'admin.packages.delete': 'Borrar',
+  'admin.packages.failed': 'No se pudo guardar el paquete.',
+  'admin.packages.empty':
+    'No hay paquetes definidos. Los equipos sin paquete ven la organizacion general tal cual, limitada a lo que su ambito permite.',
+  'admin.packages.column.package': 'Paquete',
+  'admin.packages.column.modules': 'Modulos',
+  'admin.packages.column.teams': 'Asignado a',
+  'admin.packages.moduleCount': '{n, plural, =0 {ninguno} one {# modulo} other {# modulos}}',
+  'admin.packages.noTeams': 'A ningun equipo',
+  'admin.packages.ok': 'Todo visible',
+  'admin.packages.dangling': '{n, plural, one {# nodo no se muestra} other {# nodos no se muestran}}',
+  'admin.packages.dangling.intro':
+    'Estos nodos estan en un paquete pero la audiencia no los tiene concedidos, asi que no se le dibujan:',
+  'admin.packages.dangling.for': 'para {equipo}',
+  'admin.packages.field.name': 'Nombre del paquete',
+  'admin.packages.field.modules': 'Modulos que incluye',
+  'admin.packages.noCandidates': 'No hay modulos publicados que meter en un paquete.',
   // El desplegable de la columna «Objetos»: que hay dentro del modulo y con que version.
   'admin.modules.objects.none': 'Ninguno',
   'admin.modules.objects.count': '{n, plural, one {# objeto} other {# objetos}}',

@@ -742,3 +742,98 @@ test.describe('los modulos se ven ANIDADOS, con los permisos de cada carpeta (4.
     ).toBeVisible();
   });
 });
+
+test.describe('paquetes visuales: se crean desde la pantalla (4.1.3)', () => {
+  test('crear, editar y borrar un paquete sin tocar el seed', async ({ page }) => {
+    /*
+     * La API llevaba desde el principio entera —guardar, validar, auditar, borrar— y no la
+     * llamaba ninguna pantalla: la lista era de solo lectura y un paquete solo existia si lo
+     * habia sembrado el seed. Esta prueba recorre el camino que faltaba.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules/packages');
+
+    await page.getByTestId('add-package').click();
+    await page.getByTestId('package-name').fill('Vista de prueba');
+    await page.getByTestId('package-modulo-audiencias').check();
+    await page.getByTestId('guardar-package').click();
+
+    // Se busca por el nombre dentro de la tabla: el identificador lo genera el cliente, asi que
+    // la prueba no puede conocerlo de antemano.
+    const fila = page.getByTestId('tabla-paquetes').locator('tbody tr').filter({
+      hasText: 'Vista de prueba',
+    });
+    await expect(fila).toHaveCount(1);
+    await expect(fila).toContainText('1 modulo');
+
+    // Editar: se abre con lo que tenia, y anadir otro modulo se refleja en la tabla.
+    const id = ((await fila.getAttribute('data-testid')) ?? '').replace('package-', '');
+    await page.getByTestId(`editar-package-${id}`).click();
+    await expect(page.getByTestId('package-modulo-audiencias')).toBeChecked();
+    await page.getByTestId('package-modulo-casos-pendientes').check();
+    await page.getByTestId('guardar-package').click();
+    await expect(page.getByTestId(`package-${id}`)).toContainText('2 modulos');
+
+    await page.getByTestId(`borrar-package-${id}`).click();
+    await expect(page.getByTestId(`package-${id}`)).toHaveCount(0);
+  });
+
+  test('la tabla dice cuantos nodos no se muestran, y por que', async ({ page }) => {
+    /*
+     * La validacion de 4.10.6 ya existia y salia en la pantalla; lo que no habia era forma de
+     * provocarla desde la interfaz. Un paquete asignado al equipo Este que incluya un modulo del
+     * Norte referencia algo que esa audiencia no tiene concedido: no falla, simplemente no se le
+     * dibuja, y sin aviso nadie se entera hasta que alguien pregunta por que no lo ve.
+     */
+    await asLogin(page, 'u-admin');
+
+    const creado = await page.request.post('/api/admin/packages', {
+      data: {
+        paquete: {
+          id: 'pkg-colgante',
+          name: 'Con un nodo fuera',
+          visualTree: [
+            {
+              id: 'pkg-colgante-norte',
+              type: 'module',
+              moduleRef: {
+                moduleId: 'casos-pendientes',
+                slug: 'casos-pendientes',
+                name: 'Casos pendientes',
+              },
+            },
+          ],
+        },
+      },
+    });
+    expect(creado.ok(), await creado.text()).toBe(true);
+
+    // Se le asigna al equipo Este, que no tiene concedida la carpeta Norte. `saveTeam` reemplaza
+    // el equipo entero, asi que se lee primero: mandar solo el campo que cambia lo dejaria sin
+    // miembros ni nodos concedidos.
+    const { equipos } = (await (await page.request.get('/api/admin/teams')).json()) as {
+      equipos: { id: string }[];
+    };
+    const este = equipos.find((e) => e.id === 'equipo-este');
+    const asignado = await page.request.post('/api/admin/teams', {
+      data: { accion: 'guardar', equipo: { ...este, assignedPackageId: 'pkg-colgante' } },
+    });
+    expect(asignado.ok(), await asignado.text()).toBe(true);
+
+    await page.goto('/admin/modules/packages');
+    await expect(page.getByTestId('package-estado-pkg-colgante')).toContainText(/no se muestra/);
+    await expect(page.getByTestId('package-problemas-pkg-colgante')).toContainText(
+      'casos-pendientes',
+    );
+
+    // Borrar el paquete tambien lo despega del equipo, asi que no queda nada que deshacer: es
+    // parte de lo que hace `deletePackage` y conviene que la prueba dependa de ello.
+    await page.getByTestId('borrar-package-pkg-colgante').click();
+    await expect(page.getByTestId('package-pkg-colgante')).toHaveCount(0);
+
+    const despues = (await (await page.request.get('/api/admin/teams')).json()) as {
+      equipos: { id: string; assignedPackageId?: string }[];
+    };
+    expect(despues.equipos.find((e) => e.id === 'equipo-este')?.assignedPackageId).toBeUndefined();
+  });
+});

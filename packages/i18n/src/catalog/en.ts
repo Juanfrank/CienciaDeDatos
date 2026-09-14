@@ -200,6 +200,29 @@ export const en: Record<MessageKey, string> = {
   'admin.modules.loose': 'Not placed ({n})',
   'admin.modules.loose.intro':
     'These do not hang from any folder yet. A module enters the general organization when it is published; until then only its editor sees it.',
+  // Visual packages — section 4.1.3.
+  'admin.packages.title': 'Visual packages',
+  'admin.packages.intro':
+    'A package regroups, renames and reorders what an audience can ALREADY see. It is a view, not a permission: scope resolution never consults a package, only the general organization.',
+  'admin.packages.add': 'Create a package',
+  'admin.packages.edit': 'Edit',
+  'admin.packages.delete': 'Delete',
+  'admin.packages.failed': 'The package could not be saved.',
+  'admin.packages.empty':
+    'No packages defined. Teams without one see the general organization as it is, limited to what their scope allows.',
+  'admin.packages.column.package': 'Package',
+  'admin.packages.column.modules': 'Modules',
+  'admin.packages.column.teams': 'Assigned to',
+  'admin.packages.moduleCount': '{n, plural, =0 {none} one {# module} other {# modules}}',
+  'admin.packages.noTeams': 'No team',
+  'admin.packages.ok': 'All visible',
+  'admin.packages.dangling': '{n, plural, one {# node is not shown} other {# nodes are not shown}}',
+  'admin.packages.dangling.intro':
+    'These nodes are in a package but the audience has not been granted them, so they are not drawn:',
+  'admin.packages.dangling.for': 'for {equipo}',
+  'admin.packages.field.name': 'Package name',
+  'admin.packages.field.modules': 'Modules it includes',
+  'admin.packages.noCandidates': 'There are no published modules to put in a package.',
   // The dropdown behind the Objects column: what the module holds and at which version.
   'admin.modules.objects.none': 'None',
   'admin.modules.objects.count': '{n, plural, one {# object} other {# objects}}',

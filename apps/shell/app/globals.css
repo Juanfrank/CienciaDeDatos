@@ -4243,3 +4243,29 @@ th[aria-sort='descending'] .table__flecha {
 .fila-carpeta__nombre {
   font-weight: 600;
 }
+
+/*
+ * El alta de un paquete visual.
+ *
+ * Se dibuja donde se va a usar —encima de la tabla que edita— y no en otra pantalla: elegir que
+ * modulos entran se hace mirando lo que ya hay.
+ */
+.formulario-paquete {
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--space-md);
+  margin-block: var(--space-md);
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.formulario-paquete fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--space-md);
+}
+
+.formulario-paquete legend {
+  padding: 0;
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
