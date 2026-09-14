@@ -493,3 +493,115 @@ export async function indicadoresDeAdmin(): Promise<{
     borradores: definiciones.filter((m) => m.status === 'pendiente-de-aprobacion').length,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Quien ve un modulo, visto DESDE el modulo (4.10.6 y 4.10.8)
+// ---------------------------------------------------------------------------
+
+export interface AccesoDeEquipo {
+  teamId: string;
+  nombre: string;
+  /** Concedido directamente sobre el nodo del modulo: se puede revocar desde aqui. */
+  directo: boolean;
+  /** Concedido porque el equipo tiene una carpeta ANCESTRO: se revoca alli, no aqui. */
+  heredadoDe: string | null;
+  /** Si de hecho lo alcanza, contando lo oculto. */
+  alcanza: boolean;
+  /** Personas del equipo, que son las que lo ven a traves de el. */
+  miembros: { userId: string; nombre: string; role: AppRole }[];
+}
+
+export interface AccesoAlModulo {
+  moduleId: string;
+  /** El nodo del modulo en la organizacion general. Sin el no hay nada que conceder. */
+  nodeId: string | null;
+  equipos: AccesoDeEquipo[];
+}
+
+/**
+ * Quien alcanza un modulo y por que — visto desde el propio modulo.
+ *
+ * Es la misma informacion que ya se concede desde el equipo, leida por el otro extremo. Hace
+ * falta porque las dos preguntas se hacen desde sitios distintos: «que ve este equipo» al dar de
+ * alta a alguien, y «quien ve esto» al publicar un tablero con datos sensibles. Sin la segunda,
+ * responderla obliga a abrir los equipos uno por uno.
+ *
+ * Distingue lo DIRECTO de lo HEREDADO a proposito: revocar lo heredado desde aqui no se puede
+ * —habria que quitarle al equipo la carpeta entera, que es otra decision y afecta a mas cosas—, y
+ * un boton que lo intentara dejaria a quien lo pulsa creyendo que lo hizo.
+ */
+export async function accessToModule(moduleId: string): Promise<AccesoAlModulo> {
+  const [generalTree, equipos, usuarios] = await Promise.all([
+    getGeneralTree(),
+    governance.listTeams(),
+    governance.listUsers(),
+  ]);
+
+  /** Ruta de nodos desde la raiz hasta el modulo, el ultimo incluido. */
+  const ruta = (nodos: NavNode[]): NavNode[] | null => {
+    for (const nodo of nodos) {
+      if (!isFolder(nodo)) {
+        if (nodo.moduleRef.moduleId === moduleId) return [nodo];
+        continue;
+      }
+      const sub = ruta(nodo.children);
+      if (sub) return [nodo, ...sub];
+    }
+    return null;
+  };
+
+  const camino = ruta(generalTree);
+  const nodeId = camino ? (camino[camino.length - 1]?.id ?? null) : null;
+  const ancestros = camino ? camino.slice(0, -1) : [];
+
+  return {
+    moduleId,
+    nodeId,
+    equipos: equipos
+      .map((equipo) => {
+        const ancestro = ancestros.find((a) => equipo.grantedNodes.includes(a.id));
+        return {
+          teamId: equipo.id,
+          nombre: equipo.name,
+          directo: nodeId !== null && equipo.grantedNodes.includes(nodeId),
+          heredadoDe: ancestro ? (ancestro as FolderNode).name : null,
+          alcanza: canTeamAccessModule(generalTree, equipo, moduleId),
+          miembros: equipo.members.map((m) => ({
+            userId: m.userId,
+            nombre: usuarios.find((u) => u.userId === m.userId)?.displayName ?? m.userId,
+            role: m.role,
+          })),
+        };
+      })
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+  };
+}
+
+/**
+ * Concede o revoca un modulo a un equipo, desde el modulo.
+ *
+ * Escribe por el MISMO sitio que la pantalla del equipo —`saveTeam`, con su auditoria— en vez de
+ * tocar `grantedNodes` por su cuenta: dos caminos para conceder acabarian con dos reglas para
+ * conceder.
+ */
+export async function grantModuleToTeam(
+  actor: Actor,
+  input: { moduleId: string; teamId: string; conceder: boolean },
+): Promise<Team> {
+  const { nodeId } = await accessToModule(input.moduleId);
+  if (!nodeId) {
+    throw new AdminError(
+      'Ese modulo todavia no esta en la organizacion general, asi que no hay nodo que conceder.',
+      409,
+    );
+  }
+
+  const equipo = await governance.getTeam(input.teamId);
+  if (!equipo) throw new AdminError(`El equipo '${input.teamId}' no existe.`, 404);
+
+  const concedidos = new Set(equipo.grantedNodes);
+  if (input.conceder) concedidos.add(nodeId);
+  else concedidos.delete(nodeId);
+
+  return await saveTeam(actor, { ...equipo, grantedNodes: [...concedidos] });
+}

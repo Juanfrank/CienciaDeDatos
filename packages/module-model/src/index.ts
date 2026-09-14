@@ -1,11 +1,15 @@
 /** Definicion de modulo — secciones 4.1, 4.2 y 4.6. */
 export {
+  MODULE_OPTIONS,
   datasetsConsumedBy,
   findPage,
   instancesOf,
+  moduleOptionOn,
   moduleUrl,
+  type DefaultFilter,
   type GridItem,
   type ModuleDefinition,
+  type ModuleOption,
   type ModulePage,
   type ModuleStatus,
 } from './ModuleDefinition';

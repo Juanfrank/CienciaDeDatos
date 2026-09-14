@@ -33,6 +33,7 @@ export interface TreeAuditEvent {
     | 'renombrar'
     | 'mover'
     | 'reordenar'
+    | 'ocultar'
     | 'enviar-a-papelera'
     | 'restaurar'
     | 'borrar-definitivamente';
@@ -53,6 +54,7 @@ export type TreeOperation =
   | { type: 'renombrar'; nodeId: string; name: string }
   | { type: 'mover'; nodeId: string; newParentId: string | null; index?: number }
   | { type: 'reordenar'; nodeId: string; index: number }
+  | { type: 'ocultar'; nodeId: string; hidden: boolean }
   | { type: 'enviar-a-papelera'; nodeId: string }
   | { type: 'restaurar'; trashedNodeId: string }
   | { type: 'borrar-definitivamente'; trashedNodeId: string };
@@ -73,6 +75,9 @@ const CAPACIDAD_REQUERIDA: Record<TreeOperation['type'], Capability> = {
   // hereda ese ambito de inmediato (4.1.2). Por eso esta reservado a Administrador.
   mover: 'reorganizar-arbol-general',
   reordenar: 'reorganizar-arbol-general',
+  // Ocultar quita de la vista Y del acceso: quien no lo ve tampoco lo alcanza por URL. Eso lo
+  // pone al nivel de mover, no al de renombrar.
+  ocultar: 'reorganizar-arbol-general',
   'enviar-a-papelera': 'crear-editar-modulos-borrador',
   restaurar: 'reorganizar-arbol-general',
   'borrar-definitivamente': 'borrar-definitivamente',
@@ -250,6 +255,38 @@ export function applyTreeOperation(
             action: 'reordenar',
             nodeId: op.nodeId,
             detail: `Reordenado a la posicion ${op.index} dentro de su carpeta.`,
+          },
+        ],
+      };
+    }
+
+    /*
+     * Ocultar y volver a mostrar.
+     *
+     * Se escribe la bandera y se acabo: no se mueve nada de sitio. Es la diferencia con la
+     * papelera —que saca el nodo del arbol— y con mover, que cambiaria el ambito heredado de lo
+     * que contiene. Ocultar deja todo donde esta y solo deja de servirlo.
+     */
+    case 'ocultar': {
+      const encontrado = locate(siguiente.nodes, op.nodeId);
+      if (!encontrado) return { ok: false, error: `El nodo '${op.nodeId}' no existe.` };
+
+      if (op.hidden) encontrado.node.hidden = true;
+      // Se BORRA la bandera en vez de ponerla a `false`: un `hidden: false` por todo el arbol es
+      // ruido en el almacen y en cada diff de auditoria.
+      else delete encontrado.node.hidden;
+
+      return {
+        ok: true,
+        tree: siguiente,
+        audit: [
+          {
+            actorId: actor.userId,
+            action: 'ocultar',
+            nodeId: op.nodeId,
+            detail: op.hidden
+              ? 'Oculto: deja de mostrarse y de servirse.'
+              : 'Vuelve a mostrarse.',
           },
         ],
       };

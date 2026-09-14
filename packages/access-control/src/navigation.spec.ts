@@ -165,3 +165,60 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
     expect(view.dangling).toHaveLength(3);
   });
 });
+
+describe('ocultar un nodo lo quita de la vista Y del acceso', () => {
+  /*
+   * Ocultar no puede ser solo cosmetico.
+   *
+   * Si el nodo desapareciera del menu pero `accessibleModuleIds` lo siguiera devolviendo, el
+   * modulo seguiria sirviendose en `/m/{slug}` a quien conociera la direccion. Eso es
+   * ocultamiento de interfaz, que es lo que el criterio de la seccion 9 dice expresamente que no
+   * basta. Las dos comprobaciones van juntas a proposito: la del menu sola pasaria igual.
+   */
+  const ocultar = (tree: NavNode[], nodeId: string): NavNode[] =>
+    tree.map((nodo) => {
+      if (nodo.id === nodeId) return { ...nodo, hidden: true };
+      return isFolder(nodo) ? { ...nodo, children: ocultar(nodo.children, nodeId) } : nodo;
+    });
+
+  /** El nodo de un modulo concreto dentro del arbol de pruebas. */
+  const nodoDe = (tree: NavNode[], moduleId: string): string => {
+    for (const nodo of tree) {
+      if (!isFolder(nodo)) {
+        if (nodo.moduleRef.moduleId === moduleId) return nodo.id;
+        continue;
+      }
+      const encontrado = nodoDe(nodo.children, moduleId);
+      if (encontrado) return encontrado;
+    }
+    return '';
+  };
+
+  it('un modulo oculto deja de estar accesible y deja de dibujarse', () => {
+    const nodeId = nodoDe(generalTree, 'audiencias-norte');
+    expect(nodeId).not.toBe('');
+    const conOculto = ocultar(generalTree, nodeId);
+
+    expect(accessibleModuleIds(conOculto, norteTeam).has('audiencias-norte')).toBe(false);
+    expect(canTeamAccessModule(conOculto, norteTeam, 'audiencias-norte')).toBe(false);
+    expect(visibleModules(buildNavigationView({ generalTree: conOculto, team: norteTeam }).tree)).not.toContain(
+      'audiencias-norte',
+    );
+  });
+
+  it('y solo ese: lo que estaba al lado se sigue viendo', () => {
+    const conOculto = ocultar(generalTree, nodoDe(generalTree, 'audiencias-norte'));
+    expect(accessibleModuleIds(conOculto, norteTeam).has('casos-pendientes-norte')).toBe(true);
+  });
+
+  it('ocultar una CARPETA se lleva consigo todo lo que contiene', () => {
+    // Es lo que se espera al retirar una rama entera mientras se reorganiza: no hay que ir nodo
+    // por nodo.
+    const carpeta = generalTree.find(isFolder);
+    expect(carpeta).toBeDefined();
+    const conOculta = ocultar(generalTree, (carpeta as { id: string }).id);
+
+    expect([...accessibleModuleIds(conOculta, norteTeam)]).toEqual([]);
+    expect(buildNavigationView({ generalTree: conOculta, team: norteTeam }).tree).toEqual([]);
+  });
+});

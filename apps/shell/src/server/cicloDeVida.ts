@@ -8,8 +8,11 @@ import {
   isModule,
 } from '@app/access-control';
 import {
+  MODULE_OPTIONS,
+  type DefaultFilter,
   type ModuleDefinition,
   type ModuleDiff,
+  type ModuleOption,
   type ModuleStatus,
   type PublishBlocker,
   diffModules,
@@ -733,4 +736,114 @@ export async function userServableModule(
   userId: string,
 ): Promise<ModuleDefinition | undefined> {
   return slugServableModule(slug, { userId, role: await roleMoreHeightOf(userId) });
+}
+
+export interface ModuleSettings {
+  name: string;
+  slug: string;
+  description: string;
+  options: Partial<Record<ModuleOption, boolean>>;
+  defaultFilters: DefaultFilter[];
+}
+
+/**
+ * Configuracion de un modulo: como se llama, donde vive y que ofrece — secciones 4.1 y 4.11.
+ *
+ * Es distinto de `saveDraft` a proposito, y no una opcion mas suya. `saveDraft` edita el
+ * CONTENIDO de un borrador y por eso exige que sea un borrador y que sea tuyo; esto edita lo que
+ * el modulo ES, y un modulo publicado tambien se renombra y tambien se le apaga la exportacion sin
+ * que eso sea una version nueva de su contenido. Son dos permisos distintos y dos condiciones
+ * distintas: mezclarlos habria dejado la configuracion de lo publicado fuera de alcance.
+ */
+export async function saveSettings(input: {
+  actor: ModuleActor;
+  moduleId: string;
+  settings: ModuleSettings;
+}): Promise<ModuleDefinition> {
+  const modulo = await modules.get(input.moduleId);
+  if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
+
+  // Configurar lo PUBLICADO afecta a todos los equipos que lo ven; configurar el borrador propio
+  // no. Es la misma division que ya hace `revertDraft`.
+  if (modulo.status === 'publicado') {
+    permission(input.actor, 'publicar-modulo-institucional');
+  } else {
+    if (input.actor.role !== 'administrador') authorshipRequire(modulo, input.actor);
+    permission(input.actor, 'crear-editar-modulos-borrador');
+  }
+
+  const name = input.settings.name.trim();
+  if (!name) throw new CicloDeVidaError('El modulo necesita un nombre.', 400);
+
+  const slug = input.settings.slug.trim().toLowerCase();
+  /*
+   * El slug es la URL publica y estable de 4.11: se valida, no se sanea en silencio.
+   *
+   * Corregirlo por detras dejaria a quien lo escribio con una direccion que no es la que puso, y
+   * enterandose el dia que la comparte.
+   */
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    throw new CicloDeVidaError(
+      `'${input.settings.slug}' no sirve como URL: minusculas, numeros y guiones, sin empezar ni acabar en guion.`,
+      400,
+    );
+  }
+  const ocupado = (await modules.list()).find((m) => m.slug === slug && m.moduleId !== modulo.moduleId);
+  if (ocupado) {
+    throw new CicloDeVidaError(`La URL '/m/${slug}' ya es la de '${ocupado.name}'.`, 409);
+  }
+
+  // Solo se guarda lo APAGADO. El valor por defecto —encendido— vive en un sitio, en
+  // `moduleOptionOn`, y no repetido en cada modulo del almacen.
+  const options = Object.fromEntries(
+    MODULE_OPTIONS.filter((opcion) => input.settings.options[opcion] === false).map((opcion) => [
+      opcion,
+      false,
+    ]),
+  );
+
+  const defaultFilters = input.settings.defaultFilters
+    .map((f) => ({ field: f.field.trim(), values: f.values.filter((v) => v.trim() !== '') }))
+    .filter((f) => f.field !== '' && f.values.length > 0);
+
+  const description = input.settings.description.trim();
+
+  const actualizado: ModuleDefinition = {
+    ...modulo,
+    name,
+    slug,
+    ...(description ? { description } : {}),
+    ...(Object.keys(options).length > 0 ? { options } : {}),
+    ...(defaultFilters.length > 0 ? { defaultFilters } : {}),
+    updatedAt: ahora(),
+  };
+  // Un campo que se vacia se BORRA, no se guarda como cadena vacia: `description: ''` obligaria a
+  // cada lector a distinguir «sin descripcion» de «descripcion vacia», que son lo mismo.
+  if (!description) delete actualizado.description;
+  if (Object.keys(options).length === 0) delete actualizado.options;
+  if (defaultFilters.length === 0) delete actualizado.defaultFilters;
+
+  await modules.save(actualizado);
+  await changeRecord({
+    actorId: input.actor.userId,
+    entityType: 'module',
+    entityId: modulo.moduleId,
+    action: 'update',
+    before: {
+      name: modulo.name,
+      slug: modulo.slug,
+      ...(modulo.description ? { descripcion: modulo.description } : {}),
+      ...(modulo.options ? { opciones: modulo.options } : {}),
+      ...(modulo.defaultFilters ? { filtros: modulo.defaultFilters } : {}),
+    },
+    after: {
+      name: actualizado.name,
+      slug: actualizado.slug,
+      ...(actualizado.description ? { descripcion: actualizado.description } : {}),
+      ...(actualizado.options ? { opciones: actualizado.options } : {}),
+      ...(actualizado.defaultFilters ? { filtros: actualizado.defaultFilters } : {}),
+    },
+  });
+
+  return actualizado;
 }

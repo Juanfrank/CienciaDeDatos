@@ -10,6 +10,7 @@ import { Bookmarks } from './Bookmarks';
 import { MyView } from './MyView';
 import { ModuleObject } from './ModuleObject';
 import { Grid } from './Grid';
+import { moduleOptionOn, type ModuleDefinition } from '@app/module-model';
 import type { SerializedObject } from '../server/serialize';
 
 /** Interruptor de la consulta en lenguaje natural (4.9). */
@@ -22,6 +23,7 @@ export function ModuleView({
   insignias,
   moduleSlug,
   pageSlug,
+  options,
   embedded = false,
 }: {
   objetos: SerializedObject[];
@@ -30,9 +32,19 @@ export function ModuleView({
   insignias?: React.ReactNode;
   moduleSlug: string;
   pageSlug?: string;
+  /*
+   * Lo que este modulo ofrece, decidido en su configuracion.
+   *
+   * Viaja desde el servidor y se pregunta con `moduleOptionOn`, que trata «ausente» como
+   * encendido: leyendo `options.marcadores` a secas, un modulo que nunca se configuro se quedaria
+   * sin marcadores — y eso son todos los que hay hoy.
+   */
+  options?: ModuleDefinition['options'];
   /** true cuando la vista se dibuja dentro del portal de otra institucion (4.9). */
   embedded?: boolean;
 }) {
+  const ofrece = (opcion: Parameters<typeof moduleOptionOn>[1]) =>
+    moduleOptionOn({ ...(options ? { options } : {}) }, opcion);
   const { toggle, clearAll, searchParams } = useUrlFilters();
   const filtersHas = [...searchParams.keys()].length > 0;
 
@@ -79,15 +91,25 @@ export function ModuleView({
           {insignias}
 
           <div className="module-bar__actions" role="toolbar" aria-label="Acciones del modulo">
-            <MyView moduleSlug={moduleSlug} personalizada={provenance.isPersonalized} />
-            <Bookmarks moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
-            <Export moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
-            <CreateNotice
-              moduleSlug={moduleSlug}
-              {...(pageSlug ? { pageSlug } : {})}
-              vigilables={vigilables}
-            />
-            <Embed moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+            {ofrece('personalizacion') ? (
+              <MyView moduleSlug={moduleSlug} personalizada={provenance.isPersonalized} />
+            ) : null}
+            {ofrece('marcadores') ? (
+              <Bookmarks moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+            ) : null}
+            {ofrece('exportacion') ? (
+              <Export moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+            ) : null}
+            {ofrece('alertas') ? (
+              <CreateNotice
+                moduleSlug={moduleSlug}
+                {...(pageSlug ? { pageSlug } : {})}
+                vigilables={vigilables}
+              />
+            ) : null}
+            {ofrece('embebido') ? (
+              <Embed moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+            ) : null}
           </div>
 
           {filtersHas ? (

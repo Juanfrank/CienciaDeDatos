@@ -1,15 +1,18 @@
 import Link from 'next/link';
 import type { MessageKey, Translator } from '@app/i18n';
+import { isFolder, type NavNode } from '@app/access-control';
 import { SectionIndex } from '../../../src/components/admin/SectionIndex';
 import { sectionOf } from '../../../src/components/admin/sections';
 import { ModuleObjects } from '../../../src/components/admin/ModuleObjects';
+import { TreeActions, type DestinoPosible } from '../../../src/components/admin/TreeActions';
 import { modules } from '../../../src/server/moduleStore';
-import { getGeneralTree } from '../../../src/server/context';
+import { getGeneralTree, listUsers } from '../../../src/server/context';
 import { objectsOfModule } from '../../../src/server/recursos';
 import {
   looseModules,
   organizationRows,
   type FilaCarpeta,
+  type FilaModulo,
   type FilaOrganizacion,
 } from '../../../src/server/organizacion';
 import { translator } from '../../../src/server/locale';
@@ -26,25 +29,57 @@ const ESTADO: Record<string, MessageKey> = {
 const SANGRIA = (profundidad: number) => ({ paddingInlineStart: `${profundidad * 1.5}rem` });
 
 /**
+ * Las carpetas a las que se puede mover algo, con la sangria puesta.
+ *
+ * Se ofrece la raiz tambien: sin ella, lo que baja a una carpeta no puede volver a salir, y no
+ * habria forma de sacar nada sin pasar por la papelera.
+ */
+function destinos(nodos: NavNode[], t: Translator, profundidad = 0): DestinoPosible[] {
+  const salida: DestinoPosible[] = profundidad === 0 ? [{ id: null, etiqueta: t('admin.tree.move.root') }] : [];
+  for (const nodo of nodos) {
+    if (!isFolder(nodo)) continue;
+    salida.push({ id: nodo.id, etiqueta: `${'— '.repeat(profundidad)}${nodo.name}` });
+    salida.push(...destinos(nodo.children, t, profundidad + 1));
+  }
+  return salida;
+}
+
+/**
  * Los modulos ANIDADOS en sus carpetas — secciones 4.1, 4.2 y 4.10.6.
  *
  * Estaban en una lista plana ordenada por nombre, y eso borra lo unico que explica el acceso: un
  * modulo hereda el ambito de la carpeta que lo contiene, asi que dos modulos contiguos en esa
  * lista podian verlos audiencias distintas sin que nada en pantalla lo dijera. Ahora la tabla es
- * el arbol, y cada carpeta lleva su ambito al lado con el enlace para configurarlo.
+ * el arbol, y cada fila lleva sus seis acciones.
  */
 export default async function ModulosPage() {
   const seccion = sectionOf('/admin/modules');
-  const [t, definiciones, arbol] = await Promise.all([
+  const [t, definiciones, arbol, usuarios] = await Promise.all([
     translator(),
     modules.list(),
     getGeneralTree(),
+    listUsers(),
   ]);
 
   const porId = new Map(definiciones.map((m) => [m.moduleId, m]));
   const filas = organizationRows(arbol, porId);
   const sueltos = looseModules(arbol, porId);
   const esperando = definiciones.filter((m) => m.status === 'pendiente-de-aprobacion');
+
+  /*
+   * El identificador de una persona no es su nombre.
+   *
+   * La columna decia «Autor» y ensenaba `u-ana`, que no es el autor: es su clave en el directorio.
+   * Y para un modulo publicado salia «—», porque lo publicado no tiene autor —tiene a quien lo
+   * aprobo—. Ahora el nombre acompana al modulo y solo cuando lo hay.
+   */
+  const nombreDe = (userId: string | undefined): string | null => {
+    if (!userId) return null;
+    const persona = usuarios.find((u) => u.userId === userId);
+    return persona?.displayName ?? userId;
+  };
+
+  const posibles = destinos(arbol, t);
 
   return (
     <section>
@@ -75,19 +110,16 @@ export default async function ModulosPage() {
 
       <div className="container-table">
         <table className="tabla" data-testid="tabla-modulos">
-          <thead>
-            <tr>
-              <th scope="col">{t('admin.modules.column.module')}</th>
-              <th scope="col">{t('admin.modules.column.status')}</th>
-              <th scope="col">{t('admin.modules.column.version')}</th>
-              <th scope="col">{t('admin.modules.column.pages')}</th>
-              <th scope="col">{t('admin.modules.column.objects')}</th>
-              <th scope="col">{t('admin.modules.column.author')}</th>
-            </tr>
-          </thead>
+          <Cabecera t={t} />
           <tbody>
             {filas.map((fila) => (
-              <Fila key={`${fila.tipo}-${fila.id}`} fila={fila} t={t} />
+              <Fila
+                key={`${fila.tipo}-${fila.id}`}
+                fila={fila}
+                t={t}
+                destinos={posibles}
+                autor={fila.tipo === 'modulo' ? nombreDe(fila.modulo.ownerUserId) : null}
+              />
             ))}
           </tbody>
         </table>
@@ -104,22 +136,26 @@ export default async function ModulosPage() {
           <p className="muted-text">{t('admin.modules.loose.intro')}</p>
           <div className="container-table">
             <table className="tabla" data-testid="tabla-modulos-sueltos">
-              <thead>
-                <tr>
-                  <th scope="col">{t('admin.modules.column.module')}</th>
-                  <th scope="col">{t('admin.modules.column.status')}</th>
-                  <th scope="col">{t('admin.modules.column.version')}</th>
-                  <th scope="col">{t('admin.modules.column.pages')}</th>
-                  <th scope="col">{t('admin.modules.column.objects')}</th>
-                  <th scope="col">{t('admin.modules.column.author')}</th>
-                </tr>
-              </thead>
+              <Cabecera t={t} />
               <tbody>
                 {sueltos.map((m) => (
-                  <Fila
+                  <Modulo
                     key={m.moduleId}
-                    fila={{ tipo: 'modulo', id: m.moduleId, profundidad: 0, modulo: m }}
+                    fila={{
+                      tipo: 'modulo',
+                      id: m.moduleId,
+                      profundidad: 0,
+                      indice: 0,
+                      hermanos: 1,
+                      hidden: false,
+                      modulo: m,
+                    }}
                     t={t}
+                    destinos={posibles}
+                    autor={nombreDe(m.ownerUserId)}
+                    // Un modulo que no esta en el arbol no se puede mover dentro de el: los tres
+                    // primeros iconos no tendrian sobre que actuar.
+                    enElArbol={false}
                   />
                 ))}
               </tbody>
@@ -135,17 +171,70 @@ export default async function ModulosPage() {
   );
 }
 
-function Fila({ fila, t }: { fila: FilaOrganizacion; t: Translator }) {
-  if (fila.tipo === 'carpeta') return <Carpeta fila={fila} t={t} />;
-
-  const m = fila.modulo;
+/** Las seis columnas, iguales en las dos tablas: una cabecera, un solo sitio que mantener. */
+function Cabecera({ t }: { t: Translator }) {
   return (
-    <tr data-testid={`modulo-${m.slug}`} data-depth={fila.profundidad}>
+    <thead>
+      <tr>
+        <th scope="col">{t('admin.modules.column.module')}</th>
+        <th scope="col">{t('admin.modules.column.status')}</th>
+        <th scope="col">{t('admin.modules.column.version')}</th>
+        <th scope="col">{t('admin.modules.column.pages')}</th>
+        <th scope="col">{t('admin.modules.column.objects')}</th>
+        <th scope="col">{t('admin.resources.column.actions')}</th>
+      </tr>
+    </thead>
+  );
+}
+
+function Fila({
+  fila,
+  t,
+  destinos: posibles,
+  autor,
+}: {
+  fila: FilaOrganizacion;
+  t: Translator;
+  destinos: DestinoPosible[];
+  autor: string | null;
+}) {
+  if (fila.tipo === 'carpeta') return <Carpeta fila={fila} t={t} destinos={posibles} />;
+  return <Modulo fila={fila} t={t} destinos={posibles} autor={autor} enElArbol />;
+}
+
+function Modulo({
+  fila,
+  t,
+  destinos: posibles,
+  autor,
+  enElArbol,
+}: {
+  fila: FilaModulo;
+  t: Translator;
+  destinos: DestinoPosible[];
+  autor: string | null;
+  enElArbol: boolean;
+}) {
+  const m = fila.modulo;
+
+  return (
+    <tr
+      data-testid={`modulo-${m.slug}`}
+      data-depth={fila.profundidad}
+      data-hidden={fila.hidden ? 'si' : 'no'}
+    >
       <th scope="row" style={SANGRIA(fila.profundidad)}>
         <Link href={`/editor/${m.slug}`}>{m.name}</Link>
         <span className="muted-text"> /m/{m.slug}</span>
+        {/* El nombre de quien lo tiene a su cargo va DEBAJO del modulo y no en una columna
+            propia: solo lo tiene un borrador, y una columna vacia en cuatro de cada cinco filas
+            es una columna que no dice nada. */}
+        {autor ? <p className="muted-text">{t('admin.modules.owner', { quien: autor })}</p> : null}
       </th>
-      <td>{ESTADO[m.status] ? t(ESTADO[m.status] as MessageKey) : m.status}</td>
+      <td>
+        {t(ESTADO[m.status] ?? 'admin.modules.status.draft')}
+        {fila.hidden ? <Oculto t={t} /> : null}
+      </td>
       <td>
         {/* La version es el enlace a lo que hubo antes: es la pregunta que se hace mirando ese
             numero. */}
@@ -157,26 +246,50 @@ function Fila({ fila, t }: { fila: FilaOrganizacion; t: Translator }) {
       <td>
         <ModuleObjects slug={m.slug} objetos={objectsOfModule(m)} t={t} />
       </td>
-      <td>{m.ownerUserId ?? '—'}</td>
+      <td>
+        <TreeActions
+          nodeId={fila.id}
+          nombre={m.name}
+          hidden={fila.hidden}
+          indice={fila.indice}
+          puedeSubir={enElArbol && fila.indice > 0}
+          puedeBajar={enElArbol && fila.indice < fila.hermanos - 1}
+          destinos={posibles}
+          hrefConfigurar={`/admin/modules/${m.slug}/settings`}
+          hrefPermisos={`/admin/modules/${m.slug}/permissions`}
+        />
+      </td>
     </tr>
   );
 }
 
 /**
- * Una carpeta, con sus permisos al lado.
+ * Una carpeta, con su ambito en la columna de ESTADO.
  *
- * El ambito de la carpeta es lo que decide quien ve los modulos que contiene (4.10.6), asi que se
- * configura DESDE aqui y no en otra pantalla: mirando el arbol es cuando alguien se pregunta por
- * que ese modulo lo ve quien lo ve. El enlace lleva al editor de ambitos con la carpeta ya
- * elegida — un camino, no dos, para que la puerta de `wouldExpand` y la auditoria sigan siendo
- * las mismas.
+ * Antes ocupaba cuatro columnas con `colSpan` y dejaba el ambito bajo «Objetos» y el enlace bajo
+ * «Autor»: la tabla ensenaba valores en columnas que no eran las suyas. El ambito es el estado de
+ * una carpeta —hereda o restringe—, asi que va donde el modulo pone el suyo y todo lo demas queda
+ * vacio, que es la verdad: una carpeta no tiene version ni paginas ni objetos.
  */
-function Carpeta({ fila, t }: { fila: FilaCarpeta; t: Translator }) {
+function Carpeta({
+  fila,
+  t,
+  destinos: posibles,
+}: {
+  fila: FilaCarpeta;
+  t: Translator;
+  destinos: DestinoPosible[];
+}) {
   const restricciones = fila.scope?.restrictions ?? [];
 
   return (
-    <tr className="fila-carpeta" data-testid={`carpeta-${fila.id}`} data-depth={fila.profundidad}>
-      <th scope="row" colSpan={4} style={SANGRIA(fila.profundidad)}>
+    <tr
+      className="fila-carpeta"
+      data-testid={`carpeta-${fila.id}`}
+      data-depth={fila.profundidad}
+      data-hidden={fila.hidden ? 'si' : 'no'}
+    >
+      <th scope="row" style={SANGRIA(fila.profundidad)}>
         <span className="fila-carpeta__nombre">{fila.nombre}</span>{' '}
         <span className="muted-text">{t('admin.modules.folder.count', { n: fila.modulos })}</span>
       </th>
@@ -190,15 +303,38 @@ function Carpeta({ fila, t }: { fila: FilaCarpeta; t: Translator }) {
             })}
           </span>
         )}
+        {fila.hidden ? <Oculto t={t} /> : null}
       </td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
       <td>
-        <Link
-          href={`/admin/scopes?destino=${encodeURIComponent(fila.id)}`}
-          data-testid={`permisos-${fila.id}`}
-        >
-          {t('admin.modules.folder.configure')}
-        </Link>
+        <TreeActions
+          nodeId={fila.id}
+          nombre={fila.nombre}
+          hidden={fila.hidden}
+          indice={fila.indice}
+          puedeSubir={fila.indice > 0}
+          puedeBajar={fila.indice < fila.hermanos - 1}
+          // Una carpeta no se puede meter dentro de si misma ni de una de sus hijas: la lista se
+          // recorta antes de ofrecerla, en vez de dejar que la operacion lo rechace despues.
+          destinos={posibles.filter((d) => d.id !== fila.id)}
+          hrefConfigurar={`/admin/scopes?destino=${encodeURIComponent(fila.id)}`}
+          hrefPermisos={`/admin/scopes?destino=${encodeURIComponent(fila.id)}`}
+        />
       </td>
     </tr>
+  );
+}
+
+/** La insignia de oculto, que dice tambien lo que implica. */
+function Oculto({ t }: { t: Translator }) {
+  return (
+    <>
+      {' '}
+      <span className="insignia badge--error" title={t('admin.tree.hidden.explain')}>
+        {t('admin.tree.hidden')}
+      </span>
+    </>
   );
 }

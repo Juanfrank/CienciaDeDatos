@@ -65,6 +65,19 @@ export const ICON_STROKES = {
   ojo: 'M12 5C5 5 2 12 2 12s3 7 10 7 10-7 10-7-3-7-10-7zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6z',
   'ojo-tachado':
     'M12 5C5 5 2 12 2 12s3 7 10 7 10-7 10-7-3-7-10-7zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM4 4l16 16',
+  // Acciones sobre una fila del arbol: mover, configurar, permisos.
+  'flecha-arriba': 'M12 20V5M6 11l6-6 6 6',
+  'flecha-abajo': 'M12 4v15M6 13l6 6 6-6',
+  // «Mover a» no es una flecha mas: lleva a otro sitio del arbol, no una posicion arriba. Una
+  // carpeta con una flecha entrando dice eso y no se confunde con las dos de al lado.
+  mover: 'M4 6h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM12 17v-5M9.5 14.5 12 12l2.5 2.5',
+  // Una rueda con cuatro radios, no una tuerca de ocho dientes: a 18 px los ocho dientes se
+  // funden en una mancha y deja de reconocerse como nada.
+  tuerca:
+    'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.2 2.2M16.2 16.2l2.2 2.2M18.4 5.6l-2.2 2.2M7.8 16.2l-2.2 2.2',
+  // Una persona con un ojo: gestionar QUIEN ve esto. El `view` de al lado es solo la persona.
+  'persona-ojo':
+    'M9.5 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 20a6.5 6.5 0 0 1 11-4.7M14 18.5s2-3 4.5-3 4.5 3 4.5 3-2 3-4.5 3-4.5-3-4.5-3zM18.5 19v.4',
 } as const;
 
 export type IconName = keyof typeof ICON_STROKES;

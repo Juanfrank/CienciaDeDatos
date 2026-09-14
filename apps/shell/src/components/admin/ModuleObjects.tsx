@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { MessageKey, Translator } from '@app/i18n';
 import type { ObjetoEnModulo } from '../../server/recursos';
 import { BumpModule } from './BumpModule';
+import { Icon } from '../icons/Icon';
 
 /**
  * Que hay dentro de un modulo, sin salir de la lista — seccion 4.5.
@@ -31,11 +32,24 @@ export function ModuleObjects({
     <details data-testid={`objetos-${slug}`}>
       <summary>
         {t('admin.modules.objects.count', { n: objetos.length })}
+        {/*
+          Un ICONO, no la frase.
+          «3 objetos · 2 con version antigua» en cada una de veinte filas convierte la columna en
+          un parrafo y hace falta leerla entera para encontrar la fila que importa. Un triangulo
+          rojo se ve de un vistazo. El texto no se pierde: viaja en `title` y en `aria-label`, asi
+          que el raton lo ensena al pasar y un lector de pantalla lo anuncia igual que antes.
+        */}
         {atrasados > 0 ? (
           <>
             {' '}
-            <span className="insignia badge--error" data-testid={`objetos-atrasados-${slug}`}>
-              {t('admin.modules.objects.behind', { n: atrasados })}
+            <span
+              className="alerta-version"
+              role="img"
+              title={t('admin.modules.objects.behind', { n: atrasados })}
+              aria-label={t('admin.modules.objects.behind', { n: atrasados })}
+              data-testid={`objetos-atrasados-${slug}`}
+            >
+              <Icon nombre="aviso_triangulo" tamano={16} />
             </span>
           </>
         ) : null}

@@ -13,21 +13,34 @@ import type { ModuleDefinition } from '@app/module-model';
  * columnas —estado, version, objetos— tienen que alinearse entre filas, y una tabla por nivel no
  * alinea nada. La profundidad viaja en cada fila y la sangria la pone el estilo.
  */
-export interface FilaCarpeta {
+/*
+ * Lo que toda fila necesita para poder moverse.
+ *
+ * El indice y el numero de hermanos vienen del servidor porque `reordenar` toma un indice
+ * ABSOLUTO y el cliente no conoce el arbol. Con ellos, el boton de subir del primero y el de
+ * bajar del ultimo salen apagados en vez de fallar al pulsarlos.
+ */
+interface FilaComun {
+  profundidad: number;
+  indice: number;
+  hermanos: number;
+  /** Oculta: sigue en el arbol y no se le dibuja a nadie. */
+  hidden: boolean;
+}
+
+export interface FilaCarpeta extends FilaComun {
   tipo: 'carpeta';
   id: string;
   nombre: string;
-  profundidad: number;
   /** Ambito propio, si lo tiene. Lo que no lo tiene hereda y no restringe por su cuenta. */
   scope?: AccessScope;
   /** Cuantos modulos cuelgan de ella, contando los de sus subcarpetas. */
   modulos: number;
 }
 
-export interface FilaModulo {
+export interface FilaModulo extends FilaComun {
   tipo: 'modulo';
   id: string;
-  profundidad: number;
   modulo: ModuleDefinition;
 }
 
@@ -56,32 +69,50 @@ export function organizationRows(
 ): FilaOrganizacion[] {
   const filas: FilaOrganizacion[] = [];
 
-  // Carpetas primero y modulos despues, cada grupo por nombre: es como se lee un arbol de
-  // archivos en cualquier sitio, y evita que una carpeta quede escondida entre veinte modulos.
-  const carpetas = nodos.filter(isFolder).sort((a, b) => a.name.localeCompare(b.name, 'es'));
-  const modulos = nodos
-    .filter(isModule)
-    .map((nodo) => ({ nodo, definicion: definiciones.get(nodo.moduleRef.moduleId) }))
-    .filter((p): p is { nodo: (typeof p)['nodo']; definicion: ModuleDefinition } =>
-      p.definicion !== undefined,
-    )
-    .sort((a, b) => a.definicion.name.localeCompare(b.definicion.name, 'es'));
+  /*
+   * En el ORDEN DEL ARBOL, sin ordenar por nombre.
+   *
+   * Antes salian las carpetas primero y cada grupo alfabetico, que se lee bien mientras la tabla
+   * solo se mire. En cuanto cada fila lleva flechas de subir y bajar, ordenar la vista es mentir:
+   * las flechas mueven el orden REAL, asi que pulsar «bajar» en la fila que parece primera la
+   * movia en una secuencia que no estaba en pantalla — y a veces la tabla no cambiaba nada, que
+   * es exactamente como se ve un boton roto.
+   *
+   * El orden del arbol es ademas el que ve la gente en el menu, asi que la tabla y la navegacion
+   * ensenan por fin lo mismo.
+   */
+  nodos.forEach((nodo, indice) => {
+    if (isFolder(nodo)) {
+      filas.push({
+        tipo: 'carpeta',
+        id: nodo.id,
+        nombre: nodo.name,
+        profundidad,
+        indice,
+        hermanos: nodos.length,
+        hidden: nodo.hidden === true,
+        ...(nodo.scope ? { scope: nodo.scope } : {}),
+        modulos: modulosBajo(nodo.children),
+      });
+      filas.push(...organizationRows(nodo.children, definiciones, profundidad + 1));
+      return;
+    }
 
-  for (const carpeta of carpetas) {
+    // Una referencia a un modulo que ya no existe se omite en vez de dibujarse a medias: es un
+    // nodo colgante, y eso lo denuncia el editor del arbol, que es donde se arregla.
+    const definicion = definiciones.get(nodo.moduleRef.moduleId);
+    if (!definicion) return;
+
     filas.push({
-      tipo: 'carpeta',
-      id: carpeta.id,
-      nombre: carpeta.name,
+      tipo: 'modulo',
+      id: nodo.id,
       profundidad,
-      ...(carpeta.scope ? { scope: carpeta.scope } : {}),
-      modulos: modulosBajo(carpeta.children),
+      indice,
+      hermanos: nodos.length,
+      hidden: nodo.hidden === true,
+      modulo: definicion,
     });
-    filas.push(...organizationRows(carpeta.children, definiciones, profundidad + 1));
-  }
-
-  for (const { nodo, definicion } of modulos) {
-    filas.push({ tipo: 'modulo', id: nodo.id, profundidad, modulo: definicion });
-  }
+  });
 
   return filas;
 }

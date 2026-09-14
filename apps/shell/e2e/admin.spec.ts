@@ -837,3 +837,150 @@ test.describe('paquetes visuales: se crean desde la pantalla (4.1.3)', () => {
     expect(despues.equipos.find((e) => e.id === 'equipo-este')?.assignedPackageId).toBeUndefined();
   });
 });
+
+test.describe('las seis acciones de una fila del arbol (4.1 y 4.10.8)', () => {
+  test('subir y bajar cambian el orden, y los extremos salen apagados', async ({ page }) => {
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    // Dentro de Regional, en el ORDEN DEL ARBOL: Norte va primero y Este despues. Por nombre
+    // saldrian al reves, y esa es justo la razon de que la tabla ya no ordene por nombre.
+    const orden = async () =>
+      await page.locator('[data-testid^="carpeta-nodo-distrito"], [data-testid="carpeta-nodo-norte"], [data-testid="carpeta-nodo-este"]').evaluateAll((filas) =>
+        filas.map((f) => f.getAttribute('data-testid')),
+      );
+    expect(await orden()).toEqual(['carpeta-nodo-norte', 'carpeta-nodo-este']);
+
+    // El primero de su carpeta no puede subir: el boton se apaga en vez de fallar al pulsarlo.
+    await expect(page.getByTestId('subir-nodo-norte')).toBeDisabled();
+    await expect(page.getByTestId('bajar-nodo-este')).toBeDisabled();
+
+    await page.getByTestId('bajar-nodo-norte').click();
+    await expect
+      .poll(async () => await orden())
+      .toEqual(['carpeta-nodo-este', 'carpeta-nodo-norte']);
+
+    // Se deja como estaba: el almacen sobrevive entre pruebas del mismo archivo.
+    await page.getByTestId('subir-nodo-norte').click();
+    await expect
+      .poll(async () => await orden())
+      .toEqual(['carpeta-nodo-norte', 'carpeta-nodo-este']);
+  });
+
+  test('ocultar un modulo lo retira de la navegacion Y de su URL', async ({ page }) => {
+    /*
+     * Ocultar no puede ser cosmetico.
+     *
+     * Si solo desapareciera del menu, `/m/{slug}` seguiria sirviendolo a quien conociera la
+     * direccion, y eso es ocultamiento de interfaz — lo que el criterio de la seccion 9 dice
+     * expresamente que no basta. Las dos mitades se comprueban juntas.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+    await page.getByTestId('ocultar-nodo-m-audiencias').click();
+    await expect(page.getByTestId('modulo-audiencias')).toHaveAttribute('data-hidden', 'si');
+
+    // Con `u-admin`, que esta en el equipo Norte y SI lo veria: con alguien que no lo ve de todas
+    // formas, la prueba pasaria sin comprobar nada.
+    await page.goto('/');
+    await expect(page.getByTestId('nav-audiencias')).toHaveCount(0);
+    await page.goto('/m/audiencias');
+    await expect(page.getByTestId('module-title')).toHaveCount(0);
+
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+    await page.getByTestId('ocultar-nodo-m-audiencias').click();
+    await expect(page.getByTestId('modulo-audiencias')).toHaveAttribute('data-hidden', 'no');
+  });
+});
+
+test.describe('configuracion de un modulo (4.1 y 4.11)', () => {
+  test('apagar una opcion la RETIRA de la barra del modulo', async ({ page }) => {
+    // El interruptor tiene que apagar algo. Se comprueba cruzando las dos pantallas: se apaga en
+    // la configuracion y se mira en el modulo.
+    await asLogin(page, 'u-admin');
+    await page.goto('/m/casos-pendientes');
+    await expect(page.getByTestId('incrustar')).toBeVisible();
+
+    await page.goto('/admin/modules/casos-pendientes/settings');
+    await page.getByTestId('opcion-embebido-casilla').uncheck();
+    await page.getByTestId('guardar-settings').click();
+    await expect(page.getByTestId('settings-mensaje')).toBeVisible();
+
+    await page.goto('/m/casos-pendientes');
+    await expect(page.getByTestId('incrustar')).toHaveCount(0);
+    // Y solo esa: apagar una no puede llevarse por delante a las demas.
+    await expect(page.getByTestId('open-export')).toBeVisible();
+
+    await page.goto('/admin/modules/casos-pendientes/settings');
+    await page.getByTestId('opcion-embebido-casilla').check();
+    await page.getByTestId('guardar-settings').click();
+    await expect(page.getByTestId('settings-mensaje')).toBeVisible();
+  });
+
+  test('la descripcion se guarda y se lee en el propio modulo', async ({ page }) => {
+    await asLogin(page, 'u-admin');
+    const texto = `Demoras por materia, al cierre del trimestre ${Date.now()}`;
+
+    await page.goto('/admin/modules/casos-pendientes/settings');
+    await page.getByTestId('settings-descripcion').fill(texto);
+    await page.getByTestId('guardar-settings').click();
+    await expect(page.getByTestId('settings-mensaje')).toBeVisible();
+
+    await page.goto('/m/casos-pendientes');
+    await expect(page.getByTestId('module-descripcion')).toHaveText(texto);
+  });
+
+  test('una URL invalida se rechaza con el motivo, no se sanea en silencio', async ({ page }) => {
+    // Corregirla por detras dejaria a quien la escribio con una direccion que no es la suya, y
+    // enterandose el dia que la comparte.
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules/casos-pendientes/settings');
+    await page.getByTestId('settings-slug').fill('Con Mayusculas Y Espacios');
+    await page.getByTestId('guardar-settings').click();
+
+    await expect(page.getByTestId('settings-mensaje')).toContainText('no sirve como URL');
+    // Y la de verdad no cambio.
+    await page.goto('/m/casos-pendientes');
+    await expect(page.getByTestId('module-title')).toBeVisible();
+  });
+});
+
+test.describe('permisos de un modulo, desde el modulo (4.10.6)', () => {
+  test('dice quien lo alcanza y por que, distinguiendo lo heredado', async ({ page }) => {
+    /*
+     * Con `composicion` y no con `audiencias`.
+     *
+     * `audiencias` lo mueve a Distrito Este una prueba anterior de este mismo archivo, asi que
+     * para cuando llega esta el equipo Este ya lo hereda y la comprobacion diria otra cosa. El
+     * orden dentro de un archivo es parte de lo que se prueba, asi que se elige un modulo que
+     * nadie mueve en vez de pelearse con el.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules/composicion/permissions');
+
+    // El equipo Norte tiene concedida la carpeta Regional, no el modulo: es herencia, y revocarla
+    // desde aqui no se puede. La pantalla lo dice en vez de ofrecer un boton que no haria nada.
+    await expect(page.getByTestId('acceso-equipo-norte-como')).toContainText(/Hereda/);
+    await expect(page.getByTestId('acceso-equipo-norte')).toContainText(/Se revoca en la carpeta/);
+  });
+
+  test('conceder a un equipo hace que sus personas lo vean', async ({ page }) => {
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules/composicion/permissions');
+    await expect(page.getByTestId('acceso-equipo-este-como')).toContainText(/Sin acceso/);
+
+    await page.getByTestId('conceder-equipo-este').click();
+    await expect(page.getByTestId('acceso-equipo-este-como')).toContainText(/Concedido aqui/);
+
+    // Lo que manda es lo que ve la persona, no la insignia. `u-beto` es visor del equipo Este.
+    await asLogin(page, 'u-beto');
+    await page.goto('/');
+    await expect(page.getByTestId('nav-composicion')).toBeVisible();
+
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules/composicion/permissions');
+    await page.getByTestId('conceder-equipo-este').click();
+    await expect(page.getByTestId('acceso-equipo-este-como')).toContainText(/Sin acceso/);
+  });
+});

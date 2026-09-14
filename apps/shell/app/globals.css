@@ -4275,3 +4275,45 @@ th[aria-sort='descending'] .table__flecha {
   font-size: var(--md-sys-typescale-body-small-size);
   color: var(--md-sys-color-on-surface-variant);
 }
+
+/*
+ * El aviso de «hay algo en una version vieja», como icono.
+ *
+ * En rojo de error y con el texto en `title`/`aria-label`: el color solo no vale —4.9 dice que
+ * ninguna informacion puede ir solo en el color— y por eso la forma es un triangulo de aviso y
+ * no un punto.
+ */
+.alerta-version {
+  display: inline-flex;
+  vertical-align: middle;
+  color: var(--md-sys-color-error);
+}
+
+/* La casilla y su rotulo de encendida/apagada, en una linea. */
+.opcion-interruptor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  white-space: nowrap;
+}
+
+/* La descripcion del modulo, debajo de su titulo. */
+.module__descripcion {
+  margin: var(--space-xs) 0 0;
+  color: var(--md-sys-color-on-surface-variant);
+  max-width: 70ch;
+}
+
+/*
+ * El desplegable de «mover a».
+ *
+ * Va debajo de la fila y no flotando: un menu flotante dentro de una celda de tabla se recorta
+ * con el desbordamiento horizontal del contenedor, y el destino que hay que elegir queda fuera.
+ */
+.mover-a {
+  margin-block-start: var(--space-sm);
+  padding: var(--space-sm);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-surface-container-lowest);
+}

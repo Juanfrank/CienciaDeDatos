@@ -43,20 +43,36 @@ const arbol: NavNode[] = [
 ];
 
 describe('organizationRows', () => {
-  it('devuelve el arbol en el orden en que se dibuja, con su profundidad', () => {
+  it('devuelve el arbol en SU orden, no ordenado por nombre', () => {
+    /*
+     * El orden del arbol es el contrato.
+     *
+     * Ordenar la vista por nombre se leia bien mientras la tabla solo se mirara; con flechas de
+     * subir y bajar en cada fila pasa a ser mentira, porque esas flechas mueven el orden real y
+     * la pantalla ensenaria otro. En el arbol de prueba, `Beta` va antes que la `Subcarpeta` y
+     * `Alfa` va al final: por nombre saldrian al reves.
+     */
     expect(
       organizationRows(arbol, definiciones).map((f) => [
         f.tipo,
         f.profundidad,
+        f.indice,
         f.tipo === 'carpeta' ? f.nombre : f.modulo.name,
       ]),
     ).toEqual([
-      ['carpeta', 0, 'Norte'],
-      ['carpeta', 1, 'Subcarpeta'],
-      ['modulo', 2, 'Gama'],
-      ['modulo', 1, 'Beta'],
-      ['modulo', 0, 'Alfa'],
+      ['carpeta', 0, 0, 'Norte'],
+      ['modulo', 1, 0, 'Beta'],
+      ['carpeta', 1, 1, 'Subcarpeta'],
+      ['modulo', 2, 0, 'Gama'],
+      ['modulo', 0, 1, 'Alfa'],
     ]);
+  });
+
+  it('cada fila sabe cuantos hermanos tiene, para apagar la flecha del extremo', () => {
+    const filas = organizationRows(arbol, definiciones);
+    // La raiz tiene dos nodos: la carpeta Norte y el modulo Alfa.
+    expect(filas[0]?.hermanos).toBe(2);
+    expect(filas[filas.length - 1]?.indice).toBe(1);
   });
 
   it('una carpeta cuenta los modulos de sus subcarpetas, no solo los suyos', () => {

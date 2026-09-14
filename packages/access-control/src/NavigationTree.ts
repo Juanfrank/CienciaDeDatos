@@ -19,6 +19,14 @@ export interface FolderNode {
    * de una sola vez.
    */
   scope?: AccessScope;
+  /*
+   * Oculta: sigue existiendo y sigue en el arbol, pero no se le dibuja a nadie.
+   *
+   * No es un permiso ni un borrado. Es lo que hace falta para retirar una carpeta de la vista
+   * mientras se reorganiza, sin mover nada de sitio —mover cambia el ambito de lo que contiene
+   * (4.1.2)— y sin mandarla a la papelera, que es una decision mucho mas grande.
+   */
+  hidden?: boolean;
 }
 
 export interface ModuleRef {
@@ -33,6 +41,8 @@ export interface ModuleLeaf {
   id: string;
   type: 'module';
   moduleRef: ModuleRef;
+  /** Oculto: igual que en una carpeta. No se dibuja, pero sigue estando. */
+  hidden?: boolean;
 }
 
 export const isFolder = (node: NavNode): node is FolderNode => node.type === 'folder';

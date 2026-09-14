@@ -38,13 +38,26 @@ export default async function PaginaModulo({
 
   const module = await slugServableModule(slug, await actorDe(sesion));
   if (!module) notFound();
+  /*
+   * Los filtros por defecto solo entran cuando NADIE pide otra cosa.
+   *
+   * Si se mezclaran con lo que trae la URL, quitar un filtro que viene por defecto seria
+   * imposible: al quitarlo, la URL se queda sin ese campo y el valor por defecto lo devolveria.
+   * Asi, en cuanto alguien toca un filtro, manda la URL entera.
+   */
+  const sinFiltros = Object.keys(query).length === 0;
+  const porDefecto: Record<string, string | string[]> = Object.fromEntries(
+    (module.defaultFilters ?? []).map((f) => [f.field, f.values]),
+  );
+  const filtrosPedidos = sinFiltros ? porDefecto : filtersOf(query);
+
   const loaded = await moduleLoad({
     module,
     personalization: await readPersonalization(sesion.userId, module.moduleId),
     ...(page ? { pageSlug: page } : {}),
     userId: sesion.userId,
     teamId: sesion.activeTeamId,
-    requestedFilters: filtersOf(query),
+    requestedFilters: filtrosPedidos,
   });
 
   if (!loaded) notFound();
@@ -52,7 +65,7 @@ export default async function PaginaModulo({
   // Se distingue lo que la persona ELIGIO de lo que su AMBITO le impone. Mezclarlos en una sola
   // linea de "filtros aplicados" hace creer que el ambito es algo que uno se puso y se puede
   // quitar, cuando no lo es.
-  const chosenFilters = Object.entries(filtersOf(query)).map(
+  const chosenFilters = Object.entries(filtrosPedidos).map(
     ([fieldName, valor]) => [fieldName, Array.isArray(valor) ? valor : [valor]] as const,
   );
   const chosenFields = new Set(chosenFilters.map(([fieldName]) => fieldName));
@@ -64,6 +77,11 @@ export default async function PaginaModulo({
     <article className="modulo">
       <header className="module__header">
         <h1 data-testid="module-title">{module.name}</h1>
+        {module.description ? (
+          <p className="module__descripcion" data-testid="module-descripcion">
+            {module.description}
+          </p>
+        ) : null}
         <p className="muted-text" data-testid="frescura">
           {loaded.generatedAt
             ? `Datos actualizados el ${new Date(loaded.generatedAt).toLocaleString('es-DO')}`
@@ -91,6 +109,7 @@ export default async function PaginaModulo({
         }
         moduleSlug={module.slug}
         pageSlug={loaded.pageSlug}
+        {...(module.options ? { options: module.options } : {})}
       />
     </article>
   );
