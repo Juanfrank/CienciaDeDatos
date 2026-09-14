@@ -6,6 +6,7 @@ Scripts que no forman parte de la aplicacion. `project.json` los declara como el
 | Comando | Que hace |
 |---|---|
 | `nx run verificacion:typecheck` | `tsc -b` sobre las referencias Y `tsc -p apps/shell` aparte |
+| `nx run coherencia:test` | Los dos lados de cada contrato que nadie ata; ver `coherencia/AGENTS.md` |
 | `nx run verificacion:limites` | Comprueba que la regla de limites sigue rechazando el fixture |
 | `nx run verificacion:esquema` | Valida el esquema Prisma |
 | `nx run verificacion:infra` | Compila Bicep tratando toda advertencia como error |
@@ -20,6 +21,10 @@ Scripts que no forman parte de la aplicacion. `project.json` los declara como el
   ignora en silencio, y eso ya paso una vez.
 - **Cada target declara sus entradas y salidas.** Sin salidas declaradas, un acierto de cache
   deja el directorio sin construir y la verificacion siguiente mide algo viejo.
+- **Lo afectado es la via normal.** `npm run afectado` en local y `nx affected` en los PR. Lo
+  que decide si una tarea corre de verdad son los `inputs` de `nx.json`, no `affected`: el input
+  `pruebas` excluye los `.md`, asi que tocar una especificacion marca el proyecto como afectado
+  pero la tarea sale de cache.
 - **El shell se comprueba APARTE.** El `tsconfig.json` de la raiz excluye `apps/shell/**`, porque
   Next necesita sus propias opciones, y `next.config.mjs` lleva `ignoreBuildErrors: true`. Entre
   las dos cosas, la aplicacion mas grande del repositorio estuvo sin comprobar: `tsc -b` la

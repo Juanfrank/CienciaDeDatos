@@ -36,8 +36,20 @@ tiene su propio `AGENTS.md` con las reglas locales; este fija las que valen en t
 npm run verify     # typecheck, lint, pruebas unitarias, limites, esquema y navegador
 ```
 
+Mientras se trabaja, lo normal es correr SOLO lo que el cambio toca:
+
+```bash
+npm run afectado          # lint y pruebas de los proyectos afectados
+npm run verify:afectado   # lo mismo, mas typecheck, navegador y las dos verificaciones globales
+```
+
 Por partes: `npm run typecheck`, `npm run lint`, `npm run test`, `npm run e2e`,
 `npm run verify:boundaries`, `npm run verify:schema`, `npm run verify:infra` (necesita Bicep).
+
+`affected` elige los PROYECTOS por los archivos que cambiaron; lo que decide si la tarea se
+ejecuta o sale de cache son los `inputs` de `nx.json`. El input `pruebas` excluye los `.md`, asi
+que tocar una especificacion marca el proyecto como afectado y la tarea acierta en cache: un
+cambio de documentacion no ejecuta ni una prueba.
 
 Ninguna tarea necesita `--skip-nx-cache`: las entradas y salidas de cada target estan
 declaradas, y `shell:e2e` construye antes de arrancar.
@@ -110,5 +122,6 @@ de lint, y `npm run verify:boundaries` comprueba que esa regla sigue mordiendo.
 | `packages/*` | Librerias compartidas, una por responsabilidad |
 | `packages/i18n` | Catalogos ICU y traductor. El idioma se elige con la cookie `idioma` |
 | `tools` | Scripts de verificacion y utilidades de desarrollo |
+| `tools/coherencia` | Las pruebas que comparan los dos lados de un contrato que nadie ata |
 | `infra` | Plantillas Bicep |
 | `.claude/depgraph.json` | Mapa de imports y definiciones, para consultas estructurales |

@@ -26,17 +26,19 @@ jobs:
 
       - run: npm ci
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      # En PR solo se construye y prueba lo afectado (seccion 3.1); en main, todo.
-      - name: Lint y pruebas de lo afectado
+      # En PR solo se comprueba lo afectado (seccion 3.1); en main, todo.
+      #
+      # `affected` elige los PROYECTOS por los archivos que cambiaron; lo que decide si la tarea
+      # se ejecuta o sale de cache son los `inputs` de `nx.json`. Por eso el input `pruebas`
+      # excluye los `.md`: tocar un AGENTS.md marca el proyecto como afectado, pero la tarea
+      # acierta en cache y no corre nada.
+      - name: Typecheck, lint y pruebas de lo afectado
         if: github.event_name == 'pull_request'
-        run: npx nx affected -t lint test --base=origin/${{ github.base_ref }}
+        run: npx nx affected -t typecheck lint test --base=origin/${{ github.base_ref }}
 
-      - name: Lint y pruebas de todo
+      - name: Typecheck, lint y pruebas de todo
         if: github.event_name != 'pull_request'
-        run: npx nx run-many -t lint test
+        run: npx nx run-many -t typecheck lint test
 
       # Comprueba que el limite type:module -> type:server-data sigue siendo un error.
       # Es la garantia del criterio de aceptacion de la seccion 9 sobre el principio 2.
@@ -61,6 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # `affected` compara contra la base: sin historia no hay con que comparar.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -72,7 +77,17 @@ jobs:
 
       # `shell:e2e` depende de `shell:build`: nx construye antes de arrancar. Es lo que evita que
       # las pruebas midan una version anterior de la aplicacion.
+      #
+      # En PR solo corre si algo del grafo del shell cambio. Sus `inputs` incluyen el poblador
+      # del cache, que no es dependencia suya por el grafo pero si por lo que la suite necesita
+      # para arrancar: sin declararlo, un cambio en el poblador dejaria pasar un acierto de cache
+      # sobre datos distintos.
+      - name: Pruebas de navegador de lo afectado
+        if: github.event_name == 'pull_request'
+        run: npx nx affected -t e2e --base=origin/${{ github.base_ref }}
+
       - name: Pruebas de navegador
+        if: github.event_name != 'pull_request'
         run: npm run e2e
 
       - if: failure()

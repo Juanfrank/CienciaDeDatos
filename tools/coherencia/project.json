@@ -1,0 +1,30 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "coherencia",
+  "projectType": "library",
+  "sourceRoot": "tools/coherencia",
+  "tags": ["type:tooling", "scope:repo"],
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --dir tools/coherencia"
+      },
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{workspaceRoot}/tools/rename/segmentos.mjs",
+        "{workspaceRoot}/tools/rename/glosario.json",
+        "{workspaceRoot}/apps/shell/app/**/*",
+        "{workspaceRoot}/apps/shell/src/**/*",
+        "{workspaceRoot}/apps/shell/e2e/**/*",
+        "{workspaceRoot}/packages/ui-components/src/registry/catalog.ts",
+        "{workspaceRoot}/**/*.md",
+        "{workspaceRoot}/**/AGENTS.md"
+      ]
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "eslint tools/coherencia --max-warnings 0" }
+    }
+  }
+}

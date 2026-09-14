@@ -65,6 +65,17 @@ const depConstraints = [
     sourceTag: 'type:util',
     onlyDependOnLibsWithTags: ['type:util'],
   },
+  {
+    // Las herramientas verifican el repositorio: comparan lo que una libreria declara contra lo
+    // que la aplicacion hace. Para eso tienen que LEER el contrato —el catalogo de objetos, los
+    // tipos, los catalogos de texto—, asi que pueden depender de ellos.
+    //
+    // Lo que no pueden es alcanzar `type:server-data`: el principio 2 vale tambien aqui, y una
+    // prueba que abriera la fuente para comprobar algo seria el primer camino de produccion que
+    // lo rompe sin que ninguna regla lo note.
+    sourceTag: 'type:tooling',
+    onlyDependOnLibsWithTags: ['type:ui', 'type:contract-types', 'type:lib', 'type:util'],
+  },
 ];
 
 export default [
@@ -90,7 +101,10 @@ export default [
         'error',
         {
           enforceBuildableLibDependency: false,
-          allow: [],
+          // El segmentador de JSX es uno solo: lo usa el renombrador para no traducir prosa y lo
+          // usa la prueba que comprueba que no quedo ninguna traducida. Dos copias acabarian
+          // discrepando justo en el caso raro, que es el unico que importa.
+          allow: ['../rename/segmentos.mjs'],
           depConstraints,
         },
       ],

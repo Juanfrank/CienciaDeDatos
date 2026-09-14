@@ -23,7 +23,10 @@
     "verify": "nx run-many -t typecheck lint test limites esquema && nx run shell:e2e",
     "verify:boundaries": "nx run verificacion:limites",
     "verify:schema": "nx run verificacion:esquema",
-    "verify:infra": "nx run verificacion:infra"
+    "verify:infra": "nx run verificacion:infra",
+    "afectado": "nx affected -t lint test --base=$(git merge-base HEAD origin/main 2>/dev/null || echo HEAD~1)",
+    "afectado:e2e": "nx affected -t e2e --base=$(git merge-base HEAD origin/main 2>/dev/null || echo HEAD~1)",
+    "verify:afectado": "nx affected -t typecheck lint test e2e --base=$(git merge-base HEAD origin/main 2>/dev/null || echo HEAD~1) && nx run-many -t limites esquema"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

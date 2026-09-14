@@ -66,13 +66,13 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "vitest run --dir tools --passWithNoTests"
+        "command": "vitest run --dir tools --exclude 'tools/coherencia/**' --passWithNoTests"
       }
     },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "eslint tools --max-warnings 0"
+        "command": "eslint tools --ignore-pattern 'tools/coherencia/**' --max-warnings 0"
       }
     }
   }

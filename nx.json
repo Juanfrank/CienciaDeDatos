@@ -18,20 +18,31 @@
       "{workspaceRoot}/playwright.config.mts",
       "{workspaceRoot}/package.json",
       "{workspaceRoot}/.nvmrc"
+    ],
+    "pruebas": [
+      "production",
+      "{projectRoot}/**/*.spec.ts",
+      "{projectRoot}/**/*.spec.tsx"
+    ],
+    "navegador": [
+      "pruebas",
+      "{projectRoot}/e2e/**/*",
+      "{workspaceRoot}/playwright.config.mts",
+      "{workspaceRoot}/tools/poblar-cache.mts"
     ]
   },
   "targetDefaults": {
     "lint": {
       "cache": true,
-      "inputs": ["default", "^production"]
+      "inputs": ["pruebas", "^production"]
     },
     "test": {
       "cache": true,
-      "inputs": ["default", "^production"]
+      "inputs": ["pruebas", "^production"]
     },
     "typecheck": {
       "cache": true,
-      "inputs": ["default", "^production"]
+      "inputs": ["pruebas", "^production"]
     },
     "build": {
       "cache": true,
@@ -39,8 +50,10 @@
       "inputs": ["production", "^production"]
     },
     "e2e": {
-      "cache": false,
-      "dependsOn": ["build"]
+      "cache": true,
+      "dependsOn": ["build"],
+      "inputs": ["navegador", "^production"],
+      "outputs": ["{workspaceRoot}/test-results"]
     }
   },
   "defaultBase": "main"

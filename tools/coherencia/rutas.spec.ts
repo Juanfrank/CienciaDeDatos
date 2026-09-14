@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { execSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -11,7 +12,7 @@ import { describe, expect, it } from 'vitest';
  * accesibilidad seguia en verde, porque un 404 tambien es accesible.
  */
 
-const raiz = join(__dirname, '../../../..');
+const raiz = execSync('git rev-parse --show-toplevel').toString().trim();
 const app = join(raiz, 'apps/shell/app');
 
 /** Las rutas estaticas que el enrutador sirve de verdad, sin los grupos entre parentesis. */
