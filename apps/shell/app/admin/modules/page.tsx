@@ -5,6 +5,11 @@ import { SectionIndex } from '../../../src/components/admin/SectionIndex';
 import { sectionOf } from '../../../src/components/admin/sections';
 import { ModuleObjects } from '../../../src/components/admin/ModuleObjects';
 import { TreeActions, type DestinoPosible } from '../../../src/components/admin/TreeActions';
+import {
+  ArbolPlegable,
+  BotonPlegar,
+  type FilaDelArbol,
+} from '../../../src/components/admin/ArbolPlegable';
 import { modules } from '../../../src/server/moduleStore';
 import { getGeneralTree, listUsers } from '../../../src/server/context';
 import { objectsOfModule } from '../../../src/server/recursos';
@@ -108,22 +113,33 @@ export default async function ModulosPage() {
       <h3>{t('admin.modules.current', { n: definiciones.length })}</h3>
       <p className="muted-text">{t('admin.modules.tree.intro')}</p>
 
-      <div className="container-table">
-        <table className="tabla" data-testid="tabla-modulos">
-          <Cabecera t={t} />
-          <tbody>
-            {filas.map((fila) => (
-              <Fila
-                key={`${fila.tipo}-${fila.id}`}
-                fila={fila}
-                t={t}
-                destinos={posibles}
-                autor={fila.tipo === 'modulo' ? nombreDe(fila.modulo.ownerUserId) : null}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/*
+        La tabla se dibuja aqui, en el servidor, y quien decide que filas se ven es un componente
+        de cliente que la envuelve. Las filas le llegan como `children` y no se enteran: lo unico
+        que cruza la frontera son datos —id, profundidad y padre— y el traductor se queda de este
+        lado, que es lo que impide repetir el fallo de pasar funciones a un componente de cliente.
+      */}
+      <ArbolPlegable
+        filas={filas.map(
+          (fila): FilaDelArbol => ({
+            id: fila.id,
+            tipo: fila.tipo,
+            profundidad: fila.profundidad,
+            padre: fila.padre,
+          }),
+        )}
+        cabecera={<Cabecera t={t} />}
+      >
+        {filas.map((fila) => (
+          <Fila
+            key={`${fila.tipo}-${fila.id}`}
+            fila={fila}
+            t={t}
+            destinos={posibles}
+            autor={fila.tipo === 'modulo' ? nombreDe(fila.modulo.ownerUserId) : null}
+          />
+        ))}
+      </ArbolPlegable>
 
       {/*
         Lo que el arbol no coloca. Un borrador recien creado entra en la organizacion general al
@@ -148,6 +164,7 @@ export default async function ModulosPage() {
                       indice: 0,
                       hermanos: 1,
                       hidden: false,
+                      padre: null,
                       modulo: m,
                     }}
                     t={t}
@@ -290,6 +307,7 @@ function Carpeta({
       data-hidden={fila.hidden ? 'si' : 'no'}
     >
       <th scope="row" style={SANGRIA(fila.profundidad)}>
+        <BotonPlegar nodeId={fila.id} nombre={fila.nombre} />{' '}
         <span className="fila-carpeta__nombre">{fila.nombre}</span>{' '}
         <span className="muted-text">{t('admin.modules.folder.count', { n: fila.modulos })}</span>
       </th>

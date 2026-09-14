@@ -204,6 +204,12 @@ export const en: Record<MessageKey, string> = {
   'admin.modules.folder.restricts': 'Restricts by {cuales}',
   'admin.modules.folder.configure': 'Configure permissions',
   // The six actions on a tree row.
+  // Folding and unfolding the tree in the table.
+  'admin.tree.fold.controls': 'Fold and unfold',
+  'admin.tree.fold.expandAll': 'Unfold all',
+  'admin.tree.fold.toLevel': 'Fold to level {n}',
+  'admin.tree.fold.collapse': 'Fold',
+  'admin.tree.fold.expand': 'Unfold',
   'admin.tree.action.up': 'Move up',
   'admin.tree.action.down': 'Move down',
   'admin.tree.action.moveTo': 'Move to',

@@ -26,6 +26,14 @@ interface FilaComun {
   hermanos: number;
   /** Oculta: sigue en el arbol y no se le dibuja a nadie. */
   hidden: boolean;
+  /*
+   * La carpeta que la contiene, o null en la raiz.
+   *
+   * Sin esto, una lista plana no sabe que se lleva consigo al plegar una carpeta: la profundidad
+   * sola diria «lo que viene detras con mas profundidad», que se rompe en cuanto hay dos ramas
+   * seguidas al mismo nivel.
+   */
+  padre: string | null;
 }
 
 export interface FilaCarpeta extends FilaComun {
@@ -66,6 +74,7 @@ export function organizationRows(
   nodos: NavNode[],
   definiciones: Map<string, ModuleDefinition>,
   profundidad = 0,
+  padre: string | null = null,
 ): FilaOrganizacion[] {
   const filas: FilaOrganizacion[] = [];
 
@@ -91,10 +100,11 @@ export function organizationRows(
         indice,
         hermanos: nodos.length,
         hidden: nodo.hidden === true,
+        padre,
         ...(nodo.scope ? { scope: nodo.scope } : {}),
         modulos: modulosBajo(nodo.children),
       });
-      filas.push(...organizationRows(nodo.children, definiciones, profundidad + 1));
+      filas.push(...organizationRows(nodo.children, definiciones, profundidad + 1, nodo.id));
       return;
     }
 
@@ -110,6 +120,7 @@ export function organizationRows(
       indice,
       hermanos: nodos.length,
       hidden: nodo.hidden === true,
+      padre,
       modulo: definicion,
     });
   });

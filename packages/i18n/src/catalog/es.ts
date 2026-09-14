@@ -204,6 +204,12 @@ export const es = {
   'admin.modules.folder.restricts': 'Restringe por {cuales}',
   'admin.modules.folder.configure': 'Configurar permisos',
   // Las seis acciones de una fila del arbol.
+  // Plegar y desplegar el arbol de la tabla.
+  'admin.tree.fold.controls': 'Plegar y desplegar',
+  'admin.tree.fold.expandAll': 'Desplegar todo',
+  'admin.tree.fold.toLevel': 'Plegar al nivel {n}',
+  'admin.tree.fold.collapse': 'Plegar',
+  'admin.tree.fold.expand': 'Desplegar',
   'admin.tree.action.up': 'Subir',
   'admin.tree.action.down': 'Bajar',
   'admin.tree.action.moveTo': 'Mover a',

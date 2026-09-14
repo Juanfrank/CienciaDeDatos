@@ -984,3 +984,83 @@ test.describe('permisos de un modulo, desde el modulo (4.10.6)', () => {
     await expect(page.getByTestId('acceso-equipo-este-como')).toContainText(/Sin acceso/);
   });
 });
+
+test.describe('la tabla del arbol se pliega y se despliega (4.1)', () => {
+  test('plegar una carpeta esconde lo que contiene, y desplegarla lo devuelve', async ({ page }) => {
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    /*
+     * Con `composicion`, que vive en `nodo-norte` y no lo mueve nadie.
+     *
+     * `audiencias` lo lleva a Distrito Este una prueba anterior de este mismo archivo, asi que
+     * para cuando llega esta ya no esta en la carpeta que se pliega. El orden dentro de un archivo
+     * es parte de lo que se prueba, asi que se elige un modulo quieto en vez de pelearse con el.
+     */
+    await expect(page.getByTestId('modulo-composicion')).toBeVisible();
+    await expect(page.getByTestId('plegar-nodo-norte')).toHaveAttribute('aria-expanded', 'true');
+
+    await page.getByTestId('plegar-nodo-norte').click();
+    await expect(page.getByTestId('plegar-nodo-norte')).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.getByTestId('modulo-composicion')).toHaveCount(0);
+    // Y la carpeta sigue ahi: plegar no es ocultar.
+    await expect(page.getByTestId('carpeta-nodo-norte')).toBeVisible();
+    // Lo que esta FUERA de esa rama no se toca.
+    await expect(page.getByTestId('carpeta-nodo-este')).toBeVisible();
+
+    await page.getByTestId('plegar-nodo-norte').click();
+    await expect(page.getByTestId('modulo-composicion')).toBeVisible();
+  });
+
+  test('plegar una carpeta de arriba se lleva las subcarpetas enteras', async ({ page }) => {
+    // Es lo que distingue «esconder lo de dentro» de «esconder la rama»: sin recorrer ancestros,
+    // plegar Institucional dejaria Regional y sus modulos a la vista.
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    await page.getByTestId('plegar-nodo-institucional').click();
+    await expect(page.getByTestId('carpeta-nodo-regional')).toHaveCount(0);
+    await expect(page.getByTestId('carpeta-nodo-norte')).toHaveCount(0);
+    await expect(page.getByTestId('modulo-composicion')).toHaveCount(0);
+    await expect(page.getByTestId('carpeta-nodo-institucional')).toBeVisible();
+
+    await page.getByTestId('desplegar-todo').click();
+    await expect(page.getByTestId('modulo-composicion')).toBeVisible();
+  });
+
+  test('se pliega por NIVEL, no solo carpeta a carpeta', async ({ page }) => {
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    // Nivel 2 pliega todo lo que esta a profundidad 1 o mas: Regional se pliega, Institucional no.
+    await page.getByTestId('plegar-nivel-1').click();
+    await expect(page.getByTestId('carpeta-nodo-institucional')).toBeVisible();
+    await expect(page.getByTestId('carpeta-nodo-regional')).toBeVisible();
+    await expect(page.getByTestId('carpeta-nodo-norte')).toHaveCount(0);
+
+    await page.getByTestId('desplegar-todo').click();
+    await expect(page.getByTestId('carpeta-nodo-norte')).toBeVisible();
+  });
+
+  test('lo plegado se recuerda al volver, y es de quien mira', async ({ page }) => {
+    /*
+     * Vive en el navegador de cada persona.
+     *
+     * No es una decision sobre la organizacion —eso son mover, ocultar y los permisos, que si van
+     * al almacen y a la auditoria—: es como prefiere leer la pantalla quien la mira. Guardarlo en
+     * el servidor lo compartiria con todo el mundo, que no es lo que nadie espera de un triangulo.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+    await page.getByTestId('plegar-nodo-norte').click();
+    await expect(page.getByTestId('modulo-composicion')).toHaveCount(0);
+
+    await page.reload();
+    await expect(page.getByTestId('plegar-nodo-norte')).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.getByTestId('modulo-composicion')).toHaveCount(0);
+
+    await page.getByTestId('desplegar-todo').click();
+    await page.reload();
+    await expect(page.getByTestId('modulo-composicion')).toBeVisible();
+  });
+});

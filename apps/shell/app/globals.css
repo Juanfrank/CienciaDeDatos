@@ -4397,3 +4397,52 @@ th[aria-sort='descending'] .table__flecha {
   border-radius: var(--md-sys-shape-corner-medium);
   background: var(--md-sys-color-surface-container-lowest);
 }
+
+/*
+ * Plegar el arbol de la tabla.
+ *
+ * El triangulo va ANTES del nombre y ocupa sitio aunque la carpeta este vacia: sin el hueco, los
+ * nombres de las carpetas con hijos y los de las vacias no alinean, y la sangria —que es lo unico
+ * que dice el nivel— deja de leerse como una columna.
+ */
+.arbol-plegar,
+.arbol-hueco {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  vertical-align: middle;
+}
+
+.arbol-plegar {
+  border: 0;
+  padding: 0;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  transition: transform var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+
+.arbol-plegar:hover {
+  background: var(--md-sys-color-surface-container-high);
+}
+
+/* Plegada: el chevron apunta a la derecha, como en cualquier arbol de archivos. */
+.arbol-plegar[aria-expanded='false'] {
+  transform: rotate(-90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arbol-plegar {
+    transition: none;
+  }
+}
+
+.arbol-controles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-block: var(--space-md);
+}
