@@ -15,9 +15,19 @@ import { idioma } from '../src/server/locale';
 import { colorMode } from '../src/server/theme';
 import './globals.css';
 
+/*
+ * El titulo del documento es lo que se lee en la pestana del navegador y en un marcador, asi que
+ * es el MISMO nombre que lleva el encabezado. Se quedo en «Capa de visualizacion» —el nombre con
+ * el que se describe el proyecto por dentro— cuando el encabezado paso a nombrarse de cara a la
+ * gente, y una pestana que no coincide con lo que se ve en pantalla es de las cosas que hacen
+ * dudar de si uno esta donde cree.
+ *
+ * No sale del catalogo: `metadata` se evalua una vez, fuera de la peticion, asi que no hay
+ * idioma que consultar. El nombre de la institucion tampoco se traduce.
+ */
 export const metadata: Metadata = {
-  title: 'Capa de visualizacion',
-  description: `Reporting institucional — ${defaultIdentity.name}`,
+  title: 'Gestión de Datos y Conocimiento',
+  description: `${defaultIdentity.name} — Gestión de Datos y Conocimiento`,
 };
 
 /** Montserrat, la tipografia institucional. */

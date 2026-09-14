@@ -151,6 +151,10 @@ describe('las credenciales de demostracion no se siembran solas', () => {
     ['apps/shell/project.json', 'el objetivo `dev`, que es la demostracion local'],
     ['README.md', 'la documentacion que explica la puerta'],
     ['docs/hoja-de-ruta.md', 'el registro de por que se cerro y que falta ahora (2.15)'],
+    [
+      'tools/capture-admin.mts',
+      'las instrucciones para levantar el servidor de demostracion contra el que captura',
+    ],
     ['tools/coherence/autorizacion.spec.ts', 'esta misma guarda'],
   ]);
 

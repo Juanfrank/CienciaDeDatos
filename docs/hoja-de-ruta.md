@@ -65,6 +65,21 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   siempre. Lo que tapaba: las dos pantallas de auditoria mostraban `u-admin` donde deberia ir un
   nombre. Arreglado en las dos, y la prueba ahora provoca el cambio y comprueba las cuatro
   columnas sin condicion.
+- **La pestana del navegador decia otra cosa que el encabezado.** El `<title>` del documento se
+  quedo en «Capa de visualizacion» —el nombre con el que el contrato describe el sistema por
+  dentro— cuando el encabezado paso a nombrarse de cara a la gente. Una pestana que no coincide
+  con lo que se ve en pantalla es de las cosas que hacen dudar de si uno esta donde cree.
+- **El script de capturas del panel estaba roto de tres formas** y ninguna se notaba, porque un
+  script de capturas solo falla cuando alguien lo ejecuta: apuntaba a `/admin/arbol` y a una
+  gemela que el renombrado al ingles movio, y entraba llamando a `/api/session/active-team` con
+  un `userId`, que es justo lo que 4.7 cerro. Reescrito: entra por la puerta, cubre las veinte
+  secciones y siembra una propuesta para que la cola de revision no salga vacia —una captura de
+  una pantalla vacia no ensena la pantalla—.
+  La guarda de rutas ahora mira tambien bajo `tools/`, y por dos caminos que antes no cubria: los
+  archivos `.mts` —el filtro era `/\.tsx?$/`, asi que la carpeta entraba en la lista y salian cero
+  archivos— y las URL que viajan en una TABLA en vez de dentro del `goto`, comparando por
+  segmentos para que `/m/casos-pendientes` siga casando con `/m/[slug]` mientras `/admin/arbol` no
+  casa con nada.
 - **La matriz de permisos de 4.10.1, visible (4.10.8).** Estaba escrita, probada y era invisible:
   `MATRIX` es privada de `@app/access-control`, y `capabilitiesOf` no lo llamaba nadie desde
   produccion. Quien administra no tenia forma de ver que puede cada rol. Ahora

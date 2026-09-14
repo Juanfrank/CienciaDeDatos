@@ -51,9 +51,22 @@ function fuentes(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
     const ruta = join(dir, e.name);
     if (e.isDirectory()) return e.name === '.next' || e.name === 'node_modules' ? [] : fuentes(ruta);
-    return /\.tsx?$/.test(e.name) ? [ruta] : [];
+    // `.mts` cuenta: los scripts de `tools/` se escriben asi, y es justo donde estaba la rotura.
+    // Con `/\.tsx?$/` la carpeta entraba en la lista y salian cero archivos, que es la forma
+    // mas silenciosa de que una guarda no compruebe nada.
+    return /\.m?tsx?$/.test(e.name) ? [ruta] : [];
   });
 }
+
+/**
+ * Donde se buscan URL internas.
+ *
+ * `tools/` entra por la misma razon que entro `/api`: el hueco se llena solo. `capture-admin.mts`
+ * apuntaba a `/admin/arbol` y a `/admin/sees-who-where`, dos rutas que el renombrado al ingles
+ * movio, y nadie se entero porque un script de capturas solo falla cuando alguien lo ejecuta. No
+ * compila menos, no rompe ninguna prueba, y el dia que se necesita la captura sale un 404.
+ */
+const DONDE = ['apps/shell', 'tools'];
 
 describe('rutas', () => {
   const servidas = new Set(rutas(app).filter(Boolean));
@@ -65,7 +78,7 @@ describe('rutas', () => {
 
   it('ninguna URL interna apunta a una ruta que no existe', () => {
     const rotas: string[] = [];
-    for (const archivo of fuentes(join(raiz, 'apps/shell'))) {
+    for (const archivo of DONDE.flatMap((d) => fuentes(join(raiz, d)))) {
       const contenido = readFileSync(archivo, 'utf8');
       // Solo lo que NAVEGA de verdad. Una cadena suelta que empieza por barra puede ser el
       // trozo final de una ruta de API compuesta con plantilla, o el nombre de un fixture.
@@ -78,6 +91,57 @@ describe('rutas', () => {
         if (/\[|\.|^\/api\b/.test(url)) continue;
         // Un prefijo servido basta: `/m/casos-pendientes` cuelga de `/m/[slug]`.
         if (servidas.has(url) || [...servidas].some((r) => url.startsWith(`${r}/`))) continue;
+        rotas.push(`${archivo.slice(raiz.length + 1)}: ${url}`);
+      }
+    }
+    expect([...new Set(rotas)].sort()).toEqual([]);
+  });
+
+  /*
+   * Y las que viajan en una TABLA, no en la llamada.
+   *
+   * La comprobacion de arriba mira lo que esta dentro de `goto(...)` o de un `href`, y eso deja
+   * fuera el caso mas comun en un script: una lista de rutas arriba y un bucle abajo que las
+   * recorre. Asi estaban `/admin/arbol` y su gemela en `capture-admin.mts`: rutas muertas dentro
+   * de un array, a diez lineas del `goto` que las usaba.
+   *
+   * Se reconoce una URL por su PRIMER segmento: si empieza por uno que el enrutador sirve de
+   * verdad —`/admin`, `/editor`, `/m`…—, es una direccion de esta aplicacion y tiene que existir.
+   * Una cadena que empiece por cualquier otra cosa no se toca, y eso es lo que mantiene la
+   * comprobacion sin falsos positivos.
+   */
+  it('ninguna URL suelta en una tabla apunta a una ruta que no existe', () => {
+    const raices = new Set(
+      [...servidas].map((r) => r.split('/')[1]).filter((s): s is string => Boolean(s)),
+    );
+
+    /*
+     * Aqui se compara por SEGMENTOS, no por prefijo.
+     *
+     * La comprobacion de arriba acepta cualquier URL que cuelgue de una ruta servida, porque
+     * necesita que `/m/casos-pendientes` pase por `/m/[slug]`. Esa misma indulgencia deja pasar
+     * `/admin/lo-que-sea`, que es exactamente la rotura que se busca. Con segmentos, un `[slug]`
+     * es comodin donde LO HAY —`/m/casos-pendientes` casa— y `/admin/arbol` no casa con nada,
+     * porque bajo `/admin` no hay ningun segmento dinamico.
+     */
+    const declaradas = [...servidas].map((r) => r.split('/').filter(Boolean));
+    const casaPagina = (url: string): boolean => {
+      const pedida = url.split('/').filter(Boolean);
+      return declaradas.some(
+        (ruta) =>
+          ruta.length === pedida.length &&
+          ruta.every((seg, i) => /^\[.*\]$/.test(seg) || seg === pedida[i]),
+      );
+    };
+
+    const rotas: string[] = [];
+    for (const archivo of DONDE.flatMap((d) => fuentes(join(raiz, d)))) {
+      const contenido = readFileSync(archivo, 'utf8');
+      for (const m of contenido.matchAll(/['"](\/[a-z][\w/-]*)['"]/g)) {
+        const url = m[1] as string;
+        const primero = url.split('/')[1];
+        if (!primero || !raices.has(primero)) continue;
+        if (casaPagina(url)) continue;
         rotas.push(`${archivo.slice(raiz.length + 1)}: ${url}`);
       }
     }
@@ -122,9 +186,14 @@ describe('rutas de API', () => {
     expect(declaradas.length).toBeGreaterThan(15);
   });
 
+  // Se cuenta CADA carpeta: si una deja de devolver archivos, la guarda la recorre en vano.
+  it.each(DONDE)('hay fuentes que revisar en %s', (carpeta) => {
+    expect(fuentes(join(raiz, carpeta)).length).toBeGreaterThan(0);
+  });
+
   it('ninguna URL de API apunta a una ruta que no existe', () => {
     const rotas: string[] = [];
-    for (const archivo of fuentes(join(raiz, 'apps/shell'))) {
+    for (const archivo of DONDE.flatMap((d) => fuentes(join(raiz, d)))) {
       // Se miran solo las CADENAS: `page.request.post('/api/...')` escrito dentro de un
       // comentario es prosa, no una llamada, y no hay ruta que pueda casar con «...».
       const contenido = (segmentar(readFileSync(archivo, 'utf8')) as { tipo: string; texto: string }[])
