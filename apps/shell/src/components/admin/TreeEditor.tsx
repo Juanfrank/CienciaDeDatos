@@ -166,7 +166,7 @@ function Nodes({
   nivel?: number;
 }) {
   return (
-    <ul className="tree-editor__list" level-data={nivel}>
+    <ul className="tree-editor__list" data-level={nivel}>
       {nodos.map((node) => {
         const nombre = node.type === 'folder' ? node.name : node.moduleRef.name;
         const esCarpeta = node.type === 'folder';

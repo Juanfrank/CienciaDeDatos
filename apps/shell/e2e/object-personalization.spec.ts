@@ -7,7 +7,7 @@ type Pagina = import('@playwright/test').Page;
 
 /** Espera a que el editor termine de guardar. */
 const guardado = async (page: Pagina) => {
-  await expect(page.locator('.editor')).toHaveAttribute('saving-data', 'no');
+  await expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
 };
 
 /** El id del objeto recien colocado, leido del BLOQUE del lienzo. */
@@ -88,15 +88,15 @@ test.describe('el editor configura como se ve un objeto', () => {
     await page.goto('/m/casos-pendientes');
 
     const card = page.locator('.objeto').first();
-    await expect(card).toHaveAttribute('accent-data', 'primario');
-    await expect(card).toHaveAttribute('highlight-data', 'si');
+    await expect(card).toHaveAttribute('data-accent', 'primario');
+    await expect(card).toHaveAttribute('data-highlight', 'si');
     await expect(card.getByTestId('subtitle-object')).toHaveText('Al cierre del trimestre');
     // La unidad sale del formato de la instancia, no de una cadena escrita en el componente.
     await expect(card.getByTestId('value-kpi')).toContainText('casos');
 
     // La segunda tarjeta es el MISMO objeto con otra presentacion.
     const segunda = page.locator('.objeto').nth(1);
-    await expect(segunda).toHaveAttribute('accent-data', 'terciario');
+    await expect(segunda).toHaveAttribute('data-accent', 'terciario');
   });
 
   test('el editor NO ofrece lo que el objeto no admite', async ({ page }) => {

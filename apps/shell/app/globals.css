@@ -513,15 +513,15 @@ code {
   white-space: nowrap;
 }
 
-.pastilla-estado[status-data='publicado'] {
+.pastilla-estado[data-status='publicado'] {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
 }
-.pastilla-estado[status-data='pendiente-de-aprobacion'] {
+.pastilla-estado[data-status='pendiente-de-aprobacion'] {
   background: var(--md-sys-color-tertiary-container);
   color: var(--md-sys-color-on-tertiary-container);
 }
-.pastilla-estado[status-data='bloqueada'] {
+.pastilla-estado[data-status='bloqueada'] {
   background: var(--md-sys-color-error-container);
   color: var(--md-sys-color-on-error-container);
 }
@@ -714,27 +714,27 @@ input[type='radio'] {
 /*
  * El acento de un objeto es un ROL del tema, no un color.
  *
- * `--objeto-acento` se resuelve aqui a partir de `accent-data`, y a partir de ahi el icono y la
+ * `--objeto-acento` se resuelve aqui a partir de `data-accent`, y a partir de ahi el icono y la
  * linea de resaltado lo consumen sin saber cual es. Es lo que impide que personalizar un objeto
  * se convierta en elegir un hexadecimal que la puerta de contraste de 4.3 no ha comprobado
  * nunca: solo hay cuatro valores posibles y los cuatro salen de pares ya verificados.
  */
-.objeto[accent-data='primario'] {
+.objeto[data-accent='primario'] {
   --objeto-acento: var(--md-sys-color-primary);
   --objeto-acento-fondo: var(--md-sys-color-primary-container);
   --objeto-acento-texto: var(--md-sys-color-on-primary-container);
 }
-.objeto[accent-data='secundario'] {
+.objeto[data-accent='secundario'] {
   --objeto-acento: var(--md-sys-color-secondary);
   --objeto-acento-fondo: var(--md-sys-color-secondary-container);
   --objeto-acento-texto: var(--md-sys-color-on-secondary-container);
 }
-.objeto[accent-data='terciario'] {
+.objeto[data-accent='terciario'] {
   --objeto-acento: var(--md-sys-color-tertiary);
   --objeto-acento-fondo: var(--md-sys-color-tertiary-container);
   --objeto-acento-texto: var(--md-sys-color-on-tertiary-container);
 }
-.objeto[accent-data='neutro'] {
+.objeto[data-accent='neutro'] {
   --objeto-acento: var(--md-sys-color-outline);
   --objeto-acento-fondo: var(--md-sys-color-surface-container-high);
   --objeto-acento-texto: var(--md-sys-color-on-surface-variant);
@@ -762,8 +762,8 @@ input[type='radio'] {
  * lados: cambiarle el grosor a uno solo descuadra el radio de las esquinas. Asi la linea se
  * apoya DENTRO del borde y las esquinas siguen siendo las mismas.
  */
-.objeto[highlight-data='si'] { position: relative; }
-.objeto[highlight-data='si']::before {
+.objeto[data-highlight='si'] { position: relative; }
+.objeto[data-highlight='si']::before {
   content: '';
   position: absolute;
   top: 0;
@@ -774,9 +774,9 @@ input[type='radio'] {
   background: var(--color-de-resaltado, var(--objeto-acento));
   border-radius: var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 0 0;
 }
-.objeto[highlight-data='si'] .object__header { padding-top: calc(var(--space-md) + 4px); }
+.objeto[data-highlight='si'] .object__header { padding-top: calc(var(--space-md) + 4px); }
 /* Sin cabecera que empujar, el hueco de la linea lo deja el cuerpo. */
-.objeto[highlight-data='si'] > .object__body:first-child { padding-top: calc(var(--space-md) + 4px); }
+.objeto[data-highlight='si'] > .object__body:first-child { padding-top: calc(var(--space-md) + 4px); }
 
 /* La tarjeta: valor y etiqueta como un bloque, para poder alinearlo en vertical. */
 /*
@@ -1319,8 +1319,8 @@ body[sidebar-data='oculto'] .admin__nav { display: none; }
 .sidebar__title { margin: 0 0 var(--space-sm); padding: 0 var(--space-md); color: var(--md-sys-color-on-surface-variant); }
 
 .arbol { list-style: none; margin: 0; padding: 0; }
-.arbol[level-data='0'] > li { margin-bottom: 2px; }
-.arbol:not([level-data='0']) { padding-left: var(--space-md); }
+.arbol[data-level='0'] > li { margin-bottom: 2px; }
+.arbol:not([data-level='0']) { padding-left: var(--space-md); }
 .tree__folder-name {
   display: block;
   padding: var(--space-sm) var(--space-md);
@@ -1862,9 +1862,9 @@ th[aria-sort='descending'] .table__flecha {
   transition: transform var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
 /* Cada nivel pesa un poco menos que el de encima: es la jerarquia dicha con tipografia. */
-.matrix-table tbody tr[level-data='0'] > th { font-weight: 600; }
-.matrix-table tbody tr[level-data='1'] > th { font-weight: 500; }
-.matrix-table tbody tr[level-data='2'] > th {
+.matrix-table tbody tr[data-level='0'] > th { font-weight: 600; }
+.matrix-table tbody tr[data-level='1'] > th { font-weight: 500; }
+.matrix-table tbody tr[data-level='2'] > th {
   font-weight: 400;
   color: var(--md-sys-color-on-surface-variant);
 }
@@ -2665,7 +2665,7 @@ th[aria-sort='descending'] .table__flecha {
   border-radius: var(--md-sys-shape-corner-small);
   background: var(--md-sys-color-surface-container-low);
 }
-.seccion[level-data='2'] { background: var(--md-sys-color-surface-container-lowest); }
+.seccion[data-level='2'] { background: var(--md-sys-color-surface-container-lowest); }
 
 /*
  * El triangulo nativo se sustituye por uno propio para poder colocarlo a la izquierda y girarlo.
@@ -2693,7 +2693,7 @@ th[aria-sort='descending'] .table__flecha {
   transition: transform var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
 .seccion[open] > .section__title::before { transform: rotate(90deg); }
-.seccion[level-data='2'] > .section__title {
+.seccion[data-level='2'] > .section__title {
   font-size: var(--md-sys-typescale-label-medium-size);
   color: var(--md-sys-color-on-surface-variant);
 }
@@ -3125,7 +3125,7 @@ th[aria-sort='descending'] .table__flecha {
 }
 
 .tree-editor__list { list-style: none; margin: 0; padding: 0; }
-.tree-editor__list[level-data]:not([level-data='0']) { padding-left: var(--space-lg); }
+.tree-editor__list[data-level]:not([data-level='0']) { padding-left: var(--space-lg); }
 .tree-editor__node {
   display: flex;
   align-items: center;

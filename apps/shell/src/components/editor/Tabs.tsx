@@ -59,7 +59,7 @@ export function Tabs<T extends string>({
     if (!siguiente) return;
     onElegir(siguiente.id);
     const button = rail.current?.querySelector<HTMLButtonElement>(
-      `[tab-data='${siguiente.id}']`,
+      `[data-tab='${siguiente.id}']`,
     );
     button?.focus();
     // `nearest` y no `center`: centrar salta la barra entera aunque la pestana ya se vea.
@@ -86,7 +86,7 @@ export function Tabs<T extends string>({
             type="button"
             role="tab"
             id={`pestana-${p.id}`}
-            tab-data={p.id}
+            data-tab={p.id}
             aria-selected={activa === p.id}
             aria-controls={`panel-${p.id}`}
             tabIndex={activa === p.id ? 0 : -1}

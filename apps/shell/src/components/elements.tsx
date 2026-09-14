@@ -135,7 +135,7 @@ export function FormaBasica({ config }: { config: ShapeSettings | undefined }) {
   const recorte = RECORTE[forma];
 
   return (
-    <div className="forma" data-testid="forma" shape-data={forma}>
+    <div className="forma" data-testid="forma" data-shape={forma}>
       <div
         className="shape__body"
         data-regular={regular ? 'si' : undefined}

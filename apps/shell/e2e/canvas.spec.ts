@@ -5,7 +5,7 @@ import { entrarComo } from './session';
 /** El lienzo del editor — seccion 4.2, con la accesibilidad de 4.9. */
 
 const guardado = async (page: Page) =>
-  expect(page.locator('.editor')).toHaveAttribute('saving-data', 'no');
+  expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
 
 const newModule = async (page: Page, slug: string) => {
   await page.goto('/editor');

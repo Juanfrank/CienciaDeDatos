@@ -153,7 +153,7 @@ function FieldPicker({
   return (
     <fieldset
       className="filters-panel__field"
-      kind-data={picker.tipo}
+      data-kind={picker.tipo}
       data-testid={prueba}
     >
       <legend className="filters-panel__label">

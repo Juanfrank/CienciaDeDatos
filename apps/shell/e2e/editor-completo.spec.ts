@@ -6,7 +6,7 @@ import { entrarComo } from './session';
 /** Todo objeto del catalogo se COLOCA y se CONFIGURA desde el editor — seccion 4.2. */
 
 const guardado = async (page: Page) =>
-  expect(page.locator('.editor')).toHaveAttribute('saving-data', 'no');
+  expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
 
 /** Despliega todas las secciones del panel. */
 const abrirSecciones = async (page: Page) => {

@@ -151,6 +151,17 @@ export function traducir(identificador) {
   if (/^use[A-Z]/.test(identificador)) {
     return `use${traducir(identificador.slice(3)) ?? identificador.slice(3)}`;
   }
+  /*
+   * El `data-` de un atributo de datos es un prefijo del HTML, no una palabra.
+   *
+   * Tratado como sustantivo, la inversion de dos nombres produce `accent-data`, que el navegador
+   * no reconoce como atributo de datos: funciona solo mientras los dos lados —el TSX y el
+   * selector del CSS— lleven el mismo error.
+   */
+  if (/^data-/.test(identificador)) {
+    const resto = identificador.slice(5);
+    return `data-${traducir(resto) ?? resto}`;
+  }
   const ultimo = partes[partes.length - 1];
   if (partes.length > 1 && PREPOSICIONES[ultimo] !== undefined) {
     sufijo = PREPOSICIONES[ultimo];

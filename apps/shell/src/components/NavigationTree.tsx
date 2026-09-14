@@ -9,7 +9,7 @@ export function NavigationTree({ nodos, nivel = 0 }: { nodos: NavNode[]; nivel?:
   const pathname = usePathname();
 
   return (
-    <ul className="arbol" level-data={nivel}>
+    <ul className="arbol" data-level={nivel}>
       {nodos.map((node) =>
         node.type === 'folder' ? (
           <li key={node.id} className="tree__folder">

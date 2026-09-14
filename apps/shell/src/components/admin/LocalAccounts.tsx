@@ -132,7 +132,7 @@ export function CuentasLocales({
                 <td>
                   <span
                     className="pastilla-estado"
-                    status-data={c.bloqueada ? "bloqueada" : "activa"}
+                    data-status={c.bloqueada ? "bloqueada" : "activa"}
                   >
                     {c.bloqueada ? "Bloqueada" : "Activa"}
                   </span>

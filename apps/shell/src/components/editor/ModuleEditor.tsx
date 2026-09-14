@@ -155,12 +155,12 @@ export function ModuleEditor({
     <div className="taller">
       <div className="taller__obra">
         <EditorHeader />
-        <section className="editor" saving-data={saving ? 'si' : 'no'}>
+        <section className="editor" data-saving={saving ? 'si' : 'no'}>
       <header className="editor__header">
         <div>
           <h2>{modulo.name}</h2>
           <p className="muted-text">
-            <span className="pastilla-estado" status-data={modulo.status}>
+            <span className="pastilla-estado" data-status={modulo.status}>
               {modulo.status}
             </span>{' '}
             · /m/{modulo.slug} · v{modulo.version}

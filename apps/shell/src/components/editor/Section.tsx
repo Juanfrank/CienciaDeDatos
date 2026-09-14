@@ -56,7 +56,7 @@ export function Section({
     <details
       ref={detalle}
       className="seccion"
-      level-data={nivel}
+      data-level={nivel}
       // Buscando, las secciones que quedan se abren: si siguieran plegadas, encontrar una
       // obligaria a un clic mas para ver lo que se estaba buscando.
       open={filtro === '' ? abierta : true}

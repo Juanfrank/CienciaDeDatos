@@ -155,8 +155,8 @@ export function Frame({
   return (
     <div
       className="objeto"
-      accent-data={acento}
-      highlight-data={presentacion?.resaltado ? 'si' : undefined}
+      data-accent={acento}
+      data-highlight={presentacion?.resaltado ? 'si' : undefined}
       // El color del resaltado, cuando debe decir algo distinto del acento. Es una variable y no
       // una clase porque el valor sale de un rol del tema, no de un conjunto de estados.
       style={

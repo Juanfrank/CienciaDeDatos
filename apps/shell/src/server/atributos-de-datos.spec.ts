@@ -43,6 +43,18 @@ describe('atributos de datos', () => {
     expect([...usados].filter((a) => !puestos.has(a)).sort()).toEqual([]);
   });
 
+  it('ningun atributo de la interfaz se queda a medio camino de ser `data-`', () => {
+    // `data-pestana` se convirtio en `tab-data`, que el navegador no reconoce como atributo de
+    // datos: el selector lo encontraba solo porque los dos lados llevaban el mismo error.
+    const aMedias = new Set<string>();
+    for (const ruta of fuentes) {
+      for (const m of readFileSync(ruta, 'utf8').matchAll(/\s([a-z][\w-]*-data)\s*=\s*\{/g)) {
+        aMedias.add(m[1] as string);
+      }
+    }
+    expect([...aMedias].sort()).toEqual([]);
+  });
+
   it('ningun atributo de datos lleva mayusculas', () => {
     // El navegador pasa a minusculas el nombre del atributo, asi que `data-textPosition` llega al
     // DOM como `data-textposition` y el selector que lo busca tal cual no encuentra nada.

@@ -199,7 +199,7 @@ export function ModuleList({
                       </span>
                     </th>
                     <td>
-                      <span className="pastilla-estado" status-data={m.status}>
+                      <span className="pastilla-estado" data-status={m.status}>
                         {LABEL[m.status]}
                       </span>
                       {m.locks.length > 0 ? (

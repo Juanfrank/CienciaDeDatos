@@ -234,7 +234,7 @@ function MatrixRow({
 }) {
   const tieneHijos = node.hijos.length > 0;
   return (
-    <tr level-data={node.nivel} data-testid={`matrix-row-${pathKey(node.path)}`}>
+    <tr data-level={node.nivel} data-testid={`matrix-row-${pathKey(node.path)}`}>
       {/*
         La sangria va en el `padding` y no con espacios: un lector de pantalla no los pronuncia, y
         el nivel viaja ademas en `data-nivel` y en `aria-expanded`, que es donde si se anuncia.

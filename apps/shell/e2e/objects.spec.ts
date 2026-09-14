@@ -28,7 +28,7 @@ test.describe('elementos (no leen datos)', () => {
 
   test('un cuadrado es cuadrado, no un rectangulo estirado a la celda', async ({ page }) => {
     await page.goto('/m/composicion/elementos');
-    const circulo = page.locator('[shape-data="circulo"] .shape__body');
+    const circulo = page.locator('[data-shape="circulo"] .shape__body');
     const box = await circulo.boundingBox();
     expect(box).not.toBeNull();
     expect(Math.abs((box?.width ?? 0) - (box?.height ?? 0))).toBeLessThan(2);
