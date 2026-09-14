@@ -148,8 +148,7 @@ emergencia cubren el caso.
 
 El campo «Pregunte:» esta **oculto**: `VISIBLE_QUERY` en
 `apps/shell/src/components/ModuleView.tsx` es `false`. La ruta `/api/consulta` sigue viva y sus
-pruebas tambien; lo que se salta es el bloque de pruebas de la interfaz, marcado con la misma
-razon.
+pruebas tambien.
 
 El motivo no es que falle, es que responde poco: reconoce medidas y valores del vocabulario del
 modulo y devuelve una URL con filtros. Eso es util como cimiento y no es lo que alguien espera al
