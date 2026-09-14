@@ -4317,3 +4317,83 @@ th[aria-sort='descending'] .table__flecha {
   border-radius: var(--md-sys-shape-corner-small);
   background: var(--md-sys-color-surface-container-lowest);
 }
+
+/*
+ * Contenedor expandible: un chiclet que se abre EN SU SITIO.
+ *
+ * Lo de abajo se desplaza solo, y eso no lo hace ningun JavaScript: las celdas de la rejilla se
+ * colocan con `grid-row: span N` y SIN linea de inicio, asi que el navegador las va acomodando en
+ * orden. Al crecer el `span` de una, las siguientes bajan. Lo unico que hace falta es que la
+ * celda sepa que su contenido esta abierto, y eso lo dice `:has()`.
+ *
+ * La regla apunta a la celda por su CONTENIDO y no al reves porque el contenedor no puede
+ * escribir en su propio padre: en React los datos bajan. `:has()` es justo la forma de que el
+ * estilo suba.
+ */
+.grid__cell:has(> .objeto > .contenedor-expandible[data-expandido='si']),
+.grid__cell:has(> .contenedor-expandible[data-expandido='si']) {
+  grid-row: span calc(1 + var(--filas-al-expandir, 4));
+}
+
+/* Cerrado ocupa UNA fila, sea cual sea el alto con el que lo pusieran en el lienzo: un chiclet
+   que reservara cuatro filas vacias no seria un chiclet. */
+.grid__cell:has(> .objeto > .contenedor-expandible[data-expandido='no']),
+.grid__cell:has(> .contenedor-expandible[data-expandido='no']) {
+  grid-row: span 1;
+}
+
+.contenedor-expandible {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-height: 0;
+}
+
+/* El chiclet: una pastilla con contorno, como la de las capturas. */
+.chiclet {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  align-self: flex-start;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
+  font: var(--md-sys-typescale-label-large);
+  cursor: pointer;
+}
+
+.chiclet:hover {
+  background: var(--md-sys-color-surface-container);
+}
+
+.chiclet__rotulo {
+  font-weight: var(--font-weight-medium);
+}
+
+/* Gira, no cambia de icono: girar dice que es el mismo control en otro estado. */
+.chiclet__chevron {
+  display: inline-flex;
+  transition: transform var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+
+[data-expandido='si'] > .chiclet .chiclet__chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chiclet__chevron {
+    transition: none;
+  }
+}
+
+.contenedor-expandible__panel {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-md);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: var(--md-sys-color-surface-container-lowest);
+}

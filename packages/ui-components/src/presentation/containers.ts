@@ -60,6 +60,23 @@ export interface ExpandableSettingsContainer extends SimpleSettingsContainer {
   textoDeAmpliar?: string;
 }
 
+/**
+ * Contenedor expandible: un chiclet que se abre EN SU SITIO y empuja lo de abajo.
+ *
+ * No es el ampliable. El ampliable abre una ventana encima —lo de debajo sigue donde estaba y
+ * queda tapado—; este crece dentro de la rejilla del modulo, y los objetos que tiene debajo se
+ * desplazan para hacerle hueco. Es la diferencia entre mirar algo aparte y trabajar con ello sin
+ * perder de vista lo demas.
+ */
+export interface ExpandableInPlaceSettings extends SimpleSettingsContainer {
+  /** Filas de la rejilla del modulo que ocupa abierto, ademas de la del chiclet. */
+  filasAlExpandir?: number;
+  /** Rotulo del chiclet. Es lo unico que se lee cerrado, asi que por defecto va el titulo. */
+  rotulo?: string;
+  /** Si abre ya expandido. Util para el que trae los filtros de la pagina. */
+  abiertoAlCargar?: boolean;
+}
+
 export interface TabContainerSettings extends SimpleSettingsContainer {
   /** Que pestana se ve al abrir. Si el id no existe, la primera. */
   initialTab?: string;
@@ -74,6 +91,7 @@ export interface ContainerSettings {
   simple?: SimpleSettingsContainer;
   scrollable?: ScrollableSettingsContainer;
   expandable?: ExpandableSettingsContainer;
+  expandableInPlace?: ExpandableInPlaceSettings;
   tabs?: TabContainerSettings;
 }
 
@@ -81,6 +99,7 @@ export const CONTAINERS = [
   'contenedor-simple',
   'contenedor-desplazable',
   'contenedor-ampliable',
+  'contenedor-expandible',
   'contenedor-con-pestanas',
 ] as const;
 export type ContainerId = (typeof CONTAINERS)[number];
@@ -89,6 +108,14 @@ export const isContainer = (objectId: string): objectId is ContainerId =>
   (CONTAINERS as readonly string[]).includes(objectId);
 
 export const DEFAULT_COLUMN_INTERNAL = 6;
+
+/**
+ * Filas que ocupa un expandible abierto, si nadie dice otra cosa.
+ *
+ * Cuatro es lo que cabe un panel de filtros de dos renglones, que es el caso que lo motivo. Se
+ * configura porque el contenido manda: un contenedor con una tabla dentro necesita mas.
+ */
+export const DEFAULT_ROWS_ON_EXPAND = 4;
 
 export const EMPTY_PANEL = (n = 1): ContainerPanel => ({
   panelId: `p${n}`,
@@ -195,8 +222,19 @@ export function columnsOf(objectId: string, config: ContainerSettings | undefine
     config?.simple?.gridColumns ??
     config?.scrollable?.gridColumns ??
     config?.expandable?.gridColumns ??
+    config?.expandableInPlace?.gridColumns ??
     config?.tabs?.gridColumns;
   return Math.max(1, Math.round(propia ?? DEFAULT_COLUMN_INTERNAL));
+}
+
+/**
+ * Filas que ocupa un expandible cuando esta abierto.
+ *
+ * Minimo una: con cero, abrirlo no dejaria sitio para nada y el contenedor no haria nada. Se
+ * redondea porque llega de un campo de la interfaz y media fila de rejilla no existe.
+ */
+export function rowsOnExpand(config: ContainerSettings | undefined): number {
+  return Math.max(1, Math.round(config?.expandableInPlace?.filasAlExpandir ?? DEFAULT_ROWS_ON_EXPAND));
 }
 
 /* ── Lo que trae un objeto recien puesto ───────────────────────────────────────────────────── */
@@ -235,6 +273,12 @@ export function initialSettings(
       return { objectId, panels, scrollable: { axis: 'y' } };
     case 'contenedor-ampliable':
       return { objectId, panels, expandable: { expandedColumns: 12, textoDeAmpliar: 'Ampliar' } };
+    case 'contenedor-expandible':
+      return {
+        objectId,
+        panels,
+        expandableInPlace: { filasAlExpandir: DEFAULT_ROWS_ON_EXPAND },
+      };
     case 'contenedor-con-pestanas':
       return { objectId, panels, tabs: { initialTab: 'p1' } };
     default:

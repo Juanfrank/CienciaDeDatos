@@ -1141,6 +1141,22 @@ export const initialCatalog: VisualObjectDefinition[] = [
     ],
   },
   {
+    objectId: 'contenedor-expandible',
+    icono: 'chevron-abajo',
+    name: 'Contenedor expandible',
+    description:
+      'Un chiclet de una fila que al pulsarlo se abre en su sitio y empuja hacia abajo lo que tiene debajo.',
+    category: 'contenedor',
+    versions: [
+      v1(
+        'Version inicial: chiclet de una fila, rejilla interna propia y N filas configurables al abrir.',
+        WITHOUT_DATA(
+          'No tapa nada: crece dentro de la rejilla del modulo y lo de abajo se desplaza. Es lo que lo distingue del ampliable, que abre una ventana encima.',
+        ),
+      ),
+    ],
+  },
+  {
     objectId: 'contenedor-con-pestanas',
     icono: 'tabs',
     name: 'Contenedor con pestanas',

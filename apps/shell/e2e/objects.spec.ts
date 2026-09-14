@@ -112,12 +112,26 @@ test.describe('contenedores', () => {
     // pintado: midiendo nada mas cargar, `before` sale de una disposicion que todavia se esta
     // asentando y la comparacion falla por cuatro pixeles bajo carga, sin que nada se haya movido.
     await expect(page.getByTestId('chart-cp-barras')).toHaveAttribute('data-montado', 'si');
-    const before = await contenedor.boundingBox();
+
+    /*
+     * Se mide contra el DOCUMENTO, no contra la ventana.
+     *
+     * `boundingBox()` da coordenadas de viewport, y pulsar una pestana que esta por debajo del
+     * pliegue desplaza la pagina para alcanzarla: el contenedor salia «movido» 359 px sin haberse
+     * movido ni un pixel. La prueba decia algo verdadero por una razon falsa —que la pagina cabia
+     * entera— y dejo de pasar en cuanto la pagina crecio. `offsetTop` no depende del desplazamiento.
+     */
+    const caja = async () =>
+      await contenedor.evaluate((el) => {
+        const e = el as HTMLElement;
+        return { x: e.offsetLeft, y: e.offsetTop, width: e.offsetWidth, height: e.offsetHeight };
+      });
+    const before = await caja();
 
     await page.getByTestId('tab-p2').click();
     await expect(page.getByTestId('contenedor-con-pestanas').getByTestId('matriz')).toBeVisible();
 
-    const after = await contenedor.boundingBox();
+    const after = await caja();
     // Es la regla que el contenido de la segunda pestana —una matriz de varias filas— romperia si
     // el alto lo mandara lo que hay dentro en vez de la rejilla.
     expect(after?.x).toBe(before?.x);
@@ -274,5 +288,63 @@ test.describe('los dos carriles de pantalla', () => {
     // ella: con `sticky` dentro, bajar por el lienzo lo arrastraba unos pixeles antes de fijarlo.
     expect(after?.arriba).toBe(before?.arriba);
     expect(after?.abajo).toBe(before?.abajo);
+  });
+});
+
+test.describe('contenedor expandible: se abre EN SU SITIO y empuja lo de abajo', () => {
+  test('al abrirlo, lo que tiene debajo se desplaza hacia abajo', async ({ page }) => {
+    /*
+     * Se mide la POSICION real en pantalla, no una clase ni un atributo.
+     *
+     * Que la celda diga que ocupa mas filas no prueba nada: lo que hay que comprobar es que el
+     * vecino de abajo no se quede tapado, y eso solo lo dice su caja. Es ademas la diferencia
+     * entera con el contenedor ampliable, que abre una ventana ENCIMA y deja lo de debajo donde
+     * estaba.
+     *
+     * Se mira en el modulo publicado y no en el editor: en el lienzo cada objeto lleva encima su
+     * capa de seleccion —ahi se eligen, no se usan— y el chiclet no llegaria a recibir el clic.
+     */
+    await page.goto('/m/composicion/contenedores');
+
+    const chiclet = page.getByTestId('chiclet');
+    await expect(chiclet).toBeVisible();
+    await expect(chiclet).toHaveAttribute('aria-expanded', 'false');
+
+    // El siguiente del arbol, no el primero de la pagina: el expandible va arriba del todo.
+    const arribaDelSiguiente = async () =>
+      (await page.getByTestId('cell-cont-simple').boundingBox())?.y ?? 0;
+    const cerrado = await arribaDelSiguiente();
+    expect(cerrado).toBeGreaterThan(0);
+
+    await chiclet.click();
+    await expect(chiclet).toHaveAttribute('aria-expanded', 'true');
+    await expect.poll(async () => await arribaDelSiguiente()).toBeGreaterThan(cerrado);
+
+    // Y al plegarlo vuelve a su sitio: abrir no puede dejar un hueco permanente.
+    await chiclet.click();
+    await expect(chiclet).toHaveAttribute('aria-expanded', 'false');
+    await expect.poll(async () => await arribaDelSiguiente()).toBe(cerrado);
+  });
+
+  test('el panel se oculta, no se desmonta: lo de dentro sobrevive al plegarlo', async ({ page }) => {
+    // Desmontarlo tiraria lo que alguien hubiera elegido en un filtro del contenido, que es justo
+    // lo que no puede pasar en el caso que lo motivo.
+    await page.goto('/m/composicion/contenedores');
+
+    const panel = page.locator('.contenedor-expandible__panel');
+    await expect(panel).toBeHidden();
+    await page.getByTestId('chiclet').click();
+    await expect(panel).toBeVisible();
+    await page.getByTestId('chiclet').click();
+    await expect(panel).toHaveCount(1);
+    await expect(panel).toBeHidden();
+  });
+
+  test('cerrado ocupa UNA fila, por alto que lo pusieran en el lienzo', async ({ page }) => {
+    // Un chiclet que reservara cuatro filas vacias no seria un chiclet.
+    await page.goto('/m/composicion/contenedores');
+    const celda = await page.getByTestId('cell-cont-expandible').boundingBox();
+    const vecina = await page.getByTestId('cell-cont-simple').boundingBox();
+    expect(celda?.height ?? 0).toBeLessThan(vecina?.height ?? 0);
   });
 });

@@ -57,6 +57,14 @@ const POR_FORMA: Record<string, DefaultSize> = {
   forma: { w: 2, h: 2 },
   // Une dos objetos: nace pequena y se estira hasta donde haga falta.
   conexion: { w: 2, h: 2 },
+  /*
+   * El expandible nace como lo que es cerrado: una fila.
+   *
+   * Por su categoria le tocarian las cuatro filas de un contenedor, y nacer reservando cuatro
+   * filas vacias es justo lo contrario de un chiclet. Lo que ocupa abierto lo decide su propia
+   * configuracion, no esta talla.
+   */
+  'contenedor-expandible': { w: 12, h: 1 },
 };
 
 /**

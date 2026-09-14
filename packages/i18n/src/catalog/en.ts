@@ -182,6 +182,12 @@ export const en: Record<MessageKey, string> = {
   'action.signOut': "Sign out",
 
   'admin.modules.title': 'Modules',
+  'obj.expandInPlace.rows': 'Rows when expanded',
+  'obj.expandInPlace.rows.help':
+    'How many grid rows it takes when open, on top of the chiclet row. Whatever is below shifts down to make room.',
+  'obj.expandInPlace.label': 'Chiclet label',
+  'obj.expandInPlace.label.help': 'The only thing read when closed. Empty falls back to the title.',
+  'obj.expandInPlace.open': 'Open on load',
   'admin.modules.awaiting':
     '{n, plural, one {One module is awaiting approval} other {# modules are awaiting approval}}: {nombres}.',
   'admin.modules.current': 'Current modules ({n})',

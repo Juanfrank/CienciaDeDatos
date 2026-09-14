@@ -182,6 +182,12 @@ export const es = {
   'list.noActions': "Sin acciones disponibles",
   'action.signOut': "Salir",
   'admin.modules.title': 'Modulos',
+  'obj.expandInPlace.rows': 'Filas al expandir',
+  'obj.expandInPlace.rows.help':
+    'Cuantas filas de la rejilla ocupa abierto, ademas de la del chiclet. Lo que tiene debajo se desplaza para hacerle sitio.',
+  'obj.expandInPlace.label': 'Rotulo del chiclet',
+  'obj.expandInPlace.label.help': 'Lo unico que se lee cerrado. Vacio, se usa el titulo.',
+  'obj.expandInPlace.open': 'Abierto al cargar',
   'admin.modules.awaiting':
     '{n, plural, one {Un modulo espera aprobacion} other {# modulos esperan aprobacion}}: {nombres}.',
   'admin.modules.current': 'Modulos vigentes ({n})',

@@ -23,6 +23,7 @@ import {
   isContainer,
   isElement,
   panelsOf,
+  DEFAULT_ROWS_ON_EXPAND,
 } from '@app/ui-components';
 import { ColorPalette } from './EditorTextStyle';
 import { Section } from './Section';
@@ -430,6 +431,7 @@ export function EditorObjectSettings({
     conf.simple?.gridColumns ??
     conf.scrollable?.gridColumns ??
     conf.expandable?.gridColumns ??
+    conf.expandableInPlace?.gridColumns ??
     conf.tabs?.gridColumns ??
     6;
 
@@ -440,6 +442,7 @@ export function EditorObjectSettings({
       'contenedor-simple': 'simple',
       'contenedor-desplazable': 'scrollable',
       'contenedor-ampliable': 'expandable',
+      'contenedor-expandible': 'expandableInPlace',
       'contenedor-con-pestanas': 'tabs',
     };
     const clave = block[objectId] ?? 'simple';
@@ -484,6 +487,68 @@ export function EditorObjectSettings({
           </select>
           <span className="field__pista">{t('obj.scroll.help')}</span>
         </label>
+      ) : null}
+
+      {objectId === 'contenedor-expandible' ? (
+        <>
+          <label className="form__field">
+            <span>{t('obj.expandInPlace.rows')}</span>
+            <select
+              value={String(conf.expandableInPlace?.filasAlExpandir ?? DEFAULT_ROWS_ON_EXPAND)}
+              disabled={saving}
+              data-testid={`${prueba}-filas-al-expandir`}
+              onChange={(e) =>
+                set({
+                  expandableInPlace: {
+                    ...conf.expandableInPlace,
+                    filasAlExpandir: Number(e.target.value),
+                  },
+                })
+              }
+            >
+              {[2, 3, 4, 6, 8, 10].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+            <span className="field__pista">{t('obj.expandInPlace.rows.help')}</span>
+          </label>
+
+          <label className="form__field">
+            <span>{t('obj.expandInPlace.label')}</span>
+            <input
+              type="text"
+              value={conf.expandableInPlace?.rotulo ?? ''}
+              disabled={saving}
+              data-testid={`${prueba}-rotulo-chiclet`}
+              onChange={(e) =>
+                set({
+                  expandableInPlace: { ...conf.expandableInPlace, rotulo: e.target.value },
+                })
+              }
+            />
+            <span className="field__pista">{t('obj.expandInPlace.label.help')}</span>
+          </label>
+
+          <label className="form__field">
+            <span>{t('obj.expandInPlace.open')}</span>
+            <input
+              type="checkbox"
+              checked={conf.expandableInPlace?.abiertoAlCargar === true}
+              disabled={saving}
+              data-testid={`${prueba}-abierto-al-cargar`}
+              onChange={(e) =>
+                set({
+                  expandableInPlace: {
+                    ...conf.expandableInPlace,
+                    abiertoAlCargar: e.target.checked,
+                  },
+                })
+              }
+            />
+          </label>
+        </>
       ) : null}
 
       {objectId === 'contenedor-ampliable' ? (

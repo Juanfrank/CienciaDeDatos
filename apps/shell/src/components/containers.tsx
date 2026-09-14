@@ -6,6 +6,7 @@ import {
   type Axis,
   DEFAULT_COLUMN_INTERNAL,
   columnsOf,
+  rowsOnExpand,
 } from '@app/ui-components';
 import { Icon } from './icons/Icon';
 import { Frame } from './objects';
@@ -175,6 +176,73 @@ export function ExpandableContainer({ objeto, titulo, config, draw }: ContainerP
         </div>
       ) : null}
     </>
+  );
+}
+
+/* ── Expandible en su sitio ────────────────────────────────────────────────────────────────── */
+
+/**
+ * Un chiclet que se abre EN SU SITIO y empuja hacia abajo lo que tiene debajo.
+ *
+ * No es el ampliable. El ampliable abre una ventana encima: lo de debajo sigue donde estaba y
+ * queda tapado. Este crece dentro de la rejilla del modulo, y los objetos que tiene debajo se
+ * desplazan para hacerle hueco — que es lo que hace falta cuando lo que se abre es un panel de
+ * filtros y hay que seguir viendo lo que filtra.
+ *
+ * El desplazamiento no lo hace este componente: lo hace la rejilla. Las celdas se colocan con
+ * `grid-row: span N` y sin linea de inicio, asi que el navegador las va acomodando en orden; al
+ * crecer el `span` de una, las siguientes bajan solas. Lo unico que hay que hacer desde aqui es
+ * decir cuantas filas ocupa, y eso viaja hacia arriba en un atributo que la hoja de estilo lee
+ * sobre `.grid__cell`. Calcular posiciones a mano habria sido reimplementar la rejilla.
+ */
+export function ExpandableInPlaceContainer({ objeto, titulo, config, draw }: ContainerProps) {
+  const ajustes = config?.expandableInPlace;
+  const [abierto, setAbierto] = useState(ajustes?.abiertoAlCargar === true);
+  const id = useId();
+  const filas = rowsOnExpand(config);
+
+  return (
+    <div
+      className="contenedor-expandible"
+      data-testid="contenedor-expandible"
+      // Lo lee la hoja de estilo sobre la celda que lo contiene, con `:has()`. Es lo que convierte
+      // «este contenedor esta abierto» en «esta celda ocupa mas filas».
+      data-expandido={abierto ? 'si' : 'no'}
+      style={{ '--filas-al-expandir': filas } as React.CSSProperties}
+    >
+      <button
+        type="button"
+        className="chiclet"
+        aria-expanded={abierto}
+        aria-controls={`${id}-panel`}
+        data-testid="chiclet"
+        onClick={() => setAbierto((previo) => !previo)}
+      >
+        <Icon nombre="filtro" tamano={16} />
+        <span className="chiclet__rotulo">{ajustes?.rotulo?.trim() || titulo}</span>
+        {/*
+          El chevron gira, no se cambia por otro icono: girar dice que es el MISMO control en otro
+          estado. `aria-expanded` ya lo cuenta, asi que el icono se esconde del lector de pantalla
+          en vez de anunciarse dos veces.
+        */}
+        <span className="chiclet__chevron" aria-hidden="true">
+          <Icon nombre="chevron-abajo" tamano={16} />
+        </span>
+      </button>
+
+      {/*
+        El panel se OCULTA con `hidden`, no se desmonta.
+        Desmontarlo tiraria lo que alguien hubiera escrito en un campo del contenido al plegarlo,
+        que en un panel de filtros es justo lo que no puede pasar.
+      */}
+      <div id={`${id}-panel`} className="contenedor-expandible__panel" hidden={!abierto}>
+        <InternalGrid
+          panel={objeto.panels?.[0]}
+          gridColumns={columnsOf('contenedor-expandible', config)}
+          draw={draw}
+        />
+      </div>
+    </div>
   );
 }
 

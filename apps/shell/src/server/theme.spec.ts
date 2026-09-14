@@ -46,6 +46,10 @@ describe('el tema cubre todas las variables que la hoja de estilo usa', () => {
     '--fila-tableta',
     '--col-escritorio',
     '--fila-escritorio',
+    // La escribe el contenedor expandible con las filas que ocupa abierto. Se lee con valor de
+    // respaldo —`var(--filas-al-expandir, 4)`—, asi que un contenedor sin configurar tampoco se
+    // queda sin altura.
+    '--filas-al-expandir',
   ];
 
   const emittedIn = (mode: ColorMode): Set<string> => {

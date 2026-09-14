@@ -12,6 +12,7 @@ import {
   TabContainer,
   ScrollableContainer,
   SimpleContainer,
+  ExpandableInPlaceContainer,
 } from './containers';
 import { TextBox, BasicShape, DividerLine, SectionTitle } from './elements';
 import { GridConnection } from './GridConnection';
@@ -110,6 +111,8 @@ export function ModuleObject({
       return <ScrollableContainer {...containerProps} />;
     case 'contenedor-ampliable':
       return <ExpandableContainer {...containerProps} />;
+    case 'contenedor-expandible':
+      return <ExpandableInPlaceContainer {...containerProps} />;
     case 'contenedor-con-pestanas':
       return <TabContainer {...containerProps} />;
     default:

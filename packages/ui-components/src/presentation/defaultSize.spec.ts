@@ -66,9 +66,23 @@ describe('tamano por defecto', () => {
   });
 
   it('un contenedor nace con sitio para su propia rejilla', () => {
-    for (const objeto of initialCatalog.filter((o) => o.category === 'contenedor')) {
+    /*
+     * Menos el expandible, que cerrado ES una fila.
+     *
+     * La regla vale para los que nacen abiertos: un contenedor sin sitio para su rejilla nace
+     * inservible. El expandible no tiene rejilla visible hasta que alguien lo abre, y nacer
+     * reservando cuatro filas vacias es justo lo contrario de un chiclet. El sitio que necesita
+     * lo pide al abrirse, y eso lo decide su configuracion, no esta talla.
+     */
+    for (const objeto of initialCatalog.filter(
+      (o) => o.category === 'contenedor' && o.objectId !== 'contenedor-expandible',
+    )) {
       const { w, h } = defaultSize(comoLaPaleta(objeto));
       expect(w * h, objeto.objectId).toBeGreaterThanOrEqual(16);
     }
+  });
+
+  it('y el expandible nace como un chiclet: ancho completo y UNA fila', () => {
+    expect(de('contenedor-expandible')).toEqual({ w: 12, h: 1 });
   });
 });

@@ -1584,9 +1584,69 @@ export const demoModules: ModuleDefinition[] = [
         slug: 'contenedores',
         name: 'Contenedores',
         items: [
+          /*
+           * El expandible va el PRIMERO, y con un chiclet de una fila.
+           *
+           * Es donde se usa: un panel que se abre encima de lo que filtra y empuja la pagina hacia
+           * abajo. Ponerlo al final lo dejaria abriendose sobre nada y no se veria lo unico que lo
+           * distingue del ampliable — que no tapa, desplaza.
+           */
+          {
+            id: 'cont-expandible',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'cont-expandible',
+              objectId: 'contenedor-expandible',
+              version: '1.0.0',
+              title: 'Contenedor expandible',
+              binding: WITHOUT_DATA,
+              settings: {
+                objectId: 'contenedor-expandible',
+                expandableInPlace: { gridColumns: 12, filasAlExpandir: 4, rotulo: 'Filtros' },
+                panels: [
+                  {
+                    panelId: 'p1',
+                    nombre: 'Contenido',
+                    items: [
+                      {
+                        id: 'ce-filtro-distrito',
+                        position: { x: 0, y: 0, w: 4, h: 2 },
+                        instance: {
+                          instanceId: 'ce-filtro-distrito',
+                          objectId: 'segmentador',
+                          version: '1.0.0',
+                          title: 'Distrito',
+                          binding: {
+                            datasetId: DATASET,
+                            dimensions: [DISTRITO],
+                            measures: [],
+                          },
+                        },
+                      },
+                      {
+                        id: 'ce-filtro-materia',
+                        position: { x: 4, y: 0, w: 4, h: 2 },
+                        instance: {
+                          instanceId: 'ce-filtro-materia',
+                          objectId: 'segmentador',
+                          version: '1.0.0',
+                          title: 'Materia',
+                          binding: {
+                            datasetId: DATASET,
+                            dimensions: [MATERIA],
+                            measures: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
           {
             id: 'cont-simple',
-            position: { x: 0, y: 0, w: 6, h: 4 },
+            position: { x: 0, y: 1, w: 6, h: 4 },
             instance: {
               instanceId: 'cont-simple',
               objectId: 'contenedor-simple',
@@ -1636,7 +1696,7 @@ export const demoModules: ModuleDefinition[] = [
           },
           {
             id: 'cont-desplazable',
-            position: { x: 6, y: 0, w: 6, h: 4 },
+            position: { x: 6, y: 1, w: 6, h: 4 },
             instance: {
               instanceId: 'cont-desplazable',
               objectId: 'contenedor-desplazable',
@@ -1675,7 +1735,7 @@ export const demoModules: ModuleDefinition[] = [
           },
           {
             id: 'cont-pestanas',
-            position: { x: 0, y: 4, w: 12, h: 5 },
+            position: { x: 0, y: 5, w: 12, h: 5 },
             instance: {
               instanceId: 'cont-pestanas',
               objectId: 'contenedor-con-pestanas',
@@ -1746,7 +1806,7 @@ export const demoModules: ModuleDefinition[] = [
           },
           {
             id: 'cont-ampliable',
-            position: { x: 0, y: 9, w: 12, h: 4 },
+            position: { x: 0, y: 10, w: 12, h: 4 },
             instance: {
               instanceId: 'cont-ampliable',
               objectId: 'contenedor-ampliable',

@@ -214,10 +214,12 @@ export {
 } from './presentation/elements';
 export {
   DEFAULT_COLUMN_INTERNAL,
+  DEFAULT_ROWS_ON_EXPAND,
   CONTAINERS,
   AXES,
   EMPTY_PANEL,
   columnsOf,
+  rowsOnExpand,
   initialSettings,
   isContainer,
   nestedInstances,
@@ -226,6 +228,7 @@ export {
   validateContainer,
   type ContainerSettings,
   type ExpandableSettingsContainer,
+  type ExpandableInPlaceSettings,
   type TabContainerSettings,
   type ScrollableSettingsContainer,
   type SimpleSettingsContainer,
