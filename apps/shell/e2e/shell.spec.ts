@@ -277,6 +277,48 @@ test.describe('marcadores (4.4)', () => {
   });
 });
 
+test.describe('la politica de contenido no rompe la pagina', () => {
+  /*
+   * Una CSP mal puesta no da error: deja la pagina en blanco. El navegador bloquea los scripts,
+   * React no hidrata y lo que queda es el HTML sin comportamiento. Por eso lo que se comprueba
+   * aqui no es la cabecera —eso ya lo hace una prueba unitaria— sino que la aplicacion SIGUE
+   * VIVA con ella puesta: que hay consola limpia, que el JavaScript corrio y que un gesto que
+   * depende de el funciona.
+   */
+  test('la cabecera va, los scripts se ejecutan y no hay nada bloqueado', async ({
+    page,
+    origen,
+  }) => {
+    const bloqueados: string[] = [];
+    page.on('console', (m) => {
+      const t = m.text();
+      if (/Content Security Policy|refused to|blocked/i.test(t)) bloqueados.push(t);
+    });
+
+    const respuesta = await page.goto('/m/casos-pendientes');
+    const csp = respuesta?.headers()['content-security-policy'] ?? '';
+    expect(csp, 'no llego la cabecera').toContain("default-src 'self'");
+    expect(csp).toMatch(/script-src 'self' 'nonce-[^']+'/);
+    expect(csp).toContain("frame-ancestors 'none'");
+
+    // Si React no hidrato, esto es `undefined` y el resto de la suite fallaria en cascada.
+    await expect(page.getByTestId('slicer-Penal')).toBeVisible();
+    await page.getByTestId('slicer-Penal').click();
+    await expect(page).toHaveURL(/Materia=Penal/);
+
+    expect(bloqueados, `la CSP bloqueo algo:\n${bloqueados.join('\n')}`).toEqual([]);
+    expect(origen).toContain('http://localhost:');
+  });
+
+  test('la vista incrustable conserva su propia politica de enmarcado', async ({ page }) => {
+    const respuesta = await page.goto('/incrustar/m/casos-pendientes');
+    const csp = respuesta?.headers()['content-security-policy'] ?? '';
+    // Sin origenes configurados se deniega, que es el valor por defecto y lo correcto.
+    expect(csp).toContain('frame-ancestors');
+    expect(csp).toContain("default-src 'self'");
+  });
+});
+
 test.describe('principio 1: el navegador solo habla con esta aplicacion', () => {
   test('ninguna peticion sale fuera del origen de la aplicacion', async ({ page, origen }) => {
     const externas: string[] = [];

@@ -16,3 +16,4 @@ playwright-report/
 .cache-ci/
 estado-de-modulos.json
 .cache-demo*/
+.cache-csp*/
