@@ -2,9 +2,9 @@
  * Capturas del editor de modulos, para revision visual.
  *
  * El editor no es el panel, y por eso no cae en `capture-admin.mts`. Lo que hay que poder mirar
- * aqui son los ESTADOS: recien abierto, con cambios sin guardar, y despues de guardar. Son tres
- * fotos distintas de la misma pantalla, y la diferencia entre ellas es justo lo que cambio cuando
- * el editor dejo de guardar solo.
+ * aqui son los ESTADOS: recien abierto, con un objeto que se guardo solo, y despues de descartar.
+ * Son tres fotos de la misma pantalla, y lo que las separa es lo que hace el autoguardado: entre
+ * la primera y la segunda no se pulso ningun boton.
  *
  *   npx nx run shell:build
  *   CACHE_DIR=.cache-shot npx tsx tools/populate-cache.mts --connector mock --dir .cache-shot
@@ -36,12 +36,16 @@ const entrar = async (userId: string) => {
   if (!r.ok()) throw new Error(`no se pudo entrar como ${userId}: ${r.status()}`);
 };
 
-/** El editor esta al dia: ni guardando ni dibujando. */
+/**
+ * El editor esta al dia: nada pendiente, nada en vuelo, nada dibujandose.
+ *
+ * Se espera por SELECTOR y no con `waitForFunction`: el cuerpo de esa funcion corre en el
+ * navegador, asi que toca `document`, y este archivo se compila con la configuracion de Node —
+ * donde `document` no existe—. Compilaba porque nadie habia ejecutado el typecheck del
+ * repositorio entero sobre el.
+ */
 const alDia = async () => {
-  await pagina.waitForFunction(() => {
-    const el = document.querySelector('.editor');
-    return el?.getAttribute('data-saving') === 'no' && el?.getAttribute('data-drawing') === 'no';
-  });
+  await pagina.waitForSelector('.editor[data-dirty="no"][data-saving="no"][data-drawing="no"]');
 };
 
 const foto = async (nombre: string) => {
@@ -62,13 +66,14 @@ await pagina.goto(`${base}/editor/${slug}`);
 await alDia();
 await foto('30-editor-vacio');
 
-// Un objeto colocado y SIN guardar: es el estado que antes no existia.
+// Un objeto colocado y ya guardado SIN haber pulsado nada: es lo que hace el autoguardado.
 await pagina.getByTestId('add-tarjeta-kpi').click();
 await alDia();
-await foto('31-editor-sin-guardar');
+await foto('31-editor-autoguardado');
 
-await pagina.getByTestId('guardar-borrador').click();
+// Y descartar, que deshace la sesion entera y deja el modulo como se abrio.
+await pagina.getByTestId('descartar-borrador').click();
 await alDia();
-await foto('32-editor-guardado');
+await foto('32-editor-descartado');
 
 await navegador.close();

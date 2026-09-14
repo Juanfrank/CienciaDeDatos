@@ -414,6 +414,7 @@ export const en: Record<MessageKey, string> = {
   'editor.saved': 'Saved',
   'editor.saveDraft': 'Save draft',
   'editor.discard': 'Discard',
+  'editor.discard.help': 'Undoes everything done since the editor was opened.',
   'editor.submit': 'Submit for approval',
   'editor.approve': 'Approve and publish',
   'editor.backToList': 'Back to the list',

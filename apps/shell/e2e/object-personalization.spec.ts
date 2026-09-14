@@ -1,21 +1,10 @@
 import { expect, test } from './instance';
-import { asLogin } from './session';
+import { alDia, asLogin } from './session';
 
 /** Personalizar un objeto SIN escribir codigo — secciones 4.2 y 4.3. */
 
 type Pagina = import('@playwright/test').Page;
 
-/**
- * Espera a que el editor este AL DIA: ni guardando ni dibujando.
- *
- * Dibujar dejo de ser un efecto secundario de guardar, asi que hay dos esperas distintas. Mirar
- * solo `data-saving` deja la prueba leyendo el lienzo anterior — y con el guardado explicito ese
- * atributo es casi siempre «no», con lo que la espera no esperaba nada.
- */
-const alDia = async (page: Pagina) => {
-  await expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
-  await expect(page.locator('.editor')).toHaveAttribute('data-drawing', 'no');
-};
 
 /** El id del objeto recien colocado, leido del BLOQUE del lienzo. */
 const blockFirstId = async (page: Pagina): Promise<string> => {
@@ -75,12 +64,8 @@ test.describe('el editor configura como se ve un objeto', () => {
     await alDia(page);
     await expect(page.getByTestId('editor-without-locks')).toBeVisible();
 
-    // Se guarda a proposito: el editor ya no lo hace solo, y lo que esta prueba comprueba es que
-    // lo elegido llegue al MODULO, no que se vea en pantalla mientras se elige.
-    await page.getByTestId('guardar-borrador').click();
-    await alDia(page);
-
-    // Se recarga: lo elegido tiene que venir del servidor, no del estado del componente.
+    // Se recarga: lo elegido tiene que venir del servidor, no del estado del componente. El
+    // autoguardado ya lo escribio y `alDia` espero a que saliera del navegador.
     await page.reload();
     await page.getByTestId(`select-${id}`).click();
     await page.getByTestId('tab-formato').click();
@@ -173,13 +158,10 @@ test.describe('el editor configura como se ve un objeto', () => {
     await alDia(page);
     await expect(page.getByTestId('editor-without-locks')).toBeVisible();
 
-    // El borrador no se abre en /m/ —no esta publicado ni concedido—, asi que lo que se
-    // comprueba aqui es que la eleccion sobrevive al servidor. Se guarda a proposito: el editor
-    // ya no lo hace solo.
-    // Tras recargar no hay nada elegido, asi que hay que volver a elegir el bloque. Que el desplegable se DIBUJE lo
-    // cubre `filtros.spec.ts` sobre el panel del modulo publicado.
-    await page.getByTestId('guardar-borrador').click();
-    await alDia(page);
+    // El borrador no se abre en /m/ —no esta publicado ni concedido—, asi que lo que se comprueba
+    // aqui es que la eleccion sobrevive al servidor: el autoguardado ya la escribio, y `alDia` lo
+    // espero. Tras recargar no hay nada elegido, asi que hay que volver a elegir el bloque. Que
+    // el desplegable se DIBUJE lo cubre `filtros.spec.ts` sobre el panel del modulo publicado.
     await page.reload();
     await page.getByTestId(`select-${id}`).click();
     await page.getByTestId('tab-formato').click();

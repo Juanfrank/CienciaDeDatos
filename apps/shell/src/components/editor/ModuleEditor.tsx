@@ -18,6 +18,14 @@ import { Canvas } from './Canvas';
 import { SidebarPanel } from './SidebarPanel';
 import { useTranslator } from '../Locale';
 
+/*
+ * Lo que espera el autoguardado antes de escribir.
+ *
+ * Suficiente para que una rafaga de gestos —arrastrar, teclear un titulo— sea UNA escritura, y
+ * poco para que nadie llegue a cerrar la pestana creyendo que lo suyo se perdio.
+ */
+const MS_AUTOGUARDADO = 800;
+
 /** Editor de un modulo — seccion 4.2. */
 export function ModuleEditor({
   initial,
@@ -49,18 +57,21 @@ export function ModuleEditor({
   const [dibujando, setDibujando] = useState(false);
 
   /*
-   * El borrador VIVE aqui, no en el servidor.
+   * El borrador VIVE aqui, y ademas se guarda solo.
    *
-   * Antes cada gesto —anadir un objeto, mapear un campo, mover una caja— escribia en el almacen.
-   * Con eso no habia forma de probar una idea y desecharla: lo probado ya estaba guardado, y
-   * «descartar» significaba deshacer a mano lo que uno acababa de hacer. Ahora el editor guarda
-   * cuando alguien lo pide, y hasta entonces lo tocado es suyo.
+   * `paginas` es lo que se esta editando; `modulo.pages` es lo ultimo que acepto el servidor. Que
+   * el borrador viva en el cliente es lo que permite dibujar sin escribir; que se guarde solo es
+   * lo que impide perder una tarde de trabajo al cerrar una pestana.
    *
-   * `paginas` es lo que se esta editando; `modulo.pages` es lo ultimo guardado. La diferencia
-   * entre las dos es lo que se pierde al descartar, y es lo que el boton dice que se va a perder.
+   * `puntoDeRetorno` es como estaba el modulo al abrir el editor. Es lo que «descartar» deshace:
+   * con autoguardado, «volver a lo ultimo guardado» no significaria nada —lo ultimo guardado es
+   * lo que hay en pantalla un segundo despues de cada gesto—, mientras que «deshacer todo lo que
+   * he hecho en esta sesion» si es una pregunta que alguien se hace de verdad.
    */
   const [paginas, setPaginas] = useState<ModuleDefinition['pages']>(modulo.pages);
+  const [puntoDeRetorno] = useState<ModuleDefinition['pages']>(initial.pages);
   const sucio = JSON.stringify(paginas) !== JSON.stringify(modulo.pages);
+  const desviado = JSON.stringify(paginas) !== JSON.stringify(puntoDeRetorno);
 
   const pagina = paginas[0];
   const items = pagina?.items ?? [];
@@ -154,6 +165,22 @@ export function ModuleEditor({
     [modulo.slug, router],
   );
 
+  /*
+   * El autoguardado.
+   *
+   * Con rebote, no en cada tecla: arrastrar una caja por la rejilla emite decenas de posiciones y
+   * cada una seria una escritura. El temporizador se rearma con cada cambio, asi que se guarda
+   * cuando la mano para, no mientras se mueve.
+   *
+   * No corre si no se puede editar, ni encima de un guardado en curso: dos PUT simultaneos al
+   * mismo modulo tienen un orden de llegada que nadie controla, y el que llegue segundo gana.
+   */
+  useEffect(() => {
+    if (!editable || !sucio || saving) return;
+    const temporizador = setTimeout(() => void guardar(paginas), MS_AUTOGUARDADO);
+    return () => clearTimeout(temporizador);
+  }, [editable, sucio, saving, paginas, guardar]);
+
   const conItems = (nuevos: GridItem[]): ModuleDefinition['pages'] =>
     paginas.map((p, i) => (i === 0 ? { ...p, items: nuevos } : p));
 
@@ -214,12 +241,18 @@ export function ModuleEditor({
     editar(conItems(items.filter((i) => i.id !== itemId)));
   };
 
-  /** Devuelve el borrador a lo ultimo guardado. Lo tocado desde entonces se pierde. */
+  /**
+   * Deshace todo lo hecho desde que se abrio el editor.
+   *
+   * No revierte «a lo ultimo guardado», que con autoguardado seria lo de hace un segundo y no
+   * serviria de nada: revierte al `puntoDeRetorno`. Y la vuelta atras se guarda, como cualquier
+   * otro cambio — si no, el autoguardado volveria a escribirla igualmente medio segundo despues,
+   * y tener dos caminos para lo mismo es como se acaba con dos comportamientos distintos.
+   */
   const descartar = () => {
     setSeleccion(null);
     setError('');
-    setPaginas(modulo.pages);
-    void dibujar(modulo.pages);
+    editar(puntoDeRetorno);
   };
 
   /** Guarda y, acto seguido, pide la transicion. Enviar algo sin guardar enviaria lo viejo. */
@@ -275,6 +308,13 @@ export function ModuleEditor({
             dos esperas distintas, y una prueba que solo mire la de guardar lee el lienzo viejo.
           */
           data-drawing={dibujando ? 'si' : 'no'}
+          /*
+            Y `data-dirty` porque el autoguardado anade una tercera espera: entre el gesto y la
+            escritura hay un rebote en el que no se esta guardando NI dibujando. Una prueba que
+            solo mirase las otras dos leeria «al dia» sobre un cambio que todavia no ha salido del
+            navegador, que es exactamente como se escribe una prueba que no comprueba nada.
+          */
+          data-dirty={sucio ? 'si' : 'no'}
         >
       <header className="editor__header">
         <div>
@@ -299,6 +339,11 @@ export function ModuleEditor({
           {/* Guardar y descartar son de quien EDITA. */}
           {editable ? (
             <>
+              {/*
+                El boton no es OTRO camino de guardado: dispara el mismo que el rebote, solo que
+                ahora. Existe porque «se guarda solo» es algo que hay que creerse, y pulsar y ver
+                «Guardado» es como se cree.
+              */}
               <button
                 type="button"
                 className="pastilla"
@@ -308,10 +353,16 @@ export function ModuleEditor({
               >
                 {t('editor.saveDraft')}
               </button>
+              {/*
+                Descartar se habilita con `desviado`, no con `sucio`: lo que deshace es la sesion
+                entera, y el autoguardado deja `sucio` en falso casi siempre. Con la condicion
+                vieja el boton habria estado apagado justo cuando hace falta.
+              */}
               <button
                 type="button"
                 className="boton-contorno"
-                disabled={saving || !sucio}
+                disabled={saving || !desviado}
+                title={t('editor.discard.help')}
                 data-testid="descartar-borrador"
                 onClick={descartar}
               >

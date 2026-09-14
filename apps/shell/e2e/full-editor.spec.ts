@@ -1,21 +1,10 @@
 import { expect, test, type Page } from './instance';
 import { initialCatalog } from '@app/ui-components';
 import { FIRST_OPENS, KEY_CONTROL } from '../src/components/editor/controls';
-import { asLogin, newModule } from './session';
+import { alDia, asLogin, newModule } from './session';
 
 /** Todo objeto del catalogo se COLOCA y se CONFIGURA desde el editor — seccion 4.2. */
 
-/**
- * Espera a que el editor este AL DIA: ni guardando ni dibujando.
- *
- * Dibujar dejo de ser un efecto secundario de guardar, asi que hay dos esperas distintas. Mirar
- * solo `data-saving` deja la prueba leyendo el lienzo anterior — y con el guardado explicito ese
- * atributo es casi siempre «no», con lo que la espera no esperaba nada.
- */
-const alDia = async (page: Page) => {
-  await expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
-  await expect(page.locator('.editor')).toHaveAttribute('data-drawing', 'no');
-};
 
 /** Despliega todas las secciones del panel. */
 const openSections = async (page: Page) => {
@@ -55,9 +44,10 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
     await alDia(page);
   });
 
-  test('y lo colocado sobrevive a recargar: se guardo de verdad', async ({ page }) => {
+  test('y lo colocado sobrevive a recargar SIN pulsar nada: se guarda solo', async ({ page }) => {
     // Colocar y que se dibuje no es haberlo guardado. Es la diferencia entre un editor y una
-    // maqueta, y se comprueba saliendo y volviendo.
+    // maqueta, y se comprueba saliendo y volviendo — aqui sin tocar ningun boton, que es lo que
+    // distingue el autoguardado de un guardado explicito.
     const slug = `persiste-${Date.now()}`;
     await newModule(page, slug);
 
@@ -67,32 +57,56 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
     await page.getByTestId('add-mapa-de-arbol').click();
     await alDia(page);
 
-    // El editor ya no guarda solo, y eso es justo lo que esta prueba distingue: hasta aqui los
-    // dos objetos estan DIBUJADOS y no guardados.
-    await page.getByTestId('guardar-borrador').click();
-    await alDia(page);
-
     await page.goto(`/editor/${slug}`);
     await expect(page.locator('[data-testid^="block"]')).toHaveCount(2);
   });
 
-  /*
-   * La otra mitad de lo mismo, que antes no se podia ni escribir: sin guardar, no queda nada.
-   *
-   * Con el guardado automatico «descartar» no existia — lo probado ya estaba escrito, y deshacer
-   * era rehacer a mano. Es la razon de que el guardado explicito valga la pena, asi que se
-   * comprueba.
-   */
-  test('y lo NO guardado no sobrevive: descartar y recargar lo confirman', async ({ page }) => {
-    const slug = `descarta-${Date.now()}`;
+  test('y el boton de guardar escribe lo mismo, solo que ya', async ({ page }) => {
+    /*
+     * El boton no es otro camino: es el mismo, disparado a mano.
+     *
+     * Se comprueba que con el se llega al mismo sitio —recargar y encontrarlo— porque un boton
+     * que pareciera guardar sin guardar seria peor que no tenerlo: alguien lo pulsa, ve
+     * «Guardado» y cierra la pestana.
+     */
+    const slug = `manual-${Date.now()}`;
     await newModule(page, slug);
 
     await page.getByTestId('add-embudo').click();
-    await alDia(page);
+    await expect(page.getByTestId('guardar-borrador')).toBeEnabled();
     await page.getByTestId('guardar-borrador').click();
     await alDia(page);
+    // El boton se apaga solo cuando no queda nada por guardar: es el mismo estado que lee
+    // `data-dirty`, dicho donde lo ve quien lo pulso. No se comprueba el texto porque depende
+    // del idioma y esta prueba no va de eso.
+    await expect(page.getByTestId('guardar-borrador')).toBeDisabled();
 
-    // Un segundo objeto que NO se guarda.
+    await page.goto(`/editor/${slug}`);
+    await expect(page.locator('[data-testid^="block"]')).toHaveCount(1);
+  });
+
+  /*
+   * Descartar, con autoguardado, deshace LA SESION.
+   *
+   * No puede significar «vuelve a lo ultimo guardado», porque lo ultimo guardado es lo que hay en
+   * pantalla un segundo despues de cada gesto: el boton no haria nada. Significa volver a como
+   * estaba el modulo al abrir el editor, y esa vuelta atras se guarda como cualquier otro cambio.
+   * Se comprueba recargando, que es lo unico que distingue haber revertido de parecerlo.
+   */
+  test('descartar deshace la sesion entera, y la vuelta atras tambien se guarda', async ({
+    page,
+  }) => {
+    const slug = `descarta-${Date.now()}`;
+    await newModule(page, slug);
+
+    // Una primera sesion que SI deja algo: se abre, se coloca, se guarda solo.
+    await page.getByTestId('add-embudo').click();
+    await alDia(page);
+
+    // Y una segunda sesion, que es la que se va a descartar entera. Abrirla de nuevo es lo que
+    // fija el punto de retorno en «un objeto».
+    await page.goto(`/editor/${slug}`);
+    await expect(page.locator('[data-testid^="block"]')).toHaveCount(1);
     await page.getByTestId('tab-objetos').click();
     await page.getByTestId('add-mapa-de-arbol').click();
     await alDia(page);
@@ -102,7 +116,7 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
     await alDia(page);
     await expect(page.locator('[data-testid^="block"]')).toHaveCount(1);
 
-    // Y al volver sigue habiendo uno: lo descartado no llego nunca al almacen.
+    // Y al volver sigue habiendo uno: lo descartado se fue tambien del almacen.
     await page.goto(`/editor/${slug}`);
     await expect(page.locator('[data-testid^="block"]')).toHaveCount(1);
   });

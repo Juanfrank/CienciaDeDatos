@@ -86,6 +86,33 @@ describe('atributos de datos', () => {
     expect(conOrigen(atributos, invalidos)).toEqual([]);
   });
 
+  /*
+   * Y el otro lado del mismo contrato: lo que las PRUEBAS esperan.
+   *
+   * La comprobacion de arriba mira el CSS. Una prueba de navegador que espera
+   * `data-dirty` y un script de `tools/` que hace `waitForFunction` sobre el mismo nombre son
+   * exactamente el mismo tipo de contrato sin atar, y fallan peor: la prueba agota su espera de
+   * treinta segundos y el script se cuelga sin decir por que.
+   */
+  it('cada atributo de datos que una prueba espera lo escribe algun componente', () => {
+    const esperados = recoger(
+      [...pruebas, ...listar("'tools/*.mts' 'tools/*.ts'")],
+      /getAttribute\(\s*'data-([a-z][\w-]*)'|toHaveAttribute\(\s*'data-([a-z][\w-]*)'|\[data-([a-z][\w-]*)/g,
+      0,
+    );
+    // El grupo que capturo depende de cual de las tres alternativas caso, asi que se extrae el
+    // nombre del texto completo en vez de adivinar el indice.
+    const nombres = new Map<string, Set<string>>();
+    for (const [texto, origen] of esperados) {
+      const nombre = /data-([a-z][\w-]*)/.exec(texto)?.[1];
+      if (!nombre) continue;
+      if (!nombres.has(nombre)) nombres.set(nombre, new Set());
+      for (const o of origen) (nombres.get(nombre) as Set<string>).add(o);
+    }
+    expect(nombres.size).toBeGreaterThan(2);
+    expect(conOrigen(nombres, [...nombres.keys()].filter((a) => !puestos.has(a)))).toEqual([]);
+  });
+
   it('ningun atributo de datos lleva mayusculas', () => {
     // El navegador pasa a minusculas el nombre del atributo, asi que `data-textPosition` llega al
     // DOM como `data-textposition` y el selector que lo busca tal cual no encuentra nada.

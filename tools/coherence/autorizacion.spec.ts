@@ -155,6 +155,10 @@ describe('las credenciales de demostracion no se siembran solas', () => {
       'tools/capture-admin.mts',
       'las instrucciones para levantar el servidor de demostracion contra el que captura',
     ],
+    [
+      'tools/capture-editor.mts',
+      'las mismas instrucciones, para las capturas del editor',
+    ],
     ['tools/coherence/autorizacion.spec.ts', 'esta misma guarda'],
   ]);
 

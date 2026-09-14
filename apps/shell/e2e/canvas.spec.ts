@@ -1,21 +1,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from './instance';
-import { asLogin, newModule } from './session';
+import { alDia, asLogin, newModule } from './session';
 
 /** El lienzo del editor — seccion 4.2, con la accesibilidad de 4.9. */
 
-/**
- * Espera a que el editor este AL DIA, no solo a que termine de guardar.
- *
- * Antes bastaba con `data-saving`, porque cada gesto escribia en el servidor y el lienzo se
- * dibujaba con lo que devolvia esa escritura. Separadas las dos cosas, hay dos esperas: la de
- * guardar y la de dibujar. Mirar solo la primera dejaba la prueba leyendo el lienzo anterior —y
- * como con el guardado explicito `data-saving` es casi siempre «no», la espera no esperaba nada.
- */
-const alDia = async (page: Page) => {
-  await expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
-  await expect(page.locator('.editor')).toHaveAttribute('data-drawing', 'no');
-};
 
 const blockId = async (page: Page): Promise<string> => {
   const testid = await page
@@ -828,10 +816,8 @@ test.describe('como se resume cada medida', () => {
      */
     await newModule(page, 'agr-imposible');
     await page.getByTestId('add-tarjeta-kpi').click();
-    await alDia(page);
-    // Se guarda antes de forzar por la API: el editor ya no guarda solo, y sin esto la API
-    // devolveria un modulo vacio y el PUT de mas abajo escribiria la pagina sin el objeto.
-    await page.getByTestId('guardar-borrador').click();
+    // `alDia` incluye `data-dirty`, asi que aqui el objeto ya esta en el almacen: sin esa espera
+    // la API de mas abajo leeria un modulo vacio y el PUT escribiria la pagina sin el objeto.
     await alDia(page);
     const id = await blockId(page);
 

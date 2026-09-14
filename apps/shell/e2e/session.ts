@@ -46,3 +46,23 @@ export async function newModule(page: Page, slug: string): Promise<void> {
   expect(creado.ok(), `No se pudo crear el modulo ${slug}: ${await creado.text()}`).toBe(true);
   await page.goto(`/editor/${slug}`);
 }
+
+/**
+ * Espera a que el editor este AL DIA: nada pendiente, nada en vuelo, nada dibujandose.
+ *
+ * Son tres esperas y hacen falta las tres. Al principio bastaba `data-saving`, porque cada gesto
+ * escribia y el lienzo se dibujaba con lo que devolvia esa escritura; al separar dibujar de
+ * guardar hizo falta `data-drawing`; y con el autoguardado aparece una tercera ventana —el
+ * rebote— en la que no se esta guardando ni dibujando y el cambio sigue solo en el navegador.
+ * Mirando dos de las tres, la espera pasa por encima de esa ventana y la prueba lee el estado
+ * anterior.
+ *
+ * Vive aqui porque estaba copiada en tres archivos de pruebas, que es la forma conocida de que
+ * una se arregle y las otras dos se queden como estaban: al anadir `data-dirty` paso exactamente
+ * eso.
+ */
+export async function alDia(page: Page): Promise<void> {
+  await expect(page.locator('.editor')).toHaveAttribute('data-dirty', 'no');
+  await expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
+  await expect(page.locator('.editor')).toHaveAttribute('data-drawing', 'no');
+}
