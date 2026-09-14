@@ -14,7 +14,7 @@ La respuesta ingenua a la segunda —un temporizador propio— evalua dos veces 
 
 ## Decision
 
-**Una alerta se define sobre un objeto de un modulo y se evalua con `cargarModulo` bajo el usuario y el equipo que la crearon**, resueltos en el momento de evaluar. Es el mismo camino que sirve la pantalla y el mismo que genera una exportacion: lee del cache (principio 2) y aplica el ambito efectivo (4.10.4).
+**Una alerta se define sobre un objeto de un modulo y se evalua con `moduleLoad` bajo el usuario y el equipo que la crearon**, resueltos en el momento de evaluar. Es el mismo camino que sirve la pantalla y el mismo que genera una exportacion: lee del cache (principio 2) y aplica el ambito efectivo (4.10.4).
 
 El equipo se fija EN LA REGLA y no se toma del equipo activo al evaluar: una persona que pertenece a dos equipos tiene dos ambitos, y una alerta tiene que saber cual es el suyo.
 

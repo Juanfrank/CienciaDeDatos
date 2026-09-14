@@ -61,9 +61,9 @@ como encendida: exigirla haria que cada modulo nuevo naciera invisible.
 
 ### Dos puertas, no una
 
-- `moduloVisiblePorSlug` responde al **ciclo de vida**: existe y su estado permite abrirlo. La
+- `visibleModuleSlug` responde al **ciclo de vida**: existe y su estado permite abrirlo. La
   usan el editor y el panel de administracion.
-- `moduloServiblePorSlug` añade la bandera. La usan los caminos que **sirven** el modulo: la
+- `slugServableModule` añade la bandera. La usan los caminos que **sirven** el modulo: la
   pagina, el incrustado, la API, la exportacion y la evaluacion de alertas.
 
 La distincion importa en la direccion que no es obvia: un modulo apagado **tiene que seguir

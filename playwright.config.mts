@@ -34,9 +34,24 @@ const PIMIENTA = 'pimienta-de-pruebas-e2e';
  * `multiinstancia` y `personalization` estan ademas por otro motivo: hablan con la SEGUNDA
  * instancia, que es lo que comprueba el criterio de escalado horizontal de la seccion 9.
  */
+/**
+ * Lo que solo cambia cuando cambia un objeto del catalogo.
+ *
+ * Cincuenta y ocho pruebas comprueban la MISMA cosa objeto a objeto: que cada pagina de objetos
+ * nuevos pasa axe, que pasa el contraste en tema oscuro, que no desborda en movil, y que cada
+ * objeto del catalogo ofrece en el panel las claves que declara. Son 171 de los 761 segundos de
+ * la suite —el 22%— y no dependen de nada que se toque a diario: dependen del catalogo.
+ *
+ * No se borran, que perderia cobertura que las secciones 4.2 y 4.9 exigen objeto a objeto. Se
+ * atan a lo que las hace cambiar: `shell:e2e-catalogo` declara como entradas el repositorio de
+ * objetos, la presentacion, los renderizadores y los temas. Se crea o se edita un objeto y
+ * corren enteras; no se toca ninguno y aciertan en cache.
+ */
+const CATALOGO = /@catalogo/;
+
 const SECUENCIALES = [
   'admin.spec.ts',
-  'cuentas.spec.ts',
+  'accounts.spec.ts',
   'login.spec.ts',
   'multiinstancia.spec.ts',
   'personalization.spec.ts',
@@ -100,6 +115,7 @@ export default defineConfig({
     {
       name: 'paralelo',
       testIgnore: SECUENCIALES,
+      grepInvert: CATALOGO,
       /*
        * El doble de margen que en solitario.
        *
@@ -113,6 +129,13 @@ export default defineConfig({
     {
       name: 'secuencial',
       testMatch: SECUENCIALES,
+      grepInvert: CATALOGO,
+    },
+    {
+      // Lo que se comprueba objeto a objeto, con su propio pase y su propia cache en nx.
+      name: 'catalogo',
+      grep: CATALOGO,
+      timeout: 60_000,
     },
   ],
   webServer: Array.from({ length: WORKERS }, (_, i) => servidoresDe(i)).flat(),

@@ -15,8 +15,8 @@ if (!rutaInforme || !endpoint) {
 }
 
 const informe = JSON.parse(readFileSync(rutaInforme, 'utf8')) as Informe;
-const credencial = new DefaultAzureCredential();
-const token = await credencial.getToken('https://azconfig.io/.default');
+const credential = new DefaultAzureCredential();
+const token = await credential.getToken('https://azconfig.io/.default');
 if (!token) throw new Error('Sin token para App Configuration');
 
 const base = endpoint.replace(/\/$/, '');

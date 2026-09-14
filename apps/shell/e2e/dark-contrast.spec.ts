@@ -68,7 +68,7 @@ test('los dos juegos de variables vienen del MISMO modo', async ({ page }) => {
   expect(derived).toBe(md);
 });
 
-test.describe('paginas de modulo en tema oscuro', () => {
+test.describe('paginas de modulo en tema oscuro @catalogo', () => {
   const paginas = [
     ['familia', 'columnas, barras y area'],
     ['proporcion', 'pastel, dona y medidor'],

@@ -265,7 +265,7 @@ test.describe('accesibilidad en movil (4.9)', () => {
   });
 });
 
-test.describe('las paginas de objetos nuevos, en un movil', () => {
+test.describe('las paginas de objetos nuevos, en un movil @catalogo', () => {
   /*
    * Doce tipos de grafico y los pequenos multiplos se disenaron y se revisaron a 1500 px. A 390
    * los problemas son otros: una rejilla de paneles que no cabe, un objeto mas ancho que la

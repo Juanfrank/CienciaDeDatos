@@ -270,7 +270,7 @@ test.describe('navegacion solo con teclado', () => {
   });
 });
 
-test.describe('los objetos anadidos en los ultimos lotes', () => {
+test.describe('los objetos anadidos en los ultimos lotes @catalogo', () => {
   /*
    * Doce tipos de grafico y ocho claves de presentacion nuevas se anadieron sin volver a pasar
    * axe por las paginas donde viven. Un objeto puede estar bien por dentro y romper la pagina al

@@ -14,7 +14,7 @@ Tambien es la que convierte un iframe en un canal por el que sale cualquier dato
 
 ## Decision
 
-**No hay token de incrustacion.** La vista incrustada usa la MISMA sesion, el MISMO `cargarModulo` y el MISMO ambito efectivo que la pagina normal. Quien mire el portal anfitrion tiene que estar autenticado en esta aplicacion y vera lo que su propio ambito permita.
+**No hay token de incrustacion.** La vista incrustada usa la MISMA sesion, el MISMO `moduleLoad` y el MISMO ambito efectivo que la pagina normal. Quien mire el portal anfitrion tiene que estar autenticado en esta aplicacion y vera lo que su propio ambito permita.
 
 Lo unico que se anade es una **lista de portales autorizados a enmarcarnos** (`frame-ancestors`), configurable en ejecucion. Es una restriccion sobre quien puede mostrar la aplicacion, no una concesion sobre quien puede ver los datos.
 

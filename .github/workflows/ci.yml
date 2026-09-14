@@ -82,13 +82,18 @@ jobs:
       # del cache, que no es dependencia suya por el grafo pero si por lo que la suite necesita
       # para arrancar: sin declararlo, un cambio en el poblador dejaria pasar un acierto de cache
       # sobre datos distintos.
+      # `e2e-catalogo` va aparte porque depende de OTRA cosa: no del shell, sino del catalogo de
+      # objetos. Son las 58 pruebas que comprueban lo mismo objeto a objeto —axe, contraste en
+      # oscuro, desbordamiento en movil, claves del panel—, el 22% del tiempo de la suite. Sus
+      # entradas son el repositorio de objetos y los temas, asi que un cambio en el shell las deja
+      # en cache y crear o editar un objeto las corre enteras.
       - name: Pruebas de navegador de lo afectado
         if: github.event_name == 'pull_request'
-        run: npx nx affected -t e2e --base=origin/${{ github.base_ref }}
+        run: npx nx affected -t e2e e2e-catalogo --base=origin/${{ github.base_ref }}
 
       - name: Pruebas de navegador
         if: github.event_name != 'pull_request'
-        run: npm run e2e
+        run: npm run e2e && npm run e2e:catalogo
 
       - if: failure()
         uses: actions/upload-artifact@v4

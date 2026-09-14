@@ -51,6 +51,19 @@ ejecuta o sale de cache son los `inputs` de `nx.json`. El input `pruebas` excluy
 que tocar una especificacion marca el proyecto como afectado y la tarea acierta en cache: un
 cambio de documentacion no ejecuta ni una prueba.
 
+Las pruebas de navegador van en dos targets porque dependen de cosas distintas. `shell:e2e` es
+la suite general. `shell:e2e-catalogo` son las 58 que comprueban lo MISMO objeto a objeto —que
+cada pagina de objetos pasa axe, que pasa el contraste en oscuro, que no desborda en movil, que
+cada objeto ofrece en el panel las claves que declara—: el 22% del tiempo de la suite, y no
+dependen de nada que se toque a diario. Sus entradas son el repositorio de objetos, los temas y
+los modulos, asi que se crea o se edita un objeto y corren enteras; se toca el shell y aciertan
+en cache. No se borran: la cobertura objeto a objeto la exigen 4.2 y 4.9.
+
+Dentro de `shell:e2e` hay a su vez dos pases. El paralelo reparte por archivo entre varios
+workers, cada uno con su propia pareja de instancias y su propio almacen. El secuencial corre con
+un worker las seis suites que tocan la semilla de identidad y gobierno —crean cuentas, bloquean
+usuarios, mueven carpetas, amplian ambitos, cambian roles— contra la que el resto inicia sesion.
+
 Ninguna tarea necesita `--skip-nx-cache`: las entradas y salidas de cada target estan
 declaradas, y `shell:e2e` construye antes de arrancar.
 

@@ -71,7 +71,7 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
   });
 });
 
-test.describe('configurable: lo que cada objeto declara sale en su panel', () => {
+test.describe('configurable: lo que cada objeto declara sale en su panel @catalogo', () => {
   /*
    * Se comprueba OBJETO A OBJETO y no sobre la union de las claves.
    */

@@ -1,8 +1,8 @@
 /** Valida cada modulo POR SEPARADO y emite el resultado — seccion 3.4. */
 import { writeFileSync } from 'node:fs';
 import { type HealthSummary, type ModuleHealth, healthOf } from '@app/module-model';
-import { diagnosticarDefinicion } from '../apps/shell/src/server/data';
-import { modules } from '../apps/shell/src/server/almacenModulos';
+import { definitionDiagnose } from '../apps/shell/src/server/data';
+import { modules } from '../apps/shell/src/server/moduleStore';
 
 interface EstadoDeModulo extends HealthSummary {
   slug: string;
@@ -12,19 +12,19 @@ interface EstadoDeModulo extends HealthSummary {
 const destino = process.argv[2] ?? 'estado-de-modulos.json';
 
 const lista = await modules.list();
-const estados: EstadoDeModulo[] = [];
+const states: EstadoDeModulo[] = [];
 
 for (const modulo of lista) {
   try {
     // La clasificacion vive en `module-model`, no aqui: es una afirmacion sobre el dominio —
     // cuando un modulo se puede servir— y el panel de administracion la necesita igual.
-    const resumen = healthOf(await diagnosticarDefinicion(modulo));
-    estados.push({ slug: modulo.slug, moduleId: modulo.moduleId, ...resumen });
+    const resumen = healthOf(await definitionDiagnose(modulo));
+    states.push({ slug: modulo.slug, moduleId: modulo.moduleId, ...resumen });
   } catch (error) {
     /*
      * Que un modulo reviente al validarse tampoco tumba a los demas.
      */
-    estados.push({
+    states.push({
       slug: modulo.slug,
       moduleId: modulo.moduleId,
       health: 'fallo',
@@ -34,18 +34,18 @@ for (const modulo of lista) {
   }
 }
 
-const informe = { generadoEn: new Date().toISOString(), modules: estados };
+const informe = { generadoEn: new Date().toISOString(), modules: states };
 writeFileSync(destino, `${JSON.stringify(informe, null, 2)}\n`);
 
 const MARCA: Record<ModuleHealth, string> = { ok: '✓', degradado: '~', fallo: '✗' };
-for (const e of estados) {
+for (const e of states) {
   console.log(`${MARCA[e.health]} ${e.slug}${e.problems.length ? ` — ${e.problems.join(' · ')}` : ''}`);
 }
 
-const caidos = estados.filter((e) => e.health === 'fallo');
-const degradados = estados.filter((e) => e.health === 'degradado');
+const caidos = states.filter((e) => e.health === 'fallo');
+const degradados = states.filter((e) => e.health === 'degradado');
 console.log(
-  `\n${estados.length - caidos.length - degradados.length} sanos · ${degradados.length} degradados · ` +
+  `\n${states.length - caidos.length - degradados.length} sanos · ${degradados.length} degradados · ` +
     `${caidos.length} caidos · informe en ${destino}`,
 );
 if (degradados.length > 0) {

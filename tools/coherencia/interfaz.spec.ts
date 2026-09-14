@@ -162,3 +162,38 @@ describe('identificadores de prueba', () => {
     expect(conOrigen(prefijosPedidos, huerfanos)).toEqual([]);
   });
 });
+
+/**
+ * Lo que `playwright.config.mts` nombra y lo que el disco tiene.
+ *
+ * La configuracion reparte las pruebas por NOMBRE DE ARCHIVO: una lista dice cuales tocan la
+ * semilla y corren solas, y una etiqueta dice cuales dependen del catalogo de objetos. Las dos
+ * son cadenas, y una cadena no la sigue ningun renombrado: cuando `cuentas.spec.ts` paso a
+ * `accounts.spec.ts`, la lista siguio citando el nombre viejo y el archivo que muta la identidad
+ * sembrada se fue al pase paralelo. No fallo la configuracion —Playwright ignora un patron que no
+ * casa— sino veintisiete pruebas de otros archivos, por un motivo que no se parecia a la causa.
+ */
+describe('el reparto de la suite de navegador', () => {
+  const config = leer('playwright.config.mts');
+
+  const secuenciales = [...config.matchAll(/'([\w-]+\.spec\.ts)'/g)].map((m) => m[1] as string);
+  const existentes = new Set(listar("'apps/shell/e2e/*.spec.ts'").map((f) => f.split('/').pop()));
+
+  it('hay pruebas repartidas', () => {
+    expect(secuenciales.length).toBeGreaterThan(3);
+    expect(existentes.size).toBeGreaterThan(15);
+  });
+
+  it('todo archivo que la configuracion nombra existe', () => {
+    expect(secuenciales.filter((f) => !existentes.has(f)).sort()).toEqual([]);
+  });
+
+  it('la etiqueta del catalogo la lleva algun describe', () => {
+    const etiquetados = listar("'apps/shell/e2e/*.spec.ts'").filter((f) =>
+      /@catalogo/.test(leer(f)),
+    );
+    expect(etiquetados.length).toBeGreaterThan(0);
+    // Si la etiqueta se escribe mal, el pase del catalogo se queda vacio y nadie lo nota.
+    expect(config).toMatch(/@catalogo/);
+  });
+});

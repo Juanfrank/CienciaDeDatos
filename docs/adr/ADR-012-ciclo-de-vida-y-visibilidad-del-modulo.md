@@ -12,7 +12,7 @@ Sin flujo, la distincion entre "lo que alguien esta probando" y "lo que la insti
 
 ## Decision
 
-**El estado decide la visibilidad, y se resuelve en el servidor.** `puedeVer(modulo, actor)` es la unica regla:
+**El estado decide la visibilidad, y se resuelve en el servidor.** `seeCan(modulo, actor)` es la unica regla:
 
 | Estado | Quien lo ve |
 |---|---|
@@ -20,7 +20,7 @@ Sin flujo, la distincion entre "lo que alguien esta probando" y "lo que la insti
 | `pendiente-de-aprobacion` | su autor y los Administradores |
 | `publicado` | quien tenga concedido su nodo, como siempre |
 
-Todos los caminos que sirven un modulo pasan por `moduloVisiblePorSlug` o `visibleModuleUser`: la pagina, la vista incrustada, la API de datos, la exportacion, las alertas, las suscripciones y la consulta en lenguaje natural. `findModuleBySlug` sigue existiendo sin filtrar porque el editor necesita abrir borradores, y por eso lleva escrito en su comentario que no se use en un camino de lectura.
+Todos los caminos que sirven un modulo pasan por `visibleModuleSlug` o `visibleModuleUser`: la pagina, la vista incrustada, la API de datos, la exportacion, las alertas, las suscripciones y la consulta en lenguaje natural. `findModuleBySlug` sigue existiendo sin filtrar porque el editor necesita abrir borradores, y por eso lleva escrito en su comentario que no se use en un camino de lectura.
 
 **Un borrador es de quien lo escribe, y tampoco lo toca un Administrador.** Administrar no concede acceso al trabajo en curso de otra persona. Un Administrador interviene cuando el modulo se propone; para uno abandonado tiene el borrado definitivo, que no exige leerlo.
 

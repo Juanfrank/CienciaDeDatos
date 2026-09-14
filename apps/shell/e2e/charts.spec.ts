@@ -280,7 +280,7 @@ test.describe('los formateadores llegan hasta el dibujo', () => {
   });
 });
 
-test.describe('lo que cuesta una pagina llena de graficos', () => {
+test.describe('lo que cuesta una pagina llena de graficos @catalogo', () => {
   /*
    * Doce tipos de objeto y los pequenos multiplos hacen que una sola tarjeta pueda montar varias
    * instancias de ECharts. Esto no mide milisegundos —un presupuesto de tiempo en CI es una

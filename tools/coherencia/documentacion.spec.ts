@@ -92,14 +92,14 @@ describe('referencias de los markdown', () => {
           const limpia = cita.replace(/[#:].*$/, '').replace(/\/$/, '');
           if (limpia === '' || limpia === '.') continue;
           // Desde la raiz, relativa al propio `.md`, o solo el nombre del archivo.
-          const existe =
+          const exists =
             versionados.has(limpia) ||
             carpetas.has(limpia) ||
             versionados.has(`${dir}/${limpia}`) ||
             carpetas.has(`${dir}/${limpia}`) ||
             versionados.has(resolve(dir, limpia).slice(raiz.length + 1)) ||
             (!limpia.includes('/') && nombres.has(limpia));
-          if (!existe) rotas.push(`${md}:${i + 1}: ${cita}`);
+          if (!exists) rotas.push(`${md}:${i + 1}: ${cita}`);
         }
       });
     }

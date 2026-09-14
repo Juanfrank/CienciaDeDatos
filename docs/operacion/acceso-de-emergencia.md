@@ -59,7 +59,7 @@ Requisitos previos: dos personas. Quien ejecuta y quien atestigua. La segunda no
 5. **Entrar por la aplicacion con esa persona** y comprobar que el panel responde.
 
 6. **Registrar el cambio DENTRO de la aplicacion.** El cambio hecho en la base directamente no
-   pasa por `registrarCambio` y por tanto no esta en la auditoria de configuracion. Hay que
+   pasa por `changeRecord` y por tanto no esta en la auditoria de configuracion. Hay que
    dejarlo: el primer acto del Administrador restituido es hacer un cambio equivalente desde el
    panel —por ejemplo, confirmar la membresia— para que la auditoria refleje quien administra
    desde cuando.
