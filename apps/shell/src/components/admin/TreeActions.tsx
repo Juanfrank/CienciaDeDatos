@@ -69,6 +69,17 @@ export function TreeActions({
   const [error, setError] = useState<string | null>(null);
   const [moviendo, setMoviendo] = useState(false);
 
+  /*
+   * El destino elegido ESPERA a que alguien vea lo que implica.
+   *
+   * Mover no es cosmetico: si la carpeta de destino tiene otro ambito, lo que se mueve hereda ese
+   * ambito de inmediato y cambia quien lo ve (4.1.2). Esto lo avisaba el editor de arbol anterior
+   * y la tabla no, asi que al sustituirlo se habria perdido la unica pantalla donde constaba el
+   * cambio de acceso ANTES de aplicarlo — y lo que se pierde ahi no se nota hasta que alguien ve
+   * datos que no le tocan.
+   */
+  const [confirmar, setConfirmar] = useState<Confirmacion | null>(null);
+
   const enviar = async (operacion: Record<string, unknown>) => {
     setEnCurso(true);
     setError(null);
@@ -84,7 +95,35 @@ export function TreeActions({
       return;
     }
     setMoviendo(false);
+    setConfirmar(null);
     router.refresh();
+  };
+
+  /** Pregunta al servidor que cambia, y solo mueve directamente si no cambia nada. */
+  const pedirMovimiento = async (destino: DestinoPosible) => {
+    setEnCurso(true);
+    setError(null);
+    const respuesta = await fetch('/api/admin/tree?previsualizar=1', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ type: 'mover', nodeId, newParentId: destino.id }),
+    });
+    setEnCurso(false);
+    if (!respuesta.ok) {
+      const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
+      setError(cuerpo.error ?? t('admin.tree.action.failed'));
+      return;
+    }
+
+    const previo = (await respuesta.json()) as {
+      cambiaElAmbito: boolean;
+      moduleIds: string[];
+    };
+    if (!previo.cambiaElAmbito) {
+      await enviar({ type: 'mover', nodeId, newParentId: destino.id });
+      return;
+    }
+    setConfirmar({ destino, moduleIds: previo.moduleIds });
   };
 
   const rotuloVisible = hidden ? t('admin.tree.action.show') : t('admin.tree.action.hide');
@@ -216,15 +255,49 @@ export function TreeActions({
                   className="boton-contorno"
                   disabled={enCurso}
                   data-testid={`mover-${nodeId}-a-${destino.id ?? 'raiz'}`}
-                  onClick={() =>
-                    void enviar({ type: 'mover', nodeId, newParentId: destino.id })
-                  }
+                  onClick={() => void pedirMovimiento(destino)}
                 >
                   {destino.etiqueta}
                 </button>
               </li>
             ))}
           </ul>
+        </div>
+      ) : null}
+
+      {confirmar ? (
+        <div
+          className="aviso notice-atencion"
+          role="alert"
+          data-testid={`confirmar-movimiento-${nodeId}`}
+        >
+          <p>
+            {t('admin.tree.move.changesScope', {
+              destino: confirmar.destino.etiqueta.replace(/^(?:— )+/, ''),
+              n: confirmar.moduleIds.length,
+              cuales: t.lista(confirmar.moduleIds),
+            })}
+          </p>
+          <button
+            type="button"
+            className="pastilla"
+            disabled={enCurso}
+            data-testid={`confirmar-movimiento-si-${nodeId}`}
+            onClick={() =>
+              void enviar({ type: 'mover', nodeId, newParentId: confirmar.destino.id })
+            }
+          >
+            {t('admin.tree.move.confirm')}
+          </button>
+          <button
+            type="button"
+            className="boton-contorno"
+            disabled={enCurso}
+            data-testid={`confirmar-movimiento-no-${nodeId}`}
+            onClick={() => setConfirmar(null)}
+          >
+            {t('action.cancel')}
+          </button>
         </div>
       ) : null}
 
@@ -235,4 +308,11 @@ export function TreeActions({
       ) : null}
     </>
   );
+}
+
+/** Un movimiento elegido y pendiente de confirmar, con lo que se lleva por delante. */
+interface Confirmacion {
+  destino: DestinoPosible;
+  /** Los modulos cuyo ambito cambia. Son los que hay que mirar antes de decir que si. */
+  moduleIds: string[];
 }

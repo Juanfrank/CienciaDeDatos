@@ -41,13 +41,20 @@ interface Plegado {
 
 const Contexto = createContext<Plegado | null>(null);
 
-/** La clave con la que cada persona guarda lo que tiene plegado. */
-const CLAVE = 'admin.arbol.plegadas';
+/**
+ * La clave con la que cada persona guarda lo que tiene plegado, por tabla.
+ *
+ * Por TABLA y no una sola: la de modulos y la de carpetas dibujan arboles distintos, y con una
+ * clave compartida plegar una carpeta en una la plegaba en la otra —incluso cuando alli no
+ * escondia lo mismo—.
+ */
+const CLAVE = (tabla: string) => `admin.arbol.plegadas.${tabla}`;
 
 export function ArbolPlegable({
   filas,
   cabecera,
   children,
+  testid = 'tabla-modulos',
 }: {
   filas: FilaDelArbol[];
   /*
@@ -59,6 +66,8 @@ export function ArbolPlegable({
    */
   cabecera: React.ReactNode;
   children: React.ReactNode;
+  /** Identifica la tabla: en los `data-testid` y en la clave con la que se recuerda el plegado. */
+  testid?: string;
 }) {
   const t = useTranslator();
   const [plegadas, setPlegadas] = useState<Set<string>>(new Set());
@@ -77,18 +86,18 @@ export function ArbolPlegable({
    */
   useEffect(() => {
     try {
-      const guardado = window.localStorage.getItem(CLAVE);
+      const guardado = window.localStorage.getItem(CLAVE(testid));
       if (guardado) setPlegadas(new Set(JSON.parse(guardado) as string[]));
     } catch {
       // Ventana privada, almacenamiento bloqueado o JSON corrupto: se empieza desplegado, que es
       // el estado en el que nada falta.
     }
-  }, []);
+  }, [testid]);
 
   const guardar = (siguiente: Set<string>) => {
     setPlegadas(siguiente);
     try {
-      window.localStorage.setItem(CLAVE, JSON.stringify([...siguiente]));
+      window.localStorage.setItem(CLAVE(testid), JSON.stringify([...siguiente]));
     } catch {
       // Que no se pueda recordar no puede impedir plegar.
     }
@@ -122,7 +131,11 @@ export function ArbolPlegable({
   };
 
   const hijas = Children.toArray(children);
-  const profundidadMaxima = filas.reduce((n, f) => Math.max(n, f.profundidad), 0);
+
+  /** Las carpetas que de hecho esconden algo. Plegar una vacia no cambia nada en pantalla. */
+  const plegables = filas
+    .filter((f) => f.tipo === 'carpeta' && conHijos.has(f.id))
+    .map((f) => f.id);
 
   /*
    * Buscando, el plegado NO se aplica.
@@ -153,63 +166,63 @@ export function ArbolPlegable({
 
   return (
     <Contexto.Provider value={valor}>
-      <p className="buscador">
-        <label className="buscador__campo" htmlFor={`${idBuscador}-buscar`}>
-          <Icon nombre="lupa" tamano={16} />
-          <input
-            id={`${idBuscador}-buscar`}
-            type="search"
-            value={consulta}
-            placeholder={t('admin.search.placeholder')}
-            data-testid="buscar-modulos"
-            onChange={(e) => setConsulta(e.target.value)}
-          />
-        </label>
-        <span className="muted-text" role="status" data-testid="resultados-modulos">
-          {t('admin.search.results', { n: cuantas, total: filas.length })}
-        </span>
-      </p>
-
       {/*
-        Plegar por NIVEL, no solo carpeta a carpeta.
-        Con tres niveles y veinte carpetas, ir una por una es el mismo trabajo que leerlas todas.
-        Buscando no sirven de nada —el plegado no se aplica—, asi que se apagan en vez de quedarse
-        ahi sin efecto.
+        El buscador y los controles van EN LA MISMA LINEA.
+        Eran dos bloques uno encima del otro y ocupaban dos renglones para tres controles, que en
+        una pantalla que ya es una tabla larga es empujar la tabla hacia abajo por nada.
       */}
-      <div className="arbol-controles" role="group" aria-label={t('admin.tree.fold.controls')}>
-        <button
-          type="button"
-          className="boton-contorno"
-          disabled={plegadas.size === 0 || buscado !== ''}
-          data-testid="desplegar-todo"
-          onClick={() => guardar(new Set())}
-        >
-          {t('admin.tree.fold.expandAll')}
-        </button>
-        {Array.from({ length: profundidadMaxima }, (_, i) => i).map((nivel) => (
+      <div className="barra-de-tabla">
+        <p className="buscador">
+          <label className="buscador__campo" htmlFor={`${idBuscador}-buscar`}>
+            <Icon nombre="lupa" tamano={16} />
+            <input
+              id={`${idBuscador}-buscar`}
+              type="search"
+              value={consulta}
+              placeholder={t('admin.search.placeholder')}
+              data-testid={`buscar-${testid}`}
+              onChange={(e) => setConsulta(e.target.value)}
+            />
+          </label>
+          <span className="muted-text" role="status" data-testid={`resultados-${testid}`}>
+            {t('admin.search.results', { n: cuantas, total: filas.length })}
+          </span>
+        </p>
+
+        {/*
+          Dos botones, no uno por nivel.
+          Habia uno por cada nivel del arbol —«Plegar al nivel 1», «al 2», «al 3»— y la fila crecia
+          con la organizacion: con cinco niveles son cinco botones para un gesto que casi siempre
+          es «cierralo todo» o «abrelo todo». Plegar un nivel concreto se sigue pudiendo, carpeta a
+          carpeta, que es cuando de verdad se quiere.
+
+          Buscando no sirven de nada —el plegado no se aplica—, asi que se apagan en vez de
+          quedarse ahi sin efecto.
+        */}
+        <div className="arbol-controles" role="group" aria-label={t('admin.tree.fold.controls')}>
           <button
-            key={nivel}
             type="button"
             className="boton-contorno"
-            disabled={buscado !== ''}
-            data-testid={`plegar-nivel-${nivel}`}
-            onClick={() =>
-              guardar(
-                new Set(
-                  filas
-                    .filter((f) => f.tipo === 'carpeta' && f.profundidad >= nivel && conHijos.has(f.id))
-                    .map((f) => f.id),
-                ),
-              )
-            }
+            disabled={plegables.length === 0 || buscado !== ''}
+            data-testid="colapsar-todo"
+            onClick={() => guardar(new Set(plegables))}
           >
-            {t('admin.tree.fold.toLevel', { n: nivel + 1 })}
+            {t('admin.tree.fold.collapseAll')}
           </button>
-        ))}
+          <button
+            type="button"
+            className="boton-contorno"
+            disabled={plegadas.size === 0 || buscado !== ''}
+            data-testid="desplegar-todo"
+            onClick={() => guardar(new Set())}
+          >
+            {t('admin.tree.fold.expandAll')}
+          </button>
+        </div>
       </div>
 
       <div className="container-table">
-        <table className="tabla" data-testid="tabla-modulos">
+        <table className="tabla" data-testid={testid}>
           {cabecera}
           <tbody>
             {filas.map((fila, i) => (seVe(fila) ? hijas[i] : null))}
@@ -218,7 +231,7 @@ export function ArbolPlegable({
       </div>
 
       {cuantas === 0 ? (
-        <p className="muted-text" data-testid="sin-resultados-modulos">
+        <p className="muted-text" data-testid={`sin-resultados-${testid}`}>
           {t('admin.search.empty', { consulta: consulta.trim() })}
         </p>
       ) : null}

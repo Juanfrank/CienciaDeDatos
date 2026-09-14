@@ -31,7 +31,7 @@ export interface FilaBuscable {
 export const normalizar = (texto: string): string =>
   texto
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
 export function TablaBuscable({
@@ -39,8 +39,15 @@ export function TablaBuscable({
   cabecera,
   children,
   testid,
-  /** Debajo de cuantas filas no se ofrece: buscar entre cuatro cosas es mas trabajo que mirarlas. */
-  desde = 8,
+  /**
+   * Debajo de cuantas filas no se ofrece.
+   *
+   * Por defecto cero: el buscador esta SIEMPRE. Estaba en ocho, y con eso desaparecia de
+   * elementos, contenedores y complementos —que hoy tienen cinco, cinco y dos— mientras salia en
+   * visualizaciones y en iconos. Que el control aparezca y desaparezca segun la seccion obliga a
+   * mirar si esta antes de poder usarlo, que cuesta mas que el renglon que ahorra.
+   */
+  desde = 0,
 }: {
   filas: FilaBuscable[];
   cabecera: React.ReactNode;

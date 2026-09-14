@@ -320,15 +320,15 @@ lea. Ha pasado cinco veces durante el renombrado.
 
 Hoy hay un trinquete: `tools/coherence/i18n.spec.ts` cuenta las cadenas sueltas y falla si suben
 del tope. El numero solo puede bajar, y quien migre una cadena baja el tope en el mismo commit.
-Empezo en 322 con 53 claves; va por **218 con 290 claves**, y las cuatro pantallas que mas
+Empezo en 322 con 53 claves; va por **203 con 331 claves**, y las cuatro pantallas que mas
 acumulaban ya no estan entre las peores.
 
 Migrar de golpe es un cambio grande y mecanico. El orden sensato sigue siendo por pantalla,
 empezando por las que mas acumulan hoy:
 `apps/shell/src/components/CreateNotice.tsx` (13),
-`apps/shell/src/components/admin/TreeEditor.tsx` (13),
-`apps/shell/app/admin/audit/page.tsx` (12) y
-`apps/shell/src/components/admin/LocalAccounts.tsx` (11).
+`apps/shell/app/admin/audit/page.tsx` (12),
+`apps/shell/src/components/admin/LocalAccounts.tsx` (11) y
+`apps/shell/src/components/editor/ColorRules.tsx` (11).
 
 ### 2.11 Las propiedades siguen en espanol
 

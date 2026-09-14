@@ -4217,6 +4217,25 @@ th[aria-sort='descending'] .table__flecha {
  * Separados de `.fila-acciones`, que es para los iconos de dentro de una fila: alli el hueco es
  * el minimo que deja pulsar uno sin rozar el otro, y aqui son pastillas con texto.
  */
+/*
+ * El buscador y los controles de plegado, en UN renglon.
+ *
+ * Eran dos bloques apilados y empujaban la tabla hacia abajo por tres controles. Se envuelve en
+ * pantalla estrecha en vez de encogerlos: un campo de busqueda de cuatro caracteres no sirve.
+ */
+.barra-de-tabla {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
+  align-items: center;
+  justify-content: space-between;
+  margin-block: var(--space-sm);
+}
+.barra-de-tabla .buscador,
+.barra-de-tabla .arbol-controles {
+  margin: 0;
+}
+
 .barra-de-acciones {
   display: flex;
   flex-wrap: wrap;

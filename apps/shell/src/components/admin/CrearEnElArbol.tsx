@@ -17,7 +17,19 @@ import type { DestinoPosible } from './TreeActions';
  * que se apruebe (4.1); una carpeta entra en la organizacion general en el acto, y lo que cuelgue
  * de ella heredara su ambito.
  */
-export function CrearEnElArbol({ destinos }: { destinos: DestinoPosible[] }) {
+export function CrearEnElArbol({
+  destinos,
+  soloCarpeta = false,
+}: {
+  destinos: DestinoPosible[];
+  /**
+   * En la organizacion general solo se crean CARPETAS.
+   *
+   * Un modulo no nace ahi: nace como borrador de alguien y entra en el arbol al publicarse, asi
+   * que un boton de crearlo en esta pantalla prometeria colocarlo donde no se coloca.
+   */
+  soloCarpeta?: boolean;
+}) {
   const t = useTranslator();
   const router = useRouter();
   const [enCurso, setEnCurso] = useState(false);
@@ -93,6 +105,7 @@ export function CrearEnElArbol({ destinos }: { destinos: DestinoPosible[] }) {
       ) : null}
 
       <p className="barra-de-acciones">
+        {soloCarpeta ? null : (
         <button
           type="button"
           className="pastilla"
@@ -106,10 +119,11 @@ export function CrearEnElArbol({ destinos }: { destinos: DestinoPosible[] }) {
         >
           {t('admin.modules.create')}
         </button>
+        )}
 
         <button
           type="button"
-          className="boton-contorno"
+          className={soloCarpeta ? 'pastilla' : 'boton-contorno'}
           data-testid="abrir-crear-carpeta"
           onClick={() => {
             setError(null);

@@ -145,16 +145,22 @@ test.describe('editor de arbol (4.1.2)', () => {
   });
 
   test('el arbol se reorganiza SOLO CON TECLADO, sin arrastrar', async ({ page }) => {
-    // 4.10.8 pide arrastrar y soltar; 4.9 dice que la accesibilidad no se pospone. Los dos
-    // gestos llaman a la misma operacion, asi que basta con comprobar el accesible.
-    await page.goto('/admin/modules/tree');
-    await page.getByTestId('node-nodo-m-audiencias').click();
-    await page.getByTestId('move-nodo-m-audiencias').selectOption('nodo-este');
+    /*
+     * 4.10.8 pide arrastrar y soltar; 4.9 dice que la accesibilidad no se pospone. Los dos gestos
+     * llaman a la misma operacion, asi que basta con comprobar el accesible.
+     *
+     * El movimiento se hace desde la TABLA DE MODULOS: la de organizacion general ensena solo
+     * carpetas, y lo que aqui se mueve es un modulo.
+     */
+    await page.goto('/admin/modules');
+    await page.getByTestId('mover-nodo-m-audiencias').click();
+    await page.getByTestId('mover-nodo-m-audiencias-a-nodo-este').click();
 
-    // Mover cambia el ambito, asi que pide confirmacion explicita.
-    await expect(page.getByTestId('confirmar-movimiento')).toBeVisible();
-    await expect(page.getByTestId('confirmar-movimiento')).toContainText('Distrito Norte');
-    await expect(page.getByTestId('confirmar-movimiento')).toContainText('Distrito Este');
+    // Mover cambia el ambito, asi que pide confirmacion explicita y dice QUE cambia.
+    const aviso = page.getByTestId('confirmar-movimiento-nodo-m-audiencias');
+    await expect(aviso).toBeVisible();
+    await expect(aviso).toContainText('Distrito Este');
+    await expect(aviso).toContainText('audiencias');
 
     // Se espera a que la escritura TERMINE antes de navegar. Antes el almacen era un mapa de
     // proceso y la escritura acababa dentro del mismo tick; ahora va a disco y compartida, asi
@@ -163,7 +169,7 @@ test.describe('editor de arbol (4.1.2)', () => {
       page.waitForResponse(
         (r) => r.url().endsWith('/api/admin/tree') && r.request().method() === 'POST',
       ),
-      page.getByTestId('confirmar-movimiento-si').click(),
+      page.getByTestId('confirmar-movimiento-si-nodo-m-audiencias').click(),
     ]);
 
     // El movimiento queda registrado en la auditoria.
@@ -183,15 +189,21 @@ test.describe('editor de arbol (4.1.2)', () => {
   });
 
   test('la papelera conserva lo eliminado y permite restaurarlo', async ({ page }) => {
+    /*
+     * Con una CARPETA, que es lo que la organizacion general gobierna ahora.
+     *
+     * Y con `nodo-este`, que esta vacio para cuando llega esta prueba: la anterior se llevo
+     * `audiencias` dentro, asi que restaurar tiene que devolver la carpeta con lo que tenia.
+     */
     await page.goto('/admin/modules/tree');
-    await page.getByTestId('node-nodo-m-nacional').click();
-    await page.getByTestId('trash-nodo-m-nacional').click();
+    await page.getByTestId('trash-nodo-este').click();
 
     await expect(page.getByTestId('papelera')).toBeVisible();
-    await expect(page.getByTestId('papelera')).toContainText('Estadisticas nacionales');
+    await expect(page.getByTestId('papelera')).toContainText('Distrito Este');
+    await expect(page.getByTestId('carpeta-nodo-este')).toHaveCount(0);
 
-    await page.getByTestId('restore-nodo-m-nacional').click();
-    await expect(page.getByTestId('node-nodo-m-nacional')).toBeVisible();
+    await page.getByTestId('restore-nodo-este').click();
+    await expect(page.getByTestId('carpeta-nodo-este')).toBeVisible();
   });
 });
 
@@ -1113,18 +1125,51 @@ test.describe('la tabla del arbol se pliega y se despliega (4.1)', () => {
     await expect(page.getByTestId('modulo-composicion')).toBeVisible();
   });
 
-  test('se pliega por NIVEL, no solo carpeta a carpeta', async ({ page }) => {
+  test('colapsar todo deja solo la raiz, y expandir todo lo devuelve', async ({ page }) => {
+    /*
+     * Dos botones, no uno por nivel.
+     *
+     * Habia uno por cada profundidad del arbol y la fila crecia con la organizacion: con cinco
+     * niveles eran cinco botones para un gesto que casi siempre es «cierralo todo» o «abrelo
+     * todo». Plegar un nivel concreto se sigue pudiendo carpeta a carpeta, que es cuando de
+     * verdad se quiere.
+     */
     await asLogin(page, 'u-admin');
     await page.goto('/admin/modules');
 
-    // Nivel 2 pliega todo lo que esta a profundidad 1 o mas: Regional se pliega, Institucional no.
-    await page.getByTestId('plegar-nivel-1').click();
+    await page.getByTestId('colapsar-todo').click();
+    // La raiz se queda; todo lo que cuelga de ella desaparece, a cualquier profundidad.
     await expect(page.getByTestId('carpeta-nodo-institucional')).toBeVisible();
-    await expect(page.getByTestId('carpeta-nodo-regional')).toBeVisible();
+    await expect(page.getByTestId('carpeta-nodo-regional')).toHaveCount(0);
     await expect(page.getByTestId('carpeta-nodo-norte')).toHaveCount(0);
 
     await page.getByTestId('desplegar-todo').click();
     await expect(page.getByTestId('carpeta-nodo-norte')).toBeVisible();
+  });
+
+  test('el buscador y los botones van EN LA MISMA LINEA', async ({ page }) => {
+    /*
+     * Se mide la posicion en pantalla, no la clase ni el orden del marcado.
+     *
+     * Eran dos bloques apilados y empujaban la tabla un renglon hacia abajo por tres controles.
+     * Comprobar que comparten envoltorio pasaria igual de verde con los dos uno encima del otro;
+     * lo que se afirma es que se ven en la misma linea, asi que se comparan sus cajas.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    const buscador = await page.getByTestId('buscar-tabla-modulos').boundingBox();
+    const boton = await page.getByTestId('colapsar-todo').boundingBox();
+    expect(buscador).not.toBeNull();
+    expect(boton).not.toBeNull();
+
+    // Se solapan verticalmente: comparten renglon aunque no midan lo mismo de alto.
+    const arriba = Math.max(buscador?.y ?? 0, boton?.y ?? 0);
+    const abajo = Math.min(
+      (buscador?.y ?? 0) + (buscador?.height ?? 0),
+      (boton?.y ?? 0) + (boton?.height ?? 0),
+    );
+    expect(abajo).toBeGreaterThan(arriba);
   });
 
   test('lo plegado se recuerda al volver, y es de quien mira', async ({ page }) => {

@@ -129,6 +129,41 @@ export function organizationRows(
 }
 
 /**
+ * Solo las carpetas, para la pantalla de organizacion general.
+ *
+ * Se saca FILTRANDO las filas del arbol y no recorriendolo otra vez. El indice de cada fila es
+ * absoluto entre sus hermanos —lo pide `reordenar`, que no sabe de arboles— y recalcularlo aqui
+ * contando solo carpetas daria un segundo indice para lo mismo: subir una carpeta la moveria a un
+ * sitio distinto segun la pantalla desde la que se pulse.
+ */
+export function folderRows(
+  nodos: NavNode[],
+  definiciones: Map<string, ModuleDefinition>,
+): FilaCarpeta[] {
+  return organizationRows(nodos, definiciones).filter(
+    (fila): fila is FilaCarpeta => fila.tipo === 'carpeta',
+  );
+}
+
+/** Cuantas subcarpetas cuelgan de una, en cualquier nivel. Lo dice la tabla junto a los modulos. */
+export function subfoldersOf(nodos: NavNode[], nodeId: string): number {
+  const contar = (lista: NavNode[]): number =>
+    lista.reduce((n, nodo) => (isFolder(nodo) ? n + 1 + contar(nodo.children) : n), 0);
+
+  const buscar = (lista: NavNode[]): number | null => {
+    for (const nodo of lista) {
+      if (!isFolder(nodo)) continue;
+      if (nodo.id === nodeId) return contar(nodo.children);
+      const dentro = buscar(nodo.children);
+      if (dentro !== null) return dentro;
+    }
+    return null;
+  };
+
+  return buscar(nodos) ?? 0;
+}
+
+/**
  * Los modulos que el arbol no coloca en ninguna parte.
  *
  * Un borrador recien creado todavia no esta en la organizacion general —ahi entra al publicarse—,
