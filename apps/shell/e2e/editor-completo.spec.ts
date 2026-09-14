@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './instancia';
 import { initialCatalog } from '@app/ui-components';
 import { ABRE_PRIMERO, CONTROL_DE_CLAVE } from '../src/components/editor/controls';
 import { entrarComo } from './session';

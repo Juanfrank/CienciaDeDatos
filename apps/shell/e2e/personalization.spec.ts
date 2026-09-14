@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './instancia';
 import { entrarComo } from './session';
 
 /** Personalizacion por usuario — seccion 4.6. */
@@ -158,12 +158,12 @@ test.describe('la distincion viaja al exportar (4.6)', () => {
 });
 
 test.describe('la personalizacion sobrevive al cambio de instancia (seccion 9)', () => {
-  test('lo guardado en una instancia se ve desde la otra', async ({ page }) => {
+  test('lo guardado en una instancia se ve desde la otra', async ({ page, otraInstancia }) => {
     await page.request.put(`/api/modulos/${MODULE}/vista`, { data: { ocultos: [OCULTABLE] } });
 
     const cookies = await page.context().cookies();
     const sesion = cookies.find((c) => c.name === 'sesion');
-    const respuesta = await page.request.get(`http://localhost:4311/api/modulos/${MODULE}/vista`, {
+    const respuesta = await page.request.get(`${otraInstancia}/api/modulos/${MODULE}/vista`, {
       headers: { cookie: `sesion=${sesion?.value ?? ''}` },
     });
 

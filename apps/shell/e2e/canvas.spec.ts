@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './instancia';
 import { entrarComo } from './session';
 
 /** El lienzo del editor — seccion 4.2, con la accesibilidad de 4.9. */

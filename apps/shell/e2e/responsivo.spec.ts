@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './instancia';
 import { entrarComo } from './session';
 
 /** Diseño responsivo y movil — seccion 4.9. */

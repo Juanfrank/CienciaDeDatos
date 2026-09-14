@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './instancia';
 import { entrarComo } from './session';
 
 /** Elementos y contenedores. */

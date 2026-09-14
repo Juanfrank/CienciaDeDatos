@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './instancia';
 import { entrarComo } from './session';
 
 /** Editor de modulos y ciclo de vida — secciones 4.1, 4.2 y criterios de la seccion 9. */

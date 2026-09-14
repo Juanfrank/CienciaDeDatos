@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './instancia';
 import { entrarComo } from './session';
 
 /** Verificacion de punta a punta del shell, en un navegador real. */
@@ -278,11 +278,11 @@ test.describe('marcadores (4.4)', () => {
 });
 
 test.describe('principio 1: el navegador solo habla con esta aplicacion', () => {
-  test('ninguna peticion sale fuera del origen de la aplicacion', async ({ page }) => {
+  test('ninguna peticion sale fuera del origen de la aplicacion', async ({ page, origen }) => {
     const externas: string[] = [];
     page.on('request', (req) => {
       const url = new URL(req.url());
-      if (url.origin !== 'http://localhost:4310') externas.push(req.url());
+      if (url.origin !== origen) externas.push(req.url());
     });
 
     await page.goto('/m/casos-pendientes');

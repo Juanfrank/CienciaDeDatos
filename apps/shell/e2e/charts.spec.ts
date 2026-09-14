@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './instancia';
 import { entrarComo } from './session';
 
 /** Galeria de objetos sobre Apache ECharts — seccion 4.2 y accesibilidad de 4.9. */

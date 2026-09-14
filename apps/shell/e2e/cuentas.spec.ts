@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './instancia';
 import { CLAVE_DEMO, SECRETO_TOTP_DEMO, codigoTotpDe, usuarioACorreo } from '../src/server/credencialesDemo';
 import { entrarComo } from './session';
 

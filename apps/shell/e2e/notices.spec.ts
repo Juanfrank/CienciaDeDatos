@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './instancia';
 import { entrarComo } from './session';
 
 /** Alertas y suscripciones basadas en datos (4.9). */

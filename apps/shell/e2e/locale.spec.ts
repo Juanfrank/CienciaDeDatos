@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './instancia';
 import { entrarComo } from './session';
 
 /**
@@ -10,8 +10,8 @@ import { entrarComo } from './session';
  * que nadie lee y las cadenas volverian a los componentes sin que nada fallara.
  */
 
-const enIngles = async (page: Page) => {
-  await page.context().addCookies([{ name: 'idioma', value: 'en', url: 'http://localhost:4310' }]);
+const enIngles = async (page: Page, origen: string) => {
+  await page.context().addCookies([{ name: 'idioma', value: 'en', url: origen }]);
 };
 
 const newModule = async (page: Page, slug: string) => {
@@ -27,14 +27,14 @@ test.beforeEach(async ({ page }) => {
   await entrarComo(page, 'u-admin');
 });
 
-test('el documento declara el idioma que esta usando', async ({ page }) => {
+test('el documento declara el idioma que esta usando', async ({ page, origen }) => {
   // `lang` no es decorativo: lo usan el lector de pantalla para elegir voz, el navegador para
   // separar silabas y el corrector ortografico. Un documento en ingles marcado como espanol se
   // lee en voz alta con la pronunciacion equivocada.
   await page.goto('/m/casos-pendientes');
   await expect(page.locator('html')).toHaveAttribute('lang', 'es');
 
-  await enIngles(page);
+  await enIngles(page, origen);
   await page.goto('/m/casos-pendientes');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 });
@@ -56,17 +56,17 @@ test('la cabecera del navegador NO cambia el idioma por su cuenta', async ({ bro
   await contexto.close();
 });
 
-test('una cadena migrada al catalogo cambia de idioma', async ({ page }) => {
+test('una cadena migrada al catalogo cambia de idioma', async ({ page, origen }) => {
   await newModule(page, `idioma-${Date.now()}`);
   await expect(page.getByTestId('tab-formato')).toContainText('Formato');
 
-  await enIngles(page);
+  await enIngles(page, origen);
   await page.reload();
   await expect(page.getByTestId('tab-formato')).toContainText('Format');
 });
 
-test('las familias de la paleta y su buscador tambien', async ({ page }) => {
-  await enIngles(page);
+test('las familias de la paleta y su buscador tambien', async ({ page, origen }) => {
+  await enIngles(page, origen);
   await newModule(page, `idioma-paleta-${Date.now()}`);
 
   await expect(page.getByTestId('family-proporcion')).toContainText('Break down a total');
@@ -77,12 +77,12 @@ test('las familias de la paleta y su buscador tambien', async ({ page }) => {
   await expect(page.getByTestId('without-objects')).toContainText('No object matches "zzzzz"');
 });
 
-test('un idioma desconocido no deja la pagina a medias', async ({ page }) => {
+test('un idioma desconocido no deja la pagina a medias', async ({ page, origen }) => {
   // La cookie es texto que manda el cliente. Es una preferencia de presentacion, no una
   // credencial: un valor manipulado cae al idioma de la aplicacion.
   await page
     .context()
-    .addCookies([{ name: 'idioma', value: 'klingon', url: 'http://localhost:4310' }]);
+    .addCookies([{ name: 'idioma', value: 'klingon', url: origen }]);
   await page.goto('/m/casos-pendientes');
 
   await expect(page.locator('html')).toHaveAttribute('lang', 'es');

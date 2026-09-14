@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './instancia';
 import { entrarComo } from './session';
 
 /** Personalizar un objeto SIN escribir codigo — secciones 4.2 y 4.3. */

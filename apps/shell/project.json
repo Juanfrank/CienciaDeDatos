@@ -50,7 +50,7 @@
     "e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "playwright test --config playwright.config.mts"
+        "command": "playwright test --config playwright.config.mts --project=paralelo && E2E_WORKERS=1 playwright test --config playwright.config.mts --project=secuencial"
       },
       "dependsOn": [
         "build"

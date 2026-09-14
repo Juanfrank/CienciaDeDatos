@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './instancia';
 import { entrarComo } from './session';
 
 /** Lo que el catalogo declara tiene que estar EN EL PANEL — secciones 4.2 y 4.5. */

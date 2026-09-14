@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './instancia';
 import { entrarComo } from './session';
 
 /** Contraste con el TEMA OSCURO — secciones 4.3 y 4.9. */
@@ -7,10 +7,8 @@ import { entrarComo } from './session';
 const LEVEL = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
 /** Pone el modo oscuro en el contexto, que es como lo pediria una persona desde sus ajustes. */
-async function enOscuro(page: Page): Promise<void> {
-  await page.context().addCookies([
-    { name: 'tema', value: 'dark', url: 'http://localhost:4310' },
-  ]);
+async function enOscuro(page: Page, origen: string): Promise<void> {
+  await page.context().addCookies([{ name: 'tema', value: 'dark', url: origen }]);
 }
 
 async function infracciones(page: Page): Promise<string[]> {
@@ -22,9 +20,9 @@ async function infracciones(page: Page): Promise<string[]> {
   );
 }
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, origen }) => {
   await entrarComo(page, 'u-ana');
-  await enOscuro(page);
+  await enOscuro(page, origen);
 });
 
 test('el modo se pide con una cookie y llega al documento', async ({ page }) => {
@@ -128,9 +126,9 @@ test.describe('el resto de la aplicacion en tema oscuro', () => {
     expect(await infracciones(page)).toEqual([]);
   });
 
-  test('el panel de administracion', async ({ page }) => {
+  test('el panel de administracion', async ({ page, origen }) => {
     await entrarComo(page, 'u-admin');
-    await enOscuro(page);
+    await enOscuro(page, origen);
     await page.goto('/admin/arbol');
     await expect(page.locator('h1')).toBeVisible();
 
