@@ -20,7 +20,7 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
     await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(1);
 
     const id = await page.locator('[data-testid^="block-obj-"]').first().getAttribute('data-testid');
-    const objectInstance = (id ?? '').replace('block', '');
+    const objectInstance = (id ?? '').replace('block-', '');
 
     // La seccion vive en la pestana de Formato, que es donde se personaliza el objeto.
     await page.getByTestId('tab-formato').click();
@@ -38,7 +38,7 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
     await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(1);
 
     const id = await page.locator('[data-testid^="block-obj-"]').first().getAttribute('data-testid');
-    const objectInstance = (id ?? '').replace('block', '');
+    const objectInstance = (id ?? '').replace('block-', '');
 
     /*
      * Se busca el ajuste por su nombre, que es como se llega a el de verdad.
@@ -61,7 +61,7 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
     await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(1);
 
     const id = await page.locator('[data-testid^="block-obj-"]').first().getAttribute('data-testid');
-    const item = (id ?? '').replace('block', '');
+    const item = (id ?? '').replace('block-', '');
 
     // Los pozos viven en la pestana de Datos. Se pide explicitamente para que la prueba no
     // dependa de a que pestana salte el editor al seleccionar el objeto.

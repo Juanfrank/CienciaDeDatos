@@ -87,7 +87,7 @@ test.describe('configurable: lo que cada objeto declara sale en su panel', () =>
         .locator('[data-testid^="block"]')
         .first()
         .getAttribute('data-testid');
-      const item = (id ?? '').replace('block', '');
+      const item = (id ?? '').replace('block-', '');
 
       await page.getByTestId('tab-formato').click();
       await expect(page.getByTestId(`pres-${item}`)).toBeVisible();
@@ -134,7 +134,7 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     await page.getByTestId('add-medidor').click();
     await guardado(page);
     const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
-    const item = (id ?? '').replace('block', '');
+    const item = (id ?? '').replace('block-', '');
 
     // El objeto llega ya mapeado a la primera medida del dataset: colocar algo que no dibuja nada
     // seria empezar por una tarjeta vacia. Aqui solo hace falta la escala.
@@ -160,7 +160,7 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     await newModule(page, `usar-embudo-${Date.now()}`);
     await page.getByTestId('add-embudo').click();
     const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
-    const item = (id ?? '').replace('block', '');
+    const item = (id ?? '').replace('block-', '');
 
     await page.getByTestId('tab-formato').click();
     await abrirSecciones(page);
@@ -181,7 +181,7 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
-    const item = (id ?? '').replace('block', '');
+    const item = (id ?? '').replace('block-', '');
 
     // El eje ya viene mapeado; lo unico que hay que anadir es la dimension que reparte los paneles.
     await page.getByTestId('tab-datos').click();

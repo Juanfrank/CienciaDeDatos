@@ -21,7 +21,7 @@ const blockId = async (page: Page): Promise<string> => {
     .locator('[data-testid^="block-obj-"]')
     .first()
     .getAttribute('data-testid');
-  return (testid ?? '').replace('block', '');
+  return (testid ?? '').replace('block-', '');
 };
 
 test.beforeEach(async ({ page }) => {
@@ -467,7 +467,7 @@ test.describe('arrastrar y redimensionar', () => {
     await page.getByTestId('tab-formato').click();
     await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–6 de 12');
 
-    await arrastrar(page, `asa-mover-${id}`, 3, 0);
+    await arrastrar(page, `move-handle-${id}`, 3, 0);
     await guardado(page);
 
     await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 4–9 de 12');
@@ -480,7 +480,7 @@ test.describe('arrastrar y redimensionar', () => {
     const id = await blockId(page);
     await page.getByTestId('tab-formato').click();
 
-    await arrastrar(page, `asa-medir-${id}`, 2, 0);
+    await arrastrar(page, `resize-handle-${id}`, 2, 0);
     await guardado(page);
 
     await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–8 de 12');
@@ -498,7 +498,7 @@ test.describe('arrastrar y redimensionar', () => {
     const id = await blockId(page);
     await page.getByTestId('tab-formato').click();
 
-    await arrastrar(page, `asa-mover-${id}`, 2, 0);
+    await arrastrar(page, `move-handle-${id}`, 2, 0);
     await guardado(page);
     await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 3–8 de 12');
 
@@ -522,13 +522,13 @@ test.describe('arrastrar y redimensionar', () => {
     // El primero esta en 1–6 y el segundo en 7–12, en la misma fila.
     const primero = (
       (await page.locator('[data-testid^="block-obj-"]').first().getAttribute('data-testid')) ?? ''
-    ).replace('block', '');
+    ).replace('block-', '');
 
     await page.getByTestId(`select-${primero}`).click();
     await page.getByTestId('tab-formato').click();
     await expect(page.getByTestId(`position-${primero}`)).toContainText('Columna 1–6 de 12');
 
-    await arrastrar(page, `asa-mover-${primero}`, 6, 0);
+    await arrastrar(page, `move-handle-${primero}`, 6, 0);
     await guardado(page);
 
     // Sigue donde estaba: el destino se pisaba con el otro bloque.

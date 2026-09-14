@@ -13,7 +13,7 @@ const guardado = async (page: Pagina) => {
 /** El id del objeto recien colocado, leido del BLOQUE del lienzo. */
 const idDelPrimerBloque = async (page: Pagina): Promise<string> => {
   const testid = await page.locator('[data-testid^="block-obj-"]').first().getAttribute('data-testid');
-  return (testid ?? '').replace('block', '');
+  return (testid ?? '').replace('block-', '');
 };
 
 /** Abre una subseccion del panel por su testid. */

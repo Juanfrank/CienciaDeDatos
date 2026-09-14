@@ -22,7 +22,12 @@ const raiz = execSync('git rev-parse --show-toplevel').toString().trim();
 const lee = (patron: string) =>
   execSync(`git -C ${raiz} ls-files ${patron}`).toString().trim().split('\n').filter(Boolean);
 
-const fuentes = lee("'apps/shell/src/**' 'apps/shell/app/**'").filter((f) => /\.tsx?$/.test(f));
+// Las propias pruebas quedan fuera: esta misma cita `asa-mover-${id}` en el comentario de arriba
+// bastaba para que el prefijo contase como escrito por un componente, y la comprobacion no veia
+// nada.
+const fuentes = lee("'apps/shell/src/**' 'apps/shell/app/**'").filter(
+  (f) => /\.tsx?$/.test(f) && !/\.spec\.tsx?$/.test(f),
+);
 const pruebas = lee("'apps/shell/e2e/*.ts'");
 
 /** Lo que los componentes pueden producir. */
@@ -49,6 +54,26 @@ for (const ruta of pruebas) {
   }
 }
 
+/**
+ * Los prefijos que las pruebas COMPONEN, que es donde el renombrado se cuela sin que nadie mire.
+ *
+ * `arrastrar(page, `asa-mover-${id}`)` no pasa por `getByTestId` —el testid viaja como argumento
+ * de una funcion de la propia prueba—, asi que la comprobacion de arriba no lo alcanza.
+ */
+const prefijosPedidos = new Map<string, Set<string>>();
+for (const ruta of pruebas) {
+  const fuente = readFileSync(`${raiz}/${ruta}`, 'utf8');
+  for (const m of fuente.matchAll(/`([a-z][\w-]*-)((?:[^`\\]|\\.)*)`/g)) {
+    // Una plantilla que interpola un reloj o un aleatorio no es un testid: es un slug que la
+    // prueba inventa para no chocar con la ejecucion anterior.
+    if (!/^\$\{/.test(m[2] as string)) continue;
+    if (/Date\.now|Math\.random/.test(m[2] as string)) continue;
+    const p = m[1] as string;
+    if (!prefijosPedidos.has(p)) prefijosPedidos.set(p, new Set());
+    (prefijosPedidos.get(p) as Set<string>).add(ruta);
+  }
+}
+
 describe('identificadores de prueba', () => {
   it('hay componentes y pruebas que comparar', () => {
     expect(literales.size).toBeGreaterThan(100);
@@ -65,6 +90,14 @@ describe('identificadores de prueba', () => {
           ![...prefijos].some((p) => id.startsWith(p) || p.startsWith(id)),
       )
       .map((id) => `${id} <- ${[...(pedidos.get(id) as Set<string>)].join(', ')}`);
+
+    expect(huerfanos.sort()).toEqual([]);
+  });
+
+  it('cada prefijo que una prueba compone lo escribe algun componente', () => {
+    const huerfanos = [...prefijosPedidos.keys()]
+      .filter((p) => ![...prefijos].some((c) => p.startsWith(c) || c.startsWith(p)))
+      .map((p) => `${p} <- ${[...(prefijosPedidos.get(p) as Set<string>)].join(', ')}`);
 
     expect(huerfanos.sort()).toEqual([]);
   });
