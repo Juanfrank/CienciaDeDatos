@@ -1,4 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
+import { DEMO_KEY, SECRETO_TOTP_DEMO, mailUser, totpCodeOf } from '../src/server/demoCredentials';
 import { expect, test } from './instance';
 import { asLogin } from './session';
 
@@ -122,5 +123,79 @@ test.describe('el codigo de incrustacion se copia desde la vista', () => {
 
     await expect(page.getByTestId('embed-notice')).toContainText('iniciado sesion');
     await expect(page.getByTestId('embed-notice')).toContainText('su propio');
+  });
+});
+
+
+test.describe('las dos formas de incrustar (4.9)', () => {
+  test('sin encabezado: ni emblema ni salida, y SI quien mira', async ({ page }) => {
+    /*
+     * La version limpia se incrusta dentro de un sistema que ya es del Poder Judicial, asi que el
+     * emblema repetido no dice nada nuevo y el enlace de salida es justo lo que quien la incrusta
+     * no quiere. Lo que NO se quita es quien mira: lo que se ve depende de su ambito, y una vista
+     * que no lo diga se lee como la de todo el mundo.
+     */
+    await asLogin(page, 'u-ana');
+    await page.goto('/embed/m/casos-pendientes?cromo=limpio');
+
+    await expect(page.locator('.embedded__institucion')).toHaveCount(0);
+    await expect(page.getByTestId('see-completo')).toHaveCount(0);
+    await expect(page.getByTestId('embedded-quien')).toBeVisible();
+
+    // Y sigue siendo el modulo, no una version recortada de sus datos.
+    await expect(page.getByTestId('module-title')).toContainText('Casos pendientes');
+    await expect(page.getByTestId('frescura')).toContainText('Datos actualizados');
+  });
+
+  test('con encabezado: emblema, salida, y tambien quien mira', async ({ page }) => {
+    await asLogin(page, 'u-ana');
+    await page.goto('/embed/m/casos-pendientes');
+
+    await expect(page.locator('.embedded__institucion')).toContainText('Poder Judicial');
+    await expect(page.getByTestId('see-completo')).toBeVisible();
+    await expect(page.getByTestId('embedded-quien')).toBeVisible();
+  });
+
+  test('sin sesion se dibuja la PANTALLA DE ACCESO, y entrar deja en la misma vista', async ({
+    page,
+  }) => {
+    /*
+     * Antes era un aviso con un enlace a otra pestana. Ahora se entra aqui dentro, y lo que hay
+     * que comprobar no es que el formulario exista: es a donde lleva. Un `router.push('/')` —que
+     * es lo que hacia la pantalla de acceso— meteria la aplicacion entera en el hueco del portal
+     * anfitrion, que es exactamente lo que la vista incrustada existe para no hacer.
+     */
+    await page.context().clearCookies();
+    await page.goto('/embed/m/casos-pendientes?cromo=limpio');
+
+    await expect(page.getByLabel(/correo/i)).toBeVisible();
+    // Y la salida a una pestana propia sigue ahi: un iframe de otro sitio muchas veces no puede
+    // escribir la cookie de sesion, y sin ella entrar aqui fallaria en silencio.
+    await expect(page.getByTestId('embedded-without-session')).toBeVisible();
+
+    // Se entra POR EL FORMULARIO, no por la API: lo que se comprueba es a donde lleva entrar
+    // desde aqui dentro, y eso solo lo decide el formulario.
+    await page.getByLabel(/correo/i).fill(mailUser('u-ana'));
+    await page.getByLabel(/contrase/i).fill(DEMO_KEY);
+    await page.getByRole('button', { name: /entrar/i }).click();
+    await page.getByLabel(/codigo|código/i).fill(totpCodeOf(SECRETO_TOTP_DEMO));
+    await page.getByRole('button', { name: /verificar|entrar/i }).click();
+    await expect(page).toHaveURL(/\/embed\/m\/casos-pendientes\?cromo=limpio$/);
+    await expect(page.getByTestId('module-title')).toBeVisible();
+  });
+
+  test('el dialogo ofrece las dos, y el codigo cambia', async ({ page }) => {
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId('incrustar').click();
+
+    // Por defecto la completa: ante la duda, la que MAS dice de donde salen los datos.
+    expect(await page.getByTestId('embed-code').inputValue()).not.toContain('cromo=limpio');
+
+    await page.getByTestId('cromo-limpio').check();
+    expect(await page.getByTestId('embed-code').inputValue()).toContain('cromo=limpio');
+
+    await page.getByTestId('cromo-completo').check();
+    expect(await page.getByTestId('embed-code').inputValue()).not.toContain('cromo=limpio');
   });
 });

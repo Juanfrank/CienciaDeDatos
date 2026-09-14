@@ -178,7 +178,7 @@ export type {
   TooltipAttachment,
   VisualObjectDefinition,
 } from './registry/types';
-export { notConsumesData } from './registry/types';
+export { notConsumesData, placeable } from './registry/types';
 export {
   DEFAULT_CONNECTION,
   DEFAULT_BOX_TEXT,

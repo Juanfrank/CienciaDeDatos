@@ -22,7 +22,16 @@ export type ObjectCategory =
   | 'mapa'
   | 'complemento'
   | 'elemento'
-  | 'contenedor';
+  | 'contenedor'
+  /**
+   * Navega entre las paginas de un modulo. No se COLOCA en el lienzo.
+   *
+   * Es la unica categoria que no se arrastra a una pagina, y con motivo: lo que navega es el
+   * modulo, no una pagina suya. Puesto dentro de una habria que ponerlo en todas, mantenerlo igual
+   * en todas, y la primera que se quedara sin el seria un callejon sin salida. Se elige en la
+   * configuracion del modulo y se dibuja alrededor de cualquier pagina que se abra.
+   */
+  | 'navegacion';
 
 /**
  * A que PREGUNTA responde un objeto: comparar, ver la evolucion, repartir un total.
@@ -224,5 +233,19 @@ export type ObjectSettings =
  * una segunda fuente de verdad. Lo consultan la validacion de modulo, la lista de datasets
  * consumidos y el lector del cache.
  */
+/**
+ * Si un objeto se COLOCA en la rejilla de una pagina.
+ *
+ * Tres clases de objeto no se colocan, y por motivos distintos: un complemento se ADJUNTA a otro
+ * objeto, y un navegador de pagina se elige en la configuracion del MODULO porque lo que navega es
+ * el modulo entero. La regla vive aqui, en una funcion, y no repetida en la paleta y en la prueba
+ * que recorre el catalogo: repetida, el dia que entre una cuarta clase una de las dos se enterara
+ * y la otra no.
+ */
+export const placeable = (definicion: {
+  attachable?: boolean;
+  category: ObjectCategory;
+}): boolean => definicion.attachable !== true && definicion.category !== 'navegacion';
+
 export const notConsumesData = (contrato: ObjectDataContract): boolean =>
   contrato.dimensions.max === 0 && contrato.measures.max === 0;

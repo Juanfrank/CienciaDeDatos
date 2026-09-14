@@ -47,6 +47,13 @@ export default async function ModuleSettingsPage({
           description: modulo.description ?? '',
           options: modulo.options ?? {},
           defaultFilters: modulo.defaultFilters ?? [],
+          navigator: modulo.navigator ?? null,
+          pages: modulo.pages.map((p) => ({
+            pageId: p.pageId,
+            slug: p.slug,
+            name: p.name,
+            icon: p.icon ?? '',
+          })),
         }}
       />
     </section>

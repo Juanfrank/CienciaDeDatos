@@ -9,6 +9,7 @@ const diagnostico = (
   moduleId: 'm',
   hasBrokenItems: items.some((i) => i.roto),
   layoutProblems,
+  navigationProblems: [],
   items: items.map((i, n) => ({
     itemId: `i${n}`,
     objectId: 'tarjeta-kpi',

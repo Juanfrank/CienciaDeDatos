@@ -7,9 +7,17 @@ import { useState } from 'react';
 export function Login({
   azureAdAvailable,
   identity,
+  destino = '/',
 }: {
   azureAdAvailable: boolean;
   identity: { name: string; emblem: { src: string; width: number; height: number } };
+  /**
+   * A donde se va al entrar. Por defecto, a la aplicacion.
+   *
+   * Lo necesita la vista incrustada: alli entrar tiene que dejar a la persona en la MISMA vista
+   * incrustada, no llevarse la aplicacion entera a un hueco de 640 pixeles del portal anfitrion.
+   */
+  destino?: string;
 }) {
   const router = useRouter();
   const [mail, setCorreo] = useState('');
@@ -30,7 +38,7 @@ export function Login({
       });
 
       if (r.ok) {
-        router.push('/');
+        router.push(destino);
         router.refresh();
         return;
       }

@@ -5,6 +5,7 @@ import {
   nestedInstances,
 } from '@app/ui-components';
 import type { GridPosition } from './grid';
+import type { PageNavigatorSettings } from './pageNavigator';
 
 /** Definicion de un modulo — secciones 4.1 y 4.2. */
 
@@ -25,6 +26,13 @@ export interface ModulePage {
   /** Slug de la pagina: /m/{module-slug}/{page-slug} (4.11). */
   slug: string;
   name: string;
+  /**
+   * Icono de la pagina, del catalogo de iconos. Lo dibuja el navegador de pagina.
+   *
+   * Opcional: un modulo de dos paginas se lee bien con solo los nombres. Con ocho, el icono es lo
+   * que permite dar con la que se busca sin leer la lista entera.
+   */
+  icon?: string;
   items: GridItem[];
 }
 
@@ -79,6 +87,13 @@ export interface ModuleDefinition {
    * Quien los quite los quita, y entonces ve todo lo que su ambito le permite.
    */
   defaultFilters?: DefaultFilter[];
+  /**
+   * Como se pasa de una pagina a otra (4.2). Obligatorio en cuanto hay mas de una.
+   *
+   * Vive aqui y no dentro de una pagina porque lo que navega es el MODULO: en una pagina habria
+   * que ponerlo en todas, y la primera que se quedara sin el seria un callejon sin salida.
+   */
+  navigator?: PageNavigatorSettings;
   createdAt: string;
   updatedAt: string;
 }

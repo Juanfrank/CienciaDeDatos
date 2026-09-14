@@ -59,3 +59,14 @@ export {
 } from './validation';
 export { healthOf, type HealthSummary, type ModuleHealth } from './health';
 export { diffModules, type ModuleDiff, type ObjectChange } from './diff';
+export {
+  NAVIGATOR_KINDS,
+  NAVIGATOR_IS_PANEL,
+  PANEL_BEHAVIORS,
+  navigatorByDefault,
+  navigatorProblems,
+  type NavigatorKind,
+  type NavigatorFilters,
+  type PageNavigatorSettings,
+  type PanelBehavior,
+} from './pageNavigator';

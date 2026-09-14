@@ -1,5 +1,6 @@
 import type { Aggregation, DatasetGrain, QueryResult, SchemaDescriptor } from '@app/data-contracts';
 import { canAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
+import { NAVIGATOR_IS_PANEL } from '@app/module-model';
 import { SCHEMA_CACHE_KEY, type ReadResult, getDataset } from '@app/caching';
 import {
   type AvailableColumn,
@@ -75,6 +76,15 @@ export interface LoadedModule {
   degraded: boolean;
   /** true si lo que se devuelve es la vista PERSONALIZADA de esta persona y no la institucional. */
   isPersonalized: boolean;
+  /**
+   * La seccion de filtros del navegador lateral, ya leida.
+   *
+   * Se lee por el MISMO camino que cualquier otro objeto —un `panel-de-filtros` sintetico que pasa
+   * por `readObjects`— y no por una consulta aparte. Un segundo camino para leer valores de filtro
+   * es un segundo sitio donde aplicar el ambito, y el dia que uno de los dos se olvidara de
+   * aplicarlo el panel ofreceria valores que quien mira no puede ver.
+   */
+  navigatorFilters?: LoadedObject;
 }
 
 /** Filtros sin los que corresponden a las dimensiones propias del objeto. */
@@ -280,6 +290,11 @@ export async function moduleLoad(input: {
   const appliedFilters = intersectRequestedFilters(scope, requestedFilters);
   const { objetos, masAntiguo, degraded } = await readObjects(page.items, scope, requestedFilters);
 
+  const navegador = navigatorFiltersItem(module);
+  const filtrosDelNavegador = navegador
+    ? (await readObjects([navegador], scope, requestedFilters)).objetos[0]
+    : undefined;
+
   return {
     module,
     pageSlug: page.slug,
@@ -288,6 +303,40 @@ export async function moduleLoad(input: {
     ...(masAntiguo ? { generatedAt: masAntiguo } : {}),
     degraded,
     isPersonalized,
+    ...(filtrosDelNavegador ? { navigatorFilters: filtrosDelNavegador } : {}),
+  };
+}
+
+/**
+ * La seccion de filtros de un panel lateral, expresada como un `panel-de-filtros` cualquiera.
+ *
+ * Es el truco entero, y esta puesto a proposito: en vez de un lector nuevo para los filtros del
+ * navegador, se arma la misma instancia que tendria si alguien la hubiera colocado en el lienzo.
+ * Asi el ambito, el cache, la degradacion y la validacion de selectores son literalmente el mismo
+ * codigo — y lo que se dibuja arriba son los mismos controles.
+ */
+function navigatorFiltersItem(module: ModuleDefinition): GridItem | undefined {
+  const navegador = module.navigator;
+  const filtros = navegador?.filtros;
+  if (!navegador || !filtros || filtros.pickers.length === 0) return undefined;
+  if (!NAVIGATOR_IS_PANEL(navegador.tipo) || !filtros.datasetId) return undefined;
+
+  const dimensions = filtros.pickers.map((p) => {
+    const [table, ...resto] = p.fieldName.split('.');
+    return { table: table ?? '', field: resto.join('.') };
+  });
+
+  return {
+    id: 'navegador-filtros',
+    position: { x: 0, y: 0, w: 12, h: 2 },
+    instance: {
+      instanceId: 'navegador-filtros',
+      objectId: 'panel-de-filtros',
+      version: '1.0.0',
+      title: filtros.etiqueta ?? 'Filtros',
+      binding: { datasetId: filtros.datasetId, dimensions, measures: [] },
+      settings: { objectId: 'panel-de-filtros', pickers: filtros.pickers },
+    },
   };
 }
 

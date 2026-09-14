@@ -347,11 +347,31 @@ export const demoModules: ModuleDefinition[] = [
     version: 1,
     createdAt: '2026-09-12T08:00:00.000Z',
     updatedAt: '2026-09-12T08:00:00.000Z',
+    /*
+     * Once paginas y, hasta ahora, ninguna forma de llegar a diez de ellas.
+     *
+     * Existian en el modelo y solo se alcanzaban escribiendo la URL a mano. Es exactamente el caso
+     * que el navegador de pagina viene a cerrar, y por eso este modulo lleva el tipo que mas
+     * trabaja: panel a la izquierda, fijo en la rejilla, con su seccion de filtros debajo.
+     */
+    navigator: {
+      tipo: 'panel-izquierdo',
+      comportamiento: 'grilla',
+      filtros: {
+        etiqueta: 'Filtros de busqueda',
+        datasetId: DATASET,
+        pickers: [
+          { fieldName: 'DimTiempo.Trimestre', tipo: 'desplegable', etiqueta: 'Trimestre' },
+          { fieldName: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Materia' },
+        ],
+      },
+    },
     pages: [
       {
         pageId: 'p-elementos',
         slug: 'elementos',
         name: 'Elementos',
+        icon: 'titulo',
         items: [
           {
             id: 'el-titulo',
@@ -571,6 +591,7 @@ export const demoModules: ModuleDefinition[] = [
         pageId: 'p-graficos',
         slug: 'graficos',
         name: 'Graficos',
+        icon: 'barras',
         items: [
           {
             id: 'g-titulo',
@@ -662,6 +683,7 @@ export const demoModules: ModuleDefinition[] = [
         pageId: 'p-familia',
         slug: 'familia',
         name: 'Barras y area',
+        icon: 'area',
         items: [
           {
             id: 'f-titulo',
@@ -785,6 +807,7 @@ export const demoModules: ModuleDefinition[] = [
         pageId: 'p-proporcion',
         slug: 'proporcion',
         name: 'Proporcion y meta',
+        icon: 'dona',
         items: [
           {
             id: 'pr-titulo',
@@ -903,6 +926,7 @@ export const demoModules: ModuleDefinition[] = [
         pageId: 'p-relacion',
         slug: 'relacion',
         name: 'Dos medidas a la vez',
+        icon: 'dispersion',
         items: [
           {
             id: 'rel-titulo',
@@ -1024,6 +1048,7 @@ export const demoModules: ModuleDefinition[] = [
         pageId: 'p-flujo',
         slug: 'flujo',
         name: 'Flujo y composicion',
+        icon: 'embudo',
         items: [
           {
             id: 'flu-titulo',
@@ -1132,6 +1157,7 @@ export const demoModules: ModuleDefinition[] = [
         pageId: 'p-referencia',
         slug: 'referencia',
         name: 'Metas y escalas',
+        icon: 'medidor',
         items: [
           {
             id: 'ref-titulo',
@@ -1244,6 +1270,7 @@ export const demoModules: ModuleDefinition[] = [
         pageId: 'p-detalle',
         slug: 'detalle',
         name: 'Etiquetas y tooltip',
+        icon: 'informacion',
         items: [
           {
             id: 'det-titulo',
@@ -1355,6 +1382,7 @@ export const demoModules: ModuleDefinition[] = [
         pageId: 'p-multiplos',
         slug: 'multiplos',
         name: 'Pequenos multiplos',
+        icon: 'combinado',
         items: [
           {
             id: 'mul-titulo',
@@ -1433,6 +1461,7 @@ export const demoModules: ModuleDefinition[] = [
         pageId: 'p-condicional',
         slug: 'condicional',
         name: 'Color por valor',
+        icon: 'indicador',
         items: [
           {
             id: 'con-titulo',
@@ -1583,6 +1612,7 @@ export const demoModules: ModuleDefinition[] = [
         pageId: 'p-contenedores',
         slug: 'contenedores',
         name: 'Contenedores',
+        icon: 'contenedor',
         items: [
           /*
            * El expandible va el PRIMERO, y con un chiclet de una fila.

@@ -934,6 +934,33 @@ export const initialCatalog: VisualObjectDefinition[] = [
     ],
   },
   {
+    objectId: 'navegador-de-pagina',
+    family: 'control',
+    icono: 'arbol',
+    name: 'Navegador de pagina',
+    description:
+      'Como se pasa de una pagina de un modulo a otra: panel a la izquierda, a la derecha, ' +
+      'pestanas debajo o un menu. Obligatorio en cuanto el modulo tiene mas de una pagina.',
+    category: 'navegacion',
+    versions: [
+      v1(
+        'Version inicial: cuatro tipos, tres comportamientos de panel y seccion de filtros.',
+        {
+          // Cero y cero: el navegador no lee datos POR SI MISMO. Su seccion de filtros si, y por
+          // eso la seccion lleva su propio dataset en la configuracion en vez de forzar al
+          // navegador entero a declarar un mapeo que casi nunca usa.
+          dimensions: { min: 0, max: 0 },
+          measures: { min: 0, max: 0 },
+          notes:
+            'No se coloca en el lienzo: se elige en la configuracion del modulo y se dibuja ' +
+            'alrededor de la pagina que se abra. Los dos paneles admiten una seccion de filtros ' +
+            'con los mismos selectores que el panel de filtros.',
+          wells: [],
+        },
+      ),
+    ],
+  },
+  {
     objectId: 'segmentador',
     family: 'control',
     icono: 'filtro',

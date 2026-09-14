@@ -1,5 +1,5 @@
 import { expect, test, type Page } from './instance';
-import { initialCatalog } from '@app/ui-components';
+import { initialCatalog, placeable } from '@app/ui-components';
 import { FIRST_OPENS, KEY_CONTROL } from '../src/components/editor/controls';
 import { alDia, asLogin, newModule } from './session';
 
@@ -13,8 +13,15 @@ const openSections = async (page: Page) => {
     .evaluateAll((nodos) => nodos.forEach((n) => ((n as HTMLDetailsElement).open = true)));
 };
 
-/** Los que van en la rejilla. Los complementos se adjuntan y tienen su propia pestana. */
-const COLOCABLES = initialCatalog.filter((o) => !o.attachable);
+/**
+ * Los que van en la rejilla, por la MISMA regla que usa la paleta.
+ *
+ * Se filtra con `placeable` y no con `!attachable`: un complemento se adjunta y tiene su propia
+ * pestana, y un navegador de pagina se elige en la configuracion del modulo porque lo que navega
+ * es el modulo entero. Repitiendo aqui la condicion, el dia que entre una cuarta clase de objeto
+ * esta prueba exigiria en la paleta algo que la paleta no ofrece — que es como se descubrio esta.
+ */
+const COLOCABLES = initialCatalog.filter(placeable);
 
 test.beforeEach(async ({ page }) => {
   await asLogin(page, 'u-admin');

@@ -16,6 +16,7 @@ import {
   validateContainer,
 } from '@app/ui-components';
 import type { ModuleDefinition } from './ModuleDefinition';
+import { navigatorProblems } from './pageNavigator';
 import { type GridProblem, validateLayout } from './grid';
 
 /** Validacion de esquema en cada carga del editor — seccion 4.2. */
@@ -36,6 +37,15 @@ export interface ModuleDiagnostics {
   moduleId: string;
   items: ItemDiagnostic[];
   layoutProblems: GridProblem[];
+  /**
+   * Lo que impide NAVEGAR el modulo: un modulo de varias paginas sin navegador elegido.
+   *
+   * Va con los demas diagnosticos y no en una comprobacion aparte porque es de la misma clase que
+   * un objeto roto: el modulo se dibuja, pero no se puede usar entero. Un modulo de seis paginas
+   * publicado sin navegador ensena una y esconde cinco, y quien lo abre no tiene forma de saber
+   * que estan ahi.
+   */
+  navigationProblems: string[];
   /** true si algo impide que el modulo se dibuje integro. */
   hasBrokenItems: boolean;
 }
@@ -219,6 +229,7 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
     moduleId: module.moduleId,
     items,
     layoutProblems,
+    navigationProblems: navigatorProblems(module),
     hasBrokenItems: items.some((i) => i.broken),
   };
 }
@@ -246,6 +257,10 @@ export function findPublishBlockers(
 
   for (const issue of diagnostics.layoutProblems) {
     locks.push({ reason: `disposicion-${issue.kind}`, detail: issue.problem });
+  }
+
+  for (const detail of diagnostics.navigationProblems) {
+    locks.push({ reason: 'navegacion', detail });
   }
 
   for (const instanceId of expiredInstanceIds) {

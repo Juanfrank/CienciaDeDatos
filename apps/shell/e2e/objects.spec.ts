@@ -370,3 +370,86 @@ test.describe('contenedor expandible: se abre EN SU SITIO y empuja lo de abajo',
     expect(medidas.contenedor).toBe(medidas.celda);
   });
 });
+
+
+test.describe('navegador de pagina: las paginas dejan de ser invisibles (4.2)', () => {
+  test('el panel lista TODAS las paginas y llevan a ellas', async ({ page }) => {
+    /*
+     * `composicion` tiene once paginas y hasta ahora solo se llegaba a diez de ellas escribiendo
+     * la URL a mano. Es el caso que el navegador viene a cerrar, asi que la prueba no mira que el
+     * panel exista: cuenta las paginas y sigue una.
+     */
+    await page.goto('/m/composicion');
+
+    const navegador = page.getByTestId('navegador-de-pagina');
+    await expect(navegador).toBeVisible();
+    await expect(navegador).toHaveAttribute('data-tipo', 'panel-izquierdo');
+    await expect(navegador.locator('[data-testid^="nav-pagina-"]')).toHaveCount(11);
+
+    // La abierta se marca, y no solo con color: `aria-current` es lo que lo dice sin verlo.
+    await expect(page.getByTestId('nav-pagina-elementos')).toHaveAttribute('aria-current', 'page');
+
+    await page.getByTestId('nav-pagina-contenedores').click();
+    await expect(page).toHaveURL(/\/m\/composicion\/contenedores$/);
+    await expect(page.getByTestId('nav-pagina-contenedores')).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  });
+
+  test('cada pagina tiene su URL: se comparte, se marca y el boton de atras funciona', async ({
+    page,
+  }) => {
+    /*
+     * Las paginas son ENLACES, no botones que cambian un estado local. La diferencia no se ve
+     * hasta que alguien pulsa atras o pega la direccion a otra persona — y entonces se ve entera.
+     */
+    await page.goto('/m/composicion');
+    await page.getByTestId('nav-pagina-graficos').click();
+    await expect(page).toHaveURL(/\/graficos$/);
+
+    await page.goBack();
+    await expect(page).toHaveURL(/\/m\/composicion$/);
+    await expect(page.getByTestId('nav-pagina-elementos')).toHaveAttribute('aria-current', 'page');
+  });
+
+  test('el panel lleva su seccion de filtros, y filtra de verdad', async ({ page }) => {
+    /*
+     * «Bajo el mismo metodo que los filtros ordinarios» se comprueba por donde acaba la seleccion:
+     * en la QUERY STRING, igual que cualquier otro filtro. Un panel con sus propios controles la
+     * habria guardado en estado local, y entonces el filtro no viajaria ni al enlace, ni al
+     * marcador, ni a la exportacion.
+     */
+    await page.goto('/m/composicion');
+
+    const filtros = page.getByTestId('navegador-filtros');
+    await expect(filtros).toBeVisible();
+    // El rotulo sale de la configuracion del navegador; las mayusculas las pone el CSS, asi que
+    // lo que se compara es el texto y no como se dibuja.
+    await expect(filtros).toContainText('Filtros de busqueda');
+
+    await filtros.getByRole('button', { name: 'Penal' }).click();
+    await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
+
+    await page.getByTestId('navegador-filtros-limpiar').click();
+    await expect(page).not.toHaveURL(/DimTribunal\.Materia=Penal/);
+  });
+
+  test('el panel fijo NO ofrece plegarse: un boton que no pliega nada parece roto', async ({
+    page,
+  }) => {
+    // `composicion` lo lleva en `grilla`, que es fijo por definicion.
+    await page.goto('/m/composicion');
+    await expect(page.getByTestId('navegador-de-pagina')).toHaveAttribute(
+      'data-comportamiento',
+      'grilla',
+    );
+    await expect(page.getByTestId('navegador-plegar')).toHaveCount(0);
+  });
+
+  test('un modulo de UNA pagina no dibuja navegador', async ({ page }) => {
+    // Con una sola no hay a donde ir, y un panel lateral de una entrada roba ancho para nada.
+    await page.goto('/m/casos-pendientes');
+    await expect(page.getByTestId('navegador-de-pagina')).toHaveCount(0);
+  });
+});

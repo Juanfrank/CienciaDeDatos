@@ -1,10 +1,15 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { defaultIdentity } from '@app/design-tokens';
 import { describeProvenance } from '@app/module-model';
 import { moduleLoad } from '../../../../../src/server/data';
 import { actorDe, slugServableModule } from '../../../../../src/server/cicloDeVida';
+import { embedChromeOf } from '../../../../../src/server/embedding';
 import { objectSerialize } from '../../../../../src/server/serialize';
 import { sessionGet } from '../../../../../src/server/session';
+import { findUser } from '../../../../../src/server/context';
+import { AZURE_AD_AVAILABLE } from '../../../../../src/server/identity';
+import { Login } from '../../../../../src/components/Login';
 import { ModuleView } from '../../../../../src/components/ModuleView';
 
 /** Modulo incrustado en otro portal — seccion 4.9. */
@@ -17,29 +22,39 @@ export default async function EmbeddedPage({
 }) {
   const { slug } = await params;
   const query = await searchParams;
+  const cromo = embedChromeOf(query['cromo']);
 
   const filtros: Record<string, string | string[]> = {};
   for (const [clave, valor] of Object.entries(query)) {
-    if (valor !== undefined) filtros[clave] = valor;
+    if (valor !== undefined && clave !== 'cromo') filtros[clave] = valor;
   }
 
-  // Sin sesion NO se redirige a la pantalla de acceso. Esta pagina se sirve dentro de un iframe
-  // de otro portal: un formulario de contrasena dibujado ahi dentro es indistinguible de uno
-  // falso incrustado por el anfitrion, y ensena a la gente a escribir su clave dentro de un marco
-  // ajeno. Se dice que hace falta entrar, con un enlace que abre la aplicacion en otra pestana.
   const sesion = await sessionGet();
   if (!sesion) {
+    /*
+     * Sin sesion se dibuja la PANTALLA DE ACCESO, aqui dentro.
+     *
+     * Antes se dibujaba un aviso con un enlace a otra pestana, por una razon que sigue siendo
+     * cierta: un formulario de contrasena dentro de un marco ajeno es indistinguible de uno falso
+     * que ponga el anfitrion, y acostumbra a la gente a escribir su clave dentro del marco de otro.
+     *
+     * Lo que lo hace aceptable es que el marco NO es de cualquiera: `frame-ancestors` solo deja
+     * enmarcar a los origenes que un Administrador autorizo, asi que la superficie es la lista de
+     * portales de la propia institucion, no la web entera. Aun asi se conserva la salida a una
+     * pestana propia, y no solo por precaucion: un iframe de otro sitio muchas veces no puede
+     * escribir la cookie de sesion —los navegadores bloquean la de terceros—, y sin esa salida
+     * entrar aqui fallaria en silencio y sin explicacion.
+     */
+    const volverAqui = `/embed/m/${slug}${cromo === 'limpio' ? '?cromo=limpio' : ''}`;
     return (
-      <div className="vacio">
-        <h1>Se requiere iniciar sesion</h1>
-        <p className="muted-text" data-testid="embedded-without-session">
-          Esta vista muestra datos institucionales y necesita una sesion abierta en la capa de
-          visualizacion.
+      <main className="embedded__body">
+        <Login azureAdAvailable={AZURE_AD_AVAILABLE} identity={defaultIdentity} destino={volverAqui} />
+        <p className="embedded__pie" data-testid="embedded-without-session">
+          <a href="/sign-in" target="_blank" rel="noopener noreferrer">
+            Si no puede entrar aqui, abra la aplicacion en otra pestana
+          </a>
         </p>
-        <a href="/sign-in" target="_blank" rel="noopener noreferrer" className="button-link">
-          Abrir la aplicacion
-        </a>
-      </div>
+      </main>
     );
   }
 
@@ -58,34 +73,77 @@ export default async function EmbeddedPage({
 
   if (!loaded) notFound();
 
+  const usuario = await findUser(sesion.userId);
+  const quienMira = usuario?.displayName ?? sesion.userId;
+
   return (
-    <article className="modulo">
-      <header className="module__header">
-        <h1 data-testid="module-title">{module.name}</h1>
-        <p className="muted-text" data-testid="frescura">
-          {loaded.generatedAt
-            ? `Datos actualizados el ${new Date(loaded.generatedAt).toLocaleString('es-DO')}`
-            : 'Sin datos poblados todavia'}
+    <>
+      {cromo === 'completo' ? (
+        <header className="embedded__header">
+          <img
+            className="embedded__emblema"
+            src={defaultIdentity.emblem.src}
+            width={defaultIdentity.emblem.width}
+            height={defaultIdentity.emblem.height}
+            alt=""
+          />
+          <span className="embedded__institucion">{defaultIdentity.name}</span>
+          <span className="embedded__quien" data-testid="embedded-quien">
+            {quienMira}
+          </span>
+        </header>
+      ) : (
+        /*
+          Lo UNICO que sobrevive del encabezado: quien mira.
+          No es adorno. Lo que se ve depende del ambito de quien tiene la sesion abierta, asi que
+          una vista que no diga con que identidad esta dibujada invita a leerla como si fuera la de
+          todo el mundo — y en una pantalla compartida, a leer los datos de otro como propios.
+        */
+        <p className="embedded__identidad" data-testid="embedded-quien">
+          {quienMira}
         </p>
-      </header>
+      )}
 
-      <ModuleView
-        objetos={loaded.objetos.map(objectSerialize)}
-        provenance={describeProvenance(false)}
-        moduleSlug={module.slug}
-        pageSlug={loaded.pageSlug}
-        embedded
-      />
+      <main className="embedded__body">
+        <article className="modulo">
+          <header className="module__header">
+            <h1 data-testid="module-title">{module.name}</h1>
+            <p className="muted-text" data-testid="frescura">
+              {loaded.generatedAt
+                ? `Datos actualizados el ${new Date(loaded.generatedAt).toLocaleString('es-DO')}`
+                : 'Sin datos poblados todavia'}
+            </p>
+          </header>
 
-      {/*
-        Un enlace de vuelta, en pestana nueva: dentro de un iframe, navegar en el mismo marco
-        dejaria la aplicacion entera metida en un hueco de 640 pixeles del portal anfitrion.
-      */}
-      <p className="embedded__pie">
-        <Link href={`/m/${module.slug}`} target="_blank" rel="noopener" data-testid="see-completo">
-          Ver en la capa de visualizacion
-        </Link>
-      </p>
-    </article>
+          <ModuleView
+            objetos={loaded.objetos.map(objectSerialize)}
+            provenance={describeProvenance(false)}
+            moduleSlug={module.slug}
+            pageSlug={loaded.pageSlug}
+            embedded
+          />
+
+          {/*
+            La salida a la aplicacion existe SOLO en la version completa.
+            La limpia se incrusta dentro de un sistema que ya es de la institucion, como una pieza
+            mas de su pantalla: un enlace que se lleva a quien lo pulsa a otra aplicacion es
+            justamente lo que quien la incrusta no quiere. En pestana nueva en cualquier caso —
+            navegar en el mismo marco dejaria la aplicacion entera metida en un hueco de 640 px.
+          */}
+          {cromo === 'completo' ? (
+            <p className="embedded__pie">
+              <Link
+                href={`/m/${module.slug}`}
+                target="_blank"
+                rel="noopener"
+                data-testid="see-completo"
+              >
+                Ver en la capa de visualizacion
+              </Link>
+            </p>
+          ) : null}
+        </article>
+      </main>
+    </>
   );
 }

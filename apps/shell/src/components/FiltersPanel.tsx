@@ -111,7 +111,7 @@ export function FiltersPanel({
 }
 
 /** Valores distintos de una columna, ordenados. Salen del dataset YA recortado por el ambito. */
-function optionsOf(result: QueryResult, fieldName: string): string[] {
+export function optionsOf(result: QueryResult, fieldName: string): string[] {
   const [tabla, ...resto] = fieldName.split(".");
   return toSlicerOptions(result, {
     table: tabla ?? "",
@@ -119,7 +119,14 @@ function optionsOf(result: QueryResult, fieldName: string): string[] {
   });
 }
 
-function FieldPicker({
+/*
+ * Se EXPORTA porque el navegador lateral dibuja su seccion de filtros con el, no con una copia.
+ *
+ * «Bajo el mismo metodo que los filtros ordinarios» no es una frase sobre la configuracion: si el
+ * panel lateral tuviera sus propios controles, un rango de fechas se comportaria distinto segun
+ * donde estuviera, y nadie lo habria decidido.
+ */
+export function FieldPicker({
   picker,
   opciones,
   valores,

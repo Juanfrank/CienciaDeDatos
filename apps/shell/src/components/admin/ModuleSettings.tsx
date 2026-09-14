@@ -2,7 +2,17 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MODULE_OPTIONS, type ModuleOption } from '@app/module-model';
+import {
+  MODULE_OPTIONS,
+  NAVIGATOR_IS_PANEL,
+  NAVIGATOR_KINDS,
+  PANEL_BEHAVIORS,
+  navigatorByDefault,
+  type ModuleOption,
+  type NavigatorKind,
+  type PageNavigatorSettings,
+  type PanelBehavior,
+} from '@app/module-model';
 import type { MessageKey } from '@app/i18n';
 import { useTranslator } from '../Locale';
 
@@ -18,7 +28,25 @@ export interface SettingsForm {
   description: string;
   options: Partial<Record<ModuleOption, boolean>>;
   defaultFilters: { field: string; values: string[] }[];
+  /** `null` es «ninguno», y con mas de una pagina no se deja guardar asi. */
+  navigator: PageNavigatorSettings | null;
+  pages: { pageId: string; slug: string; name: string; icon: string }[];
 }
+
+/** Como se llama cada tipo de navegador, dicho donde se elige. */
+const NAVEGADOR: Record<NavigatorKind, MessageKey> = {
+  'panel-izquierdo': 'nav.kind.leftPanel',
+  'panel-derecho': 'nav.kind.rightPanel',
+  'pestanas-abajo': 'nav.kind.tabs',
+  menu: 'nav.kind.menu',
+};
+
+/** Y cada comportamiento de panel, que es lo que decide si le quita ancho al contenido. */
+const COMPORTAMIENTO: Record<PanelBehavior, { titulo: MessageKey; desc: MessageKey }> = {
+  grilla: { titulo: 'nav.behavior.grid', desc: 'nav.behavior.grid.desc' },
+  drawer: { titulo: 'nav.behavior.drawer', desc: 'nav.behavior.drawer.desc' },
+  overlay: { titulo: 'nav.behavior.overlay', desc: 'nav.behavior.overlay.desc' },
+};
 
 /** Como se llama cada opcion y que hace, dicho donde se enciende. */
 const OPCION: Record<ModuleOption, { titulo: MessageKey; desc: MessageKey }> = {
@@ -114,6 +142,135 @@ export function ModuleSettings({
           onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
         />
       </label>
+
+      {/*
+        El navegador solo aparece con MAS DE UNA pagina.
+        Con una sola no hay a donde ir, y ofrecer la eleccion invitaria a poner un panel lateral de
+        una entrada que roba ancho y no lleva a ningun lado.
+      */}
+      {form.pages.length > 1 ? (
+        <>
+          <h3>{t('nav.title')}</h3>
+          <p className="muted-text">{t('nav.intro')}</p>
+
+          <fieldset className="nav-kinds">
+            <legend className="visualmente-oculto">{t('nav.title')}</legend>
+            {NAVIGATOR_KINDS.map((tipo) => (
+              <label key={tipo}>
+                <input
+                  type="radio"
+                  name="navegador"
+                  checked={form.navigator?.tipo === tipo}
+                  data-testid={`navegador-${tipo}`}
+                  onChange={() => setForm((p) => ({ ...p, navigator: navigatorByDefault(tipo) }))}
+                />{' '}
+                {t(NAVEGADOR[tipo])}
+              </label>
+            ))}
+          </fieldset>
+
+          {form.navigator && NAVIGATOR_IS_PANEL(form.navigator.tipo) ? (
+            <div className="container-table">
+              <table className="tabla" data-testid="tabla-comportamiento">
+                <thead>
+                  <tr>
+                    <th scope="col">{t('nav.behavior')}</th>
+                    <th scope="col">{t('admin.settings.options.column.state')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {PANEL_BEHAVIORS.map((cual) => (
+                    <tr key={cual} data-testid={`comportamiento-${cual}`}>
+                      <th scope="row">
+                        {t(COMPORTAMIENTO[cual].titulo)}
+                        <p className="muted-text">{t(COMPORTAMIENTO[cual].desc)}</p>
+                      </th>
+                      <td>
+                        <label>
+                          <span className="visualmente-oculto">{t(COMPORTAMIENTO[cual].titulo)}</span>
+                          <input
+                            type="radio"
+                            name="comportamiento"
+                            checked={(form.navigator?.comportamiento ?? 'grilla') === cual}
+                            data-testid={`elegir-comportamiento-${cual}`}
+                            onChange={() =>
+                              setForm((p) =>
+                                p.navigator
+                                  ? { ...p, navigator: { ...p.navigator, comportamiento: cual } }
+                                  : p,
+                              )
+                            }
+                          />
+                        </label>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+
+          <h3>{t('nav.pages.title')}</h3>
+          {/* El SLUG no se edita aqui: es la direccion de la pagina, y cambiarlo al renombrar
+              romperia en silencio los enlaces que alguien tenga guardados. */}
+          <p className="muted-text">{t('nav.pages.intro')}</p>
+          <div className="container-table">
+            <table className="tabla" data-testid="tabla-paginas">
+              <thead>
+                <tr>
+                  <th scope="col">{t('admin.settings.name')}</th>
+                  <th scope="col">{t('admin.settings.slug')}</th>
+                  <th scope="col">{t('nav.pages.icon')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {form.pages.map((pagina, i) => (
+                  <tr key={pagina.pageId} data-testid={`pagina-${pagina.slug}`}>
+                    <th scope="row">
+                      <label>
+                        <span className="visualmente-oculto">{t('admin.settings.name')}</span>
+                        <input
+                          type="text"
+                          value={pagina.name}
+                          data-testid={`pagina-${pagina.slug}-nombre`}
+                          onChange={(e) =>
+                            setForm((p) => ({
+                              ...p,
+                              pages: p.pages.map((q, j) =>
+                                j === i ? { ...q, name: e.target.value } : q,
+                              ),
+                            }))
+                          }
+                        />
+                      </label>
+                    </th>
+                    <td className="muted-text">/{pagina.slug}</td>
+                    <td>
+                      <label>
+                        <span className="visualmente-oculto">{t('nav.pages.icon')}</span>
+                        <input
+                          type="text"
+                          value={pagina.icon}
+                          placeholder={t('nav.pages.icon.example')}
+                          data-testid={`pagina-${pagina.slug}-icono`}
+                          onChange={(e) =>
+                            setForm((p) => ({
+                              ...p,
+                              pages: p.pages.map((q, j) =>
+                                j === i ? { ...q, icon: e.target.value } : q,
+                              ),
+                            }))
+                          }
+                        />
+                      </label>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : null}
 
       <h3>{t('admin.settings.options')}</h3>
       <p className="muted-text">{t('admin.settings.options.intro')}</p>

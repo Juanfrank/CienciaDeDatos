@@ -10,7 +10,9 @@ import {
 } from '@app/access-control';
 import {
   MODULE_OPTIONS,
+  navigatorProblems,
   type DefaultFilter,
+  type PageNavigatorSettings,
   type ModuleDefinition,
   type ModuleDiff,
   type ModuleOption,
@@ -894,6 +896,16 @@ export interface ModuleSettings {
   description: string;
   options: Partial<Record<ModuleOption, boolean>>;
   defaultFilters: DefaultFilter[];
+  /**
+   * Como se navega entre sus paginas. Obligatorio en cuanto hay mas de una.
+   *
+   * `null` significa «ninguno» explicitamente, y por eso no es `undefined`: ausente querria decir
+   * «no se toca», que es lo que hace falta cuando el formulario manda solo una parte. Se distingue
+   * a proposito para que quitar un navegador sea posible y no solo ponerlo.
+   */
+  navigator?: PageNavigatorSettings | null;
+  /** Renombrar una pagina y darle icono. Solo llegan las que cambian. */
+  pages?: { pageId: string; name?: string; icon?: string | null }[];
 }
 
 /**
@@ -958,15 +970,52 @@ export async function saveSettings(input: {
 
   const description = input.settings.description.trim();
 
+  /*
+   * El navegador se VALIDA antes de guardarlo, no al publicar.
+   *
+   * La puerta de publicacion tambien lo mira, y las dos hacen falta: la de publicacion impide que
+   * salga un modulo de seis paginas del que solo se ve una, y esta impide guardar un tipo o un
+   * comportamiento que no existe — que no se descubriria hasta intentar dibujarlo.
+   */
+  const navigator =
+    input.settings.navigator === undefined ? modulo.navigator : (input.settings.navigator ?? undefined);
+  const problemasDeNavegacion = navigatorProblems({ pages: modulo.pages, ...(navigator ? { navigator } : {}) });
+  if (navigator && problemasDeNavegacion.length > 0) {
+    throw new CicloDeVidaError(problemasDeNavegacion.join(' '), 400);
+  }
+
+  /*
+   * Renombrar una pagina y darle icono.
+   *
+   * El SLUG no se toca desde aqui: es la direccion de la pagina (4.11), y cambiarlo al renombrar
+   * romperia en silencio los enlaces que alguien tenga guardados. Renombrar cambia el rotulo; la
+   * direccion es otra decision.
+   */
+  const cambiosDePagina = new Map((input.settings.pages ?? []).map((p) => [p.pageId, p]));
+  const pages = modulo.pages.map((pagina) => {
+    const cambio = cambiosDePagina.get(pagina.pageId);
+    if (!cambio) return pagina;
+    const siguiente = { ...pagina };
+    if (cambio.name !== undefined && cambio.name.trim() !== '') siguiente.name = cambio.name.trim();
+    if (cambio.icon !== undefined) {
+      if (cambio.icon === null || cambio.icon === '') delete siguiente.icon;
+      else siguiente.icon = cambio.icon;
+    }
+    return siguiente;
+  });
+
   const actualizado: ModuleDefinition = {
     ...modulo,
     name,
     slug,
+    pages,
     ...(description ? { description } : {}),
     ...(Object.keys(options).length > 0 ? { options } : {}),
     ...(defaultFilters.length > 0 ? { defaultFilters } : {}),
+    ...(navigator ? { navigator } : {}),
     updatedAt: ahora(),
   };
+  if (!navigator) delete actualizado.navigator;
   // Un campo que se vacia se BORRA, no se guarda como cadena vacia: `description: ''` obligaria a
   // cada lector a distinguir «sin descripcion» de «descripcion vacia», que son lo mismo.
   if (!description) delete actualizado.description;
@@ -985,6 +1034,8 @@ export async function saveSettings(input: {
       ...(modulo.description ? { descripcion: modulo.description } : {}),
       ...(modulo.options ? { opciones: modulo.options } : {}),
       ...(modulo.defaultFilters ? { filtros: modulo.defaultFilters } : {}),
+      ...(modulo.navigator ? { navegador: modulo.navigator } : {}),
+      paginas: modulo.pages.map((p) => ({ slug: p.slug, name: p.name, icon: p.icon ?? null })),
     },
     after: {
       name: actualizado.name,
@@ -992,6 +1043,8 @@ export async function saveSettings(input: {
       ...(actualizado.description ? { descripcion: actualizado.description } : {}),
       ...(actualizado.options ? { opciones: actualizado.options } : {}),
       ...(actualizado.defaultFilters ? { filtros: actualizado.defaultFilters } : {}),
+      ...(actualizado.navigator ? { navegador: actualizado.navigator } : {}),
+      paginas: actualizado.pages.map((p) => ({ slug: p.slug, name: p.name, icon: p.icon ?? null })),
     },
   });
 

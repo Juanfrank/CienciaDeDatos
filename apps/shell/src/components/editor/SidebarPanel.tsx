@@ -22,6 +22,7 @@ import {
   type IconName,
   isContainer,
   isElement,
+  placeable,
 } from '@app/ui-components';
 import type { PaletteDataset, PaletteObject } from '../../server/editor';
 import { Icon } from '../icons/Icon';
@@ -273,7 +274,10 @@ function Palette({
   const t = useTranslator();
   // Los complementos se adjuntan a otro objeto, no se colocan en la rejilla. La validacion lo
   // rechaza, asi que tampoco se ofrecen aqui: tienen su propia pestana.
-  const colocables = objetos.filter((o) => !o.attachable);
+  // La regla de que se coloca vive en `placeable`, no aqui: un complemento se adjunta y un
+  // navegador de pagina se elige en la configuracion del modulo, y los dos tienen que quedar
+  // fuera de la paleta por el mismo sitio.
+  const colocables = objetos.filter(placeable);
   const [busqueda, setBusqueda] = useState('');
 
   /*

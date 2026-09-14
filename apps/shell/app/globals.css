@@ -3664,8 +3664,41 @@ th[aria-sort='descending'] .table__flecha {
 }
 .embedded__emblema { width: auto; height: 24px; flex-shrink: 0; }
 .embedded__institucion { color: var(--md-sys-color-on-surface-variant); }
+
+/*
+ * Quien mira, en las dos formas de incrustar.
+ *
+ * En la completa va al final del encabezado; en la limpia es lo UNICO que queda de el, y por eso
+ * se dibuja como una linea propia y discreta en vez de desaparecer: lo que se ve depende del
+ * ambito de quien tiene la sesion abierta, y una vista que no lo diga se lee como la de todos.
+ */
+.embedded__quien { margin-inline-start: auto; color: var(--md-sys-color-on-surface-variant); }
+.embedded__identidad {
+  margin: 0;
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: end;
+}
+
 .embedded__body { flex: 1; padding: var(--space-md); min-width: 0; }
 .embedded__pie { margin-top: var(--space-md); font-size: var(--md-sys-typescale-body-medium-size); }
+/* Las dos formas de incrustar, una debajo de otra: son una eleccion, no una lista de ajustes. */
+.embed__cromo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: var(--space-sm) 0;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+}
+.embed__cromo legend {
+  padding-inline: var(--space-xs);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
 .embed__code {
   width: 100%;
   min-height: 120px;
@@ -4290,6 +4323,162 @@ th[aria-sort='descending'] .table__flecha {
  * Eran dos bloques apilados y empujaban la tabla hacia abajo por tres controles. Se envuelve en
  * pantalla estrecha en vez de encogerlos: un campo de busqueda de cuatro caracteres no sirve.
  */
+/*
+ * ---- Navegador de pagina (4.2) ----
+ *
+ * Cuatro formas de lo mismo, y la disposicion es lo unico que las diferencia de verdad. El panel
+ * lateral es el unico que compite por ANCHO con el contenido, asi que es el unico que tiene que
+ * decir como lo ocupa: `grilla` se lo queda, `drawer` lo devuelve al plegarse y `overlay` no lo
+ * pide nunca —se pone encima—.
+ */
+.con-navegador {
+  display: grid;
+  gap: var(--space-md);
+  align-items: start;
+}
+.con-navegador[data-tipo='panel-izquierdo'] { grid-template-columns: auto minmax(0, 1fr); }
+.con-navegador[data-tipo='panel-derecho'] {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.con-navegador[data-tipo='panel-derecho'] > .navegador { order: 2; }
+.con-navegador[data-tipo='pestanas-abajo'] { display: flex; flex-direction: column-reverse; }
+.con-navegador[data-tipo='menu'] { display: flex; flex-direction: column; }
+
+.navegador__paginas { list-style: none; margin: 0; padding: 0; }
+.navegador__pagina {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--md-sys-shape-corner-full);
+  color: var(--md-sys-color-on-surface);
+  text-decoration: none;
+}
+.navegador__pagina:hover { background: var(--md-sys-color-surface-container); }
+.navegador__pagina.is-active {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font-weight: 500;
+}
+
+/* El panel: una columna con su contorno, como el carril de administracion. */
+.navegador--panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 16rem;
+  padding: var(--space-sm);
+  border-radius: var(--md-sys-shape-corner-large);
+  background: var(--md-sys-color-surface-container-low);
+}
+
+/*
+ * `overlay` se pone ENCIMA y no pide sitio: sale de la rejilla por completo.
+ * Por eso su celda se colapsa a cero y el panel se posiciona sobre el contenido. Es lo que hace
+ * falta en una pantalla estrecha, donde robarle ancho al contenido lo deja ilegible.
+ */
+.con-navegador:has(> .navegador[data-comportamiento='overlay']) {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr);
+}
+.navegador--panel[data-comportamiento='overlay'] {
+  position: absolute;
+  inset-block-start: 0;
+  z-index: 3;
+  box-shadow: var(--md-sys-elevation-2);
+}
+.con-navegador[data-tipo='panel-izquierdo'] .navegador--panel[data-comportamiento='overlay'] {
+  inset-inline-start: 0;
+}
+.con-navegador[data-tipo='panel-derecho'] .navegador--panel[data-comportamiento='overlay'] {
+  inset-inline-end: 0;
+}
+
+/* Plegado, el drawer deja solo el boton: devuelve el ancho al contenido, que es para lo que esta. */
+.navegador--panel[data-abierto='no'] { width: auto; }
+
+.navegador__plegar {
+  align-self: flex-start;
+  padding: var(--space-xs);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: none;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+}
+.navegador__plegar:hover { background: var(--md-sys-color-surface-container-high); }
+
+.navegador__contenido { display: flex; flex-direction: column; gap: var(--space-md); min-width: 0; }
+
+.navegador__filtros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+.navegador__filtros-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+.navegador__filtros-cabecera h2 {
+  margin: 0;
+  font-size: var(--md-sys-typescale-label-medium-size);
+  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+  text-transform: uppercase;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Las pestanas, en fila y con desplazamiento: con doce paginas la fila no puede romper el ancho. */
+.navegador--pestanas-abajo .navegador__paginas {
+  display: flex;
+  gap: var(--space-xs);
+  overflow-x: auto;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  padding-top: var(--space-sm);
+}
+.navegador--pestanas-abajo .navegador__pagina { white-space: nowrap; }
+
+.navegador__menu > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: fit-content;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-full);
+  cursor: pointer;
+}
+.navegador__menu[open] > .navegador__paginas {
+  margin-top: var(--space-xs);
+  padding: var(--space-xs);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: var(--md-sys-color-surface-container-lowest);
+}
+
+/* En pantalla estrecha ningun panel se queda a un lado: no hay ancho que repartir. */
+@media (max-width: 720px) {
+  .con-navegador[data-tipo='panel-izquierdo'],
+  .con-navegador[data-tipo='panel-derecho'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .navegador--panel { width: auto; }
+}
+
+/* Los cuatro tipos, en columna: es una eleccion entre cuatro, no una lista de ajustes. */
+.nav-kinds {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: var(--space-sm) 0;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+}
+
 .barra-de-tabla {
   display: flex;
   flex-wrap: wrap;

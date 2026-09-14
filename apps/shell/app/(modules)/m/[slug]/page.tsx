@@ -6,6 +6,8 @@ import { actorDe, slugServableModule } from '../../../../src/server/cicloDeVida'
 import { objectSerialize } from '../../../../src/server/serialize';
 import { pageSessionRequire } from '../../../../src/server/session';
 import { ModuleView } from '../../../../src/components/ModuleView';
+import { translator } from '../../../../src/server/locale';
+import { PageNavigator } from '../../../../src/components/PageNavigator';
 import { ScopeBadge } from '../../../../src/components/ScopeBadge';
 import { ProvenanceBadge } from '../../../../src/components/ProvenanceBadge';
 
@@ -34,7 +36,7 @@ export default async function PaginaModulo({
   const { slug, page } = await params;
   const query = await searchParams;
 
-  const sesion = await pageSessionRequire();
+  const [sesion, t] = await Promise.all([pageSessionRequire(), translator()]);
 
   const module = await slugServableModule(slug, await actorDe(sesion));
   if (!module) notFound();
@@ -73,7 +75,25 @@ export default async function PaginaModulo({
     ([fieldName, valores]) => !chosenFields.has(fieldName) && valores.length > 0,
   );
 
-  return (
+  /*
+   * El navegador envuelve la pagina; no es un objeto de dentro.
+   *
+   * Y solo aparece con mas de una pagina: con una sola no hay a donde ir, y un panel lateral de
+   * una entrada roba ancho para no llevar a ningun lado. Con mas de una es obligatorio, y eso lo
+   * hace cumplir la puerta de publicacion — aqui no hace falta un caso para «falta»: un modulo
+   * publicado sin el no existe.
+   */
+  const navegador = module.pages.length > 1 ? module.navigator : undefined;
+  const filtrosDelPanel =
+    loaded.navigatorFilters?.result && loaded.navigatorFilters.item
+      ? {
+          instance: loaded.navigatorFilters.item.instance,
+          result: loaded.navigatorFilters.result,
+          titulo: module.navigator?.filtros?.etiqueta ?? t('nav.filters'),
+        }
+      : undefined;
+
+  const contenido = (
     <article className="modulo">
       <header className="module__header">
         <h1 data-testid="module-title">{module.name}</h1>
@@ -112,5 +132,24 @@ export default async function PaginaModulo({
         {...(module.options ? { options: module.options } : {})}
       />
     </article>
+  );
+
+  if (!navegador) return contenido;
+
+  return (
+    <div className="con-navegador" data-tipo={navegador.tipo}>
+      <PageNavigator
+        navegador={navegador}
+        paginas={module.pages.map((p) => ({
+          slug: p.slug,
+          name: p.name,
+          ...(p.icon ? { icon: p.icon } : {}),
+        }))}
+        moduleSlug={module.slug}
+        actual={loaded.pageSlug}
+        {...(filtrosDelPanel ? { filtros: filtrosDelPanel } : {})}
+      />
+      {contenido}
+    </div>
   );
 }
