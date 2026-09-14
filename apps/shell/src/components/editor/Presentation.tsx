@@ -4,7 +4,6 @@ import {
   ACCENTS,
   FUNNEL_COMPARISONS,
   CIRCULAR_LABELS,
-  OBJECT_ICONS,
   MAX_RADIO_INTERIOR,
   STACKING_MODES,
   LEGEND_MODES,
@@ -46,12 +45,21 @@ import { useTranslator } from '../Locale';
 export function Presentation({
   instance,
   admitidas,
+  iconos,
   kinds,
   saving,
   onCambiar,
 }: {
   instance: ObjectInstance;
   admitidas: PresentationKey[];
+  /*
+   * La lista de iconos viene del SERVIDOR.
+   *
+   * Era `OBJECT_ICONS`, leido aqui mismo, y por eso deshabilitar un icono desde el panel no lo
+   * quitaba de este desplegable: una lista escrita en el cliente no sabe nada del almacen de
+   * gobierno.
+   */
+  iconos: IconName[];
   /** Tipo de cada columna del dataset, para ofrecer los selectores que tienen sentido. */
   kinds: Record<string, string>;
   saving: boolean;
@@ -184,7 +192,7 @@ export function Presentation({
                 }
               >
                 <option value="">{t('pres.icon.default')}</option>
-                {OBJECT_ICONS.map((nombre) => (
+                {iconos.map((nombre) => (
                   <option key={nombre} value={nombre}>
                     {nombre}
                   </option>

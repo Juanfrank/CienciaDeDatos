@@ -477,6 +477,7 @@ export function ModuleEditor({
         <SidebarPanel
           objetos={palette.objetos}
           datasets={palette.datasets}
+          iconos={palette.iconos}
           selected={chosen}
           saving={saving}
           onAnadir={(objectId) => void add(objectId)}

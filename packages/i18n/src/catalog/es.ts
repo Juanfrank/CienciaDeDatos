@@ -393,6 +393,15 @@ export const es = {
   'admin.usage.column.pinned': 'Version que fija',
   'admin.usage.column.instances': 'Instancias',
   'admin.usage.latest': 'Ultima',
+  // Recursos que no son objetos: iconos, imagenes, geometrias de mapa.
+  'admin.assets.state.chrome': 'Cromo de la aplicacion',
+  'admin.assets.usage.total': '{n, plural, one {# uso} other {# usos}}',
+  'admin.assets.usage.catalog': '{n, plural, one {# objeto del catalogo lo lleva} other {# objetos del catalogo lo llevan}}: {cuales}',
+  'admin.assets.usage.instances': '{n, plural, one {# instancia} other {# instancias}}',
+  'admin.assets.icons.intro':
+    'El icono no es un objeto: se usa DENTRO de uno. Deshabilitar uno deja de ofrecerlo para elegir, y no lo retira de los modulos que ya lo tienen puesto.',
+  'admin.assets.images.intro': 'Imagenes servidas desde el propio origen.',
+  'admin.assets.geometries.intro': 'Geometrias para los mapas, tambien desde el propio origen.',
   'admin.usage.behind': 'Atrasada',
   // Propuestas sobre el catalogo — seccion 4.5.
   'admin.proposals.title': 'Propuestas sobre el catalogo',

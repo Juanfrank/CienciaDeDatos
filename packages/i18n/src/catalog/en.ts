@@ -395,6 +395,15 @@ export const en: Record<MessageKey, string> = {
   'admin.usage.column.pinned': 'Pinned version',
   'admin.usage.column.instances': 'Instances',
   'admin.usage.latest': 'Latest',
+  // Resources that are not objects: icons, images, map geometries.
+  'admin.assets.state.chrome': 'Application chrome',
+  'admin.assets.usage.total': '{n, plural, one {# use} other {# uses}}',
+  'admin.assets.usage.catalog': '{n, plural, one {# catalog object uses it} other {# catalog objects use it}}: {cuales}',
+  'admin.assets.usage.instances': '{n, plural, one {# instance} other {# instances}}',
+  'admin.assets.icons.intro':
+    'An icon is not an object: it is used INSIDE one. Disabling one stops it being offered, and does not remove it from modules that already use it.',
+  'admin.assets.images.intro': 'Images served from our own origin.',
+  'admin.assets.geometries.intro': 'Map geometries, also from our own origin.',
   'admin.usage.behind': 'Behind',
 
   // Catalog proposals — section 4.5.

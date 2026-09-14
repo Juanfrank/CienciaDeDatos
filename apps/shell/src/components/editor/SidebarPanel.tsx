@@ -19,6 +19,7 @@ import {
 import {
   type ObjectFamily,
   type ObjectCategory,
+  type IconName,
   isContainer,
   isElement,
 } from '@app/ui-components';
@@ -39,6 +40,7 @@ type Tab = 'objetos' | 'datos' | 'formato' | 'complementos';
 export function SidebarPanel({
   objetos,
   datasets,
+  iconos,
   selected,
   saving,
   onAnadir,
@@ -47,6 +49,8 @@ export function SidebarPanel({
 }: {
   objetos: PaletteObject[];
   datasets: PaletteDataset[];
+  /** Los iconos que se pueden elegir hoy: el panel de administracion puede haber apagado alguno. */
+  iconos: IconName[];
   selected: GridItem | null;
   saving: boolean;
   onAnadir: (objectId: string) => void;
@@ -167,6 +171,7 @@ export function SidebarPanel({
             />
 
             <Presentation
+              iconos={iconos}
               instance={selected.instance}
               admitidas={definicion?.presentacion ?? []}
               kinds={dataset?.kinds ?? {}}

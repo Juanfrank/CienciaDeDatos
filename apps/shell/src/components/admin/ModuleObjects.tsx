@@ -60,16 +60,7 @@ export function ModuleObjects({
                 <span className="muted-text">{t(CATEGORIA[o.category] ?? 'admin.modules.objects.category.other')}</span>
               </th>
               <td>
-                v{o.version}{' '}
-                {o.desconocido ? (
-                  <span className="insignia badge--error">{t('admin.modules.objects.unknown')}</span>
-                ) : o.atrasada ? (
-                  <span className="insignia badge--error">
-                    {t('admin.modules.objects.latestIs', { version: o.ultima })}
-                  </span>
-                ) : (
-                  <span className="insignia">{t('admin.usage.latest')}</span>
-                )}
+                v{o.version} <Vigencia objeto={o} t={t} />
               </td>
               <td>{o.instancias}</td>
               <td>
@@ -90,6 +81,26 @@ export function ModuleObjects({
       </table>
     </details>
   );
+}
+
+/**
+ * Si la version fijada es la ultima, una vieja, o de un objeto que ya no existe.
+ *
+ * Con nombre y no como ternario anidado, por lo mismo que en `AssetTable`: la rama del medio se
+ * queda en una linea que el trinquete de cadenas sueltas cuenta como prosa de pantalla.
+ */
+function Vigencia({ objeto, t }: { objeto: ObjetoEnModulo; t: Translator }) {
+  if (objeto.desconocido) {
+    return <span className="insignia badge--error">{t('admin.modules.objects.unknown')}</span>;
+  }
+  if (objeto.atrasada) {
+    return (
+      <span className="insignia badge--error">
+        {t('admin.modules.objects.latestIs', { version: objeto.ultima })}
+      </span>
+    );
+  }
+  return <span className="insignia">{t('admin.usage.latest')}</span>;
 }
 
 /** La categoria del catalogo, dicha en la lengua de quien mira. */

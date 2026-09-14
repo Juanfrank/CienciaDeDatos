@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { initialCatalog } from '@app/ui-components';
+import { ICON_NAMES, initialCatalog } from '@app/ui-components';
 import { PermissionError, assertCan } from '@app/access-control';
 import type { Actor } from '@app/access-control';
 import { leer, write } from './almacenCompartido';
@@ -22,6 +22,15 @@ import { changeRecord } from './audit';
  */
 
 export const KEY_CATALOG = 'app:catalogo:gobierno';
+
+/**
+ * El prefijo con el que un recurso que NO es objeto vive en este almacen.
+ *
+ * Vive aqui, y no junto a la tabla que lo dibuja, porque el conjunto de deshabilitados vive aqui:
+ * poniendolo del otro lado, `recursos.ts` y `catalogo.ts` se importarian el uno al otro.
+ */
+export const ICON_PREFIX = 'icono:';
+export const IMAGE_PREFIX = 'imagen:';
 
 export type ProposalStatus = 'pendiente' | 'aprobada' | 'devuelta';
 
@@ -87,6 +96,22 @@ export async function disabledResources(): Promise<Set<string>> {
 }
 
 /**
+ * Los identificadores que se pueden deshabilitar.
+ *
+ * Dos espacios de nombres en el mismo conjunto. Un objeto del catalogo va por su `objectId` a
+ * secas; un icono o una imagen —que no son objetos, se usan DENTRO de uno— llevan prefijo. El
+ * prefijo no es decorativo: sin el, un icono llamado `tabla` y el objeto `tabla` serian la misma
+ * clave, y deshabilitar uno apagaria el otro.
+ */
+function recursoConocido(id: string): boolean {
+  if (id.startsWith(ICON_PREFIX)) {
+    return (ICON_NAMES as readonly string[]).includes(id.slice(ICON_PREFIX.length));
+  }
+  if (id.startsWith(IMAGE_PREFIX)) return id.length > IMAGE_PREFIX.length;
+  return initialCatalog.some((o) => o.objectId === id);
+}
+
+/**
  * Deja de ofrecer un objeto en el editor, sin tocar los modulos que ya lo tienen.
  *
  * Es la diferencia entre retirar y romper. Un objeto que se deshabilita deja de aparecer en la
@@ -99,8 +124,8 @@ export async function setResourceDisabled(
   disabled: boolean,
 ): Promise<void> {
   permiso(actor, 'proponer-objetos-al-repositorio');
-  if (!initialCatalog.some((o) => o.objectId === objectId)) {
-    throw new CatalogError(`El catalogo no tiene ningun objeto '${objectId}'.`, 404);
+  if (!recursoConocido(objectId)) {
+    throw new CatalogError(`El catalogo no tiene ningun recurso '${objectId}'.`, 404);
   }
 
   const gobierno = await leerGobierno();

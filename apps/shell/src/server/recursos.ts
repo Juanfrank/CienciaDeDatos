@@ -1,8 +1,8 @@
-import { initialCatalog, latestVersion } from '@app/ui-components';
+import { ICON_NAMES, OBJECT_ICONS, initialCatalog, latestVersion } from '@app/ui-components';
 import type { ObjectCategory } from '@app/ui-components';
 import type { ModuleDefinition } from '@app/module-model';
 import type { ResourceRow } from '../components/admin/ResourceList';
-import { disabledResources } from './catalogo';
+import { ICON_PREFIX, disabledResources } from './catalogo';
 import { modules } from './moduleStore';
 
 /**
@@ -208,4 +208,95 @@ export function objectsOfModule(modulo: ModuleDefinition): ObjetoEnModulo[] {
   return [...porClave.values()].sort(
     (a, b) => a.name.localeCompare(b.name, 'es') || a.version.localeCompare(b.version),
   );
+}
+
+/**
+ * Los recursos que NO son objetos: iconos, imagenes, geometrias de mapa.
+ *
+ * Se usan dentro de un objeto, no en lugar de uno, asi que no tienen version ni changelog ni
+ * revision por pares: forzarlos en la misma fila que un grafico haria que tres columnas dijeran
+ * «—» y que la tabla mintiera sobre lo que hay detras. Lo que si comparten es la pregunta que
+ * importa antes de tocar cualquiera de ellos: quien lo esta usando.
+ */
+export interface UsoDeRecurso {
+  /** Objetos del catalogo que lo declaran como su icono por defecto. */
+  catalogo: string[];
+  /** Modulos cuyas instancias lo eligen a mano, con cuantas veces cada uno. */
+  modulos: { moduleId: string; slug: string; name: string; instancias: number }[];
+  total: number;
+}
+
+export interface AssetRow {
+  /** Namespaced: `icono:balanza`. El espacio de nombres es lo que impide chocar con un objectId. */
+  id: string;
+  nombre: string;
+  uso: UsoDeRecurso;
+  disabled: boolean;
+  /*
+   * Si el editor lo ofrece para elegir.
+   *
+   * El catalogo tiene cincuenta iconos y el editor ofrece veinticuatro: los demas son cromo —el
+   * sandwich del menu, la flecha de un desplegable— y no los elige nadie. Sin distinguirlos, la
+   * tabla ofreceria «deshabilitar» sobre un icono que ningun desplegable ensena, y apagarlo no
+   * cambiaria nada de lo que quien lo pulsa espera.
+   */
+  seleccionable: boolean;
+}
+
+/** Donde se usa cada icono, por nombre. */
+export async function iconUsage(): Promise<Map<string, UsoDeRecurso>> {
+  const uso = new Map<string, UsoDeRecurso>();
+  const de = (nombre: string): UsoDeRecurso => {
+    const previo = uso.get(nombre);
+    if (previo) return previo;
+    const nuevo: UsoDeRecurso = { catalogo: [], modulos: [], total: 0 };
+    uso.set(nombre, nuevo);
+    return nuevo;
+  };
+
+  for (const objeto of initialCatalog) {
+    if (!objeto.icono) continue;
+    de(objeto.icono).catalogo.push(objeto.name);
+  }
+
+  for (const modulo of await modules.list()) {
+    const porIcono = new Map<string, number>();
+    for (const pagina of modulo.pages) {
+      for (const item of pagina.items) {
+        // El icono elegido a mano vive en la presentacion de la instancia; lo demas de esa
+        // presentacion aqui no importa.
+        const elegido = item.instance.presentacion?.['icono'];
+        if (typeof elegido !== 'string' || elegido.length === 0) continue;
+        porIcono.set(elegido, (porIcono.get(elegido) ?? 0) + 1);
+      }
+    }
+    for (const [nombre, instancias] of porIcono) {
+      de(nombre).modulos.push({
+        moduleId: modulo.moduleId,
+        slug: modulo.slug,
+        name: modulo.name,
+        instancias,
+      });
+    }
+  }
+
+  for (const [, u] of uso) {
+    u.catalogo.sort((a, b) => a.localeCompare(b, 'es'));
+    u.modulos.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    u.total = u.catalogo.length + u.modulos.reduce((n, m) => n + m.instancias, 0);
+  }
+
+  return uso;
+}
+
+/** Los iconos como filas de tabla, con su uso y si estan deshabilitados. */
+export async function iconRows(): Promise<AssetRow[]> {
+  const [uso, deshabilitados] = await Promise.all([iconUsage(), disabledResources()]);
+  return ICON_NAMES.map((nombre) => ({
+    id: `${ICON_PREFIX}${nombre}`,
+    nombre,
+    uso: uso.get(nombre) ?? { catalogo: [], modulos: [], total: 0 },
+    disabled: deshabilitados.has(`${ICON_PREFIX}${nombre}`),
+    seleccionable: (OBJECT_ICONS as readonly string[]).includes(nombre),
+  }));
 }

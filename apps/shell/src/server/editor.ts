@@ -7,8 +7,9 @@ import type {
   ObjectCategory,
   FieldWell,
 } from '@app/ui-components';
-import { fieldKey } from '@app/ui-components';
+import { OBJECT_ICONS, fieldKey } from '@app/ui-components';
 import { objectRegistry } from './context';
+import { ICON_PREFIX, disabledResources } from './catalogo';
 import { declaredAggregations, availableColumnsOf } from './data';
 
 /** Paleta del editor de modulos — seccion 4.2. */
@@ -48,36 +49,57 @@ export interface PaletteDataset {
 
 export interface EditorPalette {
   objetos: PaletteObject[];
+  /*
+   * Los iconos que el editor puede ofrecer.
+   *
+   * Viajan desde el servidor y no se leen de `OBJECT_ICONS` en el componente porque el panel de
+   * administracion puede deshabilitar uno, y una lista escrita en el cliente no se entera. Es la
+   * misma razon por la que los objetos deshabilitados salen ya filtrados de aqui.
+   */
+  iconos: IconName[];
   datasets: PaletteDataset[];
 }
 
 export async function editorPalette(): Promise<EditorPalette> {
-  const objetos: PaletteObject[] = objectRegistry.list().map((definicion) => {
-    // La ultima version publicada: un objeto nuevo se coloca en la mas reciente, no en la que
-    // estuviera escrita en otro modulo.
-    const version = objectRegistry.latest(definicion.objectId);
-    if (!version) {
-      throw new Error(
-        `El objeto '${definicion.objectId}' esta en el catalogo sin ninguna version publicada. ` +
-          `Es un fallo del catalogo, no algo que el editor deba dibujar a medias.`,
-      );
-    }
-    return {
-      objectId: definicion.objectId,
-      icono: definicion.icono,
-      ...(definicion.family ? { family: definicion.family } : {}),
-      name: definicion.name,
-      description: definicion.description,
-      category: definicion.category,
-      version: version.version,
-      attachable: definicion.attachable ?? false,
-      dimensiones: version.dataContract.dimensions,
-      medidas: version.dataContract.measures,
-      presentacion: version.presentation,
-      wells: version.dataContract.wells ?? [],
-      ...(version.dataContract.notes ? { notas: version.dataContract.notes } : {}),
-    };
-  });
+  /*
+   * Lo deshabilitado no se ofrece.
+   *
+   * `disabledResources` existia, la tabla de recursos lo dibujaba y el boton lo escribia, pero la
+   * paleta no lo consultaba: deshabilitar un objeto cambiaba una insignia en el panel y nada mas.
+   * Un interruptor que no apaga nada es peor que no tener interruptor, porque quien lo pulsa se
+   * queda creyendo que ya esta.
+   */
+  const deshabilitados = await disabledResources();
+
+  const objetos: PaletteObject[] = objectRegistry
+    .list()
+    .filter((definicion) => !deshabilitados.has(definicion.objectId))
+    .map((definicion) => {
+      // La ultima version publicada: un objeto nuevo se coloca en la mas reciente, no en la que
+      // estuviera escrita en otro modulo.
+      const version = objectRegistry.latest(definicion.objectId);
+      if (!version) {
+        throw new Error(
+          `El objeto '${definicion.objectId}' esta en el catalogo sin ninguna version publicada. ` +
+            `Es un fallo del catalogo, no algo que el editor deba dibujar a medias.`,
+        );
+      }
+      return {
+        objectId: definicion.objectId,
+        icono: definicion.icono,
+        ...(definicion.family ? { family: definicion.family } : {}),
+        name: definicion.name,
+        description: definicion.description,
+        category: definicion.category,
+        version: version.version,
+        attachable: definicion.attachable ?? false,
+        dimensiones: version.dataContract.dimensions,
+        medidas: version.dataContract.measures,
+        presentacion: version.presentation,
+        wells: version.dataContract.wells ?? [],
+        ...(version.dataContract.notes ? { notas: version.dataContract.notes } : {}),
+      };
+    });
 
   const datasets: PaletteDataset[] = [];
   const declared = await declaredAggregations();
@@ -103,5 +125,9 @@ export async function editorPalette(): Promise<EditorPalette> {
     });
   }
 
-  return { objetos, datasets };
+  // Deshabilitar un icono no retira el que ya esta puesto en un modulo —eso seria romper, no
+  // retirar—: deja de ofrecerse para elegir uno nuevo, igual que con los objetos.
+  const iconos = OBJECT_ICONS.filter((nombre) => !deshabilitados.has(`${ICON_PREFIX}${nombre}`));
+
+  return { objetos, datasets, iconos };
 }

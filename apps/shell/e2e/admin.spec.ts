@@ -1,5 +1,5 @@
 import { expect, test } from './instance';
-import { asLogin } from './session';
+import { alDia, asLogin, newModule } from './session';
 
 /** Panel de administracion — verificacion en navegador (4.10.8). */
 
@@ -636,5 +636,54 @@ test.describe('que hay dentro de cada modulo, y subirlo de version (4.5)', () =>
     const instancia = modulo.pages[0]?.items[0]?.instance;
     expect(instancia?.version).not.toBe('1.0.0');
     expect(instancia?.presentacion?.['formato']).toBe('entero');
+  });
+});
+
+test.describe('los recursos que no son objetos (4.5)', () => {
+  test('los iconos salen en tabla, con quien los usa y su estado', async ({ page }) => {
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/resources/other');
+
+    await expect(page.getByTestId('tabla-iconos')).toBeVisible();
+    await expect(page.getByTestId('asset-balanza')).toBeVisible();
+    // El cromo se distingue de lo que el editor ofrece: sobre el no hay interruptor que apagar.
+    await expect(page.getByTestId('asset-sandwich-estado')).toHaveText(/Cromo/);
+    await expect(page.getByTestId('deshabilitar-icono:sandwich')).toHaveCount(0);
+    await expect(page.getByTestId('deshabilitar-icono:balanza')).toBeVisible();
+  });
+
+  test('deshabilitar un icono lo RETIRA del desplegable del editor', async ({ page }) => {
+    /*
+     * El interruptor tiene que apagar algo.
+     *
+     * `disabledResources` llevaba escrito desde el principio, la tabla lo dibujaba y el boton lo
+     * escribia — y la paleta del editor no lo consultaba, asi que deshabilitar cambiaba una
+     * insignia del panel y nada mas. Esta prueba es la que cruza las dos pantallas.
+     */
+    await asLogin(page, 'u-admin');
+    const slug = `icono-${Date.now()}`;
+    await newModule(page, slug);
+    await page.getByTestId('add-tarjeta-kpi').click();
+    await alDia(page);
+
+    const bloque = page.locator('[data-testid^="block-obj-"]').first();
+    const id = ((await bloque.getAttribute('data-testid')) ?? '').replace('block-', '');
+    await page.getByTestId(`select-${id}`).click();
+    await page.getByTestId('tab-formato').click();
+    await expect(page.getByTestId(`pres-${id}-icono`).locator('option[value="balanza"]')).toHaveCount(1);
+
+    await page.goto('/admin/resources/other');
+    await page.getByTestId('deshabilitar-icono:balanza').click();
+    await expect(page.getByTestId('asset-balanza-estado')).toHaveText(/Deshabilitar/i);
+
+    await page.goto(`/editor/${slug}`);
+    await page.getByTestId(`select-${id}`).click();
+    await page.getByTestId('tab-formato').click();
+    await expect(page.getByTestId(`pres-${id}-icono`).locator('option[value="balanza"]')).toHaveCount(0);
+
+    // Se deja como estaba: el almacen sobrevive entre pruebas del mismo archivo.
+    await page.goto('/admin/resources/other');
+    await page.getByTestId('deshabilitar-icono:balanza').click();
+    await expect(page.getByTestId('asset-balanza-estado')).not.toHaveText(/Deshabilitar/i);
   });
 });
