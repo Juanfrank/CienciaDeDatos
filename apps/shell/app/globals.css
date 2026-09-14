@@ -4186,3 +4186,19 @@ th[aria-sort='descending'] .table__flecha {
   padding-block: var(--space-xs);
   font-size: var(--md-sys-typescale-body-small-size);
 }
+
+/*
+ * Las acciones de una fila de tabla.
+ *
+ * En linea y pegadas: son iconos de 18px, y separarlos como texto haria que la columna ocupara
+ * mas que el nombre del recurso. El `gap` es el minimo que deja pulsar uno sin rozar el otro.
+ */
+.fila-acciones {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.fila-acciones .button-link {
+  padding: var(--space-xs);
+  min-width: 0;
+}

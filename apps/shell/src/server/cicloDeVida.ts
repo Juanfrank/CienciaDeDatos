@@ -20,6 +20,7 @@ import { navigationFor } from './context';
 import { auditList, changeRecord, treeEventRecord } from './audit';
 import { governance } from './governance';
 import { moduloEncendido, disabledSlugs } from './settings';
+import { initialCatalog, bumpInstance } from '@app/ui-components';
 import { modules, type PublishedVersion } from './moduleStore';
 import { definitionDiagnose } from './data';
 import type { ShellSession } from './session';
@@ -344,6 +345,121 @@ export async function pendingReviews(actor: ModuleActor): Promise<PendingReview[
       };
     }),
   );
+}
+
+/**
+ * Sube todas las instancias de un objeto dentro de un modulo a otra version — seccion 4.5.
+ *
+ * Lo que se conserva y lo que no lo decide `bumpInstance`, que es donde vive la regla: lo
+ * configurado se queda, y solo lo que la version nueva anade cae a su defecto. Aqui lo unico que
+ * se anade es el CAMINO: un modulo publicado no se modifica, se publica otra version. Un
+ * borrador, en cambio, se guarda y ya — todavia no lo ve nadie.
+ */
+export interface BumpReport {
+  module: ModuleDefinition;
+  /** Cuantas instancias se subieron. */
+  instancias: number;
+  /** Claves de presentacion que se conservaron, sin repetir. */
+  preserved: string[];
+  /** Las que la version nueva ya no admite, con el objeto en el que estaban. */
+  retiradas: { instanceId: string; clave: string; valor: unknown }[];
+  /** Las que la version nueva anade y quedan en su valor por defecto. */
+  nuevas: string[];
+}
+
+export async function bumpObjectInModule(input: {
+  actor: ModuleActor;
+  moduleId: string;
+  objectId: string;
+  hasta: string;
+}): Promise<BumpReport> {
+  const modulo = await modules.get(input.moduleId);
+  if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
+
+  // Subir la version de lo que TODA la institucion ve es publicar. Sobre un borrador propio basta
+  // con poder editarlo.
+  if (modulo.status === 'publicado') permission(input.actor, 'publicar-modulo-institucional');
+  else {
+    permission(input.actor, 'crear-editar-modulos-borrador');
+    authorshipRequire(modulo, input.actor);
+  }
+
+  const definicion = initialCatalog.find((o) => o.objectId === input.objectId);
+  if (!definicion) {
+    throw new CicloDeVidaError(`El catalogo no tiene ningun objeto '${input.objectId}'.`, 404);
+  }
+
+  const preserved = new Set<string>();
+  const nuevas = new Set<string>();
+  const retiradas: BumpReport['retiradas'] = [];
+  let instancias = 0;
+
+  const paginas = modulo.pages.map((pagina) => ({
+    ...pagina,
+    items: pagina.items.map((item) => {
+      if (item.instance.objectId !== input.objectId) return item;
+      if (item.instance.version === input.hasta) return item;
+
+      const r = bumpInstance(item.instance, definicion, input.hasta);
+      instancias += 1;
+      r.preserved.forEach((c) => preserved.add(c));
+      r.nuevas.forEach((c) => nuevas.add(c));
+      r.retiradas.forEach((x) =>
+        retiradas.push({ instanceId: item.instance.instanceId, clave: x.clave, valor: x.valor }),
+      );
+      return { ...item, instance: r.instance };
+    }),
+  }));
+
+  if (instancias === 0) {
+    throw new CicloDeVidaError(
+      `Ese modulo no tiene ninguna instancia de '${input.objectId}' por debajo de '${input.hasta}'.`,
+      409,
+    );
+  }
+
+  const subido: ModuleDefinition = { ...modulo, pages: paginas, updatedAt: ahora() };
+
+  // Se comprueba ANTES de tocar el almacen, igual que al restaurar: una version nueva puede
+  // exigir ranuras que este modulo no mapea, y descubrirlo despues de guardar dejaria lo que
+  // esta vivo reemplazado por algo que no se puede publicar.
+  const locks = await publicationLocks(subido);
+  if (locks.length > 0) {
+    throw new CicloDeVidaError(
+      `Subir a '${input.hasta}' dejaria el modulo con problemas sin resolver.`,
+      422,
+      locks,
+    );
+  }
+
+  const comun = {
+    instancias,
+    preserved: [...preserved].sort(),
+    retiradas,
+    nuevas: [...nuevas].sort(),
+  };
+
+  if (modulo.status !== 'publicado') {
+    await modules.save(subido);
+    await changeRecord({
+      actorId: input.actor.userId,
+      entityType: 'module',
+      entityId: modulo.moduleId,
+      action: 'update',
+      before: { objeto: input.objectId },
+      after: { objeto: input.objectId, version: input.hasta, instancias },
+    });
+    return { module: subido, ...comun };
+  }
+
+  await modules.save({ ...subido, status: 'pendiente-de-aprobacion' });
+  try {
+    const publicado = await publicar({ actor: input.actor, moduleId: input.moduleId });
+    return { module: publicado, ...comun };
+  } catch (error) {
+    await modules.save(modulo);
+    throw error;
+  }
 }
 
 /**

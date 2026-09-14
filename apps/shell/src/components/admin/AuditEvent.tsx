@@ -11,12 +11,15 @@ const ACTION: Record<ConfigChangeLog['action'], string> = {
   submit: 'envio a aprobacion',
   publish: 'publico',
   withdraw: 'retiro',
+  disable: 'dejo de ofrecer',
+  enable: 'volvio a ofrecer',
 };
 
 const ENTIDAD: Record<ConfigChangeLog['entityType'], string> = {
   team: 'el equipo',
   membership: 'la membresia de',
   'nav-node': 'el nodo',
+  object: 'el objeto',
   scope: 'el ambito',
   package: 'el paquete',
   role: 'el rol de',

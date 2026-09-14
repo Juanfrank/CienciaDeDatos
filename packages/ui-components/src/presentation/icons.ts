@@ -60,6 +60,11 @@ export const ICON_STROKES = {
   baja: 'M4 7l6 6 4-4 6 7M15 16h5v-5',
   aviso_triangulo: 'M12 4.5 2.8 20h18.4zM12 10v4.5M12 17v.4',
   lugar: 'M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  // Acciones de una fila de tabla.
+  editar: 'M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L4 18v2zM14 8l3 3',
+  ojo: 'M12 5C5 5 2 12 2 12s3 7 10 7 10-7 10-7-3-7-10-7zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6z',
+  'ojo-tachado':
+    'M12 5C5 5 2 12 2 12s3 7 10 7 10-7 10-7-3-7-10-7zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM4 4l16 16',
 } as const;
 
 export type IconName = keyof typeof ICON_STROKES;

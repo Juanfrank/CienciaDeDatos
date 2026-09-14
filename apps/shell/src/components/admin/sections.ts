@@ -83,6 +83,12 @@ export const GRUPOS: GrupoDeAdmin[] = [
         icono: 'paquete',
         hijas: [
           {
+            href: '/admin/resources/proposals',
+            label: 'Propuestas del catalogo',
+            desc: 'Que version de que objeto se propone certificar, quien la propuso y que cambia.',
+            icono: 'reloj',
+          },
+          {
             href: '/admin/resources/visualizations',
             label: 'Visualizaciones',
             desc: 'Los objetos que leen datos de un dataset certificado.',

@@ -24,13 +24,28 @@ export interface ConfigChangeLog {
   kind: 'config-change';
   timestamp: string;
   actorId: string;
-  entityType: 'team' | 'membership' | 'nav-node' | 'scope' | 'package' | 'role' | 'module';
+  // `object` es un objeto del catalogo. El catalogo es codigo, pero la DECISION de certificar
+  // una version, o de dejar de ofrecerla en el editor, la toma una persona aqui y tiene que
+  // constar igual que cualquier otro cambio de configuracion (seccion 7).
+  entityType:
+    | 'team'
+    | 'membership'
+    | 'nav-node'
+    | 'scope'
+    | 'package'
+    | 'role'
+    | 'module'
+    | 'object';
   entityId: string;
   action:
     | 'create'
     | 'update'
     | 'delete'
     | 'move'
+    // Deja de ofrecerse en el editor, sin desaparecer de los modulos que ya lo tienen: retirar
+    // y romper no son lo mismo, y el registro distingue las dos.
+    | 'disable'
+    | 'enable'
     | 'scope-expansion'
     // Transiciones del ciclo de vida de un modulo (4.1). Van como acciones propias y no como
     // 'update' porque publicar no es editar: cambia QUIEN ve el modulo, y esa es la fila que un

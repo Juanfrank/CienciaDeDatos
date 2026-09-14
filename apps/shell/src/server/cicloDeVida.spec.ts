@@ -17,6 +17,7 @@ import {
   visibleModuleSlug,
   statusPrune,
   publicar,
+  bumpObjectInModule,
   historialDe,
   restaurarVersion,
   seeCan,
@@ -635,5 +636,145 @@ describe('volver a una version anterior', () => {
     await expect(
       restaurarVersion({ actor: admin, moduleId: segunda.moduleId, version: segunda.version }),
     ).rejects.toMatchObject({ status: 409 });
+  });
+});
+
+/**
+ * Subir un objeto de version dentro de un modulo — seccion 4.5.
+ *
+ * Se prueba contra el catalogo REAL y no contra un objeto inventado, porque lo que importa es que
+ * la regla se cumpla con las versiones que existen: `tarjeta-kpi` va por 1.2.0, y cada version
+ * anadio una clave —1.1.0 anadio `etiqueta`, 1.2.0 anadio `condicional`—. Es exactamente la forma
+ * del caso que preocupa: alguien configuro cosas hace meses y hay que subirle la version sin
+ * tocarselas.
+ */
+describe('subir un objeto de version dentro de un modulo', () => {
+  /** Un borrador con un KPI anclado a 1.0.0 y con presentacion configurada a mano. */
+  async function conKpiViejo(slug: string): Promise<ModuleDefinition> {
+    const creado = await createDraft({ actor: admin, name: `Modulo ${slug}`, slug });
+    const pagina = creado.pages[0];
+    if (!pagina) throw new Error('fixture inesperado');
+    return saveDraft({
+      actor: admin,
+      moduleId: creado.moduleId,
+      cambios: {
+        pages: [
+          {
+            ...pagina,
+            items: [
+              {
+                ...validItem(),
+                instance: {
+                  ...validItem().instance,
+                  version: '1.0.0',
+                  presentacion: { acento: 'secundario', subtitulo: 'Al cierre del trimestre' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+  }
+
+  it('conserva lo configurado y deja lo nuevo en su defecto', async () => {
+    const modulo = await conKpiViejo('subir-kpi');
+    const r = await bumpObjectInModule({
+      actor: admin,
+      moduleId: modulo.moduleId,
+      objectId: 'tarjeta-kpi',
+      hasta: '1.2.0',
+    });
+
+    expect(r.instancias).toBe(1);
+    const item = r.module.pages[0]?.items[0];
+    expect(item?.instance.version).toBe('1.2.0');
+    // Lo que alguien eligio a mano sigue ahi, con el mismo valor.
+    expect(item?.instance.presentacion).toEqual({
+      acento: 'secundario',
+      subtitulo: 'Al cierre del trimestre',
+    });
+    expect(r.preserved).toEqual(['acento', 'subtitulo']);
+    // `etiqueta` y `condicional` son las que anadieron 1.1.0 y 1.2.0: quedan sin escribir.
+    expect(r.nuevas).toContain('etiqueta');
+    expect(r.nuevas).toContain('condicional');
+    expect(r.retiradas).toEqual([]);
+  });
+
+  it('un borrador se guarda, no se publica: todavia no lo ve nadie', async () => {
+    const modulo = await conKpiViejo('subir-borrador');
+    const r = await bumpObjectInModule({
+      actor: admin,
+      moduleId: modulo.moduleId,
+      objectId: 'tarjeta-kpi',
+      hasta: '1.2.0',
+    });
+    expect(r.module.status).toBe('borrador');
+    expect(r.module.version).toBe(modulo.version);
+  });
+
+  /*
+   * Un modulo publicado no se modifica: se publica otra version. Es el mismo principio 8 que
+   * ordena el historial, y subir una version de objeto no es una excepcion a el.
+   */
+  it('un modulo publicado sube publicando una version NUEVA', async () => {
+    const modulo = await conKpiViejo('subir-publicado');
+    await sendApproval({ actor: admin, moduleId: modulo.moduleId });
+    const publicado = await publicar({ actor: admin, moduleId: modulo.moduleId });
+
+    const r = await bumpObjectInModule({
+      actor: admin,
+      moduleId: modulo.moduleId,
+      objectId: 'tarjeta-kpi',
+      hasta: '1.2.0',
+    });
+
+    expect(r.module.status).toBe('publicado');
+    expect(r.module.version).toBe(publicado.version + 1);
+    // Y queda en el historial, como cualquier otra publicacion.
+    const historial = await historialDe(admin, modulo.moduleId);
+    expect(historial[0]?.version).toBe(r.module.version);
+  });
+
+  it('subir a la version que ya tiene no hace nada, y lo dice', async () => {
+    const modulo = await conKpiViejo('subir-igual');
+    await bumpObjectInModule({
+      actor: admin,
+      moduleId: modulo.moduleId,
+      objectId: 'tarjeta-kpi',
+      hasta: '1.2.0',
+    });
+    await expect(
+      bumpObjectInModule({
+        actor: admin,
+        moduleId: modulo.moduleId,
+        objectId: 'tarjeta-kpi',
+        hasta: '1.2.0',
+      }),
+    ).rejects.toMatchObject({ status: 409 });
+  });
+
+  it('un Visor no puede subir nada', async () => {
+    const modulo = await conKpiViejo('subir-visor');
+    await expect(
+      bumpObjectInModule({
+        actor: visor,
+        moduleId: modulo.moduleId,
+        objectId: 'tarjeta-kpi',
+        hasta: '1.2.0',
+      }),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+
+  it('un objeto que el catalogo no tiene se rechaza', async () => {
+    const modulo = await conKpiViejo('subir-inventado');
+    await expect(
+      bumpObjectInModule({
+        actor: admin,
+        moduleId: modulo.moduleId,
+        objectId: 'objeto-inventado',
+        hasta: '1.2.0',
+      }),
+    ).rejects.toMatchObject({ status: 404 });
   });
 });

@@ -65,6 +65,28 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   siempre. Lo que tapaba: las dos pantallas de auditoria mostraban `u-admin` donde deberia ir un
   nombre. Arreglado en las dos, y la prueba ahora provoca el cambio y comprueba las cuatro
   columnas sin condicion.
+- **Los recursos, en tabla, con su uso real y su vuelta atras (4.5, 4.10.8).** La lista de
+  tarjetas se lee bien de una en una y mal de quince en quince: para comparar «que version corre
+  cada uno» habia que recorrerla con el dedo. Ahora es una tabla con acciones por fila —editar,
+  que lleva a proponer, y deshabilitar, que quita el objeto de la paleta SIN tocar los modulos que
+  ya lo tienen, porque retirar y romper no son lo mismo—.
+  La columna de uso decia «12 usos» y ahi se acababa: doce usos en dos modulos que ya corren la
+  ultima version no son lo mismo que doce en nueve anclados a una que se retira el mes que viene,
+  y la pantalla los dibujaba igual. Ahora dice en cuantos MODULOS, cuantos van atrasados, y lleva
+  a una pantalla donde cada fila es un modulo con la version que fija y el boton de subirlo.
+- **Subir de version conserva lo configurado.** Es la regla que ordena `bumpInstance`: lo que
+  alguien eligio a mano se queda, y SOLO lo que la version nueva anade cae a su valor por defecto.
+  Lo nuevo no se rellena con un valor —se queda ausente, que es como el dibujante aplica su
+  defecto—, y lo que la version nueva ya no admite se quita pero nunca en silencio: vuelve con su
+  valor anterior para que quien sube lo lea antes de confirmar. Sobre un borrador se guarda; sobre
+  un modulo publicado se publica una version NUEVA, porque el principio 8 no tiene excepciones.
+  Se prueba contra el catalogo real: `tarjeta-kpi` va por 1.2.0 y cada version anadio una clave.
+- **Las propuestas del catalogo, como metadato.** El catalogo es codigo y eso no es un accidente
+  que corregir: 4.5 exige pruebas en verde y revision por pares, y ninguna de las dos se puede
+  afirmar sobre algo tecleado en un formulario. Por eso el permiso del Colaborador es «proponer
+  objetos al repositorio» y no «crear objetos». Lo que el panel gobierna es la DECISION: quien
+  propuso que version, que cambia, y si se certifica o se devuelve con motivo. El codigo sigue
+  llegando por el repositorio.
 - **La pestana del navegador decia otra cosa que el encabezado.** El `<title>` del documento se
   quedo en «Capa de visualizacion» —el nombre con el que el contrato describe el sistema por
   dentro— cuando el encabezado paso a nombrarse de cara a la gente. Una pestana que no coincide
