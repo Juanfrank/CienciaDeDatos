@@ -5,24 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Icon, type IconName } from './icons/Icon';
 import { useTranslator } from './Locale';
+import { initialsOf } from './initials';
 
 /** Quien esta dentro, a donde puede ir y como se sale (4.7 y 4.9). */
-
-/**
- * Las iniciales del avatar.
- *
- * La primera del nombre y la primera del ULTIMO apellido: «Juan F. Medina C.» da JC, que es como
- * esa persona firma. Tomar las dos primeras palabras daria JF, que no identifica a nadie.
- */
-export function initialsOf(nombre: string): string {
-  const palabras = nombre
-    .split(/\s+/)
-    .map((p) => p.replace(/[^\p{L}]/gu, ''))
-    .filter(Boolean);
-  const primera = palabras[0] ?? '';
-  const ultima = palabras.length > 1 ? (palabras[palabras.length - 1] as string) : '';
-  return `${primera.slice(0, 1)}${ultima.slice(0, 1)}`.toUpperCase() || '?';
-}
 
 export interface AccountEntry {
   href: string;

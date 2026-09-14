@@ -38,6 +38,7 @@ export function PageNavigator({
   moduleSlug,
   actual,
   filtros,
+  embedded,
 }: {
   navegador: PageNavigatorSettings;
   paginas: PaginaNavegable[];
@@ -46,12 +47,26 @@ export function PageNavigator({
   actual: string;
   /** La seccion de filtros del panel, ya leida por el servidor. */
   filtros?: { instance: ObjectInstance; result: QueryResult; titulo: string };
+  /**
+   * El cromo de la vista incrustada, si se dibuja dentro de un marco.
+   *
+   * Cambia A DONDE apuntan los enlaces, que es lo unico que no puede salir mal aqui: dentro de un
+   * iframe, un enlace a `/m/...` se llevaria la aplicacion entera al hueco del portal anfitrion —
+   * exactamente lo que la vista incrustada existe para no hacer—. Ir de una pagina a otra del
+   * mismo modulo es moverse dentro de lo que se incrusto, y eso si.
+   */
+  embedded?: 'completo' | 'limpio';
 }) {
   const t = useTranslator();
   const comportamiento: PanelBehavior = navegador.comportamiento ?? 'grilla';
   // Un drawer empieza abierto: plegado por defecto esconde la navegacion entera a quien entra por
   // primera vez, que es justo cuando mas falta hace saber que hay mas paginas.
   const [abierto, setAbierto] = useState(true);
+
+  const hrefDe = (slug: string) =>
+    embedded
+      ? `/embed/m/${moduleSlug}?pagina=${slug}${embedded === 'limpio' ? '&cromo=limpio' : ''}`
+      : `/m/${moduleSlug}/${slug}`;
 
   const enlaces = (
     <ul className="navegador__paginas">
@@ -60,7 +75,16 @@ export function PageNavigator({
         return (
           <li key={pagina.slug}>
             <Link
-              href={`/m/${moduleSlug}/${pagina.slug}`}
+              href={hrefDe(pagina.slug)}
+              /*
+                Sin PREFETCH, y no es una micro-optimizacion.
+                Cada pagina de un modulo es un render dinamico entero: resuelve ambito, lee el
+                cache de cada objeto y los proyecta. Un navegador de once paginas que las precargue
+                todas al aparecer dispara once de esos renders para usar uno — y en la vista
+                incrustada, donde las once comparten ruta y solo cambia la query, el navegador los
+                lanza a la vez y se queda sin recursos antes de terminar de dibujar.
+              */
+              prefetch={false}
               className={`navegador__pagina ${es ? 'is-active' : ''}`}
               {...(es ? { 'aria-current': 'page' as const } : {})}
               data-testid={`nav-pagina-${pagina.slug}`}

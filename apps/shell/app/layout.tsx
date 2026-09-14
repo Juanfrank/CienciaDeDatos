@@ -14,6 +14,9 @@ import { LocaleProvider } from '../src/components/Locale';
 import { sessionGet } from '../src/server/session';
 import { idioma } from '../src/server/locale';
 import { activeTheme, colorMode } from '../src/server/theme';
+import { PATH_HEADER } from '../src/server/csp';
+import { isEmbeddablePath } from '../src/server/embedding';
+import { headers } from 'next/headers';
 import './globals.css';
 
 /*
@@ -54,12 +57,25 @@ function themeVariables(definicion: ThemeDefinition, mode: ColorMode): Record<st
 
 /** Cromo comun a toda la aplicacion: documento, tema y cabecera. */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [sesion, mode, locale, tema] = await Promise.all([
+  const [sesion, mode, locale, tema, cabeceras] = await Promise.all([
     sessionGet(),
     colorMode(),
     idioma(),
     activeTheme(),
+    headers(),
   ]);
+
+  /*
+   * La cabecera de la aplicacion NO se dibuja sobre una vista incrustada.
+   *
+   * Incrustar servia dos encabezados —el de la aplicacion encima del institucional— y con ellos la
+   * navegacion entera de la capa de visualizacion dentro del hueco del portal anfitrion. La
+   * version «sin encabezado» tenia uno igualmente, que es lo que lo dejo a la vista.
+   *
+   * La ruta llega por una cabecera que pone el middleware: una disposicion de Next no sabe que
+   * ruta sirve, y esta es la unica que necesita distinguirla.
+   */
+  const incrustada = isEmbeddablePath(cabeceras.get(PATH_HEADER) ?? '');
 
   /*
    * `colorScheme` no es decorativo: es lo que hace que el navegador dibuje en oscuro lo que no
@@ -78,7 +94,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         }
       >
         <LocaleProvider locale={locale}>
-          {sesion ? <Header sesion={sesion} /> : null}
+          {sesion && !incrustada ? <Header sesion={sesion} /> : null}
           {children}
         </LocaleProvider>
       </body>

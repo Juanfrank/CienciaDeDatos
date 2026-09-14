@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { NONCE_HEADER, contentSecurityPolicy, nuevoNonce } from './src/server/csp';
+import { PATH_HEADER, NONCE_HEADER, contentSecurityPolicy, nuevoNonce } from './src/server/csp';
 import { framedHeaders, parsearOrigenes } from './src/server/embedding';
 
 /**
@@ -35,6 +35,9 @@ export function middleware(request: NextRequest) {
    */
   const cabecerasDeEntrada = new Headers(request.headers);
   cabecerasDeEntrada.set(NONCE_HEADER, nonce);
+  // La ruta, para que la disposicion raiz pueda distinguir una vista incrustada. Es lo unico que
+  // la separa de cualquier otra pantalla, y una disposicion no tiene otra forma de saberlo.
+  cabecerasDeEntrada.set(PATH_HEADER, request.nextUrl.pathname);
 
   const respuesta = NextResponse.next({ request: { headers: cabecerasDeEntrada } });
 

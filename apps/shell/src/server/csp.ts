@@ -17,6 +17,17 @@ import { framedPolicy } from './embedding';
 export const NONCE_HEADER = 'x-nonce';
 
 /**
+ * La ruta pedida, puesta por el middleware en la cabecera de ENTRADA.
+ *
+ * Una disposicion de Next no sabe que ruta se esta sirviendo —`usePathname` es de cliente y
+ * `params` solo llega a la pagina—, y la raiz necesita saberlo para una cosa: no dibujar la
+ * cabecera de la aplicacion sobre una vista incrustada. Sin esto, incrustar un modulo servia DOS
+ * encabezados, el de la aplicacion encima del institucional, y la version «sin encabezado» tenia
+ * uno igualmente.
+ */
+export const PATH_HEADER = 'x-pathname';
+
+/**
  * `script-src` lleva nonce; `style-src` lleva `unsafe-inline`.
  *
  * No es una concesion por comodidad. React escribe estilos en linea —`style={{ width }}`— en cada

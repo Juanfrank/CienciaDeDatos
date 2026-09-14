@@ -10,7 +10,9 @@ import { sessionGet } from '../../../../../src/server/session';
 import { findUser } from '../../../../../src/server/context';
 import { AZURE_AD_AVAILABLE } from '../../../../../src/server/identity';
 import { Login } from '../../../../../src/components/Login';
+import { initialsOf } from '../../../../../src/components/initials';
 import { ModuleView } from '../../../../../src/components/ModuleView';
+import { PageNavigator } from '../../../../../src/components/PageNavigator';
 
 /** Modulo incrustado en otro portal — seccion 4.9. */
 export default async function EmbeddedPage({
@@ -76,6 +78,46 @@ export default async function EmbeddedPage({
   const usuario = await findUser(sesion.userId);
   const quienMira = usuario?.displayName ?? sesion.userId;
 
+  /*
+   * Quien mira, con la MISMA estructura que en la cabecera de la aplicacion.
+   *
+   * Nombre, correo debajo y el avatar con sus iniciales, reusando `account__*` y `initialsOf` en
+   * vez de escribir aqui otra version: la gente reconoce ese bloque, y una segunda forma de
+   * dibujar la misma cosa acaba divergiendo —otro tamano, otras iniciales— sin que nadie lo decida.
+   *
+   * Lo que NO lleva es el desplegable: desde una vista incrustada no se cierra sesion ni se cambia
+   * de equipo. Es una identidad, no un menu.
+   */
+  const identidad = (
+    <span className="account account--estatico" data-testid="embedded-quien">
+      <span className="account__identity">
+        <span className="account__name">{quienMira}</span>
+        {usuario?.mail ? <span className="account__mail">{usuario.mail}</span> : null}
+      </span>
+      <span className="account__avatar" aria-hidden="true">
+        {initialsOf(quienMira)}
+      </span>
+    </span>
+  );
+
+  /*
+   * El navegador SI entra en la vista incrustada, y no es una excepcion a «no se puede salir».
+   *
+   * Lo que no puede hacer una vista incrustada es llevarse a quien la mira a otra aplicacion; ir
+   * de una pagina del modulo a otra es moverse DENTRO de lo que se incrusto. Sin el, incrustar un
+   * modulo de once paginas ensenaria una y escondaria diez, que es el mismo agujero que el
+   * navegador vino a cerrar.
+   */
+  const navegador = module.pages.length > 1 ? module.navigator : undefined;
+  const filtrosDelPanel =
+    loaded.navigatorFilters?.result && loaded.navigatorFilters.item
+      ? {
+          instance: loaded.navigatorFilters.item.instance,
+          result: loaded.navigatorFilters.result,
+          titulo: module.navigator?.filtros?.etiqueta ?? 'Filtros',
+        }
+      : undefined;
+
   return (
     <>
       {cromo === 'completo' ? (
@@ -88,9 +130,7 @@ export default async function EmbeddedPage({
             alt=""
           />
           <span className="embedded__institucion">{defaultIdentity.name}</span>
-          <span className="embedded__quien" data-testid="embedded-quien">
-            {quienMira}
-          </span>
+          <span className="embedded__quien">{identidad}</span>
         </header>
       ) : (
         /*
@@ -99,12 +139,25 @@ export default async function EmbeddedPage({
           una vista que no diga con que identidad esta dibujada invita a leerla como si fuera la de
           todo el mundo — y en una pantalla compartida, a leer los datos de otro como propios.
         */
-        <p className="embedded__identidad" data-testid="embedded-quien">
-          {quienMira}
-        </p>
+        <p className="embedded__identidad">{identidad}</p>
       )}
 
       <main className="embedded__body">
+        <div className="con-navegador" {...(navegador ? { 'data-tipo': navegador.tipo } : {})}>
+        {navegador ? (
+          <PageNavigator
+            navegador={navegador}
+            paginas={module.pages.map((p) => ({
+              slug: p.slug,
+              name: p.name,
+              ...(p.icon ? { icon: p.icon } : {}),
+            }))}
+            moduleSlug={module.slug}
+            actual={loaded.pageSlug}
+            embedded={cromo}
+            {...(filtrosDelPanel ? { filtros: filtrosDelPanel } : {})}
+          />
+        ) : null}
         <article className="modulo">
           <header className="module__header">
             <h1 data-testid="module-title">{module.name}</h1>
@@ -143,6 +196,7 @@ export default async function EmbeddedPage({
             </p>
           ) : null}
         </article>
+        </div>
       </main>
     </>
   );

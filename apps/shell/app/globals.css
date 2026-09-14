@@ -1423,6 +1423,27 @@ input[type='radio'] {
   }
 }
 
+/*
+ * El mismo chip de cuenta, sobre fondo claro y sin desplegable — la vista incrustada.
+ *
+ * Se reusa la estructura entera —nombre, correo debajo, avatar con iniciales— porque es la que la
+ * gente reconoce, y escribir aqui otra version acabaria divergiendo sin que nadie lo decidiera.
+ * Lo unico que cambia es el color: los de arriba estan pensados para el azul de la cabecera, y
+ * sobre la superficie clara del marco serian blanco sobre blanco.
+ *
+ * Y la identidad NO se esconde en pantalla estrecha, al reves que en la cabecera. Alli el nombre
+ * se puede sacrificar porque quien mira sabe quien es y tiene el avatar al lado; aqui es lo unico
+ * que dice con que ambito esta dibujado lo que se ve.
+ */
+.account--estatico { display: inline-flex; gap: var(--space-sm); }
+.account--estatico .account__identity { display: flex; }
+.account--estatico .account__name { color: var(--md-sys-color-on-surface); }
+.account--estatico .account__mail { color: var(--md-sys-color-on-surface-variant); }
+.account--estatico .account__avatar {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
 .team-picker { display: flex; gap: var(--space-md); flex-wrap: wrap; }
 .team-picker__field { margin-bottom: 0; }
 .team-picker select { min-height: 40px; }
@@ -3674,11 +3695,10 @@ th[aria-sort='descending'] .table__flecha {
  */
 .embedded__quien { margin-inline-start: auto; color: var(--md-sys-color-on-surface-variant); }
 .embedded__identidad {
+  display: flex;
+  justify-content: flex-end;
   margin: 0;
-  padding: var(--space-xs) var(--space-md);
-  font-size: var(--md-sys-typescale-body-small-size);
-  color: var(--md-sys-color-on-surface-variant);
-  text-align: end;
+  padding: var(--space-sm) var(--space-md);
 }
 
 .embedded__body { flex: 1; padding: var(--space-md); min-width: 0; }

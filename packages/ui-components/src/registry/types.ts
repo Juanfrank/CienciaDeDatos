@@ -3,7 +3,7 @@ import type { PresentationKey, ObjectPresentation } from '../presentation/contra
 import type { IconName } from '../presentation/icons';
 import type { ContainerSettings, ContainerId } from '../presentation/containers';
 import type { ElementSettings, ElementId } from '../presentation/elements';
-import type { FiltersPanelSettings } from '../presentation/filtersPanel';
+import type { FiltersPanelSettings, PickerKind } from '../presentation/filtersPanel';
 import type { SlotAssignment, FieldSlot } from '../presentation/wells';
 
 /**
@@ -156,12 +156,74 @@ export interface TablePopupAttachment extends AttachedObjectBase {
 }
 
 /**
+ * Filtro de visualizacion: acota SOLO este objeto, por uno de los campos que el mismo mapea.
+ *
+ * Es distinto del filtrado cruzado y de los objetos de filtro, y la diferencia importa: aquellos
+ * mueven la pagina entera, este solo su anfitrion. De ahi que su seleccion viaje en la URL con el
+ * `instanceId` delante (`f.<instanceId>`) en vez de con la clave del campo: dos objetos filtrados
+ * por la misma dimension tienen que poder estar en valores distintos, que es justo lo que se pide
+ * al filtrar una visual sola.
+ *
+ * El campo base se elige entre los que el anfitrion YA mapea. Uno cualquiera del dataset lo
+ * convertiria en un filtro general disfrazado de complemento, y ademas podria acotar por algo que
+ * el objeto no ensena — un filtro cuyo efecto no se ve es un filtro que nadie entiende.
+ */
+export interface VisualFilterAttachment extends AttachedObjectBase {
+  objectId: 'filtro-de-visualizacion';
+  /** `Tabla.Campo` de una dimension mapeada, o el nombre de una medida mapeada. */
+  fieldName: string;
+  /** Como se elige el valor. Sin decirlo, el que corresponda al tipo del campo. */
+  tipo?: PickerKind;
+}
+
+/**
+ * Pie de pagina del objeto: una nota, fija o con cifras dentro.
+ *
+ * Las cifras se referencian por el ORDEN DE MAPEO y no por su nombre: `{{1}}` es la primera medida
+ * mapeada. Es a proposito — el nombre de una medida puede cambiar en el esquema, y un pie que la
+ * nombrara se quedaria escribiendo una columna que ya no existe. El orden lo fija quien configura
+ * el objeto, y mientras no lo cambie el pie sigue diciendo lo mismo.
+ */
+export interface FooterAttachment extends AttachedObjectBase {
+  objectId: 'pie-de-pagina';
+  /** El texto. `{{1}}`, `{{2}}`… se sustituyen por el resultado de la medida en esa posicion. */
+  texto: string;
+}
+
+/** Donde va la coletilla de «Registros del N al N. Total N», si va. */
+export const PAGINATION_LEGENDS = ['ninguna', 'arriba', 'abajo'] as const;
+
+export type PaginationLegend = (typeof PAGINATION_LEGENDS)[number];
+
+/**
+ * Paginado: parte lo que el objeto ensena en paginas del tamano que se elija.
+ *
+ * Existe porque el alto de un objeto NO depende de su contenido (esa regla se comprueba en
+ * `shell.spec.ts`): una tabla de cuatrocientas filas dentro de una caja de cuatro filas se
+ * desplaza, y desplazarse no deja ver cuanto falta. El paginado si lo dice.
+ */
+export interface PaginationAttachment extends AttachedObjectBase {
+  objectId: 'paginado';
+  /** Cuantos registros —o categorias— por pagina. */
+  porPagina: number;
+  /** El selector con botones de anterior y siguiente. Sin el, el paginado no se puede recorrer. */
+  selector?: boolean;
+  /** «Registros del N al N. Total N», y donde. */
+  coletilla?: PaginationLegend;
+}
+
+/**
  * Instancia de un objeto adjuntado.
  *
  * Union discriminada y no una bolsa generica: cada complemento tiene configuracion propia y
  * obligatoria, y asi falta se detecta al guardar y no al dibujar.
  */
-export type AttachedObjectInstance = TooltipAttachment | TablePopupAttachment;
+export type AttachedObjectInstance =
+  | TooltipAttachment
+  | TablePopupAttachment
+  | VisualFilterAttachment
+  | FooterAttachment
+  | PaginationAttachment;
 
 /**
  * Instancia de un objeto dentro de un modulo.

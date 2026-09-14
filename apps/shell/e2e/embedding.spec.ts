@@ -147,6 +147,47 @@ test.describe('las dos formas de incrustar (4.9)', () => {
     await expect(page.getByTestId('frescura')).toContainText('Datos actualizados');
   });
 
+  test('la cabecera de la APLICACION no entra en el marco, en ninguna de las dos', async ({
+    page,
+  }) => {
+    /*
+     * Servia DOS encabezados: el de la aplicacion encima del institucional, y con el la
+     * navegacion entera de la capa de visualizacion dentro del hueco del portal anfitrion. La
+     * version «sin encabezado» tenia uno igualmente, que es lo que lo dejo a la vista.
+     *
+     * Se comprueba por el conmutador de navegacion y por el nombre de la institucion que dibuja
+     * esa cabecera: los dos salen de ella y de ningun otro sitio.
+     */
+    await asLogin(page, 'u-ana');
+    for (const ruta of ['/embed/m/casos-pendientes', '/embed/m/casos-pendientes?cromo=limpio']) {
+      await page.goto(ruta);
+      await expect(page.locator('.cabecera'), ruta).toHaveCount(0);
+      await expect(page.getByTestId('open-navigation'), ruta).toHaveCount(0);
+      await expect(page.getByTestId('institucion'), ruta).toHaveCount(0);
+    }
+  });
+
+  test('el navegador de pagina SI entra, y sus enlaces NO salen del marco', async ({ page }) => {
+    /*
+     * Ir de una pagina del modulo a otra es moverse dentro de lo que se incrusto, asi que el
+     * navegador entra: sin el, incrustar un modulo de once paginas ensenaria una y escondaria
+     * diez. Lo que no puede hacer es apuntar a `/m/...`, que se llevaria la aplicacion entera al
+     * hueco del portal anfitrion — que es lo que la vista incrustada existe para no hacer.
+     */
+    await asLogin(page, 'u-ana');
+    await page.goto('/embed/m/composicion?cromo=limpio');
+
+    const enlace = page.getByTestId('nav-pagina-graficos');
+    await expect(enlace).toBeVisible();
+    await expect(enlace).toHaveAttribute('href', /^\/embed\/m\/composicion/);
+    await expect(enlace).toHaveAttribute('href', /cromo=limpio/);
+
+    await enlace.click();
+    await expect(page).toHaveURL(/\/embed\/m\/composicion\?pagina=graficos&cromo=limpio$/);
+    // Y sigue sin encabezado despues de navegar: el cromo viaja con el enlace.
+    await expect(page.locator('.embedded__institucion')).toHaveCount(0);
+  });
+
   test('con encabezado: emblema, salida, y tambien quien mira', async ({ page }) => {
     await asLogin(page, 'u-ana');
     await page.goto('/embed/m/casos-pendientes');
