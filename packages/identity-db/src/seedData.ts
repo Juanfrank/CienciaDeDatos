@@ -111,9 +111,24 @@ export const seedGrantedNodes: TeamGrantedNodeRow[] = [
 ];
 
 export const seedUsers: UserRow[] = [
-  { id: 'u-ana', combineTeamsByUnion: false },
-  { id: 'u-beto', combineTeamsByUnion: false },
-  { id: 'u-admin', combineTeamsByUnion: false },
+  {
+    id: 'u-ana',
+    combineTeamsByUnion: false,
+    displayName: 'Ana Rodriguez M.',
+    mail: 'u-ana@poderjudicial.gob.do',
+  },
+  {
+    id: 'u-beto',
+    combineTeamsByUnion: false,
+    displayName: 'Beto Fernandez P.',
+    mail: 'u-beto@poderjudicial.gob.do',
+  },
+  {
+    id: 'u-admin',
+    combineTeamsByUnion: false,
+    displayName: 'Juan F. Medina C.',
+    mail: 'u-admin@poderjudicial.gob.do',
+  },
   // Existe en el directorio y no pertenece a NINGUN equipo. Es un caso real —alguien dado de
   // alta antes de asignarle equipo— y es la cuenta contra la que se prueba el bloqueo por
   // intentos fallidos sin dejar bloqueada a nadie que las demas pruebas necesiten.

@@ -34,6 +34,16 @@ export interface Team {
 /** Usuario en el modelo de gobierno. */
 export interface GovernedUser {
   userId: string;
+  /**
+   * Como se llama y como se le escribe.
+   *
+   * Viven aqui y no en la capa de credenciales porque son datos del DIRECTORIO, no del metodo de
+   * acceso: la misma persona entra hoy con contrasena local y manana con Azure AD, y se sigue
+   * llamando igual. Son opcionales: un directorio que no los traiga deja la cabecera mostrando el
+   * identificador, que es lo que se mostraba antes.
+   */
+  displayName?: string;
+  mail?: string;
   personalScope?: AccessScope;
   personalModuleScopeOverrides?: Record<string, AccessScope>;
   /**

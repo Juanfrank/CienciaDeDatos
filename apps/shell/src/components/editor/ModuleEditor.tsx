@@ -10,7 +10,7 @@ import type {
   PublishBlocker,
 } from '@app/module-model';
 import { findFreeSlot } from '@app/module-model';
-import { initialSettings } from '@app/ui-components';
+import { defaultSize, initialSettings } from '@app/ui-components';
 import type { EditorPalette } from '../../server/editor';
 import type { SerializedObject } from '../../server/serialize';
 import { EditorHeader } from './EditorHeader';
@@ -110,7 +110,12 @@ export function ModuleEditor({
     // `findFreeSlot` busca el primer hueco de la rejilla en vez de apilar al final. Existia desde
     // que se escribio la rejilla y no lo llamaba nadie: el editor anterior apilaba, asi que dos
     // objetos de media anchura no se ponian nunca uno al lado del otro.
-    const position = findFreeSlot(items, 6, 3);
+    //
+    // El tamano sale de lo que el objeto declara, no de un 6x3 para todos: un titulo de seccion
+    // ocupaba media pagina para una linea de texto y una tabla de doce columnas nacia con sitio
+    // para cuatro. Se puede cambiar despues; es la talla de salida, no un minimo.
+    const { w, h } = defaultSize(definicion);
+    const position = findFreeSlot(items, w, h);
 
     const nuevo: GridItem = {
       id,

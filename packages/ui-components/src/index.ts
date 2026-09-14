@@ -1,4 +1,5 @@
 /** Repositorio de objetos visuales versionados — secciones 4.2 y 4.5. */
+export { defaultSize, type DefaultSize, type SizeableObject } from './presentation/defaultSize';
 export { ObjectRegistry, ObjectRegistryError, type DeprecationWarning, type PublishInput } from './registry/ObjectRegistry';
 export {
   attachmentOf,

@@ -68,6 +68,8 @@ export interface UserScopeRow {
 export interface UserRow {
   id: string;
   combineTeamsByUnion: boolean;
+  displayName?: string;
+  mail?: string;
 }
 
 export interface PackageNodeRow {

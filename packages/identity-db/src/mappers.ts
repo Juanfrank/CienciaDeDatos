@@ -161,6 +161,8 @@ export function toGovernedUser(row: UserRow, userScopes: UserScopeRow[], scopes:
 
   return {
     userId: row.id,
+    ...(row.displayName ? { displayName: row.displayName } : {}),
+    ...(row.mail ? { mail: row.mail } : {}),
     ...(personalScope ? { personalScope } : {}),
     ...(Object.keys(module).length > 0 ? { personalModuleScopeOverrides: module } : {}),
     ...(row.combineTeamsByUnion ? { combineTeamsByUnion: true } : {}),

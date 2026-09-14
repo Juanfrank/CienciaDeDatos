@@ -173,4 +173,5 @@ export const en: Record<MessageKey, string> = {
   'lista.enviar': "Send for approval",
   'lista.publicar': "Publish",
   'lista.sinAcciones': "No actions available",
+  'accion.salir': "Sign out",
 };

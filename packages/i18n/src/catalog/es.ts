@@ -174,6 +174,7 @@ export const es = {
   'lista.enviar': "Enviar a aprobacion",
   'lista.publicar': "Publicar",
   'lista.sinAcciones': "Sin acciones disponibles",
+  'accion.salir': "Salir",
 } as const;
 
 export type MessageKey = keyof typeof es;

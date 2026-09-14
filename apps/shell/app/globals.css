@@ -1215,6 +1215,97 @@ input[type='radio'] {
 .header__subtitle { color: var(--md-sys-color-on-surface-variant); }
 .header__actions { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
 
+/*
+ * Quien esta dentro, y como se sale.
+ *
+ * Antes era un enlace con el identificador tecnico —«Salir · u-admin»—, que ni identifica a una
+ * persona ni se parece a un boton. Ahora se lee el nombre con el que firma, el correo por el que
+ * se le escribe, y salir es un boton con su icono.
+ *
+ * El avatar lleva las iniciales y no una foto: no hay fotos en el directorio, y un circulo vacio
+ * ocupa lo mismo sin decir nada.
+ */
+.account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.account__identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.account__name {
+  font-weight: 600;
+  font-size: var(--md-sys-typescale-label-large-size, 0.875rem);
+  color: var(--md-sys-color-on-primary);
+  /* Un nombre largo recorta con puntos suspensivos en vez de empujar el boton fuera. */
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account__mail {
+  font-size: var(--md-sys-typescale-label-small-size, 0.75rem);
+  /* Sobre el azul de la cabecera el mismo color al 80 % baja el contraste sin perder legibilidad:
+     el correo es dato de apoyo, no lo primero que se lee. */
+  color: color-mix(in srgb, var(--md-sys-color-on-primary) 80%, transparent);
+  max-width: 26ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account__avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-primary);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+}
+
+.account__exit {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0.375rem 0.875rem;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-on-primary) 55%, transparent);
+  border-radius: var(--md-sys-shape-corner-full, 999px);
+  background: transparent;
+  color: var(--md-sys-color-on-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.account__exit:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--md-sys-color-on-primary) 12%, transparent);
+}
+
+.account__exit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* En movil el nombre y el correo sobran: lo que hace falta es poder salir. */
+@media (max-width: 640px) {
+  .account__identity {
+    display: none;
+  }
+}
+
 .team-picker { display: flex; gap: var(--space-md); flex-wrap: wrap; }
 .team-picker__field { margin-bottom: 0; }
 .team-picker select { min-height: 40px; }

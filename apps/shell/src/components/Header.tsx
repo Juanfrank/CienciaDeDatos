@@ -6,6 +6,7 @@ import { findTeam } from '../server/context';
 import type { ShellSession } from '../server/session';
 import { ToggleSidebar } from './ToggleSidebar';
 import { Bell } from './Bell';
+import { listUsers } from '../server/context';
 import { CloseSession } from './CloseSession';
 
 /** Cromo de cabecera de la aplicacion. */
@@ -15,6 +16,9 @@ export async function Header({ sesion }: { sesion: ShellSession }) {
   // El enlace solo se dibuja para quien puede usarlo. Ocultarlo no protege nada —eso lo hace el
   // guardian del backend— pero no tiene sentido ofrecer una puerta cerrada.
   const manageCan = await isAdministrator(sesion.userId);
+  // El nombre y el correo salen del directorio de gobierno, no de las credenciales: la misma
+  // persona entra hoy con contrasena local y manana con Azure AD, y se sigue llamando igual.
+  const perfil = (await listUsers()).find((u) => u.userId === sesion.userId);
   const editCan = can(await roleMoreHeightOf(sesion.userId), 'crear-editar-modulos-borrador');
 
   return (
@@ -56,7 +60,11 @@ export async function Header({ sesion }: { sesion: ShellSession }) {
             Administracion
           </Link>
         ) : null}
-        <CloseSession user={sesion.userId} />
+        <CloseSession
+          user={sesion.userId}
+          {...(perfil?.displayName ? { displayName: perfil.displayName } : {})}
+          {...(perfil?.mail ? { mail: perfil.mail } : {})}
+        />
       </div>
     </header>
   );
