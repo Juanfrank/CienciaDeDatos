@@ -1,15 +1,15 @@
 import { expect, test } from '@playwright/test';
 import { CLAVE_DEMO, SECRETO_TOTP_DEMO, codigoTotpDe, usuarioACorreo } from '../src/server/credencialesDemo';
-import { entrarComo } from './sesion';
+import { entrarComo } from './session';
 
 /** Cuentas locales, desbloqueo y restablecimiento — seccion 4.7.2. */
 
-const CUENTA = 'u-sin-equipo';
-const CORREO = usuarioACorreo(CUENTA);
+const ACCOUNT = 'u-sin-equipo';
+const CORREO = usuarioACorreo(ACCOUNT);
 
 /** Una contrasena distinta por uso. */
 let contador = 0;
-const claveNueva = (): string => `Restablecida-${Date.now()}-${(contador += 1)}-Aa!`;
+const newKey = (): string => `Restablecida-${Date.now()}-${(contador += 1)}-Aa!`;
 
 /** Tramita un restablecimiento como Administrador y devuelve el codigo. */
 async function tramitar(
@@ -58,10 +58,10 @@ test.describe('la superficie de cuentas locales (4.7.2)', () => {
     await bloquear(page);
 
     await page.goto('/admin/cuentas');
-    await expect(page.getByTestId(`cuenta-${CUENTA}`)).toContainText('Bloqueada');
+    await expect(page.getByTestId(`account-${ACCOUNT}`)).toContainText('Bloqueada');
 
-    await page.getByTestId(`desbloquear-${CUENTA}`).click();
-    await expect(page.getByTestId(`cuenta-${CUENTA}`)).toContainText('Activa');
+    await page.getByTestId(`unlock-${ACCOUNT}`).click();
+    await expect(page.getByTestId(`account-${ACCOUNT}`)).toContainText('Activa');
 
     // Y la contrasena de siempre vuelve a servir: un error de dedos no obliga a cambiarla.
     const entrada = await page.request.post('/api/acceso', {
@@ -77,7 +77,7 @@ test.describe('restablecimiento con token de un solo uso', () => {
   test('el flujo completo: tramitar, canjear, y entrar con la contrasena nueva', async ({ page }) => {
     await entrarComo(page, 'u-admin');
 
-    const first = claveNueva();
+    const first = newKey();
     const uno = await tramitar(page);
     // El canal automatico no entrego nada y lo dice; por eso el codigo viaja al Administrador.
     expect(uno.entregado).toBe(false);
@@ -96,7 +96,7 @@ test.describe('restablecimiento con token de un solo uso', () => {
     expect(conLaPrimera.status()).toBe(403);
 
     // Y al restablecerla otra vez, la anterior deja de servir.
-    const segunda = claveNueva();
+    const segunda = newKey();
     const dos = await tramitar(page);
     await page.request.post('/api/restablecer', {
       data: { resetId: dos.resetId, codigo: dos.codigo, clave: segunda },
@@ -121,7 +121,7 @@ test.describe('restablecimiento con token de un solo uso', () => {
   test('no se puede reutilizar una contrasena reciente (4.7.2)', async ({ page }) => {
     await entrarComo(page, 'u-admin');
 
-    const clave = claveNueva();
+    const clave = newKey();
     const primero = await tramitar(page);
     await page.request.post('/api/restablecer', {
       data: { resetId: primero.resetId, codigo: primero.codigo, clave },
@@ -141,12 +141,12 @@ test.describe('restablecimiento con token de un solo uso', () => {
     const { resetId, codigo } = await tramitar(page);
 
     const primero = await page.request.post('/api/restablecer', {
-      data: { resetId, codigo, clave: claveNueva() },
+      data: { resetId, codigo, clave: newKey() },
     });
     expect(primero.ok(), await primero.text()).toBe(true);
 
     const second = await page.request.post('/api/restablecer', {
-      data: { resetId, codigo, clave: claveNueva() },
+      data: { resetId, codigo, clave: newKey() },
     });
 
     expect(second.status()).toBe(400);
@@ -160,7 +160,7 @@ test.describe('restablecimiento con token de un solo uso', () => {
     const { resetId } = await tramitar(page);
 
     const fallo = await page.request.post('/api/restablecer', {
-      data: { resetId, codigo: 'inventado', clave: claveNueva() },
+      data: { resetId, codigo: 'inventado', clave: newKey() },
     });
     expect(fallo.status()).toBe(400);
     expect((await fallo.json()).motivo).toBe('token-invalido');
@@ -185,7 +185,7 @@ test.describe('restablecimiento con token de un solo uso', () => {
 
     // El codigo sigue vivo: un intento rechazado por la politica no gasta el token.
     const bueno = await page.request.post('/api/restablecer', {
-      data: { resetId, codigo, clave: claveNueva() },
+      data: { resetId, codigo, clave: newKey() },
     });
     expect(bueno.ok(), await bueno.text()).toBe(true);
   });
@@ -207,37 +207,37 @@ test.describe('la pantalla de restablecimiento', () => {
     await page.goto('/restablecer');
     // Sin sesion no redirige a /acceso: quien llega aqui es precisamente quien no puede entrar.
     await expect(page).toHaveURL(/\/restablecer/);
-    await expect(page.getByTestId('restablecer-id')).toBeVisible();
-    await expect(page.getByTestId('restablecer-codigo')).toBeVisible();
+    await expect(page.getByTestId('reset-id')).toBeVisible();
+    await expect(page.getByTestId('reset-codigo')).toBeVisible();
   });
 
   test('desde la pantalla, con el codigo que da el panel', async ({ page }) => {
     await entrarComo(page, 'u-admin');
     await page.goto('/admin/cuentas');
-    await page.getByTestId(`restablecer-${CUENTA}`).click();
+    await page.getByTestId(`reset-${ACCOUNT}`).click();
 
     const resetId = await page.getByTestId('reset-id').innerText();
     const codigo = await page.getByTestId('reset-codigo').innerText();
 
-    const clave = claveNueva();
+    const clave = newKey();
     await page.goto('/restablecer');
-    await page.getByTestId('restablecer-id').fill(resetId);
-    await page.getByTestId('restablecer-codigo').fill(codigo);
-    await page.getByTestId('restablecer-clave').fill(clave);
-    await page.getByTestId('restablecer-repetida').fill(clave);
-    await page.getByTestId('restablecer-enviar').click();
+    await page.getByTestId('reset-id').fill(resetId);
+    await page.getByTestId('reset-codigo').fill(codigo);
+    await page.getByTestId('reset-key').fill(clave);
+    await page.getByTestId('reset-repetida').fill(clave);
+    await page.getByTestId('reset-send').click();
 
-    await expect(page.getByTestId('restablecer-ir-a-acceso')).toBeVisible();
+    await expect(page.getByTestId('reset-ir-a-acceso')).toBeVisible();
   });
 
   test('dos contrasenas distintas se avisan antes de enviar', async ({ page }) => {
     await page.goto('/restablecer');
-    await page.getByTestId('restablecer-id').fill('x');
-    await page.getByTestId('restablecer-codigo').fill('y');
-    await page.getByTestId('restablecer-clave').fill(claveNueva());
-    await page.getByTestId('restablecer-repetida').fill('Otra-Cosa-2026!');
-    await page.getByTestId('restablecer-enviar').click();
+    await page.getByTestId('reset-id').fill('x');
+    await page.getByTestId('reset-codigo').fill('y');
+    await page.getByTestId('reset-key').fill(newKey());
+    await page.getByTestId('reset-repetida').fill('Otra-Cosa-2026!');
+    await page.getByTestId('reset-send').click();
 
-    await expect(page.getByTestId('restablecer-error')).toContainText('no coinciden');
+    await expect(page.getByTestId('reset-error')).toContainText('no coinciden');
   });
 });

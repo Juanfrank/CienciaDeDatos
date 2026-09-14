@@ -77,7 +77,7 @@ export function aSvg(document: ExportableDocument): string {
       return [
         `<rect x="${x}" y="${y.toFixed(1)}" width="${widthBar}" height="${heightBar.toFixed(1)}" fill="${color}" />`,
         `<text x="${x + widthBar / 2}" y="${(y - 6).toFixed(1)}" text-anchor="middle" font-size="11" fill="${palette.content}">${escaparXml(textos[i] ?? String(valor))}</text>`,
-        `<text x="${x + widthBar / 2}" y="${margenSup + heightChart + 16}" text-anchor="middle" font-size="10" fill="${palette.textoAtenuado}">${escaparXml(String(fila[0] ?? ''))}</text>`,
+        `<text x="${x + widthBar / 2}" y="${margenSup + heightChart + 16}" text-anchor="middle" font-size="10" fill="${palette.mutedText}">${escaparXml(String(fila[0] ?? ''))}</text>`,
       ].join('');
     })
     .join('');
@@ -85,7 +85,7 @@ export function aSvg(document: ExportableDocument): string {
   const metadatos = heading.lineas
     .map(
       (l, i) =>
-        `<text x="16" y="${38 + i * 14}" font-size="10" fill="${palette.textoAtenuado}">${escaparXml(l)}</text>`,
+        `<text x="16" y="${38 + i * 14}" font-size="10" fill="${palette.mutedText}">${escaparXml(l)}</text>`,
     )
     .join('');
 
@@ -98,7 +98,7 @@ export function aSvg(document: ExportableDocument): string {
     barras,
     ...notas.map(
       (nota, i) =>
-        `<text x="16" y="${margenSup + heightChart + 60 + i * 14}" font-size="10" fill="${palette.textoAtenuado}">${escaparXml(nota)}</text>`,
+        `<text x="16" y="${margenSup + heightChart + 60 + i * 14}" font-size="10" fill="${palette.mutedText}">${escaparXml(nota)}</text>`,
     ),
     '</svg>',
   ].join('');

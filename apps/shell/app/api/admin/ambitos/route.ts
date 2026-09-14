@@ -1,11 +1,11 @@
 import type { AccessScope } from '@app/access-control';
-import { conAdmin } from '../guardia';
+import { withAdmin } from '../guardia';
 import { AdminError, saveScope, validateDimensions } from '../../../../src/server/admin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-interface CuerpoAmbito {
+interface ScopeBody {
   destino: { tipo: 'carpeta'; nodeId: string } | { tipo: 'equipo'; teamId: string };
   scope: AccessScope;
   justificacion?: string;
@@ -13,9 +13,9 @@ interface CuerpoAmbito {
 
 /** Guarda un ambito de acceso (4.10.3). */
 export async function POST(request: Request) {
-  const body = (await request.json()) as CuerpoAmbito;
+  const body = (await request.json()) as ScopeBody;
 
-  return conAdmin(async (actor) => {
+  return withAdmin(async (actor) => {
     const desconocidas = await validateDimensions(body.scope);
     if (desconocidas.length > 0) {
       throw new AdminError(

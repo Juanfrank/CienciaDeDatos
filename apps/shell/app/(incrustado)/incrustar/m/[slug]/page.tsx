@@ -5,7 +5,7 @@ import { cargarModulo } from '../../../../../src/server/data';
 import { actorDe, moduloServiblePorSlug } from '../../../../../src/server/cicloDeVida';
 import { serializarObjeto } from '../../../../../src/server/serializar';
 import { obtenerSesion } from '../../../../../src/server/session';
-import { VistaModulo } from '../../../../../src/components/VistaModulo';
+import { ModuleView } from '../../../../../src/components/ModuleView';
 
 /** Modulo incrustado en otro portal — seccion 4.9. */
 export default async function PaginaIncrustada({
@@ -32,7 +32,7 @@ export default async function PaginaIncrustada({
     return (
       <div className="vacio">
         <h1>Se requiere iniciar sesion</h1>
-        <p className="texto-atenuado" data-testid="incrustado-sin-sesion">
+        <p className="muted-text" data-testid="embedded-without-session">
           Esta vista muestra datos institucionales y necesita una sesion abierta en la capa de
           visualizacion.
         </p>
@@ -60,29 +60,29 @@ export default async function PaginaIncrustada({
 
   return (
     <article className="modulo">
-      <header className="modulo__cabecera">
-        <h1 data-testid="titulo-modulo">{module.name}</h1>
-        <p className="texto-atenuado" data-testid="frescura">
+      <header className="module__header">
+        <h1 data-testid="module-title">{module.name}</h1>
+        <p className="muted-text" data-testid="frescura">
           {cargado.generatedAt
             ? `Datos actualizados el ${new Date(cargado.generatedAt).toLocaleString('es-DO')}`
             : 'Sin datos poblados todavia'}
         </p>
       </header>
 
-      <VistaModulo
+      <ModuleView
         objetos={cargado.objetos.map(serializarObjeto)}
         provenance={describeProvenance(false)}
         moduleSlug={module.slug}
         pageSlug={cargado.pageSlug}
-        incrustado
+        embedded
       />
 
       {/*
         Un enlace de vuelta, en pestana nueva: dentro de un iframe, navegar en el mismo marco
         dejaria la aplicacion entera metida en un hueco de 640 pixeles del portal anfitrion.
       */}
-      <p className="incrustado__pie">
-        <Link href={`/m/${module.slug}`} target="_blank" rel="noopener" data-testid="ver-completo">
+      <p className="embedded__pie">
+        <Link href={`/m/${module.slug}`} target="_blank" rel="noopener" data-testid="see-completo">
           Ver en la capa de visualizacion
         </Link>
       </p>

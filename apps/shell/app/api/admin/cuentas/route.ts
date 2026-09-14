@@ -1,10 +1,10 @@
-import { conAdmin } from '../guardia';
+import { withAdmin } from '../guardia';
 import { AdminError } from '../../../../src/server/admin';
 import {
   CORREO_DISPONIBLE,
   canalDeRestablecimiento,
   cuentasLocales,
-  desbloquearCuenta,
+  unlockAccount,
   restablecimientos,
 } from '../../../../src/server/identity';
 import { registrarCambio } from '../../../../src/server/audit';
@@ -14,26 +14,26 @@ export const dynamic = 'force-dynamic';
 
 /** Cuentas locales — seccion 4.7.2. */
 export async function GET() {
-  return conAdmin(async () => ({
+  return withAdmin(async () => ({
     cuentas: await cuentasLocales(),
     canal: canalDeRestablecimiento.name,
     correoDisponible: CORREO_DISPONIBLE,
   }));
 }
 
-interface CuerpoDeCuenta {
+interface AccountBody {
   accion: 'desbloquear' | 'restablecer';
   email?: string;
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as CuerpoDeCuenta;
+  const body = (await request.json()) as AccountBody;
 
-  return conAdmin(async (actor) => {
+  return withAdmin(async (actor) => {
     if (!body.email) throw new AdminError('Falta el correo de la cuenta.', 400);
 
     if (body.accion === 'desbloquear') {
-      const desbloqueada = await desbloquearCuenta(body.email);
+      const desbloqueada = await unlockAccount(body.email);
       if (!desbloqueada) throw new AdminError('No hay ninguna cuenta local con ese correo.', 404);
 
       await registrarCambio({

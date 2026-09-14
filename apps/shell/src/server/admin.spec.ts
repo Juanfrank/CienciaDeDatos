@@ -16,13 +16,13 @@ import {
   saveScope,
   saveTeam,
   previsualizarMovimiento,
-  quienVeQue,
+  seesWhoWhere,
   rolMasAltoDe,
   UltimoAdministradorError,
   administradores,
-  borrarEquipo,
+  deleteTeam,
 } from './admin';
-import { contarAmpliaciones, limpiarAuditoria, listarAuditoria } from './audit';
+import { contarAmpliaciones, clearAudit, listarAuditoria } from './audit';
 import { gobierno } from './gobierno';
 import type { SesionShell } from './session';
 
@@ -48,7 +48,7 @@ const teamOf = async (id: string) => {
 
 beforeEach(async () => {
   await gobierno.reset();
-  await limpiarAuditoria();
+  await clearAudit();
 });
 
 describe('almacen de gobierno', () => {
@@ -324,7 +324,7 @@ describe('membresia (4.10.2)', () => {
 
 describe('quien ve que (4.10.8)', () => {
   it('muestra el ambito resuelto y NOMBRA la carpeta que lo origino', async () => {
-    const r = await quienVeQue('u-ana', 'equipo-norte', 'casos-pendientes');
+    const r = await seesWhoWhere('u-ana', 'equipo-norte', 'casos-pendientes');
     expect(r.tieneAcceso).toBe(true);
     expect(r.pasos.map((p) => p.source)).toEqual([
       'Equipo Distrito Norte',
@@ -339,9 +339,9 @@ describe('quien ve que (4.10.8)', () => {
   });
 
   it('distingue "no tiene acceso" de "tiene acceso pero no ve filas"', async () => {
-    const sinConceder = await quienVeQue('u-ana', 'equipo-norte', 'estadisticas');
-    expect(sinConceder.existeEnElArbol).toBe(true);
-    expect(sinConceder.tieneAcceso).toBe(false);
+    const withoutGrant = await seesWhoWhere('u-ana', 'equipo-norte', 'estadisticas');
+    expect(withoutGrant.existeEnElArbol).toBe(true);
+    expect(withoutGrant.tieneAcceso).toBe(false);
   });
 
   it('señala cuando el ambito resuelto proviene de una ampliacion', async () => {
@@ -351,7 +351,7 @@ describe('quien ve que (4.10.8)', () => {
       scope: scope(DIM_DISTRITO, 'Distrito Norte', 'Distrito Este'),
       justificacion: 'Supervision conjunta Norte-Este durante el trimestre',
     });
-    expect((await quienVeQue('u-ana', 'equipo-norte', 'casos-pendientes')).usoAmpliacion).toBe(true);
+    expect((await seesWhoWhere('u-ana', 'equipo-norte', 'casos-pendientes')).usoAmpliacion).toBe(true);
   });
 });
 
@@ -402,7 +402,7 @@ describe('la institucion no se puede quedar sin Administrador (4.10.1)', () => {
   });
 
   it('borrar el equipo donde estaba el ultimo Administrador tampoco', async () => {
-    await expect(borrarEquipo(admin, 'equipo-norte')).rejects.toBeInstanceOf(
+    await expect(deleteTeam(admin, 'equipo-norte')).rejects.toBeInstanceOf(
       UltimoAdministradorError,
     );
     expect((await gobierno.getTeam('equipo-norte'))).toBeDefined();
@@ -429,7 +429,7 @@ describe('borrar un equipo deja rastro', () => {
   it('emite un evento de auditoria, que antes no emitia', async () => {
     // Se nombra un segundo Administrador para poder borrar el equipo del primero.
     await cambiarMembresia(admin, 'equipo-este', 'u-ana', 'administrador');
-    await borrarEquipo(admin, 'equipo-norte');
+    await deleteTeam(admin, 'equipo-norte');
 
     const evento = (await listarAuditoria()).find(
       (e) => e.entityType === 'team' && e.entityId === 'equipo-norte' && e.action === 'delete',
@@ -443,13 +443,13 @@ describe('borrar un equipo deja rastro', () => {
   });
 
   it('borrar uno que no existe es 404, no un exito silencioso', async () => {
-    const fallo = await borrarEquipo(admin, 'equipo-inventado').catch((e: unknown) => e);
+    const fallo = await deleteTeam(admin, 'equipo-inventado').catch((e: unknown) => e);
     expect((fallo as AdminError).status).toBe(404);
   });
 
   it('un Visor no puede borrar equipos', async () => {
     // `PermissionError`, igual que el resto de operaciones de equipo: el envoltorio de los
     // handlers lo traduce a 403. Es la diferencia con el ultimo Administrador, que es 409.
-    await expect(borrarEquipo(visor, 'equipo-este')).rejects.toBeInstanceOf(PermissionError);
+    await expect(deleteTeam(visor, 'equipo-este')).rejects.toBeInstanceOf(PermissionError);
   });
 });

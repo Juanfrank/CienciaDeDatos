@@ -33,7 +33,7 @@ export async function GET() {
         updatedAt: m.updatedAt,
         // Los bloqueos viajan con la lista para que la interfaz pueda deshabilitar "Enviar a
         // aprobacion" y decir por que, en vez de ofrecer un boton que siempre falla.
-        bloqueos: m.status === 'publicado' ? [] : await bloqueosDePublicacion(m),
+        locks: m.status === 'publicado' ? [] : await bloqueosDePublicacion(m),
       })),
     ),
   });

@@ -1,5 +1,5 @@
-import { conAdmin } from '../guardia';
-import { AdminError, quienVeQue } from '../../../../src/server/admin';
+import { withAdmin } from '../guardia';
+import { AdminError, seesWhoWhere } from '../../../../src/server/admin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,10 +11,10 @@ export async function GET(request: Request) {
   const teamId = url.searchParams.get('teamId');
   const moduleId = url.searchParams.get('moduleId');
 
-  return conAdmin(async () => {
+  return withAdmin(async () => {
     if (!userId || !teamId || !moduleId) {
       throw new AdminError('Se requieren userId, teamId y moduleId.', 400);
     }
-    return await quienVeQue(userId, teamId, moduleId);
+    return await seesWhoWhere(userId, teamId, moduleId);
   });
 }

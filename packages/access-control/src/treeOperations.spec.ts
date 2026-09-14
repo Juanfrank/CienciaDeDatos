@@ -21,7 +21,7 @@ const esperarOk = (r: ReturnType<typeof applyTreeOperation>) => {
   return r;
 };
 
-const valoresDe = (t: ManagedTree, moduleId: string, dim: { table: string; field: string }) =>
+const valuesOf = (t: ManagedTree, moduleId: string, dim: { table: string; field: string }) =>
   resolveEffectiveScope({
     user: usuarioAna,
     activeTeam: equipoNorte,
@@ -40,7 +40,7 @@ describe('permisos sobre el arbol: la comprobacion ocurre antes que nada', () =>
   it('un Colaborador puede crear un modulo borrador pero NO reorganizar el arbol', () => {
     const puede = applyTreeOperation(
       arbol(),
-      { type: 'crear-modulo', parentId: 'carpeta-norte', id: 'n1', moduleRef: { moduleId: 'm1', slug: 's1', name: 'M1' } },
+      { type: 'create-module', parentId: 'carpeta-norte', id: 'n1', moduleRef: { moduleId: 'm1', slug: 's1', name: 'M1' } },
       colaborador,
     );
     expect(puede.ok).toBe(true);
@@ -65,13 +65,13 @@ describe('permisos sobre el arbol: la comprobacion ocurre antes que nada', () =>
 describe('mover es estructural, no cosmetico (4.1.2)', () => {
   it('mover un modulo entre carpetas con ambitos distintos cambia su ambito DE INMEDIATO', () => {
     const before = arbol();
-    expect(valoresDe(before, 'audiencias-norte', DIM_DISTRITO)).toEqual(['Distrito Norte']);
+    expect(valuesOf(before, 'audiencias-norte', DIM_DISTRITO)).toEqual(['Distrito Norte']);
 
     const r = esperarOk(
       applyTreeOperation(before, { type: 'mover', nodeId: 'nodo-audiencias-norte', newParentId: 'carpeta-este' }, admin),
     );
 
-    expect(valoresDe(r.tree, 'audiencias-norte', DIM_DISTRITO)).toEqual(['Distrito Este']);
+    expect(valuesOf(r.tree, 'audiencias-norte', DIM_DISTRITO)).toEqual(['Distrito Este']);
   });
 
   it('el evento de auditoria registra el ambito antes y despues, no solo que algo se movio', () => {
@@ -123,7 +123,7 @@ describe('papelera: nunca borrado inmediato (4.1)', () => {
     ).tree;
 
     expect(findNode(restaurado.nodes, 'nodo-audiencias-norte')).not.toBeNull();
-    expect(valoresDe(restaurado, 'audiencias-norte', DIM_DISTRITO)).toEqual(['Distrito Norte']);
+    expect(valuesOf(restaurado, 'audiencias-norte', DIM_DISTRITO)).toEqual(['Distrito Norte']);
   });
 
   it('si la carpeta original ya no existe, NO recuelga el nodo en la raiz', () => {
@@ -173,12 +173,12 @@ describe('crear, renombrar y reordenar', () => {
     const conModulo = esperarOk(
       applyTreeOperation(
         r.tree,
-        { type: 'crear-modulo', parentId: 'carpeta-sur', id: 'n-sur', moduleRef: { moduleId: 'casos-sur', slug: 'casos-sur', name: 'Casos Sur' } },
+        { type: 'create-module', parentId: 'carpeta-sur', id: 'n-sur', moduleRef: { moduleId: 'casos-sur', slug: 'casos-sur', name: 'Casos Sur' } },
         admin,
       ),
     );
     // Regional permite Norte/Este/Sur; la carpeta nueva lo restringe a Sur.
-    expect(valoresDe(conModulo.tree, 'casos-sur', DIM_DISTRITO)).toEqual(['Distrito Sur']);
+    expect(valuesOf(conModulo.tree, 'casos-sur', DIM_DISTRITO)).toEqual(['Distrito Sur']);
   });
 
   it('rechaza un id duplicado', () => {
@@ -198,12 +198,12 @@ describe('crear, renombrar y reordenar', () => {
   });
 
   it('reordena dentro de la misma carpeta sin cambiar el ambito', () => {
-    const before = valoresDe(arbol(), 'audiencias-norte', DIM_MATERIA);
+    const before = valuesOf(arbol(), 'audiencias-norte', DIM_MATERIA);
     const r = esperarOk(applyTreeOperation(arbol(), { type: 'reordenar', nodeId: 'nodo-audiencias-norte', index: 0 }, admin));
     const carpeta = findNode(r.tree.nodes, 'carpeta-norte');
     if (!carpeta || !isFolder(carpeta)) throw new Error('se esperaba carpeta');
     expect(carpeta.children[0]?.id).toBe('nodo-audiencias-norte');
-    expect(valoresDe(r.tree, 'audiencias-norte', DIM_MATERIA)).toEqual(before);
+    expect(valuesOf(r.tree, 'audiencias-norte', DIM_MATERIA)).toEqual(before);
   });
 });
 

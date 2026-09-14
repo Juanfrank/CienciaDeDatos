@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { entrarComo } from './sesion';
+import { entrarComo } from './session';
 
 /** Panel de administracion — verificacion en navegador (4.10.8). */
 
@@ -34,7 +34,7 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
     await entrarComo(page, 'u-beto');
     await page.goto('/admin');
     await expect(page.getByTestId('sin-permiso')).toBeVisible();
-    await expect(page.getByTestId('admin-nav-arbol')).toHaveCount(0);
+    await expect(page.getByTestId('admin-nav-tree')).toHaveCount(0);
   });
 
   test('un Administrador si entra', async ({ page }) => {
@@ -42,7 +42,7 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
     await page.goto('/');
     await expect(page.getByTestId('enlace-admin')).toBeVisible();
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-arbol')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
   });
 });
 
@@ -89,7 +89,7 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
     expect(respuesta.status()).toBe(200);
 
     await page.goto('/admin/auditoria?soloAmpliaciones=1');
-    const tabla = page.getByTestId('tabla-auditoria');
+    const tabla = page.getByTestId('audit-table');
     await expect(tabla).toContainText('Auditoria laboral trimestral');
     await expect(tabla).toContainText('Ampliacion');
     // Y el contador de ampliaciones vigentes deja de ser cero.
@@ -116,7 +116,7 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
 
   test('el editor solo ofrece dimensiones del esquema, no un campo de texto libre', async ({ page }) => {
     await page.goto('/admin/ambitos');
-    const picker = page.getByTestId('anadir-dimension');
+    const picker = page.getByTestId('add-dimension');
     await expect(picker).toBeVisible();
     const opciones = await picker.locator('option').allTextContents();
     expect(opciones.join(' ')).toContain('DimTribunal.Distrito');
@@ -142,8 +142,8 @@ test.describe('editor de arbol (4.1.2)', () => {
     // 4.10.8 pide arrastrar y soltar; 4.9 dice que la accesibilidad no se pospone. Los dos
     // gestos llaman a la misma operacion, asi que basta con comprobar el accesible.
     await page.goto('/admin/arbol');
-    await page.getByTestId('nodo-nodo-m-audiencias').click();
-    await page.getByTestId('mover-nodo-m-audiencias').selectOption('nodo-este');
+    await page.getByTestId('node-nodo-m-audiencias').click();
+    await page.getByTestId('move-nodo-m-audiencias').selectOption('nodo-este');
 
     // Mover cambia el ambito, asi que pide confirmacion explicita.
     await expect(page.getByTestId('confirmar-movimiento')).toBeVisible();
@@ -162,7 +162,7 @@ test.describe('editor de arbol (4.1.2)', () => {
 
     // El movimiento queda registrado en la auditoria.
     await page.goto('/admin/auditoria?soloMovimientos=1');
-    await expect(page.getByTestId('tabla-auditoria')).toContainText('nodo-m-audiencias');
+    await expect(page.getByTestId('audit-table')).toContainText('nodo-m-audiencias');
   });
 
   test('el movimiento cambia el ambito efectivo de inmediato', async ({ page }) => {
@@ -178,14 +178,14 @@ test.describe('editor de arbol (4.1.2)', () => {
 
   test('la papelera conserva lo eliminado y permite restaurarlo', async ({ page }) => {
     await page.goto('/admin/arbol');
-    await page.getByTestId('nodo-nodo-m-nacional').click();
-    await page.getByTestId('papelera-nodo-m-nacional').click();
+    await page.getByTestId('node-nodo-m-nacional').click();
+    await page.getByTestId('trash-nodo-m-nacional').click();
 
     await expect(page.getByTestId('papelera')).toBeVisible();
     await expect(page.getByTestId('papelera')).toContainText('Estadisticas nacionales');
 
-    await page.getByTestId('restaurar-nodo-m-nacional').click();
-    await expect(page.getByTestId('nodo-nodo-m-nacional')).toBeVisible();
+    await page.getByTestId('restore-nodo-m-nacional').click();
+    await expect(page.getByTestId('node-nodo-m-nacional')).toBeVisible();
   });
 });
 
@@ -269,8 +269,8 @@ test.describe('paquetes visuales (4.10.6)', () => {
 
     // El panel lo señala explicitamente en vez de ocultarlo sin aviso.
     await page.goto('/admin/paquetes');
-    await expect(page.getByTestId('paquete-problemas-pkg-prueba')).toBeVisible();
-    await expect(page.getByTestId('paquete-problemas-pkg-prueba')).toContainText('casos-pendientes');
+    await expect(page.getByTestId('package-problemas-pkg-prueba')).toBeVisible();
+    await expect(page.getByTestId('package-problemas-pkg-prueba')).toContainText('casos-pendientes');
 
     // Y lo que de verdad importa: al equipo Este NO se le muestra.
     await entrarComo(page, 'u-beto');
@@ -322,7 +322,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
 
     // Y sigue administrando: el panel se abre igual.
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-arbol')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
   });
 
   test('degradarse a Colaborador tampoco', async ({ page }) => {
@@ -386,7 +386,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
     // Y el estado quedo como estaba, comprobado desde la cuenta restituida.
     await entrarComo(page, 'u-admin');
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-arbol')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
   });
 
   test('el panel avisa cuando solo hay un Administrador', async ({ page }) => {
@@ -422,7 +422,7 @@ test.describe('el carril de administracion', () => {
     await page.goto('/admin/equipos');
     // Con la regla de prefijo, /admin reclamaria /admin/equipos y habria DOS activas a la vez.
     await expect(page.getByTestId('admin-nav-admin')).not.toHaveAttribute('aria-current', 'page');
-    await expect(page.getByTestId('admin-nav-equipos')).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByTestId('admin-nav-teams')).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('[aria-current="page"]')).toHaveCount(1);
   });
 
@@ -458,7 +458,7 @@ test.describe('el carril de administracion', () => {
     // Se provoca un cambio real para que haya algo que leer.
     await page.goto('/admin/equipos');
     await page.goto('/admin/auditoria');
-    const dataRows = page.locator('.registro__fila');
+    const dataRows = page.locator('.log__row');
     if ((await dataRows.count()) > 0) {
       await expect(dataRows.first().locator('time')).toHaveAttribute('dateTime', /\d{4}-\d{2}-\d{2}/);
     }

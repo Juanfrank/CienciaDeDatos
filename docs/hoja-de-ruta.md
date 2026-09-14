@@ -151,8 +151,8 @@ emergencia cubren el caso.
 
 ### 2.9 La consulta en lenguaje natural, retirada de la interfaz
 
-El campo «Pregunte:» esta **oculto**: `CONSULTA_VISIBLE` en
-`apps/shell/src/components/VistaModulo.tsx` es `false`. La ruta `/api/consulta` sigue viva y sus
+El campo «Pregunte:» esta **oculto**: `VISIBLE_QUERY` en
+`apps/shell/src/components/ModuleView.tsx` es `false`. La ruta `/api/consulta` sigue viva y sus
 pruebas tambien; lo que se salta es el bloque de pruebas de la interfaz, marcado con la misma
 razon.
 

@@ -75,8 +75,8 @@ h1, h2, h3, h4 { margin: 0; }
 
 .md-display-small,
 .vacio h1,
-.kpi__valor,
-.tarjeta__valor {
+.kpi__value,
+.card__value {
   font-size: var(--md-sys-typescale-display-small-size);
   line-height: var(--md-sys-typescale-display-small-line-height);
   font-weight: var(--md-sys-typescale-display-small-weight);
@@ -84,9 +84,9 @@ h1, h2, h3, h4 { margin: 0; }
 }
 
 .md-headline-small,
-.admin__cabecera h1,
+.admin__header h1,
 .avisos h1,
-.acceso__tarjeta h1 {
+.login__card h1 {
   font-size: var(--md-sys-typescale-headline-small-size);
   line-height: var(--md-sys-typescale-headline-small-line-height);
   font-weight: var(--md-sys-typescale-headline-small-weight);
@@ -94,11 +94,11 @@ h1, h2, h3, h4 { margin: 0; }
 }
 
 .md-title-large,
-.cabecera__titulo,
+.header__title,
 .avisos h2,
-.editor__cuerpo h2,
+.editor__body h2,
 .admin__principal h2,
-.emergente__cabecera h2 {
+.popover__header h2 {
   font-size: var(--md-sys-typescale-title-large-size);
   line-height: var(--md-sys-typescale-title-large-line-height);
   font-weight: var(--md-sys-typescale-title-large-weight);
@@ -107,9 +107,9 @@ h1, h2, h3, h4 { margin: 0; }
 
 .md-title-medium,
 .admin__principal h3,
-.editor__paleta h3,
-.editor__objeto h4,
-.lateral__titulo {
+.editor__palette h3,
+.editor__object h4,
+.sidebar__title {
   font-size: var(--md-sys-typescale-title-medium-size);
   line-height: var(--md-sys-typescale-title-medium-line-height);
   font-weight: var(--md-sys-typescale-title-medium-weight);
@@ -117,7 +117,7 @@ h1, h2, h3, h4 { margin: 0; }
 }
 
 .md-title-small,
-.objeto__cabecera h3,
+.object__header h3,
 .admin__principal h4 {
   font-size: var(--md-sys-typescale-title-small-size);
   line-height: var(--md-sys-typescale-title-small-line-height);
@@ -126,8 +126,8 @@ h1, h2, h3, h4 { margin: 0; }
 }
 
 .md-body-medium,
-.texto-atenuado,
-.cabecera__subtitulo,
+.muted-text,
+.header__subtitle,
 .admin__nav-label {
   font-size: var(--md-sys-typescale-body-medium-size);
   line-height: var(--md-sys-typescale-body-medium-line-height);
@@ -136,11 +136,11 @@ h1, h2, h3, h4 { margin: 0; }
 
 .md-body-small,
 .admin__nav-desc,
-.tarjeta__etiqueta,
-.lista-problemas,
-.editor__bloqueos,
-.editor__problemas,
-.incrustado__institucion {
+.card__label,
+.problems-list,
+.editor__locks,
+.editor__problems,
+.embedded__institucion {
   font-size: var(--md-sys-typescale-body-small-size);
   line-height: var(--md-sys-typescale-body-small-line-height);
   letter-spacing: var(--md-sys-typescale-body-small-tracking);
@@ -153,7 +153,7 @@ h1, h2, h3, h4 { margin: 0; }
   letter-spacing: var(--md-sys-typescale-label-large-tracking);
 }
 
-.texto-atenuado { color: var(--md-sys-color-on-surface-variant); margin: 0; }
+.muted-text { color: var(--md-sys-color-on-surface-variant); margin: 0; }
 
 code {
   font-family: var(--md-ref-typeface-mono);
@@ -258,7 +258,7 @@ code {
   color: var(--md-sys-color-on-secondary-container);
 }
 .md-boton--contorno,
-.acceso__azure {
+.login__azure {
   background: transparent;
   color: var(--md-sys-color-primary);
   border: 1px solid var(--md-sys-color-outline);
@@ -270,7 +270,7 @@ code {
 }
 
 .pastilla,
-.acceso__azure {
+.login__azure {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -288,10 +288,10 @@ code {
   isolation: isolate;
   overflow: hidden;
 }
-.acceso__azure { border: 1px solid var(--md-sys-color-outline); }
+.login__azure { border: 1px solid var(--md-sys-color-outline); }
 
 .pastilla::before,
-.acceso__azure::before,
+.login__azure::before,
 .boton-enlace::before {
   content: '';
   position: absolute;
@@ -303,14 +303,14 @@ code {
   z-index: -1;
 }
 .pastilla:hover:not(:disabled)::before,
-.acceso__azure:hover::before,
+.login__azure:hover::before,
 .boton-enlace:hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); }
 .pastilla:active:not(:disabled)::before,
-.acceso__azure:active::before,
+.login__azure:active::before,
 .boton-enlace:active:not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
 
 .pastilla:disabled,
-.acceso__azure:disabled {
+.login__azure:disabled {
   cursor: not-allowed;
   background: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
   color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
@@ -335,7 +335,7 @@ code {
  * `.boton-contorno` es el boton CONTORNEADO: mismo peso visual bajo, pero con un limite dibujado,
  * asi que se ve que es un control aunque nadie lo toque. Es el que corresponde a «volver».
  *
- * `.boton-peligro` es el contenedor de error: para lo que borra algo. Rojo del tema, no un rojo
+ * `.danger-button` es el contenedor de error: para lo que borra algo. Rojo del tema, no un rojo
  * suelto, para que siga a la comprobacion de contraste de 4.3 como todo lo demas.
  */
 .boton-contorno {
@@ -373,7 +373,7 @@ code {
 .boton-contorno:active:not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
 .boton-contorno:disabled { opacity: 0.38; cursor: not-allowed; }
 
-.boton-peligro {
+.danger-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -392,7 +392,7 @@ code {
   isolation: isolate;
   overflow: hidden;
 }
-.boton-peligro::before {
+.danger-button::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -402,9 +402,9 @@ code {
   pointer-events: none;
   z-index: -1;
 }
-.boton-peligro:hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); }
-.boton-peligro:active:not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
-.boton-peligro:disabled { opacity: 0.38; cursor: not-allowed; }
+.danger-button:hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); }
+.danger-button:active:not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
+.danger-button:disabled { opacity: 0.38; cursor: not-allowed; }
 
 .boton-enlace {
   display: inline-flex;
@@ -513,15 +513,15 @@ code {
   white-space: nowrap;
 }
 
-.pastilla-estado[data-estado='publicado'] {
+.pastilla-estado[status-data='publicado'] {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
 }
-.pastilla-estado[data-estado='pendiente-de-aprobacion'] {
+.pastilla-estado[status-data='pendiente-de-aprobacion'] {
   background: var(--md-sys-color-tertiary-container);
   color: var(--md-sys-color-on-tertiary-container);
 }
-.pastilla-estado[data-estado='bloqueada'] {
+.pastilla-estado[status-data='bloqueada'] {
   background: var(--md-sys-color-error-container);
   color: var(--md-sys-color-on-error-container);
 }
@@ -552,8 +552,8 @@ code {
  */
 .md-campo,
 .campo,
-.formulario__campo,
-.selector-equipo__campo {
+.form__field,
+.team-picker__field {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
@@ -565,8 +565,8 @@ code {
 /*
  * El rotulo de un campo: pequeño y en el rol variante, como manda MD3.
  *
- * `.formulario__campo > span` faltaba, y el marcado real es justo ese: `<label
- * class="formulario__campo"><span>Icono</span><select>`. La regla decia `.formulario__campo label`
+ * `.form__field > span` faltaba, y el marcado real es justo ese: `<label
+ * class="form__field"><span>Icono</span><select>`. La regla decia `.form__field label`
  * —un `label` DENTRO del campo—, que no existe en ninguna parte, asi que esos rotulos nunca
  * recibieron su estilo y caian en el tamaño heredado, `body-large`. Se notaba sobre todo en el
  * panel del editor, donde cada rotulo pesaba visualmente mas que el control que rotula.
@@ -574,9 +574,9 @@ code {
 .md-campo > span,
 .md-campo > label,
 .campo > span,
-.formulario__campo > span,
-.formulario__campo label,
-.selector-equipo__etiqueta {
+.form__field > span,
+.form__field label,
+.team-picker__label {
   font-size: var(--md-sys-typescale-body-small-size);
   line-height: var(--md-sys-typescale-body-small-line-height);
   letter-spacing: var(--md-sys-typescale-body-small-tracking);
@@ -658,11 +658,11 @@ input[type='radio'] {
 .tarjeta,
 .equipo,
 .regla,
-.editor__objeto,
-.editor__paleta,
-.editor__crear,
-.acceso__tarjeta,
-.marcadores__panel {
+.editor__object,
+.editor__palette,
+.editor__create,
+.login__card,
+.bookmarks__panel {
   background: var(--md-sys-color-surface-container-lowest);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-medium);
@@ -697,14 +697,14 @@ input[type='radio'] {
  * centrar dejaba el icono flotando a media altura de dos lineas de texto. Los complementos se
  * anclan arriba por lo mismo.
  */
-.objeto__cabecera {
+.object__header {
   display: flex;
   align-items: flex-start;
   gap: var(--space-sm);
   padding: var(--space-md) var(--space-md) 0;
 }
-.objeto__titulos { flex: 1; min-width: 0; }
-.objeto__subtitulo {
+.object__titulos { flex: 1; min-width: 0; }
+.object__subtitle {
   margin: 2px 0 0;
   font-size: var(--md-sys-typescale-body-small-size);
   line-height: var(--md-sys-typescale-body-small-line-height);
@@ -714,36 +714,36 @@ input[type='radio'] {
 /*
  * El acento de un objeto es un ROL del tema, no un color.
  *
- * `--objeto-acento` se resuelve aqui a partir de `data-acento`, y a partir de ahi el icono y la
+ * `--objeto-acento` se resuelve aqui a partir de `accent-data`, y a partir de ahi el icono y la
  * linea de resaltado lo consumen sin saber cual es. Es lo que impide que personalizar un objeto
  * se convierta en elegir un hexadecimal que la puerta de contraste de 4.3 no ha comprobado
  * nunca: solo hay cuatro valores posibles y los cuatro salen de pares ya verificados.
  */
-.objeto[data-acento='primario'] {
+.objeto[accent-data='primario'] {
   --objeto-acento: var(--md-sys-color-primary);
   --objeto-acento-fondo: var(--md-sys-color-primary-container);
   --objeto-acento-texto: var(--md-sys-color-on-primary-container);
 }
-.objeto[data-acento='secundario'] {
+.objeto[accent-data='secundario'] {
   --objeto-acento: var(--md-sys-color-secondary);
   --objeto-acento-fondo: var(--md-sys-color-secondary-container);
   --objeto-acento-texto: var(--md-sys-color-on-secondary-container);
 }
-.objeto[data-acento='terciario'] {
+.objeto[accent-data='terciario'] {
   --objeto-acento: var(--md-sys-color-tertiary);
   --objeto-acento-fondo: var(--md-sys-color-tertiary-container);
   --objeto-acento-texto: var(--md-sys-color-on-tertiary-container);
 }
-.objeto[data-acento='neutro'] {
+.objeto[accent-data='neutro'] {
   --objeto-acento: var(--md-sys-color-outline);
   --objeto-acento-fondo: var(--md-sys-color-surface-container-high);
   --objeto-acento-texto: var(--md-sys-color-on-surface-variant);
 }
 
-.objeto__cabecera .complemento,
-.objeto__cabecera .complementos { flex-shrink: 0; }
+.object__header .complemento,
+.object__header .complementos { flex-shrink: 0; }
 
-.objeto__icono {
+.object__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -762,8 +762,8 @@ input[type='radio'] {
  * lados: cambiarle el grosor a uno solo descuadra el radio de las esquinas. Asi la linea se
  * apoya DENTRO del borde y las esquinas siguen siendo las mismas.
  */
-.objeto[data-resaltado='si'] { position: relative; }
-.objeto[data-resaltado='si']::before {
+.objeto[highlight-data='si'] { position: relative; }
+.objeto[highlight-data='si']::before {
   content: '';
   position: absolute;
   top: 0;
@@ -774,9 +774,9 @@ input[type='radio'] {
   background: var(--color-de-resaltado, var(--objeto-acento));
   border-radius: var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 0 0;
 }
-.objeto[data-resaltado='si'] .objeto__cabecera { padding-top: calc(var(--space-md) + 4px); }
+.objeto[highlight-data='si'] .object__header { padding-top: calc(var(--space-md) + 4px); }
 /* Sin cabecera que empujar, el hueco de la linea lo deja el cuerpo. */
-.objeto[data-resaltado='si'] > .objeto__cuerpo:first-child { padding-top: calc(var(--space-md) + 4px); }
+.objeto[highlight-data='si'] > .object__body:first-child { padding-top: calc(var(--space-md) + 4px); }
 
 /* La tarjeta: valor y etiqueta como un bloque, para poder alinearlo en vertical. */
 /*
@@ -786,18 +786,18 @@ input[type='radio'] {
  * una `<dl>` dice exactamente eso: cada rotulo con su cifra. Una tabla de una sola fila
  * obligaria a un lector de pantalla a anunciar encabezados de columna que no separan nada.
  */
-.medidor-respaldo {
+.fallback-gauge {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 24px;
   margin: 0;
 }
-.medidor-respaldo > div { display: flex; flex-direction: column; gap: 2px; }
-.medidor-respaldo dt {
+.fallback-gauge > div { display: flex; flex-direction: column; gap: 2px; }
+.fallback-gauge dt {
   font-size: var(--md-sys-typescale-body-small-size);
   color: var(--md-sys-color-on-surface-variant);
 }
-.medidor-respaldo dd {
+.fallback-gauge dd {
   margin: 0;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
@@ -835,26 +835,26 @@ input[type='radio'] {
 @container tarjeta (max-width: 380px) {
   .multiplos { grid-template-columns: 1fr; }
 }
-.multiplos__panel {
+.multiples__panel {
   display: flex;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
 }
-.multiplos__omitidos {
+.multiples__omitted {
   align-self: center;
   margin: 0;
   font-size: var(--md-sys-typescale-body-small-size);
   color: var(--md-sys-color-on-surface-variant);
 }
-.multiplos__titulo {
+.multiples__title {
   margin: 0 0 2px;
   font-size: var(--md-sys-typescale-label-medium-size);
   font-weight: 600;
   color: var(--md-sys-color-on-surface-variant);
 }
 /* El grafico de cada panel ocupa lo que queda bajo su rotulo, y ni un pixel mas. */
-.multiplos__panel .grafico { flex: 1; min-height: 0; }
+.multiples__panel .grafico { flex: 1; min-height: 0; }
 
 /*
  * Una linea de referencia, como grupo.
@@ -880,7 +880,7 @@ input[type='radio'] {
  * se ve —no es un `placeholder`—: un `placeholder` desaparece al escribir y deja el campo sin
  * nombre para quien vuelve a el.
  */
-.editor__buscador {
+.editor__search-box {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -892,10 +892,10 @@ input[type='radio'] {
  * Se dibuja siempre que hay busqueda y solo aparece cuando no queda ninguna seccion. Preguntarlo
  * en JavaScript obligaria a repetir ahi la lista de que secciones admite cada objeto.
  */
-.editor__vacio { display: none; }
+.editor__empty { display: none; }
 /* La paleta si sabe cuando no hay resultados —filtra una lista, no un arbol de secciones— y por
    eso puede decirlo sin `:has()`. */
-.editor__vacio--visible {
+.editor__empty-visible {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -912,16 +912,16 @@ input[type='radio'] {
  *
  * El titulo de la familia ya no se dibuja aqui: lo lleva el `<summary>` de su seccion.
  *
- * `.tienda__familia` y `.tienda__familia-titulo` se van con el. Dejar las reglas «por si acaso»
+ * `.palette__family` y `.palette__title-family` se van con el. Dejar las reglas «por si acaso»
  * es como se acumulan hojas de estilo en las que nadie se atreve a borrar nada: si alguien
  * vuelve a necesitar el titulo suelto, lo escribe entonces y sabra para que es.
  */
-.tienda__familia-que {
+.palette__family-where {
   margin: 0 0 6px;
   font-size: var(--md-sys-typescale-body-small-size);
   color: var(--md-sys-color-on-surface-variant);
 }
-.editor__formato:not(:has(details.seccion)) .editor__vacio {
+.editor__format:not(:has(details.seccion)) .editor__empty {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -929,26 +929,26 @@ input[type='radio'] {
   padding: 16px 0;
   color: var(--md-sys-color-on-surface-variant);
 }
-.editor__vacio p { margin: 0; }
+.editor__empty p { margin: 0; }
 
-.editor__buscador-rotulo {
+.editor__label-search-box {
   font-size: var(--md-sys-typescale-label-medium-size);
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.referencia__acciones { display: flex; gap: 4px; flex-wrap: wrap; }
-.referencia__titulo {
+.reference__actions { display: flex; gap: 4px; flex-wrap: wrap; }
+.reference__title {
   padding: 0 4px;
   font-size: var(--md-sys-typescale-label-medium-size);
   color: var(--md-sys-color-on-surface-variant);
 }
 
 /* Dos campos numericos cortos en una fila: un minimo y un maximo se leen juntos o no se leen. */
-.formulario__pareja { display: flex; gap: 8px; }
-.formulario__pareja > * { flex: 1; min-width: 0; }
+.form__pair { display: flex; gap: 8px; }
+.form__pair > * { flex: 1; min-width: 0; }
 
 .kpi { display: flex; flex-direction: column; min-height: 0; }
-.kpi__etiqueta {
+.kpi__label {
   margin: 0;
   font-size: var(--md-sys-typescale-body-small-size);
   line-height: var(--md-sys-typescale-body-small-line-height);
@@ -956,19 +956,19 @@ input[type='radio'] {
 }
 
 /* La pista y el error de un campo, debajo del control. */
-.campo__pista,
-.campo__error {
+.field__pista,
+.field__error {
   font-size: var(--md-sys-typescale-body-small-size);
   line-height: var(--md-sys-typescale-body-small-line-height);
 }
-.campo__pista { color: var(--md-sys-color-on-surface-variant); }
-.campo__pista code {
+.field__pista { color: var(--md-sys-color-on-surface-variant); }
+.field__pista code {
   padding: 0 3px;
   border-radius: 3px;
   background: var(--md-sys-color-surface-container-high);
   font-family: ui-monospace, monospace;
 }
-.campo__error { color: var(--md-sys-color-error); font-weight: 500; }
+.field__error { color: var(--md-sys-color-error); font-weight: 500; }
 /*
  * El cuerpo es lo que SE DESPLAZA cuando no cabe.
  *
@@ -979,7 +979,7 @@ input[type='radio'] {
  * La barra lleva los colores del tema y se ve, por lo mismo que la del panel: un contenido que
  * sigue mas abajo y no lo anuncia es un contenido que nadie descubre.
  */
-.objeto__cuerpo {
+.object__body {
   /* Contenedor de consulta para lo que hay dentro de una tarjeta: ver `.multiplos`. */
   container-type: inline-size;
   container-name: tarjeta;
@@ -997,7 +997,7 @@ input[type='radio'] {
   scrollbar-width: thin;
   scrollbar-color: var(--md-sys-color-outline) var(--md-sys-color-surface-container-high);
 }
-.objeto__pie {
+.object__pie {
   padding: 0 var(--space-md) var(--space-md);
   font-size: var(--md-sys-typescale-body-small-size);
   color: var(--md-sys-color-on-surface-variant);
@@ -1030,14 +1030,14 @@ input[type='radio'] {
   gap: 2px;
   padding: var(--space-md);
 }
-.tarjeta--alerta { background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); }
-.tarjeta__valor { margin: 0; }
-.tarjeta__etiqueta { margin: 0; color: var(--md-sys-color-on-surface-variant); }
-.tarjeta__nota { font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); }
-.tarjeta__icono { color: var(--md-sys-color-on-surface-variant); }
-.tarjeta--alerta .tarjeta__etiqueta,
-.tarjeta--alerta .tarjeta__nota,
-.tarjeta--alerta .tarjeta__icono { color: inherit; }
+.alert-card { background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); }
+.card__value { margin: 0; }
+.card__label { margin: 0; color: var(--md-sys-color-on-surface-variant); }
+.card__nota { font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); }
+.card__icon { color: var(--md-sys-color-on-surface-variant); }
+.alert-card .card__label,
+.alert-card .card__nota,
+.alert-card .card__icon { color: inherit; }
 
 /*
  * La cifra ES el enlace a donde se actua sobre ella.
@@ -1056,7 +1056,7 @@ input[type='radio'] {
 /* ── Registro de auditoria ────────────────────────────────────────────────────────────────── */
 
 .registro { list-style: none; margin: 0; padding: 0; }
-.registro__fila {
+.log__row {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
@@ -1064,21 +1064,21 @@ input[type='radio'] {
   padding: var(--space-sm) 0;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
-.registro__cuando {
+.log__cuando {
   flex-shrink: 0;
   width: 8.5rem;
   font: var(--md-sys-typescale-body-small);
   color: var(--md-sys-color-on-surface-variant);
   font-variant-numeric: tabular-nums;
 }
-.registro__que { flex: 1; min-width: 14rem; }
-.registro__que code {
+.log__que { flex: 1; min-width: 14rem; }
+.log__que code {
   padding: 1px 5px;
   border-radius: var(--md-sys-shape-corner-extra-small);
   background: var(--md-sys-color-surface-container-high);
 }
 /* El motivo baja a su propia linea: es una frase, no un dato de la fila. */
-.registro__motivo {
+.log__motivo {
   flex-basis: 100%;
   padding-left: 8.5rem;
   font: var(--md-sys-typescale-body-small);
@@ -1086,20 +1086,20 @@ input[type='radio'] {
   font-style: italic;
 }
 /* Una ampliacion se distingue por la insignia Y por el filo: el color no puede ir solo (1.4.1). */
-.registro__fila[data-ampliacion='si'] { border-left: 3px solid var(--md-sys-color-error); padding-left: var(--space-sm); }
+.log__row[data-ampliacion='si'] { border-left: 3px solid var(--md-sys-color-error); padding-left: var(--space-sm); }
 
-.admin-inicio__registro-cabecera {
+.admin-inicio__header-log {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-md);
   flex-wrap: wrap;
 }
-.admin-inicio__registro-cabecera h2 { margin: 0 0 var(--space-sm); }
+.admin-inicio__header-log h2 { margin: 0 0 var(--space-sm); }
 
 .equipo { margin-bottom: var(--space-sm); }
-.equipo__detalle { padding: 0 var(--space-md) var(--space-md); }
-.equipo__titulo {
+.team__detail { padding: 0 var(--space-md) var(--space-md); }
+.team__title {
   width: 100%;
   text-align: left;
   font-family: inherit;
@@ -1130,20 +1130,20 @@ input[type='radio'] {
 .aviso p:last-child { margin-bottom: 0; }
 .aviso ul { margin: 0; padding-left: var(--space-lg); }
 
-.aviso--error,
-.aviso--problema {
+.notice-error,
+.problem-notice {
   background: var(--md-sys-color-error-container);
   color: var(--md-sys-color-on-error-container);
 }
-.aviso--atencion {
+.notice-atencion {
   background: var(--md-sys-color-tertiary-container);
   color: var(--md-sys-color-on-tertiary-container);
 }
-.aviso--ok {
+.notice-ok {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
 }
-.aviso__acciones { display: flex; gap: var(--space-sm); align-items: center; margin-top: var(--space-sm); flex-wrap: wrap; }
+.notice__actions { display: flex; gap: var(--space-sm); align-items: center; margin-top: var(--space-sm); flex-wrap: wrap; }
 
 /* ------------------------------------------------------------------ *
  * Estructura: cabecera, navegacion, contenido                         *
@@ -1169,11 +1169,11 @@ input[type='radio'] {
   color: var(--md-sys-color-on-primary);
   flex-wrap: wrap;
 }
-.cabecera .cabecera__titulo,
-.cabecera .cabecera__subtitulo,
+.cabecera .header__title,
+.cabecera .header__subtitle,
 .cabecera .boton-enlace,
 .cabecera .campana,
-.cabecera .selector-equipo__etiqueta { color: var(--md-sys-color-on-primary); }
+.cabecera .team-picker__label { color: var(--md-sys-color-on-primary); }
 .cabecera select {
   background: color-mix(in srgb, var(--md-sys-color-on-primary) 14%, transparent);
   border-color: color-mix(in srgb, var(--md-sys-color-on-primary) 45%, transparent);
@@ -1203,21 +1203,21 @@ input[type='radio'] {
 .cabecera :focus-visible { outline-color: var(--md-sys-color-on-primary); }
 
 /* El emblema lleva su propio disco blanco: el escudo es azul y rojo, y sobre azul se perderia. */
-.cabecera__emblema {
+.header__emblema {
   background: var(--md-sys-color-on-primary);
   border-radius: var(--md-sys-shape-corner-full);
   padding: 4px 6px;
 }
-.cabecera__marca { display: flex; align-items: center; gap: var(--space-md); min-width: 0; }
-.cabecera__textos { display: flex; flex-direction: column; min-width: 0; }
-.cabecera__emblema { width: auto; height: 40px; flex-shrink: 0; }
-.cabecera__titulo { text-decoration: none; color: var(--md-sys-color-on-surface); }
-.cabecera__subtitulo { color: var(--md-sys-color-on-surface-variant); }
-.cabecera__acciones { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
+.header__mark { display: flex; align-items: center; gap: var(--space-md); min-width: 0; }
+.header__texts { display: flex; flex-direction: column; min-width: 0; }
+.header__emblema { width: auto; height: 40px; flex-shrink: 0; }
+.header__title { text-decoration: none; color: var(--md-sys-color-on-surface); }
+.header__subtitle { color: var(--md-sys-color-on-surface-variant); }
+.header__actions { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
 
-.selector-equipo { display: flex; gap: var(--space-md); flex-wrap: wrap; }
-.selector-equipo__campo { margin-bottom: 0; }
-.selector-equipo select { min-height: 40px; }
+.team-picker { display: flex; gap: var(--space-md); flex-wrap: wrap; }
+.team-picker__field { margin-bottom: 0; }
+.team-picker select { min-height: 40px; }
 
 .cuerpo { display: flex; flex: 1; min-width: 0; min-height: 0; }
 
@@ -1247,15 +1247,15 @@ input[type='radio'] {
 /*
  * El plegado.
  *
- * Lo decide `data-lateral` en `<body>`, que escribe el boton de la cabecera. Se oculta con
+ * Lo decide `sidebar-data` en `<body>`, que escribe el boton de la cabecera. Se oculta con
  * `display: none` y no moviendolo fuera de la pantalla a proposito: un panel escondido con
  * `transform` sigue estando en el orden de tabulacion, asi que al plegarlo el foco se iria a una
  * lista de enlaces invisibles.
  *
  * Sin el atributo —es decir, sin JavaScript— el panel se queda visible a cualquier ancho.
  */
-body[data-lateral='oculto'] .lateral,
-body[data-lateral='oculto'] .admin__nav { display: none; }
+body[sidebar-data='oculto'] .lateral,
+body[sidebar-data='oculto'] .admin__nav { display: none; }
 
 /* El arbol arriba y el equipo abajo, con el hueco entre medias. */
 .lateral {
@@ -1263,14 +1263,14 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   flex-direction: column;
   gap: var(--space-md);
 }
-.lateral__contenido { flex: 1; min-height: 0; }
-.lateral__pie {
+.sidebar__contenido { flex: 1; min-height: 0; }
+.sidebar__pie {
   padding-top: var(--space-sm);
   border-top: 1px solid var(--md-sys-color-outline-variant);
 }
-.lateral__pie .selector-equipo__campo { width: 100%; }
-.lateral__pie select { width: 100%; }
-.selector-equipo__rol {
+.sidebar__pie .team-picker__field { width: 100%; }
+.sidebar__pie select { width: 100%; }
+.team-picker__role {
   margin: var(--space-xs) 0 0;
   font-size: var(--md-sys-typescale-body-small-size);
   color: var(--md-sys-color-on-surface-variant);
@@ -1284,7 +1284,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * minimo de 2.5.5 de WCAG, y un icono de 22 px es exactamente el control que se falla al
  * pulsarlo con el pulgar.
  */
-.cabecera__sandwich {
+.header__sandwich {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1302,7 +1302,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   isolation: isolate;
   overflow: hidden;
 }
-.cabecera__sandwich::before {
+.header__sandwich::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1312,16 +1312,16 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   pointer-events: none;
   z-index: -1;
 }
-.cabecera__sandwich:hover::before { opacity: var(--md-sys-state-hover-opacity); }
-.cabecera__sandwich:active::before { opacity: var(--md-sys-state-pressed-opacity); }
+.header__sandwich:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+.header__sandwich:active::before { opacity: var(--md-sys-state-pressed-opacity); }
 
-.lateral__resumen { display: none; }
-.lateral__titulo { margin: 0 0 var(--space-sm); padding: 0 var(--space-md); color: var(--md-sys-color-on-surface-variant); }
+.sidebar__resumen { display: none; }
+.sidebar__title { margin: 0 0 var(--space-sm); padding: 0 var(--space-md); color: var(--md-sys-color-on-surface-variant); }
 
 .arbol { list-style: none; margin: 0; padding: 0; }
-.arbol[data-nivel='0'] > li { margin-bottom: 2px; }
-.arbol:not([data-nivel='0']) { padding-left: var(--space-md); }
-.arbol__nombre-carpeta {
+.arbol[level-data='0'] > li { margin-bottom: 2px; }
+.arbol:not([level-data='0']) { padding-left: var(--space-md); }
+.tree__folder-name {
   display: block;
   padding: var(--space-sm) var(--space-md);
   color: var(--md-sys-color-on-surface-variant);
@@ -1336,7 +1336,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * necesita el mismo enfasis que una accion, y con `primary` el arbol entero compite con el
  * contenido.
  */
-.arbol__enlace {
+.tree__enlace {
   display: block;
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--md-sys-shape-corner-full);
@@ -1348,7 +1348,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   isolation: isolate;
   overflow: hidden;
 }
-.arbol__enlace::before {
+.tree__enlace::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1358,8 +1358,8 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   pointer-events: none;
   z-index: -1;
 }
-.arbol__enlace:hover::before { opacity: var(--md-sys-state-hover-opacity); }
-.arbol__enlace.es-activo {
+.tree__enlace:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+.tree__enlace.is-active {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
 }
@@ -1385,20 +1385,20 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * los titulos de las ocho tarjetas de debajo, y en una pantalla llena de cifras hacia falta un
  * ancla que dijera en que modulo se esta sin tener que leer.
  */
-.modulo__cabecera {
+.module__header {
   margin-bottom: var(--space-md);
   padding-left: var(--space-md);
   border-left: 4px solid var(--md-sys-color-primary);
   border-radius: var(--md-sys-shape-corner-extra-small);
 }
-.modulo__cabecera h1 {
+.module__header h1 {
   font-size: var(--md-sys-typescale-headline-medium-size);
   line-height: var(--md-sys-typescale-headline-medium-line-height);
   font-weight: var(--md-sys-typescale-headline-medium-weight);
   letter-spacing: var(--md-sys-typescale-headline-medium-tracking);
 }
 
-.barra-estado {
+.status-bar {
   display: flex;
   align-items: center;
   gap: var(--space-md);
@@ -1412,7 +1412,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * El separador vertical entre unas y otros los distingue sin meter una segunda linea: a la
  * izquierda lo que DICE de donde salen los datos, a la derecha lo que se puede HACER con ellos.
  */
-.barra-modulo {
+.module-bar {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -1421,7 +1421,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   padding-bottom: var(--space-sm);
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
-.barra-modulo__acciones {
+.module-bar__actions {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
@@ -1430,7 +1430,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   padding-left: var(--space-sm);
   border-left: 1px solid var(--md-sys-color-outline-variant);
 }
-.barra-modulo__limpiar { margin-left: auto; }
+.module-bar__clear { margin-left: auto; }
 
 /*
  * Boton de icono de MD3: 40 px de caja, 48 de area tactil, pastilla al pasar el raton.
@@ -1439,7 +1439,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * caja el control cumple de sobra en un raton y se queda corto para un pulgar, y 2.5.5 mide el
  * area, no lo que se ve.
  */
-.boton-icono {
+.icon-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1455,7 +1455,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   position: relative;
   isolation: isolate;
 }
-.boton-icono::before {
+.icon-button::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1466,20 +1466,20 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   pointer-events: none;
   z-index: -1;
 }
-.boton-icono::after {
+.icon-button::after {
   content: '';
   position: absolute;
   inset: -4px;
 }
-.boton-icono:hover::before { opacity: var(--md-sys-state-hover-opacity); }
-.boton-icono:active::before { opacity: var(--md-sys-state-pressed-opacity); }
+.icon-button:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+.icon-button:active::before { opacity: var(--md-sys-state-pressed-opacity); }
 
 /* Pulsado = la accion esta abierta o activa. Es el estado seleccionado de MD3. */
-.boton-icono[aria-pressed='true'] {
+.icon-button[aria-pressed='true'] {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
 }
-.boton-icono__contador {
+.icon-button__contador {
   font-size: var(--md-sys-typescale-label-small-size);
   font-weight: var(--md-sys-typescale-label-small-weight);
   font-variant-numeric: tabular-nums;
@@ -1492,7 +1492,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * `position: relative` en el envoltorio es lo que ancla el globo; sin el se posicionaria contra
  * la pagina y aparecería en una esquina.
  */
-.modulo__procedencia {
+.module__provenance {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -1500,14 +1500,14 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   margin: var(--space-sm) 0 0;
 }
 .ambito { position: relative; display: inline-flex; }
-.insignia--ambito {
+.scope-badge {
   border: none;
   cursor: help;
   font-family: inherit;
   background: var(--md-sys-color-tertiary-container);
   color: var(--md-sys-color-on-tertiary-container);
 }
-.ambito__detalle {
+.scope__detail {
   position: absolute;
   top: calc(100% + var(--space-xs));
   left: 0;
@@ -1546,7 +1546,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * Con `secondary-container` y una barra del mismo `secondary` se lee como una nota del sistema,
  * que es lo que es.
  */
-.ambito-activo {
+.active-scope {
   margin: var(--space-sm) 0 0;
   padding: var(--space-sm) var(--space-md);
   border-left: 4px solid var(--md-sys-color-secondary);
@@ -1586,7 +1586,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
    */
   position: relative;
 }
-.rejilla__celda {
+.grid__cell {
   min-width: 0;
   min-height: 0;
   grid-column: var(--col-escritorio);
@@ -1607,7 +1607,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  */
 @media (max-width: 1023px) {
   .rejilla { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-  .rejilla__celda { grid-column: var(--col-tableta); grid-row: var(--fila-tableta); }
+  .grid__cell { grid-column: var(--col-tableta); grid-row: var(--fila-tableta); }
 }
 @media (max-width: 639px) {
   .rejilla { grid-template-columns: 1fr; }
@@ -1620,7 +1620,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
    * con su cabecera y nada debajo, con el grafico recortado dentro.
    */
   .rejilla { grid-auto-rows: auto; }
-  .rejilla__celda { grid-column: var(--col-movil); grid-row: var(--fila-movil); }
+  .grid__cell { grid-column: var(--col-movil); grid-row: var(--fila-movil); }
 }
 
 /* ------------------------------------------------------------------ *
@@ -1634,7 +1634,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * del texto. El azul es el color del titulo en la portada de un informe institucional: aqui
  * hace el mismo trabajo, jerarquizar.
  */
-.kpi__valor { margin: 0; color: var(--md-sys-color-primary); }
+.kpi__value { margin: 0; color: var(--md-sys-color-primary); }
 .kpi__delta { margin: var(--space-xs) 0 0; font-size: var(--md-sys-typescale-body-medium-size); }
 .kpi__delta.es-positivo { color: var(--md-sys-color-secondary); }
 .kpi__delta.es-negativo { color: var(--md-sys-color-error); }
@@ -1650,10 +1650,10 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   color: var(--md-sys-color-on-surface-variant);
 }
 .leyenda li { display: flex; align-items: center; gap: var(--space-xs); }
-.leyenda__marca { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.legend__mark { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 
-.lista-problemas { margin: var(--space-sm) 0 0; padding-left: var(--space-lg); }
-.lista-problemas li { margin-bottom: var(--space-xs); }
+.problems-list { margin: var(--space-sm) 0 0; padding-left: var(--space-lg); }
+.problems-list li { margin-bottom: var(--space-xs); }
 
 /*
  * Grafico de barras en HTML.
@@ -1663,13 +1663,13 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * filtra— y no un dibujo: funciona con teclado y lo lee un lector de pantalla.
  */
 .barras { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-sm); }
-.barras__fila {
+.bars__row {
   display: grid;
   grid-template-columns: minmax(88px, 1fr) 2fr auto;
   align-items: center;
   gap: var(--space-sm);
 }
-.barras__etiqueta {
+.bars__label {
   font: inherit;
   font-size: var(--md-sys-typescale-body-medium-size);
   text-align: left;
@@ -1684,7 +1684,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   isolation: isolate;
   overflow: hidden;
 }
-.barras__etiqueta::before {
+.bars__label::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1694,20 +1694,20 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   pointer-events: none;
   z-index: -1;
 }
-.barras__etiqueta:hover::before { opacity: var(--md-sys-state-hover-opacity); }
-.barras__pista {
+.bars__label:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+.bars__pista {
   height: 16px;
   background: var(--md-sys-color-surface-container-highest);
   border-radius: var(--md-sys-shape-corner-full);
   overflow: hidden;
 }
-.barras__relleno {
+.bars__relleno {
   display: block;
   height: 100%;
   background: var(--md-sys-color-categorical-0);
   border-radius: var(--md-sys-shape-corner-full);
 }
-.barras__valor {
+.bars__value {
   font-size: var(--md-sys-typescale-body-medium-size);
   font-variant-numeric: tabular-nums;
   color: var(--md-sys-color-on-surface);
@@ -1726,8 +1726,8 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * una tabla de treinta filas empujaba la tarjeta hacia abajo y —con filas de rejilla elasticas—
  * estiraba la fila entera. Ahora la tarjeta mide lo que dice su `h` y la tabla se recorre.
  */
-.tabla-contenedor,
-.tabla-contenedor-datos {
+.container-table,
+.table-container-data {
   overflow: auto;
   max-height: 100%;
   min-height: 0;
@@ -1735,32 +1735,32 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   scrollbar-color: var(--md-sys-color-outline) var(--md-sys-color-surface-container-high);
 }
 /* En el emergente de datos manda el alto del dialogo, no el de una celda de rejilla. */
-.emergente .tabla-contenedor { max-height: 60vh; }
+.emergente .container-table { max-height: 60vh; }
 
 .tabla,
-.tabla-datos {
+.data-table {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--md-sys-typescale-body-medium-size);
 }
 .tabla th,
 .tabla td,
-.tabla-datos th,
-.tabla-datos td {
+.data-table th,
+.data-table td {
   padding: var(--space-sm) var(--space-md);
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
   text-align: left;
   vertical-align: top;
 }
 .tabla thead th,
-.tabla-datos thead th {
+.data-table thead th {
   font-size: var(--md-sys-typescale-label-medium-size);
   font-weight: var(--md-sys-typescale-label-medium-weight);
   letter-spacing: var(--md-sys-typescale-label-medium-tracking);
   color: var(--md-sys-color-on-surface-variant);
 }
-.tabla .es-numero { text-align: right; font-variant-numeric: tabular-nums; }
-.tabla .es-total { font-weight: 500; }
+.tabla .is-number { text-align: right; font-variant-numeric: tabular-nums; }
+.tabla .is-total { font-weight: 500; }
 
 /*
  * ---- Legibilidad de una tabla larga ----
@@ -1797,11 +1797,11 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   background: var(--md-sys-color-surface-container-high);
 }
 /* La esquina se cruza con las dos bandas fijas: por encima de ambas o se solapan al desplazar. */
-.tabla thead th.tabla__esquina { left: 0; z-index: 3; }
+.tabla thead th.table__esquina { left: 0; z-index: 3; }
 
 /* La fila de total cierra la tabla: se separa con una linea, no solo con negrita. */
-.tabla__fila-total > th,
-.tabla__fila-total > td {
+.table__total-row > th,
+.table__total-row > td {
   border-top: 2px solid var(--md-sys-color-outline);
   background: var(--md-sys-color-surface-container-high);
 }
@@ -1813,7 +1813,7 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
  * entero, que es lo que la gente intenta pulsar de todas formas. La flecha doble en reposo dice
  * que se puede ordenar sin decir que ya lo esta.
  */
-.tabla__ordenar {
+.table__sort {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
@@ -1826,20 +1826,20 @@ body[data-lateral='oculto'] .admin__nav { display: none; }
   text-align: inherit;
   cursor: pointer;
 }
-.tabla__ordenar:hover { color: var(--md-sys-color-primary); }
-.tabla .es-numero .tabla__ordenar,
-.tabla thead th.es-numero .tabla__ordenar { justify-content: flex-end; }
-.tabla__flecha { font-size: 0.7em; opacity: 0.55; }
-.tabla__ordenar:hover .tabla__flecha { opacity: 1; }
-th[aria-sort='ascending'] .tabla__flecha,
-th[aria-sort='descending'] .tabla__flecha {
+.table__sort:hover { color: var(--md-sys-color-primary); }
+.tabla .is-number .table__sort,
+.tabla thead th.is-number .table__sort { justify-content: flex-end; }
+.table__flecha { font-size: 0.7em; opacity: 0.55; }
+.table__sort:hover .table__flecha { opacity: 1; }
+th[aria-sort='ascending'] .table__flecha,
+th[aria-sort='descending'] .table__flecha {
   opacity: 1;
   color: var(--md-sys-color-primary);
 }
 
 /* ---- Jerarquia de la matriz ---- */
-.tabla__encabezado { display: inline-flex; align-items: center; gap: var(--space-xs); min-width: 0; }
-.tabla__plegar {
+.table__heading { display: inline-flex; align-items: center; gap: var(--space-xs); min-width: 0; }
+.table__collapse {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1853,18 +1853,18 @@ th[aria-sort='descending'] .tabla__flecha {
   color: var(--md-sys-color-on-surface-variant);
   cursor: pointer;
 }
-.tabla__plegar:hover { background: var(--md-sys-color-surface-container-highest); }
+.table__collapse:hover { background: var(--md-sys-color-surface-container-highest); }
 /* Un hueco del mismo tamano donde no hay nada que plegar: sin el, las hojas no alinean con sus hermanos. */
-.tabla__plegar--vacio { cursor: default; }
+.table__collapse-empty { cursor: default; }
 /* Plegado apunta a la derecha; desplegado, abajo. El giro es la unica pista de estado que hace falta. */
-.tabla__plegar[aria-expanded='false'] svg { transform: rotate(-90deg); }
-.tabla__plegar svg {
+.table__collapse[aria-expanded='false'] svg { transform: rotate(-90deg); }
+.table__collapse svg {
   transition: transform var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
 /* Cada nivel pesa un poco menos que el de encima: es la jerarquia dicha con tipografia. */
-.tabla--matriz tbody tr[data-nivel='0'] > th { font-weight: 600; }
-.tabla--matriz tbody tr[data-nivel='1'] > th { font-weight: 500; }
-.tabla--matriz tbody tr[data-nivel='2'] > th {
+.matrix-table tbody tr[level-data='0'] > th { font-weight: 600; }
+.matrix-table tbody tr[level-data='1'] > th { font-weight: 500; }
+.matrix-table tbody tr[level-data='2'] > th {
   font-weight: 400;
   color: var(--md-sys-color-on-surface-variant);
 }
@@ -1882,19 +1882,19 @@ th[aria-sort='descending'] .tabla__flecha {
  * columnas y uno de diez se reparte en las que quepan, sin que nadie tenga que declarar cuantas.
  * Es el mismo objeto con una dimension o con diez.
  */
-.panel-filtros {
+.filters-panel {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-md);
   align-items: start;
 }
-.panel-filtros__campo {
+.filters-panel__field {
   margin: 0;
   padding: 0;
   border: none;
   min-width: 0;
 }
-.panel-filtros__etiqueta {
+.filters-panel__label {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -1905,10 +1905,10 @@ th[aria-sort='descending'] .tabla__flecha {
   letter-spacing: var(--md-sys-typescale-label-medium-tracking);
   color: var(--md-sys-color-on-surface-variant);
 }
-.panel-filtros__limpiar { font-size: var(--md-sys-typescale-label-small-size); }
-.panel-filtros__campo select,
-.panel-filtros__buscar { width: 100%; min-height: 40px; }
-.panel-filtros__buscar {
+.filters-panel__clear { font-size: var(--md-sys-typescale-label-small-size); }
+.filters-panel__field select,
+.filters-panel__search { width: 100%; min-height: 40px; }
+.filters-panel__search {
   padding: 0 var(--space-md);
   border: 1px solid var(--md-sys-color-outline);
   border-radius: var(--md-sys-shape-corner-extra-small);
@@ -1926,7 +1926,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * todo lo que el modulo tiene debajo. El filtro dejaria de ser un control lateral para convertirse
  * en el contenido de la pagina.
  */
-.panel-filtros__lista {
+.filters-panel__list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -1934,41 +1934,41 @@ th[aria-sort='descending'] .tabla__flecha {
   overflow-y: auto;
   font-size: var(--md-sys-typescale-body-medium-size);
 }
-.panel-filtros__lista label {
+.filters-panel__list label {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   padding: 4px 0;
   cursor: pointer;
 }
-.panel-filtros__rango {
+.filters-panel__range {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: var(--space-xs) var(--space-sm);
 }
-.panel-filtros__rango label {
+.filters-panel__range label {
   font-size: var(--md-sys-typescale-body-small-size);
   color: var(--md-sys-color-on-surface-variant);
 }
-.panel-filtros__rango input { min-height: 40px; width: 100%; }
+.filters-panel__range input { min-height: 40px; width: 100%; }
 
 /* ------------------------------------------------------------------ *
  * Panel de administracion y editor                                    *
  * ------------------------------------------------------------------ */
 
 .admin { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.admin__ruta { display: flex; align-items: baseline; gap: var(--space-sm); min-width: 0; flex-wrap: wrap; }
-.admin__ruta h1 { margin: 0; }
-.admin__ruta h1 a { color: inherit; text-decoration: none; }
-.admin__ruta h1 a:hover { text-decoration: underline; }
-.admin__ruta-sep { color: var(--md-sys-color-outline); }
-.admin__ruta-actual {
+.admin__path { display: flex; align-items: baseline; gap: var(--space-sm); min-width: 0; flex-wrap: wrap; }
+.admin__path h1 { margin: 0; }
+.admin__path h1 a { color: inherit; text-decoration: none; }
+.admin__path h1 a:hover { text-decoration: underline; }
+.admin__path-sep { color: var(--md-sys-color-outline); }
+.admin__path-actual {
   font: var(--md-sys-typescale-title-medium);
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.admin__cabecera {
+.admin__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1977,7 +1977,7 @@ th[aria-sort='descending'] .tabla__flecha {
   background: var(--md-sys-color-surface-container);
   flex-wrap: wrap;
 }
-.admin__cuerpo { display: flex; flex: 1; min-width: 0; min-height: 0; }
+.admin__body { display: flex; flex: 1; min-width: 0; min-height: 0; }
 .admin__nav ul { list-style: none; margin: 0; padding: 0; }
 
 /*
@@ -2031,7 +2031,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * mirar. Y el numero nunca va solo — el texto para lectores dice de que son, porque «3» junto a
  * «Auditoria» no significa nada por si mismo (1.4.1).
  */
-.admin__nav-indicador {
+.admin__indicator-nav {
   flex-shrink: 0;
   min-width: 20px;
   padding: 0 6px;
@@ -2088,7 +2088,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * mas larga es la linea. Al convertirse el editor en un lienzo, ese mismo tope dejaba cuatrocientos
  * pixeles en blanco a la derecha del panel en una pantalla normal: espacio que el modulo que se
  * esta construyendo podria estar usando. El tope se conserva donde tenia sentido —la lista— con
- * `.editor__lista`.
+ * `.editor__list`.
  */
 /*
  * El taller: dos columnas de pantalla completa.
@@ -2113,10 +2113,10 @@ th[aria-sort='descending'] .tabla__flecha {
 }
 .taller__obra > .editor { padding: var(--space-lg); }
 
-.editor__cuerpo { flex: 1; padding: var(--space-lg); min-width: 0; min-height: 0; overflow-y: auto; }
-.editor__lista { max-width: 1100px; }
-.editor__cuerpo h2 { margin-bottom: var(--space-md); }
-.editor__crear {
+.editor__body { flex: 1; padding: var(--space-lg); min-width: 0; min-height: 0; overflow-y: auto; }
+.editor__list { max-width: 1100px; }
+.editor__body h2 { margin-bottom: var(--space-md); }
+.editor__create {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -2124,8 +2124,8 @@ th[aria-sort='descending'] .tabla__flecha {
   padding: var(--space-md);
   margin-bottom: var(--space-md);
 }
-.editor__crear .formulario__campo { margin-bottom: 0; }
-.editor__cabecera {
+.editor__create .form__field { margin-bottom: 0; }
+.editor__header {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -2141,10 +2141,10 @@ th[aria-sort='descending'] .tabla__flecha {
  * su borde inferior se dibuja a una altura distinta del resto. Se veia como lineas sueltas
  * flotando en la ultima columna.
  */
-.editor__acciones { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; }
-.editor__sin-acciones { color: var(--md-sys-color-outline); }
-.editor__bloqueos,
-.editor__problemas { margin: var(--space-xs) 0 0; padding-left: var(--space-lg); }
+.editor__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; }
+.editor__without-actions { color: var(--md-sys-color-outline); }
+.editor__locks,
+.editor__problems { margin: var(--space-xs) 0 0; padding-left: var(--space-lg); }
 /* ------------------------------------------------------------------ *
  * Editor: lienzo y panel                                              *
  * ------------------------------------------------------------------ */
@@ -2172,7 +2172,7 @@ th[aria-sort='descending'] .tabla__flecha {
   min-height: 420px;
 }
 
-.lienzo__rejilla {
+.canvas__grid {
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--rejilla-columnas), minmax(0, 1fr));
@@ -2211,7 +2211,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * guia empieza la fila de verdad. Un degradado de fondo habria sido mas corto y tampoco sirve:
  * no sabe nada del `gap` ni de que las filas midan distinto.
  */
-.lienzo__guias {
+.canvas__guias {
   grid-area: 1 / 1 / -1 / -1;
   display: grid;
   grid-template-columns: subgrid;
@@ -2232,12 +2232,12 @@ th[aria-sort='descending'] .tabla__flecha {
  * sin las horizontales no habia forma de ver cuantas filas ocupa un bloque ni donde empieza el
  * siguiente.
  */
-.lienzo__guia {
+.canvas__guia {
   border: 1px dashed var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-extra-small);
 }
 
-.lienzo__bloque {
+.canvas__block {
   position: relative;
   z-index: 1;
   min-width: 0;
@@ -2247,8 +2247,8 @@ th[aria-sort='descending'] .tabla__flecha {
   border: 2px solid transparent;
   border-radius: var(--md-sys-shape-corner-medium);
 }
-.lienzo__bloque:hover { border-color: var(--md-sys-color-outline); }
-.lienzo__bloque[data-chosen='si'] {
+.canvas__block:hover { border-color: var(--md-sys-color-outline); }
+.canvas__block[data-chosen='si'] {
   border-color: var(--md-sys-color-primary);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-sys-color-primary) 18%, transparent);
 }
@@ -2263,7 +2263,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * `touch-action: none` es obligatorio y no cosmetico: sin el, el navegador se queda el gesto para
  * desplazar la pagina y el arrastre no llega a empezar en una pantalla tactil.
  */
-.lienzo__asa {
+.canvas__handle {
   position: absolute;
   z-index: 3;
   display: inline-flex;
@@ -2276,10 +2276,10 @@ th[aria-sort='descending'] .tabla__flecha {
   touch-action: none;
   transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
-.lienzo__bloque:hover .lienzo__asa,
-.lienzo__bloque[data-chosen='si'] .lienzo__asa { opacity: 1; }
+.canvas__block:hover .canvas__handle,
+.canvas__block[data-chosen='si'] .canvas__handle { opacity: 1; }
 
-.lienzo__asa--mover {
+.canvas__move-handle {
   top: 4px;
   right: 4px;
   width: 26px;
@@ -2287,10 +2287,10 @@ th[aria-sort='descending'] .tabla__flecha {
   border-radius: var(--md-sys-shape-corner-extra-small);
   cursor: grab;
 }
-.lienzo__asa--mover:active { cursor: grabbing; }
+.canvas__move-handle:active { cursor: grabbing; }
 
 /* La esquina inferior derecha, como cualquier control de redimension. */
-.lienzo__asa--medir {
+.canvas__resize-handle {
   right: -2px;
   bottom: -2px;
   width: 16px;
@@ -2300,7 +2300,7 @@ th[aria-sort='descending'] .tabla__flecha {
 }
 
 /* Mientras se arrastra, el bloque se atenua: lo que manda es la sombra del destino. */
-.lienzo__bloque[data-arrastrando='si'] { opacity: 0.45; }
+.canvas__block[data-arrastrando='si'] { opacity: 0.45; }
 
 /*
  * La sombra del destino.
@@ -2309,7 +2309,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * rectangulo flotante calculado en pixeles habria quedado a uno o dos de donde acaba el objeto, y
  * es justo la diferencia que hace dudar de si va a caer donde parece.
  */
-.lienzo__sombra {
+.canvas__sombra {
   z-index: 2;
   display: flex;
   align-items: center;
@@ -2322,14 +2322,14 @@ th[aria-sort='descending'] .tabla__flecha {
   font-weight: var(--md-sys-typescale-label-medium-weight);
   pointer-events: none;
 }
-.lienzo__sombra[data-valido='no'] {
+.canvas__sombra[data-valido='no'] {
   border-color: var(--md-sys-color-error);
   background: color-mix(in srgb, var(--md-sys-color-error) 10%, transparent);
   color: var(--md-sys-color-error);
 }
 
 /* Mientras se arrastra no se selecciona texto por accidente. */
-.lienzo__rejilla[data-arrastrando='si'] { user-select: none; }
+.canvas__grid[data-arrastrando='si'] { user-select: none; }
 
 /*
  * El boton de seleccion: transparente y del tamano del bloque.
@@ -2338,7 +2338,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * debajo tenga que dejar de ser lo que es. El foco se dibuja sobre el bloque entero porque es lo
  * que se selecciona, no un rectangulo suelto en una esquina.
  */
-.lienzo__seleccionar {
+.canvas__select {
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -2348,13 +2348,13 @@ th[aria-sort='descending'] .tabla__flecha {
   background: transparent;
   cursor: pointer;
 }
-.lienzo__seleccionar:focus-visible {
+.canvas__select:focus-visible {
   outline: 3px solid var(--md-sys-color-secondary);
   outline-offset: 2px;
 }
 
 /* El tamano en celdas, visible sobre el bloque elegido. Lo mismo que dice el panel con palabras. */
-.lienzo__medida {
+.canvas__measure {
   position: absolute;
   top: -10px;
   left: var(--space-sm);
@@ -2368,12 +2368,12 @@ th[aria-sort='descending'] .tabla__flecha {
   opacity: 0;
   transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
-.lienzo__bloque[data-chosen='si'] .lienzo__medida,
-.lienzo__bloque:hover .lienzo__medida { opacity: 1; }
+.canvas__block[data-chosen='si'] .canvas__measure,
+.canvas__block:hover .canvas__measure { opacity: 1; }
 
-.lienzo__contenido { height: 100%; min-height: 0; display: flex; }
-.lienzo__contenido > .objeto { flex: 1; min-height: 0; }
-.lienzo__vacio {
+.canvas__contenido { height: 100%; min-height: 0; display: flex; }
+.canvas__contenido > .objeto { flex: 1; min-height: 0; }
+.canvas__empty {
   margin: 0;
   padding: var(--space-xl) var(--space-md);
   text-align: center;
@@ -2381,7 +2381,7 @@ th[aria-sort='descending'] .tabla__flecha {
 }
 
 /* El panel: pestanas arriba, cuerpo desplazable debajo. */
-.panel-editor {
+.editor-panel {
   width: 340px;
   flex-shrink: 0;
   align-self: stretch;
@@ -2399,7 +2399,7 @@ th[aria-sort='descending'] .tabla__flecha {
   border-left: 1px solid var(--md-sys-color-outline-variant);
   overflow: hidden;
 }
-.panel-editor__barra {
+.editor-panel__bar {
   display: flex;
   align-items: stretch;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
@@ -2412,17 +2412,17 @@ th[aria-sort='descending'] .tabla__flecha {
  * que no cabe se alcanza con los chevrones o con las flechas del teclado. Encogerlas hasta que
  * quepan habria cortado los rotulos y convertido la barra en iconos sin nombre.
  */
-.panel-editor__pestanas {
+.editor-panel__tabs {
   flex: 1;
   display: flex;
   overflow-x: auto;
   scrollbar-width: none;
   scroll-behavior: smooth;
 }
-.panel-editor__pestanas::-webkit-scrollbar { display: none; }
+.editor-panel__tabs::-webkit-scrollbar { display: none; }
 
 /* Estrecho, como pide un control que solo desplaza: no compite con las pestanas. */
-.panel-editor__chevron {
+.editor-panel__chevron {
   flex-shrink: 0;
   width: 20px;
   border: none;
@@ -2432,7 +2432,7 @@ th[aria-sort='descending'] .tabla__flecha {
   line-height: 1;
   cursor: pointer;
 }
-.panel-editor__chevron:hover { background: var(--md-sys-color-surface-container); }
+.editor-panel__chevron:hover { background: var(--md-sys-color-surface-container); }
 
 /*
  * Pestana de MD3: indicador abajo, no un fondo.
@@ -2447,7 +2447,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * pestana cuyo rotulo no se lee entero no cumple su unica funcion. Al vivir en un carril que se
  * desplaza, pueden ocupar lo que necesiten: lo que sobra se alcanza con los chevrones.
  */
-.panel-editor__pestana {
+.editor-panel__tab {
   flex: 0 0 auto;
   white-space: nowrap;
   display: flex;
@@ -2464,11 +2464,11 @@ th[aria-sort='descending'] .tabla__flecha {
   font-weight: var(--md-sys-typescale-label-medium-weight);
   cursor: pointer;
 }
-.panel-editor__pestana[aria-selected='true'] {
+.editor-panel__tab[aria-selected='true'] {
   color: var(--md-sys-color-primary);
   border-bottom-color: var(--md-sys-color-primary);
 }
-.panel-editor__pestana:disabled {
+.editor-panel__tab:disabled {
   opacity: var(--md-sys-state-disabled-opacity);
   cursor: not-allowed;
 }
@@ -2492,7 +2492,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * movil, con la barra del navegador, no lo era nunca—. Ahora el carril es un hermano de la
  * columna que se desplaza, asi que su alto lo reparte el flex y no hay nada que adivinar.
  */
-.panel-editor__cuerpo {
+.editor-panel__body {
   flex: 1;
   min-height: 0;
   padding: var(--space-md);
@@ -2535,35 +2535,35 @@ th[aria-sort='descending'] .tabla__flecha {
  * `scrollbar-color`, los motores basados en Chromium ignoran los pseudoelementos, asi que tener
  * las dos cosas solo deja codigo muerto que aparenta hacer algo.
  */
-.panel-editor__cuerpo {
+.editor-panel__body {
   gap: var(--space-sm);
   scrollbar-width: auto;
   scrollbar-color: var(--md-sys-color-outline) var(--md-sys-color-surface-container-high);
   scrollbar-gutter: stable;
 }
 
-.panel-editor input[type='text'],
-.panel-editor input[type='search'],
-.panel-editor input:not([type]),
-.panel-editor select,
-.panel-editor textarea {
+.editor-panel input[type='text'],
+.editor-panel input[type='search'],
+.editor-panel input:not([type]),
+.editor-panel select,
+.editor-panel textarea {
   min-height: 36px;
   padding: 0 10px;
   font-size: var(--md-sys-typescale-body-medium-size);
   line-height: var(--md-sys-typescale-body-medium-line-height);
 }
-.panel-editor textarea { padding: 6px 10px; min-height: 64px; }
+.editor-panel textarea { padding: 6px 10px; min-height: 64px; }
 
-.panel-editor .formulario__campo { gap: 2px; margin-bottom: var(--space-sm); }
+.editor-panel .form__field { gap: 2px; margin-bottom: var(--space-sm); }
 /* El ultimo campo de una seccion no necesita margen: el `padding` de la seccion ya lo pone. */
-.panel-editor .formulario__campo:last-child { margin-bottom: 0; }
+.editor-panel .form__field:last-child { margin-bottom: 0; }
 
-.panel-editor .seccion__titulo { padding: var(--space-xs) var(--space-sm); }
-.panel-editor .seccion__cuerpo {
+.editor-panel .section__title { padding: var(--space-xs) var(--space-sm); }
+.editor-panel .section__body {
   padding: 0 var(--space-sm) var(--space-sm);
   gap: var(--space-sm);
 }
-.panel-editor .pozo__etiqueta { margin-bottom: 2px; }
+.editor-panel .well__label { margin-bottom: 2px; }
 
 /*
  * Con el dedo, no.
@@ -2573,20 +2573,20 @@ th[aria-sort='descending'] .tabla__flecha {
  * no hay motivo para apretarlo. 4.9 no admite que la densidad se pague con accesibilidad.
  */
 @media (pointer: coarse) {
-  .panel-editor input[type='text'],
-  .panel-editor input[type='search'],
-  .panel-editor input:not([type]),
-  .panel-editor select,
-  .panel-editor textarea { min-height: 48px; padding: 0 16px; }
-  .panel-editor .seccion__titulo { padding: var(--space-sm) var(--space-md); }
+  .editor-panel input[type='text'],
+  .editor-panel input[type='search'],
+  .editor-panel input:not([type]),
+  .editor-panel select,
+  .editor-panel textarea { min-height: 48px; padding: 0 16px; }
+  .editor-panel .section__title { padding: var(--space-sm) var(--space-md); }
 }
 
-.panel-editor__nota { font-size: var(--md-sys-typescale-body-small-size); }
+.editor-panel__nota { font-size: var(--md-sys-typescale-body-small-size); }
 /* Separado del ultimo pozo y a lo ancho: no es una opcion mas de la lista, es el final. */
-.panel-editor__quitar { align-self: stretch; margin-top: var(--space-xs); }
+.editor-panel__remove { align-self: stretch; margin-top: var(--space-xs); }
 
 /* ---- Estilo de texto y paleta ---- */
-.estilo-texto {
+.text-style {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
@@ -2594,7 +2594,7 @@ th[aria-sort='descending'] .tabla__flecha {
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-small);
 }
-.estilo-texto__rotulo {
+.text-style__label {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -2603,14 +2603,14 @@ th[aria-sort='descending'] .tabla__flecha {
   font-weight: var(--md-sys-typescale-label-medium-weight);
   color: var(--md-sys-color-on-surface-variant);
 }
-.estilo-texto__fila { display: flex; gap: var(--space-xs); }
+.text-style__row { display: flex; gap: var(--space-xs); }
 /*
  * B, I, U: cuadrados, iguales y contiguos, como en cualquier editor de texto.
  *
  * `aria-pressed` es lo que dice si estan activos, y el relleno lo acompana — el estado no se fia
  * solo del color, que es lo que 1.4.1 pide para un control que solo tiene dos posiciones.
  */
-.estilo-texto__boton {
+.text-style__button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2624,13 +2624,13 @@ th[aria-sort='descending'] .tabla__flecha {
   font-size: var(--md-sys-typescale-body-medium-size);
   cursor: pointer;
 }
-.estilo-texto__boton:hover:not(:disabled) { background: var(--md-sys-color-surface-container-high); }
-.estilo-texto__boton[aria-pressed='true'] {
+.text-style__button:hover:not(:disabled) { background: var(--md-sys-color-surface-container-high); }
+.text-style__button[aria-pressed='true'] {
   background: var(--md-sys-color-secondary-container);
   border-color: var(--md-sys-color-secondary);
   color: var(--md-sys-color-on-secondary-container);
 }
-.estilo-texto__boton:disabled { opacity: 0.38; cursor: not-allowed; }
+.text-style__button:disabled { opacity: 0.38; cursor: not-allowed; }
 
 /*
  * La paleta: seis muestras, una por ROL del tema.
@@ -2640,7 +2640,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * un borde sobre una muestra de color es lo unico que se distingue sin depender del color mismo.
  */
 .paleta { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
-.paleta__muestra {
+.palette__muestra {
   width: 26px;
   height: 26px;
   padding: 0;
@@ -2648,15 +2648,15 @@ th[aria-sort='descending'] .tabla__flecha {
   border-radius: 50%;
   cursor: pointer;
 }
-.paleta__muestra[aria-checked='true'] {
+.palette__muestra[aria-checked='true'] {
   outline: 2px solid var(--md-sys-color-on-surface);
   outline-offset: 2px;
 }
-.paleta__muestra:focus-visible {
+.palette__muestra:focus-visible {
   outline: 2px solid var(--md-sys-color-primary);
   outline-offset: 2px;
 }
-.panel-editor__adjuntos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-sm); }
+.editor-panel__attachments { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-sm); }
 
 /* ---- Secciones colapsables ---- */
 
@@ -2665,13 +2665,13 @@ th[aria-sort='descending'] .tabla__flecha {
   border-radius: var(--md-sys-shape-corner-small);
   background: var(--md-sys-color-surface-container-low);
 }
-.seccion[data-nivel='2'] { background: var(--md-sys-color-surface-container-lowest); }
+.seccion[level-data='2'] { background: var(--md-sys-color-surface-container-lowest); }
 
 /*
  * El triangulo nativo se sustituye por uno propio para poder colocarlo a la izquierda y girarlo.
  * `list-style: none` mas la regla `::-webkit-details-marker` cubren los dos motores.
  */
-.seccion__titulo {
+.section__title {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -2682,8 +2682,8 @@ th[aria-sort='descending'] .tabla__flecha {
   font-weight: var(--md-sys-typescale-label-large-weight);
   color: var(--md-sys-color-on-surface);
 }
-.seccion__titulo::-webkit-details-marker { display: none; }
-.seccion__titulo::before {
+.section__title::-webkit-details-marker { display: none; }
+.section__title::before {
   content: '';
   width: 0;
   height: 0;
@@ -2692,12 +2692,12 @@ th[aria-sort='descending'] .tabla__flecha {
   border-bottom: 4px solid transparent;
   transition: transform var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
-.seccion[open] > .seccion__titulo::before { transform: rotate(90deg); }
-.seccion[data-nivel='2'] > .seccion__titulo {
+.seccion[open] > .section__title::before { transform: rotate(90deg); }
+.seccion[level-data='2'] > .section__title {
   font-size: var(--md-sys-typescale-label-medium-size);
   color: var(--md-sys-color-on-surface-variant);
 }
-.seccion__cuerpo {
+.section__body {
   padding: 0 var(--space-md) var(--space-md);
   display: flex;
   flex-direction: column;
@@ -2707,7 +2707,7 @@ th[aria-sort='descending'] .tabla__flecha {
 /* ---- Pozos de campos ---- */
 
 .pozo { position: relative; }
-.pozo__etiqueta {
+.well__label {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -2725,8 +2725,8 @@ th[aria-sort='descending'] .tabla__flecha {
  * atrapar: comprueba los pares de roles, y una opacidad encima altera el color despues de que los
  * haya comprobado. Si algo tiene que pesar menos, se baja de rol tipografico, no se difumina.
  */
-.pozo__cupo { font-variant-numeric: tabular-nums; }
-.pozo__nombre { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+.well__cupo { font-variant-numeric: tabular-nums; }
+.well__name { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
 
 /*
  * El asterisco de obligatorio.
@@ -2736,7 +2736,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * «(obligatorio)» para lectores de pantalla, porque un asterisco leido en voz alta no informa de
  * nada, y el color por si solo tampoco (1.4.1).
  */
-.pozo__obligatorio {
+.well__obligatorio {
   color: var(--md-sys-color-error);
   font-weight: 700;
   line-height: 1;
@@ -2744,7 +2744,7 @@ th[aria-sort='descending'] .tabla__flecha {
 
 /* ---- Ayuda contextual ---- */
 .ayuda { position: relative; display: inline-flex; }
-.ayuda__icono {
+.help__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2757,8 +2757,8 @@ th[aria-sort='descending'] .tabla__flecha {
   color: var(--md-sys-color-on-surface-variant);
   cursor: help;
 }
-.ayuda__icono:hover { background: var(--md-sys-color-secondary-container); }
-.ayuda__icono:focus-visible {
+.help__icon:hover { background: var(--md-sys-color-secondary-container); }
+.help__icon:focus-visible {
   outline: 2px solid var(--md-sys-color-primary);
   outline-offset: 1px;
 }
@@ -2768,7 +2768,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * `z-index` alto porque cae sobre las secciones de al lado, y ancho fijo porque el panel mide
  * 340 px: sin el, una ayuda larga estiraria la fila entera.
  */
-.ayuda__globo {
+.help__globo {
   position: absolute;
   top: calc(100% + 6px);
   left: -6px;
@@ -2785,7 +2785,7 @@ th[aria-sort='descending'] .tabla__flecha {
   font-weight: 400;
   white-space: normal;
 }
-.pozo__chiclets {
+.well__chiclets {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -2821,7 +2821,7 @@ th[aria-sort='descending'] .tabla__flecha {
   color: var(--md-sys-color-on-secondary-container);
   font-size: var(--md-sys-typescale-body-medium-size);
 }
-.chiclet__nombre {
+.chip__name {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -2852,7 +2852,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * explicitamente, porque en varios motores heredan el del `select` y el menu desplegado saldria
  * en blanco sobre blanco.
  */
-.chiclet__agregacion {
+.chip__aggregation {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -2863,8 +2863,8 @@ th[aria-sort='descending'] .tabla__flecha {
   border-radius: var(--md-sys-shape-corner-extra-small);
   color: var(--md-sys-color-on-surface-variant);
 }
-.chiclet__agregacion:hover { background: var(--md-sys-color-surface-container-highest); }
-.chiclet__agregacion select {
+.chip__aggregation:hover { background: var(--md-sys-color-surface-container-highest); }
+.chip__aggregation select {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -2878,15 +2878,15 @@ th[aria-sort='descending'] .tabla__flecha {
   color: transparent;
   cursor: pointer;
 }
-.chiclet__agregacion select option { color: var(--md-sys-color-on-surface); }
-.chiclet__agregacion select:disabled { cursor: not-allowed; }
+.chip__aggregation select option { color: var(--md-sys-color-on-surface); }
+.chip__aggregation select:disabled { cursor: not-allowed; }
 /* El foco se dibuja en el envoltorio: el `select` no tiene caja visible donde ponerlo. */
-.chiclet__agregacion:focus-within {
+.chip__aggregation:focus-within {
   outline: 2px solid var(--md-sys-color-primary);
   outline-offset: 1px;
 }
-.chiclet__agregacion svg { pointer-events: none; }
-.chiclet__quitar {
+.chip__aggregation svg { pointer-events: none; }
+.chip__remove {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2899,9 +2899,9 @@ th[aria-sort='descending'] .tabla__flecha {
   color: inherit;
   cursor: pointer;
 }
-.chiclet__quitar:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
+.chip__remove:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
 
-.chiclet--anadir {
+.add-chip {
   justify-content: center;
   padding: 0;
   border-style: dashed;
@@ -2913,10 +2913,10 @@ th[aria-sort='descending'] .tabla__flecha {
   cursor: pointer;
   width: 100%;
 }
-.chiclet--anadir:hover:not(:disabled) { background: var(--md-sys-color-primary-container); }
-.chiclet--anadir:disabled { opacity: var(--md-sys-state-disabled-opacity); cursor: not-allowed; }
+.add-chip:hover:not(:disabled) { background: var(--md-sys-color-primary-container); }
+.add-chip:disabled { opacity: var(--md-sys-state-disabled-opacity); cursor: not-allowed; }
 
-.pozo__emergente {
+.well__popover {
   position: absolute;
   left: 0;
   right: 0;
@@ -2927,7 +2927,7 @@ th[aria-sort='descending'] .tabla__flecha {
   border-radius: var(--md-sys-shape-corner-medium);
   box-shadow: var(--md-sys-elevation-2);
 }
-.pozo__buscar {
+.well__search {
   width: 100%;
   min-height: 36px;
   padding: 0 var(--space-sm);
@@ -2938,7 +2938,7 @@ th[aria-sort='descending'] .tabla__flecha {
   font: inherit;
   font-size: var(--md-sys-typescale-body-medium-size);
 }
-.pozo__candidatos {
+.well__candidatos {
   list-style: none;
   margin: var(--space-xs) 0 0;
   padding: 0;
@@ -2946,15 +2946,15 @@ th[aria-sort='descending'] .tabla__flecha {
   overflow-y: auto;
   font-size: var(--md-sys-typescale-body-medium-size);
 }
-.pozo__candidatos label {
+.well__candidatos label {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   padding: 4px 2px;
   cursor: pointer;
 }
-.panel-editor__pasos { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
-.panel-editor__pasos .md-chip { font-size: var(--md-sys-typescale-label-medium-size); padding: 0 10px; }
+.editor-panel__pasos { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.editor-panel__pasos .md-chip { font-size: var(--md-sys-typescale-label-medium-size); padding: 0 10px; }
 
 /*
  * La tienda: DOS columnas de fichas con icono, como el panel de visualizaciones de Power BI.
@@ -2975,7 +2975,7 @@ th[aria-sort='descending'] .tabla__flecha {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
-.tienda__objeto {
+.palette__object {
   width: 100%;
   height: 100%;
   display: flex;
@@ -3001,19 +3001,19 @@ th[aria-sort='descending'] .tabla__flecha {
      antes que desbordar la baldosa. */
   overflow-wrap: anywhere;
 }
-.tienda__objeto:hover:not(:disabled) {
+.palette__object:hover:not(:disabled) {
   border-color: var(--md-sys-color-primary);
   background: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
 }
-.tienda__objeto:disabled { opacity: var(--md-sys-state-disabled-opacity); cursor: not-allowed; }
-.tienda__nombre {
+.palette__object:disabled { opacity: var(--md-sys-state-disabled-opacity); cursor: not-allowed; }
+.palette__name {
   font-size: var(--md-sys-typescale-label-medium-size);
   font-weight: var(--md-sys-typescale-label-large-weight);
   /* Interlineado corto: un nombre de tres lineas no puede estirar la fila entera de baldosas. */
   line-height: 1.25;
 }
-.tienda__contrato {
+.palette__contract {
   font-size: var(--md-sys-typescale-label-small-size);
   color: var(--md-sys-color-on-surface-variant);
   /* Empujado al fondo de la baldosa: asi el contrato de las dos de una fila queda a la misma
@@ -3021,11 +3021,11 @@ th[aria-sort='descending'] .tabla__flecha {
   margin-top: auto;
   white-space: nowrap;
 }
-.tienda__objeto:hover:not(:disabled) .tienda__contrato { color: inherit; }
+.palette__object:hover:not(:disabled) .palette__contract { color: inherit; }
 
-.editor__cabecera-acciones { display: flex; align-items: center; gap: var(--space-md); }
+.editor__actions-header { display: flex; align-items: center; gap: var(--space-md); }
 
-.editor__paleta { padding: var(--space-md); margin-bottom: var(--space-md); }
+.editor__palette { padding: var(--space-md); margin-bottom: var(--space-md); }
 
 /*
  * La presentacion, dentro de la ficha del objeto.
@@ -3041,7 +3041,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * desplegables en una tira de mas de cuatrocientos pixeles de alto, junto a un hueco vacio a la
  * derecha. `grid-column: 1 / -1` lo saca de esa columna y le deja repartir sus controles.
  */
-.editor__estado {
+.editor__status {
   margin: 0;
   min-height: 1.25rem;
   font-size: var(--md-sys-typescale-body-small-size);
@@ -3056,7 +3056,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * era complejidad; y los siete controles apilados sin agrupar obligaban a recorrerlos todos para
  * encontrar uno.
  */
-.editor__presentacion {
+.editor__presentation {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
@@ -3068,21 +3068,21 @@ th[aria-sort='descending'] .tabla__flecha {
   font-size: var(--md-sys-typescale-body-medium-size);
   min-height: 40px;
 }
-.editor__icono-elegido { display: flex; align-items: center; gap: var(--space-sm); }
-.editor__icono-elegido select { flex: 1; min-width: 0; }
+.editor__chosen-icon { display: flex; align-items: center; gap: var(--space-sm); }
+.editor__chosen-icon select { flex: 1; min-width: 0; }
 
 /* Los selectores del panel ocupan la fila entera: son una lista, no un control mas. */
-.editor__selectores {
+.editor__pickers {
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--space-sm) var(--space-md);
   align-items: end;
 }
-.editor__selectores > p { grid-column: 1 / -1; margin: 0; }
-.editor__mapeo > [data-testid^='quitar-'] { grid-column: 1 / -1; justify-self: start; }
-.editor__paleta h3 { margin-bottom: var(--space-xs); }
-.editor__catalogo {
+.editor__pickers > p { grid-column: 1 / -1; margin: 0; }
+.editor__mapeo > [data-testid^='remove'] { grid-column: 1 / -1; justify-self: start; }
+.editor__palette h3 { margin-bottom: var(--space-xs); }
+.editor__catalog {
   list-style: none;
   margin: var(--space-sm) 0 0;
   padding: 0;
@@ -3091,10 +3091,10 @@ th[aria-sort='descending'] .tabla__flecha {
   gap: var(--space-xs);
   font-size: var(--md-sys-typescale-body-medium-size);
 }
-.editor__objetos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-md); }
-.editor__objeto { padding: var(--space-md); }
-.editor__objeto--roto { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
-.editor__objeto h4 { margin-bottom: var(--space-xs); }
+.editor__objects { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-md); }
+.editor__object { padding: var(--space-md); }
+.editor__object--roto { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
+.editor__object h4 { margin-bottom: var(--space-xs); }
 .editor__mapeo {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -3102,20 +3102,20 @@ th[aria-sort='descending'] .tabla__flecha {
   align-items: start;
   margin-top: var(--space-sm);
 }
-.editor__campos,
-.mi-vista__objetos {
+.editor__fields,
+.my-view__objects {
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-small);
   padding: var(--space-sm) var(--space-md);
 }
-.editor__campos legend,
-.mi-vista__objetos legend {
+.editor__fields legend,
+.my-view__objects legend {
   font-size: var(--md-sys-typescale-body-small-size);
   color: var(--md-sys-color-on-surface-variant);
   padding: 0 var(--space-xs);
 }
-.editor__campos label,
-.mi-vista__objetos label {
+.editor__fields label,
+.my-view__objects label {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -3124,9 +3124,9 @@ th[aria-sort='descending'] .tabla__flecha {
   cursor: pointer;
 }
 
-.editor-arbol__lista { list-style: none; margin: 0; padding: 0; }
-.editor-arbol__lista[data-nivel]:not([data-nivel='0']) { padding-left: var(--space-lg); }
-.editor-arbol__nodo {
+.tree-editor__list { list-style: none; margin: 0; padding: 0; }
+.tree-editor__list[level-data]:not([level-data='0']) { padding-left: var(--space-lg); }
+.tree-editor__node {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -3134,9 +3134,9 @@ th[aria-sort='descending'] .tabla__flecha {
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--md-sys-shape-corner-small);
 }
-.editor-arbol__nodo:hover { background: var(--md-sys-color-surface-container); }
-.editor-arbol__nodo.es-activo { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
-.editor-arbol__nombre {
+.tree-editor__node:hover { background: var(--md-sys-color-surface-container); }
+.tree-editor__node.is-active { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+.tree-editor__name {
   font: inherit;
   font-size: var(--md-sys-typescale-body-medium-size);
   background: transparent;
@@ -3147,20 +3147,20 @@ th[aria-sort='descending'] .tabla__flecha {
   cursor: pointer;
   text-align: left;
 }
-.editor-arbol__acciones { display: flex; gap: var(--space-sm); align-items: center; flex-wrap: wrap; }
+.tree-editor__actions { display: flex; gap: var(--space-sm); align-items: center; flex-wrap: wrap; }
 
-.lista-simple { list-style: none; margin: 0 0 var(--space-sm); padding: 0; font-size: var(--md-sys-typescale-body-medium-size); }
-.lista-simple li { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-xs) 0; flex-wrap: wrap; }
+.simple-list { list-style: none; margin: 0 0 var(--space-sm); padding: 0; font-size: var(--md-sys-typescale-body-medium-size); }
+.simple-list li { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-xs) 0; flex-wrap: wrap; }
 .lista-casillas { list-style: none; margin: 0; padding: 0; font-size: var(--md-sys-typescale-body-medium-size); }
 .lista-casillas label { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-xs) 0; cursor: pointer; }
 
-.quien-ve-que__filtros { display: flex; gap: var(--space-md); align-items: flex-end; flex-wrap: wrap; margin-bottom: var(--space-md); }
-.quien-ve-que__pasos { font-size: var(--md-sys-typescale-body-medium-size); padding-left: var(--space-lg); }
-.quien-ve-que__pasos li { margin-bottom: var(--space-sm); }
-.quien-ve-que__pasos li.es-ampliacion { color: var(--md-sys-color-error); }
-.quien-ve-que__origen { color: var(--md-sys-color-primary); font-weight: 500; }
+.sees-who-where__filters { display: flex; gap: var(--space-md); align-items: flex-end; flex-wrap: wrap; margin-bottom: var(--space-md); }
+.sees-who-where__pasos { font-size: var(--md-sys-typescale-body-medium-size); padding-left: var(--space-lg); }
+.sees-who-where__pasos li { margin-bottom: var(--space-sm); }
+.sees-who-where__pasos li.es-ampliacion { color: var(--md-sys-color-error); }
+.sees-who-where__source { color: var(--md-sys-color-primary); font-weight: 500; }
 
-.filtros-auditoria { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); font-size: var(--md-sys-typescale-body-medium-size); flex-wrap: wrap; }
+.audit-filters { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); font-size: var(--md-sys-typescale-body-medium-size); flex-wrap: wrap; }
 .papelera { margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--md-sys-color-outline-variant); }
 
 /* ------------------------------------------------------------------ *
@@ -3196,21 +3196,21 @@ th[aria-sort='descending'] .tabla__flecha {
   width: 100%;
 }
 /* Detras de `.emergente` a proposito: misma especificidad, asi que manda el que va despues. */
-.emergente--ancho { max-width: min(1100px, 94vw); }
+.width-popover { max-width: min(1100px, 94vw); }
 
 .emergente::backdrop { background: color-mix(in srgb, var(--md-sys-color-scrim) 40%, transparent); }
-.emergente__cabecera {
+.popover__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
   margin-bottom: var(--space-md);
 }
-.emergente__acciones { display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: center; margin-top: var(--space-md); }
+.popover__actions { display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: center; margin-top: var(--space-md); }
 
 /* Menu de MD3: `surface-container` y elevacion 2. */
 .marcadores { position: relative; }
-.marcadores__panel {
+.bookmarks__panel {
   position: absolute;
   right: 0;
   top: calc(100% + var(--space-xs));
@@ -3221,11 +3221,11 @@ th[aria-sort='descending'] .tabla__flecha {
   border-radius: var(--md-sys-shape-corner-medium);
   box-shadow: var(--md-sys-elevation-2);
 }
-.marcadores__guardar { display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm); }
-.marcadores__guardar input { flex: 1; min-width: 0; min-height: 40px; }
-.marcadores__lista { list-style: none; margin: 0; padding: 0; font-size: var(--md-sys-typescale-body-medium-size); }
-.marcadores__lista li { padding: var(--space-xs) 0; }
-.marcadores__lista a { color: var(--md-sys-color-primary); }
+.bookmarks__save { display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+.bookmarks__save input { flex: 1; min-width: 0; min-height: 40px; }
+.bookmarks__list { list-style: none; margin: 0; padding: 0; font-size: var(--md-sys-typescale-body-medium-size); }
+.bookmarks__list li { padding: var(--space-xs) 0; }
+.bookmarks__list a { color: var(--md-sys-color-primary); }
 
 /* ------------------------------------------------------------------ *
  * Complementos, campana, exportar, preguntar                          *
@@ -3241,7 +3241,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * parece un boton. El circulo de `surface-container-high` los declara pulsables antes de
  * tocarlos, que es lo que MD3 llama un boton de icono con contenedor.
  */
-.complemento__icono {
+.addon__icon {
   width: 32px;
   height: 32px;
   display: inline-flex;
@@ -3257,11 +3257,11 @@ th[aria-sort='descending'] .tabla__flecha {
   overflow: hidden;
   transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
-.complemento__icono:hover {
+.addon__icon:hover {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
 }
-.complemento__icono::before {
+.addon__icon::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -3271,14 +3271,14 @@ th[aria-sort='descending'] .tabla__flecha {
   pointer-events: none;
   z-index: -1;
 }
-.complemento__icono:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+.addon__icon:hover::before { opacity: var(--md-sys-state-hover-opacity); }
 
 /* Tooltip enriquecido de MD3. */
 /*
  * `fixed` y no `absolute`: el globo tiene que salir de la caja de la tarjeta, que es justo lo que
  * `absolute` impide. Las coordenadas las pone el componente, medidas del icono y de la tarjeta.
  */
-.complemento__tooltip {
+.addon__tooltip {
   position: fixed;
   z-index: 30;
   width: 260px;
@@ -3327,7 +3327,7 @@ th[aria-sort='descending'] .tabla__flecha {
 .campana:hover::before { opacity: var(--md-sys-state-hover-opacity); }
 
 /* Insignia de MD3: numero pequeno sobre el color de error. */
-.campana__contador {
+.bell__contador {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3355,14 +3355,14 @@ th[aria-sort='descending'] .tabla__flecha {
   border-radius: var(--md-sys-shape-corner-medium);
   box-shadow: var(--md-sys-elevation-2);
 }
-.exportar__etiqueta { font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface-variant); }
-.exportar__formato { min-height: 40px; }
-.exportar__estado { font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface-variant); }
+.exportar__label { font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface-variant); }
+.exportar__format { min-height: 40px; }
+.exportar__status { font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface-variant); }
 
 .preguntar { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-md); }
-.preguntar__campo { flex: 1 1 320px; min-width: 0; }
-.preguntar__respuesta { flex: 1 1 100%; font-size: var(--md-sys-typescale-body-medium-size); }
-.preguntar__respuesta p { margin: 0 0 var(--space-xs); }
+.ask__field { flex: 1 1 320px; min-width: 0; }
+.ask__respuesta { flex: 1 1 100%; font-size: var(--md-sys-typescale-body-medium-size); }
+.ask__respuesta p { margin: 0 0 var(--space-xs); }
 
 /* ------------------------------------------------------------------ *
  * Avisos, acceso e incrustacion                                       *
@@ -3371,10 +3371,10 @@ th[aria-sort='descending'] .tabla__flecha {
 .avisos { padding: var(--space-lg); max-width: 900px; }
 .avisos h1 { margin-bottom: var(--space-md); }
 .avisos h2 { margin: var(--space-lg) 0 var(--space-sm); }
-.aviso--sin-leer { border-left: 4px solid var(--md-sys-color-primary); }
-.aviso__cuerpo { flex: 1; min-width: 0; }
-.aviso__asunto { font-weight: 500; }
-.aviso__meta { font-size: var(--md-sys-typescale-body-small-size); color: var(--md-sys-color-on-surface-variant); }
+.notice-without-read { border-left: 4px solid var(--md-sys-color-primary); }
+.notice__body { flex: 1; min-width: 0; }
+.notice__asunto { font-weight: 500; }
+.notice__target { font-size: var(--md-sys-typescale-body-small-size); color: var(--md-sys-color-on-surface-variant); }
 
 /*
  * La pantalla de acceso lleva la marca.
@@ -3393,20 +3393,20 @@ th[aria-sort='descending'] .tabla__flecha {
   padding: var(--space-lg);
   background: var(--md-sys-color-surface);
 }
-.acceso__marca { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); text-align: center; }
-.acceso__marca img { height: 72px; width: auto; }
-.acceso__institucion { color: var(--md-sys-color-on-surface-variant); margin: 0; }
+.login__mark { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); text-align: center; }
+.login__mark img { height: 72px; width: auto; }
+.login__institucion { color: var(--md-sys-color-on-surface-variant); margin: 0; }
 .acceso .pastilla { margin-top: var(--space-sm); }
-.acceso__tarjeta > .texto-atenuado:last-child { margin-top: var(--space-md); }
-.acceso__tarjeta {
+.login__card > .muted-text:last-child { margin-top: var(--space-md); }
+.login__card {
   width: min(420px, 100%);
   padding: var(--space-xl);
   background: var(--md-sys-color-surface-container-low);
   border-radius: var(--md-sys-shape-corner-extra-large);
 }
-.acceso__tarjeta h1 { margin-bottom: var(--space-lg); }
-.acceso__azure { width: 100%; }
-.acceso__separador {
+.login__card h1 { margin-bottom: var(--space-lg); }
+.login__azure { width: 100%; }
+.login__separador {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -3414,9 +3414,9 @@ th[aria-sort='descending'] .tabla__flecha {
   font-size: var(--md-sys-typescale-body-small-size);
   color: var(--md-sys-color-on-surface-variant);
 }
-.acceso__separador::before,
-.acceso__separador::after { content: ''; flex: 1; border-top: 1px solid var(--md-sys-color-outline-variant); }
-.acceso__error {
+.login__separador::before,
+.login__separador::after { content: ''; flex: 1; border-top: 1px solid var(--md-sys-color-outline-variant); }
+.login__error {
   min-height: 1.25rem;
   margin: 0 0 var(--space-sm);
   font-size: var(--md-sys-typescale-body-medium-size);
@@ -3425,18 +3425,18 @@ th[aria-sort='descending'] .tabla__flecha {
 .acceso .pastilla { width: 100%; }
 
 .incrustado { display: flex; flex-direction: column; min-height: 100vh; }
-.incrustado__cabecera {
+.embedded__header {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
   background: var(--md-sys-color-surface-container);
 }
-.incrustado__emblema { width: auto; height: 24px; flex-shrink: 0; }
-.incrustado__institucion { color: var(--md-sys-color-on-surface-variant); }
-.incrustado__cuerpo { flex: 1; padding: var(--space-md); min-width: 0; }
-.incrustado__pie { margin-top: var(--space-md); font-size: var(--md-sys-typescale-body-medium-size); }
-.incrustar__codigo {
+.embedded__emblema { width: auto; height: 24px; flex-shrink: 0; }
+.embedded__institucion { color: var(--md-sys-color-on-surface-variant); }
+.embedded__body { flex: 1; padding: var(--space-md); min-width: 0; }
+.embedded__pie { margin-top: var(--space-md); font-size: var(--md-sys-typescale-body-medium-size); }
+.embed__codigo {
   width: 100%;
   min-height: 120px;
   font-family: var(--md-ref-typeface-mono);
@@ -3489,14 +3489,14 @@ th[aria-sort='descending'] .tabla__flecha {
   .cabecera { padding: var(--space-sm) var(--space-md); }
   .principal,
   .admin__principal,
-  .editor__cuerpo { padding: var(--space-md); }
+  .editor__body { padding: var(--space-md); }
 
   .cuerpo,
-  .admin__cuerpo { flex-direction: column; }
+  .admin__body { flex-direction: column; }
   .lateral,
   .admin__nav { width: 100%; }
 
-  .editor__crear { flex-direction: column; align-items: stretch; }
+  .editor__create { flex-direction: column; align-items: stretch; }
   /*
    * En movil el panel va DEBAJO, no al lado.
    *
@@ -3505,8 +3505,8 @@ th[aria-sort='descending'] .tabla__flecha {
    */
   .editor__banco { flex-direction: column; }
   /* Apilado, un panel pegado taparia el lienzo: en movil vuelve a fluir con la pagina. */
-  .panel-editor { width: 100%; position: static; max-height: none; }
-  .panel-editor__cuerpo { overflow-y: visible; }
+  .editor-panel { width: 100%; position: static; max-height: none; }
+  .editor-panel__body { overflow-y: visible; }
   .emergente { max-width: 96vw; }
 }
 
@@ -3547,7 +3547,7 @@ th[aria-sort='descending'] .tabla__flecha {
   flex: 1;
   min-height: 0;
 }
-.grafico__lienzo { width: 100%; flex: 1; min-width: 0; min-height: 120px; }
+.chart__canvas { width: 100%; flex: 1; min-width: 0; min-height: 120px; }
 
 /*
  * En movil, el grafico APORTA alto; en escritorio se encoge.
@@ -3571,15 +3571,15 @@ th[aria-sort='descending'] .tabla__flecha {
    *
    * Y el desplazamiento se quita: `overflow: auto` es lo que impide que el contenido empuje —lo
    * recorta en vez de crecer— y solo tiene sentido cuando hay un alto fijo que respetar. Las
-   * tablas siguen teniendo el suyo en `.tabla-contenedor`, que es donde hace falta.
+   * tablas siguen teniendo el suyo en `.container-table`, que es donde hace falta.
    */
   .objeto,
-  .objeto__cuerpo { overflow: visible; }
-  .objeto__cuerpo { flex: 1 1 auto; }
+  .object__body { overflow: visible; }
+  .object__body { flex: 1 1 auto; }
   .grafico { min-height: 200px; }
   /* Dentro de un multiplo hay varios apilados: cada uno pide menos para que la tarjeta no crezca
      hasta ser una pagina entera. */
-  .multiplos__panel .grafico { min-height: 140px; }
+  .multiples__panel .grafico { min-height: 140px; }
 }
 
 /*
@@ -3589,7 +3589,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * que un lector de pantalla recorra. Quitarlo del DOM dejaria el filtrado cruzado de 4.4 sin
  * equivalente por teclado.
  */
-.grafico[data-montado='si'] .grafico__respaldo {
+.grafico[data-montado='si'] .chart__fallback {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -3604,7 +3604,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * Y reaparece al recibir el foco. Un control invisible que recibe el foco desorienta mas que uno
  * que no existe: quien tabula tiene que VER donde esta.
  */
-.grafico[data-montado='si'] .grafico__respaldo:focus-within {
+.grafico[data-montado='si'] .chart__fallback:focus-within {
   position: static;
   width: auto;
   height: auto;
@@ -3617,7 +3617,7 @@ th[aria-sort='descending'] .tabla__flecha {
   border-radius: var(--md-sys-shape-corner-medium);
 }
 
-.grafico__respaldo-titulo {
+.chart__title-fallback {
   margin: 0 0 var(--space-sm);
   font-size: var(--md-sys-typescale-label-medium-size);
   font-weight: var(--md-sys-typescale-label-medium-weight);
@@ -3626,8 +3626,8 @@ th[aria-sort='descending'] .tabla__flecha {
 
 /* Al imprimir, el respaldo vuelve: las cifras exactas valen mas en papel que la forma. */
 @media print {
-  .grafico__respaldo,
-  .grafico[data-montado='si'] .grafico__respaldo {
+  .chart__fallback,
+  .grafico[data-montado='si'] .chart__fallback {
     position: static !important;
     width: auto !important;
     height: auto !important;
@@ -3645,24 +3645,24 @@ th[aria-sort='descending'] .tabla__flecha {
  * una tarjeta.
  */
 
-.cuadro-texto {
+.text-box {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
 }
-.cuadro-texto p { margin: 0; }
-.cuadro-texto__titulo { margin: 0; font: var(--md-sys-typescale-title-small); }
-.cuadro-texto__lista { margin: 0; padding-left: 1.25rem; }
+.text-box p { margin: 0; }
+.text-box__title { margin: 0; font: var(--md-sys-typescale-title-small); }
+.text-box__list { margin: 0; padding-left: 1.25rem; }
 
 /* El titulo de seccion ocupa el ancho que le den y reparte lo que sobra entre sus lineas. */
-.titulo-seccion {
+.section-title {
   display: flex;
   align-items: center;
   gap: var(--space-md);
   height: 100%;
   min-width: 0;
 }
-.titulo-seccion__texto {
+.section-title__text {
   margin: 0;
   font: var(--md-sys-typescale-title-medium);
   color: var(--md-sys-color-on-surface);
@@ -3676,9 +3676,9 @@ th[aria-sort='descending'] .tabla__flecha {
   text-overflow: ellipsis;
   min-width: 0;
 }
-.titulo-seccion__linea { flex: 1 1 0; min-width: 8px; }
-.titulo-seccion[data-text-position='centro'] { justify-content: center; }
-.titulo-seccion[data-text-position='derecha'] { justify-content: flex-end; }
+.section-title__line { flex: 1 1 0; min-width: 8px; }
+.section-title[data-text-position='centro'] { justify-content: center; }
+.section-title[data-text-position='derecha'] { justify-content: flex-end; }
 
 .linea-divisoria {
   display: flex;
@@ -3699,17 +3699,17 @@ th[aria-sort='descending'] .tabla__flecha {
   /* Para que `cqw`/`cqh` midan ESTA caja: sin `size`, las unidades de contenedor no existen. */
   container-type: size;
 }
-.forma__cuerpo { width: 100%; height: 100%; }
+.shape__body { width: 100%; height: 100%; }
 /*
  * Un cuadrado y un circulo se dibujan con lado igual al menor de los dos ejes.
  * Los dos lados salen del MISMO `min()`, asi que no hay forma de que uno se recorte y el otro no
  * — que es lo que convertia el circulo en elipse al estrechar la celda.
  */
-.forma__cuerpo[data-regular='si'] {
+.shape__body[data-regular='si'] {
   width: min(100cqw, 100cqh);
   height: min(100cqw, 100cqh);
 }
-.forma__texto {
+.shape__text {
   position: absolute;
   inset: 0;
   display: flex;
@@ -3734,8 +3734,8 @@ th[aria-sort='descending'] .tabla__flecha {
   pointer-events: none;
   z-index: 1;
 }
-.conexion__texto { font: var(--md-sys-typescale-label-small); }
-.conexion__sin-extremos {
+.connection__text { font: var(--md-sys-typescale-label-small); }
+.connection__without-ends {
   margin: 0;
   padding: var(--space-sm);
   font: var(--md-sys-typescale-body-small);
@@ -3758,7 +3758,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * La rejilla interna. Filas de alto fijo, igual que la de fuera y por el mismo motivo: lo que no
  * cabe se desplaza, no estira.
  */
-.contenedor__rejilla {
+.container__grid {
   display: grid;
   grid-auto-rows: 56px;
   gap: var(--space-sm);
@@ -3766,9 +3766,9 @@ th[aria-sort='descending'] .tabla__flecha {
   flex: 1;
   min-height: 0;
 }
-.contenedor__celda { min-width: 0; min-height: 0; }
+.container__cell { min-width: 0; min-height: 0; }
 
-.contenedor__vacio {
+.container__empty {
   margin: 0;
   display: flex;
   align-items: center;
@@ -3788,12 +3788,12 @@ th[aria-sort='descending'] .tabla__flecha {
  * apareceria sola en cuanto un filtro alargara una tabla de dentro, y la regla se incumpliria justo
  * cuando mas contenido hay que recorrer.
  */
-.contenedor--desplazable { scrollbar-width: thin; scrollbar-color: var(--md-sys-color-outline) var(--md-sys-color-surface-container-high); }
-.contenedor--desplazable[data-axis='y'] { overflow-y: auto; overflow-x: hidden; }
-.contenedor--desplazable[data-axis='x'] { overflow-x: auto; overflow-y: hidden; }
-.contenedor--desplazable[data-axis='x'] .contenedor__rejilla { grid-auto-flow: column; }
-.contenedor__pista { display: flex; min-height: 0; }
-.contenedor__pista > .contenedor__rejilla { flex: 1; }
+.scrollable-container { scrollbar-width: thin; scrollbar-color: var(--md-sys-color-outline) var(--md-sys-color-surface-container-high); }
+.scrollable-container[data-axis='y'] { overflow-y: auto; overflow-x: hidden; }
+.scrollable-container[data-axis='x'] { overflow-x: auto; overflow-y: hidden; }
+.scrollable-container[data-axis='x'] .container__grid { grid-auto-flow: column; }
+.container__pista { display: flex; min-height: 0; }
+.container__pista > .container__grid { flex: 1; }
 
 /* La ventana ampliada: rejilla propia, y cierre explicito. */
 .ampliado {
@@ -3806,7 +3806,7 @@ th[aria-sort='descending'] .tabla__flecha {
   padding: var(--space-lg);
   background: rgb(0 0 0 / 45%);
 }
-.ampliado__caja {
+.ampliado__box {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
@@ -3817,8 +3817,8 @@ th[aria-sort='descending'] .tabla__flecha {
   border-radius: var(--md-sys-shape-corner-large);
   box-shadow: var(--md-sys-elevation-3);
 }
-.ampliado__cabecera { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
-.ampliado__cabecera h2 { margin: 0; font: var(--md-sys-typescale-title-large); }
+.ampliado__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+.ampliado__header h2 { margin: 0; font: var(--md-sys-typescale-title-large); }
 .contenedor--ampliado { overflow: auto; }
 
 /*
@@ -3828,7 +3828,7 @@ th[aria-sort='descending'] .tabla__flecha {
  * de desmontarse, asi que el contenedor no reflow­ea al cambiar y conserva posicion, dimensiones y
  * espacio ocupado.
  */
-.contenedor__pestanas {
+.container__tabs {
   display: flex;
   gap: var(--space-xs);
   flex: 0 0 auto;
@@ -3836,7 +3836,7 @@ th[aria-sort='descending'] .tabla__flecha {
   margin-bottom: var(--space-sm);
   overflow-x: auto;
 }
-.contenedor__pestana {
+.container__tab {
   padding: var(--space-xs) var(--space-sm);
   background: none;
   border: none;
@@ -3846,10 +3846,10 @@ th[aria-sort='descending'] .tabla__flecha {
   cursor: pointer;
   white-space: nowrap;
 }
-.contenedor__pestana[aria-selected='true'] {
+.container__tab[aria-selected='true'] {
   color: var(--md-sys-color-primary);
   border-bottom-color: var(--md-sys-color-primary);
 }
-.contenedor__panel { flex: 1; min-height: 0; display: flex; overflow: auto; }
-.contenedor__panel[hidden] { display: none; }
-.contenedor__panel > .contenedor__rejilla { flex: 1; }
+.container__panel { flex: 1; min-height: 0; display: flex; overflow: auto; }
+.container__panel[hidden] { display: none; }
+.container__panel > .container__grid { flex: 1; }

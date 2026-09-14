@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ID_LATERAL } from '../../src/components/NavegacionPlegable';
-import { CarrilDeAdmin, SeccionActual } from '../../src/components/admin/CarrilDeAdmin';
+import { SIDEBAR_ID } from '../../src/components/CollapsibleNavigation';
+import { AdminRail, SeccionActual } from '../../src/components/admin/AdminRail';
 import { esAdministrador } from '../../src/server/admin';
 import { indicadoresDeAdmin } from '../../src/server/admin';
 import { exigirSesionDePagina } from '../../src/server/session';
@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="admin">
-      <header className="admin__cabecera">
+      <header className="admin__header">
         {/*
           La cabecera dice DONDE se esta, no por que existe el panel.
           Decia «superficie de gestion, separada de los modulos de negocio», que es la
@@ -29,7 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           al lado, la pagina sigue orientando aunque el carril este plegado, que es como arranca en
           pantalla estrecha.
         */}
-        <div className="admin__ruta">
+        <div className="admin__path">
           <h1>
             <Link href="/admin">Administracion</Link>
           </h1>
@@ -40,8 +40,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </Link>
       </header>
 
-      <div className="admin__cuerpo">
-        <CarrilDeAdmin id={ID_LATERAL} indicadores={await indicadoresDeAdmin()} />
+      <div className="admin__body">
+        <AdminRail id={SIDEBAR_ID} indicadores={await indicadoresDeAdmin()} />
         <main className="admin__principal" id="contenido-admin" tabIndex={-1}>
           {children}
         </main>

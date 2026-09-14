@@ -33,7 +33,7 @@ esta en el codigo.
   `getBoundingClientRect`, no se lee el CSS.
 - **Afirma la regla, no el recuento.** «Pintada equivale a pasar del umbral» vale con cualquier
   reparto de datos; «alguna pintada y no todas» falla el dia que el ambito cambia las cifras.
-- **Espera al guardado** (`data-guardando="no"`) antes de pulsar algo que vuelva a guardar.
+- **Espera al guardado** (`saving-data="no"`) antes de pulsar algo que vuelva a guardar.
 - **Espera a que ECharts monte** (`data-montado="si"`) antes de analizar una pagina con graficos.
 
 ## Que NO hacer

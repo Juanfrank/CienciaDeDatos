@@ -1,15 +1,15 @@
 import { expect, test, type Page } from '@playwright/test';
-import { entrarComo } from './sesion';
+import { entrarComo } from './session';
 
 /**
  * Criterio de la seccion 9: "la aplicacion escala a mas de una instancia sin perdida de sesion
  * ni de estado de personalizacion en edicion".
  */
 
-const OTRA = process.env['SEGUNDA_INSTANCIA'] ?? 'http://localhost:4311';
+const OTHER = process.env['SEGUNDA_INSTANCIA'] ?? 'http://localhost:4311';
 
 /** Reproduce en la otra instancia la cookie de sesion que tiene esta pagina. */
-async function conMismaSesion(page: Page): Promise<Record<string, string>> {
+async function withSameSession(page: Page): Promise<Record<string, string>> {
   const cookies = await page.context().cookies();
   const sesion = cookies.find((c) => c.name === 'sesion');
   expect(sesion, 'la sesion tiene que existir para poder comprobar que viaja').toBeDefined();
@@ -25,8 +25,8 @@ test.describe('la sesion sobrevive al cambio de instancia', () => {
   test('la segunda instancia reconoce la sesion abierta en la primera', async ({ page }) => {
     await entrarComo(page, 'u-beto');
 
-    const cabeceras = await conMismaSesion(page);
-    const respuesta = await page.request.get(`${OTRA}/api/navegacion`, { headers: cabeceras });
+    const cabeceras = await withSameSession(page);
+    const respuesta = await page.request.get(`${OTHER}/api/navegacion`, { headers: cabeceras });
 
     expect(respuesta.status()).toBe(200);
     const body = (await respuesta.json()) as { equipoActivo?: string };
@@ -37,10 +37,10 @@ test.describe('la sesion sobrevive al cambio de instancia', () => {
 
   test('cambiar de equipo en una instancia se ve en la otra, sin cerrar sesion', async ({ page }) => {
     await entrarComo(page, 'u-ana');
-    const cabeceras = await conMismaSesion(page);
+    const cabeceras = await withSameSession(page);
 
     // El cambio se hace contra la SEGUNDA instancia y se comprueba en la primera.
-    await page.request.post(`${OTRA}/api/sesion/equipo-activo`, {
+    await page.request.post(`${OTHER}/api/sesion/equipo-activo`, {
       headers: cabeceras,
       data: { teamId: 'equipo-este' },
     });
@@ -55,7 +55,7 @@ test.describe('la sesion sobrevive al cambio de instancia', () => {
 test.describe('la personalizacion no se queda en una instancia', () => {
   test('un marcador guardado en una instancia se lista desde la otra', async ({ page }) => {
     await entrarComo(page, 'u-ana');
-    const cabeceras = await conMismaSesion(page);
+    const cabeceras = await withSameSession(page);
 
     const nombre = `marcador-multiinstancia-${Date.now()}`;
     await page.request.post('/api/marcadores', {
@@ -68,10 +68,10 @@ test.describe('la personalizacion no se queda en una instancia', () => {
     });
 
     const desdeLaOtra = (await (
-      await page.request.get(`${OTRA}/api/marcadores`, { headers: cabeceras })
-    ).json()) as { marcadores: { name: string }[] };
+      await page.request.get(`${OTHER}/api/marcadores`, { headers: cabeceras })
+    ).json()) as { bookmarks: { name: string }[] };
 
-    expect(desdeLaOtra.marcadores.map((m) => m.name)).toContain(nombre);
+    expect(desdeLaOtra.bookmarks.map((m) => m.name)).toContain(nombre);
   });
 });
 
@@ -84,7 +84,7 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
     // persiste entre pruebas, y tocar el equipo Norte dejaba fallando a las de otros archivos
     // que asertan sobre su nombre. Un estado compartido de verdad obliga a limpiar de verdad.
     await entrarComo(page, 'u-admin');
-    const cabeceras = await conMismaSesion(page);
+    const cabeceras = await withSameSession(page);
 
     const id = `equipo-multiinstancia-${Date.now()}`;
     const equipo = {
@@ -103,7 +103,7 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
       expect(guardado.status()).toBe(200);
 
       const desdeLaOtra = (await (
-        await page.request.get(`${OTRA}/api/admin/equipos`, { headers: cabeceras })
+        await page.request.get(`${OTHER}/api/admin/equipos`, { headers: cabeceras })
       ).json()) as { equipos: { id: string; name: string }[] };
 
       expect(desdeLaOtra.equipos.map((e) => e.id)).toContain(id);
@@ -115,10 +115,10 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
   test('la auditoria de la otra instancia incluye ese mismo cambio', async ({ page }) => {
     // Un registro de auditoria por instancia no es un registro de auditoria.
     await entrarComo(page, 'u-admin');
-    const cabeceras = await conMismaSesion(page);
+    const cabeceras = await withSameSession(page);
 
     const before = (await (
-      await page.request.get(`${OTRA}/api/admin/auditoria`, { headers: cabeceras })
+      await page.request.get(`${OTHER}/api/admin/auditoria`, { headers: cabeceras })
     ).json()) as { eventos: unknown[] };
 
     // De usar y tirar, por lo mismo: la auditoria solo tiene que crecer, no importa con que.
@@ -138,7 +138,7 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
     });
 
     const after = (await (
-      await page.request.get(`${OTRA}/api/admin/auditoria`, { headers: cabeceras })
+      await page.request.get(`${OTHER}/api/admin/auditoria`, { headers: cabeceras })
     ).json()) as { eventos: unknown[] };
 
     expect(after.eventos.length).toBeGreaterThan(before.eventos.length);
@@ -151,13 +151,13 @@ test.describe('las dos instancias sirven el mismo dato del cache', () => {
     // Criterio de la seccion 9: dos modulos distintos —aqui, dos instancias— leen de la misma
     // entrada de cache, sin consultas redundantes a la fuente.
     await entrarComo(page, 'u-ana');
-    const cabeceras = await conMismaSesion(page);
+    const cabeceras = await withSameSession(page);
 
     const aqui = (await (await page.request.get('/api/modulos/casos-pendientes')).json()) as {
       generatedAt?: string;
     };
     const alla = (await (
-      await page.request.get(`${OTRA}/api/modulos/casos-pendientes`, { headers: cabeceras })
+      await page.request.get(`${OTHER}/api/modulos/casos-pendientes`, { headers: cabeceras })
     ).json()) as { generatedAt?: string };
 
     expect(alla.generatedAt).toBe(aqui.generatedAt);

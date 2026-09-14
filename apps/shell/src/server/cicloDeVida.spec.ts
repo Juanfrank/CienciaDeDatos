@@ -2,12 +2,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { GridItem, ModuleDefinition } from '@app/module-model';
 import { KEY_MODULES, modules } from './almacenModulos';
 import { borrar } from './almacenCompartido';
-import { limpiarAuditoria, listarAuditoria } from './audit';
+import { clearAudit, listarAuditoria } from './audit';
 import { reiniciarConfiguracion } from './settings';
 import {
   type ActorDeModulo,
   CicloDeVidaError,
-  borrarModulo,
+  deleteModule,
   crearBorrador,
   devolverABorrador,
   enviarAAprobacion,
@@ -58,7 +58,7 @@ async function borradorListo(actor: ActorDeModulo, slug: string): Promise<Module
 beforeEach(async () => {
   // Se parte de la semilla en cada prueba: el almacen es compartido y persiste entre ficheros.
   await borrar(KEY_MODULES);
-  await limpiarAuditoria();
+  await clearAudit();
 });
 
 describe('crear un borrador', () => {
@@ -122,7 +122,7 @@ describe('un borrador es de quien lo escribe', () => {
     ).rejects.toMatchObject({ status: 403 });
 
     // Lo que si puede es borrar uno abandonado, que no exige leerlo.
-    await expect(borrarModulo({ actor: admin, moduleId: modulo.moduleId })).resolves.toBeUndefined();
+    await expect(deleteModule({ actor: admin, moduleId: modulo.moduleId })).resolves.toBeUndefined();
   });
 });
 
@@ -262,7 +262,7 @@ describe('retirar y rechazar', () => {
     await enviarAAprobacion({ actor: colaborador, moduleId: modulo.moduleId });
     await publicar({ actor: admin, moduleId: modulo.moduleId });
 
-    await expect(borrarModulo({ actor: admin, moduleId: modulo.moduleId })).rejects.toMatchObject({
+    await expect(deleteModule({ actor: admin, moduleId: modulo.moduleId })).rejects.toMatchObject({
       status: 409,
     });
   });

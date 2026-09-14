@@ -1,5 +1,5 @@
 import type { ConfigChangeLog } from '@app/observability';
-import { conAdmin } from '../guardia';
+import { withAdmin } from '../guardia';
 import { contarAmpliaciones, listarAuditoria } from '../../../../src/server/audit';
 
 export const runtime = 'nodejs';
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const entityType = url.searchParams.get('entityType');
 
-  return conAdmin(async () => ({
+  return withAdmin(async () => ({
     eventos: await listarAuditoria({
       ...(entityType ? { entityType: entityType as ConfigChangeLog['entityType'] } : {}),
       ...(url.searchParams.get('soloAmpliaciones') === '1' ? { soloAmpliaciones: true } : {}),

@@ -5,7 +5,7 @@ import { AdminError, assertAdmin } from '../../../src/server/admin';
 import { obtenerSesion } from '../../../src/server/session';
 
 /** Envoltorio de los handlers del panel. */
-export async function conAdmin<T>(
+export async function withAdmin<T>(
   fn: (actor: Actor) => Promise<T> | T,
 ): Promise<NextResponse> {
   let actor: Actor;

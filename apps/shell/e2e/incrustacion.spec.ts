@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { entrarComo } from './sesion';
+import { entrarComo } from './session';
 
 /** Incorporacion en otros portales — seccion 4.9. */
 
@@ -32,7 +32,7 @@ test.describe('la vista incrustada aplica el mismo ambito', () => {
   test('muestra los datos del equipo de QUIEN MIRA, no del que la incrusto', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/incrustar/m/casos-pendientes');
-    await expect(page.getByTestId('titulo-modulo')).toHaveText('Casos pendientes');
+    await expect(page.getByTestId('module-title')).toHaveText('Casos pendientes');
     await expect(page.getByTestId('tabla')).toContainText('Distrito Norte');
     await expect(page.getByTestId('tabla')).not.toContainText('Distrito Este');
   });
@@ -61,14 +61,14 @@ test.describe('la vista incrustada conserva lo que la hace interpretable', () =>
     // aplicacion que le diga de donde salen las cifras ni de cuando son.
     await expect(page.getByTestId('procedencia')).toContainText('Vista institucional oficial');
     await expect(page.getByTestId('frescura')).toContainText('Datos actualizados');
-    await expect(page.locator('.incrustado__institucion')).toContainText('Poder Judicial');
+    await expect(page.locator('.embedded__institucion')).toContainText('Poder Judicial');
   });
 
   test('no lleva los controles que sacan de la vista', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/incrustar/m/casos-pendientes');
 
-    for (const control of ['exportar', 'crear-aviso', 'incrustar']) {
+    for (const control of ['exportar', 'create-notice', 'incrustar']) {
       await expect(page.getByTestId(control)).toHaveCount(0);
     }
     // El arbol de navegacion tampoco: compite con la navegacion del portal anfitrion.
@@ -79,13 +79,13 @@ test.describe('la vista incrustada conserva lo que la hace interpretable', () =>
     // Navegar en el mismo marco dejaria la aplicacion entera metida en un hueco del portal.
     await entrarComo(page, 'u-ana');
     await page.goto('/incrustar/m/casos-pendientes');
-    await expect(page.getByTestId('ver-completo')).toHaveAttribute('target', '_blank');
+    await expect(page.getByTestId('see-completo')).toHaveAttribute('target', '_blank');
   });
 
   test('el filtrado cruzado sigue funcionando dentro del marco', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/incrustar/m/casos-pendientes');
-    await page.getByTestId('segmentador-Penal').click();
+    await page.getByTestId('slicer-Penal').click();
     await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
   });
 
@@ -120,7 +120,7 @@ test.describe('el codigo de incrustacion se copia desde la vista', () => {
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('incrustar').click();
 
-    await expect(page.getByTestId('incrustar-aviso')).toContainText('iniciado sesion');
-    await expect(page.getByTestId('incrustar-aviso')).toContainText('su propio');
+    await expect(page.getByTestId('embed-notice')).toContainText('iniciado sesion');
+    await expect(page.getByTestId('embed-notice')).toContainText('su propio');
   });
 });

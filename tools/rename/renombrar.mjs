@@ -121,9 +121,11 @@ function recomponer(partes, estiloDestino) {
  */
 export function traducir(identificador) {
   if (estilo(identificador) === 'bem') {
+    // Cada parte se traduce sola y vuelve en kebab: `editor__buscador` es `editor__search-box`,
+    // no `editor__searchBox`, que mezcla dos convenciones en el mismo nombre.
     const propuesto = identificador
       .split('__')
-      .map((t) => traducir(t) ?? t)
+      .map((t) => (traducir(t) ?? t).replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase())
       .join('__');
     return propuesto === identificador ? null : propuesto;
   }
@@ -140,6 +142,15 @@ export function traducir(identificador) {
    */
   let sufijo = '';
   let prefijo = '';
+  /*
+   * El `use` de un hook de React va SIEMPRE delante: es lo que lo identifica como hook.
+   *
+   * Tratado como una palabra mas, la inversion del complemento lo manda al final y
+   * `useFiltrosDeUrl` sale `urlFiltersUse`, que ni es un hook ni lo parece.
+   */
+  if (/^use[A-Z]/.test(identificador)) {
+    return `use${traducir(identificador.slice(3)) ?? identificador.slice(3)}`;
+  }
   const ultimo = partes[partes.length - 1];
   if (partes.length > 1 && PREPOSICIONES[ultimo] !== undefined) {
     sufijo = PREPOSICIONES[ultimo];
@@ -147,6 +158,16 @@ export function traducir(identificador) {
   }
   if (partes.length > 1 && partes[0] === 'con') {
     prefijo = 'with';
+    partes = partes.slice(1);
+  }
+  // `es-activo` es una clase de estado: en ingles se escribe `is-active`, con el verbo delante.
+  if (partes.length > 1 && partes[0] === 'es') {
+    prefijo = 'is';
+    partes = partes.slice(1);
+  }
+  // `sin-complementos` es `without-addons`: la negacion va delante, igual que el `con`.
+  if (partes.length > 1 && partes[0] === 'sin') {
+    prefijo = 'without';
     partes = partes.slice(1);
   }
 
@@ -157,6 +178,17 @@ export function traducir(identificador) {
   const traducidas = utiles.map((p) => GLOSARIO[p] ?? (/^\d+$/.test(p) ? p : null));
   if (traducidas.includes(null)) return null;
 
+  /*
+   * Un nombre que YA esta en ingles no se traduce: se deja donde esta.
+   *
+   * El glosario lleva entradas que se traducen a si mismas —`dataset`, `admin`, `nav`—, porque
+   * hacen falta para completar nombres mixtos como `panel-de-datasets`. Sin esta guarda, esas
+   * entradas bastan para que `datasetId` entre en el mapa, y la inversion de dos sustantivos lo
+   * convierte en `idDataset`: mismo nombre, orden al reves, y 227 sitios apuntando a una
+   * propiedad que ya no existe.
+   */
+  if (utiles.every((p, i) => p === traducidas[i].toLowerCase())) return null;
+
   let ordenadas;
   if (VERBOS.has(utiles[0])) {
     ordenadas = traducidas;
@@ -166,6 +198,19 @@ export function traducir(identificador) {
       ...traducidas.filter((_, i) => !ADJETIVOS.has(utiles[i])),
     ];
   } else if (hayComplemento && traducidas.length > 1) {
+    ordenadas = [...traducidas].reverse();
+  } else if (ADJETIVOS.has(utiles[0])) {
+    // Ya viene delante —`miVista`, `nuevoModulo`—: en ingles va igual, no hay nada que mover.
+    ordenadas = traducidas;
+  } else if (traducidas.length === 2) {
+    /*
+     * Dos sustantivos seguidos invierten, aunque no lleve enlace.
+     *
+     * `tabla-datos` es «tabla DE datos» con el `de` implicito, y en ingles el calificador va
+     * delante: `data-table`. Sin esta regla salen `table-data`, `title-module` y `ViewModule`,
+     * que se leen al reves. Un adjetivo o un verbo delante ya se han resuelto en las ramas de
+     * arriba, asi que aqui solo quedan dos sustantivos.
+     */
     ordenadas = [...traducidas].reverse();
   } else {
     ordenadas = traducidas;
@@ -522,18 +567,45 @@ function aplicar(plan) {
  */
 const SUFIJOS = ['', '.ts', '.tsx', '.mts', '.d.ts', '.css', '.json', '/index.ts', '/index.tsx'];
 
+const EXTENSIONES_DE_FUENTE = /\.(tsx?|mts|css|md|json|mjs)$/;
+
 function especificadoresRotos() {
   const rotos = [];
+  const nombresDeArchivo = new Set(rutasDe("'*'").map((r) => r.split('/').pop()));
   for (const ruta of rutasDe("'*.ts' '*.tsx' '*.mts'")) {
-    if (ruta.startsWith('tools/rename/')) continue;
+    // Los `.d.ts` ambientales los escribe la herramienta, no nosotros, y apuntan a lo construido:
+    // `next-env.d.ts` referencia `.next/types/`, que existe o no segun cuando se mire.
+    if (ruta.startsWith('tools/rename/') || ruta.endsWith('.d.ts')) continue;
     const dir = ruta.split('/').slice(0, -1).join('/');
     const fuente = readFileSync(ruta, 'utf8');
+
     const re = /(?:from|import|require)\s*\(?\s*['"](\.{1,2}\/[^'"]*)['"]/g;
     let m = re.exec(fuente);
     while (m) {
       const destino = resolve(dir, m[1]);
       if (!SUFIJOS.some((s) => existsSync(destino + s))) rotos.push(`${ruta}: ${m[1]}`);
       m = re.exec(fuente);
+    }
+
+    /*
+     * Una prueba que LEE un archivo fuente lo nombra por su ruta desde la raiz.
+     *
+     * `theme.spec.ts` abre `components/Rejilla.tsx` para comprobar que la variable CSS que el
+     * componente escribe es la que la hoja de estilo lee. Movido el archivo, la cadena se queda
+     * apuntando a donde ya no hay nada; es `cadena`, asi que ningun mapa de codigo la alcanza.
+     */
+    // Con al menos una barra: sin ella, un token como `radius.md` pasaria por un archivo.
+    const reRepo = /['"`]([\w.-]+(?:\/[\w.-]+)+\.\w+)['"`]/g;
+    let r = reRepo.exec(fuente);
+    while (r) {
+      // Se compara por el NOMBRE del archivo: la ruta suele componerse con `join(...)` en tiempo
+      // de ejecucion, asi que no se puede resolver aqui, pero un nombre que no existe en ningun
+      // sitio del repositorio no apunta a nada.
+      const base = r[1].split('/').pop();
+      if (EXTENSIONES_DE_FUENTE.test(base) && !nombresDeArchivo.has(base)) {
+        rotos.push(`${ruta}: ${r[1]}`);
+      }
+      r = reRepo.exec(fuente);
     }
   }
   return rotos;

@@ -31,7 +31,7 @@ de objeto se selecciono.
 ### «No consume datos» se DEDUCE del contrato
 
 Un objeto cuyo contrato admite cero dimensiones y cero medidas no necesita dataset. No hay un
-interruptor `sinDatos`: seria una segunda fuente de verdad sobre lo mismo, y el dia que discrepara
+interruptor `withoutData`: seria una segunda fuente de verdad sobre lo mismo, y el dia que discrepara
 del contrato la validacion pediria un dataset a un objeto que no tiene donde ponerlo, o dejaria
 pasar un grafico sin cache poblada.
 

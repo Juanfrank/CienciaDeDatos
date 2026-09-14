@@ -1,0 +1,134 @@
+'use client';
+
+import { useState } from 'react';
+
+/** Vista de "quien ve que" — seccion 4.10.8. */
+interface Paso {
+  capa: string;
+  source: string;
+  amplio: boolean;
+  resultado: { restrictions: { dimension: { table: string; field: string }; allowedValues: string[] }[] };
+}
+
+interface Result {
+  tieneAcceso: boolean;
+  existeEnElArbol: boolean;
+  noVeNada: boolean;
+  usoAmpliacion: boolean;
+  scope: Paso['resultado'];
+  pasos: Paso[];
+}
+
+const LABELS: Record<string, string> = {
+  'ambito-general-del-equipo': 'Ambito general del equipo',
+  carpeta: 'Carpeta',
+  'override-por-modulo-del-equipo': 'Override por modulo del equipo',
+  'ambito-personal': 'Ambito personal',
+  'ambito-personal-por-modulo': 'Ambito personal por modulo',
+};
+
+const describir = (scope: Paso['resultado']): string =>
+  scope.restrictions.length === 0
+    ? 'sin restriccion'
+    : scope.restrictions
+        .map((r) => `${r.dimension.table}.${r.dimension.field} = ${r.allowedValues.join(', ') || '(nada)'}`)
+        .join(' · ');
+
+export function SeesWhoWhere({
+  usuarios,
+  equipos,
+  modules,
+}: {
+  usuarios: string[];
+  equipos: { id: string; name: string }[];
+  modules: { moduleId: string; name: string }[];
+}) {
+  const [userId, setUserId] = useState(usuarios[0] ?? '');
+  const [teamId, setTeamId] = useState(equipos[0]?.id ?? '');
+  const [moduleId, setModuleId] = useState(modules[0]?.moduleId ?? '');
+  const [resultado, setResultado] = useState<Result | null>(null);
+
+  const consultar = async () => {
+    const r = await fetch(
+      `/api/admin/quien-ve-que?userId=${encodeURIComponent(userId)}&teamId=${encodeURIComponent(teamId)}&moduleId=${encodeURIComponent(moduleId)}`,
+    );
+    setResultado(r.ok ? ((await r.json()) as Result) : null);
+  };
+
+  return (
+    <div className="sees-who-where">
+      <div className="sees-who-where__filters">
+        <label className="campo">
+          <span>Persona</span>
+          <select value={userId} data-testid="qvq-usuario" onChange={(e) => setUserId(e.target.value)}>
+            {usuarios.map((u) => (
+              <option key={u} value={u}>{u}</option>
+            ))}
+          </select>
+        </label>
+        <label className="campo">
+          <span>Equipo activo</span>
+          <select value={teamId} data-testid="qvq-equipo" onChange={(e) => setTeamId(e.target.value)}>
+            {equipos.map((t) => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+        </label>
+        <label className="campo">
+          <span>Modulo</span>
+          <select value={moduleId} data-testid="qvq-modulo" onChange={(e) => setModuleId(e.target.value)}>
+            {modules.map((m) => (
+              <option key={m.moduleId} value={m.moduleId}>{m.name}</option>
+            ))}
+          </select>
+        </label>
+        <button type="button" data-testid="qvq-consultar" onClick={() => void consultar()}>
+          Resolutor
+        </button>
+      </div>
+
+      {resultado ? (
+        <div className="sees-who-where__result" data-testid="qvq-resultado">
+          {!resultado.tieneAcceso ? (
+            <p className="aviso notice-error" data-testid="qvq-sin-acceso">
+              {resultado.existeEnElArbol
+                ? 'Este equipo NO tiene concedido este modulo. El ambito es irrelevante: no lo ve.'
+                : 'Este modulo no existe en la organizacion general.'}
+            </p>
+          ) : null}
+
+          {resultado.tieneAcceso ? (
+            <>
+              <p>
+                <strong>Ambito efectivo:</strong>{' '}
+                <span data-testid="qvq-ambito">{describir(resultado.scope)}</span>
+              </p>
+              {resultado.noVeNada ? (
+                <p className="aviso notice-atencion">
+                  El ambito resuelto no permite ver ninguna fila.
+                </p>
+              ) : null}
+              {resultado.usoAmpliacion ? (
+                <p className="aviso notice-error" data-testid="qvq-ampliacion">
+                  Este ambito proviene de una AMPLIACION autorizada.
+                </p>
+              ) : null}
+
+              <h3>Como se llego a ese ambito</h3>
+              <ol className="sees-who-where__pasos" data-testid="qvq-pasos">
+                {resultado.pasos.map((p, i) => (
+                  <li key={i} className={p.amplio ? 'es-ampliacion' : ''}>
+                    <strong>{LABELS[p.capa] ?? p.capa}</strong>
+                    {/* El origen es lo que el documento pide destacar: que carpeta lo causo. */}
+                    <span className="sees-who-where__source"> — {p.source}</span>
+                    <div className="muted-text">{describir(p.resultado)}</div>
+                  </li>
+                ))}
+              </ol>
+            </>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}

@@ -123,7 +123,7 @@ sequenceDiagram
 
     T->>JOB: ciclo programado, o aviso de carga de la capa de analisis
     JOB->>REG: datasets cuya recurrencia se cumple
-    REG-->>JOB: datasetId, consulta, securityBinding
+    REG-->>JOB: idDataset, consulta, securityBinding
     loop por cada dataset
         JOB->>DC: query(request, context)
         alt la fuente responde

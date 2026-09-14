@@ -13,19 +13,19 @@ export default async function PaginaPaquetes() {
   return (
     <section>
       <h2>Paquetes visuales</h2>
-      <p className="texto-atenuado">
+      <p className="muted-text">
         Un paquete reagrupa, renombra y reordena lo que una audiencia ya puede ver. Es una vista,
         no un permiso: la resolucion de ambito nunca consulta un paquete, solo la organizacion
         general.
       </p>
 
       {paquetes.length === 0 ? (
-        <p className="texto-atenuado" data-testid="sin-paquetes">
+        <p className="muted-text" data-testid="sin-paquetes">
           No hay paquetes definidos. Los equipos sin paquete ven la organizacion general tal cual,
           limitada a lo que su ambito permite.
         </p>
       ) : (
-        <ul className="lista-simple" data-testid="lista-paquetes">
+        <ul className="simple-list" data-testid="lista-paquetes">
           {paquetes.map((pkg) => {
             const usuarios = equipos.filter((t) => t.assignedPackageId === pkg.id);
             const problems = usuarios.flatMap((equipo) =>
@@ -36,13 +36,13 @@ export default async function PaginaPaquetes() {
             );
 
             return (
-              <li key={pkg.id} data-testid={`paquete-${pkg.id}`}>
+              <li key={pkg.id} data-testid={`package-${pkg.id}`}>
                 <strong>{pkg.name}</strong>
-                <span className="texto-atenuado">
+                <span className="muted-text">
                   {' '}· asignado a {usuarios.length} equipo(s)
                 </span>
                 {problems.length > 0 ? (
-                  <div className="aviso aviso--atencion" data-testid={`paquete-problemas-${pkg.id}`}>
+                  <div className="aviso notice-atencion" data-testid={`package-problemas-${pkg.id}`}>
                     <p>
                       <strong>{problems.length} node(s) no se muestran</strong> porque la
                       audiencia no los tiene concedidos:

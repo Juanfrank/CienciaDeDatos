@@ -79,7 +79,7 @@ describe('el tema cubre todas las variables que la hoja de estilo usa', () => {
   it('los componentes que usan la hoja de estilo declaran las variables que ella espera', () => {
     // La otra mitad de la lista de arriba: si alguien renombra `--rejilla-columnas` en el TSX y
     // no en el CSS, la rejilla se queda sin columnas.
-    const tsx = ['components/Rejilla.tsx', 'components/objetos.tsx', 'components/editor/Lienzo.tsx']
+    const tsx = ['components/Grid.tsx', 'components/objects.tsx', 'components/editor/Canvas.tsx']
       .map((f) => readFileSync(join(process.cwd(), 'apps/shell/src', f), 'utf8'))
       .join('\n');
 

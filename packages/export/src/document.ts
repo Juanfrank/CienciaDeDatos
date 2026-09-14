@@ -7,7 +7,7 @@ import type { ExportRequest, ExportableObject } from './types';
 /** Los colores con los que se dibuja un archivo exportado. */
 export interface ExportPalette {
   content: string;
-  textoAtenuado: string;
+  mutedText: string;
   superficie: string;
   borde: string;
   /** Color de la advertencia de vista personalizada (4.6). */
@@ -19,7 +19,7 @@ export interface ExportPalette {
 export function paletteOf(theme: ThemeTokens = defaultTheme): ExportPalette {
   return {
     content: theme.color.text,
-    textoAtenuado: theme.color.textMuted,
+    mutedText: theme.color.textMuted,
     superficie: theme.color.surface,
     borde: theme.color.border,
     notice: theme.color.warning,

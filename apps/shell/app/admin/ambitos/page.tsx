@@ -1,4 +1,4 @@
-import { EditorDeAmbito, type DestinoDeAmbito } from '../../../src/components/admin/EditorDeAmbito';
+import { ScopeEditor, type DestinoDeAmbito } from '../../../src/components/admin/ScopeEditor';
 import { getGeneralTree, listTeams } from '../../../src/server/context';
 import type { NavNode } from '@app/access-control';
 
@@ -19,7 +19,7 @@ function carpetas(nodos: NavNode[], acumulado: DestinoDeAmbito[] = []): DestinoD
   return acumulado;
 }
 
-export default async function PaginaAmbitos() {
+export default async function ScopesPage() {
   const destinos: DestinoDeAmbito[] = [
     ...(await listTeams()).map((t) => ({
       tipo: 'equipo' as const,
@@ -33,12 +33,12 @@ export default async function PaginaAmbitos() {
   return (
     <section>
       <h2>Ambitos de acceso</h2>
-      <p className="texto-atenuado">
+      <p className="muted-text">
         Cada capa solo puede RESTRINGIR respecto de la anterior. Ampliar es posible, pero exige
         una justificacion explicita y queda registrada aparte: el valor por defecto de cualquier
         combinacion de reglas es siempre "mas restrictivo o igual".
       </p>
-      <EditorDeAmbito destinos={destinos} />
+      <ScopeEditor destinos={destinos} />
     </section>
   );
 }

@@ -32,7 +32,7 @@ export const en: Record<MessageKey, string> = {
   'objeto.roto': 'Broken object',
   'objeto.rotoDetalle':
     '{faltan, plural, one {Field {campos} is missing} other {Fields {campos} are missing}} from the dataset.',
-  'objeto.sinDatos': 'No data within the current scope',
+  'objeto.withoutData': 'No data within the current scope',
   'objeto.datosDe': 'Data for {titulo}',
   'objeto.filtrarPor': 'Filter by {valor}',
 

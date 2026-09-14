@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { contarAmpliaciones, listarAuditoria } from '../../src/server/audit';
 import { getManagedTree, listTeams, listUsers } from '../../src/server/context';
-import { EventoDeAuditoria } from '../../src/components/admin/EventoDeAuditoria';
-import { Icono, type IconName } from '../../src/components/iconos/Icono';
+import { AuditEvent } from '../../src/components/admin/AuditEvent';
+import { Icon, type IconName } from '../../src/components/icons/Icon';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,8 +44,8 @@ export default async function AdminInicio() {
         />
       </div>
 
-      <section className="admin-inicio__registro">
-        <div className="admin-inicio__registro-cabecera">
+      <section className="admin-inicio__log">
+        <div className="admin-inicio__header-log">
           <h2>Ultimos cambios</h2>
           <Link href="/admin/auditoria" className="boton-enlace">
             Ver el registro completo
@@ -53,11 +53,11 @@ export default async function AdminInicio() {
         </div>
 
         {recientes.length === 0 ? (
-          <p className="texto-atenuado">Sin cambios de configuracion registrados.</p>
+          <p className="muted-text">Sin cambios de configuracion registrados.</p>
         ) : (
           <ul className="registro">
             {recientes.map((e, i) => (
-              <EventoDeAuditoria key={`${e.timestamp}-${i}`} evento={e} />
+              <AuditEvent key={`${e.timestamp}-${i}`} evento={e} />
             ))}
           </ul>
         )}
@@ -86,15 +86,15 @@ function Resumen({
   return (
     <Link
       href={href}
-      className={`tarjeta tarjeta--enlace ${alerta ? 'tarjeta--alerta' : ''}`}
+      className={`tarjeta tarjeta--enlace ${alerta ? 'alert-card' : ''}`}
       {...(testId ? { 'data-testid': testId } : {})}
     >
-      <span className="tarjeta__icono" aria-hidden="true">
-        <Icono nombre={icono} tamano={18} />
+      <span className="card__icon" aria-hidden="true">
+        <Icon nombre={icono} tamano={18} />
       </span>
-      <span className="tarjeta__valor">{valor}</span>
-      <span className="tarjeta__etiqueta">{etiqueta}</span>
-      {nota ? <span className="tarjeta__nota">{nota}</span> : null}
+      <span className="card__value">{valor}</span>
+      <span className="card__label">{etiqueta}</span>
+      {nota ? <span className="card__nota">{nota}</span> : null}
     </Link>
   );
 }

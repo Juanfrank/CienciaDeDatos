@@ -29,7 +29,7 @@ export interface TreeAuditEvent {
   actorId: string;
   action:
     | 'crear-carpeta'
-    | 'crear-modulo'
+    | 'create-module'
     | 'renombrar'
     | 'mover'
     | 'reordenar'
@@ -49,7 +49,7 @@ export interface TreeAuditEvent {
 
 export type TreeOperation =
   | { type: 'crear-carpeta'; parentId: string | null; id: string; name: string; icon?: string; scope?: AccessScope }
-  | { type: 'crear-modulo'; parentId: string | null; id: string; moduleRef: ModuleRef }
+  | { type: 'create-module'; parentId: string | null; id: string; moduleRef: ModuleRef }
   | { type: 'renombrar'; nodeId: string; name: string }
   | { type: 'mover'; nodeId: string; newParentId: string | null; index?: number }
   | { type: 'reordenar'; nodeId: string; index: number }
@@ -67,7 +67,7 @@ const CAPACIDAD_REQUERIDA: Record<TreeOperation['type'], Capability> = {
   'crear-carpeta': 'reorganizar-arbol-general',
   // Crear un modulo lo puede hacer un Colaborador: nace como borrador y su publicacion
   // institucional es otra operacion, con otra capacidad.
-  'crear-modulo': 'crear-editar-modulos-borrador',
+  'create-module': 'crear-editar-modulos-borrador',
   renombrar: 'reorganizar-arbol-general',
   // Mover suena cosmetico pero NO lo es: si la carpeta de destino tiene otro ambito, el modulo
   // hereda ese ambito de inmediato (4.1.2). Por eso esta reservado a Administrador.
@@ -154,7 +154,7 @@ export function applyTreeOperation(
       };
     }
 
-    case 'crear-modulo': {
+    case 'create-module': {
       const hijos = childrenOf(siguiente, op.parentId);
       if (!hijos) return { ok: false, error: `La carpeta destino '${op.parentId}' no existe.` };
       if (locate(siguiente.nodes, op.id)) return { ok: false, error: `Ya existe un nodo con id '${op.id}'.` };
@@ -164,7 +164,7 @@ export function applyTreeOperation(
       return {
         ok: true,
         tree: siguiente,
-        audit: [{ actorId: actor.userId, action: 'crear-modulo', nodeId: op.id, detail: `Creado ${describir(hoja)}.` }],
+        audit: [{ actorId: actor.userId, action: 'create-module', nodeId: op.id, detail: `Creado ${describir(hoja)}.` }],
       };
     }
 

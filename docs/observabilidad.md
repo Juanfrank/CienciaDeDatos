@@ -49,7 +49,7 @@ customEvents
 customEvents
 | where name == "cache-serve" and isnotnull(customDimensions.ageMs)
 | summarize antiguedadMediaMin = avg(todouble(customDimensions.ageMs)) / 60000
-    by tostring(customDimensions.datasetId), bin(timestamp, 15m)
+    by tostring(customDimensions.idDataset), bin(timestamp, 15m)
 ```
 
 ```kusto

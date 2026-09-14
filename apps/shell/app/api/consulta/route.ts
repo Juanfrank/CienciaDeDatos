@@ -7,7 +7,7 @@ import { obtenerSesion } from '../../../src/server/session';
 export const runtime = 'nodejs';
 
 /** Longitud maxima de una pregunta. Mas alla de esto no es una pregunta, es un texto pegado. */
-const MAXIMO = 300;
+const MAX = 300;
 
 /** Resuelve una pregunta en lenguaje natural — seccion 4.9. */
 export async function POST(request: Request) {
@@ -25,8 +25,8 @@ export async function POST(request: Request) {
   const moduleSlug = typeof body['modulo'] === 'string' ? body['modulo'] : '';
 
   if (!pregunta) return NextResponse.json({ error: 'Falta la pregunta.' }, { status: 400 });
-  if (pregunta.length > MAXIMO) {
-    return NextResponse.json({ error: `La pregunta no puede pasar de ${MAXIMO} caracteres.` }, { status: 400 });
+  if (pregunta.length > MAX) {
+    return NextResponse.json({ error: `La pregunta no puede pasar de ${MAX} caracteres.` }, { status: 400 });
   }
 
   const resuelto = await resolverPregunta(pregunta, moduleSlug, sesion.userId, sesion.activeTeamId);

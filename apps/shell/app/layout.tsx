@@ -8,8 +8,8 @@ import {
   materialVariables,
   type ColorMode,
 } from '@app/design-tokens';
-import { Cabecera } from '../src/components/Cabecera';
-import { ProveedorDeIdioma } from '../src/components/Idioma';
+import { Header } from '../src/components/Header';
+import { ProveedorDeIdioma } from '../src/components/Locale';
 import { obtenerSesion } from '../src/server/session';
 import { idioma } from '../src/server/locale';
 import { colorMode } from '../src/server/theme';
@@ -30,7 +30,7 @@ const montserrat = Montserrat({
 });
 
 /** El tema organizacional (4.3) se inyecta como variables CSS en la raiz del documento. */
-function variablesDelTema(mode: ColorMode): Record<string, string> {
+function themeVariables(mode: ColorMode): Record<string, string> {
   const theme = themeForMode(mode);
   return { ...materialVariables(theme), ...toCssVariables(asThemeTokens(theme)) };
 }
@@ -47,10 +47,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale} className={montserrat.variable} data-theme={mode}>
       <body
-        style={{ ...variablesDelTema(mode), colorScheme: mode === 'dark' ? 'dark' : 'light' } as React.CSSProperties}
+        style={{ ...themeVariables(mode), colorScheme: mode === 'dark' ? 'dark' : 'light' } as React.CSSProperties}
       >
         <ProveedorDeIdioma locale={locale}>
-          {sesion ? <Cabecera sesion={sesion} /> : null}
+          {sesion ? <Header sesion={sesion} /> : null}
           {children}
         </ProveedorDeIdioma>
       </body>

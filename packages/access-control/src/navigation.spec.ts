@@ -44,34 +44,34 @@ describe('conceder una carpeta concede todo su contenido (4.10.6)', () => {
 
 describe('sin paquete asignado: organizacion general podada', () => {
   it('muestra la estructura real, limitada a lo concedido', () => {
-    const vista = buildNavigationView({ generalTree: generalTree, team: equipoNorte });
-    expect(vista.fromPackage).toBe(false);
-    expect(visibleModules(vista.tree)).toEqual([
+    const view = buildNavigationView({ generalTree: generalTree, team: equipoNorte });
+    expect(view.fromPackage).toBe(false);
+    expect(visibleModules(view.tree)).toEqual([
       'audiencias-norte',
       'casos-pendientes-este',
       'casos-pendientes-norte',
     ]);
     // 'estadisticas-nacionales' vive fuera de lo concedido y no aparece.
-    expect(visibleModules(vista.tree)).not.toContain('estadisticas-nacionales');
+    expect(visibleModules(view.tree)).not.toContain('estadisticas-nacionales');
   });
 
   it('no muestra carpetas que quedan sin contenido accesible', () => {
-    const vista = buildNavigationView({ generalTree: generalTree, team: equipoEste });
+    const view = buildNavigationView({ generalTree: generalTree, team: equipoEste });
     const nombresDeCarpeta = (nodes: NavNode[]): string[] =>
       nodes.flatMap((n) => (isFolder(n) ? [n.name, ...nombresDeCarpeta(n.children)] : []));
-    expect(nombresDeCarpeta(vista.tree)).not.toContain('Distrito Norte');
+    expect(nombresDeCarpeta(view.tree)).not.toContain('Distrito Norte');
   });
 });
 
 describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
   it('reagrupa y reordena los modulos concedidos', () => {
-    const vista = buildNavigationView({
+    const view = buildNavigationView({
       generalTree: generalTree,
       team: equipoNorte,
       pkg: paqueteReagrupado,
     });
-    expect(vista.fromPackage).toBe(true);
-    const carpetaVisual = vista.tree[0];
+    expect(view.fromPackage).toBe(true);
+    const carpetaVisual = view.tree[0];
     if (carpetaVisual?.type !== 'folder') throw new Error('se esperaba una carpeta visual');
     expect(carpetaVisual.name).toBe('Dia a dia');
     // Orden del paquete, distinto del de la organizacion general.
@@ -79,21 +79,21 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
   });
 
   it('NO muestra un modulo que el paquete incluye pero el equipo no tiene concedido', () => {
-    const vista = buildNavigationView({
+    const view = buildNavigationView({
       generalTree: generalTree,
       team: equipoNorte,
       pkg: paqueteReagrupado,
     });
-    expect(visibleModules(vista.tree)).not.toContain('estadisticas-nacionales');
+    expect(visibleModules(view.tree)).not.toContain('estadisticas-nacionales');
   });
 
   it('reporta explicitamente al Administrador el nodo que no pudo mostrar', () => {
-    const vista = buildNavigationView({
+    const view = buildNavigationView({
       generalTree: generalTree,
       team: equipoNorte,
       pkg: paqueteReagrupado,
     });
-    expect(vista.dangling).toEqual([
+    expect(view.dangling).toEqual([
       {
         nodeId: 'nodo-estadisticas-nacionales',
         moduleId: 'estadisticas-nacionales',
@@ -117,8 +117,8 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
         },
       ],
     };
-    const vista = buildNavigationView({ generalTree: generalTree, team: equipoNorte, pkg });
-    expect(vista.dangling[0]?.reason).toBe('no-existe-en-organizacion-general');
+    const view = buildNavigationView({ generalTree: generalTree, team: equipoNorte, pkg });
+    expect(view.dangling[0]?.reason).toBe('no-existe-en-organizacion-general');
   });
 
   it('dos paquetes distintos presentan lo mismo de forma distinta, sin cambiar el acceso', () => {
@@ -156,12 +156,12 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
   });
 
   it('un paquete vacio de contenido accesible no deja carpetas visuales huerfanas', () => {
-    const vista = buildNavigationView({
+    const view = buildNavigationView({
       generalTree: generalTree,
       team: equipoEste,
       pkg: paqueteReagrupado,
     });
-    expect(vista.tree).toEqual([]);
-    expect(vista.dangling).toHaveLength(3);
+    expect(view.tree).toEqual([]);
+    expect(view.dangling).toHaveLength(3);
   });
 });

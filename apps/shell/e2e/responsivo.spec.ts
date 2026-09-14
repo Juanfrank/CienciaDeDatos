@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { entrarComo } from './sesion';
+import { entrarComo } from './session';
 
 /** Diseño responsivo y movil — seccion 4.9. */
 
@@ -20,7 +20,7 @@ test.describe('la disposicion se adapta al ancho', () => {
     await page.goto('/m/casos-pendientes');
 
     // Las dos tarjetas de arriba comparten fila: tienen la misma coordenada vertical.
-    const cajas = await page.locator('.rejilla__celda').evaluateAll((celdas) =>
+    const cajas = await page.locator('.grid__cell').evaluateAll((celdas) =>
       celdas.map((c) => c.getBoundingClientRect().top),
     );
     expect(cajas[0]).toBe(cajas[1]);
@@ -31,7 +31,7 @@ test.describe('la disposicion se adapta al ancho', () => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    const cajas = await page.locator('.rejilla__celda').evaluateAll((celdas) =>
+    const cajas = await page.locator('.grid__cell').evaluateAll((celdas) =>
       celdas.map((c) => c.getBoundingClientRect()),
     );
     // Ninguna caja comparte fila con otra, y todas tienen el mismo ancho.
@@ -60,7 +60,7 @@ test.describe('la disposicion se adapta al ancho', () => {
     await entrarComo(page, 'u-ana');
 
     const cell = () =>
-      page.locator('.rejilla__celda').filter({ hasText: 'Pendientes por distrito' });
+      page.locator('.grid__cell').filter({ hasText: 'Pendientes por distrito' });
 
     await page.setViewportSize(ESCRITORIO);
     await page.goto('/m/casos-pendientes');
@@ -82,8 +82,8 @@ test.describe('la disposicion se adapta al ancho', () => {
     const sobrante = await cell().evaluate((el) => {
       const alto = el.getBoundingClientRect().height;
       const contenido = [...el.children].reduce((total, hijo) => {
-        const caja = hijo.getBoundingClientRect();
-        return total + caja.height;
+        const box = hijo.getBoundingClientRect();
+        return total + box.height;
       }, 0);
       return alto - contenido;
     });
@@ -101,7 +101,7 @@ test.describe('la disposicion se adapta al ancho', () => {
     await entrarComo(pagina, 'u-ana');
     await pagina.goto('/m/casos-pendientes');
 
-    const anchos = await pagina.locator('.rejilla__celda').evaluateAll((celdas) =>
+    const anchos = await pagina.locator('.grid__cell').evaluateAll((celdas) =>
       celdas.map((c) => Math.round(c.getBoundingClientRect().width)),
     );
     expect(new Set(anchos).size).toBe(1);
@@ -119,7 +119,7 @@ test.describe('la navegacion no se interpone en un movil', () => {
     await expect(page.getByTestId('nav-audiencias')).not.toBeVisible();
 
     // Lo que se venia a ver tiene que estar a la vista sin desplazarse.
-    const titulo = await page.getByTestId('titulo-modulo').boundingBox();
+    const titulo = await page.getByTestId('module-title').boundingBox();
     expect(titulo?.y ?? 9999).toBeLessThan(MOVIL.height);
   });
 
@@ -132,7 +132,7 @@ test.describe('la navegacion no se interpone en un movil', () => {
     await expect(page.getByTestId('nav-audiencias')).toBeVisible();
 
     await page.getByTestId('nav-audiencias').click();
-    await expect(page.getByTestId('titulo-modulo')).toHaveText('Audiencias');
+    await expect(page.getByTestId('module-title')).toHaveText('Audiencias');
   });
 
   test('en escritorio el arbol viene desplegado, y el boton lo pliega', async ({ page }) => {
@@ -142,12 +142,12 @@ test.describe('la navegacion no se interpone en un movil', () => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    const boton = page.getByTestId('abrir-navegacion');
-    await expect(boton).toHaveAttribute('aria-expanded', 'true');
+    const button = page.getByTestId('abrir-navegacion');
+    await expect(button).toHaveAttribute('aria-expanded', 'true');
     await expect(page.getByTestId('nav-audiencias')).toBeVisible();
 
-    await boton.click();
-    await expect(boton).toHaveAttribute('aria-expanded', 'false');
+    await button.click();
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
     await expect(page.getByTestId('nav-audiencias')).not.toBeVisible();
   });
 
@@ -192,10 +192,10 @@ test.describe('nada se sale de la pantalla', () => {
 
       for (const path of ['/m/casos-pendientes', '/editor', '/avisos']) {
         await page.goto(path);
-        const desborda = await page.evaluate(
+        const overflows = await page.evaluate(
           () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
         );
-        expect(desborda, `${path} desborda en horizontal`).toBe(false);
+        expect(overflows, `${path} desborda en horizontal`).toBe(false);
       }
     });
   }
@@ -205,7 +205,7 @@ test.describe('nada se sale de la pantalla', () => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    const contenedor = page.locator('.tabla-contenedor').last();
+    const contenedor = page.locator('.container-table').last();
     const scrollable = await contenedor.evaluate((el) => el.scrollWidth > el.clientWidth);
     expect(scrollable).toBe(true);
   });
@@ -215,7 +215,7 @@ test.describe('nada se sale de la pantalla', () => {
     await entrarComo(page, 'u-ana');
     await page.goto('/editor');
 
-    const contenedor = page.locator('.tabla-contenedor-datos').first();
+    const contenedor = page.locator('.table-container-data').first();
     expect(await contenedor.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
   });
 
@@ -224,10 +224,10 @@ test.describe('nada se sale de la pantalla', () => {
     await entrarComo(page, 'u-admin');
     await page.goto('/admin/equipos');
 
-    const desborda = await page.evaluate(
+    const overflows = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
     );
-    expect(desborda).toBe(false);
+    expect(overflows).toBe(false);
   });
 });
 
@@ -250,18 +250,18 @@ test.describe('accesibilidad en movil (4.9)', () => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    const boton = page.getByTestId('abrir-navegacion');
-    await expect(boton).toHaveAttribute('aria-expanded', 'false');
+    const button = page.getByTestId('abrir-navegacion');
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
 
-    await boton.focus();
+    await button.focus();
     await page.keyboard.press('Enter');
     await expect(page.getByTestId('nav-audiencias')).toBeVisible();
 
     // El estado se anuncia con `aria-expanded` sobre el boton, y `aria-controls` dice QUE panel
     // abre. Los dos tienen que moverse juntos: un boton que dice «desplegado» sobre un panel
     // oculto es peor que ninguno.
-    await expect(boton).toHaveAttribute('aria-expanded', 'true');
-    await expect(boton).toHaveAttribute('aria-controls', 'navegacion-lateral');
+    await expect(button).toHaveAttribute('aria-expanded', 'true');
+    await expect(button).toHaveAttribute('aria-controls', 'navegacion-lateral');
   });
 });
 
@@ -292,16 +292,16 @@ test.describe('las paginas de objetos nuevos, en un movil', () => {
       /*
        * El documento no se desplaza a lo ancho.
        */
-      const desborda = await page.evaluate(
+      const overflows = await page.evaluate(
         () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
       );
-      expect(desborda, 'la pagina se desplaza a lo ancho').toBe(false);
+      expect(overflows, 'la pagina se desplaza a lo ancho').toBe(false);
 
       // Y ninguna tarjeta se sale de su columna.
-      const anchoMaximo = await page.locator('.objeto').evaluateAll((nodos) =>
+      const maxWidth = await page.locator('.objeto').evaluateAll((nodos) =>
         Math.max(0, ...nodos.map((n) => n.getBoundingClientRect().right)),
       );
-      expect(anchoMaximo).toBeLessThanOrEqual(MOVIL.width + 1);
+      expect(maxWidth).toBeLessThanOrEqual(MOVIL.width + 1);
     });
   }
 
@@ -316,7 +316,7 @@ test.describe('las paginas de objetos nuevos, en un movil', () => {
     await page.goto('/m/composicion/multiplos');
     await expect(page.locator('.grafico').first()).toHaveAttribute('data-montado', 'si');
 
-    const izquierdas = await page.locator('.multiplos__panel').evaluateAll((nodos) =>
+    const izquierdas = await page.locator('.multiples__panel').evaluateAll((nodos) =>
       nodos.map((n) => Math.round(n.getBoundingClientRect().left)),
     );
     expect(new Set(izquierdas).size).toBe(1);

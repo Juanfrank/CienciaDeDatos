@@ -22,7 +22,7 @@ export default async function Inicio() {
   return (
     <div className="vacio">
       <h1>Sin modulos disponibles</h1>
-      <p className="texto-atenuado">
+      <p className="muted-text">
         El equipo activo no tiene ningun modulo concedido en la organizacion general.
       </p>
     </div>

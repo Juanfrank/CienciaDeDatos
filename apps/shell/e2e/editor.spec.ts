@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { entrarComo } from './sesion';
+import { entrarComo } from './session';
 
 /** Editor de modulos y ciclo de vida — secciones 4.1, 4.2 y criterios de la seccion 9. */
 
@@ -66,7 +66,7 @@ test.describe('quien entra al editor (4.10.1)', () => {
     await entrarComo(page, 'u-beto');
     await page.goto('/editor');
     await expect(page.getByTestId('sin-permiso-editor')).toBeVisible();
-    await expect(page.getByTestId('lista-modulos')).toHaveCount(0);
+    await expect(page.getByTestId('module-list')).toHaveCount(0);
   });
 
   test('un Colaborador si entra', async ({ page }) => {
@@ -84,28 +84,28 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
     await entrarComo(page, 'u-ana');
     await page.goto('/editor');
 
-    await page.getByTestId('nuevo-modulo-nombre').fill(`Modulo ${slug}`);
+    await page.getByTestId('new-module-name').fill(`Modulo ${slug}`);
     await page.getByTestId('nuevo-modulo-slug').fill(slug);
-    await page.getByTestId('crear-modulo').click();
+    await page.getByTestId('create-module').click();
 
-    await expect(page.getByTestId(`fila-${slug}`)).toBeVisible();
+    await expect(page.getByTestId(`row-${slug}`)).toBeVisible();
 
     await page.goto(`/editor/${slug}`);
-    await expect(page.getByTestId('lienzo-vacio')).toBeVisible();
+    await expect(page.getByTestId('empty-canvas')).toBeVisible();
 
     // El catalogo ofrece objetos, no una caja donde escribir SQL. Comprobar que NO hay donde
     // escribir una consulta es la mitad del criterio de 4.2 que importa.
-    await expect(page.getByTestId('anadir-tarjeta-kpi')).toBeVisible();
-    await expect(page.getByTestId('anadir-barras')).toBeVisible();
+    await expect(page.getByTestId('add-card-kpi')).toBeVisible();
+    await expect(page.getByTestId('add-bars')).toBeVisible();
     await expect(page.locator('textarea')).toHaveCount(0);
 
-    await page.getByTestId('anadir-tarjeta-kpi').click();
+    await page.getByTestId('add-card-kpi').click();
 
     // El objeto aparece EN EL LIENZO, dibujado, y queda elegido: el panel salta a «Datos», que es
     // lo que se va a configurar a continuacion.
-    await expect(page.locator('[data-testid^="bloque-obj-"]')).toHaveCount(1);
-    await expect(page.getByTestId('lienzo-vacio')).toHaveCount(0);
-    await expect(page.getByTestId('pestana-datos')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(1);
+    await expect(page.getByTestId('empty-canvas')).toHaveCount(0);
+    await expect(page.getByTestId('data-tab')).toHaveAttribute('aria-selected', 'true');
   });
 
   test('los complementos no se pueden colocar sueltos en la rejilla', async ({ page }) => {
@@ -116,8 +116,8 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
 
     // 'tooltip-explicativo' y 'tabla-de-datos' son adjuntables: acompañan a otro objeto. La
     // validacion los rechaza como elementos de la rejilla, asi que tampoco se ofrecen.
-    await expect(page.getByTestId('anadir-tooltip-explicativo')).toHaveCount(0);
-    await expect(page.getByTestId('anadir-tabla-de-datos')).toHaveCount(0);
+    await expect(page.getByTestId('add-tooltip-explicativo')).toHaveCount(0);
+    await expect(page.getByTestId('add-table-data')).toHaveCount(0);
   });
 
   test('un objeto con un campo inexistente se marca ROTO y el modulo se sigue editando', async ({
@@ -138,11 +138,11 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
 
     // El bloque se dibuja MARCADO ROTO en el lienzo, con su problema, y el modulo se sigue
     // editando alrededor. Es literalmente lo que pide 4.2: no fallar en silencio.
-    const block = page.getByTestId('bloque-kpi');
+    const block = page.getByTestId('kpi-block');
     await expect(block).toBeVisible();
     await expect(block.getByTestId('objeto-roto')).toBeVisible();
-    await expect(page.getByTestId('problemas-kpi')).toContainText('MedidaRetirada');
-    await expect(page.getByTestId('editor-bloqueos')).toBeVisible();
+    await expect(page.getByTestId('kpi-problems')).toContainText('MedidaRetirada');
+    await expect(page.getByTestId('locks-editor')).toBeVisible();
   });
 });
 
@@ -153,11 +153,11 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
     await borradorConObjeto(page, slug);
 
     await page.goto('/editor');
-    await page.getByTestId(`enviar-${slug}`).click();
-    await expect(page.getByTestId(`fila-${slug}`)).toContainText('Pendiente de aprobacion');
+    await page.getByTestId(`send-${slug}`).click();
+    await expect(page.getByTestId(`row-${slug}`)).toContainText('Pendiente de aprobacion');
 
     // Ana no puede publicar lo que ella misma propuso.
-    await expect(page.getByTestId(`publicar-${slug}`)).toHaveCount(0);
+    await expect(page.getByTestId(`publish-${slug}`)).toHaveCount(0);
     const intento = await page.request.post(`/api/modulos/${slug}/estado`, {
       data: { transicion: 'publicar' },
     });
@@ -165,8 +165,8 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
 
     await entrarComo(page, 'u-admin');
     await page.goto('/editor');
-    await page.getByTestId(`publicar-${slug}`).click();
-    await expect(page.getByTestId(`fila-${slug}`)).toContainText('Publicado');
+    await page.getByTestId(`publish-${slug}`).click();
+    await expect(page.getByTestId(`row-${slug}`)).toContainText('Publicado');
   });
 
   test('un modulo con problemas no se puede proponer', async ({ page }) => {
@@ -198,9 +198,9 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
 
     await page.goto('/editor');
     // Y el boton no se ofrece: la pantalla dice por que antes de que nadie lo intente.
-    const enviar = page.getByTestId(`enviar-${slug}`);
+    const enviar = page.getByTestId(`send-${slug}`);
     await expect(enviar).toBeDisabled();
-    await expect(page.getByTestId(`bloqueos-${slug}`)).toBeVisible();
+    await expect(page.getByTestId(`locks-${slug}`)).toBeVisible();
 
     // Y ademas SE VE deshabilitado. Sin estilo propio se dibujaba igual que un enlace activo
     // —subrayado y en azul—, asi que quien lo pulsaba no entendia por que no pasaba nada y lo
@@ -318,8 +318,8 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
 
       await entrarComo(page, 'u-beto');
       expect((await page.request.get(`/api/modulos/${slug}`)).status()).toBe(404);
-      const navegacion = await (await page.request.get('/api/navegacion')).json();
-      expect(JSON.stringify(navegacion.arbol)).not.toContain(slug);
+      const navigation = await (await page.request.get('/api/navegacion')).json();
+      expect(JSON.stringify(navigation.arbol)).not.toContain(slug);
     } finally {
       // Se devuelve el equipo a su estado: las demas pruebas asumen lo que el seed concede.
       await entrarComo(page, 'u-admin');

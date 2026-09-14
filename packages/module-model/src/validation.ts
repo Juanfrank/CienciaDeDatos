@@ -233,10 +233,10 @@ export function findPublishBlockers(
   diagnostics: ModuleDiagnostics,
   expiredInstanceIds: string[] = [],
 ): PublishBlocker[] {
-  const bloqueos: PublishBlocker[] = [];
+  const locks: PublishBlocker[] = [];
 
   for (const item of diagnostics.items.filter((i) => i.broken)) {
-    bloqueos.push({
+    locks.push({
       reason: 'objeto-roto',
       detail:
         item.unresolvedObject ??
@@ -245,15 +245,15 @@ export function findPublishBlockers(
   }
 
   for (const issue of diagnostics.layoutProblems) {
-    bloqueos.push({ reason: `disposicion-${issue.kind}`, detail: issue.problem });
+    locks.push({ reason: `disposicion-${issue.kind}`, detail: issue.problem });
   }
 
   for (const instanceId of expiredInstanceIds) {
-    bloqueos.push({
+    locks.push({
       reason: 'version-vencida',
       detail: `La instancia '${instanceId}' usa una version de objeto cuya fecha limite de deprecacion ya paso (4.5).`,
     });
   }
 
-  return bloqueos;
+  return locks;
 }

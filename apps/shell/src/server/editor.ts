@@ -33,7 +33,7 @@ export interface PaletteObject {
   notas?: string;
 }
 
-export interface DatasetDePaleta {
+export interface PaletteDataset {
   datasetId: string;
   description: string;
   /** Claves 'Tabla.Campo' que este dataset trae y el esquema sigue reconociendo. */
@@ -48,7 +48,7 @@ export interface DatasetDePaleta {
 
 export interface EditorPalette {
   objetos: PaletteObject[];
-  datasets: DatasetDePaleta[];
+  datasets: PaletteDataset[];
 }
 
 export async function editorPalette(): Promise<EditorPalette> {
@@ -79,7 +79,7 @@ export async function editorPalette(): Promise<EditorPalette> {
     };
   });
 
-  const datasets: DatasetDePaleta[] = [];
+  const datasets: PaletteDataset[] = [];
   const declaradas = await agregacionesDeclaradas();
   for (const declarado of defaultRegistry.datasets) {
     /*

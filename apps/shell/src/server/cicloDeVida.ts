@@ -210,12 +210,12 @@ export async function enviarAAprobacion(input: TransicionInput): Promise<ModuleD
 
   // Se comprueba YA, no solo al publicar. Mandar a revisar algo roto gasta el tiempo de quien
   // revisa en encontrar lo que la maquina sabe decir sola.
-  const bloqueos = await bloqueosDePublicacion(modulo);
-  if (bloqueos.length > 0) {
+  const locks = await bloqueosDePublicacion(modulo);
+  if (locks.length > 0) {
     throw new CicloDeVidaError(
       'El modulo tiene problemas que impiden proponerlo para publicacion.',
       422,
-      bloqueos,
+      locks,
     );
   }
 
@@ -241,12 +241,12 @@ export async function publicar(input: TransicionInput): Promise<ModuleDefinition
   if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
   exigirTransicion(modulo.status, 'publicado');
 
-  const bloqueos = await bloqueosDePublicacion(modulo);
-  if (bloqueos.length > 0) {
+  const locks = await bloqueosDePublicacion(modulo);
+  if (locks.length > 0) {
     throw new CicloDeVidaError(
       'El modulo no se puede publicar con problemas sin resolver.',
       422,
-      bloqueos,
+      locks,
     );
   }
 
@@ -287,7 +287,7 @@ async function colgarDelArbolSiFalta(
   const resultado = applyTreeOperation(
     arbol,
     {
-      type: 'crear-modulo',
+      type: 'create-module',
       parentId: null,
       id: `nodo-${module.moduleId}`,
       moduleRef: {
@@ -360,7 +360,7 @@ export async function devolverABorrador(input: TransicionInput): Promise<ModuleD
 }
 
 /** Borrado definitivo: solo Administrador, y solo de lo que no esta publicado. */
-export async function borrarModulo(input: TransicionInput): Promise<void> {
+export async function deleteModule(input: TransicionInput): Promise<void> {
   permiso(input.actor, 'borrar-definitivamente');
 
   const modulo = await modules.get(input.moduleId);
@@ -437,8 +437,8 @@ export async function actorDe(sesion: SesionShell): Promise<ActorDeModulo> {
 
 /** Navegacion de una sesion: lo concedido al equipo activo Y publicado. */
 export async function navigationOf(sesion: SesionShell) {
-  const vista = await navigationFor(sesion.activeTeamId);
-  return { ...vista, tree: await podarPorEstado(vista.tree, await actorDe(sesion)) };
+  const view = await navigationFor(sesion.activeTeamId);
+  return { ...view, tree: await podarPorEstado(view.tree, await actorDe(sesion)) };
 }
 
 /** Como `moduloVisiblePorSlug`, resolviendo el rol a partir del usuario. */

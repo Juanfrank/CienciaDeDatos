@@ -32,7 +32,7 @@ export interface ChartPalette {
   /** Ocho colores de serie, del tema institucional. */
   series: string[];
   content: string;
-  textoAtenuado: string;
+  mutedText: string;
   line: string;
   superficie: string;
   superficieElevada: string;
@@ -163,15 +163,15 @@ function legendOf(o: ChartOptions, hayQueDistinguir = o.vm.series.length > 1) {
    * `type: 'scroll'` en TODAS las posiciones.
    */
   const common = {
-    textStyle: { color: o.palette.textoAtenuado },
+    textStyle: { color: o.palette.mutedText },
     icon: 'roundRect' as const,
     type: 'scroll' as const,
-    pageIconColor: o.palette.textoAtenuado,
-    pageTextStyle: { color: o.palette.textoAtenuado },
+    pageIconColor: o.palette.mutedText,
+    pageTextStyle: { color: o.palette.mutedText },
   };
   const aLosLados = {
     ...common,
-    textStyle: { color: o.palette.textoAtenuado, width: 96, overflow: 'truncate' as const },
+    textStyle: { color: o.palette.mutedText, width: 96, overflow: 'truncate' as const },
   };
   const lado = mode === 'auto' ? 'abajo' : mode;
 
@@ -284,7 +284,7 @@ function roleColor(o: ChartOptions, color: ReferenceLine['color']): string {
     case 'error':
       return o.palette.series[1] ?? o.palette.content;
     case 'atenuado':
-      return o.palette.textoAtenuado;
+      return o.palette.mutedText;
     default:
       return o.palette.content;
   }
@@ -392,7 +392,7 @@ const axisCategory = (o: ChartOptions) => ({
   show: o.ejes?.mostrarX !== false,
   data: o.vm.points.map((p) => p.label),
   axisLabel: {
-    color: o.palette.textoAtenuado,
+    color: o.palette.mutedText,
   /*
    * Girados, los rotulos se dejan de esconder.
    *
@@ -412,7 +412,7 @@ const axisCategory = (o: ChartOptions) => ({
         name: o.ejes.tituloX,
         nameLocation: 'middle' as const,
         nameGap: 28,
-        nameTextStyle: { color: o.palette.textoAtenuado },
+        nameTextStyle: { color: o.palette.mutedText },
       }
     : {}),
   /*
@@ -434,7 +434,7 @@ const ejeValor = (o: ChartOptions) => ({
         ...(o.ejes?.maximoY === undefined ? {} : { max: o.ejes.maximoY }),
       }),
   axisLabel: {
-    color: o.palette.textoAtenuado,
+    color: o.palette.mutedText,
     ...(o.apilado === 'porcentaje' ? { formatter: '{value} %' } : {}),
   },
   splitLine: {
@@ -458,7 +458,7 @@ const ejeValor = (o: ChartOptions) => ({
         nameLocation: 'middle' as const,
         nameRotate: 90,
         nameGap: 44,
-        nameTextStyle: { color: o.palette.textoAtenuado },
+        nameTextStyle: { color: o.palette.mutedText },
       }
     : {}),
 });
@@ -693,7 +693,7 @@ export function pieOptions(o: ChartOptions): Record<string, unknown> {
             left: 'center',
             top: 'center',
             textStyle: { color: o.palette.content, fontSize: 20, fontWeight: 600 },
-            subtextStyle: { color: o.palette.textoAtenuado, fontSize: 12 },
+            subtextStyle: { color: o.palette.mutedText, fontSize: 12 },
           },
         }
       : {}),
@@ -819,7 +819,7 @@ export function gaugeOptions(o: ChartOptions): Record<string, unknown> {
         splitNumber: 1,
         axisLabel: {
           distance: -30,
-          color: o.palette.textoAtenuado,
+          color: o.palette.mutedText,
           fontSize: 11,
           formatter: (n: number) => formatear(n),
         },
@@ -891,7 +891,7 @@ const axisValueSecondary = (o: ChartOptions) => ({
         nameLocation: 'middle' as const,
         nameRotate: 90,
         nameGap: 44,
-        nameTextStyle: { color: o.palette.textoAtenuado },
+        nameTextStyle: { color: o.palette.mutedText },
       }
     : { name: undefined }),
 });
@@ -1007,7 +1007,7 @@ export function scatterOptions(o: ChartOptions): Record<string, unknown> {
             nameLocation: 'middle' as const,
             nameRotate: 0,
             nameGap: 28,
-            nameTextStyle: { color: o.palette.textoAtenuado },
+            nameTextStyle: { color: o.palette.mutedText },
           }
         : { name: undefined }),
     },

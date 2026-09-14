@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { AuthenticatedPrincipal } from '@app/auth';
-import { desbloquearCuenta, sesiones } from './identity';
+import { unlockAccount, sesiones } from './identity';
 import { almacenDeCredenciales } from './identity';
 
 /** Cableado de identidad en el shell — seccion 4.7. */
@@ -60,7 +60,7 @@ describe('desbloquear una cuenta', () => {
   it('pone el contador a cero y quita el bloqueo, SIN tocar la contrasena', async () => {
     const before = await almacenDeCredenciales.findByEmail('u-bloqueado@poderjudicial.gob.do');
 
-    expect(await desbloquearCuenta('u-bloqueado@poderjudicial.gob.do')).toBe(true);
+    expect(await unlockAccount('u-bloqueado@poderjudicial.gob.do')).toBe(true);
 
     const after = await almacenDeCredenciales.findByEmail('u-bloqueado@poderjudicial.gob.do');
     expect(after?.lockedUntil).toBeUndefined();
@@ -70,6 +70,6 @@ describe('desbloquear una cuenta', () => {
   });
 
   it('una cuenta que no existe devuelve false, no lanza', async () => {
-    expect(await desbloquearCuenta('no-existe@poderjudicial.gob.do')).toBe(false);
+    expect(await unlockAccount('no-existe@poderjudicial.gob.do')).toBe(false);
   });
 });

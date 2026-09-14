@@ -108,18 +108,18 @@ describe('aplicada sobre la definicion', () => {
       hiddenItemIds: ['dos'],
     });
 
-    const { module: vista, isPersonalized } = applyPersonalization(modulo, guardada);
+    const { module: view, isPersonalized } = applyPersonalization(modulo, guardada);
 
     expect(isPersonalized).toBe(true);
-    expect(vista.pages[0]?.items.map((i) => i.id)).toEqual(['uno', 'tres']);
+    expect(view.pages[0]?.items.map((i) => i.id)).toEqual(['uno', 'tres']);
     // El binding llega intacto: la personalizacion no puede tocar lo que mide un indicador.
-    expect(vista.pages[0]?.items[0]?.instance.binding.measures).toEqual(['M']);
+    expect(view.pages[0]?.items[0]?.instance.binding.measures).toEqual(['M']);
   });
 
   it('sin personalizacion, la vista es la institucional y se anuncia como tal', () => {
-    const { module: vista, isPersonalized } = applyPersonalization(modulo, undefined);
+    const { module: view, isPersonalized } = applyPersonalization(modulo, undefined);
     expect(isPersonalized).toBe(false);
-    expect(vista.pages[0]?.items).toHaveLength(3);
+    expect(view.pages[0]?.items).toHaveLength(3);
   });
 
   it('una personalizacion guardada que no oculta nada NO marca la vista como personalizada', async () => {

@@ -1,17 +1,17 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { entrarComo } from './sesion';
+import { entrarComo } from './session';
 
 /**
  * Accesibilidad — seccion 4.9, "no opcional, no se pospone", y criterio de la seccion 9:
  * "Accesibilidad verificada (no pospuesta) en los modulos publicados a nivel institucional".
  */
 
-const NIVEL = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+const LEVEL = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
 /** Analiza la pagina actual y devuelve las infracciones, ya legibles en el mensaje de fallo. */
 async function infracciones(page: Page): Promise<string[]> {
-  const { violations } = await new AxeBuilder({ page }).withTags(NIVEL).analyze();
+  const { violations } = await new AxeBuilder({ page }).withTags(LEVEL).analyze();
   return violations.map(
     (v) =>
       `${v.id} (${v.impact}): ${v.help} — ${v.nodes.length} nodo(s): ` +
@@ -46,7 +46,7 @@ test.describe('paginas de modulo', () => {
   test('con un tooltip explicativo abierto tampoco hay infracciones', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('tooltip-icono-Pendientes por distrito').hover();
+    await page.getByTestId('icon-tooltip-Pendientes por distrito').hover();
     await expect(page.getByTestId('tooltip-Pendientes por distrito')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);
@@ -55,8 +55,8 @@ test.describe('paginas de modulo', () => {
   test('el emergente de datos de origen es accesible, con el foco dentro', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('tabla-datos-abrir-Pendientes por distrito').click();
-    await expect(page.getByTestId('tabla-datos-Pendientes por distrito')).toBeVisible();
+    await page.getByTestId('data-table-abrir-Pendientes por distrito').click();
+    await expect(page.getByTestId('data-table-Pendientes por distrito')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);
 
@@ -73,7 +73,7 @@ test.describe('paginas de modulo', () => {
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('abrir-exportar').click();
     await page.getByTestId('exportar').click();
-    await expect(page.getByTestId('estado-exportacion')).toHaveText(/Lista/, { timeout: 15_000 });
+    await expect(page.getByTestId('export-status')).toHaveText(/Lista/, { timeout: 15_000 });
 
     expect(await infracciones(page)).toEqual([]);
   });
@@ -103,7 +103,7 @@ test.describe('panel de administracion (4.10.8)', () => {
 test.describe('restablecimiento de contrasena (4.7.2)', () => {
   test('la pantalla de restablecimiento es accesible, sin sesion', async ({ page }) => {
     await page.goto('/restablecer');
-    await expect(page.getByTestId('restablecer-enviar')).toBeVisible();
+    await expect(page.getByTestId('reset-send')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);
   });
@@ -113,8 +113,8 @@ test.describe('personalizacion (4.6)', () => {
   test('el dialogo de Mi vista es accesible, con sus casillas etiquetadas', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('mi-vista').click();
-    await expect(page.getByTestId('dialogo-mi-vista')).toBeVisible();
+    await page.getByTestId('my-view').click();
+    await expect(page.getByTestId('dialogo-my-view')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);
   });
@@ -137,11 +137,11 @@ test.describe('editor de modulos (4.2)', () => {
     expect(await infracciones(page)).toEqual([]);
 
     await page.goto(`/editor/${slug}`);
-    await page.getByTestId('anadir-barras').click();
+    await page.getByTestId('add-bars').click();
     // Con el objeto YA DIBUJADO en el lienzo y su panel abierto: es donde estarian los problemas
     // si los hubiera —un bloque que anida controles, unas pestanas que no se anuncian como tales,
     // un `<select>` sin nombre—.
-    await expect(page.locator('[data-testid^="bloque-obj-"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(1);
     expect(await infracciones(page)).toEqual([]);
   });
 
@@ -167,7 +167,7 @@ test.describe('avisos (4.9)', () => {
   }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('crear-aviso').click();
+    await page.getByTestId('create-notice').click();
     await expect(page.getByTestId('dialogo-aviso')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);
@@ -248,7 +248,7 @@ test.describe('navegacion solo con teclado', () => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    const contenedor = page.locator('.tabla-contenedor').first();
+    const contenedor = page.locator('.container-table').first();
     await expect(contenedor).toHaveAttribute('tabindex', '0');
     await expect(contenedor).toHaveAttribute('role', 'region');
     await expect(contenedor).toHaveAttribute('aria-label', /.+/);
@@ -260,11 +260,11 @@ test.describe('navegacion solo con teclado', () => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('segmentador-Penal').focus();
+    await page.getByTestId('slicer-Penal').focus();
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(/Materia=Penal/);
 
-    await page.getByTestId('segmentador-Civil').focus();
+    await page.getByTestId('slicer-Civil').focus();
     await page.keyboard.press('Space');
     await expect(page).toHaveURL(/Materia=Civil/);
   });
@@ -312,11 +312,11 @@ test.describe('los objetos anadidos en los ultimos lotes', () => {
     await page.goto('/m/composicion/flujo');
 
     for (const testid of ['embudo', 'cascada', 'mapa-de-arbol']) {
-      const respaldo = page.getByTestId(testid).first();
-      await expect(respaldo).toBeAttached();
+      const fallback = page.getByTestId(testid).first();
+      await expect(fallback).toBeAttached();
       // Oculto a la vista, presente en el documento: es lo que distingue «no se dibuja» de «no
       // existe para quien no ve el dibujo».
-      await expect(respaldo).not.toBeInViewport();
+      await expect(fallback).not.toBeInViewport();
     }
   });
 
@@ -326,7 +326,7 @@ test.describe('los objetos anadidos en los ultimos lotes', () => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/composicion/multiplos');
 
-    const titulos = page.locator('.multiplos__titulo');
+    const titulos = page.locator('.multiples__title');
     expect(await titulos.count()).toBeGreaterThan(1);
     await expect(titulos.first()).toHaveText(/\w/);
   });

@@ -21,7 +21,7 @@ const vm: CategoricalViewModel = {
 const PALETTE = {
   series: ['#c1', '#c2', '#c3', '#c4', '#c5', '#c6', '#c7', '#c8'],
   content: '#111111',
-  textoAtenuado: '#555555',
+  mutedText: '#555555',
   line: '#999999',
   superficie: '#ffffff',
   superficieElevada: '#eeeeee',

@@ -4,17 +4,17 @@ import { defaultIdentity } from '@app/design-tokens';
 export default function IncrustadoLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="incrustado">
-      <header className="incrustado__cabecera">
+      <header className="embedded__header">
         <img
-          className="incrustado__emblema"
+          className="embedded__emblema"
           src={defaultIdentity.emblem.src}
           width={defaultIdentity.emblem.width}
           height={defaultIdentity.emblem.height}
           alt=""
         />
-        <span className="incrustado__institucion">{defaultIdentity.name}</span>
+        <span className="embedded__institucion">{defaultIdentity.name}</span>
       </header>
-      <main className="incrustado__cuerpo">{children}</main>
+      <main className="embedded__body">{children}</main>
     </div>
   );
 }

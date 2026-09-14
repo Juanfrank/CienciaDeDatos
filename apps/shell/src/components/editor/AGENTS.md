@@ -4,10 +4,10 @@ Construye un modulo sin escribir codigo (4.2). Cuatro pestanas, cada una con una
 
 | Pestana | Pregunta | Archivo |
 |---|---|---|
-| Objetos | que quiero poner | `PanelLateral.tsx` (`Tienda`) |
-| Datos | que mide | `PanelLateral.tsx` (`Datos`) + `Pozo.tsx` |
+| Objetos | que quiero poner | `SidebarPanel.tsx` (`Tienda`) |
+| Datos | que mide | `SidebarPanel.tsx` (`Datos`) + `Pozo.tsx` |
 | Formato | como se ve | `Presentacion.tsx` |
-| Complementos | que lo acompana | `PanelLateral.tsx` |
+| Complementos | que lo acompana | `SidebarPanel.tsx` |
 
 ## Reglas
 

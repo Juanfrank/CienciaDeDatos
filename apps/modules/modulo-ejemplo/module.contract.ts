@@ -39,7 +39,7 @@ export const contract: ModuleContract = {
   },
   uiComponents: [
     { name: 'TablaBasica', version: '0.1.0' },
-    { name: 'TarjetaKpi', version: '0.1.0' },
+    { name: 'KpiCard', version: '0.1.0' },
   ],
   includedInTeamBundles: ['equipo-distrito-norte', 'equipo-distrito-este'],
   minimumRoleToEdit: 'colaborador',

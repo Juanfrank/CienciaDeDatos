@@ -230,7 +230,7 @@ export const CORREO_DISPONIBLE = Boolean(process.env['SMTP_HOST']);
 export const canalDeRestablecimiento: IResetChannel = new CorreoInstitucionalNoDisponible();
 
 /** Desbloqueo de una cuenta local, sin cambiar la contraseña. */
-export async function desbloquearCuenta(email: string): Promise<boolean> {
+export async function unlockAccount(email: string): Promise<boolean> {
   const cuenta = await almacenDeCredenciales.findByEmail(email);
   if (!cuenta) return false;
 

@@ -33,7 +33,7 @@ export const es = {
   'objeto.roto': 'Objeto roto',
   'objeto.rotoDetalle':
     '{faltan, plural, one {Falta el campo {campos}} other {Faltan los campos {campos}}} en el dataset.',
-  'objeto.sinDatos': 'Sin datos para el ambito actual',
+  'objeto.withoutData': 'Sin datos para el ambito actual',
   'objeto.datosDe': 'Datos de {titulo}',
   'objeto.filtrarPor': 'Filtrar por {valor}',
 

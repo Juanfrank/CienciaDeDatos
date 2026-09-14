@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { captureBookmark } from '@app/module-model';
-import { borrarMarcador, saveBookmark, listarMarcadores } from '../../../src/server/bookmarks';
+import { deleteBookmark, saveBookmark, listarMarcadores } from '../../../src/server/bookmarks';
 import { withoutSession } from '../../../src/server/respuestas';
 import { obtenerSesion } from '../../../src/server/session';
 
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const sesion = await obtenerSesion();
   if (!sesion) return withoutSession();
-  return NextResponse.json({ marcadores: await listarMarcadores(sesion.userId, sesion.activeTeamId) });
+  return NextResponse.json({ bookmarks: await listarMarcadores(sesion.userId, sesion.activeTeamId) });
 }
 
 /** Guarda el estado de filtros actual como marcador. */
@@ -52,7 +52,7 @@ export async function DELETE(request: Request) {
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Se requiere id.' }, { status: 400 });
 
-  const borrado = await borrarMarcador(id, sesion.userId);
+  const borrado = await deleteBookmark(id, sesion.userId);
   return borrado
     ? NextResponse.json({ borrado: id })
     : NextResponse.json({ error: 'No existe o no es suyo.' }, { status: 404 });

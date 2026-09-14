@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { entrarComo } from './sesion';
+import { entrarComo } from './session';
 
 /** Exportacion — seccion 4.9, encolada como exige 5.3. */
 
@@ -124,9 +124,9 @@ test.describe('cada objeto exporta LO QUE MUESTRA, no el dataset entero', () => 
     );
 
     // La tarjeta muestra un numero: exporta una cabecera y UNA fila.
-    const tarjeta = bloques.get('Casos pendientes') ?? [];
-    expect(tarjeta[0]).toBe('Indicador,CasosPendientes');
-    expect(tarjeta.filter((l) => l.trim() !== '')).toHaveLength(2);
+    const card = bloques.get('Casos pendientes') ?? [];
+    expect(card[0]).toBe('Indicador,CasosPendientes');
+    expect(card.filter((l) => l.trim() !== '')).toHaveLength(2);
 
     // El grafico muestra una barra por distrito: exporta una fila por distrito, ya agregada.
     const barras = bloques.get('Pendientes por distrito') ?? [];
@@ -223,13 +223,13 @@ test.describe('un archivo exportado no es alcanzable por otra persona', () => {
   test('consultar y descargar la exportacion de otro responde 404', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'csv' });
-    const rutaEstado = `/api/exportaciones/${estado.id}`;
+    const statusPath = `/api/exportaciones/${estado.id}`;
     const rutaArchivo = archivoDe(estado).descargarEn;
 
     // La misma URL de descarga, con otra sesion. Se responde 404 y no 403: decir "prohibido"
     // confirmaria que ese identificador existe y que alguien exporto ese modulo.
     await entrarComo(page, 'u-beto');
-    expect((await page.request.get(rutaEstado)).status()).toBe(404);
+    expect((await page.request.get(statusPath)).status()).toBe(404);
     expect((await page.request.get(rutaArchivo)).status()).toBe(404);
   });
 });
@@ -244,7 +244,7 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
     await page.getByTestId('exportar').click();
 
     // El estado es una region viva: cambia sin recargar y se anuncia a un lector de pantalla.
-    await expect(page.getByTestId('estado-exportacion')).toHaveText(/Lista/, { timeout: 15_000 });
+    await expect(page.getByTestId('export-status')).toHaveText(/Lista/, { timeout: 15_000 });
 
     const enlace = page.getByTestId('descargar-exportacion');
     await expect(enlace).toBeVisible();
@@ -260,22 +260,22 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
     await page.getByTestId('abrir-exportar').click();
     await page.getByTestId('exportar').click();
     await page.getByTestId('abrir-exportar').click();
-    await expect(page.getByTestId('panel-exportar')).toHaveCount(0);
+    await expect(page.getByTestId('export-panel')).toHaveCount(0);
 
-    await expect(page.getByTestId('estado-exportacion')).toHaveText(/Lista/, { timeout: 15_000 });
+    await expect(page.getByTestId('export-status')).toHaveText(/Lista/, { timeout: 15_000 });
     await expect(page.getByTestId('descargar-exportacion')).toBeVisible();
   });
 
   test('exporta lo que se ve: el filtro elegido viaja al archivo', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('segmentador-Penal').click();
+    await page.getByTestId('slicer-Penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
 
     await page.getByTestId('abrir-exportar').click();
     await page.getByLabel('Formato').selectOption('csv');
     await page.getByTestId('exportar').click();
-    await expect(page.getByTestId('estado-exportacion')).toHaveText(/Lista/, { timeout: 15_000 });
+    await expect(page.getByTestId('export-status')).toHaveText(/Lista/, { timeout: 15_000 });
 
     const href = await page.getByTestId('descargar-exportacion').getAttribute('href');
     const csv = await (await page.request.get(href ?? '')).text();

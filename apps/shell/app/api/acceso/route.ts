@@ -12,7 +12,7 @@ import { COOKIE_SESION, closeSession, obtenerSesion } from '../../../src/server/
 export const runtime = 'nodejs';
 
 /** Inicio de sesion — seccion 4.7. */
-const MENSAJES: Record<string, string> = {
+const MESSAGES: Record<string, string> = {
   'credenciales-invalidas': 'Correo o contrasena incorrectos.',
   'cuenta-bloqueada': 'La cuenta esta bloqueada temporalmente por intentos fallidos.',
   'mfa-requerido': 'Introduzca el codigo de su aplicacion de autenticacion.',
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
     if (error instanceof AuthenticationError) {
       const estado = error.reason === 'mfa-requerido' ? 428 : 401;
       return NextResponse.json(
-        { error: MENSAJES[error.reason] ?? 'No se pudo iniciar sesion.', motivo: error.reason },
+        { error: MESSAGES[error.reason] ?? 'No se pudo iniciar sesion.', motivo: error.reason },
         { status: estado },
       );
     }

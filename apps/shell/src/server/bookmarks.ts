@@ -18,7 +18,7 @@ export async function listarMarcadores(userId: string, teamId: string): Promise<
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function borrarMarcador(id: string, userId: string): Promise<boolean> {
+export async function deleteBookmark(id: string, userId: string): Promise<boolean> {
   const actuales = await all();
   const marcador = actuales.find((m) => m.id === id);
   // Solo quien lo creo puede borrarlo.

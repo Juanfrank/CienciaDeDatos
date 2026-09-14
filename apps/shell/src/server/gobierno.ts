@@ -141,9 +141,9 @@ export class StoreGovernanceRepository implements GovernanceStore {
       // organizacion general tal cual (4.1.3). No se les quita acceso.
       teams: actual.teams.map((equipo) => {
         if (equipo.assignedPackageId !== packageId) return equipo;
-        const sinPaquete = { ...equipo };
-        delete sinPaquete.assignedPackageId;
-        return sinPaquete;
+        const withoutPackage = { ...equipo };
+        delete withoutPackage.assignedPackageId;
+        return withoutPackage;
       }),
     }));
     return true;

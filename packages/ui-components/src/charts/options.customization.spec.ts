@@ -6,7 +6,7 @@ import type { CategoricalViewModel } from '../registry/viewModel';
 const palette = {
   series: ['#1', '#2'],
   content: '#t',
-  textoAtenuado: '#ta',
+  mutedText: '#ta',
   line: '#l',
   superficie: '#s',
   superficieElevada: '#se',

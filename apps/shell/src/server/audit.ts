@@ -56,7 +56,7 @@ export async function registrarEventoDeArbol(evento: TreeAuditEvent): Promise<Co
 function mapearAccion(accion: TreeAuditEvent['action']): ConfigChangeLog['action'] {
   switch (accion) {
     case 'crear-carpeta':
-    case 'crear-modulo':
+    case 'create-module':
       return 'create';
     case 'borrar-definitivamente':
       return 'delete';
@@ -93,6 +93,6 @@ export async function contarAmpliaciones(): Promise<number> {
 }
 
 /** Solo para pruebas. */
-export async function limpiarAuditoria(): Promise<void> {
+export async function clearAudit(): Promise<void> {
   await escribir(KEY_AUDIT, []);
 }

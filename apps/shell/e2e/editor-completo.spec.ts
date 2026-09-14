@@ -1,26 +1,26 @@
 import { expect, test, type Page } from '@playwright/test';
 import { initialCatalog } from '@app/ui-components';
-import { ABRE_PRIMERO, CONTROL_DE_CLAVE } from '../src/components/editor/controles';
-import { entrarComo } from './sesion';
+import { ABRE_PRIMERO, CONTROL_DE_CLAVE } from '../src/components/editor/controls';
+import { entrarComo } from './session';
 
 /** Todo objeto del catalogo se COLOCA y se CONFIGURA desde el editor — seccion 4.2. */
 
 const guardado = async (page: Page) =>
-  expect(page.locator('.editor')).toHaveAttribute('data-guardando', 'no');
+  expect(page.locator('.editor')).toHaveAttribute('saving-data', 'no');
 
 /** Despliega todas las secciones del panel. */
 const abrirSecciones = async (page: Page) => {
   await page
-    .locator('.panel-editor details')
+    .locator('.editor-panel details')
     .evaluateAll((nodos) => nodos.forEach((n) => ((n as HTMLDetailsElement).open = true)));
 };
 
-const nuevoModulo = async (page: Page, slug: string) => {
+const newModule = async (page: Page, slug: string) => {
   await page.goto('/editor');
-  await page.getByTestId('nuevo-modulo-nombre').fill(slug);
+  await page.getByTestId('new-module-name').fill(slug);
   await page.getByTestId('nuevo-modulo-slug').fill(slug);
-  await page.getByTestId('crear-modulo').click();
-  await expect(page.getByTestId(`fila-${slug}`)).toBeVisible();
+  await page.getByTestId('create-module').click();
+  await expect(page.getByTestId(`row-${slug}`)).toBeVisible();
   await page.goto(`/editor/${slug}`);
 };
 
@@ -33,21 +33,21 @@ test.beforeEach(async ({ page }) => {
 
 test.describe('colocable: el catalogo entero entra por la paleta', () => {
   test('cada objeto se anade desde el panel y aparece en el lienzo', async ({ page }) => {
-    await nuevoModulo(page, `todos-${Date.now()}`);
+    await newModule(page, `todos-${Date.now()}`);
 
     for (const [i, objeto] of COLOCABLES.entries()) {
       /*
        * Primero se vuelve a la pestana de Objetos, y LUEGO se busca el boton.
        */
-      await page.getByTestId('pestana-objetos').click();
+      await page.getByTestId('object-tab').click();
 
-      const boton = page.getByTestId(`anadir-${objeto.objectId}`);
+      const button = page.getByTestId(`add-${objeto.objectId}`);
       // El boton tiene que EXISTIR: un objeto publicado que no sale en la paleta esta en el
       // catalogo y fuera del alcance de quien edita.
-      await expect(boton, `${objeto.objectId} no esta en la paleta`).toBeAttached();
-      await boton.click();
+      await expect(button, `${objeto.objectId} no esta en la paleta`).toBeAttached();
+      await button.click();
       await expect(
-        page.locator('[data-testid^="bloque-"]'),
+        page.locator('[data-testid^="block"]'),
         `${objeto.objectId} no llego al lienzo`,
       ).toHaveCount(i + 1);
     }
@@ -59,15 +59,15 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
     // Colocar y que se dibuje no es haberlo guardado. Es la diferencia entre un editor y una
     // maqueta, y se comprueba saliendo y volviendo.
     const slug = `persiste-${Date.now()}`;
-    await nuevoModulo(page, slug);
+    await newModule(page, slug);
 
-    await page.getByTestId('anadir-embudo').click();
-    await page.getByTestId('pestana-objetos').click();
-    await page.getByTestId('anadir-mapa-de-arbol').click();
+    await page.getByTestId('add-funnel').click();
+    await page.getByTestId('object-tab').click();
+    await page.getByTestId('add-map-tree').click();
     await guardado(page);
 
     await page.goto(`/editor/${slug}`);
-    await expect(page.locator('[data-testid^="bloque-"]')).toHaveCount(2);
+    await expect(page.locator('[data-testid^="block"]')).toHaveCount(2);
   });
 });
 
@@ -80,16 +80,16 @@ test.describe('configurable: lo que cada objeto declara sale en su panel', () =>
     const keys = version?.presentation ?? [];
 
     test(`${objeto.objectId} — ${keys.length} claves`, async ({ page }) => {
-      await nuevoModulo(page, `cfg-${objeto.objectId}-${Date.now()}`);
-      await page.getByTestId(`anadir-${objeto.objectId}`).click();
+      await newModule(page, `cfg-${objeto.objectId}-${Date.now()}`);
+      await page.getByTestId(`add-${objeto.objectId}`).click();
 
       const id = await page
-        .locator('[data-testid^="bloque-"]')
+        .locator('[data-testid^="block"]')
         .first()
         .getAttribute('data-testid');
-      const item = (id ?? '').replace('bloque-', '');
+      const item = (id ?? '').replace('block', '');
 
-      await page.getByTestId('pestana-formato').click();
+      await page.getByTestId('format-tab').click();
       await expect(page.getByTestId(`pres-${item}`)).toBeVisible();
       await abrirSecciones(page);
 
@@ -130,19 +130,19 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
   test('el medidor: fijar el maximo desde el panel cambia la escala del respaldo', async ({
     page,
   }) => {
-    await nuevoModulo(page, `usar-medidor-${Date.now()}`);
-    await page.getByTestId('anadir-medidor').click();
+    await newModule(page, `usar-medidor-${Date.now()}`);
+    await page.getByTestId('add-gauge').click();
     await guardado(page);
-    const id = await page.locator('[data-testid^="bloque-"]').first().getAttribute('data-testid');
-    const item = (id ?? '').replace('bloque-', '');
+    const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
+    const item = (id ?? '').replace('block', '');
 
     // El objeto llega ya mapeado a la primera medida del dataset: colocar algo que no dibuja nada
     // seria empezar por una tarjeta vacia. Aqui solo hace falta la escala.
-    await page.getByTestId('pestana-formato').click();
+    await page.getByTestId('format-tab').click();
     await abrirSecciones(page);
     // La escala deducida se ve antes de tocar nada: el respaldo la dice siempre.
-    const respaldo = page.getByTestId('medidor').first();
-    await expect(respaldo).toContainText('Escala');
+    const fallback = page.getByTestId('medidor').first();
+    await expect(fallback).toContainText('Escala');
 
     /*
      * Se escribe y se SALE del campo.
@@ -153,16 +153,16 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
 
     // El respaldo accesible dice la escala con palabras: es lo que lee quien no ve la aguja, y es
     // donde se comprueba sin abrir el canvas. Sale de la misma funcion que el dibujo.
-    await expect(respaldo).toContainText('5,000');
+    await expect(fallback).toContainText('5,000');
   });
 
   test('el embudo: cambiar contra que compara cambia la columna del respaldo', async ({ page }) => {
-    await nuevoModulo(page, `usar-embudo-${Date.now()}`);
-    await page.getByTestId('anadir-embudo').click();
-    const id = await page.locator('[data-testid^="bloque-"]').first().getAttribute('data-testid');
-    const item = (id ?? '').replace('bloque-', '');
+    await newModule(page, `usar-embudo-${Date.now()}`);
+    await page.getByTestId('add-funnel').click();
+    const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
+    const item = (id ?? '').replace('block', '');
 
-    await page.getByTestId('pestana-formato').click();
+    await page.getByTestId('format-tab').click();
     await abrirSecciones(page);
     const compare = page.getByTestId(`pres-${item}-comparar`);
     await expect(compare).toBeVisible();
@@ -177,22 +177,22 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
   });
 
   test('los multiplos: elegir dos columnas desde el panel reparte los paneles', async ({ page }) => {
-    await nuevoModulo(page, `usar-multiplos-${Date.now()}`);
-    await page.getByTestId('anadir-barras').click();
+    await newModule(page, `usar-multiplos-${Date.now()}`);
+    await page.getByTestId('add-bars').click();
     await guardado(page);
-    const id = await page.locator('[data-testid^="bloque-"]').first().getAttribute('data-testid');
-    const item = (id ?? '').replace('bloque-', '');
+    const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
+    const item = (id ?? '').replace('block', '');
 
     // El eje ya viene mapeado; lo unico que hay que anadir es la dimension que reparte los paneles.
-    await page.getByTestId('pestana-datos').click();
-    await page.getByTestId(`pozo-${item}-multiplo-anadir`).click();
-    await page.getByTestId(`pozo-${item}-multiplo-opcion-DimTribunal.Materia`).click();
+    await page.getByTestId('data-tab').click();
+    await page.getByTestId(`well-${item}-multiplo-anadir`).click();
+    await page.getByTestId(`well-${item}-multiplo-opcion-DimTribunal.Materia`).click();
     await guardado(page);
 
     // Sin tocar nada mas, el objeto ya se parte en paneles: el pozo es lo que lo decide.
-    await expect(page.locator('.multiplos__panel').first()).toBeVisible();
+    await expect(page.locator('.multiples__panel').first()).toBeVisible();
 
-    await page.getByTestId('pestana-formato').click();
+    await page.getByTestId('format-tab').click();
     await abrirSecciones(page);
     await page.getByTestId(`pres-${item}-multiplos-columnas`).selectOption('2');
     await guardado(page);

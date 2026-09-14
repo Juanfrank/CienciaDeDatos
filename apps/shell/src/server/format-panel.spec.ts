@@ -2,12 +2,12 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { PRESENTATION_KEYS, initialCatalog, type PresentationKey } from '@app/ui-components';
-import { CONTROL_DE_CLAVE } from '../components/editor/controles';
+import { CONTROL_DE_CLAVE } from '../components/editor/controls';
 
 /** Toda clave de presentacion que un objeto DECLARA tiene un control en el panel — 4.2. */
 
 const PANEL = readFileSync(
-  join(process.cwd(), 'apps/shell/src/components/editor/Presentacion.tsx'),
+  join(process.cwd(), 'apps/shell/src/components/editor/Presentation.tsx'),
   'utf8',
 );
 

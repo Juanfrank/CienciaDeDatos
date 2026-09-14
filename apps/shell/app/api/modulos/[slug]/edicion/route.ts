@@ -3,7 +3,7 @@ import type { ModuleDefinition, ModulePage } from '@app/module-model';
 import {
   actorDe,
   bloqueosDePublicacion,
-  borrarModulo,
+  deleteModule,
   guardarBorrador,
   moduloVisiblePorSlug,
 } from '../../../../../src/server/cicloDeVida';
@@ -29,7 +29,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   return NextResponse.json({
     modulo,
     diagnosticos: await diagnosticarDefinicion(modulo),
-    bloqueos: await bloqueosDePublicacion(modulo),
+    locks: await bloqueosDePublicacion(modulo),
     objetos: await previsualizar(modulo, sesion.userId, sesion.activeTeamId),
   });
 }
@@ -68,7 +68,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({
       modulo,
       diagnosticos: await diagnosticarDefinicion(modulo),
-      bloqueos: await bloqueosDePublicacion(modulo),
+      locks: await bloqueosDePublicacion(modulo),
       objetos: await previsualizar(modulo, sesion.userId, sesion.activeTeamId),
     });
   } catch (error) {
@@ -86,7 +86,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   if (!existente) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
   try {
-    await borrarModulo({ actor, moduleId: existente.moduleId });
+    await deleteModule({ actor, moduleId: existente.moduleId });
     return NextResponse.json({ borrado: existente.moduleId });
   } catch (error) {
     return respuestaDeError(error);

@@ -1,4 +1,4 @@
-import { conAdmin } from '../guardia';
+import { withAdmin } from '../guardia';
 import {
   ejecutarOperacionDeArbol,
   previsualizarMovimiento,
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 /** Organizacion general vigente, con su papelera. */
 export async function GET() {
-  return conAdmin(async () => await getManagedTree());
+  return withAdmin(async () => await getManagedTree());
 }
 
 /** Aplica una operacion sobre el arbol (4.1, 4.1.2). */
@@ -21,10 +21,10 @@ export async function POST(request: Request) {
 
   if (url.searchParams.get('previsualizar') === '1') {
     if (body.type !== 'mover') {
-      return conAdmin(async () => ({ cambiaElAmbito: false, moduleIds: [] }));
+      return withAdmin(async () => ({ cambiaElAmbito: false, moduleIds: [] }));
     }
-    return conAdmin(async () => await previsualizarMovimiento(body.nodeId, body.newParentId));
+    return withAdmin(async () => await previsualizarMovimiento(body.nodeId, body.newParentId));
   }
 
-  return conAdmin(async (actor) => ({ arbol: await ejecutarOperacionDeArbol(actor, body) }));
+  return withAdmin(async (actor) => ({ arbol: await ejecutarOperacionDeArbol(actor, body) }));
 }

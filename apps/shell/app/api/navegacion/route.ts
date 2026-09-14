@@ -9,12 +9,12 @@ export const runtime = 'nodejs';
 export async function GET() {
   const sesion = await obtenerSesion();
   if (!sesion) return withoutSession();
-  const vista = await navigationOf(sesion);
+  const view = await navigationOf(sesion);
   return NextResponse.json({
     equipoActivo: sesion.activeTeamId,
-    arbol: vista.tree,
-    desdePaquete: vista.fromPackage,
+    arbol: view.tree,
+    packageFrom: view.fromPackage,
     // Los nodos que un paquete no pudo mostrar se reportan al Administrador, no se ocultan.
-    noMostrados: vista.dangling,
+    noMostrados: view.dangling,
   });
 }

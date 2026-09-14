@@ -53,7 +53,7 @@ en un filtro.
 
 ## Consecuencias
 
-- Un defecto real que el panel destapo: `useFiltrosDeUrl` partia de los `searchParams` del render
+- Un defecto real que el panel destapo: `useUrlFilters` partia de los `searchParams` del render
   al escribir. Con un segmentador por objeto casi no se notaba —hacian falta dos clics en objetos
   distintos en menos de lo que tarda un render—. Con diez controles juntos, pulsar dos seguidos
   es el gesto normal, y el primer filtro desaparecia sin dejar rastro. Ahora se parte de lo

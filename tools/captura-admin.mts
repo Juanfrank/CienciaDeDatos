@@ -35,10 +35,10 @@ for (const [path, label] of [
 }
 
 // "Quien ve que" necesita una consulta antes de tener algo que mostrar.
-await pagina.goto(`${base}/admin/quien-ve-que`);
+await pagina.goto(`${base}/admin/sees-who-where`);
 await pagina.getByTestId('qvq-consultar').click();
 await pagina.waitForTimeout(400);
-await pagina.screenshot({ path: `${salida}-quien-ve-que.png`, fullPage: true });
+await pagina.screenshot({ path: `${salida}-sees-who-where.png`, fullPage: true });
 
 await navegador.close();
 console.log('capturas listas');

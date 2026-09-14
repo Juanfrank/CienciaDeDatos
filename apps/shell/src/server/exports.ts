@@ -145,8 +145,8 @@ function notasDe(instance: ObjectInstance): string[] {
     notas.push(`${nombre}: ${line.valor}`);
   }
   for (const colorRule of p?.condicional?.rules ?? []) {
-    const alcance = colorRule.medida ? `${colorRule.medida} ` : '';
-    notas.push(`Marcado en pantalla: ${alcance}${describirRegla(colorRule)}`);
+    const reach = colorRule.medida ? `${colorRule.medida} ` : '';
+    notas.push(`Marcado en pantalla: ${reach}${describirRegla(colorRule)}`);
   }
   return notas;
 }

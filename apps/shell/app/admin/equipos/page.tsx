@@ -1,4 +1,4 @@
-import { EditorDeEquipos } from '../../../src/components/admin/EditorDeEquipos';
+import { TeamEditor } from '../../../src/components/admin/TeamEditor';
 import { administradores } from '../../../src/server/admin';
 import { getGeneralTree, listTeams, listUsers } from '../../../src/server/context';
 import { gobierno } from '../../../src/server/gobierno';
@@ -19,16 +19,16 @@ function aplanar(nodos: NavNode[], acumulado: { id: string; nombre: string; tipo
   return acumulado;
 }
 
-export default async function PaginaEquipos() {
+export default async function TeamPage() {
   return (
     <section>
       <h2>Equipos y membresia</h2>
-      <p className="texto-atenuado">
+      <p className="muted-text">
         Un equipo es la unidad de agrupacion tanto para el acceso a modulos como para el ambito de
         datos por defecto. Su acceso se concede otorgando nodos del arbol real, para que el acceso
         y la estructura nunca diverjan.
       </p>
-      <EditorDeEquipos
+      <TeamEditor
         administradores={await administradores()}
         equipos={await listTeams()}
         nodos={aplanar(await getGeneralTree())}

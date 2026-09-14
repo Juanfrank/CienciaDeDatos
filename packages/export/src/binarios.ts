@@ -84,7 +84,7 @@ export function aPdf(document: ExportableDocument): Promise<Buffer> {
       doc.moveDown(0.2);
     }
 
-    doc.font('Helvetica').fontSize(8).fillColor(palette.textoAtenuado);
+    doc.font('Helvetica').fontSize(8).fillColor(palette.mutedText);
     for (const line of heading.lineas) doc.text(line);
     doc.moveDown(0.8);
 
@@ -97,7 +97,7 @@ export function aPdf(document: ExportableDocument): Promise<Buffer> {
        * Las notas, DEBAJO de su tabla.
        */
       for (const nota of hoja.notas ?? []) {
-        doc.font('Helvetica-Oblique').fontSize(7).fillColor(palette.textoAtenuado).text(nota);
+        doc.font('Helvetica-Oblique').fontSize(7).fillColor(palette.mutedText).text(nota);
       }
       doc.moveDown(1);
     }
@@ -109,7 +109,7 @@ export function aPdf(document: ExportableDocument): Promise<Buffer> {
       doc
         .font('Helvetica')
         .fontSize(7)
-        .fillColor(palette.textoAtenuado)
+        .fillColor(palette.mutedText)
         .text(
           `${heading.titulo} — pagina ${i + 1} de ${rango.count}`,
           MARGIN,

@@ -53,8 +53,8 @@ export function cabecerasDeEnmarcado(path: string, origenes: string[]): Cabecera
 }
 
 /** Codigo que el portal anfitrion pega en su pagina. */
-export function codigoDeIncrustacion(urlBase: string, path: string, titulo: string): string {
-  const url = `${urlBase.replace(/\/$/, '')}${path}`;
+export function codigoDeIncrustacion(baseUrl: string, path: string, titulo: string): string {
+  const url = `${baseUrl.replace(/\/$/, '')}${path}`;
   return [
     `<iframe src="${url}"`,
     `        title="${titulo.replace(/"/g, '&quot;')}"`,

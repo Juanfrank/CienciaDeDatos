@@ -4,12 +4,12 @@ import { diagnosticarDefinicion, vistaPreviaDelBorrador } from '../../../src/ser
 import { serializarObjeto } from '../../../src/server/serializar';
 import { editorPalette } from '../../../src/server/editor';
 import { exigirSesionDePagina } from '../../../src/server/session';
-import { EditorDeModulo } from '../../../src/components/editor/EditorDeModulo';
+import { ModuleEditor } from '../../../src/components/editor/ModuleEditor';
 
 export const dynamic = 'force-dynamic';
 
 /** Editor de un modulo — seccion 4.2. */
-export default async function PaginaEditorDeModulo({
+export default async function ModuleEditorPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
@@ -31,11 +31,11 @@ export default async function PaginaEditorDeModulo({
   // El editor monta sus dos columnas por su cuenta —taller y carril de objetos—, asi que la
   // pagina no lo envuelve en un `main` con padding: eso volveria a separar el carril del borde.
   return (
-    <EditorDeModulo
-      inicial={modulo}
+    <ModuleEditor
+      initial={modulo}
       objetosIniciales={(previa?.objetos ?? []).map(serializarObjeto)}
       diagnosticos={await diagnosticarDefinicion(modulo)}
-      bloqueos={await bloqueosDePublicacion(modulo)}
+      locks={await bloqueosDePublicacion(modulo)}
       palette={await editorPalette()}
       editable={modulo.status === 'borrador' && modulo.ownerUserId === sesion.userId}
     />

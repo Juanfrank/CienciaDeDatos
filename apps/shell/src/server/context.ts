@@ -15,7 +15,7 @@ import { gobierno } from './gobierno';
 /** Contexto de servidor del shell. */
 
 /*
- * El conector activo lo resuelve ahora `configuracion.ts` contra App Configuration (2.2).
+ * El conector activo lo resuelve ahora `settings.ts` contra App Configuration (2.2).
  */
 export { conectorActivo } from './settings';
 

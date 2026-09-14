@@ -19,8 +19,8 @@ El editor pasa a ser **un lienzo con el modulo dibujado** y **un panel lateral c
 
 ### El lienzo
 
-- Cada bloque se renderiza con **los mismos componentes** que la vista publicada. `ObjetoDeModulo`
-  sale de `VistaModulo` para que los dos lo compartan: si el editor tuviera su propia version, las
+- Cada bloque se renderiza con **los mismos componentes** que la vista publicada. `ModuleObject`
+  sale de `ModuleView` para que los dos lo compartan: si el editor tuviera su propia version, las
   dos divergirian en cuanto alguien anadiera un tipo de objeto, y el primero en notarlo seria
   quien publicara algo que no se parece a lo que vio.
 - Con **datos reales**, leidos del cache. Vuelven en la MISMA respuesta que el guardado, no en una

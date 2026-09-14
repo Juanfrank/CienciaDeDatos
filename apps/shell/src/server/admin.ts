@@ -310,7 +310,7 @@ async function escribirEquipo(equipo: Team): Promise<void> {
 }
 
 /** Borrado de un equipo, con la misma comprobacion. */
-export async function borrarEquipo(actor: Actor, teamId: string): Promise<void> {
+export async function deleteTeam(actor: Actor, teamId: string): Promise<void> {
   assertCan(actor.role, 'gestionar-equipos');
 
   const before = await gobierno.listTeams();
@@ -392,7 +392,7 @@ export interface ValidacionDePaquete {
 }
 
 /** Guarda un paquete y comprueba, contra CADA equipo que lo usa, que no cuela accesos. */
-export async function guardarPaquete(actor: Actor, pkg: ModulePackage): Promise<ValidacionDePaquete> {
+export async function savePackage(actor: Actor, pkg: ModulePackage): Promise<ValidacionDePaquete> {
   assertCan(actor.role, 'gestionar-paquetes-visuales');
   const anterior = await gobierno.getPackage(pkg.id);
   await gobierno.upsertPackage(pkg);
@@ -402,8 +402,8 @@ export async function guardarPaquete(actor: Actor, pkg: ModulePackage): Promise<
 
   for (const equipo of await gobierno.listTeams()) {
     if (equipo.assignedPackageId !== pkg.id) continue;
-    const vista = buildNavigationView({ generalTree, team: equipo, pkg });
-    for (const colgante of vista.dangling) {
+    const view = buildNavigationView({ generalTree, team: equipo, pkg });
+    for (const colgante of view.dangling) {
       noMostrables.push({
         teamId: equipo.id,
         moduleId: colgante.moduleId,
@@ -428,7 +428,7 @@ export async function guardarPaquete(actor: Actor, pkg: ModulePackage): Promise<
 // Quien ve que (4.10.8)
 // ---------------------------------------------------------------------------
 
-export interface QuienVeQue {
+export interface SeesWhoWhere {
   userId: string;
   teamId: string;
   moduleId: string;
@@ -443,7 +443,7 @@ export interface QuienVeQue {
 }
 
 /** Resuelve "quien ve que" para un usuario y un modulo. */
-export async function quienVeQue(userId: string, teamId: string, moduleId: string): Promise<QuienVeQue> {
+export async function seesWhoWhere(userId: string, teamId: string, moduleId: string): Promise<SeesWhoWhere> {
   const equipo = await gobierno.getTeam(teamId);
   if (!equipo) throw new AdminError(`El equipo '${teamId}' no existe.`, 404);
 

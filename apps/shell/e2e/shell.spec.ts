@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { entrarComo } from './sesion';
+import { entrarComo } from './session';
 
 /** Verificacion de punta a punta del shell, en un navegador real. */
 
@@ -16,12 +16,12 @@ test.describe('navegacion y ruteo por slug (4.11)', () => {
   test('la raiz redirige al primer modulo accesible', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveURL(/\/m\/casos-pendientes/);
-    await expect(page.getByTestId('titulo-modulo')).toHaveText('Casos pendientes');
+    await expect(page.getByTestId('module-title')).toHaveText('Casos pendientes');
   });
 
   test('cada modulo tiene su propia URL estable, abrible directamente', async ({ page }) => {
     await page.goto('/m/audiencias');
-    await expect(page.getByTestId('titulo-modulo')).toHaveText('Audiencias');
+    await expect(page.getByTestId('module-title')).toHaveText('Audiencias');
   });
 
   test('el arbol de navegacion solo muestra lo concedido al equipo activo', async ({ page }) => {
@@ -36,8 +36,8 @@ test.describe('navegacion y ruteo por slug (4.11)', () => {
 test.describe('los objetos se dibujan con datos leidos del cache', () => {
   test('un modulo muestra KPI, barras, matriz y tabla con datos reales', async ({ page }) => {
     await page.goto('/m/casos-pendientes');
-    await expect(page.getByTestId('kpi-valor').first()).not.toHaveText('0');
-    await expect(page.getByTestId('grafico-barras-distrito').getByTestId('barras')).toBeVisible();
+    await expect(page.getByTestId('value-kpi').first()).not.toHaveText('0');
+    await expect(page.getByTestId('chart-barras-distrito').getByTestId('barras')).toBeVisible();
     await expect(page.getByTestId('matriz')).toBeVisible();
     await expect(page.getByTestId('tabla')).toBeVisible();
   });
@@ -55,7 +55,7 @@ test.describe('los objetos se dibujan con datos leidos del cache', () => {
     await expect(roto).toBeVisible();
     await expect(roto).toContainText('CampoRetirado');
     // El resto del modulo sigue en pie: el objeto sano de al lado se dibuja igual.
-    await expect(page.getByTestId('titulo-modulo')).toBeVisible();
+    await expect(page.getByTestId('module-title')).toBeVisible();
     await expect(page.getByTestId('barras')).toBeVisible();
   });
 });
@@ -89,11 +89,11 @@ test.describe('ambito de acceso por equipo activo (4.10.4)', () => {
     // Ana pertenece a los dos equipos. Cambia el ACTIVO, no la identidad: es el gesto que
     // describe 4.10.2, y antes esta prueba lo hacia cambiando de persona en un desplegable, que
     // no probaba nada de lo que dice su titulo.
-    await page.getByTestId('selector-equipo').selectOption('equipo-este');
+    await page.getByTestId('team-picker').selectOption('equipo-este');
     await page.waitForLoadState('networkidle');
     await page.goto('/m/casos-este');
 
-    await expect(page.getByTestId('titulo-modulo')).toHaveText('Casos pendientes Este');
+    await expect(page.getByTestId('module-title')).toHaveText('Casos pendientes Este');
 
     // La sesion es la MISMA: cambiar de equipo no reemite credenciales (criterio de seccion 9).
     const cookieDespues = (await page.context().cookies()).find((c) => c.name === 'sesion')?.value;
@@ -108,7 +108,7 @@ test.describe('acceso: ocultar no es proteger (criterio de la seccion 9)', () =>
     // al equipo Norte. El arbol no lo muestra; escribir la URL a mano tampoco debe servir.
     const respuesta = await page.goto('/m/estadisticas');
     expect(respuesta?.status()).toBe(404);
-    await expect(page.getByTestId('titulo-modulo')).toHaveCount(0);
+    await expect(page.getByTestId('module-title')).toHaveCount(0);
   });
 
   test('la API tampoco lo sirve, aunque se la llame directamente', async ({ page }) => {
@@ -130,7 +130,7 @@ test.describe('acceso: ocultar no es proteger (criterio de la seccion 9)', () =>
 test.describe('estado de filtros en la URL (4.11)', () => {
   test('seleccionar en el segmentador se refleja en la query string', async ({ page }) => {
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('segmentador-Penal').click();
+    await page.getByTestId('slicer-Penal').click();
     await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
     await expect(page.getByTestId('filtros-activos')).toContainText('Penal');
   });
@@ -138,7 +138,7 @@ test.describe('estado de filtros en la URL (4.11)', () => {
   test('recargar la URL con filtros reproduce el mismo estado sin pasos adicionales', async ({ page }) => {
     await page.goto('/m/casos-pendientes?DimTribunal.Materia=Penal');
     await expect(page.getByTestId('filtros-activos')).toContainText('Penal');
-    await expect(page.getByTestId('segmentador-Penal')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('slicer-Penal')).toHaveAttribute('aria-pressed', 'true');
 
     // En una pestaña nueva, la misma URL da la misma vista.
     await page.reload();
@@ -157,11 +157,11 @@ test.describe('estado de filtros en la URL (4.11)', () => {
     // Si el segmentador se filtrara con su propia seleccion, al elegir 'Penal' desapareceria
     // 'Civil' y no habria forma de anadirlo ni de volver atras.
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('segmentador-Penal').click();
+    await page.getByTestId('slicer-Penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
 
-    await expect(page.getByTestId('segmentador-Civil')).toBeVisible();
-    await page.getByTestId('segmentador-Civil').click();
+    await expect(page.getByTestId('slicer-Civil')).toBeVisible();
+    await page.getByTestId('slicer-Civil').click();
     await expect(page).toHaveURL(/Materia=Penal[\s\S]*Materia=Civil/);
     await expect(page.getByTestId('filtros-activos')).toContainText('Civil');
   });
@@ -169,9 +169,9 @@ test.describe('estado de filtros en la URL (4.11)', () => {
   test('los ajustes de filtro usan replaceState: el boton atras no se satura', async ({ page }) => {
     await page.goto('/m/audiencias');
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('segmentador-Penal').click();
+    await page.getByTestId('slicer-Penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
-    await page.getByTestId('segmentador-Civil').click();
+    await page.getByTestId('slicer-Civil').click();
     await expect(page).toHaveURL(/Materia=Civil/);
 
     // Dos ajustes de filtro no han anadido dos entradas al historial: un solo "atras" vuelve
@@ -185,7 +185,7 @@ test.describe('filtrado cruzado (4.4)', () => {
   test('pulsar una categoria en el grafico filtra el resto del modulo', async ({ page }) => {
     await entrarComo(page, 'u-beto');
     await page.goto('/m/casos-este');
-    await page.getByTestId('barra-Penal').click();
+    await page.getByTestId('bar-Penal').click();
     await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
     await expect(page.getByTestId('filtros-activos')).toContainText('Penal');
   });
@@ -198,13 +198,13 @@ test.describe('la interfaz distingue lo elegido de lo impuesto por el ambito', (
 
     // Que la vista esta recortada se ve SIEMPRE; el detalle de por donde, solo si se pide. El
     // enunciado completo ocupaba una linea entera encima del modulo y crece con el ambito.
-    const insignia = page.getByTestId('ambito-activo');
-    await expect(insignia).toBeVisible();
-    await expect(page.getByTestId('ambito-detalle')).toHaveCount(0);
+    const badge = page.getByTestId('active-scope');
+    await expect(badge).toBeVisible();
+    await expect(page.getByTestId('detail-scope')).toHaveCount(0);
 
     // El equipo Norte esta restringido a Penal y Civil: eso es ambito, no una eleccion.
-    await insignia.hover();
-    await expect(page.getByTestId('ambito-detalle')).toContainText('Penal, Civil');
+    await badge.hover();
+    await expect(page.getByTestId('detail-scope')).toContainText('Penal, Civil');
     await expect(page.getByTestId('filtros-activos')).toHaveCount(0);
   });
 
@@ -214,21 +214,21 @@ test.describe('la interfaz distingue lo elegido de lo impuesto por el ambito', (
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('ambito-activo').focus();
-    await expect(page.getByTestId('ambito-detalle')).toContainText('Penal, Civil');
+    await page.getByTestId('active-scope').focus();
+    await expect(page.getByTestId('detail-scope')).toContainText('Penal, Civil');
 
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId('ambito-detalle')).toHaveCount(0);
+    await expect(page.getByTestId('detail-scope')).toHaveCount(0);
   });
 
   test('al elegir un filtro, aparece como propio y deja de contarse como ambito', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('segmentador-Penal').click();
+    await page.getByTestId('slicer-Penal').click();
     await expect(page.getByTestId('filtros-activos')).toContainText('Penal');
 
-    await page.getByTestId('ambito-activo').hover();
-    await expect(page.getByTestId('ambito-detalle')).not.toContainText('Materia');
+    await page.getByTestId('active-scope').hover();
+    await expect(page.getByTestId('detail-scope')).not.toContainText('Materia');
   });
 });
 
@@ -236,20 +236,20 @@ test.describe('marcadores (4.4)', () => {
   test('guardar el estado actual como marcador y volver a el', async ({ page }) => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('segmentador-Penal').click();
+    await page.getByTestId('slicer-Penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
 
     await page.getByTestId('abrir-marcadores').click();
-    await page.getByTestId('nombre-marcador').fill('Solo penal');
-    await page.getByTestId('guardar-marcador').click();
+    await page.getByTestId('bookmark-name').fill('Solo penal');
+    await page.getByTestId('save-bookmark').click();
 
-    await expect(page.getByTestId('marcador-Solo penal')).toBeVisible();
+    await expect(page.getByTestId('only-bookmark penal')).toBeVisible();
 
     // Salir del modulo y volver por el marcador reproduce el estado guardado.
     await page.goto('/m/casos-pendientes');
     await expect(page).not.toHaveURL(/Materia=/);
     await page.getByTestId('abrir-marcadores').click();
-    await page.getByTestId('marcador-Solo penal').click();
+    await page.getByTestId('only-bookmark penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
   });
 
@@ -258,11 +258,11 @@ test.describe('marcadores (4.4)', () => {
     await entrarComo(page, 'u-ana');
     await page.goto('/m/casos-pendientes?DimTribunal.Distrito=Distrito+Norte');
     await page.getByTestId('abrir-marcadores').click();
-    await page.getByTestId('nombre-marcador').fill('Mi distrito');
-    await page.getByTestId('guardar-marcador').click();
-    await expect(page.getByTestId('marcador-Mi distrito')).toBeVisible();
+    await page.getByTestId('bookmark-name').fill('Mi distrito');
+    await page.getByTestId('save-bookmark').click();
+    await expect(page.getByTestId('my-bookmark distrito')).toBeVisible();
 
-    const url = await page.getByTestId('marcador-Mi distrito').getAttribute('href');
+    const url = await page.getByTestId('my-bookmark distrito').getAttribute('href');
     expect(url).toContain('Distrito+Norte');
 
     // Beto, del equipo Este, abre exactamente esa URL.
@@ -286,7 +286,7 @@ test.describe('principio 1: el navegador solo habla con esta aplicacion', () => 
     });
 
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('segmentador-Penal').click();
+    await page.getByTestId('slicer-Penal').click();
     await page.waitForLoadState('networkidle');
     await page.goto('/m/audiencias');
     await page.waitForLoadState('networkidle');
@@ -309,7 +309,7 @@ test.describe('identidad institucional (4.3)', () => {
       await expect(page.getByTestId('institucion')).toContainText(
         'Poder Judicial de la República Dominicana',
       );
-      await expect(page.locator('.cabecera__emblema')).toBeVisible();
+      await expect(page.locator('.header__emblema')).toBeVisible();
     }
   });
 
@@ -317,7 +317,7 @@ test.describe('identidad institucional (4.3)', () => {
     // Principio 1: el navegador solo habla con esta aplicacion. Un logotipo traido de fuera es
     // la forma mas facil de abrir esa puerta sin darse cuenta.
     const src = await page.goto('/m/casos-pendientes').then(async () => {
-      return page.locator('.cabecera__emblema').getAttribute('src');
+      return page.locator('.header__emblema').getAttribute('src');
     });
     expect(src?.startsWith('/')).toBe(true);
 
@@ -329,7 +329,7 @@ test.describe('identidad institucional (4.3)', () => {
   test('el emblema es decorativo: el nombre lo lleva el texto de al lado', async ({ page }) => {
     // Con texto alternativo, un lector de pantalla anunciaria dos veces la institucion.
     await page.goto('/m/casos-pendientes');
-    await expect(page.locator('.cabecera__emblema')).toHaveAttribute('alt', '');
+    await expect(page.locator('.header__emblema')).toHaveAttribute('alt', '');
   });
 });
 
@@ -354,9 +354,9 @@ test.describe('el alto de un objeto no depende de su contenido', () => {
   test('dos objetos de la misma fila miden exactamente lo mismo', async ({ page }) => {
     await entrarComo(page, 'u-admin');
     await page.goto('/m/casos-pendientes');
-    await expect(page.locator('.rejilla__celda').first()).toBeVisible();
+    await expect(page.locator('.grid__cell').first()).toBeVisible();
 
-    const celdas = await page.locator('.rejilla__celda').evaluateAll((els) =>
+    const celdas = await page.locator('.grid__cell').evaluateAll((els) =>
       els.map((el) => {
         const r = el.getBoundingClientRect();
         return { top: Math.round(r.top), alto: Math.round(r.height) };
@@ -375,7 +375,7 @@ test.describe('el alto de un objeto no depende de su contenido', () => {
   test('el alto es multiplo exacto de las filas declaradas, no del contenido', async ({ page }) => {
     await entrarComo(page, 'u-admin');
     await page.goto('/m/casos-pendientes');
-    await expect(page.locator('.rejilla__celda').first()).toBeVisible();
+    await expect(page.locator('.grid__cell').first()).toBeVisible();
 
     const { unit, hole, altos } = await page.evaluate(() => {
       const rejilla = document.querySelector('.rejilla') as HTMLElement;
@@ -383,7 +383,7 @@ test.describe('el alto de un objeto no depende de su contenido', () => {
       return {
         unit: parseFloat(e.gridAutoRows),
         hole: parseFloat(e.rowGap),
-        altos: Array.from(document.querySelectorAll('.rejilla__celda')).map((el) =>
+        altos: Array.from(document.querySelectorAll('.grid__cell')).map((el) =>
           Math.round(el.getBoundingClientRect().height),
         ),
       };
@@ -402,11 +402,11 @@ test.describe('el alto de un objeto no depende de su contenido', () => {
     const contenedor = page.getByTestId('tabla').first().locator('..');
 
     const medida = await contenedor.evaluate((el: HTMLElement) => ({
-      desborda: el.scrollHeight > el.clientHeight,
+      overflows: el.scrollHeight > el.clientHeight,
       overflowY: getComputedStyle(el).overflowY,
     }));
     expect(medida.overflowY).toBe('auto');
-    expect(medida.desborda).toBe(true);
+    expect(medida.overflows).toBe(true);
 
     // Y se desplaza de verdad, sin que la tarjeta crezca.
     const before = await page.getByTestId('tabla').first().locator('../..').boundingBox();
