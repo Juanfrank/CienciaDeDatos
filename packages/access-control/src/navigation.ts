@@ -7,7 +7,7 @@ import {
   isFolder,
   isModule,
 } from './NavigationTree';
-import type { Team } from './Team';
+import type { GovernedUser, Team } from './Team';
 
 /** Construccion de la vista de navegacion de una persona — secciones 4.1.3 y 4.10.6. */
 
@@ -45,10 +45,23 @@ function findVisibleNode(nodes: NavNode[], nodeId: string): NavNode | null {
   return null;
 }
 
-/** Ids de modulo efectivamente concedidos a un equipo por sus grantedNodes. */
-export function accessibleModuleIds(generalTree: NavNode[], team: Team): Set<string> {
+/**
+ * Ids de modulo concedidos, por el equipo Y por la persona.
+ *
+ * Son DOS caminos, y esta funcion es el unico sitio donde se juntan: mientras solo exista una
+ * union, no puede haber una pantalla que diga que alguien alcanza algo que no alcanza. Por eso
+ * la concesion individual entro por aqui y no por una comprobacion suelta en la pagina.
+ *
+ * El usuario es opcional porque el panel pregunta muchas veces por el equipo solo —«que alcanza
+ * este equipo», sin nadie delante—, y esa pregunta no tiene usuario que pasar.
+ */
+export function accessibleModuleIds(
+  generalTree: NavNode[],
+  team: Team,
+  user?: Pick<GovernedUser, 'grantedNodes'>,
+): Set<string> {
   const ids = new Set<string>();
-  for (const nodeId of team.grantedNodes) {
+  for (const nodeId of [...team.grantedNodes, ...(user?.grantedNodes ?? [])]) {
     const node = findVisibleNode(generalTree, nodeId);
     // Un grantedNode que ya no existe en el arbol se ignora en silencio para la persona
     // usuaria (falla cerrado) pero se reporta al Administrador via findDanglingGrants.
@@ -101,14 +114,16 @@ export interface BuildNavigationViewInput {
   /** La organizacion general: unica fuente de verdad sobre que existe y quien lo administra. */
   generalTree: NavNode[];
   team: Team;
+  /** Quien mira, para sumar lo que tenga concedido a titulo individual. */
+  user?: Pick<GovernedUser, 'grantedNodes'>;
   /** Paquete asignado al equipo, si lo hay. */
   pkg?: ModulePackage;
 }
 
 /** Construye la vista de navegacion de un equipo. */
 export function buildNavigationView(input: BuildNavigationViewInput): NavigationView {
-  const { generalTree, team, pkg } = input;
-  const accesibles = accessibleModuleIds(generalTree, team);
+  const { generalTree, team, user, pkg } = input;
+  const accesibles = accessibleModuleIds(generalTree, team, user);
 
   if (!pkg) {
     return { tree: pruneGeneralTree(generalTree, accesibles), fromPackage: false, dangling: [] };
@@ -147,9 +162,33 @@ export function buildNavigationView(input: BuildNavigationViewInput): Navigation
   return { tree: filtrar(pkg.visualTree), fromPackage: true, dangling };
 }
 
-/** Comprueba si una persona puede ver un modulo concreto. */
+/**
+ * Comprueba si un EQUIPO alcanza un modulo, sin mirar a nadie en concreto.
+ *
+ * Se conserva con este nombre porque hay una pregunta que de verdad es sobre el equipo: la
+ * columna «alcanza» de la tabla de permisos, que habla de equipos y no de personas. Para saber
+ * si una PERSONA lo alcanza, la funcion es `canAccessModule`: esta no ve sus concesiones
+ * individuales y responderia que no a quien si lo tiene.
+ */
 export function canTeamAccessModule(generalTree: NavNode[], team: Team, moduleId: string): boolean {
   return accessibleModuleIds(generalTree, team).has(moduleId);
+}
+
+/**
+ * Comprueba si una PERSONA alcanza un modulo: por su equipo activo o por concesion individual.
+ *
+ * Es la pregunta que tiene que hacer todo lo que sirve un modulo. Ocultar no es proteger, asi que
+ * la comprobacion vive en el backend y no en el menu (criterio de la seccion 9), y desde que hay
+ * dos caminos de concesion tiene que mirar los dos o la concesion individual seria un boton que
+ * escribe y no concede.
+ */
+export function canAccessModule(input: {
+  generalTree: NavNode[];
+  team: Team;
+  user?: Pick<GovernedUser, 'grantedNodes'>;
+  moduleId: string;
+}): boolean {
+  return accessibleModuleIds(input.generalTree, input.team, input.user).has(input.moduleId);
 }
 
 /** Carpetas de la organizacion general que llevan ambito propio, para el panel de administracion. */

@@ -2,7 +2,6 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import type { MessageKey } from '@app/i18n';
 import type { AccesoAlModulo } from '../../server/admin';
 import { useTranslator } from '../Locale';
 import { Icon } from '../icons/Icon';
@@ -19,10 +18,13 @@ import { Icon } from '../icons/Icon';
  * «quien no lo ve», que no es la pregunta, y crecia con cada equipo nuevo de la institucion.
  * Conceder es otra cosa y tiene su propio boton, con una lista donde se marcan varios de una vez.
  *
- * A una PERSONA no se le concede directamente. No es una limitacion de la pantalla: el modelo
- * resuelve el acceso por equipo (4.10.6), y una concesion individual seria un segundo camino que
- * la resolucion de ambito no consulta — la pantalla diria que alguien ve algo que no ve. Lo que
- * si se hace desde aqui es meter a esa persona en un equipo que ya lo tiene.
+ * A una PERSONA se le concede a su nombre. Meterla en un equipo que ya lo tenia concedia, si,
+ * pero de paso le daba todo lo demas de ese equipo, y el registro decia «cambio de membresia»
+ * donde lo que habia pasado era «le dieron este modulo». La concesion individual existe ahora en
+ * el modelo (`GovernedUser.grantedNodes`) y la mira todo lo que resuelve navegacion y acceso.
+ *
+ * Lo que NO hace es abrir el ambito: quien llega por esta via ve el modulo con las filas que le
+ * tocan por su equipo activo y por las carpetas por las que cuelga, no sin restriccion.
  */
 export function ModuleAccess({
   slug,
@@ -126,54 +128,57 @@ export function ModuleAccess({
       <p className="muted-text">{t('admin.access.people.intro')}</p>
 
       <AnadirPersonas
-        equipos={conAcceso.map((e) => ({ id: e.teamId, nombre: e.nombre }))}
-        personas={personas.filter(
-          (p) => !conAcceso.some((e) => e.miembros.some((m) => m.userId === p.userId)),
+        candidatos={personas.filter(
+          (p) => !acceso.personas.some((q) => q.userId === p.userId && (q.directo || q.heredadoDe)),
         )}
         enCurso={enCurso}
-        onAnadir={(ids, teamId, role) => {
-          for (const userId of ids) {
-            void enviar({ accion: 'persona', teamId, userId, role, conceder: true });
-          }
+        onAnadir={(ids) => {
+          for (const userId of ids) void enviar({ accion: 'persona', userId, conceder: true });
         }}
       />
 
-      {conAcceso.length === 0 ? null : (
+      {acceso.personas.length === 0 ? (
+        <p className="muted-text" data-testid="nadie-persona">
+          {t('admin.access.nobodyPerson')}
+        </p>
+      ) : (
         <div className="container-table">
           <table className="tabla" data-testid="tabla-acceso-personas">
             <thead>
               <tr>
                 <th scope="col">{t('admin.access.column.person')}</th>
-                <th scope="col">{t('admin.access.column.through')}</th>
-                <th scope="col">{t('admin.access.column.role')}</th>
+                <th scope="col">{t('admin.access.column.how')}</th>
                 <th scope="col">{t('admin.resources.column.actions')}</th>
               </tr>
             </thead>
             <tbody>
-              {conAcceso.flatMap((equipo) =>
-                equipo.miembros.map((persona) => (
-                  <tr
-                    key={`${equipo.teamId}-${persona.userId}`}
-                    data-testid={`persona-${persona.userId}-${equipo.teamId}`}
-                  >
-                    <th scope="row">
-                      {persona.nombre}
-                      <span className="muted-text"> {persona.userId}</span>
-                    </th>
-                    <td>{equipo.nombre}</td>
-                    <td>{t(`role.${persona.role}` as MessageKey)}</td>
-                    <td>
+              {acceso.personas.map((persona) => (
+                <tr key={persona.userId} data-testid={`persona-${persona.userId}`}>
+                  <th scope="row">
+                    {persona.nombre}
+                    <span className="muted-text"> {persona.userId}</span>
+                  </th>
+                  <td data-testid={`persona-${persona.userId}-como`}>
+                    <ComoPersona persona={persona} />
+                  </td>
+                  <td>
+                    {/*
+                      Solo se quita lo concedido a su NOMBRE. Lo que le llega por un equipo se
+                      revoca en el equipo, y lo heredado de una carpeta en la carpeta: una × aqui
+                      que intentara cualquiera de las dos cosas dejaria a quien la pulsa creyendo
+                      que lo hizo.
+                    */}
+                    {persona.directo ? (
                       <button
                         type="button"
                         className="button-link"
                         disabled={enCurso}
-                        title={t('admin.access.removeFromTeam')}
-                        aria-label={`${t('admin.access.removeFromTeam')}: ${persona.nombre}`}
-                        data-testid={`quitar-${persona.userId}-${equipo.teamId}`}
+                        title={t('admin.access.revoke')}
+                        aria-label={`${t('admin.access.revoke')}: ${persona.nombre}`}
+                        data-testid={`quitar-persona-${persona.userId}`}
                         onClick={() =>
                           void enviar({
                             accion: 'persona',
-                            teamId: equipo.teamId,
                             userId: persona.userId,
                             conceder: false,
                           })
@@ -181,14 +186,42 @@ export function ModuleAccess({
                       >
                         <Icon nombre="close" tamano={18} />
                       </button>
-                    </td>
-                  </tr>
-                )),
-              )}
+                    ) : (
+                      <span className="muted-text">{t('admin.access.inherited.revokeThere')}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       )}
+    </>
+  );
+}
+
+/**
+ * Por que camino alcanza una persona el modulo.
+ *
+ * Se dicen TODOS los que tenga, no el primero que se encuentre: quitarle la concesion individual
+ * a quien ademas lo tiene por su equipo no la deja fuera, y quien pulsa la × tiene que saberlo
+ * antes de pulsarla.
+ */
+function ComoPersona({ persona }: { persona: AccesoAlModulo['personas'][number] }) {
+  const t = useTranslator();
+  return (
+    <>
+      {persona.directo ? <span className="insignia">{t('admin.access.direct.person')}</span> : null}
+      {persona.heredadoDe ? (
+        <span className="insignia">
+          {t('admin.access.inherited', { carpeta: persona.heredadoDe })}
+        </span>
+      ) : null}
+      {persona.porEquipo.map((equipo) => (
+        <span key={equipo} className="insignia">
+          {t('admin.access.throughTeam', { equipo })}
+        </span>
+      ))}
     </>
   );
 }
@@ -330,26 +363,32 @@ function AnadirEquipos({
   );
 }
 
-/** Dar acceso a varias personas: se marcan, y entran todas en el mismo equipo con el mismo rol. */
+/**
+ * Dar acceso a varias personas, a su nombre.
+ *
+ * Sin selector de equipo ni de rol: lo que se concede es ESTE modulo, no la entrada a un equipo.
+ * El rol de cada cual lo sigue decidiendo su pertenencia, que es de donde sale y donde se cambia.
+ */
 function AnadirPersonas({
-  equipos,
-  personas,
+  candidatos,
   enCurso,
   onAnadir,
 }: {
-  equipos: { id: string; nombre: string }[];
-  personas: { userId: string; nombre: string }[];
+  candidatos: { userId: string; nombre: string }[];
   enCurso: boolean;
-  onAnadir: (ids: string[], teamId: string, role: string) => void;
+  onAnadir: (ids: string[]) => void;
 }) {
   const t = useTranslator();
   const dialogo = useRef<HTMLDialogElement>(null);
   const [marcados, setMarcados] = useState<string[]>([]);
-  const [teamId, setTeamId] = useState(equipos[0]?.id ?? '');
-  const [role, setRole] = useState('visor');
 
-  // Sin equipo con acceso no hay donde meter a nadie: el boton llevaria a un dialogo sin destino.
-  if (equipos.length === 0 || personas.length === 0) return null;
+  if (candidatos.length === 0) {
+    return (
+      <p className="muted-text" data-testid="sin-personas-que-anadir">
+        {t('admin.access.allPeople')}
+      </p>
+    );
+  }
 
   return (
     <>
@@ -360,7 +399,6 @@ function AnadirPersonas({
           data-testid="anadir-personas"
           onClick={() => {
             setMarcados([]);
-            setTeamId(equipos[0]?.id ?? '');
             dialogo.current?.showModal();
           }}
         >
@@ -383,32 +421,8 @@ function AnadirPersonas({
 
         <p className="muted-text">{t('admin.access.addPeople.intro')}</p>
 
-        <label className="form__field">
-          <span>{t('admin.access.column.through')}</span>
-          <select value={teamId} data-testid="equipo-destino" onChange={(e) => setTeamId(e.target.value)}>
-            {equipos.map((equipo) => (
-              <option key={equipo.id} value={equipo.id}>
-                {equipo.nombre}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="form__field">
-          <span>{t('admin.access.column.role')}</span>
-          {/* Los tres roles de 4.10.1, con el nombre del catalogo: son los mismos de la tabla de
-              permisos, y escribirlos aqui a mano los dejaria sin traducir. */}
-          <select value={role} data-testid="rol-nuevo" onChange={(e) => setRole(e.target.value)}>
-            {ROLES.map((cual) => (
-              <option key={cual} value={cual}>
-                {t(`role.${cual}` as MessageKey)}
-              </option>
-            ))}
-          </select>
-        </label>
-
         <ul className="simple-list">
-          {personas.map((persona) => (
+          {candidatos.map((persona) => (
             <li key={persona.userId}>
               <label>
                 <input
@@ -432,11 +446,11 @@ function AnadirPersonas({
         <button
           type="button"
           className="pastilla"
-          disabled={enCurso || marcados.length === 0 || teamId === ''}
+          disabled={enCurso || marcados.length === 0}
           data-testid="dar-acceso"
           onClick={() => {
             dialogo.current?.close();
-            onAnadir(marcados, teamId, role);
+            onAnadir(marcados);
           }}
         >
           {t('admin.access.grantN', { n: marcados.length })}
@@ -445,6 +459,3 @@ function AnadirPersonas({
     </>
   );
 }
-
-/** Los tres roles de 4.10.1. No son configurables, asi que la lista es fija a proposito. */
-const ROLES = ['visor', 'colaborador', 'administrador'] as const;

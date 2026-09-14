@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   generalTree,
   esteTeam,
+  betoUser,
   norteTeam,
   regroupedPackage,
 } from './__fixtures__/governance';
@@ -10,6 +11,7 @@ import { collectModuleIds, isFolder, type NavNode } from './NavigationTree';
 import {
   accessibleModuleIds,
   buildNavigationView,
+  canAccessModule,
   canTeamAccessModule,
   findDanglingGrants,
 } from './navigation';
@@ -220,5 +222,64 @@ describe('ocultar un nodo lo quita de la vista Y del acceso', () => {
 
     expect([...accessibleModuleIds(conOculta, norteTeam)]).toEqual([]);
     expect(buildNavigationView({ generalTree: conOculta, team: norteTeam }).tree).toEqual([]);
+  });
+});
+
+
+describe('concesion individual: la excepcion nominal (4.10.6)', () => {
+  /*
+   * Es un SEGUNDO camino de acceso, y la unica forma de que no se vuelva una mentira es que todo
+   * lo que pregunte «alcanza esta persona esto» lo mire. Por eso las pruebas van sobre las tres
+   * puertas por las que se entra —la union, la pregunta completa y el menu— y no sobre el campo.
+   *
+   * `beto` esta en el equipo del Distrito Este, que no alcanza nada del Norte.
+   */
+  const conNorte = { ...betoUser, grantedNodes: ['carpeta-norte'] };
+
+  it('sin concesion individual, el equipo manda y no alcanza lo ajeno', () => {
+    expect(canTeamAccessModule(generalTree, esteTeam, 'audiencias-norte')).toBe(false);
+    expect(
+      canAccessModule({ generalTree, team: esteTeam, user: betoUser, moduleId: 'audiencias-norte' }),
+    ).toBe(false);
+  });
+
+  it('concedido a su nombre, lo alcanza aunque su equipo no lo tenga', () => {
+    // El equipo sigue sin alcanzarlo: lo que cambio es lo que alcanza LA PERSONA. Las dos
+    // afirmaciones van juntas porque separar equipo de persona es justo lo que se anadio.
+    expect(canTeamAccessModule(generalTree, esteTeam, 'audiencias-norte')).toBe(false);
+    expect(
+      canAccessModule({ generalTree, team: esteTeam, user: conNorte, moduleId: 'audiencias-norte' }),
+    ).toBe(true);
+    expect(accessibleModuleIds(generalTree, esteTeam, conNorte).has('audiencias-norte')).toBe(true);
+  });
+
+  it('lo concedido a su nombre aparece en SU MENU, no solo en la comprobacion', () => {
+    // Conceder sin que se vea es un boton que escribe y no concede. Se comprueba el arbol que
+    // se dibuja, que es donde la persona lo busca.
+    const sinElla = visibleModules(buildNavigationView({ generalTree, team: esteTeam }).tree);
+    const conElla = visibleModules(
+      buildNavigationView({ generalTree, team: esteTeam, user: conNorte }).tree,
+    );
+    expect(sinElla).not.toContain('audiencias-norte');
+    expect(conElla).toContain('audiencias-norte');
+  });
+
+  it('una carpeta oculta se lleva tambien lo concedido a una persona', () => {
+    // La concesion individual no es una puerta trasera al ocultamiento: si lo fuera, ocultar una
+    // rama dejaria de ser una forma de retirarla mientras se reorganiza.
+    const esconder = (nodos: NavNode[]): NavNode[] =>
+      nodos.map((nodo) => {
+        if (nodo.id === 'carpeta-norte') return { ...nodo, hidden: true };
+        return isFolder(nodo) ? { ...nodo, children: esconder(nodo.children) } : nodo;
+      });
+    const oculto = esconder(generalTree);
+    expect(
+      canAccessModule({
+        generalTree: oculto,
+        team: esteTeam,
+        user: conNorte,
+        moduleId: 'audiencias-norte',
+      }),
+    ).toBe(false);
   });
 });

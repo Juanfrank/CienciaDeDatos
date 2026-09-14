@@ -58,6 +58,7 @@ export {
 export {
   accessibleModuleIds,
   buildNavigationView,
+  canAccessModule,
   canTeamAccessModule,
   findDanglingGrants,
   foldersWithScope,

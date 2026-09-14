@@ -9,6 +9,7 @@ import {
   CicloDeVidaError,
   deleteModule,
   createDraft,
+  createRevision,
   revertDraft,
   sendApproval,
   saveDraft,
@@ -776,5 +777,81 @@ describe('subir un objeto de version dentro de un modulo', () => {
         hasta: '1.2.0',
       }),
     ).rejects.toMatchObject({ status: 404 });
+  });
+});
+
+
+describe('editar lo publicado abre una REVISION, no lo despublica (4.1)', () => {
+  /** Un modulo publicado, con su version y su foto en el historial. */
+  const publicado = async (slug: string): Promise<ModuleDefinition> => {
+    const borrador = await readyDraft(colaborador, slug);
+    await sendApproval({ actor: colaborador, moduleId: borrador.moduleId });
+    return publicar({ actor: admin, moduleId: borrador.moduleId });
+  };
+
+  it('el original sigue publicado mientras la revision se edita', async () => {
+    /*
+     * Es la razon entera de que exista la revision.
+     *
+     * Antes la unica forma de tocar algo publicado era `revertDraft`, que lo devolvia a borrador:
+     * corregir una palabra retiraba el tablero de la navegacion de toda la institucion hasta que
+     * alguien aprobara el cambio.
+     */
+    const original = await publicado('revision-vive');
+    const revision = await createRevision({ actor: colaborador, moduleId: original.moduleId });
+
+    expect(revision.moduleId).not.toBe(original.moduleId);
+    expect(revision.status).toBe('borrador');
+    expect(revision.revisionOf).toBe(original.moduleId);
+
+    const vigente = await modules.get(original.moduleId);
+    expect(vigente?.status).toBe('publicado');
+    expect(vigente?.version).toBe(original.version);
+  });
+
+  it('publicarla escribe SOBRE el original: mismo moduleId y mismo slug', async () => {
+    /*
+     * Del `moduleId` cuelgan el nodo del arbol, lo concedido a cada equipo y a cada persona y la
+     * personalizacion de quien lo haya tocado; del slug, las direcciones que alguien tenga
+     * guardadas. Publicar la revision como un modulo nuevo dejaria todo eso apuntando a la version
+     * vieja, que ademas seguiria publicada: dos modulos iguales, y el concedido seria el viejo.
+     */
+    const original = await publicado('revision-encima');
+    const revision = await createRevision({ actor: admin, moduleId: original.moduleId });
+    await saveDraft({
+      actor: admin,
+      moduleId: revision.moduleId,
+      cambios: { name: 'Nombre cambiado' },
+    });
+    await sendApproval({ actor: admin, moduleId: revision.moduleId });
+    const resultado = await publicar({ actor: admin, moduleId: revision.moduleId });
+
+    expect(resultado.moduleId).toBe(original.moduleId);
+    expect(resultado.slug).toBe(original.slug);
+    expect(resultado.name).toBe('Nombre cambiado');
+    expect(resultado.version).toBe(original.version + 1);
+    expect(resultado.revisionOf).toBeUndefined();
+
+    // Y la copia desaparece: dejarla viva serian dos modulos con el mismo contenido, uno de
+    // ellos con un slug `-revision` que nadie pidio.
+    expect(await modules.get(revision.moduleId)).toBeUndefined();
+    expect((await modules.list()).filter((m) => m.slug.endsWith('-revision'))).toHaveLength(0);
+  });
+
+  it('solo cabe UNA revision viva por modulo', async () => {
+    // Dos serian dos personas editando lo mismo sin saberlo, y la segunda en publicar se llevaria
+    // por delante el trabajo de la primera sin que nadie viera el choque.
+    const original = await publicado('revision-unica');
+    await createRevision({ actor: colaborador, moduleId: original.moduleId });
+    await expect(
+      createRevision({ actor: admin, moduleId: original.moduleId }),
+    ).rejects.toBeInstanceOf(CicloDeVidaError);
+  });
+
+  it('un borrador no se revisa: se edita y ya', async () => {
+    const borrador = await readyDraft(colaborador, 'revision-de-borrador');
+    await expect(
+      createRevision({ actor: colaborador, moduleId: borrador.moduleId }),
+    ).rejects.toBeInstanceOf(CicloDeVidaError);
   });
 });

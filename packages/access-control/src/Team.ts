@@ -44,6 +44,29 @@ export interface GovernedUser {
    */
   displayName?: string;
   mail?: string;
+  /**
+   * Nodos concedidos a ESTA PERSONA, al margen de sus equipos (4.10.6).
+   *
+   * Es un segundo camino de acceso, y se abrio a proposito. Antes solo concedia el equipo, y el
+   * boton de «anadir personas» del panel metia a alguien en un equipo que ya tenia el modulo:
+   * funcionaba, pero concedia de paso todo lo demas que tuviera ese equipo, y el registro decia
+   * «cambio de membresia» donde lo que habia pasado era «le dieron este modulo».
+   *
+   * Que sea un segundo camino obliga a dos cosas, y las dos estan cumplidas:
+   *
+   * 1. Todo lo que pregunta «alcanza esta persona este modulo» tiene que mirar los dos —
+   *    `accessibleModuleIds` toma el usuario ademas del equipo, y `canAccessModule` es la
+   *    pregunta completa; `canTeamAccessModule` sigue existiendo para la pregunta que de verdad
+   *    es sobre el equipo, que es la que hace el panel al listar equipos.
+   * 2. El AMBITO no se abre con ella. Alcanzar el modulo no es ver sus filas: la resolucion de
+   *    ambito sigue partiendo del equipo activo y bajando por las carpetas, asi que quien llega
+   *    por esta via ve el modulo con el ambito que le corresponde por donde esta, no sin
+   *    restriccion. Conceder acceso nunca amplia lo que se ve dentro.
+   *
+   * Conceder por equipo sigue siendo lo normal; esto es la excepcion nominal, y por eso se
+   * audita como `user-grant` y no como un cambio del equipo.
+   */
+  grantedNodes?: string[];
   personalScope?: AccessScope;
   personalModuleScopeOverrides?: Record<string, AccessScope>;
   /**

@@ -5,6 +5,7 @@ import {
   applyTreeOperation,
   assertCan,
   findModulePath,
+  isFolder,
   isModule,
 } from '@app/access-control';
 import {
@@ -151,6 +152,69 @@ export async function createDraft(input: CreateDraftInput): Promise<ModuleDefini
   return modulo;
 }
 
+/**
+ * Abre una REVISION de un modulo publicado: un borrador aparte, sin tocar lo que se sirve.
+ *
+ * Es la accion «editar» de la tabla de modulos. Lo que hacia antes era devolver el modulo a
+ * borrador, y eso lo retiraba de la navegacion de toda la institucion mientras alguien cambiaba
+ * una palabra. Ahora el publicado se queda donde esta y lo que se edita es una copia, que pasa
+ * por la misma aprobacion que cualquier otra propuesta (4.1).
+ *
+ * Solo puede haber UNA revision viva por modulo. Dos serian dos personas editando lo mismo sin
+ * saberlo, y la segunda en publicar se llevaria por delante el trabajo de la primera sin que
+ * nadie viera el choque.
+ */
+export async function createRevision(input: {
+  actor: ModuleActor;
+  moduleId: string;
+}): Promise<ModuleDefinition> {
+  permission(input.actor, 'crear-editar-modulos-borrador');
+
+  const modulo = await modules.get(input.moduleId);
+  if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
+  if (modulo.status !== 'publicado') {
+    throw new CicloDeVidaError(
+      'Solo lo publicado se revisa: un borrador se edita directamente.',
+      409,
+    );
+  }
+
+  const abierta = (await modules.list()).find((m) => m.revisionOf === modulo.moduleId);
+  if (abierta) {
+    throw new CicloDeVidaError(
+      `Ya hay una revision abierta de este modulo, a cargo de ${abierta.ownerUserId ?? 'nadie'}.`,
+      409,
+    );
+  }
+
+  const momento = ahora();
+  const revision: ModuleDefinition = {
+    ...modulo,
+    moduleId: `mod-${crypto.randomUUID()}`,
+    // El slug no se sirve mientras es revision —solo se sirve lo publicado—, pero tiene que ser
+    // unico igual: es la clave por la que se busca un modulo, y dos iguales harian que
+    // `bySlug` devolviera cualquiera de los dos.
+    slug: `${modulo.slug}-revision`,
+    status: 'borrador',
+    ownerUserId: input.actor.userId,
+    revisionOf: modulo.moduleId,
+    pages: clonarPaginas(modulo.pages),
+    createdAt: momento,
+    updatedAt: momento,
+  };
+
+  await modules.save(revision);
+  await changeRecord({
+    actorId: input.actor.userId,
+    entityType: 'module',
+    entityId: revision.moduleId,
+    action: 'create',
+    after: { slug: revision.slug, name: revision.name, revisionDe: modulo.moduleId },
+  });
+
+  return revision;
+}
+
 export interface SaveDraftInput {
   actor: ModuleActor;
   moduleId: string;
@@ -262,10 +326,33 @@ export async function publicar(input: InputTransition): Promise<ModuleDefinition
     );
   }
 
+  /*
+   * Una REVISION se publica SOBRE el modulo que revisa, conservando su `moduleId`.
+   *
+   * De ese identificador cuelgan el nodo del arbol, lo concedido a cada equipo y a cada persona,
+   * los paquetes visuales que lo listan y la personalizacion de quien lo haya tocado. Publicarla
+   * como un modulo nuevo dejaria todo eso apuntando a la version vieja, que ademas seguiria
+   * publicada: dos modulos iguales, uno de ellos el que todo el mundo tiene concedido.
+   *
+   * Y el slug que gana es el del ORIGINAL, no el `-revision` con el que nacio la copia: el slug
+   * es la URL, y las direcciones que alguien tenga guardadas tienen que seguir valiendo (4.11).
+   */
+  const revisado = modulo.revisionOf ? await modules.get(modulo.revisionOf) : undefined;
+  if (modulo.revisionOf && !revisado) {
+    throw new CicloDeVidaError(
+      'El modulo que esta revision cambiaba ya no existe, asi que no hay donde publicarla.',
+      409,
+    );
+  }
+
+  const base = revisado ?? modulo;
   const actualizado: ModuleDefinition = {
     ...modulo,
+    moduleId: base.moduleId,
+    slug: base.slug,
+    createdAt: base.createdAt,
     status: 'publicado',
-    version: modulo.version + 1,
+    version: base.version + 1,
     // Un modulo publicado a nivel institucional deja de pertenecer a una persona: pertenece a
     // la institucion (4.1). Conservar el autor haria pensar que sigue siendo suyo y que puede
     // cambiarlo sin pasar por aqui.
@@ -273,6 +360,7 @@ export async function publicar(input: InputTransition): Promise<ModuleDefinition
     updatedAt: ahora(),
   };
   delete actualizado.ownerUserId;
+  delete actualizado.revisionOf;
 
   await modules.save(actualizado);
   // La foto se guarda DESPUES de que la publicacion sea firme, y antes de colgar el modulo del
@@ -285,11 +373,15 @@ export async function publicar(input: InputTransition): Promise<ModuleDefinition
     ...(input.restoredFrom === undefined ? {} : { restoredFrom: input.restoredFrom }),
     definition: actualizado,
   });
+  // La copia se retira DESPUES de que lo publicado este guardado. Al reves, un fallo al guardar
+  // dejaria el trabajo borrado y el modulo sin cambiar.
+  if (revisado) await modules.remove(modulo.moduleId);
   await missingIfTreeAttach(actualizado, input.actor);
+  await sincronizarRefEnArbol(actualizado, input.actor);
   await changeRecord({
     actorId: input.actor.userId,
     entityType: 'module',
-    entityId: modulo.moduleId,
+    entityId: actualizado.moduleId,
     action: 'publish',
     before: { status: modulo.status, version: modulo.version, autor: modulo.ownerUserId },
     after: {
@@ -337,7 +429,14 @@ export async function pendingReviews(actor: ModuleActor): Promise<PendingReview[
         .reverse()
         .find((e) => e.entityId === module.moduleId && e.action === 'submit');
 
-      const historial = await modules.history(module.moduleId);
+      /*
+       * Una REVISION se compara con el modulo que revisa, no consigo misma.
+       *
+       * Su historial esta vacio: nacio hace un rato y nunca se publico. Quien aprueba veria «sin
+       * cambios» delante de una propuesta que cambia medio tablero, y firmaria en blanco — que es
+       * justo lo que esta pantalla existe para impedir.
+       */
+      const historial = await modules.history(module.revisionOf ?? module.moduleId);
       const ultima = historial[0];
 
       return {
@@ -557,6 +656,57 @@ export async function restaurarVersion(input: {
   }
 }
 
+/**
+ * El nodo del arbol guarda una COPIA del nombre, el slug y el icono. Aqui se vuelve a cuadrar.
+ *
+ * `moduleRef` no es estado independiente: es una proyeccion de la definicion, y el menu lateral
+ * se dibuja con ella —el rotulo sale de `moduleRef.name` y el enlace de `moduleRef.slug`—. Si no
+ * se refresca, renombrar un modulo deja el menu diciendo el nombre viejo, y cambiarle el slug
+ * deja el enlace apuntando a una direccion que ya no existe.
+ *
+ * No se notaba porque hasta ahora renombrar algo publicado era raro: habia que despublicarlo. Con
+ * la revision es el camino normal, asi que lo que era un caso de esquina pasa a ser el caso.
+ *
+ * Se escribe solo si algo cambio, para no dejar un evento de auditoria por cada publicacion que
+ * no toco el nombre.
+ */
+async function sincronizarRefEnArbol(module: ModuleDefinition, actor: ModuleActor): Promise<void> {
+  const arbol = await governance.getTree();
+
+  let cambio: string | null = null;
+  const refrescar = (nodos: NavNode[]): NavNode[] =>
+    nodos.map((nodo) => {
+      if (isFolder(nodo)) return { ...nodo, children: refrescar(nodo.children) };
+      if (nodo.moduleRef.moduleId !== module.moduleId) return nodo;
+
+      const ref = nodo.moduleRef;
+      if (ref.name === module.name && ref.slug === module.slug && ref.icon === module.icon) {
+        return nodo;
+      }
+      cambio = `Actualizado a '${module.name}' (/${module.slug}).`;
+      return {
+        ...nodo,
+        moduleRef: {
+          moduleId: module.moduleId,
+          slug: module.slug,
+          name: module.name,
+          ...(module.icon ? { icon: module.icon } : {}),
+        },
+      };
+    });
+
+  const nodes = refrescar(arbol.nodes);
+  if (cambio === null) return;
+
+  await governance.setTree({ ...arbol, nodes });
+  await treeEventRecord({
+    actorId: actor.userId,
+    action: 'renombrar',
+    nodeId: `nodo-${module.moduleId}`,
+    detail: cambio,
+  });
+}
+
 /** Al publicar, el modulo tiene que existir en la ORGANIZACION GENERAL. */
 async function missingIfTreeAttach(
   module: ModuleDefinition,
@@ -718,7 +868,7 @@ export async function actorDe(sesion: ShellSession): Promise<ModuleActor> {
 
 /** Navegacion de una sesion: lo concedido al equipo activo Y publicado. */
 export async function navigationOf(sesion: ShellSession) {
-  const view = await navigationFor(sesion.activeTeamId);
+  const view = await navigationFor(sesion.activeTeamId, sesion.userId);
   return { ...view, tree: await statusPrune(view.tree, await actorDe(sesion)) };
 }
 

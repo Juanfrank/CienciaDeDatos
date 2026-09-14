@@ -4,6 +4,7 @@ import { isFolder, type NavNode } from '@app/access-control';
 import { sectionOf } from '../../../src/components/admin/sections';
 import { ModuleObjects } from '../../../src/components/admin/ModuleObjects';
 import { TreeActions, type DestinoPosible } from '../../../src/components/admin/TreeActions';
+import { CrearEnElArbol } from '../../../src/components/admin/CrearEnElArbol';
 import {
   ArbolPlegable,
   BotonPlegar,
@@ -110,6 +111,8 @@ export default async function ModulosPage() {
 
       <h3>{t('admin.modules.current', { n: definiciones.length })}</h3>
       <p className="muted-text">{t('admin.modules.tree.intro')}</p>
+
+      <CrearEnElArbol destinos={posibles} />
 
       {/*
         La tabla se dibuja aqui, en el servidor, y quien decide que filas se ven es un componente
@@ -278,6 +281,7 @@ function Modulo({
           destinos={posibles}
           hrefConfigurar={`/admin/modules/${m.slug}/settings`}
           hrefPermisos={`/admin/modules/${m.slug}/permissions`}
+          {...(m.status === 'publicado' ? { editable: m.slug } : {})}
         />
       </td>
     </tr>

@@ -76,15 +76,25 @@ export async function roleOf(userId: string, teamId: string): Promise<string> {
   return equipo?.members.find((m) => m.userId === userId)?.role ?? 'visor';
 }
 
-/** Vista de navegacion de una persona con un equipo activo dado. */
-export async function navigationFor(teamId: string) {
+/**
+ * Vista de navegacion de una persona con un equipo activo dado.
+ *
+ * El `userId` no es opcional por comodidad: sin el, lo que esta concedido a la persona a titulo
+ * individual no aparece en su menu, y entonces el boton de conceder de la pantalla de permisos
+ * escribiria algo que no se ve por ningun lado.
+ */
+export async function navigationFor(teamId: string, userId?: string) {
   const team = await governance.getTeam(teamId);
   if (!team) return { tree: [], fromPackage: false, dangling: [] };
 
-  const pkg = team.assignedPackageId ? await governance.getPackage(team.assignedPackageId) : undefined;
+  const [pkg, user] = await Promise.all([
+    team.assignedPackageId ? governance.getPackage(team.assignedPackageId) : undefined,
+    userId ? governance.getUser(userId) : undefined,
+  ]);
   return buildNavigationView({
     generalTree: await getGeneralTree(),
     team,
+    ...(user ? { user } : {}),
     ...(pkg ? { pkg } : {}),
   });
 }

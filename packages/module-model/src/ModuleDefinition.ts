@@ -42,6 +42,21 @@ export interface ModuleDefinition {
    * pertenecen a una persona: pertenecen a la institucion.
    */
   ownerUserId?: string;
+  /**
+   * Si este borrador es la REVISION de un modulo ya publicado, cual (4.1).
+   *
+   * Editar algo publicado no lo despublica. Antes la unica forma de tocarlo era devolverlo a
+   * borrador, y mientras alguien lo editaba el modulo dejaba de servirse a toda la institucion —
+   * una correccion de una palabra apagaba el tablero hasta que la aprobaran.
+   *
+   * Una revision es un borrador APARTE, con su propio `moduleId`, que se edita y se aprueba por
+   * el camino normal mientras el publicado sigue en pie. Al publicarla, su contenido se escribe
+   * SOBRE el modulo original y la revision desaparece: lo que no puede cambiar es el `moduleId`,
+   * porque de el cuelgan el nodo del arbol, lo concedido a cada equipo y a cada persona, y la
+   * personalizacion de quien lo haya tocado. Publicar la revision como un modulo nuevo dejaria
+   * todo eso apuntando a la version vieja.
+   */
+  revisionOf?: string;
   pages: ModulePage[];
   /**
    * Version de la definicion. Todo objeto compartido esta versionado y nunca se modifica uno

@@ -70,9 +70,17 @@ export function BumpModule({
     }
     setHecho((await respuesta.json()) as Resultado);
     setConfirmando(false);
-    router.refresh();
   }
 
+  /*
+   * El refresco espera a que alguien haya LEIDO lo que paso.
+   *
+   * Antes se lanzaba nada mas subir la version, y eso borraba el informe con el mismo gesto que
+   * lo producia: al refrescar, el objeto ya no esta atrasado, el servidor deja de dibujar este
+   * boton entero, y con el se va el unico sitio donde constaba que claves se conservaron y
+   * cuales se perdieron. En una pantalla rapida se alcanzaba a leer; en una lenta, no — y lo que
+   * se pierde ahi es justo lo que hay que revisar despues de subir de version.
+   */
   if (hecho) {
     return (
       <div data-testid={`bump-hecho-${clave}`}>
@@ -90,6 +98,14 @@ export function BumpModule({
             {t('admin.bump.dropped', { claves: t.lista(hecho.retiradas.map((r) => r.clave)) })}
           </p>
         ) : null}
+        <button
+          type="button"
+          className="boton-contorno"
+          data-testid={`bump-cerrar-${clave}`}
+          onClick={() => router.refresh()}
+        >
+          {t('action.close')}
+        </button>
       </div>
     );
   }

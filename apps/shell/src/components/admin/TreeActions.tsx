@@ -7,7 +7,7 @@ import { useTranslator } from '../Locale';
 import { Icon } from '../icons/Icon';
 
 /**
- * Las seis acciones de una fila del arbol — secciones 4.1 y 4.10.8.
+ * Las acciones de una fila del arbol — secciones 4.1 y 4.10.8.
  *
  * Van como icono y no como texto porque son seis por fila y en un arbol de veinte filas eso son
  * ciento veinte palabras. Cada una lleva su nombre en `title` y en `aria-label`, que es lo que
@@ -33,6 +33,7 @@ export function TreeActions({
   destinos,
   hrefConfigurar,
   hrefPermisos,
+  editable,
   nombre,
 }: {
   nodeId: string;
@@ -51,6 +52,14 @@ export function TreeActions({
   destinos: DestinoPosible[];
   hrefConfigurar: string;
   hrefPermisos: string;
+  /**
+   * El slug del modulo PUBLICADO de esta fila, si lo es. Las carpetas no lo llevan.
+   *
+   * Editar no existe para una carpeta —no tiene contenido que editar, tiene hijos— ni para un
+   * borrador, que ya se abre en el editor directamente. Es una accion de lo publicado, y por eso
+   * el boton no esta siempre y apagado, sino que no esta.
+   */
+  editable?: string;
   /** Para los rotulos accesibles: «Subir: Distrito Norte» dice mas que «Subir». */
   nombre: string;
 }) {
@@ -79,6 +88,29 @@ export function TreeActions({
   };
 
   const rotuloVisible = hidden ? t('admin.tree.action.show') : t('admin.tree.action.hide');
+
+  /*
+   * Editar NO edita: abre una revision, que es un borrador aparte.
+   *
+   * Lo que se sirve sigue sirviendose mientras tanto, y el cambio pasa por la misma aprobacion
+   * que cualquier propuesta. Antes la unica forma de tocar algo publicado era devolverlo a
+   * borrador, y eso lo retiraba de la navegacion de toda la institucion mientras se editaba.
+   */
+  const editar = async () => {
+    setEnCurso(true);
+    setError(null);
+    const respuesta = await fetch(`/api/modules/${editable}/revision`, { method: 'POST' });
+    setEnCurso(false);
+    const cuerpo = (await respuesta.json().catch(() => ({}))) as {
+      error?: string;
+      modulo?: { slug: string };
+    };
+    if (!respuesta.ok || !cuerpo.modulo) {
+      setError(cuerpo.error ?? t('admin.tree.action.failed'));
+      return;
+    }
+    router.push(`/editor/${cuerpo.modulo.slug}`);
+  };
 
   return (
     <>
@@ -132,6 +164,20 @@ export function TreeActions({
         >
           <Icon nombre={hidden ? 'ojo-tachado' : 'ojo'} tamano={18} />
         </button>
+
+        {editable ? (
+          <button
+            type="button"
+            className="button-link"
+            disabled={enCurso}
+            title={t('admin.tree.action.edit')}
+            aria-label={`${t('admin.tree.action.edit')}: ${nombre}`}
+            data-testid={`editar-${nodeId}`}
+            onClick={() => void editar()}
+          >
+            <Icon nombre="editar" tamano={18} />
+          </button>
+        ) : null}
 
         <Link
           href={hrefConfigurar}

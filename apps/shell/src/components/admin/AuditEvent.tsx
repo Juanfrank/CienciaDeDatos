@@ -24,6 +24,7 @@ const ENTIDAD: Record<ConfigChangeLog['entityType'], string> = {
   package: 'el paquete',
   role: 'el rol de',
   module: 'el modulo',
+  'user-grant': 'el acceso individual de',
 };
 
 /** Fecha corta y legible. La hora importa: dos cambios del mismo dia se distinguen por ella. */

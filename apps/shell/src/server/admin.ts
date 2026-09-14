@@ -7,6 +7,7 @@ import {
   type AppRole,
   type Actor,
   type FolderNode,
+  type GovernedUser,
   type ManagedTree,
   type LastAdministratorDenial,
   type ModulePackage,
@@ -23,6 +24,7 @@ import {
   dimensionKey,
   findNode,
   isFolder,
+  isMember,
   resolveEffectiveScope,
   wouldExpand,
   wouldLeaveNoAdministrator,
@@ -511,11 +513,25 @@ export interface AccesoDeEquipo {
   miembros: { userId: string; nombre: string; role: AppRole }[];
 }
 
+/** Una persona que alcanza el modulo, y por que camino. */
+export interface AccesoDePersona {
+  userId: string;
+  nombre: string;
+  /** Concedido a su nombre sobre el nodo del modulo: se revoca desde aqui. */
+  directo: boolean;
+  /** Concedido a su nombre sobre una carpeta ANCESTRO: se revoca alli. */
+  heredadoDe: string | null;
+  /** Equipos suyos que tambien lo alcanzan. Si los hay, quitarle lo individual no la deja fuera. */
+  porEquipo: string[];
+}
+
 export interface AccesoAlModulo {
   moduleId: string;
   /** El nodo del modulo en la organizacion general. Sin el no hay nada que conceder. */
   nodeId: string | null;
   equipos: AccesoDeEquipo[];
+  /** Quien lo alcanza a titulo individual, o por un equipo, con el camino de cada cual. */
+  personas: AccesoDePersona[];
 }
 
 /**
@@ -554,9 +570,34 @@ export async function accessToModule(moduleId: string): Promise<AccesoAlModulo> 
   const nodeId = camino ? (camino[camino.length - 1]?.id ?? null) : null;
   const ancestros = camino ? camino.slice(0, -1) : [];
 
+  /*
+   * Las personas se listan una sola vez, con TODOS sus caminos.
+   *
+   * Listar «los concedidos individualmente» por un lado y «los de los equipos» por otro dejaria a
+   * quien tiene las dos cosas apareciendo dos veces, y la × de una de las filas pareceria que le
+   * quita el acceso cuando no se lo quita.
+   */
+  const personas = usuarios
+    .map((usuario) => {
+      const suyos = new Set(usuario.grantedNodes ?? []);
+      const ancestro = ancestros.find((a) => suyos.has(a.id));
+      return {
+        userId: usuario.userId,
+        nombre: usuario.displayName ?? usuario.userId,
+        directo: nodeId !== null && suyos.has(nodeId),
+        heredadoDe: ancestro ? (ancestro as FolderNode).name : null,
+        porEquipo: equipos
+          .filter((e) => isMember(e, usuario.userId) && canTeamAccessModule(generalTree, e, moduleId))
+          .map((e) => e.name),
+      };
+    })
+    .filter((p) => p.directo || p.heredadoDe !== null || p.porEquipo.length > 0)
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+
   return {
     moduleId,
     nodeId,
+    personas,
     equipos: equipos
       .map((equipo) => {
         const ancestro = ancestros.find((a) => equipo.grantedNodes.includes(a.id));
@@ -604,4 +645,52 @@ export async function grantModuleToTeam(
   else concedidos.delete(nodeId);
 
   return await saveTeam(actor, { ...equipo, grantedNodes: [...concedidos] });
+}
+
+/**
+ * Concede o revoca un modulo a UNA PERSONA, a su nombre.
+ *
+ * Antes este boton metia a la persona en un equipo que ya tenia el modulo. Concedia, si, pero de
+ * paso le daba todo lo demas que tuviera ese equipo, y el registro decia «cambio de membresia»
+ * donde lo que habia pasado era «le dieron este modulo». Ahora la concesion individual existe en
+ * el modelo (`GovernedUser.grantedNodes`) y la resolucion de navegacion la mira, asi que esto
+ * concede exactamente lo que dice y nada mas.
+ *
+ * Se audita como `user-grant` y no como `team`: leer el registro de un equipo no puede contar
+ * quien mas alcanza sus modulos, y el que concede a una persona tiene que constar por si mismo.
+ */
+export async function grantModuleToUser(
+  actor: Actor,
+  input: { moduleId: string; userId: string; conceder: boolean },
+): Promise<GovernedUser> {
+  assertCan(actor.role, 'gestionar-usuarios-y-roles');
+
+  const { nodeId } = await accessToModule(input.moduleId);
+  if (!nodeId) {
+    throw new AdminError(
+      'Ese modulo todavia no esta en la organizacion general, asi que no hay nodo que conceder.',
+      409,
+    );
+  }
+
+  const usuario = await governance.getUser(input.userId);
+  if (!usuario) throw new AdminError(`La persona '${input.userId}' no existe.`, 404);
+
+  const concedidos = new Set(usuario.grantedNodes ?? []);
+  if (input.conceder) concedidos.add(nodeId);
+  else concedidos.delete(nodeId);
+
+  const actualizado: GovernedUser = { ...usuario, grantedNodes: [...concedidos] };
+  await governance.upsertUser(actualizado);
+
+  await changeRecord({
+    actorId: actor.userId,
+    entityType: 'user-grant',
+    entityId: `${input.userId}/${nodeId}`,
+    action: input.conceder ? 'update' : 'delete',
+    before: usuario.grantedNodes ?? [],
+    after: actualizado.grantedNodes,
+  });
+
+  return actualizado;
 }

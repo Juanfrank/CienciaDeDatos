@@ -624,10 +624,19 @@ test.describe('que hay dentro de cada modulo, y subirlo de version (4.5)', () =>
     await page.getByTestId(`bump-${slug}-tarjeta-kpi`).click();
     await page.getByTestId(`bump-confirm-${slug}-tarjeta-kpi`).click();
 
+    /*
+     * El informe se queda hasta que alguien lo cierra.
+     *
+     * Antes el propio refresco que seguia a subir la version lo borraba: el objeto dejaba de
+     * estar atrasado, el servidor dejaba de dibujar el boton, y con el se iba el unico sitio
+     * donde constaba que se conservo. La prueba pasaba porque le daba tiempo a mirar, que es
+     * pasar por un motivo que no es el suyo.
+     */
     const hecho = page.getByTestId(`bump-hecho-${slug}-tarjeta-kpi`);
     await expect(hecho).toBeVisible();
     // Y dice QUE conservo: sin eso, «hecho» es una promesa sin comprobante.
     await expect(hecho).toContainText('formato');
+    await page.getByTestId(`bump-cerrar-${slug}-tarjeta-kpi`).click();
 
     // Lo que manda es el almacen, no el mensaje.
     const { modulo } = (await (await page.request.get(`/api/modules/${slug}/edit`)).json()) as {
@@ -989,6 +998,76 @@ test.describe('permisos de un modulo, desde el modulo (4.10.6)', () => {
     await page.getByTestId('quitar-equipo-equipo-este').click();
     await expect(page.getByTestId('acceso-equipo-este')).toHaveCount(0);
   });
+
+  test('conceder a UNA PERSONA se lo da a ella y a nadie mas de su equipo', async ({ page }) => {
+    /*
+     * Es el camino que se abrio en el modelo, y la unica forma de comprobarlo es mirando lo que
+     * ve cada cual: antes este boton metia a la persona en un equipo que ya tenia el modulo, que
+     * concedia pero de paso le daba todo lo demas del equipo.
+     *
+     * `u-beto` esta solo en el equipo Este, que no alcanza `composicion`. Se le concede a su
+     * nombre, y lo que prueba que la concesion es individual y no del equipo son dos cosas: que
+     * el equipo Este sigue sin salir en la tabla de equipos, y que `u-ana` —que TAMBIEN esta en
+     * el equipo Este— no lo ve cuando trabaja desde ese equipo.
+     *
+     * Ana con su equipo Norte activo si lo ve, y eso no dice nada: el Norte tiene concedida la
+     * carpeta Regional de la que cuelga. Por eso se le cambia el equipo activo antes de mirar; sin
+     * ese paso la prueba pasaria por un motivo que no es el suyo.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules/composicion/permissions');
+    await expect(page.getByTestId('acceso-equipo-este')).toHaveCount(0);
+
+    await page.getByTestId('anadir-personas').click();
+    await page.getByTestId('marcar-persona-u-beto').check();
+    await page.getByTestId('dar-acceso').click();
+    await expect(page.getByTestId('persona-u-beto-como')).toContainText(/Concedido a su nombre/);
+
+    // Concedio a la PERSONA: el equipo no aparece entre los que lo alcanzan.
+    await expect(page.getByTestId('acceso-equipo-este')).toHaveCount(0);
+
+    // Y lo que manda es lo que se ve. Beto si, y ademas puede abrirlo: ocultar no es proteger, y
+    // conceder tampoco puede quedarse en el menu.
+    await asLogin(page, 'u-beto');
+    await page.goto('/');
+    await expect(page.getByTestId('nav-composicion')).toBeVisible();
+    await page.goto('/m/composicion');
+    await expect(page.getByRole('heading', { name: 'Composicion' })).toBeVisible();
+
+    // Ana, compañera suya en el equipo Este, no: la concesion fue nominal, no del equipo.
+    await asLogin(page, 'u-ana');
+    expect(
+      (
+        await page.request.post('/api/session/active-team', {
+          data: { teamId: 'equipo-este' },
+        })
+      ).ok(),
+    ).toBe(true);
+    await page.goto('/');
+    await expect(page.getByTestId('nav-composicion')).toHaveCount(0);
+
+    // Y se revoca por el mismo sitio por el que se concedio.
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules/composicion/permissions');
+    await page.getByTestId('quitar-persona-u-beto').click();
+    await expect(page.getByTestId('persona-u-beto')).toHaveCount(0);
+
+    await asLogin(page, 'u-beto');
+    await page.goto('/');
+    await expect(page.getByTestId('nav-composicion')).toHaveCount(0);
+  });
+
+  test('revocado, la URL escrita a mano tampoco sirve (criterio de la seccion 9)', async ({
+    page,
+  }) => {
+    // El menu es lo primero que se mira y lo ultimo que protege. La comprobacion que importa es
+    // la del backend, y desde que hay dos caminos de concesion tiene que mirar los dos: uno que
+    // solo preguntara por el equipo le cerraria la puerta a quien la tiene a su nombre, y uno que
+    // no preguntara por nada se la abriria a todos.
+    await asLogin(page, 'u-beto');
+    const respuesta = await page.request.get('/m/composicion');
+    expect(respuesta.status()).toBe(404);
+  });
 });
 
 test.describe('la tabla del arbol se pliega y se despliega (4.1)', () => {
@@ -1127,5 +1206,63 @@ test.describe('el carril dice el nivel con la sangria (4.10.8)', () => {
     expect(await page.locator('[data-testid^="recurso-"][data-testid$="-estado"]').count()).toBe(
       dice,
     );
+  });
+});
+
+
+test.describe('crear y editar desde la tabla de modulos (4.1 y 4.10.8)', () => {
+  test('crear una carpeta la coloca donde se dijo, y aparece en la tabla', async ({ page }) => {
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    await page.getByTestId('abrir-crear-carpeta').click();
+    await page.getByTestId('nueva-carpeta-nombre').fill('Carpeta de prueba');
+    await page.getByTestId('nueva-carpeta-padre').selectOption('nodo-norte');
+    await page.getByTestId('crear-carpeta').click();
+
+    const fila = page.getByRole('row', { name: /Carpeta de prueba/ });
+    await expect(fila).toBeVisible();
+    // Dentro de Distrito Norte, que esta a profundidad 2: la hija va una mas adentro.
+    await expect(fila).toHaveAttribute('data-depth', '3');
+  });
+
+  test('crear un modulo lo abre EN EL EDITOR, que es donde se sigue', async ({ page }) => {
+    // Un borrador recien creado esta vacio: devolver a la tabla obliga a buscar la fila nueva y
+    // abrirla, que es el paso que de verdad se queria dar.
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    await page.getByTestId('abrir-crear-modulo').click();
+    await page.getByTestId('nuevo-modulo-nombre').fill('Módulo de prueba');
+    // El slug se propone a partir del nombre, sin acentos y con guiones.
+    await expect(page.getByTestId('nuevo-modulo-slug')).toHaveValue('modulo-de-prueba');
+    await page.getByTestId('crear-modulo').click();
+
+    await expect(page).toHaveURL(/\/editor\/modulo-de-prueba$/);
+  });
+
+  test('editar un publicado abre una revision y NO lo retira de la navegacion', async ({ page }) => {
+    /*
+     * Es lo que separa «editar» de lo que habia antes, que era despublicar.
+     *
+     * Se comprueba lo que ve una persona cualquiera mientras tanto: si el modulo desapareciera de
+     * su menu, corregir una palabra habria apagado el tablero para toda la institucion.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    const fila = page.getByTestId('modulo-composicion');
+    await expect(fila).toContainText('Publicado');
+    await fila.getByTestId(/^editar-/).click();
+
+    // Lleva al editor de la REVISION, que es un modulo distinto con su propio slug.
+    await expect(page).toHaveURL(/\/editor\/composicion-revision$/);
+
+    // Y el publicado sigue en pie para quien lo tenia.
+    await asLogin(page, 'u-ana');
+    await page.goto('/');
+    await expect(page.getByTestId('nav-composicion')).toBeVisible();
+    await page.goto('/m/composicion');
+    await expect(page.getByRole('heading', { name: 'Composicion' })).toBeVisible();
   });
 });

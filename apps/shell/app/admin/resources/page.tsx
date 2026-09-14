@@ -33,19 +33,29 @@ export default async function RecursosPage() {
 
   const pendientes = propuestas.filter((p) => p.status === 'pendiente').length;
 
-  const filas = [
-    {
-      href: '/admin/resources/proposals',
-      cuantos: propuestas.length,
-      // Lo unico accionable de la lista se dice aparte, porque es lo que decide si hay que entrar.
-      pendiente: pendientes,
-    },
-    { href: '/admin/resources/visualizations', cuantos: visualizaciones.length, pendiente: 0 },
-    { href: '/admin/resources/elements', cuantos: elementos.length, pendiente: 0 },
-    { href: '/admin/resources/containers', cuantos: contenedores.length, pendiente: 0 },
-    { href: '/admin/resources/addons', cuantos: complementos.length, pendiente: 0 },
-    { href: '/admin/resources/other', cuantos: iconos.length, pendiente: 0 },
-  ].map((f) => ({ ...f, seccion: sectionOf(f.href) }));
+  /*
+   * El ORDEN sale del carril, no de una lista escrita aqui.
+   *
+   * Escribirlo dos veces es la forma segura de que el dia que se mueva una entrada del submenu la
+   * tabla siga en el orden viejo, y las dos pantallas digan cosas distintas sobre lo mismo. Lo
+   * que si vive aqui es CUANTOS hay de cada cosa, que es lo unico que el carril no sabe.
+   */
+  const cuantos: Record<string, number> = {
+    '/admin/resources/proposals': propuestas.length,
+    '/admin/resources/visualizations': visualizaciones.length,
+    '/admin/resources/elements': elementos.length,
+    '/admin/resources/containers': contenedores.length,
+    '/admin/resources/addons': complementos.length,
+    '/admin/resources/other': iconos.length,
+  };
+
+  const filas = (seccion?.hijas ?? []).map((hija) => ({
+    href: hija.href,
+    seccion: hija,
+    cuantos: cuantos[hija.href] ?? 0,
+    // Lo unico accionable de la lista se dice aparte, porque es lo que decide si hay que entrar.
+    pendiente: hija.href === '/admin/resources/proposals' ? pendientes : 0,
+  }));
 
   return (
     <section>

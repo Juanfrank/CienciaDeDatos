@@ -1,5 +1,5 @@
 import type { Aggregation, DatasetGrain, QueryResult, SchemaDescriptor } from '@app/data-contracts';
-import { canTeamAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
+import { canAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
 import { SCHEMA_CACHE_KEY, type ReadResult, getDataset } from '@app/caching';
 import {
   type AvailableColumn,
@@ -27,7 +27,15 @@ import {
   validateSlots,
   validateBinding,
 } from '@app/ui-components';
-import { cacheL2, datasetReader, findTeam, getGeneralTree, objectRegistry, scopeFor } from './context';
+import {
+  cacheL2,
+  datasetReader,
+  findTeam,
+  findUser,
+  getGeneralTree,
+  objectRegistry,
+  scopeFor,
+} from './context';
 
 /** Carga de un modulo para una persona concreta. */
 
@@ -245,10 +253,24 @@ export async function moduleLoad(input: {
   // escrita a mano llega igual aqui. La seccion 9 lo dice literalmente — la comprobacion tiene
   // que estar en el backend, "no solo ocultamiento de UI".
   //
-  // Sin esto, un modulo que existe en la organizacion general pero que el equipo NO tiene entre
-  // sus grantedNodes se renderizaria con el ambito por defecto del equipo, que es una fuga.
-  const team = await findTeam(teamId);
-  if (!team || !canTeamAccessModule(await getGeneralTree(), team, module.moduleId)) return null;
+  // Sin esto, un modulo que existe en la organizacion general pero que nadie tiene concedido se
+  // renderizaria con el ambito por defecto del equipo, que es una fuga.
+  //
+  // Se pregunta por la PERSONA, no por el equipo: desde que la concesion puede ser individual,
+  // preguntar solo por el equipo cerraria la puerta a quien la tiene concedida a su nombre — el
+  // menu se la ensenaria y la pagina le respondería que no existe.
+  const [team, user] = await Promise.all([findTeam(teamId), findUser(userId)]);
+  if (
+    !team ||
+    !canAccessModule({
+      generalTree: await getGeneralTree(),
+      team,
+      ...(user ? { user } : {}),
+      moduleId: module.moduleId,
+    })
+  ) {
+    return null;
+  }
 
   const resolucion = await scopeFor(userId, teamId, module.moduleId);
   // Sin ambito resoluble, el modulo no existe para esta persona. Resultado vacio y explicito,

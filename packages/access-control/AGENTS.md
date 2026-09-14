@@ -22,35 +22,47 @@ administracion lo cablea antes de guardar.
 `resolveEffectiveScope` devuelve `steps` con la capa, la fuente y el ambito acumulado: es lo que
 permite decir QUE CARPETA origino una restriccion, no solo cual es.
 
-## El acceso se concede por EQUIPO, nunca a una persona suelta
+## Se concede por EQUIPO y, como excepcion, a una PERSONA
 
-Es una decision del modelo, no una carencia de ninguna pantalla, y conviene dejarla dicha porque
-cada cierto tiempo alguien pide «dar permiso a esta persona» y la tentacion es anadir un campo.
+Hay dos caminos de concesion, y el segundo se abrio a proposito.
 
-`resolveEffectiveScope` resuelve el acceso de alguien a partir de su EQUIPO ACTIVO: los nodos que
-ese equipo tiene concedidos y el ambito que resulta de encadenar las capas. No consulta ninguna
-lista de concesiones individuales, y por eso una lista asi seria un segundo camino de acceso que
-la resolucion no ve. Las consecuencias son dos, y las dos son peores que la molestia que
-resolverian:
+El normal es el EQUIPO: `Team.grantedNodes`. Es lo que se usa para todo lo que tiene que escalar
+—un area, una jurisdiccion, un tribunal— porque la persona que entra manana hereda lo que ya
+tiene su equipo sin que nadie se acuerde de ella.
 
-1. La pantalla de permisos diria que alguien alcanza un modulo que en realidad no alcanza, porque
-   lo que decide es `resolveEffectiveScope` y no la tabla.
-2. Revocar por el camino que si se consulta —quitar al equipo el nodo— dejaria a esa persona
-   dentro, y nadie lo relacionaria con la concesion individual de hace seis meses.
+El segundo es la PERSONA: `GovernedUser.grantedNodes`. Antes no existia, y el boton de «anadir
+personas» del panel la metia en un equipo que ya tenia el modulo. Concedia, si, pero de paso le
+daba todo lo demas que tuviera ese equipo, y el registro decia «cambio de membresia» donde lo que
+habia pasado era «le dieron este modulo». Es la excepcion nominal: esta persona, este modulo.
 
-Lo que SI se hace, y es lo que hace el panel desde la pantalla del modulo, es meter a esa persona
-en un equipo que ya lo tiene, con su rol. Es el camino que el modelo reconoce, pasa por
-`membershipChange` y queda en auditoria.
+Que sean dos obliga a dos cosas, y las dos estan cumplidas. Si se toca algo de esto, tienen que
+seguir cumpliendose:
 
-Abrir la concesion individual es un cambio de modelo: `resolveEffectiveScope` tendria que
-consultarla como una capa mas, `AccessScope` decidir como se combina con la del equipo —y esa
-combinacion no puede ampliar por accidente (4.10.4)—, y la revocacion tendria que cerrar los dos
-caminos. No es una linea de codigo, y no se hace sin decidirlo a proposito.
+1. **Se juntan en un solo sitio.** `accessibleModuleIds(generalTree, team, user)` es la union, y
+   todo lo que pregunta «alcanza esta persona este modulo» pasa por ahi — `canAccessModule` y
+   `buildNavigationView`. Mientras solo exista una union, no puede haber una pantalla que diga que
+   alguien alcanza algo que no alcanza. `canTeamAccessModule` sigue existiendo para la pregunta
+   que de verdad es sobre el equipo (la columna «alcanza» de la tabla de permisos); usarla donde
+   se pregunta por una persona responderia que no a quien si lo tiene.
+2. **No abre el ambito.** Alcanzar el modulo no es ver sus filas. `resolveEffectiveScope` no mira
+   `grantedNodes` de nadie: parte del ambito del equipo activo y baja por las carpetas, asi que
+   quien llega por concesion individual ve el modulo con las restricciones que le tocan por donde
+   esta. Conceder acceso nunca amplia lo que se ve dentro, que es justo lo que 4.10.4 protege.
+
+La revocacion cierra el camino por el que se concedio, y solo ese: la × de la tabla de personas
+quita la concesion individual, la de equipos quita el nodo del equipo, y lo heredado de una
+carpeta se revoca en la carpeta. La pantalla dice los caminos que tiene cada cual precisamente
+para que quitar uno no parezca quitar todos.
+
+Se audita como `user-grant`, no como un cambio del equipo: leer el registro de un equipo no puede
+contar quien mas alcanza sus modulos.
 
 ## Que NO hacer
 
 - No escribir una dimension de ambito sin validarla contra el esquema real.
 - No permitir que un ambito se guarde ampliando sin justificacion.
 - No dejar un equipo sin administrador: `lastAdministrator.ts` existe para impedirlo.
-- No anadir una concesion de acceso directa a una persona sin cambiar tambien
-  `resolveEffectiveScope`: seria un permiso que la resolucion de ambito no ve.
+- No preguntar por el acceso de una PERSONA con `canTeamAccessModule`: no ve su concesion
+  individual y responderia que no a quien si lo tiene.
+- No hacer que la concesion —de equipo o individual— toque el ambito. Alcanzar un modulo y ver sus
+  filas son dos preguntas distintas, y mezclarlas amplia por accidente.

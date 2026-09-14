@@ -35,7 +35,10 @@ export interface ConfigChangeLog {
     | 'package'
     | 'role'
     | 'module'
-    | 'object';
+    | 'object'
+    // Concesion directa a una PERSONA, que es un camino de acceso distinto del equipo y por eso
+    // se audita aparte: leer el registro de un equipo no cuenta quien mas alcanza sus modulos.
+    | 'user-grant';
   entityId: string;
   action:
     | 'create'

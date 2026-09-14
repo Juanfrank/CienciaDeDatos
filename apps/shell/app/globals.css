@@ -4212,6 +4212,19 @@ th[aria-sort='descending'] .table__flecha {
 }
 
 /*
+ * Los botones que encabezan una tabla: crear, anadir.
+ *
+ * Separados de `.fila-acciones`, que es para los iconos de dentro de una fila: alli el hueco es
+ * el minimo que deja pulsar uno sin rozar el otro, y aqui son pastillas con texto.
+ */
+.barra-de-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+/*
  * Las acciones de una fila de tabla.
  *
  * En linea y pegadas: son iconos de 18px, y separarlos como texto haria que la columna ocupara
