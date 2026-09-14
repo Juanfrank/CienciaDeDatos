@@ -209,5 +209,22 @@ await pagina.mouse.move(700, 600);
 await pagina.waitForTimeout(250);
 await pagina.screenshot({ path: `${salida}/21-recursos-uso.png`, fullPage: true });
 
+/*
+ * La configuracion y los permisos de UN modulo.
+ *
+ * Llevan slug, asi que tampoco caben en la lista fija. Se usa `casos-pendientes`, que esta
+ * publicado y tiene objetos dentro: sobre un borrador vacio las dos pantallas saldrian en blanco.
+ */
+for (const [ruta, label] of [
+  ['/admin/modules/casos-pendientes/settings', '22-modulo-configuracion'],
+  ['/admin/modules/casos-pendientes/permissions', '23-modulo-permisos'],
+] as const) {
+  await pagina.goto(`${base}${ruta}`);
+  await pagina.waitForLoadState('networkidle');
+  await pagina.mouse.move(700, 600);
+  await pagina.waitForTimeout(250);
+  await pagina.screenshot({ path: `${salida}/${label}.png`, fullPage: true });
+}
+
 await navegador.close();
-console.log(`${SECCIONES.length + 2} capturas en ${salida}/`);
+console.log(`${SECCIONES.length + 4} capturas en ${salida}/`);

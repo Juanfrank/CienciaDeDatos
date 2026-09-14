@@ -76,4 +76,17 @@ await pagina.getByTestId('descartar-borrador').click();
 await alDia();
 await foto('32-editor-descartado');
 
+/*
+ * El contenedor expandible, en sus dos estados.
+ *
+ * En el modulo publicado y no en el lienzo: lo que hay que ver es que al abrirlo lo de abajo BAJA,
+ * y en el editor cada objeto lleva encima su capa de seleccion.
+ */
+await pagina.goto(`${base}/m/composicion/contenedores`);
+await pagina.waitForLoadState('networkidle');
+await foto('33-expandible-cerrado');
+await pagina.getByTestId('chiclet').click();
+await pagina.waitForTimeout(400);
+await foto('34-expandible-abierto');
+
 await navegador.close();

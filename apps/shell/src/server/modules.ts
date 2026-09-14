@@ -1602,7 +1602,7 @@ export const demoModules: ModuleDefinition[] = [
               binding: WITHOUT_DATA,
               settings: {
                 objectId: 'contenedor-expandible',
-                expandableInPlace: { gridColumns: 12, filasAlExpandir: 4, rotulo: 'Filtros' },
+                expandableInPlace: { gridColumns: 12, filasAlExpandir: 2, rotulo: 'Filtros' },
                 panels: [
                   {
                     panelId: 'p1',
