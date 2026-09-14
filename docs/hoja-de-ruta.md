@@ -65,6 +65,16 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   siempre. Lo que tapaba: las dos pantallas de auditoria mostraban `u-admin` donde deberia ir un
   nombre. Arreglado en las dos, y la prueba ahora provoca el cambio y comprueba las cuatro
   columnas sin condicion.
+- **Lo publicado se guarda, ya no se pisa (4.5).** El modelo decia versionar desde el primer dia
+  —el comentario de `version` dice literalmente que un objeto publicado nunca se modifica, que se
+  publica otra version— y lo que hacia el codigo era `modules.save(...)` con
+  `version: modulo.version + 1`: sobrescribir, con un contador al lado. La pregunta «¿que veia la
+  gente antes del cambio del martes?» no tenia respuesta. Ahora cada publicacion guarda una foto
+  completa, el panel las lista en `/admin/modules/<slug>/history` con quien publico cada una, y
+  volver atras **publica una version nueva** con el contenido de la vieja en vez de reactivarla,
+  que es lo unico que deja el historial legible. Se comprueba ANTES de tocar el almacen: una
+  version que hoy no se puede publicar —un campo del esquema que ya no existe— se rechaza sin
+  llegar a reemplazar lo que esta vivo, y eso tiene su propia prueba.
 - **La siembra de credenciales de demostracion, cerrada con llave.** `asegurarCredenciales()` se
   llamaba en CADA peticion de acceso sin ninguna condicion, y da de alta a todas las cuentas del
   gobierno con la misma contrasena y el mismo secreto TOTP, los dos publicados en este

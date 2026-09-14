@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { GridItem, ModuleDefinition } from '@app/module-model';
-import { KEY_MODULES, modules } from './moduleStore';
+import { KEY_HISTORY, KEY_MODULES, modules } from './moduleStore';
 import { borrar } from './almacenCompartido';
 import { clearAudit, auditList } from './audit';
 import { settingsRestart } from './settings';
@@ -17,6 +17,8 @@ import {
   visibleModuleSlug,
   statusPrune,
   publicar,
+  historialDe,
+  restaurarVersion,
   seeCan,
 } from './cicloDeVida';
 
@@ -58,6 +60,7 @@ async function readyDraft(actor: ModuleActor, slug: string): Promise<ModuleDefin
 beforeEach(async () => {
   // Se parte de la semilla en cada prueba: el almacen es compartido y persiste entre ficheros.
   await borrar(KEY_MODULES);
+  await borrar(KEY_HISTORY);
   await clearAudit();
 });
 
@@ -432,5 +435,205 @@ describe('banderas por modulo (3.4)', () => {
       expect(await slugServableModule('vivo', visor)).toBeDefined();
       expect(await slugServableModule('muerto', visor)).toBeUndefined();
     });
+  });
+});
+
+/**
+ * El historial de versiones publicadas — seccion 4.5 y principio 8.
+ *
+ * El modelo decia versionar desde el primer dia: el comentario de `version` dice literalmente que
+ * un objeto publicado nunca se modifica y que se publica una version nueva. Lo que hacia el
+ * codigo era `modules.save(...)` con `version: modulo.version + 1`, es decir SOBRESCRIBIR con un
+ * contador al lado. Nada guardaba lo anterior, asi que la pregunta «¿que veia la gente el mes
+ * pasado?» no tenia respuesta, y volver atras significaba reconstruir el modulo a mano.
+ */
+/** Un segundo objeto con identidad y sitio propios: repetir `validItem()` choca consigo mismo. */
+const secondItem = (): GridItem => {
+  const base = validItem();
+  return {
+    ...base,
+    id: 'kpi-dos',
+    position: { x: 3, y: 0, w: 3, h: 2 },
+    instance: { ...base.instance, instanceId: 'kpi-dos', title: 'Resueltos' },
+  };
+};
+
+describe('historial de versiones publicadas', () => {
+  async function publicado(slug: string): Promise<ModuleDefinition> {
+    const borrador = await readyDraft(colaborador, slug);
+    await sendApproval({ actor: colaborador, moduleId: borrador.moduleId });
+    return publicar({ actor: admin, moduleId: borrador.moduleId });
+  }
+
+  it('publicar guarda una foto, y la siguiente publicacion no la pisa', async () => {
+    const primera = await publicado('historial-uno');
+
+    await revertDraft({ actor: admin, moduleId: primera.moduleId, motivo: 'falta una medida' });
+    const pagina = primera.pages[0];
+    if (!pagina) throw new Error('fixture inesperado');
+    await saveDraft({
+      actor: admin,
+      moduleId: primera.moduleId,
+      cambios: { pages: [{ ...pagina, items: [validItem(), secondItem()] }] },
+    });
+    await sendApproval({ actor: admin, moduleId: primera.moduleId });
+    const segunda = await publicar({ actor: admin, moduleId: primera.moduleId });
+
+    const historial = await historialDe(admin, primera.moduleId);
+    expect(historial.map((v) => v.version)).toEqual([segunda.version, primera.version]);
+    // Y la foto vieja conserva SU contenido, no el de ahora: es lo que no hacia el contador.
+    const vieja = historial[1];
+    expect(vieja?.definition.pages[0]?.items).toHaveLength(1);
+    expect(historial[0]?.definition.pages[0]?.items).toHaveLength(2);
+  });
+
+  it('el historial dice quien publico cada version', async () => {
+    const modulo = await publicado('historial-quien');
+    const historial = await historialDe(admin, modulo.moduleId);
+    expect(historial[0]?.publishedBy).toBe('u-admin');
+  });
+
+  it('solo lo ve quien administra', async () => {
+    const modulo = await publicado('historial-permiso');
+    await expect(historialDe(colaborador, modulo.moduleId)).rejects.toMatchObject({ status: 403 });
+    await expect(historialDe(visor, modulo.moduleId)).rejects.toMatchObject({ status: 403 });
+  });
+
+  it('un modulo sin publicar no tiene historial, y eso no es un error', async () => {
+    const borrador = await readyDraft(colaborador, 'historial-vacio');
+    expect(await historialDe(admin, borrador.moduleId)).toEqual([]);
+  });
+});
+
+describe('volver a una version anterior', () => {
+  /*
+   * Devuelve la segunda publicacion y el numero de la PRIMERA.
+   *
+   * No se escribe `1` a mano: un borrador nace con `version: 1` y publicar la sube, asi que la
+   * primera version publicada es la 2. Fijar el numero en la prueba la ataria a esa aritmetica.
+   */
+  async function conDosVersiones(): Promise<{ segunda: ModuleDefinition; primera: number }> {
+    const borrador = await readyDraft(colaborador, 'vuelta-atras');
+    await sendApproval({ actor: colaborador, moduleId: borrador.moduleId });
+    const primera = await publicar({ actor: admin, moduleId: borrador.moduleId });
+
+    await revertDraft({ actor: admin, moduleId: primera.moduleId, motivo: 'anadir un objeto' });
+    const pagina = primera.pages[0];
+    if (!pagina) throw new Error('fixture inesperado');
+    await saveDraft({
+      actor: admin,
+      moduleId: primera.moduleId,
+      cambios: { pages: [{ ...pagina, items: [validItem(), secondItem()] }] },
+    });
+    await sendApproval({ actor: admin, moduleId: primera.moduleId });
+    return { segunda: await publicar({ actor: admin, moduleId: primera.moduleId }), primera: primera.version };
+  }
+
+  /*
+   * Lo que NO hace es reactivar la version vieja. 4.5 dice que un objeto publicado no se toca;
+   * si volver atras «devolviera» la v1 al presente, el historial dejaria de explicar lo que la
+   * gente vio y cuando, que es su unica razon de existir.
+   */
+  it('publica una version NUEVA con el contenido de la vieja, y lo deja dicho', async () => {
+    const { segunda, primera } = await conDosVersiones();
+    const restaurado = await restaurarVersion({
+      actor: admin,
+      moduleId: segunda.moduleId,
+      version: primera,
+    });
+
+    expect(restaurado.version).toBe(segunda.version + 1);
+    expect(restaurado.status).toBe('publicado');
+    expect(restaurado.pages[0]?.items).toHaveLength(1);
+
+    const historial = await historialDe(admin, segunda.moduleId);
+    expect(historial[0]?.restoredFrom).toBe(primera);
+    // Las dos anteriores siguen ahi, intactas.
+    expect(historial).toHaveLength(3);
+    expect(historial[2]?.definition.pages[0]?.items).toHaveLength(1);
+  });
+
+  it('queda en la auditoria, con la version de la que salio', async () => {
+    const { segunda, primera } = await conDosVersiones();
+    await restaurarVersion({ actor: admin, moduleId: segunda.moduleId, version: primera });
+
+    const eventos = await auditList();
+    const vuelta = eventos.find(
+      (e) => e.entityId === segunda.moduleId && (e.after as { restauradoDe?: number }).restauradoDe === primera,
+    );
+    expect(vuelta?.action).toBe('publish');
+    expect(vuelta?.actorId).toBe('u-admin');
+  });
+
+  it('un Colaborador no puede: publicar sigue siendo del Administrador', async () => {
+    const { segunda, primera } = await conDosVersiones();
+    await expect(
+      restaurarVersion({ actor: colaborador, moduleId: segunda.moduleId, version: primera }),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+
+  it('una version que no existe se rechaza, no se inventa', async () => {
+    const { segunda } = await conDosVersiones();
+    await expect(
+      restaurarVersion({ actor: admin, moduleId: segunda.moduleId, version: 99 }),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+
+  /*
+   * Es la razon de que la comprobacion vaya ANTES de guardar.
+   *
+   * Una version vieja puede haber dejado de ser publicable sin que nadie la toque: basta con que
+   * el esquema retire un campo que uno de sus objetos mapea. Si se guardara primero, el modulo
+   * VIVO quedaria reemplazado por una definicion vieja y ademas rota — peor que no haber
+   * restaurado, y sin nada en pantalla que lo explicara.
+   */
+  it('una version que hoy no se puede publicar no llega a tocar lo que esta vivo', async () => {
+    const { segunda, primera } = await conDosVersiones();
+
+    // Se rompe la foto vieja en el historial, como haria un campo retirado del esquema.
+    const historial = await modules.history(segunda.moduleId);
+    const vieja = historial.find((v) => v.version === primera);
+    if (!vieja) throw new Error('fixture inesperado');
+    const primeraPagina = vieja.definition.pages[0];
+    const item = primeraPagina?.items[0];
+    if (!primeraPagina || !item) throw new Error('fixture inesperado');
+    await borrar(KEY_HISTORY);
+    await modules.versionRecord({
+      ...vieja,
+      definition: {
+        ...vieja.definition,
+        pages: [
+          {
+            ...primeraPagina,
+            items: [
+              {
+                ...item,
+                instance: {
+                  ...item.instance,
+                  binding: { ...item.instance.binding, datasetId: 'dataset-que-no-existe' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    await expect(
+      restaurarVersion({ actor: admin, moduleId: segunda.moduleId, version: primera }),
+    ).rejects.toMatchObject({ status: 422 });
+
+    // Lo que estaba publicado sigue publicado, con su version y su contenido.
+    const vivo = await modules.get(segunda.moduleId);
+    expect(vivo?.version).toBe(segunda.version);
+    expect(vivo?.status).toBe('publicado');
+    expect(vivo?.pages[0]?.items).toHaveLength(2);
+  });
+
+  it('restaurar la que ya esta publicada no hace nada', async () => {
+    const { segunda } = await conDosVersiones();
+    await expect(
+      restaurarVersion({ actor: admin, moduleId: segunda.moduleId, version: segunda.version }),
+    ).rejects.toMatchObject({ status: 409 });
   });
 });

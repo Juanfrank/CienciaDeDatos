@@ -63,7 +63,13 @@ export default async function ModulosPage() {
                 <span className="muted-text"> /m/{m.slug}</span>
               </th>
               <td>{ESTADO[m.status] ? t(ESTADO[m.status] as MessageKey) : m.status}</td>
-              <td>v{m.version}</td>
+              <td>
+                {/* La version es el enlace a lo que hubo antes: es la pregunta que se hace
+                    mirando ese numero. */}
+                <Link href={`/admin/modules/${m.slug}/history`} data-testid={`history-${m.slug}`}>
+                  v{m.version}
+                </Link>
+              </td>
               <td>{m.pages.length}</td>
               <td>{m.pages.reduce((total, p) => total + p.items.length, 0)}</td>
               <td>{m.ownerUserId ?? '—'}</td>

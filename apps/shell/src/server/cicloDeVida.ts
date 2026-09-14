@@ -18,7 +18,7 @@ import { navigationFor } from './context';
 import { changeRecord, treeEventRecord } from './audit';
 import { governance } from './governance';
 import { moduloEncendido, disabledSlugs } from './settings';
-import { modules } from './moduleStore';
+import { modules, type PublishedVersion } from './moduleStore';
 import { definitionDiagnose } from './data';
 import type { ShellSession } from './session';
 
@@ -91,6 +91,10 @@ function transitionRequire(desde: ModuleStatus, hasta: ModuleStatus): void {
 }
 
 const ahora = (): string => new Date().toISOString();
+
+/** Copia profunda de las paginas: lo restaurado no puede compartir objetos con el historial. */
+const clonarPaginas = (paginas: ModuleDefinition['pages']): ModuleDefinition['pages'] =>
+  JSON.parse(JSON.stringify(paginas)) as ModuleDefinition['pages'];
 
 export interface CreateDraftInput {
   actor: ModuleActor;
@@ -197,6 +201,8 @@ export interface InputTransition {
   moduleId: string;
   /** Obligatoria al devolver a borrador o retirar: sin motivo, nadie sabe que arreglar. */
   motivo?: string;
+  /** Version de la que sale el contenido, cuando la publicacion es una vuelta atras. */
+  restoredFrom?: number;
 }
 
 /** borrador -> pendiente-de-aprobacion. Lo hace el autor: es una propuesta, no una publicacion. */
@@ -263,6 +269,16 @@ export async function publicar(input: InputTransition): Promise<ModuleDefinition
   delete actualizado.ownerUserId;
 
   await modules.save(actualizado);
+  // La foto se guarda DESPUES de que la publicacion sea firme, y antes de colgar el modulo del
+  // arbol: si lo que falla es el arbol, lo publicado ya esta y el historial lo refleja.
+  await modules.versionRecord({
+    moduleId: actualizado.moduleId,
+    version: actualizado.version,
+    publishedAt: actualizado.updatedAt,
+    publishedBy: input.actor.userId,
+    ...(input.restoredFrom === undefined ? {} : { restoredFrom: input.restoredFrom }),
+    definition: actualizado,
+  });
   await missingIfTreeAttach(actualizado, input.actor);
   await changeRecord({
     actorId: input.actor.userId,
@@ -270,10 +286,106 @@ export async function publicar(input: InputTransition): Promise<ModuleDefinition
     entityId: modulo.moduleId,
     action: 'publish',
     before: { status: modulo.status, version: modulo.version, autor: modulo.ownerUserId },
-    after: { status: actualizado.status, version: actualizado.version },
+    after: {
+      status: actualizado.status,
+      version: actualizado.version,
+      ...(input.restoredFrom === undefined ? {} : { restauradoDe: input.restoredFrom }),
+    },
   });
 
   return actualizado;
+}
+
+/**
+ * El historial de versiones publicadas de un modulo.
+ *
+ * Pide el mismo permiso que publicar, y no el de ver el modulo. El historial dice QUIEN publico
+ * cada version y cuando: es informacion de gobierno, de la misma familia que el registro de
+ * auditoria, no parte de lo que un modulo muestra. Quien puede verlo es quien administra.
+ */
+export async function historialDe(
+  actor: ModuleActor,
+  moduleId: string,
+): Promise<PublishedVersion[]> {
+  permission(actor, 'publicar-modulo-institucional');
+  return modules.history(moduleId);
+}
+
+/**
+ * Vuelve a publicar el contenido de una version anterior.
+ *
+ * No modifica la version vieja ni la «reactiva»: publica una version NUEVA con su contenido, y
+ * deja dicho de cual salio. Es lo que pide 4.5 —un objeto publicado no se toca— y ademas es lo
+ * unico que deja el historial legible: una vuelta atras que reescribiera el pasado haria que el
+ * registro dejara de explicar lo que la gente vio.
+ *
+ * Lo que se restaura es el CONTENIDO —paginas y objetos—, no el estado ni el autor: el modulo
+ * sigue siendo institucional y el ciclo de vida no retrocede.
+ */
+export async function restaurarVersion(input: {
+  actor: ModuleActor;
+  moduleId: string;
+  version: number;
+}): Promise<ModuleDefinition> {
+  permission(input.actor, 'publicar-modulo-institucional');
+
+  const modulo = await modules.get(input.moduleId);
+  if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
+
+  const historial = await modules.history(input.moduleId);
+  const anterior = historial.find((v) => v.version === input.version);
+  if (!anterior) {
+    throw new CicloDeVidaError(
+      `El modulo no tiene ninguna version publicada con el numero ${input.version}.`,
+      404,
+    );
+  }
+  if (anterior.version === modulo.version) {
+    throw new CicloDeVidaError('Esa version es la que esta publicada ahora mismo.', 409);
+  }
+
+  const restaurado: ModuleDefinition = {
+    ...modulo,
+    pages: clonarPaginas(anterior.definition.pages),
+    name: anterior.definition.name,
+    ...(anterior.definition.icon === undefined ? {} : { icon: anterior.definition.icon }),
+    // Queda a un paso de publicarse, no en borrador: el estado intermedio existe para que
+    // `publicar` acepte la transicion, y quien restaura es quien aprueba de todas formas.
+    status: 'pendiente-de-aprobacion',
+    updatedAt: ahora(),
+  };
+
+  /*
+   * Se comprueba ANTES de tocar el almacen.
+   *
+   * Una version vieja puede no poder publicarse hoy: basta con que el esquema haya retirado un
+   * campo que uno de sus objetos mapea. Guardar primero y descubrirlo despues dejaria el modulo
+   * VIVO reemplazado por una definicion vieja y ademas rota, que es peor que no haber restaurado.
+   */
+  const locks = await publicationLocks(restaurado);
+  if (locks.length > 0) {
+    throw new CicloDeVidaError(
+      `La version ${input.version} no se puede republicar: tiene problemas sin resolver.`,
+      422,
+      locks,
+    );
+  }
+
+  await modules.save(restaurado);
+  try {
+    // Se publica por el MISMO camino que cualquier otra publicacion: mismas cerraduras, misma
+    // auditoria, mismo historial. Dos caminos hacia «publicado» acabarian divergiendo.
+    return await publicar({
+      actor: input.actor,
+      moduleId: input.moduleId,
+      restoredFrom: input.version,
+    });
+  } catch (error) {
+    // Y si aun asi falla, el modulo vuelve a ser lo que era. Sin esto, un fallo a mitad deja
+    // publicado algo que nadie eligio publicar.
+    await modules.save(modulo);
+    throw error;
+  }
 }
 
 /** Al publicar, el modulo tiene que existir en la ORGANIZACION GENERAL. */

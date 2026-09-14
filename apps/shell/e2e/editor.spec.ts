@@ -365,3 +365,99 @@ test.describe('cada transicion queda registrada (4.10.7)', () => {
     expect(dataRows.some((f) => f.action === 'publish' && f.actorId === 'u-admin')).toBe(true);
   });
 });
+
+/**
+ * El historial de versiones publicadas — seccion 4.5.
+ *
+ * El modelo decia versionar desde el primer dia; lo que hacia era sobrescribir con un contador al
+ * lado. La pregunta que esto responde es la que nadie podia responder: «¿que veia la gente antes
+ * del cambio del martes?».
+ */
+test.describe('lo publicado se guarda, no se pisa (4.5)', () => {
+  /** Publica el borrador y devuelve la version resultante. */
+  async function publicar(page: import('@playwright/test').Page, slug: string): Promise<number> {
+    await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'enviar' } });
+    const respuesta = await page.request.post(`/api/modules/${slug}/status`, {
+      data: { transition: 'publicar' },
+    });
+    expect(respuesta.ok(), await respuesta.text()).toBe(true);
+    const { modulo } = (await respuesta.json()) as { modulo: { version: number } };
+    return modulo.version;
+  }
+
+  test('cada publicacion deja una fila, y volver atras publica una NUEVA', async ({ page }) => {
+    const slug = newSlug('historial');
+    await asLogin(page, 'u-admin');
+    await objectDraft(page, slug);
+    const primera = await publicar(page, slug);
+
+    // Un segundo objeto, y otra publicacion.
+    await page.request.post(`/api/modules/${slug}/status`, {
+      data: { transition: 'devolver', motivo: 'falta la segunda cifra' },
+    });
+    const actual = await (await page.request.get(`/api/modules/${slug}/edit`)).json();
+    const pagina = actual.modulo.pages[0];
+    await page.request.put(`/api/modules/${slug}/edit`, {
+      data: {
+        paginas: [
+          {
+            ...pagina,
+            items: [
+              ...pagina.items,
+              {
+                id: 'kpi-dos',
+                position: { x: 3, y: 0, w: 3, h: 2 },
+                instance: {
+                  instanceId: 'kpi-dos',
+                  objectId: 'tarjeta-kpi',
+                  version: '1.0.0',
+                  title: 'Resueltos',
+                  binding: {
+                    datasetId: 'casos-por-distrito-trimestre',
+                    dimensions: [],
+                    measures: ['CasosPendientes'],
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+    const segunda = await publicar(page, slug);
+    expect(segunda).toBeGreaterThan(primera);
+
+    await page.goto(`/admin/modules/${slug}/history`);
+    await expect(page.getByTestId(`history-v${primera}`)).toBeVisible();
+    await expect(page.getByTestId(`history-v${segunda}`)).toBeVisible();
+    // La vigente no se puede restaurar sobre si misma: no se ofrece.
+    await expect(page.getByTestId(`history-vigente-${segunda}`)).toBeVisible();
+    await expect(page.getByTestId(`restore-v${segunda}`)).toHaveCount(0);
+
+    // La foto vieja conserva SU contenido: un objeto, no los dos de ahora.
+    await expect(page.getByTestId(`history-v${primera}`)).toContainText('1');
+    await expect(page.getByTestId(`history-v${segunda}`)).toContainText('2');
+
+    // Volver atras pide confirmacion con el numero delante, no un «¿seguro?» a secas.
+    await page.getByTestId(`restore-v${primera}`).click();
+    await page.getByTestId(`restore-confirm-v${primera}`).click();
+
+    const tercera = segunda + 1;
+    await expect(page.getByTestId(`history-v${tercera}`)).toBeVisible();
+    await expect(page.getByTestId(`history-v${tercera}`)).toContainText(`restaurada de v${primera}`);
+    // Y las dos anteriores siguen ahi: una vuelta atras no borra lo que hubo.
+    await expect(page.getByTestId(`history-v${primera}`)).toBeVisible();
+    await expect(page.getByTestId(`history-v${segunda}`)).toBeVisible();
+  });
+
+  test('un Colaborador no ve el historial: es informacion de gobierno', async ({ page }) => {
+    const slug = newSlug('historial-permiso');
+    await asLogin(page, 'u-admin');
+    await objectDraft(page, slug);
+    await publicar(page, slug);
+
+    await asLogin(page, 'u-ana');
+    const respuesta = await page.request.get(`/api/modules/${slug}/history`);
+    expect(respuesta.status()).toBe(403);
+  });
+});
