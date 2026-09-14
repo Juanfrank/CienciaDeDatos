@@ -186,7 +186,7 @@ test.describe('avisos (4.9)', () => {
 test.describe('paginas de estado', () => {
   test('la pagina de sin permiso es accesible', async ({ page }) => {
     await asLogin(page, 'u-beto');
-    await page.goto('/admin-without-permission');
+    await page.goto('/admin-sin-permiso');
     expect(await infracciones(page)).toEqual([]);
   });
 

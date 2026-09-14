@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     //
     // Para una pagina, redirigir es el comportamiento idiomatico; lo que devuelve 403 es la API
     // (/api/admin/*), que es la que importa cuando alguien se salta la interfaz.
-    redirect('/admin-without-permission');
+    redirect('/admin-sin-permiso');
   }
 
   return (

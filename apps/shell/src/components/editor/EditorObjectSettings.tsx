@@ -26,6 +26,7 @@ import {
 } from '@app/ui-components';
 import { ColorPalette } from './EditorTextStyle';
 import { Section } from './Section';
+import { useTranslator } from '../Locale';
 
 /** Configuracion propia de los elementos y los contenedores. */
 
@@ -84,12 +85,13 @@ function EditorLine({
   saving: boolean;
   onCambiar: (line: LineSettings) => void;
 }) {
+  const t = useTranslator();
   const cambiar = (parcial: Partial<LineSettings>) => onCambiar({ ...line, ...parcial });
 
   return (
     <>
       <label className="form__field">
-        <span>Estilo de linea</span>
+        <span>{t('obj.linea.estilo')}</span>
         <select
           value={line?.style ?? 'solida'}
           disabled={saving}
@@ -105,7 +107,7 @@ function EditorLine({
       </label>
 
       <label className="form__field">
-        <span>Grosor</span>
+        <span>{t('obj.grosor')}</span>
         <select
           value={String(line?.thickness ?? 1)}
           disabled={saving}
@@ -121,7 +123,7 @@ function EditorLine({
       </label>
 
       <div className="form__field">
-        <span>Color de linea</span>
+        <span>{t('obj.linea.color')}</span>
         <ColorPalette
           valor={line?.color ?? 'atenuado'}
           nombre="la linea"
@@ -142,6 +144,7 @@ export function EditorObjectSettings({
   saving: boolean;
   onCambiar: (change: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
+  const t = useTranslator();
   const { objectId } = instance;
   if (!isElement(objectId) && !isContainer(objectId)) return null;
 
@@ -187,35 +190,35 @@ export function EditorObjectSettings({
           data-testid={`${prueba}-anadir-parrafo`}
           onClick={() => set({ textBox: { parrafos: [...parrafos, { content: '' }] } })}
         >
-          Anadir parrafo
+          {t('obj.parrafo.anadir')}
         </button>
       </Section>
     );
   }
 
   if (objectId === 'titulo-de-seccion') {
-    const t = conf.sectionTitle;
+    const sectionTitle = conf.sectionTitle;
     return (
       <Section titulo="Titulo de seccion" nivel={2} prueba={prueba}>
         <label className="form__field">
           <span>Texto</span>
           <input
-            defaultValue={t?.content ?? ''}
+            defaultValue={sectionTitle?.content ?? ''}
             disabled={saving}
             data-testid={`${prueba}-texto`}
-            onBlur={(e) => set({ sectionTitle: { ...t, content: e.target.value } })}
+            onBlur={(e) => set({ sectionTitle: { ...sectionTitle, content: e.target.value } })}
           />
         </label>
 
         <label className="form__field">
-          <span>Posicion del content</span>
+          <span>{t('obj.contenido.posicion')}</span>
           <select
-            value={t?.textPosition ?? 'izquierda'}
+            value={sectionTitle?.textPosition ?? 'izquierda'}
             disabled={saving}
             data-testid={`${prueba}-posicion`}
             onChange={(e) =>
               set({
-                sectionTitle: { ...t, content: t?.content ?? '', textPosition: e.target.value as Alignment },
+                sectionTitle: { ...sectionTitle, content: sectionTitle?.content ?? '', textPosition: e.target.value as Alignment },
               })
             }
           >
@@ -228,14 +231,14 @@ export function EditorObjectSettings({
         </label>
 
         <label className="form__field">
-          <span>Lineas</span>
+          <span>{t('obj.lineas')}</span>
           <select
-            value={t?.line ?? 'ninguna'}
+            value={sectionTitle?.line ?? 'ninguna'}
             disabled={saving}
             data-testid={`${prueba}-linea`}
             onChange={(e) =>
               set({
-                sectionTitle: { ...t, content: t?.content ?? '', line: e.target.value as LinePosition },
+                sectionTitle: { ...sectionTitle, content: sectionTitle?.content ?? '', line: e.target.value as LinePosition },
               })
             }
           >
@@ -245,15 +248,15 @@ export function EditorObjectSettings({
               </option>
             ))}
           </select>
-          <span className="field__pista">Se reparten el ancho que sobre despues del content.</span>
+          <span className="field__pista">{t('obj.lineas.ayuda')}</span>
         </label>
 
         <EditorLine
-          line={t?.estiloDeLinea}
+          line={sectionTitle?.estiloDeLinea}
           prueba={`${prueba}-l`}
           saving={saving}
           onCambiar={(estiloDeLinea) =>
-            set({ sectionTitle: { ...t, content: t?.content ?? '', estiloDeLinea } })
+            set({ sectionTitle: { ...sectionTitle, content: sectionTitle?.content ?? '', estiloDeLinea } })
           }
         />
       </Section>
@@ -265,7 +268,7 @@ export function EditorObjectSettings({
     return (
       <Section titulo="Linea divisoria" nivel={2} prueba={prueba}>
         <label className="form__field">
-          <span>Orientacion</span>
+          <span>{t('obj.orientacion')}</span>
           <select
             value={l?.orientation ?? 'horizontal'}
             disabled={saving}
@@ -296,7 +299,7 @@ export function EditorObjectSettings({
     return (
       <Section titulo="Forma" nivel={2} prueba={prueba}>
         <label className="form__field">
-          <span>Forma</span>
+          <span>{t('obj.forma')}</span>
           <select
             value={f?.forma ?? 'rectangulo'}
             disabled={saving}
@@ -312,7 +315,7 @@ export function EditorObjectSettings({
         </label>
 
         <div className="form__field">
-          <span>Relleno</span>
+          <span>{t('obj.relleno')}</span>
           <ColorPalette
             valor={f?.relleno ?? 'primario'}
             nombre="el relleno"
@@ -322,7 +325,7 @@ export function EditorObjectSettings({
         </div>
 
         <label className="form__field">
-          <span>Opacidad</span>
+          <span>{t('obj.opacidad')}</span>
           <select
             value={String(f?.opacidad ?? 100)}
             disabled={saving}
@@ -340,7 +343,7 @@ export function EditorObjectSettings({
         </label>
 
         <label className="form__field">
-          <span>Texto dentro</span>
+          <span>{t('obj.textoDentro')}</span>
           <input
             defaultValue={f?.content ?? ''}
             disabled={saving}
@@ -366,7 +369,7 @@ export function EditorObjectSettings({
           exactamente que espera, y la conexion avisa en el lienzo cuando un extremo no existe.
         */}
         <label className="form__field">
-          <span>Desde (id del objeto)</span>
+          <span>{t('obj.conexion.desde')}</span>
           <input
             defaultValue={c?.desde ?? ''}
             disabled={saving}
@@ -375,7 +378,7 @@ export function EditorObjectSettings({
           />
         </label>
         <label className="form__field">
-          <span>Hasta (id del objeto)</span>
+          <span>{t('obj.conexion.hasta')}</span>
           <input
             defaultValue={c?.hasta ?? ''}
             disabled={saving}
@@ -384,16 +387,16 @@ export function EditorObjectSettings({
           />
         </label>
         <label className="form__field">
-          <span>Trazado</span>
+          <span>{t('obj.trazado')}</span>
           <select
             value={c?.dash ?? 'angulo'}
             disabled={saving}
             data-testid={`${prueba}-trazado`}
             onChange={(e) => set({ conexion: { ...c, dash: e.target.value as Dash } })}
           >
-            {TRAZADOS.map((t) => (
-              <option key={t} value={t}>
-                {DASH_LABEL[t]}
+            {TRAZADOS.map((sectionTitle) => (
+              <option key={sectionTitle} value={sectionTitle}>
+                {DASH_LABEL[sectionTitle]}
               </option>
             ))}
           </select>
@@ -446,7 +449,7 @@ export function EditorObjectSettings({
   return (
     <Section titulo="Contenedor" nivel={2} prueba={prueba}>
       <label className="form__field">
-        <span>Columnas internas</span>
+        <span>{t('obj.columnas.internas')}</span>
         <select
           value={String(gridColumns)}
           disabled={saving}
@@ -459,12 +462,12 @@ export function EditorObjectSettings({
             </option>
           ))}
         </select>
-        <span className="field__pista">La rejilla de dentro es independiente de la del modulo.</span>
+        <span className="field__pista">{t('obj.rejilla.interna.ayuda')}</span>
       </label>
 
       {objectId === 'contenedor-desplazable' ? (
         <label className="form__field">
-          <span>Eje de desplazamiento</span>
+          <span>{t('obj.desplazamiento.eje')}</span>
           <select
             value={conf.scrollable?.axis ?? 'y'}
             disabled={saving}
@@ -479,13 +482,13 @@ export function EditorObjectSettings({
               </option>
             ))}
           </select>
-          <span className="field__pista">Uno solo. El otro eje nunca se desplaza.</span>
+          <span className="field__pista">{t('obj.desplazamiento.ayuda')}</span>
         </label>
       ) : null}
 
       {objectId === 'contenedor-ampliable' ? (
         <label className="form__field">
-          <span>Columnas al ampliar</span>
+          <span>{t('obj.ampliar.columnas')}</span>
           <select
             value={String(conf.expandable?.expandedColumns ?? 12)}
             disabled={saving}
@@ -529,7 +532,7 @@ export function EditorObjectSettings({
             data-testid={`${prueba}-anadir-pestana`}
             onClick={() => set({ panels: [...panels, EMPTY_PANEL(panels.length + 1)] })}
           >
-            Anadir pestana
+            {t('obj.pestana.anadir')}
           </button>
         </>
       ) : null}

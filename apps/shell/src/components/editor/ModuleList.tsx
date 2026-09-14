@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { PublishBlocker } from "@app/module-model";
+import { useTranslator } from '../Locale';
 
 /** Lista de modulos del editor — secciones 4.1 y 4.2. */
 
@@ -34,6 +35,7 @@ export function ModuleList({
   role: string;
   user: string;
 }) {
+  const t = useTranslator();
   const router = useRouter();
   const [nombre, setNombre] = useState("");
   const [slug, setSlug] = useState("");
@@ -107,7 +109,7 @@ export function ModuleList({
     // La lista si tiene tope de ancho: es una tabla, y una linea de tabla muy larga se sigue con
     // el dedo. El lienzo no lo tiene, porque ahi el ancho es sitio para el modulo.
     <section className="editor__list">
-      <h2>Modulos</h2>
+      <h2>{t('lista.titulo')}</h2>
 
       <form
         className="editor__create"
@@ -117,7 +119,7 @@ export function ModuleList({
         }}
       >
         <p className="form__field">
-          <label htmlFor="nuevo-nombre">Nombre</label>
+          <label htmlFor="nuevo-nombre">{t('lista.nombre')}</label>
           <input
             id="nuevo-nombre"
             value={nombre}
@@ -138,7 +140,7 @@ export function ModuleList({
           />
         </p>
         <p className="form__field">
-          <label htmlFor="nuevo-slug">Slug (parte de la URL)</label>
+          <label htmlFor="nuevo-slug">{t('lista.slug')}</label>
           <input
             id="nuevo-slug"
             value={slug}
@@ -152,7 +154,7 @@ export function ModuleList({
           data-testid="create-module"
           disabled={trabajando}
         >
-          Crear borrador
+          {t('lista.crearBorrador')}
         </button>
       </form>
 
@@ -162,18 +164,18 @@ export function ModuleList({
 
       {modules.length === 0 ? (
         <p className="muted-text">
-          No hay ningun modulo que pueda editar. Cree un borrador para empezar.
+          {t('lista.vacia')}
         </p>
       ) : (
         <div className="table-container-data">
           <table className="data-table" data-testid="module-list">
             <thead>
               <tr>
-                <th scope="col">Modulo</th>
-                <th scope="col">Estado</th>
-                <th scope="col">Autor</th>
-                <th scope="col">Objetos</th>
-                <th scope="col">Acciones</th>
+                <th scope="col">{t('lista.modulo')}</th>
+                <th scope="col">{t('lista.estado')}</th>
+                <th scope="col">{t('lista.autor')}</th>
+                <th scope="col">{t('lista.objetos')}</th>
+                <th scope="col">{t('lista.acciones')}</th>
               </tr>
             </thead>
             <tbody>
@@ -229,7 +231,7 @@ export function ModuleList({
                             disabled={trabajando || m.locks.length > 0}
                             onClick={() => void transition(m, "enviar")}
                           >
-                            Enviar a aprobacion
+                            {t('lista.enviar')}
                           </button>
                         ) : null}
 
@@ -241,7 +243,7 @@ export function ModuleList({
                             disabled={trabajando || m.locks.length > 0}
                             onClick={() => void transition(m, "publicar")}
                           >
-                            Publicar
+                            {t('lista.publicar')}
                           </button>
                         ) : null}
 
@@ -262,7 +264,7 @@ export function ModuleList({
                         {withoutActions ? (
                           <span
                             className="editor__without-actions"
-                            aria-label="Sin acciones disponibles"
+                            aria-label={t('lista.sinAcciones')}
                           >
                             &mdash;
                           </span>

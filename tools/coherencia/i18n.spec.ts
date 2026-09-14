@@ -10,9 +10,10 @@ import { describe, expect, it } from 'vitest';
  * incumpliendose casi entera: 53 claves en el catalogo contra mas de trescientas cadenas escritas
  * dentro de los componentes.
  *
- * Migrarlas de golpe es un cambio grande y va a la hoja de ruta. Lo que si se puede hoy es que la
- * deuda deje de crecer: este numero solo puede BAJAR. Quien anada una cadena suelta rompe la
- * prueba; quien migre una puede bajar el tope y dejar constancia en el mismo commit.
+ * El numero solo puede BAJAR. Quien anada una cadena suelta rompe la prueba; quien migre una baja
+ * el tope en el mismo commit. Empezo en 322 con 53 claves; va por 222 con 152, y las cuatro
+ * pantallas que mas acumulaban —el panel de formato, los ajustes de objeto, el panel lateral y la
+ * lista de modulos— ya no estan entre las peores.
  */
 
 const raiz = execSync('git rev-parse --show-toplevel').toString().trim();
@@ -36,7 +37,7 @@ const PALABRA = /[A-Za-zÀ-ÿ]{3,}/;
  * Es una foto, no un objetivo: cada cadena que se migre al catalogo puede bajarlo. Subirlo
  * requiere explicar por que una cadena nueva no puede ir al catalogo.
  */
-const TOPE = 322;
+const TOPE = 222;
 
 function cadenasDe(ruta: string): string[] {
   const fuente = readFileSync(`${raiz}/${ruta}`, 'utf8');

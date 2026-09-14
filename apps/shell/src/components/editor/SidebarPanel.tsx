@@ -145,11 +145,11 @@ export function SidebarPanel({
               No se guarda: el filtro es un gesto de un momento, no una preferencia.
             */}
             <label className="editor__search-box">
-              <span className="editor__label-search-box">Buscar un ajuste</span>
+              <span className="editor__label-search-box">{t('panel.buscarAjuste')}</span>
               <input
                 type="search"
                 value={filtro}
-                placeholder="meta, decimales, leyenda…"
+                placeholder={t('panel.buscarAjuste.ejemplo')}
                 data-testid="buscar-ajuste"
                 onChange={(e) => setFiltro(e.target.value)}
               />
@@ -209,7 +209,7 @@ export function SidebarPanel({
                   data-testid="limpiar-busqueda"
                   onClick={() => setFiltro('')}
                 >
-                  Ver todos los ajustes
+                  {t('panel.verAjustes')}
                 </button>
               </div>
             ) : null}
@@ -292,7 +292,7 @@ function Palette({
         <input
           type="search"
           value={busqueda}
-          placeholder="barras, meta, etapas…"
+          placeholder={t('panel.buscarObjeto.ejemplo')}
           data-testid="search-object"
           onChange={(e) => setBusqueda(e.target.value)}
         />
@@ -307,7 +307,7 @@ function Palette({
             data-testid="limpiar-busqueda-objeto"
             onClick={() => setBusqueda('')}
           >
-            Ver todos los objetos
+            {t('panel.verObjetos')}
           </button>
         </div>
       ) : null}
@@ -315,7 +315,7 @@ function Palette({
       {withData.length > 0 ? (
         <Section titulo="Visualizaciones" prueba="visualization-section">
           <p className="muted-text editor-panel__nota">
-            Se enlazan a un dataset certificado del registro. Un modulo no construye consultas (4.2).
+            {t('panel.visualizaciones.ayuda')}
           </p>
 
           {/*
@@ -367,7 +367,7 @@ function Palette({
       {de('elemento').length > 0 ? (
         <Section titulo="Elementos" prueba="element-section">
           <p className="muted-text editor-panel__nota">
-            No se enlazan a datos: componen la pagina. Texto, titulos, lineas, formas y conexiones.
+            {t('panel.elementos.ayuda')}
           </p>
           <ObjectList
             objetos={de('elemento')}
@@ -381,7 +381,7 @@ function Palette({
       {de('contenedor').length > 0 ? (
         <Section titulo="Contenedores" prueba="container-section">
           <p className="muted-text editor-panel__nota">
-            Agrupan elementos y visualizaciones en su propia rejilla.
+            {t('panel.contenedores.ayuda')}
           </p>
           <ObjectList
             objetos={de('contenedor')}
@@ -455,6 +455,7 @@ function Data({
   onCambiar: (itemId: string, change: (item: GridItem) => GridItem) => void;
   onQuitar: (itemId: string) => void;
 }) {
+  const t = useTranslator();
   const dataset = datasets.find((d) => d.datasetId === item.instance.binding.datasetId);
   const instanceChange = (change: (i: ObjectInstance) => ObjectInstance) =>
     onCambiar(item.id, (it) => ({ ...it, instance: change(it.instance) }));
@@ -534,7 +535,7 @@ function Data({
         </label>
 
         <label className="form__field">
-          <span>Dataset</span>
+          <span>{t('panel.dataset')}</span>
           <select
             value={item.instance.binding.datasetId}
             disabled={saving}
@@ -610,7 +611,7 @@ function Data({
         onClick={() => onQuitar(item.id)}
       >
         <Icon nombre="close" tamano={14} />
-        Quitar del modulo
+        {t('panel.quitarDelModulo')}
       </button>
     </>
   );
@@ -675,6 +676,7 @@ function Addons({
   saving: boolean;
   onCambiar: (itemId: string, change: (item: GridItem) => GridItem) => void;
 }) {
+  const t = useTranslator();
   const adjuntables = objetos.filter((o) => o.attachable);
   const puestos = item.instance.attachments ?? [];
 
@@ -721,7 +723,7 @@ function Addons({
       <Section titulo="Puestos" prueba={`section-addons-${item.id}`}>
         {puestos.length === 0 ? (
           <p className="muted-text" data-testid={`without-addons-${item.id}`}>
-            Este objeto no lleva ninguno.
+            {t('panel.sinDataset')}
           </p>
         ) : (
           <ul className="editor-panel__attachments">
@@ -753,7 +755,7 @@ function Addons({
                     </label>
                   ) : (
                     <label className="form__field">
-                      <span>Alcance</span>
+                      <span>{t('panel.alcance')}</span>
                       <select
                         value={a.objectId === 'tabla-de-datos' ? a.scope : 'objeto'}
                         disabled={saving}
@@ -768,8 +770,8 @@ function Addons({
                           )
                         }
                       >
-                        <option value="objeto">Todo el objeto</option>
-                        <option value="subobjeto">La categoria elegida</option>
+                        <option value="objeto">{t('panel.alcance.objeto')}</option>
+                        <option value="subobjeto">{t('panel.alcance.categoria')}</option>
                       </select>
                     </label>
                   )}

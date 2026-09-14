@@ -4,12 +4,21 @@ import { execSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Toda URL de `/admin` o `/api` que el codigo pide tiene que existir como ruta.
+ * Toda URL interna que el codigo pide tiene que existir como ruta.
  *
  * La URL vive en una cadena y la ruta es una CARPETA: nada las ata. El renombrado al ingles
  * tradujo la URL del panel de «quien ve que» dentro del componente y de las pruebas, y dejo la
  * carpeta como estaba. La pagina pasaba a ser un 404 — y la prueba de
  * accesibilidad seguia en verde, porque un 404 tambien es accesible.
+ *
+ * La primera version solo miraba `/admin` y `/api/admin`, y por ese hueco se colaron dos mas:
+ * `redirect('/editor-without-permission')` y su gemelo de `/admin`, con las carpetas todavia en
+ * `editor-sin-permiso` y `admin-sin-permiso`. Quien no tiene permiso para editar acababa en un
+ * 404 en vez de en la pantalla que se lo explica. Ahora se miran TODAS.
+ *
+ * Las URL del producto estan en espanol —`/acceso`, `/avisos`, `/restablecer`— y se quedan asi:
+ * son lo que una persona ve y comparte, no un identificador. El renombrado al ingles no debia
+ * tocarlas.
  */
 
 const raiz = execSync('git rev-parse --show-toplevel').toString().trim();
@@ -42,13 +51,22 @@ describe('rutas', () => {
     expect(existsSync(join(app, 'api/admin/quien-ve-que/route.ts'))).toBe(true);
   });
 
-  it('ninguna URL de /admin o /api apunta a una ruta que no existe', () => {
+  it('ninguna URL interna apunta a una ruta que no existe', () => {
     const rotas: string[] = [];
     for (const archivo of fuentes(join(raiz, 'apps/shell'))) {
       const contenido = readFileSync(archivo, 'utf8');
-      for (const m of contenido.matchAll(/['"`](\/(?:api\/)?admin\/[a-z][\w/-]*)/g)) {
-        const url = m[1] as string;
-        if (!servidas.has(url)) rotas.push(`${archivo.slice(raiz.length + 1)}: ${url}`);
+      // Solo lo que NAVEGA de verdad. Una cadena suelta que empieza por barra puede ser el
+      // trozo final de una ruta de API compuesta con plantilla, o el nombre de un fixture.
+      for (const m of contenido.matchAll(
+        /(?:redirect|push|replace|goto)\(\s*['"`](\/[^'"`${}]*)|href=["'`](\/[^'"`${}]*)/g,
+      )) {
+        const url = (m[1] ?? m[2]) as string;
+        if (!url || url === '/') continue;
+        // Las dinamicas y las de datos no son paginas; los ficheros estaticos tampoco.
+        if (/\[|\.|^\/api\b/.test(url)) continue;
+        // Un prefijo servido basta: `/m/casos-pendientes` cuelga de `/m/[slug]`.
+        if (servidas.has(url) || [...servidas].some((r) => url.startsWith(`${r}/`))) continue;
+        rotas.push(`${archivo.slice(raiz.length + 1)}: ${url}`);
       }
     }
     expect([...new Set(rotas)].sort()).toEqual([]);
