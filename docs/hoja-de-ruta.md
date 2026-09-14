@@ -329,6 +329,21 @@ Lo que de verdad falta para esa clase de fallo es una guarda sobre la asercion c
 `expect` dentro de un `if` puede no ejecutarse nunca, y una prueba que no se ejecuta no se
 distingue de una que pasa.
 
+**El otro sentido esta medido y duele mas: una clase que el TSX escribe y que NINGUNA regla
+estiliza.** Paso durante la cola de revision: los botones de publicar y devolver salieron con
+`button-primario` y `button-secundario`, que no existen —las de verdad son `pastilla` y
+`boton-contorno`—, y la pagina se dibujo con botones grises del navegador sin que nada fallara.
+No lo caza el tipo, ni el lint, ni el navegador: un selector que no casa no protesta.
+
+Medido hoy: **36 candidatos en 17 archivos**, pero la mayoria son falsos positivos del extractor
+—un `className={\`x ${cond ? 'a' : 'b'}\`}` arrastra `cond`, `a` y `b` como si fueran clases—.
+Los que parecen reales son una docena: `modulo`, `tree__folder`, `admin-home`, `admin-home__log`,
+`alerta`, `latido`, `scope-editor`, `ampliaciones`, `pestana`, `opcion`, `valores`, `activo`.
+
+Antes de la guarda hace falta un extractor que entienda las plantillas, porque una guarda con
+falsos positivos termina con alguien relajandola. Con eso, las dos mitades de 2.14 se cierran a la
+vez: la regla sin TSX es CSS muerto, y el TSX sin regla es un estilo que no se aplica.
+
 ### 2.15 No hay forma de crear el PRIMER Administrador en un despliegue real
 
 Lo abre el arreglo anterior, y hay que decirlo claro: cerrar la siembra de demostracion deja un

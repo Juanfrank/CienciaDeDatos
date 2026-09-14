@@ -44,7 +44,7 @@ export function ReviewActions({ slug, publicable }: { slug: string; publicable: 
       <p>
         <button
           type="button"
-          className="button-primario"
+          className="pastilla"
           data-testid={`approve-${slug}`}
           disabled={enCurso || !publicable}
           onClick={() => void transicion('publicar')}
@@ -53,7 +53,7 @@ export function ReviewActions({ slug, publicable }: { slug: string; publicable: 
         </button>{' '}
         <button
           type="button"
-          className="button-secundario"
+          className="boton-contorno"
           data-testid={`return-${slug}`}
           disabled={enCurso}
           onClick={() => setDevolviendo((v) => !v)}
@@ -76,7 +76,7 @@ export function ReviewActions({ slug, publicable }: { slug: string; publicable: 
           <p>
             <button
               type="button"
-              className="button-primario"
+              className="pastilla"
               data-testid={`return-confirm-${slug}`}
               /* Se deshabilita por lo mismo que lo exige el servidor: sin motivo, quien lo
                  propuso no sabe que arreglar. */
@@ -87,7 +87,7 @@ export function ReviewActions({ slug, publicable }: { slug: string; publicable: 
             </button>{' '}
             <button
               type="button"
-              className="button-secundario"
+              className="boton-contorno"
               data-testid={`return-cancel-${slug}`}
               onClick={() => setDevolviendo(false)}
             >

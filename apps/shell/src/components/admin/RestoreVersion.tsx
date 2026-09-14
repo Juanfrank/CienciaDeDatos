@@ -41,7 +41,7 @@ export function RestoreVersion({ slug, version }: { slug: string; version: numbe
       <>
         <button
           type="button"
-          className="button-secundario"
+          className="boton-contorno"
           data-testid={`restore-v${version}`}
           onClick={() => setConfirmando(true)}
         >
@@ -61,7 +61,7 @@ export function RestoreVersion({ slug, version }: { slug: string; version: numbe
       <p className="muted-text">{t('admin.history.restoreWarn', { version })}</p>
       <button
         type="button"
-        className="button-primario"
+        className="pastilla"
         data-testid={`restore-confirm-v${version}`}
         disabled={enCurso}
         onClick={() => void restaurar()}
@@ -70,7 +70,7 @@ export function RestoreVersion({ slug, version }: { slug: string; version: numbe
       </button>{' '}
       <button
         type="button"
-        className="button-secundario"
+        className="boton-contorno"
         data-testid={`restore-cancel-v${version}`}
         onClick={() => setConfirmando(false)}
       >
