@@ -15,12 +15,12 @@ const newKey = (): string => `Restablecida-${Date.now()}-${(contador += 1)}-Aa!`
 async function tramitar(
   page: import('@playwright/test').Page,
   email = CORREO,
-): Promise<{ resetId: string; codigo: string; entregado: boolean }> {
+): Promise<{ resetId: string; code: string; entregado: boolean }> {
   const respuesta = await page.request.post('/api/admin/cuentas', {
     data: { accion: 'restablecer', email },
   });
   expect(respuesta.ok(), await respuesta.text()).toBe(true);
-  return (await respuesta.json()) as { resetId: string; codigo: string; entregado: boolean };
+  return (await respuesta.json()) as { resetId: string; code: string; entregado: boolean };
 }
 
 /** Falla el inicio de sesion las veces que hagan falta para bloquear la cuenta. */
@@ -65,7 +65,7 @@ test.describe('la superficie de cuentas locales (4.7.2)', () => {
 
     // Y la contrasena de siempre vuelve a servir: un error de dedos no obliga a cambiarla.
     const entrada = await page.request.post('/api/acceso', {
-      data: { correo: CORREO, clave: CLAVE_DEMO, codigo: codigoTotpDe(SECRETO_TOTP_DEMO) },
+      data: { correo: CORREO, clave: CLAVE_DEMO, code: codigoTotpDe(SECRETO_TOTP_DEMO) },
     });
     // La cuenta no pertenece a ningun equipo, asi que autenticar funciona y la sesion no se
     // emite: 403 por falta de equipo, NO 401 por credenciales. Esa distincion es el resultado.
@@ -84,14 +84,14 @@ test.describe('restablecimiento con token de un solo uso', () => {
     expect(uno.resetId).toBeTruthy();
 
     const canjeado = await page.request.post('/api/restablecer', {
-      data: { resetId: uno.resetId, codigo: uno.codigo, clave: first },
+      data: { resetId: uno.resetId, code: uno.code, clave: first },
     });
     expect(canjeado.ok(), await canjeado.text()).toBe(true);
 
     // Sirve: 403 por no pertenecer a ningun equipo, NO 401 por credenciales. La cuenta esta
     // reservada justo por eso, y esa distincion es lo que prueba que la contrasena es correcta.
     const conLaPrimera = await page.request.post('/api/acceso', {
-      data: { correo: CORREO, clave: first, codigo: codigoTotpDe(SECRETO_TOTP_DEMO) },
+      data: { correo: CORREO, clave: first, code: codigoTotpDe(SECRETO_TOTP_DEMO) },
     });
     expect(conLaPrimera.status()).toBe(403);
 
@@ -99,20 +99,20 @@ test.describe('restablecimiento con token de un solo uso', () => {
     const segunda = newKey();
     const dos = await tramitar(page);
     await page.request.post('/api/restablecer', {
-      data: { resetId: dos.resetId, codigo: dos.codigo, clave: segunda },
+      data: { resetId: dos.resetId, code: dos.code, clave: segunda },
     });
 
     expect(
       (
         await page.request.post('/api/acceso', {
-          data: { correo: CORREO, clave: first, codigo: codigoTotpDe(SECRETO_TOTP_DEMO) },
+          data: { correo: CORREO, clave: first, code: codigoTotpDe(SECRETO_TOTP_DEMO) },
         })
       ).status(),
     ).toBe(401);
     expect(
       (
         await page.request.post('/api/acceso', {
-          data: { correo: CORREO, clave: segunda, codigo: codigoTotpDe(SECRETO_TOTP_DEMO) },
+          data: { correo: CORREO, clave: segunda, code: codigoTotpDe(SECRETO_TOTP_DEMO) },
         })
       ).status(),
     ).toBe(403);
@@ -124,12 +124,12 @@ test.describe('restablecimiento con token de un solo uso', () => {
     const clave = newKey();
     const primero = await tramitar(page);
     await page.request.post('/api/restablecer', {
-      data: { resetId: primero.resetId, codigo: primero.codigo, clave },
+      data: { resetId: primero.resetId, code: primero.code, clave },
     });
 
     const second = await tramitar(page);
     const repetida = await page.request.post('/api/restablecer', {
-      data: { resetId: second.resetId, codigo: second.codigo, clave },
+      data: { resetId: second.resetId, code: second.code, clave },
     });
 
     expect(repetida.status()).toBe(422);
@@ -138,15 +138,15 @@ test.describe('restablecimiento con token de un solo uso', () => {
 
   test('el token sirve UNA sola vez', async ({ page }) => {
     await entrarComo(page, 'u-admin');
-    const { resetId, codigo } = await tramitar(page);
+    const { resetId, code } = await tramitar(page);
 
     const primero = await page.request.post('/api/restablecer', {
-      data: { resetId, codigo, clave: newKey() },
+      data: { resetId, code, clave: newKey() },
     });
     expect(primero.ok(), await primero.text()).toBe(true);
 
     const second = await page.request.post('/api/restablecer', {
-      data: { resetId, codigo, clave: newKey() },
+      data: { resetId, code, clave: newKey() },
     });
 
     expect(second.status()).toBe(400);
@@ -160,7 +160,7 @@ test.describe('restablecimiento con token de un solo uso', () => {
     const { resetId } = await tramitar(page);
 
     const fallo = await page.request.post('/api/restablecer', {
-      data: { resetId, codigo: 'inventado', clave: newKey() },
+      data: { resetId, code: 'inventado', clave: newKey() },
     });
     expect(fallo.status()).toBe(400);
     expect((await fallo.json()).motivo).toBe('token-invalido');
@@ -172,10 +172,10 @@ test.describe('restablecimiento con token de un solo uso', () => {
 
   test('la contrasena nueva pasa por la politica, y el error dice que falta', async ({ page }) => {
     await entrarComo(page, 'u-admin');
-    const { resetId, codigo } = await tramitar(page);
+    const { resetId, code } = await tramitar(page);
 
     const fallo = await page.request.post('/api/restablecer', {
-      data: { resetId, codigo, clave: 'corta' },
+      data: { resetId, code, clave: 'corta' },
     });
 
     // 422 y no 400: el token servia; lo que falla es la contrasena propuesta. Esa distincion le
@@ -185,7 +185,7 @@ test.describe('restablecimiento con token de un solo uso', () => {
 
     // El codigo sigue vivo: un intento rechazado por la politica no gasta el token.
     const bueno = await page.request.post('/api/restablecer', {
-      data: { resetId, codigo, clave: newKey() },
+      data: { resetId, code, clave: newKey() },
     });
     expect(bueno.ok(), await bueno.text()).toBe(true);
   });
@@ -217,12 +217,12 @@ test.describe('la pantalla de restablecimiento', () => {
     await page.getByTestId(`reset-${ACCOUNT}`).click();
 
     const resetId = await page.getByTestId('reset-id').innerText();
-    const codigo = await page.getByTestId('reset-codigo').innerText();
+    const code = await page.getByTestId('reset-codigo').innerText();
 
     const clave = newKey();
     await page.goto('/restablecer');
     await page.getByTestId('reset-id').fill(resetId);
-    await page.getByTestId('reset-codigo').fill(codigo);
+    await page.getByTestId('reset-codigo').fill(code);
     await page.getByTestId('reset-key').fill(clave);
     await page.getByTestId('reset-repetida').fill(clave);
     await page.getByTestId('reset-send').click();

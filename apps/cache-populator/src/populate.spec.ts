@@ -47,7 +47,7 @@ const registry: DatasetRegistry = {
   ],
 };
 
-const claveDeCasos = () => {
+const casosKey = () => {
   const dataset = registry.datasets[0];
   if (!dataset) throw new Error('fixture inesperado');
   return buildCacheKey({
@@ -81,7 +81,7 @@ describe('populate: la unica via que invoca al conector', () => {
     expect(heartbeat.datasets).toEqual([
       expect.objectContaining({ datasetId: 'casos', outcome: 'ok' }),
     ]);
-    expect((await cacheStore.get(claveDeCasos()))?.value).toBeDefined();
+    expect((await cacheStore.get(casosKey()))?.value).toBeDefined();
     expect((await cacheStore.get(POPULATOR_HEARTBEAT_KEY))?.value).toBeDefined();
   });
 
@@ -106,7 +106,7 @@ describe('populate: la unica via que invoca al conector', () => {
   it('ante fallo de la fuente CONSERVA la ultima version valida', async () => {
     // Primer ciclo correcto.
     await populate({ connector: new MockDataConnector(), cacheStore, registry, connectorKind: 'mock' });
-    const original = await cacheStore.get(claveDeCasos());
+    const original = await cacheStore.get(casosKey());
     expect(original?.value).toBeDefined();
 
     // Segundo ciclo: la fuente falla.
@@ -125,7 +125,7 @@ describe('populate: la unica via que invoca al conector', () => {
 
     expect(heartbeat.datasets[0]).toMatchObject({ outcome: 'fallo', error: 'la fuente no responde' });
     // El dato anterior sigue ahi: la persona lo ve con su fecha, en vez de un error.
-    expect(await cacheStore.get(claveDeCasos())).toEqual(original);
+    expect(await cacheStore.get(casosKey())).toEqual(original);
     expect(logs.at(-1)?.outcome).toBe('fallo');
   });
 
@@ -182,7 +182,7 @@ describe('repopulateTargeted: invalidacion dirigida (6.5)', () => {
       connectorKind: 'mock',
     });
 
-    expect((await cacheStore.get(claveDeCasos()))?.value).toBeDefined();
+    expect((await cacheStore.get(casosKey()))?.value).toBeDefined();
     // Un dataset ajeno no se toca: no se vacia todo el cache.
     expect((await cacheStore.get('ds:otro:abc'))?.value).toEqual({ intacto: true });
   });

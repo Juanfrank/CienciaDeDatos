@@ -114,15 +114,15 @@ export function intersectRequestedFilters(
   scope: AccessScope,
   requested: Record<string, string | string[]>,
 ): Record<string, string[]> {
-  const efectivos = scopeToFilters(scope);
+  const effective = scopeToFilters(scope);
 
   for (const [clave, valor] of Object.entries(requested)) {
     const pedidos = Array.isArray(valor) ? valor.map(String) : [String(valor)];
-    const permitidos = efectivos[clave];
-    efectivos[clave] = permitidos ? pedidos.filter((v) => permitidos.includes(v)) : pedidos;
+    const permitidos = effective[clave];
+    effective[clave] = permitidos ? pedidos.filter((v) => permitidos.includes(v)) : pedidos;
   }
 
-  return efectivos;
+  return effective;
 }
 
 /** Aplica el ambito sobre un QueryResult ya leido del cache, antes de devolverlo al cliente. */

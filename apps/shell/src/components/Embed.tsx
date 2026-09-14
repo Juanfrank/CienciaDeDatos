@@ -24,7 +24,7 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
     ].join('\n');
   };
 
-  const [codigo, setCodigo] = useState('');
+  const [code, setCodigo] = useState('');
 
   const abrir = () => {
     setCodigo(construirCodigo());
@@ -34,7 +34,7 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
 
   const copiar = async () => {
     try {
-      await navigator.clipboard.writeText(codigo);
+      await navigator.clipboard.writeText(code);
       setCopiado(true);
     } catch {
       // Sin permiso de portapapeles el texto sigue ahi para seleccionarlo a mano: el dialogo no
@@ -72,7 +72,7 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
           className="embed__codigo"
           data-testid="incrustar-codigo"
           readOnly
-          value={codigo}
+          value={code}
         />
 
         <p className="active-scope" data-testid="embed-notice">

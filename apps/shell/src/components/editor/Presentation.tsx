@@ -1078,7 +1078,7 @@ function PanelPickers({
     instance.settings?.objectId === "panel-de-filtros"
       ? instance.settings
       : undefined;
-  const efectivos = selectoresEfectivos(instance, settings, kinds);
+  const effective = selectoresEfectivos(instance, settings, kinds);
   const prueba = `selectores-${instance.instanceId}`;
 
   const ponerTipo = (fieldName: string, tipo: PickerKind) =>
@@ -1088,7 +1088,7 @@ function PanelPickers({
           ? i.settings.pickers
           : []
       ).filter((s) => s.fieldName !== fieldName);
-      const anterior = efectivos.find((s) => s.fieldName === fieldName);
+      const anterior = effective.find((s) => s.fieldName === fieldName);
       return {
         ...i,
         settings: {
@@ -1105,7 +1105,7 @@ function PanelPickers({
       };
     });
 
-  if (efectivos.length === 0) {
+  if (effective.length === 0) {
     return (
       <p className="muted-text" data-testid={`${prueba}-vacio`}>
         Marque al menos una dimension arriba para configurar sus selectores.
@@ -1116,7 +1116,7 @@ function PanelPickers({
   return (
     <div className="editor__pickers" data-testid={prueba}>
       <p className="muted-text">Como se filtra cada dimension</p>
-      {efectivos.map((s) => {
+      {effective.map((s) => {
         const columnKind = kinds[s.fieldName] ?? "";
         return (
           <label key={s.fieldName} className="form__field">

@@ -1,4 +1,4 @@
 /** FIXTURE NEGATIVO — no forma parte de la aplicacion. */
 import { MockDataConnector } from '@app/data-contracts-server';
 
-export const conectorProhibido = MockDataConnector;
+export const forbiddenConnector = MockDataConnector;

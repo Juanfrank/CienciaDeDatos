@@ -100,7 +100,7 @@ export const betoUser: GovernedUser = { userId: 'beto' };
  * incluye ademas un modulo que el equipo NO tiene concedido: sirve para comprobar que un
  * paquete no puede colar accesos.
  */
-export const paqueteReagrupado: ModulePackage = {
+export const regroupedPackage: ModulePackage = {
   id: 'paquete-operativo',
   name: 'Vista operativa',
   visualTree: [

@@ -96,7 +96,7 @@ describe('2.4 — ni apps/* ni ui-components conocen la fuente', () => {
   ];
 
   /** Quita comentarios antes de buscar. */
-  const sinComentarios = (content: string): string =>
+  const withoutComments = (content: string): string =>
     content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
   const revisar = (relativo: string, excepciones: string[] = []) => {
@@ -107,9 +107,9 @@ describe('2.4 — ni apps/* ni ui-components conocen la fuente', () => {
 
     const hallazgos: string[] = [];
     for (const archivo of files) {
-      const codigo = sinComentarios(readFileSync(archivo, 'utf8'));
+      const code = withoutComments(readFileSync(archivo, 'utf8'));
       for (const term of PROHIBIDOS) {
-        if (codigo.includes(term)) {
+        if (code.includes(term)) {
           hallazgos.push(`${archivo.replace(RAIZ, '')}: ${term}`);
         }
       }

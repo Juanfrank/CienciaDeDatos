@@ -9,7 +9,7 @@ import {
   scope,
   anaUser,
   betoUser,
-} from './__fixtures__/gobierno';
+} from './__fixtures__/governance';
 import { dimensionKey, scopeToFilters } from './AccessScope';
 import type { NavNode } from './NavigationTree';
 import { resolveEffectiveScope } from './resolveEffectiveScope';
@@ -212,9 +212,9 @@ describe('resolveEffectiveScope (4.10.4)', () => {
 
       // Se mueve 'audiencias-norte' de la carpeta Norte a la carpeta Este.
       const movido: NavNode[] = JSON.parse(JSON.stringify(generalTree));
-      const institucional = movido[0];
-      if (institucional?.type !== 'folder') throw new Error('fixture inesperado');
-      const regional = institucional.children[0];
+      const institutional = movido[0];
+      if (institutional?.type !== 'folder') throw new Error('fixture inesperado');
+      const regional = institutional.children[0];
       if (regional?.type !== 'folder') throw new Error('fixture inesperado');
       const [norte, este] = regional.children;
       if (norte?.type !== 'folder' || este?.type !== 'folder') throw new Error('fixture inesperado');
@@ -249,15 +249,15 @@ describe('resolveEffectiveScope (4.10.4)', () => {
   });
 
   it('es una funcion pura: no muta el arbol, el equipo ni el usuario', () => {
-    const arbolAntes = JSON.stringify(generalTree);
-    const equipoAntes = JSON.stringify(norteTeam);
+    const beforeTree = JSON.stringify(generalTree);
+    const beforeTeam = JSON.stringify(norteTeam);
     resolveEffectiveScope({
       user: anaUser,
       activeTeam: norteTeam,
       moduleId: 'casos-pendientes-norte',
       generalTree: generalTree,
     });
-    expect(JSON.stringify(generalTree)).toBe(arbolAntes);
-    expect(JSON.stringify(norteTeam)).toBe(equipoAntes);
+    expect(JSON.stringify(generalTree)).toBe(beforeTree);
+    expect(JSON.stringify(norteTeam)).toBe(beforeTeam);
   });
 });

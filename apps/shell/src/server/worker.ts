@@ -1,4 +1,4 @@
-import { procesarPendientes } from '@app/export';
+import { pendientesProcess } from '@app/export';
 import { atenderSuscripciones, evaluarSiHayDatoNuevo } from './alerts';
 import { queueExports, resolverObjetos } from './exports';
 
@@ -38,7 +38,7 @@ export function iniciarTrabajadorDeFondo(): void {
 
   global[KEY] = [
     enBucle('exportaciones', INTERVALO_COLA_MS, () =>
-      procesarPendientes(queueExports, resolverObjetos),
+      pendientesProcess(queueExports, resolverObjetos),
     ),
     enBucle('alertas', INTERVALO_ALERTAS_MS, () => evaluarSiHayDatoNuevo()),
     enBucle('suscripciones', INTERVALO_SUSCRIPCIONES_MS, () => atenderSuscripciones()),

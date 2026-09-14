@@ -106,11 +106,11 @@ test.describe('el codigo de incrustacion se copia desde la vista', () => {
     await page.goto('/m/casos-pendientes?DimTribunal.Materia=Penal');
 
     await page.getByTestId('incrustar').click();
-    const codigo = await page.getByTestId('incrustar-codigo').inputValue();
+    const code = await page.getByTestId('incrustar-codigo').inputValue();
 
-    expect(codigo).toContain('/incrustar/m/casos-pendientes');
-    expect(codigo).toContain('DimTribunal.Materia=Penal');
-    expect(codigo).toContain('allow=""');
+    expect(code).toContain('/incrustar/m/casos-pendientes');
+    expect(code).toContain('DimTribunal.Materia=Penal');
+    expect(code).toContain('allow=""');
   });
 
   test('avisa de que la vista incrustada NO es publica', async ({ page }) => {

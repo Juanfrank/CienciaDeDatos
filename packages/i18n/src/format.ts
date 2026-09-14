@@ -14,13 +14,13 @@
 export type MessageParameters = Record<string, string | number>;
 
 /** Un `{...}` de nivel superior dentro de `texto`, a partir de `desde`. */
-function argumento(content: string, desde: number): { home: number; fin: number } | null {
+function argumento(content: string, desde: number): { home: number; end: number } | null {
   const home = content.indexOf('{', desde);
   if (home === -1) return null;
   let depth = 0;
   for (let i = home; i < content.length; i++) {
     if (content[i] === '{') depth++;
-    else if (content[i] === '}' && --depth === 0) return { home, fin: i };
+    else if (content[i] === '}' && --depth === 0) return { home, end: i };
   }
   return null;
 }
@@ -34,8 +34,8 @@ function opciones(body: string): Map<string, string> {
     if (!clave) break;
     const block = argumento(body, i + clave[0].length);
     if (!block) break;
-    mapa.set(clave[1] as string, body.slice(block.home + 1, block.fin));
-    i = block.fin + 1;
+    mapa.set(clave[1] as string, body.slice(block.home + 1, block.end));
+    i = block.end + 1;
   }
   return mapa;
 }
@@ -63,13 +63,13 @@ export function formatMessage(
     }
 
     salida += mensaje.slice(cursor, block.home);
-    const interior = mensaje.slice(block.home + 1, block.fin);
+    const interior = mensaje.slice(block.home + 1, block.end);
     const [crudo = '', tipo, ...resto] = interior.split(',');
     const nombre = crudo.trim();
     const valor = parameters[nombre];
 
     if (valor === undefined) {
-      salida += mensaje.slice(block.home, block.fin + 1);
+      salida += mensaje.slice(block.home, block.end + 1);
     } else if (tipo === undefined) {
       salida += String(valor);
     } else {
@@ -92,6 +92,6 @@ export function formatMessage(
       }
     }
 
-    cursor = block.fin + 1;
+    cursor = block.end + 1;
   }
 }

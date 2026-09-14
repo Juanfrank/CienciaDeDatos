@@ -1,6 +1,6 @@
 import { defaultTheme, lightTheme } from '@app/design-tokens';
 import { describe, expect, it } from 'vitest';
-import { buildDocument, paletteOf, cellText, type HojaExportable } from './document';
+import { buildDocument, paletteOf, cellText, type ExportableSheet } from './document';
 import { aCsv, aSvg } from './formats';
 import type { ExportRequest, ExportableObject } from './types';
 
@@ -123,7 +123,7 @@ describe('la marca institucional llega al archivo exportado', () => {
 });
 
 describe('lo que se lee y lo que se calcula no son lo mismo', () => {
-  const hoja = (): HojaExportable => ({
+  const sheet = (): ExportableSheet => ({
     title: 'Casos',
     columns: [
       { name: 'Trimestre', type: 'string' },
@@ -135,7 +135,7 @@ describe('lo que se lee y lo que se calcula no son lo mismo', () => {
   });
 
   it('el texto de una celda es el de la pantalla', () => {
-    expect(cellText(hoja(), 0, 1)).toBe('2,216 casos');
+    expect(cellText(sheet(), 0, 1)).toBe('2,216 casos');
   });
 
   it('sin texto formateado cae al valor, no a una celda vacia', () => {
@@ -143,7 +143,7 @@ describe('lo que se lee y lo que se calcula no son lo mismo', () => {
      * Una celda vacia se leeria como «no hay dato», que es una afirmacion distinta de «este
      * objeto no declara formato».
      */
-    const withoutTexts: HojaExportable = { ...hoja(), textos: undefined as unknown as string[][] };
+    const withoutTexts: ExportableSheet = { ...sheet(), textos: undefined as unknown as string[][] };
     expect(cellText(withoutTexts, 0, 1)).toBe('2216');
   });
 
@@ -154,7 +154,7 @@ describe('lo que se lee y lo que se calcula no son lo mismo', () => {
      */
     const csv = aCsv({
       heading: { titulo: 'T', lineas: [], personalizada: false, autor: 'u-admin' },
-      leaves: [hoja()],
+      leaves: [sheet()],
       palette: paletteOf(),
     });
     expect(csv).toContain('2216');
@@ -164,7 +164,7 @@ describe('lo que se lee y lo que se calcula no son lo mismo', () => {
   it('y aun asi el CSV no pierde la meta: va como comentario', () => {
     const csv = aCsv({
       heading: { titulo: 'T', lineas: [], personalizada: false, autor: 'u-admin' },
-      leaves: [hoja()],
+      leaves: [sheet()],
       palette: paletteOf(),
     });
     expect(csv).toContain('# Meta: 900');
@@ -173,9 +173,9 @@ describe('lo que se lee y lo que se calcula no son lo mismo', () => {
   it('el SVG dibuja la cifra formateada y escribe las notas', () => {
     const svg = aSvg({
       heading: { titulo: 'T', lineas: [], personalizada: false, autor: 'u-admin' },
-      leaves: [hoja()],
+      leaves: [sheet()],
       palette: paletteOf(),
-      grafico: hoja(),
+      grafico: sheet(),
     });
     expect(svg).toContain('2,216 casos');
     expect(svg).toContain('Meta: 900');

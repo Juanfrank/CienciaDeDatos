@@ -6,7 +6,7 @@ export type ExportFormat = 'csv' | 'xlsx' | 'pdf' | 'svg';
 
 export const FORMATS: readonly ExportFormat[] = ['csv', 'xlsx', 'pdf', 'svg'];
 
-export const TIPOS_MIME: Record<ExportFormat, string> = {
+export const MIME_KINDS: Record<ExportFormat, string> = {
   csv: 'text/csv; charset=utf-8',
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   pdf: 'application/pdf',
@@ -74,7 +74,7 @@ export interface ExportJob {
 }
 
 /** Nombre de archivo legible y con fecha, para que no se acumulen "export(3).xlsx". */
-export function nombreDeArchivo(request: ExportRequest, ahora: Date): string {
+export function fileName(request: ExportRequest, ahora: Date): string {
   const fecha = ahora.toISOString().slice(0, 10);
   const base = request.moduleSlug.replace(/[^a-z0-9-]+/gi, '-');
   const sufijo = request.provenance.isPersonalized ? '-vista-personalizada' : '';
@@ -82,4 +82,4 @@ export function nombreDeArchivo(request: ExportRequest, ahora: Date): string {
 }
 
 /** Clave del trabajo en el store. Los trabajos de exportacion no son datos de negocio. */
-export const claveDeTrabajo = (id: string): string => `export:job:${id}`;
+export const jobKey = (id: string): string => `export:job:${id}`;

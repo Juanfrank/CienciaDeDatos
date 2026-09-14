@@ -1269,10 +1269,10 @@ export function treeMapOptions(o: ChartOptions): Record<string, unknown> {
     const valor = punto.values[0];
     // Un nulo no es un rectangulo de area cero: es «no hay respuesta», y no se dibuja.
     if (valor === null || valor === undefined) continue;
-    const [grupo = punto.label, hoja] = punto.label.split(' / ');
-    if (hoja !== undefined) jerarquico = true;
+    const [grupo = punto.label, sheet] = punto.label.split(' / ');
+    if (sheet !== undefined) jerarquico = true;
     const hijos = raices.get(grupo) ?? [];
-    hijos.push({ name: hoja ?? grupo, value: valor });
+    hijos.push({ name: sheet ?? grupo, value: valor });
     raices.set(grupo, hijos);
   }
 

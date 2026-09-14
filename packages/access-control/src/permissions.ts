@@ -16,7 +16,7 @@ export type Capability =
   | 'gestionar-paquetes-visuales'
   | 'borrar-definitivamente';
 
-const MATRIZ: Record<Capability, readonly AppRole[]> = {
+const MATRIX: Record<Capability, readonly AppRole[]> = {
   'ver-modulos-de-sus-equipos': ['administrador', 'colaborador', 'visor'],
   'personalizar-su-vista': ['administrador', 'colaborador', 'visor'],
   'crear-editar-modulos-borrador': ['administrador', 'colaborador'],
@@ -36,7 +36,7 @@ const MATRIZ: Record<Capability, readonly AppRole[]> = {
 };
 
 export function can(role: AppRole, capability: Capability): boolean {
-  return MATRIZ[capability].includes(role);
+  return MATRIX[capability].includes(role);
 }
 
 export interface PermissionDenial {
@@ -49,7 +49,7 @@ export function denial(role: AppRole, capability: Capability): PermissionDenial 
   return {
     capability,
     role,
-    reason: `El rol '${role}' no puede '${capability}'. Permitido para: ${MATRIZ[capability].join(', ')}.`,
+    reason: `El rol '${role}' no puede '${capability}'. Permitido para: ${MATRIX[capability].join(', ')}.`,
   };
 }
 
@@ -70,5 +70,5 @@ export class PermissionError extends Error {
 
 /** Capacidades de un rol, para que la interfaz oculte lo que no aplica. */
 export function capabilitiesOf(role: AppRole): Capability[] {
-  return (Object.keys(MATRIZ) as Capability[]).filter((c) => can(role, c));
+  return (Object.keys(MATRIX) as Capability[]).filter((c) => can(role, c));
 }

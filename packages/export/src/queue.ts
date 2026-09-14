@@ -1,5 +1,5 @@
 import type { CacheEntry, ICacheStore } from '@app/caching';
-import { claveDeTrabajo } from './types';
+import { jobKey } from './types';
 import type { ExportJob, ExportRequest } from './types';
 
 /** Cola de exportaciones — seccion 5.3. */
@@ -7,7 +7,7 @@ import type { ExportJob, ExportRequest } from './types';
 export const KEY_QUEUE = 'export:queue:pendientes';
 
 /** Un trabajo terminado deja de ser interesante bastante rapido; el artefacto ocupa sitio. */
-export const TTL_TRABAJO_MS = 60 * 60 * 1000;
+export const TTL_JOB_MS = 60 * 60 * 1000;
 
 export interface IExportQueue {
   encolar(request: ExportRequest, ahora?: Date): Promise<ExportJob>;
@@ -50,14 +50,14 @@ export class StoreExportQueue implements IExportQueue {
       createdAt: ahora.toISOString(),
     };
 
-    await this.store.set(claveDeTrabajo(job.id), entrada(job, ahora));
+    await this.store.set(jobKey(job.id), entrada(job, ahora));
     const queue = await this.pendientes();
     await this.store.set(KEY_QUEUE, entrada([...queue, job.id], ahora));
     return job;
   }
 
   async consultar(id: string): Promise<ExportJob | null> {
-    const entry = await this.store.get<ExportJob>(claveDeTrabajo(id));
+    const entry = await this.store.get<ExportJob>(jobKey(id));
     return entry?.value ?? null;
   }
 
@@ -80,7 +80,7 @@ export class StoreExportQueue implements IExportQueue {
     if (!job) return this.tomarSiguiente(ahora);
 
     const enCurso: ExportJob = { ...job, status: 'procesando', startedAt: ahora.toISOString() };
-    await this.store.set(claveDeTrabajo(id), entrada(enCurso, ahora));
+    await this.store.set(jobKey(id), entrada(enCurso, ahora));
     return enCurso;
   }
 
@@ -91,13 +91,13 @@ export class StoreExportQueue implements IExportQueue {
   ): Promise<void> {
     const job = await this.consultar(id);
     if (!job) return;
-    const listo: ExportJob = {
+    const ready: ExportJob = {
       ...job,
       status: 'lista',
       finishedAt: ahora.toISOString(),
       artifact,
     };
-    await this.store.set(claveDeTrabajo(id), entrada(listo, ahora));
+    await this.store.set(jobKey(id), entrada(ready, ahora));
   }
 
   async fallar(id: string, error: string, ahora = this.now()): Promise<void> {
@@ -109,6 +109,6 @@ export class StoreExportQueue implements IExportQueue {
       finishedAt: ahora.toISOString(),
       error,
     };
-    await this.store.set(claveDeTrabajo(id), entrada(fallido, ahora));
+    await this.store.set(jobKey(id), entrada(fallido, ahora));
   }
 }

@@ -83,7 +83,7 @@ export {
 } from './resolveEffectiveScope';
 
 /** Fixtures del modelo de gobierno, para pruebas. */
-export * as gobiernoFixtures from './__fixtures__/gobierno';
+export * as gobiernoFixtures from './__fixtures__/governance';
 export {
   administratorsOf,
   wouldLeaveNoAdministrator,

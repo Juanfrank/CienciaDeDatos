@@ -7,7 +7,7 @@ import { useState } from 'react';
 export function Reset() {
   const router = useRouter();
   const [resetId, setResetId] = useState('');
-  const [codigo, setCodigo] = useState('');
+  const [code, setCodigo] = useState('');
   const [clave, setClave] = useState('');
   const [repetida, setRepetida] = useState('');
   const [error, setError] = useState('');
@@ -29,7 +29,7 @@ export function Reset() {
       const r = await fetch('/api/restablecer', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ resetId, codigo, clave }),
+        body: JSON.stringify({ resetId, code, clave }),
       });
 
       if (r.ok) {
@@ -53,7 +53,7 @@ export function Reset() {
         <div className="login__card">
           <h1>Contrasena restablecida</h1>
           <p className="muted-text">
-            Ya puede iniciar sesion con la contrasena new y su codigo de verificacion. Las
+            Ya puede iniciar sesion con la contrasena new y su code de verificacion. Las
             sesiones que estuvieran abiertas con la anterior se han cerrado.
           </p>
           <button
@@ -98,7 +98,7 @@ export function Reset() {
           <label htmlFor="reset-codigo">Codigo</label>
           <input
             id="reset-codigo"
-            value={codigo}
+            value={code}
             data-testid="reset-codigo"
             onChange={(e) => setCodigo(e.target.value)}
           />

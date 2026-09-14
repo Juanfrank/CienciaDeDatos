@@ -109,12 +109,12 @@ describe('selectoresEfectivos', () => {
   it('da un selector a CADA dimension, aunque no este configurada', () => {
     // Lo importante de esta prueba: una dimension mapeada y no configurada seria una dimension
     // invisible, que es el peor fallo de un filtro — quien mira cree estar viendo el total.
-    const efectivos = selectoresEfectivos(
+    const effective = selectoresEfectivos(
       objectInstance(['DimTribunal.Materia', 'DimTiempo.Fecha']),
       { pickers: [{ fieldName: 'DimTribunal.Materia', tipo: 'desplegable' }] },
       KINDS,
     );
-    expect(efectivos.map((s) => [s.fieldName, s.tipo])).toEqual([
+    expect(effective.map((s) => [s.fieldName, s.tipo])).toEqual([
       ['DimTribunal.Materia', 'desplegable'],
       ['DimTiempo.Fecha', 'rango-de-fechas'],
     ]);
@@ -137,7 +137,7 @@ describe('selectoresEfectivos', () => {
   it('mantiene el ORDEN del mapeo, no el de la configuracion', () => {
     // El orden en pantalla lo decide el binding, que es lo que el editor reordena. Si mandara el
     // de la configuracion, mover una dimension no cambiaria nada y nadie sabria por que.
-    const efectivos = selectoresEfectivos(
+    const effective = selectoresEfectivos(
       objectInstance(['DimTribunal.Materia', 'DimTribunal.Distrito']),
       {
         pickers: [
@@ -147,7 +147,7 @@ describe('selectoresEfectivos', () => {
       },
       KINDS,
     );
-    expect(efectivos.map((s) => s.fieldName)).toEqual([
+    expect(effective.map((s) => s.fieldName)).toEqual([
       'DimTribunal.Materia',
       'DimTribunal.Distrito',
     ]);

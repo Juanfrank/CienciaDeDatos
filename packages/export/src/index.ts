@@ -3,7 +3,7 @@ export { aExcel, aPdf } from './binarios';
 export {
   KEY_QUEUE,
   StoreExportQueue,
-  TTL_TRABAJO_MS,
+  TTL_JOB_MS,
   type IExportQueue,
   type StoreExportQueueOptions,
 } from './queue';
@@ -11,24 +11,24 @@ export {
   buildDocument,
   paletteOf,
   type ExportableDocument,
-  type HojaExportable,
+  type ExportableSheet,
   type ExportPalette,
 } from './document';
 export { buildHeading, type Heading } from './heading';
 export { aCsv, aSvg, escaparCsv } from './formats';
 export {
   generarArtefacto,
-  procesarPendientes,
-  procesarTrabajo,
+  pendientesProcess,
+  jobProcess,
   type ArtefactoGenerado,
   type GenerarOptions,
-  type ResolverObjetos,
-} from './procesar';
+  type ResolverObjects,
+} from './process';
 export {
   FORMATS,
-  TIPOS_MIME,
-  claveDeTrabajo,
-  nombreDeArchivo,
+  MIME_KINDS,
+  jobKey,
+  fileName,
   type ExportFormat,
   type ExportJob,
   type ExportProvenance,

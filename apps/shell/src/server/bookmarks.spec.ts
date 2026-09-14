@@ -17,9 +17,9 @@ const marcadorDeAna = captureBookmark({
 describe('un marcador compartido se filtra segun QUIEN LO ABRE (criterio de la seccion 9)', () => {
   it('alguien de otro ambito no ve los datos del creador', () => {
     const ambitoDeBeto = scope(DIM_DISTRITO, 'Distrito Este');
-    const efectivos = intersectRequestedFilters(ambitoDeBeto, marcadorDeAna.filters);
+    const effective = intersectRequestedFilters(ambitoDeBeto, marcadorDeAna.filters);
     // El marcador pedia el Norte; el ambito de Beto no lo permite.
-    expect(efectivos[dimensionKey(DIM_DISTRITO)]).toEqual([]);
+    expect(effective[dimensionKey(DIM_DISTRITO)]).toEqual([]);
   });
 
   it('quien comparte el ambito si ve lo mismo', () => {

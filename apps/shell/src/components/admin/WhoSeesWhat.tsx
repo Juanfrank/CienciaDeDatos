@@ -27,7 +27,7 @@ const LABELS: Record<string, string> = {
   'ambito-personal-por-modulo': 'Ambito personal por modulo',
 };
 
-const describir = (scope: Paso['resultado']): string =>
+const describe = (scope: Paso['resultado']): string =>
   scope.restrictions.length === 0
     ? 'sin restriccion'
     : scope.restrictions
@@ -101,7 +101,7 @@ export function SeesWhoWhere({
             <>
               <p>
                 <strong>Ambito efectivo:</strong>{' '}
-                <span data-testid="qvq-ambito">{describir(resultado.scope)}</span>
+                <span data-testid="qvq-ambito">{describe(resultado.scope)}</span>
               </p>
               {resultado.noVeNada ? (
                 <p className="aviso notice-atencion">
@@ -121,7 +121,7 @@ export function SeesWhoWhere({
                     <strong>{LABELS[p.capa] ?? p.capa}</strong>
                     {/* El origen es lo que el documento pide destacar: que carpeta lo causo. */}
                     <span className="sees-who-where__source"> — {p.source}</span>
-                    <div className="muted-text">{describir(p.resultado)}</div>
+                    <div className="muted-text">{describe(p.resultado)}</div>
                   </li>
                 ))}
               </ol>

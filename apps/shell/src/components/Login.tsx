@@ -14,7 +14,7 @@ export function Login({
   const router = useRouter();
   const [correo, setCorreo] = useState('');
   const [clave, setClave] = useState('');
-  const [codigo, setCodigo] = useState('');
+  const [code, setCodigo] = useState('');
   const [pideCodigo, setPideCodigo] = useState(false);
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -26,7 +26,7 @@ export function Login({
       const r = await fetch('/api/acceso', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ correo, clave, ...(codigo ? { codigo } : {}) }),
+        body: JSON.stringify({ correo, clave, ...(code ? { code } : {}) }),
       });
 
       if (r.ok) {
@@ -119,7 +119,7 @@ export function Login({
               id="codigo"
               inputMode="numeric"
               autoComplete="one-time-code"
-              value={codigo}
+              value={code}
               data-testid="acceso-codigo"
               onChange={(e) => setCodigo(e.target.value)}
             />
@@ -137,7 +137,7 @@ export function Login({
 
         <p className="muted-text">
           Las cuentas locales exigen un second factor. Si olvido su contrasena, un Administrador
-          inicia el restablecimiento y le entrega un codigo de un solo uso; con el, entre en{' '}
+          inicia el restablecimiento y le entrega un code de un solo uso; con el, entre en{' '}
           <a href="/restablecer" data-testid="enlace-restablecer">
             restablecer contrasena
           </a>

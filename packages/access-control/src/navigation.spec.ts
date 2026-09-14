@@ -3,8 +3,8 @@ import {
   generalTree,
   esteTeam,
   norteTeam,
-  paqueteReagrupado,
-} from './__fixtures__/gobierno';
+  regroupedPackage,
+} from './__fixtures__/governance';
 import type { ModulePackage } from './ModulePackage';
 import { collectModuleIds, isFolder, type NavNode } from './NavigationTree';
 import {
@@ -57,9 +57,9 @@ describe('sin paquete asignado: organizacion general podada', () => {
 
   it('no muestra carpetas que quedan sin contenido accesible', () => {
     const view = buildNavigationView({ generalTree: generalTree, team: esteTeam });
-    const nombresDeCarpeta = (nodes: NavNode[]): string[] =>
-      nodes.flatMap((n) => (isFolder(n) ? [n.name, ...nombresDeCarpeta(n.children)] : []));
-    expect(nombresDeCarpeta(view.tree)).not.toContain('Distrito Norte');
+    const folderNames = (nodes: NavNode[]): string[] =>
+      nodes.flatMap((n) => (isFolder(n) ? [n.name, ...folderNames(n.children)] : []));
+    expect(folderNames(view.tree)).not.toContain('Distrito Norte');
   });
 });
 
@@ -68,21 +68,21 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
     const view = buildNavigationView({
       generalTree: generalTree,
       team: norteTeam,
-      pkg: paqueteReagrupado,
+      pkg: regroupedPackage,
     });
     expect(view.fromPackage).toBe(true);
-    const carpetaVisual = view.tree[0];
-    if (carpetaVisual?.type !== 'folder') throw new Error('se esperaba una carpeta visual');
-    expect(carpetaVisual.name).toBe('Dia a dia');
+    const visualFolder = view.tree[0];
+    if (visualFolder?.type !== 'folder') throw new Error('se esperaba una carpeta visual');
+    expect(visualFolder.name).toBe('Dia a dia');
     // Orden del paquete, distinto del de la organizacion general.
-    expect(collectModuleIds(carpetaVisual)).toEqual(['audiencias-norte', 'casos-pendientes-norte']);
+    expect(collectModuleIds(visualFolder)).toEqual(['audiencias-norte', 'casos-pendientes-norte']);
   });
 
   it('NO muestra un modulo que el paquete incluye pero el equipo no tiene concedido', () => {
     const view = buildNavigationView({
       generalTree: generalTree,
       team: norteTeam,
-      pkg: paqueteReagrupado,
+      pkg: regroupedPackage,
     });
     expect(visibleModules(view.tree)).not.toContain('estadisticas-nacionales');
   });
@@ -91,7 +91,7 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
     const view = buildNavigationView({
       generalTree: generalTree,
       team: norteTeam,
-      pkg: paqueteReagrupado,
+      pkg: regroupedPackage,
     });
     expect(view.dangling).toEqual([
       {
@@ -159,7 +159,7 @@ describe('un paquete es una vista, nunca un permiso (4.1.3 y 4.10.6)', () => {
     const view = buildNavigationView({
       generalTree: generalTree,
       team: esteTeam,
-      pkg: paqueteReagrupado,
+      pkg: regroupedPackage,
     });
     expect(view.tree).toEqual([]);
     expect(view.dangling).toHaveLength(3);

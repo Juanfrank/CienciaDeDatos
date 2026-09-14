@@ -12,7 +12,7 @@ export async function entrarComo(page: Page, userId: string, base = ''): Promise
     data: {
       correo: usuarioACorreo(userId),
       clave: CLAVE_DEMO,
-      codigo: codigoTotpDe(SECRETO_TOTP_DEMO),
+      code: codigoTotpDe(SECRETO_TOTP_DEMO),
     },
   });
 

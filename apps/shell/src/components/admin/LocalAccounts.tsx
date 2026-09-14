@@ -19,7 +19,7 @@ export function CuentasLocales({
   const [emitido, setEmitido] = useState<{
     email: string;
     resetId: string;
-    codigo?: string;
+    code?: string;
     expiraEn: string;
   } | null>(null);
   const [trabajando, setTrabajando] = useState(false);
@@ -40,7 +40,7 @@ export function CuentasLocales({
       const body = (await r.json()) as {
         error?: string;
         resetId?: string;
-        codigo?: string;
+        code?: string;
         expiraEn?: string;
       };
 
@@ -52,7 +52,7 @@ export function CuentasLocales({
         setEmitido({
           email,
           resetId: body.resetId,
-          ...(body.codigo ? { codigo: body.codigo } : {}),
+          ...(body.code ? { code: body.code } : {}),
           expiraEn: body.expiraEn ?? "",
         });
       }
@@ -95,9 +95,9 @@ export function CuentasLocales({
           <p>
             Identificador: <code data-testid="reset-id">{emitido.resetId}</code>
           </p>
-          {emitido.codigo ? (
+          {emitido.code ? (
             <p>
-              Codigo: <code data-testid="reset-codigo">{emitido.codigo}</code>
+              Codigo: <code data-testid="reset-codigo">{emitido.code}</code>
             </p>
           ) : null}
           <p className="muted-text">

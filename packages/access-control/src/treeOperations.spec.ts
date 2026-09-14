@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { dimensionKey } from './AccessScope';
-import { DIM_DISTRITO, DIM_MATERIA, generalTree, norteTeam, scope, anaUser } from './__fixtures__/gobierno';
+import { DIM_DISTRITO, DIM_MATERIA, generalTree, norteTeam, scope, anaUser } from './__fixtures__/governance';
 import { findNode, isFolder, type NavNode } from './NavigationTree';
 import { resolveEffectiveScope } from './resolveEffectiveScope';
 import {
@@ -45,12 +45,12 @@ describe('permisos sobre el arbol: la comprobacion ocurre antes que nada', () =>
     );
     expect(puede.ok).toBe(true);
 
-    const noPuede = applyTreeOperation(
+    const canNot = applyTreeOperation(
       arbol(),
       { type: 'mover', nodeId: 'nodo-audiencias-norte', newParentId: 'carpeta-este' },
       colaborador,
     );
-    expect(noPuede.ok).toBe(false);
+    expect(canNot.ok).toBe(false);
   });
 
   it('solo un Administrador borra definitivamente', () => {
@@ -170,7 +170,7 @@ describe('crear, renombrar y reordenar', () => {
         admin,
       ),
     );
-    const conModulo = esperarOk(
+    const withModule = esperarOk(
       applyTreeOperation(
         r.tree,
         { type: 'create-module', parentId: 'carpeta-sur', id: 'n-sur', moduleRef: { moduleId: 'casos-sur', slug: 'casos-sur', name: 'Casos Sur' } },
@@ -178,7 +178,7 @@ describe('crear, renombrar y reordenar', () => {
       ),
     );
     // Regional permite Norte/Este/Sur; la carpeta nueva lo restringe a Sur.
-    expect(valuesOf(conModulo.tree, 'casos-sur', DIM_DISTRITO)).toEqual(['Distrito Sur']);
+    expect(valuesOf(withModule.tree, 'casos-sur', DIM_DISTRITO)).toEqual(['Distrito Sur']);
   });
 
   it('rechaza un id duplicado', () => {

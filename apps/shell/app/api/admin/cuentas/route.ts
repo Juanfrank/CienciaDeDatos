@@ -74,7 +74,7 @@ export async function POST(request: Request) {
          * no pudo entregarlo. Es el flujo mediado: el Administrador ya verifico la identidad de
          * la persona por una via de la que responde, y le dicta el codigo.
          */
-        ...(entregado ? {} : { codigo: emitido.token }),
+        ...(entregado ? {} : { code: emitido.token }),
       };
     }
 

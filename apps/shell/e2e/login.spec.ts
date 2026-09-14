@@ -92,7 +92,7 @@ test.describe('el segundo factor es obligatorio en las cuentas locales (4.7.2)',
 
   test('un codigo equivocado no entra aunque la contrasena sea correcta', async ({ page }) => {
     const respuesta = await page.request.post('/api/acceso', {
-      data: { correo: CORREO, clave: CLAVE_DEMO, codigo: '000000' },
+      data: { correo: CORREO, clave: CLAVE_DEMO, code: '000000' },
     });
     expect(respuesta.status()).toBe(401);
     expect((await respuesta.json()).motivo).toBe('mfa-invalido');
@@ -148,7 +148,7 @@ test.describe('la pantalla de acceso no informa a quien tantea', () => {
     // Y estando bloqueada, la contrasena CORRECTA tampoco entra: si entrara, el bloqueo solo
     // frenaria a quien se equivoca, no a quien acierta al final.
     const conLaBuena = await page.request.post('/api/acceso', {
-      data: { correo, clave: CLAVE_DEMO, codigo: codigoTotpDe(SECRETO_TOTP_DEMO) },
+      data: { correo, clave: CLAVE_DEMO, code: codigoTotpDe(SECRETO_TOTP_DEMO) },
     });
     expect((await conLaBuena.json()).motivo).toBe('cuenta-bloqueada');
   });

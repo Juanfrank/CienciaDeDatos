@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { QueryResult } from '@app/data-contracts';
-import { DIM_DISTRITO, DIM_MATERIA, scope } from './__fixtures__/gobierno';
+import { DIM_DISTRITO, DIM_MATERIA, scope } from './__fixtures__/governance';
 import {
   UNRESTRICTED_SCOPE,
   assertScopeIsEnforceable,
@@ -104,10 +104,10 @@ describe('intersectRequestedFilters — parametros de URL (4.11)', () => {
 
   it('un enlace compartido se filtra segun quien lo abre, no segun quien lo genero', () => {
     // La URL la genero alguien del Norte, filtrada a su ambito.
-    const parametrosDeLaUrl = { 'DimTribunal.Distrito': 'Norte' };
+    const urlTheParameters = { 'DimTribunal.Distrito': 'Norte' };
     // La abre alguien cuyo ambito es solo Este.
-    const ambitoDeQuienAbre = scope(DIM_DISTRITO, 'Este');
-    expect(intersectRequestedFilters(ambitoDeQuienAbre, parametrosDeLaUrl)).toEqual({
+    const opensWhoScope = scope(DIM_DISTRITO, 'Este');
+    expect(intersectRequestedFilters(opensWhoScope, urlTheParameters)).toEqual({
       'DimTribunal.Distrito': [],
     });
   });

@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
   const correo = typeof body['correo'] === 'string' ? body['correo'].trim() : '';
   const clave = typeof body['clave'] === 'string' ? body['clave'] : '';
-  const codigo = typeof body['codigo'] === 'string' ? body['codigo'].trim() : undefined;
+  const code = typeof body['codigo'] === 'string' ? body['codigo'].trim() : undefined;
 
   if (!correo || !clave) {
     return NextResponse.json({ error: 'Faltan el correo o la contrasena.' }, { status: 400 });
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     const principal = await proveedorLocal().authenticate({
       email: correo,
       password: clave,
-      ...(codigo ? { totpCode: codigo } : {}),
+      ...(code ? { totpCode: code } : {}),
       // La IP se registra en la auditoria de login; en App Service llega por esta cabecera.
       ...(request.headers.get('x-forwarded-for')
         ? { sourceIp: request.headers.get('x-forwarded-for') as string }

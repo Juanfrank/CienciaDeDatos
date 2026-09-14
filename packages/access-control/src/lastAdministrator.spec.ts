@@ -4,14 +4,14 @@ import { administratorsOf, wouldLeaveNoAdministrator } from './index';
 
 /** La institucion no puede quedarse sin ningun Administrador — seccion 4.10.1. */
 
-const SIN_AMBITO: AccessScope = { restrictions: [] };
+const WITHOUT_SCOPE: AccessScope = { restrictions: [] };
 
 const equipo = (id: string, miembros: Team['members']): Team => ({
   id,
   name: id,
   grantedNodes: [],
   members: miembros,
-  defaultScope: SIN_AMBITO,
+  defaultScope: WITHOUT_SCOPE,
   moduleScopeOverrides: {},
 });
 
@@ -38,7 +38,7 @@ describe('quienes administran', () => {
 });
 
 describe('el cambio que se lleva al ultimo Administrador', () => {
-  const conUno = [
+  const withOne = [
     equipo('norte', [
       { userId: 'u-admin', role: 'administrador' },
       { userId: 'u-ana', role: 'colaborador' },
@@ -47,7 +47,7 @@ describe('el cambio que se lleva al ultimo Administrador', () => {
 
   it('retirarle el rol al unico que hay se deniega', () => {
     const after = [equipo('norte', [{ userId: 'u-ana', role: 'colaborador' }])];
-    const denegacion = wouldLeaveNoAdministrator(conUno, after);
+    const denegacion = wouldLeaveNoAdministrator(withOne, after);
 
     expect(denegacion).not.toBeNull();
     // El mensaje NOMBRA a quien administra: sin eso, quien lo lea no sabe a quien nombrar antes.
@@ -62,11 +62,11 @@ describe('el cambio que se lleva al ultimo Administrador', () => {
         { userId: 'u-ana', role: 'colaborador' },
       ]),
     ];
-    expect(wouldLeaveNoAdministrator(conUno, after)).not.toBeNull();
+    expect(wouldLeaveNoAdministrator(withOne, after)).not.toBeNull();
   });
 
   it('borrar el equipo donde estaba tambien, por un camino que no menciona la palabra rol', () => {
-    expect(wouldLeaveNoAdministrator(conUno, [])).not.toBeNull();
+    expect(wouldLeaveNoAdministrator(withOne, [])).not.toBeNull();
   });
 
   it('si queda otro, se permite', () => {
@@ -82,10 +82,10 @@ describe('el cambio que se lleva al ultimo Administrador', () => {
   });
 
   it('un cambio que no toca la membresia no se estorba', () => {
-    const norte = conUno[0];
+    const norte = withOne[0];
     if (!norte) throw new Error('fixture inesperado');
     const after = [{ ...norte, name: 'Renombrado', grantedNodes: ['nodo-x'] }];
-    expect(wouldLeaveNoAdministrator(conUno, after)).toBeNull();
+    expect(wouldLeaveNoAdministrator(withOne, after)).toBeNull();
   });
 
   it('nombrar a otro Administrador se permite, obviamente', () => {
@@ -95,7 +95,7 @@ describe('el cambio que se lleva al ultimo Administrador', () => {
         { userId: 'u-ana', role: 'administrador' },
       ]),
     ];
-    expect(wouldLeaveNoAdministrator(conUno, after)).toBeNull();
+    expect(wouldLeaveNoAdministrator(withOne, after)).toBeNull();
   });
 });
 

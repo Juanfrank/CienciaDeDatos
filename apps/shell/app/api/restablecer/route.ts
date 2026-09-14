@@ -14,10 +14,10 @@ export async function POST(request: Request) {
   }
 
   const resetId = typeof body['resetId'] === 'string' ? body['resetId'].trim() : '';
-  const codigo = typeof body['codigo'] === 'string' ? body['codigo'].trim() : '';
+  const code = typeof body['codigo'] === 'string' ? body['codigo'].trim() : '';
   const clave = typeof body['clave'] === 'string' ? body['clave'] : '';
 
-  if (!resetId || !codigo || !clave) {
+  if (!resetId || !code || !clave) {
     return NextResponse.json(
       { error: 'Se requieren el identificador, el codigo y la contrasena nueva.' },
       { status: 400 },
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   try {
     await restablecimientos.redeem({
       resetId,
-      token: codigo,
+      token: code,
       newPassword: clave,
       ...(request.headers.get('x-forwarded-for')
         ? { sourceIp: request.headers.get('x-forwarded-for') as string }

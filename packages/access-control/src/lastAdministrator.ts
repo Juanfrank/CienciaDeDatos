@@ -2,13 +2,13 @@ import type { AppRole, Team } from './Team';
 
 /** La institucion no puede quedarse sin ningun Administrador — seccion 4.10.1. */
 
-const ADMINISTRADOR: AppRole = 'administrador';
+const ADMINISTRATOR: AppRole = 'administrador';
 
 /** Personas con rol Administrador en CUALQUIER equipo. Administrar no es por equipo (4.10.1). */
 export function administratorsOf(teams: Team[]): string[] {
   return [
     ...new Set(
-      teams.flatMap((t) => t.members.filter((m) => m.role === ADMINISTRADOR).map((m) => m.userId)),
+      teams.flatMap((t) => t.members.filter((m) => m.role === ADMINISTRATOR).map((m) => m.userId)),
     ),
   ].sort();
 }

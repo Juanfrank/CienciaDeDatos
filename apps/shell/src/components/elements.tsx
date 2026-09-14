@@ -232,8 +232,8 @@ export function Connection({
 function curva(puntos: [number, number][]): string {
   const [home, ...resto] = puntos;
   if (!home) return '';
-  const fin = resto[resto.length - 1];
-  if (!fin) return '';
+  const end = resto[resto.length - 1];
+  if (!end) return '';
   const control = resto[0] ?? home;
-  return `M ${home[0]} ${home[1]} Q ${control[0]} ${control[1]} ${fin[0]} ${fin[1]}`;
+  return `M ${home[0]} ${home[1]} Q ${control[0]} ${control[1]} ${end[0]} ${end[1]}`;
 }

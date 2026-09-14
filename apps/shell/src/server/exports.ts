@@ -3,7 +3,7 @@ import {
   StoreExportQueue,
   type ExportRequest,
   type ExportableObject,
-  type ResolverObjetos,
+  type ResolverObjects,
 } from '@app/export';
 import { describeProvenance } from '@app/module-model';
 import {
@@ -27,7 +27,7 @@ const ES_CONTROL = new Set(['segmentador']);
 /** Categorias del catalogo que merecen dibujarse como imagen al exportar en SVG. */
 const CHART_CATEGORIES = new Set(['grafico', 'mapa']);
 
-export const resolverObjetos: ResolverObjetos = async (request: ExportRequest) => {
+export const resolverObjetos: ResolverObjects = async (request: ExportRequest) => {
   const module = await moduloServibleParaUsuario(request.moduleSlug, request.requestedBy);
   if (!module) throw new Error(`El modulo '${request.moduleSlug}' ya no existe.`);
 

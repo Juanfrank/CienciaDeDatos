@@ -1,4 +1,4 @@
-import { cellText, type ExportableDocument, type HojaExportable } from './document';
+import { cellText, type ExportableDocument, type ExportableSheet } from './document';
 
 /** Formatos de texto: CSV y SVG. */
 
@@ -17,18 +17,18 @@ export function aCsv(document: ExportableDocument): string {
     '',
   ];
 
-  for (const hoja of leaves) {
-    if (leaves.length > 1) lineas.push(`# ${hoja.title}`);
-    lineas.push(hoja.columns.map((c) => escaparCsv(c.name)).join(','));
+  for (const sheet of leaves) {
+    if (leaves.length > 1) lineas.push(`# ${sheet.title}`);
+    lineas.push(sheet.columns.map((c) => escaparCsv(c.name)).join(','));
     /*
      * El CSV lleva los VALORES, no los textos formateados.
      */
-    for (const fila of hoja.rows) {
+    for (const fila of sheet.rows) {
       lineas.push(fila.map(escaparCsv).join(','));
     }
     // Las notas, como comentario: un CSV no tiene donde dibujar una meta, pero quien lo reciba
     // tiene que poder saber contra que se leian esas cifras.
-    for (const nota of hoja.notas ?? []) lineas.push(`# ${nota}`);
+    for (const nota of sheet.notas ?? []) lineas.push(`# ${nota}`);
     lineas.push('');
   }
 
@@ -40,44 +40,44 @@ const escaparXml = (t: string): string =>
 
 /** SVG de un grafico de barras. */
 export function aSvg(document: ExportableDocument): string {
-  const hoja: HojaExportable | undefined = document.grafico ?? document.leaves[0];
+  const sheet: ExportableSheet | undefined = document.grafico ?? document.leaves[0];
   const { heading, palette } = document;
 
-  if (!hoja) throw new Error('No hay ningun objeto con datos que dibujar.');
+  if (!sheet) throw new Error('No hay ningun objeto con datos que dibujar.');
 
-  const indiceValor = Math.max(
+  const valueIndex = Math.max(
     0,
-    hoja.columns.findIndex((c) => c.type === 'number'),
+    sheet.columns.findIndex((c) => c.type === 'number'),
   );
-  const dataRows = hoja.rows.slice(0, 20);
-  const valores = dataRows.map((f) => Number(f[indiceValor]) || 0);
+  const dataRows = sheet.rows.slice(0, 20);
+  const valores = dataRows.map((f) => Number(f[valueIndex]) || 0);
   // La cifra sobre la barra, con el formato de la pantalla. Lo demas ya se hizo en el lienzo:
   // aqui pasaba lo mismo que pasaba alli, y por el mismo motivo — nadie habia pasado el formato.
-  const textos = dataRows.map((_, i) => cellText(hoja, i, indiceValor));
+  const textos = dataRows.map((_, i) => cellText(sheet, i, valueIndex));
   const maximo = Math.max(1, ...valores);
 
   const widthBar = 40;
   const separacion = 16;
-  const margenIzq = 60;
-  const margenSup = 40 + heading.lineas.length * 14;
+  const leftMargin = 60;
+  const topMargin = 40 + heading.lineas.length * 14;
   const heightChart = 220;
-  const ancho = Math.max(400, margenIzq + dataRows.length * (widthBar + separacion) + 40);
-  const notas = hoja.notas ?? [];
+  const ancho = Math.max(400, leftMargin + dataRows.length * (widthBar + separacion) + 40);
+  const notas = sheet.notas ?? [];
   // Se reserva alto para las notas: escritas sobre el area de dibujo taparian las barras, y
   // fuera del `viewBox` no se verian en absoluto.
-  const alto = margenSup + heightChart + 80 + notas.length * 14;
+  const alto = topMargin + heightChart + 80 + notas.length * 14;
 
   const barras = dataRows
     .map((fila, i) => {
       const valor = valores[i] ?? 0;
       const heightBar = (valor / maximo) * heightChart;
-      const x = margenIzq + i * (widthBar + separacion);
-      const y = margenSup + heightChart - heightBar;
+      const x = leftMargin + i * (widthBar + separacion);
+      const y = topMargin + heightChart - heightBar;
       const color = palette.series[i % palette.series.length] ?? palette.content;
       return [
         `<rect x="${x}" y="${y.toFixed(1)}" width="${widthBar}" height="${heightBar.toFixed(1)}" fill="${color}" />`,
         `<text x="${x + widthBar / 2}" y="${(y - 6).toFixed(1)}" text-anchor="middle" font-size="11" fill="${palette.content}">${escaparXml(textos[i] ?? String(valor))}</text>`,
-        `<text x="${x + widthBar / 2}" y="${margenSup + heightChart + 16}" text-anchor="middle" font-size="10" fill="${palette.mutedText}">${escaparXml(String(fila[0] ?? ''))}</text>`,
+        `<text x="${x + widthBar / 2}" y="${topMargin + heightChart + 16}" text-anchor="middle" font-size="10" fill="${palette.mutedText}">${escaparXml(String(fila[0] ?? ''))}</text>`,
       ].join('');
     })
     .join('');
@@ -90,15 +90,15 @@ export function aSvg(document: ExportableDocument): string {
     .join('');
 
   return [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ancho} ${alto}" width="${ancho}" height="${alto}" role="img" aria-label="${escaparXml(hoja.title)}">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ancho} ${alto}" width="${ancho}" height="${alto}" role="img" aria-label="${escaparXml(sheet.title)}">`,
     `<rect width="${ancho}" height="${alto}" fill="${palette.superficie}" />`,
-    `<text x="16" y="22" font-size="14" font-weight="bold" fill="${palette.content}">${escaparXml(heading.titulo)} — ${escaparXml(hoja.title)}</text>`,
+    `<text x="16" y="22" font-size="14" font-weight="bold" fill="${palette.content}">${escaparXml(heading.titulo)} — ${escaparXml(sheet.title)}</text>`,
     metadatos,
-    `<line x1="${margenIzq - 8}" y1="${margenSup + heightChart}" x2="${ancho - 20}" y2="${margenSup + heightChart}" stroke="${palette.borde}" />`,
+    `<line x1="${leftMargin - 8}" y1="${topMargin + heightChart}" x2="${ancho - 20}" y2="${topMargin + heightChart}" stroke="${palette.borde}" />`,
     barras,
     ...notas.map(
       (nota, i) =>
-        `<text x="16" y="${margenSup + heightChart + 60 + i * 14}" font-size="10" fill="${palette.mutedText}">${escaparXml(nota)}</text>`,
+        `<text x="16" y="${topMargin + heightChart + 60 + i * 14}" font-size="10" fill="${palette.mutedText}">${escaparXml(nota)}</text>`,
     ),
     '</svg>',
   ].join('');

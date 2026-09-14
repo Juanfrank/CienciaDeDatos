@@ -3,13 +3,13 @@ import { aExcel, aPdf } from './binarios';
 import { buildDocument } from './document';
 import { aCsv, aSvg } from './formats';
 import type { IExportQueue } from './queue';
-import { TIPOS_MIME, nombreDeArchivo } from './types';
+import { MIME_KINDS, fileName } from './types';
 import type { ExportJob, ExportRequest, ExportableObject } from './types';
 
 /** Procesamiento de un trabajo de exportacion. */
 
 /** Resuelve los objetos a exportar para una peticion. Lo aporta quien cablea, que sabe leer. */
-export type ResolverObjetos = (request: ExportRequest) => Promise<{
+export type ResolverObjects = (request: ExportRequest) => Promise<{
   objetos: ExportableObject[];
   generatedAt?: string;
   /** Los filtros REALMENTE aplicados, ya intersecados con el ambito de quien exporta. */
@@ -65,8 +65,8 @@ export async function generarArtefacto(
   }
 
   return {
-    filename: nombreDeArchivo(request, ahora),
-    contentType: TIPOS_MIME[request.format],
+    filename: fileName(request, ahora),
+    contentType: MIME_KINDS[request.format],
     contentBase64: contenido.toString('base64'),
     bytes: contenido.byteLength,
   };
@@ -77,10 +77,10 @@ export async function generarArtefacto(
  * que quien lo pidio pueda ver por que no salio, en vez de quedarse consultando un estado que
  * no avanza nunca.
  */
-export async function procesarTrabajo(
+export async function jobProcess(
   job: ExportJob,
   queue: IExportQueue,
-  resolver: ResolverObjetos,
+  resolver: ResolverObjects,
   options: GenerarOptions = {},
 ): Promise<void> {
   try {
@@ -105,9 +105,9 @@ export async function procesarTrabajo(
 }
 
 /** Vacia la cola. Devuelve cuantos trabajos proceso. */
-export async function procesarPendientes(
+export async function pendientesProcess(
   queue: IExportQueue,
-  resolver: ResolverObjetos,
+  resolver: ResolverObjects,
   options: GenerarOptions & { maximo?: number } = {},
 ): Promise<number> {
   const maximo = options.maximo ?? 25;
@@ -116,7 +116,7 @@ export async function procesarPendientes(
   while (procesados < maximo) {
     const job = await queue.tomarSiguiente(options.ahora);
     if (!job) break;
-    await procesarTrabajo(job, queue, resolver, options);
+    await jobProcess(job, queue, resolver, options);
     procesados += 1;
   }
 

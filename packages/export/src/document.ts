@@ -27,7 +27,7 @@ export function paletteOf(theme: ThemeTokens = defaultTheme): ExportPalette {
   };
 }
 
-export interface HojaExportable {
+export interface ExportableSheet {
   title: string;
   columns: { name: string; type: string }[];
   /** Los valores, sin formatear. Es lo que va al CSV y al XLSX, donde un numero debe ser numero. */
@@ -39,19 +39,19 @@ export interface HojaExportable {
 }
 
 /** El texto de una celda, para los formatos que se LEEN. */
-export function cellText(hoja: HojaExportable, fila: number, column: number): string {
-  const formateado = hoja.textos?.[fila]?.[column];
+export function cellText(sheet: ExportableSheet, fila: number, column: number): string {
+  const formateado = sheet.textos?.[fila]?.[column];
   if (formateado !== undefined) return formateado;
-  return String(hoja.rows[fila]?.[column] ?? '');
+  return String(sheet.rows[fila]?.[column] ?? '');
 }
 
 export interface ExportableDocument {
   heading: Heading;
-  leaves: HojaExportable[];
+  leaves: ExportableSheet[];
   /** Paleta institucional con la que dibujan los cuatro formatos. */
   palette: ExportPalette;
   /** La hoja que debe dibujar un formato de una sola imagen. */
-  grafico?: HojaExportable;
+  grafico?: ExportableSheet;
 }
 
 export function buildDocument(
@@ -59,7 +59,7 @@ export function buildDocument(
   request: ExportRequest,
   theme: ThemeTokens = defaultTheme,
 ): ExportableDocument {
-  const leaves: HojaExportable[] = objetos.map((o) => ({
+  const leaves: ExportableSheet[] = objetos.map((o) => ({
     title: o.title,
     columns: o.result.columns,
     rows: o.result.rows,
@@ -67,8 +67,8 @@ export function buildDocument(
     ...(o.notas && o.notas.length > 0 ? { notas: o.notas } : {}),
   }));
 
-  const indiceGrafico = objetos.findIndex((o) => o.isChart);
-  const grafico = indiceGrafico >= 0 ? leaves[indiceGrafico] : undefined;
+  const chartIndex = objetos.findIndex((o) => o.isChart);
+  const grafico = chartIndex >= 0 ? leaves[chartIndex] : undefined;
 
   return {
     heading: buildHeading(request),

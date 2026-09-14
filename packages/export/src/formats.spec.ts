@@ -111,11 +111,11 @@ describe('aSvg', () => {
   });
 
   it('escapa el texto de las etiquetas para no romper el xml', () => {
-    const conAngulos: ExportableObject = {
+    const withAngles: ExportableObject = {
       title: 'Casos',
       result: { ...objeto.result, rows: [['<script>', 5]] },
     };
-    const svg = aSvg(doc([conAngulos], peticion({ format: 'svg' })));
+    const svg = aSvg(doc([withAngles], peticion({ format: 'svg' })));
     expect(svg).not.toContain('<script>');
     expect(svg).toContain('&lt;script&gt;');
   });
@@ -133,15 +133,15 @@ describe('aExcel', () => {
     // Firma de ZIP: un xlsx es un zip. Si esto falla, el archivo no abrira en Excel.
     expect(buffer.subarray(0, 2).toString('latin1')).toBe('PK');
 
-    const libro = await abrirLibro(buffer);
-    expect(libro.worksheets.map((h) => h.name)).toEqual(['Procedencia', 'Casos por materia']);
+    const workbook = await openWorkbook(buffer);
+    expect(workbook.worksheets.map((h) => h.name)).toEqual(['Procedencia', 'Casos por materia']);
 
-    const portada = libro.getWorksheet('Procedencia');
+    const portada = workbook.getWorksheet('Procedencia');
     const content = (portada?.getColumn(1).values ?? []).join('\n');
     expect(content).toContain('Vista institucional oficial');
     expect(content).toContain('ana');
 
-    const datos = libro.getWorksheet('Casos por materia');
+    const datos = workbook.getWorksheet('Casos por materia');
     expect(datos?.getRow(1).values).toEqual([undefined, 'materia', 'casos']);
     expect(datos?.getRow(2).values).toEqual([undefined, 'Penal', 120]);
   });
@@ -153,8 +153,8 @@ describe('aExcel', () => {
         peticion({ format: 'xlsx', provenance: { isPersonalized: true, label: 'Vista personalizada de ana' } }),
       ),
     );
-    const libro = await abrirLibro(buffer);
-    const content = (libro.getWorksheet('Procedencia')?.getColumn(1).values ?? []).join('\n');
+    const workbook = await openWorkbook(buffer);
+    const content = (workbook.getWorksheet('Procedencia')?.getColumn(1).values ?? []).join('\n');
     expect(content).toContain('VISTA PERSONALIZADA');
   });
 
@@ -164,8 +164,8 @@ describe('aExcel', () => {
       result: objeto.result,
     };
     const buffer = await aExcel(doc([largo], peticion({ format: 'xlsx' })));
-    const libro = await abrirLibro(buffer);
-    const nombre = libro.worksheets[1]?.name ?? '';
+    const workbook = await openWorkbook(buffer);
+    const nombre = workbook.worksheets[1]?.name ?? '';
     expect(nombre.length).toBeLessThanOrEqual(31);
     expect(nombre).not.toMatch(/[/\\?*[\]:]/);
   });
@@ -203,7 +203,7 @@ describe('aPdf', () => {
 });
 
 /** Abre un xlsx generado. */
-async function abrirLibro(buffer: Buffer) {
+async function openWorkbook(buffer: Buffer) {
   const { Workbook } = await import('exceljs');
   return new Workbook().xlsx.load(buffer as never);
 }
@@ -217,11 +217,11 @@ function pdfText(buffer: Buffer): string {
   for (;;) {
     const home = buffer.indexOf(mark, desde);
     if (home === -1) break;
-    const fin = buffer.indexOf(Buffer.from('endstream'), home);
-    if (fin === -1) break;
-    desde = fin + 1;
+    const end = buffer.indexOf(Buffer.from('endstream'), home);
+    if (end === -1) break;
+    desde = end + 1;
 
-    const crudo = buffer.subarray(home + mark.length, fin);
+    const crudo = buffer.subarray(home + mark.length, end);
     const zlib = crudo.indexOf(0x78);
     if (zlib === -1) continue;
     let contenido: string;

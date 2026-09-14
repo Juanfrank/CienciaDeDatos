@@ -87,9 +87,9 @@ function analizar(content: string): Section {
       continue;
     }
     if (c === '"') {
-      const fin = content.indexOf('"', i + 1);
-      section.pattern += fin === -1 ? content.slice(i + 1) : content.slice(i + 1, fin);
-      i = fin === -1 ? content.length : fin;
+      const end = content.indexOf('"', i + 1);
+      section.pattern += end === -1 ? content.slice(i + 1) : content.slice(i + 1, end);
+      i = end === -1 ? content.length : end;
       continue;
     }
     if (c === '.') {

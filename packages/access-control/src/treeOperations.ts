@@ -115,7 +115,7 @@ function isSelfOrAncestor(nodes: NavNode[], nodeId: string, possibleDescendantId
   return locate(encontrado.node.children, possibleDescendantId) !== null;
 }
 
-const describir = (node: NavNode): string =>
+const describe = (node: NavNode): string =>
   isFolder(node) ? `carpeta '${node.name}'` : `modulo '${node.moduleRef.name}'`;
 
 /** Aplica una operacion sobre el arbol. */
@@ -150,7 +150,7 @@ export function applyTreeOperation(
       return {
         ok: true,
         tree: siguiente,
-        audit: [{ actorId: actor.userId, action: 'crear-carpeta', nodeId: op.id, detail: `Creada ${describir(carpeta)}.` }],
+        audit: [{ actorId: actor.userId, action: 'crear-carpeta', nodeId: op.id, detail: `Creada ${describe(carpeta)}.` }],
       };
     }
 
@@ -159,12 +159,12 @@ export function applyTreeOperation(
       if (!hijos) return { ok: false, error: `La carpeta destino '${op.parentId}' no existe.` };
       if (locate(siguiente.nodes, op.id)) return { ok: false, error: `Ya existe un nodo con id '${op.id}'.` };
 
-      const hoja: NavNode = { id: op.id, type: 'module', moduleRef: op.moduleRef };
-      hijos.push(hoja);
+      const sheet: NavNode = { id: op.id, type: 'module', moduleRef: op.moduleRef };
+      hijos.push(sheet);
       return {
         ok: true,
         tree: siguiente,
-        audit: [{ actorId: actor.userId, action: 'create-module', nodeId: op.id, detail: `Creado ${describir(hoja)}.` }],
+        audit: [{ actorId: actor.userId, action: 'create-module', nodeId: op.id, detail: `Creado ${describe(sheet)}.` }],
       };
     }
 
@@ -210,9 +210,9 @@ export function applyTreeOperation(
       const indice = op.index === undefined ? destino.length : Math.max(0, Math.min(op.index, destino.length));
       destino.splice(indice, 0, extraido);
 
-      const carpetaDestino = op.newParentId === null ? null : locate(siguiente.nodes, op.newParentId);
+      const targetFolder = op.newParentId === null ? null : locate(siguiente.nodes, op.newParentId);
       const scopeAfter =
-        carpetaDestino && isFolder(carpetaDestino.node) ? carpetaDestino.node.scope : undefined;
+        targetFolder && isFolder(targetFolder.node) ? targetFolder.node.scope : undefined;
 
       return {
         ok: true,
@@ -223,7 +223,7 @@ export function applyTreeOperation(
             action: 'mover',
             nodeId: op.nodeId,
             detail:
-              `Movido ${describir(extraido)} a ${op.newParentId ?? 'la raiz'}. ` +
+              `Movido ${describe(extraido)} a ${op.newParentId ?? 'la raiz'}. ` +
               `Es un cambio estructural: el ambito heredado puede haber cambiado (4.1.2).`,
             ...(scopeBefore ? { scopeBefore } : {}),
             ...(scopeAfter ? { scopeAfter } : {}),
@@ -279,7 +279,7 @@ export function applyTreeOperation(
             actorId: actor.userId,
             action: 'enviar-a-papelera',
             nodeId: op.nodeId,
-            detail: `${describir(extraido)} enviado a la papelera. No es un borrado: se puede restaurar.`,
+            detail: `${describe(extraido)} enviado a la papelera. No es un borrado: se puede restaurar.`,
           },
         ],
       };
@@ -315,7 +315,7 @@ export function applyTreeOperation(
             actorId: actor.userId,
             action: 'restaurar',
             nodeId: op.trashedNodeId,
-            detail: `${describir(entrada.node)} restaurado a su carpeta original.`,
+            detail: `${describe(entrada.node)} restaurado a su carpeta original.`,
           },
         ],
       };
@@ -337,7 +337,7 @@ export function applyTreeOperation(
             actorId: actor.userId,
             action: 'borrar-definitivamente',
             nodeId: op.trashedNodeId,
-            detail: `${describir(entrada.node)} borrado definitivamente de la papelera.`,
+            detail: `${describe(entrada.node)} borrado definitivamente de la papelera.`,
           },
         ],
       };

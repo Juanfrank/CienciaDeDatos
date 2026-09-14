@@ -1,9 +1,9 @@
 import { InMemoryCacheStore } from '@app/caching';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { KEY_QUEUE, StoreExportQueue } from './queue';
-import { generarArtefacto, procesarPendientes, procesarTrabajo } from './procesar';
-import type { ResolverObjetos } from './procesar';
-import { claveDeTrabajo } from './types';
+import { generarArtefacto, pendientesProcess, jobProcess } from './process';
+import type { ResolverObjects } from './process';
+import { jobKey } from './types';
 import type { ExportJob, ExportRequest, ExportableObject } from './types';
 
 /**
@@ -82,7 +82,7 @@ describe('StoreExportQueue', () => {
   it('descarta un id huerfano en vez de atascarse en el', async () => {
     const huerfano = await queue.encolar(peticion({ moduleSlug: 'caducado' }));
     const vivo = await queue.encolar(peticion({ moduleSlug: 'vivo' }));
-    await store.delete(claveDeTrabajo(huerfano.id));
+    await store.delete(jobKey(huerfano.id));
 
     expect((await queue.tomarSiguiente())?.id).toBe(vivo.id);
     expect(await queue.pendientes()).toEqual([]);
@@ -98,10 +98,10 @@ describe('StoreExportQueue', () => {
       bytes: 1,
     });
 
-    const listo = await queue.consultar(job.id);
-    expect(listo?.status).toBe('lista');
-    expect(listo?.artifact?.filename).toBe('x.csv');
-    expect(listo?.finishedAt).toBeDefined();
+    const ready = await queue.consultar(job.id);
+    expect(ready?.status).toBe('lista');
+    expect(ready?.artifact?.filename).toBe('x.csv');
+    expect(ready?.finishedAt).toBeDefined();
   });
 
   it('fallar deja el motivo escrito, para no dejar consultando un estado que no avanza', async () => {
@@ -154,8 +154,8 @@ describe('generarArtefacto', () => {
   });
 });
 
-describe('procesarTrabajo', () => {
-  const resolver: ResolverObjetos = async () => ({
+describe('jobProcess', () => {
+  const resolver: ResolverObjects = async () => ({
     objetos: [objeto],
     generatedAt: '2026-03-01T10:00:00.000Z',
   });
@@ -177,17 +177,17 @@ describe('procesarTrabajo', () => {
     const tomado = await siguiente();
     expect(tomado.status).toBe('procesando');
 
-    await procesarTrabajo(tomado, queue, resolver);
+    await jobProcess(tomado, queue, resolver);
 
-    const listo = await queue.consultar(encolado.id);
-    expect(listo?.status).toBe('lista');
-    expect(contenidoDe(listo)).toContain('Penal');
+    const ready = await queue.consultar(encolado.id);
+    expect(ready?.status).toBe('lista');
+    expect(contenidoDe(ready)).toContain('Penal');
   });
 
   it('incorpora la marca de tiempo del dato que devuelve el resolutor (4.8)', async () => {
     await queue.encolar(peticion());
     const tomado = await siguiente();
-    await procesarTrabajo(tomado, queue, resolver);
+    await jobProcess(tomado, queue, resolver);
 
     expect(contenidoDe(await queue.consultar(tomado.id))).toContain('Datos actualizados');
   });
@@ -198,7 +198,7 @@ describe('procesarTrabajo', () => {
     await queue.encolar(peticion({ appliedFilters: { distrito: ['Este'] } }));
     const tomado = await siguiente();
 
-    await procesarTrabajo(tomado, queue, async () => ({
+    await jobProcess(tomado, queue, async () => ({
       objetos: [objeto],
       appliedFilters: { distrito: ['Norte'] },
       outOfScopeFilters: ['distrito'],
@@ -215,7 +215,7 @@ describe('procesarTrabajo', () => {
     const tomado = await siguiente();
 
     await expect(
-      procesarTrabajo(tomado, queue, async () => {
+      jobProcess(tomado, queue, async () => {
         throw new Error('el modulo ya no existe');
       }),
     ).resolves.toBeUndefined();
@@ -226,12 +226,12 @@ describe('procesarTrabajo', () => {
     });
   });
 
-  it('procesarPendientes vacia la cola y respeta el maximo por vuelta', async () => {
+  it('pendientesProcess vacia la cola y respeta el maximo por vuelta', async () => {
     for (let i = 0; i < 5; i += 1) await queue.encolar(peticion());
 
-    expect(await procesarPendientes(queue, resolver, { maximo: 2 })).toBe(2);
+    expect(await pendientesProcess(queue, resolver, { maximo: 2 })).toBe(2);
     expect(await queue.pendientes()).toHaveLength(3);
-    expect(await procesarPendientes(queue, resolver)).toBe(3);
+    expect(await pendientesProcess(queue, resolver)).toBe(3);
     expect(await queue.pendientes()).toHaveLength(0);
   });
 });

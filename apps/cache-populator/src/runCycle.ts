@@ -25,7 +25,7 @@ export async function runScheduledCycle(
 ): Promise<PopulateResult & { schemaRefreshed: boolean }> {
   const now = options.now ?? (() => new Date());
   const registry = options.registry ?? defaultRegistry;
-  const intervaloEsquema = options.schemaRefreshIntervalMs ?? 12 * 60 * 60 * 1000;
+  const schemeInterval = options.schemaRefreshIntervalMs ?? 12 * 60 * 60 * 1000;
 
   const anterior =
     (await options.cacheStore.get<PopulatorHeartbeat>(POPULATOR_HEARTBEAT_KEY))?.value ?? null;
@@ -42,11 +42,11 @@ export async function runScheduledCycle(
   });
 
   const lastScheme = anterior?.schemaRefreshedAt;
-  const tocaEsquema =
-    !lastScheme || now().getTime() - new Date(lastScheme).getTime() >= intervaloEsquema;
+  const schemeTouches =
+    !lastScheme || now().getTime() - new Date(lastScheme).getTime() >= schemeInterval;
 
   let schemaRefreshed = false;
-  if (tocaEsquema) {
+  if (schemeTouches) {
     const schema = await refreshSchema({
       connector: options.connector,
       cacheStore: options.cacheStore,

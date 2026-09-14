@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
 import { Workbook } from 'exceljs';
-import { cellText, type ExportableDocument, type HojaExportable, type ExportPalette } from './document';
+import { cellText, type ExportableDocument, type ExportableSheet, type ExportPalette } from './document';
 
 /** Formatos binarios: Excel y PDF. */
 
@@ -12,12 +12,12 @@ function columnWidth(nombre: string, valores: unknown[]): number {
 
 export async function aExcel(document: ExportableDocument): Promise<Buffer> {
   const { heading, leaves, palette } = document;
-  const libro = new Workbook();
-  libro.creator = heading.autor;
-  libro.created = new Date();
+  const workbook = new Workbook();
+  workbook.creator = heading.autor;
+  workbook.created = new Date();
 
   /** Primera hoja: la procedencia, sola. */
-  const portada = libro.addWorksheet('Procedencia');
+  const portada = workbook.addWorksheet('Procedencia');
   portada.columns = [{ width: 100 }];
   portada.addRow([heading.titulo]).font = { bold: true, size: 14 };
   if (heading.personalizada) {
@@ -32,9 +32,9 @@ export async function aExcel(document: ExportableDocument): Promise<Buffer> {
   for (const [indice, source] of leaves.entries()) {
     // Excel rechaza / \ ? * [ ] : en el nombre de hoja y lo limita a 31 caracteres.
     const nombre = source.title.replace(/[/\\?*[\]:]/g, '-').slice(0, 31) || `Datos ${indice + 1}`;
-    const hoja = libro.addWorksheet(nombre);
+    const sheet = workbook.addWorksheet(nombre);
 
-    hoja.columns = source.columns.map((column, i) => ({
+    sheet.columns = source.columns.map((column, i) => ({
       header: column.name,
       key: `c${i}`,
       width: columnWidth(
@@ -42,20 +42,20 @@ export async function aExcel(document: ExportableDocument): Promise<Buffer> {
         source.rows.slice(0, 200).map((f) => f[i]),
       ),
     }));
-    hoja.getRow(1).font = { bold: true };
-    hoja.views = [{ state: 'frozen', ySplit: 1 }];
+    sheet.getRow(1).font = { bold: true };
+    sheet.views = [{ state: 'frozen', ySplit: 1 }];
 
-    for (const fila of source.rows) hoja.addRow(fila);
+    for (const fila of source.rows) sheet.addRow(fila);
 
     if (source.rows.length > 0) {
-      hoja.autoFilter = {
+      sheet.autoFilter = {
         from: { row: 1, column: 1 },
         to: { row: 1, column: source.columns.length },
       };
     }
   }
 
-  const buffer = await libro.xlsx.writeBuffer();
+  const buffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(buffer);
 }
 
@@ -88,15 +88,15 @@ export function aPdf(document: ExportableDocument): Promise<Buffer> {
     for (const line of heading.lineas) doc.text(line);
     doc.moveDown(0.8);
 
-    for (const hoja of leaves) {
-      doc.font('Helvetica-Bold').fontSize(11).fillColor(palette.content).text(hoja.title);
+    for (const sheet of leaves) {
+      doc.font('Helvetica-Bold').fontSize(11).fillColor(palette.content).text(sheet.title);
       doc.moveDown(0.3);
-      drawTable(doc, hoja, palette);
+      drawTable(doc, sheet, palette);
 
       /*
        * Las notas, DEBAJO de su tabla.
        */
-      for (const nota of hoja.notas ?? []) {
+      for (const nota of sheet.notas ?? []) {
         doc.font('Helvetica-Oblique').fontSize(7).fillColor(palette.mutedText).text(nota);
       }
       doc.moveDown(1);
@@ -125,16 +125,16 @@ export function aPdf(document: ExportableDocument): Promise<Buffer> {
 /** Tabla simple con salto de pagina y repeticion de cabecera. */
 function drawTable(
   doc: PDFKit.PDFDocument,
-  hoja: HojaExportable,
+  sheet: ExportableSheet,
   palette: ExportPalette,
 ): void {
-  const gridColumns = hoja.columns;
+  const gridColumns = sheet.columns;
   if (gridColumns.length === 0) return;
 
-  const anchoUtil = WIDTH_PAGE - MARGIN * 2;
-  const widthColumn = anchoUtil / gridColumns.length;
+  const usableWidth = WIDTH_PAGE - MARGIN * 2;
+  const widthColumn = usableWidth / gridColumns.length;
   const heightRow = 14;
-  const limiteInferior = doc.page.height - 45;
+  const lowerLimit = doc.page.height - 45;
 
   const pageHeader = (): void => {
     const y = doc.y;
@@ -158,8 +158,8 @@ function drawTable(
   pageHeader();
 
   doc.font('Helvetica').fontSize(8).fillColor(palette.content);
-  hoja.rows.forEach((_, f) => {
-    if (doc.y + heightRow > limiteInferior) {
+  sheet.rows.forEach((_, f) => {
+    if (doc.y + heightRow > lowerLimit) {
       doc.addPage();
       pageHeader();
       doc.font('Helvetica').fontSize(8).fillColor(palette.content);
@@ -168,7 +168,7 @@ function drawTable(
     gridColumns.forEach((_, i) => {
       // El texto formateado, no el valor: un PDF que dice «2216» contradice a la pantalla de la
       // que salio, donde ponia «2,216 casos».
-      doc.text(cellText(hoja, f, i), MARGIN + i * widthColumn, y, {
+      doc.text(cellText(sheet, f, i), MARGIN + i * widthColumn, y, {
         width: widthColumn - 4,
         ellipsis: true,
         lineBreak: false,

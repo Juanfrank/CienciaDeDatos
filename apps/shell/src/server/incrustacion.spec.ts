@@ -92,15 +92,15 @@ describe('cabecerasDeEnmarcado', () => {
 
 describe('codigoDeIncrustacion', () => {
   it('produce un iframe sin permisos de navegador', () => {
-    const codigo = codigoDeIncrustacion('https://capa.ejemplo.do/', '/incrustar/m/casos', 'Casos');
-    expect(codigo).toContain('src="https://capa.ejemplo.do/incrustar/m/casos"');
+    const code = codigoDeIncrustacion('https://capa.ejemplo.do/', '/incrustar/m/casos', 'Casos');
+    expect(code).toContain('src="https://capa.ejemplo.do/incrustar/m/casos"');
     // El iframe no usa camara, micro ni ubicacion: declararlo evita que el portal anfitrion se
     // los conceda sin querer.
-    expect(codigo).toContain('allow=""');
+    expect(code).toContain('allow=""');
   });
 
   it('escapa las comillas del titulo, que viene del nombre del modulo', () => {
-    const codigo = codigoDeIncrustacion('https://x.do', '/incrustar/m/a', 'Casos "especiales"');
-    expect(codigo).toContain('title="Casos &quot;especiales&quot;"');
+    const code = codigoDeIncrustacion('https://x.do', '/incrustar/m/a', 'Casos "especiales"');
+    expect(code).toContain('title="Casos &quot;especiales&quot;"');
   });
 });
