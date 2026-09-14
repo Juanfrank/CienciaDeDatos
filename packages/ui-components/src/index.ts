@@ -2,10 +2,26 @@
 export { defaultSize, type DefaultSize, type SizeableObject } from './presentation/defaultSize';
 export { ObjectRegistry, ObjectRegistryError, type DeprecationWarning, type PublishInput } from './registry/ObjectRegistry';
 export {
+  ATTACHMENT_BY_DEFAULT,
+  ATTACHMENT_IDS,
   attachmentOf,
+  filterableFields,
   validateAttachments,
+  type AttachmentId,
   type SearchDefinition,
 } from './registry/attachments';
+export {
+  applyVisualFilter,
+  attachmentKeyIs,
+  footerReferences,
+  footerText,
+  paginate,
+  paginationKey,
+  paginationLegend,
+  visualFilterKey,
+  visualFilterOptions,
+  type PaginationView,
+} from './registry/attachmentView';
 export { initialCatalog } from './registry/catalog';
 export {
   COMPARATORS,
@@ -176,8 +192,13 @@ export type {
   ObjectVersion,
   TablePopupAttachment,
   TooltipAttachment,
+  VisualFilterAttachment,
+  FooterAttachment,
+  PaginationAttachment,
+  PaginationLegend,
   VisualObjectDefinition,
 } from './registry/types';
+export { PAGINATION_LEGENDS } from './registry/types';
 export { notConsumesData, placeable } from './registry/types';
 export {
   DEFAULT_CONNECTION,

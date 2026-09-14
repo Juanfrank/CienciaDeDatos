@@ -12,8 +12,10 @@ import {
   aggregationsFor,
   gaugeScale,
   slotField,
+  attachmentOf,
   conditionalColor,
   columnsFor,
+  paginationLegend,
   niceScale,
   maxCommon,
   splitMultiples,
@@ -30,7 +32,8 @@ import {
 } from '@app/ui-components';
 import type { ObjectInstance } from '@app/ui-components';
 import { useOverflows } from '../hooks/useOverflows';
-import { Addons } from './Addons';
+import { Addons, Pagination, VisualFilter } from './Addons';
+import { useObjectChrome } from './ObjectView';
 import { MatrixTable } from './MatrixTable';
 import { SortableTable } from './SortableTable';
 import { Chart } from './Chart';
@@ -152,6 +155,17 @@ export function Frame({
   const withHeader = presentacion?.mostrarTitulo !== false;
   const body = useOverflows<HTMLDivElement>();
 
+  /*
+   * Los tres complementos de vista llegan por CONTEXTO, no por propiedad.
+   *
+   * Este marco lo dibujan los dieciseis renderizadores. Pasarlos de mano en mano seria tocarlos
+   * todos y confiar en que ninguno se olvide: el que se olvidara dejaria un objeto con el
+   * complemento configurado y sin dibujar, que es la peor de las dos formas de fallar — la que no
+   * se nota. Por contexto, un objeto nuevo los hereda por usar el marco.
+   */
+  const chrome = useObjectChrome();
+  const tipoDeFiltro = instance ? attachmentOf(instance, 'filtro-de-visualizacion')?.tipo : undefined;
+
   return (
     <div
       className="objeto"
@@ -201,6 +215,17 @@ export function Frame({
             aggregations={aggregations ?? []}
           />
         ) : null}
+        {chrome.filtro && result ? (
+          <VisualFilter
+            titulo={titulo}
+            filtro={chrome.filtro}
+            columnKind={
+              result.columns.find((c) => c.name === chrome.filtro?.fieldName)?.type ?? 'texto'
+            }
+            {...(tipoDeFiltro ? { tipo: tipoDeFiltro } : {})}
+            opciones={chrome.filtro.opciones}
+          />
+        ) : null}
         {accion}
       </div>
       ) : null}
@@ -209,6 +234,11 @@ export function Frame({
         Una region desplazable tiene que alcanzarse con el teclado (2.1.1); ponerla en todas las
         tarjetas por si acaso sumaria una parada por objeto que no lleva a ninguna parte.
       */}
+      {chrome.paginado?.coletilla === 'arriba' ? (
+        <p className="paginado__coletilla es-arriba" data-testid={`pagination-legend-${titulo}`}>
+          {paginationLegend(chrome.paginado.vista)}
+        </p>
+      ) : null}
       <div
         className="object__body"
         ref={body.ref}
@@ -218,7 +248,19 @@ export function Frame({
       >
         {children}
       </div>
+      {/*
+        El paginado va DEBAJO del cuerpo, fuera de el.
+        Dentro se desplazaria con el contenido y habria que bajar hasta el final para cambiar de
+        pagina; y el alto de la tarjeta lo manda la rejilla, asi que el sitio que ocupa se lo quita
+        al cuerpo — no se lo suma a la tarjeta.
+      */}
+      {chrome.paginado ? <Pagination titulo={titulo} paginado={chrome.paginado} /> : null}
       {pie ? <div className="object__pie">{pie}</div> : null}
+      {chrome.pie ? (
+        <p className="object__pie" data-testid={`footer-${titulo}`}>
+          {chrome.pie}
+        </p>
+      ) : null}
     </div>
   );
 }

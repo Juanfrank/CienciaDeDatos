@@ -3566,6 +3566,49 @@ th[aria-sort='descending'] .table__flecha {
 }
 .addon__icon:hover::before { opacity: var(--md-sys-state-hover-opacity); }
 
+/*
+ * Un filtro PUESTO se ve puesto.
+ *
+ * El complemento vive detras de un icono, asi que sin esta marca un objeto acotado se lee igual
+ * que uno entero: quien mira toma una cifra recortada por la cifra completa, y no hay nada en
+ * pantalla que le diga lo contrario.
+ */
+.addon__icon[data-puesto='si'] {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+/*
+ * El paginado: debajo del cuerpo y FUERA de el.
+ *
+ * Dentro se desplazaria con el contenido —habria que bajar hasta el final para pasar de pagina— y
+ * ademas el alto de la tarjeta lo manda la rejilla: lo que ocupa esta barra se lo quita al cuerpo,
+ * no se lo suma a la tarjeta.
+ */
+.object__paginado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+.paginado__selector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.paginado__selector .boton-contorno { padding: 2px var(--space-sm); }
+.paginado__estado,
+.paginado__coletilla {
+  margin: 0;
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+/* Arriba va pegada al cuerpo y sin barra: es una nota, no un control. */
+.paginado__coletilla.es-arriba { padding: 0 var(--space-md); }
+
 /* Tooltip enriquecido de MD3. */
 /*
  * `fixed` y no `absolute`: el globo tiene que salir de la caja de la tarjeta, que es justo lo que

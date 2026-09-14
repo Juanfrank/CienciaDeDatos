@@ -79,6 +79,16 @@ export const ICON_STROKES = {
   'desplegar-panel':
     'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM9 5v14M14 9l3 3-3 3',
   lupa: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5 20 20',
+  /*
+   * Los dos complementos que no tenian icono propio.
+   *
+   * El pie de pagina es la caja del objeto con una banda separada abajo, que es literalmente lo
+   * que hace; el paginado, una hoja entre dos flechas. Ninguno reutiliza otro icono: `content`
+   * para el pie diria «texto» —que es lo que un cuadro de texto ya dice— y `tabs` para el
+   * paginado diria «pestanas», que es un contenedor distinto y esta a dos lineas de aqui.
+   */
+  'pie-de-pagina': 'M4 4h16v16H4zM4 15h16M7 18h7',
+  paginado: 'M9 5h6v14H9zM6 9l-2 3 2 3M18 9l2 3-2 3',
   // Acciones sobre una fila del arbol: mover, configurar, permisos.
   'flecha-arriba': 'M12 20V5M6 11l6-6 6 6',
   'flecha-abajo': 'M12 4v15M6 13l6 6 6-6',

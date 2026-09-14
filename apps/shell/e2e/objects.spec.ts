@@ -375,7 +375,7 @@ test.describe('contenedor expandible: se abre EN SU SITIO y empuja lo de abajo',
 test.describe('navegador de pagina: las paginas dejan de ser invisibles (4.2)', () => {
   test('el panel lista TODAS las paginas y llevan a ellas', async ({ page }) => {
     /*
-     * `composicion` tiene once paginas y hasta ahora solo se llegaba a diez de ellas escribiendo
+     * `composicion` tiene doce paginas y hasta ahora solo se llegaba a once de ellas escribiendo
      * la URL a mano. Es el caso que el navegador viene a cerrar, asi que la prueba no mira que el
      * panel exista: cuenta las paginas y sigue una.
      */
@@ -384,7 +384,7 @@ test.describe('navegador de pagina: las paginas dejan de ser invisibles (4.2)', 
     const navegador = page.getByTestId('navegador-de-pagina');
     await expect(navegador).toBeVisible();
     await expect(navegador).toHaveAttribute('data-tipo', 'panel-izquierdo');
-    await expect(navegador.locator('[data-testid^="nav-pagina-"]')).toHaveCount(11);
+    await expect(navegador.locator('[data-testid^="nav-pagina-"]')).toHaveCount(12);
 
     // La abierta se marca, y no solo con color: `aria-current` es lo que lo dice sin verlo.
     await expect(page.getByTestId('nav-pagina-elementos')).toHaveAttribute('aria-current', 'page');
@@ -452,8 +452,8 @@ test.describe('navegador de pagina: las paginas dejan de ser invisibles (4.2)', 
     await expect(navegador).toHaveAttribute('data-abierto', 'no');
     await expect.poll(ancho).toBeLessThan(abierto);
 
-    // Y lo que queda sigue navegando: los once enlaces, con su nombre para quien no ve el icono.
-    await expect(navegador.locator('[data-testid^="nav-pagina-"]')).toHaveCount(11);
+    // Y lo que queda sigue navegando: los doce enlaces, con su nombre para quien no ve el icono.
+    await expect(navegador.locator('[data-testid^="nav-pagina-"]')).toHaveCount(12);
     await expect(page.getByTestId('nav-pagina-graficos')).toHaveAttribute('title', 'Graficos');
 
     await page.getByTestId('navegador-plegar').click();
@@ -507,5 +507,108 @@ test.describe('navegador de pagina: las paginas dejan de ser invisibles (4.2)', 
     // Con una sola no hay a donde ir, y un panel lateral de una entrada roba ancho para nada.
     await page.goto('/m/casos-pendientes');
     await expect(page.getByTestId('navegador-de-pagina')).toHaveCount(0);
+  });
+});
+
+test.describe('los tres complementos de vista (4.2)', () => {
+  const RUTA = '/m/composicion/complementos';
+  const TABLA = 'Pendientes por trimestre';
+
+  test('el paginado parte por CATEGORIA y dice por donde va', async ({ page }) => {
+    /*
+     * El paginado existe porque el alto de un objeto no depende de su contenido: ocho
+     * combinaciones dentro de una caja de cinco filas se desplazan, y desplazarse no dice cuanto
+     * falta. Por eso se comprueba la coletilla y no solo que los botones esten.
+     */
+    await page.goto(RUTA);
+
+    const filas = page.locator('[data-testid="cell-comp-tabla"] tbody tr');
+    await expect(filas).toHaveCount(2);
+
+    const coletilla = page.getByTestId(`pagination-legend-${TABLA}`);
+    await expect(coletilla).toContainText('Registros del 1 al 2. Total 4.');
+
+    await page.getByTestId(`pagination-next-${TABLA}`).click();
+    await expect(coletilla).toContainText('Registros del 3 al 4');
+
+    /*
+     * Y la pagina viaja en la URL (4.11): se comparte y se marca.
+     *
+     * Lo que NO hace es apilarse en el historial —se escribe con `replace`, como los filtros—, y
+     * por eso aqui se comprueba abriendo la direccion, no con el boton de atras: pasar diez
+     * paginas y querer salir no puede costar diez pulsaciones de «atras».
+     */
+    await expect(page).toHaveURL(/p\.comp-tabla=2/);
+
+    await page.goto(`${RUTA}?p.comp-tabla=2`);
+    await expect(page.getByTestId(`pagination-legend-${TABLA}`)).toContainText('Registros del 3');
+  });
+
+  test('en la primera pagina no se puede retroceder, ni avanzar en la ultima', async ({ page }) => {
+    // Un boton que no lleva a ninguna parte y aun asi se puede pulsar deja a quien lo pulsa
+    // preguntandose si la pantalla se ha colgado.
+    await page.goto(RUTA);
+    await expect(page.getByTestId(`pagination-previous-${TABLA}`)).toBeDisabled();
+
+    const estado = page.getByTestId(`pagination-state-${TABLA}`);
+    const texto = (await estado.textContent()) ?? '';
+    const paginas = Number(texto.split(' ').pop());
+    await page.goto(`${RUTA}?p.comp-tabla=${paginas}`);
+    await expect(page.getByTestId(`pagination-next-${TABLA}`)).toBeDisabled();
+  });
+
+  test('el filtro de visualizacion acota SU objeto y no la pagina', async ({ page }) => {
+    /*
+     * Es la unica diferencia que importa entre este complemento y un segmentador, y no se ve
+     * mirando el control: hay que mirar el objeto de al lado. Por eso la pagina lleva una segunda
+     * visual con los mismos datos, y lo que se comprueba es que NO se mueve.
+     */
+    await page.goto(RUTA);
+
+    // Se espera a que el grafico este montado ANTES de fotografiarlo: comparado a medio dibujar,
+    // el «antes» seria otro texto por razones que no tienen que ver con el filtro.
+    const espejo = page.locator('[data-testid="cell-comp-espejo"] .grafico');
+    await expect(espejo).toHaveAttribute('data-montado', 'si');
+    const antes = await espejo.innerText();
+
+    await page.getByTestId(`visual-filter-open-${TABLA}`).click();
+    const emergente = page.getByTestId(`visual-filter-${TABLA}`);
+    await expect(emergente).toBeVisible();
+
+    await emergente.locator('button', { hasText: 'Q1' }).first().click();
+    await page.getByTestId('visual-filter-close').click();
+
+    // La tabla se acota...
+    await expect(page.locator('[data-testid="cell-comp-tabla"] tbody')).not.toContainText('Q3');
+    // ...y el objeto de al lado se queda exactamente igual.
+    await expect
+      .poll(async () => espejo.innerText())
+      .toBe(antes);
+    // Y el icono dice que hay un filtro puesto: un objeto acotado que se ve entero se lee como si
+    // lo fuera, y quien mira toma una cifra recortada por la cifra completa.
+    await expect(page.getByTestId(`visual-filter-open-${TABLA}`)).toHaveAttribute(
+      'data-puesto',
+      'si',
+    );
+    // Y la linea de filtros del MODULO no lo recita: la pagina no esta filtrada por ello, y
+    // verlo ahi —con su clave interna delante— hace leer el recorte de una tarjeta como si
+    // acotara todo lo demas.
+    await expect(page.getByTestId('filtros-activos')).toHaveCount(0);
+  });
+
+  test('el pie resuelve {{n}} por ORDEN DE MAPEO, y sigue al filtro', async ({ page }) => {
+    await page.goto(RUTA);
+
+    // Dos medidas mapeadas: {{1}} es la primera y {{2}} la segunda. Por posicion, no por nombre.
+    const pie = page.getByTestId('footer-Ingresados y resueltos por trimestre');
+    await expect(pie).toContainText('ingresados y');
+    await expect(pie).not.toContainText('{{');
+
+    // Y el de la tabla cuenta lo que se esta viendo, no el dataset entero: un total que
+    // contradijera a la visual que acompana deja a quien lo lee sin saber cual vale.
+    const total = page.getByTestId(`footer-${TABLA}`);
+    const entero = await total.textContent();
+    await page.goto(`${RUTA}?f.comp-tabla=Q1`);
+    await expect(total).not.toHaveText(entero ?? '');
   });
 });

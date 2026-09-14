@@ -7,10 +7,18 @@ import {
   aggregateBy,
   attachmentOf,
   breakdownOf,
+  defaultPicker,
   fieldKey,
+  paginationLegend,
   projectObject,
   type ObjectInstance,
+  type PickerKind,
+  type SelectorEfectivo,
 } from '@app/ui-components';
+import { useUrlFilters } from '../hooks/useUrlFilters';
+import { useTranslator } from './Locale';
+import { FieldPicker } from './FiltersPanel';
+import type { ObjectViewChrome } from './ObjectView';
 
 /** Objetos adjuntados — complementos de un objeto, nunca objetos independientes. */
 
@@ -289,6 +297,160 @@ export function DataTable({
         )}
       </dialog>
     </>
+  );
+}
+
+/**
+ * Filtro de visualizacion: acota SOLO su anfitrion.
+ *
+ * Va en un emergente y no suelto en la cabecera por sitio: la tarjeta mas pequena de la rejilla
+ * mide cuatro columnas, y un desplegable ahi dentro se come el titulo. El icono dice que el objeto
+ * se puede acotar, y se marca cuando ESTA acotado — un filtro puesto que no se ve deja a quien
+ * mira leyendo una cifra recortada como si fuera la entera.
+ *
+ * Los controles son los MISMOS que los del panel de filtros —`FieldPicker`, importado, no
+ * copiado—: si tuviera los suyos, elegir un valor se comportaria distinto segun desde donde se
+ * eligiera, y nadie lo habria decidido.
+ */
+export function VisualFilter({
+  titulo,
+  filtro,
+  columnKind,
+  tipo,
+  opciones,
+}: {
+  titulo: string;
+  filtro: { fieldName: string; valores: string[]; clave: string };
+  /** El tipo de la columna, para elegir selector cuando el complemento no lo dice. */
+  columnKind: string;
+  tipo?: PickerKind;
+  opciones: string[];
+}) {
+  const t = useTranslator();
+  const dialogo = useRef<HTMLDialogElement>(null);
+  const { toggle, fijar, clearField } = useUrlFilters();
+  const puesto = filtro.valores.length > 0;
+
+  const picker: SelectorEfectivo = {
+    fieldName: filtro.fieldName,
+    tipo: tipo ?? defaultPicker(columnKind),
+    etiqueta: filtro.fieldName.split('.').slice(-1)[0] ?? filtro.fieldName,
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        className="addon__icon"
+        data-puesto={puesto ? 'si' : 'no'}
+        aria-label={
+          puesto
+            ? `Filtrar «${titulo}» — ${filtro.valores.length} valor(es) elegidos`
+            : `Filtrar «${titulo}»`
+        }
+        data-testid={`visual-filter-open-${titulo}`}
+        onClick={() => dialogo.current?.showModal()}
+      >
+        <Icon nombre="filtro" tamano={18} />
+      </button>
+
+      <dialog
+        ref={dialogo}
+        className="emergente"
+        aria-label={`Filtrar ${titulo}`}
+        data-testid={`visual-filter-${titulo}`}
+      >
+        <div className="popover__header">
+          <h2>Filtrar — {titulo}</h2>
+          <button
+            type="button"
+            className="button-link"
+            data-testid="visual-filter-close"
+            onClick={() => dialogo.current?.close()}
+          >
+            {t('action.close')}
+          </button>
+        </div>
+
+        <p className="muted-text">{t('addon.filter.note')}</p>
+
+        <div data-testid={`visual-filter-picker-${titulo}`}>
+          <FieldPicker
+            picker={picker}
+            opciones={opciones}
+            valores={filtro.valores}
+            desde=""
+            hasta=""
+            onAlternar={(valor) => toggle(filtro.clave, valor)}
+            onFijar={(valor) => fijar(filtro.clave, valor)}
+            /*
+              El rango de fechas NO entra aqui, y la validacion lo rechaza antes de guardarlo. Es
+              deliberado: `applyVisualFilter` compara por valor, asi que un «desde/hasta» quedaria
+              escrito en la URL sin acotar nada — un control que no hace nada es peor que no tenerlo.
+            */
+            onFijarFecha={() => undefined}
+            onLimpiar={() => clearField(filtro.clave)}
+          />
+        </div>
+      </dialog>
+    </>
+  );
+}
+
+/**
+ * El selector de pagina y su coletilla.
+ *
+ * Los botones llevan rotulo ademas de flecha, y el estado dice en que pagina se esta: un par de
+ * flechas sueltas no dicen si quedan dos paginas o veinte, que es justamente lo que el paginado
+ * existe para decir.
+ */
+export function Pagination({
+  titulo,
+  paginado,
+}: {
+  titulo: string;
+  paginado: NonNullable<ObjectViewChrome['paginado']>;
+}) {
+  const t = useTranslator();
+  const { fijar } = useUrlFilters();
+  const { vista, clave } = paginado;
+  const ir = (pagina: number) => fijar(clave, pagina > 1 ? String(pagina) : '');
+
+  return (
+    <div className="object__paginado" data-testid={`pagination-${titulo}`}>
+      {paginado.selector ? (
+        <div className="paginado__selector">
+          <button
+            type="button"
+            className="boton-contorno"
+            disabled={vista.pagina <= 1}
+            aria-label={`Pagina anterior de «${titulo}»`}
+            data-testid={`pagination-previous-${titulo}`}
+            onClick={() => ir(vista.pagina - 1)}
+          >
+            {t('addon.page.previous')}
+          </button>
+          <span className="paginado__estado" data-testid={`pagination-state-${titulo}`}>
+            Pagina {vista.pagina} de {vista.paginas}
+          </span>
+          <button
+            type="button"
+            className="boton-contorno"
+            disabled={vista.pagina >= vista.paginas}
+            aria-label={`Pagina siguiente de «${titulo}»`}
+            data-testid={`pagination-next-${titulo}`}
+            onClick={() => ir(vista.pagina + 1)}
+          >
+            {t('addon.page.next')}
+          </button>
+        </div>
+      ) : null}
+      {paginado.coletilla === 'abajo' ? (
+        <p className="paginado__coletilla" data-testid={`pagination-legend-${titulo}`}>
+          {paginationLegend(vista)}
+        </p>
+      ) : null}
+    </div>
   );
 }
 

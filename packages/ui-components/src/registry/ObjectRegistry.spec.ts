@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { MIN_PRESENTATION } from '../presentation/contract';
 import { ObjectRegistry, ObjectRegistryError } from './ObjectRegistry';
 import { initialCatalog } from './catalog';
+import { ATTACHMENT_IDS } from './attachments';
 import type { ObjectInstance, ObjectVersion, VisualObjectDefinition } from './types';
 
 const certificado = { testsPassed: true, reviewedBy: 'equipo-plataforma', reviewedAt: '2026-09-11' };
@@ -62,10 +63,15 @@ describe('catalogo inicial (4.2)', () => {
     const registro = new ObjectRegistry(initialCatalog);
     const complementos = registro.list().filter((o) => o.attachable);
 
-    expect(complementos.map((o) => o.objectId).sort()).toEqual([
-      'tabla-de-datos',
-      'tooltip-explicativo',
-    ]);
+    /*
+     * La lista NO se escribe a mano: se compara contra el modelo.
+     *
+     * Escrita a mano, esta prueba solo dice que alguien acerto a copiarla, y el fallo que importa
+     * —un complemento con tipo pero sin entrada de catalogo, o al reves— la deja igual de verde.
+     * `ATTACHMENT_IDS` sale de un `Record` exhaustivo sobre la union de complementos, asi que
+     * comparar contra el ata las dos caras: el modelo y el catalogo.
+     */
+    expect(complementos.map((o) => o.objectId).sort()).toEqual([...ATTACHMENT_IDS].sort());
     // Un complemento lee el dataset de su anfitrion: no puede declarar ranuras propias, o el
     // editor pediria un mapeo para algo que no se enlaza contra nada.
     for (const complemento of complementos) {

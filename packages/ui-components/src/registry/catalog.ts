@@ -1013,6 +1013,61 @@ export const initialCatalog: VisualObjectDefinition[] = [
     ],
   },
   {
+    objectId: 'filtro-de-visualizacion',
+    icono: 'filtro',
+    name: 'Filtro de visualizacion',
+    description:
+      'Acota SOLO este objeto, por uno de los campos que el mismo mapea. No mueve la pagina: ' +
+      'para eso estan el segmentador y el panel de filtros.',
+    category: 'complemento',
+    attachable: true,
+    versions: [
+      v1('Version inicial: seleccion sobre un campo mapeado por el anfitrion, reflejada en la URL.', {
+        dimensions: { min: 0, max: 0 },
+        measures: { min: 0, max: 0 },
+        notes:
+          'El campo base se elige entre los que el anfitrion ya mapea. Uno cualquiera del ' +
+          'dataset lo convertiria en un filtro general disfrazado de complemento.',
+      }),
+    ],
+  },
+  {
+    objectId: 'pie-de-pagina',
+    icono: 'pie-de-pagina',
+    name: 'Pie de pagina',
+    description:
+      'Nota al pie del objeto, fija o con cifras dentro. Las cifras se referencian por su orden ' +
+      'de mapeo: {{1}} es la primera medida mapeada.',
+    category: 'complemento',
+    attachable: true,
+    versions: [
+      v1('Version inicial: texto con referencias {{n}} a las medidas mapeadas por el anfitrion.', {
+        dimensions: { min: 0, max: 0 },
+        measures: { min: 0, max: 0 },
+        notes: 'Las cifras se resuelven sobre lo que el objeto tiene delante, ya filtrado.',
+      }),
+    ],
+  },
+  {
+    objectId: 'paginado',
+    icono: 'paginado',
+    name: 'Paginado',
+    description:
+      'Parte lo que el objeto ensena en paginas del tamano elegido, con selector y con la ' +
+      'coletilla de «Registros del N al N. Total N».',
+    category: 'complemento',
+    attachable: true,
+    versions: [
+      v1('Version inicial: registros por pagina, selector de pagina y coletilla con su posicion.', {
+        dimensions: { min: 0, max: 0 },
+        measures: { min: 0, max: 0 },
+        notes:
+          'Pagina por combinacion distinta de las dimensiones mapeadas: un registro en una ' +
+          'tabla, una categoria en un grafico.',
+      }),
+    ],
+  },
+  {
     objectId: 'mapa',
     family: 'location',
     icono: 'lugar',

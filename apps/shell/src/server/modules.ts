@@ -348,7 +348,7 @@ export const demoModules: ModuleDefinition[] = [
     createdAt: '2026-09-12T08:00:00.000Z',
     updatedAt: '2026-09-12T08:00:00.000Z',
     /*
-     * Once paginas y, hasta ahora, ninguna forma de llegar a diez de ellas.
+     * Doce paginas y, hasta ahora, ninguna forma de llegar a once de ellas.
      *
      * Existian en el modelo y solo se alcanzaban escribiendo la URL a mano. Es exactamente el caso
      * que el navegador de pagina viene a cerrar, y por eso este modulo lleva el tipo que mas
@@ -1871,6 +1871,148 @@ export const demoModules: ModuleDefinition[] = [
                   },
                 ],
               },
+            },
+          },
+        ],
+      },
+      {
+        pageId: 'p-complementos',
+        slug: 'complementos',
+        name: 'Complementos',
+        icon: 'paginado',
+        items: [
+          {
+            id: 'comp-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'comp-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo',
+              binding: WITHOUT_DATA,
+              settings: {
+                objectId: 'titulo-de-seccion',
+                sectionTitle: {
+                  content: 'Lo que se le cuelga a un objeto',
+                  textPosition: 'izquierda',
+                  line: 'derecha',
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          /*
+           * Una tabla con las tres cosas a la vez, que es como se usan de verdad.
+           *
+           * El paginado existe porque el alto de un objeto no depende de su contenido: ocho
+           * combinaciones dentro de una caja de cuatro filas se desplazan, y desplazarse no dice
+           * cuanto falta. El filtro acota esta tabla y solo esta —la de al lado no se mueve—, y el
+           * pie cuenta el total de lo que se esta mirando.
+           */
+          {
+            id: 'comp-tabla',
+            position: { x: 0, y: 1, w: 8, h: 5 },
+            instance: {
+              instanceId: 'comp-tabla',
+              objectId: 'tabla',
+              version: '1.1.0',
+              title: 'Pendientes por trimestre',
+              /*
+               * Por TRIMESTRE, no por distrito.
+               *
+               * El distrito lo recorta el ambito de quien mira —un equipo de un solo distrito ve
+               * una fila— y una pagina de ejemplo que se queda en una fila no ensena para que
+               * sirve el paginado. El trimestre lo ve todo el mundo entero.
+               */
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosPendientes'],
+              },
+              presentacion: { subtitulo: 'Paginada, acotable y con su total al pie' },
+              attachments: [
+                {
+                  instanceId: 'comp-tabla-paginado',
+                  objectId: 'paginado',
+                  version: '1.0.0',
+                  porPagina: 2,
+                  selector: true,
+                  coletilla: 'abajo',
+                },
+                {
+                  instanceId: 'comp-tabla-filtro',
+                  objectId: 'filtro-de-visualizacion',
+                  version: '1.0.0',
+                  fieldName: 'DimTiempo.Trimestre',
+                  tipo: 'pastillas',
+                },
+                {
+                  instanceId: 'comp-tabla-pie',
+                  objectId: 'pie-de-pagina',
+                  version: '1.0.0',
+                  // El total es el de la SELECCION, no el de la pagina que se ve: un total que cambiara al
+                  // pasar de pagina no es un total, y contradiria a la coletilla de al lado.
+                  texto: 'Total de la seleccion: {{1}} casos pendientes.',
+                },
+              ],
+            },
+          },
+          /*
+           * La de al lado, SIN complementos y con los mismos datos.
+           *
+           * Es la comparacion que hace visible lo que el filtro de visualizacion es: al acotar la
+           * primera, esta se queda como estaba. Sin una segunda tabla delante, un filtro que solo
+           * mueve su objeto y uno que mueve la pagina entera se ven exactamente igual.
+           */
+          {
+            id: 'comp-espejo',
+            position: { x: 8, y: 1, w: 4, h: 5 },
+            instance: {
+              instanceId: 'comp-espejo',
+              objectId: 'barras',
+              version: '1.2.0',
+              title: 'Los mismos datos, sin complementos',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosPendientes'],
+              },
+              presentacion: {
+                subtitulo: 'No se mueve cuando se acota la tabla',
+                leyenda: 'oculta',
+                ejes: { tituloY: 'Casos' },
+              },
+            },
+          },
+          {
+            id: 'comp-pie',
+            position: { x: 0, y: 6, w: 12, h: 4 },
+            instance: {
+              instanceId: 'comp-pie',
+              objectId: 'lineas',
+              version: '1.1.0',
+              title: 'Ingresados y resueltos por trimestre',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [TRIMESTRE],
+                measures: ['CasosIngresados', 'CasosResueltos'],
+              },
+              presentacion: {
+                subtitulo: 'El pie referencia las medidas por su orden de mapeo',
+                leyenda: 'abajo',
+                ejes: { tituloY: 'Casos' },
+              },
+              attachments: [
+                {
+                  instanceId: 'comp-pie-nota',
+                  objectId: 'pie-de-pagina',
+                  version: '1.0.0',
+                  // {{1}} es CasosIngresados y {{2}} CasosResueltos: por POSICION de mapeo, no por
+                  // nombre. Renombrar la medida en el esquema no deja el pie escribiendo una
+                  // columna que ya no existe.
+                  texto: 'En el periodo: {{1}} ingresados y {{2}} resueltos.',
+                },
+              ],
             },
           },
         ],

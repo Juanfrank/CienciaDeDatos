@@ -4,7 +4,12 @@ import { useEffect, useState } from 'react';
 import type { Aggregation } from '@app/data-contracts';
 import { GRID_COLUMNS, type GridItem } from '@app/module-model';
 import {
+  ATTACHMENT_BY_DEFAULT,
+  DATE_PICKERS,
   DEFAULT_AGGREGATION,
+  PAGINATION_LEGENDS,
+  PICKER_KINDS,
+  filterableFields,
   possibleAggregations,
   slotFits,
   fieldKey,
@@ -13,8 +18,11 @@ import {
   defaultSlots,
   slotFieldWithout,
   type AttachedObjectInstance,
+  type AttachmentId,
   type ObjectInstance,
   type FieldSlot,
+  type PaginationLegend,
+  type PickerKind,
 } from '@app/ui-components';
 import {
   type ObjectFamily,
@@ -695,29 +703,27 @@ function Addons({
       instance: { ...it.instance, attachments: siguientes },
     }));
 
+  /*
+   * Como nace cada complemento lo dice el MODELO, no este panel.
+   *
+   * Antes eran dos ramas de un `if`, y un complemento nuevo caia en el `else` —naciendo como una
+   * tabla de datos— sin que nada se quejara. `ATTACHMENT_BY_DEFAULT` es exhaustivo por tipo: un
+   * complemento nuevo sin configuracion de partida no compila.
+   */
   const add = (objectId: string, version: string) => {
-    const instanceId = `${objectId}-${item.id}`;
-    if (objectId === 'tooltip-explicativo') {
-      withAttachments([
-        ...puestos,
-        {
-          instanceId,
-          objectId: 'tooltip-explicativo',
-          version,
-          // Un tooltip sin texto no es nada, y la validacion lo rechaza. Se crea con un texto de
-          // partida en vez de vacio para que el objeto nazca valido y se pueda ver dibujado.
-          text: `Que muestra «${item.instance.title ?? item.instance.objectId}».`,
-        },
-      ]);
-      return;
-    }
+    const nacer = ATTACHMENT_BY_DEFAULT[objectId as AttachmentId];
+    if (!nacer) return;
     withAttachments([
       ...puestos,
-      // Alcance de objeto por defecto: es el unico que vale para cualquier anfitrion. El de
-      // subobjeto necesita una dimension mapeada, y la validacion lo rechaza sin ella.
-      { instanceId, objectId: 'tabla-de-datos', version, scope: 'objeto' },
+      nacer({ instanceId: `${objectId}-${item.id}`, version, host: item.instance }),
     ]);
   };
+
+  /** Reemplaza UN complemento, dejando el resto como estaba. */
+  const cambiarUno = (
+    instanceId: string,
+    cambio: (a: AttachedObjectInstance) => AttachedObjectInstance,
+  ) => withAttachments(puestos.map((x) => (x.instanceId === instanceId ? cambio(x) : x)));
 
   const remove = (instanceId: string) =>
     withAttachments(puestos.filter((a) => a.instanceId !== instanceId));
@@ -743,47 +749,12 @@ function Addons({
                   nivel={2}
                   prueba={`attachment-${item.id}-${a.objectId}`}
                 >
-                  {a.objectId === 'tooltip-explicativo' ? (
-                    <label className="form__field">
-                      <span>Texto</span>
-                      <textarea
-                        rows={3}
-                        defaultValue={a.text}
-                        disabled={saving}
-                        data-testid={`text-${item.id}`}
-                        onBlur={(e) =>
-                          withAttachments(
-                            puestos.map((x) =>
-                              x.instanceId === a.instanceId && x.objectId === 'tooltip-explicativo'
-                                ? { ...x, text: e.target.value }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
-                    </label>
-                  ) : (
-                    <label className="form__field">
-                      <span>{t('panel.extent')}</span>
-                      <select
-                        value={a.objectId === 'tabla-de-datos' ? a.scope : 'objeto'}
-                        disabled={saving}
-                        data-testid={`reach-${item.id}`}
-                        onChange={(e) =>
-                          withAttachments(
-                            puestos.map((x) =>
-                              x.instanceId === a.instanceId && x.objectId === 'tabla-de-datos'
-                                ? { ...x, scope: e.target.value as 'objeto' | 'subobjeto' }
-                                : x,
-                            ),
-                          )
-                        }
-                      >
-                        <option value="objeto">{t('panel.extent.object')}</option>
-                        <option value="subobjeto">{t('panel.extent.category')}</option>
-                      </select>
-                    </label>
-                  )}
+                  <AttachmentSettings
+                    item={item}
+                    attachment={a}
+                    saving={saving}
+                    onCambiar={cambiarUno}
+                  />
 
                   <button
                     type="button"
@@ -828,6 +799,215 @@ function Addons({
       </Section>
     </>
   );
+}
+
+/**
+ * La configuracion propia de CADA complemento.
+ *
+ * Un `switch` sobre la union discriminada y no un formulario generico: cada complemento pide cosas
+ * distintas —un texto, un alcance, un campo, un tamano de pagina— y un formulario que las tratara
+ * a todas igual acabaria ofreciendo «alcance» a un pie de pagina. El `default` no existe: si se
+ * anade un complemento al modelo y no se le da pantalla aqui, TypeScript lo dice.
+ */
+function AttachmentSettings({
+  item,
+  attachment,
+  saving,
+  onCambiar,
+}: {
+  item: GridItem;
+  attachment: AttachedObjectInstance;
+  saving: boolean;
+  onCambiar: (
+    instanceId: string,
+    cambio: (a: AttachedObjectInstance) => AttachedObjectInstance,
+  ) => void;
+}) {
+  const t = useTranslator();
+  const cambiar = (cambio: (a: AttachedObjectInstance) => AttachedObjectInstance) =>
+    onCambiar(attachment.instanceId, cambio);
+
+  switch (attachment.objectId) {
+    case 'tooltip-explicativo':
+      return (
+        <label className="form__field">
+          <span>Texto</span>
+          <textarea
+            rows={3}
+            defaultValue={attachment.text}
+            disabled={saving}
+            data-testid={`text-${item.id}`}
+            onBlur={(e) =>
+              cambiar((x) =>
+                x.objectId === 'tooltip-explicativo' ? { ...x, text: e.target.value } : x,
+              )
+            }
+          />
+        </label>
+      );
+
+    case 'tabla-de-datos':
+      return (
+        <label className="form__field">
+          <span>{t('panel.extent')}</span>
+          <select
+            value={attachment.scope}
+            disabled={saving}
+            data-testid={`reach-${item.id}`}
+            onChange={(e) =>
+              cambiar((x) =>
+                x.objectId === 'tabla-de-datos'
+                  ? { ...x, scope: e.target.value as 'objeto' | 'subobjeto' }
+                  : x,
+              )
+            }
+          >
+            <option value="objeto">{t('panel.extent.object')}</option>
+            <option value="subobjeto">{t('panel.extent.category')}</option>
+          </select>
+        </label>
+      );
+
+    case 'filtro-de-visualizacion': {
+      // Solo lo que el objeto YA mapea: un campo cualquiera del dataset convertiria el
+      // complemento en un filtro general disfrazado, y la validacion lo rechaza.
+      const campos = filterableFields(item.instance);
+      return (
+        <>
+          <label className="form__field">
+            <span>{t('panel.addon.field')}</span>
+            <select
+              value={attachment.fieldName}
+              disabled={saving || campos.length === 0}
+              data-testid={`filter-field-${item.id}`}
+              onChange={(e) =>
+                cambiar((x) =>
+                  x.objectId === 'filtro-de-visualizacion'
+                    ? { ...x, fieldName: e.target.value }
+                    : x,
+                )
+              }
+            >
+              {campos.map((campo) => (
+                <option key={campo} value={campo}>
+                  {campo}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="form__field">
+            <span>{t('panel.addon.picker')}</span>
+            <select
+              value={attachment.tipo ?? ''}
+              disabled={saving}
+              data-testid={`filter-kind-${item.id}`}
+              onChange={(e) =>
+                cambiar((x) =>
+                  x.objectId === 'filtro-de-visualizacion'
+                    ? e.target.value === ''
+                      ? (({ tipo: _quitado, ...resto }) => resto)(x)
+                      : { ...x, tipo: e.target.value as PickerKind }
+                    : x,
+                )
+              }
+            >
+              <option value="">{t('panel.addon.picker.auto')}</option>
+              {/* Los de fecha NO se ofrecen: este complemento compara por valor, y la validacion
+                  los rechaza. Ofrecerlos seria ofrecer un control que no acota nada. */}
+              {PICKER_KINDS.filter((k) => !DATE_PICKERS.includes(k)).map((kind) => (
+                <option key={kind} value={kind}>
+                  {kind}
+                </option>
+              ))}
+            </select>
+          </label>
+        </>
+      );
+    }
+
+    case 'pie-de-pagina':
+      return (
+        <>
+          <label className="form__field">
+            <span>{t('panel.addon.footer')}</span>
+            <textarea
+              rows={2}
+              defaultValue={attachment.texto}
+              disabled={saving}
+              data-testid={`footer-text-${item.id}`}
+              onBlur={(e) =>
+                cambiar((x) =>
+                  x.objectId === 'pie-de-pagina' ? { ...x, texto: e.target.value } : x,
+                )
+              }
+            />
+          </label>
+          <p className="muted-text editor-panel__nota">
+            {t('panel.addon.footer.help')}
+            {item.instance.binding.measures.map((m, i) => ` {{${i + 1}}} = ${m}.`).join('')}
+          </p>
+        </>
+      );
+
+    case 'paginado':
+      return (
+        <>
+          <label className="form__field">
+            <span>{t('panel.addon.perPage')}</span>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={attachment.porPagina}
+              disabled={saving}
+              data-testid={`per-page-${item.id}`}
+              onChange={(e) =>
+                cambiar((x) =>
+                  x.objectId === 'paginado'
+                    ? { ...x, porPagina: Number(e.target.value) }
+                    : x,
+                )
+              }
+            />
+          </label>
+          <label className="form__check">
+            <input
+              type="checkbox"
+              checked={attachment.selector !== false}
+              disabled={saving}
+              data-testid={`page-selector-${item.id}`}
+              onChange={(e) =>
+                cambiar((x) =>
+                  x.objectId === 'paginado' ? { ...x, selector: e.target.checked } : x,
+                )
+              }
+            />
+            <span>{t('panel.addon.pageSelector')}</span>
+          </label>
+          <label className="form__field">
+            <span>{t('panel.addon.legend')}</span>
+            <select
+              value={attachment.coletilla ?? 'ninguna'}
+              disabled={saving}
+              data-testid={`legend-${item.id}`}
+              onChange={(e) =>
+                cambiar((x) =>
+                  x.objectId === 'paginado'
+                    ? { ...x, coletilla: e.target.value as PaginationLegend }
+                    : x,
+                )
+              }
+            >
+              {PAGINATION_LEGENDS.map((donde) => (
+                <option key={donde} value={donde}>
+                  {t(`panel.addon.legend.${donde}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </>
+      );
+  }
 }
 
 /** Tamano y posicion, con numeros y con botones. */

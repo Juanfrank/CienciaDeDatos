@@ -39,6 +39,7 @@ import {
   Table,
   KpiCard,
 } from './objects';
+import { ObjectChromeProvider, useObjectView } from './ObjectView';
 import type { SerializedObject } from '../server/serialize';
 
 /** Que componente dibuja cada instancia. */
@@ -46,12 +47,42 @@ import type { SerializedObject } from '../server/serialize';
 /** Filtrado cruzado apagado: el objeto recibe siempre la funcion, y esta no hace nada. */
 const WITHOUT_FILTERED = (): undefined => undefined;
 
+/**
+ * Un objeto, con los complementos de vista ya aplicados.
+ *
+ * El filtro de visualizacion y el paginado no dibujan nada por su cuenta: cambian QUE DATOS ve el
+ * objeto. Por eso se resuelven aqui, una vez y antes de elegir renderizador, y no dentro de cada
+ * uno: dieciseis renderizadores aplicando su propio recorte es dieciseis sitios donde el orden
+ * entre filtrar y paginar puede salir distinto.
+ *
+ * Lo que el cromo necesita para dibujarse —opciones del filtro, numero de paginas, el pie ya
+ * resuelto— baja por contexto hasta el marco comun.
+ */
 export function ModuleObject({
   objeto,
   onFiltrar,
 }: {
   objeto: SerializedObject;
   /** Opcional a proposito: en la vista previa del editor no hay filtrado cruzado. */
+  onFiltrar?: (fieldName: string, valor: string) => void;
+}) {
+  const { result, chrome } = useObjectView(objeto);
+
+  return (
+    <ObjectChromeProvider value={chrome}>
+      <ObjectBody
+        objeto={result ? { ...objeto, result } : objeto}
+        {...(onFiltrar ? { onFiltrar } : {})}
+      />
+    </ObjectChromeProvider>
+  );
+}
+
+function ObjectBody({
+  objeto,
+  onFiltrar,
+}: {
+  objeto: SerializedObject;
   onFiltrar?: (fieldName: string, valor: string) => void;
 }) {
   const titulo = objeto.titulo;

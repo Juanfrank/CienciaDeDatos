@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { describeProvenance } from '@app/module-model';
+import { attachmentKeyIs } from '@app/ui-components';
 import { readPersonalization } from '../../../../src/server/personalization';
 import { moduleLoad } from '../../../../src/server/data';
 import { actorDe, slugServableModule } from '../../../../src/server/cicloDeVida';
@@ -67,9 +68,12 @@ export default async function PaginaModulo({
   // Se distingue lo que la persona ELIGIO de lo que su AMBITO le impone. Mezclarlos en una sola
   // linea de "filtros aplicados" hace creer que el ambito es algo que uno se puso y se puede
   // quitar, cuando no lo es.
-  const chosenFilters = Object.entries(filtrosPedidos).map(
-    ([fieldName, valor]) => [fieldName, Array.isArray(valor) ? valor : [valor]] as const,
-  );
+  const chosenFilters = Object.entries(filtrosPedidos)
+    // Lo que acota UN objeto no se recita aqui: la pagina no esta filtrada por ello, y ensenar
+    // «f.comp-tabla = Q1» en la linea del modulo hace leer el recorte de una tarjeta como si
+    // acotara todo lo demas. Cada objeto lo dice en su sitio, con su icono marcado.
+    .filter(([clave]) => !attachmentKeyIs(clave))
+    .map(([fieldName, valor]) => [fieldName, Array.isArray(valor) ? valor : [valor]] as const);
   const chosenFields = new Set(chosenFilters.map(([fieldName]) => fieldName));
   const scopeRestrictions = Object.entries(loaded.appliedFilters).filter(
     ([fieldName, valores]) => !chosenFields.has(fieldName) && valores.length > 0,
