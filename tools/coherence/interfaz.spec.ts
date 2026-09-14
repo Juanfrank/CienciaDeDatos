@@ -263,3 +263,58 @@ describe('el carril de administracion', () => {
     expect(conOrigen(pedidos, huerfanas)).toEqual([]);
   });
 });
+
+/**
+ * Las clases de CSS que una prueba de navegador usa como selector.
+ *
+ * Los identificadores de prueba ya se atan arriba. Las CLASES no, y son la otra mitad de lo
+ * mismo: `page.locator('.log__row')` es un contrato entre la prueba y el TSX que nadie relaciona,
+ * porque una clase es una cadena en los dos lados.
+ *
+ * Se encontro leyendo la prueba del registro de auditoria, que decia comprobar que la columna
+ * «quien» no muestra identificadores crudos. `.log__row` no existe —la tabla es `tabla` y sus
+ * filas son `tr`—, asi que el contador daba cero siempre; y la unica asercion vivia dentro de
+ * `if (filas.count() > 0)`. La prueba llevaba desde que se escribio saliendo verde sin mirar
+ * nada, y con eso tapaba que la pagina SI mostraba `u-admin` en esa columna.
+ *
+ * Un selector que no casa con nada no falla: devuelve una lista vacia. Por eso hay que
+ * preguntarlo aparte.
+ */
+describe('clases que usan las pruebas de navegador', () => {
+  const clasesEscritas = new Set<string>();
+  for (const archivo of listar(
+    "'apps/shell/src/**/*.tsx' 'apps/shell/app/**/*.tsx' 'packages/ui-components/src/**/*.tsx'",
+  )) {
+    const texto = readFileSync(`${raiz}/${archivo}`, 'utf8');
+    // `className="a b"`, y tambien lo que haya dentro de un `className={...}` con plantillas.
+    for (const m of texto.matchAll(/className=(?:"([^"]*)"|\{([^}]*)\})/g)) {
+      for (const palabra of ((m[1] ?? m[2]) as string).split(/[^A-Za-z0-9_-]+/)) {
+        if (palabra) clasesEscritas.add(palabra);
+      }
+    }
+  }
+
+  const usadas: { archivo: string; clase: string }[] = [];
+  for (const archivo of listar("'apps/shell/e2e/*.ts'")) {
+    const texto = readFileSync(`${raiz}/${archivo}`, 'utf8');
+    for (const m of texto.matchAll(/locator\(\s*'([^']*\.[A-Za-z][\w-]*[^']*)'/g)) {
+      const selector = m[1] as string;
+      // Un selector puede llevar varias clases y combinadores: se miran todas.
+      for (const c of selector.matchAll(/\.([A-Za-z][\w-]*)/g)) {
+        usadas.push({ archivo, clase: c[1] as string });
+      }
+    }
+  }
+
+  it('hay clases que comparar', () => {
+    expect(clasesEscritas.size).toBeGreaterThan(50);
+    expect(usadas.length).toBeGreaterThan(10);
+  });
+
+  it('toda clase que una prueba selecciona la escribe algun componente', () => {
+    const fantasmas = usadas
+      .filter(({ clase }) => !clasesEscritas.has(clase))
+      .map(({ archivo, clase }) => `${archivo}: .${clase}`);
+    expect([...new Set(fantasmas)].sort()).toEqual([]);
+  });
+});

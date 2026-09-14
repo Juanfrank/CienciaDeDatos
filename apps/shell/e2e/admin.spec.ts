@@ -119,9 +119,13 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
   test('el editor solo ofrece dimensiones del esquema, no un campo de texto libre', async ({ page }) => {
     await page.goto('/admin/scopes');
     const picker = page.getByTestId('add-dispersion');
-    await expect(picker).toBeVisible();
+    // Las dimensiones llegan por `fetch` DESPUES del primer pintado. El `select` ya existe antes,
+    // con su «Elegir dimension…» dentro, asi que esperar a que sea visible no espera a nada:
+    // `allTextContents()` se lleva una foto de una lista que aun no ha llegado. Se espera a la
+    // opcion concreta con un matcher que reintenta, que es lo unico que ata la espera al dato.
+    await expect(picker.locator('option', { hasText: 'DimTribunal.Distrito' })).toHaveCount(1);
+
     const opciones = await picker.locator('option').allTextContents();
-    expect(opciones.join(' ')).toContain('DimTribunal.Distrito');
     expect(opciones.join(' ')).not.toContain('DimInventada');
   });
 });
@@ -457,12 +461,37 @@ test.describe('el carril de administracion', () => {
   });
 
   test('el registro dice quien, que y cuando, no identificadores crudos', async ({ page }) => {
-    // Se provoca un cambio real para que haya algo que leer.
-    await page.goto('/admin/teams');
+    /*
+     * El cambio se PROVOCA con una escritura, y la comprobacion NO es condicional.
+     *
+     * Antes decia «se provoca un cambio real» y lo que hacia era `goto('/admin/teams')`: una
+     * lectura, que no registra nada. Debajo, la unica asercion vivia dentro de
+     * `if (filas.count() > 0)`, asi que con el registro vacio —que era siempre— la prueba no
+     * comprobaba absolutamente nada y salia verde igual. Una prueba que pasa sin mirar es peor
+     * que no tenerla: ocupa el sitio de la que si miraria.
+     */
+    const equipo = await page.request
+      .get('/api/admin/teams')
+      .then((r) => r.json())
+      .then((c) => c.equipos.find((t: { id: string }) => t.id === 'equipo-este'));
+    const guardado = await page.request.post('/api/admin/teams', {
+      data: { accion: 'guardar', equipo },
+    });
+    expect(guardado.status()).toBe(200);
+
     await page.goto('/admin/audit');
-    const dataRows = page.locator('.log__row');
-    if ((await dataRows.count()) > 0) {
-      await expect(dataRows.first().locator('time')).toHaveAttribute('dateTime', /\d{4}-\d{2}-\d{2}/);
-    }
+    // El selector tambien estaba mal, de la forma mas dificil de ver: `.log__row` EXISTE, pero en
+    // el resumen de `/admin`, no en la tabla de `/admin/audit`, que es la pagina que se abria.
+    // Clase correcta, pagina equivocada, cero filas y ninguna queja.
+    const filas = page.getByTestId('audit-table').locator('tbody tr');
+    await expect(filas.first()).toBeVisible();
+
+    // «Cuando»: una fecha legible, no el ISO crudo ni un numero de milisegundos.
+    await expect(filas.first().locator('td').first()).toHaveText(/\d{1,2}\/\d{1,2}\/\d{4}/);
+    // «Quien»: una persona, no el identificador con el que el gobierno la guarda.
+    await expect(filas.first().locator('td').nth(1)).toHaveText('Juan F. Medina C.');
+    // «Que» y «Accion» estan, y dicen algo.
+    await expect(filas.first().locator('td').nth(2)).toHaveText(/\w/);
+    await expect(filas.first().locator('td').nth(3)).toHaveText(/\w/);
   });
 });

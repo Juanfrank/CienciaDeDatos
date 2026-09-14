@@ -3,7 +3,10 @@
   "name": "coherence",
   "projectType": "library",
   "sourceRoot": "tools/coherence",
-  "tags": ["type:tooling", "scope:repo"],
+  "tags": [
+    "type:tooling",
+    "scope:repo"
+  ],
   "targets": {
     "test": {
       "executor": "nx:run-commands",
@@ -17,14 +20,20 @@
         "{workspaceRoot}/apps/shell/app/**/*",
         "{workspaceRoot}/apps/shell/src/**/*",
         "{workspaceRoot}/apps/shell/e2e/**/*",
-        "{workspaceRoot}/packages/ui-components/src/registry/catalog.ts",
         "{workspaceRoot}/**/*.md",
-        "{workspaceRoot}/**/AGENTS.md"
+        "{workspaceRoot}/**/AGENTS.md",
+        "{workspaceRoot}/packages/i18n/src/catalog/*.ts",
+        "{workspaceRoot}/packages/ui-components/src/**/*",
+        "{workspaceRoot}/tools/*.sh",
+        "{workspaceRoot}/**/*.json",
+        "{workspaceRoot}/.github/**/*"
       ]
     },
     "lint": {
       "executor": "nx:run-commands",
-      "options": { "command": "eslint tools/coherence --max-warnings 0" }
+      "options": {
+        "command": "eslint tools/coherence --max-warnings 0"
+      }
     }
   }
 }

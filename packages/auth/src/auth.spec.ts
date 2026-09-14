@@ -252,6 +252,42 @@ describe('LocalIdentityProvider (4.7.2)', () => {
       ).rejects.toMatchObject({ reason: 'credenciales-invalidas' });
       expect(auditLog.events[0]?.reason).toBe('credenciales-invalidas');
     });
+
+    /*
+     * Y tampoco lo revela el RELOJ, que es por donde se escapaba.
+     *
+     * El mensaje era el mismo desde el principio; el tiempo no. Argon2id con m=19456 tarda
+     * decenas de milisegundos a proposito, y la rama de «esta cuenta no existe» salia sin
+     * verificar nada, en microsegundos. Con eso, quien recorra una lista de correos midiendo lo
+     * que tarda la respuesta separa las cuentas de la institucion de las que no lo son, sin
+     * acertar ni una contraseña y sin dejar mas rastro que intentos fallidos normales.
+     *
+     * Se comparan las dos ramas, no un umbral en milisegundos: una cifra absoluta depende de la
+     * maquina y acaba relajandose hasta no comprobar nada. La proporcion no: antes del arreglo
+     * era del orden de 0,01 —dos ordenes de magnitud— y ahora ronda 1.
+     */
+    it('ni por el tiempo que tarda en contestar', async () => {
+      await createAccount();
+      // El primer Argon2 del proceso paga la inicializacion, y el hash de relleno se calcula una
+      // sola vez: sin calentar, la primera medicion mide otra cosa.
+      await expect(
+        provider.authenticate({ email: 'ana@externo.org', password: 'mal' }),
+      ).rejects.toThrow();
+      await expect(
+        provider.authenticate({ email: 'nadie@externo.org', password: 'mal' }),
+      ).rejects.toThrow();
+
+      const mide = async (email: string) => {
+        const desde = performance.now();
+        await expect(provider.authenticate({ email, password: 'mal' })).rejects.toThrow();
+        return performance.now() - desde;
+      };
+
+      const existe = await mide('ana@externo.org');
+      const noExiste = await mide('nadie@externo.org');
+
+      expect(noExiste).toBeGreaterThan(existe * 0.5);
+    });
   });
 });
 

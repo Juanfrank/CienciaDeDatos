@@ -609,7 +609,7 @@
   },
   {
    "path": "packages/access-control/src/Team.ts",
-   "hash": "a4227db975ac41bcd683028979e228c79d061aba400fa746181cece7b97def7e",
+   "hash": "a5af9a2c42e1590588bf567e059b6552693c929adaa0d90d20562fe85818ffb9",
    "imports": [
     "./AccessScope"
    ],
@@ -1145,7 +1145,7 @@
   },
   {
    "path": "packages/identity-db/src/seedData.ts",
-   "hash": "0f6fad84316fa957c9da8d40be7a539346322e66d0566391042e6db9edbac3ec",
+   "hash": "2d44a00b740973a295202f229833e8acee3b056e4e4d27dc1f20f0f506b1bbd6",
    "imports": [
     "./rows"
    ],
@@ -1217,7 +1217,7 @@
   },
   {
    "path": "packages/identity-db/src/mappers.ts",
-   "hash": "716220d901d5a4dce947445f298fcd1766fa8cf5063ec9f22c2fe4e3c54139fb",
+   "hash": "3ea8c45774721d7bbfaf51b3c5eebe88135984a244d6c1ca7c36db2c15d546fa",
    "imports": [
     "./rows",
     "@app/access-control"
@@ -1486,7 +1486,7 @@
   },
   {
    "path": "packages/identity-db/src/rows.ts",
-   "hash": "3c1830fb461267045eb847aeea87e7ce4aba0999eba7fe1fb77ccd8ecf01406c",
+   "hash": "fbcf05523ce1678b3d0a87f84878565338540dab254378fe205cb8fddb380f17",
    "imports": [],
    "defines": [],
    "exports": [],
@@ -2047,7 +2047,7 @@
   },
   {
    "path": "packages/module-model/src/validation.ts",
-   "hash": "97f916d7deb7eca4d96e58b08ca6c9333ac3b431984fdd6dc181f1d969b496e1",
+   "hash": "b091f12f8e86d05e788408a7cad0daab13a918157d39849e8079a3f201b9f1a8",
    "imports": [
     "./ModuleDefinition",
     "./grid",
@@ -2104,7 +2104,7 @@
   },
   {
    "path": "packages/module-model/src/moduleModel.spec.ts",
-   "hash": "68eccb9a35ba7fdd39e8e8ba4f2d1dd18aa5905bc2c51c33a6efbdea65870ab7",
+   "hash": "6a92d158a914188ed211e32944fb797f8f046ec65efd8f4666fcd867904a0291",
    "imports": [
     "./ModuleDefinition",
     "./grid",
@@ -2715,12 +2715,13 @@
   },
   {
    "path": "packages/auth/src/LocalIdentityProvider.ts",
-   "hash": "d6454ceb0ca398846c3866ddcde11f24a3aabcdfbd126133f179d145c9cee271",
+   "hash": "7ff89e80abeb384b9adb89391fabaa9af1f999d0a70725bdb6a17d7da154e1ed",
    "imports": [
     "./IIdentityProvider",
     "./passwordPolicy",
     "./stores",
     "@node-rs/argon2",
+    "node:crypto",
     "otpauth"
    ],
    "defines": [
@@ -2749,6 +2750,10 @@
     },
     {
      "module": "@node-rs/argon2",
+     "resolved": null
+    },
+    {
+     "module": "node:crypto",
      "resolved": null
     },
     {
@@ -2839,7 +2844,7 @@
   },
   {
    "path": "packages/auth/src/auth.spec.ts",
-   "hash": "bbf46313c659cd93fc399a6f9011bf1635c09b75df0f0fb75d4ff361ef2bd544",
+   "hash": "e5c15aba7642bdc2677e18125e7db0e4748c14372ac04052643e5f4542edb654",
    "imports": [
     "./AzureAdIdentityProvider",
     "./IIdentityProvider",
@@ -4486,7 +4491,7 @@
   },
   {
    "path": "packages/design-tokens/src/identity.ts",
-   "hash": "cdc5637d442563d2103c4674a921eeecf32465ca19db116d7a19b90b635bc011",
+   "hash": "b7399b7e20dc13344fcd57ba3b81ed3ca397f98a8bf7fd190b38a4de11db7959",
    "imports": [],
    "defines": [
     {
@@ -4941,7 +4946,7 @@
   },
   {
    "path": "packages/ui-components/src/index.ts",
-   "hash": "5d7e7afe50e6f1fc041ab7a5b38833bff9b29d840005227d631e3cb37a497697",
+   "hash": "bff66474c9305da55e796084710b7f92e08a840cbf92b24e70dfcbdd861228da",
    "imports": [],
    "defines": [
     {
@@ -5301,6 +5306,11 @@
     },
     {
      "name": "defaultPicker",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "defaultSize",
      "line": null,
      "type": "export"
     },
@@ -5695,6 +5705,11 @@
      "type": "export"
     },
     {
+     "name": "type DefaultSize",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "type DeprecationWarning",
      "line": null,
      "type": "export"
@@ -5970,6 +5985,11 @@
      "type": "export"
     },
     {
+     "name": "type SizeableObject",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "type SlotAssignment",
      "line": null,
      "type": "export"
@@ -6168,6 +6188,7 @@
     "contractSlots",
     "dateKindIs",
     "defaultPicker",
+    "defaultSize",
     "defaultSlots",
     "effectivePickers",
     "elementsOf",
@@ -6246,6 +6267,7 @@
     "type Dash",
     "type DatumLabels",
     "type DatumPosition",
+    "type DefaultSize",
     "type DeprecationWarning",
     "type DimensionPicker",
     "type Direction",
@@ -6301,6 +6323,7 @@
     "type Shape",
     "type ShapeSettings",
     "type SimpleSettingsContainer",
+    "type SizeableObject",
     "type SlotAssignment",
     "type SlotProblem",
     "type SortCriterion",
@@ -6420,7 +6443,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/filtersPanel.spec.ts",
-   "hash": "8b655f2072f7ee66b4774fb2d8b7c8074057e7837b250e0813f9df81ea21c82c",
+   "hash": "63a066f1e50fcd0cd03013ba2ad5528aa76af9ce267d3d1753c7103d6d93f6aa",
    "imports": [
     "../registry/types",
     "./filtersPanel",
@@ -6514,6 +6537,30 @@
    ]
   },
   {
+   "path": "packages/ui-components/src/presentation/defaultSize.ts",
+   "hash": "0b4937752b21f678ea637461fd2b2df39b76aea4c1b0a4ad372f6dde45a1f312",
+   "imports": [
+    "../registry/types"
+   ],
+   "defines": [
+    {
+     "name": "defaultSize",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "defaultSize"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../registry/types",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "packages/ui-components/src/presentation/contract.spec.ts",
    "hash": "dbf959ce3253047f8edef2a096b3fd80a04a6277bcf9aa9c4242b4c87c064209",
    "imports": [
@@ -6541,6 +6588,32 @@
     },
     {
      "module": "./icons",
+     "resolved": null
+    },
+    {
+     "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "packages/ui-components/src/presentation/defaultSize.spec.ts",
+   "hash": "5aa018fbce6998a96a9a71322ea423c2f7533e84eda427f94ae509b02edc8c47",
+   "imports": [
+    "../registry/catalog",
+    "./defaultSize",
+    "vitest"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../registry/catalog",
+     "resolved": null
+    },
+    {
+     "module": "./defaultSize",
      "resolved": null
     },
     {
@@ -7054,7 +7127,7 @@
   },
   {
    "path": "packages/ui-components/src/presentation/number.ts",
-   "hash": "98392b2beb0fa388c3bc6c6727c1ab20319516dcdf9382d435298f48b61bfc50",
+   "hash": "9cd991f42b60acd620fbe5b0eb56afdfb2d4232d5e5ad360b6744d39fc6ef934",
    "imports": [],
    "defines": [
     {
@@ -7184,7 +7257,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/catalog.ts",
-   "hash": "5e90002f02171e9df5a1d2021ed036b20c30f15d01051b91487072ffc3774878",
+   "hash": "8fa4c9b54932809b41d81f481de8166325fa59936376b1ec35c5aceecb6d5d67",
    "imports": [
     "../presentation/contract",
     "../presentation/wells",
@@ -7818,7 +7891,7 @@
   },
   {
    "path": "packages/ui-components/src/registry/types.ts",
-   "hash": "14f7e948ba2b4f7aae86ad2f4b269629e77e7f476e8f9cfdb827d2583f2b71f9",
+   "hash": "e137a2778162b8176ced36316015a73e9c31d8b87201c7fda0e9426e5d008c6d",
    "imports": [
     "../presentation/containers",
     "../presentation/contract",
@@ -8837,7 +8910,7 @@
   },
   {
    "path": "packages/i18n/src/catalog.spec.ts",
-   "hash": "fe93c18eb21d79693bbd6ea3cb77eb883901a035a57a00e42fa31c98379acc2a",
+   "hash": "635ab1940f4fe1e9fcd1eda0cf6796d9509f77c891d91073fbd48acdae4ec1a3",
    "imports": [
     "./index",
     "./locales",
@@ -8863,7 +8936,7 @@
   },
   {
    "path": "packages/i18n/src/translator.ts",
-   "hash": "f3f81ea2ca7d9df1cc1616b8f5cdfda3fa6732c907f9dda1f43523a699584477",
+   "hash": "a0a1057539d332f6c0fbb3e20b9dd7ca6f9e1bc29a19f7841d6b3d0d607770b7",
    "imports": [
     "./catalog/en",
     "./catalog/es",
@@ -8949,7 +9022,7 @@
   },
   {
    "path": "packages/i18n/src/catalog/es.ts",
-   "hash": "d15f45914d88f0deb0f2c1fcb94a673438df012a1ce8fe27e52eec30b1dcfa15",
+   "hash": "cdf847e2cb93a621bc8d6463a22476c31e0d1c0c9db74b1ff42a0676884193a9",
    "imports": [],
    "defines": [
     {
@@ -8966,7 +9039,7 @@
   },
   {
    "path": "packages/i18n/src/catalog/en.ts",
-   "hash": "9ae8900d75408939b9fc459b18357ff9a654b7db3f0b40badbf03183a218c1bb",
+   "hash": "337c116ee8fce87ef9e78400460629cb8f0fe5d812af9a400b745aef100ef134",
    "imports": [
     "./es"
    ],
@@ -9525,9 +9598,70 @@
    ]
   },
   {
-   "path": "tools/coherence/rutas.spec.ts",
-   "hash": "31d6e962da536e821a44ef92e48180e4e2634d851820b99204bb43601ffbca83",
+   "path": "tools/coherence/rutas-de-scripts.spec.ts",
+   "hash": "8b3b51c13a3d720eeff85f420345bbe80e3fc731f429f1d5832ab2b566f03003",
    "imports": [
+    "node:child_process",
+    "node:fs",
+    "vitest"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "node:child_process",
+     "resolved": null
+    },
+    {
+     "module": "node:fs",
+     "resolved": null
+    },
+    {
+     "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "tools/coherence/autorizacion.spec.ts",
+   "hash": "e74f7d7dc83bd3e64345b48a765ed7d61b772dbe9304911bd1efb20eb318d0e7",
+   "imports": [
+    "node:child_process",
+    "node:fs",
+    "vitest"
+   ],
+   "defines": [
+    {
+     "name": "$",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "$"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "node:child_process",
+     "resolved": null
+    },
+    {
+     "module": "node:fs",
+     "resolved": null
+    },
+    {
+     "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "tools/coherence/rutas.spec.ts",
+   "hash": "ddae459e37d0bfa8e7b8afb182d17346a789b67132833e1cd58be6c9ac621570",
+   "imports": [
+    "../rename/segmentos.mjs",
     "node:child_process",
     "node:fs",
     "node:path",
@@ -9537,6 +9671,10 @@
    "exports": [],
    "references": [],
    "import_edges": [
+    {
+     "module": "../rename/segmentos.mjs",
+     "resolved": null
+    },
     {
      "module": "node:child_process",
      "resolved": null
@@ -9556,8 +9694,34 @@
    ]
   },
   {
+   "path": "tools/coherence/i18n.spec.ts",
+   "hash": "d40ce6291b63e283b1c8c3e1e2283e969984efc4e7a2d2c7de213368226fcf2e",
+   "imports": [
+    "node:child_process",
+    "node:fs",
+    "vitest"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "node:child_process",
+     "resolved": null
+    },
+    {
+     "module": "node:fs",
+     "resolved": null
+    },
+    {
+     "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "tools/coherence/interfaz.spec.ts",
-   "hash": "39246d840c961fd20c5fee22b08b07383a8787e2700fefcc3c9546b6d61b719f",
+   "hash": "87832dba2f16e14210b2443bccad514c674890eae204a91b1befab141e482fbb",
    "imports": [
     "@app/ui-components",
     "node:child_process",
@@ -9588,8 +9752,9 @@
   },
   {
    "path": "tools/coherence/api.spec.ts",
-   "hash": "d09aee57dffe722587cc4df52a682352dd52da86e6702a06273f5d32c099d606",
+   "hash": "823788032d01afc52581b4d5dbd2454c8a70eef62eeab6a493b8630344982760",
    "imports": [
+    "../rename/segmentos.mjs",
     "node:child_process",
     "node:fs",
     "vitest"
@@ -9598,6 +9763,10 @@
    "exports": [],
    "references": [],
    "import_edges": [
+    {
+     "module": "../rename/segmentos.mjs",
+     "resolved": null
+    },
     {
      "module": "node:child_process",
      "resolved": null
@@ -9614,7 +9783,7 @@
   },
   {
    "path": "tools/coherence/documentacion.spec.ts",
-   "hash": "bf1e61ce672eb76c2cbc7dd2cbe71a8bd857e9b7771dec8c236424bd3f28e7ef",
+   "hash": "b0bc589228167df84176958b5762e9c28e81e320007b5398ac85231005086f77",
    "imports": [
     "../rename/segmentos.mjs",
     "node:child_process",
@@ -9644,6 +9813,27 @@
     },
     {
      "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "tools/rename/migrate-folders.mjs",
+   "hash": "71bcca93837d7c345017b84fab7040cb9b7618985c77ba13c4d3a1e941feeab2",
+   "imports": [
+    "node:child_process",
+    "node:fs"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "node:child_process",
+     "resolved": null
+    },
+    {
+     "module": "node:fs",
      "resolved": null
     }
    ]
@@ -9740,7 +9930,7 @@
   },
   {
    "path": "tools/rename/detect.mjs",
-   "hash": "fc9a6502e318de63b1e0dbeaf907d19bcc4658d13c1fab0977a3687ae33ec72e",
+   "hash": "242b4a9e6541a117879b4452f8c352699ea9ef0fccd0e4905f6af649dbabb3e7",
    "imports": [
     "./renombrar.mjs",
     "node:child_process",
@@ -9825,7 +10015,7 @@
   },
   {
    "path": "tools/rename/segmentos.mjs",
-   "hash": "8f983b39069cceee2fd2400af768dbb27bb1970e0ac1aaaa8a2998dc66697667",
+   "hash": "687fafdd371dda6d5519a212114844b030381f78932eabb184809fac982a64c5",
    "imports": [],
    "defines": [
     {
@@ -9857,6 +10047,35 @@
    ],
    "references": [],
    "import_edges": []
+  },
+  {
+   "path": "tools/i18n/migrate-keys.mjs",
+   "hash": "a28d48f4d7f4afc2cdb356dba44e0299c4ed5bbd644aa5032a44ce2b5fce96a0",
+   "imports": [
+    "node:child_process",
+    "node:fs"
+   ],
+   "defines": [
+    {
+     "name": "translateKey",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "translateKey"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "node:child_process",
+     "resolved": null
+    },
+    {
+     "module": "node:fs",
+     "resolved": null
+    }
+   ]
   },
   {
    "path": "apps/modules/sample-module/module.contract.ts",
@@ -9919,7 +10138,7 @@
   },
   {
    "path": "apps/modules/sample-module/src/index.spec.ts",
-   "hash": "6d29a6a58b7591eacd9b1d9fb7f18057a8cf8ffc97ecb7b07b3778513d7274d6",
+   "hash": "127dd1e64c233c2c96944c0ef3ac284de00ddd84ebff1b5612e56e77735c5c83",
    "imports": [
     "./index",
     "vitest"
@@ -10310,9 +10529,10 @@
   },
   {
    "path": "apps/shell/middleware.ts",
-   "hash": "a5863356ab1f37eb1e84439b6d92ddd69b8b404aa7073b5acafe24bb58a6ab30",
+   "hash": "4bae6fc4150c653e5113f7b5c221319f7da59c192850c73d7b2619ff69dedad1",
    "imports": [
-    "./src/server/incrustacion",
+    "./src/server/csp",
+    "./src/server/embedding",
     "next/server"
    ],
    "defines": [
@@ -10334,7 +10554,11 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./src/server/incrustacion",
+     "module": "./src/server/csp",
+     "resolved": null
+    },
+    {
+     "module": "./src/server/embedding",
      "resolved": null
     },
     {
@@ -10345,7 +10569,7 @@
   },
   {
    "path": "apps/shell/instrumentation.ts",
-   "hash": "6b3ff196ab376f0a310064595033bc6f6697c796ceb431eb44283e703eea273a",
+   "hash": "7a8699e6b12fe80c438e733d8af2752df553bf06279adde0de016763c777b1f9",
    "imports": [],
    "defines": [
     {
@@ -10383,7 +10607,7 @@
   },
   {
    "path": "apps/shell/src/components/Export.tsx",
-   "hash": "435cb062be97f6639c67eec9fb4d0fcf6426b5ca235497931712da6015a87cb4",
+   "hash": "6ad7ea0f9447da9ec3151bae838364974be93ddf7d2abdc5667ee0462578d735",
    "imports": [
     "../hooks/useUrlFilters",
     "./icons/IconButton",
@@ -10417,7 +10641,7 @@
   },
   {
    "path": "apps/shell/src/components/NavigationTree.tsx",
-   "hash": "6af195b5a1937cf956f2019e95d50768d333a0aea8b951756cc4050869f034cc",
+   "hash": "7abf1056b8dda982082f360f2a09047327e4f57212bc50e9ecfaa6ecd3b82fc3",
    "imports": [
     "@app/access-control",
     "next/link",
@@ -10468,7 +10692,7 @@
   },
   {
    "path": "apps/shell/src/components/Addons.tsx",
-   "hash": "c4dc16ba2a25d9e5827643b875c4d029cad9b454f39e8e477dca5586c1c8c044",
+   "hash": "cfe30433c47670846520ccf6fdc92ebac154fb512e5c0152f1f5159f7853bf30",
    "imports": [
     "./icons/Icon",
     "@app/data-contracts",
@@ -10519,7 +10743,7 @@
   },
   {
    "path": "apps/shell/src/components/Reset.tsx",
-   "hash": "d0819a35af9605a316e118c47697a3f507f3f9b6c011d6a817230a4e1dda30d3",
+   "hash": "18c3fdece361a9187acd316db7913543f1ceda38d4ea16a144e317802d52c06b",
    "imports": [
     "next/navigation",
     "react"
@@ -10572,7 +10796,7 @@
   },
   {
    "path": "apps/shell/src/components/MatrixTable.tsx",
-   "hash": "e000d5f4ea168ae35746761fa4a0ddd40ab27730e95bd0ced632482f0f2d9614",
+   "hash": "e4e2b2ba037bfae4adfe23bd61a870551bbaafa9aefe60281b9ff0b80535adff",
    "imports": [
     "./icons/Icon",
     "@app/ui-components",
@@ -10606,7 +10830,7 @@
   },
   {
    "path": "apps/shell/src/components/Login.tsx",
-   "hash": "1bbd5ceeb2d227a3640a1dbd682e0f090c424cd7c6eba61e70a42c1d58c234e4",
+   "hash": "b0f4e1a9bba31b9a5e6bdc2ccc914cf1a91fdadb7fca72b614239b69598c54ee",
    "imports": [
     "next/navigation",
     "react"
@@ -10635,7 +10859,7 @@
   },
   {
    "path": "apps/shell/src/components/SortableTable.tsx",
-   "hash": "5521a896b3da4b64d3fcdd2a1b68db23537b41bb3bcfb4950721e7de3f53f3c0",
+   "hash": "54231d96e8941d50c4ea4821ad04cbd8596fd10b60d2d884a6061ccb3c6cf74c",
    "imports": [
     "@app/data-contracts",
     "@app/ui-components",
@@ -10669,11 +10893,16 @@
   },
   {
    "path": "apps/shell/src/components/elements.tsx",
-   "hash": "5562c393dd726310a513cc5112c6001f18f991efd751e284d6b7206a69df101d",
+   "hash": "9d7e849283320300af44ab18d96aa46aaa8cefc186bde7f54a002d37f8193cef",
    "imports": [
     "@app/ui-components"
    ],
    "defines": [
+    {
+     "name": "BasicShape",
+     "line": null,
+     "type": "export"
+    },
     {
      "name": "Connection",
      "line": null,
@@ -10681,11 +10910,6 @@
     },
     {
      "name": "DividerLine",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "FormaBasica",
      "line": null,
      "type": "export"
     },
@@ -10711,9 +10935,9 @@
     }
    ],
    "exports": [
+    "BasicShape",
     "Connection",
     "DividerLine",
-    "FormaBasica",
     "SectionTitle",
     "TextBox",
     "trazar",
@@ -10763,7 +10987,7 @@
   },
   {
    "path": "apps/shell/src/components/MyView.tsx",
-   "hash": "4a9075dad7124a45d992efb15565a1f9dc7336f2b7cab216d6504f9f4bd0a1b2",
+   "hash": "b1d87618f50999382e398dfd32dec5ce3f101030ae66b777511e2eba5e9d749a",
    "imports": [
     "./icons/IconButton",
     "next/navigation",
@@ -10797,7 +11021,7 @@
   },
   {
    "path": "apps/shell/src/components/Bookmarks.tsx",
-   "hash": "bb3b8a78cb91d1f1daa91a936328526f069367be24483f484142395a3b387fcc",
+   "hash": "a6350e543f28d99bddefe80842fdcf0272d6dcfc5a6ce18c33c50e438d3d3b7a",
    "imports": [
     "../hooks/useUrlFilters",
     "./icons/IconButton",
@@ -10846,13 +11070,13 @@
   },
   {
    "path": "apps/shell/src/components/Header.tsx",
-   "hash": "5bbddae404dbd5e72a0e2238f2afd5f74a0f42530c1fc11679bd792ede0dc2e6",
+   "hash": "d4a842b2fd0f52366c27740298902282e14ce42f64556a61d261e4fad592bcf4",
    "imports": [
     "../server/admin",
     "../server/context",
+    "../server/locale",
     "../server/session",
-    "./Bell",
-    "./CloseSession",
+    "./AccountMenu",
     "./ToggleSidebar",
     "@app/access-control",
     "@app/design-tokens",
@@ -10879,15 +11103,15 @@
      "resolved": null
     },
     {
+     "module": "../server/locale",
+     "resolved": null
+    },
+    {
      "module": "../server/session",
      "resolved": null
     },
     {
-     "module": "./Bell",
-     "resolved": null
-    },
-    {
-     "module": "./CloseSession",
+     "module": "./AccountMenu",
      "resolved": null
     },
     {
@@ -10910,9 +11134,9 @@
   },
   {
    "path": "apps/shell/src/components/ModuleObject.tsx",
-   "hash": "72ab46f7db020a3bd025b973eb51926499e5ab673d642fe6250def59706939e0",
+   "hash": "f412b0bca4b9a31de3dabcdeb006f34ac80089bdf13f44ce1491893f50704349",
    "imports": [
-    "../server/serializar",
+    "../server/serialize",
     "./FiltersPanel",
     "./GridConnection",
     "./Slicer",
@@ -10935,7 +11159,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "../server/serializar",
+     "module": "../server/serialize",
      "resolved": null
     },
     {
@@ -10974,7 +11198,7 @@
   },
   {
    "path": "apps/shell/src/components/TeamPicker.tsx",
-   "hash": "5edb936d3b6f90fc6b4bf4a3eeeca286564e5fe5ed9419ac7353cf2f54c0c4c3",
+   "hash": "8d84eef17d3cce51df24afd7c317c8d589fac6f59d2c14fe0ae7bc748532c236",
    "imports": [
     "next/navigation",
     "react"
@@ -10988,35 +11212,6 @@
    ],
    "exports": [
     "TeamPicker"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "next/navigation",
-     "resolved": null
-    },
-    {
-     "module": "react",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/src/components/CloseSession.tsx",
-   "hash": "0166813ccd96bbbb82053455634c727fd8af94e2362cee49a47d815f83d4570f",
-   "imports": [
-    "next/navigation",
-    "react"
-   ],
-   "defines": [
-    {
-     "name": "CloseSession",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "CloseSession"
    ],
    "references": [],
    "import_edges": [
@@ -11062,10 +11257,10 @@
   },
   {
    "path": "apps/shell/src/components/ModuleView.tsx",
-   "hash": "69aa952279ba337d14cd9c3956b53a757d50a9c4ccb4ee24b6519523babced0d",
+   "hash": "0bc14ec85d0c2004874e8110a2a2c4713b85525257deb35bc301147b71ee5705",
    "imports": [
     "../hooks/useUrlFilters",
-    "../server/serializar",
+    "../server/serialize",
     "./Ask",
     "./Bookmarks",
     "./CreateNotice",
@@ -11093,7 +11288,7 @@
      "resolved": null
     },
     {
-     "module": "../server/serializar",
+     "module": "../server/serialize",
      "resolved": null
     },
     {
@@ -11135,8 +11330,32 @@
    ]
   },
   {
+   "path": "apps/shell/src/components/noticeKinds.ts",
+   "hash": "f54c0f767a1f1cceeb4349e9ac5407e5fef906a68a7631d10264ce383214f9c6",
+   "imports": [
+    "@app/alerts"
+   ],
+   "defines": [
+    {
+     "name": "kindLabel",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "kindLabel"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "@app/alerts",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/src/components/Ask.tsx",
-   "hash": "6deb2d249ed7a00742012cfbff639f27ccff45fcb000205c4a57964cc5f27a9f",
+   "hash": "3085d29747d1d9123badde4a463a4713c00acc10792db0d3fc6c5d5119a201b8",
    "imports": [
     "next/navigation",
     "react"
@@ -11165,7 +11384,7 @@
   },
   {
    "path": "apps/shell/src/components/CreateNotice.tsx",
-   "hash": "9ec787ff5d38cf96c09580f4dfa455cb9db8e718cab15a1083ae646da79533e6",
+   "hash": "37c71df774fad3f9e1196bc14b62fb8f056f1d998414315c5860ec89ee4fa430",
    "imports": [
     "../hooks/useUrlFilters",
     "./icons/IconButton",
@@ -11209,7 +11428,7 @@
   },
   {
    "path": "apps/shell/src/components/Canvas.tsx",
-   "hash": "4d9d08b0703274d90ed25026cf009ddc9fbaa430d0150feb2e00558d9fc7a0b7",
+   "hash": "5b2f4e687b68aa7d8246a60befe10e4922bdba58dd65f2f2ed8cee990dbd0fa3",
    "imports": [
     "@app/ui-components",
     "react"
@@ -11238,7 +11457,7 @@
   },
   {
    "path": "apps/shell/src/components/Slicer.tsx",
-   "hash": "910da55161b0f1ee128f7e355ed6a2b1884bda168ea5f0720466273b772bf2e5",
+   "hash": "baaad4d02201f613508dce248a3567e6c680b75b17cd40a31b0f5d58e22b692d",
    "imports": [
     "../hooks/useUrlFilters",
     "./objects",
@@ -11277,7 +11496,7 @@
   },
   {
    "path": "apps/shell/src/components/Embed.tsx",
-   "hash": "df67b90e87e222eb56e706f74845d3348423e618e09937d924ab7c7271904edf",
+   "hash": "e4471db8e8e12b9c9a1b792c5e82effb9bec10b2bc257f4f772faea8bcf06204",
    "imports": [
     "../hooks/useUrlFilters",
     "./icons/IconButton",
@@ -11311,7 +11530,7 @@
   },
   {
    "path": "apps/shell/src/components/ScopeBadge.tsx",
-   "hash": "d5862027a86b3003ad0b93ddcd7f8454ba8a5bb56993f7b97478f9552cb6cf64",
+   "hash": "6ce7527f7322499cb3e6721c634f8a162e5ae46fe81bcaf523994a09d32e6440",
    "imports": [
     "./icons/Icon",
     "react"
@@ -11340,14 +11559,14 @@
   },
   {
    "path": "apps/shell/src/components/Locale.tsx",
-   "hash": "3b4d1697a4b2b0e17214cb235fc8fca8b9a429bdcd3436a11f7cdea76dc48ccf",
+   "hash": "44fef6f0b5e477c3297b0ad4b79042fac4b112f4639a622d6ff47a9c0fa2b956",
    "imports": [
     "@app/i18n",
     "react"
    ],
    "defines": [
     {
-     "name": "ProveedorDeIdioma",
+     "name": "LocaleProvider",
      "line": null,
      "type": "export"
     },
@@ -11358,7 +11577,7 @@
     }
    ],
    "exports": [
-    "ProveedorDeIdioma",
+    "LocaleProvider",
     "useTranslator"
    ],
    "references": [],
@@ -11375,9 +11594,9 @@
   },
   {
    "path": "apps/shell/src/components/Notices.tsx",
-   "hash": "79a64f936a9f9c6a4e1b6d52acaf6c9cd6dd8e1b6cc273e0a33ab7ce582dab0d",
+   "hash": "62e605e5c8c7f1154863e36c4ec9ec6200361d99293163392e4b5d3bdba03f1a",
    "imports": [
-    "./Bell",
+    "./noticeKinds",
     "@app/alerts",
     "next/link",
     "react"
@@ -11395,7 +11614,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./Bell",
+     "module": "./noticeKinds",
      "resolved": null
     },
     {
@@ -11414,7 +11633,7 @@
   },
   {
    "path": "apps/shell/src/components/FiltersPanel.tsx",
-   "hash": "9e7c017057ebb8acb5ec6d831a7d41bb28747795a3f3e1bb6816bfe5f53ff1a9",
+   "hash": "5246d17815aedcba89665142233593b91c4008cabe886d4d1e630a247651e9be",
    "imports": [
     "../hooks/useUrlFilters",
     "./objects",
@@ -11458,7 +11677,7 @@
   },
   {
    "path": "apps/shell/src/components/objects.tsx",
-   "hash": "9b575f4f5e01ea194f1f6954ffb9c2ceaca941cba9c8df8141bb80386a1615f4",
+   "hash": "5ee2ca49227b5bed606d10d57578cc6cdf0e92e9a18d097b857a2a5dee90fba2",
    "imports": [
     "../hooks/useOverflows",
     "./Addons",
@@ -11477,12 +11696,12 @@
      "type": "export"
     },
     {
-     "name": "BarrasHorizontales",
+     "name": "Bars",
      "line": null,
      "type": "export"
     },
     {
-     "name": "Bars",
+     "name": "BrokenObject",
      "line": null,
      "type": "export"
     },
@@ -11512,6 +11731,16 @@
      "type": "export"
     },
     {
+     "name": "GeneratingObject",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "HorizontalBars",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "KpiCard",
      "line": null,
      "type": "export"
@@ -11527,17 +11756,7 @@
      "type": "export"
     },
     {
-     "name": "ObjetoGenerandose",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "ObjetoNoDisponible",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "ObjetoRoto",
+     "name": "ObjectNotAvailable",
      "line": null,
      "type": "export"
     },
@@ -11579,19 +11798,19 @@
    ],
    "exports": [
     "Area",
-    "BarrasHorizontales",
     "Bars",
+    "BrokenObject",
     "Combo",
     "Donut",
     "Frame",
     "Funnel",
     "Gauge",
+    "GeneratingObject",
+    "HorizontalBars",
     "KpiCard",
     "Lines",
     "Matrix",
-    "ObjetoGenerandose",
-    "ObjetoNoDisponible",
-    "ObjetoRoto",
+    "ObjectNotAvailable",
     "Pie",
     "Scatter",
     "Slicer",
@@ -11641,10 +11860,60 @@
    ]
   },
   {
-   "path": "apps/shell/src/components/containers.tsx",
-   "hash": "1be1be8887f7e45d6c2551661e963de212331c1aee441dd4cddf7d97c0c16299",
+   "path": "apps/shell/src/components/AccountMenu.tsx",
+   "hash": "499f43e15e96cdf517138c11326b9c9e5239e7f27294ed071b44847b9bbed93a",
    "imports": [
-    "../server/serializar",
+    "./Locale",
+    "./icons/Icon",
+    "next/link",
+    "next/navigation",
+    "react"
+   ],
+   "defines": [
+    {
+     "name": "AccountMenu",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "initialsOf",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "AccountMenu",
+    "initialsOf"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./Locale",
+     "resolved": null
+    },
+    {
+     "module": "./icons/Icon",
+     "resolved": null
+    },
+    {
+     "module": "next/link",
+     "resolved": null
+    },
+    {
+     "module": "next/navigation",
+     "resolved": null
+    },
+    {
+     "module": "react",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/src/components/containers.tsx",
+   "hash": "8da8880dd7619ccb8074518a4627454cda326475ac51984b2923bdf929540586",
+   "imports": [
+    "../server/serialize",
     "./icons/Icon",
     "./objects",
     "@app/ui-components",
@@ -11681,7 +11950,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "../server/serializar",
+     "module": "../server/serialize",
      "resolved": null
     },
     {
@@ -11694,51 +11963,6 @@
     },
     {
      "module": "@app/ui-components",
-     "resolved": null
-    },
-    {
-     "module": "react",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/src/components/Bell.tsx",
-   "hash": "d3adb3f63b6b648de5e25499a6b5652dcc64ffd0e4c48d20508a64170e3f3575",
-   "imports": [
-    "@app/alerts",
-    "next/link",
-    "next/navigation",
-    "react"
-   ],
-   "defines": [
-    {
-     "name": "Bell",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "kindLabel",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "Bell",
-    "kindLabel"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "@app/alerts",
-     "resolved": null
-    },
-    {
-     "module": "next/link",
-     "resolved": null
-    },
-    {
-     "module": "next/navigation",
      "resolved": null
     },
     {
@@ -11783,7 +12007,7 @@
   },
   {
    "path": "apps/shell/src/components/ToggleSidebar.tsx",
-   "hash": "b43aaebc3c407c33b4e8e167b4604b4121c4f16cef50a065665bc771358ff7ee",
+   "hash": "ed9066d6899c008c539fc13485ed919b1dba0b587cb8aac754e5ca65a14eb24d",
    "imports": [
     "./CollapsibleNavigation",
     "./icons/Icon",
@@ -11792,7 +12016,7 @@
    ],
    "defines": [
     {
-     "name": "CONSULTA_MOVIL",
+     "name": "MOBILE_QUERY",
      "line": null,
      "type": "export"
     },
@@ -11803,7 +12027,7 @@
     }
    ],
    "exports": [
-    "CONSULTA_MOVIL",
+    "MOBILE_QUERY",
     "ToggleSidebar"
    ],
    "references": [],
@@ -11828,7 +12052,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Well.tsx",
-   "hash": "68fce6b2d0a24b07cd35a46bd1ed017118773ce8fc70dbf73034170d908b4bfb",
+   "hash": "fa20b219a493a087e6abe13331917f945a0d5080d110073f1335c122466dca58",
    "imports": [
     "../icons/Icon",
     "./Help",
@@ -11896,7 +12120,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Help.tsx",
-   "hash": "a8c52e12abfcb9be9ff9af436bd22f580d61f442b78d0c33fc0674f517277a0f",
+   "hash": "75778959ecc33eae5696396f6f276513a8c2c498a6567f5103b0ea83f9b59761",
    "imports": [
     "../icons/Icon",
     "react"
@@ -11925,10 +12149,10 @@
   },
   {
    "path": "apps/shell/src/components/editor/ModuleEditor.tsx",
-   "hash": "1a0ae3337f0cf06bba88d51761419a4a79d854c634a3367314d529a9eb901ab0",
+   "hash": "e73f47c33d5875b25001c3301552ed796d392802a12fda6ef403b4d09f3e11c8",
    "imports": [
     "../../server/editor",
-    "../../server/serializar",
+    "../../server/serialize",
     "./Canvas",
     "./EditorHeader",
     "./SidebarPanel",
@@ -11955,7 +12179,7 @@
      "resolved": null
     },
     {
-     "module": "../../server/serializar",
+     "module": "../../server/serialize",
      "resolved": null
     },
     {
@@ -11994,7 +12218,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/Tabs.tsx",
-   "hash": "4ad5c51781e1cf0bb1271532fc2a91d2fdcf283f6e46a173b2c18f2be9ae309f",
+   "hash": "3eadc518591c3baf39c319744381a598dcaf453e59b83f58ffb8ca42da1c1567",
    "imports": [
     "../icons/Icon",
     "react"
@@ -12023,13 +12247,13 @@
   },
   {
    "path": "apps/shell/src/components/editor/Section.tsx",
-   "hash": "478fb8f539311bd39c3573f1418930f3b2aaec8a9f00edc82cdec8604e51fcf4",
+   "hash": "1da2d0f7eec393258e2d20cc0a0534d2bea145ca2a2e8ccfcbb61cb5bd953d9e",
    "imports": [
     "react"
    ],
    "defines": [
     {
-     "name": "ProveedorDeFiltro",
+     "name": "FilterProvider",
      "line": null,
      "type": "export"
     },
@@ -12040,7 +12264,7 @@
     }
    ],
    "exports": [
-    "ProveedorDeFiltro",
+    "FilterProvider",
     "Section"
    ],
    "references": [],
@@ -12053,7 +12277,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/SidebarPanel.tsx",
-   "hash": "f5ca8ef9fe89a5c311926e74569680a0c9b4ad097d5d2cc6ef47e51040b3d544",
+   "hash": "d702dfec58f565e0cde53ce304e04dd749a1fbb7da6a49072199297437030d47",
    "imports": [
     "../../server/editor",
     "../Locale",
@@ -12137,7 +12361,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/ColorRules.tsx",
-   "hash": "11b6be506c7f3b1f3648540bf177ed7fdca4e46851a052f816de6a3ef287f984",
+   "hash": "355adcc4f207b867b1d5043575b7ba5d28bfb6002503c070ea5ba26b1093051d",
    "imports": [
     "./EditorTextStyle",
     "@app/ui-components"
@@ -12166,25 +12390,25 @@
   },
   {
    "path": "apps/shell/src/components/editor/controls.ts",
-   "hash": "93b9ec675cd9d9f3a1bdf23d5b29fd067b750d2a0902f60f04d8678d97e6ef51",
+   "hash": "6feed5ee417a85ff151b838bf750e86c97bfe1ea4fa79d39ea9b28064043bb2e",
    "imports": [
     "@app/ui-components"
    ],
    "defines": [
     {
-     "name": "ABRE_PRIMERO",
+     "name": "FIRST_OPENS",
      "line": null,
      "type": "export"
     },
     {
-     "name": "CONTROL_DE_CLAVE",
+     "name": "KEY_CONTROL",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "ABRE_PRIMERO",
-    "CONTROL_DE_CLAVE"
+    "FIRST_OPENS",
+    "KEY_CONTROL"
    ],
    "references": [],
    "import_edges": [
@@ -12196,9 +12420,9 @@
   },
   {
    "path": "apps/shell/src/components/editor/Canvas.tsx",
-   "hash": "4a06aa441e78dc76c777a246b354d5965c44dad3f3d8c10aeca5a25e50eaeae5",
+   "hash": "c5c3ddfde7c6a1a121d43d9af587b5ce33b518bc8554367b3cbb9ddd98ade57d",
    "imports": [
-    "../../server/serializar",
+    "../../server/serialize",
     "../ModuleObject",
     "../icons/Icon",
     "./useDrag",
@@ -12218,7 +12442,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "../../server/serializar",
+     "module": "../../server/serialize",
      "resolved": null
     },
     {
@@ -12245,8 +12469,9 @@
   },
   {
    "path": "apps/shell/src/components/editor/ModuleList.tsx",
-   "hash": "c9ebfa67d17af7ad2fcace54fde628f40f30ba92f69a4e7becf9b7a4a951772b",
+   "hash": "368810d0d368cba05e228c790b1d984c1cb86eaa9c0ffd5e1bdadd1132b72ce5",
    "imports": [
+    "../Locale",
     "@app/module-model",
     "next/link",
     "next/navigation",
@@ -12264,6 +12489,10 @@
    ],
    "references": [],
    "import_edges": [
+    {
+     "module": "../Locale",
+     "resolved": null
+    },
     {
      "module": "@app/module-model",
      "resolved": null
@@ -12284,8 +12513,9 @@
   },
   {
    "path": "apps/shell/src/components/editor/Presentation.tsx",
-   "hash": "4d80798f47382a35c4b233e34b474c0eb2f82538f96a372f153842da713eb0da",
+   "hash": "9a97f49ceba2763a6d2d32dbf3d25a2fc8e127abfeadbc1bc95dc0d1462da933",
    "imports": [
+    "../Locale",
     "../icons/Icon",
     "./ColorRules",
     "./EditorTextStyle",
@@ -12306,6 +12536,10 @@
    ],
    "references": [],
    "import_edges": [
+    {
+     "module": "../Locale",
+     "resolved": null
+    },
     {
      "module": "../icons/Icon",
      "resolved": null
@@ -12338,7 +12572,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/useDrag.ts",
-   "hash": "1d70ec09ab81d18c33354b974001367aaba5d376701f419995ad648df5808587",
+   "hash": "e428dde3b9e0a26769e24534c4ddc61ba51b5dc77448268acce2f08b87873335",
    "imports": [
     "@app/module-model",
     "react"
@@ -12367,8 +12601,9 @@
   },
   {
    "path": "apps/shell/src/components/editor/EditorObjectSettings.tsx",
-   "hash": "88d806e0967d7b5c2c8f02fb7a04f44cba04b943d02995836f1d481505fe2f7c",
+   "hash": "c266b796bded3f5d989fd059c1f9a4b31b89085648ed09b5fdfe7e28d889208f",
    "imports": [
+    "../Locale",
     "./EditorTextStyle",
     "./Section",
     "@app/ui-components"
@@ -12385,6 +12620,10 @@
    ],
    "references": [],
    "import_edges": [
+    {
+     "module": "../Locale",
+     "resolved": null
+    },
     {
      "module": "./EditorTextStyle",
      "resolved": null
@@ -12436,7 +12675,7 @@
   },
   {
    "path": "apps/shell/src/components/editor/ReferenceLines.tsx",
-   "hash": "16c49966f92b957064a6a76f85858b46b4b2d87ed136dc86335a60e6d2941fc4",
+   "hash": "2d646a75a619d06a3e3106f597ab77d91b359314337b34dd317863ac9b7c9666",
    "imports": [
     "./EditorTextStyle",
     "@app/ui-components"
@@ -12465,7 +12704,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/WhoSeesWhat.tsx",
-   "hash": "f644442a3c1c557645d8718aa0e8d43d5122017419f4c3ac1b15a230088c0ddb",
+   "hash": "ecef327f311aa687cd008110b29bce0d7ded4fdaee1f42df76b96176e6e5fc46",
    "imports": [
     "react"
    ],
@@ -12489,7 +12728,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/ScopeEditor.tsx",
-   "hash": "c3f67ee99085514a55c606789db2c7864391ce20464a16238a92f12e550efd45",
+   "hash": "948eced23bf0c8bc5d13b3c2c4bed55387756b227bc5e5118aadd861fd9f5a7f",
    "imports": [
     "@app/access-control",
     "react"
@@ -12518,7 +12757,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/TreeEditor.tsx",
-   "hash": "f798665e347117e359d49edac62bc747c846254741fe3094c3e58b4510539a60",
+   "hash": "d0d3cbe762bd15a4ae3bf2733511021b41c77e28b2e1ab805f38807f89e4b492",
    "imports": [
     "@app/access-control",
     "react"
@@ -12547,7 +12786,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/LocalAccounts.tsx",
-   "hash": "fa14a6bbbedf58cfa4e7614571a3f266bc65c8561216be7f9ce3118bda186b25",
+   "hash": "3614928affddd90d6544bb31f10848cff89f92f49fad35a41bcd7b222ee42c2e",
    "imports": [
     "../../server/identity",
     "next/navigation",
@@ -12555,13 +12794,13 @@
    ],
    "defines": [
     {
-     "name": "CuentasLocales",
+     "name": "LocalesAccounts",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "CuentasLocales"
+    "LocalesAccounts"
    ],
    "references": [],
    "import_edges": [
@@ -12581,7 +12820,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/sections.ts",
-   "hash": "f43498ecea52e4ebb289341c381c0b48c6c8fa3a49f0fbd2cf171a6db8fbc193",
+   "hash": "aa542e6ae6ff67aef55a0aa47d5269221201745823caccd4026c9e1180ff7118",
    "imports": [
     "../icons/Icon"
    ],
@@ -12628,8 +12867,37 @@
    ]
   },
   {
+   "path": "apps/shell/src/components/admin/ResourceList.tsx",
+   "hash": "5997c7feaa8fc741e8e79c229d29da1d0d7a095557e8629fa919330989ee21ca",
+   "imports": [
+    "@app/i18n",
+    "next/link"
+   ],
+   "defines": [
+    {
+     "name": "ResourceList",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "ResourceList"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "@app/i18n",
+     "resolved": null
+    },
+    {
+     "module": "next/link",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/src/components/admin/TeamEditor.tsx",
-   "hash": "3ec5562061eca44535f9525b5690a3c0053f6169c3548858214c762745924a4b",
+   "hash": "878dee0211f446be13e8589d461cc177e435eb759a71b8c20f146fb5cc9e993f",
    "imports": [
     "@app/access-control",
     "next/navigation",
@@ -12663,7 +12931,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/AdminRail.tsx",
-   "hash": "86ad50bebb89f07f483c3780349fde0e896876d1225c3c9f32565289f212db62",
+   "hash": "a8a70b829097d7a9c8c37c06642b073acbf7ef15b5f063bcc1dcbfaf56b0497f",
    "imports": [
     "../icons/Icon",
     "./sections",
@@ -12677,14 +12945,14 @@
      "type": "export"
     },
     {
-     "name": "SeccionActual",
+     "name": "CurrentSection",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
     "AdminRail",
-    "SeccionActual"
+    "CurrentSection"
    ],
    "references": [],
    "import_edges": [
@@ -12708,7 +12976,7 @@
   },
   {
    "path": "apps/shell/src/components/admin/AuditEvent.tsx",
-   "hash": "01390d7166864d29682534d354b97661d99434bfc1c8cc5b9f02d1e04e281c7e",
+   "hash": "a166f6e637e32ba753342e08bab145d31f96825d92cf2fafe375b471d0788be3",
    "imports": [
     "@app/observability"
    ],
@@ -12726,6 +12994,40 @@
    "import_edges": [
     {
      "module": "@app/observability",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/src/components/admin/SectionIndex.tsx",
+   "hash": "ec8d11a7edf2aba28f3fbc6b86969341c3a66b35e64573750d8e7617d5213b41",
+   "imports": [
+    "../icons/Icon",
+    "./sections",
+    "next/link"
+   ],
+   "defines": [
+    {
+     "name": "SectionIndex",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "SectionIndex"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../icons/Icon",
+     "resolved": null
+    },
+    {
+     "module": "./sections",
+     "resolved": null
+    },
+    {
+     "module": "next/link",
      "resolved": null
     }
    ]
@@ -12785,7 +13087,7 @@
   },
   {
    "path": "apps/shell/src/server/theme.ts",
-   "hash": "09af138e4c8859846753b57f56666842f59c74db2bd77fec4ca240b9fb15ec58",
+   "hash": "4dfc48f6ba0e07313765811d4a0e8501b422e2058901a37d7688e9df9010f832",
    "imports": [
     "@app/design-tokens",
     "next/headers"
@@ -12797,7 +13099,7 @@
      "type": "export"
     },
     {
-     "name": "COOKIE_DE_TEMA",
+     "name": "THEME_COOKIE",
      "line": null,
      "type": "export"
     },
@@ -12814,7 +13116,7 @@
    ],
    "exports": [
     "COLOR_MODES",
-    "COOKIE_DE_TEMA",
+    "THEME_COOKIE",
     "colorMode",
     "colorModeIs"
    ],
@@ -12832,10 +13134,10 @@
   },
   {
    "path": "apps/shell/src/server/context.ts",
-   "hash": "dc6dc7dde4917ffcf0efedee2de5a50bdda77654a525f6a6642857d5d40b96bd",
+   "hash": "c0d78d8d56f6574d1cb74207cfe51dc20860328fbee684fb19ed49f94e834b9a",
    "imports": [
     "./almacenCompartido",
-    "./gobierno",
+    "./governance",
     "@app/access-control",
     "@app/caching",
     "@app/observability",
@@ -12848,12 +13150,12 @@
      "type": "export"
     },
     {
-     "name": "cacheL2",
+     "name": "activeConnector",
      "line": null,
      "type": "export"
     },
     {
-     "name": "conectorActivo",
+     "name": "cacheL2",
      "line": null,
      "type": "export"
     },
@@ -12925,8 +13227,8 @@
    ],
    "exports": [
     "CACHE_DIR",
+    "activeConnector",
     "cacheL2",
-    "conectorActivo",
     "datasetReader",
     "findTeam",
     "findUser",
@@ -12948,7 +13250,7 @@
      "resolved": null
     },
     {
-     "module": "./gobierno",
+     "module": "./governance",
      "resolved": null
     },
     {
@@ -12971,7 +13273,7 @@
   },
   {
    "path": "apps/shell/src/server/worker.ts",
-   "hash": "9e8aa42c7d1c1860fa04d420e920271db25725e65180f414894770c96462cae2",
+   "hash": "cbbcff6f3139d2efae67a13122b0cc52aef026e002e1c3cf298662ff500b68dc",
    "imports": [
     "./alerts",
     "./exports",
@@ -12979,13 +13281,13 @@
    ],
    "defines": [
     {
-     "name": "iniciarTrabajadorDeFondo",
+     "name": "backgroundWorkerStart",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "iniciarTrabajadorDeFondo"
+    "backgroundWorkerStart"
    ],
    "references": [],
    "import_edges": [
@@ -13005,14 +13307,14 @@
   },
   {
    "path": "apps/shell/src/server/cicloDeVida.ts",
-   "hash": "12236feb817fcca2cb79f3b80d14a21c7e8f2358b6ace82f8248fd42df442f29",
+   "hash": "814b245d7295d5eb4c262ad29cb5dc577a28a7674d989e1b11f2fe30f1c37f11",
    "imports": [
     "./admin",
-    "./almacenModulos",
     "./audit",
     "./context",
     "./data",
-    "./gobierno",
+    "./governance",
+    "./moduleStore",
     "./session",
     "./settings",
     "@app/access-control",
@@ -13030,12 +13332,7 @@
      "type": "export"
     },
     {
-     "name": "bloqueosDePublicacion",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "crearBorrador",
+     "name": "createDraft",
      "line": null,
      "type": "export"
     },
@@ -13045,42 +13342,7 @@
      "type": "export"
     },
     {
-     "name": "devolverABorrador",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "enviarAAprobacion",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "guardarBorrador",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "moduloServibleParaUsuario",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "moduloServiblePorSlug",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "moduloVisiblePorSlug",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "navigationOf",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "podarPorEstado",
      "line": null,
      "type": "export"
     },
@@ -13090,7 +13352,47 @@
      "type": "export"
     },
     {
-     "name": "puedeVer",
+     "name": "publicationLocks",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "revertDraft",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "saveDraft",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "seeCan",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "sendApproval",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "slugServableModule",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "statusPrune",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "userServableModule",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "visibleModuleSlug",
      "line": null,
      "type": "export"
     },
@@ -13108,19 +13410,19 @@
    "exports": [
     "CicloDeVidaError",
     "actorDe",
-    "bloqueosDePublicacion",
-    "crearBorrador",
+    "createDraft",
     "deleteModule",
-    "devolverABorrador",
-    "enviarAAprobacion",
-    "guardarBorrador",
-    "moduloServibleParaUsuario",
-    "moduloServiblePorSlug",
-    "moduloVisiblePorSlug",
     "navigationOf",
-    "podarPorEstado",
     "publicar",
-    "puedeVer",
+    "publicationLocks",
+    "revertDraft",
+    "saveDraft",
+    "seeCan",
+    "sendApproval",
+    "slugServableModule",
+    "statusPrune",
+    "userServableModule",
+    "visibleModuleSlug",
     "visibleModuleUser",
     "visibleModules"
    ],
@@ -13128,10 +13430,6 @@
    "import_edges": [
     {
      "module": "./admin",
-     "resolved": null
-    },
-    {
-     "module": "./almacenModulos",
      "resolved": null
     },
     {
@@ -13147,7 +13445,11 @@
      "resolved": null
     },
     {
-     "module": "./gobierno",
+     "module": "./governance",
+     "resolved": null
+    },
+    {
+     "module": "./moduleStore",
      "resolved": null
     },
     {
@@ -13169,67 +13471,8 @@
    ]
   },
   {
-   "path": "apps/shell/src/server/incrustacion.ts",
-   "hash": "6e3073fbe085582024b071a6e11ead5425fa93782e362bfec5e6f472bc241e3c",
-   "imports": [],
-   "defines": [
-    {
-     "name": "PREFIJO_INCRUSTACION",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "SIN_ENMARCADO",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "cabecerasDeEnmarcado",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "codigoDeIncrustacion",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "esRutaIncrustable",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "origenesDescartados",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "parsearOrigenes",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "politicaDeEnmarcado",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "PREFIJO_INCRUSTACION",
-    "SIN_ENMARCADO",
-    "cabecerasDeEnmarcado",
-    "codigoDeIncrustacion",
-    "esRutaIncrustable",
-    "origenesDescartados",
-    "parsearOrigenes",
-    "politicaDeEnmarcado"
-   ],
-   "references": [],
-   "import_edges": []
-  },
-  {
    "path": "apps/shell/src/server/settings.ts",
-   "hash": "6c699e1384dafa67714bf9bf19b7d34e25ec5947f6a60954739a97b79792ca2e",
+   "hash": "13f568b3abe6594900f0ab58f69a40097538df4772a5a1b66a8cd352c75255d1",
    "imports": [
     "./almacenCompartido",
     "@app/config",
@@ -13237,7 +13480,12 @@
    ],
    "defines": [
     {
-     "name": "conectorActivo",
+     "name": "activeConnector",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "disabledSlugs",
      "line": null,
      "type": "export"
     },
@@ -13247,21 +13495,16 @@
      "type": "export"
     },
     {
-     "name": "reiniciarConfiguracion",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "slugsApagados",
+     "name": "settingsRestart",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "conectorActivo",
+    "activeConnector",
+    "disabledSlugs",
     "moduloEncendido",
-    "reiniciarConfiguracion",
-    "slugsApagados"
+    "settingsRestart"
    ],
    "references": [],
    "import_edges": [
@@ -13281,11 +13524,12 @@
   },
   {
    "path": "apps/shell/src/server/admin.ts",
-   "hash": "9d914242a71f017e00134fe17e32dfd412f87a5dff8268aa45751147dc7bbb5d",
+   "hash": "8c147fcddadc371a9d9ecf0abfd4e678711f6b2821f302a5013d29e9dc80d6c5",
    "imports": [
     "./audit",
     "./context",
-    "./gobierno",
+    "./governance",
+    "./moduleStore",
     "./session",
     "@app/access-control",
     "@app/caching",
@@ -13298,12 +13542,12 @@
      "type": "export"
     },
     {
-     "name": "ExpansionSinJustificarError",
+     "name": "ExpansionWithoutJustifyError",
      "line": null,
      "type": "export"
     },
     {
-     "name": "UltimoAdministradorError",
+     "name": "LastAdministratorError",
      "line": null,
      "type": "export"
     },
@@ -13323,7 +13567,7 @@
      "type": "export"
     },
     {
-     "name": "cambiarMembresia",
+     "name": "availableDimensions",
      "line": null,
      "type": "export"
     },
@@ -13333,22 +13577,7 @@
      "type": "export"
     },
     {
-     "name": "dimensionesAmpliadas",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "dimensionesDisponibles",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "ejecutarOperacionDeArbol",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "esAdministrador",
+     "name": "expandedDimensions",
      "line": null,
      "type": "export"
     },
@@ -13358,12 +13587,22 @@
      "type": "export"
     },
     {
+     "name": "isAdministrator",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "membershipChange",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "previsualizarMovimiento",
      "line": null,
      "type": "export"
     },
     {
-     "name": "rolMasAltoDe",
+     "name": "roleMoreHeightOf",
      "line": null,
      "type": "export"
     },
@@ -13388,6 +13627,11 @@
      "type": "export"
     },
     {
+     "name": "treeOperationRun",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "validateDimensions",
      "line": null,
      "type": "export"
@@ -13395,24 +13639,24 @@
    ],
    "exports": [
     "AdminError",
-    "ExpansionSinJustificarError",
-    "UltimoAdministradorError",
+    "ExpansionWithoutJustifyError",
+    "LastAdministratorError",
     "activeScheme",
     "administradores",
     "assertAdmin",
-    "cambiarMembresia",
+    "availableDimensions",
     "deleteTeam",
-    "dimensionesAmpliadas",
-    "dimensionesDisponibles",
-    "ejecutarOperacionDeArbol",
-    "esAdministrador",
+    "expandedDimensions",
     "indicadoresDeAdmin",
+    "isAdministrator",
+    "membershipChange",
     "previsualizarMovimiento",
-    "rolMasAltoDe",
+    "roleMoreHeightOf",
     "savePackage",
     "saveScope",
     "saveTeam",
     "seesWhoWhere",
+    "treeOperationRun",
     "validateDimensions"
    ],
    "references": [],
@@ -13426,7 +13670,11 @@
      "resolved": null
     },
     {
-     "module": "./gobierno",
+     "module": "./governance",
+     "resolved": null
+    },
+    {
+     "module": "./moduleStore",
      "resolved": null
     },
     {
@@ -13448,54 +13696,67 @@
    ]
   },
   {
-   "path": "apps/shell/src/server/almacenModulos.ts",
-   "hash": "c442340f3af9242e30a56248101164942ce9140775caf7847d7c56c8555aaa69",
-   "imports": [
-    "./almacenCompartido",
-    "./modules",
-    "@app/module-model"
-   ],
+   "path": "apps/shell/src/server/embedding.ts",
+   "hash": "5c91bfce022a13b929e7bf517ab955a41e53b0d96d63154be0f02ca052abde97",
+   "imports": [],
    "defines": [
     {
-     "name": "KEY_MODULES",
+     "name": "EMBEDDING_PREFIX",
      "line": null,
      "type": "export"
     },
     {
-     "name": "StoreModuleRepository",
+     "name": "WITHOUT_FRAMED",
      "line": null,
      "type": "export"
     },
     {
-     "name": "modules",
+     "name": "embeddingCode",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "framedHeaders",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "framedPolicy",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "isEmbeddablePath",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "origenesDescartados",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "parsearOrigenes",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "KEY_MODULES",
-    "StoreModuleRepository",
-    "modules"
+    "EMBEDDING_PREFIX",
+    "WITHOUT_FRAMED",
+    "embeddingCode",
+    "framedHeaders",
+    "framedPolicy",
+    "isEmbeddablePath",
+    "origenesDescartados",
+    "parsearOrigenes"
    ],
    "references": [],
-   "import_edges": [
-    {
-     "module": "./almacenCompartido",
-     "resolved": null
-    },
-    {
-     "module": "./modules",
-     "resolved": null
-    },
-    {
-     "module": "@app/module-model",
-     "resolved": null
-    }
-   ]
+   "import_edges": []
   },
   {
    "path": "apps/shell/src/server/query.ts",
-   "hash": "74deaf7bbd5537d33fc061f0b31a5732d7a4475f8008dc1e49a14b4f8ff1275c",
+   "hash": "ddefe4b18d42410b38d8908eeb446341860c0756f01871c57fc349026f107f53",
    "imports": [
     "./cicloDeVida",
     "./data",
@@ -13540,7 +13801,7 @@
   },
   {
    "path": "apps/shell/src/server/editor.ts",
-   "hash": "46f7b229e0dac6a5caff737cb0b65b72077856c1aee903a1784c06423920cc24",
+   "hash": "7f460dea84c9b2ffa522ef240363bbb69c22200035ffdadc64382c223171783a",
    "imports": [
     "./context",
     "./data",
@@ -13584,7 +13845,7 @@
   },
   {
    "path": "apps/shell/src/server/session.ts",
-   "hash": "989bf69dd9e78d925b3f80a1d3d9751e9a7e3539d3bc80ffbbf43b51f40b006a",
+   "hash": "903c1cdc8787249027890301708e0112b0622f5cab42890467afe68851ccf158",
    "imports": [
     "./identity",
     "next/headers",
@@ -13592,17 +13853,17 @@
    ],
    "defines": [
     {
-     "name": "COOKIE_SESION",
+     "name": "SESSION_COOKIE",
      "line": null,
      "type": "export"
     },
     {
-     "name": "SinSesionError",
+     "name": "WithoutErrorSession",
      "line": null,
      "type": "export"
     },
     {
-     "name": "cambiarEquipoActivo",
+     "name": "activeChangeTeam",
      "line": null,
      "type": "export"
     },
@@ -13612,29 +13873,29 @@
      "type": "export"
     },
     {
-     "name": "exigirSesion",
+     "name": "pageSessionRequire",
      "line": null,
      "type": "export"
     },
     {
-     "name": "exigirSesionDePagina",
+     "name": "sessionGet",
      "line": null,
      "type": "export"
     },
     {
-     "name": "obtenerSesion",
+     "name": "sessionRequire",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "COOKIE_SESION",
-    "SinSesionError",
-    "cambiarEquipoActivo",
+    "SESSION_COOKIE",
+    "WithoutErrorSession",
+    "activeChangeTeam",
     "closeSession",
-    "exigirSesion",
-    "exigirSesionDePagina",
-    "obtenerSesion"
+    "pageSessionRequire",
+    "sessionGet",
+    "sessionRequire"
    ],
    "references": [],
    "import_edges": [
@@ -13653,25 +13914,99 @@
    ]
   },
   {
+   "path": "apps/shell/src/server/seguridad.spec.ts",
+   "hash": "5743c09b7cce3f582161422c46c884d1b70fed45bdefc1892c2d5e628755c8cc",
+   "imports": [
+    "./embedding",
+    "node:fs",
+    "vitest"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./embedding",
+     "resolved": null
+    },
+    {
+     "module": "node:fs",
+     "resolved": null
+    },
+    {
+     "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/src/server/filters.ts",
-   "hash": "d2b6fe8f778c0619e7f69c62712108f393100e43faed5041ae2399ffd4f06685",
+   "hash": "3fe2db334a643b6da624f879ddc34e041950286d73aa49f15fd4792f3245b845",
    "imports": [],
    "defines": [
     {
-     "name": "normalizarFiltros",
+     "name": "filtersNormalize",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "normalizarFiltros"
+    "filtersNormalize"
    ],
    "references": [],
    "import_edges": []
   },
   {
+   "path": "apps/shell/src/server/demoCredentials.ts",
+   "hash": "f6d548eb4abe60f789d06b715a23b28a1e5d00806b67efcc747b6b929bcbb9f9",
+   "imports": [
+    "otpauth"
+   ],
+   "defines": [
+    {
+     "name": "DEMO_KEY",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "SECRETO_TOTP_DEMO",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "mailUser",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "totpCodeOf",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "userMail",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "DEMO_KEY",
+    "SECRETO_TOTP_DEMO",
+    "mailUser",
+    "totpCodeOf",
+    "userMail"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "otpauth",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/src/server/identity.spec.ts",
-   "hash": "38d593105d3d83f0cb35424d58b31831eb42cf329cb56fb709093ed9332faa00",
+   "hash": "9b80ecda2f67bab88974d2ac24ff0dbb9de4a423c38436dc1218859dca265208",
    "imports": [
     "./identity",
     "@app/auth",
@@ -13697,14 +14032,14 @@
   },
   {
    "path": "apps/shell/src/server/locale.ts",
-   "hash": "461349b12e189b607750283b16ab33cde2982046d6668568e653168859aa6289",
+   "hash": "b60e430b78e06582f8caf28e89e24b7d51a94d56087dc21fbe90efe542be5e1d",
    "imports": [
     "@app/i18n",
     "next/headers"
    ],
    "defines": [
     {
-     "name": "COOKIE_DE_IDIOMA",
+     "name": "LOCALE_COOKIE",
      "line": null,
      "type": "export"
     },
@@ -13720,7 +14055,7 @@
     }
    ],
    "exports": [
-    "COOKIE_DE_IDIOMA",
+    "LOCALE_COOKIE",
     "idioma",
     "translator"
    ],
@@ -13737,20 +14072,110 @@
    ]
   },
   {
+   "path": "apps/shell/src/server/serialize.ts",
+   "hash": "d25ee96f443d0fb13fcae8c85baf8954553cd4af9969a6fe1f561d38e55a193d",
+   "imports": [
+    "./context",
+    "./data",
+    "@app/data-contracts",
+    "@app/module-model",
+    "@app/ui-components"
+   ],
+   "defines": [
+    {
+     "name": "objectSerialize",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "objectSerialize"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./context",
+     "resolved": null
+    },
+    {
+     "module": "./data",
+     "resolved": null
+    },
+    {
+     "module": "@app/data-contracts",
+     "resolved": null
+    },
+    {
+     "module": "@app/module-model",
+     "resolved": null
+    },
+    {
+     "module": "@app/ui-components",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/src/server/governance.ts",
+   "hash": "7c380b0b2d5b2162fdd29999aab47aed6c98cce5fa5bd3a95952f76bbabdf527",
+   "imports": [
+    "./almacenCompartido",
+    "@app/access-control",
+    "@app/identity-db"
+   ],
+   "defines": [
+    {
+     "name": "StoreGovernanceRepository",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "governance",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "initialStatus",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "StoreGovernanceRepository",
+    "governance",
+    "initialStatus"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./almacenCompartido",
+     "resolved": null
+    },
+    {
+     "module": "@app/access-control",
+     "resolved": null
+    },
+    {
+     "module": "@app/identity-db",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/src/server/personalization.ts",
-   "hash": "4cb50014a58adacb76123b9e582d1950aa05eea5b4da5c10783c9f79ce4a5279",
+   "hash": "0c180bcb1a65ec3115c79a0be98a1b8f6fa79f9f0528fa15d710cb61a08a3d2f",
    "imports": [
     "./almacenCompartido",
     "@app/module-model"
    ],
    "defines": [
     {
-     "name": "PersonalizacionInvalidaError",
+     "name": "PersonalizationInvalidError",
      "line": null,
      "type": "export"
     },
     {
-     "name": "descartarPersonalizacion",
+     "name": "personalizationDiscard",
      "line": null,
      "type": "export"
     },
@@ -13766,8 +14191,8 @@
     }
    ],
    "exports": [
-    "PersonalizacionInvalidaError",
-    "descartarPersonalizacion",
+    "PersonalizationInvalidError",
+    "personalizationDiscard",
     "readPersonalization",
     "savePersonalization"
    ],
@@ -13784,20 +14209,66 @@
    ]
   },
   {
+   "path": "apps/shell/src/server/moduleStore.ts",
+   "hash": "487750b136b0a384ceb844b7c1954faede5262c3c74d16f8597840a54270d5b8",
+   "imports": [
+    "./almacenCompartido",
+    "./modules",
+    "@app/module-model"
+   ],
+   "defines": [
+    {
+     "name": "KEY_MODULES",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "StoreModuleRepository",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "modules",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "KEY_MODULES",
+    "StoreModuleRepository",
+    "modules"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./almacenCompartido",
+     "resolved": null
+    },
+    {
+     "module": "./modules",
+     "resolved": null
+    },
+    {
+     "module": "@app/module-model",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/src/server/bookmarks.ts",
-   "hash": "dd9f7ebd0281481ea863c55ad3329d5ccd3fac836422f6e69caddf60a8b6dff5",
+   "hash": "7257b54abbd4ffbb47977306237498671eb4542558125f6591243734ccacf15d",
    "imports": [
     "./almacenCompartido",
     "@app/module-model"
    ],
    "defines": [
     {
-     "name": "deleteBookmark",
+     "name": "bookmarksList",
      "line": null,
      "type": "export"
     },
     {
-     "name": "listarMarcadores",
+     "name": "deleteBookmark",
      "line": null,
      "type": "export"
     },
@@ -13808,8 +14279,8 @@
     }
    ],
    "exports": [
+    "bookmarksList",
     "deleteBookmark",
-    "listarMarcadores",
     "saveBookmark"
    ],
    "references": [],
@@ -13826,7 +14297,7 @@
   },
   {
    "path": "apps/shell/src/server/modules.spec.ts",
-   "hash": "7b241407cdddf3e075287ce947445e0f16ae5855738f6fca486c97681e5a50bc",
+   "hash": "7e88e9490c3eef1c8f0f7ae0f115c00d5eea9b1f823fae6a8b11eda114d3221a",
    "imports": [
     "./context",
     "./modules",
@@ -13856,10 +14327,10 @@
    ]
   },
   {
-   "path": "apps/shell/src/server/incrustacion.spec.ts",
-   "hash": "0d4712b2c91975fffefce24b03a84bfdd17ef5c52398e6b6b67d8dd7e9415df1",
+   "path": "apps/shell/src/server/embedding.spec.ts",
+   "hash": "d55cb2ea656ccf78c51692bb8a94fd42e8e18e43efb17482e025e9e5e28076f2",
    "imports": [
-    "./incrustacion",
+    "./embedding",
     "vitest"
    ],
    "defines": [],
@@ -13867,7 +14338,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./incrustacion",
+     "module": "./embedding",
      "resolved": null
     },
     {
@@ -13878,7 +14349,7 @@
   },
   {
    "path": "apps/shell/src/server/bookmarks.spec.ts",
-   "hash": "ad78b4fcf475668d9e119331c52cd0dcd2041d580d5817fdaddec4b696e41076",
+   "hash": "93dc54ea5d1ebef2624ce2246267c8bd44648cdd81c55676305a732a9c9273d9",
    "imports": [
     "@app/access-control",
     "@app/module-model",
@@ -13904,7 +14375,7 @@
   },
   {
    "path": "apps/shell/src/server/format-panel.spec.ts",
-   "hash": "f151c860277b796f42eb1d1e58de7d0a4a231229ed9aee00bc448550afec0945",
+   "hash": "a7b770fd3d84363a7dc8bb152ab846e7de65532a9dabf51c8fc595161ca36426",
    "imports": [
     "../components/editor/controls",
     "@app/ui-components",
@@ -13939,8 +14410,74 @@
    ]
   },
   {
+   "path": "apps/shell/src/server/recursos.ts",
+   "hash": "6db4c7d6e8bbb374e91f7d124c029d8e6c753e35948e36dcd20338b0aacbdf24",
+   "imports": [
+    "../components/admin/ResourceList",
+    "./moduleStore",
+    "@app/ui-components"
+   ],
+   "defines": [
+    {
+     "name": "FAMILIAS",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "resourcesOf",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "FAMILIAS",
+    "resourcesOf"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../components/admin/ResourceList",
+     "resolved": null
+    },
+    {
+     "module": "./moduleStore",
+     "resolved": null
+    },
+    {
+     "module": "@app/ui-components",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/src/server/csp.spec.ts",
+   "hash": "43de0ab44fc7ca02ef3b9970c8b2d859ec1ffff0d28bfdc4316a656d2336f634",
+   "imports": [
+    "./csp",
+    "./embedding",
+    "vitest"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./csp",
+     "resolved": null
+    },
+    {
+     "module": "./embedding",
+     "resolved": null
+    },
+    {
+     "module": "vitest",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/src/server/exports.ts",
-   "hash": "639600d4d22b796c66effcf3e4b9020a34b7f25a676f9499828c1b66e6ea7529",
+   "hash": "8d08e5b393cae011add4521d8f5f36c82b343f9ddc540e3074cb6db3318d816c",
    "imports": [
     "./cicloDeVida",
     "./context",
@@ -13953,7 +14490,7 @@
    ],
    "defines": [
     {
-     "name": "encolarExportacion",
+     "name": "exportEnqueue",
      "line": null,
      "type": "export"
     },
@@ -13963,15 +14500,15 @@
      "type": "export"
     },
     {
-     "name": "resolverObjetos",
+     "name": "resolverObjects",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "encolarExportacion",
+    "exportEnqueue",
     "queueExports",
-    "resolverObjetos"
+    "resolverObjects"
    ],
    "references": [],
    "import_edges": [
@@ -14011,7 +14548,7 @@
   },
   {
    "path": "apps/shell/src/server/alerts.ts",
-   "hash": "8f28369aabb44cd32a8dec9ae78eeb257610a63ef8484577867bd269fbfa5d94",
+   "hash": "1a7f204ec57fb50a3250719137b61ffb7520b37f49b9af745b62521b299c5c39",
    "imports": [
     "./cicloDeVida",
     "./context",
@@ -14028,17 +14565,12 @@
      "type": "export"
     },
     {
-     "name": "atenderSuscripciones",
+     "name": "evaluateAlerts",
      "line": null,
      "type": "export"
     },
     {
-     "name": "evaluarAlertas",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "evaluarSiHayDatoNuevo",
+     "name": "evaluateIfHasDatumNew",
      "line": null,
      "type": "export"
     },
@@ -14051,15 +14583,20 @@
      "name": "observacionesDe",
      "line": null,
      "type": "export"
+    },
+    {
+     "name": "subscriptionsServe",
+     "line": null,
+     "type": "export"
     }
    ],
    "exports": [
     "alertStore",
-    "atenderSuscripciones",
-    "evaluarAlertas",
-    "evaluarSiHayDatoNuevo",
+    "evaluateAlerts",
+    "evaluateIfHasDatumNew",
     "notificaciones",
-    "observacionesDe"
+    "observacionesDe",
+    "subscriptionsServe"
    ],
    "references": [],
    "import_edges": [
@@ -14095,7 +14632,7 @@
   },
   {
    "path": "apps/shell/src/server/audit.ts",
-   "hash": "4da438471a973c48e627e808ab029e9c83f00f954e1baaec1ec23a462f6ef1ad",
+   "hash": "d4c192bcc0d6c8fedb7bedee2224914adf02c6f273f7feea5e8a47cafefbffe2",
    "imports": [
     "./almacenCompartido",
     "@app/access-control",
@@ -14103,37 +14640,37 @@
    ],
    "defines": [
     {
+     "name": "auditList",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "changeRecord",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "clearAudit",
      "line": null,
      "type": "export"
     },
     {
-     "name": "contarAmpliaciones",
+     "name": "expansionsCount",
      "line": null,
      "type": "export"
     },
     {
-     "name": "listarAuditoria",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "registrarCambio",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "registrarEventoDeArbol",
+     "name": "treeEventRecord",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
+    "auditList",
+    "changeRecord",
     "clearAudit",
-    "contarAmpliaciones",
-    "listarAuditoria",
-    "registrarCambio",
-    "registrarEventoDeArbol"
+    "expansionsCount",
+    "treeEventRecord"
    ],
    "references": [],
    "import_edges": [
@@ -14153,7 +14690,7 @@
   },
   {
    "path": "apps/shell/src/server/theme.spec.ts",
-   "hash": "decb6622cf1d10f83cc8915fce5f4cb0215d8c441919c0304c089ab2f89e2f5d",
+   "hash": "9bab77190ce41ef89fba603b1905ab6b1a835e658627e3eece561be3131748d8",
    "imports": [
     "./theme",
     "@app/design-tokens",
@@ -14188,52 +14725,8 @@
    ]
   },
   {
-   "path": "apps/shell/src/server/serializar.ts",
-   "hash": "f3931bb10bad982e820a5fe52a2c0eb72d82d67da76cb34a286eb7473380b42d",
-   "imports": [
-    "./context",
-    "./data",
-    "@app/data-contracts",
-    "@app/module-model",
-    "@app/ui-components"
-   ],
-   "defines": [
-    {
-     "name": "serializarObjeto",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "serializarObjeto"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "./context",
-     "resolved": null
-    },
-    {
-     "module": "./data",
-     "resolved": null
-    },
-    {
-     "module": "@app/data-contracts",
-     "resolved": null
-    },
-    {
-     "module": "@app/module-model",
-     "resolved": null
-    },
-    {
-     "module": "@app/ui-components",
-     "resolved": null
-    }
-   ]
-  },
-  {
    "path": "apps/shell/src/server/almacenCompartido.ts",
-   "hash": "bea07e20aea50035d0fdb7b17d4ecd5d30705c42b1dbae30962b33b1d1ebde5a",
+   "hash": "74af9c59907eeffd76647c0d97f4739eb3a8d9d89832d43dc383d9f3d43384c5",
    "imports": [
     "@app/caching",
     "node:path"
@@ -14245,7 +14738,7 @@
      "type": "export"
     },
     {
-     "name": "CLAVE_GOBIERNO",
+     "name": "GOVERNANCE_KEY",
      "line": null,
      "type": "export"
     },
@@ -14275,11 +14768,6 @@
      "type": "export"
     },
     {
-     "name": "escribir",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "leer",
      "line": null,
      "type": "export"
@@ -14288,19 +14776,24 @@
      "name": "readList",
      "line": null,
      "type": "export"
+    },
+    {
+     "name": "write",
+     "line": null,
+     "type": "export"
     }
    ],
    "exports": [
     "CACHE_DIR",
-    "CLAVE_GOBIERNO",
+    "GOVERNANCE_KEY",
     "KEY_AUDIT",
     "KEY_BOOKMARKS",
     "borrar",
     "cacheL1",
     "cacheL2",
-    "escribir",
     "leer",
-    "readList"
+    "readList",
+    "write"
    ],
    "references": [],
    "import_edges": [
@@ -14316,12 +14809,17 @@
   },
   {
    "path": "apps/shell/src/server/modules.ts",
-   "hash": "97626964fada07f0d0ced91cc4c1bb5902eb35a18f3e881b08f7e640c4ee0198",
+   "hash": "276e726eb5c3b2a22ae78df3a1e40dc9d25b16b0e7ec2c7ba16b94a7178135e8",
    "imports": [
-    "./almacenModulos",
+    "./moduleStore",
     "@app/module-model"
    ],
    "defines": [
+    {
+     "name": "demoModules",
+     "line": null,
+     "type": "export"
+    },
     {
      "name": "findModuleById",
      "line": null,
@@ -14331,22 +14829,17 @@
      "name": "findModuleBySlug",
      "line": null,
      "type": "export"
-    },
-    {
-     "name": "modulosDemo",
-     "line": null,
-     "type": "export"
     }
    ],
    "exports": [
+    "demoModules",
     "findModuleById",
-    "findModuleBySlug",
-    "modulosDemo"
+    "findModuleBySlug"
    ],
    "references": [],
    "import_edges": [
     {
-     "module": "./almacenModulos",
+     "module": "./moduleStore",
      "resolved": null
     },
     {
@@ -14357,7 +14850,7 @@
   },
   {
    "path": "apps/shell/src/server/data.ts",
-   "hash": "048316c75d7d03078e007a3423769aaee1ddac11eb381c5b97b316be8f7de954",
+   "hash": "bb80c65abffb0ca13c7e0b2652e5dbcbd7c823ed2ee3a053ba814fc8499f89c5",
    "imports": [
     "./context",
     "@app/access-control",
@@ -14368,12 +14861,7 @@
    ],
    "defines": [
     {
-     "name": "cargarModulo",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "columnasDisponiblesDe",
+     "name": "availableColumnsOf",
      "line": null,
      "type": "export"
     },
@@ -14383,28 +14871,33 @@
      "type": "export"
     },
     {
-     "name": "diagnosticarDefinicion",
+     "name": "definitionDiagnose",
      "line": null,
      "type": "export"
     },
     {
-     "name": "diagnosticarModulo",
+     "name": "draftPreviousView",
      "line": null,
      "type": "export"
     },
     {
-     "name": "vistaPreviaDelBorrador",
+     "name": "moduleDiagnose",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "moduleLoad",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "cargarModulo",
-    "columnasDisponiblesDe",
+    "availableColumnsOf",
     "declaredAggregations",
-    "diagnosticarDefinicion",
-    "diagnosticarModulo",
-    "vistaPreviaDelBorrador"
+    "definitionDiagnose",
+    "draftPreviousView",
+    "moduleDiagnose",
+    "moduleLoad"
    ],
    "references": [],
    "import_edges": [
@@ -14436,7 +14929,7 @@
   },
   {
    "path": "apps/shell/src/server/personalization.spec.ts",
-   "hash": "cc6d81e080b114ce136ef1bfabbd76f5816ad701801ba30ef3f70dc09502d3a2",
+   "hash": "94410ab6288a898add312e70b6cb945a29f85b397d7f05ed0107e8356b66947b",
    "imports": [
     "./personalization",
     "@app/module-model",
@@ -14461,86 +14954,33 @@
    ]
   },
   {
-   "path": "apps/shell/src/server/credencialesDemo.ts",
-   "hash": "99ee645bf6a6df3ab9ca9bc011c5ab6dc015d84ddbd52ff1abf32073c3da437a",
-   "imports": [
-    "otpauth"
-   ],
-   "defines": [
-    {
-     "name": "CLAVE_DEMO",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "SECRETO_TOTP_DEMO",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "codigoTotpDe",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "correoAUsuario",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "usuarioACorreo",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "CLAVE_DEMO",
-    "SECRETO_TOTP_DEMO",
-    "codigoTotpDe",
-    "correoAUsuario",
-    "usuarioACorreo"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "otpauth",
-     "resolved": null
-    }
-   ]
-  },
-  {
    "path": "apps/shell/src/server/identity.ts",
-   "hash": "05e38e565bdf3d4454a1c066a4726e94a0c1095c52920c4840faad9a705e4cf5",
+   "hash": "cd90c756600a2b48a0ca78a40c710d75d7194a90e1f7ab9ef65744cbf1fde57a",
    "imports": [
     "./almacenCompartido",
-    "./credencialesDemo",
-    "./gobierno",
+    "./demoCredentials",
+    "./governance",
     "@app/auth",
     "@node-rs/argon2"
    ],
    "defines": [
     {
-     "name": "AZURE_AD_DISPONIBLE",
+     "name": "AVAILABLE_MAIL",
      "line": null,
      "type": "export"
     },
     {
-     "name": "CLAVE_DEMO",
+     "name": "AZURE_AD_AVAILABLE",
      "line": null,
      "type": "export"
     },
     {
-     "name": "CORREO_DISPONIBLE",
+     "name": "DEMO_KEY",
      "line": null,
      "type": "export"
     },
     {
      "name": "SECRETO_TOTP_DEMO",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "almacenDeCredenciales",
      "line": null,
      "type": "export"
     },
@@ -14550,47 +14990,52 @@
      "type": "export"
     },
     {
-     "name": "auditoriaDeLogin",
-     "line": null,
-     "type": "export"
-    },
-    {
      "name": "canalDeRestablecimiento",
      "line": null,
      "type": "export"
     },
     {
-     "name": "codigoTotpDe",
+     "name": "credentialsStore",
      "line": null,
      "type": "export"
     },
     {
-     "name": "correoAUsuario",
+     "name": "localProvider",
      "line": null,
      "type": "export"
     },
     {
-     "name": "cuentasLocales",
+     "name": "localesAccounts",
      "line": null,
      "type": "export"
     },
     {
-     "name": "listarAuditoriaDeLogin",
+     "name": "loginAudit",
      "line": null,
      "type": "export"
     },
     {
-     "name": "proveedorLocal",
+     "name": "loginAuditList",
      "line": null,
      "type": "export"
     },
     {
-     "name": "restablecimientos",
+     "name": "mailUser",
      "line": null,
      "type": "export"
     },
     {
-     "name": "sesiones",
+     "name": "resets",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "sessions",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "totpCodeOf",
      "line": null,
      "type": "export"
     },
@@ -14600,29 +15045,29 @@
      "type": "export"
     },
     {
-     "name": "usuarioACorreo",
+     "name": "userMail",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "AZURE_AD_DISPONIBLE",
-    "CLAVE_DEMO",
-    "CORREO_DISPONIBLE",
+    "AVAILABLE_MAIL",
+    "AZURE_AD_AVAILABLE",
+    "DEMO_KEY",
     "SECRETO_TOTP_DEMO",
-    "almacenDeCredenciales",
     "asegurarCredenciales",
-    "auditoriaDeLogin",
     "canalDeRestablecimiento",
-    "codigoTotpDe",
-    "correoAUsuario",
-    "cuentasLocales",
-    "listarAuditoriaDeLogin",
-    "proveedorLocal",
-    "restablecimientos",
-    "sesiones",
+    "credentialsStore",
+    "localProvider",
+    "localesAccounts",
+    "loginAudit",
+    "loginAuditList",
+    "mailUser",
+    "resets",
+    "sessions",
+    "totpCodeOf",
     "unlockAccount",
-    "usuarioACorreo"
+    "userMail"
    ],
    "references": [],
    "import_edges": [
@@ -14631,11 +15076,11 @@
      "resolved": null
     },
     {
-     "module": "./credencialesDemo",
+     "module": "./demoCredentials",
      "resolved": null
     },
     {
-     "module": "./gobierno",
+     "module": "./governance",
      "resolved": null
     },
     {
@@ -14650,12 +15095,12 @@
   },
   {
    "path": "apps/shell/src/server/cicloDeVida.spec.ts",
-   "hash": "1a3f5ab89f08beaee475ebfdd66f00f76dd77df6c26d4c936355a54d05146cd9",
+   "hash": "2f1c66bd6ebb03c069841e65d545709d670a1fdc6decfb93bac885f5b6e1cdf6",
    "imports": [
     "./almacenCompartido",
-    "./almacenModulos",
     "./audit",
     "./cicloDeVida",
+    "./moduleStore",
     "./settings",
     "@app/module-model",
     "vitest"
@@ -14669,15 +15114,15 @@
      "resolved": null
     },
     {
-     "module": "./almacenModulos",
-     "resolved": null
-    },
-    {
      "module": "./audit",
      "resolved": null
     },
     {
      "module": "./cicloDeVida",
+     "resolved": null
+    },
+    {
+     "module": "./moduleStore",
      "resolved": null
     },
     {
@@ -14696,7 +15141,7 @@
   },
   {
    "path": "apps/shell/src/server/alerts.spec.ts",
-   "hash": "19f90e919711c4bccb034979690dc6dc0035557499d0db8462bdceb86b378a3f",
+   "hash": "0ebc41b60a28be0ab382247eb5a47bf8e3f20c8ec0d42d0ab16aed2e18a294f5",
    "imports": [
     "./alerts",
     "@app/alerts",
@@ -14721,47 +15166,37 @@
    ]
   },
   {
-   "path": "apps/shell/src/server/gobierno.ts",
-   "hash": "b5da685d38dd72b4a719f5bebd9aec15cb298b04c51b7ca3164f5b9b06299d02",
+   "path": "apps/shell/src/server/csp.ts",
+   "hash": "55e0163930b5d5df91759f7677e2138d5b039feafdfec0d27b62cb55173a8684",
    "imports": [
-    "./almacenCompartido",
-    "@app/access-control",
-    "@app/identity-db"
+    "./embedding"
    ],
    "defines": [
     {
-     "name": "StoreGovernanceRepository",
+     "name": "NONCE_HEADER",
      "line": null,
      "type": "export"
     },
     {
-     "name": "gobierno",
+     "name": "contentSecurityPolicy",
      "line": null,
      "type": "export"
     },
     {
-     "name": "initialStatus",
+     "name": "nuevoNonce",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "StoreGovernanceRepository",
-    "gobierno",
-    "initialStatus"
+    "NONCE_HEADER",
+    "contentSecurityPolicy",
+    "nuevoNonce"
    ],
    "references": [],
    "import_edges": [
     {
-     "module": "./almacenCompartido",
-     "resolved": null
-    },
-    {
-     "module": "@app/access-control",
-     "resolved": null
-    },
-    {
-     "module": "@app/identity-db",
+     "module": "./embedding",
      "resolved": null
     }
    ]
@@ -14799,14 +15234,14 @@
   },
   {
    "path": "apps/shell/src/server/respuestas.ts",
-   "hash": "967f40963ff2e82f4daf33f98e57843ca0c7ea0b90c4d0d9cfe237ea2f066ad4",
+   "hash": "c8541ce8b30c034e3b0345daaec06dff29e459f324f59e541e2f436f87adfd2c",
    "imports": [
     "./cicloDeVida",
     "next/server"
    ],
    "defines": [
     {
-     "name": "respuestaDeError",
+     "name": "errorResponse",
      "line": null,
      "type": "export"
     },
@@ -14817,7 +15252,7 @@
     }
    ],
    "exports": [
-    "respuestaDeError",
+    "errorResponse",
     "withoutSession"
    ],
    "references": [],
@@ -14834,11 +15269,11 @@
   },
   {
    "path": "apps/shell/src/server/admin.spec.ts",
-   "hash": "adea132f56d0b88a8c05538276efc503c01af7780c64b728683525987263123f",
+   "hash": "627aa12c1f5018fad23bc7d9a54e3eed9a4a99ac16104b8a76a4d360bd4fbb97",
    "imports": [
     "./admin",
     "./audit",
-    "./gobierno",
+    "./governance",
     "./session",
     "@app/access-control",
     "vitest"
@@ -14856,7 +15291,7 @@
      "resolved": null
     },
     {
-     "module": "./gobierno",
+     "module": "./governance",
      "resolved": null
     },
     {
@@ -14899,7 +15334,7 @@
   },
   {
    "path": "apps/shell/src/hooks/useUrlFilters.ts",
-   "hash": "c94311edec7c30980140d61e346858c62f3d7b008156f2b4a045f15f9e4fbb1e",
+   "hash": "dada360ff10734a8e9d963ca28a1d0a2d38ab189bd7d3b1e6f0808170c64d2d8",
    "imports": [
     "next/navigation",
     "react"
@@ -14945,7 +15380,7 @@
   },
   {
    "path": "apps/shell/app/layout.tsx",
-   "hash": "fda88b232f46333446dde06327cd8f211d7b9d29cd67ccb4f0366dff343963bb",
+   "hash": "b3d0f33d40f3454e146197d2fb3f6581a25badd51edc98b44165083cec5e7d73",
    "imports": [
     "../src/components/Header",
     "../src/components/Locale",
@@ -15014,73 +15449,8 @@
    ]
   },
   {
-   "path": "apps/shell/app/reset/page.tsx",
-   "hash": "e8ff359c0a1dfcc8b21ea2559a63a46c30cdba3941c64add100983a08f39643f",
-   "imports": [
-    "../../src/components/Reset"
-   ],
-   "defines": [
-    {
-     "name": "ResetPage",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "metadata",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "ResetPage",
-    "metadata"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../src/components/Reset",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/notices/page.tsx",
-   "hash": "815b60d11175953930f0b7d600505609ecb5c4b72b0ea9f8ffbd3e0bf911435a",
-   "imports": [
-    "../../src/components/Notices",
-    "../../src/server/session"
-   ],
-   "defines": [
-    {
-     "name": "NoticesPage",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "metadata",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "NoticesPage",
-    "metadata"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../src/components/Notices",
-     "resolved": null
-    },
-    {
-     "module": "../../src/server/session",
-     "resolved": null
-    }
-   ]
-  },
-  {
    "path": "apps/shell/app/editor/page.tsx",
-   "hash": "bcb655d7676b4381078e25e6c41d96cf28752fb7de47c6dc2d149f93f9c88e2d",
+   "hash": "95fd9fdcab3ee2eb97c950f4ee465fdb7a2e09ca8ab74cccf50639773d5a5266",
    "imports": [
     "../../src/components/editor/EditorHeader",
     "../../src/components/editor/ModuleList",
@@ -15131,7 +15501,7 @@
   },
   {
    "path": "apps/shell/app/editor/layout.tsx",
-   "hash": "c33e99b81bf3c684654cc3ffd257f741933d06869ed0fafd85eac8c07224327b",
+   "hash": "b7055364b4ce9bbfd3ae8b653d78c34bb141daee22914c66475fffdd2868d3cf",
    "imports": [
     "../../src/server/cicloDeVida",
     "../../src/server/session",
@@ -15170,13 +15540,13 @@
   },
   {
    "path": "apps/shell/app/editor/[slug]/page.tsx",
-   "hash": "d78b02b31316b4c88fcbf6b4de16da0dd37975de0ed4acaf27d3e7fdf40c601c",
+   "hash": "7102ee5d8d09bddabbfd0a0514d521a2d4c56d7c102f6d970c8e9b11b75c7e15",
    "imports": [
     "../../../src/components/editor/ModuleEditor",
     "../../../src/server/cicloDeVida",
     "../../../src/server/data",
     "../../../src/server/editor",
-    "../../../src/server/serializar",
+    "../../../src/server/serialize",
     "../../../src/server/session",
     "next/navigation"
    ],
@@ -15215,7 +15585,7 @@
      "resolved": null
     },
     {
-     "module": "../../../src/server/serializar",
+     "module": "../../../src/server/serialize",
      "resolved": null
     },
     {
@@ -15230,7 +15600,7 @@
   },
   {
    "path": "apps/shell/app/admin/page.tsx",
-   "hash": "405abeff41feab19d5be5d430ec786fe24b8c047668067759f777adef7397e45",
+   "hash": "6802ec4ed883738986e1a4c3492f98f6afeba4a701bebb3f5814ebc69c475e0e",
    "imports": [
     "../../src/components/admin/AuditEvent",
     "../../src/components/icons/Icon",
@@ -15240,7 +15610,7 @@
    ],
    "defines": [
     {
-     "name": "AdminInicio",
+     "name": "HomeAdmin",
      "line": null,
      "type": "export"
     },
@@ -15251,7 +15621,7 @@
     }
    ],
    "exports": [
-    "AdminInicio",
+    "HomeAdmin",
     "dynamic"
    ],
    "references": [],
@@ -15280,7 +15650,7 @@
   },
   {
    "path": "apps/shell/app/admin/layout.tsx",
-   "hash": "7fe3644a9de9c366b9e9e6c90f8f80def14034b764591bbf46fd96f193b1cdfe",
+   "hash": "970fcf9798ede4ec87561fb71de5957fd983fb579e3e14334689be8132673168",
    "imports": [
     "../../src/components/CollapsibleNavigation",
     "../../src/components/admin/AdminRail",
@@ -15328,13 +15698,143 @@
    ]
   },
   {
+   "path": "apps/shell/app/admin/modules/page.tsx",
+   "hash": "a36f42201ef23637836410f046ca2130d400c76ba12c6d2a4c19a9cf9c316e88",
+   "imports": [
+    "../../../src/components/admin/SectionIndex",
+    "../../../src/components/admin/sections",
+    "../../../src/server/locale",
+    "../../../src/server/moduleStore",
+    "@app/i18n",
+    "next/link"
+   ],
+   "defines": [
+    {
+     "name": "ModulosPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "ModulosPage",
+    "dynamic"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/components/admin/SectionIndex",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/components/admin/sections",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/locale",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/moduleStore",
+     "resolved": null
+    },
+    {
+     "module": "@app/i18n",
+     "resolved": null
+    },
+    {
+     "module": "next/link",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/admin/modules/packages/page.tsx",
+   "hash": "e4e7985337d7527e1638cfe3b41f0d20f1466e529fe51fabf9ef83658c8f94e2",
+   "imports": [
+    "../../../../src/server/context",
+    "../../../../src/server/governance",
+    "@app/access-control"
+   ],
+   "defines": [
+    {
+     "name": "PackagesPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "PackagesPage",
+    "dynamic"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/server/context",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/governance",
+     "resolved": null
+    },
+    {
+     "module": "@app/access-control",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/admin/modules/tree/page.tsx",
+   "hash": "78a8a47f3f143d1c61725a6a7bcc69fc68db6a22bac619c2077bffe78bbef8df",
+   "imports": [
+    "../../../../src/components/admin/TreeEditor",
+    "../../../../src/server/context"
+   ],
+   "defines": [
+    {
+     "name": "TreePage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "TreePage",
+    "dynamic"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/components/admin/TreeEditor",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/context",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/app/admin/teams/page.tsx",
-   "hash": "1ab0a1c28bdb501c60abc0910fb261a0a0c9f74960f61262444ef801a1ab884a",
+   "hash": "275673bb72cd2b2968f7e0836de0d720b7fd3196e180e3f289d43e2972ce6312",
    "imports": [
     "../../../src/components/admin/TeamEditor",
     "../../../src/server/admin",
     "../../../src/server/context",
-    "../../../src/server/gobierno",
+    "../../../src/server/governance",
     "@app/access-control"
    ],
    "defines": [
@@ -15368,7 +15868,7 @@
      "resolved": null
     },
     {
-     "module": "../../../src/server/gobierno",
+     "module": "../../../src/server/governance",
      "resolved": null
     },
     {
@@ -15378,8 +15878,58 @@
    ]
   },
   {
+   "path": "apps/shell/app/admin/users/page.tsx",
+   "hash": "a8f03c2e6634ae3a36ec8abb2aab89ba588c6a996b05741cd3ae3930dff3b53f",
+   "imports": [
+    "../../../src/server/admin",
+    "../../../src/server/context",
+    "../../../src/server/locale",
+    "@app/access-control",
+    "next/link"
+   ],
+   "defines": [
+    {
+     "name": "UsuariosPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "UsuariosPage",
+    "dynamic"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/server/admin",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/context",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/locale",
+     "resolved": null
+    },
+    {
+     "module": "@app/access-control",
+     "resolved": null
+    },
+    {
+     "module": "next/link",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/app/admin/audit/page.tsx",
-   "hash": "d0e42e71740a577d7081d0b3de2eae33ebb601d653bff71de40e96ca5644faff",
+   "hash": "11d347586948f1e8cc18418db8662fa1be377a02ec11912cf10c67d8ce78b38a",
    "imports": [
     "../../../src/server/audit"
    ],
@@ -15408,15 +15958,16 @@
    ]
   },
   {
-   "path": "apps/shell/app/admin/arbol/page.tsx",
-   "hash": "5fc7164e4d11dad4428350f1b1a402c4a4343288c08c8b4d8f6cd9fb05b02d58",
+   "path": "apps/shell/app/admin/themes/page.tsx",
+   "hash": "c9fd8ae1eb10d89cf8340aec920376a5e636d0981b3ef6148a68bdea7ac938c8",
    "imports": [
-    "../../../src/components/admin/TreeEditor",
-    "../../../src/server/context"
+    "../../../src/server/locale",
+    "@app/design-tokens",
+    "@app/i18n"
    ],
    "defines": [
     {
-     "name": "TreePage",
+     "name": "TemasPage",
      "line": null,
      "type": "export"
     },
@@ -15427,17 +15978,61 @@
     }
    ],
    "exports": [
-    "TreePage",
+    "TemasPage",
     "dynamic"
    ],
    "references": [],
    "import_edges": [
     {
-     "module": "../../../src/components/admin/TreeEditor",
+     "module": "../../../src/server/locale",
+     "resolved": null
+    },
+    {
+     "module": "@app/design-tokens",
+     "resolved": null
+    },
+    {
+     "module": "@app/i18n",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/admin/scopes/page.tsx",
+   "hash": "f098b73c8c9185ea59a62dd201a4540a2a4180c35dc6e4c2dc9ef6ed20a298f8",
+   "imports": [
+    "../../../src/components/admin/ScopeEditor",
+    "../../../src/server/context",
+    "@app/access-control"
+   ],
+   "defines": [
+    {
+     "name": "ScopesPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "ScopesPage",
+    "dynamic"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/components/admin/ScopeEditor",
      "resolved": null
     },
     {
      "module": "../../../src/server/context",
+     "resolved": null
+    },
+    {
+     "module": "@app/access-control",
      "resolved": null
     }
    ]
@@ -15483,16 +16078,17 @@
    ]
   },
   {
-   "path": "apps/shell/app/admin/paquetes/page.tsx",
-   "hash": "072e77f9a8d0a9819be68b82977b5df5ace48d59cf3b9567cfc44f6f7218583e",
+   "path": "apps/shell/app/admin/sources/page.tsx",
+   "hash": "1b7a39a1b5281b12db55539382b95563d85065ebd62d0b5beda616b28062cf98",
    "imports": [
+    "../../../src/server/admin",
     "../../../src/server/context",
-    "../../../src/server/gobierno",
-    "@app/access-control"
+    "../../../src/server/locale",
+    "@app/observability"
    ],
    "defines": [
     {
-     "name": "PaginaPaquetes",
+     "name": "OrigenesPage",
      "line": null,
      "type": "export"
     },
@@ -15503,35 +16099,304 @@
     }
    ],
    "exports": [
-    "PaginaPaquetes",
+    "OrigenesPage",
     "dynamic"
    ],
    "references": [],
    "import_edges": [
     {
+     "module": "../../../src/server/admin",
+     "resolved": null
+    },
+    {
      "module": "../../../src/server/context",
      "resolved": null
     },
     {
-     "module": "../../../src/server/gobierno",
+     "module": "../../../src/server/locale",
      "resolved": null
     },
     {
-     "module": "@app/access-control",
+     "module": "@app/observability",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/admin/resources/page.tsx",
+   "hash": "e9570aca4cad7fd6a835d54a963ea5d1325c54e3efb8f4e324a425a003a2c8c9",
+   "imports": [
+    "../../../src/components/admin/SectionIndex",
+    "../../../src/components/admin/sections",
+    "../../../src/server/locale"
+   ],
+   "defines": [
+    {
+     "name": "RecursosPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "RecursosPage",
+    "dynamic"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/components/admin/SectionIndex",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/components/admin/sections",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/locale",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/admin/resources/elements/page.tsx",
+   "hash": "9077d5fc4e6861243453b4f3c9a8479c881a3043b4c6c1c0d7347e0e414ed3a8",
+   "imports": [
+    "../../../../src/components/admin/ResourceList",
+    "../../../../src/components/admin/sections",
+    "../../../../src/server/locale",
+    "../../../../src/server/recursos"
+   ],
+   "defines": [
+    {
+     "name": "ElementosPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "ElementosPage",
+    "dynamic"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/components/admin/ResourceList",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/components/admin/sections",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/locale",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/recursos",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/admin/resources/containers/page.tsx",
+   "hash": "cd71a719fb0711bf5df3af18feaef6b472336bd00fd06679a0c41b5240c1d1eb",
+   "imports": [
+    "../../../../src/components/admin/ResourceList",
+    "../../../../src/components/admin/sections",
+    "../../../../src/server/locale",
+    "../../../../src/server/recursos"
+   ],
+   "defines": [
+    {
+     "name": "ContenedoresPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "ContenedoresPage",
+    "dynamic"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/components/admin/ResourceList",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/components/admin/sections",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/locale",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/recursos",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/admin/resources/addons/page.tsx",
+   "hash": "db744986beb50e53239e627f0975057de801acf59352e23008d50d7ce32535da",
+   "imports": [
+    "../../../../src/components/admin/ResourceList",
+    "../../../../src/components/admin/sections",
+    "../../../../src/server/locale",
+    "../../../../src/server/recursos"
+   ],
+   "defines": [
+    {
+     "name": "ComplementosPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "ComplementosPage",
+    "dynamic"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/components/admin/ResourceList",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/components/admin/sections",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/locale",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/recursos",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/admin/resources/visualizations/page.tsx",
+   "hash": "a621f97c8b67bd1cc55c1a26ea7893366b265ed5d817839ceea1999b8edabf6f",
+   "imports": [
+    "../../../../src/components/admin/ResourceList",
+    "../../../../src/components/admin/sections",
+    "../../../../src/server/locale",
+    "../../../../src/server/recursos"
+   ],
+   "defines": [
+    {
+     "name": "VisualizacionesPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "VisualizacionesPage",
+    "dynamic"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/components/admin/ResourceList",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/components/admin/sections",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/locale",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/recursos",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/admin/resources/other/page.tsx",
+   "hash": "b3858fbb1753a653714700a1bffed6de3dc09b6c158ec5513f0e2ab83df1fd5d",
+   "imports": [
+    "../../../../src/components/icons/Icon",
+    "../../../../src/server/locale",
+    "@app/design-tokens",
+    "@app/ui-components"
+   ],
+   "defines": [
+    {
+     "name": "OtrosRecursosPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "OtrosRecursosPage",
+    "dynamic"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/components/icons/Icon",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/locale",
+     "resolved": null
+    },
+    {
+     "module": "@app/design-tokens",
+     "resolved": null
+    },
+    {
+     "module": "@app/ui-components",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/app/admin/accounts/page.tsx",
-   "hash": "811f4943c8980a2603eca24f8a00d77ea9ec95ba2bc3b679d4426a4a7467cd43",
+   "hash": "4f02be53bb90990156d439ac1263e5767b3d767a3ffb4085ec59abdfd5648b96",
    "imports": [
     "../../../src/components/admin/LocalAccounts",
     "../../../src/server/identity"
    ],
    "defines": [
     {
-     "name": "PaginaCuentas",
+     "name": "AccountsPage",
      "line": null,
      "type": "export"
     },
@@ -15542,7 +16407,7 @@
     }
    ],
    "exports": [
-    "PaginaCuentas",
+    "AccountsPage",
     "dynamic"
    ],
    "references": [],
@@ -15558,673 +16423,72 @@
    ]
   },
   {
-   "path": "apps/shell/app/admin/scopes/page.tsx",
-   "hash": "b35e7487cec874b4d88abcdd6bc47eb8ede3ce41444043ce60f1ebc3bf6bf58b",
+   "path": "apps/shell/app/(embedded)/layout.tsx",
+   "hash": "ce257b19c596fb04993ee838723f7a3bd985b639da4d687e33a157b944ea4971",
    "imports": [
-    "../../../src/components/admin/ScopeEditor",
-    "../../../src/server/context",
-    "@app/access-control"
+    "@app/design-tokens"
    ],
    "defines": [
     {
-     "name": "ScopesPage",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "dynamic",
+     "name": "LayoutEmbedded",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "ScopesPage",
-    "dynamic"
+    "LayoutEmbedded"
    ],
    "references": [],
    "import_edges": [
     {
-     "module": "../../../src/components/admin/ScopeEditor",
-     "resolved": null
-    },
-    {
-     "module": "../../../src/server/context",
-     "resolved": null
-    },
-    {
-     "module": "@app/access-control",
+     "module": "@app/design-tokens",
      "resolved": null
     }
    ]
   },
   {
-   "path": "apps/shell/app/editor-without-permission/page.tsx",
-   "hash": "712531d22f507a44e6b47b6536c5770d2388f4e8c77cb7d73adf36e5a11a464f",
+   "path": "apps/shell/app/(embedded)/embed/m/[slug]/page.tsx",
+   "hash": "0aea59e0ee5ea7226145c616f4f70c18c18ff39ded3011c81c4fd0976e094c44",
    "imports": [
-    "next/link"
-   ],
-   "defines": [
-    {
-     "name": "SinPermisoEditor",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "metadata",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "SinPermisoEditor",
-    "metadata"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "next/link",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/reset/route.ts",
-   "hash": "6a7144731182c8162dba6f79baba68981512abb99dfacbc24a167f0159b348af",
-   "imports": [
-    "../../../src/server/identity",
-    "@app/auth",
-    "next/server"
-   ],
-   "defines": [
-    {
-     "name": "POST",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "POST",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../src/server/identity",
-     "resolved": null
-    },
-    {
-     "module": "@app/auth",
-     "resolved": null
-    },
-    {
-     "module": "next/server",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/notifications/route.ts",
-   "hash": "3991bfad2a5681893e4103bbd1eaf1a3dfa4a7d6eb7b3c0883618d3d755e441f",
-   "imports": [
-    "../../../src/server/alerts",
-    "../../../src/server/respuestas",
-    "../../../src/server/session",
-    "@app/alerts",
-    "next/server"
-   ],
-   "defines": [
-    {
-     "name": "GET",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "POST",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "GET",
-    "POST",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../src/server/alerts",
-     "resolved": null
-    },
-    {
-     "module": "../../../src/server/respuestas",
-     "resolved": null
-    },
-    {
-     "module": "../../../src/server/session",
-     "resolved": null
-    },
-    {
-     "module": "@app/alerts",
-     "resolved": null
-    },
-    {
-     "module": "next/server",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/admin/guardia.ts",
-   "hash": "93066c7c7f00163a9a4044544770466c2ca3afb17ca07701528dfc48404ec062",
-   "imports": [
-    "../../../src/server/admin",
-    "../../../src/server/session",
-    "@app/access-control",
-    "next/server"
-   ],
-   "defines": [
-    {
-     "name": "withAdmin",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "withAdmin"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../src/server/admin",
-     "resolved": null
-    },
-    {
-     "module": "../../../src/server/session",
-     "resolved": null
-    },
-    {
-     "module": "@app/access-control",
-     "resolved": null
-    },
-    {
-     "module": "next/server",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/admin/teams/route.ts",
-   "hash": "01c4d6c6db432c3d5dab154070df8312fe647b12b821fff4efff29b6498df74c",
-   "imports": [
-    "../../../../src/server/admin",
-    "../../../../src/server/context",
-    "../../../../src/server/gobierno",
-    "../guardia",
-    "@app/access-control"
-   ],
-   "defines": [
-    {
-     "name": "GET",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "POST",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "dynamic",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "GET",
-    "POST",
-    "dynamic",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../../src/server/admin",
-     "resolved": null
-    },
-    {
-     "module": "../../../../src/server/context",
-     "resolved": null
-    },
-    {
-     "module": "../../../../src/server/gobierno",
-     "resolved": null
-    },
-    {
-     "module": "../guardia",
-     "resolved": null
-    },
-    {
-     "module": "@app/access-control",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/admin/audit/route.ts",
-   "hash": "bdde9e40acc5397140188a82888fe84059d277b903cf5bb907c3a5f4f2d73ed5",
-   "imports": [
-    "../../../../src/server/audit",
-    "../guardia",
-    "@app/observability"
-   ],
-   "defines": [
-    {
-     "name": "GET",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "dynamic",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "GET",
-    "dynamic",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../../src/server/audit",
-     "resolved": null
-    },
-    {
-     "module": "../guardia",
-     "resolved": null
-    },
-    {
-     "module": "@app/observability",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/admin/tree/route.ts",
-   "hash": "8e836a713136d92bbf0a34025df0b3665d9e6642005203b7e914f2f9c7bf377b",
-   "imports": [
-    "../../../../src/server/admin",
-    "../../../../src/server/context",
-    "../guardia",
-    "@app/access-control"
-   ],
-   "defines": [
-    {
-     "name": "GET",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "POST",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "dynamic",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "GET",
-    "POST",
-    "dynamic",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../../src/server/admin",
-     "resolved": null
-    },
-    {
-     "module": "../../../../src/server/context",
-     "resolved": null
-    },
-    {
-     "module": "../guardia",
-     "resolved": null
-    },
-    {
-     "module": "@app/access-control",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/admin/who-sees-what/route.ts",
-   "hash": "6a03eb7fa1ce1a25befbad3b4f23af77e62187e710e7b024f9b89e27c38d2ab8",
-   "imports": [
-    "../../../../src/server/admin",
-    "../guardia"
-   ],
-   "defines": [
-    {
-     "name": "GET",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "dynamic",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "GET",
-    "dynamic",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../../src/server/admin",
-     "resolved": null
-    },
-    {
-     "module": "../guardia",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/admin/packages/route.ts",
-   "hash": "eefe4c13172bc01f55eaf9fb82188fd2a1078cc12c4a5b5ef44113d685ca7723",
-   "imports": [
-    "../../../../src/server/admin",
-    "../../../../src/server/gobierno",
-    "../guardia",
-    "@app/access-control"
-   ],
-   "defines": [
-    {
-     "name": "GET",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "POST",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "dynamic",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "GET",
-    "POST",
-    "dynamic",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../../src/server/admin",
-     "resolved": null
-    },
-    {
-     "module": "../../../../src/server/gobierno",
-     "resolved": null
-    },
-    {
-     "module": "../guardia",
-     "resolved": null
-    },
-    {
-     "module": "@app/access-control",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/admin/accounts/route.ts",
-   "hash": "0c639ba2abcc016ee778b9b842b37467050ed2b0aaf828b949f9eac8167daf4e",
-   "imports": [
-    "../../../../src/server/admin",
-    "../../../../src/server/audit",
-    "../../../../src/server/identity",
-    "../guardia"
-   ],
-   "defines": [
-    {
-     "name": "GET",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "POST",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "dynamic",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "GET",
-    "POST",
-    "dynamic",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../../src/server/admin",
-     "resolved": null
-    },
-    {
-     "module": "../../../../src/server/audit",
-     "resolved": null
-    },
-    {
-     "module": "../../../../src/server/identity",
-     "resolved": null
-    },
-    {
-     "module": "../guardia",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/admin/schema/route.ts",
-   "hash": "3b1d98e11fcc0dabc5759abe3d2377ae25c8aa3e8e8e765a116ec336af84d70a",
-   "imports": [
-    "../../../../src/server/admin",
-    "../guardia"
-   ],
-   "defines": [
-    {
-     "name": "GET",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "dynamic",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "GET",
-    "dynamic",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../../src/server/admin",
-     "resolved": null
-    },
-    {
-     "module": "../guardia",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/admin/scopes/route.ts",
-   "hash": "32e022ce58143c03d2cfb638aaf451d24d914f548fc42242cd0949e8102647d8",
-   "imports": [
-    "../../../../src/server/admin",
-    "../guardia",
-    "@app/access-control"
-   ],
-   "defines": [
-    {
-     "name": "POST",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "dynamic",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "POST",
-    "dynamic",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../../src/server/admin",
-     "resolved": null
-    },
-    {
-     "module": "../guardia",
-     "resolved": null
-    },
-    {
-     "module": "@app/access-control",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/bookmarks/route.ts",
-   "hash": "d4f084bac0ea5a2880a4d33d4c3054f17ea93df2c4d62820666b1d7fed9ae988",
-   "imports": [
-    "../../../src/server/bookmarks",
-    "../../../src/server/respuestas",
-    "../../../src/server/session",
+    "../../../../../src/components/ModuleView",
+    "../../../../../src/server/cicloDeVida",
+    "../../../../../src/server/data",
+    "../../../../../src/server/serialize",
+    "../../../../../src/server/session",
     "@app/module-model",
-    "next/server"
+    "next/link",
+    "next/navigation"
    ],
    "defines": [
     {
-     "name": "DELETE",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "GET",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "POST",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "dynamic",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
+     "name": "EmbeddedPage",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "DELETE",
-    "GET",
-    "POST",
-    "dynamic",
-    "runtime"
+    "EmbeddedPage"
    ],
    "references": [],
    "import_edges": [
     {
-     "module": "../../../src/server/bookmarks",
+     "module": "../../../../../src/components/ModuleView",
      "resolved": null
     },
     {
-     "module": "../../../src/server/respuestas",
+     "module": "../../../../../src/server/cicloDeVida",
      "resolved": null
     },
     {
-     "module": "../../../src/server/session",
+     "module": "../../../../../src/server/data",
+     "resolved": null
+    },
+    {
+     "module": "../../../../../src/server/serialize",
+     "resolved": null
+    },
+    {
+     "module": "../../../../../src/server/session",
      "resolved": null
     },
     {
@@ -16232,99 +16496,18 @@
      "resolved": null
     },
     {
-     "module": "next/server",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/hooks/dataset-refresh/route.ts",
-   "hash": "8af4f0a762a543d7be54e0bf4fdf6e1a99dde132ce65a8e48ab3b67b4003d34a",
-   "imports": [
-    "../../../../src/server/context",
-    "@app/caching",
-    "next/server"
-   ],
-   "defines": [
-    {
-     "name": "POST",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "POST",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../../src/server/context",
+     "module": "next/link",
      "resolved": null
     },
     {
-     "module": "@app/caching",
-     "resolved": null
-    },
-    {
-     "module": "next/server",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/navigation/route.ts",
-   "hash": "dc445e2a7308913b49f9f028c173b83c36bc6c48f45b3b2366053f2722c524f5",
-   "imports": [
-    "../../../src/server/cicloDeVida",
-    "../../../src/server/respuestas",
-    "../../../src/server/session",
-    "next/server"
-   ],
-   "defines": [
-    {
-     "name": "GET",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "GET",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../src/server/cicloDeVida",
-     "resolved": null
-    },
-    {
-     "module": "../../../src/server/respuestas",
-     "resolved": null
-    },
-    {
-     "module": "../../../src/server/session",
-     "resolved": null
-    },
-    {
-     "module": "next/server",
+     "module": "next/navigation",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/app/api/modules/route.ts",
-   "hash": "33c0d792bd64c5ca3ee4680496a4f56e220ba07f901a8c1c0d27426b961429c4",
+   "hash": "86936f0c6442e9db96620a01932ecaa076810b4ba4ea5ea0dd40bffdd8d159b0",
    "imports": [
     "../../../src/server/cicloDeVida",
     "../../../src/server/respuestas",
@@ -16381,13 +16564,13 @@
   },
   {
    "path": "apps/shell/app/api/modules/[slug]/route.ts",
-   "hash": "1715d83765a4867accec0e80346113ce9b0b6d3833a3040598e013bb94eda6c2",
+   "hash": "3a914fcd648043604c5e8724cdaf0134953a0c69c0d4f072e43678003443f01b",
    "imports": [
     "../../../../src/server/cicloDeVida",
     "../../../../src/server/data",
     "../../../../src/server/personalization",
     "../../../../src/server/respuestas",
-    "../../../../src/server/serializar",
+    "../../../../src/server/serialize",
     "../../../../src/server/session",
     "next/server"
    ],
@@ -16426,7 +16609,7 @@
      "resolved": null
     },
     {
-     "module": "../../../../src/server/serializar",
+     "module": "../../../../src/server/serialize",
      "resolved": null
     },
     {
@@ -16441,12 +16624,12 @@
   },
   {
    "path": "apps/shell/app/api/modules/[slug]/edit/route.ts",
-   "hash": "69b263935e63a5f65e12031ea8ff59b7020c4b1447037de11b798ce8ff7e8565",
+   "hash": "a9172d8d1e3865074f70fa3d967b34117302efbd08d8363c3a2202debfef3417",
    "imports": [
     "../../../../../src/server/cicloDeVida",
     "../../../../../src/server/data",
     "../../../../../src/server/respuestas",
-    "../../../../../src/server/serializar",
+    "../../../../../src/server/serialize",
     "../../../../../src/server/session",
     "@app/module-model",
     "next/server"
@@ -16500,7 +16683,7 @@
      "resolved": null
     },
     {
-     "module": "../../../../../src/server/serializar",
+     "module": "../../../../../src/server/serialize",
      "resolved": null
     },
     {
@@ -16519,7 +16702,7 @@
   },
   {
    "path": "apps/shell/app/api/modules/[slug]/view/route.ts",
-   "hash": "464161d078839d2fe63c298d32067b9010b2fec99ad91a3a23972620436e1f9b",
+   "hash": "529420f7ad700da79a82ce192abb9184ff5d6d8d4875eb2184fdbf86ce506ba5",
    "imports": [
     "../../../../../src/server/cicloDeVida",
     "../../../../../src/server/personalization",
@@ -16587,7 +16770,7 @@
   },
   {
    "path": "apps/shell/app/api/modules/[slug]/status/route.ts",
-   "hash": "af7e2bf7e60fd00405e1d9f5770a7c6573d0ccda56bc6d8e1018cddd747b64da",
+   "hash": "72d2ab4f5199158ca6bc319bd3d98d4e9d0c3f085b26dc3fd65ae5b05f504d90",
    "imports": [
     "../../../../../src/server/cicloDeVida",
     "../../../../../src/server/respuestas",
@@ -16631,18 +16814,59 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/query/route.ts",
-   "hash": "e9098008d2cc318e4ac1b662e0893187b7528080ad2ce1838c4bb2174085ed7e",
+   "path": "apps/shell/app/api/admin/guardia.ts",
+   "hash": "08b684a5d6662711fad05a3af3386e88d10a2e8a08ca83a7e0b851be7ce9aebf",
    "imports": [
-    "../../../src/server/query",
-    "../../../src/server/respuestas",
+    "../../../src/server/admin",
     "../../../src/server/session",
-    "@app/nl-query",
+    "@app/access-control",
     "next/server"
    ],
    "defines": [
     {
-     "name": "POST",
+     "name": "withAdmin",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "withAdmin"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/server/admin",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/session",
+     "resolved": null
+    },
+    {
+     "module": "@app/access-control",
+     "resolved": null
+    },
+    {
+     "module": "next/server",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/admin/schema/route.ts",
+   "hash": "0e66ed6168b8f8066e817652787de759def595337df5d718a4251b50554136f1",
+   "imports": [
+    "../../../../src/server/admin",
+    "../guardia"
+   ],
+   "defines": [
+    {
+     "name": "GET",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
      "line": null,
      "type": "export"
     },
@@ -16653,51 +16877,33 @@
     }
    ],
    "exports": [
-    "POST",
+    "GET",
+    "dynamic",
     "runtime"
    ],
    "references": [],
    "import_edges": [
     {
-     "module": "../../../src/server/query",
+     "module": "../../../../src/server/admin",
      "resolved": null
     },
     {
-     "module": "../../../src/server/respuestas",
-     "resolved": null
-    },
-    {
-     "module": "../../../src/server/session",
-     "resolved": null
-    },
-    {
-     "module": "@app/nl-query",
-     "resolved": null
-    },
-    {
-     "module": "next/server",
+     "module": "../guardia",
      "resolved": null
     }
    ]
   },
   {
-   "path": "apps/shell/app/api/alerts/route.ts",
-   "hash": "dd23c23d4c340989d5490c9d789f4afc14e9cdd1d7fc4ac2ee5c02d7dd92e61a",
+   "path": "apps/shell/app/api/admin/teams/route.ts",
+   "hash": "8dbe50a8ee5c047e091b5e0b282a89e9e096983ebb8e20b547d24fa95a0df02c",
    "imports": [
-    "../../../src/server/alerts",
-    "../../../src/server/cicloDeVida",
-    "../../../src/server/filters",
-    "../../../src/server/respuestas",
-    "../../../src/server/session",
-    "@app/alerts",
-    "next/server"
+    "../../../../src/server/admin",
+    "../../../../src/server/context",
+    "../../../../src/server/governance",
+    "../guardia",
+    "@app/access-control"
    ],
    "defines": [
-    {
-     "name": "DELETE",
-     "line": null,
-     "type": "export"
-    },
     {
      "name": "GET",
      "line": null,
@@ -16709,124 +16915,56 @@
      "type": "export"
     },
     {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "runtime",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "DELETE",
     "GET",
     "POST",
+    "dynamic",
     "runtime"
    ],
    "references": [],
    "import_edges": [
     {
-     "module": "../../../src/server/alerts",
+     "module": "../../../../src/server/admin",
      "resolved": null
     },
     {
-     "module": "../../../src/server/cicloDeVida",
+     "module": "../../../../src/server/context",
      "resolved": null
     },
     {
-     "module": "../../../src/server/filters",
+     "module": "../../../../src/server/governance",
      "resolved": null
     },
     {
-     "module": "../../../src/server/respuestas",
+     "module": "../guardia",
      "resolved": null
     },
     {
-     "module": "../../../src/server/session",
-     "resolved": null
-    },
-    {
-     "module": "@app/alerts",
-     "resolved": null
-    },
-    {
-     "module": "next/server",
+     "module": "@app/access-control",
      "resolved": null
     }
    ]
   },
   {
-   "path": "apps/shell/app/api/sign-in/route.ts",
-   "hash": "05080c1b64cb1f06574d1bbbf5c9ed4e1a51f24cc907ef40a49c644de731d696",
+   "path": "apps/shell/app/api/admin/packages/route.ts",
+   "hash": "cf2a973bb27f4e3150e1774251eed996ad6e85abd8637fad6c2ed155f634b8e4",
    "imports": [
-    "../../../src/server/context",
-    "../../../src/server/identity",
-    "../../../src/server/session",
-    "@app/auth",
-    "next/server"
+    "../../../../src/server/admin",
+    "../../../../src/server/governance",
+    "../guardia",
+    "@app/access-control"
    ],
    "defines": [
-    {
-     "name": "DELETE",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "POST",
-     "line": null,
-     "type": "export"
-    },
-    {
-     "name": "runtime",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "DELETE",
-    "POST",
-    "runtime"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../src/server/context",
-     "resolved": null
-    },
-    {
-     "module": "../../../src/server/identity",
-     "resolved": null
-    },
-    {
-     "module": "../../../src/server/session",
-     "resolved": null
-    },
-    {
-     "module": "@app/auth",
-     "resolved": null
-    },
-    {
-     "module": "next/server",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/api/subscriptions/route.ts",
-   "hash": "ea8ac9731436e8c99ff2004fcfaaa522606f70d84a401ccee9f357b0d9d6e58b",
-   "imports": [
-    "../../../src/server/alerts",
-    "../../../src/server/cicloDeVida",
-    "../../../src/server/filters",
-    "../../../src/server/respuestas",
-    "../../../src/server/session",
-    "@app/alerts",
-    "@app/export",
-    "next/server"
-   ],
-   "defines": [
-    {
-     "name": "DELETE",
-     "line": null,
-     "type": "export"
-    },
     {
      "name": "GET",
      "line": null,
@@ -16838,29 +16976,363 @@
      "type": "export"
     },
     {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    },
+    {
      "name": "runtime",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "DELETE",
     "GET",
+    "POST",
+    "dynamic",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/server/admin",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/governance",
+     "resolved": null
+    },
+    {
+     "module": "../guardia",
+     "resolved": null
+    },
+    {
+     "module": "@app/access-control",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/admin/tree/route.ts",
+   "hash": "8df9a41b7e78c4a331bc0c1441600928153b40590700b900724d1754b79df591",
+   "imports": [
+    "../../../../src/server/admin",
+    "../../../../src/server/context",
+    "../guardia",
+    "@app/access-control"
+   ],
+   "defines": [
+    {
+     "name": "GET",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "POST",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "GET",
+    "POST",
+    "dynamic",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/server/admin",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/context",
+     "resolved": null
+    },
+    {
+     "module": "../guardia",
+     "resolved": null
+    },
+    {
+     "module": "@app/access-control",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/admin/audit/route.ts",
+   "hash": "158d2d9d9f55a7e82256448615293d67efd52d034fb865ff1b62b47cdda3195d",
+   "imports": [
+    "../../../../src/server/audit",
+    "../guardia",
+    "@app/observability"
+   ],
+   "defines": [
+    {
+     "name": "GET",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "GET",
+    "dynamic",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/server/audit",
+     "resolved": null
+    },
+    {
+     "module": "../guardia",
+     "resolved": null
+    },
+    {
+     "module": "@app/observability",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/admin/scopes/route.ts",
+   "hash": "32e022ce58143c03d2cfb638aaf451d24d914f548fc42242cd0949e8102647d8",
+   "imports": [
+    "../../../../src/server/admin",
+    "../guardia",
+    "@app/access-control"
+   ],
+   "defines": [
+    {
+     "name": "POST",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "POST",
+    "dynamic",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/server/admin",
+     "resolved": null
+    },
+    {
+     "module": "../guardia",
+     "resolved": null
+    },
+    {
+     "module": "@app/access-control",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/admin/who-sees-what/route.ts",
+   "hash": "6a03eb7fa1ce1a25befbad3b4f23af77e62187e710e7b024f9b89e27c38d2ab8",
+   "imports": [
+    "../../../../src/server/admin",
+    "../guardia"
+   ],
+   "defines": [
+    {
+     "name": "GET",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "GET",
+    "dynamic",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/server/admin",
+     "resolved": null
+    },
+    {
+     "module": "../guardia",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/admin/accounts/route.ts",
+   "hash": "a2e6aaa93f465074fc40b3b2a1a57f75738b803cc408bd7caeb1f1b443ed55b5",
+   "imports": [
+    "../../../../src/server/admin",
+    "../../../../src/server/audit",
+    "../../../../src/server/identity",
+    "../guardia"
+   ],
+   "defines": [
+    {
+     "name": "GET",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "POST",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "GET",
+    "POST",
+    "dynamic",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../../src/server/admin",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/audit",
+     "resolved": null
+    },
+    {
+     "module": "../../../../src/server/identity",
+     "resolved": null
+    },
+    {
+     "module": "../guardia",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/hooks/dataset-refresh/route.ts",
+   "hash": "890d9cec9f5b0f97de5980b2a69d2c527a621b8194c92f0b0c0773d407e94c87",
+   "imports": [
+    "../../../../src/server/context",
+    "@app/caching",
+    "next/server",
+    "node:crypto"
+   ],
+   "defines": [
+    {
+     "name": "POST",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
     "POST",
     "runtime"
    ],
    "references": [],
    "import_edges": [
     {
-     "module": "../../../src/server/alerts",
+     "module": "../../../../src/server/context",
      "resolved": null
     },
+    {
+     "module": "@app/caching",
+     "resolved": null
+    },
+    {
+     "module": "next/server",
+     "resolved": null
+    },
+    {
+     "module": "node:crypto",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/navigation/route.ts",
+   "hash": "4788d514137909d8711ce6952c4abc82891ef1785d8a37a7c4f262cf8b898dd0",
+   "imports": [
+    "../../../src/server/cicloDeVida",
+    "../../../src/server/respuestas",
+    "../../../src/server/session",
+    "next/server"
+   ],
+   "defines": [
+    {
+     "name": "GET",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "GET",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
     {
      "module": "../../../src/server/cicloDeVida",
-     "resolved": null
-    },
-    {
-     "module": "../../../src/server/filters",
      "resolved": null
     },
     {
@@ -16869,14 +17341,6 @@
     },
     {
      "module": "../../../src/server/session",
-     "resolved": null
-    },
-    {
-     "module": "@app/alerts",
-     "resolved": null
-    },
-    {
-     "module": "@app/export",
      "resolved": null
     },
     {
@@ -16887,7 +17351,7 @@
   },
   {
    "path": "apps/shell/app/api/exports/route.ts",
-   "hash": "08bb24ad3f38932c619a06bcf776460b8bd9031c8867d40a09cfaee8fca05e3a",
+   "hash": "7e2723f887eb455b1c07190b63b902dbce81916884812c624f84184c36f0db19",
    "imports": [
     "../../../src/server/exports",
     "../../../src/server/filters",
@@ -16942,7 +17406,7 @@
   },
   {
    "path": "apps/shell/app/api/exports/[id]/route.ts",
-   "hash": "7853bb13bda1bb4f2e11f6b2ce764e73ff7569a5273e2a5206489e5a33acd91a",
+   "hash": "aaa625f43a159ff05976706943f946f2e9b26d441dd73ffd5164659419e9dd59",
    "imports": [
     "../../../../src/server/exports",
     "../../../../src/server/respuestas",
@@ -16987,7 +17451,7 @@
   },
   {
    "path": "apps/shell/app/api/exports/[id]/download/route.ts",
-   "hash": "75211c4f08703de87bacaf9d9473e71496dc4d58919bdc954fb7fc77d4dc602f",
+   "hash": "24a1470c178feb2571c40ad7da8182a93dd1a3bb20ee47c6aa0cba42adcd874f",
    "imports": [
     "../../../../../src/server/exports",
     "../../../../../src/server/respuestas",
@@ -17026,8 +17490,238 @@
    ]
   },
   {
+   "path": "apps/shell/app/api/query/route.ts",
+   "hash": "b7c6e80cdcbe97050d77ab67a368dbfb85144d781c103e8d021706383757213d",
+   "imports": [
+    "../../../src/server/query",
+    "../../../src/server/respuestas",
+    "../../../src/server/session",
+    "@app/nl-query",
+    "next/server"
+   ],
+   "defines": [
+    {
+     "name": "POST",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "POST",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/server/query",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/respuestas",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/session",
+     "resolved": null
+    },
+    {
+     "module": "@app/nl-query",
+     "resolved": null
+    },
+    {
+     "module": "next/server",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/bookmarks/route.ts",
+   "hash": "1891e8c325b15d4775b8cd4204378b5d6c11aa9b76545773ba3036f2ee1ea2a2",
+   "imports": [
+    "../../../src/server/bookmarks",
+    "../../../src/server/respuestas",
+    "../../../src/server/session",
+    "@app/module-model",
+    "next/server"
+   ],
+   "defines": [
+    {
+     "name": "DELETE",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "GET",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "POST",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "dynamic",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "DELETE",
+    "GET",
+    "POST",
+    "dynamic",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/server/bookmarks",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/respuestas",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/session",
+     "resolved": null
+    },
+    {
+     "module": "@app/module-model",
+     "resolved": null
+    },
+    {
+     "module": "next/server",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/notifications/route.ts",
+   "hash": "6b9e3ccf62a89f1b3aeac10b788385ffc6ab02a5f13852333dc8b602f0c51001",
+   "imports": [
+    "../../../src/server/alerts",
+    "../../../src/server/respuestas",
+    "../../../src/server/session",
+    "@app/alerts",
+    "next/server"
+   ],
+   "defines": [
+    {
+     "name": "GET",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "POST",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "GET",
+    "POST",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/server/alerts",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/respuestas",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/session",
+     "resolved": null
+    },
+    {
+     "module": "@app/alerts",
+     "resolved": null
+    },
+    {
+     "module": "next/server",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/sign-in/route.ts",
+   "hash": "b74ccd9992c9a2a2cc29477d119f4a3620a5029f935bf345000bac4f69e74526",
+   "imports": [
+    "../../../src/server/context",
+    "../../../src/server/identity",
+    "../../../src/server/session",
+    "@app/auth",
+    "next/server"
+   ],
+   "defines": [
+    {
+     "name": "DELETE",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "POST",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "DELETE",
+    "POST",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/server/context",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/identity",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/session",
+     "resolved": null
+    },
+    {
+     "module": "@app/auth",
+     "resolved": null
+    },
+    {
+     "module": "next/server",
+     "resolved": null
+    }
+   ]
+  },
+  {
    "path": "apps/shell/app/api/session/active-team/route.ts",
-   "hash": "f579b799fa431d55b9dd9ae8b9ca648313892c94301a860a69eb76aaedcf6463",
+   "hash": "1a553270cb819831143bf3a2790f61e1a424c54ce4fbf334feb72210fa6237fb",
    "imports": [
     "../../../../src/server/context",
     "../../../../src/server/respuestas",
@@ -17071,8 +17765,214 @@
    ]
   },
   {
+   "path": "apps/shell/app/api/alerts/route.ts",
+   "hash": "08a68539c182fd3dc1710d3c3d0ddd33835b8b16ad5e142cb3f7cc56e4c21c98",
+   "imports": [
+    "../../../src/server/alerts",
+    "../../../src/server/cicloDeVida",
+    "../../../src/server/filters",
+    "../../../src/server/respuestas",
+    "../../../src/server/session",
+    "@app/alerts",
+    "next/server"
+   ],
+   "defines": [
+    {
+     "name": "DELETE",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "GET",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "POST",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "DELETE",
+    "GET",
+    "POST",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/server/alerts",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/cicloDeVida",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/filters",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/respuestas",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/session",
+     "resolved": null
+    },
+    {
+     "module": "@app/alerts",
+     "resolved": null
+    },
+    {
+     "module": "next/server",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/reset/route.ts",
+   "hash": "04ec3e7d687cd4192108629ce0823a818e3b0d7ce5b58feed2553c5803978a73",
+   "imports": [
+    "../../../src/server/identity",
+    "@app/auth",
+    "next/server"
+   ],
+   "defines": [
+    {
+     "name": "POST",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "POST",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/server/identity",
+     "resolved": null
+    },
+    {
+     "module": "@app/auth",
+     "resolved": null
+    },
+    {
+     "module": "next/server",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/api/subscriptions/route.ts",
+   "hash": "d74f42fb122f861088caddb4ea2d885acdd737e56d3ad39d99590a37ed5cce55",
+   "imports": [
+    "../../../src/server/alerts",
+    "../../../src/server/cicloDeVida",
+    "../../../src/server/filters",
+    "../../../src/server/respuestas",
+    "../../../src/server/session",
+    "@app/alerts",
+    "@app/export",
+    "next/server"
+   ],
+   "defines": [
+    {
+     "name": "DELETE",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "GET",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "POST",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "runtime",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "DELETE",
+    "GET",
+    "POST",
+    "runtime"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../../src/server/alerts",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/cicloDeVida",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/filters",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/respuestas",
+     "resolved": null
+    },
+    {
+     "module": "../../../src/server/session",
+     "resolved": null
+    },
+    {
+     "module": "@app/alerts",
+     "resolved": null
+    },
+    {
+     "module": "@app/export",
+     "resolved": null
+    },
+    {
+     "module": "next/server",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/admin-without-permission/page.tsx",
+   "hash": "906a0589880de43a9a50380d9cf4af3f95568ff13e505c7d2c0a7562a147657e",
+   "imports": [],
+   "defines": [
+    {
+     "name": "WithoutPermission",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "WithoutPermission"
+   ],
+   "references": [],
+   "import_edges": []
+  },
+  {
    "path": "apps/shell/app/sign-in/page.tsx",
-   "hash": "1169272a0a5679cbed975b8164bcefb6924050fcd5b57ac908079e80414df90e",
+   "hash": "9ce41e5fe42d9aa3a2e52046c08e1ae380683e572fc033e365c6d563eab6a44e",
    "imports": [
     "../../src/components/Login",
     "../../src/server/identity",
@@ -17121,91 +18021,8 @@
    ]
   },
   {
-   "path": "apps/shell/app/(embedded)/layout.tsx",
-   "hash": "520fdf0158239bb14c2f25eaf4cf24153c99843ad19811f2623bbcf8dbcde6f7",
-   "imports": [
-    "@app/design-tokens"
-   ],
-   "defines": [
-    {
-     "name": "IncrustadoLayout",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "IncrustadoLayout"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "@app/design-tokens",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/(embedded)/embed/m/[slug]/page.tsx",
-   "hash": "00a5a50463bc8e6343a394ccff1eb0995c3e02e18583cc33970291f9ed1af553",
-   "imports": [
-    "../../../../../src/components/ModuleView",
-    "../../../../../src/server/cicloDeVida",
-    "../../../../../src/server/data",
-    "../../../../../src/server/serializar",
-    "../../../../../src/server/session",
-    "@app/module-model",
-    "next/link",
-    "next/navigation"
-   ],
-   "defines": [
-    {
-     "name": "PaginaIncrustada",
-     "line": null,
-     "type": "export"
-    }
-   ],
-   "exports": [
-    "PaginaIncrustada"
-   ],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../../../../../src/components/ModuleView",
-     "resolved": null
-    },
-    {
-     "module": "../../../../../src/server/cicloDeVida",
-     "resolved": null
-    },
-    {
-     "module": "../../../../../src/server/data",
-     "resolved": null
-    },
-    {
-     "module": "../../../../../src/server/serializar",
-     "resolved": null
-    },
-    {
-     "module": "../../../../../src/server/session",
-     "resolved": null
-    },
-    {
-     "module": "@app/module-model",
-     "resolved": null
-    },
-    {
-     "module": "next/link",
-     "resolved": null
-    },
-    {
-     "module": "next/navigation",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/app/(modulos)/page.tsx",
-   "hash": "129aa14b30319e68bfd793a764c5680b5ee96cca27403d6520ef9b7b377ed578",
+   "path": "apps/shell/app/(modules)/page.tsx",
+   "hash": "b1431cb3dc10b7f6cdef1169c333aea2c8d66f56c7baebff8efb234c38c0650a",
    "imports": [
     "../../src/server/cicloDeVida",
     "../../src/server/session",
@@ -17214,13 +18031,13 @@
    ],
    "defines": [
     {
-     "name": "Inicio",
+     "name": "Home",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "Inicio"
+    "Home"
    ],
    "references": [],
    "import_edges": [
@@ -17243,8 +18060,8 @@
    ]
   },
   {
-   "path": "apps/shell/app/(modulos)/layout.tsx",
-   "hash": "2c7c74a38a8697136956e5c33ab712f9922dc5eae102039a3cd11581ce37a7ab",
+   "path": "apps/shell/app/(modules)/layout.tsx",
+   "hash": "2608c21788fc07666f74f02da975f2a071aadf2db96f2d5c7163aeafbb901753",
    "imports": [
     "../../src/components/CollapsibleNavigation",
     "../../src/components/NavigationTree",
@@ -17254,13 +18071,13 @@
    ],
    "defines": [
     {
-     "name": "ModulosLayout",
+     "name": "LayoutModules",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "ModulosLayout"
+    "LayoutModules"
    ],
    "references": [],
    "import_edges": [
@@ -17287,8 +18104,8 @@
    ]
   },
   {
-   "path": "apps/shell/app/(modulos)/m/[slug]/page.tsx",
-   "hash": "93d35c7ef92596a62813ea612bef5a11befa9b859c47cb1745bbebad0ba9c733",
+   "path": "apps/shell/app/(modules)/m/[slug]/page.tsx",
+   "hash": "871c9bd1260c1200f969a8bd382289ea65e7f69f8a9a6f2aaa373ebadf71cf69",
    "imports": [
     "../../../../src/components/ModuleView",
     "../../../../src/components/ProvenanceBadge",
@@ -17296,7 +18113,7 @@
     "../../../../src/server/cicloDeVida",
     "../../../../src/server/data",
     "../../../../src/server/personalization",
-    "../../../../src/server/serializar",
+    "../../../../src/server/serialize",
     "../../../../src/server/session",
     "@app/module-model",
     "next/navigation"
@@ -17338,7 +18155,7 @@
      "resolved": null
     },
     {
-     "module": "../../../../src/server/serializar",
+     "module": "../../../../src/server/serialize",
      "resolved": null
     },
     {
@@ -17356,7 +18173,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/(modulos)/m/[slug]/[page]/page.tsx",
+   "path": "apps/shell/app/(modules)/m/[slug]/[page]/page.tsx",
    "hash": "779fb1568e832468a4dcb06136fa3dfc9adea3e78c91ca1d88a9da50127a1e68",
    "imports": [],
    "defines": [
@@ -17374,7 +18191,7 @@
   },
   {
    "path": "apps/shell/app/health/route.ts",
-   "hash": "d90e11a132f375706d8a8ba6431f1ec309a2bc3e6dd05a9dbf5ffbcd1f25dcf2",
+   "hash": "1d8fea40cf6829b2040f29257bbf8fe70df66d58e71d77e4f677b872d09c4668",
    "imports": [
     "../../src/server/context",
     "@app/observability",
@@ -17419,27 +18236,105 @@
    ]
   },
   {
-   "path": "apps/shell/app/admin-without-permission/page.tsx",
-   "hash": "f30f2a07cb894504d357d62d9bb98d2193a930feefce16fc1e137bf22a154b12",
-   "imports": [],
+   "path": "apps/shell/app/editor-without-permission/page.tsx",
+   "hash": "84eeec16d91162ed99c61d48f586d6f33acea03bfca6bd3b4c3455093dedf33d",
+   "imports": [
+    "next/link"
+   ],
    "defines": [
     {
-     "name": "SinPermiso",
+     "name": "WithoutEditorPermission",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "metadata",
      "line": null,
      "type": "export"
     }
    ],
    "exports": [
-    "SinPermiso"
+    "WithoutEditorPermission",
+    "metadata"
    ],
    "references": [],
-   "import_edges": []
+   "import_edges": [
+    {
+     "module": "next/link",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/notices/page.tsx",
+   "hash": "1f9d588d8db076ed5280ed048c937827146a4fd0258e97fce12fcf92a73ae82c",
+   "imports": [
+    "../../src/components/Notices",
+    "../../src/server/session"
+   ],
+   "defines": [
+    {
+     "name": "NoticesPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "metadata",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "NoticesPage",
+    "metadata"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../src/components/Notices",
+     "resolved": null
+    },
+    {
+     "module": "../../src/server/session",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/app/reset/page.tsx",
+   "hash": "e8ff359c0a1dfcc8b21ea2559a63a46c30cdba3941c64add100983a08f39643f",
+   "imports": [
+    "../../src/components/Reset"
+   ],
+   "defines": [
+    {
+     "name": "ResetPage",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "metadata",
+     "line": null,
+     "type": "export"
+    }
+   ],
+   "exports": [
+    "ResetPage",
+    "metadata"
+   ],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../../src/components/Reset",
+     "resolved": null
+    }
+   ]
   },
   {
    "path": "apps/shell/e2e/locale.spec.ts",
-   "hash": "c742dd0263d8f36e7e8168c96aa5d3de9c3b4d2ef50de5c157729aaebb8dbc85",
+   "hash": "d2feecd5be00057074ba1aff2f454b702e2d639f804a0de61159aaa37a716a25",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session"
    ],
    "defines": [],
@@ -17447,7 +18342,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17458,9 +18353,9 @@
   },
   {
    "path": "apps/shell/e2e/addons.spec.ts",
-   "hash": "998e377e3e4e32cf4d5492b098b3e92a70a7efdfa3984e5f578e5236f80b669d",
+   "hash": "deddf72dfa2acc8755b7de18926c225e979a771fc7f4b33ecee343a960e4041c",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session"
    ],
    "defines": [],
@@ -17468,7 +18363,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17479,9 +18374,9 @@
   },
   {
    "path": "apps/shell/e2e/exportacion.spec.ts",
-   "hash": "57d1fad4a5dddda18bce8de7e689522fa45f52e36dc896c67d497300aeecff63",
+   "hash": "8d6717544598c30e4116645b8d9216c666f64b9adb45196c5619ea4ac765f204",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session"
    ],
    "defines": [],
@@ -17489,7 +18384,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17500,9 +18395,9 @@
   },
   {
    "path": "apps/shell/e2e/canvas.spec.ts",
-   "hash": "598c7bbc36be2e9390248c649c62f5de3d355fe5cb8d1058e921ec828577d599",
+   "hash": "3c52448fe1dabfb6a225269826b864437f898ef3e9f3e90f5c4fcfe5dac68f53",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session",
     "@axe-core/playwright"
    ],
@@ -17511,7 +18406,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17526,9 +18421,9 @@
   },
   {
    "path": "apps/shell/e2e/multiinstancia.spec.ts",
-   "hash": "86d01656bc8dd01c1586e03cdbfcdfa14b917b97e76417eeeea5c3e730cf0117",
+   "hash": "2a3ccc3bb99847abedbe87b4043954cee67f994584dd8d30f72311f096bd9adb",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session"
    ],
    "defines": [],
@@ -17536,7 +18431,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17547,9 +18442,9 @@
   },
   {
    "path": "apps/shell/e2e/charts.spec.ts",
-   "hash": "807c89b85a6e93fb1eebfaf1a1864e8d8e848c80c7886dd1d680ff52b733c3c2",
+   "hash": "c443dc3a42323b6bee9a3c28437c36267790195f66e6d72b59f5f65d691793ea",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session",
     "@axe-core/playwright"
    ],
@@ -17558,7 +18453,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17573,9 +18468,9 @@
   },
   {
    "path": "apps/shell/e2e/responsivo.spec.ts",
-   "hash": "1e1e8a4122bd63056048c1c57b5f7af12be7c78e1a43a5f3229ab52b78e21238",
+   "hash": "ef1d510684de4f8d2ef525549d1c9f8ebe407e0d6cdc9f52992e8fc3b4ebe22a",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session",
     "@axe-core/playwright"
    ],
@@ -17584,7 +18479,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17599,14 +18494,19 @@
   },
   {
    "path": "apps/shell/e2e/session.ts",
-   "hash": "4fa3417da560c8c87915b19f48f6aaf234646d19ab8f4c4c657b56b276e65a58",
+   "hash": "a5daa6ee12cce4a4d12d4a9c905048432783e0a571b583837b504b63b0c3b62e",
    "imports": [
-    "../src/server/credencialesDemo",
+    "../src/server/demoCredentials",
     "@playwright/test"
    ],
    "defines": [
     {
-     "name": "entrarComo",
+     "name": "asLogin",
+     "line": null,
+     "type": "export"
+    },
+    {
+     "name": "newModule",
      "line": null,
      "type": "export"
     },
@@ -17617,13 +18517,14 @@
     }
    ],
    "exports": [
-    "entrarComo",
+    "asLogin",
+    "newModule",
     "salir"
    ],
    "references": [],
    "import_edges": [
     {
-     "module": "../src/server/credencialesDemo",
+     "module": "../src/server/demoCredentials",
      "resolved": null
     },
     {
@@ -17634,9 +18535,9 @@
   },
   {
    "path": "apps/shell/e2e/shell.spec.ts",
-   "hash": "13ccea9b8fef6e972ce5e0381e78f0bd8eb693d0fca8a5fc0c24925e7fdfdb1d",
+   "hash": "5819b721b85617bf0770a60d47401f030acd72aeb4c2f0388075b38271c25fb7",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session"
    ],
    "defines": [],
@@ -17644,7 +18545,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17655,9 +18556,9 @@
   },
   {
    "path": "apps/shell/e2e/dark-contrast.spec.ts",
-   "hash": "dcfaef3899e1d6b12e28c3695cd57ac0a0c72b509103d819a8fc796b401a228d",
+   "hash": "3369e0a7f56d498e4312cbd8de77dc904bf4f9485159a3df8289342082c3f461",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session",
     "@axe-core/playwright"
    ],
@@ -17666,7 +18567,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17681,9 +18582,9 @@
   },
   {
    "path": "apps/shell/e2e/notices.spec.ts",
-   "hash": "7c9caf17e55a2853d8af59c18b5c7f27bb1711ab1bd48720e3d429943d101c35",
+   "hash": "8bb2a71d3d90716ccecb13ac53b4eb85d895dc81a6ddd81b518f94e910b9a187",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session"
    ],
    "defines": [],
@@ -17691,20 +18592,72 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
      "module": "./session",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/e2e/accounts.spec.ts",
+   "hash": "7a3e9df0a82169189b320e0ade85679ffc03eadf753507eb15fe8c9136f57a16",
+   "imports": [
+    "../src/server/demoCredentials",
+    "./instance",
+    "./session"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../src/server/demoCredentials",
+     "resolved": null
+    },
+    {
+     "module": "./instance",
+     "resolved": null
+    },
+    {
+     "module": "./session",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/e2e/embedding.spec.ts",
+   "hash": "f6c53f89e584b1e896442c7023369ca3b090524a36a5133dbf21ef1dfb9f6b1e",
+   "imports": [
+    "./instance",
+    "./session",
+    "@axe-core/playwright"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./instance",
+     "resolved": null
+    },
+    {
+     "module": "./session",
+     "resolved": null
+    },
+    {
+     "module": "@axe-core/playwright",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/object-personalization.spec.ts",
-   "hash": "205c83a15cce213fe9c95150e58ee5f745700a7feea7fd5737ea35d1c3a234cf",
+   "hash": "10a9b470cc409a06f345281db08df21e038953cffb8427c905ad365bdab05574",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session"
    ],
    "defines": [],
@@ -17712,46 +18665,41 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
      "module": "./session",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/e2e/incrustacion.spec.ts",
-   "hash": "9e154f3042b939ea881603421890cfa097fa67d84c8980fc38646aa918cc4d77",
-   "imports": [
-    "./instancia",
-    "./session",
-    "@axe-core/playwright"
-   ],
-   "defines": [],
-   "exports": [],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "./instancia",
-     "resolved": null
-    },
-    {
-     "module": "./session",
-     "resolved": null
-    },
-    {
-     "module": "@axe-core/playwright",
      "resolved": null
     }
    ]
   },
   {
    "path": "apps/shell/e2e/query.spec.ts",
-   "hash": "28c455c1708095e8e68fc800059e4af5677eb268b98e7abb37ef8db28fd7fd43",
+   "hash": "d8e4802f3cee7c51217f53c0bdb988e2abd71dac0ddb0fa28167d3c907b02adf",
    "imports": [
-    "./instancia",
+    "./instance",
+    "./session"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./instance",
+     "resolved": null
+    },
+    {
+     "module": "./session",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/e2e/accesibilidad.spec.ts",
+   "hash": "f29927c253aff8c6a763ac233fb9d09ad6d39f89e2af950c9ad1c72027ece9ca",
+   "imports": [
+    "./instance",
     "./session",
     "@axe-core/playwright"
    ],
@@ -17760,7 +18708,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17774,8 +18722,55 @@
    ]
   },
   {
-   "path": "apps/shell/e2e/instancia.ts",
-   "hash": "93f8a590aabf42dcf4b675a7a8513710f0131ac48663c36e490b0e6b5ae50774",
+   "path": "apps/shell/e2e/object-contract.spec.ts",
+   "hash": "ecb7173bcee661f34bfdf2e8fcaf911337b9c03e49d759bcb78f1413b602600f",
+   "imports": [
+    "./instance",
+    "./session"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "./instance",
+     "resolved": null
+    },
+    {
+     "module": "./session",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/e2e/login.spec.ts",
+   "hash": "769903da34d7fe5fedec13a82a50495627b518f20ea19a7c3ddafcd20c0a05e8",
+   "imports": [
+    "../src/server/demoCredentials",
+    "./instance",
+    "./session"
+   ],
+   "defines": [],
+   "exports": [],
+   "references": [],
+   "import_edges": [
+    {
+     "module": "../src/server/demoCredentials",
+     "resolved": null
+    },
+    {
+     "module": "./instance",
+     "resolved": null
+    },
+    {
+     "module": "./session",
+     "resolved": null
+    }
+   ]
+  },
+  {
+   "path": "apps/shell/e2e/instance.ts",
+   "hash": "60860d970d2037c4e0c00d81cfa8238a56f7634979ed8f3e0e3a7a73165f12d0",
    "imports": [
     "@playwright/test"
    ],
@@ -17816,37 +18811,32 @@
    ]
   },
   {
-   "path": "apps/shell/e2e/accesibilidad.spec.ts",
-   "hash": "c4fb39f4c8a6a289d1d65287d01ee9614ce132ead7824270f95d0943a63ab3c0",
+   "path": "apps/shell/e2e/personalization.spec.ts",
+   "hash": "2bc27439810fec1a601da99db1d2f1171f0c10c9c975de4ee12f7bc86c004818",
    "imports": [
-    "./instancia",
-    "./session",
-    "@axe-core/playwright"
+    "./instance",
+    "./session"
    ],
    "defines": [],
    "exports": [],
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
      "module": "./session",
      "resolved": null
-    },
-    {
-     "module": "@axe-core/playwright",
-     "resolved": null
     }
    ]
   },
   {
-   "path": "apps/shell/e2e/editor-completo.spec.ts",
-   "hash": "dcdbccb5e8c923e8792b6880638efbce3f50f804d8792962a32fbf16b302ffe8",
+   "path": "apps/shell/e2e/full-editor.spec.ts",
+   "hash": "363be4d4310d577f177295b19b72238ce0c6ac2ddcb9c0088a2db3129e6961b9",
    "imports": [
     "../src/components/editor/controls",
-    "./instancia",
+    "./instance",
     "./session",
     "@app/ui-components"
    ],
@@ -17859,7 +18849,7 @@
      "resolved": null
     },
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17873,78 +18863,10 @@
    ]
   },
   {
-   "path": "apps/shell/e2e/object-contract.spec.ts",
-   "hash": "93582cc2ce0dd0bb109054e3433439ad0b069ca4b6c9a565df1de81abd112c69",
-   "imports": [
-    "./instancia",
-    "./session"
-   ],
-   "defines": [],
-   "exports": [],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "./instancia",
-     "resolved": null
-    },
-    {
-     "module": "./session",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/e2e/login.spec.ts",
-   "hash": "2df30ecd6161b999c0caa0140427ae2f7742dfd86f62434a907f3e37d2c43145",
-   "imports": [
-    "../src/server/credencialesDemo",
-    "./instancia",
-    "./session"
-   ],
-   "defines": [],
-   "exports": [],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../src/server/credencialesDemo",
-     "resolved": null
-    },
-    {
-     "module": "./instancia",
-     "resolved": null
-    },
-    {
-     "module": "./session",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/e2e/personalization.spec.ts",
-   "hash": "29317667f4784ee779f9e03c0259ddb77fe9b586d352f7da9c9262986dccfeba",
-   "imports": [
-    "./instancia",
-    "./session"
-   ],
-   "defines": [],
-   "exports": [],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "./instancia",
-     "resolved": null
-    },
-    {
-     "module": "./session",
-     "resolved": null
-    }
-   ]
-  },
-  {
    "path": "apps/shell/e2e/objects.spec.ts",
-   "hash": "7a30a3c2ca057073db3827ac5b9b016005b14254d7386df06ec11b6d8f0ec8b5",
+   "hash": "29c37a907794a0c194f60891a17a0d592b6167f19c7721c42497e8b702e88713",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session"
    ],
    "defines": [],
@@ -17952,33 +18874,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
-     "resolved": null
-    },
-    {
-     "module": "./session",
-     "resolved": null
-    }
-   ]
-  },
-  {
-   "path": "apps/shell/e2e/cuentas.spec.ts",
-   "hash": "ec9986553e4b7c4b3884728be5f64f417cfbf668beb3ce0b47406b22ab78f088",
-   "imports": [
-    "../src/server/credencialesDemo",
-    "./instancia",
-    "./session"
-   ],
-   "defines": [],
-   "exports": [],
-   "references": [],
-   "import_edges": [
-    {
-     "module": "../src/server/credencialesDemo",
-     "resolved": null
-    },
-    {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -17989,9 +18885,9 @@
   },
   {
    "path": "apps/shell/e2e/admin.spec.ts",
-   "hash": "9fbff02d95e137b9ee21298ed22bb9c01e21172db5cc2ad36de0419afcf124d8",
+   "hash": "fa5ac26b4515fa9a560db5440b6e7da1c4a8defa73e3a1495775617b946994f3",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session"
    ],
    "defines": [],
@@ -17999,7 +18895,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -18010,9 +18906,9 @@
   },
   {
    "path": "apps/shell/e2e/editor.spec.ts",
-   "hash": "40f75a2320d0b9e0c8acc1fdf1cab802d82bbce821cf89cddbb8640f56f84973",
+   "hash": "b2a1473e89257a3aabf9dda62e5acfdfbb40041e55b516370d0019d46072a503",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session"
    ],
    "defines": [],
@@ -18020,7 +18916,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -18031,9 +18927,9 @@
   },
   {
    "path": "apps/shell/e2e/filters.spec.ts",
-   "hash": "e71828ed17d52b3a04f2ab2a3c8bf42f1ddcd8c4764a61012cc65216c1e004e2",
+   "hash": "8ec3ef6dacf11bb0553c39fbb76c7d386b05bcccd2bcd37821caaed74c50b67c",
    "imports": [
-    "./instancia",
+    "./instance",
     "./session",
     "@axe-core/playwright"
    ],
@@ -18042,7 +18938,7 @@
    "references": [],
    "import_edges": [
     {
-     "module": "./instancia",
+     "module": "./instance",
      "resolved": null
     },
     {
@@ -18056,5 +18952,5 @@
    ]
   }
  ],
- "file_count": 361
+ "file_count": 384
 }

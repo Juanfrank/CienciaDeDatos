@@ -12,7 +12,7 @@
 #    IDataConnector.query() de forma directa."
 set -uo pipefail
 
-FIXTURE="apps/modules/modulo-ejemplo/src/__boundary-fixture__/forbidden-import.ts"
+FIXTURE="apps/modules/sample-module/src/__boundary-fixture__/forbidden-import.ts"
 REGLA="@nx/enforce-module-boundaries"
 
 echo "==> Linteando el fixture negativo: $FIXTURE"

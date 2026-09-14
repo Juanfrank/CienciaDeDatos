@@ -83,7 +83,7 @@ npm run poblar -- --connector sql    # falla limpio: Sql se implementa en Fase 4
 /apps
   /shell                     Shell Next.js: navegacion, layout, auth, API          [type:app]
   /modules
-    /modulo-ejemplo          Un proyecto por modulo de negocio                     [type:module]
+    /sample-module           Un proyecto por modulo de negocio                     [type:module]
   /cache-populator           Job de poblacion de cache (Azure Function)            [type:job]
 /packages
   /data-contracts

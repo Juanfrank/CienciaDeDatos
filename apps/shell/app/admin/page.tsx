@@ -57,7 +57,11 @@ export default async function HomeAdmin() {
         ) : (
           <ul className="registro">
             {recientes.map((e, i) => (
-              <AuditEvent key={`${e.timestamp}-${i}`} evento={e} />
+              <AuditEvent
+                key={`${e.timestamp}-${i}`}
+                evento={e}
+                actor={personas.find((u) => u.userId === e.actorId)?.displayName ?? e.actorId}
+              />
             ))}
           </ul>
         )}

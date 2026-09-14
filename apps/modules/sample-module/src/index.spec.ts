@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { contract, describeQuery } from './index';
 
-describe('modulo-ejemplo', () => {
+describe('sample-module', () => {
   it('declara su consumo de datos en el contrato de modulo (3.3)', () => {
     expect(contract.slug).toBe('casos-pendientes');
     expect(contract.consumes.datasets).not.toHaveLength(0);

@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Algorithm, hash, verify } from '@node-rs/argon2';
 import { TOTP } from 'otpauth';
 import {
@@ -49,6 +50,21 @@ const ARGON2_OPTIONS = {
   timeCost: 2,
   parallelism: 1,
 } as const;
+
+/**
+ * Un hash con los MISMOS parametros, para gastar el mismo tiempo cuando no hay cuenta contra la
+ * que verificar.
+ *
+ * Se calcula una sola vez y se reutiliza: lo que iguala el tiempo es el coste de `verify`, que no
+ * depende de contra que hash se verifique mientras los parametros sean los mismos. La contraseña
+ * de la que sale es aleatoria y no se guarda en ningun sitio, porque nadie tiene que poder
+ * acertarla: este hash no autoriza nada, solo hace bulto.
+ */
+let relleno: Promise<string> | undefined;
+function hashDeRelleno(): Promise<string> {
+  relleno ??= hash(randomUUID(), ARGON2_OPTIONS);
+  return relleno;
+}
 
 export class LocalIdentityProvider implements IIdentityProvider {
   private readonly store: ILocalIdentityStore;
@@ -146,7 +162,15 @@ export class LocalIdentityProvider implements IIdentityProvider {
 
     // Cuenta inexistente: mismo error y mismo camino que una contraseña erronea, para no
     // revelar que correos existen en el almacen local.
+    //
+    // El mensaje ya era el mismo; el TIEMPO no. Argon2id con m=19456 tarda decenas de
+    // milisegundos a proposito, y salir aqui sin verificar nada contestaba mucho antes que una
+    // contraseña erronea sobre una cuenta que si existe. La diferencia se mide desde fuera con un
+    // cronometro: el atacante recorre una lista de correos, mide, y sabe cuales son cuentas de la
+    // institucion sin acertar ni una contraseña. Asi que se verifica igual, contra un hash de
+    // relleno, y se paga el mismo coste.
     if (!registro) {
+      await this.safeVerify(await hashDeRelleno(), password);
       await this.audit(email, 'fallo', 'credenciales-invalidas', sourceIp);
       throw new AuthenticationError('Credenciales invalidas.', 'credenciales-invalidas');
     }

@@ -46,13 +46,31 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   `tools/i18n/migrate-keys.mjs`, que ademas se ejecuta con `--check`.
 - **Las carpetas, al ingles.** 54 carpetas —rutas del panel, rutas de API, `tools/`, `docs/`, el
   modulo de ejemplo— con su registro en `tools/rename/migrate-folders.mjs`. La excepcion
-  deliberada es `m/[slug]`: es la URL que la gente guarda, incrusta y reparte. El grupo
+  deliberada es `/m/[slug]`: es la URL que la gente guarda, incrusta y reparte. El grupo
   `(modules)` que la contiene si se renombro, porque los parentesis lo sacan de la URL.
 - **Dos guardas nuevas, cada una probada con el fallo real que la motivo.** `tools/coherence/`
   ata ahora tambien las **rutas de API** —por ahi se colaron cinco roturas de golpe, porque la
   guarda de rutas se saltaba `/api` a proposito— y los **prefijos de clave armados con
-  plantilla**: `t(`familia.${x}`)` lleva un `as MessageKey` que apaga el tipo, y el renombrado
-  dejo la paleta del editor dibujando «familia.comparison» como encabezado.
+  plantilla**: una clave armada con plantilla lleva un `as MessageKey` que apaga el tipo, y por
+  ahi el renombrado dejo la paleta del editor dibujando «familia.comparison» como encabezado.
+- **Auditoria de seguridad: lo que se arreglo.** El acceso revelaba por el RELOJ que correos
+  existen —la rama «esta cuenta no existe» salia sin verificar nada, en microsegundos, frente a
+  las decenas de milisegundos que Argon2id tarda a proposito—. Ahora verifica contra un hash de
+  relleno y paga el mismo coste; lo mide `packages/auth/src/auth.spec.ts`, que antes del arreglo
+  veia 0,17 ms contra 34 ms. Y tres superficies que se cumplian pero que nada MANTENIA quedan
+  atadas en `tools/coherence/autorizacion.spec.ts` y `tools/coherence/rutas-de-scripts.spec.ts`.
+- **Una prueba que llevaba desde el primer dia sin comprobar nada.** «El registro dice quien, que
+  y cuando, no identificadores crudos» seleccionaba `.log__row` en `/admin/audit`, donde esa clase
+  no esta, y metia su unica asercion dentro de `if (filas.count() > 0)`. Cero filas, verde
+  siempre. Lo que tapaba: las dos pantallas de auditoria mostraban `u-admin` donde deberia ir un
+  nombre. Arreglado en las dos, y la prueba ahora provoca el cambio y comprueba las cuatro
+  columnas sin condicion.
+- **Lo que la auditoria confirmo sano**, para no volver a mirarlo sin motivo: Argon2id con los
+  parametros de OWASP y pimienta separada; sesion opaca de 8 h, revocable, con `httpOnly` y
+  `secure` en produccion; el webhook de recarga falla cerrado y compara en tiempo constante; el
+  token de restablecimiento son 24 bytes aleatorios, de un solo uso y con caducidad; la descarga
+  de una exportacion comprueba de quien es y no toca el disco; la personalizacion toma el usuario
+  de la sesion, nunca del cuerpo. `npm audit` da cero vulnerabilidades.
 
 **2.2 sigue pendiente** aunque dependia de 2.1: el reposicionamiento existe en el editor, no en
 el dialogo «Mi vista» de la personalizacion.
@@ -253,6 +271,22 @@ la mayoria envoltorios de BEM sin estilo propio, que es legitimo.
 La guarda util es la del sentido que no tiene falsos positivos: una regla cuyo nombre no aparece
 en ningun componente es CSS muerto. Hace falta antes limpiar las 26, porque un trinquete que nace
 rojo no lo mira nadie.
+
+**Media hecha.** El otro sentido —la clase que una PRUEBA usa como selector— ya esta atado en
+`tools/coherence/interfaz.spec.ts`, y no nacia rojo. Queda la mitad del CSS muerto, que si lo
+hace.
+
+Aun asi no habria bastado para el fallo que lo motivo, y conviene decirlo: la prueba del registro
+de auditoria seleccionaba `.log__row`, que EXISTE —en el resumen de `/admin`— mientras la prueba
+abria `/admin/audit`, donde la tabla es otra. Clase correcta, pagina equivocada, cero filas, y la
+unica asercion metida dentro de un `if (filas.count() > 0)` que nunca se cumplia. La prueba salia
+verde desde que se escribio sin mirar nada, y con eso tapaba que las dos pantallas mostraban
+`u-admin` en la columna «quien», que es justo lo que decia comprobar que no pasaba. Las dos
+pantallas muestran ya el nombre de la persona.
+
+Lo que de verdad falta para esa clase de fallo es una guarda sobre la asercion condicional: un
+`expect` dentro de un `if` puede no ejecutarse nunca, y una prueba que no se ejecuta no se
+distingue de una que pasa.
 
 ---
 

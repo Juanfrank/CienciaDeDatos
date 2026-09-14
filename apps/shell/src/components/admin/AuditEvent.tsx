@@ -32,7 +32,14 @@ const cuando = (iso: string): string =>
     minute: '2-digit',
   });
 
-export function AuditEvent({ evento }: { evento: ConfigChangeLog }) {
+/**
+ * `actor` es el NOMBRE de quien hizo el cambio.
+ *
+ * Se pasa desde fuera porque el nombre vive en el gobierno y este componente no lee del servidor.
+ * Es opcional y cae al identificador: un directorio que no traiga nombre deja lo que se veia
+ * antes, que es lo correcto, en vez de dejar la columna vacia.
+ */
+export function AuditEvent({ evento, actor }: { evento: ConfigChangeLog; actor?: string }) {
   return (
     <li className="log__row" data-ampliacion={evento.isScopeExpansion ? 'si' : undefined}>
       <span className="log__cuando">
@@ -40,7 +47,7 @@ export function AuditEvent({ evento }: { evento: ConfigChangeLog }) {
         <time dateTime={evento.timestamp}>{cuando(evento.timestamp)}</time>
       </span>
       <span className="log__que">
-        <strong>{evento.actorId}</strong> {ACTION[evento.action] ?? evento.action}{' '}
+        <strong>{actor ?? evento.actorId}</strong> {ACTION[evento.action] ?? evento.action}{' '}
         {ENTIDAD[evento.entityType] ?? evento.entityType} <code>{evento.entityId}</code>
       </span>
       {evento.isScopeExpansion ? (

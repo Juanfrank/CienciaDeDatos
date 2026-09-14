@@ -1,4 +1,5 @@
 import { expansionsCount, auditList } from '../../../src/server/audit';
+import { listUsers } from '../../../src/server/context';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +18,16 @@ export default async function AuditPage({
     ...(onlyMoves ? { onlyMoves: true } : {}),
   });
   const ampliaciones = await expansionsCount();
+
+  /*
+   * «Quien» es una persona, no una fila del almacen.
+   *
+   * La columna mostraba `actorId` en crudo —`u-admin`—, que es el identificador con el que el
+   * gobierno guarda a alguien, no su nombre. Quien audita no tiene por que saberselos, y la
+   * cabecera de la aplicacion lleva mostrando el nombre desde que existe `displayName`. Si el
+   * directorio no trae nombre, se cae al identificador, que es lo que se veia antes.
+   */
+  const nombreDe = new Map((await listUsers()).map((u) => [u.userId, u.displayName ?? u.userId]));
 
   return (
     <section>
@@ -62,7 +73,7 @@ export default async function AuditPage({
               {eventos.map((e, i) => (
                 <tr key={i} className={e.isScopeExpansion ? 'es-ampliacion' : ''}>
                   <td>{new Date(e.timestamp).toLocaleString('es-DO')}</td>
-                  <td>{e.actorId}</td>
+                  <td>{nombreDe.get(e.actorId) ?? e.actorId}</td>
                   <td>
                     <code>{e.entityType}</code> {e.entityId}
                   </td>
