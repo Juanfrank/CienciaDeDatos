@@ -25,6 +25,13 @@
         "{workspaceRoot}/packages/i18n/src/catalog/*.ts",
         "{workspaceRoot}/packages/ui-components/src/**/*",
         "{workspaceRoot}/tools/*.sh",
+        "{workspaceRoot}/tools/**/*.sh",
+        "{workspaceRoot}/tools/*.mts",
+        "{workspaceRoot}/tools/**/*.mts",
+        "{workspaceRoot}/tools/*.ts",
+        "{workspaceRoot}/tools/**/*.ts",
+        "{workspaceRoot}/tools/*.mjs",
+        "{workspaceRoot}/tools/**/*.mjs",
         "{workspaceRoot}/**/*.json",
         "{workspaceRoot}/.github/**/*"
       ]
