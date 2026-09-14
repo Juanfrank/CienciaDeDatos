@@ -432,7 +432,7 @@ export const es = {
   'admin.assets.usage.catalog': '{n, plural, one {# objeto del catalogo lo lleva} other {# objetos del catalogo lo llevan}}: {cuales}',
   'admin.assets.usage.instances': '{n, plural, one {# instancia} other {# instancias}}',
   'admin.assets.icons.intro':
-    'El icono no es un objeto: se usa DENTRO de uno. Deshabilitar uno deja de ofrecerlo para elegir, y no lo retira de los modulos que ya lo tienen puesto.',
+    'El icono no es un objeto: se usa DENTRO de uno. Deshabilitar uno deja de ofrecerlo para elegir, y no lo retira de los modulos que ya lo tienen puesto. «En uso» cuenta el catalogo y los modulos, NO la propia interfaz: un icono marcado sin usar puede estar dibujando un boton de esta misma pantalla.',
   'admin.assets.images.intro': 'Imagenes servidas desde el propio origen.',
   'admin.assets.geometries.intro': 'Geometrias para los mapas, tambien desde el propio origen.',
   'admin.usage.behind': 'Atrasada',

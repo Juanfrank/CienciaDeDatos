@@ -4244,6 +4244,12 @@ th[aria-sort='descending'] .table__flecha {
   font-weight: 600;
 }
 
+/* «Configurar permisos» son dos palabras y una sola accion: partida en dos lineas se lee como si
+   fueran dos enlaces. */
+.fila-carpeta a {
+  white-space: nowrap;
+}
+
 /*
  * El alta de un paquete visual.
  *

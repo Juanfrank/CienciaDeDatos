@@ -136,7 +136,50 @@ async function sembrarPropuesta(): Promise<void> {
   await pagina.request.post(`${base}/api/modules/${slug}/status`, { data: { transition: 'enviar' } });
 }
 
+/*
+ * Un paquete visual de verdad, por lo mismo que la propuesta.
+ *
+ * La tabla vacia solo ensena el boton de crear. Lo que hay que poder mirar es una fila: cuantos
+ * modulos lleva, a que equipo esta asignado y si algun nodo suyo no se le muestra.
+ */
+async function sembrarPaquete(): Promise<void> {
+  await entrar('u-admin');
+
+  const creado = await pagina.request.post(`${base}/api/admin/packages`, {
+    data: {
+      paquete: {
+        id: 'pkg-capturas',
+        name: 'Vista del Distrito Este',
+        visualTree: [
+          {
+            id: 'pkg-capturas-casos-este',
+            type: 'module',
+            moduleRef: {
+              moduleId: 'casos-este',
+              slug: 'casos-este',
+              name: 'Casos pendientes Este',
+            },
+          },
+        ],
+      },
+    },
+  });
+  if (!creado.ok()) return;
+
+  // Se le asigna a un equipo: sin asignar, la columna «Asignado a» sale vacia y no ensena nada.
+  // `saveTeam` reemplaza el equipo entero, asi que se lee primero.
+  const { equipos } = (await (await pagina.request.get(`${base}/api/admin/teams`)).json()) as {
+    equipos: { id: string }[];
+  };
+  const este = equipos.find((e) => e.id === 'equipo-este');
+  if (!este) return;
+  await pagina.request.post(`${base}/api/admin/teams`, {
+    data: { accion: 'guardar', equipo: { ...este, assignedPackageId: 'pkg-capturas' } },
+  });
+}
+
 await sembrarPropuesta();
+await sembrarPaquete();
 await entrar('u-admin');
 
 // El desplegable de la cuenta, abierto: es donde vive todo lo que no es mirar datos.

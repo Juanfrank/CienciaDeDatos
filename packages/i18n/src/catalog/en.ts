@@ -434,7 +434,7 @@ export const en: Record<MessageKey, string> = {
   'admin.assets.usage.catalog': '{n, plural, one {# catalog object uses it} other {# catalog objects use it}}: {cuales}',
   'admin.assets.usage.instances': '{n, plural, one {# instance} other {# instances}}',
   'admin.assets.icons.intro':
-    'An icon is not an object: it is used INSIDE one. Disabling one stops it being offered, and does not remove it from modules that already use it.',
+    'An icon is not an object: it is used INSIDE one. Disabling one stops it being offered, and does not remove it from modules that already use it. "In use" counts the catalog and modules, NOT the interface itself: an icon marked unused may be drawing a button on this very screen.',
   'admin.assets.images.intro': 'Images served from our own origin.',
   'admin.assets.geometries.intro': 'Map geometries, also from our own origin.',
   'admin.usage.behind': 'Behind',
