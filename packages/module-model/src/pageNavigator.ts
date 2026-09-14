@@ -107,5 +107,47 @@ export function navigatorProblems(modulo: {
   ) {
     return [`«${modulo.navigator.comportamiento}» no es un comportamiento de panel.`];
   }
-  return [];
+  return filterProblems(modulo.navigator);
+}
+
+/**
+ * Lo que impide que la seccion de filtros del panel se dibuje.
+ *
+ * Se comprueba aqui porque el camino de lectura la DESCARTA EN SILENCIO cuando le falta algo: sin
+ * dataset, o colgada de unas pestanas, `navigatorFiltersItem` devuelve «nada» y el panel sale sin
+ * filtros. Quien la configuro ve un panel normal y no tiene forma de saber que se le ignoro — que
+ * es la peor manera de fallar, porque no parece un fallo.
+ */
+function filterProblems(navegador: PageNavigatorSettings): string[] {
+  const filtros = navegador.filtros;
+  if (!filtros) return [];
+
+  const problemas: string[] = [];
+
+  if (!NAVIGATOR_IS_PANEL(navegador.tipo)) {
+    problemas.push(
+      'La seccion de filtros solo cabe en un panel lateral: en unas pestanas o en un menu no hay ' +
+        'donde ponerla.',
+    );
+  }
+
+  if (filtros.pickers.length > 0 && !filtros.datasetId) {
+    problemas.push(
+      'La seccion de filtros no dice de que dataset salen los valores, asi que no hay de donde ' +
+        'sacarlos.',
+    );
+  }
+
+  const vistos = new Set<string>();
+  for (const picker of filtros.pickers) {
+    if (vistos.has(picker.fieldName)) {
+      problemas.push(
+        `'${picker.fieldName}' tiene mas de un selector en la seccion de filtros. Cada campo ` +
+          'lleva uno.',
+      );
+    }
+    vistos.add(picker.fieldName);
+  }
+
+  return problemas;
 }

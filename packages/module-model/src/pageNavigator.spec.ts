@@ -5,6 +5,7 @@ import {
   PANEL_BEHAVIORS,
   navigatorByDefault,
   navigatorProblems,
+  type PageNavigatorSettings,
 } from './pageNavigator';
 
 /** Navegador de pagina — seccion 4.2. */
@@ -77,5 +78,66 @@ describe('solo los paneles ocupan un lado', () => {
     // El CSS los lee de `data-comportamiento`: un nombre que cambie aqui y no alli deja el panel
     // dibujandose con el estilo por defecto y sin que falle nada.
     expect([...PANEL_BEHAVIORS]).toEqual(['grilla', 'drawer', 'overlay']);
+  });
+});
+
+describe('la seccion de filtros del panel', () => {
+  const conFiltros = (navigator: PageNavigatorSettings) =>
+    navigatorProblems({ pages: [{ pageId: 'p1' }, { pageId: 'p2' }], navigator });
+
+  it('acepta una seccion completa sobre un panel', () => {
+    expect(
+      conFiltros({
+        tipo: 'panel-izquierdo',
+        comportamiento: 'grilla',
+        filtros: {
+          datasetId: 'casos',
+          pickers: [{ fieldName: 'DimTribunal.Distrito', tipo: 'pastillas' }],
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza una seccion sin dataset en vez de ignorarla', () => {
+    /*
+     * El camino de lectura la descarta en silencio cuando le falta el dataset: el panel sale sin
+     * filtros y quien los configuro ve un panel normal. Un fallo que no parece un fallo es el que
+     * mas tarda en descubrirse, asi que se bloquea la publicacion y se dice por que.
+     */
+    const problemas = conFiltros({
+      tipo: 'panel-izquierdo',
+      filtros: { pickers: [{ fieldName: 'DimTribunal.Distrito', tipo: 'pastillas' }] },
+    });
+
+    expect(problemas).toHaveLength(1);
+    expect(problemas[0]).toMatch(/de que dataset/);
+  });
+
+  it('rechaza colgar la seccion de unas pestanas o de un menu', () => {
+    for (const tipo of ['pestanas-abajo', 'menu'] as const) {
+      const problemas = conFiltros({
+        tipo,
+        filtros: {
+          datasetId: 'casos',
+          pickers: [{ fieldName: 'DimTribunal.Distrito', tipo: 'pastillas' }],
+        },
+      });
+      expect(problemas[0], tipo).toMatch(/solo cabe en un panel lateral/);
+    }
+  });
+
+  it('rechaza dos selectores sobre el mismo campo', () => {
+    const problemas = conFiltros({
+      tipo: 'panel-izquierdo',
+      filtros: {
+        datasetId: 'casos',
+        pickers: [
+          { fieldName: 'DimTribunal.Distrito', tipo: 'pastillas' },
+          { fieldName: 'DimTribunal.Distrito', tipo: 'lista' },
+        ],
+      },
+    });
+
+    expect(problemas[0]).toMatch(/mas de un selector/);
   });
 });

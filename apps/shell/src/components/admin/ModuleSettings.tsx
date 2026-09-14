@@ -11,8 +11,17 @@ import {
   type ModuleOption,
   type NavigatorKind,
   type PageNavigatorSettings,
+  type NavigatorFilters,
   type PanelBehavior,
 } from '@app/module-model';
+import {
+  DATE_PICKERS,
+  PICKER_KINDS,
+  dateKindIs,
+  defaultPicker,
+  type DimensionPicker,
+  type PickerKind,
+} from '@app/ui-components';
 import type { MessageKey } from '@app/i18n';
 import { useTranslator } from '../Locale';
 
@@ -31,6 +40,28 @@ export interface SettingsForm {
   /** `null` es «ninguno», y con mas de una pagina no se deja guardar asi. */
   navigator: PageNavigatorSettings | null;
   pages: { pageId: string; slug: string; name: string; icon: string }[];
+}
+
+/**
+ * Cambiar de tipo sin tirar lo que sigue valiendo.
+ *
+ * Un panel izquierdo y uno derecho son el MISMO panel en otro sitio: su comportamiento y su
+ * seccion de filtros siguen teniendo sentido, y volverlos a poner despues de mover el panel de
+ * lado es trabajo que nadie pidio —y que, si no se nota, deja el panel sin los filtros que alguien
+ * creia tener—. Pasar a pestanas o a menu si los tira, porque alli no caben y la validacion los
+ * rechaza.
+ */
+function cambiarDeTipo(
+  previo: PageNavigatorSettings | null,
+  tipo: NavigatorKind,
+): PageNavigatorSettings {
+  const base = navigatorByDefault(tipo);
+  if (!previo || !NAVIGATOR_IS_PANEL(tipo) || !NAVIGATOR_IS_PANEL(previo.tipo)) return base;
+  return {
+    ...base,
+    ...(previo.comportamiento ? { comportamiento: previo.comportamiento } : {}),
+    ...(previo.filtros ? { filtros: previo.filtros } : {}),
+  };
 }
 
 /** Como se llama cada tipo de navegador, dicho donde se elige. */
@@ -61,11 +92,20 @@ export function ModuleSettings({
   slug: slugOriginal,
   inicial,
   campos,
+  datasets,
 }: {
   slug: string;
   inicial: SettingsForm;
   /** Los campos del esquema que se pueden filtrar, leidos del cache. Nunca texto libre. */
   campos: string[];
+  /**
+   * Los datasets con sus dimensiones y el tipo de cada una.
+   *
+   * La seccion de filtros del panel se configura contra ESTO y no contra texto libre: un campo
+   * escrito a mano que no existe deja un selector sin valores, y el tipo es lo que decide que
+   * selectores tienen sentido —un rango de fechas sobre una materia no significa nada—.
+   */
+  datasets: { datasetId: string; dimensiones: string[]; kinds: Record<string, string> }[];
 }) {
   const t = useTranslator();
   const router = useRouter();
@@ -162,7 +202,9 @@ export function ModuleSettings({
                   name="navegador"
                   checked={form.navigator?.tipo === tipo}
                   data-testid={`navegador-${tipo}`}
-                  onChange={() => setForm((p) => ({ ...p, navigator: navigatorByDefault(tipo) }))}
+                  onChange={() =>
+                    setForm((p) => ({ ...p, navigator: cambiarDeTipo(p.navigator, tipo) }))
+                  }
                 />{' '}
                 {t(NAVEGADOR[tipo])}
               </label>
@@ -208,6 +250,30 @@ export function ModuleSettings({
                 </tbody>
               </table>
             </div>
+          ) : null}
+
+          {/*
+            La seccion de filtros, SOLO en los paneles.
+            En unas pestanas o en un menu no hay donde ponerla, y la validacion lo rechaza: aqui
+            ni siquiera se ofrece, para no proponer algo que despues bloquea la publicacion.
+          */}
+          {form.navigator && NAVIGATOR_IS_PANEL(form.navigator.tipo) ? (
+            <NavigatorFiltersSection
+              filtros={form.navigator.filtros}
+              datasets={datasets}
+              onCambiar={(filtros) =>
+                setForm((p) =>
+                  p.navigator
+                    ? {
+                        ...p,
+                        navigator: filtros
+                          ? { ...p.navigator, filtros }
+                          : (({ filtros: _quitados, ...resto }) => resto)(p.navigator),
+                      }
+                    : p,
+                )
+              }
+            />
           ) : null}
 
           <h3>{t('nav.pages.title')}</h3>
@@ -417,6 +483,199 @@ function FiltrosPorDefecto({
       >
         {t('admin.settings.filters.add')}
       </button>
+    </>
+  );
+}
+
+/**
+ * La seccion de filtros del panel lateral, configurada desde la pantalla.
+ *
+ * Hasta ahora existia en el modelo y solo se podia poner por API o sembrandola a mano: quien
+ * administra veia la eleccion de navegador y de comportamiento, y no tenia forma de anadirle los
+ * filtros que el propio modelo describe. Una funcionalidad que solo se alcanza por API no esta
+ * entregada — esta escrita.
+ *
+ * Los campos salen del DATASET elegido, no de una lista de todo el esquema: un selector sobre una
+ * dimension que el dataset no trae se dibuja vacio y nadie sabe por que.
+ */
+function NavigatorFiltersSection({
+  filtros,
+  datasets,
+  onCambiar,
+}: {
+  filtros: NavigatorFilters | undefined;
+  datasets: { datasetId: string; dimensiones: string[]; kinds: Record<string, string> }[];
+  onCambiar: (filtros: NavigatorFilters | undefined) => void;
+}) {
+  const t = useTranslator();
+  const elegido = datasets.find((d) => d.datasetId === filtros?.datasetId);
+  const dimensiones = elegido?.dimensiones ?? [];
+  const puestos = filtros?.pickers ?? [];
+  const libres = dimensiones.filter((d) => !puestos.some((p) => p.fieldName === d));
+
+  const conPickers = (pickers: DimensionPicker[]) =>
+    onCambiar({ ...(filtros ?? { pickers: [] }), pickers });
+
+  return (
+    <>
+      <h3>{t('nav.filters.title')}</h3>
+      <p className="muted-text">{t('nav.filters.intro')}</p>
+
+      <label className="form__check">
+        <input
+          type="checkbox"
+          checked={filtros !== undefined}
+          data-testid="nav-filtros-encender"
+          onChange={(e) =>
+            onCambiar(
+              e.target.checked
+                ? { pickers: [], datasetId: datasets[0]?.datasetId ?? '' }
+                : // Apagarla BORRA su configuracion en vez de dejarla escondida: una seccion
+                  // apagada que conserva sus selectores reaparece al volver a encenderla con algo
+                  // que nadie recuerda haber puesto.
+                  undefined,
+            )
+          }
+        />
+        <span>{t('nav.filters.enable')}</span>
+      </label>
+
+      {filtros ? (
+        <>
+          <label className="form__field">
+            <span>{t('nav.filters.label')}</span>
+            <input
+              type="text"
+              value={filtros.etiqueta ?? ''}
+              placeholder={t('nav.filters.label.example')}
+              data-testid="nav-filtros-etiqueta"
+              onChange={(e) => onCambiar({ ...filtros, etiqueta: e.target.value })}
+            />
+          </label>
+
+          <label className="form__field">
+            <span>{t('nav.filters.dataset')}</span>
+            <select
+              value={filtros.datasetId ?? ''}
+              data-testid="nav-filtros-dataset"
+              onChange={(e) =>
+                // Cambiar de dataset VACIA los selectores: los campos del anterior no tienen por
+                // que existir en el nuevo, y dejarlos puestos guarda una configuracion que la
+                // validacion rechaza y que quien la ve no escribio.
+                onCambiar({ ...filtros, datasetId: e.target.value, pickers: [] })
+              }
+            >
+              {datasets.map((d) => (
+                <option key={d.datasetId} value={d.datasetId}>
+                  {d.datasetId}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="container-table">
+            <table className="tabla" data-testid="tabla-nav-filtros">
+              <thead>
+                <tr>
+                  <th scope="col">{t('nav.filters.field')}</th>
+                  <th scope="col">{t('panel.addon.picker')}</th>
+                  <th scope="col">{t('nav.filters.legend')}</th>
+                  <th scope="col">{t('nav.filters.actions')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {puestos.map((picker, i) => (
+                  <tr key={picker.fieldName} data-testid={`nav-filtro-${picker.fieldName}`}>
+                    <th scope="row">{picker.fieldName}</th>
+                    <td>
+                      <label>
+                        <span className="visualmente-oculto">{t('panel.addon.picker')}</span>
+                        <select
+                          value={picker.tipo}
+                          data-testid={`nav-filtro-${picker.fieldName}-tipo`}
+                          onChange={(e) =>
+                            conPickers(
+                              puestos.map((q, j) =>
+                                j === i ? { ...q, tipo: e.target.value as PickerKind } : q,
+                              ),
+                            )
+                          }
+                        >
+                          {/* Los de fecha SOLO sobre una dimension de fecha: sobre un texto no
+                              significan nada, y la validacion del panel de filtros los rechaza. */}
+                          {PICKER_KINDS.filter(
+                            (kind) =>
+                              !DATE_PICKERS.includes(kind) ||
+                              dateKindIs(elegido?.kinds[picker.fieldName] ?? ''),
+                          ).map((kind) => (
+                            <option key={kind} value={kind}>
+                              {kind}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </td>
+                    <td>
+                      <label>
+                        <span className="visualmente-oculto">{t('nav.filters.legend')}</span>
+                        <input
+                          type="text"
+                          value={picker.etiqueta ?? ''}
+                          data-testid={`nav-filtro-${picker.fieldName}-etiqueta`}
+                          onChange={(e) =>
+                            conPickers(
+                              puestos.map((q, j) =>
+                                j === i ? { ...q, etiqueta: e.target.value } : q,
+                              ),
+                            )
+                          }
+                        />
+                      </label>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="boton-contorno"
+                        data-testid={`nav-filtro-${picker.fieldName}-quitar`}
+                        onClick={() => conPickers(puestos.filter((_, j) => j !== i))}
+                      >
+                        {t('action.remove')}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {libres.length > 0 ? (
+            <label className="form__field">
+              <span>{t('nav.filters.add')}</span>
+              <select
+                value=""
+                data-testid="nav-filtro-anadir"
+                onChange={(e) => {
+                  const fieldName = e.target.value;
+                  if (!fieldName) return;
+                  conPickers([
+                    ...puestos,
+                    // El selector por defecto sale del TIPO de la columna, la misma regla que usa
+                    // el panel de filtros: una fecha nace con rango y un texto con pastillas.
+                    { fieldName, tipo: defaultPicker(elegido?.kinds[fieldName] ?? '') },
+                  ]);
+                }}
+              >
+                <option value="">{t('nav.filters.add.choose')}</option>
+                {libres.map((campo) => (
+                  <option key={campo} value={campo}>
+                    {campo}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+        </>
+      ) : null}
     </>
   );
 }

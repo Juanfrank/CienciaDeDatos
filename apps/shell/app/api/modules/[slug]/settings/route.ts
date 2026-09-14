@@ -41,6 +41,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
         description: entrada.description ?? modulo.description ?? '',
         options: entrada.options ?? modulo.options ?? {},
         defaultFilters: entrada.defaultFilters ?? modulo.defaultFilters ?? [],
+        /*
+         * El navegador y las paginas SE REENVIAN, y antes no.
+         *
+         * La pantalla los mandaba, `saveSettings` sabia guardarlos, y esta ruta —que esta en
+         * medio— construia un objeto nuevo sin ellos: elegir un navegador, renombrar una pagina o
+         * anadirle un icono se guardaba en ningun sitio y la pantalla decia «guardado». Es la
+         * forma de fallar mas cara de encontrar, porque las dos puntas estan bien.
+         *
+         * Se pasan tal cual, sin `??`: en `navigator`, `undefined` significa «no se toca» y `null`
+         * significa «ninguno». Poner un valor por defecto aqui borraria esa diferencia y dejaria
+         * de poder quitarse un navegador.
+         */
+        ...(entrada.navigator !== undefined ? { navigator: entrada.navigator } : {}),
+        ...(entrada.pages !== undefined ? { pages: entrada.pages } : {}),
       },
     });
     return NextResponse.json({ modulo: actualizado });

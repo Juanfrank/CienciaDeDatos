@@ -965,6 +965,75 @@ test.describe('configuracion de un modulo (4.1 y 4.11)', () => {
     await page.goto('/m/casos-pendientes');
     await expect(page.getByTestId('module-title')).toBeVisible();
   });
+
+  test('el tipo de navegador y el nombre de una pagina se guardan de verdad', async ({ page }) => {
+    /*
+     * Las dos puntas estaban bien y el medio se comia la configuracion.
+     *
+     * La pantalla mandaba el navegador y las paginas, `saveSettings` sabia guardarlos, y la ruta
+     * de en medio construia el objeto sin ellos: elegir un panel derecho o renombrar una pagina
+     * decia «guardado» y no guardaba nada. Por eso la prueba cruza las dos pantallas en vez de
+     * mirar el formulario: en el formulario, el fallo no se veia.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules/composicion/settings');
+    await page.getByTestId('navegador-panel-derecho').check();
+    await page.getByTestId('pagina-graficos-nombre').fill('Graficos y series');
+    await page.getByTestId('guardar-settings').click();
+    await expect(page.getByTestId('settings-mensaje')).toBeVisible();
+
+    await page.goto('/m/composicion');
+    await expect(page.getByTestId('navegador-de-pagina')).toHaveAttribute(
+      'data-tipo',
+      'panel-derecho',
+    );
+    await expect(page.getByTestId('nav-pagina-graficos')).toContainText('Graficos y series');
+
+    // Se deja como estaba.
+    await page.goto('/admin/modules/composicion/settings');
+    await page.getByTestId('navegador-panel-izquierdo').check();
+    await page.getByTestId('pagina-graficos-nombre').fill('Graficos');
+    await page.getByTestId('guardar-settings').click();
+    await expect(page.getByTestId('settings-mensaje')).toBeVisible();
+  });
+
+  test('la seccion de filtros del panel se configura DESDE LA PANTALLA', async ({ page }) => {
+    /*
+     * Existia en el modelo y solo se podia poner por API o sembrandola a mano.
+     *
+     * Quien administra veia la eleccion de navegador y de comportamiento, y no tenia forma de
+     * anadirle los filtros que el propio modelo describe. Una funcionalidad que solo se alcanza
+     * por API no esta entregada, esta escrita — asi que la prueba cruza las dos pantallas: se
+     * anade aqui y se mira en el modulo.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/m/composicion');
+    await expect(page.getByTestId('navegador-filtros')).toBeVisible();
+    // El distrito NO esta todavia: es lo que esta prueba va a anadir.
+    await expect(page.getByTestId('filter-DimTribunal.Distrito')).toHaveCount(0);
+
+    await page.goto('/admin/modules/composicion/settings');
+    await page.getByTestId('nav-filtro-anadir').selectOption('DimTribunal.Distrito');
+    await expect(page.getByTestId('nav-filtro-DimTribunal.Distrito')).toBeVisible();
+    await page.getByTestId('nav-filtro-DimTribunal.Distrito-etiqueta').fill('Distrito judicial');
+    await page.getByTestId('guardar-settings').click();
+    await expect(page.getByTestId('settings-mensaje')).toBeVisible();
+
+    // Y aparece en el panel, con su rotulo y con los MISMOS controles que el panel de filtros.
+    await page.goto('/m/composicion');
+    const nuevo = page.getByTestId('filter-DimTribunal.Distrito');
+    await expect(nuevo).toBeVisible();
+    await expect(nuevo).toContainText('Distrito judicial');
+
+    // Se deja como estaba: la siguiente prueba no tiene por que heredar lo que esta puso.
+    await page.goto('/admin/modules/composicion/settings');
+    await page.getByTestId('nav-filtro-DimTribunal.Distrito-quitar').click();
+    await page.getByTestId('guardar-settings').click();
+    await expect(page.getByTestId('settings-mensaje')).toBeVisible();
+
+    await page.goto('/m/composicion');
+    await expect(page.getByTestId('filter-DimTribunal.Distrito')).toHaveCount(0);
+  });
 });
 
 test.describe('permisos de un modulo, desde el modulo (4.10.6)', () => {

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ModuleSettings } from '../../../../../src/components/admin/ModuleSettings';
 import { availableDimensions } from '../../../../../src/server/admin';
+import { editorPalette } from '../../../../../src/server/editor';
 import { modules } from '../../../../../src/server/moduleStore';
 import { translator } from '../../../../../src/server/locale';
 
@@ -20,10 +21,14 @@ export default async function ModuleSettingsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [t, definiciones, dimensiones] = await Promise.all([
+  const [t, definiciones, dimensiones, paleta] = await Promise.all([
     translator(),
     modules.list(),
     availableDimensions(),
+    // La seccion de filtros del panel se configura contra los datasets reales —sus dimensiones y
+    // el tipo de cada una—, que es la misma lista de la que come el editor. Con texto libre, un
+    // campo mal escrito deja un selector sin valores y nadie sabe por que.
+    editorPalette(),
   ]);
 
   const modulo = definiciones.find((m) => m.slug === slug);
@@ -41,6 +46,11 @@ export default async function ModuleSettingsPage({
       <ModuleSettings
         slug={modulo.slug}
         campos={dimensiones.map((d) => d.key)}
+        datasets={paleta.datasets.map((d) => ({
+          datasetId: d.datasetId,
+          dimensiones: d.dimensiones,
+          kinds: d.kinds,
+        }))}
         inicial={{
           name: modulo.name,
           slug: modulo.slug,
