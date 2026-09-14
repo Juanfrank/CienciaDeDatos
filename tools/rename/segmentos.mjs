@@ -185,8 +185,21 @@ const PALABRA_DE_CODIGO =
  * Se admite el par que ABRE y CIERRA el segmento, no un parentesis suelto en medio: dejarlos
  * pasar a todos mete dentro los genericos —`Set<string>`, `Record<K, V>`— y una guarda con falsos
  * positivos acaba relajada.
+ *
+ * El texto tambien puede terminar en una INTERPOLACION, no solo en una etiqueta. `Su role aqui:
+ * {rol}` se leia en pantalla, en ingles, y era invisible para la guarda porque detras venia `{` y
+ * no `<`. Media frase antes de un dato es exactamente donde se cuela una palabra traducida.
  */
-const TEXTO_JSX = /([>}])(\(?[^<>{}=;()[\]`]*[A-Za-zÀ-ÿ][^<>{}=;()[\]`]*\)?)(<)/g;
+/**
+ * Operadores que la prosa no lleva nunca.
+ *
+ * Al admitir que el texto termine en una interpolacion, `measures: definicion?.medidas ??` —el
+ * valor de una propiedad, entre el `}` de un objeto y el `{` del siguiente— entraba como prosa.
+ * Una frase que una persona lee puede llevar dos puntos; no lleva `??`, ni `?.`, ni `=>`.
+ */
+const OPERADOR = /\?\?|\?\.|=>|&&|\|\|/;
+
+const TEXTO_JSX = /([>}])(\(?[^<>{}=;()[\]`]*[A-Za-zÀ-ÿ][^<>{}=;()[\]`]*\)?)(?=([<{]))/g;
 
 /** Como `segmentar`, pero marcando como `prosa` el texto visible de un JSX. */
 export function segmentarJsx(fuente) {
@@ -195,7 +208,7 @@ export function segmentarJsx(fuente) {
     const trozos = [];
     let ultimo = 0;
     for (const m of s.texto.matchAll(TEXTO_JSX)) {
-      if (PALABRA_DE_CODIGO.test(m[2])) continue;
+      if (PALABRA_DE_CODIGO.test(m[2]) || OPERADOR.test(m[2])) continue;
       const inicio = m.index + m[1].length;
       trozos.push({ tipo: 'codigo', texto: s.texto.slice(ultimo, inicio) });
       trozos.push({ tipo: 'prosa', texto: m[2] });

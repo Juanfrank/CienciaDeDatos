@@ -46,7 +46,7 @@ export function TeamPicker({
       </label>
       {activeRole ? (
         <p className="team-picker__role" data-testid="team-role">
-          Su role aqui: {activeRole}
+          Su rol aqui: {activeRole}
         </p>
       ) : null}
     </div>

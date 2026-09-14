@@ -187,7 +187,7 @@ export function DataTable({
         onClose={close}
       >
         <div className="popover__header">
-          <h2>Data de source — {titulo}</h2>
+          <h2>Datos de origen — {titulo}</h2>
           <button type="button" className="button-link" onClick={close} data-testid="table-data-close">
             Cerrar
           </button>

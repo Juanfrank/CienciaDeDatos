@@ -507,7 +507,7 @@ export function EditorObjectSettings({
         <>
           {panels.map((panel, i) => (
             <label key={panel.panelId} className="form__field">
-              <span>Tab {i + 1}</span>
+              <span>Pestana {i + 1}</span>
               <input
                 defaultValue={panel.nombre}
                 disabled={saving}

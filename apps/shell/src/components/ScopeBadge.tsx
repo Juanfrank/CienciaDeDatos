@@ -44,7 +44,7 @@ export function ScopeBadge({ restricciones }: { restricciones: [string, string[]
 
       {visible ? (
         <span role="tooltip" id={id} className="scope__detail" data-testid="detail-scope">
-          Su ambito de login limita esta view a: {detalle}
+          Su ambito de login limita esta vista a: {detalle}
         </span>
       ) : null}
     </span>
