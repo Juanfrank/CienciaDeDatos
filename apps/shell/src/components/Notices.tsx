@@ -23,9 +23,9 @@ export function Notices() {
 
   const recargar = useCallback(async () => {
     const [n, a, s] = await Promise.all([
-      fetch('/api/notificaciones').then((r) => r.json()),
-      fetch('/api/alertas').then((r) => r.json()),
-      fetch('/api/suscripciones').then((r) => r.json()),
+      fetch('/api/notifications').then((r) => r.json()),
+      fetch('/api/alerts').then((r) => r.json()),
+      fetch('/api/subscriptions').then((r) => r.json()),
     ]);
     setBandeja(n.notificaciones as Notification[]);
     setReglas(a.alertas as StatusRule[]);
@@ -41,7 +41,7 @@ export function Notices() {
   useEffect(() => {
     const withoutRead = inbox.filter((n) => !n.readAt).map((n) => n.id);
     if (withoutRead.length === 0) return;
-    void fetch('/api/notificaciones', {
+    void fetch('/api/notifications', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ ids: withoutRead }),

@@ -43,7 +43,7 @@ const PIMIENTA = 'pimienta-de-pruebas-e2e';
  * la suite —el 22%— y no dependen de nada que se toque a diario: dependen del catalogo.
  *
  * No se borran, que perderia cobertura que las secciones 4.2 y 4.9 exigen objeto a objeto. Se
- * atan a lo que las hace cambiar: `shell:e2e-catalogo` declara como entradas el repositorio de
+ * atan a lo que las hace cambiar: `shell:e2e-catalog` declara como entradas el repositorio de
  * objetos, la presentacion, los renderizadores y los temas. Se crea o se edita un objeto y
  * corren enteras; no se toca ninguno y aciertan en cache.
  */
@@ -82,7 +82,7 @@ function servidoresDe(indice: number) {
       // motivo aparente.
       command:
         `rm -rf ${cache} && ` +
-        `npx tsx tools/poblar-cache.mts --connector mock --dir ${cache} && ` +
+        `npx tsx tools/populate-cache.mts --connector mock --dir ${cache} && ` +
         `${entorno}npx next start apps/shell --port ${principal}`,
       url: `http://localhost:${principal}/health`,
       reuseExistingServer: false,
@@ -113,7 +113,7 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'paralelo',
+      name: 'parallel',
       testIgnore: SECUENCIALES,
       grepInvert: CATALOGO,
       /*
@@ -127,13 +127,13 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      name: 'secuencial',
+      name: 'sequential',
       testMatch: SECUENCIALES,
       grepInvert: CATALOGO,
     },
     {
       // Lo que se comprueba objeto a objeto, con su propio pase y su propia cache en nx.
-      name: 'catalogo',
+      name: 'catalog',
       grep: CATALOGO,
       timeout: 60_000,
     },

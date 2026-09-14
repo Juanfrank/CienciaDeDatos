@@ -827,7 +827,7 @@ test.describe('como se resume cada medida', () => {
      * dataset cambiado despues. El mensaje tiene que seguir estando para ese caso.
      */
     await page.evaluate(async (itemId) => {
-      const url = location.pathname.replace('/editor/', '/api/modulos/') + '/edicion';
+      const url = location.pathname.replace('/editor/', '/api/modules/') + '/edit';
       const { modulo } = await (await fetch(url)).json();
       for (const pagina of modulo.pages) {
         for (const it of pagina.items) {
@@ -1025,12 +1025,12 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
   test('las visualizaciones se agrupan por lo que responden', async ({ page }) => {
     await newModule(page, 'paleta-familias');
 
-    await expect(page.getByTestId('family-comparacion')).toBeVisible();
-    await expect(page.getByTestId('family-evolucion')).toBeVisible();
-    await expect(page.getByTestId('family-proporcion')).toBeVisible();
+    await expect(page.getByTestId('family-comparison')).toBeVisible();
+    await expect(page.getByTestId('family-trend')).toBeVisible();
+    await expect(page.getByTestId('family-proportion')).toBeVisible();
 
     // El rotulo es la PREGUNTA, no el nombre tecnico de la familia.
-    await expect(page.getByTestId('family-comparacion')).toContainText('Comparar entre categorias');
+    await expect(page.getByTestId('family-comparison')).toContainText('Comparar entre categorias');
   });
 
   test('el buscador encuentra por la descripcion, no solo por el nombre', async ({ page }) => {
@@ -1050,8 +1050,8 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
     await newModule(page, 'paleta-vacia');
 
     await page.getByTestId('search-object').fill('etapas');
-    await expect(page.getByTestId('family-comparacion')).toHaveCount(0);
-    await expect(page.getByTestId('family-proporcion')).toBeVisible();
+    await expect(page.getByTestId('family-comparison')).toHaveCount(0);
+    await expect(page.getByTestId('family-proportion')).toBeVisible();
   });
 
   test('y sin ningun resultado lo dice, con la salida', async ({ page }) => {
@@ -1069,7 +1069,7 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
      */
     await newModule(page, 'paleta-columnas');
 
-    const fichas = page.getByTestId('palette-proporcion').locator('.palette__object');
+    const fichas = page.getByTestId('palette-proportion').locator('.palette__object');
     expect(await fichas.count()).toBeGreaterThanOrEqual(4);
 
     const cajas = await fichas.evaluateAll((nodos) =>
@@ -1098,7 +1098,7 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
     // interesan es lo que deja a la vista las que si.
     await newModule(page, 'paleta-plegar');
 
-    const family = page.getByTestId('family-proporcion');
+    const family = page.getByTestId('family-proportion');
     const objeto = page.getByTestId('add-embudo');
     await expect(objeto).toBeVisible();
 
@@ -1121,7 +1121,7 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
      */
     await newModule(page, 'paleta-buscar-plegada');
 
-    await page.getByTestId('family-proporcion').locator('summary').click();
+    await page.getByTestId('family-proportion').locator('summary').click();
     await expect(page.getByTestId('add-embudo')).not.toBeVisible();
 
     await page.getByTestId('search-object').fill('etapas');

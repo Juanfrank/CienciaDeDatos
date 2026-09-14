@@ -16,7 +16,7 @@ export function Ask({ moduleSlug }: { moduleSlug: string }) {
 
   const preguntar = async () => {
     if (!pregunta.trim()) return;
-    const r = await fetch('/api/consulta', {
+    const r = await fetch('/api/query', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ pregunta, modulo: moduleSlug }),

@@ -12,7 +12,7 @@ La tentacion es tener dos caminos: sincrono para lo pequeño, encolado para lo g
 
 ## Decision
 
-**Todas** las exportaciones se encolan, sea cual sea su tamaño. `POST /api/exportaciones` responde `202` con un identificador; el estado se consulta en `GET /api/exportaciones/{id}`; el archivo se descarga en una tercera peticion.
+**Todas** las exportaciones se encolan, sea cual sea su tamaño. `POST /api/exports` responde `202` con un identificador; el estado se consulta en `GET /api/exports/{id}`; el archivo se descarga en una tercera peticion.
 
 El puerto es `IExportQueue`. El adaptador de este entorno, `StoreExportQueue`, se apoya en el `ICacheStore` en disco que ya comparten el shell y el job. En Azure el mismo puerto se cablea a Azure Queue Storage sobre el Storage Account que ADR-004 ya provisiona.
 

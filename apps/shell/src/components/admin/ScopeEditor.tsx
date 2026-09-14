@@ -28,7 +28,7 @@ export function ScopeEditor({ targets }: { targets: ScopeTarget[] }) {
   const destino = targets.find((d) => d.id === destinoId);
 
   useEffect(() => {
-    void fetch('/api/admin/esquema')
+    void fetch('/api/admin/schema')
       .then((r) => r.json())
       .then((c: { dimensiones?: Dimension[] }) => setDimensiones(c.dimensiones ?? []));
   }, []);
@@ -53,7 +53,7 @@ export function ScopeEditor({ targets }: { targets: ScopeTarget[] }) {
       ...(justificacion.trim() ? { justificacion: justificacion.trim() } : {}),
     };
 
-    const r = await fetch('/api/admin/ambitos', {
+    const r = await fetch('/api/admin/scopes', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),

@@ -33,7 +33,7 @@ export function framedPolicy(path: string, origenes: string[]): string {
   return `frame-ancestors ${origenes.join(' ')}`;
 }
 
-export const EMBEDDING_PREFIX = '/incrustar';
+export const EMBEDDING_PREFIX = '/embed';
 
 export function isEmbeddablePath(path: string): boolean {
   return path === EMBEDDING_PREFIX || path.startsWith(`${EMBEDDING_PREFIX}/`);

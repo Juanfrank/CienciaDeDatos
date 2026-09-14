@@ -52,7 +52,7 @@ que tocar una especificacion marca el proyecto como afectado y la tarea acierta 
 cambio de documentacion no ejecuta ni una prueba.
 
 Las pruebas de navegador van en dos targets porque dependen de cosas distintas. `shell:e2e` es
-la suite general. `shell:e2e-catalogo` son las 58 que comprueban lo MISMO objeto a objeto —que
+la suite general. `shell:e2e-catalog` son las 58 que comprueban lo MISMO objeto a objeto —que
 cada pagina de objetos pasa axe, que pasa el contraste en oscuro, que no desborda en movil, que
 cada objeto ofrece en el panel las claves que declara—: el 22% del tiempo de la suite, y no
 dependen de nada que se toque a diario. Sus entradas son el repositorio de objetos, los temas y
@@ -206,6 +206,6 @@ nombre mejor.
 | `packages/*` | Librerias compartidas, una por responsabilidad |
 | `packages/i18n` | Catalogos ICU y traductor. El idioma se elige con la cookie `idioma` |
 | `tools` | Scripts de verificacion y utilidades de desarrollo |
-| `tools/coherencia` | Las pruebas que comparan los dos lados de un contrato que nadie ata |
+| `tools/coherence` | Las pruebas que comparan los dos lados de un contrato que nadie ata |
 | `infra` | Plantillas Bicep |
 | `.claude/depgraph.json` | Mapa de imports y definiciones; se consulta antes de buscar a mano |

@@ -50,7 +50,7 @@ export function SeesWhoWhere({
 
   const consultar = async () => {
     const r = await fetch(
-      `/api/admin/quien-ve-que?userId=${encodeURIComponent(userId)}&teamId=${encodeURIComponent(teamId)}&moduleId=${encodeURIComponent(moduleId)}`,
+      `/api/admin/who-sees-what?userId=${encodeURIComponent(userId)}&teamId=${encodeURIComponent(teamId)}&moduleId=${encodeURIComponent(moduleId)}`,
     );
     setResultado(r.ok ? ((await r.json()) as Result) : null);
   };

@@ -12,7 +12,7 @@ interface QueryResponse {
 }
 
 const preguntar = async (page: Page, pregunta: string, modulo = 'casos-pendientes') => {
-  const r = await page.request.post('/api/consulta', { data: { pregunta, modulo } });
+  const r = await page.request.post('/api/query', { data: { pregunta, modulo } });
   return { estado: r.status(), body: (await r.json()) as Partial<QueryResponse> };
 };
 

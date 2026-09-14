@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  verificacion:
+  verification:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -82,18 +82,18 @@ jobs:
       # del cache, que no es dependencia suya por el grafo pero si por lo que la suite necesita
       # para arrancar: sin declararlo, un cambio en el poblador dejaria pasar un acierto de cache
       # sobre datos distintos.
-      # `e2e-catalogo` va aparte porque depende de OTRA cosa: no del shell, sino del catalogo de
+      # `e2e-catalog` va aparte porque depende de OTRA cosa: no del shell, sino del catalogo de
       # objetos. Son las 58 pruebas que comprueban lo mismo objeto a objeto —axe, contraste en
       # oscuro, desbordamiento en movil, claves del panel—, el 22% del tiempo de la suite. Sus
       # entradas son el repositorio de objetos y los temas, asi que un cambio en el shell las deja
       # en cache y crear o editar un objeto las corre enteras.
       - name: Pruebas de navegador de lo afectado
         if: github.event_name == 'pull_request'
-        run: npx nx affected -t e2e e2e-catalogo --base=origin/${{ github.base_ref }}
+        run: npx nx affected -t e2e e2e-catalog --base=origin/${{ github.base_ref }}
 
       - name: Pruebas de navegador
         if: github.event_name != 'pull_request'
-        run: npm run e2e && npm run e2e:catalogo
+        run: npm run e2e && npm run e2e:catalog
 
       - if: failure()
         uses: actions/upload-artifact@v4
@@ -143,13 +143,13 @@ jobs:
       # El cache se puebla primero: la validacion contrasta cada modulo contra las columnas que
       # de verdad existen, no contra las que su definicion supone.
       - name: Poblar el cache
-        run: npx tsx tools/poblar-cache.mts --connector mock --dir .cache-ci
+        run: npx tsx tools/populate-cache.mts --connector mock --dir .cache-ci
 
       - name: Validar cada modulo por separado
         id: estado
         env:
           CACHE_DIR: .cache-ci
-        run: npx tsx tools/estado-de-modulos.mts estado-de-modulos.json | tee $GITHUB_STEP_SUMMARY
+        run: npx tsx tools/module-status.mts estado-de-modulos.json | tee $GITHUB_STEP_SUMMARY
 
       # Viaja al despliegue: es la lista de que se apaga y que no.
       - uses: actions/upload-artifact@v4

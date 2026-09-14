@@ -22,7 +22,7 @@ contrato de interfaz, es decir testids y clases CSS.
 - **Lo que `--proponer` retiene se mira a mano.** `colisiones` (dos origenes al mismo destino),
   `ocupados` (el destino ya se declara en ese archivo) y `ambiguos` (el identificador tambien es
   miembro de una union de cadenas) no se resuelven solos.
-- **`nx run verificacion:typecheck --skip-nx-cache`.** Sin `--skip-nx-cache`, nx repitio un
+- **`nx run verification:typecheck --skip-nx-cache`.** Sin `--skip-nx-cache`, nx repitio un
   resultado cacheado sobre un arbol ya roto.
 - **Despues de cada pasada: typecheck, `vitest run`, lint y `nx run shell:e2e`.** El lint es el
   que ve un `id.get(id)` que compila y esta mal.

@@ -10,7 +10,7 @@ async function objectDraft(
   page: import('@playwright/test').Page,
   slug: string,
 ): Promise<void> {
-  const creado = await page.request.post('/api/modulos', {
+  const creado = await page.request.post('/api/modules', {
     data: { nombre: `Modulo ${slug}`, slug },
   });
   expect(creado.ok(), await creado.text()).toBe(true);
@@ -18,7 +18,7 @@ async function objectDraft(
   const { modulo } = (await creado.json()) as { modulo: { pages: { pageId: string }[] } };
   const pagina = modulo.pages[0];
 
-  const guardado = await page.request.put(`/api/modulos/${slug}/edicion`, {
+  const guardado = await page.request.put(`/api/modules/${slug}/edit`, {
     data: {
       paginas: [
         {
@@ -56,7 +56,7 @@ test.describe('quien entra al editor (4.10.1)', () => {
     await expect(page.getByTestId('link-editor')).toHaveCount(0);
 
     // Lo que importa no es el enlace ausente: crear modulos a mano tampoco debe funcionar.
-    const respuesta = await page.request.post('/api/modulos', {
+    const respuesta = await page.request.post('/api/modules', {
       data: { nombre: 'Intento', slug: newSlug('intento-visor') },
     });
     expect(respuesta.status()).toBe(403);
@@ -130,9 +130,9 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
     await objectDraft(page, slug);
 
     // Se rompe el mapeo por API, como si la fuente hubiera retirado el campo.
-    const actual = await (await page.request.get(`/api/modulos/${slug}/edicion`)).json();
+    const actual = await (await page.request.get(`/api/modules/${slug}/edit`)).json();
     actual.modulo.pages[0].items[0].instance.binding.measures = ['MedidaRetirada'];
-    await page.request.put(`/api/modulos/${slug}/edicion`, {
+    await page.request.put(`/api/modules/${slug}/edit`, {
       data: { paginas: actual.modulo.pages },
     });
 
@@ -160,7 +160,7 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
 
     // Ana no puede publicar lo que ella misma propuso.
     await expect(page.getByTestId(`publish-${slug}`)).toHaveCount(0);
-    const intento = await page.request.post(`/api/modulos/${slug}/estado`, {
+    const intento = await page.request.post(`/api/modules/${slug}/status`, {
       data: { transition: 'publicar' },
     });
     expect(intento.status()).toBe(403);
@@ -174,10 +174,10 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
   test('un modulo con problemas no se puede proponer', async ({ page }) => {
     await asLogin(page, 'u-ana');
     const slug = newSlug('con-problemas');
-    await page.request.post('/api/modulos', { data: { nombre: 'Vacio', slug } });
+    await page.request.post('/api/modules', { data: { nombre: 'Vacio', slug } });
 
     // Sin objetos no hay nada roto, asi que se rompe uno a proposito.
-    const actual = await (await page.request.get(`/api/modulos/${slug}/edicion`)).json();
+    const actual = await (await page.request.get(`/api/modules/${slug}/edit`)).json();
     actual.modulo.pages[0].items = [
       {
         id: 'malo',
@@ -191,9 +191,9 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
         },
       },
     ];
-    await page.request.put(`/api/modulos/${slug}/edicion`, { data: { paginas: actual.modulo.pages } });
+    await page.request.put(`/api/modules/${slug}/edit`, { data: { paginas: actual.modulo.pages } });
 
-    const respuesta = await page.request.post(`/api/modulos/${slug}/estado`, {
+    const respuesta = await page.request.post(`/api/modules/${slug}/status`, {
       data: { transition: 'enviar' },
     });
     expect(respuesta.status()).toBe(422);
@@ -216,7 +216,7 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
     const slug = newSlug('sin-escalas');
     await objectDraft(page, slug);
 
-    const respuesta = await page.request.post(`/api/modulos/${slug}/estado`, {
+    const respuesta = await page.request.post(`/api/modules/${slug}/status`, {
       data: { transition: 'publicar' },
     });
     expect(respuesta.status()).toBe(409);
@@ -232,8 +232,8 @@ test.describe('un borrador es personal (criterio de la seccion 9)', () => {
     await asLogin(page, 'u-beto');
     // Un Visor ni siquiera entra al editor; lo que se comprueba es la API, que es donde
     // importa, y la pagina del modulo.
-    expect((await page.request.get(`/api/modulos/${slug}/edicion`)).status()).toBe(404);
-    expect((await page.request.get(`/api/modulos/${slug}`)).status()).toBe(404);
+    expect((await page.request.get(`/api/modules/${slug}/edit`)).status()).toBe(404);
+    expect((await page.request.get(`/api/modules/${slug}`)).status()).toBe(404);
     expect((await page.goto(`/m/${slug}`))?.status()).toBe(404);
   });
 
@@ -243,13 +243,13 @@ test.describe('un borrador es personal (criterio de la seccion 9)', () => {
     await objectDraft(page, slug);
 
     await asLogin(page, 'u-admin');
-    expect((await page.request.get(`/api/modulos/${slug}/edicion`)).status()).toBe(404);
+    expect((await page.request.get(`/api/modules/${slug}/edit`)).status()).toBe(404);
 
     // Cuando se propone, si: revisar a ciegas no es revisar.
     await asLogin(page, 'u-ana');
-    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transition: 'enviar' } });
+    await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'enviar' } });
     await asLogin(page, 'u-admin');
-    expect((await page.request.get(`/api/modulos/${slug}/edicion`)).status()).toBe(200);
+    expect((await page.request.get(`/api/modules/${slug}/edit`)).status()).toBe(200);
   });
 
   test('otro Colaborador no puede reescribirlo', async ({ page }) => {
@@ -259,7 +259,7 @@ test.describe('un borrador es personal (criterio de la seccion 9)', () => {
 
     // u-admin tiene el permiso general de editar borradores y aun asi no puede tocar este.
     await asLogin(page, 'u-admin');
-    const respuesta = await page.request.put(`/api/modulos/${slug}/edicion`, {
+    const respuesta = await page.request.put(`/api/modules/${slug}/edit`, {
       data: { nombre: 'Reescrito' },
     });
     expect(respuesta.status()).toBe(404);
@@ -273,27 +273,27 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
     const slug = newSlug('retirado');
     await asLogin(page, 'u-ana');
     await objectDraft(page, slug);
-    const detalle = await (await page.request.get(`/api/modulos/${slug}/edicion`)).json();
+    const detalle = await (await page.request.get(`/api/modules/${slug}/edit`)).json();
     const moduleId = detalle.modulo.moduleId as string;
-    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transition: 'enviar' } });
+    await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'enviar' } });
 
     await asLogin(page, 'u-admin');
-    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transition: 'publicar' } });
+    await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'publicar' } });
 
     // Publicar lo cuelga en la RAIZ del arbol, que es el sitio mas restrictivo: existe en la
     // organizacion general y todavia no esta concedido a ningun equipo. Que publicar no conceda
     // acceso es deliberado — conceder es 4.10.6 y lo decide un Administrador.
-    const arbol = (await (await page.request.get('/api/admin/arbol')).json()) as {
+    const arbol = (await (await page.request.get('/api/admin/tree')).json()) as {
       nodes: { id: string }[];
     };
     expect(arbol.nodes.some((n) => n.id === `nodo-${moduleId}`)).toBe(true);
 
     await asLogin(page, 'u-beto');
-    expect((await page.request.get(`/api/modulos/${slug}`)).status()).toBe(404);
+    expect((await page.request.get(`/api/modules/${slug}`)).status()).toBe(404);
 
     // Se concede el nodo al equipo de Beto y entonces si lo ve.
     await asLogin(page, 'u-admin');
-    const equipos = await (await page.request.get('/api/admin/equipos')).json();
+    const equipos = await (await page.request.get('/api/admin/teams')).json();
     const esteTeam = (equipos.equipos as { id: string; grantedNodes: string[] }[]).find(
       (e) => e.id === 'equipo-este',
     );
@@ -301,7 +301,7 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
     const concedidosOriginales = [...esteTeam.grantedNodes];
 
     try {
-      await page.request.post('/api/admin/equipos', {
+      await page.request.post('/api/admin/teams', {
         data: {
           accion: 'guardar',
           equipo: { ...esteTeam, grantedNodes: [...concedidosOriginales, `nodo-${moduleId}`] },
@@ -309,23 +309,23 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
       });
 
       await asLogin(page, 'u-beto');
-      expect((await page.request.get(`/api/modulos/${slug}`)).status()).toBe(200);
+      expect((await page.request.get(`/api/modules/${slug}`)).status()).toBe(200);
 
       // Y al retirarlo deja de servir, aunque el nodo siga concedido: el estado manda.
       await asLogin(page, 'u-admin');
-      const retirada = await page.request.post(`/api/modulos/${slug}/estado`, {
+      const retirada = await page.request.post(`/api/modules/${slug}/status`, {
         data: { transition: 'devolver', motivo: 'La medida esta mal calculada.' },
       });
       expect(retirada.ok(), await retirada.text()).toBe(true);
 
       await asLogin(page, 'u-beto');
-      expect((await page.request.get(`/api/modulos/${slug}`)).status()).toBe(404);
-      const navigation = await (await page.request.get('/api/navegacion')).json();
+      expect((await page.request.get(`/api/modules/${slug}`)).status()).toBe(404);
+      const navigation = await (await page.request.get('/api/navigation')).json();
       expect(JSON.stringify(navigation.arbol)).not.toContain(slug);
     } finally {
       // Se devuelve el equipo a su estado: las demas pruebas asumen lo que el seed concede.
       await asLogin(page, 'u-admin');
-      await page.request.post('/api/admin/equipos', {
+      await page.request.post('/api/admin/teams', {
         data: { accion: 'guardar', equipo: { ...esteTeam, grantedNodes: concedidosOriginales } },
       });
     }
@@ -335,10 +335,10 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
     const slug = newSlug('sin-motivo');
     await asLogin(page, 'u-ana');
     await objectDraft(page, slug);
-    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transition: 'enviar' } });
+    await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'enviar' } });
 
     await asLogin(page, 'u-admin');
-    const respuesta = await page.request.post(`/api/modulos/${slug}/estado`, {
+    const respuesta = await page.request.post(`/api/modules/${slug}/status`, {
       data: { transition: 'devolver' },
     });
     expect(respuesta.status()).toBe(400);
@@ -350,15 +350,15 @@ test.describe('cada transicion queda registrada (4.10.7)', () => {
     const slug = newSlug('auditado');
     await asLogin(page, 'u-ana');
     await objectDraft(page, slug);
-    await page.request.post(`/api/modulos/${slug}/estado`, { data: { transition: 'enviar' } });
+    await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'enviar' } });
 
     await asLogin(page, 'u-admin');
-    const publicado = await page.request.post(`/api/modulos/${slug}/estado`, {
+    const publicado = await page.request.post(`/api/modules/${slug}/status`, {
       data: { transition: 'publicar' },
     });
     expect(publicado.ok()).toBe(true);
 
-    const audit = await (await page.request.get('/api/admin/auditoria')).json();
+    const audit = await (await page.request.get('/api/admin/audit')).json();
     const dataRows = (audit.eventos as { entityType: string; action: string; actorId: string }[])
       .filter((e) => e.entityType === 'module');
 

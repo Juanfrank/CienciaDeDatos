@@ -77,7 +77,7 @@ export function ModuleList({
 
   const crear = async () => {
     if (
-      await pedir("/api/modulos", {
+      await pedir("/api/modules", {
         method: "POST",
         body: JSON.stringify({ nombre, slug }),
       })
@@ -99,7 +99,7 @@ export function ModuleList({
         : "";
     if (cual === "devolver" && !motivo.trim()) return;
 
-    await pedir(`/api/modulos/${fila.slug}/estado`, {
+    await pedir(`/api/modules/${fila.slug}/status`, {
       method: "POST",
       body: JSON.stringify({ transition: cual, ...(motivo ? { motivo } : {}) }),
     });

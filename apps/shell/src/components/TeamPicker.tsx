@@ -15,7 +15,7 @@ export function TeamPicker({
   const [pendiente, iniciarTransicion] = useTransition();
 
   const cambiar = async (teamId: string) => {
-    await fetch('/api/sesion/equipo-activo', {
+    await fetch('/api/session/active-team', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ teamId }),

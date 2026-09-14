@@ -10,7 +10,7 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
     await expect(page.getByTestId('link-admin')).toHaveCount(0);
 
     // Lo que importa no es el enlace ausente, sino que llamar a la API a mano no sirva.
-    for (const path of ['/api/admin/arbol', '/api/admin/equipos', '/api/admin/auditoria']) {
+    for (const path of ['/api/admin/tree', '/api/admin/teams', '/api/admin/audit']) {
       expect((await page.request.get(path)).status()).toBe(403);
     }
   });
@@ -19,12 +19,12 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
     await asLogin(page, 'u-ana');
     await page.goto('/');
     await expect(page.getByTestId('link-admin')).toHaveCount(0);
-    expect((await page.request.get('/api/admin/arbol')).status()).toBe(403);
+    expect((await page.request.get('/api/admin/tree')).status()).toBe(403);
   });
 
   test('una escritura de administracion tambien se rechaza, no solo la lectura', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    const respuesta = await page.request.post('/api/admin/arbol', {
+    const respuesta = await page.request.post('/api/admin/tree', {
       data: { type: 'renombrar', nodeId: 'nodo-norte', name: 'Intento no autorizado' },
     });
     expect(respuesta.status()).toBe(403);
@@ -34,7 +34,7 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
     await asLogin(page, 'u-beto');
     await page.goto('/admin');
     await expect(page.getByTestId('without-permission')).toBeVisible();
-    await expect(page.getByTestId('admin-nav-modulos')).toHaveCount(0);
+    await expect(page.getByTestId('admin-nav-modules')).toHaveCount(0);
   });
 
   test('un Administrador si entra', async ({ page }) => {
@@ -44,7 +44,7 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
     await page.getByTestId('account-trigger').click();
     await expect(page.getByTestId('link-admin')).toBeVisible();
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-modulos')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-modules')).toBeVisible();
   });
 });
 
@@ -54,7 +54,7 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
   });
 
   test('AMPLIAR sin justificacion se rechaza y dice que dimension se amplia', async ({ page }) => {
-    const respuesta = await page.request.post('/api/admin/ambitos', {
+    const respuesta = await page.request.post('/api/admin/scopes', {
       data: {
         destino: { tipo: 'equipo', teamId: 'equipo-norte' },
         scope: {
@@ -74,7 +74,7 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
   });
 
   test('con justificacion se guarda y queda DESTACADA en auditoria', async ({ page }) => {
-    const respuesta = await page.request.post('/api/admin/ambitos', {
+    const respuesta = await page.request.post('/api/admin/scopes', {
       data: {
         destino: { tipo: 'equipo', teamId: 'equipo-norte' },
         scope: {
@@ -90,7 +90,7 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
     });
     expect(respuesta.status()).toBe(200);
 
-    await page.goto('/admin/auditoria?onlyExpansions=1');
+    await page.goto('/admin/audit?onlyExpansions=1');
     const tabla = page.getByTestId('audit-table');
     await expect(tabla).toContainText('Auditoria laboral trimestral');
     await expect(tabla).toContainText('Ampliacion');
@@ -99,7 +99,7 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
   });
 
   test('NO acepta una dimension que no existe en el esquema real', async ({ page }) => {
-    const respuesta = await page.request.post('/api/admin/ambitos', {
+    const respuesta = await page.request.post('/api/admin/scopes', {
       data: {
         destino: { tipo: 'equipo', teamId: 'equipo-este' },
         scope: {
@@ -117,7 +117,7 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
   });
 
   test('el editor solo ofrece dimensiones del esquema, no un campo de texto libre', async ({ page }) => {
-    await page.goto('/admin/ambitos');
+    await page.goto('/admin/scopes');
     const picker = page.getByTestId('add-dispersion');
     await expect(picker).toBeVisible();
     const opciones = await picker.locator('option').allTextContents();
@@ -132,7 +132,7 @@ test.describe('editor de arbol (4.1.2)', () => {
   });
 
   test('avisa de que mover cambia el acceso ANTES de confirmarlo', async ({ page }) => {
-    const previo = await page.request.post('/api/admin/arbol?previsualizar=1', {
+    const previo = await page.request.post('/api/admin/tree?previsualizar=1', {
       data: { type: 'mover', nodeId: 'nodo-m-audiencias', newParentId: 'nodo-este' },
     });
     const body = await previo.json();
@@ -143,7 +143,7 @@ test.describe('editor de arbol (4.1.2)', () => {
   test('el arbol se reorganiza SOLO CON TECLADO, sin arrastrar', async ({ page }) => {
     // 4.10.8 pide arrastrar y soltar; 4.9 dice que la accesibilidad no se pospone. Los dos
     // gestos llaman a la misma operacion, asi que basta con comprobar el accesible.
-    await page.goto('/admin/modulos/arbol');
+    await page.goto('/admin/modules/tree');
     await page.getByTestId('node-nodo-m-audiencias').click();
     await page.getByTestId('move-nodo-m-audiencias').selectOption('nodo-este');
 
@@ -157,20 +157,20 @@ test.describe('editor de arbol (4.1.2)', () => {
     // que navegar sin esperar es una carrera — la prueba pasaba por casualidad.
     await Promise.all([
       page.waitForResponse(
-        (r) => r.url().endsWith('/api/admin/arbol') && r.request().method() === 'POST',
+        (r) => r.url().endsWith('/api/admin/tree') && r.request().method() === 'POST',
       ),
       page.getByTestId('confirmar-movimiento-si').click(),
     ]);
 
     // El movimiento queda registrado en la auditoria.
-    await page.goto('/admin/auditoria?onlyMoves=1');
+    await page.goto('/admin/audit?onlyMoves=1');
     await expect(page.getByTestId('audit-table')).toContainText('nodo-m-audiencias');
   });
 
   test('el movimiento cambia el ambito efectivo de inmediato', async ({ page }) => {
     // Tras la prueba anterior, 'audiencias' vive bajo Distrito Este.
     const r = await page.request.get(
-      '/api/admin/quien-ve-que?userId=u-ana&teamId=equipo-norte&moduleId=audiencias',
+      '/api/admin/who-sees-what?userId=u-ana&teamId=equipo-norte&moduleId=audiencias',
     );
     const body = await r.json();
     const origenes = (body.pasos as { source: string }[]).map((p) => p.source);
@@ -179,7 +179,7 @@ test.describe('editor de arbol (4.1.2)', () => {
   });
 
   test('la papelera conserva lo eliminado y permite restaurarlo', async ({ page }) => {
-    await page.goto('/admin/modulos/arbol');
+    await page.goto('/admin/modules/tree');
     await page.getByTestId('node-nodo-m-nacional').click();
     await page.getByTestId('trash-nodo-m-nacional').click();
 
@@ -197,7 +197,7 @@ test.describe('quien ve que (4.10.8)', () => {
   });
 
   test('nombra la carpeta de la organizacion general que origino el ambito', async ({ page }) => {
-    await page.goto('/admin/quien-ve-que');
+    await page.goto('/admin/who-sees-what');
     await page.getByTestId('qvq-usuario').selectOption('u-ana');
     await page.getByTestId('qvq-equipo').selectOption('equipo-norte');
     await page.getByTestId('qvq-modulo').selectOption('casos-pendientes');
@@ -213,7 +213,7 @@ test.describe('quien ve que (4.10.8)', () => {
 
   test('distingue "no tiene acceso" de "no ve filas"', async ({ page }) => {
     const r = await page.request.get(
-      '/api/admin/quien-ve-que?userId=u-ana&teamId=equipo-norte&moduleId=estadisticas',
+      '/api/admin/who-sees-what?userId=u-ana&teamId=equipo-norte&moduleId=estadisticas',
     );
     const body = await r.json();
     expect(body.treeTheExists).toBe(true);
@@ -228,7 +228,7 @@ test.describe('paquetes visuales (4.10.6)', () => {
     await asLogin(page, 'u-admin');
 
     // Un paquete para el equipo Este que incluye un modulo que ese equipo NO tiene concedido.
-    await page.request.post('/api/admin/paquetes', {
+    await page.request.post('/api/admin/packages', {
       data: {
         paquete: {
           id: 'pkg-prueba',
@@ -261,16 +261,16 @@ test.describe('paquetes visuales (4.10.6)', () => {
     });
 
     const esteTeam = await page.request
-      .get('/api/admin/equipos')
+      .get('/api/admin/teams')
       .then((r) => r.json())
       .then((c) => c.equipos.find((t: { id: string }) => t.id === 'equipo-este'));
 
-    await page.request.post('/api/admin/equipos', {
+    await page.request.post('/api/admin/teams', {
       data: { accion: 'guardar', equipo: { ...esteTeam, assignedPackageId: 'pkg-prueba' } },
     });
 
     // El panel lo señala explicitamente en vez de ocultarlo sin aviso.
-    await page.goto('/admin/modulos/paquetes');
+    await page.goto('/admin/modules/packages');
     await expect(page.getByTestId('package-problemas-pkg-prueba')).toBeVisible();
     await expect(page.getByTestId('package-problemas-pkg-prueba')).toContainText('casos-pendientes');
 
@@ -286,18 +286,18 @@ test.describe('membresia (4.10.2)', () => {
   test('anadir y quitar a una persona de un equipo cambia lo que ve', async ({ page }) => {
     await asLogin(page, 'u-admin');
 
-    await page.request.post('/api/admin/equipos', {
+    await page.request.post('/api/admin/teams', {
       data: { accion: 'membresia', teamId: 'equipo-este', userId: 'u-nuevo', role: 'visor' },
     });
 
-    const equipos = await page.request.get('/api/admin/equipos').then((r) => r.json());
+    const equipos = await page.request.get('/api/admin/teams').then((r) => r.json());
     const este = equipos.equipos.find((t: { id: string }) => t.id === 'equipo-este');
     expect(este.members.some((m: { userId: string }) => m.userId === 'u-nuevo')).toBe(true);
 
-    await page.request.post('/api/admin/equipos', {
+    await page.request.post('/api/admin/teams', {
       data: { accion: 'membresia', teamId: 'equipo-este', userId: 'u-nuevo', role: null },
     });
-    const after = await page.request.get('/api/admin/equipos').then((r) => r.json());
+    const after = await page.request.get('/api/admin/teams').then((r) => r.json());
     const este2 = after.equipos.find((t: { id: string }) => t.id === 'equipo-este');
     expect(este2.members.some((m: { userId: string }) => m.userId === 'u-nuevo')).toBe(false);
   });
@@ -314,7 +314,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
   });
 
   test('retirarse el rol a uno mismo se rechaza con 409', async ({ page }) => {
-    const respuesta = await page.request.post('/api/admin/equipos', {
+    const respuesta = await page.request.post('/api/admin/teams', {
       data: { accion: 'membresia', teamId: 'equipo-norte', userId: 'u-admin', role: null },
     });
 
@@ -324,11 +324,11 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
 
     // Y sigue administrando: el panel se abre igual.
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-modulos')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-modules')).toBeVisible();
   });
 
   test('degradarse a Colaborador tampoco', async ({ page }) => {
-    const respuesta = await page.request.post('/api/admin/equipos', {
+    const respuesta = await page.request.post('/api/admin/teams', {
       data: { accion: 'membresia', teamId: 'equipo-norte', userId: 'u-admin', role: 'colaborador' },
     });
     expect(respuesta.status()).toBe(409);
@@ -337,7 +337,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
   test('reescribir la membresia del equipo entero tampoco, que es el camino discreto', async ({
     page,
   }) => {
-    const { equipos } = (await (await page.request.get('/api/admin/equipos')).json()) as {
+    const { equipos } = (await (await page.request.get('/api/admin/teams')).json()) as {
       equipos: { id: string; members: { userId: string; role: string }[] }[];
     };
     const norte = equipos.find((e) => e.id === 'equipo-norte');
@@ -345,7 +345,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
 
     // Aqui no se menciona la palabra "rol" en ningun sitio: se manda el equipo con una lista de
     // miembros distinta, y el Administrador simplemente no esta en ella.
-    const respuesta = await page.request.post('/api/admin/equipos', {
+    const respuesta = await page.request.post('/api/admin/teams', {
       data: {
         accion: 'guardar',
         equipo: { ...norte, members: norte.members.filter((m) => m.userId !== 'u-admin') },
@@ -356,7 +356,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
   });
 
   test('borrar el equipo donde estaba el ultimo Administrador tampoco', async ({ page }) => {
-    const respuesta = await page.request.post('/api/admin/equipos', {
+    const respuesta = await page.request.post('/api/admin/teams', {
       data: { accion: 'borrar', teamId: 'equipo-norte' },
     });
     expect(respuesta.status()).toBe(409);
@@ -364,7 +364,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
 
   test('con otro Administrador nombrado antes, el relevo pasa', async ({ page }) => {
     const membresia = (teamId: string, userId: string, role: string | null) =>
-      page.request.post('/api/admin/equipos', {
+      page.request.post('/api/admin/teams', {
         data: { accion: 'membresia', teamId, userId, role },
       });
 
@@ -388,11 +388,11 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
     // Y el estado quedo como estaba, comprobado desde la cuenta restituida.
     await asLogin(page, 'u-admin');
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-modulos')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-modules')).toBeVisible();
   });
 
   test('el panel avisa cuando solo hay un Administrador', async ({ page }) => {
-    await page.goto('/admin/equipos');
+    await page.goto('/admin/teams');
     // El servidor lo impide, pero eso solo avisa cuando ya se esta intentando. Con uno solo, el
     // sistema esta a una baja de necesitar el procedimiento de acceso de emergencia.
     await expect(page.getByTestId('administradores')).toContainText('u-admin');
@@ -421,15 +421,15 @@ test.describe('el carril de administracion', () => {
     await page.goto('/admin');
     await expect(page.getByTestId('admin-nav-admin')).toHaveAttribute('aria-current', 'page');
 
-    await page.goto('/admin/equipos');
-    // Con la regla de prefijo, /admin reclamaria /admin/equipos y habria DOS activas a la vez.
+    await page.goto('/admin/teams');
+    // Con la regla de prefijo, /admin reclamaria /admin/teams y habria DOS activas a la vez.
     await expect(page.getByTestId('admin-nav-admin')).not.toHaveAttribute('aria-current', 'page');
-    await expect(page.getByTestId('admin-nav-equipos')).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByTestId('admin-nav-teams')).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('[aria-current="page"]')).toHaveCount(1);
   });
 
   test('la cabecera dice en que seccion se esta, para cuando el carril esta plegado', async ({ page }) => {
-    await page.goto('/admin/auditoria');
+    await page.goto('/admin/audit');
     await expect(page.getByTestId('admin-section-current')).toHaveText('Auditoria');
     // En el resumen no se repite: el titulo ya lo dice.
     await page.goto('/admin');
@@ -458,8 +458,8 @@ test.describe('el carril de administracion', () => {
 
   test('el registro dice quien, que y cuando, no identificadores crudos', async ({ page }) => {
     // Se provoca un cambio real para que haya algo que leer.
-    await page.goto('/admin/equipos');
-    await page.goto('/admin/auditoria');
+    await page.goto('/admin/teams');
+    await page.goto('/admin/audit');
     const dataRows = page.locator('.log__row');
     if ((await dataRows.count()) > 0) {
       await expect(dataRows.first().locator('time')).toHaveAttribute('dateTime', /\d{4}-\d{2}-\d{2}/);

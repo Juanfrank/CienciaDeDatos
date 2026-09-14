@@ -22,7 +22,7 @@ export function Bookmarks({
   const [abierto, setAbierto] = useState(false);
 
   const recargar = async () => {
-    const r = await fetch('/api/marcadores');
+    const r = await fetch('/api/bookmarks');
     const { bookmarks: lista } = (await r.json()) as { bookmarks: Bookmark[] };
     setMarcadores(lista);
   };
@@ -33,7 +33,7 @@ export function Bookmarks({
 
   const guardar = async () => {
     if (!nombre.trim()) return;
-    await fetch('/api/marcadores', {
+    await fetch('/api/bookmarks', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({

@@ -26,7 +26,7 @@ export function Reset() {
 
     setEnviando(true);
     try {
-      const r = await fetch('/api/restablecer', {
+      const r = await fetch('/api/reset', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ resetId, code, clave }),
@@ -60,7 +60,7 @@ export function Reset() {
             type="button"
             className="pastilla"
             data-testid="reset-ir-a-acceso"
-            onClick={() => router.push('/acceso')}
+            onClick={() => router.push('/sign-in')}
           >
             Iniciar sesion
           </button>

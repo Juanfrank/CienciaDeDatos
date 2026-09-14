@@ -28,7 +28,7 @@
       "pruebas",
       "{projectRoot}/e2e/**/*",
       "{workspaceRoot}/playwright.config.mts",
-      "{workspaceRoot}/tools/poblar-cache.mts"
+      "{workspaceRoot}/tools/populate-cache.mts"
     ]
   },
   "targetDefaults": {

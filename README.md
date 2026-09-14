@@ -11,7 +11,7 @@ modulos de negocio:
 
 | | Artefacto | Donde |
 |---|---|---|
-| **A.1** | Diagrama de arquitectura | [`docs/arquitectura/`](docs/arquitectura/README.md) |
+| **A.1** | Diagrama de arquitectura | [`docs/architecture/`](docs/architecture/README.md) |
 | **A.2** | Contrato de conector de datos | [`packages/data-contracts/`](packages/data-contracts/README.md) |
 | **A.3** | Estructura de monorepo con limites forzados | este archivo + [`eslint.config.mjs`](eslint.config.mjs) |
 
@@ -100,7 +100,7 @@ npm run poblar -- --connector sql    # falla limpio: Sql se implementa en Fase 4
   /testing-utils             Utilidades compartidas de prueba                      [type:util]
 /infra                       IaC (Bicep)
 /docs/adr                    Decisiones de arquitectura
-/docs/arquitectura           Diagramas
+/docs/architecture           Diagramas
 ```
 
 Siguen siendo **marcadores de posicion**, con sus etiquetas de limites ya aplicadas y un

@@ -190,7 +190,7 @@ test.describe('nada se sale de la pantalla', () => {
       await page.setViewportSize(tamano);
       await asLogin(page, 'u-ana');
 
-      for (const path of ['/m/casos-pendientes', '/editor', '/avisos']) {
+      for (const path of ['/m/casos-pendientes', '/editor', '/notices']) {
         await page.goto(path);
         const overflows = await page.evaluate(
           () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
@@ -222,7 +222,7 @@ test.describe('nada se sale de la pantalla', () => {
   test('el panel de administracion tampoco desborda en movil', async ({ page }) => {
     await page.setViewportSize(MOBILE);
     await asLogin(page, 'u-admin');
-    await page.goto('/admin/equipos');
+    await page.goto('/admin/teams');
 
     const overflows = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,

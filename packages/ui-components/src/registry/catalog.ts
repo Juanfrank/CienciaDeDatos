@@ -261,7 +261,7 @@ const PIE_CONTRACT: VisualObjectDefinition['versions'][number]['dataContract'] =
 export const initialCatalog: VisualObjectDefinition[] = [
   {
     objectId: 'tarjeta-kpi',
-    family: 'valor',
+    family: 'value',
     icono: 'indicador',
     name: 'Tarjeta KPI',
     description: 'Un unico valor destacado, con su etiqueta y una variacion opcional.',
@@ -301,7 +301,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     objectId: 'tabla',
-    family: 'detalle',
+    family: 'detail',
     icono: 'tabla',
     name: 'Tabla',
     description: 'Filas y columnas con las dimensiones y medidas mapeadas.',
@@ -380,7 +380,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     objectId: 'barras',
-    family: 'comparacion',
+    family: 'comparison',
     icono: 'barras',
     /*
      * «Columnas», no «barras». El identificador se queda en `barras` porque ES el contrato (4.5):
@@ -480,7 +480,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
      * El «grafico de barras» de verdad: horizontales.
      */
     objectId: 'barras-horizontales',
-    family: 'comparacion',
+    family: 'comparison',
     icono: 'barras-horizontales',
     name: 'Grafico de barras',
     description: 'Barras horizontales. Para categorias con nombres largos o muchas categorias.',
@@ -509,7 +509,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
      * Pastel y dona son DOS entradas del catalogo y UN solo dibujo.
      */
     objectId: 'pastel',
-    family: 'proporcion',
+    family: 'proportion',
     icono: 'pastel',
     name: 'Grafico circular (pastel)',
     description: 'La parte que representa cada categoria sobre el total.',
@@ -524,7 +524,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     objectId: 'dona',
-    family: 'proporcion',
+    family: 'proportion',
     icono: 'dona',
     name: 'Grafico de anillos (dona)',
     description: 'Lo mismo que el circular, con el total en el centro.',
@@ -539,7 +539,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     objectId: 'medidor',
-    family: 'valor',
+    family: 'value',
     icono: 'medidor',
     name: 'Medidor (tacometro)',
     description: 'Una cifra contra su meta, sobre una escala fija.',
@@ -580,7 +580,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
      * Combinado — la pregunta que hoy obliga a poner dos objetos juntos.
      */
     objectId: 'combinado',
-    family: 'relacion',
+    family: 'relation',
     icono: 'combinado',
     name: 'Grafico combinado de columnas y lineas',
     description: 'Dos grupos de medidas en el mismo eje, con eje secundario opcional.',
@@ -609,7 +609,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
      * Dispersion — el unico objeto donde la dimension NO reparte el eje.
      */
     objectId: 'dispersion',
-    family: 'relacion',
+    family: 'relation',
     icono: 'dispersion',
     name: 'Grafico de dispersion',
     description: 'Dos medidas enfrentadas, un punto por categoria. La tercera da el tamano.',
@@ -664,7 +664,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
      * Embudo — etapas de un proceso, en SU orden.
      */
     objectId: 'embudo',
-    family: 'proporcion',
+    family: 'proportion',
     icono: 'embudo',
     name: 'Grafico de embudo',
     description: 'La caida entre etapas de un proceso, en el orden en que ocurren.',
@@ -704,7 +704,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
      * Cascada — de que se compone una diferencia.
      */
     objectId: 'cascada',
-    family: 'proporcion',
+    family: 'proportion',
     icono: 'cascada',
     name: 'Grafico de cascada',
     description: 'Como cada categoria suma o resta hasta el total.',
@@ -744,7 +744,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
      * Mapa de arbol — la composicion cuando hay demasiadas partes para un circular.
      */
     objectId: 'mapa-de-arbol',
-    family: 'proporcion',
+    family: 'proportion',
     icono: 'arbol',
     name: 'Mapa de arbol',
     description: 'Composicion con muchas categorias, y con jerarquia si hay dos dimensiones.',
@@ -788,7 +788,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     objectId: 'area',
-    family: 'evolucion',
+    family: 'trend',
     icono: 'area',
     name: 'Grafico de area',
     description: 'Una linea con el volumen debajo. Apilada, ensena de que se compone un total.',
@@ -808,7 +808,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     objectId: 'lineas',
-    family: 'evolucion',
+    family: 'trend',
     icono: 'lineas',
     name: 'Grafico de lineas',
     description: 'Evolucion de una o varias medidas a lo largo de una dimension ordenada.',
@@ -855,7 +855,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     objectId: 'matriz',
-    family: 'detalle',
+    family: 'detail',
     icono: 'tabla',
     name: 'Matriz',
     description: 'Cruce jerarquico de dimensiones, con subtotales por nivel.',
@@ -987,7 +987,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     objectId: 'mapa',
-    family: 'ubicacion',
+    family: 'location',
     icono: 'lugar',
     name: 'Mapa',
     description: 'Distribucion geografica de una medida por division territorial.',

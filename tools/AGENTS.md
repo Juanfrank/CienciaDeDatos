@@ -5,13 +5,13 @@ Scripts que no forman parte de la aplicacion. `project.json` los declara como el
 
 | Comando | Que hace |
 |---|---|
-| `nx run verificacion:typecheck` | `tsc -b` sobre las referencias Y `tsc -p apps/shell` aparte |
-| `nx run coherencia:test` | Los dos lados de cada contrato que nadie ata; ver `coherencia/AGENTS.md` |
-| `nx run verificacion:limites` | Comprueba que la regla de limites sigue rechazando el fixture |
-| `nx run verificacion:esquema` | Valida el esquema Prisma |
-| `nx run verificacion:infra` | Compila Bicep tratando toda advertencia como error |
-| `tsx tools/poblar-cache.mts` | Puebla el cache |
-| `tsx tools/estado-de-modulos.mts` | Valida cada modulo por separado y produce el informe |
+| `nx run verification:typecheck` | `tsc -b` sobre las referencias Y `tsc -p apps/shell` aparte |
+| `nx run coherence:test` | Los dos lados de cada contrato que nadie ata; ver `coherence/AGENTS.md` |
+| `nx run verification:boundaries` | Comprueba que la regla de limites sigue rechazando el fixture |
+| `nx run verification:schema` | Valida el esquema Prisma |
+| `nx run verification:infra` | Compila Bicep tratando toda advertencia como error |
+| `tsx tools/populate-cache.mts` | Puebla el cache |
+| `tsx tools/module-status.mts` | Valida cada modulo por separado y produce el informe |
 
 ## Reglas
 

@@ -53,7 +53,7 @@ export function Export({
     const filtros: Record<string, string[]> = {};
     for (const clave of new Set(searchParams.keys())) filtros[clave] = searchParams.getAll(clave);
 
-    const respuesta = await fetch('/api/exportaciones', {
+    const respuesta = await fetch('/api/exports', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -74,7 +74,7 @@ export function Export({
 
     sondeo.current = setInterval(() => {
       void (async () => {
-        const r = await fetch(`/api/exportaciones/${id}`);
+        const r = await fetch(`/api/exports/${id}`);
         if (!r.ok) {
           detener();
           setTrabajo({ id, estado: 'fallida', error: 'La exportacion ya no esta disponible.' });

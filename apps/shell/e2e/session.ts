@@ -8,7 +8,7 @@ import {
 
 /** Inicio de sesion de verdad para las pruebas de navegador. */
 export async function asLogin(page: Page, userId: string, base = ''): Promise<void> {
-  const respuesta = await page.request.post(`${base}/api/acceso`, {
+  const respuesta = await page.request.post(`${base}/api/sign-in`, {
     data: {
       mail: mailUser(userId),
       clave: DEMO_KEY,
@@ -28,7 +28,7 @@ export async function asLogin(page: Page, userId: string, base = ''): Promise<vo
 
 /** Cierra la sesion del contexto, revocandola tambien del lado servidor. */
 export async function salir(page: Page, base = ''): Promise<void> {
-  await page.request.delete(`${base}/api/acceso`);
+  await page.request.delete(`${base}/api/sign-in`);
 }
 
 /**
@@ -40,7 +40,7 @@ export async function salir(page: Page, base = ''): Promise<void> {
  * su pregunta, es `editor.spec.ts`, y sigue haciendolo por el formulario.
  */
 export async function newModule(page: Page, slug: string): Promise<void> {
-  const creado = await page.request.post('/api/modulos', {
+  const creado = await page.request.post('/api/modules', {
     data: { nombre: `Modulo ${slug}`, slug },
   });
   expect(creado.ok(), `No se pudo crear el modulo ${slug}: ${await creado.text()}`).toBe(true);

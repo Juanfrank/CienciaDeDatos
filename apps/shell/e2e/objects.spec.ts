@@ -108,6 +108,10 @@ test.describe('contenedores', () => {
   test('cambiar de pestana no mueve el contenedor ni cambia lo que ocupa', async ({ page }) => {
     await page.goto('/m/composicion/contenedores');
     const contenedor = page.getByTestId('cell-cont-pestanas');
+    // Se mide DESPUES de que la primera pestana haya dibujado. ECharts monta en un segundo
+    // pintado: midiendo nada mas cargar, `before` sale de una disposicion que todavia se esta
+    // asentando y la comparacion falla por cuatro pixeles bajo carga, sin que nada se haya movido.
+    await expect(page.getByTestId('chart-cp-barras')).toHaveAttribute('data-montado', 'si');
     const before = await contenedor.boundingBox();
 
     await page.getByTestId('tab-p2').click();

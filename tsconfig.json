@@ -14,7 +14,7 @@
     "node_modules",
     "dist",
     ".nx",
-    "apps/modules/modulo-ejemplo/src/__boundary-fixture__/**",
+    "apps/modules/sample-module/src/__boundary-fixture__/**",
     "apps/shell/**"
   ]
 }

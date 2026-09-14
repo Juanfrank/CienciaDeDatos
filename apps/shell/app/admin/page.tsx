@@ -25,16 +25,16 @@ export default async function HomeAdmin() {
         <Resumen
           etiqueta="Nodos en la organizacion"
           valor={nodesCount(arbol.nodes)}
-          href="/admin/modulos/arbol"
+          href="/admin/modules/tree"
           icono="carpeta"
         />
-        <Resumen etiqueta="En papelera" valor={arbol.trash.length} href="/admin/modulos/arbol" icono="carpeta" />
-        <Resumen etiqueta="Equipos" valor={equipos.length} href="/admin/equipos" icono="personas" />
-        <Resumen etiqueta="Personas" valor={personas.length} href="/admin/equipos" icono="personas" />
+        <Resumen etiqueta="En papelera" valor={arbol.trash.length} href="/admin/modules/tree" icono="carpeta" />
+        <Resumen etiqueta="Equipos" valor={equipos.length} href="/admin/teams" icono="personas" />
+        <Resumen etiqueta="Personas" valor={personas.length} href="/admin/teams" icono="personas" />
         <Resumen
           etiqueta="Ampliaciones de ambito vigentes"
           valor={ampliaciones}
-          href="/admin/auditoria?filtro=ampliaciones"
+          href="/admin/audit?filtro=ampliaciones"
           icono="ambito"
           // Deberia tender a cero. Un numero creciente es señal de que el gobierno de RLS se
           // relaja por acumulacion de excepciones (§7), asi que se destaca al dejar de ser cero.
@@ -47,7 +47,7 @@ export default async function HomeAdmin() {
       <section className="admin-home__log">
         <div className="admin-home__header-log">
           <h2>Ultimos cambios</h2>
-          <Link href="/admin/auditoria" className="button-link">
+          <Link href="/admin/audit" className="button-link">
             Ver el registro completo
           </Link>
         </div>

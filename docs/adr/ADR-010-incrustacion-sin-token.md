@@ -18,11 +18,11 @@ Tambien es la que convierte un iframe en un canal por el que sale cualquier dato
 
 Lo unico que se anade es una **lista de portales autorizados a enmarcarnos** (`frame-ancestors`), configurable en ejecucion. Es una restriccion sobre quien puede mostrar la aplicacion, no una concesion sobre quien puede ver los datos.
 
-Por defecto, **ninguna ruta es enmarcable**. Solo `/incrustar/*`, y solo desde los origenes de la lista.
+Por defecto, **ninguna ruta es enmarcable**. Solo `/embed/*`, y solo desde los origenes de la lista.
 
 ## Consecuencias
 
-- **Falla cerrado.** Sin lista configurada, tambien `/incrustar/*` deniega. Una configuracion olvidada deja la aplicacion sin incrustar, nunca incrustable por cualquiera.
+- **Falla cerrado.** Sin lista configurada, tambien `/embed/*` deniega. Una configuracion olvidada deja la aplicacion sin incrustar, nunca incrustable por cualquiera.
 - **Denegar por defecto cierra el clickjacking en todas las pantallas**, incluido el panel de administracion, sin que haya que acordarse de ninguna. Es un beneficio que no se buscaba y que conviene no perder al tocar el middleware.
 - **No se admite comodin de subdominio**, aunque CSP lo permita: `https://*.ejemplo.do` autoriza cualquier subdominio presente y futuro, incluido el que alguien consiga apropiarse. Para unos pocos portales conocidos, escribirlos uno a uno cuesta poco.
 - **`X-Frame-Options` solo se emite donde se deniega.** No admite lista de origenes —`ALLOW-FROM` se retiro de los navegadores— asi que en la ruta incrustable manda `frame-ancestors`; ponerla ahi bloquearia la incrustacion en los navegadores que dan prioridad a la cabecera antigua.

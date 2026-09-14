@@ -82,13 +82,13 @@ test.describe('paginas de modulo', () => {
 test.describe('panel de administracion (4.10.8)', () => {
   for (const path of [
     '/admin',
-    '/admin/modulos/arbol',
-    '/admin/equipos',
-    '/admin/modulos/paquetes',
-    '/admin/ambitos',
-    '/admin/quien-ve-que',
-    '/admin/cuentas',
-    '/admin/auditoria',
+    '/admin/modules/tree',
+    '/admin/teams',
+    '/admin/modules/packages',
+    '/admin/scopes',
+    '/admin/who-sees-what',
+    '/admin/accounts',
+    '/admin/audit',
   ]) {
     test(`${path} no tiene infracciones WCAG 2.1 AA`, async ({ page }) => {
       await asLogin(page, 'u-admin');
@@ -102,7 +102,7 @@ test.describe('panel de administracion (4.10.8)', () => {
 
 test.describe('restablecimiento de contrasena (4.7.2)', () => {
   test('la pantalla de restablecimiento es accesible, sin sesion', async ({ page }) => {
-    await page.goto('/restablecer');
+    await page.goto('/reset');
     await expect(page.getByTestId('reset-send')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);
@@ -127,7 +127,7 @@ test.describe('editor de modulos (4.2)', () => {
     // Con un modulo de verdad dentro: un editor vacio no dibuja ni la paleta ni los campos de
     // mapeo, que es justo donde estaria el problema de accesibilidad si lo hubiera.
     const slug = `accesible-${Date.now()}`;
-    const creado = await page.request.post('/api/modulos', {
+    const creado = await page.request.post('/api/modules', {
       data: { nombre: 'Modulo accesible', slug },
     });
     expect(creado.ok(), await creado.text()).toBe(true);
@@ -156,7 +156,7 @@ test.describe('editor de modulos (4.2)', () => {
 test.describe('avisos (4.9)', () => {
   test('la bandeja de avisos no tiene infracciones WCAG 2.1 AA', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    await page.goto('/avisos');
+    await page.goto('/notices');
     await expect(page.getByRole('heading', { name: 'Avisos' })).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);
@@ -181,7 +181,7 @@ test.describe('avisos (4.9)', () => {
     const disparador = page.getByTestId('account-trigger');
     await expect(disparador).toBeVisible();
     // El contador se sondea despues de la primera pintura: sin esperarlo se mira un menu vacio.
-    await page.waitForResponse((r) => r.url().includes('/api/notificaciones'));
+    await page.waitForResponse((r) => r.url().includes('/api/notifications'));
 
     if ((await page.getByTestId('account-dot').count()) > 0) {
       await expect(disparador).toContainText(/\d+ avisos? sin leer/);
@@ -195,7 +195,7 @@ test.describe('avisos (4.9)', () => {
 test.describe('paginas de estado', () => {
   test('la pagina de sin permiso es accesible', async ({ page }) => {
     await asLogin(page, 'u-beto');
-    await page.goto('/admin-sin-permiso');
+    await page.goto('/admin-without-permission');
     expect(await infracciones(page)).toEqual([]);
   });
 

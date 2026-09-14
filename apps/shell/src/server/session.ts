@@ -47,7 +47,7 @@ export async function sessionRequire(): Promise<ShellSession> {
 /** Sesion o pantalla de acceso, para las paginas. */
 export async function pageSessionRequire(): Promise<ShellSession> {
   const sesion = await sessionGet();
-  if (!sesion) redirect('/acceso');
+  if (!sesion) redirect('/sign-in');
   return sesion;
 }
 

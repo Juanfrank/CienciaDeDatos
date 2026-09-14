@@ -13,7 +13,7 @@ test.describe('politica de enmarcado', () => {
   test('ninguna pantalla normal se puede enmarcar', async ({ page }) => {
     // Denegar por defecto cierra el clickjacking en toda la aplicacion —incluido el panel de
     // administracion— sin que haya que acordarse de ninguna pantalla.
-    for (const path of ['/m/casos-pendientes', '/admin', '/avisos']) {
+    for (const path of ['/m/casos-pendientes', '/admin', '/notices']) {
       const respuesta = await page.request.get(path);
       expect(respuesta.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
       expect(respuesta.headers()['x-frame-options']).toBe('DENY');
@@ -23,7 +23,7 @@ test.describe('politica de enmarcado', () => {
   test('sin portales configurados, la ruta de incrustacion tampoco se enmarca', async ({ page }) => {
     // El servidor de pruebas corre sin EMBED_ALLOWED_ORIGINS: es el caso de la configuracion
     // olvidada, y tiene que fallar cerrado.
-    const respuesta = await page.request.get('/incrustar/m/casos-pendientes');
+    const respuesta = await page.request.get('/embed/m/casos-pendientes');
     expect(respuesta.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
   });
 });
@@ -31,7 +31,7 @@ test.describe('politica de enmarcado', () => {
 test.describe('la vista incrustada aplica el mismo ambito', () => {
   test('muestra los datos del equipo de QUIEN MIRA, no del que la incrusto', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    await page.goto('/incrustar/m/casos-pendientes');
+    await page.goto('/embed/m/casos-pendientes');
     await expect(page.getByTestId('module-title')).toHaveText('Casos pendientes');
     await expect(page.getByTestId('tabla')).toContainText('Distrito Norte');
     await expect(page.getByTestId('tabla')).not.toContainText('Distrito Este');
@@ -41,13 +41,13 @@ test.describe('la vista incrustada aplica el mismo ambito', () => {
     await asLogin(page, 'u-ana');
     // 'estadisticas' vive fuera de lo concedido al equipo Norte. La ruta de incrustacion no
     // puede ser el atajo que se salta esa comprobacion.
-    const respuesta = await page.goto('/incrustar/m/estadisticas');
+    const respuesta = await page.goto('/embed/m/estadisticas');
     expect(respuesta?.status()).toBe(404);
   });
 
   test('un filtro fuera del ambito no amplia lo incrustado', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    await page.goto('/incrustar/m/casos-pendientes?DimTribunal.Distrito=Distrito+Este');
+    await page.goto('/embed/m/casos-pendientes?DimTribunal.Distrito=Distrito+Este');
     await expect(page.getByTestId('tabla')).not.toContainText('Distrito Este');
   });
 });
@@ -55,7 +55,7 @@ test.describe('la vista incrustada aplica el mismo ambito', () => {
 test.describe('la vista incrustada conserva lo que la hace interpretable', () => {
   test('lleva procedencia (4.6), frescura (4.8) e identidad institucional', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    await page.goto('/incrustar/m/casos-pendientes');
+    await page.goto('/embed/m/casos-pendientes');
 
     // Dentro de otro portal es donde mas falta hacen: quien mira ya no tiene alrededor la
     // aplicacion que le diga de donde salen las cifras ni de cuando son.
@@ -66,7 +66,7 @@ test.describe('la vista incrustada conserva lo que la hace interpretable', () =>
 
   test('no lleva los controles que sacan de la vista', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    await page.goto('/incrustar/m/casos-pendientes');
+    await page.goto('/embed/m/casos-pendientes');
 
     for (const control of ['exportar', 'create-notice', 'incrustar']) {
       await expect(page.getByTestId(control)).toHaveCount(0);
@@ -78,20 +78,20 @@ test.describe('la vista incrustada conserva lo que la hace interpretable', () =>
   test('el enlace de vuelta abre en pestana nueva', async ({ page }) => {
     // Navegar en el mismo marco dejaria la aplicacion entera metida en un hueco del portal.
     await asLogin(page, 'u-ana');
-    await page.goto('/incrustar/m/casos-pendientes');
+    await page.goto('/embed/m/casos-pendientes');
     await expect(page.getByTestId('see-completo')).toHaveAttribute('target', '_blank');
   });
 
   test('el filtrado cruzado sigue funcionando dentro del marco', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    await page.goto('/incrustar/m/casos-pendientes');
+    await page.goto('/embed/m/casos-pendientes');
     await page.getByTestId('slicer-Penal').click();
     await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
   });
 
   test('no tiene infracciones WCAG 2.1 AA', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    await page.goto('/incrustar/m/casos-pendientes');
+    await page.goto('/embed/m/casos-pendientes');
 
     const { violations } = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -108,7 +108,7 @@ test.describe('el codigo de incrustacion se copia desde la vista', () => {
     await page.getByTestId('incrustar').click();
     const code = await page.getByTestId('embed-code').inputValue();
 
-    expect(code).toContain('/incrustar/m/casos-pendientes');
+    expect(code).toContain('/embed/m/casos-pendientes');
     expect(code).toContain('DimTribunal.Materia=Penal');
     expect(code).toContain('allow=""');
   });

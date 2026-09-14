@@ -23,7 +23,7 @@ igual con la fuente caida y lo que impide que una consulta de negocio la sature.
 
 ```bash
 npm run poblar              # conector mock, directorio .cache
-npx tsx tools/poblar-cache.mts --connector mock --dir .cache-e2e
+npx tsx tools/populate-cache.mts --connector mock --dir .cache-e2e
 ```
 
 ## Que NO hacer

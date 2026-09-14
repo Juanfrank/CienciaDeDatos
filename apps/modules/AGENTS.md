@@ -8,7 +8,7 @@ fuente vienen los datos, ni construye consultas.
 `type:module` solo puede importar `type:ui`, `type:contract-types`, `type:lib` y `type:util`. En
 particular NO puede importar `type:server-data`, que es lo que habla con la fuente.
 
-`modulo-ejemplo/src/__boundary-fixture__/forbidden-import.ts` importa lo prohibido a proposito.
+`sample-module/src/__boundary-fixture__/forbidden-import.ts` importa lo prohibido a proposito.
 No es codigo muerto: `npm run verify:boundaries` lintea ese archivo y falla si el import deja de
 ser un error. Es lo que garantiza que la regla sigue mordiendo despues de una migracion de
 configuracion.

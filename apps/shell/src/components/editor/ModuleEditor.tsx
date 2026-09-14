@@ -61,7 +61,7 @@ export function ModuleEditor({
       setError('');
       setGuardando(true);
       try {
-        const r = await fetch(`/api/modulos/${modulo.slug}/edicion`, {
+        const r = await fetch(`/api/modules/${modulo.slug}/edit`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ paginas }),

@@ -77,7 +77,7 @@ export function CreateNotice({
         ? { ...common, objeto, medida, operador, umbral: Number(umbral) }
         : { ...common, formato, cadencia, hora: Number(hora) };
 
-    const respuesta = await fetch(pestana === 'alerta' ? '/api/alertas' : '/api/suscripciones', {
+    const respuesta = await fetch(pestana === 'alerta' ? '/api/alerts' : '/api/subscriptions', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
@@ -91,7 +91,7 @@ export function CreateNotice({
 
     setNombre('');
     close();
-    router.push('/avisos');
+    router.push('/notices');
   };
 
   if (vigilables.length === 0) return null;

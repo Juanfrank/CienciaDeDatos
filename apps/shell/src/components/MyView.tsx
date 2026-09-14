@@ -21,7 +21,7 @@ export function MyView({
 
   const open = async () => {
     setError('');
-    const r = await fetch(`/api/modulos/${moduleSlug}/vista`);
+    const r = await fetch(`/api/modules/${moduleSlug}/view`);
     if (!r.ok) return;
     const body = (await r.json()) as {
       ocultos: string[];
@@ -36,7 +36,7 @@ export function MyView({
     setError('');
     setTrabajando(true);
     try {
-      const r = await fetch(`/api/modulos/${moduleSlug}/vista`, {
+      const r = await fetch(`/api/modules/${moduleSlug}/view`, {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ ocultos }),
@@ -56,7 +56,7 @@ export function MyView({
     setError('');
     setTrabajando(true);
     try {
-      await fetch(`/api/modulos/${moduleSlug}/vista`, { method: 'DELETE' });
+      await fetch(`/api/modules/${moduleSlug}/view`, { method: 'DELETE' });
       dialogo.current?.close();
       router.refresh();
     } finally {

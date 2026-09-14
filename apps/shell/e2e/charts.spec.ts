@@ -130,7 +130,7 @@ test.describe('carga diferida (4.2)', () => {
     page.on('request', (r) => descargas.push(r.url()));
 
     // La bandeja de avisos no tiene ningun objeto de datos: nada que dibujar.
-    await page.goto('/avisos');
+    await page.goto('/notices');
     await expect(page.getByRole('heading', { name: 'Avisos' })).toBeVisible();
 
     const pesado = descargas.filter((u) => /echarts/i.test(u));

@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "name": "verificacion",
+  "name": "verification",
   "projectType": "library",
   "sourceRoot": "tools",
   "tags": [
@@ -29,7 +29,7 @@
         "{workspaceRoot}/packages/data-contracts/*/dist"
       ]
     },
-    "limites": {
+    "boundaries": {
       "executor": "nx:run-commands",
       "options": {
         "command": "bash tools/verify-module-boundaries.sh"
@@ -41,7 +41,7 @@
         "{workspaceRoot}/**/project.json"
       ]
     },
-    "esquema": {
+    "schema": {
       "executor": "nx:run-commands",
       "options": {
         "command": "prisma validate --schema packages/identity-db/prisma/schema.prisma",
@@ -66,13 +66,13 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "vitest run --dir tools --exclude 'tools/coherencia/**' --passWithNoTests"
+        "command": "vitest run --dir tools --exclude 'tools/coherence/**' --passWithNoTests"
       }
     },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "eslint tools --ignore-pattern 'tools/coherencia/**' --max-warnings 0"
+        "command": "eslint tools --ignore-pattern 'tools/coherence/**' --max-warnings 0"
       }
     }
   }

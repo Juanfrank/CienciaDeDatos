@@ -12,12 +12,12 @@ interface EstadoExportacion {
 
 /** Encola y espera a que el trabajador termine. Devuelve el estado final. */
 async function exportar(page: Page, body: Record<string, unknown>): Promise<EstadoExportacion> {
-  const encolada = await page.request.post('/api/exportaciones', { data: body });
+  const encolada = await page.request.post('/api/exports', { data: body });
   expect(encolada.status()).toBe(202);
   const { id } = (await encolada.json()) as { id: string };
 
   const consultar = async (): Promise<EstadoExportacion> =>
-    (await (await page.request.get(`/api/exportaciones/${id}`)).json()) as EstadoExportacion;
+    (await (await page.request.get(`/api/exports/${id}`)).json()) as EstadoExportacion;
 
   await expect.poll(async () => (await consultar()).estado, { timeout: 15_000 }).toMatch(/lista|fallida/);
 
@@ -38,7 +38,7 @@ test.beforeEach(async ({ page }) => {
 test.describe('la exportacion se despacha a una cola (5.3)', () => {
   test('encolar responde 202 con un identificador, no con el archivo', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    const respuesta = await page.request.post('/api/exportaciones', {
+    const respuesta = await page.request.post('/api/exports', {
       data: { modulo: 'casos-pendientes', formato: 'csv' },
     });
 
@@ -62,7 +62,7 @@ test.describe('la exportacion se despacha a una cola (5.3)', () => {
 
   test('un formato desconocido se rechaza antes de encolar nada', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    const respuesta = await page.request.post('/api/exportaciones', {
+    const respuesta = await page.request.post('/api/exports', {
       data: { modulo: 'casos-pendientes', formato: 'docx' },
     });
     expect(respuesta.status()).toBe(400);
@@ -178,7 +178,7 @@ test.describe('la procedencia de la vista sobrevive a la exportacion (4.6)', () 
     // persona tiene personalizacion de este modulo. Antes esta prueba enviaba
     // `personalizada: true` y pasaba sin que hubiera ninguna personalizacion detras, que es
     // exactamente el agujero que 4.6 deja abierto si la etiqueta la elige el navegador.
-    await page.request.put('/api/modulos/casos-pendientes/vista', {
+    await page.request.put('/api/modules/casos-pendientes/view', {
       data: { ocultos: ['kpi-ingresados'] },
     });
 
@@ -191,7 +191,7 @@ test.describe('la procedencia de la vista sobrevive a la exportacion (4.6)', () 
       // Y lo que se oculto no aparece en el archivo: se exporta lo que se ve.
       expect(csv).not.toContain('Ingresados vs resueltos');
     } finally {
-      await page.request.delete('/api/modulos/casos-pendientes/vista');
+      await page.request.delete('/api/modules/casos-pendientes/view');
     }
   });
 });
@@ -223,7 +223,7 @@ test.describe('un archivo exportado no es alcanzable por otra persona', () => {
   test('consultar y descargar la exportacion de otro responde 404', async ({ page }) => {
     await asLogin(page, 'u-ana');
     const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'csv' });
-    const statusPath = `/api/exportaciones/${estado.id}`;
+    const statusPath = `/api/exports/${estado.id}`;
     const filePath = fileOf(estado).descargarEn;
 
     // La misma URL de descarga, con otra sesion. Se responde 404 y no 403: decir "prohibido"

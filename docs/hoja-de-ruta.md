@@ -40,6 +40,19 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   controles compitiendo con el arbol; ahora todo lo que no es mirar datos vive en el menu que se
   despliega sobre las iniciales. El panel se agrupa por el OBJETO que se administra —modulos,
   recursos, usuarios, equipos, temas, origenes— en vez de por concepto.
+- **Las claves del catalogo de mensajes, al ingles.** Las 253 claves pasaron de
+  `accion.guardar` a `action.save`. Los VALORES del catalogo espanol siguen en espanol: son el
+  idioma de la aplicacion, no un identificador. El registro de la correspondencia queda en
+  `tools/i18n/migrate-keys.mjs`, que ademas se ejecuta con `--check`.
+- **Las carpetas, al ingles.** 54 carpetas —rutas del panel, rutas de API, `tools/`, `docs/`, el
+  modulo de ejemplo— con su registro en `tools/rename/migrate-folders.mjs`. La excepcion
+  deliberada es `m/[slug]`: es la URL que la gente guarda, incrusta y reparte. El grupo
+  `(modules)` que la contiene si se renombro, porque los parentesis lo sacan de la URL.
+- **Dos guardas nuevas, cada una probada con el fallo real que la motivo.** `tools/coherence/`
+  ata ahora tambien las **rutas de API** —por ahi se colaron cinco roturas de golpe, porque la
+  guarda de rutas se saltaba `/api` a proposito— y los **prefijos de clave armados con
+  plantilla**: `t(`familia.${x}`)` lleva un `as MessageKey` que apaga el tipo, y el renombrado
+  dejo la paleta del editor dibujando «familia.comparison» como encabezado.
 
 **2.2 sigue pendiente** aunque dependia de 2.1: el reposicionamiento existe en el editor, no en
 el dialogo «Mi vista» de la personalizacion.
@@ -68,7 +81,7 @@ implementa devolviendo `false` — declarado y no disponible, el mismo patron qu
 datos pendientes y que Azure AD.
 
 **Que se hace mientras tanto.** Un flujo **mediado**: el Administrador tramita el
-restablecimiento desde `/admin/cuentas`, la aplicacion le muestra el codigo, y el lo entrega a la
+restablecimiento desde `/admin/accounts`, la aplicacion le muestra el codigo, y el lo entrega a la
 persona por una via en la que haya verificado su identidad. Queda registrado quien lo tramito y
 por que canal.
 
@@ -89,7 +102,7 @@ cambia: la respuesta deja de traer el codigo porque `entregado` pasa a ser `true
 ### 1.2 Azure AD (4.7.1)
 
 `AzureAdIdentityProvider` esta implementado y probado; necesita un tenant contra el que validar
-tokens. `/api/acceso` responde 501 con una explicacion en vez de simular un inicio de sesion.
+tokens. `/api/sign-in` responde 501 con una explicacion en vez de simular un inicio de sesion.
 
 ### 1.3 Conectores de datos reales (2.2, fase 4)
 
@@ -154,8 +167,8 @@ desactivo, satisface la invariante mientras la institucion sigue de hecho sin ac
 
 Hacerlo bien exige que la comprobacion de gobierno consulte el estado de identidad, y son dos
 capas que hoy estan separadas a proposito: `access-control` es `type:lib` y no sabe nada de
-credenciales. Lo razonable es un aviso —no un bloqueo— en `/admin/equipos` y en
-`/admin/cuentas`, cruzando quienes administran con el estado de sus cuentas locales.
+credenciales. Lo razonable es un aviso —no un bloqueo— en `/admin/teams` y en
+`/admin/accounts`, cruzando quienes administran con el estado de sus cuentas locales.
 
 Mientras tanto, el aviso de "conviene que haya al menos dos" y el procedimiento de acceso de
 emergencia cubren el caso.
@@ -163,7 +176,7 @@ emergencia cubren el caso.
 ### 2.9 La consulta en lenguaje natural, retirada de la interfaz
 
 El campo «Pregunte:» esta **oculto**: `VISIBLE_QUERY` en
-`apps/shell/src/components/ModuleView.tsx` es `false`. La ruta `/api/consulta` sigue viva y sus
+`apps/shell/src/components/ModuleView.tsx` es `false`. La ruta `/api/query` sigue viva y sus
 pruebas tambien.
 
 El motivo no es que falle, es que responde poco: reconoce medidas y valores del vocabulario del
@@ -196,16 +209,16 @@ idioma —que es lo que el propio paquete existe para permitir—, cada cadena r
 pantallas puede discrepar, y nada impide que una palabra en ingles se cuele donde una persona la
 lea. Ha pasado cinco veces durante el renombrado.
 
-Hoy hay un trinquete: `tools/coherencia/i18n.spec.ts` cuenta las cadenas sueltas y falla si suben
+Hoy hay un trinquete: `tools/coherence/i18n.spec.ts` cuenta las cadenas sueltas y falla si suben
 del tope. El numero solo puede bajar, y quien migre una cadena baja el tope en el mismo commit.
-Empezo en 322 con 53 claves; va por **219 con 252 claves**, y las cuatro pantallas que mas
+Empezo en 322 con 53 claves; va por **219 con 253 claves**, y las cuatro pantallas que mas
 acumulaban ya no estan entre las peores.
 
 Migrar de golpe es un cambio grande y mecanico. El orden sensato sigue siendo por pantalla,
 empezando por las que mas acumulan hoy:
 `apps/shell/src/components/CreateNotice.tsx` (13),
 `apps/shell/src/components/admin/TreeEditor.tsx` (13),
-`apps/shell/app/admin/auditoria/page.tsx` (12) y
+`apps/shell/app/admin/audit/page.tsx` (12) y
 `apps/shell/src/components/admin/LocalAccounts.tsx` (11).
 
 ### 2.11 Las propiedades siguen en espanol
@@ -228,7 +241,7 @@ Hace falta, por ese orden:
 
 ### 2.14 Clases de CSS que nadie escribe, y nada lo comprueba
 
-Las guardas de `tools/coherencia` atan los atributos `data-*`, los identificadores de prueba, las
+Las guardas de `tools/coherence` atan los atributos `data-*`, los identificadores de prueba, las
 rutas y los campos del cable. Falta la que ata **los nombres de clase**: el TSX escribe uno y la
 hoja de estilo define otro, y no se entera nadie —el navegador aplica un selector que no encuentra
 nada y se queda mudo—.
@@ -253,7 +266,7 @@ Se anota para que no se vuelva a proponer sin argumento nuevo.
   iframe no funciona para visitantes anonimos. Que no funcione es el comportamiento correcto:
   una vista incrustada no es una vista publica. Ver ADR-010.
 - **Cuenta de emergencia con credenciales guardadas.** Ver
-  `docs/operacion/acceso-de-emergencia.md`, apartado "Lo que NO se hace".
+  `docs/operations/acceso-de-emergencia.md`, apartado "Lo que NO se hace".
 - **Cachear por usuario para acelerar el camino de lectura.** Multiplica las entradas de cache
   por el numero de personas y rompe 6.6, que pide cachear el dataset una vez y reutilizarlo. El
   ambito se aplica al leer, no al poblar.

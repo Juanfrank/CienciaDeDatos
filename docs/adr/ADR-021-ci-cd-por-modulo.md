@@ -84,13 +84,13 @@ ademas dejaria permanentemente rojo al fixture que existe para demostrarla.
 
 ### El CI no se bloquea
 
-`tools/estado-de-modulos.mts` valida cada modulo por separado —con `try/catch` por modulo, para
+`tools/module-status.mts` valida cada modulo por separado —con `try/catch` por modulo, para
 que una excepcion en el septimo no deje sin evaluar del octavo al decimo— y emite un JSON. **Sale
 con codigo 0 aunque haya modulos caidos**: si saliera 1, el paso de despliegue no correria y un
 modulo roto bloquearia a los demas, que es exactamente lo que §3.4 prohibe. El job vive aparte del
 de verificacion por lo mismo.
 
-`tools/aplicar-banderas.mts` lleva ese JSON a App Configuration antes del swap, en las **dos**
+`tools/apply-flags.mts` lleva ese JSON a App Configuration antes del swap, en las **dos**
 direcciones: apaga lo caido y vuelve a encender lo recuperado. Un interruptor que solo sabe apagar
 deja el modulo arreglado invisible hasta que alguien se acuerde, y convierte cada arreglo en dos
 tareas. Solo escribe lo que cambia: cada escritura es una revision, y reescribir diez banderas

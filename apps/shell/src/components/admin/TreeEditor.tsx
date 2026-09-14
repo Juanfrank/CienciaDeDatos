@@ -27,7 +27,7 @@ export function TreeEditor({ initial }: { initial: ManagedTree }) {
 
   const enviar = useCallback(async (op: TreeOperation) => {
     setError(null);
-    const r = await fetch('/api/admin/arbol', {
+    const r = await fetch('/api/admin/tree', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(op),
@@ -45,7 +45,7 @@ export function TreeEditor({ initial }: { initial: ManagedTree }) {
   const pedirMovimiento = useCallback(async (nodeId: string, newParentId: string | null) => {
     setError(null);
     const op: TreeOperation = { type: 'mover', nodeId, newParentId };
-    const r = await fetch('/api/admin/arbol?previsualizar=1', {
+    const r = await fetch('/api/admin/tree?previsualizar=1', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(op),

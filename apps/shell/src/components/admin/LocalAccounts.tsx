@@ -32,7 +32,7 @@ export function LocalesAccounts({
     setEmitido(null);
     setTrabajando(true);
     try {
-      const r = await fetch("/api/admin/cuentas", {
+      const r = await fetch("/api/admin/accounts", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ accion, email }),
@@ -101,7 +101,7 @@ export function LocalesAccounts({
             </p>
           ) : null}
           <p className="muted-text">
-            La persona entra en /restablecer con estos dos datos y elige su
+            La persona entra en /reset con estos dos datos y elige su
             contrasena new. Al hacerlo se le desbloquea la cuenta y se cierran
             sus sessions abiertas.
           </p>

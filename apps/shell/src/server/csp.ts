@@ -51,7 +51,7 @@ function directivas(nonce: string, enDesarrollo: boolean): string[] {
 /**
  * La cabecera completa para una ruta.
  *
- * `frame-ancestors` sale de `framedPolicy`, que ya sabe que `/incrustar` es enmarcable y el resto
+ * `frame-ancestors` sale de `framedPolicy`, que ya sabe que `/embed` es enmarcable y el resto
  * no. Aqui solo se le anade el resto de la politica.
  */
 export function contentSecurityPolicy(

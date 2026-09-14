@@ -51,13 +51,13 @@ describe('framedPolicy', () => {
   const origenes = ['https://portal.ejemplo.do'];
 
   it('deniega el enmarcado en cualquier ruta que no sea de incrustacion', () => {
-    for (const path of ['/', '/m/casos', '/admin', '/admin/equipos', '/avisos', '/api/alertas']) {
+    for (const path of ['/', '/m/casos', '/admin', '/admin/teams', '/notices', '/api/alerts']) {
       expect(framedPolicy(path, origenes)).toBe(WITHOUT_FRAMED);
     }
   });
 
   it('permite enmarcar la ruta de incrustacion desde los origenes configurados', () => {
-    expect(framedPolicy('/incrustar/m/casos', origenes)).toBe(
+    expect(framedPolicy('/embed/m/casos', origenes)).toBe(
       'frame-ancestors https://portal.ejemplo.do',
     );
   });
@@ -65,13 +65,13 @@ describe('framedPolicy', () => {
   it('SIN lista configurada la ruta de incrustacion tambien deniega', () => {
     // Falla cerrado a proposito: una configuracion olvidada tiene que dejar la aplicacion sin
     // incrustar, nunca incrustable por cualquiera.
-    expect(framedPolicy('/incrustar/m/casos', [])).toBe(WITHOUT_FRAMED);
+    expect(framedPolicy('/embed/m/casos', [])).toBe(WITHOUT_FRAMED);
   });
 
   it('una ruta que solo empieza parecido no cuenta como incrustable', () => {
     expect(isEmbeddablePath('/incrustaciones-falsas')).toBe(false);
     expect(isEmbeddablePath(EMBEDDING_PREFIX)).toBe(true);
-    expect(isEmbeddablePath('/incrustar/m/casos')).toBe(true);
+    expect(isEmbeddablePath('/embed/m/casos')).toBe(true);
   });
 });
 
@@ -85,22 +85,22 @@ describe('framedHeaders', () => {
   it('donde se permite, NO se emite X-Frame-Options', () => {
     // La cabecera antigua no admite lista de origenes —ALLOW-FROM se retiro— asi que ponerla
     // bloquearia la incrustacion en los navegadores que le dan prioridad.
-    const cabeceras = framedHeaders('/incrustar/m/casos', ['https://portal.ejemplo.do']);
+    const cabeceras = framedHeaders('/embed/m/casos', ['https://portal.ejemplo.do']);
     expect(cabeceras['x-frame-options']).toBeUndefined();
   });
 });
 
 describe('embeddingCode', () => {
   it('produce un iframe sin permisos de navegador', () => {
-    const code = embeddingCode('https://capa.ejemplo.do/', '/incrustar/m/casos', 'Casos');
-    expect(code).toContain('src="https://capa.ejemplo.do/incrustar/m/casos"');
+    const code = embeddingCode('https://capa.ejemplo.do/', '/embed/m/casos', 'Casos');
+    expect(code).toContain('src="https://capa.ejemplo.do/embed/m/casos"');
     // El iframe no usa camara, micro ni ubicacion: declararlo evita que el portal anfitrion se
     // los conceda sin querer.
     expect(code).toContain('allow=""');
   });
 
   it('escapa las comillas del titulo, que viene del nombre del modulo', () => {
-    const code = embeddingCode('https://x.do', '/incrustar/m/a', 'Casos "especiales"');
+    const code = embeddingCode('https://x.do', '/embed/m/a', 'Casos "especiales"');
     expect(code).toContain('title="Casos &quot;especiales&quot;"');
   });
 });

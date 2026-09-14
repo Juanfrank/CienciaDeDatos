@@ -46,7 +46,7 @@ export const GRUPOS: GrupoDeAdmin[] = [
     titulo: 'Contenido',
     sections: [
       {
-        href: '/admin/modulos',
+        href: '/admin/modules',
         label: 'Modulos',
         desc:
           'El arbol de navegacion, los modulos que cuelgan de el, sus versiones y que puede ' +
@@ -55,13 +55,13 @@ export const GRUPOS: GrupoDeAdmin[] = [
         indicador: 'papelera',
         hijas: [
           {
-            href: '/admin/modulos/arbol',
+            href: '/admin/modules/tree',
             label: 'Organizacion general',
             desc: 'La estructura canonica: donde vive cada modulo y que ambito hereda.',
             icono: 'carpeta',
           },
           {
-            href: '/admin/modulos/paquetes',
+            href: '/admin/modules/packages',
             label: 'Paquetes visuales',
             desc: 'Reagrupan lo ya accesible para una audiencia. Nunca conceden nada nuevo.',
             icono: 'paquete',
@@ -69,7 +69,7 @@ export const GRUPOS: GrupoDeAdmin[] = [
         ],
       },
       {
-        href: '/admin/recursos',
+        href: '/admin/resources',
         label: 'Recursos',
         desc:
           'Lo que un modulo puede COLOCAR: visualizaciones, elementos, contenedores, ' +
@@ -77,31 +77,31 @@ export const GRUPOS: GrupoDeAdmin[] = [
         icono: 'paquete',
         hijas: [
           {
-            href: '/admin/recursos/visualizaciones',
+            href: '/admin/resources/visualizations',
             label: 'Visualizaciones',
             desc: 'Los objetos que leen datos de un dataset certificado.',
             icono: 'barras',
           },
           {
-            href: '/admin/recursos/elementos',
+            href: '/admin/resources/elements',
             label: 'Elementos',
             desc: 'Lo que compone la pagina sin leer datos: texto, titulos, lineas, formas.',
             icono: 'titulo',
           },
           {
-            href: '/admin/recursos/contenedores',
+            href: '/admin/resources/containers',
             label: 'Contenedores',
             desc: 'Agrupan objetos en su propia rejilla.',
             icono: 'contenedor',
           },
           {
-            href: '/admin/recursos/complementos',
+            href: '/admin/resources/addons',
             label: 'Complementos',
             desc: 'Se adjuntan a un objeto y no amplian lo que se puede ver.',
             icono: 'informacion',
           },
           {
-            href: '/admin/recursos/otros',
+            href: '/admin/resources/other',
             label: 'Otros recursos',
             desc: 'Iconos, imagenes, SVG y geometrias de mapa.',
             icono: 'lugar',
@@ -109,7 +109,7 @@ export const GRUPOS: GrupoDeAdmin[] = [
         ],
       },
       {
-        href: '/admin/temas',
+        href: '/admin/themes',
         label: 'Temas',
         desc: 'La identidad visual: color, tipografia y forma. Versionada como todo lo demas.',
         icono: 'view',
@@ -121,19 +121,19 @@ export const GRUPOS: GrupoDeAdmin[] = [
     titulo: 'Personas',
     sections: [
       {
-        href: '/admin/usuarios',
+        href: '/admin/users',
         label: 'Usuarios',
         desc: 'Quien es cada quien, a que equipos pertenece y con que rol en cada uno.',
         icono: 'personas',
       },
       {
-        href: '/admin/equipos',
+        href: '/admin/teams',
         label: 'Equipos',
         desc: 'La unidad de agrupacion para el acceso a modulos y el ambito de datos.',
         icono: 'personas',
       },
       {
-        href: '/admin/cuentas',
+        href: '/admin/accounts',
         label: 'Cuentas locales',
         desc: 'La excepcion, no la via por defecto.',
         icono: 'llave',
@@ -145,13 +145,13 @@ export const GRUPOS: GrupoDeAdmin[] = [
     titulo: 'Datos',
     sections: [
       {
-        href: '/admin/origenes',
+        href: '/admin/sources',
         label: 'Origenes de datos',
         desc: 'De donde sale lo que se dibuja, y si esta alcanzable.',
         icono: 'datos',
       },
       {
-        href: '/admin/ambitos',
+        href: '/admin/scopes',
         label: 'Ambitos de acceso',
         desc: 'El filtro de negocio que se aplica a los datos de quien mira.',
         icono: 'ambito',
@@ -163,13 +163,13 @@ export const GRUPOS: GrupoDeAdmin[] = [
     titulo: 'Supervision',
     sections: [
       {
-        href: '/admin/quien-ve-que',
+        href: '/admin/who-sees-what',
         label: 'Quien ve que',
         desc: 'El ambito efectivo de una persona sobre un modulo, y que carpeta lo origino.',
         icono: 'view',
       },
       {
-        href: '/admin/auditoria',
+        href: '/admin/audit',
         label: 'Auditoria',
         desc: 'Cambios de configuracion, con las ampliaciones destacadas aparte.',
         icono: 'registro',
@@ -195,7 +195,7 @@ export function sectionOf(path: string): AdminSection | undefined {
 /**
  * La seccion que se marca en el carril.
  *
- * Una pagina hija marca a su MADRE: el carril ensena donde se esta, y `/admin/modulos/arbol` esta
+ * Una pagina hija marca a su MADRE: el carril ensena donde se esta, y `/admin/modules/tree` esta
  * en Modulos. Marcar la hija obligaria a que el carril listara todo el arbol de paginas.
  */
 export function activeSectionIn(path: string): AdminSection | undefined {

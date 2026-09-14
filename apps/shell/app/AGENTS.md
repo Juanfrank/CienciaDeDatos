@@ -4,8 +4,8 @@ App Router. Cada carpeta es una ruta; los grupos entre parentesis no aparecen en
 
 | Ruta | Que es |
 |---|---|
-| `(modulos)/m/[slug]` | Una pagina de modulo, con sus objetos |
-| `(incrustado)/incrustar/m/[slug]` | El mismo modulo para incrustar en otro portal |
+| `(modules)/m/[slug]` | Una pagina de modulo, con sus objetos |
+| `(embedded)/embed/m/[slug]` | El mismo modulo para incrustar en otro portal |
 | `editor`, `editor/[slug]` | El editor de modulos |
 | `admin/*` | Panel de administracion (4.10.8), separado de los modulos de negocio |
 | `acceso`, `restablecer` | Autenticacion, sin sesion |

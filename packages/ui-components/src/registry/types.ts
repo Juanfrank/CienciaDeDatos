@@ -31,13 +31,13 @@ export type ObjectCategory =
  * se elige por lo que se quiere contar y no por el nombre del objeto.
  */
 export const OBJECT_FAMILIES = [
-  'comparacion',
-  'evolucion',
-  'proporcion',
-  'relacion',
-  'valor',
-  'detalle',
-  'ubicacion',
+  'comparison',
+  'trend',
+  'proportion',
+  'relation',
+  'value',
+  'detail',
+  'location',
   'control',
 ] as const;
 export type ObjectFamily = (typeof OBJECT_FAMILIES)[number];

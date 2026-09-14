@@ -13,7 +13,7 @@ export const defaultIdentity: InstitutionIdentity = {
   name: 'Poder Judicial de la República Dominicana',
   shortName: 'Poder Judicial',
   emblem: {
-    src: '/marca/poder-judicial-emblema.png',
+    src: '/brand/poder-judicial-emblema.png',
     // Medidas del archivo (2x de la altura de dibujo), para que el navegador reserve el hueco
     // y la cabecera no salte al cargar la imagen.
     width: 61,

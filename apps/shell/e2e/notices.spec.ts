@@ -11,7 +11,7 @@ interface CreatedAlert {
 
 /** Crea una regla por API, que es como la crea la interfaz. */
 async function createAlert(page: Page, datos: Record<string, unknown>) {
-  const r = await page.request.post('/api/alertas', { data: datos });
+  const r = await page.request.post('/api/alerts', { data: datos });
   return {
     estado: r.status(),
     body: (await r.json()) as { alerta?: CreatedAlert; error?: string },
@@ -20,7 +20,7 @@ async function createAlert(page: Page, datos: Record<string, unknown>) {
 
 /** Borra lo creado por la prueba: el almacen persiste entre pruebas del mismo servidor. */
 async function clear(page: Page) {
-  for (const path of ['/api/alertas', '/api/suscripciones']) {
+  for (const path of ['/api/alerts', '/api/subscriptions']) {
     const body = (await (await page.request.get(path)).json()) as Record<string, { id: string }[]>;
     for (const item of Object.values(body)[0] ?? []) {
       await page.request.delete(`${path}?id=${encodeURIComponent(item.id)}`);
@@ -111,29 +111,29 @@ test.describe('una regla es privada de quien la creo', () => {
     const id = body.alerta?.id ?? '';
 
     await asLogin(page, 'u-beto');
-    const lista = (await (await page.request.get('/api/alertas')).json()) as {
+    const lista = (await (await page.request.get('/api/alerts')).json()) as {
       alertas: { id: string }[];
     };
     // Ver la regla de otra persona revelaria que modulo vigila y con que umbral.
     expect(lista.alertas.some((a) => a.id === id)).toBe(false);
 
     // Borrarla responde 404 y no 403: decir "prohibido" confirmaria que ese id existe.
-    expect((await page.request.delete(`/api/alertas?id=${id}`)).status()).toBe(404);
+    expect((await page.request.delete(`/api/alerts?id=${id}`)).status()).toBe(404);
 
     await asLogin(page, 'u-ana');
-    expect((await page.request.delete(`/api/alertas?id=${id}`)).status()).toBe(200);
+    expect((await page.request.delete(`/api/alerts?id=${id}`)).status()).toBe(200);
   });
 });
 
 test.describe('la bandeja es de quien pide, sin parametro que manipular', () => {
   test('cada persona ve su propia bandeja', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    const deAna = (await (await page.request.get('/api/notificaciones')).json()) as {
+    const deAna = (await (await page.request.get('/api/notifications')).json()) as {
       notificaciones: unknown[];
     };
 
     await asLogin(page, 'u-beto');
-    const deBeto = (await (await page.request.get('/api/notificaciones')).json()) as {
+    const deBeto = (await (await page.request.get('/api/notifications')).json()) as {
       notificaciones: unknown[];
     };
 
@@ -151,7 +151,7 @@ test.describe('suscripciones', () => {
 
   test('se crea con cadencia y formato, y queda listada', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    const r = await page.request.post('/api/suscripciones', {
+    const r = await page.request.post('/api/subscriptions', {
       data: {
         nombre: 'Casos cada lunes',
         modulo: 'casos-pendientes',
@@ -163,7 +163,7 @@ test.describe('suscripciones', () => {
     });
     expect(r.status()).toBe(201);
 
-    const lista = (await (await page.request.get('/api/suscripciones')).json()) as {
+    const lista = (await (await page.request.get('/api/subscriptions')).json()) as {
       suscripciones: { name: string; teamId: string }[];
     };
     expect(lista.suscripciones.map((s) => s.name)).toContain('Casos cada lunes');
@@ -175,10 +175,10 @@ test.describe('suscripciones', () => {
     const common = { nombre: 'X', modulo: 'casos-pendientes', formato: 'pdf' };
 
     expect(
-      (await page.request.post('/api/suscripciones', { data: { ...common, cadencia: 'diaria', hora: 99 } })).status(),
+      (await page.request.post('/api/subscriptions', { data: { ...common, cadencia: 'diaria', hora: 99 } })).status(),
     ).toBe(400);
     expect(
-      (await page.request.post('/api/suscripciones', { data: { ...common, cadencia: 'cuando-sea', hora: 8 } })).status(),
+      (await page.request.post('/api/subscriptions', { data: { ...common, cadencia: 'cuando-sea', hora: 8 } })).status(),
     ).toBe(400);
   });
 });
@@ -200,7 +200,7 @@ test.describe('interfaz', () => {
     await page.getByTestId('threshold-notice').fill('10');
     await page.getByTestId('save-notice').click();
 
-    await expect(page).toHaveURL(/\/avisos/);
+    await expect(page).toHaveURL(/\/notices/);
     await expect(page.getByTestId('alert-Pendientes por encima de 10')).toBeVisible();
   });
 
@@ -223,9 +223,9 @@ test.describe('interfaz', () => {
     await page.getByTestId('name-notice').fill('Solo penal');
     await page.getByTestId('threshold-notice').fill('10');
     await page.getByTestId('save-notice').click();
-    await expect(page).toHaveURL(/\/avisos/);
+    await expect(page).toHaveURL(/\/notices/);
 
-    const lista = (await (await page.request.get('/api/alertas')).json()) as {
+    const lista = (await (await page.request.get('/api/alerts')).json()) as {
       alertas: { name: string; filters: Record<string, string[]> }[];
     };
     const created = lista.alertas.find((a) => a.name === 'Solo penal');
@@ -242,7 +242,7 @@ test.describe('interfaz', () => {
     await page.getByTestId('notice-cadencia').selectOption('semanal');
     await page.getByTestId('save-notice').click();
 
-    await expect(page).toHaveURL(/\/avisos/);
+    await expect(page).toHaveURL(/\/notices/);
     await expect(page.getByTestId('subscription-Resumen semanal')).toBeVisible();
   });
 });

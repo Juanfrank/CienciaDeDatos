@@ -234,18 +234,18 @@ export function SidebarPanel({
 /**
  * Las familias de la paleta, en el orden en que se ofrecen.
  *
- * El rotulo sale del catalogo de mensajes —`familia.<id>`— y la linea que lo explica se queda
+ * El rotulo sale del catalogo de mensajes —`family.<id>`— y la linea que lo explica se queda
  * aqui hasta que se traduzca tambien. Que el orden viva en un array y no en el catalogo es
  * deliberado: es una decision de producto, no una cadena.
  */
 const FAMILIES: { family: ObjectFamily; que: string }[] = [
-  { family: 'valor', que: 'El dato que hay que ver de un vistazo.' },
-  { family: 'comparacion', que: 'Cuanto mide cada distrito, cada materia, cada tribunal.' },
-  { family: 'evolucion', que: 'La trayectoria de una medida a lo largo de una dimension ordenada.' },
-  { family: 'proporcion', que: 'Que parte aporta cada categoria, y donde se pierde.' },
-  { family: 'relacion', que: 'Si dos cifras se mueven juntas, o cada una en su escala.' },
-  { family: 'detalle', que: 'Cuando hace falta la cifra exacta.' },
-  { family: 'ubicacion', que: 'La dimension geografica.' },
+  { family: 'value', que: 'El dato que hay que ver de un vistazo.' },
+  { family: 'comparison', que: 'Cuanto mide cada distrito, cada materia, cada tribunal.' },
+  { family: 'trend', que: 'La trayectoria de una medida a lo largo de una dimension ordenada.' },
+  { family: 'proportion', que: 'Que parte aporta cada categoria, y donde se pierde.' },
+  { family: 'relation', que: 'Si dos cifras se mueven juntas, o cada una en su escala.' },
+  { family: 'detail', que: 'Cuando hace falta la cifra exacta.' },
+  { family: 'location', que: 'La dimension geografica.' },
   { family: 'control', que: 'No dibujan datos: eligen cuales se ven.' },
 ];
 
@@ -341,7 +341,7 @@ function Palette({
               return (
                 <Section
                   key={family}
-                  titulo={t(`familia.${family}` as MessageKey)}
+                  titulo={t(`family.${family}` as MessageKey)}
                   nivel={2}
                   prueba={`family-${family}`}
                   /*

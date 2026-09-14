@@ -26,7 +26,7 @@ export function TeamEditor({
 
   const enviar = async (body: Record<string, unknown>) => {
     setError(null);
-    const r = await fetch('/api/admin/equipos', {
+    const r = await fetch('/api/admin/teams', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),

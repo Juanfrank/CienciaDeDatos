@@ -182,7 +182,7 @@ async function deliverIfThisReady(sub: Subscription, ahora: Date): Promise<boole
       kind: 'suscripcion',
       subject: sub.name,
       body: `${job.artifact.filename} — ${Math.max(1, Math.round(job.artifact.bytes / 1024))} KB.`,
-      link: `/api/exportaciones/${job.id}/descarga`,
+      link: `/api/exports/${job.id}/download`,
       createdAt: ahora.toISOString(),
     });
   }

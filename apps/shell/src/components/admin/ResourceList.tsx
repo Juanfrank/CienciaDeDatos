@@ -92,7 +92,7 @@ export function ResourceList({
       ))}
       <li className="muted-text">
         {t('admin.resources.footer')}{' '}
-        <Link href="/admin/auditoria">{t('admin.resources.footer.link')}</Link>
+        <Link href="/admin/audit">{t('admin.resources.footer.link')}</Link>
       </li>
     </ul>
   );

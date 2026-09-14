@@ -22,7 +22,7 @@ export async function Header({ sesion }: { sesion: ShellSession }) {
 
   const entradas: AccountEntry[] = [
     {
-      href: '/avisos',
+      href: '/notices',
       label: t('chrome.notices'),
       icono: 'notice',
       prueba: 'link-avisos',

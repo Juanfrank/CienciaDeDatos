@@ -114,7 +114,7 @@ test.describe('el resto de la aplicacion en tema oscuro', () => {
     // Con un objeto YA DIBUJADO y su panel abierto: la paleta, los pozos y las pestanas son la
     // mayor concentracion de texto pequeno sobre superficies elevadas de toda la aplicacion.
     const slug = `dark-${Date.now()}`;
-    const creado = await page.request.post('/api/modulos', {
+    const creado = await page.request.post('/api/modules', {
       data: { nombre: 'Modulo en tema oscuro', slug },
     });
     expect(creado.ok(), await creado.text()).toBe(true);
@@ -129,7 +129,7 @@ test.describe('el resto de la aplicacion en tema oscuro', () => {
   test('el panel de administracion', async ({ page, origen }) => {
     await asLogin(page, 'u-admin');
     await enOscuro(page, origen);
-    await page.goto('/admin/modulos/arbol');
+    await page.goto('/admin/modules/tree');
     await expect(page.locator('h1')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);
@@ -138,7 +138,7 @@ test.describe('el resto de la aplicacion en tema oscuro', () => {
   test('la pantalla de restablecer, que se ve SIN sesion', async ({ page }) => {
     // El tema se aplica en el layout raiz, que envuelve tambien lo que se ve sin haber entrado:
     // si el modo dependiera de la sesion, esta pantalla saldria en claro.
-    await page.goto('/restablecer');
+    await page.goto('/reset');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.getByTestId('reset-send')).toBeVisible();
 

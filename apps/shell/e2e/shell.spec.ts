@@ -73,7 +73,7 @@ test.describe('ambito de acceso por equipo activo (4.10.4)', () => {
     const esteText = await page.getByTestId('barras').innerText();
     expect(esteText.length).toBeGreaterThan(0);
 
-    const datos = await page.request.get('/api/modulos/casos-este').then((r) => r.json());
+    const datos = await page.request.get('/api/modules/casos-este').then((r) => r.json());
     const dataRows = datos.objetos[0].result.rows as unknown[][];
     const distritos = [...new Set(dataRows.map((f) => String(f[0])))];
     expect(distritos).toEqual(['Distrito Este']);
@@ -113,14 +113,14 @@ test.describe('acceso: ocultar no es proteger (criterio de la seccion 9)', () =>
 
   test('la API tampoco lo sirve, aunque se la llame directamente', async ({ page }) => {
     await asLogin(page, 'u-ana');
-    const respuesta = await page.request.get('/api/modulos/estadisticas');
+    const respuesta = await page.request.get('/api/modules/estadisticas');
     expect(respuesta.status()).toBe(404);
   });
 
   test('un equipo no puede fijar un teamId al que no pertenece', async ({ page }) => {
     await asLogin(page, 'u-beto');
     // Beto solo pertenece al equipo Este. Pedir el Norte con una peticion a mano es 403.
-    const respuesta = await page.request.post('/api/sesion/equipo-activo', {
+    const respuesta = await page.request.post('/api/session/active-team', {
       data: { teamId: 'equipo-norte' },
     });
     expect(respuesta.status()).toBe(403);
@@ -268,7 +268,7 @@ test.describe('marcadores (4.4)', () => {
     // Beto, del equipo Este, abre exactamente esa URL.
     await asLogin(page, 'u-beto');
     const datos = await page.request
-      .get(`/api/modulos/casos-este?${url?.split('?')[1] ?? ''}`)
+      .get(`/api/modules/casos-este?${url?.split('?')[1] ?? ''}`)
       .then((r) => r.json());
 
     // El marcador pedia el Norte; el ambito de Beto no lo permite. No ve los datos de Ana.
@@ -311,7 +311,7 @@ test.describe('la politica de contenido no rompe la pagina', () => {
   });
 
   test('la vista incrustable conserva su propia politica de enmarcado', async ({ page }) => {
-    const respuesta = await page.goto('/incrustar/m/casos-pendientes');
+    const respuesta = await page.goto('/embed/m/casos-pendientes');
     const csp = respuesta?.headers()['content-security-policy'] ?? '';
     // Sin origenes configurados se deniega, que es el valor por defecto y lo correcto.
     expect(csp).toContain('frame-ancestors');
@@ -346,7 +346,7 @@ test.describe('identidad institucional (4.3)', () => {
     // La norma de marca pide el nombre de la institucion en cada pagina. Se comprueba en las
     // tres superficies distintas —modulo, panel de administracion y avisos— porque cada una
     // tiene su propia disposicion y es donde se perderia si alguien anadiera una cuarta.
-    for (const path of ['/m/casos-pendientes', '/admin', '/avisos']) {
+    for (const path of ['/m/casos-pendientes', '/admin', '/notices']) {
       await page.goto(path);
       await expect(page.getByTestId('institucion')).toContainText(
         'Poder Judicial de la República Dominicana',

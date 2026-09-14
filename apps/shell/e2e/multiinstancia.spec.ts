@@ -24,7 +24,7 @@ test.describe('la sesion sobrevive al cambio de instancia', () => {
     await asLogin(page, 'u-beto');
 
     const cabeceras = await withSameSession(page);
-    const respuesta = await page.request.get(`${instanceOther}/api/navegacion`, { headers: cabeceras });
+    const respuesta = await page.request.get(`${instanceOther}/api/navigation`, { headers: cabeceras });
 
     expect(respuesta.status()).toBe(200);
     const body = (await respuesta.json()) as { equipoActivo?: string };
@@ -38,12 +38,12 @@ test.describe('la sesion sobrevive al cambio de instancia', () => {
     const cabeceras = await withSameSession(page);
 
     // El cambio se hace contra la SEGUNDA instancia y se comprueba en la primera.
-    await page.request.post(`${instanceOther}/api/sesion/equipo-activo`, {
+    await page.request.post(`${instanceOther}/api/session/active-team`, {
       headers: cabeceras,
       data: { teamId: 'equipo-este' },
     });
 
-    const aqui = (await (await page.request.get('/api/navegacion')).json()) as {
+    const aqui = (await (await page.request.get('/api/navigation')).json()) as {
       equipoActivo?: string;
     };
     expect(aqui.equipoActivo).toBe('equipo-este');
@@ -56,7 +56,7 @@ test.describe('la personalizacion no se queda en una instancia', () => {
     const cabeceras = await withSameSession(page);
 
     const nombre = `marcador-multiinstancia-${Date.now()}`;
-    await page.request.post('/api/marcadores', {
+    await page.request.post('/api/bookmarks', {
       data: {
         name: nombre,
         moduleSlug: 'casos-pendientes',
@@ -66,7 +66,7 @@ test.describe('la personalizacion no se queda en una instancia', () => {
     });
 
     const fromTheOther = (await (
-      await page.request.get(`${instanceOther}/api/marcadores`, { headers: cabeceras })
+      await page.request.get(`${instanceOther}/api/bookmarks`, { headers: cabeceras })
     ).json()) as { bookmarks: { name: string }[] };
 
     expect(fromTheOther.bookmarks.map((m) => m.name)).toContain(nombre);
@@ -95,18 +95,18 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
     };
 
     try {
-      const guardado = await page.request.post('/api/admin/equipos', {
+      const guardado = await page.request.post('/api/admin/teams', {
         data: { accion: 'guardar', equipo },
       });
       expect(guardado.status()).toBe(200);
 
       const fromTheOther = (await (
-        await page.request.get(`${instanceOther}/api/admin/equipos`, { headers: cabeceras })
+        await page.request.get(`${instanceOther}/api/admin/teams`, { headers: cabeceras })
       ).json()) as { equipos: { id: string; name: string }[] };
 
       expect(fromTheOther.equipos.map((e) => e.id)).toContain(id);
     } finally {
-      await page.request.post('/api/admin/equipos', { data: { accion: 'borrar', teamId: id } });
+      await page.request.post('/api/admin/teams', { data: { accion: 'borrar', teamId: id } });
     }
   });
 
@@ -116,12 +116,12 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
     const cabeceras = await withSameSession(page);
 
     const before = (await (
-      await page.request.get(`${instanceOther}/api/admin/auditoria`, { headers: cabeceras })
+      await page.request.get(`${instanceOther}/api/admin/audit`, { headers: cabeceras })
     ).json()) as { eventos: unknown[] };
 
     // De usar y tirar, por lo mismo: la auditoria solo tiene que crecer, no importa con que.
     const id = `equipo-auditoria-${Date.now()}`;
-    await page.request.post('/api/admin/equipos', {
+    await page.request.post('/api/admin/teams', {
       data: {
         accion: 'guardar',
         equipo: {
@@ -136,11 +136,11 @@ test.describe('el gobierno es el mismo en las dos instancias', () => {
     });
 
     const after = (await (
-      await page.request.get(`${instanceOther}/api/admin/auditoria`, { headers: cabeceras })
+      await page.request.get(`${instanceOther}/api/admin/audit`, { headers: cabeceras })
     ).json()) as { eventos: unknown[] };
 
     expect(after.eventos.length).toBeGreaterThan(before.eventos.length);
-    await page.request.post('/api/admin/equipos', { data: { accion: 'borrar', teamId: id } });
+    await page.request.post('/api/admin/teams', { data: { accion: 'borrar', teamId: id } });
   });
 });
 
@@ -151,11 +151,11 @@ test.describe('las dos instancias sirven el mismo dato del cache', () => {
     await asLogin(page, 'u-ana');
     const cabeceras = await withSameSession(page);
 
-    const aqui = (await (await page.request.get('/api/modulos/casos-pendientes')).json()) as {
+    const aqui = (await (await page.request.get('/api/modules/casos-pendientes')).json()) as {
       generatedAt?: string;
     };
     const alla = (await (
-      await page.request.get(`${instanceOther}/api/modulos/casos-pendientes`, { headers: cabeceras })
+      await page.request.get(`${instanceOther}/api/modules/casos-pendientes`, { headers: cabeceras })
     ).json()) as { generatedAt?: string };
 
     expect(alla.generatedAt).toBe(aqui.generatedAt);

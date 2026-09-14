@@ -72,7 +72,7 @@ export function AccountMenu({
   const consultar = useCallback(async () => {
     if (!hayAvisos) return;
     try {
-      const r = await fetch('/api/notificaciones');
+      const r = await fetch('/api/notifications');
       if (!r.ok) return;
       const { withoutRead: n } = (await r.json()) as { withoutRead: number };
       setSinLeer(n);
@@ -121,9 +121,9 @@ export function AccountMenu({
 
   const salir = async () => {
     setSaliendo(true);
-    await fetch('/api/acceso', { method: 'DELETE' });
+    await fetch('/api/sign-in', { method: 'DELETE' });
     // replace y no push: volver atras no debe devolver a una pagina de dentro.
-    router.replace('/acceso');
+    router.replace('/sign-in');
     router.refresh();
   };
 

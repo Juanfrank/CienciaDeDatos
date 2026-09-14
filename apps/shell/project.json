@@ -50,16 +50,16 @@
     "e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "playwright test --config playwright.config.mts --project=paralelo && E2E_WORKERS=1 playwright test --config playwright.config.mts --project=secuencial"
+        "command": "playwright test --config playwright.config.mts --project=parallel && E2E_WORKERS=1 playwright test --config playwright.config.mts --project=sequential"
       },
       "dependsOn": [
         "build"
       ]
     },
-    "e2e-catalogo": {
+    "e2e-catalog": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "playwright test --config playwright.config.mts --project=catalogo"
+        "command": "playwright test --config playwright.config.mts --project=catalog"
       },
       "dependsOn": [
         "build"
@@ -67,7 +67,7 @@
       "inputs": [
         "{projectRoot}/e2e/**/*",
         "{workspaceRoot}/playwright.config.mts",
-        "{workspaceRoot}/tools/poblar-cache.mts",
+        "{workspaceRoot}/tools/populate-cache.mts",
         "{workspaceRoot}/packages/ui-components/src/**",
         "{workspaceRoot}/packages/design-tokens/src/**",
         "{workspaceRoot}/packages/module-model/src/**",

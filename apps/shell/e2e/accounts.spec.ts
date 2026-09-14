@@ -16,7 +16,7 @@ async function tramitar(
   page: import('@playwright/test').Page,
   email = MAIL,
 ): Promise<{ resetId: string; code: string; entregado: boolean }> {
-  const respuesta = await page.request.post('/api/admin/cuentas', {
+  const respuesta = await page.request.post('/api/admin/accounts', {
     data: { accion: 'restablecer', email },
   });
   expect(respuesta.ok(), await respuesta.text()).toBe(true);
@@ -26,15 +26,15 @@ async function tramitar(
 /** Falla el inicio de sesion las veces que hagan falta para bloquear la cuenta. */
 async function bloquear(page: import('@playwright/test').Page): Promise<void> {
   for (let i = 0; i < 6; i += 1) {
-    await page.request.post('/api/acceso', { data: { mail: MAIL, clave: `Mal-${i}-2026!` } });
+    await page.request.post('/api/sign-in', { data: { mail: MAIL, clave: `Mal-${i}-2026!` } });
   }
 }
 
 test.describe('la superficie de cuentas locales (4.7.2)', () => {
   test('un Visor no entra, ni por la pagina ni por la API', async ({ page }) => {
     await asLogin(page, 'u-beto');
-    expect((await page.request.get('/api/admin/cuentas')).status()).toBe(403);
-    await page.goto('/admin/cuentas');
+    expect((await page.request.get('/api/admin/accounts')).status()).toBe(403);
+    await page.goto('/admin/accounts');
     await expect(page.getByTestId('table-accounts')).toHaveCount(0);
   });
 
@@ -42,7 +42,7 @@ test.describe('la superficie de cuentas locales (4.7.2)', () => {
     page,
   }) => {
     await asLogin(page, 'u-admin');
-    await page.goto('/admin/cuentas');
+    await page.goto('/admin/accounts');
 
     await expect(page.getByTestId('table-accounts')).toBeVisible();
     // Sin correo institucional configurado, la pantalla lo dice en vez de dar a entender que
@@ -57,14 +57,14 @@ test.describe('la superficie de cuentas locales (4.7.2)', () => {
     await asLogin(page, 'u-admin');
     await bloquear(page);
 
-    await page.goto('/admin/cuentas');
+    await page.goto('/admin/accounts');
     await expect(page.getByTestId(`account-${ACCOUNT}`)).toContainText('Bloqueada');
 
     await page.getByTestId(`unlock-${ACCOUNT}`).click();
     await expect(page.getByTestId(`account-${ACCOUNT}`)).toContainText('Activa');
 
     // Y la contrasena de siempre vuelve a servir: un error de dedos no obliga a cambiarla.
-    const entrada = await page.request.post('/api/acceso', {
+    const entrada = await page.request.post('/api/sign-in', {
       data: { mail: MAIL, clave: DEMO_KEY, code: totpCodeOf(SECRETO_TOTP_DEMO) },
     });
     // La cuenta no pertenece a ningun equipo, asi que autenticar funciona y la sesion no se
@@ -83,14 +83,14 @@ test.describe('restablecimiento con token de un solo uso', () => {
     expect(one.entregado).toBe(false);
     expect(one.resetId).toBeTruthy();
 
-    const canjeado = await page.request.post('/api/restablecer', {
+    const canjeado = await page.request.post('/api/reset', {
       data: { resetId: one.resetId, code: one.code, clave: first },
     });
     expect(canjeado.ok(), await canjeado.text()).toBe(true);
 
     // Sirve: 403 por no pertenecer a ningun equipo, NO 401 por credenciales. La cuenta esta
     // reservada justo por eso, y esa distincion es lo que prueba que la contrasena es correcta.
-    const withFirstThe = await page.request.post('/api/acceso', {
+    const withFirstThe = await page.request.post('/api/sign-in', {
       data: { mail: MAIL, clave: first, code: totpCodeOf(SECRETO_TOTP_DEMO) },
     });
     expect(withFirstThe.status()).toBe(403);
@@ -98,20 +98,20 @@ test.describe('restablecimiento con token de un solo uso', () => {
     // Y al restablecerla otra vez, la anterior deja de servir.
     const segunda = newKey();
     const dos = await tramitar(page);
-    await page.request.post('/api/restablecer', {
+    await page.request.post('/api/reset', {
       data: { resetId: dos.resetId, code: dos.code, clave: segunda },
     });
 
     expect(
       (
-        await page.request.post('/api/acceso', {
+        await page.request.post('/api/sign-in', {
           data: { mail: MAIL, clave: first, code: totpCodeOf(SECRETO_TOTP_DEMO) },
         })
       ).status(),
     ).toBe(401);
     expect(
       (
-        await page.request.post('/api/acceso', {
+        await page.request.post('/api/sign-in', {
           data: { mail: MAIL, clave: segunda, code: totpCodeOf(SECRETO_TOTP_DEMO) },
         })
       ).status(),
@@ -123,12 +123,12 @@ test.describe('restablecimiento con token de un solo uso', () => {
 
     const clave = newKey();
     const primero = await tramitar(page);
-    await page.request.post('/api/restablecer', {
+    await page.request.post('/api/reset', {
       data: { resetId: primero.resetId, code: primero.code, clave },
     });
 
     const second = await tramitar(page);
-    const repetida = await page.request.post('/api/restablecer', {
+    const repetida = await page.request.post('/api/reset', {
       data: { resetId: second.resetId, code: second.code, clave },
     });
 
@@ -140,12 +140,12 @@ test.describe('restablecimiento con token de un solo uso', () => {
     await asLogin(page, 'u-admin');
     const { resetId, code } = await tramitar(page);
 
-    const primero = await page.request.post('/api/restablecer', {
+    const primero = await page.request.post('/api/reset', {
       data: { resetId, code, clave: newKey() },
     });
     expect(primero.ok(), await primero.text()).toBe(true);
 
-    const second = await page.request.post('/api/restablecer', {
+    const second = await page.request.post('/api/reset', {
       data: { resetId, code, clave: newKey() },
     });
 
@@ -159,7 +159,7 @@ test.describe('restablecimiento con token de un solo uso', () => {
     await asLogin(page, 'u-admin');
     const { resetId } = await tramitar(page);
 
-    const fallo = await page.request.post('/api/restablecer', {
+    const fallo = await page.request.post('/api/reset', {
       data: { resetId, code: 'inventado', clave: newKey() },
     });
     expect(fallo.status()).toBe(400);
@@ -167,14 +167,14 @@ test.describe('restablecimiento con token de un solo uso', () => {
 
     // No hay GET: un endpoint para preguntar si un resetId existe seria un oraculo para tantear
     // tokens sin gastar intentos.
-    expect((await page.request.get('/api/restablecer')).status()).toBe(405);
+    expect((await page.request.get('/api/reset')).status()).toBe(405);
   });
 
   test('la contrasena nueva pasa por la politica, y el error dice que falta', async ({ page }) => {
     await asLogin(page, 'u-admin');
     const { resetId, code } = await tramitar(page);
 
-    const fallo = await page.request.post('/api/restablecer', {
+    const fallo = await page.request.post('/api/reset', {
       data: { resetId, code, clave: 'corta' },
     });
 
@@ -184,7 +184,7 @@ test.describe('restablecimiento con token de un solo uso', () => {
     expect((await fallo.json()).motivo).toBe('politica-incumplida');
 
     // El codigo sigue vivo: un intento rechazado por la politica no gasta el token.
-    const bueno = await page.request.post('/api/restablecer', {
+    const bueno = await page.request.post('/api/reset', {
       data: { resetId, code, clave: newKey() },
     });
     expect(bueno.ok(), await bueno.text()).toBe(true);
@@ -192,7 +192,7 @@ test.describe('restablecimiento con token de un solo uso', () => {
 
   test('restablecer una cuenta inexistente responde 404 al Administrador', async ({ page }) => {
     await asLogin(page, 'u-admin');
-    const respuesta = await page.request.post('/api/admin/cuentas', {
+    const respuesta = await page.request.post('/api/admin/accounts', {
       data: { accion: 'restablecer', email: 'no-existe@poderjudicial.gob.do' },
     });
     // Aqui SI se distingue, y es correcto: quien pregunta es un Administrador autenticado
@@ -204,23 +204,23 @@ test.describe('restablecimiento con token de un solo uso', () => {
 
 test.describe('la pantalla de restablecimiento', () => {
   test('no pide sesion, y el identificador no viaja en la URL', async ({ page }) => {
-    await page.goto('/restablecer');
-    // Sin sesion no redirige a /acceso: quien llega aqui es precisamente quien no puede entrar.
-    await expect(page).toHaveURL(/\/restablecer/);
+    await page.goto('/reset');
+    // Sin sesion no redirige a /sign-in: quien llega aqui es precisamente quien no puede entrar.
+    await expect(page).toHaveURL(/\/reset/);
     await expect(page.getByTestId('reset-id')).toBeVisible();
     await expect(page.getByTestId('reset-code')).toBeVisible();
   });
 
   test('desde la pantalla, con el codigo que da el panel', async ({ page }) => {
     await asLogin(page, 'u-admin');
-    await page.goto('/admin/cuentas');
+    await page.goto('/admin/accounts');
     await page.getByTestId(`reset-${ACCOUNT}`).click();
 
     const resetId = await page.getByTestId('reset-id').innerText();
     const code = await page.getByTestId('reset-code').innerText();
 
     const clave = newKey();
-    await page.goto('/restablecer');
+    await page.goto('/reset');
     await page.getByTestId('reset-id').fill(resetId);
     await page.getByTestId('reset-code').fill(code);
     await page.getByTestId('reset-key').fill(clave);
@@ -231,7 +231,7 @@ test.describe('la pantalla de restablecimiento', () => {
   });
 
   test('dos contrasenas distintas se avisan antes de enviar', async ({ page }) => {
-    await page.goto('/restablecer');
+    await page.goto('/reset');
     await page.getByTestId('reset-id').fill('x');
     await page.getByTestId('reset-code').fill('y');
     await page.getByTestId('reset-key').fill(newKey());

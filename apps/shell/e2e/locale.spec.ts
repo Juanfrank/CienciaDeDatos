@@ -60,8 +60,8 @@ test('las familias de la paleta y su buscador tambien', async ({ page, origen })
   await enIngles(page, origen);
   await newModule(page, `idioma-paleta-${Date.now()}`);
 
-  await expect(page.getByTestId('family-proporcion')).toContainText('Break down a total');
-  await expect(page.getByTestId('family-comparacion')).toContainText('Compare across categories');
+  await expect(page.getByTestId('family-proportion')).toContainText('Break down a total');
+  await expect(page.getByTestId('family-comparison')).toContainText('Compare across categories');
 
   // El mensaje con argumento se interpola en el idioma pedido, no se queda con la llave a la vista.
   await page.getByTestId('search-object').fill('zzzzz');

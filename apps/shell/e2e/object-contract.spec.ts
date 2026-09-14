@@ -12,7 +12,7 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
      */
     await asLogin(page, 'u-ana');
     const slug = `contrato-${Date.now()}`;
-    const creado = await page.request.post('/api/modulos', { data: { nombre: 'Contrato', slug } });
+    const creado = await page.request.post('/api/modules', { data: { nombre: 'Contrato', slug } });
     expect(creado.ok(), await creado.text()).toBe(true);
 
     await page.goto(`/editor/${slug}`);
@@ -30,7 +30,7 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
   test('el combinado ofrece apilar sus columnas', async ({ page }) => {
     await asLogin(page, 'u-ana');
     const slug = `contrato-comb-${Date.now()}`;
-    const creado = await page.request.post('/api/modulos', { data: { nombre: 'Contrato', slug } });
+    const creado = await page.request.post('/api/modules', { data: { nombre: 'Contrato', slug } });
     expect(creado.ok(), await creado.text()).toBe(true);
 
     await page.goto(`/editor/${slug}`);
@@ -53,7 +53,7 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
     // es motivo para dejar el mapeo sin nombrar: el mapeo es lo unico que hoy se puede preparar.
     await asLogin(page, 'u-ana');
     const slug = `contrato-mapa-${Date.now()}`;
-    const creado = await page.request.post('/api/modulos', { data: { nombre: 'Contrato', slug } });
+    const creado = await page.request.post('/api/modules', { data: { nombre: 'Contrato', slug } });
     expect(creado.ok(), await creado.text()).toBe(true);
 
     await page.goto(`/editor/${slug}`);

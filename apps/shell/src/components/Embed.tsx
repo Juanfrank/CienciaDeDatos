@@ -14,7 +14,7 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
     const params = new URLSearchParams(searchParams.toString());
     if (pageSlug) params.set('pagina', pageSlug);
     const cadena = params.toString();
-    const url = `${window.location.origin}/incrustar/m/${moduleSlug}${cadena ? `?${cadena}` : ''}`;
+    const url = `${window.location.origin}/embed/m/${moduleSlug}${cadena ? `?${cadena}` : ''}`;
 
     return [
       `<iframe src="${url}"`,

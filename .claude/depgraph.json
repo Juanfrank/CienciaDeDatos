@@ -9525,7 +9525,7 @@
    ]
   },
   {
-   "path": "tools/coherencia/rutas.spec.ts",
+   "path": "tools/coherence/rutas.spec.ts",
    "hash": "31d6e962da536e821a44ef92e48180e4e2634d851820b99204bb43601ffbca83",
    "imports": [
     "node:child_process",
@@ -9556,7 +9556,7 @@
    ]
   },
   {
-   "path": "tools/coherencia/interfaz.spec.ts",
+   "path": "tools/coherence/interfaz.spec.ts",
    "hash": "39246d840c961fd20c5fee22b08b07383a8787e2700fefcc3c9546b6d61b719f",
    "imports": [
     "@app/ui-components",
@@ -9587,7 +9587,7 @@
    ]
   },
   {
-   "path": "tools/coherencia/api.spec.ts",
+   "path": "tools/coherence/api.spec.ts",
    "hash": "d09aee57dffe722587cc4df52a682352dd52da86e6702a06273f5d32c099d606",
    "imports": [
     "node:child_process",
@@ -9613,7 +9613,7 @@
    ]
   },
   {
-   "path": "tools/coherencia/documentacion.spec.ts",
+   "path": "tools/coherence/documentacion.spec.ts",
    "hash": "bf1e61ce672eb76c2cbc7dd2cbe71a8bd857e9b7771dec8c236424bd3f28e7ef",
    "imports": [
     "../rename/segmentos.mjs",
@@ -9859,7 +9859,7 @@
    "import_edges": []
   },
   {
-   "path": "apps/modules/modulo-ejemplo/module.contract.ts",
+   "path": "apps/modules/sample-module/module.contract.ts",
    "hash": "374ccb3686fe8bdfb94756808267aa7cd996cd3be04df7cc0ef08f6f2c539221",
    "imports": [
     "@app/data-contracts"
@@ -9883,7 +9883,7 @@
    ]
   },
   {
-   "path": "apps/modules/modulo-ejemplo/src/index.ts",
+   "path": "apps/modules/sample-module/src/index.ts",
    "hash": "9fcc037a5909011c2b81e3f2b05ad044aa8133c9335228cf994f4bc18d226bd2",
    "imports": [
     "../module.contract",
@@ -9918,7 +9918,7 @@
    ]
   },
   {
-   "path": "apps/modules/modulo-ejemplo/src/index.spec.ts",
+   "path": "apps/modules/sample-module/src/index.spec.ts",
    "hash": "6d29a6a58b7591eacd9b1d9fb7f18057a8cf8ffc97ecb7b07b3778513d7274d6",
    "imports": [
     "./index",
@@ -9939,7 +9939,7 @@
    ]
   },
   {
-   "path": "apps/modules/modulo-ejemplo/src/__boundary-fixture__/forbidden-import.ts",
+   "path": "apps/modules/sample-module/src/__boundary-fixture__/forbidden-import.ts",
    "hash": "665b634585316e74a44f65ef2d80bfa2b4e3ed3a28e9b0890c312986b091814b",
    "imports": [
     "@app/data-contracts-server"
@@ -15014,7 +15014,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/restablecer/page.tsx",
+   "path": "apps/shell/app/reset/page.tsx",
    "hash": "e8ff359c0a1dfcc8b21ea2559a63a46c30cdba3941c64add100983a08f39643f",
    "imports": [
     "../../src/components/Reset"
@@ -15044,7 +15044,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/avisos/page.tsx",
+   "path": "apps/shell/app/notices/page.tsx",
    "hash": "815b60d11175953930f0b7d600505609ecb5c4b72b0ea9f8ffbd3e0bf911435a",
    "imports": [
     "../../src/components/Notices",
@@ -15328,7 +15328,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/admin/equipos/page.tsx",
+   "path": "apps/shell/app/admin/teams/page.tsx",
    "hash": "1ab0a1c28bdb501c60abc0910fb261a0a0c9f74960f61262444ef801a1ab884a",
    "imports": [
     "../../../src/components/admin/TeamEditor",
@@ -15378,7 +15378,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/admin/auditoria/page.tsx",
+   "path": "apps/shell/app/admin/audit/page.tsx",
    "hash": "d0e42e71740a577d7081d0b3de2eae33ebb601d653bff71de40e96ca5644faff",
    "imports": [
     "../../../src/server/audit"
@@ -15443,7 +15443,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/admin/quien-ve-que/page.tsx",
+   "path": "apps/shell/app/admin/who-sees-what/page.tsx",
    "hash": "8416440ea735db2c97141953032a87de40747f7641fa5d84a271dc68fb84d033",
    "imports": [
     "../../../src/components/admin/WhoSeesWhat",
@@ -15523,7 +15523,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/admin/cuentas/page.tsx",
+   "path": "apps/shell/app/admin/accounts/page.tsx",
    "hash": "811f4943c8980a2603eca24f8a00d77ea9ec95ba2bc3b679d4426a4a7467cd43",
    "imports": [
     "../../../src/components/admin/LocalAccounts",
@@ -15558,7 +15558,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/admin/ambitos/page.tsx",
+   "path": "apps/shell/app/admin/scopes/page.tsx",
    "hash": "b35e7487cec874b4d88abcdd6bc47eb8ede3ce41444043ce60f1ebc3bf6bf58b",
    "imports": [
     "../../../src/components/admin/ScopeEditor",
@@ -15598,7 +15598,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/editor-sin-permiso/page.tsx",
+   "path": "apps/shell/app/editor-without-permission/page.tsx",
    "hash": "712531d22f507a44e6b47b6536c5770d2388f4e8c77cb7d73adf36e5a11a464f",
    "imports": [
     "next/link"
@@ -15628,7 +15628,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/restablecer/route.ts",
+   "path": "apps/shell/app/api/reset/route.ts",
    "hash": "6a7144731182c8162dba6f79baba68981512abb99dfacbc24a167f0159b348af",
    "imports": [
     "../../../src/server/identity",
@@ -15668,7 +15668,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/notificaciones/route.ts",
+   "path": "apps/shell/app/api/notifications/route.ts",
    "hash": "3991bfad2a5681893e4103bbd1eaf1a3dfa4a7d6eb7b3c0883618d3d755e441f",
    "imports": [
     "../../../src/server/alerts",
@@ -15763,7 +15763,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/admin/equipos/route.ts",
+   "path": "apps/shell/app/api/admin/teams/route.ts",
    "hash": "01c4d6c6db432c3d5dab154070df8312fe647b12b821fff4efff29b6498df74c",
    "imports": [
     "../../../../src/server/admin",
@@ -15825,7 +15825,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/admin/auditoria/route.ts",
+   "path": "apps/shell/app/api/admin/audit/route.ts",
    "hash": "bdde9e40acc5397140188a82888fe84059d277b903cf5bb907c3a5f4f2d73ed5",
    "imports": [
     "../../../../src/server/audit",
@@ -15871,7 +15871,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/admin/arbol/route.ts",
+   "path": "apps/shell/app/api/admin/tree/route.ts",
    "hash": "8e836a713136d92bbf0a34025df0b3665d9e6642005203b7e914f2f9c7bf377b",
    "imports": [
     "../../../../src/server/admin",
@@ -15928,7 +15928,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/admin/quien-ve-que/route.ts",
+   "path": "apps/shell/app/api/admin/who-sees-what/route.ts",
    "hash": "6a03eb7fa1ce1a25befbad3b4f23af77e62187e710e7b024f9b89e27c38d2ab8",
    "imports": [
     "../../../../src/server/admin",
@@ -15969,7 +15969,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/admin/paquetes/route.ts",
+   "path": "apps/shell/app/api/admin/packages/route.ts",
    "hash": "eefe4c13172bc01f55eaf9fb82188fd2a1078cc12c4a5b5ef44113d685ca7723",
    "imports": [
     "../../../../src/server/admin",
@@ -16026,7 +16026,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/admin/cuentas/route.ts",
+   "path": "apps/shell/app/api/admin/accounts/route.ts",
    "hash": "0c639ba2abcc016ee778b9b842b37467050ed2b0aaf828b949f9eac8167daf4e",
    "imports": [
     "../../../../src/server/admin",
@@ -16083,7 +16083,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/admin/esquema/route.ts",
+   "path": "apps/shell/app/api/admin/schema/route.ts",
    "hash": "3b1d98e11fcc0dabc5759abe3d2377ae25c8aa3e8e8e765a116ec336af84d70a",
    "imports": [
     "../../../../src/server/admin",
@@ -16124,7 +16124,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/admin/ambitos/route.ts",
+   "path": "apps/shell/app/api/admin/scopes/route.ts",
    "hash": "32e022ce58143c03d2cfb638aaf451d24d914f548fc42242cd0949e8102647d8",
    "imports": [
     "../../../../src/server/admin",
@@ -16170,7 +16170,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/marcadores/route.ts",
+   "path": "apps/shell/app/api/bookmarks/route.ts",
    "hash": "d4f084bac0ea5a2880a4d33d4c3054f17ea93df2c4d62820666b1d7fed9ae988",
    "imports": [
     "../../../src/server/bookmarks",
@@ -16278,7 +16278,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/navegacion/route.ts",
+   "path": "apps/shell/app/api/navigation/route.ts",
    "hash": "dc445e2a7308913b49f9f028c173b83c36bc6c48f45b3b2366053f2722c524f5",
    "imports": [
     "../../../src/server/cicloDeVida",
@@ -16323,7 +16323,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/modulos/route.ts",
+   "path": "apps/shell/app/api/modules/route.ts",
    "hash": "33c0d792bd64c5ca3ee4680496a4f56e220ba07f901a8c1c0d27426b961429c4",
    "imports": [
     "../../../src/server/cicloDeVida",
@@ -16380,7 +16380,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/modulos/[slug]/route.ts",
+   "path": "apps/shell/app/api/modules/[slug]/route.ts",
    "hash": "1715d83765a4867accec0e80346113ce9b0b6d3833a3040598e013bb94eda6c2",
    "imports": [
     "../../../../src/server/cicloDeVida",
@@ -16440,7 +16440,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/modulos/[slug]/edicion/route.ts",
+   "path": "apps/shell/app/api/modules/[slug]/edit/route.ts",
    "hash": "69b263935e63a5f65e12031ea8ff59b7020c4b1447037de11b798ce8ff7e8565",
    "imports": [
     "../../../../../src/server/cicloDeVida",
@@ -16518,7 +16518,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/modulos/[slug]/vista/route.ts",
+   "path": "apps/shell/app/api/modules/[slug]/view/route.ts",
    "hash": "464161d078839d2fe63c298d32067b9010b2fec99ad91a3a23972620436e1f9b",
    "imports": [
     "../../../../../src/server/cicloDeVida",
@@ -16586,7 +16586,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/modulos/[slug]/estado/route.ts",
+   "path": "apps/shell/app/api/modules/[slug]/status/route.ts",
    "hash": "af7e2bf7e60fd00405e1d9f5770a7c6573d0ccda56bc6d8e1018cddd747b64da",
    "imports": [
     "../../../../../src/server/cicloDeVida",
@@ -16631,7 +16631,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/consulta/route.ts",
+   "path": "apps/shell/app/api/query/route.ts",
    "hash": "e9098008d2cc318e4ac1b662e0893187b7528080ad2ce1838c4bb2174085ed7e",
    "imports": [
     "../../../src/server/query",
@@ -16681,7 +16681,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/alertas/route.ts",
+   "path": "apps/shell/app/api/alerts/route.ts",
    "hash": "dd23c23d4c340989d5490c9d789f4afc14e9cdd1d7fc4ac2ee5c02d7dd92e61a",
    "imports": [
     "../../../src/server/alerts",
@@ -16753,7 +16753,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/acceso/route.ts",
+   "path": "apps/shell/app/api/sign-in/route.ts",
    "hash": "05080c1b64cb1f06574d1bbbf5c9ed4e1a51f24cc907ef40a49c644de731d696",
    "imports": [
     "../../../src/server/context",
@@ -16809,7 +16809,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/suscripciones/route.ts",
+   "path": "apps/shell/app/api/subscriptions/route.ts",
    "hash": "ea8ac9731436e8c99ff2004fcfaaa522606f70d84a401ccee9f357b0d9d6e58b",
    "imports": [
     "../../../src/server/alerts",
@@ -16886,7 +16886,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/exportaciones/route.ts",
+   "path": "apps/shell/app/api/exports/route.ts",
    "hash": "08bb24ad3f38932c619a06bcf776460b8bd9031c8867d40a09cfaee8fca05e3a",
    "imports": [
     "../../../src/server/exports",
@@ -16941,7 +16941,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/exportaciones/[id]/route.ts",
+   "path": "apps/shell/app/api/exports/[id]/route.ts",
    "hash": "7853bb13bda1bb4f2e11f6b2ce764e73ff7569a5273e2a5206489e5a33acd91a",
    "imports": [
     "../../../../src/server/exports",
@@ -16986,7 +16986,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/exportaciones/[id]/descarga/route.ts",
+   "path": "apps/shell/app/api/exports/[id]/download/route.ts",
    "hash": "75211c4f08703de87bacaf9d9473e71496dc4d58919bdc954fb7fc77d4dc602f",
    "imports": [
     "../../../../../src/server/exports",
@@ -17026,7 +17026,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/api/sesion/equipo-activo/route.ts",
+   "path": "apps/shell/app/api/session/active-team/route.ts",
    "hash": "f579b799fa431d55b9dd9ae8b9ca648313892c94301a860a69eb76aaedcf6463",
    "imports": [
     "../../../../src/server/context",
@@ -17071,7 +17071,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/acceso/page.tsx",
+   "path": "apps/shell/app/sign-in/page.tsx",
    "hash": "1169272a0a5679cbed975b8164bcefb6924050fcd5b57ac908079e80414df90e",
    "imports": [
     "../../src/components/Login",
@@ -17121,7 +17121,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/(incrustado)/layout.tsx",
+   "path": "apps/shell/app/(embedded)/layout.tsx",
    "hash": "520fdf0158239bb14c2f25eaf4cf24153c99843ad19811f2623bbcf8dbcde6f7",
    "imports": [
     "@app/design-tokens"
@@ -17145,7 +17145,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/(incrustado)/incrustar/m/[slug]/page.tsx",
+   "path": "apps/shell/app/(embedded)/embed/m/[slug]/page.tsx",
    "hash": "00a5a50463bc8e6343a394ccff1eb0995c3e02e18583cc33970291f9ed1af553",
    "imports": [
     "../../../../../src/components/ModuleView",
@@ -17419,7 +17419,7 @@
    ]
   },
   {
-   "path": "apps/shell/app/admin-sin-permiso/page.tsx",
+   "path": "apps/shell/app/admin-without-permission/page.tsx",
    "hash": "f30f2a07cb894504d357d62d9bb98d2193a930feefce16fc1e137bf22a154b12",
    "imports": [],
    "defines": [

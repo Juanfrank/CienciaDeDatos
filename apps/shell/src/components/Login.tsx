@@ -23,7 +23,7 @@ export function Login({
     setError('');
     setEnviando(true);
     try {
-      const r = await fetch('/api/acceso', {
+      const r = await fetch('/api/sign-in', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ mail, clave, ...(code ? { code } : {}) }),
@@ -46,7 +46,7 @@ export function Login({
 
   const conAzureAd = async () => {
     setError('');
-    const r = await fetch('/api/acceso', {
+    const r = await fetch('/api/sign-in', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ proveedor: 'azure-ad' }),
@@ -138,7 +138,7 @@ export function Login({
         <p className="muted-text">
           Las accounts locales exigen un second factor. Si olvido su contrasena, un Administrador
           inicia el restablecimiento y le entrega un code de un solo uso; con el, entre en{' '}
-          <a href="/restablecer" data-testid="link-reset">
+          <a href="/reset" data-testid="link-reset">
             restablecer contrasena
           </a>
           .
