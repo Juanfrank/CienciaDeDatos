@@ -10,6 +10,8 @@ import { GRUPOS, RESUMEN, type AdminSection, activeSectionIn, sectionOf } from '
 export interface Indicadores {
   ampliaciones: number;
   papelera: number;
+  /** Modulos propuestos y esperando una decision. */
+  borradores: number;
 }
 
 export function AdminRail({ indicadores, id }: { indicadores: Indicadores; id: string }) {
@@ -35,15 +37,32 @@ export function AdminRail({ indicadores, id }: { indicadores: Indicadores; id: s
             {grupo.titulo}
           </h2>
           <ul aria-labelledby={`grupo-${grupo.id}`}>
-            {grupo.sections.map((s) => (
-              <li key={s.href}>
-                <SectionLink
-                  section={s}
-                  activo={actual?.href === s.href}
-                  cuenta={s.indicador ? indicadores[s.indicador] : 0}
-                />
-              </li>
-            ))}
+            {grupo.sections.map((s) => {
+              const dentro = actual?.href === s.href;
+              return (
+                <li key={s.href}>
+                  <SectionLink
+                    section={s}
+                    activo={dentro}
+                    cuenta={s.indicador ? indicadores[s.indicador] : 0}
+                  />
+                  {/*
+                    Las hijas solo se despliegan DENTRO de su madre.
+                    Listarlas siempre convertiria el carril en catorce enlaces donde hoy hay
+                    nueve, y las de Recursos no sirven de nada mientras se administran equipos.
+                  */}
+                  {dentro && s.hijas ? (
+                    <ul className="admin__hijas" data-testid={`submenu-${s.href.split('/').pop()}`}>
+                      {s.hijas.map((hija) => (
+                        <li key={hija.href}>
+                          <SectionLink section={hija} activo={path === hija.href} cuenta={0} />
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         </div>
       ))}
@@ -81,7 +100,8 @@ function SectionLink({
         <span className="admin__indicator-nav" data-testid={`indicator-${section.indicador}`}>
           <span aria-hidden="true">{cuenta > 99 ? '99+' : cuenta}</span>
           <span className="visualmente-oculto">
-            {cuenta} {section.indicador === 'ampliaciones' ? 'ampliaciones vigentes' : 'en papelera'}
+            {cuenta}{' '}
+            {section.indicador === 'ampliaciones' ? 'ampliaciones vigentes' : 'en papelera'}
           </span>
         </span>
       ) : null}

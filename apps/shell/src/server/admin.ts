@@ -1,4 +1,5 @@
 import type { SchemaDescriptor } from '@app/data-contracts';
+import { modules } from './moduleStore';
 import { getManagedTree } from './context';
 import { expansionsCount } from './audit';
 import {
@@ -475,7 +476,20 @@ export async function seesWhoWhere(userId: string, teamId: string, moduleId: str
 }
 
 /** Los numeros que el carril de administracion muestra junto a dos secciones. */
-export async function indicadoresDeAdmin(): Promise<{ ampliaciones: number; papelera: number }> {
-  const [ampliaciones, arbol] = await Promise.all([expansionsCount(), getManagedTree()]);
-  return { ampliaciones, papelera: arbol.trash.length };
+export async function indicadoresDeAdmin(): Promise<{
+  ampliaciones: number;
+  papelera: number;
+  borradores: number;
+}> {
+  const [ampliaciones, arbol, definiciones] = await Promise.all([
+    expansionsCount(),
+    getManagedTree(),
+    modules.list(),
+  ]);
+  return {
+    ampliaciones,
+    papelera: arbol.trash.length,
+    // Lo que espera una decision de alguien: un borrador propuesto y sin aprobar.
+    borradores: definiciones.filter((m) => m.status === 'pendiente-de-aprobacion').length,
+  };
 }

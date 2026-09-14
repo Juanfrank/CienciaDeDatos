@@ -24,6 +24,22 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   panel de administracion y la pantalla de restablecer EN OSCURO: dieciseis pruebas, ninguna
   infraccion. Era justo la condicion que se puso para encenderlo —«un tema dark a medias es peor
   que no tenerlo»—, y se cumple.
+- **Politica de contenido completa** (era 2.12). `apps/shell/src/server/csp.ts` construye la
+  cabecera con un `nonce` por peticion, fusionada con la politica de enmarcado que ya existia.
+  El `nonce` viaja tambien en las cabeceras de ENTRADA (`NextResponse.next({ request })`), que es
+  lo que permite a Next firmar sus propios scripts de hidratacion; sin eso la pagina sale en
+  blanco y sin error. Lo comprueban `apps/shell/src/server/csp.spec.ts` y, en el navegador,
+  `apps/shell/e2e/shell.spec.ts`.
+- **El aviso de seguridad de `uuid`** (era 2.13). Se cierra con `overrides` en `package.json`
+  —`uuid`, `smol-toml`, `deepmerge-ts`— en vez de bajar `exceljs` de version, que era un cambio
+  de API. `npm audit` reporta cero vulnerabilidades.
+- **Tamano por defecto de las visualizaciones.** Un objeto entra en la rejilla con la talla que
+  su propio contrato de datos sugiere, no con un 6x3 igual para todos.
+  `packages/ui-components/src/presentation/defaultSize.spec.ts` recorre el catalogo entero.
+- **El cromo de la cuenta y el panel de administracion, reorganizados.** La cabecera tenia cuatro
+  controles compitiendo con el arbol; ahora todo lo que no es mirar datos vive en el menu que se
+  despliega sobre las iniciales. El panel se agrupa por el OBJETO que se administra —modulos,
+  recursos, usuarios, equipos, temas, origenes— en vez de por concepto.
 
 **2.2 sigue pendiente** aunque dependia de 2.1: el reposicionamiento existe en el editor, no en
 el dialogo «Mi vista» de la personalizacion.
@@ -181,11 +197,16 @@ pantallas puede discrepar, y nada impide que una palabra en ingles se cuele dond
 lea. Ha pasado cinco veces durante el renombrado.
 
 Hoy hay un trinquete: `tools/coherencia/i18n.spec.ts` cuenta las cadenas sueltas y falla si suben
-de 322. El numero solo puede bajar, y quien migre una cadena baja el tope en el mismo commit.
+del tope. El numero solo puede bajar, y quien migre una cadena baja el tope en el mismo commit.
+Empezo en 322 con 53 claves; va por **219 con 252 claves**, y las cuatro pantallas que mas
+acumulaban ya no estan entre las peores.
 
-Migrar de golpe es un cambio grande y mecanico. El orden sensato es por pantalla, empezando por
-las que mas acumulan: `Presentation.tsx` (55), `EditorObjectSettings.tsx` (22), `SidebarPanel.tsx`
-(17), `ModuleList.tsx` (15).
+Migrar de golpe es un cambio grande y mecanico. El orden sensato sigue siendo por pantalla,
+empezando por las que mas acumulan hoy:
+`apps/shell/src/components/CreateNotice.tsx` (13),
+`apps/shell/src/components/admin/TreeEditor.tsx` (13),
+`apps/shell/app/admin/auditoria/page.tsx` (12) y
+`apps/shell/src/components/admin/LocalAccounts.tsx` (11).
 
 ### 2.11 Las propiedades siguen en espanol
 
@@ -205,27 +226,20 @@ Hace falta, por ese orden:
 3. Una guarda que compare las claves del JSON guardado con las del tipo, que es el contrato que
    hoy no ata nadie.
 
-### 2.12 Politica de contenido (CSP) completa
+### 2.14 Clases de CSS que nadie escribe, y nada lo comprueba
 
-El middleware pone ya `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` y, en
-produccion, `Strict-Transport-Security`. Falta la CSP de verdad —`default-src 'self'`—, que es la
-que haria CUMPLIR el principio 1 en vez de solo comprobarlo con una prueba de navegador.
+Las guardas de `tools/coherencia` atan los atributos `data-*`, los identificadores de prueba, las
+rutas y los campos del cable. Falta la que ata **los nombres de clase**: el TSX escribe uno y la
+hoja de estilo define otro, y no se entera nadie —el navegador aplica un selector que no encuentra
+nada y se queda mudo—.
 
-No se hizo ahora porque no es un cambio sin riesgo: ya existe una CSP parcial para el enmarcado
-(`frame-ancestors`, en `embedding.ts`) con la que habria que fusionarla, y Next necesita `nonce`
-por peticion para sus scripts de hidratacion. Una CSP mal puesta no avisa: deja la pagina en
-blanco.
+Medido hoy: **26 clases definidas en `globals.css` que ningun componente escribe** (`editor__*`
+del editor anterior, las utilidades `md-*`, `palette__*`) y una docena escritas sin ninguna regla,
+la mayoria envoltorios de BEM sin estilo propio, que es legitimo.
 
-### 2.13 `exceljs` arrastra un `uuid` con aviso de seguridad
-
-`npm audit` reporta dos avisos moderados, los dos del mismo sitio: `exceljs` depende de una
-version de `uuid` sin comprobacion de limites del buffer. `npm audit fix --force` baja `exceljs`
-a la 3.4.0, que es un cambio de API.
-
-El alcance real aqui es pequeno —el `uuid` afectado se usa al escribir un libro, con datos que ya
-pasaron por la proyeccion, y el fallo necesita que quien llama pase un buffer propio—, pero el
-aviso se queda hasta que `exceljs` publique una version con el `uuid` corregido o se cambie de
-libreria para el formato Excel.
+La guarda util es la del sentido que no tiene falsos positivos: una regla cuyo nombre no aparece
+en ningun componente es CSS muerto. Hace falta antes limpiar las 26, porque un trinquete que nace
+rojo no lo mira nadie.
 
 ---
 

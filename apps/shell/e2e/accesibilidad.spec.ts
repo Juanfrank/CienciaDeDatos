@@ -82,9 +82,9 @@ test.describe('paginas de modulo', () => {
 test.describe('panel de administracion (4.10.8)', () => {
   for (const path of [
     '/admin',
-    '/admin/arbol',
+    '/admin/modulos/arbol',
     '/admin/equipos',
-    '/admin/paquetes',
+    '/admin/modulos/paquetes',
     '/admin/ambitos',
     '/admin/quien-ve-que',
     '/admin/cuentas',
@@ -173,13 +173,22 @@ test.describe('avisos (4.9)', () => {
     expect(await infracciones(page)).toEqual([]);
   });
 
-  test('el contador de la campana se anuncia con texto, no solo con un numero', async ({
-    page,
-  }) => {
-    // "Avisos 3" no dice de que. El numero es para la vista; el texto, para quien no la usa.
+  test('el punto de avisos nunca es la unica senal: lleva su texto', async ({ page }) => {
+    // El punto del avatar es para la vista. Quien no la usa necesita oir cuantos y de que.
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
-    await expect(page.getByTestId('campana')).toContainText(/aviso\(s\) sin leer|ningun aviso sin leer/);
+
+    const disparador = page.getByTestId('account-trigger');
+    await expect(disparador).toBeVisible();
+    // El contador se sondea despues de la primera pintura: sin esperarlo se mira un menu vacio.
+    await page.waitForResponse((r) => r.url().includes('/api/notificaciones'));
+
+    if ((await page.getByTestId('account-dot').count()) > 0) {
+      await expect(disparador).toContainText(/\d+ avisos sin leer/);
+    }
+
+    await disparador.click();
+    await expect(page.getByTestId('link-avisos')).toContainText('Avisos');
   });
 });
 

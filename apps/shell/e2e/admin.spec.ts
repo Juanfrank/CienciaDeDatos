@@ -34,15 +34,17 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
     await asLogin(page, 'u-beto');
     await page.goto('/admin');
     await expect(page.getByTestId('without-permission')).toBeVisible();
-    await expect(page.getByTestId('admin-nav-tree')).toHaveCount(0);
+    await expect(page.getByTestId('admin-nav-modulos')).toHaveCount(0);
   });
 
   test('un Administrador si entra', async ({ page }) => {
     await asLogin(page, 'u-admin');
     await page.goto('/');
+    // El enlace vive en el menu de la cuenta: existe siempre, se ve al desplegarlo.
+    await page.getByTestId('account-trigger').click();
     await expect(page.getByTestId('link-admin')).toBeVisible();
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-modulos')).toBeVisible();
   });
 });
 
@@ -141,7 +143,7 @@ test.describe('editor de arbol (4.1.2)', () => {
   test('el arbol se reorganiza SOLO CON TECLADO, sin arrastrar', async ({ page }) => {
     // 4.10.8 pide arrastrar y soltar; 4.9 dice que la accesibilidad no se pospone. Los dos
     // gestos llaman a la misma operacion, asi que basta con comprobar el accesible.
-    await page.goto('/admin/arbol');
+    await page.goto('/admin/modulos/arbol');
     await page.getByTestId('node-nodo-m-audiencias').click();
     await page.getByTestId('move-nodo-m-audiencias').selectOption('nodo-este');
 
@@ -177,7 +179,7 @@ test.describe('editor de arbol (4.1.2)', () => {
   });
 
   test('la papelera conserva lo eliminado y permite restaurarlo', async ({ page }) => {
-    await page.goto('/admin/arbol');
+    await page.goto('/admin/modulos/arbol');
     await page.getByTestId('node-nodo-m-nacional').click();
     await page.getByTestId('trash-nodo-m-nacional').click();
 
@@ -268,7 +270,7 @@ test.describe('paquetes visuales (4.10.6)', () => {
     });
 
     // El panel lo señala explicitamente en vez de ocultarlo sin aviso.
-    await page.goto('/admin/paquetes');
+    await page.goto('/admin/modulos/paquetes');
     await expect(page.getByTestId('package-problemas-pkg-prueba')).toBeVisible();
     await expect(page.getByTestId('package-problemas-pkg-prueba')).toContainText('casos-pendientes');
 
@@ -322,7 +324,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
 
     // Y sigue administrando: el panel se abre igual.
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-modulos')).toBeVisible();
   });
 
   test('degradarse a Colaborador tampoco', async ({ page }) => {
@@ -386,7 +388,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
     // Y el estado quedo como estaba, comprobado desde la cuenta restituida.
     await asLogin(page, 'u-admin');
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-modulos')).toBeVisible();
   });
 
   test('el panel avisa cuando solo hay un Administrador', async ({ page }) => {
@@ -405,14 +407,14 @@ test.describe('el carril de administracion', () => {
 
   test('las siete superficies estan agrupadas por lo que se hace con ellas', async ({ page }) => {
     await page.goto('/admin');
-    // Siete elementos planos superan lo que alguien recorre de un vistazo, y mezclaban tres
-    // momentos distintos: ordenar la institucion, dar acceso, y comprobar que quedo bien.
-    for (const grupo of ['Estructura', 'Acceso', 'Supervision']) {
+    // Siete elementos planos superan lo que alguien recorre de un vistazo. Se agrupan por el
+    // OBJETO que se administra, que es como se formula la peticion: «los permisos de Ana».
+    for (const grupo of ['Contenido', 'Personas', 'Datos', 'Supervision']) {
       await expect(page.getByRole('heading', { name: grupo })).toBeVisible();
     }
     // Y cada grupo ETIQUETA su lista, para que un lector de pantalla anuncie donde empieza.
     const listas = page.locator('.admin__nav ul[aria-labelledby]');
-    await expect(listas).toHaveCount(3);
+    await expect(listas).toHaveCount(4);
   });
 
   test('el resumen se marca al entrar, y solo en su ruta exacta', async ({ page }) => {
@@ -422,7 +424,7 @@ test.describe('el carril de administracion', () => {
     await page.goto('/admin/equipos');
     // Con la regla de prefijo, /admin reclamaria /admin/equipos y habria DOS activas a la vez.
     await expect(page.getByTestId('admin-nav-admin')).not.toHaveAttribute('aria-current', 'page');
-    await expect(page.getByTestId('admin-nav-teams')).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByTestId('admin-nav-equipos')).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('[aria-current="page"]')).toHaveCount(1);
   });
 

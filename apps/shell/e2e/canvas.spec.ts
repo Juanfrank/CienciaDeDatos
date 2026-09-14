@@ -138,15 +138,16 @@ test.describe('la rejilla es visible y se maneja', () => {
     const id = await blockId(page);
     await page.getByTestId('tab-formato').click();
 
-    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–6 de 12');
+    // Tres columnas: es la talla con la que un indicador entra en la rejilla, no un 6x3 para todos.
+    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–3 de 12');
 
     await page.getByTestId(`widen-${id}`).click();
     await guardado(page);
-    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–7 de 12');
+    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–4 de 12');
 
     await page.getByTestId(`right-${id}`).click();
     await guardado(page);
-    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 2–8 de 12');
+    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 2–5 de 12');
 
     // Y la posicion que se anuncia es la que el bloque ocupa de verdad en la rejilla.
     const column = await page
@@ -166,7 +167,8 @@ test.describe('la rejilla es visible y se maneja', () => {
 
     await expect(page.getByTestId(`left-${id}`)).toBeDisabled();
 
-    for (let i = 0; i < 6; i += 1) {
+    // De las tres columnas con las que entra un indicador a las doce de la rejilla.
+    for (let i = 0; i < 9; i += 1) {
       await page.getByTestId(`widen-${id}`).click();
       await guardado(page);
     }
@@ -456,12 +458,12 @@ test.describe('arrastrar y redimensionar', () => {
     const id = await blockId(page);
 
     await page.getByTestId('tab-formato').click();
-    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–6 de 12');
+    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–3 de 12');
 
     await arrastrar(page, `move-handle-${id}`, 3, 0);
     await guardado(page);
 
-    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 4–9 de 12');
+    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 4–6 de 12');
   });
 
   test('arrastrar la esquina cambia el ancho', async ({ page }) => {
@@ -474,7 +476,7 @@ test.describe('arrastrar y redimensionar', () => {
     await arrastrar(page, `resize-handle-${id}`, 2, 0);
     await guardado(page);
 
-    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–8 de 12');
+    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–5 de 12');
   });
 
   test('el arrastre pasa por el MISMO camino que los botones', async ({ page }) => {
@@ -491,11 +493,11 @@ test.describe('arrastrar y redimensionar', () => {
 
     await arrastrar(page, `move-handle-${id}`, 2, 0);
     await guardado(page);
-    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 3–8 de 12');
+    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 3–5 de 12');
 
     await page.getByTestId(`right-${id}`).click();
     await guardado(page);
-    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 4–9 de 12');
+    await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 4–6 de 12');
   });
 
   test('un destino ocupado se marca invalido y al soltar NO pasa nada', async ({ page }) => {
@@ -510,20 +512,20 @@ test.describe('arrastrar y redimensionar', () => {
     await page.getByTestId('add-barras').click();
     await guardado(page);
 
-    // El primero esta en 1–6 y el segundo en 7–12, en la misma fila.
+    // El indicador entra en 1–3 y las barras a su lado, en 4–9: la misma fila.
     const primero = (
       (await page.locator('[data-testid^="block-obj-"]').first().getAttribute('data-testid')) ?? ''
     ).replace('block-', '');
 
     await page.getByTestId(`select-${primero}`).click();
     await page.getByTestId('tab-formato').click();
-    await expect(page.getByTestId(`position-${primero}`)).toContainText('Columna 1–6 de 12');
+    await expect(page.getByTestId(`position-${primero}`)).toContainText('Columna 1–3 de 12');
 
     await arrastrar(page, `move-handle-${primero}`, 6, 0);
     await guardado(page);
 
     // Sigue donde estaba: el destino se pisaba con el otro bloque.
-    await expect(page.getByTestId(`position-${primero}`)).toContainText('Columna 1–6 de 12');
+    await expect(page.getByTestId(`position-${primero}`)).toContainText('Columna 1–3 de 12');
   });
 
   test('sin permiso de edicion no hay asas', async ({ page }) => {

@@ -72,6 +72,8 @@ test.describe('quien entra al editor (4.10.1)', () => {
   test('un Colaborador si entra', async ({ page }) => {
     await asLogin(page, 'u-ana');
     await page.goto('/');
+    // El enlace vive en el menu de la cuenta: existe siempre, se ve al desplegarlo.
+    await page.getByTestId('account-trigger').click();
     await expect(page.getByTestId('link-editor')).toBeVisible();
     await page.goto('/editor');
     await expect(page.getByRole('heading', { name: 'Editor de modulos' })).toBeVisible();

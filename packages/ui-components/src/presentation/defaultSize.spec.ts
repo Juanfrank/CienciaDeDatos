@@ -7,7 +7,9 @@ import { initialCatalog } from '../registry/catalog';
 const GRID_COLUMNS = 12;
 /** La forma reducida con la que trabaja la paleta del editor. */
 const comoLaPaleta = (objeto: (typeof initialCatalog)[number]) => {
-  const contrato = objeto.versions[objeto.versions.length - 1]!.dataContract;
+  const ultima = objeto.versions.at(-1);
+  if (!ultima) throw new Error(`El objeto '${objeto.objectId}' no tiene ninguna version.`);
+  const contrato = ultima.dataContract;
   return {
     objectId: objeto.objectId,
     category: objeto.category,
@@ -16,8 +18,11 @@ const comoLaPaleta = (objeto: (typeof initialCatalog)[number]) => {
   };
 };
 
-const de = (objectId: string) =>
-  defaultSize(comoLaPaleta(initialCatalog.find((o) => o.objectId === objectId)!));
+const de = (objectId: string) => {
+  const objeto = initialCatalog.find((o) => o.objectId === objectId);
+  if (!objeto) throw new Error(`El catalogo no tiene ningun objeto '${objectId}'.`);
+  return defaultSize(comoLaPaleta(objeto));
+};
 
 describe('tamano por defecto', () => {
   it('todo objeto del catalogo propone un tamano que cabe', () => {

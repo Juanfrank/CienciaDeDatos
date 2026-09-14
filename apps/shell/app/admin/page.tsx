@@ -25,10 +25,10 @@ export default async function HomeAdmin() {
         <Resumen
           etiqueta="Nodos en la organizacion"
           valor={nodesCount(arbol.nodes)}
-          href="/admin/arbol"
+          href="/admin/modulos/arbol"
           icono="carpeta"
         />
-        <Resumen etiqueta="En papelera" valor={arbol.trash.length} href="/admin/arbol" icono="carpeta" />
+        <Resumen etiqueta="En papelera" valor={arbol.trash.length} href="/admin/modulos/arbol" icono="carpeta" />
         <Resumen etiqueta="Equipos" valor={equipos.length} href="/admin/equipos" icono="personas" />
         <Resumen etiqueta="Personas" valor={personas.length} href="/admin/equipos" icono="personas" />
         <Resumen

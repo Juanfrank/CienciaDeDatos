@@ -5,9 +5,8 @@ import { isAdministrator, roleMoreHeightOf } from '../server/admin';
 import { findTeam } from '../server/context';
 import type { ShellSession } from '../server/session';
 import { ToggleSidebar } from './ToggleSidebar';
-import { Bell } from './Bell';
 import { listUsers } from '../server/context';
-import { CloseSession } from './CloseSession';
+import { AccountMenu, type AccountEntry } from './AccountMenu';
 
 /** Cromo de cabecera de la aplicacion. */
 export async function Header({ sesion }: { sesion: ShellSession }) {
@@ -20,6 +19,16 @@ export async function Header({ sesion }: { sesion: ShellSession }) {
   // persona entra hoy con contrasena local y manana con Azure AD, y se sigue llamando igual.
   const perfil = (await listUsers()).find((u) => u.userId === sesion.userId);
   const editCan = can(await roleMoreHeightOf(sesion.userId), 'crear-editar-modulos-borrador');
+
+  const entradas: AccountEntry[] = [
+    { href: '/avisos', label: 'Avisos', icono: 'notice', prueba: 'link-avisos', cuentaAvisos: true },
+    ...(editCan
+      ? [{ href: '/editor', label: 'Editor de modulos', icono: 'content', prueba: 'link-editor' } as const]
+      : []),
+    ...(manageCan
+      ? [{ href: '/admin', label: 'Administracion', icono: 'llave', prueba: 'link-admin' } as const]
+      : []),
+  ];
 
   return (
     <header className="cabecera">
@@ -49,21 +58,20 @@ export async function Header({ sesion }: { sesion: ShellSession }) {
       </div>
 
       <div className="header__actions">
-        <Bell />
-        {editCan ? (
-          <Link href="/editor" className="button-link" data-testid="link-editor">
-            Editor
-          </Link>
-        ) : null}
-        {manageCan ? (
-          <Link href="/admin" className="button-link" data-testid="link-admin">
-            Administracion
-          </Link>
-        ) : null}
-        <CloseSession
+        {/*
+          Todo lo que no es navegar por los datos vive en el menu de la cuenta.
+          La cabecera tenia cuatro controles compitiendo con el arbol y con el titulo del modulo;
+          lo que una persona hace aqui cien veces es mirar datos, y una vez al dia entrar al
+          editor o a administracion.
+
+          Cada entrada sigue dibujandose solo para quien puede usarla. Ocultarla no protege nada
+          —eso lo hace el guardian del backend— pero no tiene sentido ofrecer una puerta cerrada.
+        */}
+        <AccountMenu
           user={sesion.userId}
           {...(perfil?.displayName ? { displayName: perfil.displayName } : {})}
           {...(perfil?.mail ? { mail: perfil.mail } : {})}
+          entries={entradas}
         />
       </div>
     </header>

@@ -46,6 +46,11 @@ test.describe('interaccion', () => {
     const canvas = page.getByTestId('canvas-chart').first();
     await expect(canvas).toBeVisible();
 
+    // El lienzo existe antes de que ECharts dibuje las barras, y un clic sobre el area vacia no
+    // lo recibe ninguna serie: la prueba fallaba una de cada tres veces por eso. `data-montado`
+    // es la senal que el propio grafico publica cuando termina de montar.
+    await expect(page.locator('.grafico').first()).toHaveAttribute('data-montado', 'si');
+
     // Hay que traerlo a la vista ANTES de medirlo: `boundingBox` da coordenadas del documento y
     // `mouse.click` las del viewport. El grafico queda por debajo del pliegue, asi que el clic
     // caia fuera de la ventana y no lo recibia nadie.

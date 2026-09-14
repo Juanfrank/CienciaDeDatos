@@ -1,5 +1,5 @@
-import { TreeEditor } from '../../../src/components/admin/TreeEditor';
-import { getManagedTree } from '../../../src/server/context';
+import { TreeEditor } from '../../../../src/components/admin/TreeEditor';
+import { getManagedTree } from '../../../../src/server/context';
 
 export const dynamic = 'force-dynamic';
 

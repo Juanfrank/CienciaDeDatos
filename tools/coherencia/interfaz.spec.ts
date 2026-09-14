@@ -197,3 +197,69 @@ describe('el reparto de la suite de navegador', () => {
     expect(config).toMatch(/@catalogo/);
   });
 });
+
+/**
+ * Lo que se oculta con `hidden` y lo que el CSS le pone de `display`.
+ *
+ * `hidden` solo trae `display: none` de la hoja del navegador, asi que CUALQUIER regla propia que
+ * le ponga `display` al mismo elemento gana y el atributo deja de ocultar nada. No falla, no
+ * avisa: el bloque se queda dibujado y se come las pulsaciones de lo que tiene debajo. Paso con
+ * el menu de la cuenta, que tapaba la esquina de todas las pantallas.
+ */
+describe('lo que se oculta con hidden', () => {
+  const css = hojas.map(leer).join('\n');
+
+  /** La clase del elemento que lleva `hidden={...}`, buscando hacia atras en la misma etiqueta. */
+  const conHidden = new Map<string, Set<string>>();
+  for (const ruta of componentes) {
+    const fuente = leer(ruta);
+    for (const m of fuente.matchAll(/className="([\w-]+)"[^<>]*?\bhidden=\{/g)) {
+      const clase = m[1] as string;
+      if (!conHidden.has(clase)) conHidden.set(clase, new Set());
+      (conHidden.get(clase) as Set<string>).add(ruta);
+    }
+  }
+
+  it('hay algun elemento que se oculte asi', () => {
+    expect(conHidden.size).toBeGreaterThan(0);
+  });
+
+  it('ninguna regla de display deja el atributo sin efecto', () => {
+    const rotas = [...conHidden.keys()].filter((clase) => {
+      const regla = new RegExp(`\\.${clase}\\s*\\{[^}]*\\bdisplay\\s*:`);
+      if (!regla.test(css)) return false;
+      // Con su escape explicito la regla propia vuelve a perder, que es lo que hace falta.
+      return !new RegExp(`\\.${clase}\\[hidden\\]`).test(css);
+    });
+    expect(conOrigen(conHidden, rotas)).toEqual([]);
+  });
+});
+
+/**
+ * Los identificadores que el carril de administracion COMPONE con la ruta de cada seccion.
+ *
+ * La comprobacion general de testids acepta cualquier nombre que empiece por un prefijo conocido,
+ * y `admin-nav-` es un prefijo: `admin-nav-tree` pasaba por bueno aunque ninguna seccion se llame
+ * asi —la carpeta es `arbol`— y la prueba se quedaba esperando un enlace que nadie dibuja. Aqui
+ * se compara el sufijo contra las rutas reales.
+ */
+describe('el carril de administracion', () => {
+  const secciones = leer('apps/shell/src/components/admin/sections.ts');
+  const rutas = new Set(
+    [...secciones.matchAll(/href:\s*'(\/admin[\w/-]*)'/g)].map(
+      (m) => (m[1] as string).split('/').pop() as string,
+    ),
+  );
+
+  const pedidos = recoger(pruebas, /admin-nav-([\w-]+)/g);
+
+  it('hay secciones y pruebas que comparar', () => {
+    expect(rutas.size).toBeGreaterThan(5);
+    expect(pedidos.size).toBeGreaterThan(0);
+  });
+
+  it('cada seccion que una prueba nombra existe en el carril', () => {
+    const huerfanas = [...pedidos.keys()].filter((s) => !rutas.has(s));
+    expect(conOrigen(pedidos, huerfanas)).toEqual([]);
+  });
+});

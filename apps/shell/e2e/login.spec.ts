@@ -188,6 +188,8 @@ test.describe('la sesion emitida es la de quien entro', () => {
     expect(cookie).toBeDefined();
 
     await page.goto('/m/casos-pendientes');
+    // Salir vive en el menu de la cuenta: primero se despliega.
+    await page.getByTestId('account-trigger').click();
     await page.getByTestId('close-session').click();
     await expect(page).toHaveURL(/\/acceso/);
 

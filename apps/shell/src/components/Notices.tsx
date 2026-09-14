@@ -10,7 +10,7 @@ import {
   type Notification,
   type Subscription,
 } from '@app/alerts';
-import { kindLabel } from './Bell';
+import { kindLabel } from './noticeKinds';
 
 /** Bandeja de avisos: lo recibido, y lo que lo genera. */
 

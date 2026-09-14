@@ -129,7 +129,7 @@ test.describe('el resto de la aplicacion en tema oscuro', () => {
   test('el panel de administracion', async ({ page, origen }) => {
     await asLogin(page, 'u-admin');
     await enOscuro(page, origen);
-    await page.goto('/admin/arbol');
+    await page.goto('/admin/modulos/arbol');
     await expect(page.locator('h1')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);

@@ -1,5 +1,5 @@
-import { getGeneralTree, listTeams } from '../../../src/server/context';
-import { governance } from '../../../src/server/governance';
+import { getGeneralTree, listTeams } from '../../../../src/server/context';
+import { governance } from '../../../../src/server/governance';
 import { buildNavigationView } from '@app/access-control';
 
 export const dynamic = 'force-dynamic';

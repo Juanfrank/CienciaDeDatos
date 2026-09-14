@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
  * dentro de los componentes.
  *
  * El numero solo puede BAJAR. Quien anada una cadena suelta rompe la prueba; quien migre una baja
- * el tope en el mismo commit. Empezo en 322 con 53 claves; va por 222 con 152, y las cuatro
+ * el tope en el mismo commit. Empezo en 322 con 53 claves; va por 219 con 254, y las cuatro
  * pantallas que mas acumulaban —el panel de formato, los ajustes de objeto, el panel lateral y la
  * lista de modulos— ya no estan entre las peores.
  */
@@ -37,7 +37,7 @@ const PALABRA = /[A-Za-zÀ-ÿ]{3,}/;
  * Es una foto, no un objetivo: cada cadena que se migre al catalogo puede bajarlo. Subirlo
  * requiere explicar por que una cadena nueva no puede ir al catalogo.
  */
-const TOPE = 222;
+const TOPE = 219;
 
 function cadenasDe(ruta: string): string[] {
   const fuente = readFileSync(`${raiz}/${ruta}`, 'utf8');
