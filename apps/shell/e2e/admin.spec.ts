@@ -34,7 +34,7 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
     await entrarComo(page, 'u-beto');
     await page.goto('/admin');
     await expect(page.getByTestId('sin-permiso')).toBeVisible();
-    await expect(page.getByTestId('admin-nav-tree')).toHaveCount(0);
+    await expect(page.getByTestId('admin-nav-arbol')).toHaveCount(0);
   });
 
   test('un Administrador si entra', async ({ page }) => {
@@ -42,7 +42,7 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
     await page.goto('/');
     await expect(page.getByTestId('enlace-admin')).toBeVisible();
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-arbol')).toBeVisible();
   });
 });
 
@@ -116,7 +116,7 @@ test.describe('editor de ambitos: la puerta de ampliacion (4.10.4)', () => {
 
   test('el editor solo ofrece dimensiones del esquema, no un campo de texto libre', async ({ page }) => {
     await page.goto('/admin/ambitos');
-    const picker = page.getByTestId('add-dimension');
+    const picker = page.getByTestId('add-dispersion');
     await expect(picker).toBeVisible();
     const opciones = await picker.locator('option').allTextContents();
     expect(opciones.join(' ')).toContain('DimTribunal.Distrito');
@@ -322,7 +322,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
 
     // Y sigue administrando: el panel se abre igual.
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-arbol')).toBeVisible();
   });
 
   test('degradarse a Colaborador tampoco', async ({ page }) => {
@@ -386,7 +386,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
     // Y el estado quedo como estaba, comprobado desde la cuenta restituida.
     await entrarComo(page, 'u-admin');
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-arbol')).toBeVisible();
   });
 
   test('el panel avisa cuando solo hay un Administrador', async ({ page }) => {
@@ -422,7 +422,7 @@ test.describe('el carril de administracion', () => {
     await page.goto('/admin/equipos');
     // Con la regla de prefijo, /admin reclamaria /admin/equipos y habria DOS activas a la vez.
     await expect(page.getByTestId('admin-nav-admin')).not.toHaveAttribute('aria-current', 'page');
-    await expect(page.getByTestId('admin-nav-teams')).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByTestId('admin-nav-equipos')).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('[aria-current="page"]')).toHaveCount(1);
   });
 

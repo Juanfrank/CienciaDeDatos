@@ -40,10 +40,10 @@ test.describe('el editor configura como se ve un objeto', () => {
     await entrarComo(page, 'u-admin');
     await createModule(page, 'pers-kpi');
 
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await idDelPrimerBloque(page);
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
 
     await page.getByTestId(`pres-${id}-icono`).selectOption('balanza');
     await guardado(page);
@@ -70,7 +70,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     // Se recarga: lo elegido tiene que venir del servidor, no del estado del componente.
     await page.reload();
     await page.getByTestId(`select-${id}`).click();
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await expect(page.getByTestId(`pres-${id}-icono`)).toHaveValue('balanza');
     await expect(page.getByTestId(`pres-${id}-subtitulo`)).toHaveValue('Al cierre');
     await abrir(page, `pres-${id}-borde`);
@@ -105,10 +105,10 @@ test.describe('el editor configura como se ve un objeto', () => {
     await entrarComo(page, 'u-admin');
     await createModule(page, 'pers-tabla');
 
-    await page.getByTestId('add-table').click();
+    await page.getByTestId('add-tabla').click();
     await guardado(page);
     const id = await idDelPrimerBloque(page);
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
 
     await expect(page.getByTestId(`pres-${id}-icono`)).toBeVisible();
     // Una tabla tiene formato de cifra pero no leyenda: la subseccion «Grafico» ni siquiera se
@@ -125,10 +125,10 @@ test.describe('el editor configura como se ve un objeto', () => {
      */
     await entrarComo(page, 'u-admin');
     await createModule(page, 'pers-cerrado');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await idDelPrimerBloque(page);
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
 
     for (const control of ['icono', 'acento']) {
       const nombre = await page
@@ -142,7 +142,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await entrarComo(page, 'u-admin');
     await createModule(page, 'pers-panel');
 
-    await page.getByTestId('add-panel-filters').click();
+    await page.getByTestId('add-panel-de-filtros').click();
     await guardado(page);
     const id = await idDelPrimerBloque(page);
 
@@ -152,7 +152,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     await guardado(page);
     await expect(page.getByTestId(`well-${id}-filtros`)).toContainText('DimTribunal.Materia');
 
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await abrir(page, `pres-${id}-selectores`);
     await expect(page.getByTestId(`selectores-${id}-DimTribunal.Materia`)).toBeVisible();
 
@@ -166,7 +166,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     // cubre `filtros.spec.ts` sobre el panel del modulo publicado.
     await page.reload();
     await page.getByTestId(`select-${id}`).click();
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await abrir(page, `pres-${id}-selectores`);
     await expect(page.getByTestId(`selectores-${id}-DimTribunal.Materia`)).toHaveValue(
       'desplegable',
@@ -183,10 +183,10 @@ test.describe('el editor configura como se ve un objeto', () => {
     // y no en este. Deshabilitado con su motivo, la respuesta esta donde surge la pregunta.
     await entrarComo(page, 'u-admin');
     await createModule(page, 'pers-fecha');
-    await page.getByTestId('add-panel-filters').click();
+    await page.getByTestId('add-panel-de-filtros').click();
     await guardado(page);
     const id = await idDelPrimerBloque(page);
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await abrir(page, `pres-${id}-selectores`);
 
     const opcion = page

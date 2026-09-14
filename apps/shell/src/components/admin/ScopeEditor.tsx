@@ -129,7 +129,7 @@ export function ScopeEditor({ destinos }: { destinos: DestinoDeAmbito[] }) {
         {/* Solo dimensiones del esquema real: nunca texto libre sin validar (4.10.8). */}
         <select
           defaultValue=""
-          data-testid="add-dimension"
+          data-testid="add-dispersion"
           onChange={(e) => {
             const dim = dimensiones.find((d) => d.key === e.target.value);
             if (!dim) return;

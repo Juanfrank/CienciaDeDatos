@@ -31,7 +31,7 @@ test.beforeEach(async ({ page }) => {
 test.describe('se edita el modulo, no un formulario', () => {
   test('un objeto recien colocado DIBUJA datos reales', async ({ page }) => {
     await newModule(page, 'lienzo-vivo');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
 
     // La cifra sale del cache, ya recortada por el ambito de quien edita. Sin esto, el editor
@@ -42,7 +42,7 @@ test.describe('se edita el modulo, no un formulario', () => {
 
   test('cambiar el mapeo cambia lo dibujado, sin recargar', async ({ page }) => {
     await newModule(page, 'lienzo-mapeo');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -66,7 +66,7 @@ test.describe('se edita el modulo, no un formulario', () => {
 
   test('un objeto roto se marca EN EL LIENZO y el resto se sigue editando', async ({ page }) => {
     await newModule(page, 'lienzo-roto');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -114,7 +114,7 @@ test.describe('la rejilla es visible y se maneja', () => {
     await newModule(page, 'lienzo-filas');
     // Un grafico: alto de sobra para que las filas que ocupa crezcan por encima del minimo, que es
     // el caso en el que las dos rejillas se separaban.
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -142,10 +142,10 @@ test.describe('la rejilla es visible y se maneja', () => {
 
   test('ensanchar y mover cambian la posicion, y el lienzo lo refleja', async ({ page }) => {
     await newModule(page, 'lienzo-mover');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
 
     await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–6 de 12');
 
@@ -168,10 +168,10 @@ test.describe('la rejilla es visible y se maneja', () => {
     // Un boton que guarda algo invalido y luego muestra un error hace trabajar a quien edita para
     // descubrir un limite que el editor ya conoce.
     await newModule(page, 'lienzo-borde');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
 
     await expect(page.getByTestId(`left-${id}`)).toBeDisabled();
 
@@ -188,10 +188,10 @@ test.describe('la rejilla es visible y se maneja', () => {
     // `findFreeSlot` estaba escrito y probado desde que se escribio la rejilla, y no lo llamaba
     // nadie: el editor anterior apilaba al final, asi que esto no pasaba nunca.
     await newModule(page, 'lienzo-hueco');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
-    await page.getByTestId('object-tab').click();
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('tab-objetos').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
 
     const dataRows = await page
@@ -206,42 +206,42 @@ test.describe('el panel es la unica tienda, y sus pestanas', () => {
     // Deshabilitadas y no ocultas: una barra que cambia de numero de pestanas obliga a volver a
     // buscar donde estaba cada cosa.
     await newModule(page, 'panel-vacio');
-    await expect(page.getByTestId('object-tab')).toHaveAttribute(
+    await expect(page.getByTestId('tab-objetos')).toHaveAttribute(
       'aria-selected',
       'true',
     );
-    await expect(page.getByTestId('data-tab')).toBeDisabled();
-    await expect(page.getByTestId('format-tab')).toBeDisabled();
+    await expect(page.getByTestId('tab-datos')).toBeDisabled();
+    await expect(page.getByTestId('tab-formato')).toBeDisabled();
   });
 
   test('elegir un bloque en el lienzo abre sus pestanas', async ({ page }) => {
     await newModule(page, 'panel-elegir');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
 
     // Escape deselecciona, como en cualquier editor de bloques.
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId('data-tab')).toBeDisabled();
+    await expect(page.getByTestId('tab-datos')).toBeDisabled();
     await expect(page.getByTestId(`select-${id}`)).toHaveAttribute('aria-pressed', 'false');
 
     await page.getByTestId(`select-${id}`).click();
     await expect(page.getByTestId(`select-${id}`)).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByTestId('data-tab')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('tab-datos')).toHaveAttribute('aria-selected', 'true');
   });
 
   test('las pestanas se recorren con las flechas', async ({ page }) => {
     // Es lo que distingue una barra de pestanas de tres botones que se parecen: dentro del grupo
     // se navega con flechas y el grupo entero ocupa una parada del tabulador.
     await newModule(page, 'panel-flechas');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
 
-    await page.getByTestId('data-tab').focus();
+    await page.getByTestId('tab-datos').focus();
     await page.keyboard.press('ArrowRight');
-    await expect(page.getByTestId('format-tab')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('tab-formato')).toHaveAttribute('aria-selected', 'true');
     await page.keyboard.press('ArrowLeft');
-    await expect(page.getByTestId('data-tab')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('tab-datos')).toHaveAttribute('aria-selected', 'true');
   });
 
   test('no hay ninguna caja donde escribir una consulta', async ({ page }) => {
@@ -250,12 +250,12 @@ test.describe('el panel es la unica tienda, y sus pestanas', () => {
     await expect(page.locator('textarea')).toHaveCount(0);
     // Se comprueba la SECCION y no una lista concreta: las listas se agrupan por familia y sus
     // identificadores cambian con esa agrupacion, pero que exista una tienda de objetos no.
-    await expect(page.getByTestId('seccion-visualizaciones')).toBeVisible();
+    await expect(page.getByTestId('visualization-section')).toBeVisible();
   });
 
   test('el editor no tiene infracciones WCAG 2.1 AA', async ({ page }) => {
     await newModule(page, 'panel-axe');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
 
     const { violations } = await new AxeBuilder({ page })
@@ -270,7 +270,7 @@ test.describe('los pozos de campos', () => {
     // «Dimension 1» y «dimension 2» no dicen nada: la primera reparte las barras y la segunda las
     // agrupa en series. Quien construye un modulo piensa en ejes, no en indices de un array.
     await newModule(page, 'pozos-barras');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -286,7 +286,7 @@ test.describe('los pozos de campos', () => {
      * deberia repartir.
      */
     await newModule(page, 'pozos-orden');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -301,7 +301,7 @@ test.describe('los pozos de campos', () => {
 
   test('el buscador filtra, y un pozo lleno ya no ofrece anadir', async ({ page }) => {
     await newModule(page, 'pozos-buscar');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -327,7 +327,7 @@ test.describe('los pozos de campos', () => {
      * perdia justo lo que se estaba configurando.
      */
     await newModule(page, 'pozos-escape');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -337,17 +337,17 @@ test.describe('los pozos de campos', () => {
     await page.keyboard.press('Escape');
     await expect(page.getByTestId(`well-${id}-serie-buscar`)).toHaveCount(0);
     // El objeto sigue elegido: la capa de dentro se cierra, la de fuera no se entera.
-    await expect(page.getByTestId('data-tab')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('tab-datos')).toHaveAttribute('aria-selected', 'true');
     await expect(page.getByTestId(`select-${id}`)).toHaveAttribute('aria-pressed', 'true');
 
     // Y un segundo Escape, ya sin emergente, si deselecciona.
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId('data-tab')).toBeDisabled();
+    await expect(page.getByTestId('tab-datos')).toBeDisabled();
   });
 
   test('quitar un chiclet quita el campo del mapeo', async ({ page }) => {
     await newModule(page, 'pozos-quitar');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -364,19 +364,19 @@ test.describe('secciones, complementos y pestanas', () => {
   test('tamano y posicion vive en Formato, no en Datos', async ({ page }) => {
     // Cuanto ocupa un objeto en la rejilla no cambia lo que mide: es como se ve.
     await newModule(page, 'sec-tamano');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
     await expect(page.getByTestId(`position-${id}`)).toHaveCount(0);
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await expect(page.getByTestId(`section-size-${id}`)).toBeVisible();
     await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–6 de 12');
   });
 
   test('las secciones se pliegan y se despliegan', async ({ page }) => {
     await newModule(page, 'sec-plegar');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -393,11 +393,11 @@ test.describe('secciones, complementos y pestanas', () => {
      * mano.
      */
     await newModule(page, 'sec-adjunto');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
-    await page.getByTestId('addons-tab').click();
+    await page.getByTestId('tab-complementos').click();
     await expect(page.getByTestId(`without-addons-${id}`)).toBeVisible();
 
     await page.getByTestId(`attach-tooltip-explicativo-${id}`).click();
@@ -416,7 +416,7 @@ test.describe('secciones, complementos y pestanas', () => {
     // La lista crece con cada tipo de interaccion. Encogerlas hasta que quepan cortaria los
     // rotulos y dejaria una fila de iconos sin nombre.
     await newModule(page, 'sec-chevron');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
 
     await expect(page.getByTestId('tabs-derecha')).toBeVisible();
@@ -460,11 +460,11 @@ test.describe('arrastrar y redimensionar', () => {
 
   test('arrastrar el asa mueve el bloque de columna', async ({ page }) => {
     await newModule(page, 'arr-mover');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
 
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await expect(page.getByTestId(`position-${id}`)).toContainText('Columna 1–6 de 12');
 
     await arrastrar(page, `asa-mover-${id}`, 3, 0);
@@ -475,10 +475,10 @@ test.describe('arrastrar y redimensionar', () => {
 
   test('arrastrar la esquina cambia el ancho', async ({ page }) => {
     await newModule(page, 'arr-medir');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
 
     await arrastrar(page, `asa-medir-${id}`, 2, 0);
     await guardado(page);
@@ -493,10 +493,10 @@ test.describe('arrastrar y redimensionar', () => {
      * distintos, el segundo partiria de un estado que el primero no actualizo.
      */
     await newModule(page, 'arr-mismo');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
 
     await arrastrar(page, `asa-mover-${id}`, 2, 0);
     await guardado(page);
@@ -513,10 +513,10 @@ test.describe('arrastrar y redimensionar', () => {
      * control: se mueve uno y se descolocan tres. Aqui el destino ocupado se rechaza.
      */
     await newModule(page, 'arr-ocupado');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
-    await page.getByTestId('object-tab').click();
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('tab-objetos').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
 
     // El primero esta en 1–6 y el segundo en 7–12, en la misma fila.
@@ -525,7 +525,7 @@ test.describe('arrastrar y redimensionar', () => {
     ).replace('block', '');
 
     await page.getByTestId(`select-${primero}`).click();
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await expect(page.getByTestId(`position-${primero}`)).toContainText('Columna 1–6 de 12');
 
     await arrastrar(page, `asa-mover-${primero}`, 6, 0);
@@ -552,7 +552,7 @@ test.describe('las ranuras mandan, no el orden', () => {
      * marca roto, que es lo correcto: un grafico de barras sin eje no se puede dibujar.
      */
     await newModule(page, 'ranura-solo-y');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -566,7 +566,7 @@ test.describe('las ranuras mandan, no el orden', () => {
 
   test('se puede llenar SOLO la serie, y el editor dice que falta el eje', async ({ page }) => {
     await newModule(page, 'ranura-solo-serie');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -588,7 +588,7 @@ test.describe('las ranuras mandan, no el orden', () => {
 
   test('el campo vuelve a SU ranura, no a la primera libre', async ({ page }) => {
     await newModule(page, 'ranura-vuelve');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -624,7 +624,7 @@ test.describe('las ranuras mandan, no el orden', () => {
 test.describe('el panel se lee de un vistazo', () => {
   test('la ayuda vive en un icono, no en un parrafo bajo cada rotulo', async ({ page }) => {
     await newModule(page, 'panel-ayuda');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
 
     // El texto no esta a la vista...
@@ -644,19 +644,19 @@ test.describe('el panel se lee de un vistazo', () => {
   test('Escape sobre una ayuda NO deselecciona el objeto', async ({ page }) => {
     // Mismo choque que tenia el buscador de campos: dos Escape escuchando en `document`.
     await newModule(page, 'panel-escape');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
 
     await page.locator('.help__icon').first().hover();
     await expect(page.getByRole('tooltip')).toBeVisible();
     await page.keyboard.press('Escape');
 
-    await expect(page.getByTestId('data-tab')).toBeEnabled();
+    await expect(page.getByTestId('tab-datos')).toBeEnabled();
   });
 
   test('lo obligatorio lleva asterisco, y lo dice tambien con palabras', async ({ page }) => {
     await newModule(page, 'panel-obligatorio');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -677,9 +677,9 @@ test.describe('el panel se lee de un vistazo', () => {
      */
     await page.setViewportSize({ width: 1500, height: 620 });
     await newModule(page, 'panel-scroll');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
 
     const total = await page.locator('.editor-panel details').count();
     for (let i = 0; i < total; i += 1) {
@@ -712,7 +712,7 @@ test.describe('como se resume cada medida', () => {
      * siempre porque sumar era lo unico que sabia hacer.
      */
     await newModule(page, 'agr-declarada');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -735,7 +735,7 @@ test.describe('como se resume cada medida', () => {
 
   test('cambiar el operador cambia la cifra dibujada, en vivo', async ({ page }) => {
     await newModule(page, 'agr-cambia');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -769,7 +769,7 @@ test.describe('como se resume cada medida', () => {
      * lienzo se apagan en el borde en vez de guardar algo invalido y avisar despues.
      */
     await newModule(page, 'agr-opciones');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -802,7 +802,7 @@ test.describe('como se resume cada medida', () => {
     // Un boton apagado es una promesa que no se cumple: ocupa sitio, invita a pulsarlo y no
     // explica que hay que quitar algo antes. El hueco desaparece y vuelve al quitar un campo.
     await newModule(page, 'pozo-lleno');
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -824,7 +824,7 @@ test.describe('como se resume cada medida', () => {
      * pesan igual — y no hay forma de saber si pesan igual desde el resultado.
      */
     await newModule(page, 'agr-imposible');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -856,7 +856,7 @@ test.describe('como se resume cada medida', () => {
     // Y se puede deshacer desde el propio desplegable: el operador guardado aparece marcado como
     // no aplicable, y volver a una aditiva devuelve el objeto a la vida.
     await page.getByTestId(`select-${id}`).click();
-    await page.getByTestId('data-tab').click();
+    await page.getByTestId('tab-datos').click();
     await page.getByTestId(`well-${id}-valor-agregacion-CasosIngresados`).selectOption('suma');
     await guardado(page);
     await expect(page.getByTestId(`block-${id}`).getByTestId('value-kpi')).toBeVisible();
@@ -866,7 +866,7 @@ test.describe('como se resume cada medida', () => {
     // El grano es lo que decide, no la medida: sobre los casos uno a uno no hay ninguna
     // agregacion previa que arruinar.
     await newModule(page, 'agr-atomico');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
 
@@ -884,12 +884,12 @@ test.describe('como se resume cada medida', () => {
 test.describe('estilo de texto y paleta', () => {
   test('negrita, cursiva y color se aplican al titulo, en vivo', async ({ page }) => {
     await newModule(page, 'text-style');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
     const pres = `pres-obj-${id.replace('obj-', '')}`;
 
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
 
     await page.getByTestId(`${pres}-texto-titulo-negrita`).click();
     await guardado(page);
@@ -919,9 +919,9 @@ test.describe('estilo de texto y paleta', () => {
      * comprobado contra la superficie donde acabe, y no sigue al tema oscuro.
      */
     await newModule(page, 'estilo-paleta');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
 
     const palette = page.getByRole('radiogroup', { name: /Color de Estilo del titulo/ });
     await expect(palette).toBeVisible();
@@ -933,12 +933,12 @@ test.describe('estilo de texto y paleta', () => {
   test('configurar el valor no borra lo puesto en el titulo', async ({ page }) => {
     // Sin fundir con lo que ya hubiera, el ultimo destino tocado reemplazaria a los demas.
     await newModule(page, 'estilo-fusion');
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
     await guardado(page);
     const id = await blockId(page);
     const pres = `pres-obj-${id.replace('obj-', '')}`;
 
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await page.getByTestId(`${pres}-texto-titulo-negrita`).click();
     await guardado(page);
 
@@ -973,7 +973,7 @@ test.describe('el panel de formato se busca, no se recorre', () => {
 
   const withChart = async (page: import('@playwright/test').Page, slug: string) => {
     await newModule(page, slug);
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     await page.getByRole('tab', { name: 'Formato' }).click();
     await expect(panelOf(page)).toBeVisible();
@@ -1032,12 +1032,12 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
   test('las visualizaciones se agrupan por lo que responden', async ({ page }) => {
     await newModule(page, 'paleta-familias');
 
-    await expect(page.getByTestId('comparison-family')).toBeVisible();
+    await expect(page.getByTestId('family-comparacion')).toBeVisible();
     await expect(page.getByTestId('family-evolucion')).toBeVisible();
-    await expect(page.getByTestId('proportion-family')).toBeVisible();
+    await expect(page.getByTestId('family-proporcion')).toBeVisible();
 
     // El rotulo es la PREGUNTA, no el nombre tecnico de la familia.
-    await expect(page.getByTestId('comparison-family')).toContainText('Comparar entre categorias');
+    await expect(page.getByTestId('family-comparacion')).toContainText('Comparar entre categorias');
   });
 
   test('el buscador encuentra por la descripcion, no solo por el nombre', async ({ page }) => {
@@ -1048,8 +1048,8 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
     await newModule(page, 'paleta-buscar');
 
     await page.getByTestId('search-object').fill('etapas');
-    await expect(page.getByTestId('add-funnel')).toBeVisible();
-    await expect(page.getByTestId('add-bars')).toHaveCount(0);
+    await expect(page.getByTestId('add-embudo')).toBeVisible();
+    await expect(page.getByTestId('add-barras')).toHaveCount(0);
   });
 
   test('una familia sin resultados no deja su rotulo colgando', async ({ page }) => {
@@ -1057,8 +1057,8 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
     await newModule(page, 'paleta-vacia');
 
     await page.getByTestId('search-object').fill('etapas');
-    await expect(page.getByTestId('comparison-family')).toHaveCount(0);
-    await expect(page.getByTestId('proportion-family')).toBeVisible();
+    await expect(page.getByTestId('family-comparacion')).toHaveCount(0);
+    await expect(page.getByTestId('family-proporcion')).toBeVisible();
   });
 
   test('y sin ningun resultado lo dice, con la salida', async ({ page }) => {
@@ -1067,7 +1067,7 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
     await page.getByTestId('search-object').fill('zzzzz');
     await expect(page.getByTestId('without-objects')).toBeVisible();
     await page.getByTestId('limpiar-busqueda-objeto').click();
-    await expect(page.getByTestId('add-bars')).toBeVisible();
+    await expect(page.getByTestId('add-barras')).toBeVisible();
   });
 
   test('las fichas van en DOS columnas, no en fila india', async ({ page }) => {
@@ -1076,7 +1076,7 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
      */
     await newModule(page, 'paleta-columnas');
 
-    const fichas = page.getByTestId('proportion-palette').locator('.palette__object');
+    const fichas = page.getByTestId('palette-proporcion').locator('.palette__object');
     expect(await fichas.count()).toBeGreaterThanOrEqual(4);
 
     const cajas = await fichas.evaluateAll((nodos) =>
@@ -1105,14 +1105,14 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
     // interesan es lo que deja a la vista las que si.
     await newModule(page, 'paleta-plegar');
 
-    const family = page.getByTestId('proportion-family');
-    const objeto = page.getByTestId('add-funnel');
+    const family = page.getByTestId('family-proporcion');
+    const objeto = page.getByTestId('add-embudo');
     await expect(objeto).toBeVisible();
 
     await family.locator('summary').click();
     await expect(objeto).not.toBeVisible();
     // Plegar una no toca a las demas: son secciones independientes, no un acordeon.
-    await expect(page.getByTestId('add-bars')).toBeVisible();
+    await expect(page.getByTestId('add-barras')).toBeVisible();
 
     await family.locator('summary').click();
     await expect(objeto).toBeVisible();
@@ -1128,10 +1128,10 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
      */
     await newModule(page, 'paleta-buscar-plegada');
 
-    await page.getByTestId('proportion-family').locator('summary').click();
-    await expect(page.getByTestId('add-funnel')).not.toBeVisible();
+    await page.getByTestId('family-proporcion').locator('summary').click();
+    await expect(page.getByTestId('add-embudo')).not.toBeVisible();
 
     await page.getByTestId('search-object').fill('etapas');
-    await expect(page.getByTestId('add-funnel')).toBeVisible();
+    await expect(page.getByTestId('add-embudo')).toBeVisible();
   });
 });

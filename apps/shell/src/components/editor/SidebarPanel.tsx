@@ -313,7 +313,7 @@ function Palette({
       ) : null}
 
       {withData.length > 0 ? (
-        <Section titulo="Visualizaciones" prueba="seccion-visualizaciones">
+        <Section titulo="Visualizaciones" prueba="visualization-section">
           <p className="muted-text editor-panel__nota">
             Se enlazan a un dataset certificado del registro. Un modulo no construye consultas (4.2).
           </p>

@@ -137,7 +137,7 @@ test.describe('editor de modulos (4.2)', () => {
     expect(await infracciones(page)).toEqual([]);
 
     await page.goto(`/editor/${slug}`);
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     // Con el objeto YA DIBUJADO en el lienzo y su panel abierto: es donde estarian los problemas
     // si los hubiera —un bloque que anida controles, unas pestanas que no se anuncian como tales,
     // un `<select>` sin nombre—.
@@ -214,7 +214,7 @@ test.describe('navegacion solo con teclado', () => {
     }
 
     expect(alcanzados).toContain('nav-casos-pendientes');
-    expect(alcanzados).toContain('segmentador-Penal');
+    expect(alcanzados).toContain('slicer-Penal');
     // Es el icono lo que esta en el orden de tabulacion; el boton de generar vive dentro del
     // panel que abre, y llegar al panel es llegar a exportar.
     expect(alcanzados).toContain('abrir-exportar');

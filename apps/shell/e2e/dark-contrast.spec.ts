@@ -122,7 +122,7 @@ test.describe('el resto de la aplicacion en tema oscuro', () => {
     expect(creado.ok(), await creado.text()).toBe(true);
 
     await page.goto(`/editor/${slug}`);
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(1);
 
     expect(await infracciones(page)).toEqual([]);

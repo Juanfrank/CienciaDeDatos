@@ -131,7 +131,7 @@ export function MatrixTable({
         <thead>
           <tr>
             <th scope="col" aria-sort={ariaDirection(null)} className="table__esquina">
-              {heading(null, vm.rowLevels.join(' / ') || 'Total', 'matriz-ordenar-filas')}
+              {heading(null, vm.rowLevels.join(' / ') || 'Total', 'matrix-sort-rows')}
             </th>
             {gridColumns.map((column) =>
               vm.medidas.map((medida, i) => {
@@ -157,7 +157,7 @@ export function MatrixTable({
                       {heading(
                         clave,
                         withMeasure(column.etiqueta || 'Total', medida),
-                        `matriz-ordenar-${pathKey(column.path)}-${i}`,
+                        `matrix-sort-${pathKey(column.path)}-${i}`,
                       )}
                     </span>
                   </th>
@@ -166,7 +166,7 @@ export function MatrixTable({
             )}
             {vm.medidas.map((medida, i) => (
               <th key={`total-${medida}`} scope="col" aria-sort={ariaDirection(sortKey([], i))}>
-                {heading(sortKey([], i), withMeasure('Total', medida), `matriz-ordenar-total-${i}`)}
+                {heading(sortKey([], i), withMeasure('Total', medida), `matrix-sort-total-${i}`)}
               </th>
             ))}
           </tr>

@@ -95,17 +95,17 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
 
     // El catalogo ofrece objetos, no una caja donde escribir SQL. Comprobar que NO hay donde
     // escribir una consulta es la mitad del criterio de 4.2 que importa.
-    await expect(page.getByTestId('add-card-kpi')).toBeVisible();
-    await expect(page.getByTestId('add-bars')).toBeVisible();
+    await expect(page.getByTestId('add-tarjeta-kpi')).toBeVisible();
+    await expect(page.getByTestId('add-barras')).toBeVisible();
     await expect(page.locator('textarea')).toHaveCount(0);
 
-    await page.getByTestId('add-card-kpi').click();
+    await page.getByTestId('add-tarjeta-kpi').click();
 
     // El objeto aparece EN EL LIENZO, dibujado, y queda elegido: el panel salta a «Datos», que es
     // lo que se va a configurar a continuacion.
     await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(1);
     await expect(page.getByTestId('empty-canvas')).toHaveCount(0);
-    await expect(page.getByTestId('data-tab')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('tab-datos')).toHaveAttribute('aria-selected', 'true');
   });
 
   test('los complementos no se pueden colocar sueltos en la rejilla', async ({ page }) => {
@@ -117,7 +117,7 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
     // 'tooltip-explicativo' y 'tabla-de-datos' son adjuntables: acompañan a otro objeto. La
     // validacion los rechaza como elementos de la rejilla, asi que tampoco se ofrecen.
     await expect(page.getByTestId('add-tooltip-explicativo')).toHaveCount(0);
-    await expect(page.getByTestId('add-table-data')).toHaveCount(0);
+    await expect(page.getByTestId('add-tabla-de-datos')).toHaveCount(0);
   });
 
   test('un objeto con un campo inexistente se marca ROTO y el modulo se sigue editando', async ({
@@ -138,10 +138,10 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
 
     // El bloque se dibuja MARCADO ROTO en el lienzo, con su problema, y el modulo se sigue
     // editando alrededor. Es literalmente lo que pide 4.2: no fallar en silencio.
-    const block = page.getByTestId('kpi-block');
+    const block = page.getByTestId('block-kpi');
     await expect(block).toBeVisible();
     await expect(block.getByTestId('objeto-roto')).toBeVisible();
-    await expect(page.getByTestId('kpi-problems')).toContainText('MedidaRetirada');
+    await expect(page.getByTestId('problems-kpi')).toContainText('MedidaRetirada');
     await expect(page.getByTestId('locks-editor')).toBeVisible();
   });
 });

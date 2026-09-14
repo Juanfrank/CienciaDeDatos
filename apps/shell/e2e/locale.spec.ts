@@ -58,19 +58,19 @@ test('la cabecera del navegador NO cambia el idioma por su cuenta', async ({ bro
 
 test('una cadena migrada al catalogo cambia de idioma', async ({ page }) => {
   await newModule(page, `idioma-${Date.now()}`);
-  await expect(page.getByTestId('format-tab')).toContainText('Formato');
+  await expect(page.getByTestId('tab-formato')).toContainText('Formato');
 
   await enIngles(page);
   await page.reload();
-  await expect(page.getByTestId('format-tab')).toContainText('Format');
+  await expect(page.getByTestId('tab-formato')).toContainText('Format');
 });
 
 test('las familias de la paleta y su buscador tambien', async ({ page }) => {
   await enIngles(page);
   await newModule(page, `idioma-paleta-${Date.now()}`);
 
-  await expect(page.getByTestId('proportion-family')).toContainText('Break down a total');
-  await expect(page.getByTestId('comparison-family')).toContainText('Compare across categories');
+  await expect(page.getByTestId('family-proporcion')).toContainText('Break down a total');
+  await expect(page.getByTestId('family-comparacion')).toContainText('Compare across categories');
 
   // El mensaje con argumento se interpola en el idioma pedido, no se queda con la llave a la vista.
   await page.getByTestId('search-object').fill('zzzzz');

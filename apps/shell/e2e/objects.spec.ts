@@ -176,7 +176,7 @@ test.describe('la seccion Objetos del editor', () => {
 
   test('tres subsecciones, abiertas de inicio y plegables', async ({ page }) => {
     await borrador(page);
-    for (const id of ['seccion-visualizaciones', 'element-section', 'container-section']) {
+    for (const id of ['visualization-section', 'element-section', 'container-section']) {
       await expect(page.getByTestId(id)).toHaveAttribute('open', '');
     }
     // Plegable, no solo abierta: es lo que pedia el requisito, y `<details>` sin `open` es lo que
@@ -187,19 +187,19 @@ test.describe('la seccion Objetos del editor', () => {
 
   test('los elementos y los contenedores se ofrecen para colocar', async ({ page }) => {
     await borrador(page);
-    await expect(page.getByTestId('add-box-text')).toBeVisible();
-    await expect(page.getByTestId('add-line-divider')).toBeVisible();
-    await expect(page.getByTestId('add-container-tabs')).toBeVisible();
+    await expect(page.getByTestId('add-cuadro-de-texto')).toBeVisible();
+    await expect(page.getByTestId('add-linea-divisoria')).toBeVisible();
+    await expect(page.getByTestId('add-contenedor-con-pestanas')).toBeVisible();
   });
 
   test('un elemento se coloca sin pasar por Datos, porque no los tiene', async ({ page }) => {
     await borrador(page);
-    await page.getByTestId('add-box-text').click();
+    await page.getByTestId('add-cuadro-de-texto').click();
     await expect(page.getByTestId('cuadro-de-texto')).toBeVisible();
     // La pestana Datos se deshabilita: un cuadro de texto abriria un desplegable de datasets y
     // cero pozos, una pantalla donde no hay nada que hacer.
-    await expect(page.getByTestId('data-tab')).toBeDisabled();
-    await expect(page.getByTestId('format-tab')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('tab-datos')).toBeDisabled();
+    await expect(page.getByTestId('tab-formato')).toHaveAttribute('aria-selected', 'true');
   });
 });
 

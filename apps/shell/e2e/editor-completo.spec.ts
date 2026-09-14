@@ -39,7 +39,7 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
       /*
        * Primero se vuelve a la pestana de Objetos, y LUEGO se busca el boton.
        */
-      await page.getByTestId('object-tab').click();
+      await page.getByTestId('tab-objetos').click();
 
       const button = page.getByTestId(`add-${objeto.objectId}`);
       // El boton tiene que EXISTIR: un objeto publicado que no sale en la paleta esta en el
@@ -61,9 +61,9 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
     const slug = `persiste-${Date.now()}`;
     await newModule(page, slug);
 
-    await page.getByTestId('add-funnel').click();
-    await page.getByTestId('object-tab').click();
-    await page.getByTestId('add-map-tree').click();
+    await page.getByTestId('add-embudo').click();
+    await page.getByTestId('tab-objetos').click();
+    await page.getByTestId('add-mapa-de-arbol').click();
     await guardado(page);
 
     await page.goto(`/editor/${slug}`);
@@ -89,7 +89,7 @@ test.describe('configurable: lo que cada objeto declara sale en su panel', () =>
         .getAttribute('data-testid');
       const item = (id ?? '').replace('block', '');
 
-      await page.getByTestId('format-tab').click();
+      await page.getByTestId('tab-formato').click();
       await expect(page.getByTestId(`pres-${item}`)).toBeVisible();
       await abrirSecciones(page);
 
@@ -131,14 +131,14 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     page,
   }) => {
     await newModule(page, `usar-medidor-${Date.now()}`);
-    await page.getByTestId('add-gauge').click();
+    await page.getByTestId('add-medidor').click();
     await guardado(page);
     const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
     const item = (id ?? '').replace('block', '');
 
     // El objeto llega ya mapeado a la primera medida del dataset: colocar algo que no dibuja nada
     // seria empezar por una tarjeta vacia. Aqui solo hace falta la escala.
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await abrirSecciones(page);
     // La escala deducida se ve antes de tocar nada: el respaldo la dice siempre.
     const fallback = page.getByTestId('medidor').first();
@@ -158,11 +158,11 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
 
   test('el embudo: cambiar contra que compara cambia la columna del respaldo', async ({ page }) => {
     await newModule(page, `usar-embudo-${Date.now()}`);
-    await page.getByTestId('add-funnel').click();
+    await page.getByTestId('add-embudo').click();
     const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
     const item = (id ?? '').replace('block', '');
 
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await abrirSecciones(page);
     const compare = page.getByTestId(`pres-${item}-comparar`);
     await expect(compare).toBeVisible();
@@ -178,13 +178,13 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
 
   test('los multiplos: elegir dos columnas desde el panel reparte los paneles', async ({ page }) => {
     await newModule(page, `usar-multiplos-${Date.now()}`);
-    await page.getByTestId('add-bars').click();
+    await page.getByTestId('add-barras').click();
     await guardado(page);
     const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
     const item = (id ?? '').replace('block', '');
 
     // El eje ya viene mapeado; lo unico que hay que anadir es la dimension que reparte los paneles.
-    await page.getByTestId('data-tab').click();
+    await page.getByTestId('tab-datos').click();
     await page.getByTestId(`well-${item}-multiplo-anadir`).click();
     await page.getByTestId(`well-${item}-multiplo-opcion-DimTribunal.Materia`).click();
     await guardado(page);
@@ -192,7 +192,7 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
     // Sin tocar nada mas, el objeto ya se parte en paneles: el pozo es lo que lo decide.
     await expect(page.locator('.multiples__panel').first()).toBeVisible();
 
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await abrirSecciones(page);
     await page.getByTestId(`pres-${item}-multiplos-columnas`).selectOption('2');
     await guardado(page);

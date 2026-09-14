@@ -165,9 +165,9 @@ test.describe('la matriz, con jerarquia', () => {
    * Nada se busca por su etiqueta.
    */
   const rutaDelPrimerPadre = async (page: import('@playwright/test').Page): Promise<string> => {
-    const button = page.locator('[data-testid^="collapse-matrix"]').first();
+    const button = page.locator('[data-testid^="matrix-collapse"]').first();
     const id = (await button.getAttribute('data-testid')) ?? '';
-    return id.replace('collapse-matrix', '');
+    return id.replace('matrix-collapse', '');
   };
 
   const n = (s: string) => Number(s.replace(/[^0-9]/g, ''));
@@ -201,12 +201,12 @@ test.describe('la matriz, con jerarquia', () => {
   });
 
   test('pulsar un encabezado ordena, y lo anuncia en aria-sort', async ({ page }) => {
-    const heading = page.locator('th', { has: page.getByTestId('total-matrix-sort-0') });
+    const heading = page.locator('th', { has: page.getByTestId('matrix-sort-total-0') });
     await expect(heading).toHaveAttribute('aria-sort', 'none');
 
-    await page.getByTestId('total-matrix-sort-0').click();
+    await page.getByTestId('matrix-sort-total-0').click();
     await expect(heading).toHaveAttribute('aria-sort', 'ascending');
-    await page.getByTestId('total-matrix-sort-0').click();
+    await page.getByTestId('matrix-sort-total-0').click();
     await expect(heading).toHaveAttribute('aria-sort', 'descending');
   });
 
@@ -216,7 +216,7 @@ test.describe('la matriz, con jerarquia', () => {
     const padre = await rutaDelPrimerPadre(page);
     const hijos = await page.locator(`[data-testid^="matrix-row-${padre}||"]`).count();
 
-    await page.getByTestId('total-matrix-sort-0').click();
+    await page.getByTestId('matrix-sort-total-0').click();
     await expect(page.locator(`[data-testid^="matrix-row-${padre}||"]`)).toHaveCount(hijos);
     expect(await totalOf(page.getByTestId(`matrix-row-${padre}`))).toBeGreaterThan(0);
   });
@@ -334,16 +334,16 @@ test.describe('el filtrado cruzado llega a TODOS los objetos (4.4)', () => {
   const objetos = [
     // El respaldo de las columnas es una lista de barras, no una tabla: su boton es otro y por eso
     // lleva su propio identificador. Se comprueba igual, porque el gesto es el mismo.
-    { pagina: 'familia', fallback: 'barras', button: 'barra-Penal', fieldName: 'DimTribunal.Materia' },
-    { pagina: 'familia', fallback: 'lineas', button: 'filtrar-Q1', fieldName: 'DimTiempo.Trimestre' },
-    { pagina: 'proporcion', fallback: 'circular', button: 'filtrar-Penal', fieldName: 'DimTribunal.Materia' },
-    { pagina: 'relacion', fallback: 'combinado', button: 'filtrar-Q1', fieldName: 'DimTiempo.Trimestre' },
-    { pagina: 'relacion', fallback: 'dispersion', button: 'filtrar-Q1', fieldName: 'DimTiempo.Trimestre' },
-    { pagina: 'flujo', fallback: 'embudo', button: 'filtrar-Q1', fieldName: 'DimTiempo.Trimestre' },
-    { pagina: 'flujo', fallback: 'cascada', button: 'filtrar-Q1', fieldName: 'DimTiempo.Trimestre' },
+    { pagina: 'familia', fallback: 'barras', button: 'bar-Penal', fieldName: 'DimTribunal.Materia' },
+    { pagina: 'familia', fallback: 'lineas', button: 'filter-Q1', fieldName: 'DimTiempo.Trimestre' },
+    { pagina: 'proporcion', fallback: 'circular', button: 'filter-Penal', fieldName: 'DimTribunal.Materia' },
+    { pagina: 'relacion', fallback: 'combinado', button: 'filter-Q1', fieldName: 'DimTiempo.Trimestre' },
+    { pagina: 'relacion', fallback: 'dispersion', button: 'filter-Q1', fieldName: 'DimTiempo.Trimestre' },
+    { pagina: 'flujo', fallback: 'embudo', button: 'filter-Q1', fieldName: 'DimTiempo.Trimestre' },
+    { pagina: 'flujo', fallback: 'cascada', button: 'filter-Q1', fieldName: 'DimTiempo.Trimestre' },
     // El mapa de arbol rotula sus filas «Penal / Q1» y filtra por el GRUPO: filtrar la materia
     // por la etiqueta compuesta no encontraria nada y el modulo se vaciaria sin decir por que.
-    { pagina: 'flujo', fallback: 'mapa-de-arbol', button: 'filtrar-Penal', fieldName: 'DimTribunal.Materia' },
+    { pagina: 'flujo', fallback: 'mapa-de-arbol', button: 'filter-Penal', fieldName: 'DimTribunal.Materia' },
   ] as const;
 
   for (const { pagina, fallback, button: testid, fieldName } of objetos) {

@@ -16,14 +16,14 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
     expect(creado.ok(), await creado.text()).toBe(true);
 
     await page.goto(`/editor/${slug}`);
-    await page.getByTestId('add-bars-horizontales').click();
+    await page.getByTestId('add-barras-horizontales').click();
     await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(1);
 
     const id = await page.locator('[data-testid^="block-obj-"]').first().getAttribute('data-testid');
     const objectInstance = (id ?? '').replace('block', '');
 
     // La seccion vive en la pestana de Formato, que es donde se personaliza el objeto.
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await expect(page.getByTestId(`pres-${objectInstance}-condicional`)).toBeVisible();
   });
 
@@ -34,7 +34,7 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
     expect(creado.ok(), await creado.text()).toBe(true);
 
     await page.goto(`/editor/${slug}`);
-    await page.getByTestId('add-combo').click();
+    await page.getByTestId('add-combinado').click();
     await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(1);
 
     const id = await page.locator('[data-testid^="block-obj-"]').first().getAttribute('data-testid');
@@ -43,7 +43,7 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
     /*
      * Se busca el ajuste por su nombre, que es como se llega a el de verdad.
      */
-    await page.getByTestId('format-tab').click();
+    await page.getByTestId('tab-formato').click();
     await page.getByTestId('buscar-ajuste').fill('apilado');
     await expect(page.getByTestId(`pres-${objectInstance}-apilado`)).toBeVisible();
   });
@@ -57,7 +57,7 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
     expect(creado.ok(), await creado.text()).toBe(true);
 
     await page.goto(`/editor/${slug}`);
-    await page.getByTestId('add-map').click();
+    await page.getByTestId('add-mapa').click();
     await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(1);
 
     const id = await page.locator('[data-testid^="block-obj-"]').first().getAttribute('data-testid');
@@ -65,7 +65,7 @@ test.describe('lo que se declaro en la auditoria llega al editor', () => {
 
     // Los pozos viven en la pestana de Datos. Se pide explicitamente para que la prueba no
     // dependa de a que pestana salte el editor al seleccionar el objeto.
-    await page.getByTestId('data-tab').click();
+    await page.getByTestId('tab-datos').click();
     await expect(page.getByTestId(`well-${item}-territorio`)).toBeVisible();
     await expect(page.getByTestId(`well-${item}-valor`)).toBeVisible();
     await expect(page.getByTestId(`well-${item}-territorio`)).toContainText('Territorio');
