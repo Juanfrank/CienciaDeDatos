@@ -237,7 +237,7 @@ test.describe('interfaz', () => {
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('create-notice').click();
-    await page.getByTestId('subscription-tab').click();
+    await page.getByTestId('tab-suscripcion').click();
     await page.getByTestId('name-notice').fill('Resumen semanal');
     await page.getByTestId('notice-cadencia').selectOption('semanal');
     await page.getByTestId('save-notice').click();

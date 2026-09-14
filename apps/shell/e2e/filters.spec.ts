@@ -97,7 +97,7 @@ test.describe('agrupa varias dimensiones en un solo objeto', () => {
     // sin `legend`, un `<select>` sin nombre, un campo de busqueda que parece un filtro mas.
     await page.goto('/m/casos-pendientes');
     const { violations } = await new AxeBuilder({ page })
-      .include('[data-testid="panel-filters-filters"]')
+      .include('[data-testid="filters-panel-filtros"]')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       .analyze();
     expect(violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);

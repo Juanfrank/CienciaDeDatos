@@ -167,7 +167,7 @@ test.describe('la matriz, con jerarquia', () => {
   const rutaDelPrimerPadre = async (page: import('@playwright/test').Page): Promise<string> => {
     const button = page.locator('[data-testid^="matrix-collapse"]').first();
     const id = (await button.getAttribute('data-testid')) ?? '';
-    return id.replace('matrix-collapse', '');
+    return id.replace('matrix-collapse-', '');
   };
 
   const n = (s: string) => Number(s.replace(/[^0-9]/g, ''));
@@ -188,16 +188,16 @@ test.describe('la matriz, con jerarquia', () => {
 
   test('plegar esconde los hijos y deja el subtotal del padre', async ({ page }) => {
     const padre = await rutaDelPrimerPadre(page);
-    const before = await page.locator('[data-testid^="row-matrix"]').count();
+    const before = await page.locator('[data-testid^="matrix-row"]').count();
 
     await page.getByTestId(`matrix-collapse-${padre}`).click();
     await expect(page.locator(`[data-testid^="matrix-row-${padre}||"]`)).toHaveCount(0);
     await expect(page.getByTestId(`matrix-row-${padre}`)).toBeVisible();
-    expect(await page.locator('[data-testid^="row-matrix"]').count()).toBeLessThan(before);
+    expect(await page.locator('[data-testid^="matrix-row"]').count()).toBeLessThan(before);
 
     // Y vuelve: plegar es un gesto de lectura, no un cambio.
     await page.getByTestId(`matrix-collapse-${padre}`).click();
-    expect(await page.locator('[data-testid^="row-matrix"]').count()).toBe(before);
+    expect(await page.locator('[data-testid^="matrix-row"]').count()).toBe(before);
   });
 
   test('pulsar un encabezado ordena, y lo anuncia en aria-sort', async ({ page }) => {
