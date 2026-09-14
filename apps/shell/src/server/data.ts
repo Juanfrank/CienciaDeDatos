@@ -1,3 +1,4 @@
+import { splitFilterKey } from '@app/data-contracts';
 import type { Aggregation, DatasetGrain, QueryResult, SchemaDescriptor } from '@app/data-contracts';
 import { canAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
 import { NAVIGATOR_IS_PANEL } from '@app/module-model';
@@ -87,13 +88,22 @@ export interface LoadedModule {
   navigatorFilters?: LoadedObject;
 }
 
-/** Filtros sin los que corresponden a las dimensiones propias del objeto. */
+/**
+ * Filtros sin los que corresponden a las dimensiones propias del objeto.
+ *
+ * Quita tambien los que llevan operador —`campo.no`, `campo.contiene`, `campo.desde`…—, no solo
+ * el «pertenece a». Mirando unicamente la clave desnuda, excluir un valor en un panel de filtros
+ * hacia desaparecer ese valor de su propia lista: quedaba excluido y sin forma de volver a
+ * incluirlo, porque el unico control que podia deshacerlo ya no estaba en pantalla.
+ */
 function ownWithoutFilter(
   filtros: Record<string, string | string[]>,
   propias: { table: string; field: string }[],
 ): Record<string, string | string[]> {
   const keys = new Set(propias.map(fieldKey));
-  return Object.fromEntries(Object.entries(filtros).filter(([clave]) => !keys.has(clave)));
+  return Object.fromEntries(
+    Object.entries(filtros).filter(([clave]) => !keys.has(splitFilterKey(clave).field)),
+  );
 }
 
 /** Lee los datos de una lista de objetos bajo UN ambito. */
@@ -164,16 +174,23 @@ async function readObjects(
       continue;
     }
 
-    // Un segmentador NO se filtra a si mismo. Si lo hiciera, al elegir un valor desapareceria
-    // el resto de opciones y no se podria seleccionar un segundo ni volver atras.
-    //
-    // Quitar su propio filtro NO debilita el aislamiento: el ambito se aplica dentro del lector
-    // (filterResultByScope), de forma independiente de estos filtros, asi que un segmentador
-    // sigue sin poder ofrecer valores fuera del alcance de quien mira.
-    const objectEsteFilters =
-      instance.objectId === 'segmentador'
-        ? ownWithoutFilter(requestedFilters, instance.binding.dimensions)
-        : requestedFilters;
+    /*
+     * Un objeto de FILTRO no se filtra a si mismo. Si lo hiciera, al elegir un valor desapareceria
+     * el resto de opciones y no se podria elegir un segundo ni volver atras.
+     *
+     * Se decide por la CATEGORIA del objeto y no por su identificador. Escrito como
+     * `objectId === 'segmentador'`, la regla valia solo para el primer objeto de filtro que
+     * existio: el panel de filtros, que llego despues, si se filtraba a si mismo —y con el modo
+     * «no es», excluir un valor lo borraba de su propia lista y lo dejaba excluido para siempre—.
+     *
+     * Quitar su propio filtro NO debilita el aislamiento: el ambito se aplica dentro del lector
+     * (filterResultByScope), de forma independiente de estos filtros, asi que un objeto de filtro
+     * sigue sin poder ofrecer valores fuera del alcance de quien mira.
+     */
+    const esDeFiltro = objectRegistry.get(instance.objectId)?.category === 'filtro';
+    const objectEsteFilters = esDeFiltro
+      ? ownWithoutFilter(requestedFilters, instance.binding.dimensions)
+      : requestedFilters;
 
     const lectura = await datasetReader.read({
       datasetId: instance.binding.datasetId,

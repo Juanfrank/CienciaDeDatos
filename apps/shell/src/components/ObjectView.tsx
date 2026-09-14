@@ -5,16 +5,20 @@ import type { QueryResult } from '@app/data-contracts';
 import {
   applyVisualFilter,
   attachmentOf,
+  defaultPicker,
   footerText,
   measureFormatter,
+  modesByDefault,
   paginate,
   paginationKey,
   visualFilterKey,
-  visualFilterOptions,
   type PaginationView,
   type PaginationLegend,
+  type SelectorEfectivo,
+  type ValueCount,
 } from '@app/ui-components';
 import { useUrlFilters } from '../hooks/useUrlFilters';
+import { estadoDe, valueStats, type EstadoDeCampo } from './fieldFilterState';
 import type { SerializedObject } from '../server/serialize';
 
 /**
@@ -30,9 +34,12 @@ import type { SerializedObject } from '../server/serialize';
  */
 export interface ObjectViewChrome {
   filtro?: {
-    fieldName: string;
-    opciones: string[];
-    valores: string[];
+    /** El selector, ya resuelto: su tipo, su rotulo y que formas de acotar ofrece. */
+    picker: SelectorEfectivo;
+    /** Los valores del campo con su recuento, del resultado SIN filtrar. */
+    valores: ValueCount[];
+    estado: EstadoDeCampo;
+    /** La clave con la que su estado viaja en la URL. */
     clave: string;
   };
   paginado?: {
@@ -91,16 +98,28 @@ export function useObjectView(objeto: SerializedObject): {
     const filtro = attachmentOf(instance, 'filtro-de-visualizacion');
     if (filtro) {
       const clave = visualFilterKey(instance.instanceId);
-      const valores = params.getAll(clave);
+      const estado = estadoDe(params, clave);
+      const columnKind =
+        result.columns.find((c) => c.name === filtro.fieldName)?.type ?? 'string';
       chrome.filtro = {
-        fieldName: filtro.fieldName,
-        // Las opciones salen del resultado SIN filtrar: calculadas sobre lo ya filtrado, elegir
-        // un valor dejaria una lista de un solo elemento y no habria forma de volver.
-        opciones: visualFilterOptions(result, filtro.fieldName),
-        valores,
+        picker: {
+          fieldName: filtro.fieldName,
+          tipo: filtro.tipo ?? defaultPicker(columnKind),
+          etiqueta: filtro.fieldName.split('.').slice(-1)[0] ?? filtro.fieldName,
+          // Las mismas formas de acotar que en el panel, decididas por el tipo de la columna.
+          modos: modesByDefault(columnKind),
+          orden: 'origen',
+          recuento: false,
+          todos: false,
+          plegado: false,
+        },
+        // Los valores salen del resultado SIN filtrar: calculados sobre lo ya filtrado, elegir uno
+        // dejaria una lista de un solo elemento y no habria forma de volver.
+        valores: valueStats(result, filtro.fieldName),
+        estado,
         clave,
       };
-      visto = applyVisualFilter(visto, filtro.fieldName, valores);
+      visto = applyVisualFilter(visto, filtro.fieldName, estado);
     }
 
     const pie = attachmentOf(instance, 'pie-de-pagina');

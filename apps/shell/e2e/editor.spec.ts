@@ -1,5 +1,5 @@
 import { expect, test } from './instance';
-import { asLogin } from './session';
+import { alDia, asLogin, newModule } from './session';
 
 /** Editor de modulos y ciclo de vida — secciones 4.1, 4.2 y criterios de la seccion 9. */
 
@@ -559,5 +559,52 @@ test.describe('cola de revision (4.1)', () => {
     await asLogin(page, 'u-ana');
     await page.goto('/admin/modules/pending');
     await expect(page).toHaveURL(/admin-without-permission/);
+  });
+});
+
+test.describe('el panel de filtros se personaliza sin escribir codigo (4.2)', () => {
+  test('cada campo elige su orden, su recuento y sus formas de acotar', async ({ page }) => {
+    /*
+     * Lo que se comprueba no es que los controles esten, sino que lo elegido SOBREVIVA.
+     *
+     * El editor reescribia el selector entero al cambiar su tipo y solo conservaba la etiqueta:
+     * el orden de los valores, el recuento y los botones de «Todos» desaparecian por cambiar otra
+     * cosa. Es la clase de perdida que nadie denuncia porque parece que uno no lo habia puesto.
+     */
+    await asLogin(page, 'u-admin');
+    await newModule(page, newSlug('panel-opciones'));
+    await page.getByTestId('add-panel-de-filtros').click();
+    await alDia(page);
+
+    const id = await page
+      .locator('[data-testid^="block-obj-"]')
+      .first()
+      .getAttribute('data-testid')
+      .then((t) => (t ?? '').replace('block-', ''));
+
+    // Un campo que filtrar, desde su pozo.
+    await page.getByTestId(`well-${id}-filtros-anadir`).click();
+    await page.getByTestId(`well-${id}-filtros-opcion-DimTribunal.Materia`).click();
+    await alDia(page);
+
+    await page.getByTestId('tab-formato').click();
+    const campo = `selectores-${id}-DimTribunal.Materia`;
+
+    await page.getByTestId(`${campo}-recuento`).check();
+    await page.getByTestId(`${campo}-orden`).selectOption('alfabetico');
+    await alDia(page);
+
+    // Y ahora se cambia el TIPO de control, que es lo que antes se llevaba todo por delante.
+    await page.getByTestId(campo).selectOption('lista');
+    await alDia(page);
+
+    await expect(page.getByTestId(`${campo}-recuento`)).toBeChecked();
+    await expect(page.getByTestId(`${campo}-orden`)).toHaveValue('alfabetico');
+
+    // Quitar formas de acotar deja el campo con las que queden, y nunca con ninguna.
+    await page.getByTestId(`${campo}-modo-vacios`).uncheck();
+    await alDia(page);
+    await expect(page.getByTestId(`${campo}-modo-vacios`)).not.toBeChecked();
+    await expect(page.getByTestId(`${campo}-modo-valores`)).toBeChecked();
   });
 });

@@ -91,7 +91,9 @@ export const demoModules: ModuleDefinition[] = [
            */
           {
             id: 'filtros',
-            position: { x: 6, y: 0, w: 6, h: 2 },
+            // Cuatro filas, no dos: con la forma de acotar, los botones de «Todos» y los valores,
+            // dos filas dejaban el panel desplazandose por dentro desde el primer campo.
+            position: { x: 6, y: 0, w: 6, h: 4 },
             instance: {
               instanceId: 'filtros',
               objectId: 'panel-de-filtros',
@@ -102,8 +104,24 @@ export const demoModules: ModuleDefinition[] = [
               settings: {
                 objectId: 'panel-de-filtros',
                 pickers: [
-                  { fieldName: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Materia' },
-                  { fieldName: 'DimTribunal.Distrito', tipo: 'desplegable', etiqueta: 'Distrito' },
+                  {
+                    fieldName: 'DimTribunal.Materia',
+                    tipo: 'pastillas',
+                    etiqueta: 'Materia',
+                    // Con cuantos expedientes hay detras de cada materia: sin el recuento, elegir
+                    // una y encontrarla vacia es la unica forma de saber que no habia nada.
+                    recuento: true,
+                    orden: 'frecuencia',
+                    // «Todos» y «Ninguno» van donde se eligen varios valores. En un desplegable,
+                    // que solo sostiene uno, serian dos botones que no pueden hacer lo que dicen.
+                    todos: true,
+                  },
+                  {
+                    fieldName: 'DimTribunal.Distrito',
+                    tipo: 'desplegable',
+                    etiqueta: 'Distrito',
+                    orden: 'alfabetico',
+                  },
                 ],
               },
             },
@@ -137,7 +155,7 @@ export const demoModules: ModuleDefinition[] = [
           },
           {
             id: 'matriz-distrito-materia',
-            position: { x: 6, y: 2, w: 6, h: 4 },
+            position: { x: 6, y: 4, w: 6, h: 4 },
             instance: {
               instanceId: 'matriz-distrito-materia',
               objectId: 'matriz',

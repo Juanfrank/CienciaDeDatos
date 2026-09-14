@@ -103,3 +103,86 @@ test.describe('agrupa varias dimensiones en un solo objeto', () => {
     expect(violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
   });
 });
+
+test.describe('las cinco formas de acotar, y no solo «es» (4.4)', () => {
+  const MATERIA = 'filter-DimTribunal.Materia';
+
+  test('«no es» excluye, y no es lo mismo que no elegir', async ({ page }) => {
+    /*
+     * Es la forma que mas se echa de menos y la que no existia: con cinco materias, ver «todas
+     * menos una» obligaba a pulsar cuatro pastillas y a acordarse de cual faltaba.
+     */
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId(`${MATERIA}-modo`).selectOption('excluir');
+    await page.getByTestId(`${MATERIA}-Penal`).click();
+
+    await expect(page).toHaveURL(/DimTribunal\.Materia\.no=Penal/);
+    // Y acota de verdad: el resto del modulo se queda sin lo penal.
+    await expect(page.getByTestId('cell-tabla-detalle')).not.toContainText('Penal');
+  });
+
+  test('«contiene» acota por texto, sin distinguir mayusculas', async ({ page }) => {
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId(`${MATERIA}-modo`).selectOption('texto');
+    await page.getByTestId(`${MATERIA}-contiene`).fill('pen');
+    // Al salir del campo: cada tecla reescribiria la URL y volveria a dibujar la pagina.
+    await page.getByTestId(`${MATERIA}-contiene`).blur();
+
+    await expect(page).toHaveURL(/DimTribunal\.Materia\.contiene=pen/);
+    await expect(page.getByTestId('cell-tabla-detalle')).toContainText('Penal');
+    await expect(page.getByTestId('cell-tabla-detalle')).not.toContainText('Civil');
+  });
+
+  test('«vacios» distingue lo que tiene valor de lo que no', async ({ page }) => {
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId(`${MATERIA}-modo`).selectOption('vacios');
+    await page.getByTestId(`${MATERIA}-vacios`).selectOption('si');
+
+    await expect(page).toHaveURL(/DimTribunal\.Materia\.vacio=si/);
+    // Ninguna fila tiene la materia en blanco, asi que no queda ninguna: el objeto lo dice en vez
+    // de ensenar lo de siempre como si el filtro no estuviera.
+    await expect(page.getByTestId('cell-tabla-detalle')).not.toContainText('Penal');
+  });
+
+  test('cambiar de forma LIMPIA la anterior', async ({ page }) => {
+    // «Es Penal» y «no es Penal» a la vez no devuelve nada, y quien cambio de modo no pidio eso.
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId(`${MATERIA}-Penal`).click();
+    await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
+
+    await page.getByTestId(`${MATERIA}-modo`).selectOption('excluir');
+    await expect(page).not.toHaveURL(/DimTribunal\.Materia=Penal/);
+  });
+
+  test('un enlace compartido abre en la forma que trae puesta', async ({ page }) => {
+    // Abriendo siempre en «es», quien recibe el enlace veria un filtro de exclusion dibujado como
+    // si fuera de inclusion: el mismo control diciendo lo contrario de lo que hace.
+    await page.goto('/m/casos-pendientes?DimTribunal.Materia.no=Penal');
+    await expect(page.getByTestId(`${MATERIA}-modo`)).toHaveValue('excluir');
+    await expect(page.getByTestId(`${MATERIA}-Penal`)).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+test.describe('personalizacion del panel (4.2)', () => {
+  test('el recuento dice cuantas filas hay detras de cada valor', async ({ page }) => {
+    // Sin el, elegir un valor y encontrarlo vacio es la unica forma de saber que no habia nada.
+    await page.goto('/m/casos-pendientes');
+    await expect(page.getByTestId('filter-DimTribunal.Materia-Penal')).toContainText('(');
+  });
+
+  test('«Todos» y «Ninguno» eligen de una vez', async ({ page }) => {
+    // Sobre la materia, que es donde se eligen varios: el distrito es un desplegable y sostiene
+    // uno solo, asi que alli los dos botones no podrian hacer lo que dicen.
+    await page.goto('/m/casos-pendientes');
+    const materia = 'filter-DimTribunal.Materia';
+
+    await page.getByTestId(`${materia}-todos`).click();
+    // Se espera al enrutador antes de leer la URL: `replace` no la actualiza de inmediato.
+    await expect(page).toHaveURL(/DimTribunal\.Materia=/);
+    const url = new URL(page.url());
+    expect(url.searchParams.getAll('DimTribunal.Materia').length).toBeGreaterThan(1);
+
+    await page.getByTestId(`${materia}-ninguno`).click();
+    await expect(page).not.toHaveURL(/DimTribunal\.Materia=/);
+  });
+});

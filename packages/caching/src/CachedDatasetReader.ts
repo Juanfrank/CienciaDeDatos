@@ -1,4 +1,9 @@
-import type { QueryResult } from '@app/data-contracts';
+import {
+  applyFilters,
+  parseFilters,
+  splitFilterKey,
+  type QueryResult,
+} from '@app/data-contracts';
 import {
   type AccessScope,
   assertScopeIsEnforceable,
@@ -129,9 +134,27 @@ export class CachedDatasetReader {
     // tanto si vino ya filtrado de la fuente como si se comparte entre ambitos.
     assertScopeIsEnforceable(entry.value, input.scope);
 
-    const appliedFilters = intersectRequestedFilters(input.scope, input.requestedFilters ?? {});
+    const pedidos = input.requestedFilters ?? {};
+    const appliedFilters = intersectRequestedFilters(input.scope, planos(pedidos));
     const byScope = filterResultByScope(entry.value, input.scope);
-    const result = applyRequestedFilters(byScope, appliedFilters);
+
+    /*
+     * Dos pasadas, y el orden no es casual.
+     *
+     * La primera es la de siempre: los valores pedidos ya INTERSECADOS con el ambito, de modo que
+     * pedir un distrito que no se tiene concedido no lo trae. La segunda aplica los operadores
+     * —excluir, contiene, empieza, rango, vacio— sobre lo que queda.
+     *
+     * Van despues a proposito: un operador solo puede QUITAR filas de lo que el ambito ya dejo
+     * pasar, nunca anadir ninguna, asi que por mucho que alguien escriba en la URL no puede
+     * ensanchar lo que ve. Intersecarlos con el ambito como se hace con los valores no tendria
+     * sentido —un «contiene» no es una lista de valores permitidos— y mezclarlos en la primera
+     * pasada habria puesto esa garantia en manos de la interseccion.
+     */
+    const result = applyFilters(
+      applyRequestedFilters(byScope, appliedFilters),
+      parseFilters(conOperador(pedidos)),
+    );
 
     const ageMs = Date.now() - new Date(entry.generatedAt).getTime();
     const status: ReadStatus = stale ? 'degraded' : 'ok';
@@ -147,6 +170,28 @@ export class CachedDatasetReader {
     };
   }
 }
+
+/**
+ * Las claves SIN operador: el «pertenece a» de siempre, que es lo que el ambito sabe intersecar.
+ *
+ * `campo.desde` no es el nombre de ninguna columna, asi que pasarlas por la interseccion las
+ * dejaba fuera y el lector las descartaba despues: el rango de fechas del panel de filtros se
+ * escribia en la URL y no acotaba nada.
+ */
+const planos = (
+  pedidos: Record<string, string | string[]>,
+): Record<string, string | string[]> =>
+  Object.fromEntries(
+    Object.entries(pedidos).filter(([clave]) => splitFilterKey(clave).suffix === undefined),
+  );
+
+/** Y las que SI lo llevan, que son las que entienden los operadores. */
+const conOperador = (
+  pedidos: Record<string, string | string[]>,
+): Record<string, string | string[]> =>
+  Object.fromEntries(
+    Object.entries(pedidos).filter(([clave]) => splitFilterKey(clave).suffix !== undefined),
+  );
 
 /** Aplica sobre el dataset ya cacheado los filtros efectivos. */
 export function applyRequestedFilters(

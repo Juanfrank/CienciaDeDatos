@@ -16,8 +16,11 @@ import {
   normalizedLabels,
   FORMAT_KINDS,
   PICKER_KINDS,
+  VALUE_ORDERS,
   patternProblem,
+  defaultPicker,
   effectivePickers,
+  modesByDefault,
   type ObjectAccent,
   type PresentationKey,
   type TextTarget,
@@ -32,7 +35,11 @@ import {
   type IconName,
   type ObjectPresentation,
   type PickerKind,
+  type DimensionPicker,
+  type FilterMode,
+  type ValueOrder,
 } from "@app/ui-components";
+import type { MessageKey } from "@app/i18n";
 import { Icon } from "../icons/Icon";
 import { Help } from "./Help";
 import { EditorTextStyle, ColorPalette } from "./EditorTextStyle";
@@ -1092,25 +1099,43 @@ function PanelPickers({
   const effective = effectivePickers(instance, settings, kinds);
   const prueba = `selectores-${instance.instanceId}`;
 
-  const kindSet = (fieldName: string, tipo: PickerKind) =>
+  /*
+   * Se MEZCLA con lo que el campo ya tenia, no se reconstruye.
+   *
+   * Antes esto reescribia el selector entero y solo conservaba la etiqueta: cambiar el tipo de
+   * control borraba el orden de los valores, el recuento y los botones de «Todos» — ajustes que
+   * nadie habia tocado y que desaparecian por cambiar otra cosa.
+   */
+  const pickerSet = (fieldName: string, cambio: Partial<DimensionPicker>) =>
     onCambiar((i) => {
-      const previos = (
-        i.settings?.objectId === "panel-de-filtros"
-          ? i.settings.pickers
-          : []
-      ).filter((s) => s.fieldName !== fieldName);
-      const anterior = effective.find((s) => s.fieldName === fieldName);
+      const previos =
+        i.settings?.objectId === "panel-de-filtros" ? i.settings.pickers : [];
+      const anterior =
+        previos.find((s) => s.fieldName === fieldName) ??
+        effective.find((s) => s.fieldName === fieldName);
+      const base: DimensionPicker = {
+        fieldName,
+        tipo: anterior?.tipo ?? defaultPicker(kinds[fieldName] ?? ""),
+        ...(anterior && "etiqueta" in anterior && anterior.etiqueta
+          ? { etiqueta: anterior.etiqueta }
+          : {}),
+        ...(anterior && "orden" in anterior && anterior.orden
+          ? { orden: anterior.orden }
+          : {}),
+        ...(anterior && "modos" in anterior && anterior.modos
+          ? { modos: anterior.modos }
+          : {}),
+        ...(anterior && "recuento" in anterior ? { recuento: anterior.recuento } : {}),
+        ...(anterior && "todos" in anterior ? { todos: anterior.todos } : {}),
+        ...(anterior && "plegado" in anterior ? { plegado: anterior.plegado } : {}),
+      };
       return {
         ...i,
         settings: {
           objectId: "panel-de-filtros",
           pickers: [
-            ...previos,
-            {
-              fieldName,
-              tipo,
-              ...(anterior?.etiqueta ? { etiqueta: anterior.etiqueta } : {}),
-            },
+            ...previos.filter((s) => s.fieldName !== fieldName),
+            { ...base, ...cambio },
           ],
         },
       };
@@ -1129,30 +1154,135 @@ function PanelPickers({
       <p className="muted-text">{t('pres.pickers.title')}</p>
       {effective.map((s) => {
         const columnKind = kinds[s.fieldName] ?? "";
+        const posibles = modesByDefault(columnKind);
         return (
-          <label key={s.fieldName} className="form__field">
-            <span>{s.fieldName}</span>
-            <select
-              value={s.tipo}
-              disabled={saving}
-              data-testid={`${prueba}-${s.fieldName}`}
-              onChange={(e) =>
-                kindSet(s.fieldName, e.target.value as PickerKind)
-              }
-            >
-              {PICKER_KINDS.map((t) => (
-                <option key={t} value={t} disabled={!aplicaA(t, columnKind)}>
-                  {t}
-                  {aplicaA(t, columnKind) ? "" : " — necesita una fecha"}
-                </option>
-              ))}
-            </select>
-          </label>
+          <fieldset key={s.fieldName} className="editor__picker">
+            <legend>{s.fieldName}</legend>
+
+            <label className="form__field">
+              <span>{t('pres.pickers.kind')}</span>
+              <select
+                value={s.tipo}
+                disabled={saving}
+                data-testid={`${prueba}-${s.fieldName}`}
+                onChange={(e) =>
+                  pickerSet(s.fieldName, { tipo: e.target.value as PickerKind })
+                }
+              >
+                {PICKER_KINDS.map((tipo) => (
+                  <option key={tipo} value={tipo} disabled={!aplicaA(tipo, columnKind)}>
+                    {tipo}
+                    {aplicaA(tipo, columnKind) ? "" : ` — ${t('pres.pickers.needsDate')}`}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="form__field">
+              <span>{t('pres.pickers.order')}</span>
+              <select
+                value={s.orden}
+                disabled={saving}
+                data-testid={`${prueba}-${s.fieldName}-orden`}
+                onChange={(e) =>
+                  pickerSet(s.fieldName, { orden: e.target.value as ValueOrder })
+                }
+              >
+                {VALUE_ORDERS.map((orden) => (
+                  <option key={orden} value={orden}>
+                    {t(ORDEN[orden])}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {/*
+              Las formas de acotar que ofrece ESTE campo.
+              Se ofrecen solo las que tienen sentido por el tipo de la columna —un «entre» sobre
+              una materia no significa nada— y la validacion rechaza las demas: aqui ni siquiera
+              se ensenan, para no proponer algo que despues bloquea la publicacion.
+            */}
+            <div className="editor__modos">
+              <span className="filters-panel__label">{t('pres.pickers.modes')}</span>
+              {posibles.map((modo) => {
+                const puestos = s.modos;
+                const marcado = puestos.includes(modo);
+                return (
+                  <label key={modo} className="form__check">
+                    <input
+                      type="checkbox"
+                      checked={marcado}
+                      // El ultimo no se puede quitar: un campo sin ninguna forma de acotar es un
+                      // filtro que no filtra, y la validacion lo trata como «no se dijo».
+                      disabled={saving || (marcado && puestos.length === 1)}
+                      data-testid={`${prueba}-${s.fieldName}-modo-${modo}`}
+                      onChange={() =>
+                        pickerSet(s.fieldName, {
+                          modos: marcado
+                            ? puestos.filter((m) => m !== modo)
+                            : posibles.filter((m) => puestos.includes(m) || m === modo),
+                        })
+                      }
+                    />
+                    <span>{t(MODO_ROTULO[modo])}</span>
+                  </label>
+                );
+              })}
+            </div>
+
+            <label className="form__check">
+              <input
+                type="checkbox"
+                checked={s.recuento}
+                disabled={saving}
+                data-testid={`${prueba}-${s.fieldName}-recuento`}
+                onChange={(e) => pickerSet(s.fieldName, { recuento: e.target.checked })}
+              />
+              <span>{t('pres.pickers.count')}</span>
+            </label>
+
+            <label className="form__check">
+              <input
+                type="checkbox"
+                checked={s.todos}
+                disabled={saving}
+                data-testid={`${prueba}-${s.fieldName}-todos`}
+                onChange={(e) => pickerSet(s.fieldName, { todos: e.target.checked })}
+              />
+              <span>{t('pres.pickers.selectAll')}</span>
+            </label>
+
+            <label className="form__check">
+              <input
+                type="checkbox"
+                checked={s.plegado}
+                disabled={saving}
+                data-testid={`${prueba}-${s.fieldName}-plegado`}
+                onChange={(e) => pickerSet(s.fieldName, { plegado: e.target.checked })}
+              />
+              <span>{t('pres.pickers.collapsed')}</span>
+            </label>
+          </fieldset>
         );
       })}
     </div>
   );
 }
+
+/** Como se rotula cada orden de valores, y cada forma de acotar. */
+const ORDEN: Record<ValueOrder, MessageKey> = {
+  origen: 'pres.pickers.order.source',
+  alfabetico: 'pres.pickers.order.alphabetical',
+  frecuencia: 'pres.pickers.order.frequency',
+};
+
+const MODO_ROTULO: Record<FilterMode, MessageKey> = {
+  valores: 'filters.mode.valores',
+  excluir: 'filters.mode.excluir',
+  texto: 'filters.mode.texto',
+  rango: 'filters.mode.rango',
+  vacios: 'filters.mode.vacios',
+};
 
 /** Un selector de fecha sobre una columna que no lo es se ofrece DESHABILITADO, no se esconde. */
 function aplicaA(tipo: PickerKind, columnKind: string): boolean {

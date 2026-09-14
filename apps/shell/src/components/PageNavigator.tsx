@@ -11,7 +11,8 @@ import {
 } from '@app/module-model';
 import { useUrlFilters } from '../hooks/useUrlFilters';
 import { useTranslator } from './Locale';
-import { FieldPicker, optionsOf } from './FiltersPanel';
+import { FieldPicker } from './FiltersPanel';
+import { escribirEstado, estadoDe, valueStats } from './fieldFilterState';
 import { Icon } from './icons/Icon';
 
 /**
@@ -191,16 +192,13 @@ function SeccionDeFiltros({
   titulo: string;
 }) {
   const t = useTranslator();
-  const { valuesOf, toggle, clearField, fijar, searchParams, clearAll } = useUrlFilters();
+  const { searchParams, clearAll, aplicar } = useUrlFilters();
   const fieldKinds = Object.fromEntries(result.columns.map((c) => [c.name, c.type]));
   const pickers = effectivePickers(
     instance,
     instance.settings?.objectId === 'panel-de-filtros' ? instance.settings : undefined,
     fieldKinds,
   );
-
-  const FROM = (fieldName: string) => `${fieldName}.desde`;
-  const HASTA = (fieldName: string) => `${fieldName}.hasta`;
 
   return (
     <section className="navegador__filtros" data-testid="navegador-filtros">
@@ -220,20 +218,11 @@ function SeccionDeFiltros({
         <FieldPicker
           key={picker.fieldName}
           picker={picker}
-          opciones={optionsOf(result, picker.fieldName)}
-          valores={valuesOf(picker.fieldName)}
-          desde={searchParams.get(FROM(picker.fieldName)) ?? ''}
-          hasta={searchParams.get(HASTA(picker.fieldName)) ?? ''}
-          onAlternar={(valor) => toggle(picker.fieldName, valor)}
-          onFijar={(valor) => fijar(picker.fieldName, valor)}
-          onFijarFecha={(cual, valor) =>
-            fijar(cual === 'desde' ? FROM(picker.fieldName) : HASTA(picker.fieldName), valor)
+          valores={valueStats(result, picker.fieldName)}
+          estado={estadoDe(searchParams, picker.fieldName)}
+          onCambiar={(siguiente) =>
+            aplicar((params) => escribirEstado(params, picker.fieldName, siguiente))
           }
-          onLimpiar={() => {
-            clearField(picker.fieldName);
-            clearField(FROM(picker.fieldName));
-            clearField(HASTA(picker.fieldName));
-          }}
         />
       ))}
     </section>

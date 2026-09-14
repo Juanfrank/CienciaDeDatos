@@ -21,8 +21,16 @@ import { readPersonalization } from './personalization';
 
 export const queueExports = new StoreExportQueue({ store: cacheL2 });
 
-/** Un segmentador es un control de filtrado, no contenido. Exportarlo seria ruido. */
-const ES_CONTROL = new Set(['segmentador']);
+/**
+ * Un objeto de FILTRO es un control, no contenido: exportarlo seria ruido.
+ *
+ * Se decide por la categoria y no por el identificador. Escrito como una lista con «segmentador»
+ * dentro, la regla valia solo para el primer objeto de filtro que existio: el panel de filtros,
+ * que llego despues, acababa en el archivo como una tabla de valores disponibles — y quien lo
+ * recibiera leeria «Civil» en un archivo exportado con el filtro puesto en «Penal».
+ */
+const esControl = (objectId: string): boolean =>
+  objectRegistry.get(objectId)?.category === 'filtro';
 
 /** Categorias del catalogo que merecen dibujarse como imagen al exportar en SVG. */
 const CHART_CATEGORIES = new Set(['grafico', 'mapa']);
@@ -56,7 +64,7 @@ export const resolverObjects: ResolverObjects = async (request: ExportRequest) =
   // filas completas.
   const objetos: ExportableObject[] = loaded.objetos.flatMap((o) => {
     const { instance } = o.item;
-    if (!o.result || ES_CONTROL.has(instance.objectId) || o.problems.length > 0) return [];
+    if (!o.result || esControl(instance.objectId) || o.problems.length > 0) return [];
 
     const categoria = objectRegistry.get(instance.objectId)?.category;
     const projected = projectObject(instance, o.result, o.aggregations);

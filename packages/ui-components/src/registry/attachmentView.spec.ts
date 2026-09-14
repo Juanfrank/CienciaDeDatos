@@ -23,6 +23,9 @@ import type { ObjectInstance } from './types';
 
 const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };
 
+/** Un filtro que no pide nada: el punto de partida de cada caso. */
+const SIN_PEDIR = { incluye: [] as string[], excluye: [] as string[] };
+
 /**
  * Tres distritos en seis filas: cada distrito aparece dos veces.
  *
@@ -78,11 +81,14 @@ describe('filtro de visualizacion', () => {
   });
 
   it('sin seleccion no toca nada: no es un filtro que empiece filtrando', () => {
-    expect(applyVisualFilter(result, 'DimTribunal.Distrito', [])).toBe(result);
+    expect(applyVisualFilter(result, 'DimTribunal.Distrito', SIN_PEDIR)).toBe(result);
   });
 
   it('deja solo las filas de los valores elegidos', () => {
-    const filtrado = applyVisualFilter(result, 'DimTribunal.Distrito', ['Norte']);
+    const filtrado = applyVisualFilter(result, 'DimTribunal.Distrito', {
+      ...SIN_PEDIR,
+      incluye: ['Norte'],
+    });
     expect(filtrado.rows).toEqual([
       ['Norte', 'T1', 20],
       ['Norte', 'T2', 1],
@@ -94,7 +100,21 @@ describe('filtro de visualizacion', () => {
   it('un campo que no esta en el resultado no vacia el objeto', () => {
     // Vaciarlo diria «no hay datos» cuando lo que pasa es que la configuracion apunta a un campo
     // que ya no viene. El objeto se dibuja entero y la validacion es quien lo denuncia.
-    expect(applyVisualFilter(result, 'NoExiste', ['x']).rows).toHaveLength(6);
+    expect(applyVisualFilter(result, 'NoExiste', { ...SIN_PEDIR, incluye: ['x'] }).rows).toHaveLength(6);
+  });
+
+  it('admite las MISMAS formas de acotar que el panel, no solo valores', () => {
+    // Es lo que hace que acotar una visual sola y acotar la pagina entera comparen igual: las dos
+    // pasan por `applyFilters`. Con una lista de valores, las otras cinco formas habrian
+    // necesitado una segunda implementacion aqui.
+    const excluido = applyVisualFilter(result, 'DimTribunal.Distrito', {
+      ...SIN_PEDIR,
+      excluye: ['Norte', 'Sur'],
+    });
+    expect(excluido.rows.map((f) => f[0])).toEqual(['Este', 'Este']);
+
+    const rango = applyVisualFilter(result, 'CasosPendientes', { ...SIN_PEDIR, desde: '20' });
+    expect(rango.rows).toHaveLength(2);
   });
 });
 
@@ -152,7 +172,10 @@ describe('pie de pagina', () => {
   it('resuelve sobre lo que el objeto tiene delante, no sobre el dataset entero', () => {
     // Un pie bajo un objeto filtrado que dijera el total sin filtrar contradice a la visual que
     // acompaña, y quien lo lee no tiene forma de saber cual de las dos cifras vale.
-    const filtrado = applyVisualFilter(result, 'DimTribunal.Distrito', ['Norte']);
+    const filtrado = applyVisualFilter(result, 'DimTribunal.Distrito', {
+      ...SIN_PEDIR,
+      incluye: ['Norte'],
+    });
     expect(footerText('Total: {{1}}.', instance, filtrado, ['suma'])).toBe('Total: 21.');
   });
 

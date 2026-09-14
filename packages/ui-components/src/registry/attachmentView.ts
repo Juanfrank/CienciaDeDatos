@@ -1,4 +1,5 @@
-import type { Aggregation, FieldRef, QueryResult } from '@app/data-contracts';
+import { applyFilters } from '@app/data-contracts';
+import type { Aggregation, FieldFilter, FieldRef, QueryResult } from '@app/data-contracts';
 import { aggregateBy, fieldKey } from './viewModel';
 import type { ObjectInstance } from './types';
 
@@ -49,17 +50,21 @@ export function visualFilterOptions(result: QueryResult, fieldName: string): str
   return [...vistos];
 }
 
-/** Las filas que quedan tras aplicar la seleccion del filtro de visualizacion. */
+/**
+ * Las filas que quedan tras aplicar lo que se pidio en el filtro de visualizacion.
+ *
+ * Toma un `FieldFilter` entero y no una lista de valores: el complemento admite las mismas formas
+ * de acotar que el panel —excluir, contiene, empieza, rango, vacios—, y con una lista de valores
+ * habria hecho falta una segunda implementacion para las otras cinco. `applyFilters` es la que usa
+ * tambien el lector del cache, asi que acotar una visual sola y acotar la pagina entera comparan
+ * igual.
+ */
 export function applyVisualFilter(
   result: QueryResult,
   fieldName: string,
-  valores: string[],
+  pedido: Omit<FieldFilter, 'field'>,
 ): QueryResult {
-  if (valores.length === 0) return result;
-  const i = result.columns.findIndex((c) => c.name === fieldName);
-  if (i < 0) return result;
-  const elegidos = new Set(valores);
-  return { ...result, rows: result.rows.filter((row) => elegidos.has(String(row[i]))) };
+  return applyFilters(result, [{ ...pedido, field: fieldName }]);
 }
 
 /** Lo que el paginado sabe de si mismo, y lo unico que su control necesita para dibujarse. */

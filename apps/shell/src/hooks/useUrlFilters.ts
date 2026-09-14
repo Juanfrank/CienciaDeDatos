@@ -89,5 +89,14 @@ export function useUrlFilters() {
     [router],
   );
 
-  return { valuesOf, toggle, fijar, clearField, clearAll, navegarA, searchParams };
+  /*
+   * `aplicar` se EXPONE, y no es un atajo.
+   *
+   * El panel de filtros escribe el estado entero de un campo de una vez —sus valores, su
+   * exclusion, su texto, su rango— y eso son varias claves que tienen que cambiar juntas.
+   * Llamando a `fijar` una por una, cada llamada partiria de lo ya pedido y la ultima ganaria:
+   * el resultado dependeria del orden en que se escribieron, que es justo lo que no se puede
+   * depender de.
+   */
+  return { valuesOf, toggle, fijar, clearField, clearAll, navegarA, aplicar: apply, searchParams };
 }

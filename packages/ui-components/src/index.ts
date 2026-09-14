@@ -94,16 +94,23 @@ export {
 export {
   PANEL_DIMENSIONS_MAX,
   DATE_PICKERS,
+  FILTER_MODES,
   PICKER_KINDS,
+  VALUE_ORDERS,
   dateKindIs,
   defaultPicker,
   effectivePickers,
+  modesByDefault,
+  orderedValues,
   validatePanelFilters,
   type FiltersPanelSettings,
   type PickerProblem,
   type DimensionPicker,
   type SelectorEfectivo,
   type PickerKind,
+  type FilterMode,
+  type ValueOrder,
+  type ValueCount,
 } from './presentation/filtersPanel';
 export {
   OBJECT_ICONS,

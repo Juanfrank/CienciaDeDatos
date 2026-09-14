@@ -12,7 +12,6 @@ import {
   aggregationsFor,
   gaugeScale,
   slotField,
-  attachmentOf,
   conditionalColor,
   columnsFor,
   paginationLegend,
@@ -164,7 +163,6 @@ export function Frame({
    * se nota. Por contexto, un objeto nuevo los hereda por usar el marco.
    */
   const chrome = useObjectChrome();
-  const tipoDeFiltro = instance ? attachmentOf(instance, 'filtro-de-visualizacion')?.tipo : undefined;
 
   return (
     <div
@@ -215,17 +213,7 @@ export function Frame({
             aggregations={aggregations ?? []}
           />
         ) : null}
-        {chrome.filtro && result ? (
-          <VisualFilter
-            titulo={titulo}
-            filtro={chrome.filtro}
-            columnKind={
-              result.columns.find((c) => c.name === chrome.filtro?.fieldName)?.type ?? 'texto'
-            }
-            {...(tipoDeFiltro ? { tipo: tipoDeFiltro } : {})}
-            opciones={chrome.filtro.opciones}
-          />
-        ) : null}
+        {chrome.filtro ? <VisualFilter titulo={titulo} filtro={chrome.filtro} /> : null}
         {accion}
       </div>
       ) : null}

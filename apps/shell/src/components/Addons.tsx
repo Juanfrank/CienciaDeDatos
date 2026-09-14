@@ -7,17 +7,15 @@ import {
   aggregateBy,
   attachmentOf,
   breakdownOf,
-  defaultPicker,
   fieldKey,
   paginationLegend,
   projectObject,
   type ObjectInstance,
-  type PickerKind,
-  type SelectorEfectivo,
 } from '@app/ui-components';
 import { useUrlFilters } from '../hooks/useUrlFilters';
 import { useTranslator } from './Locale';
 import { FieldPicker } from './FiltersPanel';
+import { escribirEstado, sinNada } from './fieldFilterState';
 import type { ObjectViewChrome } from './ObjectView';
 
 /** Objetos adjuntados — complementos de un objeto, nunca objetos independientes. */
@@ -315,27 +313,14 @@ export function DataTable({
 export function VisualFilter({
   titulo,
   filtro,
-  columnKind,
-  tipo,
-  opciones,
 }: {
   titulo: string;
-  filtro: { fieldName: string; valores: string[]; clave: string };
-  /** El tipo de la columna, para elegir selector cuando el complemento no lo dice. */
-  columnKind: string;
-  tipo?: PickerKind;
-  opciones: string[];
+  filtro: NonNullable<ObjectViewChrome['filtro']>;
 }) {
   const t = useTranslator();
   const dialogo = useRef<HTMLDialogElement>(null);
-  const { toggle, fijar, clearField } = useUrlFilters();
-  const puesto = filtro.valores.length > 0;
-
-  const picker: SelectorEfectivo = {
-    fieldName: filtro.fieldName,
-    tipo: tipo ?? defaultPicker(columnKind),
-    etiqueta: filtro.fieldName.split('.').slice(-1)[0] ?? filtro.fieldName,
-  };
+  const { aplicar } = useUrlFilters();
+  const puesto = !sinNada(filtro.estado);
 
   return (
     <>
@@ -343,11 +328,7 @@ export function VisualFilter({
         type="button"
         className="addon__icon"
         data-puesto={puesto ? 'si' : 'no'}
-        aria-label={
-          puesto
-            ? `Filtrar «${titulo}» — ${filtro.valores.length} valor(es) elegidos`
-            : `Filtrar «${titulo}»`
-        }
+        aria-label={puesto ? `Filtrar «${titulo}» — hay un filtro puesto` : `Filtrar «${titulo}»`}
         data-testid={`visual-filter-open-${titulo}`}
         onClick={() => dialogo.current?.showModal()}
       >
@@ -375,21 +356,18 @@ export function VisualFilter({
         <p className="muted-text">{t('addon.filter.note')}</p>
 
         <div data-testid={`visual-filter-picker-${titulo}`}>
+          {/*
+            El MISMO selector que el panel de filtros, importado y no copiado.
+            Con controles propios, un «contiene» se comportaria distinto segun desde donde se
+            eligiera, y nadie lo habria decidido.
+          */}
           <FieldPicker
-            picker={picker}
-            opciones={opciones}
+            picker={filtro.picker}
             valores={filtro.valores}
-            desde=""
-            hasta=""
-            onAlternar={(valor) => toggle(filtro.clave, valor)}
-            onFijar={(valor) => fijar(filtro.clave, valor)}
-            /*
-              El rango de fechas NO entra aqui, y la validacion lo rechaza antes de guardarlo. Es
-              deliberado: `applyVisualFilter` compara por valor, asi que un «desde/hasta» quedaria
-              escrito en la URL sin acotar nada — un control que no hace nada es peor que no tenerlo.
-            */
-            onFijarFecha={() => undefined}
-            onLimpiar={() => clearField(filtro.clave)}
+            estado={filtro.estado}
+            onCambiar={(siguiente) =>
+              aplicar((params) => escribirEstado(params, filtro.clave, siguiente))
+            }
           />
         </div>
       </dialog>

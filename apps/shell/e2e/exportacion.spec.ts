@@ -280,6 +280,14 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
     const href = await page.getByTestId('descargar-exportacion').getAttribute('href');
     const csv = await (await page.request.get(href ?? '')).text();
     expect(csv).toContain('DimTribunal.Materia = Penal');
+    /*
+     * Ni rastro de «Civil», y eso incluye a los objetos de FILTRO.
+     *
+     * Un panel de filtros lista los valores disponibles —todos, tambien los que el filtro deja
+     * fuera: para eso esta—. Exportado como una tabla mas, el archivo diria «Civil» junto al
+     * aviso de que se filtro por «Penal», y quien lo recibiera no sabria cual de las dos cosas
+     * creerse. Un control no es contenido.
+     */
     expect(csv).not.toContain('Civil');
   });
 });

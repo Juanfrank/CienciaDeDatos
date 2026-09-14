@@ -201,6 +201,54 @@ describe('CachedDatasetReader', () => {
       expect(r.result?.rows).toEqual([]);
       expect(r.appliedFilters?.['DimTribunal.Distrito']).toEqual([]);
     });
+
+    it('los OPERADORES acotan de verdad, no solo se escriben en la URL', async () => {
+      /*
+       * El panel de filtros ofrecia un rango y no acotaba nada.
+       *
+       * `campo.desde` no es el nombre de ninguna columna, asi que la interseccion con el ambito lo
+       * dejaba fuera y el lector lo descartaba: quien movia el control se quedaba creyendo que ya
+       * habia filtrado. Se comprueban los tres que no existian —rango, exclusion y texto— sobre el
+       * camino de lectura entero, no sobre la funcion suelta.
+       */
+      await sembrar();
+      // Con el equipo Este, que ve DOS filas: sobre una sola, cualquier filtro que no las quite
+      // todas deja la misma, y la prueba pasaria estuviera bien o mal.
+      const leer = (requestedFilters: Record<string, string | string[]>) =>
+        reader.read({
+          datasetId: 'casos',
+          scope: scopeOf(betoUser, esteTeam, 'casos-pendientes-este'),
+          requestedFilters,
+        });
+
+      const rango = await leer({ 'CasosPendientes.desde': '21' });
+      expect(rango.result?.rows).toEqual([['Distrito Este', 'Civil', 21]]);
+
+      const excluido = await leer({ 'DimTribunal.Materia.no': 'Penal' });
+      expect(excluido.result?.rows).toEqual([['Distrito Este', 'Civil', 21]]);
+
+      const texto = await leer({ 'DimTribunal.Materia.contiene': 'pen' });
+      expect(texto.result?.rows).toEqual([['Distrito Este', 'Penal', 20]]);
+    });
+
+    it('un operador NO puede ensanchar lo que el ambito deja ver', async () => {
+      /*
+       * Es la garantia que sostiene todo lo demas.
+       *
+       * Los operadores se aplican DESPUES del ambito, sobre las filas que este ya dejo pasar, asi
+       * que solo pueden quitar. Aplicados antes —o mezclados con la interseccion— un «no» sobre la
+       * dimension del ambito habria sido una forma de pedir justo lo que no se tiene concedido.
+       */
+      await sembrar();
+      const r = await reader.read({
+        datasetId: 'casos',
+        scope: scopeOf(betoUser, esteTeam, 'casos-pendientes-este'),
+        requestedFilters: { 'DimTribunal.Distrito.no': 'Distrito Este' },
+      });
+
+      // Su ambito es el Distrito Este; excluirlo deja cero filas, no las de los otros distritos.
+      expect(r.result?.rows).toEqual([]);
+    });
   });
 
   describe('resiliencia si el Storage de cache no esta disponible (6.9)', () => {
