@@ -243,13 +243,13 @@ test.describe('marcadores (4.4)', () => {
     await page.getByTestId('bookmark-name').fill('Solo penal');
     await page.getByTestId('save-bookmark').click();
 
-    await expect(page.getByTestId('only-bookmark penal')).toBeVisible();
+    await expect(page.getByTestId('bookmark-Solo penal')).toBeVisible();
 
     // Salir del modulo y volver por el marcador reproduce el estado guardado.
     await page.goto('/m/casos-pendientes');
     await expect(page).not.toHaveURL(/Materia=/);
     await page.getByTestId('abrir-marcadores').click();
-    await page.getByTestId('only-bookmark penal').click();
+    await page.getByTestId('bookmark-Solo penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
   });
 
@@ -260,9 +260,9 @@ test.describe('marcadores (4.4)', () => {
     await page.getByTestId('abrir-marcadores').click();
     await page.getByTestId('bookmark-name').fill('Mi distrito');
     await page.getByTestId('save-bookmark').click();
-    await expect(page.getByTestId('my-bookmark distrito')).toBeVisible();
+    await expect(page.getByTestId('bookmark-Mi distrito')).toBeVisible();
 
-    const url = await page.getByTestId('my-bookmark distrito').getAttribute('href');
+    const url = await page.getByTestId('bookmark-Mi distrito').getAttribute('href');
     expect(url).toContain('Distrito+Norte');
 
     // Beto, del equipo Este, abre exactamente esa URL.

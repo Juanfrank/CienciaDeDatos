@@ -1247,15 +1247,15 @@ input[type='radio'] {
 /*
  * El plegado.
  *
- * Lo decide `sidebar-data` en `<body>`, que escribe el boton de la cabecera. Se oculta con
+ * Lo decide `data-sidebar` en `<body>`, que escribe el boton de la cabecera. Se oculta con
  * `display: none` y no moviendolo fuera de la pantalla a proposito: un panel escondido con
  * `transform` sigue estando en el orden de tabulacion, asi que al plegarlo el foco se iria a una
  * lista de enlaces invisibles.
  *
  * Sin el atributo —es decir, sin JavaScript— el panel se queda visible a cualquier ancho.
  */
-body[sidebar-data='oculto'] .lateral,
-body[sidebar-data='oculto'] .admin__nav { display: none; }
+body[data-sidebar='oculto'] .lateral,
+body[data-sidebar='oculto'] .admin__nav { display: none; }
 
 /* El arbol arriba y el equipo abajo, con el hueco entre medias. */
 .lateral {
