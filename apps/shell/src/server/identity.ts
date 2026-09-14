@@ -151,8 +151,30 @@ export function localProvider(): LocalIdentityProvider {
   return memoizedProvider;
 }
 
-/** Siembra las credenciales locales la primera vez. */
+/**
+ * Si este entorno puede sembrar credenciales de demostracion.
+ *
+ * Es una puerta EXPLICITA, no deducida. `NODE_ENV` no sirve: las pruebas de navegador arrancan
+ * con `next start`, que es produccion, asi que mirarlo dejaria la siembra encendida justo donde
+ * mas dano hace o apagada justo donde hace falta. Un despliegue real no lleva esta variable y la
+ * siembra no ocurre nunca; quien la ponga esta diciendo «esto es una demostracion».
+ */
+const SIEMBRA_PERMITIDA = process.env['SEED_DEMO_CREDENTIALS'] === '1';
+
+/**
+ * Siembra las credenciales locales la primera vez.
+ *
+ * Lo que siembra es la MISMA contrasena y el MISMO secreto TOTP para todas las cuentas, y los dos
+ * estan escritos en `demoCredentials.ts`, dentro del repositorio —el secreto es ademas el vector
+ * de prueba publico de la RFC—. Sirven para abrir una demostracion; en un despliegue real dejarian
+ * a la institucion entera, Administradores incluidos, con una clave y un segundo factor que
+ * cualquiera puede leer.
+ *
+ * Antes esto se ejecutaba en CADA peticion de acceso sin ninguna condicion. Ahora hace falta
+ * pedirlo con `SEED_DEMO_CREDENTIALS=1`.
+ */
 export async function asegurarCredenciales(): Promise<void> {
+  if (!SIEMBRA_PERMITIDA) return;
   if (await leer<boolean>(SEEDED_KEY)) return;
 
   const usuarios = await governance.listUsers();

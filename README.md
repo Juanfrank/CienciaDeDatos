@@ -77,6 +77,19 @@ Cambiar de conector es **un valor de configuracion**, no un cambio de codigo:
 npm run poblar -- --connector sql    # falla limpio: Sql se implementa en Fase 4
 ```
 
+### Las cuentas de demostracion NO se siembran solas
+
+`npm run dev` y las pruebas de navegador ponen `SEED_DEMO_CREDENTIALS=1`, y solo con esa variable
+se dan de alta las cuentas locales con la contrasena y el secreto TOTP que estan escritos en
+`apps/shell/src/server/demoCredentials.ts`. Sirven para abrir una demostracion y no valen para
+nada mas: son la MISMA clave y el MISMO segundo factor para todas las cuentas, y estan publicados
+en este repositorio.
+
+`npm start` no la lleva a proposito, porque es la forma del despliegue real. Un entorno sin la
+variable no siembra nada, y por eso **todavia no hay manera de crear el primer Administrador en
+un despliegue de verdad**: es lo que falta para que esto sea desplegable, y esta anotado en la
+hoja de ruta.
+
 ## Estructura
 
 ```

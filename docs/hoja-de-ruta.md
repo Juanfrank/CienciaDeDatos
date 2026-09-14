@@ -65,6 +65,14 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   siempre. Lo que tapaba: las dos pantallas de auditoria mostraban `u-admin` donde deberia ir un
   nombre. Arreglado en las dos, y la prueba ahora provoca el cambio y comprueba las cuatro
   columnas sin condicion.
+- **La siembra de credenciales de demostracion, cerrada con llave.** `asegurarCredenciales()` se
+  llamaba en CADA peticion de acceso sin ninguna condicion, y da de alta a todas las cuentas del
+  gobierno con la misma contrasena y el mismo secreto TOTP, los dos publicados en este
+  repositorio. Ahora hace falta `SEED_DEMO_CREDENTIALS=1`, que ponen `npm run dev` y las pruebas
+  de navegador y no pone ningun despliegue. Mirar `NODE_ENV` no habria servido: `next start`, con
+  el que corren las pruebas, ES produccion. Lo ata
+  `tools/coherence/autorizacion.spec.ts`, que comprueba las dos mitades —que la puerta sale antes
+  de escribir nada, y que la llave solo la tienen las superficies de demostracion declaradas—.
 - **Lo que la auditoria confirmo sano**, para no volver a mirarlo sin motivo: Argon2id con los
   parametros de OWASP y pimienta separada; sesion opaca de 8 h, revocable, con `httpOnly` y
   `secure` en produccion; el webhook de recarga falla cerrado y compara en tiempo constante; el
@@ -287,6 +295,42 @@ pantallas muestran ya el nombre de la persona.
 Lo que de verdad falta para esa clase de fallo es una guarda sobre la asercion condicional: un
 `expect` dentro de un `if` puede no ejecutarse nunca, y una prueba que no se ejecuta no se
 distingue de una que pasa.
+
+### 2.15 No hay forma de crear el PRIMER Administrador en un despliegue real
+
+Lo abre el arreglo anterior, y hay que decirlo claro: cerrar la siembra de demostracion deja un
+despliegue sin la variable **sin ninguna cuenta local**. Era lo correcto —lo que sembraba era una
+clave publica para toda la institucion— pero ahora falta la otra mitad.
+
+Lo que hace falta es un **comando de operacion**, no una ruta HTTP: una ruta de arranque es una
+puerta que queda abierta para siempre y que hay que acordarse de cerrar. El comando crea una sola
+cuenta de Administrador, con contrasena aleatoria impresa UNA vez y su propio secreto TOTP, y se
+niega a ejecutarse si ya existe alguna credencial local.
+
+Va junto al procedimiento de `docs/operations/acceso-de-emergencia.md`, que describe la situacion
+inversa —quedarse sin Administradores— y comparte con este la pregunta de fondo: quien puede
+crear el acceso cuando no hay acceso.
+
+Mientras tanto, `npm run dev` y las pruebas de navegador siguen funcionando con la bandera, asi
+que esto no bloquea el desarrollo: bloquea el despliegue, que ya estaba bloqueado por 1.4.
+
+### 2.16 La incorporacion en otros portales no funciona fuera del propio dominio
+
+Decidido dejarlo asi, y anotado para que no se redescubra.
+
+La cookie de sesion es `sameSite: 'lax'`. Un navegador NO la manda a un iframe de otro sitio, asi
+que un portal externo de verdad no vera datos nunca: vera el mensaje «Se requiere iniciar sesion»,
+incluso con la sesion abierta en otra pestana. Lo que SI funciona es el mismo sitio —subdominios
+del propio portal—, y la pagina incrustada ya se comporta bien en el caso que no funciona: no
+dibuja un formulario de contrasena dentro del marco ajeno, que ensenaria a la gente a escribir su
+clave donde no debe, sino un enlace que abre la aplicacion en otra pestana.
+
+Arreglarlo es `sameSite: 'none'`, y eso quita la UNICA proteccion CSRF que hoy tiene la
+aplicacion: no hay token anti-CSRF, la proteccion es `lax`. Hacerlo bien es `none` **mas** un
+token en todas las escrituras, y es un cambio que toca toda la superficie de escritura.
+
+No se hace hasta que haya un portal externo real que lo pida. Hacerlo antes seria debilitar algo
+que funciona para habilitar algo que nadie esta usando.
 
 ---
 

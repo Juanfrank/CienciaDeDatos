@@ -126,3 +126,57 @@ describe('ninguna ruta de datos contesta sin sesion', () => {
     expect(abiertas.sort()).toEqual([]);
   });
 });
+
+/**
+ * La siembra de credenciales de demostracion, detras de una puerta explicita.
+ *
+ * `asegurarCredenciales()` da de alta a TODAS las cuentas del gobierno con la misma contrasena y
+ * el mismo secreto TOTP, los dos escritos en `demoCredentials.ts` dentro de este repositorio —el
+ * secreto es ademas el vector de prueba publico de la RFC—. Se llamaba en cada peticion de acceso
+ * sin ninguna condicion: en un despliegue real, el primer intento de entrar dejaba a la
+ * institucion entera, Administradores incluidos, con una clave y un segundo factor publicos.
+ *
+ * Mirar `NODE_ENV` no habria servido, y por eso la puerta es una variable propia: las pruebas de
+ * navegador arrancan con `next start`, que ES produccion. Lo que se comprueba aqui es que la
+ * puerta siga puesta y que la llave solo la tengan las superficies de demostracion declaradas.
+ * Una plantilla de despliegue que anadiera la variable pasaria desapercibida de cualquier otra
+ * forma: es una linea de configuracion, y nadie la lee dos veces.
+ */
+describe('las credenciales de demostracion no se siembran solas', () => {
+  const BANDERA = 'SEED_DEMO_CREDENTIALS';
+
+  /** Donde SI se enciende, con el motivo por el que es legitimo. */
+  const DEMOSTRACION = new Map<string, string>([
+    ['playwright.config.mts', 'las pruebas de navegador necesitan cuentas contra las que entrar'],
+    ['apps/shell/project.json', 'el objetivo `dev`, que es la demostracion local'],
+    ['README.md', 'la documentacion que explica la puerta'],
+    ['docs/hoja-de-ruta.md', 'el registro de por que se cerro y que falta ahora (2.15)'],
+    ['tools/coherence/autorizacion.spec.ts', 'esta misma guarda'],
+  ]);
+
+  it('la siembra comprueba la bandera antes de escribir nada', () => {
+    const identidad = readFileSync(`${raiz}/apps/shell/src/server/identity.ts`, 'utf8');
+    expect(identidad).toContain(BANDERA);
+    // Y la comprobacion sale ANTES del bucle que guarda: sin el `return`, leer la variable no
+    // impide nada.
+    const cuerpo = identidad.slice(identidad.indexOf('export async function asegurarCredenciales'));
+    expect(cuerpo.slice(0, cuerpo.indexOf('credentialsStore.save'))).toMatch(
+      /if\s*\(\s*!\s*SIEMBRA_PERMITIDA\s*\)\s*return/,
+    );
+  });
+
+  it('solo las superficies de demostracion declaradas encienden la bandera', () => {
+    const encendida = listar("'*'").filter((archivo) => {
+      if (/^(package-lock\.json|\.claude\/)/.test(archivo)) return false;
+      try {
+        return readFileSync(`${raiz}/${archivo}`, 'utf8').includes(BANDERA);
+      } catch {
+        return false;
+      }
+    });
+    const inesperadas = encendida.filter(
+      (f) => !DEMOSTRACION.has(f) && f !== 'apps/shell/src/server/identity.ts',
+    );
+    expect(inesperadas.sort()).toEqual([]);
+  });
+});

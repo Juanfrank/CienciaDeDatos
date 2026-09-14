@@ -23,7 +23,7 @@
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "next dev apps/shell --port 4300"
+        "command": "SEED_DEMO_CREDENTIALS=1 next dev apps/shell --port 4300"
       }
     },
     "build": {

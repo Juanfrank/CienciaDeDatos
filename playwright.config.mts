@@ -71,7 +71,11 @@ function servidoresDe(indice: number) {
   const principal = 4310 + indice * 2;
   const segunda = principal + 1;
   const cache = `.cache-e2e-${indice}`;
-  const entorno = `CACHE_DIR=${cache} AUTH_PEPPER=${PIMIENTA} `;
+  // `SEED_DEMO_CREDENTIALS` enciende la siembra de las cuentas de demostracion, que es contra lo
+  // que entra `session.ts`. Es una puerta explicita justamente porque `next start` es produccion:
+  // sin decirlo aqui, estas pruebas no tendrian con que iniciar sesion, y un despliegue real
+  // —que no lleva la variable— no siembra nada.
+  const entorno = `CACHE_DIR=${cache} AUTH_PEPPER=${PIMIENTA} SEED_DEMO_CREDENTIALS=1 `;
 
   return [
     {
