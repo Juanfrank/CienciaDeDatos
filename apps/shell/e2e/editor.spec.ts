@@ -461,3 +461,103 @@ test.describe('lo publicado se guarda, no se pisa (4.5)', () => {
     expect(respuesta.status()).toBe(403);
   });
 });
+
+/**
+ * La cola de revision del panel — seccion 4.1.
+ *
+ * La aprobacion vivia en `/editor`, mezclada con los borradores propios de quien miraba, y el
+ * motivo de la devolucion se pedia con `window.prompt`: un dialogo del navegador sin etiqueta,
+ * sin tema y sin lector de pantalla, que 4.9 no admite.
+ */
+test.describe('cola de revision (4.1)', () => {
+  test('dice quien propuso, que cambia, y deja decidir desde ahi', async ({ page }) => {
+    const slug = newSlug('cola');
+
+    // Un Administrador publica una primera version, para que haya con que comparar.
+    await asLogin(page, 'u-admin');
+    await objectDraft(page, slug);
+    await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'enviar' } });
+    await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'publicar' } });
+
+    // Y ahora se propone un cambio: un objeto mas.
+    await page.request.post(`/api/modules/${slug}/status`, {
+      data: { transition: 'devolver', motivo: 'falta la segunda cifra' },
+    });
+    const actual = await (await page.request.get(`/api/modules/${slug}/edit`)).json();
+    const pagina = actual.modulo.pages[0];
+    await page.request.put(`/api/modules/${slug}/edit`, {
+      data: {
+        paginas: [
+          {
+            ...pagina,
+            items: [
+              ...pagina.items,
+              {
+                id: 'kpi-dos',
+                position: { x: 3, y: 0, w: 3, h: 2 },
+                instance: {
+                  instanceId: 'kpi-dos',
+                  objectId: 'tarjeta-kpi',
+                  version: '1.0.0',
+                  title: 'Resueltos',
+                  binding: {
+                    datasetId: 'casos-por-distrito-trimestre',
+                    dimensions: [],
+                    measures: ['CasosPendientes'],
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+    await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'enviar' } });
+
+    // El aviso de la lista LLEVA a la cola: antes decia cuantas habia y no iba a ninguna parte.
+    await page.goto('/admin/modules');
+    await page.getByTestId('ir-a-pendientes').click();
+    await expect(page).toHaveURL(/\/admin\/modules\/pending/);
+
+    const fila = page.getByTestId(`pending-${slug}`);
+    await expect(fila).toBeVisible();
+    await expect(fila).toContainText('Juan F. Medina C.');
+    // Y el cambio, en palabras: el objeto nuevo por su titulo, no por su identificador.
+    await expect(page.getByTestId(`pending-diff-${slug}`)).toContainText('Resueltos');
+
+    await page.getByTestId(`approve-${slug}`).click();
+    await expect(page.getByTestId(`pending-${slug}`)).toHaveCount(0);
+  });
+
+  test('devolver exige el motivo, en un campo de verdad y no en un prompt', async ({ page }) => {
+    const slug = newSlug('devolver');
+    await asLogin(page, 'u-ana');
+    await objectDraft(page, slug);
+    await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'enviar' } });
+
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules/pending');
+    await page.getByTestId(`return-${slug}`).click();
+
+    // El boton no se puede pulsar sin motivo: es la misma regla que el servidor exige, dicha
+    // antes de gastar un viaje.
+    await expect(page.getByTestId(`return-confirm-${slug}`)).toBeDisabled();
+    await page.getByTestId(`return-reason-${slug}`).fill('Falta la comparacion con el trimestre anterior');
+    await expect(page.getByTestId(`return-confirm-${slug}`)).toBeEnabled();
+    await page.getByTestId(`return-confirm-${slug}`).click();
+
+    await expect(page.getByTestId(`pending-${slug}`)).toHaveCount(0);
+
+    // Y vuelve a ser un borrador de quien lo propuso. Se comprueba desde SU sesion: un borrador
+    // es personal, y ni un Administrador lo ve — que es justamente otra prueba de este archivo.
+    await asLogin(page, 'u-ana');
+    const detalle = await (await page.request.get(`/api/modules/${slug}/edit`)).json();
+    expect(detalle.modulo.status).toBe('borrador');
+  });
+
+  test('un Colaborador no entra a la cola: no es suya la decision', async ({ page }) => {
+    await asLogin(page, 'u-ana');
+    await page.goto('/admin/modules/pending');
+    await expect(page).toHaveURL(/admin-without-permission/);
+  });
+});

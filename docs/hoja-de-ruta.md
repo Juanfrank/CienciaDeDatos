@@ -65,6 +65,19 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   siempre. Lo que tapaba: las dos pantallas de auditoria mostraban `u-admin` donde deberia ir un
   nombre. Arreglado en las dos, y la prueba ahora provoca el cambio y comprueba las cuatro
   columnas sin condicion.
+- **La cola de revision, en el panel y con el cambio delante (4.1).** Aprobar ocurria en
+  `/editor`, mezclado con los borradores propios de quien miraba: para revisar una propuesta habia
+  que reconocerla entre los suyos, abrirla y acordarse de como estaba antes. Ahora
+  `/admin/modules/pending` lista solo lo que espera decision, con quien lo propuso, cuanto lleva
+  esperando y **que cambia** respecto a lo publicado —paginas y objetos que entran, salen o
+  cambian, por su titulo—. El resumen sale de `diffModules`, que compara por IDENTIDAD y no por
+  posicion: comparar por posicion convierte «se movieron dos objetos» en «cambiaron los dos», y un
+  resumen que exagera se deja de leer igual que uno que miente.
+- **Y el motivo de la devolucion ya no se pide con `window.prompt`.** Era un dialogo del
+  navegador: sin etiqueta asociada, sin tema, sin lector de pantalla y bloqueable. La seccion 4.9
+  dice que la accesibilidad no es opcional. Ahora es un campo con su `<label>` dentro de la pagina,
+  y el boton esta deshabilitado mientras este vacio, que es la misma regla que el servidor exige
+  dicha antes de gastar un viaje.
 - **Lo publicado se guarda, ya no se pisa (4.5).** El modelo decia versionar desde el primer dia
   —el comentario de `version` dice literalmente que un objeto publicado nunca se modifica, que se
   publica otra version— y lo que hacia el codigo era `modules.save(...)` con
@@ -247,7 +260,7 @@ lea. Ha pasado cinco veces durante el renombrado.
 
 Hoy hay un trinquete: `tools/coherence/i18n.spec.ts` cuenta las cadenas sueltas y falla si suben
 del tope. El numero solo puede bajar, y quien migre una cadena baja el tope en el mismo commit.
-Empezo en 322 con 53 claves; va por **219 con 253 claves**, y las cuatro pantallas que mas
+Empezo en 322 con 53 claves; va por **218 con 290 claves**, y las cuatro pantallas que mas
 acumulaban ya no estan entre las peores.
 
 Migrar de golpe es un cambio grande y mecanico. El orden sensato sigue siendo por pantalla,

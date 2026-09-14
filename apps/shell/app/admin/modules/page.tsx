@@ -39,7 +39,12 @@ export default async function ModulosPage() {
           {t('admin.modules.awaiting', {
             n: esperando.length,
             nombres: t.lista(esperando.map((m) => m.name)),
-          })}
+          })}{' '}
+          {/* El aviso decia cuantas hay y no llevaba a ninguna parte: quien lo lee tiene que
+              poder ir a decidir desde ahi. */}
+          <Link href="/admin/modules/pending" data-testid="ir-a-pendientes">
+            {t('admin.review.go')}
+          </Link>
         </div>
       ) : null}
 

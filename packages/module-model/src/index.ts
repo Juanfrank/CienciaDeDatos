@@ -54,3 +54,4 @@ export {
   type ValidateModuleInput,
 } from './validation';
 export { healthOf, type HealthSummary, type ModuleHealth } from './health';
+export { diffModules, type ModuleDiff, type ObjectChange } from './diff';

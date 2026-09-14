@@ -9,13 +9,15 @@ import {
 } from '@app/access-control';
 import {
   type ModuleDefinition,
+  type ModuleDiff,
   type ModuleStatus,
   type PublishBlocker,
+  diffModules,
   findPublishBlockers,
 } from '@app/module-model';
 import { roleMoreHeightOf } from './admin';
 import { navigationFor } from './context';
-import { changeRecord, treeEventRecord } from './audit';
+import { auditList, changeRecord, treeEventRecord } from './audit';
 import { governance } from './governance';
 import { moduloEncendido, disabledSlugs } from './settings';
 import { modules, type PublishedVersion } from './moduleStore';
@@ -294,6 +296,54 @@ export async function publicar(input: InputTransition): Promise<ModuleDefinition
   });
 
   return actualizado;
+}
+
+/**
+ * Lo que espera una decision, con lo que hace falta para tomarla.
+ *
+ * Hoy la aprobacion ocurre en `/editor`, mezclada con los borradores propios de quien mira. Un
+ * Administrador que revisa una propuesta tiene que reconocerla entre los suyos, abrirla, y
+ * acordarse de como estaba antes. Aqui esta separado y con el cambio delante: quien aprueba sin
+ * ver que cambia esta firmando en blanco.
+ */
+export interface PendingReview {
+  module: ModuleDefinition;
+  /** Quien la propuso. Sale de la auditoria, que es donde consta el acto de proponer. */
+  proposedBy?: string;
+  proposedAt?: string;
+  /** Contra la ultima version publicada. Ausente si el modulo nunca se publico. */
+  diff?: ModuleDiff;
+  /** Lo que impide publicarlo hoy, si lo hay. */
+  locks: PublishBlocker[];
+}
+
+export async function pendingReviews(actor: ModuleActor): Promise<PendingReview[]> {
+  permission(actor, 'publicar-modulo-institucional');
+
+  const esperando = (await modules.list()).filter(
+    (m) => m.status === 'pendiente-de-aprobacion',
+  );
+  const eventos = await auditList();
+
+  return Promise.all(
+    esperando.map(async (module) => {
+      // El evento de propuesta mas reciente de ESTE modulo. Se busca del final hacia atras
+      // porque un modulo puede haberse propuesto, devuelto y vuelto a proponer.
+      const propuesta = [...eventos]
+        .reverse()
+        .find((e) => e.entityId === module.moduleId && e.action === 'submit');
+
+      const historial = await modules.history(module.moduleId);
+      const ultima = historial[0];
+
+      return {
+        module,
+        ...(propuesta ? { proposedBy: propuesta.actorId, proposedAt: propuesta.timestamp } : {}),
+        ...(ultima ? { diff: diffModules(ultima.definition, module) } : {}),
+        locks: await publicationLocks(module),
+      };
+    }),
+  );
 }
 
 /**

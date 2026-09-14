@@ -55,6 +55,12 @@ export const GRUPOS: GrupoDeAdmin[] = [
         indicador: 'papelera',
         hijas: [
           {
+            href: '/admin/modules/pending',
+            label: 'Propuestas por revisar',
+            desc: 'Lo que espera una decision, con quien lo propuso y que cambia respecto a lo publicado.',
+            icono: 'reloj',
+          },
+          {
             href: '/admin/modules/tree',
             label: 'Organizacion general',
             desc: 'La estructura canonica: donde vive cada modulo y que ambito hereda.',

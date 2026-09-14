@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { listUsers } from '../../../../../src/server/context';
 import { modules } from '../../../../../src/server/moduleStore';
 import { RestoreVersion } from '../../../../../src/components/admin/RestoreVersion';
+import { translator } from '../../../../../src/server/locale';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,46 +19,42 @@ export default async function HistoryPage({ params }: { params: Promise<{ slug: 
   const modulo = await modules.bySlug(slug);
   if (!modulo) notFound();
 
-  const [historial, personas] = await Promise.all([
+  const [historial, personas, t] = await Promise.all([
     modules.history(modulo.moduleId),
     listUsers(),
+    translator(),
   ]);
   const nombreDe = (id: string) =>
     personas.find((u) => u.userId === id)?.displayName ?? id;
 
   return (
     <section>
-      <h2>Historial de {modulo.name}</h2>
-      <p className="muted-text">
-        Cada publicacion guarda una foto completa de la definicion. Volver atras no reescribe
-        ninguna: publica una version nueva con el contenido de la que se elija, y queda dicho de
-        cual salio.
-      </p>
+      <h2>{t('admin.history.title', { modulo: modulo.name })}</h2>
+      <p className="muted-text">{t('admin.history.intro')}</p>
 
       <p>
-        <Link href="/admin/modules">← Modulos</Link>
+        <Link href="/admin/modules">← {t('admin.modules.title')}</Link>
         {' · '}
-        <Link href={`/editor/${modulo.slug}`}>Editar</Link>
+        <Link href={`/editor/${modulo.slug}`}>{t('action.edit')}</Link>
         {' · '}
-        <Link href={`/m/${modulo.slug}`}>Ver</Link>
+        <Link href={`/m/${modulo.slug}`}>{t('action.view')}</Link>
       </p>
 
       {historial.length === 0 ? (
         <p className="muted-text" data-testid="history-empty">
-          Este modulo todavia no se ha publicado ninguna vez. El historial empieza en la primera
-          publicacion: no se inventa hacia atras.
+          {t('admin.history.empty')}
         </p>
       ) : (
         <div className="container-table">
           <table className="tabla" data-testid="history-table">
             <thead>
               <tr>
-                <th scope="col">Version</th>
-                <th scope="col">Publicada</th>
-                <th scope="col">Por</th>
-                <th scope="col">Paginas</th>
-                <th scope="col">Objetos</th>
-                <th scope="col">Accion</th>
+                <th scope="col">{t('admin.history.column.version')}</th>
+                <th scope="col">{t('admin.history.column.published')}</th>
+                <th scope="col">{t('admin.history.column.by')}</th>
+                <th scope="col">{t('admin.modules.column.pages')}</th>
+                <th scope="col">{t('admin.modules.column.objects')}</th>
+                <th scope="col">{t('admin.history.column.action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -70,11 +67,14 @@ export default async function HistoryPage({ params }: { params: Promise<{ slug: 
                       {vigente ? (
                         <span className="insignia" data-testid={`history-vigente-${v.version}`}>
                           {' '}
-                          Vigente
+                          {t('admin.history.current')}
                         </span>
                       ) : null}
                       {v.restoredFrom === undefined ? null : (
-                        <span className="muted-text"> · restaurada de v{v.restoredFrom}</span>
+                        <span className="muted-text">
+                          {' · '}
+                          {t('admin.history.restoredFrom', { version: v.restoredFrom })}
+                        </span>
                       )}
                     </th>
                     <td>

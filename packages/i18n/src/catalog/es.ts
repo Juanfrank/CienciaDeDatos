@@ -282,6 +282,47 @@ export const es = {
   'admin.sources.column.table': 'Tabla',
   'admin.sources.column.aggregation': 'Agregacion',
 
+  // Cola de revision y historial de versiones — secciones 4.1 y 4.5.
+  'admin.review.title': 'Propuestas por revisar',
+  'admin.review.intro':
+    'Lo que un Colaborador propuso y espera una decision. Publicar lo pone delante de toda la institucion; devolverlo exige decir por que, porque es lo unico que le dice a quien lo propuso que tiene que cambiar.',
+  'admin.review.empty': 'No hay ninguna propuesta esperando. Nada que decidir.',
+  'admin.review.proposedBy': 'Propuesto por {quien}',
+  'admin.review.proposed': 'Propuesto',
+  'admin.review.locked': 'No se puede publicar todavia: {detalle}',
+  'admin.review.first': 'Es la primera publicacion de este modulo: no hay nada anterior con lo que compararlo.',
+  'admin.review.identical': 'No cambia nada respecto a lo publicado. Puede que se propusiera por error.',
+  'admin.review.renamed': 'Se renombra: «{de}» pasa a «{a}»',
+  'admin.review.pageAdded': 'Pagina nueva: {nombre}',
+  'admin.review.pageRemoved': 'Pagina que se quita: {nombre}',
+  'admin.review.objectAdded': 'Objeto nuevo: {titulo}',
+  'admin.review.objectRemoved': 'Objeto que se quita: {titulo}',
+  'admin.review.objectChanged': 'Cambia: {titulo}',
+  'admin.review.publish': 'Publicar',
+  'admin.review.return': 'Devolver a borrador',
+  'admin.review.reason': 'Motivo de la devolucion (obligatorio)',
+  'admin.review.returnConfirm': 'Devolver',
+  'admin.review.failed': 'No se pudo completar la operacion.',
+  'admin.review.go': 'Revisarlas',
+  'admin.history.title': 'Historial de {modulo}',
+  'admin.history.intro':
+    'Cada publicacion guarda una foto completa de la definicion. Volver atras no reescribe ninguna: publica una version nueva con el contenido de la que se elija, y queda dicho de cual salio.',
+  'admin.history.empty':
+    'Este modulo todavia no se ha publicado ninguna vez. El historial empieza en la primera publicacion: no se inventa hacia atras.',
+  'admin.history.column.version': 'Version',
+  'admin.history.column.published': 'Publicada',
+  'admin.history.column.by': 'Por',
+  'admin.history.column.action': 'Accion',
+  'admin.history.current': 'Vigente',
+  'admin.history.restoredFrom': 'restaurada de v{version}',
+  'admin.history.restore': 'Restaurar',
+  'admin.history.restoreWarn': 'Se publicara una version nueva con el contenido de la v{version}.',
+  'admin.history.restoreConfirm': 'Publicar el contenido de la v{version}',
+  'admin.history.restoring': 'Publicando…',
+  'admin.history.restoreFailed': 'No se pudo restaurar.',
+  'action.back': 'Volver',
+  'action.edit': 'Editar',
+  'action.view': 'Ver',
 } as const;
 
 export type MessageKey = keyof typeof es;

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useTranslator } from '../Locale';
 
 /**
  * Volver a publicar el contenido de una version anterior — seccion 4.5.
@@ -12,6 +13,7 @@ import { useState } from 'react';
  */
 export function RestoreVersion({ slug, version }: { slug: string; version: number }) {
   const router = useRouter();
+  const t = useTranslator();
   const [enCurso, setEnCurso] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmando, setConfirmando] = useState(false);
@@ -27,7 +29,7 @@ export function RestoreVersion({ slug, version }: { slug: string; version: numbe
     setEnCurso(false);
     if (!respuesta.ok) {
       const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(cuerpo.error ?? 'No se pudo restaurar.');
+      setError(cuerpo.error ?? t('admin.history.restoreFailed'));
       return;
     }
     setConfirmando(false);
@@ -43,7 +45,7 @@ export function RestoreVersion({ slug, version }: { slug: string; version: numbe
           data-testid={`restore-v${version}`}
           onClick={() => setConfirmando(true)}
         >
-          Restaurar
+          {t('admin.history.restore')}
         </button>
         {error ? (
           <p className="aviso notice-error" data-testid={`restore-error-v${version}`}>
@@ -55,10 +57,8 @@ export function RestoreVersion({ slug, version }: { slug: string; version: numbe
   }
 
   return (
-    <div role="group" aria-label={`Restaurar la version ${version}`}>
-      <p className="muted-text">
-        Se publicara una version nueva con el contenido de la v{version}.
-      </p>
+    <div role="group" aria-label={t('admin.history.restoreConfirm', { version })}>
+      <p className="muted-text">{t('admin.history.restoreWarn', { version })}</p>
       <button
         type="button"
         className="button-primario"
@@ -66,7 +66,7 @@ export function RestoreVersion({ slug, version }: { slug: string; version: numbe
         disabled={enCurso}
         onClick={() => void restaurar()}
       >
-        {enCurso ? 'Publicando…' : `Publicar el contenido de la v${version}`}
+        {enCurso ? t('admin.history.restoring') : t('admin.history.restoreConfirm', { version })}
       </button>{' '}
       <button
         type="button"
@@ -74,7 +74,7 @@ export function RestoreVersion({ slug, version }: { slug: string; version: numbe
         data-testid={`restore-cancel-v${version}`}
         onClick={() => setConfirmando(false)}
       >
-        Cancelar
+        {t('action.cancel')}
       </button>
     </div>
   );
