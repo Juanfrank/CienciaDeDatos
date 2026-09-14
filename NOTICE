@@ -11,6 +11,13 @@ copia del producto.
 - **Material Color Utilities** — Copyright Google LLC.
   https://github.com/material-foundation/material-color-utilities
 
+## ISC License
+
+- **Lucide** — Copyright Lucide Contributors. https://lucide.dev
+  Solo el TRAZADO del icono de engranaje, copiado en
+  `packages/ui-components/src/presentation/icons.ts`. No es una dependencia: el principio 1 dice
+  que el navegador no habla con ningun origen ajeno, y eso incluye una fuente de iconos.
+
 ## MIT License
 
 - **Next.js** — Copyright Vercel, Inc.

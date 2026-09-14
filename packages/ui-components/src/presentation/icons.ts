@@ -65,21 +65,35 @@ export const ICON_STROKES = {
   ojo: 'M12 5C5 5 2 12 2 12s3 7 10 7 10-7 10-7-3-7-10-7zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6z',
   'ojo-tachado':
     'M12 5C5 5 2 12 2 12s3 7 10 7 10-7 10-7-3-7-10-7zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM4 4l16 16',
+  // Una lupa. El buscador llevaba el icono de «ver» —una persona— porque no habia lupa en el
+  // catalogo, y una persona delante de un campo de texto no dice «buscar», dice «usuario».
+  lupa: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5 20 20',
   // Acciones sobre una fila del arbol: mover, configurar, permisos.
   'flecha-arriba': 'M12 20V5M6 11l6-6 6 6',
   'flecha-abajo': 'M12 4v15M6 13l6 6 6-6',
-  // «Mover a» no es una flecha mas: lleva a otro sitio del arbol, no una posicion arriba. Una
-  // carpeta con una flecha entrando dice eso y no se confunde con las dos de al lado.
-  mover: 'M4 6h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM12 17v-5M9.5 14.5 12 12l2.5 2.5',
   /*
-   * Una tuerca de seis dientes CORTOS sobre un anillo ancho.
+   * «Mover a»: una carpeta con una flecha hacia la derecha DENTRO.
    *
-   * Dos intentos antes: la tuerca clasica de ocho dientes se funde en una mancha a 18 px, y un
-   * circulo pequeno con ocho radios largos se lee como un sol. Lo que la distingue de un sol es
-   * que el anillo sea grande y los dientes cortos — el hueco central es lo que dice «tuerca».
+   * Antes era la misma carpeta con una flecha hacia arriba y no se entendia: al lado de las dos
+   * flechas de subir y bajar parecia una tercera flecha, y lo que hace no es mover una posicion
+   * sino llevar a otro sitio del arbol. La flecha horizontal, dentro de la carpeta, dice «va a
+   * parar aqui dentro».
+   */
+  mover: 'M4 6h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM8.5 14.5h7M13 12l2.5 2.5L13 17',
+  /*
+   * El engranaje de Lucide, no uno dibujado a mano.
+   *
+   * Dos intentos propios antes: la tuerca clasica de ocho dientes se funde en una mancha a 18 px,
+   * y el circulo con radios se lee como un sol. Un engranaje legible a ese tamano no es un dibujo
+   * geometrico, son doce arcos calculados — y eso ya esta resuelto. Se copia el trazado, no se
+   * anade una dependencia: el principio 1 dice que el navegador no habla con nadie mas, y eso
+   * incluye una fuente de iconos de un tercero.
+   *
+   * Lucide, licencia ISC — https://lucide.dev. Consta en `NOTICE`, que es donde se conserva la
+   * atribucion. El `<circle>` del original va aqui como arco, porque este catalogo es de trazados.
    */
   tuerca:
-    'M12 16.2a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4zM12 3.2v2.4M12 18.4v2.4M3.4 12h2.4M18.2 12h2.4M5.9 5.9l1.7 1.7M16.4 16.4l1.7 1.7M18.1 5.9l-1.7 1.7M7.6 16.4l-1.7 1.7',
+    'M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
   // Una persona con un ojo: gestionar QUIEN ve esto. El `view` de al lado es solo la persona.
   'persona-ojo':
     'M9.5 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 20a6.5 6.5 0 0 1 11-4.7M14 18.5s2-3 4.5-3 4.5 3 4.5 3-2 3-4.5 3-4.5-3-4.5-3zM18.5 19v.4',
