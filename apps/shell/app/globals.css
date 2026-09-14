@@ -4202,3 +4202,18 @@ th[aria-sort='descending'] .table__flecha {
   padding: var(--space-xs);
   min-width: 0;
 }
+
+/*
+ * El historial plegado dentro de una celda de tabla.
+ *
+ * `summary` es un bloque, asi que en una columna estrecha el triangulo y la version caian en
+ * lineas distintas: la celda decia «v1.0.0» debajo de una flecha suelta, que se lee como dos
+ * cosas y no como una. `inline-flex` los mantiene juntos y `nowrap` impide que el numero se parta.
+ */
+.tabla details > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  white-space: nowrap;
+  cursor: pointer;
+}
