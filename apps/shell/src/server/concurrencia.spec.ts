@@ -5,6 +5,9 @@ import { changeRecord, auditList, clearAudit } from './audit';
 import { modules } from './moduleStore';
 import { saveBookmark, bookmarksList, deleteBookmark } from './bookmarks';
 import { governance } from './governance';
+import { proposeResource, decideProposal, listProposals } from './catalogo';
+import type { Actor } from '@app/access-control';
+import { sessions, loginAudit, loginAuditList } from './identity';
 
 /**
  * Lo que pasa cuando dos peticiones llegan a la vez.
@@ -130,6 +133,86 @@ describe('dos peticiones a la vez', () => {
     expect(await deleteBookmark('suyo', 'beto')).toBe(false);
     expect(await deleteBookmark('suyo', 'ana')).toBe(true);
     expect(await deleteBookmark('suyo', 'ana')).toBe(false);
+  });
+
+  it('dos sesiones abiertas a la vez se revocan las DOS', async () => {
+    // «Cerrar sesion en todos los dispositivos» recorre el indice por persona. Si abrir dos
+    // sesiones a la vez dejaba una fuera del indice, la revocacion la dejaba abierta: una
+    // revocacion que no revoca es peor que no tenerla.
+    const principal = {
+      userId: 'u-carrera',
+      authProvider: 'local' as const,
+      userPrincipalName: 'carrera@externo.org',
+      displayName: 'Carrera',
+      roles: [],
+      securityContext: {},
+    };
+
+    const [una, otra] = await Promise.all([
+      sessions.issue(principal, 'equipo'),
+      sessions.issue(principal, 'equipo'),
+    ]);
+
+    await sessions.revokeAllFor('u-carrera');
+
+    expect(await sessions.resolve(una.sessionId)).toBeNull();
+    expect(await sessions.resolve(otra.sessionId)).toBeNull();
+  });
+
+  it('diez intentos de acceso simultaneos quedan los diez en el registro', async () => {
+    // Los intentos fallidos llegan en rafaga, que es cuando el registro hace falta. Anotado
+    // uno de diez, el rastro de un ataque se lee como un error de dedo.
+    const antes = (await loginAuditList()).length;
+    await Promise.all(
+      Array.from({ length: 10 }, (_, i) =>
+        loginAudit.recordLogin({
+          timestamp: new Date().toISOString(),
+          authProvider: 'local',
+          attemptedPrincipal: `intento-${i}@externo.org`,
+          outcome: 'fallo',
+          reason: 'credenciales-invalidas',
+        }),
+      ),
+    );
+
+    expect((await loginAuditList()).length).toBe(antes + 10);
+  });
+
+  it('dos revisores no pueden decidir la MISMA propuesta', async () => {
+    // Los dos abren la lista, los dos la ven pendiente y los dos deciden. Sin turno, la
+    // decision que queda escrita es la del que llegue el ultimo: la propuesta acaba aprobada
+    // por quien no la aprobo, o devuelta con el motivo del otro.
+    const actor: Actor = { userId: 'u-admin', role: 'administrador' };
+    const propuesta = await proposeResource(actor, {
+      objectId: 'barras',
+      version: '9.0.0',
+      summary: 'Prueba de decision simultanea',
+    });
+
+    const decisiones = await Promise.allSettled([
+      decideProposal(actor, propuesta.id, 'aprobar'),
+      decideProposal(actor, propuesta.id, 'devolver', 'no procede'),
+    ]);
+
+    const hechas = decisiones.filter((d) => d.status === 'fulfilled');
+    expect(hechas).toHaveLength(1);
+    // Y la que fallo lo hizo diciendo por que, no con un error cualquiera.
+    const fallida = decisiones.find((d) => d.status === 'rejected');
+    expect((fallida as PromiseRejectedResult).reason).toMatchObject({ status: 409 });
+  });
+
+  it('la misma propuesta enviada dos veces a la vez se guarda UNA', async () => {
+    const actor: Actor = { userId: 'u-admin', role: 'administrador' };
+    const envios = await Promise.allSettled([
+      proposeResource(actor, { objectId: 'lineas', version: '9.9.9', summary: 'Una' }),
+      proposeResource(actor, { objectId: 'lineas', version: '9.9.9', summary: 'Otra' }),
+    ]);
+
+    expect(envios.filter((e) => e.status === 'fulfilled')).toHaveLength(1);
+    const pendientes = (await listProposals()).filter(
+      (p) => p.objectId === 'lineas' && p.version === '9.9.9',
+    );
+    expect(pendientes).toHaveLength(1);
   });
 
   it('dos equipos creados a la vez quedan los dos en el gobierno', async () => {

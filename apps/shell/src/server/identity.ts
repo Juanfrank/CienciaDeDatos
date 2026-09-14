@@ -16,7 +16,7 @@ import {
   type LoginAuditEvent,
   type ResetRecord,
 } from '@app/auth';
-import { borrar, write, leer, readList } from './almacenCompartido';
+import { borrar, mutar, write, leer, readList } from './almacenCompartido';
 import { DEMO_KEY, SECRETO_TOTP_DEMO, userMail, mailUser } from './demoCredentials';
 import { governance } from './governance';
 
@@ -64,10 +64,15 @@ class SessionsStore implements ISessionStore {
   async create(session: AppSession): Promise<void> {
     await write(KEY_SESSION(session.sessionId), session);
 
-    const indice = await readList<string>(SESSIONS_KEY_OF(session.userId));
-    if (!indice.includes(session.sessionId)) {
-      await write(SESSIONS_KEY_OF(session.userId), [session.sessionId, ...indice]);
-    }
+    // El indice se toca bajo turno. Dos inicios de sesion de la misma persona a la vez leian el
+    // mismo indice y el segundo borraba el id del primero: la sesion seguia viva pero ya no
+    // figuraba, y «cerrar sesion en todos los dispositivos» —que recorre este indice— la dejaba
+    // abierta. Una revocacion que no revoca es peor que no tenerla.
+    await mutar<string[]>(SESSIONS_KEY_OF(session.userId), (indice) =>
+      (indice ?? []).includes(session.sessionId)
+        ? (indice ?? [])
+        : [session.sessionId, ...(indice ?? [])],
+    );
   }
   async get(sessionId: string): Promise<AppSession | null> {
     return (await leer<AppSession>(KEY_SESSION(sessionId))) ?? null;
@@ -79,10 +84,8 @@ class SessionsStore implements ISessionStore {
     const sesion = await this.get(sessionId);
     await borrar(KEY_SESSION(sessionId));
     if (sesion) {
-      const indice = await readList<string>(SESSIONS_KEY_OF(sesion.userId));
-      await write(
-        SESSIONS_KEY_OF(sesion.userId),
-        indice.filter((id) => id !== sessionId),
+      await mutar<string[]>(SESSIONS_KEY_OF(sesion.userId), (indice) =>
+        (indice ?? []).filter((id) => id !== sessionId),
       );
     }
   }
@@ -105,8 +108,12 @@ const MAX_AUDIT = 200;
 
 class LoginAudit implements IAuditLog {
   async recordLogin(event: LoginAuditEvent): Promise<void> {
-    const actuales = await readList<LoginAuditEvent>(KEY_AUDIT_LOGIN);
-    await write(KEY_AUDIT_LOGIN, [event, ...actuales].slice(0, MAX_AUDIT));
+    // Bajo turno: los intentos fallidos llegan precisamente en rafaga, que es cuando el registro
+    // hace falta. Leyendo y escribiendo por separado, de diez intentos simultaneos quedaba
+    // anotado uno, y el rastro de un ataque se veria como un error de dedo.
+    await mutar<LoginAuditEvent[]>(KEY_AUDIT_LOGIN, (actuales) =>
+      [event, ...(actuales ?? [])].slice(0, MAX_AUDIT),
+    );
   }
 }
 
@@ -214,13 +221,16 @@ class ResetsStore implements IResetStore {
   async save(record: ResetRecord): Promise<void> {
     await write(RESET_KEY(record.resetId), record);
 
-    const indice = await readList<string>(KEY_RESET_INDEX(record.email));
-    if (!indice.includes(record.resetId)) {
-      // Se conservan los ultimos veinte por cuenta. El indice existe para poder invalidar los
-      // vivos al emitir uno nuevo; guardarlos todos para siempre no aporta nada que la auditoria
-      // de acceso no tenga ya.
-      await write(KEY_RESET_INDEX(record.email), [record.resetId, ...indice].slice(0, 20));
-    }
+    // Se conservan los ultimos veinte por cuenta. El indice existe para poder invalidar los
+    // vivos al emitir uno nuevo; guardarlos todos para siempre no aporta nada que la auditoria
+    // de acceso no tenga ya. Bajo turno, como el de sesiones: un id que no llegue al indice es
+    // un enlace de restablecimiento que sigue valiendo despues de que se emita otro.
+    await mutar<string[]>(KEY_RESET_INDEX(record.email), (indice) => {
+      const actual = indice ?? [];
+      return actual.includes(record.resetId)
+        ? actual
+        : [record.resetId, ...actual].slice(0, 20);
+    });
   }
 
   async get(resetId: string): Promise<ResetRecord | null> {

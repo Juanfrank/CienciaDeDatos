@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { keyedLock } from '@app/caching';
 import { Algorithm, hash, verify } from '@node-rs/argon2';
 import { TOTP } from 'otpauth';
 import {
@@ -156,8 +157,34 @@ export class LocalIdentityProvider implements IIdentityProvider {
     }
   }
 
+  /**
+   * Turno por CUENTA para el inicio de sesion.
+   *
+   * El bloqueo por intentos fallidos (4.7.2) solo sirve si cuenta los intentos, y contarlos es
+   * leer el registro, sumar uno y guardarlo. Quien ataca no prueba una contrasena y espera la
+   * respuesta: lanza todas a la vez. Sin turno, los diez intentos leen el contador a cero, los
+   * diez escriben uno, y la cuenta no se bloquea nunca — el bloqueo queda escrito, probado en
+   * serie, y sin impedir nada.
+   *
+   * Por cuenta y no global: serializarlo todo pondria el inicio de sesion de la institucion
+   * entera a esperar detras de quien se equivoque de contrasena, y cada verificacion Argon2id
+   * tarda decenas de milisegundos a proposito.
+   *
+   * El alcance es el proceso. Con varias instancias, el contador lo tiene que resolver la base
+   * de identidad —un `UPDATE ... SET failedAttempts = failedAttempts + 1`—, que es donde va.
+   */
+  private readonly turno = keyedLock();
+
   async authenticate(credentials: unknown): Promise<AuthenticatedPrincipal> {
-    const { email, password, totpCode, sourceIp } = credentials as LocalCredentials;
+    const { email } = credentials as LocalCredentials;
+    // Una cuenta inexistente tambien toma turno, y con la misma clave: no tomarlo seria una
+    // diferencia de tiempo medible desde fuera entre un correo que existe y uno que no, que es
+    // justo lo que el hash de relleno de mas abajo evita.
+    return this.turno(email.toLowerCase(), () => this.autenticar(credentials as LocalCredentials));
+  }
+
+  private async autenticar(credentials: LocalCredentials): Promise<AuthenticatedPrincipal> {
+    const { email, password, totpCode, sourceIp } = credentials;
     const registro = await this.store.findByEmail(email);
 
     // Cuenta inexistente: mismo error y mismo camino que una contraseña erronea, para no

@@ -476,3 +476,103 @@ describe('SessionService (6.7 y 4.10.2)', () => {
     expect(await service.resolve(session.sessionId)).toBeNull();
   });
 });
+
+describe('fuerza bruta en paralelo (4.7.2)', () => {
+  /**
+   * El bloqueo por intentos fallidos solo sirve si CUENTA los intentos.
+   *
+   * Quien ataca no prueba una contrasena y espera la respuesta: lanza todas a la vez. Si cada
+   * intento lee el contador antes de que ninguno lo haya escrito, los diez leen cero y los diez
+   * escriben uno: el contador se queda en 1 y la cuenta no se bloquea nunca. El bloqueo estaria
+   * escrito, probado en serie, y no impediria nada.
+   */
+  it('diez intentos fallidos a la vez bloquean la cuenta', async () => {
+    const store = new InMemoryLocalIdentityStore();
+    const directory = new TestDirectory();
+    directory.add('ana@externo.org', directoryEntry);
+    const auditLog = new InMemoryAuditLog();
+    const ahora = Date.UTC(2026, 8, 11, 8, 0, 0);
+    const provider = new LocalIdentityProvider({
+      store,
+      directory,
+      auditLog,
+      pepper: PEPPER,
+      now: () => ahora,
+    });
+
+    await store.save({
+      userId: 'u-ana',
+      email: 'ana@externo.org',
+      passwordHash: await provider.hashPassword(GOOD_KEY),
+      passwordHistory: [],
+      failedAttempts: 0,
+      emailVerified: true,
+    });
+
+    const intentos = await Promise.allSettled(
+      Array.from({ length: 10 }, () =>
+        provider.authenticate({ email: 'ana@externo.org', password: 'no-es-la-buena' }),
+      ),
+    );
+    expect(intentos.every((r) => r.status === 'rejected')).toBe(true);
+
+    const registro = await store.findByEmail('ana@externo.org');
+    // Exactamente CINCO, que es el maximo de la politica: los cinco primeros suman, el quinto
+    // bloquea la cuenta y del sexto en adelante se rechazan sin llegar a verificar nada. Que la
+    // cifra sea justo el maximo —y no diez, ni uno— es lo que dice que los intentos se contaron
+    // de uno en uno y que el bloqueo surtio efecto dentro de la misma rafaga.
+    expect(registro?.failedAttempts).toBe(5);
+    expect(registro?.lockedUntil).toBeGreaterThan(ahora);
+
+    // Y la contrasena BUENA tampoco entra mientras dure el bloqueo: es lo que el bloqueo es.
+    await expect(
+      provider.authenticate({ email: 'ana@externo.org', password: GOOD_KEY }),
+    ).rejects.toMatchObject({ reason: 'cuenta-bloqueada' });
+  });
+
+  it('cuentas distintas no se esperan entre si', async () => {
+    // Serializar por cuenta es lo correcto; serializarlo todo convertiria el inicio de sesion
+    // de la institucion entera en una fila detras de quien se equivoque de contrasena.
+    const store = new InMemoryLocalIdentityStore();
+    const directory = new TestDirectory();
+    const auditLog = new InMemoryAuditLog();
+    const provider = new LocalIdentityProvider({
+      store,
+      directory,
+      auditLog,
+      pepper: PEPPER,
+      now: () => Date.UTC(2026, 8, 11, 8, 0, 0),
+    });
+
+    for (const email of ['a@externo.org', 'b@externo.org', 'c@externo.org']) {
+      directory.add(email, directoryEntry);
+      await store.save({
+        userId: `u-${email}`,
+        email,
+        passwordHash: await provider.hashPassword(GOOD_KEY),
+        passwordHistory: [],
+        failedAttempts: 0,
+        emailVerified: true,
+      });
+    }
+
+    const inicio = Date.now();
+    await Promise.all(
+      ['a@externo.org', 'b@externo.org', 'c@externo.org'].map((email) =>
+        provider.authenticate({ email, password: GOOD_KEY }),
+      ),
+    );
+    const enParalelo = Date.now() - inicio;
+
+    const enSerie = await (async () => {
+      const desde = Date.now();
+      for (const email of ['a@externo.org', 'b@externo.org', 'c@externo.org']) {
+        await provider.authenticate({ email, password: GOOD_KEY });
+      }
+      return Date.now() - desde;
+    })();
+
+    // Tres verificaciones Argon2 en paralelo tardan claramente menos que en fila.
+    expect(enParalelo).toBeLessThan(enSerie);
+  });
+});

@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { ICON_NAMES, initialCatalog } from '@app/ui-components';
 import { PermissionError, assertCan } from '@app/access-control';
 import type { Actor } from '@app/access-control';
-import { leer, write } from './almacenCompartido';
+import { leer, mutar } from './almacenCompartido';
 import { AdminError } from './admin';
 import { changeRecord } from './audit';
 
@@ -128,12 +128,16 @@ export async function setResourceDisabled(
     throw new CatalogError(`El catalogo no tiene ningun recurso '${objectId}'.`, 404);
   }
 
+  // Bajo turno: el gobierno del catalogo es UN valor, y deshabilitar dos objetos a la vez
+  // significaba que el segundo en escribir devolvia el primero a habilitado.
   const gobierno = await leerGobierno();
-  const actuales = new Set(gobierno.disabled);
-  if (disabled) actuales.add(objectId);
-  else actuales.delete(objectId);
-
-  await write(KEY_CATALOG, { ...gobierno, disabled: [...actuales] });
+  await mutar<CatalogGovernance>(KEY_CATALOG, (guardado) => {
+    const actual = guardado ?? VACIO;
+    const actuales = new Set(actual.disabled);
+    if (disabled) actuales.add(objectId);
+    else actuales.delete(objectId);
+    return { ...actual, disabled: [...actuales] };
+  });
   await changeRecord({
     actorId: actor.userId,
     entityType: 'object',
@@ -173,15 +177,6 @@ export async function proposeResource(
     throw new CatalogError(`'${entrada.version}' no es una version MAYOR.MENOR.PARCHE.`, 400);
   }
 
-  const gobierno = await leerGobierno();
-  const repetida = gobierno.proposals.find(
-    (p) =>
-      p.status === 'pendiente' && p.objectId === entrada.objectId && p.version === entrada.version,
-  );
-  if (repetida) {
-    throw new CatalogError('Ya hay una propuesta pendiente para ese objeto y esa version.', 409);
-  }
-
   const propuesta: ResourceProposal = {
     id: randomUUID(),
     objectId: entrada.objectId,
@@ -192,7 +187,23 @@ export async function proposeResource(
     status: 'pendiente',
   };
 
-  await write(KEY_CATALOG, { ...gobierno, proposals: [...gobierno.proposals, propuesta] });
+  // La comprobacion de duplicado va DENTRO del turno. Fuera, dos envios simultaneos del mismo
+  // objeto y la misma version la pasaban los dos, y el catalogo acababa con dos propuestas
+  // pendientes identicas que habria que decidir por separado.
+  let repetida = false;
+  await mutar<CatalogGovernance>(KEY_CATALOG, (guardado) => {
+    const actual = guardado ?? VACIO;
+    repetida = actual.proposals.some(
+      (p) =>
+        p.status === 'pendiente' &&
+        p.objectId === entrada.objectId &&
+        p.version === entrada.version,
+    );
+    return repetida ? actual : { ...actual, proposals: [...actual.proposals, propuesta] };
+  });
+  if (repetida) {
+    throw new CatalogError('Ya hay una propuesta pendiente para ese objeto y esa version.', 409);
+  }
   await changeRecord({
     actorId: actor.userId,
     entityType: 'object',
@@ -212,28 +223,42 @@ export async function decideProposal(
   // Certificar es publicar: el mismo permiso que publicar un modulo institucional.
   permiso(actor, 'publicar-modulo-institucional');
 
-  const gobierno = await leerGobierno();
-  const propuesta = gobierno.proposals.find((p) => p.id === id);
-  if (!propuesta) throw new CatalogError('Propuesta no encontrada.', 404);
-  if (propuesta.status !== 'pendiente') {
-    throw new CatalogError('Esa propuesta ya esta decidida.', 409);
-  }
   if (decision === 'devolver' && !motivo?.trim()) {
     throw new CatalogError('Devolver exige un motivo.', 400);
   }
 
-  const decidida: ResourceProposal = {
-    ...propuesta,
-    status: decision === 'aprobar' ? 'aprobada' : 'devuelta',
-    decidedBy: actor.userId,
-    decidedAt: new Date().toISOString(),
-    ...(motivo?.trim() ? { motivo: motivo.trim() } : {}),
-  };
+  /*
+   * Encontrar la propuesta, comprobar que sigue pendiente y decidirla van en el MISMO turno.
+   *
+   * Separados, dos revisores que abren la lista a la vez pueden decidir la misma propuesta: los
+   * dos la leen pendiente, los dos pasan la comprobacion, y la que queda escrita es la del que
+   * llegue el ultimo. Quedaria decidida por quien no fue y con el motivo del otro.
+   */
+  let propuesta: ResourceProposal | undefined;
+  let yaDecidida = false;
+  let decidida: ResourceProposal | undefined;
 
-  await write(KEY_CATALOG, {
-    ...gobierno,
-    proposals: gobierno.proposals.map((p) => (p.id === id ? decidida : p)),
+  await mutar<CatalogGovernance>(KEY_CATALOG, (guardado) => {
+    const actual = guardado ?? VACIO;
+    propuesta = actual.proposals.find((p) => p.id === id);
+    if (!propuesta) return actual;
+    if (propuesta.status !== 'pendiente') {
+      yaDecidida = true;
+      return actual;
+    }
+    decidida = {
+      ...propuesta,
+      status: decision === 'aprobar' ? 'aprobada' : 'devuelta',
+      decidedBy: actor.userId,
+      decidedAt: new Date().toISOString(),
+      ...(motivo?.trim() ? { motivo: motivo.trim() } : {}),
+    };
+    const ya = decidida;
+    return { ...actual, proposals: actual.proposals.map((p) => (p.id === id ? ya : p)) };
   });
+
+  if (!propuesta) throw new CatalogError('Propuesta no encontrada.', 404);
+  if (yaDecidida || !decidida) throw new CatalogError('Esa propuesta ya esta decidida.', 409);
   await changeRecord({
     actorId: actor.userId,
     entityType: 'object',
