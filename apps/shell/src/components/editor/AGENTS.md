@@ -4,16 +4,16 @@ Construye un modulo sin escribir codigo (4.2). Cuatro pestanas, cada una con una
 
 | Pestana | Pregunta | Archivo |
 |---|---|---|
-| Objetos | que quiero poner | `SidebarPanel.tsx` (`Tienda`) |
-| Datos | que mide | `SidebarPanel.tsx` (`Datos`) + `Pozo.tsx` |
-| Formato | como se ve | `Presentacion.tsx` |
+| Objetos | que quiero poner | `SidebarPanel.tsx` (`Palette`) |
+| Datos | que mide | `SidebarPanel.tsx` (`Data`) + `Well.tsx` |
+| Formato | como se ve | `Presentation.tsx` |
 | Complementos | que lo acompana | `SidebarPanel.tsx` |
 
 ## Reglas
 
 - **El panel solo ofrece lo que la version del objeto declara.** El guardia es
-  `admite("<clave>")`, y `controles.ts` mapea cada clave de presentacion a su identificador de
-  prueba. Anadir una clave sin control falla en `panel-de-formato.spec.ts`.
+  `admite("<clave>")`, y `controls.ts` mapea cada clave de presentacion a su identificador de
+  prueba. Anadir una clave sin control falla en `format-panel.spec.ts`.
 - **Las secciones son `<details>`**, con el estado inicial en `abierta` y el filtro del buscador
   por contexto (`ProveedorDeFiltro`). Un `<details>` es no controlado: si hay que abrirlo desde
   React cuando el usuario ya lo toco, hay que escribir `open` en el DOM por referencia.

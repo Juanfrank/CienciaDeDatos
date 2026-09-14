@@ -7,10 +7,10 @@ recorrer trescientos archivos buscando comillas.
 | Archivo | Que es |
 |---|---|
 | `locales.ts` | Idiomas admitidos y negociacion BCP 47 |
-| `formato.ts` | Formateo ICU MessageFormat: interpolacion, numero, plural y select |
-| `catalogo/es.ts` | Catalogo de REFERENCIA. Se escribe primero |
-| `catalogo/en.ts` | Ingles. Atado por tipo al de referencia |
-| `traductor.ts` | `createTranslator(locale)` y los formateadores de `Intl` |
+| `format.ts` | Formateo ICU MessageFormat: interpolacion, numero, plural y select |
+| `src/catalog/es.ts` | Catalogo de REFERENCIA. Se escribe primero |
+| `src/catalog/en.ts` | Ingles. Atado por tipo al de referencia |
+| `translator.ts` | `createTranslator(locale)` y los formateadores de `Intl` |
 
 ## Reglas
 

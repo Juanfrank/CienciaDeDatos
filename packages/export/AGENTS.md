@@ -5,11 +5,11 @@ objeto digan lo mismo.
 
 | Archivo | Que es |
 |---|---|
-| `documento.ts` | El documento exportable: hojas, objetos, textos y notas |
-| `formatos.ts` | CSV y XLSX |
+| `document.ts` | El documento exportable: hojas, objetos, textos y notas |
+| `formats.ts` | CSV y XLSX |
 | `binarios.ts` | PDF y SVG |
-| `encabezado.ts` | Marca institucional de cada salida |
-| `cola.ts` | Exportacion como operacion encolada (4.9, 5.3) |
+| `heading.ts` | Marca institucional de cada salida |
+| `queue.ts` | Exportacion como operacion encolada (4.9, 5.3) |
 
 ## Reglas
 

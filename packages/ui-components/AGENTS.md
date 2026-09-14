@@ -5,18 +5,18 @@ deprecacion, modelo de vista y construccion de las opciones de ECharts.
 
 | Carpeta | Que hay |
 |---|---|
-| `registry/` | Catalogo, tipos, semver, proyeccion, modelo de vista y agregacion |
-| `presentacion/` | Claves de presentacion, pozos, elementos, contenedores, iconos, formato |
-| `graficos/` | Opciones de ECharts, orden y pequenos multiplos |
+| `src/registry/` | Catalogo, tipos, semver, proyeccion, modelo de vista y agregacion |
+| `src/presentation/` | Claves de presentacion, pozos, elementos, contenedores, iconos, formato |
+| `src/charts/` | Opciones de ECharts, orden y pequenos multiplos |
 
 ## Las tres listas que no pueden discrepar
 
 1. Lo que el **catalogo declara** que admite una version (`presentation`).
-2. Lo que el **dibujo honra** (`graficos/opciones.ts`).
-3. Lo que el **panel ofrece** (`apps/shell/.../editor/Presentacion.tsx`).
+2. Lo que el **dibujo honra** (`src/charts/options.ts`).
+3. Lo que el **panel ofrece** (`apps/shell/src/components/editor/Presentation.tsx`).
 
-`registry/presentacionDeclarada.spec.ts` compara las dos primeras con una sonda de
-comportamiento; `apps/shell/src/server/panel-de-formato.spec.ts` compara la primera con la
+`src/registry/declaredPresentation.spec.ts` compara las dos primeras con una sonda de
+comportamiento; `apps/shell/src/server/format-panel.spec.ts` compara la primera con la
 tercera. Una clave que el dibujo honra y el catalogo no declara solo se puede usar escribiendo
 la instancia a mano.
 

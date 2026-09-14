@@ -5,7 +5,7 @@ minimo**, separada del Data Warehouse.
 
 > Este paquete no figura en la estructura obligatoria de la seccion 3.2. Se añade porque el
 > documento exige un almacen de identidad separado (4.7.2) que ademas guarda el modelo de
-> gobierno (4.10.7), y no hay en 3.2 un lugar previsto para el. Ver `docs/adr/ADR-003`.
+> gobierno (4.10.7), y no hay en 3.2 un lugar previsto para el. Ver `docs/adr/ADR-003-azure-sql-para-identidad-y-gobierno.md`.
 
 ## El aislamiento no depende de disciplina de codigo
 

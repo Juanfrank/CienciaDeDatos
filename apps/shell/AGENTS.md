@@ -19,7 +19,7 @@ administracion y la API que los sirve.
   string, no en estado local. Un enlace tiene que reproducir lo que se esta viendo.
 - **Cada pagina exige su sesion.** Que la cabecera no se dibuje no protege nada; la proteccion
   es de servidor y hay pruebas que piden las rutas a mano sin sesion.
-- **El shell no consulta la fuente.** Lee del cache a traves de `src/server/datos.ts`.
+- **El shell no consulta la fuente.** Lee del cache a traves de `src/server/data.ts`.
 - **El tema se inyecta en `layout.tsx`** como variables CSS, los dos juegos desde el mismo modo.
   Ningun componente escribe un color literal.
 

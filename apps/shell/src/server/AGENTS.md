@@ -5,15 +5,15 @@ exportaciones.
 
 | Archivo | Responsabilidad |
 |---|---|
-| `sesion.ts`, `identidad.ts` | Sesion, credenciales locales y TOTP |
-| `datos.ts` | Lectura del cache y recorte por ambito. Es el unico camino a los datos |
-| `contexto.ts`, `gobierno.ts` | Arbol, equipos, paquetes y usuarios |
+| `session.ts`, `identity.ts` | Sesion, credenciales locales y TOTP |
+| `data.ts` | Lectura del cache y recorte por ambito. Es el unico camino a los datos |
+| `context.ts`, `gobierno.ts` | Arbol, equipos, paquetes y usuarios |
 | `admin.ts` | `assertAdmin`, la guarda de todas las rutas de administracion |
-| `auditoria.ts` | Registro de cambios de configuracion |
-| `modulos.ts`, `almacenModulos.ts`, `cicloDeVida.ts` | Definicion, almacen y estados de un modulo |
+| `audit.ts` | Registro de cambios de configuracion |
+| `modules.ts`, `almacenModulos.ts`, `cicloDeVida.ts` | Definicion, almacen y estados de un modulo |
 | `editor.ts` | Lo que el panel del editor necesita saber del catalogo |
-| `exportaciones.ts`, `trabajador.ts` | Documento exportable y cola |
-| `tema.ts` | Modo de color pedido por cookie |
+| `exports.ts`, `worker.ts` | Documento exportable y cola |
+| `theme.ts` | Modo de color pedido por cookie |
 | `almacenCompartido.ts` | Estado que sobrevive a mas de una instancia |
 
 ## Reglas

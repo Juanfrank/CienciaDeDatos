@@ -26,4 +26,4 @@ Es la hoja de estilo completa, sin modulos CSS ni utilidades. Reglas:
 ## Que NO hacer
 
 - No poner logica de acceso en el componente de pagina sin repetirla en el Route Handler.
-- No anadir una media query de tema: el modo de color lo decide `src/server/tema.ts`.
+- No anadir una media query de tema: el modo de color lo decide `apps/shell/src/server/theme.ts`.

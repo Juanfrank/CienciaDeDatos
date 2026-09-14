@@ -8,9 +8,9 @@ interaccion y salud.
 | `ModuleDefinition.ts` | La forma de un modulo: paginas, celdas e instancias |
 | `grid.ts` | Rejilla de doce columnas, colisiones y limites |
 | `validation.ts` | Que un mapeo case con el esquema real ANTES de guardar |
-| `interaccion.ts` | Filtrado cruzado, drill-through y marcadores |
+| `interaction.ts` | Filtrado cruzado, drill-through y marcadores |
 | `personalization.ts` | La vista propia de cada persona (4.6) |
-| `salud.ts` | Si un modulo se puede componer o queda apagado |
+| `health.ts` | Si un modulo se puede componer o queda apagado |
 
 ## Reglas
 

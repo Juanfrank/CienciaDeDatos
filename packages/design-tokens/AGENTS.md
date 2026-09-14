@@ -7,7 +7,7 @@ puede publicarse sin pasar (4.3).
 |---|---|
 | `material3.ts` | Generacion del esquema desde los colores de origen |
 | `material3Tokens.ts` | Tipografia, forma, elevacion y emision de variables CSS |
-| `temaInstitucional.ts` | Los colores de la marca y los temas light y dark |
+| `institutionalTheme.ts` | Los colores de la marca y los temas light y dark |
 | `contrast.ts` | Razon de contraste WCAG 2.1 y la puerta de publicacion |
 | `identity.ts` | Nombre y emblema de la institucion |
 

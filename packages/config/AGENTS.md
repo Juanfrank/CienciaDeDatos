@@ -4,7 +4,7 @@ Resuelve la configuracion efectiva desde varias fuentes, con precedencia declara
 
 | Archivo | Que es |
 |---|---|
-| `fuentes.ts` | Entorno, App Configuration e instantanea |
+| `fonts.ts` | Entorno, App Configuration e instantanea |
 | `Resolutor.ts` | La precedencia y el valor efectivo |
 | `instantanea.ts` | Copia congelada, para que dos instancias no discrepen |
 
