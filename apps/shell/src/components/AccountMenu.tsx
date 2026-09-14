@@ -181,7 +181,9 @@ export function AccountMenu({
           <>
             <span className="account__dot" aria-hidden="true" data-testid="account-dot" />
             {/* El punto es visual; esto es lo que oye quien no lo ve. */}
-            <span className="visually-hidden">{withoutRead} avisos sin leer</span>
+            <span className="visually-hidden">
+              {t('chrome.unreadNotices', { n: withoutRead })}
+            </span>
           </>
         ) : null}
       </button>
@@ -190,7 +192,7 @@ export function AccountMenu({
         className="account__menu"
         id={id}
         role="menu"
-        aria-label={`Opciones de ${nombre}`}
+        aria-label={t('chrome.accountOptions', { name: nombre })}
         hidden={!abierto}
         data-testid="account-menu"
       >
@@ -222,7 +224,7 @@ export function AccountMenu({
           onClick={() => void salir()}
         >
           <Icon nombre="close" tamano={16} />
-          <span className="account__item-label">{t('accion.salir')}</span>
+          <span className="account__item-label">{t('action.signOut')}</span>
         </button>
       </div>
     </div>

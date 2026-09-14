@@ -109,7 +109,7 @@ export function ModuleList({
     // La lista si tiene tope de ancho: es una tabla, y una linea de tabla muy larga se sigue con
     // el dedo. El lienzo no lo tiene, porque ahi el ancho es sitio para el modulo.
     <section className="editor__list">
-      <h2>{t('lista.titulo')}</h2>
+      <h2>{t('list.title')}</h2>
 
       <form
         className="editor__create"
@@ -119,7 +119,7 @@ export function ModuleList({
         }}
       >
         <p className="form__field">
-          <label htmlFor="nuevo-nombre">{t('lista.nombre')}</label>
+          <label htmlFor="nuevo-nombre">{t('list.name')}</label>
           <input
             id="nuevo-nombre"
             value={nombre}
@@ -140,7 +140,7 @@ export function ModuleList({
           />
         </p>
         <p className="form__field">
-          <label htmlFor="nuevo-slug">{t('lista.slug')}</label>
+          <label htmlFor="nuevo-slug">{t('list.slug')}</label>
           <input
             id="nuevo-slug"
             value={slug}
@@ -154,7 +154,7 @@ export function ModuleList({
           data-testid="create-module"
           disabled={trabajando}
         >
-          {t('lista.crearBorrador')}
+          {t('list.createDraft')}
         </button>
       </form>
 
@@ -164,18 +164,18 @@ export function ModuleList({
 
       {modules.length === 0 ? (
         <p className="muted-text">
-          {t('lista.vacia')}
+          {t('list.empty')}
         </p>
       ) : (
         <div className="table-container-data">
           <table className="data-table" data-testid="module-list">
             <thead>
               <tr>
-                <th scope="col">{t('lista.modulo')}</th>
-                <th scope="col">{t('lista.estado')}</th>
-                <th scope="col">{t('lista.autor')}</th>
-                <th scope="col">{t('lista.objetos')}</th>
-                <th scope="col">{t('lista.acciones')}</th>
+                <th scope="col">{t('list.module')}</th>
+                <th scope="col">{t('list.status')}</th>
+                <th scope="col">{t('list.author')}</th>
+                <th scope="col">{t('list.objects')}</th>
+                <th scope="col">{t('list.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -231,7 +231,7 @@ export function ModuleList({
                             disabled={trabajando || m.locks.length > 0}
                             onClick={() => void transition(m, "enviar")}
                           >
-                            {t('lista.enviar')}
+                            {t('list.submitForApproval')}
                           </button>
                         ) : null}
 
@@ -243,7 +243,7 @@ export function ModuleList({
                             disabled={trabajando || m.locks.length > 0}
                             onClick={() => void transition(m, "publicar")}
                           >
-                            {t('lista.publicar')}
+                            {t('list.publish')}
                           </button>
                         ) : null}
 
@@ -264,7 +264,7 @@ export function ModuleList({
                         {withoutActions ? (
                           <span
                             className="editor__without-actions"
-                            aria-label={t('lista.sinAcciones')}
+                            aria-label={t('list.noActions')}
                           >
                             &mdash;
                           </span>

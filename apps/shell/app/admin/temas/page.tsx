@@ -34,15 +34,15 @@ interface ThemeRow {
 const TEMAS: ThemeRow[] = [
   {
     id: 'institucional-claro',
-    name: 'admin.temas.claro',
-    desc: 'admin.temas.claro.desc',
+    name: 'admin.themes.light',
+    desc: 'admin.themes.light.desc',
     theme: lightTheme,
     active: true,
   },
   {
     id: 'institucional-oscuro',
-    name: 'admin.temas.oscuro',
-    desc: 'admin.temas.oscuro.desc',
+    name: 'admin.themes.dark',
+    desc: 'admin.themes.dark.desc',
     theme: darkTheme,
     active: false,
   },
@@ -56,10 +56,10 @@ export default async function TemasPage() {
 
   return (
     <section>
-      <h2>{t('admin.temas.titulo')}</h2>
-      <p className="muted-text">{t('admin.temas.intro')}</p>
+      <h2>{t('admin.themes.title')}</h2>
+      <p className="muted-text">{t('admin.themes.intro')}</p>
 
-      <h3>{t('admin.temas.origen')}</h3>
+      <h3>{t('admin.themes.source')}</h3>
       <ul className="theme-source" data-testid="origen-del-tema">
         {Object.entries(INSTITUTIONAL_SOURCE).map(([rol, valor]) => (
           <li key={rol} data-testid={`origen-${rol}`}>
@@ -74,14 +74,14 @@ export default async function TemasPage() {
         <Theme key={fila.id} fila={fila} t={t} />
       ))}
 
-      <h3>{t('admin.temas.tipografia')}</h3>
+      <h3>{t('admin.themes.typography')}</h3>
       <table className="tabla" data-testid="tabla-tipografia">
         <thead>
           <tr>
-            <th scope="col">{t('admin.temas.columna.rol')}</th>
-            <th scope="col">{t('admin.temas.columna.tamano')}</th>
-            <th scope="col">{t('admin.temas.columna.interlineado')}</th>
-            <th scope="col">{t('admin.temas.columna.grosor')}</th>
+            <th scope="col">{t('admin.themes.column.role')}</th>
+            <th scope="col">{t('admin.themes.column.size')}</th>
+            <th scope="col">{t('admin.themes.column.lineHeight')}</th>
+            <th scope="col">{t('admin.themes.column.weight')}</th>
           </tr>
         </thead>
         <tbody>
@@ -113,7 +113,7 @@ function Theme({ fila, t }: { fila: ThemeRow; t: Translator }) {
         </span>
         {fila.active ? (
           <span className="insignia" data-testid={`tema-${fila.id}-activo`}>
-            {t('admin.temas.enUso')}
+            {t('admin.themes.inUse')}
           </span>
         ) : null}
       </div>
@@ -125,13 +125,13 @@ function Theme({ fila, t }: { fila: ThemeRow; t: Translator }) {
       */}
       {fallos.length === 0 ? (
         <p className="notice-ok" data-testid={`tema-${fila.id}-contraste`}>
-          {t('admin.temas.contrasteOk', { n: comprobaciones.length })}
+          {t('admin.themes.contrastPasses', { n: comprobaciones.length })}
         </p>
       ) : (
         <ul className="notice-atencion" data-testid={`tema-${fila.id}-contraste-falla`}>
           {fallos.map((f) => (
             <li key={f.label}>
-              {t('admin.temas.contrasteFalla', {
+              {t('admin.themes.contrastFails', {
                 par: f.label,
                 razon: f.ratio === null ? '—' : t.numero(f.ratio, { maximumFractionDigits: 2 }),
                 exigido: t.numero(f.required, { maximumFractionDigits: 1 }),
@@ -141,25 +141,25 @@ function Theme({ fila, t }: { fila: ThemeRow; t: Translator }) {
         </ul>
       )}
 
-      <h4>{t('admin.temas.categoricos')}</h4>
+      <h4>{t('admin.themes.categorical')}</h4>
       <ul className="theme-palette" data-testid={`tema-${fila.id}-categoricos`}>
         {tokens.color.categorical.map((color, i) => (
           <li key={color}>
             <span className="theme-swatch" style={{ background: color }} aria-hidden="true" />
             <span className="muted-text">
-              {t('admin.temas.serie', { n: i + 1 })} · {color}
+              {t('admin.themes.series', { n: i + 1 })} · {color}
             </span>
           </li>
         ))}
       </ul>
 
       <details data-testid={`tema-${fila.id}-tokens`}>
-        <summary>{t('admin.temas.tokens')}</summary>
+        <summary>{t('admin.themes.tokens')}</summary>
         <table className="tabla">
           <thead>
             <tr>
-              <th scope="col">{t('admin.temas.columna.token')}</th>
-              <th scope="col">{t('admin.temas.columna.valor')}</th>
+              <th scope="col">{t('admin.themes.column.token')}</th>
+              <th scope="col">{t('admin.themes.column.value')}</th>
             </tr>
           </thead>
           <tbody>

@@ -41,7 +41,7 @@ export function ResourceList({
   if (rows.length === 0) {
     return (
       <p className="muted-text" data-testid={`sin-recursos-${familia}`}>
-        {t('admin.recursos.vacia')}
+        {t('admin.resources.empty')}
       </p>
     );
   }
@@ -56,7 +56,7 @@ export function ResourceList({
               v{r.current}
             </span>
             <span className="muted-text" data-testid={`recurso-${r.id}-usos`}>
-              {r.uses === 0 ? t('admin.recursos.sinUso') : t('admin.recursos.enUso', { n: r.uses })}
+              {r.uses === 0 ? t('admin.resources.unused') : t('admin.resources.inUse', { n: r.uses })}
             </span>
           </div>
           <p className="muted-text">{r.description}</p>
@@ -66,21 +66,21 @@ export function ResourceList({
             version corre», y una vez «que cambio». Un enlace mas obligaria a volver.
           */}
           <details data-testid={`recurso-${r.id}-historial`}>
-            <summary>{t('admin.recursos.historial', { n: r.versions.length })}</summary>
+            <summary>{t('admin.resources.history', { n: r.versions.length })}</summary>
             <ol className="resource__versions">
               {[...r.versions].reverse().map((v) => (
                 <li key={v.version}>
                   <b>v{v.version}</b> · {t.fecha(v.publishedAt)} ·{' '}
-                  {t('admin.recursos.revisadaPor', { quien: v.reviewedBy })}
+                  {t('admin.resources.reviewedBy', { quien: v.reviewedBy })}
                   <p>{v.changelog}</p>
                   {v.deprecation ? (
                     <p className="notice-atencion" data-testid={`recurso-${r.id}-retirada`}>
-                      {t('admin.recursos.retirada', {
+                      {t('admin.resources.deprecated', {
                         desde: v.deprecation.since,
                         motivo: v.deprecation.reason,
                       })}
                       {v.deprecation.replacement
-                        ? ` ${t('admin.recursos.reemplazo', { que: v.deprecation.replacement })}`
+                        ? ` ${t('admin.resources.replacement', { que: v.deprecation.replacement })}`
                         : ''}
                     </p>
                   ) : null}
@@ -91,8 +91,8 @@ export function ResourceList({
         </li>
       ))}
       <li className="muted-text">
-        {t('admin.recursos.pie')}{' '}
-        <Link href="/admin/auditoria">{t('admin.recursos.pie.enlace')}</Link>
+        {t('admin.resources.footer')}{' '}
+        <Link href="/admin/auditoria">{t('admin.resources.footer.link')}</Link>
       </li>
     </ul>
   );

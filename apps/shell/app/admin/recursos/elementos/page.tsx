@@ -11,7 +11,7 @@ export default async function ElementosPage() {
 
   return (
     <section>
-      <h2>{t('admin.recursos.elementos')}</h2>
+      <h2>{t('admin.resources.elements')}</h2>
       <p className="muted-text">{seccion?.desc}</p>
       <ResourceList rows={filas} familia="elementos" t={t} />
     </section>

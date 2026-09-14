@@ -25,45 +25,45 @@ export default async function OrigenesPage() {
 
   return (
     <section>
-      <h2>{t('admin.origenes.titulo')}</h2>
-      <p className="muted-text">{t('admin.origenes.intro')}</p>
+      <h2>{t('admin.sources.title')}</h2>
+      <p className="muted-text">{t('admin.sources.intro')}</p>
 
       <div className="tarjetas" data-testid="resumen-origenes">
         <div className="tarjeta">
           <span className="card__value" data-testid="conector-activo">
             {connector}
           </span>
-          <span className="card__label">{t('admin.origenes.conector')}</span>
+          <span className="card__label">{t('admin.sources.connector')}</span>
         </div>
         <div className={`tarjeta ${latido?.connectorReachable === false ? 'alert-card' : ''}`}>
           <span className="card__value" data-testid="conector-alcanzable">
             {latido === null
               ? '—'
-              : t(latido.connectorReachable ? 'admin.origenes.si' : 'admin.origenes.no')}
+              : t(latido.connectorReachable ? 'admin.sources.yes' : 'admin.sources.no')}
           </span>
-          <span className="card__label">{t('admin.origenes.respondio')}</span>
+          <span className="card__label">{t('admin.sources.answered')}</span>
         </div>
         <div className="tarjeta">
           <span className="card__value" data-testid="datasets-poblados">
             {latido?.datasets.filter((d) => d.outcome === 'ok').length ?? 0}
           </span>
-          <span className="card__label">{t('admin.origenes.enCache')}</span>
+          <span className="card__label">{t('admin.sources.inCache')}</span>
         </div>
       </div>
 
-      <h3>{t('admin.origenes.ultimaPoblacion')}</h3>
+      <h3>{t('admin.sources.lastPopulation')}</h3>
       {latido === null ? (
         /*
          * Sin latido no se concluye que el origen este caido: puede ser que la tarea no haya
          * corrido todavia. Decir «caido» aqui mandaria a revisar la red cuando falta una ejecucion.
          */
         <p className="muted-text" data-testid="sin-latido">
-          {t('admin.origenes.sinLatido')}
+          {t('admin.sources.noHeartbeat')}
         </p>
       ) : (
         <>
           <p className="muted-text" data-testid="latido">
-            {t('admin.origenes.latido', {
+            {t('admin.sources.heartbeat', {
               fecha: t.fecha(latido.finishedAt, {
                 dateStyle: 'medium',
                 timeStyle: 'short',
@@ -71,21 +71,21 @@ export default async function OrigenesPage() {
               conector: latido.connector,
             })}{' '}
             {latido.lastFullSuccessAt
-              ? t('admin.origenes.latido.completa', {
+              ? t('admin.sources.heartbeat.complete', {
                   fecha: t.fecha(latido.lastFullSuccessAt, {
                     dateStyle: 'medium',
                     timeStyle: 'short',
                   }),
                 })
-              : t('admin.origenes.latido.sinCompleta')}
+              : t('admin.sources.heartbeat.noCompleteRun')}
           </p>
           <table className="tabla" data-testid="tabla-datasets">
             <thead>
               <tr>
-                <th scope="col">{t('admin.origenes.columna.dataset')}</th>
-                <th scope="col">{t('admin.origenes.columna.resultado')}</th>
-                <th scope="col">{t('admin.origenes.columna.filas')}</th>
-                <th scope="col">{t('admin.origenes.columna.duracion')}</th>
+                <th scope="col">{t('admin.sources.column.dataset')}</th>
+                <th scope="col">{t('admin.sources.column.result')}</th>
+                <th scope="col">{t('admin.sources.column.rows')}</th>
+                <th scope="col">{t('admin.sources.column.duration')}</th>
               </tr>
             </thead>
             <tbody>
@@ -94,9 +94,9 @@ export default async function OrigenesPage() {
                   <th scope="row">{d.datasetId}</th>
                   <td>
                     {d.outcome === 'ok'
-                      ? t('admin.origenes.poblado')
-                      : t('admin.origenes.fallo', {
-                          motivo: d.error ?? t('admin.origenes.sinDetalle'),
+                      ? t('admin.sources.populated')
+                      : t('admin.sources.failure', {
+                          motivo: d.error ?? t('admin.sources.noDetail'),
                         })}
                   </td>
                   <td>{d.rowCount === undefined ? '—' : t.numero(d.rowCount)}</td>
@@ -108,15 +108,15 @@ export default async function OrigenesPage() {
         </>
       )}
 
-      <h3>{t('admin.origenes.esquema')}</h3>
+      <h3>{t('admin.sources.schema')}</h3>
       {schema === null ? (
         <p className="muted-text" data-testid="sin-esquema">
-          {t('admin.origenes.sinEsquema')}
+          {t('admin.sources.noSchema')}
         </p>
       ) : (
         <>
           <p className="muted-text" data-testid="esquema-fecha">
-            {t('admin.origenes.esquemaFecha', {
+            {t('admin.sources.schemaDate', {
               fecha: t.fecha(schema.fetchedAt, {
                 dateStyle: 'medium',
                 timeStyle: 'short',
@@ -129,26 +129,26 @@ export default async function OrigenesPage() {
                 <div className="resource__head">
                   <h4 className="resource__name">{tabla.name}</h4>
                   <span className="muted-text">
-                    {t('admin.origenes.campos', { n: tabla.fields.length })}
+                    {t('admin.sources.fields', { n: tabla.fields.length })}
                   </span>
                 </div>
                 <p className="muted-text">
                   {tabla.fields
                     .filter((f) => !f.isMeasure)
-                    .map((f) => (f.isKey ? `${f.name} (${t('admin.origenes.clave')})` : f.name))
+                    .map((f) => (f.isKey ? `${f.name} (${t('admin.sources.key')})` : f.name))
                     .join(' · ')}
                 </p>
               </li>
             ))}
           </ul>
 
-          <h4>{t('admin.origenes.medidas', { n: schema.measures.length })}</h4>
+          <h4>{t('admin.sources.measures', { n: schema.measures.length })}</h4>
           <table className="tabla" data-testid="tabla-medidas">
             <thead>
               <tr>
-                <th scope="col">{t('admin.origenes.columna.medida')}</th>
-                <th scope="col">{t('admin.origenes.columna.tabla')}</th>
-                <th scope="col">{t('admin.origenes.columna.agregacion')}</th>
+                <th scope="col">{t('admin.sources.column.measure')}</th>
+                <th scope="col">{t('admin.sources.column.table')}</th>
+                <th scope="col">{t('admin.sources.column.aggregation')}</th>
               </tr>
             </thead>
             <tbody>

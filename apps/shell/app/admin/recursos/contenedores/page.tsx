@@ -11,7 +11,7 @@ export default async function ContenedoresPage() {
 
   return (
     <section>
-      <h2>{t('admin.recursos.contenedores')}</h2>
+      <h2>{t('admin.resources.containers')}</h2>
       <p className="muted-text">{seccion?.desc}</p>
       <ResourceList rows={filas} familia="contenedores" t={t} />
     </section>

@@ -16,10 +16,10 @@ export default async function OtrosRecursosPage() {
 
   return (
     <section>
-      <h2>{t('admin.recursos.otros')}</h2>
-      <p className="muted-text">{t('admin.recursos.otros.intro')}</p>
+      <h2>{t('admin.resources.other')}</h2>
+      <p className="muted-text">{t('admin.resources.other.intro')}</p>
 
-      <h3>{t('admin.recursos.otros.iconos', { n: ICON_NAMES.length })}</h3>
+      <h3>{t('admin.resources.other.icons', { n: ICON_NAMES.length })}</h3>
       <ul className="icon-grid" data-testid="catalogo-iconos">
         {ICON_NAMES.map((nombre) => (
           <li key={nombre} data-testid={`icono-${nombre}`}>
@@ -29,7 +29,7 @@ export default async function OtrosRecursosPage() {
         ))}
       </ul>
 
-      <h3>{t('admin.recursos.otros.imagenes')}</h3>
+      <h3>{t('admin.resources.other.images')}</h3>
       <ul data-testid="catalogo-imagenes">
         <li>
           <img
@@ -40,14 +40,14 @@ export default async function OtrosRecursosPage() {
           />
           <span className="muted-text">
             {' '}
-            {t('admin.recursos.otros.emblema')} · {defaultIdentity.emblem.src}
+            {t('admin.resources.other.emblem')} · {defaultIdentity.emblem.src}
           </span>
         </li>
       </ul>
 
-      <h3>{t('admin.recursos.otros.geometrias')}</h3>
+      <h3>{t('admin.resources.other.geometries')}</h3>
       <p className="muted-text" data-testid="sin-geometrias">
-        {t('admin.recursos.otros.sinGeometrias')}
+        {t('admin.resources.other.noGeometries')}
       </p>
     </section>
   );

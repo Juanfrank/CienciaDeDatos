@@ -27,16 +27,16 @@ export default async function UsuariosPage() {
 
   return (
     <section>
-      <h2>{t('admin.usuarios.titulo')}</h2>
-      <p className="muted-text">{t('admin.usuarios.intro')}</p>
+      <h2>{t('admin.users.title')}</h2>
+      <p className="muted-text">{t('admin.users.intro')}</p>
 
       <table className="tabla" data-testid="tabla-usuarios">
         <thead>
           <tr>
-            <th scope="col">{t('admin.usuarios.columna.persona')}</th>
-            <th scope="col">{t('admin.usuarios.columna.rol')}</th>
-            <th scope="col">{t('admin.usuarios.columna.equipos')}</th>
-            <th scope="col">{t('admin.usuarios.columna.ambito')}</th>
+            <th scope="col">{t('admin.users.column.person')}</th>
+            <th scope="col">{t('admin.users.column.role')}</th>
+            <th scope="col">{t('admin.users.column.teams')}</th>
+            <th scope="col">{t('admin.users.column.scope')}</th>
             <th scope="col" />
           </tr>
         </thead>
@@ -60,7 +60,7 @@ export default async function UsuariosPage() {
                     className="notice-atencion"
                     data-testid={`usuario-${usuario.userId}-huerfano`}
                   >
-                    {t('admin.usuarios.huerfano')}
+                    {t('admin.users.orphan')}
                   </span>
                 ) : (
                   <ul className="inline-list">
@@ -75,10 +75,10 @@ export default async function UsuariosPage() {
               <td>
                 {usuario.personalScope || usuario.personalModuleScopeOverrides ? (
                   <Link href="/admin/ambitos" data-testid={`usuario-${usuario.userId}-ambito`}>
-                    {t('admin.usuarios.ambitoPropio')}
+                    {t('admin.users.scopeOwn')}
                   </Link>
                 ) : (
-                  <span className="muted-text">{t('admin.usuarios.ambitoHeredado')}</span>
+                  <span className="muted-text">{t('admin.users.scopeInherited')}</span>
                 )}
               </td>
               <td>
@@ -87,7 +87,7 @@ export default async function UsuariosPage() {
                   className="button-link"
                   data-testid={`usuario-${usuario.userId}-que-ve`}
                 >
-                  {t('admin.usuarios.queVe')}
+                  {t('admin.users.whatTheySee')}
                 </Link>
               </td>
             </tr>
@@ -96,8 +96,8 @@ export default async function UsuariosPage() {
       </table>
 
       <p className="muted-text">
-        {t('admin.usuarios.pie')}{' '}
-        <Link href="/admin/equipos">{t('admin.usuarios.pie.enlace')}</Link>
+        {t('admin.users.footer')}{' '}
+        <Link href="/admin/equipos">{t('admin.users.footer.link')}</Link>
       </p>
     </section>
   );

@@ -21,12 +21,32 @@ export async function Header({ sesion }: { sesion: ShellSession }) {
   const editCan = can(await roleMoreHeightOf(sesion.userId), 'crear-editar-modulos-borrador');
 
   const entradas: AccountEntry[] = [
-    { href: '/avisos', label: 'Avisos', icono: 'notice', prueba: 'link-avisos', cuentaAvisos: true },
+    {
+      href: '/avisos',
+      label: t('chrome.notices'),
+      icono: 'notice',
+      prueba: 'link-avisos',
+      cuentaAvisos: true,
+    },
     ...(editCan
-      ? [{ href: '/editor', label: 'Editor de modulos', icono: 'content', prueba: 'link-editor' } as const]
+      ? [
+          {
+            href: '/editor',
+            label: t('chrome.editor'),
+            icono: 'content',
+            prueba: 'link-editor',
+          } as const,
+        ]
       : []),
     ...(manageCan
-      ? [{ href: '/admin', label: 'Administracion', icono: 'llave', prueba: 'link-admin' } as const]
+      ? [
+          {
+            href: '/admin',
+            label: t('chrome.admin'),
+            icono: 'llave',
+            prueba: 'link-admin',
+          } as const,
+        ]
       : []),
   ];
 
@@ -57,7 +77,7 @@ export async function Header({ sesion }: { sesion: ShellSession }) {
             {defaultIdentity.name}
           </span>
           <Link href="/" className="header__title">
-            {t('app.nombre')}
+            {t('app.name')}
           </Link>
         </div>
       </div>

@@ -11,7 +11,7 @@ export default async function ComplementosPage() {
 
   return (
     <section>
-      <h2>{t('admin.recursos.complementos')}</h2>
+      <h2>{t('admin.resources.addons')}</h2>
       <p className="muted-text">{seccion?.desc}</p>
       <ResourceList rows={filas} familia="complementos" t={t} />
     </section>

@@ -184,7 +184,7 @@ test.describe('avisos (4.9)', () => {
     await page.waitForResponse((r) => r.url().includes('/api/notificaciones'));
 
     if ((await page.getByTestId('account-dot').count()) > 0) {
-      await expect(disparador).toContainText(/\d+ avisos sin leer/);
+      await expect(disparador).toContainText(/\d+ avisos? sin leer/);
     }
 
     await disparador.click();

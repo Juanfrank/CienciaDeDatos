@@ -114,7 +114,7 @@ export function Presentation({
           formato. Tenerlo repartido obligaba a cambiar de pestana para tocar lo mismo.
         */}
         <label className="form__field">
-          <span>{t('pres.titulo')}</span>
+          <span>{t('pres.title')}</span>
           <input
             defaultValue={instance.title ?? ""}
             disabled={saving || !mostrarTitulo}
@@ -136,7 +136,7 @@ export function Presentation({
 
         {admite("subtitulo") ? (
           <label className="form__field">
-            <span>{t('pres.subtitulo')}</span>
+            <span>{t('pres.subtitle')}</span>
             <input
               defaultValue={p.subtitulo ?? ""}
               maxLength={80}
@@ -172,7 +172,7 @@ export function Presentation({
 
         {admite("icono") ? (
           <label className="form__field">
-            <span>{t('pres.icono')}</span>
+            <span>{t('pres.icon')}</span>
             <span className="editor__chosen-icon">
               {p.icono ? <Icon nombre={p.icono} tamano={18} /> : null}
               <select
@@ -183,7 +183,7 @@ export function Presentation({
                   set({ icono: (e.target.value || undefined) as IconName | undefined })
                 }
               >
-                <option value="">{t('pres.icono.porDefecto')}</option>
+                <option value="">{t('pres.icon.default')}</option>
                 {OBJECT_ICONS.map((nombre) => (
                   <option key={nombre} value={nombre}>
                     {nombre}
@@ -201,7 +201,7 @@ export function Presentation({
           titulo="Borde" nivel={2} abierta={false} prueba={`${prueba}-borde`}>
           {admite("acento") ? (
             <label className="form__field">
-              <span>{t('pres.acento')}</span>
+              <span>{t('pres.accent')}</span>
               <select
                 value={p.acento ?? "primario"}
                 disabled={saving}
@@ -231,7 +231,7 @@ export function Presentation({
               </label>
               {p.resaltado ? (
                 <div className="form__field">
-                  <span>{t('pres.resaltado.color')}</span>
+                  <span>{t('pres.highlight.color')}</span>
                   {/*
                     Aparte del acento a proposito: el acento da el tono general del objeto y el
                     resaltado es una marca de estado —«esto pide atencion»— que a veces tiene que
@@ -284,7 +284,7 @@ export function Presentation({
           {isCard ? (
             <Section titulo="Etiqueta" nivel={2} abierta={false} prueba={`${prueba}-etiqueta`}>
               <label className="form__field">
-                <span>{t('pres.texto')}</span>
+                <span>{t('pres.text')}</span>
                 <input
                   defaultValue={p.etiqueta?.content ?? ""}
                   maxLength={40}
@@ -296,7 +296,7 @@ export function Presentation({
                 />
               </label>
               <label className="form__field">
-                <span>{t('pres.posicion')}</span>
+                <span>{t('pres.position')}</span>
                 <select
                   value={p.etiqueta?.cellPosition ?? "debajo"}
                   disabled={saving}
@@ -337,7 +337,7 @@ export function Presentation({
           titulo="Grafico" nivel={2} abierta={false} prueba={`${prueba}-grafico`}>
           {admite("leyenda") ? (
             <label className="form__field">
-              <span>{t('pres.leyenda')}</span>
+              <span>{t('pres.legend')}</span>
               <select
                 value={p.leyenda ?? "auto"}
                 disabled={saving}
@@ -371,7 +371,7 @@ export function Presentation({
               {labels.mostrar ? (
                 <>
                   <label className="form__field">
-                    <span>{t('pres.leyenda.donde')}</span>
+                    <span>{t('pres.legend.where')}</span>
                     <select
                       value={labels.cellPosition ?? "auto"}
                       disabled={saving}
@@ -419,7 +419,7 @@ export function Presentation({
 
           {admite("apilado") ? (
             <label className="form__field">
-              <span>{t('pres.apilado')}</span>
+              <span>{t('pres.stacked')}</span>
               <select
                 value={p.apilado ?? "ninguno"}
                 disabled={saving}
@@ -433,7 +433,7 @@ export function Presentation({
                 ))}
               </select>
               <span className="field__pista">
-                {t('pres.apilado.ayuda')}
+                {t('pres.stacked.help')}
               </span>
             </label>
           ) : null}
@@ -441,7 +441,7 @@ export function Presentation({
           {admite("orden") ? (
             <>
               <label className="form__field">
-                <span>{t('pres.orden.por')}</span>
+                <span>{t('pres.sort.by')}</span>
                 <select
                   value={p.orden?.por ?? "ninguno"}
                   disabled={saving}
@@ -455,15 +455,15 @@ export function Presentation({
                     })
                   }
                 >
-                  <option value="ninguno">{t('pres.orden.dataset')}</option>
-                  <option value="categoria">{t('pres.orden.categoria')}</option>
-                  <option value="valor">{t('pres.orden.medida')}</option>
+                  <option value="ninguno">{t('pres.sort.dataset')}</option>
+                  <option value="categoria">{t('pres.sort.category')}</option>
+                  <option value="valor">{t('pres.sort.measure')}</option>
                 </select>
               </label>
 
               {p.orden?.por ? (
                 <label className="form__field">
-                  <span>{t('pres.orden.direccion')}</span>
+                  <span>{t('pres.sort.direction')}</span>
                   <select
                     value={p.orden.direction ?? "asc"}
                     disabled={saving}
@@ -474,8 +474,8 @@ export function Presentation({
                       })
                     }
                   >
-                    <option value="asc">{t('pres.orden.ascendente')}</option>
-                    <option value="desc">{t('pres.orden.descendente')}</option>
+                    <option value="asc">{t('pres.sort.ascending')}</option>
+                    <option value="desc">{t('pres.sort.descending')}</option>
                   </select>
                 </label>
               ) : null}
@@ -494,7 +494,7 @@ export function Presentation({
           </p>
 
           <label className="form__field">
-            <span>{t('pres.columnas')}</span>
+            <span>{t('pres.columns')}</span>
             <select
               value={String(p.multiplos?.gridColumns ?? 0)}
               disabled={saving}
@@ -508,7 +508,7 @@ export function Presentation({
                 })
               }
             >
-              <option value="0">{t('pres.columnas.automaticas')}</option>
+              <option value="0">{t('pres.columns.automatic')}</option>
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -611,7 +611,7 @@ export function Presentation({
             del sistema.
           */}
           {instance.binding.measures.length === 0 ? (
-            <p className="field__pista">{t('pres.color.sinMedida')}</p>
+            <p className="field__pista">{t('pres.color.noMeasure')}</p>
           ) : (
             instance.binding.measures.map((medida, s) => (
               <label key={medida} className="form__field">
@@ -665,11 +665,11 @@ export function Presentation({
                 set({ circular: { ...p.circular, radioInterior: Number(e.target.value) } })
               }
             />
-            <span className="field__pista">{t('pres.hueco.ayuda')}</span>
+            <span className="field__pista">{t('pres.hole.help')}</span>
           </label>
 
           <label className="form__field">
-            <span>{t('pres.porciones.etiquetas')}</span>
+            <span>{t('pres.slices.labels')}</span>
             <select
               value={p.circular?.labels ?? "porcentaje"}
               disabled={saving}
@@ -712,7 +712,7 @@ export function Presentation({
             Total en el centro
           </label>
           {(p.circular?.radioInterior ?? 0) === 0 ? (
-            <p className="field__pista">{t('pres.hueco.sinCentro')}</p>
+            <p className="field__pista">{t('pres.hole.noHole')}</p>
           ) : null}
         </Section>
       ) : null}
@@ -728,7 +728,7 @@ export function Presentation({
           */}
           <div className="form__pair">
             <label className="form__field">
-              <span>{t('pres.minimo')}</span>
+              <span>{t('pres.min')}</span>
               <input
                 type="number"
                 defaultValue={p.medidor?.minimo ?? ""}
@@ -745,7 +745,7 @@ export function Presentation({
               />
             </label>
             <label className="form__field">
-              <span>{t('pres.maximo')}</span>
+              <span>{t('pres.max')}</span>
               <input
                 type="number"
                 defaultValue={p.medidor?.maximo ?? ""}
@@ -768,7 +768,7 @@ export function Presentation({
           </span>
 
           <label className="form__field">
-            <span>{t('pres.objetivo')}</span>
+            <span>{t('pres.target')}</span>
             <input
               type="number"
               defaultValue={p.medidor?.objetivo ?? ""}
@@ -807,7 +807,7 @@ export function Presentation({
           keys={['embudo', 'etapa', 'conversion', 'proceso']}
           titulo="Caida" nivel={2} prueba={`${prueba}-embudo`}>
           <label className="form__field">
-            <span>{t('pres.etiqueta.compara')}</span>
+            <span>{t('pres.label.comparedTo')}</span>
             <select
               value={p.embudo?.compare ?? "primero"}
               disabled={saving}
@@ -826,7 +826,7 @@ export function Presentation({
               calcularla de cabeza, que es lo que el objeto viene a evitar.
             */}
             <span className="field__pista">
-              {t('pres.etapas.orden')}
+              {t('pres.stages.sort')}
             </span>
           </label>
         </Section>
@@ -896,7 +896,7 @@ export function Presentation({
           </label>
 
           <label className="form__field">
-            <span>{t('pres.eje.categorias.titulo')}</span>
+            <span>{t('pres.axis.categories.title')}</span>
             <input
               defaultValue={p.ejes?.xTitle ?? ""}
               disabled={saving}
@@ -907,19 +907,19 @@ export function Presentation({
               Se escribe a mano y no sale del nombre del campo: `DimTribunal.Distrito` en un
               objeto de 400 px se recortaba a una letra suelta al borde del grafico.
             */}
-            <span className="field__pista">{t('pres.eje.sinTitulo')}</span>
+            <span className="field__pista">{t('pres.axis.noTitle')}</span>
           </label>
 
           {p.combinado?.axisSecondary ? (
             <label className="form__field">
-              <span>{t('pres.eje.derecha.titulo')}</span>
+              <span>{t('pres.axis.right.title')}</span>
               <input
                 defaultValue={p.ejes?.tituloY2 ?? ""}
                 disabled={saving}
                 data-testid={`${prueba}-titulo-y2`}
                 onBlur={(e) => set({ ejes: { ...p.ejes, tituloY2: e.target.value || undefined } })}
               />
-              <span className="field__pista">{t('pres.eje.derecha.ayuda')}</span>
+              <span className="field__pista">{t('pres.axis.right.help')}</span>
             </label>
           ) : null}
 
@@ -935,7 +935,7 @@ export function Presentation({
           </label>
 
           <label className="form__field">
-            <span>{t('pres.eje.valores.titulo')}</span>
+            <span>{t('pres.axis.values.title')}</span>
             <input
               defaultValue={p.ejes?.tituloY ?? ""}
               disabled={saving}
@@ -977,7 +977,7 @@ export function Presentation({
           */}
           <div className="form__pair">
             <label className="form__field">
-              <span>{t('pres.eje.minimo')}</span>
+              <span>{t('pres.axis.min')}</span>
               <input
                 type="number"
                 defaultValue={p.ejes?.minimoY ?? ""}
@@ -994,7 +994,7 @@ export function Presentation({
               />
             </label>
             <label className="form__field">
-              <span>{t('pres.eje.maximo')}</span>
+              <span>{t('pres.axis.max')}</span>
               <input
                 type="number"
                 defaultValue={p.ejes?.maximoY ?? ""}
@@ -1017,7 +1017,7 @@ export function Presentation({
           </span>
 
           <label className="form__field">
-            <span>{t('pres.rotulos.girar')}</span>
+            <span>{t('pres.tickLabels.rotate')}</span>
             <select
               value={String(p.ejes?.rotateX ?? 0)}
               disabled={saving}
@@ -1031,17 +1031,17 @@ export function Presentation({
                 })
               }
             >
-              <option value="0">{t('pres.rotulos.horizontales')}</option>
-              <option value="30">{t('pres.rotulos.30')}</option>
-              <option value="45">{t('pres.rotulos.45')}</option>
-              <option value="90">{t('pres.rotulos.verticales')}</option>
+              <option value="0">{t('pres.tickLabels.horizontal')}</option>
+              <option value="30">{t('pres.tickLabels.30')}</option>
+              <option value="45">{t('pres.tickLabels.45')}</option>
+              <option value="90">{t('pres.tickLabels.vertical')}</option>
             </select>
             {/*
               Sin girar, ECharts esconde los rotulos que no caben y el grafico acaba ensenando una
               de cada tres categorias sin decir que las demas siguen ahi. Girados se ven todas.
             */}
             <span className="field__pista">
-              {t('pres.rotulos.ayuda')}
+              {t('pres.tickLabels.help')}
             </span>
           </label>
         </Section>
@@ -1111,14 +1111,14 @@ function PanelPickers({
   if (effective.length === 0) {
     return (
       <p className="muted-text" data-testid={`${prueba}-vacio`}>
-        {t('pres.selectores.sinDimension')}
+        {t('pres.pickers.noDimension')}
       </p>
     );
   }
 
   return (
     <div className="editor__pickers" data-testid={prueba}>
-      <p className="muted-text">{t('pres.selectores.titulo')}</p>
+      <p className="muted-text">{t('pres.pickers.title')}</p>
       {effective.map((s) => {
         const columnKind = kinds[s.fieldName] ?? "";
         return (
@@ -1262,7 +1262,7 @@ function FormatRow({
       </p>
 
       <label className="form__field">
-        <span>{t('pres.formato')}</span>
+        <span>{t('pres.format')}</span>
         <select
           value={tipo}
           disabled={saving}
@@ -1279,7 +1279,7 @@ function FormatRow({
 
       {tipo === "personalizado" ? (
         <label className="form__field">
-          <span>{t('pres.formato.cadena')}</span>
+          <span>{t('pres.format.string')}</span>
           <input
             defaultValue={formato.pattern ?? ""}
             placeholder="#,##0.00"
@@ -1308,7 +1308,7 @@ function FormatRow({
       ) : (
         <>
           <label className="form__field">
-            <span>{t('pres.formato.decimales')}</span>
+            <span>{t('pres.format.decimals')}</span>
             <select
               value={String(formato.decimales ?? DEFAULT_DECIMALS[tipo])}
               disabled={saving || tipo === "entero"}
@@ -1325,7 +1325,7 @@ function FormatRow({
 
           {tipo === "moneda" ? (
             <label className="form__field">
-              <span>{t('pres.formato.simbolo')}</span>
+              <span>{t('pres.format.symbol')}</span>
               <input
                 defaultValue={formato.simbolo ?? "RD$"}
                 maxLength={4}
@@ -1338,7 +1338,7 @@ function FormatRow({
                 la institucion que publica —«RD$», «DOP», «$»— y una lista cerrada obligaria a
                 tocar codigo cada vez que alguien reporte en otra divisa.
               */}
-              <span className="field__pista">{t('pres.formato.simbolo.ayuda')}</span>
+              <span className="field__pista">{t('pres.format.symbol.help')}</span>
             </label>
           ) : null}
 
@@ -1354,7 +1354,7 @@ function FormatRow({
           </label>
 
           <label className="form__field">
-            <span>{t('pres.formato.unidad')}</span>
+            <span>{t('pres.format.unit')}</span>
             <input
               defaultValue={formato.unit ?? ""}
               maxLength={8}

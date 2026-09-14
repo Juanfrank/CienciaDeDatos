@@ -87,17 +87,17 @@ export function SidebarPanel({
   const dataConsumes = (definicion?.dimensiones.max ?? 0) > 0 || (definicion?.medidas.max ?? 0) > 0;
 
   const TABS: TabDefinition<Tab>[] = [
-    { id: 'objetos', etiqueta: t('editor.pestana.objetos'), icono: 'barras', habilitada: true },
+    { id: 'objetos', etiqueta: t('editor.tab.objects'), icono: 'barras', habilitada: true },
     {
       id: 'datos',
-      etiqueta: t('editor.pestana.datos'),
+      etiqueta: t('editor.tab.data'),
       icono: 'tabla',
       habilitada: objectHas && dataConsumes,
     },
-    { id: 'formato', etiqueta: t('editor.pestana.formato'), icono: 'indicador', habilitada: objectHas },
+    { id: 'formato', etiqueta: t('editor.tab.format'), icono: 'indicador', habilitada: objectHas },
     {
       id: 'complementos',
-      etiqueta: t('editor.pestana.complementos'),
+      etiqueta: t('editor.tab.addons'),
       icono: 'informacion',
       habilitada: objectHas,
     },
@@ -145,11 +145,11 @@ export function SidebarPanel({
               No se guarda: el filtro es un gesto de un momento, no una preferencia.
             */}
             <label className="editor__search-box">
-              <span className="editor__label-search-box">{t('panel.buscarAjuste')}</span>
+              <span className="editor__label-search-box">{t('panel.searchSetting')}</span>
               <input
                 type="search"
                 value={filtro}
-                placeholder={t('panel.buscarAjuste.ejemplo')}
+                placeholder={t('panel.searchSetting.example')}
                 data-testid="buscar-ajuste"
                 onChange={(e) => setFiltro(e.target.value)}
               />
@@ -209,7 +209,7 @@ export function SidebarPanel({
                   data-testid="limpiar-busqueda"
                   onClick={() => setFiltro('')}
                 >
-                  {t('panel.verAjustes')}
+                  {t('panel.seeSettings')}
                 </button>
               </div>
             ) : null}
@@ -288,11 +288,11 @@ function Palette({
   return (
     <>
       <label className="editor__search-box">
-        <span className="editor__label-search-box">{t('editor.buscarObjeto')}</span>
+        <span className="editor__label-search-box">{t('editor.searchObject')}</span>
         <input
           type="search"
           value={busqueda}
-          placeholder={t('panel.buscarObjeto.ejemplo')}
+          placeholder={t('panel.searchObject.example')}
           data-testid="search-object"
           onChange={(e) => setBusqueda(e.target.value)}
         />
@@ -300,14 +300,14 @@ function Palette({
 
       {visibles.length === 0 ? (
         <div className="editor__empty editor__empty-visible" data-testid="without-objects">
-          <p>{t('editor.sinObjetos', { consulta: busqueda.trim() })}</p>
+          <p>{t('editor.noObjects', { consulta: busqueda.trim() })}</p>
           <button
             type="button"
             className="md-boton md-boton--texto"
             data-testid="limpiar-busqueda-objeto"
             onClick={() => setBusqueda('')}
           >
-            {t('panel.verObjetos')}
+            {t('panel.seeObjects')}
           </button>
         </div>
       ) : null}
@@ -315,7 +315,7 @@ function Palette({
       {withData.length > 0 ? (
         <Section titulo="Visualizaciones" prueba="visualization-section">
           <p className="muted-text editor-panel__nota">
-            {t('panel.visualizaciones.ayuda')}
+            {t('panel.visualizations.help')}
           </p>
 
           {/*
@@ -367,7 +367,7 @@ function Palette({
       {de('elemento').length > 0 ? (
         <Section titulo="Elementos" prueba="element-section">
           <p className="muted-text editor-panel__nota">
-            {t('panel.elementos.ayuda')}
+            {t('panel.elements.help')}
           </p>
           <ObjectList
             objetos={de('elemento')}
@@ -381,7 +381,7 @@ function Palette({
       {de('contenedor').length > 0 ? (
         <Section titulo="Contenedores" prueba="container-section">
           <p className="muted-text editor-panel__nota">
-            {t('panel.contenedores.ayuda')}
+            {t('panel.containers.help')}
           </p>
           <ObjectList
             objetos={de('contenedor')}
@@ -611,7 +611,7 @@ function Data({
         onClick={() => onQuitar(item.id)}
       >
         <Icon nombre="close" tamano={14} />
-        {t('panel.quitarDelModulo')}
+        {t('panel.removeFromModule')}
       </button>
     </>
   );
@@ -723,7 +723,7 @@ function Addons({
       <Section titulo="Puestos" prueba={`section-addons-${item.id}`}>
         {puestos.length === 0 ? (
           <p className="muted-text" data-testid={`without-addons-${item.id}`}>
-            {t('panel.sinDataset')}
+            {t('panel.noDataset')}
           </p>
         ) : (
           <ul className="editor-panel__attachments">
@@ -755,7 +755,7 @@ function Addons({
                     </label>
                   ) : (
                     <label className="form__field">
-                      <span>{t('panel.alcance')}</span>
+                      <span>{t('panel.extent')}</span>
                       <select
                         value={a.objectId === 'tabla-de-datos' ? a.scope : 'objeto'}
                         disabled={saving}
@@ -770,8 +770,8 @@ function Addons({
                           )
                         }
                       >
-                        <option value="objeto">{t('panel.alcance.objeto')}</option>
-                        <option value="subobjeto">{t('panel.alcance.categoria')}</option>
+                        <option value="objeto">{t('panel.extent.object')}</option>
+                        <option value="subobjeto">{t('panel.extent.category')}</option>
                       </select>
                     </label>
                   )}

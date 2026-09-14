@@ -8,9 +8,9 @@ import { translator } from '../../../src/server/locale';
 export const dynamic = 'force-dynamic';
 
 const ESTADO: Record<string, MessageKey> = {
-  borrador: 'admin.modulos.estado.borrador',
-  'pendiente-de-aprobacion': 'admin.modulos.estado.pendiente',
-  publicado: 'admin.modulos.estado.publicado',
+  borrador: 'admin.modules.status.draft',
+  'pendiente-de-aprobacion': 'admin.modules.status.pending',
+  publicado: 'admin.modules.status.published',
 };
 
 /** Los modulos vigentes, su version y donde se editan — secciones 4.1 y 4.2. */
@@ -24,7 +24,7 @@ export default async function ModulosPage() {
 
   return (
     <section>
-      <h2>{t('admin.modulos.titulo')}</h2>
+      <h2>{t('admin.modules.title')}</h2>
       <p className="muted-text">{seccion?.desc}</p>
 
       <SectionIndex sections={seccion?.hijas ?? []} />
@@ -36,23 +36,23 @@ export default async function ModulosPage() {
       */}
       {esperando.length > 0 ? (
         <div className="notice-atencion" data-testid="modulos-esperando">
-          {t('admin.modulos.esperando', {
+          {t('admin.modules.awaiting', {
             n: esperando.length,
             nombres: t.lista(esperando.map((m) => m.name)),
           })}
         </div>
       ) : null}
 
-      <h3>{t('admin.modulos.vigentes', { n: definiciones.length })}</h3>
+      <h3>{t('admin.modules.current', { n: definiciones.length })}</h3>
       <table className="tabla" data-testid="tabla-modulos">
         <thead>
           <tr>
-            <th scope="col">{t('admin.modulos.columna.modulo')}</th>
-            <th scope="col">{t('admin.modulos.columna.estado')}</th>
-            <th scope="col">{t('admin.modulos.columna.version')}</th>
-            <th scope="col">{t('admin.modulos.columna.paginas')}</th>
-            <th scope="col">{t('admin.modulos.columna.objetos')}</th>
-            <th scope="col">{t('admin.modulos.columna.autor')}</th>
+            <th scope="col">{t('admin.modules.column.module')}</th>
+            <th scope="col">{t('admin.modules.column.status')}</th>
+            <th scope="col">{t('admin.modules.column.version')}</th>
+            <th scope="col">{t('admin.modules.column.pages')}</th>
+            <th scope="col">{t('admin.modules.column.objects')}</th>
+            <th scope="col">{t('admin.modules.column.author')}</th>
           </tr>
         </thead>
         <tbody>
@@ -73,7 +73,7 @@ export default async function ModulosPage() {
       </table>
 
       <p className="muted-text">
-        {t('admin.modulos.pie')} <Link href="/editor">{t('admin.modulos.pie.enlace')}</Link>
+        {t('admin.modules.footer')} <Link href="/editor">{t('admin.modules.footer.link')}</Link>
       </p>
     </section>
   );

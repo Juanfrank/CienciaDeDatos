@@ -114,8 +114,8 @@ describe('formato ICU', () => {
 
 describe('traductor', () => {
   it('devuelve el mensaje del idioma pedido', () => {
-    expect(createTranslator('en')('accion.guardar')).toBe('Save');
-    expect(createTranslator('es')('accion.guardar')).toBe('Guardar');
+    expect(createTranslator('en')('action.save')).toBe('Save');
+    expect(createTranslator('es')('action.save')).toBe('Guardar');
   });
 
   it('trae los formateadores de Intl atados al mismo idioma', () => {
@@ -125,7 +125,7 @@ describe('traductor', () => {
   });
 
   it('un idioma desconocido cae al de referencia en vez de romper', () => {
-    expect(createTranslator('pt' as 'es')('accion.guardar')).toBe('Guardar');
+    expect(createTranslator('pt' as 'es')('action.save')).toBe('Guardar');
   });
 });
 

@@ -91,7 +91,7 @@ function EditorLine({
   return (
     <>
       <label className="form__field">
-        <span>{t('obj.linea.estilo')}</span>
+        <span>{t('obj.line.style')}</span>
         <select
           value={line?.style ?? 'solida'}
           disabled={saving}
@@ -107,7 +107,7 @@ function EditorLine({
       </label>
 
       <label className="form__field">
-        <span>{t('obj.grosor')}</span>
+        <span>{t('obj.weight')}</span>
         <select
           value={String(line?.thickness ?? 1)}
           disabled={saving}
@@ -123,7 +123,7 @@ function EditorLine({
       </label>
 
       <div className="form__field">
-        <span>{t('obj.linea.color')}</span>
+        <span>{t('obj.line.color')}</span>
         <ColorPalette
           valor={line?.color ?? 'atenuado'}
           nombre="la linea"
@@ -190,7 +190,7 @@ export function EditorObjectSettings({
           data-testid={`${prueba}-anadir-parrafo`}
           onClick={() => set({ textBox: { parrafos: [...parrafos, { content: '' }] } })}
         >
-          {t('obj.parrafo.anadir')}
+          {t('obj.paragraph.add')}
         </button>
       </Section>
     );
@@ -211,7 +211,7 @@ export function EditorObjectSettings({
         </label>
 
         <label className="form__field">
-          <span>{t('obj.contenido.posicion')}</span>
+          <span>{t('obj.content.position')}</span>
           <select
             value={sectionTitle?.textPosition ?? 'izquierda'}
             disabled={saving}
@@ -231,7 +231,7 @@ export function EditorObjectSettings({
         </label>
 
         <label className="form__field">
-          <span>{t('obj.lineas')}</span>
+          <span>{t('obj.lines')}</span>
           <select
             value={sectionTitle?.line ?? 'ninguna'}
             disabled={saving}
@@ -248,7 +248,7 @@ export function EditorObjectSettings({
               </option>
             ))}
           </select>
-          <span className="field__pista">{t('obj.lineas.ayuda')}</span>
+          <span className="field__pista">{t('obj.lines.help')}</span>
         </label>
 
         <EditorLine
@@ -268,7 +268,7 @@ export function EditorObjectSettings({
     return (
       <Section titulo="Linea divisoria" nivel={2} prueba={prueba}>
         <label className="form__field">
-          <span>{t('obj.orientacion')}</span>
+          <span>{t('obj.orientation')}</span>
           <select
             value={l?.orientation ?? 'horizontal'}
             disabled={saving}
@@ -299,7 +299,7 @@ export function EditorObjectSettings({
     return (
       <Section titulo="Forma" nivel={2} prueba={prueba}>
         <label className="form__field">
-          <span>{t('obj.forma')}</span>
+          <span>{t('obj.shape')}</span>
           <select
             value={f?.forma ?? 'rectangulo'}
             disabled={saving}
@@ -315,7 +315,7 @@ export function EditorObjectSettings({
         </label>
 
         <div className="form__field">
-          <span>{t('obj.relleno')}</span>
+          <span>{t('obj.fill')}</span>
           <ColorPalette
             valor={f?.relleno ?? 'primario'}
             nombre="el relleno"
@@ -325,7 +325,7 @@ export function EditorObjectSettings({
         </div>
 
         <label className="form__field">
-          <span>{t('obj.opacidad')}</span>
+          <span>{t('obj.opacity')}</span>
           <select
             value={String(f?.opacidad ?? 100)}
             disabled={saving}
@@ -343,7 +343,7 @@ export function EditorObjectSettings({
         </label>
 
         <label className="form__field">
-          <span>{t('obj.textoDentro')}</span>
+          <span>{t('obj.textInside')}</span>
           <input
             defaultValue={f?.content ?? ''}
             disabled={saving}
@@ -369,7 +369,7 @@ export function EditorObjectSettings({
           exactamente que espera, y la conexion avisa en el lienzo cuando un extremo no existe.
         */}
         <label className="form__field">
-          <span>{t('obj.conexion.desde')}</span>
+          <span>{t('obj.connection.from')}</span>
           <input
             defaultValue={c?.desde ?? ''}
             disabled={saving}
@@ -378,7 +378,7 @@ export function EditorObjectSettings({
           />
         </label>
         <label className="form__field">
-          <span>{t('obj.conexion.hasta')}</span>
+          <span>{t('obj.connection.to')}</span>
           <input
             defaultValue={c?.hasta ?? ''}
             disabled={saving}
@@ -387,7 +387,7 @@ export function EditorObjectSettings({
           />
         </label>
         <label className="form__field">
-          <span>{t('obj.trazado')}</span>
+          <span>{t('obj.stroke')}</span>
           <select
             value={c?.dash ?? 'angulo'}
             disabled={saving}
@@ -449,7 +449,7 @@ export function EditorObjectSettings({
   return (
     <Section titulo="Contenedor" nivel={2} prueba={prueba}>
       <label className="form__field">
-        <span>{t('obj.columnas.internas')}</span>
+        <span>{t('obj.columns.inner')}</span>
         <select
           value={String(gridColumns)}
           disabled={saving}
@@ -462,12 +462,12 @@ export function EditorObjectSettings({
             </option>
           ))}
         </select>
-        <span className="field__pista">{t('obj.rejilla.interna.ayuda')}</span>
+        <span className="field__pista">{t('obj.grid.inner.help')}</span>
       </label>
 
       {objectId === 'contenedor-desplazable' ? (
         <label className="form__field">
-          <span>{t('obj.desplazamiento.eje')}</span>
+          <span>{t('obj.scroll.axis')}</span>
           <select
             value={conf.scrollable?.axis ?? 'y'}
             disabled={saving}
@@ -482,13 +482,13 @@ export function EditorObjectSettings({
               </option>
             ))}
           </select>
-          <span className="field__pista">{t('obj.desplazamiento.ayuda')}</span>
+          <span className="field__pista">{t('obj.scroll.help')}</span>
         </label>
       ) : null}
 
       {objectId === 'contenedor-ampliable' ? (
         <label className="form__field">
-          <span>{t('obj.ampliar.columnas')}</span>
+          <span>{t('obj.expand.columns')}</span>
           <select
             value={String(conf.expandable?.expandedColumns ?? 12)}
             disabled={saving}
@@ -532,7 +532,7 @@ export function EditorObjectSettings({
             data-testid={`${prueba}-anadir-pestana`}
             onClick={() => set({ panels: [...panels, EMPTY_PANEL(panels.length + 1)] })}
           >
-            {t('obj.pestana.anadir')}
+            {t('obj.tab.add')}
           </button>
         </>
       ) : null}

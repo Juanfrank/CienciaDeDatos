@@ -17,7 +17,7 @@ export type Translator = {
  * El traductor de un idioma.
  *
  * Una clave sin traducir cae al catalogo de referencia en vez de mostrar la clave: la aplicacion
- * esta en espanol y una pantalla con `editor.pestana.datos` a la vista es peor que una pantalla
+ * esta en espanol y una pantalla con `editor.tab.data` a la vista es peor que una pantalla
  * con una palabra en el idioma equivocado. La prueba del catalogo es la que impide que eso pase.
  *
  * Trae ademas los formateadores de `Intl` atados al mismo idioma. Sin ellos, un componente acaba

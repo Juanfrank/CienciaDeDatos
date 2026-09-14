@@ -11,7 +11,7 @@ export default async function VisualizacionesPage() {
 
   return (
     <section>
-      <h2>{t('admin.recursos.visualizaciones')}</h2>
+      <h2>{t('admin.resources.visualizations')}</h2>
       <p className="muted-text">{seccion?.desc}</p>
       <ResourceList rows={filas} familia="visualizaciones" t={t} />
     </section>

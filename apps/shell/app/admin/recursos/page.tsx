@@ -10,7 +10,7 @@ export default async function RecursosPage() {
 
   return (
     <section>
-      <h2>{t('admin.recursos.titulo')}</h2>
+      <h2>{t('admin.resources.title')}</h2>
       <p className="muted-text">{seccion?.desc}</p>
       <SectionIndex sections={seccion?.hijas ?? []} />
     </section>
