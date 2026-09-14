@@ -274,3 +274,10 @@ export {
   type ChartPalette,
   type ChartKind,
 } from './charts/options';
+export {
+  BumpError,
+  bumpInstance,
+  isMajorJump,
+  latestVersion,
+  type BumpResult,
+} from './registry/bump';
