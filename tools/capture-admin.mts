@@ -154,5 +154,17 @@ for (const [path, label] of SECCIONES) {
   await pagina.screenshot({ path: `${salida}/${label}.png`, fullPage: true });
 }
 
+/*
+ * El uso de un recurso vive en `/admin/resources/usage/[id]`, que lleva un parametro y por eso no
+ * cabe en la lista fija de arriba. Se llega como llega una persona: pinchando la columna «En uso».
+ */
+await pagina.goto(`${base}/admin/resources/visualizations`);
+await pagina.waitForLoadState('networkidle');
+await pagina.locator('a[href^="/admin/resources/usage/"]').first().click();
+await pagina.waitForLoadState('networkidle');
+await pagina.mouse.move(700, 600);
+await pagina.waitForTimeout(250);
+await pagina.screenshot({ path: `${salida}/21-recursos-uso.png`, fullPage: true });
+
 await navegador.close();
-console.log(`${SECCIONES.length + 1} capturas en ${salida}/`);
+console.log(`${SECCIONES.length + 2} capturas en ${salida}/`);
