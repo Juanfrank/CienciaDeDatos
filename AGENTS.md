@@ -70,6 +70,38 @@ clave `Demostracion-2026!` y TOTP del secreto `JBSWY3DPEHPK3PXP`.
 niega a arrancar con la pimienta de desarrollo. `npm run e2e` necesita
 `npx playwright install --with-deps chromium`.
 
+## Antes de buscar: el mapa de dependencias
+
+Para cualquier pregunta **estructural** —donde se define `X`, quien importa `Y`, a que arrastra
+tocar este archivo— se consulta `.claude/depgraph.json` en vez de recorrer el repositorio con
+`grep`. Es un indice de imports, exports, definiciones y referencias por archivo; el repositorio
+pasa de los 350 archivos, y leerlos para responder «donde esta esto» cuesta mucho mas que
+preguntarselo al mapa.
+
+Se usa con la habilidad **`depgraph`**, cuyas reglas valen aqui tal cual:
+
+```bash
+# Actualizar: solo vuelve a leer los archivos cuyo hash cambio.
+python scripts/build_depgraph.py --update --root . --out .claude/depgraph.json
+
+# Consultar en estrecho, nunca volcar el mapa entero.
+python scripts/build_depgraph.py --who-imports <modulo> --out .claude/depgraph.json
+python scripts/build_depgraph.py --defines <nombre>  --out .claude/depgraph.json
+python scripts/build_depgraph.py --file <ruta>       --out .claude/depgraph.json
+```
+
+- **Se regenera cuando el arbol se movio**, no en cada turno: `--update` es incremental y barato;
+  `--rebuild` solo si el mapa falta o esta corrupto.
+- **Se consulta la rebanada que hace falta.** Volcar el mapa entero al contexto cuesta mas que
+  leer los archivos, que es justo lo que se venia a evitar.
+- **El mapa dice DONDE mirar, no QUE dice el codigo.** Antes de cambiar nada se abre el archivo
+  de verdad: el mapa es una pista, no la fuente de verdad.
+- **Para uno o dos archivos, se saltan el mapa y se leen.** Se amortiza en preguntas de varios
+  archivos, no en una edicion puntual.
+
+Si el mapa esta desfasado y la pregunta no depende de que sea exacto, sale mas barato un `grep`
+acotado que bloquear el trabajo regenerandolo.
+
 ## Limites de dependencia
 
 Los impone `@nx/enforce-module-boundaries` sobre las etiquetas de cada `project.json`:
@@ -90,10 +122,49 @@ de lint, y `npm run verify:boundaries` comprueba que esa regla sigue mordiendo.
 
 ## Estilo
 
-- **Codigo y comentarios en espanol sin acentos.** Las respuestas al equipo, con acentos.
-- **Los comentarios explican el codigo, no su historia.** Un bloque de contexto por archivo;
-  en linea solo cuando el codigo no se explica solo. No se escribe que habia antes, que fallo
-  ni por que se descarto la otra opcion.
+### El codigo en ingles, los comentarios en espanol
+
+**Todo identificador se escribe en ingles. SIEMPRE.** Variables, funciones, metodos, clases,
+tipos, propiedades, parametros, constantes, archivos, carpetas, clases CSS, atributos `data-*`,
+identificadores de prueba, claves de un objeto que viaja por HTTP y ramas de git.
+
+**Todo comentario se escribe en espanol sin acentos.** El comentario es para quien mantiene esto;
+el identificador es para quien lo lee desde fuera. Las respuestas al equipo, con acentos.
+
+```ts
+/** Recorta las filas al ambito de quien mira. */
+export function applyScope(rows: Row[], scope: AccessScope): Row[] {
+```
+
+Lo unico que no se traduce es **el texto que una persona lee en pantalla**, que va en espanol y
+sale del catalogo de `@app/i18n`, nunca del componente. Hay una prueba que falla si una palabra
+inglesa se cuela en el texto visible de un JSX.
+
+Un nombre en espanol en el codigo es un error, no una preferencia: `tools/rename/AGENTS.md` tiene
+el glosario y las trampas del renombrado.
+
+### Los comentarios dicen QUE hace el codigo, no su historia
+
+Un comentario declara el **proposito**: que resuelve este archivo, que garantiza esta funcion.
+Nada mas.
+
+**Lo que NO va en un comentario:**
+
+- Que habia antes, que fallo, que se arreglo ni cuando.
+- Por que se eligio la opcion X y se descarto la Y.
+- El numero de una prueba, de un commit o de una tarea.
+- Repetir en prosa lo que la linea de al lado ya dice.
+
+**Donde va cada cosa:** lo que cambio y por que, en el **mensaje del commit**; lo que cambio de
+cara a quien usa la aplicacion, en **`CHANGELOG.md`**; una decision de arquitectura con sus
+alternativas, en una **ADR de `docs/adr`**, que para eso es un registro fechado.
+
+Un bloque de contexto por archivo, arriba. En linea, solo cuando el codigo no se explica solo.
+Si hace falta un parrafo para justificar una linea, casi siempre sobra el parrafo y falta un
+nombre mejor.
+
+### Lo demas
+
 - **Las pruebas recorren todos los casos, no una muestra.** Un objeto sin prueba no falla:
   simplemente no tiene prueba.
 - **Una sola fuente de verdad.** Dos listas que describen lo mismo acaban discrepando; si no
@@ -124,4 +195,4 @@ de lint, y `npm run verify:boundaries` comprueba que esa regla sigue mordiendo.
 | `tools` | Scripts de verificacion y utilidades de desarrollo |
 | `tools/coherencia` | Las pruebas que comparan los dos lados de un contrato que nadie ata |
 | `infra` | Plantillas Bicep |
-| `.claude/depgraph.json` | Mapa de imports y definiciones, para consultas estructurales |
+| `.claude/depgraph.json` | Mapa de imports y definiciones; se consulta antes de buscar a mano |
