@@ -79,7 +79,7 @@ export function MyView({
           <h2>Mi vista de este modulo</h2>
           <button
             type="button"
-            className="boton-enlace"
+            className="button-link"
             data-testid="my-view-close"
             onClick={() => dialogo.current?.close()}
           >
@@ -134,7 +134,7 @@ export function MyView({
           {personalizada ? (
             <button
               type="button"
-              className="boton-enlace"
+              className="button-link"
               data-testid="my-view-descartar"
               disabled={trabajando}
               onClick={() => void discard()}

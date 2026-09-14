@@ -67,7 +67,7 @@ export function TreeEditor({ initial }: { initial: ManagedTree }) {
   return (
     <div className="tree-editor">
       {error ? (
-        <p className="aviso notice-error" role="alert" data-testid="error-arbol">
+        <p className="aviso notice-error" role="alert" data-testid="error-tree">
           {error}
         </p>
       ) : null}
@@ -95,7 +95,7 @@ export function TreeEditor({ initial }: { initial: ManagedTree }) {
             >
               Mover de todas formas
             </button>
-            <button type="button" className="boton-enlace" onClick={() => setPendiente(null)}>
+            <button type="button" className="button-link" onClick={() => setPendiente(null)}>
               Cancelar
             </button>
           </div>
@@ -123,7 +123,7 @@ export function TreeEditor({ initial }: { initial: ManagedTree }) {
                 {t.node.type === 'folder' ? t.node.name : t.node.moduleRef.name}
                 <button
                   type="button"
-                  className="boton-enlace"
+                  className="button-link"
                   data-testid={`restore-${t.node.id}`}
                   onClick={() => void enviar({ type: 'restaurar', trashedNodeId: t.node.id })}
                 >
@@ -235,7 +235,7 @@ function Nodes({
 
                   <button
                     type="button"
-                    className="boton-enlace"
+                    className="button-link"
                     data-testid={`rename-${node.id}`}
                     onClick={() => {
                       const nuevo = window.prompt('Nuevo nombre', nombre);
@@ -249,7 +249,7 @@ function Nodes({
 
                   <button
                     type="button"
-                    className="boton-enlace"
+                    className="button-link"
                     data-testid={`trash-${node.id}`}
                     onClick={() => void onOperacion({ type: 'enviar-a-papelera', nodeId: node.id })}
                   >

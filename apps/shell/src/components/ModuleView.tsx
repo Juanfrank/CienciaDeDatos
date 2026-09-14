@@ -93,7 +93,7 @@ export function ModuleView({
           {filtersHas ? (
             <button
               type="button"
-              className="boton-enlace module-bar__clear"
+              className="button-link module-bar__clear"
               data-testid="clear-filters"
               onClick={clearAll}
             >

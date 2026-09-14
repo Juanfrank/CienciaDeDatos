@@ -23,7 +23,7 @@ test.describe('elementos (no leen datos)', () => {
     await expect(page.getByTestId('forma').first()).toBeVisible();
     // Ningun objeto marcado como roto: un elemento no tiene dataset, y la validacion tiene que
     // saberlo en vez de exigirle uno.
-    await expect(page.getByTestId('objeto-roto')).toHaveCount(0);
+    await expect(page.getByTestId('object-broken')).toHaveCount(0);
   });
 
   test('un cuadrado es cuadrado, no un rectangulo estirado a la celda', async ({ page }) => {
@@ -155,7 +155,7 @@ test.describe('contenedores', () => {
     expect(insideColumns).toBeGreaterThan(outsideColumns);
 
     // El cierre es un control, no «pulsar fuera»: quien navega con teclado se quedaria dentro.
-    await page.getByTestId('cerrar-ampliado').click();
+    await page.getByTestId('close-expanded').click();
     await expect(page.getByTestId('ampliado')).toHaveCount(0);
   });
 
@@ -167,7 +167,7 @@ test.describe('la seccion Objetos del editor', () => {
     const slug = `objetos-${Date.now().toString(36)}`;
     await page.goto('/editor');
     await page.getByTestId('new-module-name').fill(`Modulo ${slug}`);
-    await page.getByTestId('nuevo-modulo-slug').fill(slug);
+    await page.getByTestId('new-module-slug').fill(slug);
     await page.getByTestId('create-module').click();
     await expect(page.getByTestId(`row-${slug}`)).toBeVisible();
     await page.goto(`/editor/${slug}`);
@@ -240,7 +240,7 @@ test.describe('los dos carriles de pantalla', () => {
     const slug = `carril-${Date.now().toString(36)}`;
     await page.goto('/editor');
     await page.getByTestId('new-module-name').fill('Carriles');
-    await page.getByTestId('nuevo-modulo-slug').fill(slug);
+    await page.getByTestId('new-module-slug').fill(slug);
     await page.getByTestId('create-module').click();
     await expect(page.getByTestId(`row-${slug}`)).toBeVisible();
     await page.goto(`/editor/${slug}`);
@@ -257,7 +257,7 @@ test.describe('los dos carriles de pantalla', () => {
     const slug = `scroll-${Date.now().toString(36)}`;
     await page.goto('/editor');
     await page.getByTestId('new-module-name').fill('Desplazar');
-    await page.getByTestId('nuevo-modulo-slug').fill(slug);
+    await page.getByTestId('new-module-slug').fill(slug);
     await page.getByTestId('create-module').click();
     await expect(page.getByTestId(`row-${slug}`)).toBeVisible();
     await page.goto(`/editor/${slug}`);

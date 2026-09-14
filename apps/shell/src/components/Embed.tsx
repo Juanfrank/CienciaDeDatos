@@ -52,7 +52,7 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
           <h2>Incrustar esta vista</h2>
           <button
             type="button"
-            className="boton-enlace"
+            className="button-link"
             onClick={() => dialogo.current?.close()}
             data-testid="embed-close"
           >
@@ -69,8 +69,8 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
         </label>
         <textarea
           id="codigo-incrustacion"
-          className="embed__codigo"
-          data-testid="incrustar-codigo"
+          className="embed__code"
+          data-testid="embed-code"
           readOnly
           value={code}
         />

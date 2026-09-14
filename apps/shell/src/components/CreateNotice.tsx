@@ -103,7 +103,7 @@ export function CreateNotice({
       <dialog ref={dialogo} className="emergente" aria-label="Crear un aviso" data-testid="dialogo-aviso">
         <div className="popover__header">
           <h2>Avisarme de este modulo</h2>
-          <button type="button" className="boton-enlace" onClick={close} data-testid="close-notice">
+          <button type="button" className="button-link" onClick={close} data-testid="close-notice">
             Cerrar
           </button>
         </div>

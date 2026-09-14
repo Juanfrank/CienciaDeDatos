@@ -105,7 +105,7 @@ test.describe('el resto de la aplicacion en tema oscuro', () => {
     // Es cuando mas falta hace: un mensaje de error que no contrasta deja a quien mira sin saber
     // por que el objeto esta vacio.
     await page.goto('/m/audiencias?DimTribunal.Materia=Penal');
-    await expect(page.getByTestId('objeto-roto')).toBeVisible();
+    await expect(page.getByTestId('object-broken')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);
   });

@@ -78,7 +78,7 @@ export function LocalesAccounts({
             "su identidad. Usted responde de esa verificacion."}
       </p>
 
-      <p className="login__error" role="alert" data-testid="cuentas-error">
+      <p className="login__error" role="alert" data-testid="accounts-error">
         {error}
       </p>
 
@@ -97,7 +97,7 @@ export function LocalesAccounts({
           </p>
           {emitido.code ? (
             <p>
-              Codigo: <code data-testid="reset-codigo">{emitido.code}</code>
+              Codigo: <code data-testid="reset-code">{emitido.code}</code>
             </p>
           ) : null}
           <p className="muted-text">
@@ -109,7 +109,7 @@ export function LocalesAccounts({
       ) : null}
 
       <div className="table-container-data">
-        <table className="data-table" data-testid="tabla-cuentas">
+        <table className="data-table" data-testid="table-accounts">
           <caption className="muted-text">
             {accounts.length} cuenta{accounts.length === 1 ? "" : "s"} local
             {accounts.length === 1 ? "" : "es"} en el sistema
@@ -159,7 +159,7 @@ export function LocalesAccounts({
                 <td className="editor__actions">
                   <button
                     type="button"
-                    className="boton-enlace"
+                    className="button-link"
                     data-testid={`unlock-${c.userId}`}
                     disabled={trabajando || !c.bloqueada}
                     onClick={() => void actuar("desbloquear", c.email)}
@@ -168,7 +168,7 @@ export function LocalesAccounts({
                   </button>
                   <button
                     type="button"
-                    className="boton-enlace"
+                    className="button-link"
                     data-testid={`reset-${c.userId}`}
                     disabled={trabajando}
                     onClick={() => void actuar("restablecer", c.email)}

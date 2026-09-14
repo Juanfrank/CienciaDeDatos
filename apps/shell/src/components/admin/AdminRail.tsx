@@ -100,7 +100,7 @@ export function CurrentSection() {
       <span className="admin__path-sep" aria-hidden="true">
         /
       </span>
-      <span className="admin__path-actual" data-testid="admin-seccion-actual">
+      <span className="admin__path-actual" data-testid="admin-section-current">
         {section.label}
       </span>
     </>

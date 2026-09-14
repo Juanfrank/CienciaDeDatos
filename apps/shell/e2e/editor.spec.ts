@@ -53,7 +53,7 @@ test.describe('quien entra al editor (4.10.1)', () => {
   test('un Visor no ve el enlace y la API le responde 403', async ({ page }) => {
     await asLogin(page, 'u-beto');
     await page.goto('/');
-    await expect(page.getByTestId('enlace-editor')).toHaveCount(0);
+    await expect(page.getByTestId('link-editor')).toHaveCount(0);
 
     // Lo que importa no es el enlace ausente: crear modulos a mano tampoco debe funcionar.
     const respuesta = await page.request.post('/api/modulos', {
@@ -65,14 +65,14 @@ test.describe('quien entra al editor (4.10.1)', () => {
   test('un Visor que pide la pagina no ve el editor', async ({ page }) => {
     await asLogin(page, 'u-beto');
     await page.goto('/editor');
-    await expect(page.getByTestId('sin-permiso-editor')).toBeVisible();
+    await expect(page.getByTestId('without-permission-editor')).toBeVisible();
     await expect(page.getByTestId('module-list')).toHaveCount(0);
   });
 
   test('un Colaborador si entra', async ({ page }) => {
     await asLogin(page, 'u-ana');
     await page.goto('/');
-    await expect(page.getByTestId('enlace-editor')).toBeVisible();
+    await expect(page.getByTestId('link-editor')).toBeVisible();
     await page.goto('/editor');
     await expect(page.getByRole('heading', { name: 'Editor de modulos' })).toBeVisible();
   });
@@ -85,7 +85,7 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
     await page.goto('/editor');
 
     await page.getByTestId('new-module-name').fill(`Modulo ${slug}`);
-    await page.getByTestId('nuevo-modulo-slug').fill(slug);
+    await page.getByTestId('new-module-slug').fill(slug);
     await page.getByTestId('create-module').click();
 
     await expect(page.getByTestId(`row-${slug}`)).toBeVisible();
@@ -140,7 +140,7 @@ test.describe('un modulo se construye con objetos prediseñados, no con consulta
     // editando alrededor. Es literalmente lo que pide 4.2: no fallar en silencio.
     const block = page.getByTestId('block-kpi');
     await expect(block).toBeVisible();
-    await expect(block.getByTestId('objeto-roto')).toBeVisible();
+    await expect(block.getByTestId('object-broken')).toBeVisible();
     await expect(page.getByTestId('problems-kpi')).toContainText('MedidaRetirada');
     await expect(page.getByTestId('locks-editor')).toBeVisible();
   });

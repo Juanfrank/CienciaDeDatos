@@ -191,7 +191,7 @@ describe('la puerta de publicacion: findPublishBlockers, por fin invocado', () =
 
     expect(fallo).toMatchObject({ status: 422 });
     expect((fallo as CicloDeVidaError).detail).toEqual(
-      expect.arrayContaining([expect.objectContaining({ reason: 'objeto-roto' })]),
+      expect.arrayContaining([expect.objectContaining({ reason: 'object-broken' })]),
     );
   });
 

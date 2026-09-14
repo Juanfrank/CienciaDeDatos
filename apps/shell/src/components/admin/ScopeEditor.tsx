@@ -81,7 +81,7 @@ export function ScopeEditor({ targets }: { targets: ScopeTarget[] }) {
         <span>Ambito de</span>
         <select
           value={destinoId}
-          data-testid="selector-destino-ambito"
+          data-testid="picker-target-scope"
           onChange={(e) => setDestinoId(e.target.value)}
         >
           {targets.map((d) => (
@@ -115,7 +115,7 @@ export function ScopeEditor({ targets }: { targets: ScopeTarget[] }) {
             />
             <button
               type="button"
-              className="boton-enlace"
+              className="button-link"
               onClick={() => setRestricciones((prev) => prev.filter((_, j) => j !== i))}
             >
               Quitar

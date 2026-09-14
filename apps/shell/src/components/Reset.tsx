@@ -95,11 +95,11 @@ export function Reset() {
         </p>
 
         <p className="form__field">
-          <label htmlFor="reset-codigo">Codigo</label>
+          <label htmlFor="reset-code">Codigo</label>
           <input
-            id="reset-codigo"
+            id="reset-code"
             value={code}
-            data-testid="reset-codigo"
+            data-testid="reset-code"
             onChange={(e) => setCodigo(e.target.value)}
           />
         </p>

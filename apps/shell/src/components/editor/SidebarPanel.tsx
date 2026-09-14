@@ -776,7 +776,7 @@ function Addons({
 
                   <button
                     type="button"
-                    className="boton-enlace"
+                    className="button-link"
                     disabled={saving}
                     data-testid={`remove-attachment-${item.id}-${a.objectId}`}
                     onClick={() => remove(a.instanceId)}

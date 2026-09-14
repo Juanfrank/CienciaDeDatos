@@ -1,7 +1,7 @@
 import { expect, test, type Page } from './instance';
 import { initialCatalog } from '@app/ui-components';
 import { FIRST_OPENS, KEY_CONTROL } from '../src/components/editor/controls';
-import { asLogin } from './session';
+import { asLogin, newModule } from './session';
 
 /** Todo objeto del catalogo se COLOCA y se CONFIGURA desde el editor — seccion 4.2. */
 
@@ -13,15 +13,6 @@ const openSections = async (page: Page) => {
   await page
     .locator('.editor-panel details')
     .evaluateAll((nodos) => nodos.forEach((n) => ((n as HTMLDetailsElement).open = true)));
-};
-
-const newModule = async (page: Page, slug: string) => {
-  await page.goto('/editor');
-  await page.getByTestId('new-module-name').fill(slug);
-  await page.getByTestId('nuevo-modulo-slug').fill(slug);
-  await page.getByTestId('create-module').click();
-  await expect(page.getByTestId(`row-${slug}`)).toBeVisible();
-  await page.goto(`/editor/${slug}`);
 };
 
 /** Los que van en la rejilla. Los complementos se adjuntan y tienen su propia pestana. */
@@ -62,6 +53,9 @@ test.describe('colocable: el catalogo entero entra por la paleta', () => {
     await newModule(page, slug);
 
     await page.getByTestId('add-embudo').click();
+    // Se espera al guardado ANTES del segundo: la paleta se deshabilita mientras el editor
+    // guarda, que es lo correcto, y pulsar sin esperar solo funciona si la maquina va sobrada.
+    await guardado(page);
     await page.getByTestId('tab-objetos').click();
     await page.getByTestId('add-mapa-de-arbol').click();
     await guardado(page);

@@ -59,7 +59,7 @@ export function Notices() {
 
       <h2>Bandeja</h2>
       {inbox.length === 0 ? (
-        <p className="muted-text" data-testid="bandeja-vacia">
+        <p className="muted-text" data-testid="inbox-empty">
           No hay avisos. Los de una alerta llegan cuando su condicion empieza a cumplirse, y
           tambien cuando deja de cumplirse.
         </p>
@@ -110,7 +110,7 @@ export function Notices() {
               </span>
               <button
                 type="button"
-                className="boton-enlace"
+                className="button-link"
                 data-testid={`delete-alert-${r.name}`}
                 onClick={() => void borrar('alertas', r.id)}
               >
@@ -127,7 +127,7 @@ export function Notices() {
           Ninguna. Se crean desde el modulo que se quiera recibir.
         </p>
       ) : (
-        <ul className="simple-list" data-testid="lista-suscripciones">
+        <ul className="simple-list" data-testid="list-subscriptions">
           {suscripciones.map((s) => (
             <li key={s.id} className="regla" data-testid={`subscription-${s.name}`}>
               <span>
@@ -139,7 +139,7 @@ export function Notices() {
               </span>
               <button
                 type="button"
-                className="boton-enlace"
+                className="button-link"
                 data-testid={`delete-subscription-${s.name}`}
                 onClick={() => void borrar('suscripciones', s.id)}
               >

@@ -13,13 +13,13 @@ test.describe('agrupa varias dimensiones en un solo objeto', () => {
     await page.goto('/m/casos-pendientes');
 
     // Materia con pastillas, distrito con desplegable: el mismo objeto, dos gestos distintos.
-    await expect(page.getByTestId('filtro-DimTribunal.Materia-Penal')).toBeVisible();
-    await expect(page.getByTestId('filtro-DimTribunal.Distrito-desplegable')).toBeVisible();
+    await expect(page.getByTestId('filter-DimTribunal.Materia-Penal')).toBeVisible();
+    await expect(page.getByTestId('filter-DimTribunal.Distrito-desplegable')).toBeVisible();
   });
 
   test('una pastilla se refleja en la URL y recorta el resto del modulo', async ({ page }) => {
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('filtro-DimTribunal.Materia-Penal').click();
+    await page.getByTestId('filter-DimTribunal.Materia-Penal').click();
 
     await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
     await expect(page.getByTestId('filtros-activos')).toContainText('Penal');
@@ -29,7 +29,7 @@ test.describe('agrupa varias dimensiones en un solo objeto', () => {
     // Con `alternar` en vez de `fijar`, cambiar de distrito habria dejado los dos en la URL y el
     // modulo se habria filtrado por ambos sin que nadie lo pidiera.
     await page.goto('/m/casos-pendientes');
-    const desplegable = page.getByTestId('filtro-DimTribunal.Distrito-desplegable');
+    const desplegable = page.getByTestId('filter-DimTribunal.Distrito-desplegable');
 
     await desplegable.selectOption('Distrito Norte');
     await expect(page).toHaveURL(/DimTribunal\.Distrito=Distrito\+Norte/);
@@ -40,10 +40,10 @@ test.describe('agrupa varias dimensiones en un solo objeto', () => {
 
   test('«Quitar» limpia solo SU dimension, no todo el panel', async ({ page }) => {
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('filtro-DimTribunal.Materia-Penal').click();
-    await page.getByTestId('filtro-DimTribunal.Distrito-desplegable').selectOption('Distrito Norte');
+    await page.getByTestId('filter-DimTribunal.Materia-Penal').click();
+    await page.getByTestId('filter-DimTribunal.Distrito-desplegable').selectOption('Distrito Norte');
 
-    await page.getByTestId('filtro-DimTribunal.Materia-limpiar').click();
+    await page.getByTestId('filter-DimTribunal.Materia-limpiar').click();
     // Se espera al enrutador antes de leer la URL: `replace` no la actualiza de inmediato, y
     // leerla justo despues del clic mide el estado anterior.
     await expect(page).not.toHaveURL(/Materia=Penal/);
@@ -59,9 +59,9 @@ test.describe('agrupa varias dimensiones en un solo objeto', () => {
      */
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('filtro-DimTribunal.Materia-Penal').click();
+    await page.getByTestId('filter-DimTribunal.Materia-Penal').click();
     await page
-      .getByTestId('filtro-DimTribunal.Distrito-desplegable')
+      .getByTestId('filter-DimTribunal.Distrito-desplegable')
       .selectOption('Distrito Norte');
 
     await expect(page).toHaveURL(/DimTribunal\.Distrito=Distrito\+Norte/);
@@ -74,18 +74,18 @@ test.describe('agrupa varias dimensiones en un solo objeto', () => {
     await page.goto('/m/casos-pendientes');
     await expect(page.getByTestId('filters-panel-puestos-filtros')).toHaveCount(0);
 
-    await page.getByTestId('filtro-DimTribunal.Materia-Penal').click();
+    await page.getByTestId('filter-DimTribunal.Materia-Penal').click();
     await expect(page.getByTestId('filters-panel-puestos-filtros')).toContainText('1 de 2');
   });
 
   test('la URL con filtros puestos se abre igual en otra pestana', async ({ page, context }) => {
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('filtro-DimTribunal.Materia-Penal').click();
+    await page.getByTestId('filter-DimTribunal.Materia-Penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
 
     const otra = await context.newPage();
     await otra.goto(page.url());
-    await expect(otra.getByTestId('filtro-DimTribunal.Materia-Penal')).toHaveAttribute(
+    await expect(otra.getByTestId('filter-DimTribunal.Materia-Penal')).toHaveAttribute(
       'aria-pressed',
       'true',
     );

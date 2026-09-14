@@ -171,7 +171,7 @@ export function DataTable({
         type="button"
         className="addon__icon"
         aria-label={`Ver los datos de origen de «${titulo}»`}
-        data-testid={`data-table-abrir-${titulo}`}
+        data-testid={`data-table-open-${titulo}`}
         onClick={() => setAbierto(true)}
       >
         <Icon nombre="datos" tamano={18} />
@@ -188,7 +188,7 @@ export function DataTable({
       >
         <div className="popover__header">
           <h2>Data de source — {titulo}</h2>
-          <button type="button" className="boton-enlace" onClick={close} data-testid="table-data-close">
+          <button type="button" className="button-link" onClick={close} data-testid="table-data-close">
             Cerrar
           </button>
         </div>
@@ -224,7 +224,7 @@ export function DataTable({
                         <td>
                           <button
                             type="button"
-                            className="boton-enlace"
+                            className="button-link"
                             data-testid={`drill-${clave}`}
                             onClick={() =>
                               setSeleccion(
@@ -254,7 +254,7 @@ export function DataTable({
             {selectionLabel ? (
               <button
                 type="button"
-                className="boton-enlace"
+                className="button-link"
                 data-testid="data-table-volver"
                 onClick={() => setSeleccion(null)}
               >

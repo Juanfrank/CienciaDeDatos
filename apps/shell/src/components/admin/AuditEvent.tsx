@@ -44,7 +44,7 @@ export function AuditEvent({ evento }: { evento: ConfigChangeLog }) {
         {ENTIDAD[evento.entityType] ?? evento.entityType} <code>{evento.entityId}</code>
       </span>
       {evento.isScopeExpansion ? (
-        <span className="insignia insignia--error" data-testid="insignia-ampliacion">
+        <span className="insignia badge--error" data-testid="insignia-ampliacion">
           Ampliacion
         </span>
       ) : null}

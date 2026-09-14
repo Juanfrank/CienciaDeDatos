@@ -36,7 +36,7 @@ export function Slicer({
         seleccionados.length > 0 ? (
           <button
             type="button"
-            className="boton-enlace"
+            className="button-link"
             onClick={() => clearField(fieldName)}
           >
             Limpiar

@@ -246,7 +246,7 @@ describe('puerta de publicacion institucional', () => {
       registry: registro,
       columnsByDataset: {},
     });
-    expect(findPublishBlockers(d)[0]?.reason).toBe('objeto-roto');
+    expect(findPublishBlockers(d)[0]?.reason).toBe('object-broken');
   });
 
   it('un complemento colocado como objeto suelto bloquea la publicacion', () => {
@@ -259,7 +259,7 @@ describe('puerta de publicacion institucional', () => {
       columnsByDataset: gridColumns,
     });
 
-    expect(findPublishBlockers(d)[0]?.reason).toBe('objeto-roto');
+    expect(findPublishBlockers(d)[0]?.reason).toBe('object-broken');
     expect(findPublishBlockers(d)[0]?.detail).toMatch(/no puede colocarse como objeto independiente/);
   });
 

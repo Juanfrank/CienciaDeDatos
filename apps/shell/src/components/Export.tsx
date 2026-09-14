@@ -96,7 +96,7 @@ export function Export({
         icono="exportar"
         etiqueta="Exportar"
         presionado={abierto}
-        data-testid="abrir-exportar"
+        data-testid="open-export"
         onClick={() => setAbierto((v) => !v)}
       />
 
@@ -137,7 +137,7 @@ export function Export({
 
       {trabajo?.archivo ? (
         <a
-          className="boton-enlace"
+          className="button-link"
           href={trabajo.archivo.descargarEn}
           download={trabajo.archivo.nombre}
           data-testid="descargar-exportacion"

@@ -20,7 +20,7 @@ export function NavigationTree({ nodos, nivel = 0 }: { nodos: NavNode[]; nivel?:
           <li key={node.id}>
             <Link
               href={`/m/${node.moduleRef.slug}`}
-              className={`tree__enlace ${pathname.startsWith(`/m/${node.moduleRef.slug}`) ? 'is-active' : ''}`}
+              className={`tree__link ${pathname.startsWith(`/m/${node.moduleRef.slug}`) ? 'is-active' : ''}`}
               data-testid={`nav-${node.moduleRef.slug}`}
             >
               {node.moduleRef.name}

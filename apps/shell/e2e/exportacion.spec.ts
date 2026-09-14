@@ -239,7 +239,7 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('abrir-exportar').click();
+    await page.getByTestId('open-export').click();
     await page.getByLabel('Formato').selectOption('csv');
     await page.getByTestId('exportar').click();
 
@@ -257,9 +257,9 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('abrir-exportar').click();
+    await page.getByTestId('open-export').click();
     await page.getByTestId('exportar').click();
-    await page.getByTestId('abrir-exportar').click();
+    await page.getByTestId('open-export').click();
     await expect(page.getByTestId('export-panel')).toHaveCount(0);
 
     await expect(page.getByTestId('export-status')).toHaveText(/Lista/, { timeout: 15_000 });
@@ -272,7 +272,7 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
     await page.getByTestId('slicer-Penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
 
-    await page.getByTestId('abrir-exportar').click();
+    await page.getByTestId('open-export').click();
     await page.getByLabel('Formato').selectOption('csv');
     await page.getByTestId('exportar').click();
     await expect(page.getByTestId('export-status')).toHaveText(/Lista/, { timeout: 15_000 });

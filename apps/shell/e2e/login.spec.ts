@@ -18,7 +18,7 @@ test.describe('sin sesion no se entra (criterio de la seccion 9)', () => {
   test('una pagina lleva a la pantalla de acceso, no a los datos', async ({ page }) => {
     await page.goto('/m/casos-pendientes');
     await expect(page).toHaveURL(/\/acceso/);
-    await expect(page.getByTestId('acceso-entrar')).toBeVisible();
+    await expect(page.getByTestId('login-login')).toBeVisible();
     // Lo importante no es la redireccion, sino que no se haya dibujado el modulo.
     await expect(page.getByTestId('tabla')).toHaveCount(0);
   });
@@ -102,14 +102,14 @@ test.describe('el segundo factor es obligatorio en las cuentas locales (4.7.2)',
     await page.goto('/acceso');
     // No se pide el segundo factor de entrada: obligaria a sacar el telefono antes de saber si
     // la contrasena era correcta.
-    await expect(page.getByTestId('acceso-codigo')).toHaveCount(0);
+    await expect(page.getByTestId('login-code')).toHaveCount(0);
 
-    await page.getByTestId('acceso-correo').fill(MAIL);
+    await page.getByTestId('login-mail').fill(MAIL);
     await page.getByTestId('key-login').fill(DEMO_KEY);
-    await page.getByTestId('acceso-entrar').click();
+    await page.getByTestId('login-login').click();
 
-    await expect(page.getByTestId('acceso-codigo')).toBeVisible();
-    await expect(page.getByTestId('acceso-error')).toContainText('codigo');
+    await expect(page.getByTestId('login-code')).toBeVisible();
+    await expect(page.getByTestId('login-error')).toContainText('codigo');
   });
 });
 
@@ -204,14 +204,14 @@ test.describe('la sesion emitida es la de quien entro', () => {
 test.describe('Azure AD se declara, no se simula', () => {
   test('el boton existe y dice que no esta habilitado en este entorno', async ({ page }) => {
     await page.goto('/acceso');
-    const button = page.getByTestId('acceso-azure');
+    const button = page.getByTestId('login-azure');
     await expect(button).toBeVisible();
     await expect(button).toContainText('Azure AD');
 
     await button.click();
     // Se explica, no se finge un inicio de sesion que pareceria funcionar — el mismo criterio
     // que siguen los conectores de datos pendientes.
-    await expect(page.getByTestId('acceso-error')).toContainText('Azure AD');
+    await expect(page.getByTestId('login-error')).toContainText('Azure AD');
     await expect(page).toHaveURL(/\/acceso/);
   });
 

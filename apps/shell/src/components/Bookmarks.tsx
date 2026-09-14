@@ -58,7 +58,7 @@ export function Bookmarks({
         etiqueta="Marcadores"
         contador={moduleEste.length}
         presionado={abierto}
-        data-testid="abrir-marcadores"
+        data-testid="open-bookmarks"
         onClick={() => setAbierto((v) => !v)}
       />
 

@@ -51,7 +51,7 @@ test.describe('los objetos se dibujan con datos leidos del cache', () => {
     // 'audiencias' contiene un objeto mapeado a un campo que ya no existe en el dataset.
     await asLogin(page, 'u-ana');
     await page.goto('/m/audiencias');
-    const roto = page.getByTestId('objeto-roto');
+    const roto = page.getByTestId('object-broken');
     await expect(roto).toBeVisible();
     await expect(roto).toContainText('CampoRetirado');
     // El resto del modulo sigue en pie: el objeto sano de al lado se dibuja igual.
@@ -239,7 +239,7 @@ test.describe('marcadores (4.4)', () => {
     await page.getByTestId('slicer-Penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
 
-    await page.getByTestId('abrir-marcadores').click();
+    await page.getByTestId('open-bookmarks').click();
     await page.getByTestId('bookmark-name').fill('Solo penal');
     await page.getByTestId('save-bookmark').click();
 
@@ -248,7 +248,7 @@ test.describe('marcadores (4.4)', () => {
     // Salir del modulo y volver por el marcador reproduce el estado guardado.
     await page.goto('/m/casos-pendientes');
     await expect(page).not.toHaveURL(/Materia=/);
-    await page.getByTestId('abrir-marcadores').click();
+    await page.getByTestId('open-bookmarks').click();
     await page.getByTestId('bookmark-Solo penal').click();
     await expect(page).toHaveURL(/Materia=Penal/);
   });
@@ -257,7 +257,7 @@ test.describe('marcadores (4.4)', () => {
     // Ana, del equipo Norte, guarda un marcador filtrado a su distrito.
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes?DimTribunal.Distrito=Distrito+Norte');
-    await page.getByTestId('abrir-marcadores').click();
+    await page.getByTestId('open-bookmarks').click();
     await page.getByTestId('bookmark-name').fill('Mi distrito');
     await page.getByTestId('save-bookmark').click();
     await expect(page.getByTestId('bookmark-Mi distrito')).toBeVisible();

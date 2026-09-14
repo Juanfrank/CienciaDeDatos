@@ -47,12 +47,12 @@ export async function Header({ sesion }: { sesion: ShellSession }) {
       <div className="header__actions">
         <Bell />
         {editCan ? (
-          <Link href="/editor" className="boton-enlace" data-testid="enlace-editor">
+          <Link href="/editor" className="button-link" data-testid="link-editor">
             Editor
           </Link>
         ) : null}
         {manageCan ? (
-          <Link href="/admin" className="boton-enlace" data-testid="enlace-admin">
+          <Link href="/admin" className="button-link" data-testid="link-admin">
             Administracion
           </Link>
         ) : null}

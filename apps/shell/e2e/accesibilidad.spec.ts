@@ -38,7 +38,7 @@ test.describe('paginas de modulo', () => {
     // ser accesible, que es justo cuando mas falta hace.
     await asLogin(page, 'u-ana');
     await page.goto('/m/audiencias?DimTribunal.Materia=Penal');
-    await expect(page.getByTestId('objeto-roto')).toBeVisible();
+    await expect(page.getByTestId('object-broken')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);
   });
@@ -55,7 +55,7 @@ test.describe('paginas de modulo', () => {
   test('el emergente de datos de origen es accesible, con el foco dentro', async ({ page }) => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('data-table-abrir-Pendientes por distrito').click();
+    await page.getByTestId('data-table-open-Pendientes por distrito').click();
     await expect(page.getByTestId('data-table-Pendientes por distrito')).toBeVisible();
 
     expect(await infracciones(page)).toEqual([]);
@@ -71,7 +71,7 @@ test.describe('paginas de modulo', () => {
   test('el estado de una exportacion en curso es accesible', async ({ page }) => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
-    await page.getByTestId('abrir-exportar').click();
+    await page.getByTestId('open-export').click();
     await page.getByTestId('exportar').click();
     await expect(page.getByTestId('export-status')).toHaveText(/Lista/, { timeout: 15_000 });
 
@@ -148,7 +148,7 @@ test.describe('editor de modulos (4.2)', () => {
   test('la pantalla de sin permiso tampoco', async ({ page }) => {
     await asLogin(page, 'u-beto');
     await page.goto('/editor');
-    await expect(page.getByTestId('sin-permiso-editor')).toBeVisible();
+    await expect(page.getByTestId('without-permission-editor')).toBeVisible();
     expect(await infracciones(page)).toEqual([]);
   });
 });
@@ -186,7 +186,7 @@ test.describe('avisos (4.9)', () => {
 test.describe('paginas de estado', () => {
   test('la pagina de sin permiso es accesible', async ({ page }) => {
     await asLogin(page, 'u-beto');
-    await page.goto('/admin-sin-permiso');
+    await page.goto('/admin-without-permission');
     expect(await infracciones(page)).toEqual([]);
   });
 
@@ -217,7 +217,7 @@ test.describe('navegacion solo con teclado', () => {
     expect(alcanzados).toContain('slicer-Penal');
     // Es el icono lo que esta en el orden de tabulacion; el boton de generar vive dentro del
     // panel que abre, y llegar al panel es llegar a exportar.
-    expect(alcanzados).toContain('abrir-exportar');
+    expect(alcanzados).toContain('open-export');
   });
 
   test('el foco se VE: un control alcanzable sin indicador es inservible de hecho', async ({

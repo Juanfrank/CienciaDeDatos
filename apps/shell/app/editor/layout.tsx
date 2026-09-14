@@ -9,7 +9,7 @@ export default async function EditorLayout({ children }: { children: React.React
   const actor = await actorDe(sesion);
 
   if (!can(actor.role, 'crear-editar-modulos-borrador')) {
-    redirect('/editor-sin-permiso');
+    redirect('/editor-without-permission');
   }
 
   return <div className="admin">{children}</div>;

@@ -36,7 +36,7 @@ export default async function EmbeddedPage({
           Esta vista muestra datos institucionales y necesita una sesion abierta en la capa de
           visualizacion.
         </p>
-        <a href="/acceso" target="_blank" rel="noopener noreferrer" className="boton-enlace">
+        <a href="/acceso" target="_blank" rel="noopener noreferrer" className="button-link">
           Abrir la aplicacion
         </a>
       </div>

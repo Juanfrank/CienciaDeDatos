@@ -1,20 +1,11 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from './instance';
-import { asLogin } from './session';
+import { asLogin, newModule } from './session';
 
 /** El lienzo del editor — seccion 4.2, con la accesibilidad de 4.9. */
 
 const guardado = async (page: Page) =>
   expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
-
-const newModule = async (page: Page, slug: string) => {
-  await page.goto('/editor');
-  await page.getByTestId('new-module-name').fill(slug);
-  await page.getByTestId('nuevo-modulo-slug').fill(slug);
-  await page.getByTestId('create-module').click();
-  await expect(page.getByTestId(`row-${slug}`)).toBeVisible();
-  await page.goto(`/editor/${slug}`);
-};
 
 const blockId = async (page: Page): Promise<string> => {
   const testid = await page
@@ -74,13 +65,13 @@ test.describe('se edita el modulo, no un formulario', () => {
     await page.getByTestId(`well-${id}-valor-quitar-CasosIngresados`).click();
     await guardado(page);
 
-    await expect(page.getByTestId(`block-${id}`).getByTestId('objeto-roto')).toBeVisible();
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toBeVisible();
     await expect(page.getByTestId('locks-editor')).toBeVisible();
     // El panel sigue operativo: se puede deshacer sin recargar ni perder la seleccion.
     await page.getByTestId(`well-${id}-valor-anadir`).click();
     await page.getByTestId(`well-${id}-valor-opcion-CasosIngresados`).click();
     await guardado(page);
-    await expect(page.getByTestId(`block-${id}`).getByTestId('objeto-roto')).toHaveCount(0);
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toHaveCount(0);
   });
 });
 
@@ -356,7 +347,7 @@ test.describe('los pozos de campos', () => {
 
     await expect(page.getByTestId(`well-${id}-eje-x`)).toContainText('0/1');
     // Sin dimension, el objeto incumple su contrato y se marca roto: se ve en el acto.
-    await expect(page.getByTestId(`block-${id}`).getByTestId('objeto-roto')).toBeVisible();
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toBeVisible();
   });
 });
 
@@ -561,7 +552,7 @@ test.describe('las ranuras mandan, no el orden', () => {
 
     await expect(page.getByTestId(`well-${id}-eje-x`)).toContainText('0/1');
     await expect(page.getByTestId(`well-${id}-eje-y`)).toContainText('CasosIngresados');
-    await expect(page.getByTestId(`block-${id}`).getByTestId('objeto-roto')).toBeVisible();
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toBeVisible();
   });
 
   test('se puede llenar SOLO la serie, y el editor dice que falta el eje', async ({ page }) => {
@@ -583,7 +574,7 @@ test.describe('las ranuras mandan, no el orden', () => {
     /*
      * Y el bloque se marca ROTO en el lienzo, no se dibuja con la serie haciendo de eje.
      */
-    await expect(page.getByTestId(`block-${id}`).getByTestId('objeto-roto')).toBeVisible();
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toBeVisible();
   });
 
   test('el campo vuelve a SU ranura, no a la primera libre', async ({ page }) => {
@@ -616,7 +607,7 @@ test.describe('las ranuras mandan, no el orden', () => {
     await page.goto('/m/casos-pendientes');
 
     await expect(page.getByTestId('value-kpi').first()).not.toHaveText('0');
-    await expect(page.getByTestId('objeto-roto')).toHaveCount(0);
+    await expect(page.getByTestId('object-broken')).toHaveCount(0);
     await expect(page.getByTestId('chart-barras-flujo')).toHaveAttribute('data-montado', 'si');
   });
 });
@@ -850,7 +841,7 @@ test.describe('como se resume cada medida', () => {
     await page.reload();
     await guardado(page);
 
-    await expect(page.getByTestId(`block-${id}`).getByTestId('objeto-roto')).toBeVisible();
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toBeVisible();
     await expect(page.getByTestId('locks-editor')).toContainText(/ya agrupado/);
 
     // Y se puede deshacer desde el propio desplegable: el operador guardado aparece marcado como
@@ -876,7 +867,7 @@ test.describe('como se resume cada medida', () => {
     await page.getByTestId(`well-${id}-valor-opcion-DiasResolucion`).click();
     await guardado(page);
 
-    await expect(page.getByTestId(`block-${id}`).getByTestId('objeto-roto')).toHaveCount(0);
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toHaveCount(0);
     await expect(page.getByTestId(`block-${id}`).getByTestId('value-kpi')).toBeVisible();
   });
 });

@@ -115,7 +115,7 @@ test.describe('la navegacion no se interpone en un movil', () => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await expect(page.getByTestId('abrir-navegacion')).toBeVisible();
+    await expect(page.getByTestId('open-navigation')).toBeVisible();
     await expect(page.getByTestId('nav-audiencias')).not.toBeVisible();
 
     // Lo que se venia a ver tiene que estar a la vista sin desplazarse.
@@ -128,7 +128,7 @@ test.describe('la navegacion no se interpone en un movil', () => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('abrir-navegacion').click();
+    await page.getByTestId('open-navigation').click();
     await expect(page.getByTestId('nav-audiencias')).toBeVisible();
 
     await page.getByTestId('nav-audiencias').click();
@@ -142,7 +142,7 @@ test.describe('la navegacion no se interpone en un movil', () => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    const button = page.getByTestId('abrir-navegacion');
+    const button = page.getByTestId('open-navigation');
     await expect(button).toHaveAttribute('aria-expanded', 'true');
     await expect(page.getByTestId('nav-audiencias')).toBeVisible();
 
@@ -159,12 +159,12 @@ test.describe('la navegacion no se interpone en un movil', () => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('abrir-navegacion').click();
+    await page.getByTestId('open-navigation').click();
     await expect(page.getByTestId('nav-audiencias')).not.toBeVisible();
 
     await page.setViewportSize(TABLETA);
     await expect(page.getByTestId('nav-audiencias')).not.toBeVisible();
-    await expect(page.getByTestId('abrir-navegacion')).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.getByTestId('open-navigation')).toHaveAttribute('aria-expanded', 'false');
   });
 
   test('en tableta tambien se mantiene visible', async ({ page }) => {
@@ -250,7 +250,7 @@ test.describe('accesibilidad en movil (4.9)', () => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    const button = page.getByTestId('abrir-navegacion');
+    const button = page.getByTestId('open-navigation');
     await expect(button).toHaveAttribute('aria-expanded', 'false');
 
     await button.focus();

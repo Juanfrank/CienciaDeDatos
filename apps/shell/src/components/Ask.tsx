@@ -44,12 +44,12 @@ export function Ask({ moduleSlug }: { moduleSlug: string }) {
           if (e.key === 'Enter') void preguntar();
         }}
       />
-      <button type="button" className="boton-enlace" data-testid="preguntar" onClick={() => void preguntar()}>
+      <button type="button" className="button-link" data-testid="preguntar" onClick={() => void preguntar()}>
         Preguntar
       </button>
 
       {/* Region viva: la respuesta aparece sin recargar y hay que anunciarla. */}
-      <div className="ask__respuesta" role="status" aria-live="polite">
+      <div className="ask__response" role="status" aria-live="polite">
         {respuesta ? (
           <>
             <p data-testid="pregunta-entendido">

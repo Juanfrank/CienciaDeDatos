@@ -107,13 +107,13 @@ describe('identificadores de prueba', () => {
 
   const pedidos = recoger(
     pruebas,
-    /getByTestId\(\s*['"]([\w -]+)['"]\s*\)|\[data-testid\^?=["']([\w -]+)["']/g,
+    /getByTestId\(\s*['"]([\w .-]+)['"]\s*\)|\[data-testid\^?=["']([\w .-]+)["']/g,
     0,
   );
   /** El grupo 0 trae la coincidencia entera; se rescata el nombre de cualquiera de los dos. */
   const nombresPedidos = new Map<string, Set<string>>();
   for (const [entero, donde] of pedidos) {
-    const nombre = /['"]([\w -]+)['"]/.exec(entero)?.[1];
+    const nombre = /['"]([\w .-]+)['"]/.exec(entero)?.[1];
     if (!nombre) continue;
     if (!nombresPedidos.has(nombre)) nombresPedidos.set(nombre, new Set());
     donde.forEach((d) => (nombresPedidos.get(nombre) as Set<string>).add(d));

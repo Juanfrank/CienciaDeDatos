@@ -53,7 +53,7 @@ export function ToggleSidebar() {
       aria-expanded={abierto}
       aria-controls={SIDEBAR_ID}
       aria-label={abierto ? 'Ocultar el panel de navegacion' : 'Mostrar el panel de navegacion'}
-      data-testid="abrir-navegacion"
+      data-testid="open-navigation"
       onClick={() => {
         decidido.current = true;
         setAbierto((v) => !v);

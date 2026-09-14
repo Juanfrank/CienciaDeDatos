@@ -1,4 +1,3 @@
-import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from './instance';
 import { asLogin } from './session';
 
@@ -96,64 +95,10 @@ test.describe('una pregunta no revela lo que hay fuera del ambito (4.11)', () =>
 
 /*
  * La INTERFAZ de la consulta esta retirada de la pagina mientras lo que devuelve no sea una
- * respuesta util (`VISIBLE_QUERY` en ModuleView). El componente y su ruta siguen ahi y las
- * pruebas tambien: saltarlas deja constancia de que existen y las devuelve al servicio cambiando
- * una sola constante, mientras que borrarlas obligaria a reescribirlas cuando el campo vuelva.
+ * respuesta util (`VISIBLE_QUERY` en ModuleView). El componente y su ruta siguen cubiertos por sus
+ * pruebas unitarias y por las de arriba, que van contra la API.
+ *
+ * Las de navegador que la ejercitaban estaban saltadas, y una prueba que no corre no comprueba
+ * nada: se desincroniza del codigo en silencio y el dia que se reactiva hay que reescribirla
+ * igual. Viven en el historial, en el commit que retiro el campo.
  */
-test.describe.skip('la interfaz enseña lo que entendio antes de aplicarlo', () => {
-  test('muestra la interpretacion y navega a la vista al confirmar', async ({ page }) => {
-    await asLogin(page, 'u-ana');
-    await page.goto('/m/casos-pendientes');
-
-    await page.getByTestId('pregunta').fill('casos pendientes en Penal');
-    await page.getByTestId('preguntar').click();
-
-    await expect(page.getByTestId('pregunta-entendido')).toContainText('Penal');
-    await page.getByTestId('pregunta-aplicar').click();
-    await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
-    await expect(page.getByTestId('filtros-activos')).toContainText('Penal');
-  });
-
-  test('avisa de lo que NO reconocio en vez de contestar a medias en silencio', async ({ page }) => {
-    await asLogin(page, 'u-ana');
-    await page.goto('/m/casos-pendientes');
-
-    await page.getByTestId('pregunta').fill('casos pendientes de homicidios');
-    await page.getByTestId('preguntar').click();
-
-    await expect(page.getByTestId('pregunta-no-entendido')).toContainText('homicidios');
-    // Lo que si entendio se conserva: se contesta lo que se pudo y se avisa de lo que no.
-    await expect(page.getByTestId('pregunta-entendido')).toContainText('pendientes');
-  });
-
-  test('una pregunta sin nada reconocible no ofrece navegar', async ({ page }) => {
-    await asLogin(page, 'u-ana');
-    await page.goto('/m/casos-pendientes');
-
-    await page.getByTestId('pregunta').fill('que tal va todo');
-    await page.getByTestId('preguntar').click();
-
-    await expect(page.getByTestId('pregunta-entendido')).toContainText('No se reconocio');
-    await expect(page.getByTestId('pregunta-aplicar')).toHaveCount(0);
-  });
-
-  test('se puede preguntar con el teclado y la respuesta se anuncia', async ({ page }) => {
-    await asLogin(page, 'u-ana');
-    await page.goto('/m/casos-pendientes');
-
-    await page.getByTestId('pregunta').fill('casos pendientes en Civil');
-    await page.keyboard.press('Enter');
-    await expect(page.getByTestId('pregunta-entendido')).toContainText('Civil');
-
-    const { violations } = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-      .analyze();
-    expect(violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
-  });
-
-  test('no aparece en la vista incrustada', async ({ page }) => {
-    await asLogin(page, 'u-ana');
-    await page.goto('/incrustar/m/casos-pendientes');
-    await expect(page.getByTestId('pregunta')).toHaveCount(0);
-  });
-});

@@ -35,7 +35,7 @@ test.describe('la superficie de cuentas locales (4.7.2)', () => {
     await asLogin(page, 'u-beto');
     expect((await page.request.get('/api/admin/cuentas')).status()).toBe(403);
     await page.goto('/admin/cuentas');
-    await expect(page.getByTestId('tabla-cuentas')).toHaveCount(0);
+    await expect(page.getByTestId('table-accounts')).toHaveCount(0);
   });
 
   test('un Administrador ve cuantas cuentas locales hay y cual es el canal de entrega', async ({
@@ -44,7 +44,7 @@ test.describe('la superficie de cuentas locales (4.7.2)', () => {
     await asLogin(page, 'u-admin');
     await page.goto('/admin/cuentas');
 
-    await expect(page.getByTestId('tabla-cuentas')).toBeVisible();
+    await expect(page.getByTestId('table-accounts')).toBeVisible();
     // Sin correo institucional configurado, la pantalla lo dice en vez de dar a entender que
     // sale un correo: de ese canal depende que el flujo sea seguro.
     await expect(page.getByTestId('canal-restablecimiento')).toContainText('no configurado');
@@ -208,7 +208,7 @@ test.describe('la pantalla de restablecimiento', () => {
     // Sin sesion no redirige a /acceso: quien llega aqui es precisamente quien no puede entrar.
     await expect(page).toHaveURL(/\/restablecer/);
     await expect(page.getByTestId('reset-id')).toBeVisible();
-    await expect(page.getByTestId('reset-codigo')).toBeVisible();
+    await expect(page.getByTestId('reset-code')).toBeVisible();
   });
 
   test('desde la pantalla, con el codigo que da el panel', async ({ page }) => {
@@ -217,12 +217,12 @@ test.describe('la pantalla de restablecimiento', () => {
     await page.getByTestId(`reset-${ACCOUNT}`).click();
 
     const resetId = await page.getByTestId('reset-id').innerText();
-    const code = await page.getByTestId('reset-codigo').innerText();
+    const code = await page.getByTestId('reset-code').innerText();
 
     const clave = newKey();
     await page.goto('/restablecer');
     await page.getByTestId('reset-id').fill(resetId);
-    await page.getByTestId('reset-codigo').fill(code);
+    await page.getByTestId('reset-code').fill(code);
     await page.getByTestId('reset-key').fill(clave);
     await page.getByTestId('reset-repetida').fill(clave);
     await page.getByTestId('reset-send').click();
@@ -233,7 +233,7 @@ test.describe('la pantalla de restablecimiento', () => {
   test('dos contrasenas distintas se avisan antes de enviar', async ({ page }) => {
     await page.goto('/restablecer');
     await page.getByTestId('reset-id').fill('x');
-    await page.getByTestId('reset-codigo').fill('y');
+    await page.getByTestId('reset-code').fill('y');
     await page.getByTestId('reset-key').fill(newKey());
     await page.getByTestId('reset-repetida').fill('Otra-Cosa-2026!');
     await page.getByTestId('reset-send').click();

@@ -74,10 +74,10 @@ export function BrokenObject({
   unresolvedObject?: string;
 }) {
   return (
-    <div className="objeto objeto--roto" data-testid="objeto-roto">
+    <div className="objeto object--broken" data-testid="object-broken">
       <div className="object__header">
         <h3>{titulo}</h3>
-        <span className="insignia insignia--error">Roto</span>
+        <span className="insignia badge--error">Roto</span>
       </div>
       <div className="object__body">
         <p className="muted-text">
@@ -99,7 +99,7 @@ export function BrokenObject({
 /** Estado explicito de 6.3: el dato aun no esta. Nunca un error, nunca una consulta a la fuente. */
 export function GeneratingObject({ titulo }: { titulo: string }) {
   return (
-    <div className="objeto objeto--generandose" data-testid="objeto-generandose">
+    <div className="objeto object--generating" data-testid="object-generating">
       <div className="object__header">
         <h3>{titulo}</h3>
         <span className="insignia">Generandose</span>
@@ -704,7 +704,7 @@ function CategoryCell({
     <th scope="row">
       <button
         type="button"
-        className="boton-enlace"
+        className="button-link"
         data-testid={`filter-${filter}`}
         title={`Filtrar por ${filter}`}
         onClick={() => onFiltrar(fieldName, filter)}
@@ -1392,7 +1392,7 @@ const fieldKeyDe = (ref: { table: string; field: string } | undefined): string |
 /** Objeto declarado en el catalogo pero sin render disponible todavia (el mapa). */
 export function ObjectNotAvailable({ titulo, objectId }: { titulo: string; objectId: string }) {
   return (
-    <div className="objeto objeto--no-disponible">
+    <div className="objeto object--not-available">
       <div className="object__header">
         <h3>{titulo}</h3>
         <span className="insignia">No disponible</span>

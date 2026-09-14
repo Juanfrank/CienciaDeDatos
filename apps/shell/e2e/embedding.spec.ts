@@ -106,7 +106,7 @@ test.describe('el codigo de incrustacion se copia desde la vista', () => {
     await page.goto('/m/casos-pendientes?DimTribunal.Materia=Penal');
 
     await page.getByTestId('incrustar').click();
-    const code = await page.getByTestId('incrustar-codigo').inputValue();
+    const code = await page.getByTestId('embed-code').inputValue();
 
     expect(code).toContain('/incrustar/m/casos-pendientes');
     expect(code).toContain('DimTribunal.Materia=Penal');

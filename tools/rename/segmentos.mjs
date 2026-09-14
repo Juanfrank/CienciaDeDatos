@@ -175,7 +175,18 @@ export const unir = (segmentos) => segmentos.map((s) => s.texto).join('');
  */
 const PALABRA_DE_CODIGO =
   /\b(?:export|import|const|let|var|return|function|default|case|typeof|interface|type|class|extends|async|await|new|delete|as|satisfies|keyof|instanceof|implements)\b/;
-const TEXTO_JSX = /([>}])([^<>{}=;()[\]`]*[A-Za-zÀ-ÿ][^<>{}=;()[\]`]*)(<)/g;
+/*
+ * Un texto ENTERO entre parentesis tambien es prosa.
+ *
+ * Los parentesis estaban excluidos para no confundir una llamada con texto, y con ellos fuera
+ * `<option>(all)</option>` quedaba invisible: una palabra inglesa en una aplicacion que habla
+ * espanol, delante de quien la usa, sin que ninguna prueba la viera.
+ *
+ * Se admite el par que ABRE y CIERRA el segmento, no un parentesis suelto en medio: dejarlos
+ * pasar a todos mete dentro los genericos —`Set<string>`, `Record<K, V>`— y una guarda con falsos
+ * positivos acaba relajada.
+ */
+const TEXTO_JSX = /([>}])(\(?[^<>{}=;()[\]`]*[A-Za-zÀ-ÿ][^<>{}=;()[\]`]*\)?)(<)/g;
 
 /** Como `segmentar`, pero marcando como `prosa` el texto visible de un JSX. */
 export function segmentarJsx(fuente) {

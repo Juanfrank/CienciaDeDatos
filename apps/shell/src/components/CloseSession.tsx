@@ -19,7 +19,7 @@ export function CloseSession({ user }: { user: string }) {
   return (
     <button
       type="button"
-      className="boton-enlace"
+      className="button-link"
       data-testid="close-session"
       disabled={saliendo}
       onClick={() => void salir()}

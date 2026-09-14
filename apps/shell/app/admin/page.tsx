@@ -20,7 +20,7 @@ export default async function HomeAdmin() {
     nodos.reduce((n, node) => n + 1 + (node.type === 'folder' ? nodesCount(node.children) : 0), 0);
 
   return (
-    <div className="admin-inicio">
+    <div className="admin-home">
       <div className="tarjetas" data-testid="resumen-gobierno">
         <Resumen
           etiqueta="Nodos en la organizacion"
@@ -44,10 +44,10 @@ export default async function HomeAdmin() {
         />
       </div>
 
-      <section className="admin-inicio__log">
-        <div className="admin-inicio__header-log">
+      <section className="admin-home__log">
+        <div className="admin-home__header-log">
           <h2>Ultimos cambios</h2>
-          <Link href="/admin/auditoria" className="boton-enlace">
+          <Link href="/admin/auditoria" className="button-link">
             Ver el registro completo
           </Link>
         </div>
@@ -86,7 +86,7 @@ function Resumen({
   return (
     <Link
       href={href}
-      className={`tarjeta tarjeta--enlace ${alerta ? 'alert-card' : ''}`}
+      className={`tarjeta card--link ${alerta ? 'alert-card' : ''}`}
       {...(testId ? { 'data-testid': testId } : {})}
     >
       <span className="card__icon" aria-hidden="true">

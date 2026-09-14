@@ -151,20 +151,20 @@ export function ExpandableContainer({ objeto, titulo, config, draw }: ContainerP
             if (e.key === 'Escape') setAmpliado(false);
           }}
         >
-          <div className="ampliado__box">
-            <div className="ampliado__header">
+          <div className="expanded__box">
+            <div className="expanded__header">
               <h2>{titulo}</h2>
               <button
                 type="button"
                 className="boton-contorno"
-                data-testid="cerrar-ampliado"
+                data-testid="close-expanded"
                 autoFocus
                 onClick={() => setAmpliado(false)}
               >
                 Cerrar
               </button>
             </div>
-            <div className="contenedor contenedor--ampliado">
+            <div className="contenedor container--expanded">
               <InternalGrid
                 panel={objeto.panels?.[0]}
                 gridColumns={expandedColumns}

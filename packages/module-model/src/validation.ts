@@ -237,7 +237,7 @@ export function findPublishBlockers(
 
   for (const item of diagnostics.items.filter((i) => i.broken)) {
     locks.push({
-      reason: 'objeto-roto',
+      reason: 'object-broken',
       detail:
         item.unresolvedObject ??
         `'${item.itemId}': ${item.bindingProblems.map((p) => p.problem).join(' ')}`,

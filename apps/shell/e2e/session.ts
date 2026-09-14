@@ -30,3 +30,19 @@ export async function asLogin(page: Page, userId: string, base = ''): Promise<vo
 export async function salir(page: Page, base = ''): Promise<void> {
   await page.request.delete(`${base}/api/acceso`);
 }
+
+/**
+ * Un modulo vacio, listo para editar.
+ *
+ * Se crea por API y no rellenando el formulario. La diferencia importa: cincuenta y seis pruebas
+ * usaban el formulario como MONTAJE —dos cargas de pagina y tres interacciones cada una, por algo
+ * que no era lo que venian a comprobar—. Quien prueba la creacion por la interfaz, porque ESA es
+ * su pregunta, es `editor.spec.ts`, y sigue haciendolo por el formulario.
+ */
+export async function newModule(page: Page, slug: string): Promise<void> {
+  const creado = await page.request.post('/api/modulos', {
+    data: { nombre: `Modulo ${slug}`, slug },
+  });
+  expect(creado.ok(), `No se pudo crear el modulo ${slug}: ${await creado.text()}`).toBe(true);
+  await page.goto(`/editor/${slug}`);
+}

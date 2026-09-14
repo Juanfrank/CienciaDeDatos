@@ -142,7 +142,7 @@ function FieldPicker({
 }) {
   const id = useId();
   const [busqueda, setBusqueda] = useState("");
-  const prueba = `filtro-${picker.fieldName}`;
+  const prueba = `filter-${picker.fieldName}`;
 
   const filtradas = busqueda
     ? opciones.filter((o) => o.toLowerCase().includes(busqueda.toLowerCase()))
@@ -161,7 +161,7 @@ function FieldPicker({
         {somethingHas ? (
           <button
             type="button"
-            className="boton-enlace filters-panel__clear"
+            className="button-link filters-panel__clear"
             data-testid={`${prueba}-limpiar`}
             onClick={onLimpiar}
           >
@@ -235,7 +235,7 @@ function FieldPicker({
           data-testid={`${prueba}-desplegable`}
           onChange={(e) => onFijar(e.target.value)}
         >
-          <option value="">(all)</option>
+          <option value="">(todos)</option>
           {opciones.map((opcion) => (
             <option key={opcion} value={opcion}>
               {opcion}

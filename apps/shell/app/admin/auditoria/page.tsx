@@ -34,16 +34,16 @@ export default async function AuditPage({
 
       <nav className="audit-filters" aria-label="Filtros del registro">
         <a href="/admin/auditoria" data-testid="all-filter">Todos</a>
-        <a href="/admin/auditoria?onlyExpansions=1" data-testid="filtro-ampliaciones">
+        <a href="/admin/auditoria?onlyExpansions=1" data-testid="filter-expansions">
           Solo ampliaciones
         </a>
-        <a href="/admin/auditoria?onlyMoves=1" data-testid="filtro-movimientos">
+        <a href="/admin/auditoria?onlyMoves=1" data-testid="filter-moves">
           Solo movimientos
         </a>
       </nav>
 
       {eventos.length === 0 ? (
-        <p className="muted-text" data-testid="auditoria-vacia">
+        <p className="muted-text" data-testid="audit-empty">
           Sin cambios registrados con este filtro.
         </p>
       ) : (
@@ -69,7 +69,7 @@ export default async function AuditPage({
                   <td>
                     {e.action}
                     {e.isScopeExpansion ? (
-                      <span className="insignia insignia--error">Ampliacion</span>
+                      <span className="insignia badge--error">Ampliacion</span>
                     ) : null}
                   </td>
                   <td>{e.justification ?? '—'}</td>

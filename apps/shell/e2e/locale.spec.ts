@@ -1,5 +1,5 @@
 import { expect, test, type Page } from './instance';
-import { asLogin } from './session';
+import { asLogin, newModule } from './session';
 
 /**
  * El idioma de la interfaz.
@@ -12,15 +12,6 @@ import { asLogin } from './session';
 
 const enIngles = async (page: Page, origen: string) => {
   await page.context().addCookies([{ name: 'idioma', value: 'en', url: origen }]);
-};
-
-const newModule = async (page: Page, slug: string) => {
-  await page.goto('/editor');
-  await page.getByTestId('new-module-name').fill(slug);
-  await page.getByTestId('nuevo-modulo-slug').fill(slug);
-  await page.getByTestId('create-module').click();
-  await expect(page.getByTestId(`row-${slug}`)).toBeVisible();
-  await page.goto(`/editor/${slug}`);
 };
 
 test.beforeEach(async ({ page }) => {

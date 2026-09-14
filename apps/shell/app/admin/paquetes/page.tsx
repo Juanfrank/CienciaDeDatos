@@ -20,12 +20,12 @@ export default async function PackagesPage() {
       </p>
 
       {paquetes.length === 0 ? (
-        <p className="muted-text" data-testid="sin-paquetes">
+        <p className="muted-text" data-testid="without-packages">
           No hay paquetes definidos. Los equipos sin paquete ven la organizacion general tal cual,
           limitada a lo que su ambito permite.
         </p>
       ) : (
-        <ul className="simple-list" data-testid="lista-paquetes">
+        <ul className="simple-list" data-testid="list-packages">
           {paquetes.map((pkg) => {
             const usuarios = equipos.filter((t) => t.assignedPackageId === pkg.id);
             const problems = usuarios.flatMap((equipo) =>

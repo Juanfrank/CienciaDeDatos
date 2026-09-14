@@ -77,7 +77,7 @@ export function Login({
         <button
           type="button"
           className="login__azure"
-          data-testid="acceso-azure"
+          data-testid="login-azure"
           onClick={() => void conAzureAd()}
         >
           Continuar con Azure AD
@@ -95,7 +95,7 @@ export function Login({
             type="email"
             autoComplete="username"
             value={mail}
-            data-testid="acceso-correo"
+            data-testid="login-mail"
             onChange={(e) => setCorreo(e.target.value)}
           />
         </p>
@@ -120,25 +120,25 @@ export function Login({
               inputMode="numeric"
               autoComplete="one-time-code"
               value={code}
-              data-testid="acceso-codigo"
+              data-testid="login-code"
               onChange={(e) => setCodigo(e.target.value)}
             />
           </p>
         ) : null}
 
         {/* El error se anuncia: quien no ve la pantalla tiene que enterarse de que fallo. */}
-        <p className="login__error" role="alert" data-testid="acceso-error">
+        <p className="login__error" role="alert" data-testid="login-error">
           {error}
         </p>
 
-        <button type="submit" className="pastilla" data-testid="acceso-entrar" disabled={enviando}>
+        <button type="submit" className="pastilla" data-testid="login-login" disabled={enviando}>
           {enviando ? 'Comprobando…' : 'Entrar'}
         </button>
 
         <p className="muted-text">
           Las accounts locales exigen un second factor. Si olvido su contrasena, un Administrador
           inicia el restablecimiento y le entrega un code de un solo uso; con el, entre en{' '}
-          <a href="/restablecer" data-testid="enlace-restablecer">
+          <a href="/restablecer" data-testid="link-reset">
             restablecer contrasena
           </a>
           .

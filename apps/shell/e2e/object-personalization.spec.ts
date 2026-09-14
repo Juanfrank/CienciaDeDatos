@@ -29,7 +29,7 @@ const open = async (page: Pagina, prueba: string) => {
 const createModule = async (page: Pagina, slug: string) => {
   await page.goto('/editor');
   await page.getByTestId('new-module-name').fill(slug);
-  await page.getByTestId('nuevo-modulo-slug').fill(slug);
+  await page.getByTestId('new-module-slug').fill(slug);
   await page.getByTestId('create-module').click();
   await expect(page.getByTestId(`row-${slug}`)).toBeVisible();
   await page.goto(`/editor/${slug}`);

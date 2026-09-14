@@ -7,7 +7,7 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
   test('un Visor no ve el enlace y la API le responde 403', async ({ page }) => {
     await asLogin(page, 'u-beto');
     await page.goto('/');
-    await expect(page.getByTestId('enlace-admin')).toHaveCount(0);
+    await expect(page.getByTestId('link-admin')).toHaveCount(0);
 
     // Lo que importa no es el enlace ausente, sino que llamar a la API a mano no sirva.
     for (const path of ['/api/admin/arbol', '/api/admin/equipos', '/api/admin/auditoria']) {
@@ -18,7 +18,7 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
   test('un Colaborador tampoco: crear borradores no es administrar', async ({ page }) => {
     await asLogin(page, 'u-ana');
     await page.goto('/');
-    await expect(page.getByTestId('enlace-admin')).toHaveCount(0);
+    await expect(page.getByTestId('link-admin')).toHaveCount(0);
     expect((await page.request.get('/api/admin/arbol')).status()).toBe(403);
   });
 
@@ -33,16 +33,16 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
   test('un Visor que pide la pagina no ve contenido del panel', async ({ page }) => {
     await asLogin(page, 'u-beto');
     await page.goto('/admin');
-    await expect(page.getByTestId('sin-permiso')).toBeVisible();
-    await expect(page.getByTestId('admin-nav-arbol')).toHaveCount(0);
+    await expect(page.getByTestId('without-permission')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-tree')).toHaveCount(0);
   });
 
   test('un Administrador si entra', async ({ page }) => {
     await asLogin(page, 'u-admin');
     await page.goto('/');
-    await expect(page.getByTestId('enlace-admin')).toBeVisible();
+    await expect(page.getByTestId('link-admin')).toBeVisible();
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-arbol')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
   });
 });
 
@@ -322,7 +322,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
 
     // Y sigue administrando: el panel se abre igual.
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-arbol')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
   });
 
   test('degradarse a Colaborador tampoco', async ({ page }) => {
@@ -386,7 +386,7 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
     // Y el estado quedo como estaba, comprobado desde la cuenta restituida.
     await asLogin(page, 'u-admin');
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-nav-arbol')).toBeVisible();
+    await expect(page.getByTestId('admin-nav-tree')).toBeVisible();
   });
 
   test('el panel avisa cuando solo hay un Administrador', async ({ page }) => {
@@ -422,16 +422,16 @@ test.describe('el carril de administracion', () => {
     await page.goto('/admin/equipos');
     // Con la regla de prefijo, /admin reclamaria /admin/equipos y habria DOS activas a la vez.
     await expect(page.getByTestId('admin-nav-admin')).not.toHaveAttribute('aria-current', 'page');
-    await expect(page.getByTestId('admin-nav-equipos')).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByTestId('admin-nav-teams')).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('[aria-current="page"]')).toHaveCount(1);
   });
 
   test('la cabecera dice en que seccion se esta, para cuando el carril esta plegado', async ({ page }) => {
     await page.goto('/admin/auditoria');
-    await expect(page.getByTestId('admin-seccion-actual')).toHaveText('Auditoria');
+    await expect(page.getByTestId('admin-section-current')).toHaveText('Auditoria');
     // En el resumen no se repite: el titulo ya lo dice.
     await page.goto('/admin');
-    await expect(page.getByTestId('admin-seccion-actual')).toHaveCount(0);
+    await expect(page.getByTestId('admin-section-current')).toHaveCount(0);
   });
 
   test('cada cifra del resumen lleva a donde se actua sobre ella', async ({ page }) => {

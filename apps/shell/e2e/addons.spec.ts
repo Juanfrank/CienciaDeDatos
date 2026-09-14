@@ -51,7 +51,7 @@ test.describe('tabla de datos con alcance de objeto', () => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('data-table-abrir-Casos pendientes').click();
+    await page.getByTestId('data-table-open-Casos pendientes').click();
     const popover = page.getByTestId('data-table-Casos pendientes');
     await expect(popover).toBeVisible();
 
@@ -65,7 +65,7 @@ test.describe('tabla de datos con alcance de objeto', () => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('data-table-abrir-Casos pendientes').click();
+    await page.getByTestId('data-table-open-Casos pendientes').click();
     await expect(page.getByTestId('data-table-Casos pendientes')).toBeVisible();
 
     await page.keyboard.press('Escape');
@@ -78,7 +78,7 @@ test.describe('tabla de datos con alcance de subobjeto', () => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('data-table-abrir-Pendientes por distrito').click();
+    await page.getByTestId('data-table-open-Pendientes por distrito').click();
     const popover = page.getByTestId('data-table-Pendientes por distrito');
     await expect(popover).toContainText('Elija una categoria');
 
@@ -97,7 +97,7 @@ test.describe('tabla de datos con alcance de subobjeto', () => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('data-table-abrir-Pendientes por distrito').click();
+    await page.getByTestId('data-table-open-Pendientes por distrito').click();
     const popover = page.getByTestId('data-table-Pendientes por distrito');
     await popover.getByTestId('drill-Distrito Norte').click();
     await popover.getByTestId('data-table-volver').click();
@@ -111,7 +111,7 @@ test.describe('un complemento no amplia lo que se puede ver (principio 5)', () =
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    await page.getByTestId('data-table-abrir-Casos pendientes').click();
+    await page.getByTestId('data-table-open-Casos pendientes').click();
     const dataRows = page.getByTestId('data-table-Casos pendientes').getByTestId('table-data-rows');
 
     // El emergente lee el mismo dataset que el objeto, que llego al navegador ya filtrado en el
@@ -129,7 +129,7 @@ test.describe('un complemento no amplia lo que se puede ver (principio 5)', () =
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes?DimTribunal.Materia=Penal');
 
-    await page.getByTestId('data-table-abrir-Casos pendientes').click();
+    await page.getByTestId('data-table-open-Casos pendientes').click();
     const dataRows = page.getByTestId('data-table-Casos pendientes').getByTestId('table-data-rows');
 
     await expect(dataRows).toContainText('Penal');

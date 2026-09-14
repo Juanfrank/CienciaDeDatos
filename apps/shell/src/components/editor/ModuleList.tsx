@@ -142,7 +142,7 @@ export function ModuleList({
           <input
             id="nuevo-slug"
             value={slug}
-            data-testid="nuevo-modulo-slug"
+            data-testid="new-module-slug"
             onChange={(e) => setSlug(e.target.value)}
           />
         </p>
@@ -224,7 +224,7 @@ export function ModuleList({
                         {sendCan ? (
                           <button
                             type="button"
-                            className="boton-enlace"
+                            className="button-link"
                             data-testid={`send-${m.slug}`}
                             disabled={trabajando || m.locks.length > 0}
                             onClick={() => void transition(m, "enviar")}
@@ -248,7 +248,7 @@ export function ModuleList({
                         {revertCan ? (
                           <button
                             type="button"
-                            className="boton-enlace"
+                            className="button-link"
                             data-testid={`revert-${m.slug}`}
                             disabled={trabajando}
                             onClick={() => void transition(m, "devolver")}

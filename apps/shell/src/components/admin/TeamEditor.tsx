@@ -60,7 +60,7 @@ export function TeamEditor({
       </p>
 
       {error ? (
-        <p className="aviso notice-error" role="alert" data-testid="error-equipos">{error}</p>
+        <p className="aviso notice-error" role="alert" data-testid="error-teams">{error}</p>
       ) : null}
 
       {equipos.map((equipo) => (
