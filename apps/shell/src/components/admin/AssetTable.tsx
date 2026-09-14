@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Translator } from '@app/i18n';
 import type { AssetRow } from '../../server/recursos';
 import { ResourceActions } from './ResourceActions';
+import { TablaBuscable } from './TablaBuscable';
 
 /**
  * Los recursos que NO son objetos, en tabla — seccion 4.5.
@@ -35,8 +36,10 @@ export function AssetTable({
   }
 
   return (
-    <div className="container-table">
-      <table className="tabla" data-testid={`tabla-${familia}`}>
+    <TablaBuscable
+      testid={`tabla-${familia}`}
+      filas={filas.map((fila) => ({ id: fila.id, texto: fila.nombre }))}
+      cabecera={
         <thead>
           <tr>
             <th scope="col">{t('admin.resources.column.resource')}</th>
@@ -45,8 +48,9 @@ export function AssetTable({
             <th scope="col">{t('admin.resources.column.actions')}</th>
           </tr>
         </thead>
-        <tbody>
-          {filas.map((fila) => (
+      }
+    >
+      {filas.map((fila) => (
             <tr key={fila.id} data-testid={`asset-${fila.nombre}`}>
               <th scope="row">
                 <span className="asset__vista">
@@ -84,10 +88,8 @@ export function AssetTable({
                 )}
               </td>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+      ))}
+    </TablaBuscable>
   );
 }
 

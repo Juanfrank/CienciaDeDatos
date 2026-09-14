@@ -205,6 +205,10 @@ export const en: Record<MessageKey, string> = {
   'admin.modules.folder.configure': 'Configure permissions',
   // The six actions on a tree row.
   // Folding and unfolding the tree in the table.
+  // Search box for a long table.
+  'admin.search.placeholder': 'Search…',
+  'admin.search.results': '{n} of {total}',
+  'admin.search.empty': 'Nothing matches "{consulta}".',
   'admin.tree.fold.controls': 'Fold and unfold',
   'admin.tree.fold.expandAll': 'Unfold all',
   'admin.tree.fold.toLevel': 'Fold to level {n}',
@@ -277,7 +281,11 @@ export const en: Record<MessageKey, string> = {
   'admin.access.inherited': 'Inherits from {carpeta}',
   'admin.access.inherited.revokeThere': 'Revoked on the folder',
   'admin.access.none': 'No access',
-  'admin.access.grant': 'Grant',
+  'admin.access.addTeams': 'Add teams',
+  'admin.access.addPeople': 'Add people',
+  'admin.access.addPeople.intro': 'They all join the same team with the same role. For another team or role, add them in a second pass.',
+  'admin.access.grantN': '{n, plural, =0 {Grant} one {Grant to #} other {Grant to #}}',
+  'admin.access.allTeams': 'Every team already reaches it.',
   'admin.access.revoke': 'Revoke',
   'admin.access.grantPerson': 'Give access',
   'admin.access.removeFromTeam': 'Remove from team',
@@ -312,6 +320,8 @@ export const en: Record<MessageKey, string> = {
   'admin.packages.field.modules': 'Modules it includes',
   'admin.packages.noCandidates': 'There are no published modules to put in a package.',
   // The dropdown behind the Objects column: what the module holds and at which version.
+  'admin.modules.objects.title': 'Objects in {modulo}',
+  'admin.modules.objects.summary': '{n, plural, one {# distinct object} other {# distinct objects}}, {instancias, plural, one {# instance} other {# instances}} in total.',
   'admin.modules.objects.none': 'None',
   'admin.modules.objects.count': '{n, plural, one {# object} other {# objects}}',
   'admin.modules.objects.behind': '{n} on an old version',

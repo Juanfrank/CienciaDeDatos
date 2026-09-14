@@ -205,6 +205,10 @@ export const es = {
   'admin.modules.folder.configure': 'Configurar permisos',
   // Las seis acciones de una fila del arbol.
   // Plegar y desplegar el arbol de la tabla.
+  // Buscador de una tabla larga.
+  'admin.search.placeholder': 'Buscar…',
+  'admin.search.results': '{n} de {total}',
+  'admin.search.empty': 'Nada coincide con «{consulta}».',
   'admin.tree.fold.controls': 'Plegar y desplegar',
   'admin.tree.fold.expandAll': 'Desplegar todo',
   'admin.tree.fold.toLevel': 'Plegar al nivel {n}',
@@ -277,7 +281,11 @@ export const es = {
   'admin.access.inherited': 'Hereda de {carpeta}',
   'admin.access.inherited.revokeThere': 'Se revoca en la carpeta',
   'admin.access.none': 'Sin acceso',
-  'admin.access.grant': 'Conceder',
+  'admin.access.addTeams': 'Anadir equipos',
+  'admin.access.addPeople': 'Anadir personas',
+  'admin.access.addPeople.intro': 'Entran todas en el mismo equipo y con el mismo rol. Para otro equipo o otro rol, se anaden en otra tanda.',
+  'admin.access.grantN': '{n, plural, =0 {Conceder} one {Conceder a #} other {Conceder a #}}',
+  'admin.access.allTeams': 'Todos los equipos lo alcanzan ya.',
   'admin.access.revoke': 'Revocar',
   'admin.access.grantPerson': 'Dar acceso',
   'admin.access.removeFromTeam': 'Quitar del equipo',
@@ -312,6 +320,8 @@ export const es = {
   'admin.packages.field.modules': 'Modulos que incluye',
   'admin.packages.noCandidates': 'No hay modulos publicados que meter en un paquete.',
   // El desplegable de la columna «Objetos»: que hay dentro del modulo y con que version.
+  'admin.modules.objects.title': 'Objetos de {modulo}',
+  'admin.modules.objects.summary': '{n, plural, one {# objeto} other {# objetos}} distintos, {instancias, plural, one {# instancia} other {# instancias}} en total.',
   'admin.modules.objects.none': 'Ninguno',
   'admin.modules.objects.count': '{n, plural, one {# objeto} other {# objetos}}',
   'admin.modules.objects.behind': '{n} con version antigua',

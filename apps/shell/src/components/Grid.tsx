@@ -28,9 +28,15 @@ export function Grid({
           const cellPosition = disposiciones[tamano].get(item.id) ?? item.position;
           const alto = rowSpanForBreakpoint(cellPosition.h, tamano);
           variables[`--col-${tamano}`] = `${cellPosition.x + 1} / span ${cellPosition.w}`;
-          // `auto` deja que el contenido marque el alto: en una sola columna el alto guardado
-          // solo produce cajas altas y medio vacias.
-          variables[`--fila-${tamano}`] = alto === null ? 'auto' : `span ${alto}`;
+          /*
+           * El DOBLE de pistas, porque la pista es media fila.
+           *
+           * La rejilla se partio por la mitad para que el contenedor expandible cerrado pueda
+           * ocupar media, que es lo que es un chiclet. Todo lo demas sigue midiendo lo mismo
+           * porque ocupa dos pistas por cada fila que tenia — y `auto` sigue siendo `auto`: en
+           * una sola columna el alto guardado solo produce cajas altas y medio vacias.
+           */
+          variables[`--fila-${tamano}`] = alto === null ? 'auto' : `span ${alto * 2}`;
         }
 
         return (

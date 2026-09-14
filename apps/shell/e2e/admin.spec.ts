@@ -968,9 +968,15 @@ test.describe('permisos de un modulo, desde el modulo (4.10.6)', () => {
   test('conceder a un equipo hace que sus personas lo vean', async ({ page }) => {
     await asLogin(page, 'u-admin');
     await page.goto('/admin/modules/composicion/permissions');
-    await expect(page.getByTestId('acceso-equipo-este-como')).toContainText(/Sin acceso/);
+    // El equipo Este no lo alcanza todavia, asi que no sale en la tabla: la tabla es de quien lo
+    // tiene, no de quien no.
+    await expect(page.getByTestId('acceso-equipo-este')).toHaveCount(0);
 
-    await page.getByTestId('conceder-equipo-este').click();
+    // Se concede desde el boton de anadir, marcando uno o varios: la tabla ensena quien TIENE
+    // acceso, no quien no lo tiene, y la unica accion de una fila es quitarlo.
+    await page.getByTestId('anadir-equipos').click();
+    await page.getByTestId('marcar-equipo-equipo-este').check();
+    await page.getByTestId('conceder-marcados').click();
     await expect(page.getByTestId('acceso-equipo-este-como')).toContainText(/Concedido aqui/);
 
     // Lo que manda es lo que ve la persona, no la insignia. `u-beto` es visor del equipo Este.
@@ -980,8 +986,8 @@ test.describe('permisos de un modulo, desde el modulo (4.10.6)', () => {
 
     await asLogin(page, 'u-admin');
     await page.goto('/admin/modules/composicion/permissions');
-    await page.getByTestId('conceder-equipo-este').click();
-    await expect(page.getByTestId('acceso-equipo-este-como')).toContainText(/Sin acceso/);
+    await page.getByTestId('quitar-equipo-equipo-este').click();
+    await expect(page.getByTestId('acceso-equipo-este')).toHaveCount(0);
   });
 });
 

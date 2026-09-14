@@ -1781,7 +1781,20 @@ body[data-sidebar='oculto'] .admin__nav { display: none; }
    * hasta donde le pidiera el contenido. Lo que no cabe NO se resuelve creciendo: se desplaza
    * dentro del objeto. Crecer rompe el esquema que alguien compuso, y lo rompe en silencio.
    */
-  grid-auto-rows: var(--alto-de-fila);
+  /*
+   * La pista es MEDIA fila, y cada objeto ocupa el doble de pistas.
+   *
+   * El contenedor expandible cerrado es un chiclet, y en una fila de 72 px se veia perdido en su
+   * propio hueco. En vez de darle un alto propio —que romperia la regla de que el alto sale de la
+   * rejilla y no del contenido— se parte la rejilla por la mitad: el chiclet ocupa una pista y
+   * todo lo demas dos por cada fila que tenia.
+   *
+   * La cuenta es exacta, no aproximada. Con `gap`, n filas miden n·H + (n−1)·G. Partidas en 2n
+   * pistas de (H−G)/2 con el mismo `gap`: 2n·(H−G)/2 + (2n−1)·G = n·H + (n−1)·G. El mismo alto
+   * que antes, al pixel — por eso las pruebas que miden cajas siguen dando lo mismo.
+   */
+  --alto-de-media-fila: calc((var(--alto-de-fila) - var(--space-md)) / 2);
+  grid-auto-rows: var(--alto-de-media-fila);
   gap: var(--space-md);
   align-items: stretch;
   /*
@@ -1951,14 +1964,38 @@ body[data-sidebar='oculto'] .admin__nav { display: none; }
   border-collapse: collapse;
   font-size: var(--md-sys-typescale-body-medium-size);
 }
+/*
+ * Filas mas apretadas.
+ *
+ * El relleno vertical era el mismo que el horizontal y, con dos lineas de texto en la primera
+ * columna, cada fila pasaba de los sesenta pixeles: una tabla de quince filas no cabia en
+ * pantalla y habia que desplazarse para compararlas, que es justo lo que una tabla evita.
+ * `vertical-align: middle` remata: con `top`, una celda de una linea quedaba pegada al borde
+ * superior de una fila alta y la fila parecia mas suelta de lo que es.
+ */
 .tabla th,
 .tabla td,
 .data-table th,
 .data-table td {
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-xs) var(--space-md);
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
   text-align: left;
-  vertical-align: top;
+  vertical-align: middle;
+}
+
+/*
+ * Y los parrafos que van DENTRO de una celda no traen su margen.
+ *
+ * La descripcion de un recurso y el nombre de quien tiene un modulo a su cargo son `<p>`, y su
+ * margen por defecto sumaba dos espacios mas por fila. En una celda el parrafo es la segunda
+ * linea del rotulo, no un bloque aparte.
+ */
+.tabla td > p,
+.tabla th > p,
+.data-table td > p,
+.data-table th > p {
+  margin: 0;
+  line-height: 1.35;
 }
 .tabla thead th,
 .data-table thead th {
@@ -4155,11 +4192,19 @@ th[aria-sort='descending'] .table__flecha {
  * Sangradas y mas pequenas: la sangria dice que dependen de la de arriba, y sin ella un submenu
  * abierto parece otro grupo de secciones al mismo nivel.
  */
+/*
+ * Las subsecciones del carril, sangradas de verdad.
+ *
+ * Estaban a un `space-lg` de la madre y con la linea pegada al texto: a simple vista parecian
+ * hermanas suyas, no hijas. La sangria es lo UNICO que dice el nivel en una lista, asi que se
+ * separa la linea del texto y se aparta el bloque entero — el indice de tarjetas que repetia
+ * estas mismas secciones arriba de cada pantalla ya no esta, y el carril tiene que decirlo solo.
+ */
 .admin__hijas {
   list-style: none;
-  margin: var(--space-xs) 0 var(--space-xs) var(--space-lg);
-  padding: 0;
-  border-left: 1px solid var(--md-sys-color-outline-variant);
+  margin: var(--space-xs) 0 var(--space-sm) var(--space-md);
+  padding-inline-start: var(--space-md);
+  border-left: 2px solid var(--md-sys-color-outline-variant);
 }
 .admin__hijas a {
   padding-block: var(--space-xs);
@@ -4330,13 +4375,20 @@ th[aria-sort='descending'] .table__flecha {
  * escribir en su propio padre: en React los datos bajan. `:has()` es justo la forma de que el
  * estilo suba.
  */
+/*
+ * Abierto: media pista para el chiclet mas las filas configuradas, en pistas de media fila.
+ */
 .grid__cell:has(> .objeto > .contenedor-expandible[data-expandido='si']),
 .grid__cell:has(> .contenedor-expandible[data-expandido='si']) {
-  grid-row: span calc(1 + var(--filas-al-expandir, 4));
+  grid-row: span calc(1 + 2 * var(--filas-al-expandir, 4));
 }
 
-/* Cerrado ocupa UNA fila, sea cual sea el alto con el que lo pusieran en el lienzo: un chiclet
-   que reservara cuatro filas vacias no seria un chiclet. */
+/*
+ * Cerrado ocupa MEDIA fila, sea cual sea el alto con el que lo pusieran en el lienzo.
+ *
+ * Es lo unico del modulo que ocupa una pista suelta, y para eso se partio la rejilla: un chiclet
+ * en una fila entera se ve perdido en su propio hueco.
+ */
 .grid__cell:has(> .objeto > .contenedor-expandible[data-expandido='no']),
 .grid__cell:has(> .contenedor-expandible[data-expandido='no']) {
   grid-row: span 1;
@@ -4445,4 +4497,98 @@ th[aria-sort='descending'] .table__flecha {
   flex-wrap: wrap;
   gap: var(--space-sm);
   margin-block: var(--space-md);
+}
+
+/*
+ * Una celda que es un NUMERO y se pulsa.
+ *
+ * Parece texto y se comporta como boton: el subrayado al pasar por encima es lo unico que dice
+ * que hay algo detras, y el cursor lo confirma. Un numero que abre un dialogo sin ninguna senal
+ * es un numero que nadie pulsa.
+ */
+.celda-numero {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--md-sys-color-primary);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.celda-numero:hover {
+  text-decoration: underline;
+}
+
+/*
+ * El dialogo de la capa superior.
+ *
+ * `showModal()` lo saca del flujo y del recorte del contenedor que se desplaza, que es por lo que
+ * un panel absoluto dentro de una celda no valia. El `::backdrop` lo separa de lo que hay detras.
+ */
+.dialogo {
+  max-width: min(56rem, 92vw);
+  max-height: 85vh;
+  overflow: auto;
+  padding: var(--space-lg);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-large);
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  box-shadow: var(--md-sys-elevation-3);
+}
+
+.dialogo::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+
+.dialogo__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.dialogo__cabecera h2 {
+  margin: 0;
+}
+
+/* El buscador de una tabla: el campo y el recuento, en una linea. */
+.buscador {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+  margin-block: var(--space-md);
+}
+
+.buscador__campo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-inline: var(--space-sm);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-full);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.buscador__campo input {
+  border: 0;
+  background: none;
+  padding-block: var(--space-sm);
+  min-width: 14rem;
+  color: var(--md-sys-color-on-surface);
+}
+
+.buscador__campo input:focus {
+  outline: none;
+}
+
+/* El foco se ve sobre la pastilla entera, no sobre el campo desnudo dentro de ella. */
+.buscador__campo:focus-within {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
 }

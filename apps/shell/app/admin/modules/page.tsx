@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import type { MessageKey, Translator } from '@app/i18n';
 import { isFolder, type NavNode } from '@app/access-control';
-import { SectionIndex } from '../../../src/components/admin/SectionIndex';
 import { sectionOf } from '../../../src/components/admin/sections';
 import { ModuleObjects } from '../../../src/components/admin/ModuleObjects';
 import { TreeActions, type DestinoPosible } from '../../../src/components/admin/TreeActions';
@@ -91,7 +90,6 @@ export default async function ModulosPage() {
       <h2>{t('admin.modules.title')}</h2>
       <p className="muted-text">{seccion?.desc}</p>
 
-      <SectionIndex sections={seccion?.hijas ?? []} />
 
       {/*
         Lo que espera una decision va PRIMERO y aparte.
@@ -126,6 +124,12 @@ export default async function ModulosPage() {
             tipo: fila.tipo,
             profundidad: fila.profundidad,
             padre: fila.padre,
+            // Lo que se puede escribir para dar con la fila. Se arma aqui, en el servidor, donde
+            // estan el traductor y los datos: el filtro de cliente solo recibe texto.
+            texto:
+              fila.tipo === 'carpeta'
+                ? fila.nombre
+                : `${fila.modulo.name} ${fila.modulo.slug} ${fila.modulo.description ?? ''}`,
           }),
         )}
         cabecera={<Cabecera t={t} />}
@@ -261,7 +265,7 @@ function Modulo({
       </td>
       <td>{m.pages.length}</td>
       <td>
-        <ModuleObjects slug={m.slug} objetos={objectsOfModule(m)} t={t} />
+        <ModuleObjects slug={m.slug} objetos={objectsOfModule(m)} />
       </td>
       <td>
         <TreeActions

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Translator } from '@app/i18n';
 import { ResourceActions } from './ResourceActions';
+import { TablaBuscable } from './TablaBuscable';
 
 /**
  * Los recursos de una familia, en TABLA.
@@ -92,8 +93,10 @@ export function ResourceList({
           {t('admin.resources.empty')}
         </p>
       ) : (
-        <div className="container-table">
-          <table className="tabla" data-testid={`recursos-${familia}`}>
+        <TablaBuscable
+          testid={`recursos-${familia}`}
+          filas={rows.map((r) => ({ id: r.id, texto: `${r.name} ${r.id} ${r.description}` }))}
+          cabecera={
             <thead>
               <tr>
                 <th scope="col">{t('admin.resources.column.resource')}</th>
@@ -103,8 +106,9 @@ export function ResourceList({
                 <th scope="col">{t('admin.resources.column.actions')}</th>
               </tr>
             </thead>
-            <tbody>
-              {rows.map((r) => {
+          }
+        >
+          {rows.map((r) => {
                 const retirada = r.versions.some((v) => v.deprecation !== undefined);
                 return (
                   <tr key={r.id} data-testid={`recurso-${r.id}`}>
@@ -183,9 +187,7 @@ export function ResourceList({
                   </tr>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+        </TablaBuscable>
       )}
 
       <p className="muted-text">

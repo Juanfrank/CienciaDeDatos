@@ -1,8 +1,9 @@
 'use client';
 
-import { Children, createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { Children, createContext, useContext, useEffect, useId, useMemo, useState } from 'react';
 import { useTranslator } from '../Locale';
 import { Icon } from '../icons/Icon';
+import { normalizar } from './TablaBuscable';
 
 /**
  * Plegar y desplegar la tabla del arbol, por nivel — secciones 4.1 y 4.10.8.
@@ -27,6 +28,8 @@ export interface FilaDelArbol {
   tipo: 'carpeta' | 'modulo';
   profundidad: number;
   padre: string | null;
+  /** Todo lo que se puede escribir para dar con esta fila: nombre, URL, estado. */
+  texto: string;
 }
 
 interface Plegado {
@@ -59,6 +62,8 @@ export function ArbolPlegable({
 }) {
   const t = useTranslator();
   const [plegadas, setPlegadas] = useState<Set<string>>(new Set());
+  const [consulta, setConsulta] = useState('');
+  const idBuscador = useId();
 
   /*
    * Lo plegado es de quien mira, no del modulo.
@@ -119,17 +124,63 @@ export function ArbolPlegable({
   const hijas = Children.toArray(children);
   const profundidadMaxima = filas.reduce((n, f) => Math.max(n, f.profundidad), 0);
 
+  /*
+   * Buscando, el plegado NO se aplica.
+   *
+   * Un resultado dentro de una carpeta plegada seria un resultado invisible, y quien busca creeria
+   * que no existe. Y se ensenan tambien sus CARPETAS madre: un modulo suelto, sin la rama de la
+   * que cuelga, no dice donde esta — y donde esta es lo que decide quien lo ve.
+   */
+  const buscado = normalizar(consulta.trim());
+  const visiblesPorBusqueda = useMemo(() => {
+    if (buscado === '') return null;
+    const vistos = new Set<string>();
+    for (const fila of filas) {
+      if (!normalizar(fila.texto).includes(buscado)) continue;
+      vistos.add(fila.id);
+      let padre = fila.padre;
+      while (padre !== null && !vistos.has(padre)) {
+        vistos.add(padre);
+        padre = porId.get(padre)?.padre ?? null;
+      }
+    }
+    return vistos;
+  }, [filas, buscado, porId]);
+
+  const seVe = (fila: FilaDelArbol) =>
+    visiblesPorBusqueda ? visiblesPorBusqueda.has(fila.id) : !bajoUnPlegada(fila);
+  const cuantas = filas.filter(seVe).length;
+
   return (
     <Contexto.Provider value={valor}>
+      <p className="buscador">
+        <label className="buscador__campo" htmlFor={`${idBuscador}-buscar`}>
+          <Icon nombre="lupa" tamano={16} />
+          <input
+            id={`${idBuscador}-buscar`}
+            type="search"
+            value={consulta}
+            placeholder={t('admin.search.placeholder')}
+            data-testid="buscar-modulos"
+            onChange={(e) => setConsulta(e.target.value)}
+          />
+        </label>
+        <span className="muted-text" role="status" data-testid="resultados-modulos">
+          {t('admin.search.results', { n: cuantas, total: filas.length })}
+        </span>
+      </p>
+
       {/*
         Plegar por NIVEL, no solo carpeta a carpeta.
         Con tres niveles y veinte carpetas, ir una por una es el mismo trabajo que leerlas todas.
+        Buscando no sirven de nada —el plegado no se aplica—, asi que se apagan en vez de quedarse
+        ahi sin efecto.
       */}
       <div className="arbol-controles" role="group" aria-label={t('admin.tree.fold.controls')}>
         <button
           type="button"
           className="boton-contorno"
-          disabled={plegadas.size === 0}
+          disabled={plegadas.size === 0 || buscado !== ''}
           data-testid="desplegar-todo"
           onClick={() => guardar(new Set())}
         >
@@ -140,6 +191,7 @@ export function ArbolPlegable({
             key={nivel}
             type="button"
             className="boton-contorno"
+            disabled={buscado !== ''}
             data-testid={`plegar-nivel-${nivel}`}
             onClick={() =>
               guardar(
@@ -160,10 +212,16 @@ export function ArbolPlegable({
         <table className="tabla" data-testid="tabla-modulos">
           {cabecera}
           <tbody>
-            {filas.map((fila, i) => (bajoUnPlegada(fila) ? null : hijas[i]))}
+            {filas.map((fila, i) => (seVe(fila) ? hijas[i] : null))}
           </tbody>
         </table>
       </div>
+
+      {cuantas === 0 ? (
+        <p className="muted-text" data-testid="sin-resultados-modulos">
+          {t('admin.search.empty', { consulta: consulta.trim() })}
+        </p>
+      ) : null}
     </Contexto.Provider>
   );
 }

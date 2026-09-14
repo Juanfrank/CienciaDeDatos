@@ -1,109 +1,138 @@
+'use client';
+
+import { useRef } from 'react';
 import Link from 'next/link';
-import type { MessageKey, Translator } from '@app/i18n';
+import type { MessageKey } from '@app/i18n';
 import type { ObjetoEnModulo } from '../../server/recursos';
 import { BumpModule } from './BumpModule';
 import { Icon } from '../icons/Icon';
+import { useTranslator } from '../Locale';
 
 /**
  * Que hay dentro de un modulo, sin salir de la lista — seccion 4.5.
  *
- * La columna decia un numero. Un numero no responde a la pregunta que se hace mirandolo, que es
- * «¿y por que este modulo no se parece a los demas?». Lo que responde es el desplegable: cada
- * objeto, la version que fija, y si esa version ya no es la ultima, el boton de subirla ahi mismo.
+ * La celda dice un NUMERO y nada mas. Decia «3 objetos · 2 con version antigua» y, repetido en
+ * veinte filas, convertia la columna en un parrafo que hay que leer entero para encontrar la fila
+ * que importa. El numero se lee de un vistazo, el triangulo rojo avisa, y lo demas esta a un clic.
  *
- * Va plegado porque un modulo con quince objetos convertiria la tabla en una pared de texto.
+ * Y a un clic hay un DIALOGO, no un desplegable. La tabla vive dentro de un contenedor que se
+ * desplaza en horizontal, y un panel absoluto dentro de una celda se recorta contra ese
+ * desbordamiento: la mitad del contenido quedaba fuera. `showModal()` lo saca a la capa superior
+ * del navegador, que ademas trae gratis el cierre con Escape y la retencion del foco.
  */
-export function ModuleObjects({
-  slug,
-  objetos,
-  t,
-}: {
-  slug: string;
-  objetos: ObjetoEnModulo[];
-  t: Translator;
-}) {
+export function ModuleObjects({ slug, objetos }: { slug: string; objetos: ObjetoEnModulo[] }) {
+  const t = useTranslator();
+  const dialogo = useRef<HTMLDialogElement>(null);
+
   if (objetos.length === 0) {
-    return <span className="muted-text">{t('admin.modules.objects.none')}</span>;
+    return <span className="muted-text">—</span>;
   }
 
   const atrasados = objetos.filter((o) => o.atrasada).length;
+  const instancias = objetos.reduce((n, o) => n + o.instancias, 0);
 
   return (
-    <details data-testid={`objetos-${slug}`}>
-      <summary>
-        {t('admin.modules.objects.count', { n: objetos.length })}
-        {/*
-          Un ICONO, no la frase.
-          «3 objetos · 2 con version antigua» en cada una de veinte filas convierte la columna en
-          un parrafo y hace falta leerla entera para encontrar la fila que importa. Un triangulo
-          rojo se ve de un vistazo. El texto no se pierde: viaja en `title` y en `aria-label`, asi
-          que el raton lo ensena al pasar y un lector de pantalla lo anuncia igual que antes.
-        */}
+    <>
+      <button
+        type="button"
+        className="celda-numero"
+        data-testid={`objetos-${slug}`}
+        // El rotulo accesible SI lleva la frase: un lector de pantalla que solo oyera «3» no
+        // sabria de que, y es la misma informacion que antes estaba escrita en la celda.
+        aria-label={
+          atrasados > 0
+            ? `${t('admin.modules.objects.count', { n: objetos.length })}, ${t('admin.modules.objects.behind', { n: atrasados })}`
+            : t('admin.modules.objects.count', { n: objetos.length })
+        }
+        onClick={() => dialogo.current?.showModal()}
+      >
+        {objetos.length}
         {atrasados > 0 ? (
-          <>
-            {' '}
-            <span
-              className="alerta-version"
-              role="img"
-              title={t('admin.modules.objects.behind', { n: atrasados })}
-              aria-label={t('admin.modules.objects.behind', { n: atrasados })}
-              data-testid={`objetos-atrasados-${slug}`}
-            >
-              <Icon nombre="aviso_triangulo" tamano={16} />
-            </span>
-          </>
+          <span
+            className="alerta-version"
+            aria-hidden="true"
+            data-testid={`objetos-atrasados-${slug}`}
+          >
+            <Icon nombre="aviso_triangulo" tamano={14} />
+          </span>
         ) : null}
-      </summary>
+      </button>
 
-      <table className="tabla tabla--anidada">
-        <thead>
-          <tr>
-            <th scope="col">{t('admin.modules.objects.column.object')}</th>
-            <th scope="col">{t('admin.modules.objects.column.version')}</th>
-            <th scope="col">{t('admin.modules.objects.column.instances')}</th>
-            <th scope="col">{t('admin.resources.column.actions')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {objetos.map((o) => (
-            <tr key={`${o.objectId}@${o.version}`} data-testid={`objeto-${slug}-${o.objectId}-${o.version}`}>
-              <th scope="row">
-                {/* El nombre lleva a donde mas se usa ese objeto: es la otra mitad de la misma
-                    pregunta, leida desde el catalogo. */}
-                <Link href={`/admin/resources/usage/${o.objectId}`}>{o.name}</Link>{' '}
-                <span className="muted-text">{t(CATEGORIA[o.category] ?? 'admin.modules.objects.category.other')}</span>
-              </th>
-              <td>
-                v{o.version} <Vigencia objeto={o} t={t} />
-              </td>
-              <td>{o.instancias}</td>
-              <td>
-                {o.atrasada ? (
-                  <BumpModule
-                    slug={slug}
-                    objectId={o.objectId}
-                    desde={o.version}
-                    hasta={o.ultima}
-                  />
-                ) : (
-                  <span className="muted-text">—</span>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </details>
+      <dialog className="dialogo" ref={dialogo} data-testid={`objetos-dialogo-${slug}`}>
+        <div className="dialogo__cabecera">
+          <h2>{t('admin.modules.objects.title', { modulo: slug })}</h2>
+          <button
+            type="button"
+            className="boton-contorno"
+            data-testid={`cerrar-objetos-${slug}`}
+            onClick={() => dialogo.current?.close()}
+          >
+            {t('action.close')}
+          </button>
+        </div>
+
+        <p className="muted-text">
+          {t('admin.modules.objects.summary', { n: objetos.length, instancias })}
+        </p>
+
+        <div className="container-table">
+          <table className="tabla">
+            <thead>
+              <tr>
+                <th scope="col">{t('admin.modules.objects.column.object')}</th>
+                <th scope="col">{t('admin.modules.objects.column.version')}</th>
+                <th scope="col">{t('admin.modules.objects.column.instances')}</th>
+                <th scope="col">{t('admin.resources.column.actions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {objetos.map((o) => (
+                <tr
+                  key={`${o.objectId}@${o.version}`}
+                  data-testid={`objeto-${slug}-${o.objectId}-${o.version}`}
+                >
+                  <th scope="row">
+                    {/* El nombre lleva a donde mas se usa ese objeto: es la otra mitad de la
+                        misma pregunta, leida desde el catalogo. */}
+                    <Link href={`/admin/resources/usage/${o.objectId}`}>{o.name}</Link>{' '}
+                    <span className="muted-text">
+                      {t(CATEGORIA[o.category] ?? 'admin.modules.objects.category.other')}
+                    </span>
+                  </th>
+                  <td>
+                    v{o.version} <Vigencia objeto={o} />
+                  </td>
+                  <td>{o.instancias}</td>
+                  <td>
+                    {o.atrasada ? (
+                      <BumpModule
+                        slug={slug}
+                        objectId={o.objectId}
+                        desde={o.version}
+                        hasta={o.ultima}
+                      />
+                    ) : (
+                      <span className="muted-text">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </dialog>
+    </>
   );
 }
 
 /**
  * Si la version fijada es la ultima, una vieja, o de un objeto que ya no existe.
  *
- * Con nombre y no como ternario anidado, por lo mismo que en `AssetTable`: la rama del medio se
- * queda en una linea que el trinquete de cadenas sueltas cuenta como prosa de pantalla.
+ * Con nombre y no como ternario anidado: la rama del medio se queda en una linea que el trinquete
+ * de cadenas sueltas cuenta como prosa de pantalla.
  */
-function Vigencia({ objeto, t }: { objeto: ObjetoEnModulo; t: Translator }) {
+function Vigencia({ objeto }: { objeto: ObjetoEnModulo }) {
+  const t = useTranslator();
   if (objeto.desconocido) {
     return <span className="insignia badge--error">{t('admin.modules.objects.unknown')}</span>;
   }
