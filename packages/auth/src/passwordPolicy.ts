@@ -69,7 +69,7 @@ export const DEFAULT_LOCKOUT_POLICY: LockoutPolicy = {
  */
 export function lockDurationMs(failedAttempts: number, policy: LockoutPolicy): number {
   if (failedAttempts < policy.maxAttempts) return 0;
-  const bloqueosPrevios = failedAttempts - policy.maxAttempts;
-  const duracion = policy.baseLockMs * 2 ** bloqueosPrevios;
+  const previousLocks = failedAttempts - policy.maxAttempts;
+  const duracion = policy.baseLockMs * 2 ** previousLocks;
   return Math.min(duracion, policy.maxLockMs);
 }

@@ -21,7 +21,7 @@ export interface NumberFormat {
   /** 12.500 pasa a «12,5 mil». Util en una tarjeta, molesto en una tabla. */
   compacto?: boolean;
   /** Solo con `tipo: 'personalizado'`. */
-  patron?: string;
+  pattern?: string;
   /** Simbolo de la moneda. Solo con `tipo: 'moneda'`. */
   simbolo?: string;
 }
@@ -44,7 +44,7 @@ export function measureFormat(
 /** Una seccion ya analizada: el esqueleto literal y cuanto relleno pide la cifra. */
 interface Section {
   /** Los literales, con UN solo `#` marcando donde va la cifra entera. */
-  patron: string;
+  pattern: string;
   /** Cuantos `0` lleva la parte entera: es el relleno minimo por la izquierda. */
   enterosMin: number;
   decimalsMin: number;
@@ -65,7 +65,7 @@ const RESERVADOS = new Set(['0', '#', '.', ',', '%', '\\', '"', ';']);
 /** Analiza UNA seccion del patron. */
 function analizar(content: string): Section {
   const section: Section = {
-    patron: '',
+    pattern: '',
     enterosMin: 0,
     decimalsMin: 0,
     decimalsMax: 0,
@@ -81,14 +81,14 @@ function analizar(content: string): Section {
       // El siguiente va literal aunque sea reservado. Es como se escribe un «%» que no multiplica.
       const siguiente = content[i + 1];
       if (siguiente !== undefined) {
-        section.patron += siguiente;
+        section.pattern += siguiente;
         i += 1;
       }
       continue;
     }
     if (c === '"') {
       const fin = content.indexOf('"', i + 1);
-      section.patron += fin === -1 ? content.slice(i + 1) : content.slice(i + 1, fin);
+      section.pattern += fin === -1 ? content.slice(i + 1) : content.slice(i + 1, fin);
       i = fin === -1 ? content.length : fin;
       continue;
     }
@@ -98,7 +98,7 @@ function analizar(content: string): Section {
     }
     if (c === '%') {
       section.porcentaje = true;
-      section.patron += '%';
+      section.pattern += '%';
       continue;
     }
     if (c === ',') {
@@ -108,7 +108,7 @@ function analizar(content: string): Section {
       if ((before === '0' || before === '#') && (after === '0' || after === '#')) {
         section.millares = true;
       } else {
-        section.patron += ',';
+        section.pattern += ',';
       }
       continue;
     }
@@ -121,27 +121,27 @@ function analizar(content: string): Section {
         // UN solo marcador para toda la cifra. Uno por digito dejaba `####` en el esqueleto y
         // `aplicar` solo sustituia el primero: `0000` sobre 42 salia «42###».
         if (!cifraPuesta) {
-          section.patron += '\u0000';
+          section.pattern += '\u0000';
           cifraPuesta = true;
         }
       }
       continue;
     }
-    if (!RESERVADOS.has(c)) section.patron += c;
+    if (!RESERVADOS.has(c)) section.pattern += c;
   }
 
   return section;
 }
 
 /** Divide por `;` respetando lo escapado y lo entrecomillado. */
-function sections(patron: string): string[] {
+function sections(pattern: string): string[] {
   const partes: string[] = [];
   let actual = '';
   let enComillas = false;
-  for (let i = 0; i < patron.length; i += 1) {
-    const c = patron[i] ?? '';
+  for (let i = 0; i < pattern.length; i += 1) {
+    const c = pattern[i] ?? '';
     if (c === '\\') {
-      actual += c + (patron[i + 1] ?? '');
+      actual += c + (pattern[i + 1] ?? '');
       i += 1;
       continue;
     }
@@ -180,30 +180,30 @@ function aplicar(section: Section, valor: number): string {
   /*
    * Una seccion SIN marcador de digito es puro literal, y ahi no va ninguna cifra.
    */
-  if (!section.patron.includes('\u0000')) {
+  if (!section.pattern.includes('\u0000')) {
     return section.decimalsMax === 0 && section.enterosMin === 0
-      ? section.patron
-      : figure + section.patron;
+      ? section.pattern
+      : figure + section.pattern;
   }
-  return section.patron.replace('\u0000', figure);
+  return section.pattern.replace('\u0000', figure);
 }
 
 export class PatronInvalidoError extends Error {
-  constructor(readonly patron: string, readonly motivo: string) {
-    super(`El patron '${patron}' no se puede usar: ${motivo}`);
+  constructor(readonly pattern: string, readonly motivo: string) {
+    super(`El patron '${pattern}' no se puede usar: ${motivo}`);
     this.name = 'PatronInvalidoError';
   }
 }
 
 /** Por que un patron no vale. `null` si vale. */
-export function problemaDelPatron(patron: string): string | null {
-  if (!patron.trim()) return 'esta vacio.';
-  if (sections(patron).length > 3) {
+export function problemaDelPatron(pattern: string): string | null {
+  if (!pattern.trim()) return 'esta vacio.';
+  if (sections(pattern).length > 3) {
     return 'tiene mas de tres secciones. Son, como mucho: positivo ; negativo ; cero.';
   }
-  const withoutBookmark = sections(patron).every((s) => {
+  const withoutBookmark = sections(pattern).every((s) => {
     const a = analizar(s);
-    return !a.patron.includes('\u0000') && a.decimalsMax === 0;
+    return !a.pattern.includes('\u0000') && a.decimalsMax === 0;
   });
   if (withoutBookmark) {
     return "no tiene ningun marcador de digito. Use '0' o '#' donde deba salir la cifra.";
@@ -218,8 +218,8 @@ export function problemaDelPatron(patron: string): string | null {
 export function numberFormatter(formato: NumberFormat | undefined): (n: number | null) => string {
   const tipo = formato?.tipo ?? 'general';
 
-  if (tipo === 'personalizado' && formato?.patron && !problemaDelPatron(formato.patron)) {
-    const [positivo, negativo, cero] = sections(formato.patron).map(analizar);
+  if (tipo === 'personalizado' && formato?.pattern && !problemaDelPatron(formato.pattern)) {
+    const [positivo, negativo, cero] = sections(formato.pattern).map(analizar);
     // `secciones` siempre devuelve al menos una, pero el tipo no lo sabe: sin la guarda, el
     // formateador dependeria de un `!` que nadie vuelve a comprobar.
     if (positivo) {

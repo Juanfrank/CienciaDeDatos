@@ -36,8 +36,8 @@ export function ColorRules({
   const cambiar = (siguiente: ColorRule[]) =>
     onCambiar(siguiente.length === 0 ? undefined : siguiente);
 
-  const editar = (i: number, cambio: Partial<ColorRule>) =>
-    cambiar(rules.map((colorRule, j) => (i === j ? { ...colorRule, ...cambio } : colorRule)));
+  const editar = (i: number, change: Partial<ColorRule>) =>
+    cambiar(rules.map((colorRule, j) => (i === j ? { ...colorRule, ...change } : colorRule)));
 
   const mover = (i: number, delta: number) => {
     const j = i + delta;

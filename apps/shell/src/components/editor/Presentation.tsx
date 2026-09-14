@@ -54,7 +54,7 @@ export function Presentation({
   /** Tipo de cada columna del dataset, para ofrecer los selectores que tienen sentido. */
   kinds: Record<string, string>;
   saving: boolean;
-  onCambiar: (cambio: (i: ObjectInstance) => ObjectInstance) => void;
+  onCambiar: (change: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
   const p = instance.presentacion ?? {};
   const admite = (clave: PresentationKey) => admitidas.includes(clave);
@@ -1072,7 +1072,7 @@ function PanelPickers({
   instance: ObjectInstance;
   kinds: Record<string, string>;
   saving: boolean;
-  onCambiar: (cambio: (i: ObjectInstance) => ObjectInstance) => void;
+  onCambiar: (change: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
   const settings =
     instance.settings?.objectId === "panel-de-filtros"
@@ -1161,7 +1161,7 @@ function MeasureFormat({
   instance: ObjectInstance;
   saving: boolean;
   prueba: string;
-  onCambiar: (cambio: (i: ObjectInstance) => ObjectInstance) => void;
+  onCambiar: (change: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
   const formatos = instance.presentacion?.formatos;
   const medidas = instance.binding.measures;
@@ -1246,7 +1246,7 @@ function RenglonDeFormato({
 }) {
   const tipo = formato.tipo ?? "general";
   const cambiar = (parcial: Partial<NumberFormat>) => onCambiar({ ...formato, ...parcial });
-  const issue = tipo === "personalizado" ? problemaDelPatron(formato.patron ?? "") : null;
+  const issue = tipo === "personalizado" ? problemaDelPatron(formato.pattern ?? "") : null;
 
   return (
     // El renglon entero lleva identificador, como la paleta y el estilo de texto: preguntar si un
@@ -1277,13 +1277,13 @@ function RenglonDeFormato({
         <label className="form__field">
           <span>Cadena de formato</span>
           <input
-            defaultValue={formato.patron ?? ""}
+            defaultValue={formato.pattern ?? ""}
             placeholder="#,##0.00"
             disabled={saving}
             data-testid={`${prueba}-patron`}
             aria-describedby={issue ? `${prueba}-patron-error` : undefined}
             aria-invalid={issue ? true : undefined}
-            onBlur={(e) => cambiar({ patron: e.target.value })}
+            onBlur={(e) => cambiar({ pattern: e.target.value })}
           />
           {/*
             El error se dice AQUI y no solo en la lista de bloqueos: quien escribe la cadena esta

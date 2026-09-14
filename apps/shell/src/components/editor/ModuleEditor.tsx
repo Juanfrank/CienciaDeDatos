@@ -38,13 +38,13 @@ export function ModuleEditor({
   const [objetos, setObjetos] = useState(objetosIniciales);
   const [diag, setDiag] = useState(diagnosticos);
   const [bloq, setBloq] = useState(locks);
-  const [seleccion, setSeleccion] = useState<string | null>(null);
+  const [selection, setSeleccion] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [saving, setGuardando] = useState(false);
 
   const pagina = modulo.pages[0];
   const items = pagina?.items ?? [];
-  const chosen = items.find((i) => i.id === seleccion) ?? null;
+  const chosen = items.find((i) => i.id === selection) ?? null;
 
   // Escape deselecciona, como en cualquier editor de bloques. Va en el documento y no en el
   // lienzo porque el foco suele estar en el panel cuando hace falta.
@@ -138,8 +138,8 @@ export function ModuleEditor({
     setSeleccion(id);
   };
 
-  const cambiar = async (itemId: string, cambio: (item: GridItem) => GridItem) => {
-    await guardar(conItems(items.map((i) => (i.id === itemId ? cambio(i) : i))));
+  const cambiar = async (itemId: string, change: (item: GridItem) => GridItem) => {
+    await guardar(conItems(items.map((i) => (i.id === itemId ? change(i) : i))));
   };
 
   const remove = async (itemId: string) => {
@@ -206,7 +206,7 @@ export function ModuleEditor({
         <Canvas
           items={items}
           objetos={objetos}
-          seleccion={seleccion}
+          selection={selection}
           editable={editable}
           onSeleccionar={editable ? setSeleccion : () => undefined}
           // El arrastre entrega una posicion y la aplica el MISMO camino que los botones del
@@ -251,7 +251,7 @@ export function ModuleEditor({
           seleccionado={chosen}
           saving={saving}
           onAnadir={(objectId) => void add(objectId)}
-          onCambiar={(itemId, cambio) => void cambiar(itemId, cambio)}
+          onCambiar={(itemId, change) => void cambiar(itemId, change)}
           onQuitar={(itemId) => void remove(itemId)}
         />
       ) : null}

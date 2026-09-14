@@ -140,7 +140,7 @@ export function EditorObjectSettings({
 }: {
   instance: ObjectInstance;
   saving: boolean;
-  onCambiar: (cambio: (i: ObjectInstance) => ObjectInstance) => void;
+  onCambiar: (change: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
   const { objectId } = instance;
   if (!isElement(objectId) && !isContainer(objectId)) return null;

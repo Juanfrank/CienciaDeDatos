@@ -3,7 +3,7 @@ import type { Cadence, Subscription } from './types';
 /** Cuando toca entregar una suscripcion. */
 
 /** Inicio del periodo al que pertenece `ahora` para una cadencia dada. */
-export function inicioDelPeriodo(cadencia: Cadence, ahora: Date): Date {
+export function periodHome(cadencia: Cadence, ahora: Date): Date {
   const d = new Date(ahora);
   d.setHours(0, 0, 0, 0);
 
@@ -17,12 +17,12 @@ export function inicioDelPeriodo(cadencia: Cadence, ahora: Date): Date {
 }
 
 /** true si la suscripcion tiene una entrega pendiente en el periodo actual. */
-export function debeEntregarse(sub: Subscription, ahora: Date): boolean {
+export function deliverMust(sub: Subscription, ahora: Date): boolean {
   if (!sub.enabled) return false;
   // Con un archivo ya en cola no se encola otro: dos vueltas seguidas entregarian dos veces.
   if (sub.pendingJobId) return false;
 
-  const home = inicioDelPeriodo(sub.cadence, ahora);
+  const home = periodHome(sub.cadence, ahora);
 
   const programada = new Date(home);
   if (sub.cadence === 'semanal' && sub.weekday !== undefined) {
@@ -31,8 +31,8 @@ export function debeEntregarse(sub: Subscription, ahora: Date): boolean {
   if (sub.cadence === 'mensual' && sub.monthday !== undefined) {
     // Un dia 31 en febrero no existe: se entrega el ultimo dia del mes en vez de saltarse el
     // periodo entero, que es lo que haria una comparacion literal de fecha.
-    const ultimoDia = new Date(programada.getFullYear(), programada.getMonth() + 1, 0).getDate();
-    programada.setDate(Math.min(sub.monthday, ultimoDia));
+    const lastDay = new Date(programada.getFullYear(), programada.getMonth() + 1, 0).getDate();
+    programada.setDate(Math.min(sub.monthday, lastDay));
   }
   programada.setHours(sub.hour, 0, 0, 0);
 
@@ -43,7 +43,7 @@ export function debeEntregarse(sub: Subscription, ahora: Date): boolean {
 }
 
 /** Descripcion legible de la cadencia, para la interfaz. */
-export function describirCadencia(sub: Subscription): string {
+export function cadenceDescribe(sub: Subscription): string {
   const hora = `${String(sub.hour).padStart(2, '0')}:00`;
   const dias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
 

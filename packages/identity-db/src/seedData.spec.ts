@@ -81,21 +81,21 @@ describe('datos de arranque: dos equipos con ambitos distintos (8.1)', () => {
   });
 
   it('los equipos ven conjuntos de modulos distintos', () => {
-    const vistaNorte = buildNavigationView({ generalTree: arbol, team: equipo('equipo-norte') });
-    const vistaEste = buildNavigationView({ generalTree: arbol, team: equipo('equipo-este') });
-    expect(JSON.stringify(vistaNorte.tree)).toContain('audiencias');
-    expect(JSON.stringify(vistaEste.tree)).not.toContain('audiencias');
+    const norteView = buildNavigationView({ generalTree: arbol, team: equipo('equipo-norte') });
+    const esteView = buildNavigationView({ generalTree: arbol, team: equipo('equipo-este') });
+    expect(JSON.stringify(norteView.tree)).toContain('audiencias');
+    expect(JSON.stringify(esteView.tree)).not.toContain('audiencias');
     // 'estadisticas' vive fuera de lo concedido a ambos.
-    expect(JSON.stringify(vistaNorte.tree)).not.toContain('estadisticas');
+    expect(JSON.stringify(norteView.tree)).not.toContain('estadisticas');
   });
 
   it('un usuario en dos equipos ve segun el equipo ACTIVO, no la union de ambos (4.10.2)', () => {
     // Ana pertenece a los dos equipos. Con el equipo Este activo pierde el acceso a los
     // modulos del Norte, en vez de acumularlos.
-    const comoNorte = buildNavigationView({ generalTree: arbol, team: equipo('equipo-norte') });
-    const comoEste = buildNavigationView({ generalTree: arbol, team: equipo('equipo-este') });
-    expect(JSON.stringify(comoNorte.tree)).toContain('casos-pendientes');
-    expect(JSON.stringify(comoEste.tree)).not.toContain('casos-pendientes');
+    const norteAs = buildNavigationView({ generalTree: arbol, team: equipo('equipo-norte') });
+    const esteAs = buildNavigationView({ generalTree: arbol, team: equipo('equipo-este') });
+    expect(JSON.stringify(norteAs.tree)).toContain('casos-pendientes');
+    expect(JSON.stringify(esteAs.tree)).not.toContain('casos-pendientes');
   });
 
   it('el seed no contiene ninguna excepcion de ampliacion: el arranque es el caso limpio', () => {

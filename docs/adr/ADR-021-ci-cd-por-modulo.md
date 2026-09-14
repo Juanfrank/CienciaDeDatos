@@ -41,7 +41,7 @@ para que el arbol y la ruta no discrepen si vence el TTL a mitad.
 
 `AppConfiguration` habla la API REST con un token de `@azure/identity`, que ya era dependencia.
 No se añadio `@azure/app-configuration`: son dos llamadas HTTP, y cada paquete nuevo en un entorno
-cerrado cuesta revision y renovacion. `ConfiguracionDeEntorno` lee `MODULOS_APAGADOS` y
+cerrado cuesta revision y renovacion. `EnvironmentSettings` lee `MODULOS_APAGADOS` y
 `DATA_CONNECTOR`, y es la que corre en desarrollo y en las pruebas de navegador — el mismo puerto,
 asi que el apagado se prueba de verdad sin nube.
 

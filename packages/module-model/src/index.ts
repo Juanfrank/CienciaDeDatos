@@ -17,7 +17,7 @@ export {
   layoutsForAllBreakpoints,
   readingOrder,
   rowSpanForBreakpoint,
-  seSolapan,
+  overlapItself,
   validateLayout,
   type Breakpoint,
   type GridPosition,
@@ -31,7 +31,7 @@ export {
   type ViewProvenance,
 } from './personalization';
 export {
-  PATRONES_DE_INTERACCION,
+  INTERACTION_PATTERNS,
   bookmarkToUrl,
   captureBookmark,
   drillThroughUrl,
@@ -42,11 +42,11 @@ export {
 } from './interaction';
 
 export {
-  TIPO_DESCONOCIDO,
+  UNKNOWN_KIND,
   findPublishBlockers,
-  normalizarColumna,
+  columnNormalize,
   validateModule,
-  type ColumnaDisponible,
+  type AvailableColumn,
   type DatasetInfo,
   type ItemDiagnostic,
   type ModuleDiagnostics,

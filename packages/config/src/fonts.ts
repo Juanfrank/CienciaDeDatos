@@ -1,20 +1,20 @@
 import {
-  CLAVE_CONECTOR,
-  banderaDeModulo,
+  CONNECTOR_KEY,
+  moduleFlag,
   type SettingsFont,
-  type InstantaneaDeConfiguracion,
-} from './instantanea';
+  type SettingsSnapshot,
+} from './snapshot';
 
 /* ── Entorno: desarrollo, pruebas y el arranque sin Azure ─────────────────────────────────── */
 
 /** La configuracion que sale de variables de entorno. */
-export class ConfiguracionDeEntorno implements SettingsFont {
+export class EnvironmentSettings implements SettingsFont {
   readonly nombre = 'entorno';
 
   constructor(private readonly entorno: NodeJS.ProcessEnv = process.env) {}
 
-  async leer(): Promise<InstantaneaDeConfiguracion> {
-    const apagados = (this.entorno['MODULOS_APAGADOS'] ?? '')
+  async leer(): Promise<SettingsSnapshot> {
+    const disabled = (this.entorno['MODULOS_APAGADOS'] ?? '')
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
@@ -22,8 +22,8 @@ export class ConfiguracionDeEntorno implements SettingsFont {
     const conector = this.entorno['DATA_CONNECTOR'];
 
     return {
-      banderas: Object.fromEntries(apagados.map((slug) => [banderaDeModulo(slug), false])),
-      valores: conector ? { [CLAVE_CONECTOR]: conector } : {},
+      banderas: Object.fromEntries(disabled.map((slug) => [moduleFlag(slug), false])),
+      valores: conector ? { [CONNECTOR_KEY]: conector } : {},
       leidaEn: new Date().toISOString(),
     };
   }
@@ -32,19 +32,19 @@ export class ConfiguracionDeEntorno implements SettingsFont {
 /* ── Azure App Configuration ──────────────────────────────────────────────────────────────── */
 
 /** Como App Configuration guarda una bandera: una clave con prefijo y un JSON con `enabled`. */
-const PREFIJO_BANDERA = '.appconfig.featureflag/';
+const FLAG_PREFIX = '.appconfig.featureflag/';
 
-interface ParDeClaveValor {
+interface ValueKeyPair {
   key: string;
   value?: string;
   content_type?: string;
 }
 
-export interface OpcionesDeAppConfiguration {
+export interface ConfigurationAppOptions {
   /** `https://<tienda>.azconfig.io`, el mismo que el Bicep pasa como APP_CONFIG_ENDPOINT. */
   endpoint: string;
   /** Devuelve un token de acceso para el plano de datos. */
-  obtenerToken: () => Promise<string>;
+  tokenGet: () => Promise<string>;
   /** Etiqueta de App Configuration, si se separan entornos por etiqueta. */
   etiqueta?: string;
   search?: typeof fetch;
@@ -54,10 +54,10 @@ export interface OpcionesDeAppConfiguration {
 export class AppConfiguration implements SettingsFont {
   readonly nombre = 'app-configuration';
 
-  constructor(private readonly opciones: OpcionesDeAppConfiguration) {}
+  constructor(private readonly opciones: ConfigurationAppOptions) {}
 
-  async leer(): Promise<InstantaneaDeConfiguracion> {
-    const token = await this.opciones.obtenerToken();
+  async leer(): Promise<SettingsSnapshot> {
+    const token = await this.opciones.tokenGet();
     const search = this.opciones.search ?? fetch;
     const banderas: Record<string, boolean> = {};
     const valores: Record<string, string> = {};
@@ -77,14 +77,14 @@ export class AppConfiguration implements SettingsFont {
       if (!respuesta.ok) {
         throw new Error(`App Configuration respondio ${respuesta.status} ${respuesta.statusText}`);
       }
-      const body = (await respuesta.json()) as { items?: ParDeClaveValor[]; '@nextLink'?: string };
+      const body = (await respuesta.json()) as { items?: ValueKeyPair[]; '@nextLink'?: string };
 
-      for (const par of body.items ?? []) {
-        if (par.key.startsWith(PREFIJO_BANDERA)) {
-          const nombre = par.key.slice(PREFIJO_BANDERA.length);
-          banderas[nombre] = leerBandera(par.value);
-        } else if (par.value !== undefined) {
-          valores[par.key] = par.value;
+      for (const pair of body.items ?? []) {
+        if (pair.key.startsWith(FLAG_PREFIX)) {
+          const nombre = pair.key.slice(FLAG_PREFIX.length);
+          banderas[nombre] = readFlag(pair.value);
+        } else if (pair.value !== undefined) {
+          valores[pair.key] = pair.value;
         }
       }
 
@@ -96,7 +96,7 @@ export class AppConfiguration implements SettingsFont {
 }
 
 /** `enabled` de una bandera. */
-function leerBandera(valor: string | undefined): boolean {
+function readFlag(valor: string | undefined): boolean {
   if (!valor) return true;
   try {
     const parseada = JSON.parse(valor) as { enabled?: unknown };

@@ -1,6 +1,6 @@
 'use client';
 
-import { GRID_COLUMNS, seSolapan, type GridItem, type GridPosition } from '@app/module-model';
+import { GRID_COLUMNS, overlapItself, type GridItem, type GridPosition } from '@app/module-model';
 import { useCallback, useRef, useState } from 'react';
 
 /** Arrastrar para mover y para redimensionar, sobre la rejilla del editor. */
@@ -122,7 +122,7 @@ export function useDrag({
       }
 
       const valido = !items.some(
-        (i) => i.id !== o.itemId && seSolapan(i.position, destino),
+        (i) => i.id !== o.itemId && overlapItself(i.position, destino),
       );
       return { itemId: o.itemId, mode: o.mode, destino, valido };
     },

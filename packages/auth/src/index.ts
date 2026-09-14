@@ -42,7 +42,7 @@ export {
   type LoginAuditEvent,
 } from './stores';
 export {
-  CorreoInstitucionalNoDisponible,
+  InstitutionalMailNotAvailable,
   DEFAULT_RESET_TTL_MS,
   PasswordResetError,
   PasswordResetService,

@@ -137,7 +137,7 @@ export function DataTable({
 }) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [abierto, setAbierto] = useState(false);
-  const [seleccion, setSeleccion] = useState<Record<string, string> | null>(null);
+  const [selection, setSeleccion] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
     const el = dialogo.current;
@@ -160,10 +160,10 @@ export function DataTable({
   // Con alcance de objeto se muestran las filas de ORIGEN, sin agregar: lo interesante del
   // emergente es precisamente lo que el objeto no ensena. Con alcance de subobjeto, lo mismo
   // pero acotado a la categoria elegida.
-  const dataRows = seleccion ? breakdownOf(result, seleccion) : result;
+  const dataRows = selection ? breakdownOf(result, selection) : result;
   const projection = projectObject(instance, result, aggregations);
 
-  const etiquetaSeleccion = seleccion ? Object.values(seleccion).join(' / ') : null;
+  const etiquetaSeleccion = selection ? Object.values(selection).join(' / ') : null;
 
   return (
     <>
@@ -193,7 +193,7 @@ export function DataTable({
           </button>
         </div>
 
-        {scope === 'subobjeto' && !seleccion ? (
+        {scope === 'subobjeto' && !selection ? (
           <>
             <p className="muted-text">
               Elija una categoria para ver las dataRows que hay detras de su cifra.

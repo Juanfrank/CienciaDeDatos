@@ -1,15 +1,15 @@
 import type { ICacheStore } from '@app/caching';
 import {
-  INSTANTANEA_VACIA,
+  EMPTY_SNAPSHOT,
   type SettingsFont,
-  type InstantaneaDeConfiguracion,
-} from './instantanea';
+  type SettingsSnapshot,
+} from './snapshot';
 
 /** Sirve la instantanea vigente, con refresco y con memoria. */
 
-export const CLAVE_ULTIMA_INSTANTANEA = 'config:ultima-instantanea';
+export const LAST_KEY_SNAPSHOT = 'config:ultima-instantanea';
 
-export interface OpcionesDelResolutor {
+export interface ResolverOptions {
   source: SettingsFont;
   /** Donde recordar la ultima foto buena. Sin el, la memoria dura lo que el proceso. */
   memoria?: ICacheStore;
@@ -20,20 +20,20 @@ export interface OpcionesDelResolutor {
   alFallar?: (error: unknown) => void;
 }
 
-export class ResolutorDeConfiguracion {
-  private vigente: InstantaneaDeConfiguracion | null = null;
+export class SettingsResolver {
+  private vigente: SettingsSnapshot | null = null;
   private leidaEnMs = 0;
   /** Una lectura en vuelo se comparte: diez peticiones a la vez no hacen diez viajes. */
-  private enVuelo: Promise<InstantaneaDeConfiguracion> | null = null;
+  private enVuelo: Promise<SettingsSnapshot> | null = null;
   private readonly ttlMs: number;
   private readonly ahora: () => number;
 
-  constructor(private readonly opciones: OpcionesDelResolutor) {
+  constructor(private readonly opciones: ResolverOptions) {
     this.ttlMs = opciones.ttlMs ?? 30_000;
     this.ahora = opciones.ahora ?? Date.now;
   }
 
-  async instantanea(): Promise<InstantaneaDeConfiguracion> {
+  async snapshot(): Promise<SettingsSnapshot> {
     if (this.vigente && this.ahora() - this.leidaEnMs < this.ttlMs) return this.vigente;
     this.enVuelo ??= this.refrescar().finally(() => {
       this.enVuelo = null;
@@ -41,7 +41,7 @@ export class ResolutorDeConfiguracion {
     return this.enVuelo;
   }
 
-  private async refrescar(): Promise<InstantaneaDeConfiguracion> {
+  private async refrescar(): Promise<SettingsSnapshot> {
     try {
       const leida = await this.opciones.source.leer();
       this.vigente = leida;
@@ -49,7 +49,7 @@ export class ResolutorDeConfiguracion {
       // Se guarda DESPUES de servirla, y un fallo al guardar no tumba la lectura: la memoria es
       // una red de seguridad, no parte del camino.
       void this.opciones.memoria
-        ?.set(CLAVE_ULTIMA_INSTANTANEA, { value: leida, generatedAt: leida.leidaEn })
+        ?.set(LAST_KEY_SNAPSHOT, { value: leida, generatedAt: leida.leidaEn })
         .catch(() => undefined);
       return leida;
     } catch (error) {
@@ -58,7 +58,7 @@ export class ResolutorDeConfiguracion {
       if (this.vigente) return this.vigente;
 
       const guardada = await this.opciones.memoria
-        ?.get<InstantaneaDeConfiguracion>(CLAVE_ULTIMA_INSTANTANEA)
+        ?.get<SettingsSnapshot>(LAST_KEY_SNAPSHOT)
         .catch(() => null);
       if (guardada?.value) {
         this.vigente = guardada.value;
@@ -67,7 +67,7 @@ export class ResolutorDeConfiguracion {
         return guardada.value;
       }
 
-      return INSTANTANEA_VACIA;
+      return EMPTY_SNAPSHOT;
     }
   }
 

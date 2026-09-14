@@ -409,7 +409,7 @@ export async function podarPorEstado(nodos: NavNode[], actor: ActorDeModulo): Pr
   /*
    * Los apagados se leen UNA VEZ para todo el arbol.
    */
-  const apagados = new Set(await slugsApagados());
+  const disabled = new Set(await slugsApagados());
 
   const podar = (lista: NavNode[]): NavNode[] =>
     lista.flatMap((node): NavNode[] => {
@@ -419,7 +419,7 @@ export async function podarPorEstado(nodos: NavNode[], actor: ActorDeModulo): Pr
         // que aun no existe, y de eso ya avisa `dangling` al Administrador con su propio
         // mensaje. Ocultarlo aqui haria desaparecer el sintoma sin arreglar la causa.
         if (!definicion) return [node];
-        if (apagados.has(definicion.slug)) return [];
+        if (disabled.has(definicion.slug)) return [];
         return puedeVer(definicion, actor) ? [node] : [];
       }
 

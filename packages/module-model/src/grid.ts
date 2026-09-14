@@ -36,7 +36,7 @@ const ocupa = (p: GridPosition): { x1: number; x2: number; y1: number; y2: numbe
 });
 
 /** Si dos posiciones se pisan. */
-export const seSolapan = (a: GridPosition, b: GridPosition): boolean => {
+export const overlapItself = (a: GridPosition, b: GridPosition): boolean => {
   const ra = ocupa(a);
   const rb = ocupa(b);
   return ra.x1 < rb.x2 && rb.x1 < ra.x2 && ra.y1 < rb.y2 && rb.y1 < ra.y2;
@@ -80,7 +80,7 @@ export function validateLayout(items: { id: string; position: GridPosition }[]):
       const a = items[i];
       const b = items[j];
       if (!a || !b) continue;
-      if (seSolapan(a.position, b.position)) {
+      if (overlapItself(a.position, b.position)) {
         problems.push({
           kind: 'solapamiento',
           itemIds: [a.id, b.id],
@@ -168,7 +168,7 @@ export function findFreeSlot(
   for (let y = 0; y <= maxY; y++) {
     for (let x = 0; x + ancho <= GRID_COLUMNS; x++) {
       const candidata: GridPosition = { x, y, w: ancho, h: alto };
-      if (!items.some((i) => seSolapan(i.position, candidata))) return candidata;
+      if (!items.some((i) => overlapItself(i.position, candidata))) return candidata;
     }
   }
   return { x: 0, y: maxY, w: ancho, h: alto };

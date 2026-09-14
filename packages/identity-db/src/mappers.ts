@@ -76,8 +76,8 @@ export function buildNavTree(rows: NavNodeRow[], scopes: ScopeLookup): NavNode[]
 
   for (const row of vigentes) {
     // Si el padre declarado no esta vigente, el nodo es huerfano: se descarta del arbol.
-    const padreVigente = row.parentId === null || id.has(row.parentId);
-    if (!padreVigente) continue;
+    const currentParent = row.parentId === null || id.has(row.parentId);
+    if (!currentParent) continue;
     const clave = row.parentId;
     const lista = hijosDe.get(clave) ?? [];
     lista.push(row);

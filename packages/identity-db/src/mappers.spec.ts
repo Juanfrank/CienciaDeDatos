@@ -96,19 +96,19 @@ describe('buildNavTree — reconstruccion desde lista de adyacencia', () => {
   });
 
   it('excluye del arbol vigente lo que esta en papelera (4.1)', () => {
-    const conPapelera = dataRows.map((f) =>
+    const withTrash = dataRows.map((f) =>
       f.id === 'm-casos' ? { ...f, deletedAt: new Date('2026-09-01') } : f,
     );
-    const arbol = buildNavTree(conPapelera, scale);
+    const arbol = buildNavTree(withTrash, scale);
     expect(JSON.stringify(arbol)).not.toContain('m-casos');
   });
 
   it('un nodo cuyo ancestro esta en papelera NO se cuelga de la raiz', () => {
     // Colgarlo en la raiz lo sacaria de una carpeta restrictiva y ampliaria su ambito.
-    const conPapelera = dataRows.map((f) =>
+    const withTrash = dataRows.map((f) =>
       f.id === 'norte' ? { ...f, deletedAt: new Date('2026-09-01') } : f,
     );
-    const arbol = buildNavTree(conPapelera, scale);
+    const arbol = buildNavTree(withTrash, scale);
     expect(JSON.stringify(arbol)).not.toContain('m-casos');
   });
 

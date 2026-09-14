@@ -12,7 +12,7 @@ El obstaculo es que la via que el contrato nombra —correo verificado— necesi
 
 ## Decision
 
-**Se separa el flujo del transporte.** El flujo entero se implementa: token de 24 bytes aleatorios, guardado **hasheado** con Argon2id y pimienta, de un solo uso, con quince minutos de vida, que al canjearse aplica la politica de contrasenas, impide reutilizar las ultimas cinco, **desbloquea la cuenta** y **revoca las sesiones abiertas**. El transporte es un puerto, `IResetChannel`, con una sola implementacion: `CorreoInstitucionalNoDisponible`, que devuelve `false`.
+**Se separa el flujo del transporte.** El flujo entero se implementa: token de 24 bytes aleatorios, guardado **hasheado** con Argon2id y pimienta, de un solo uso, con quince minutos de vida, que al canjearse aplica la politica de contrasenas, impide reutilizar las ultimas cinco, **desbloquea la cuenta** y **revoca las sesiones abiertas**. El transporte es un puerto, `IResetChannel`, con una sola implementacion: `InstitutionalMailNotAvailable`, que devuelve `false`.
 
 **Se anaden DOS vias de recuperacion, no una**, porque resuelven problemas distintos:
 

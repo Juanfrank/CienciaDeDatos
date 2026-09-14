@@ -1,7 +1,7 @@
 /** Lleva el estado de los modulos a Azure App Configuration — seccion 3.4. */
 import { readFileSync } from 'node:fs';
 import { DefaultAzureCredential } from '@azure/identity';
-import { banderaDeModulo } from '@app/config';
+import { moduleFlag } from '@app/config';
 import type { ModuleHealth } from '@app/module-model';
 
 interface Informe {
@@ -28,7 +28,7 @@ const cabeceras = {
 let cambiadas = 0;
 
 for (const modulo of informe.modules) {
-  const label = banderaDeModulo(modulo.slug);
+  const label = moduleFlag(modulo.slug);
   const cacheKey = encodeURIComponent(`.appconfig.featureflag/${label}`);
   const url = `${base}/kv/${cacheKey}?api-version=2023-11-01`;
   const debeEstarEncendido = modulo.health !== 'fallo';

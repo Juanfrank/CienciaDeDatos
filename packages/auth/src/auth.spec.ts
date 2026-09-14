@@ -16,13 +16,13 @@ import {
 } from './stores';
 
 const PEPPER = 'pepper-de-key-vault-solo-para-pruebas';
-const CLAVE_BUENA = 'Tribunal#2026$Norte';
+const GOOD_KEY = 'Tribunal#2026$Norte';
 
 /**
  * Directorio institucional unico: resuelve roles y ambito por el identificador normalizado,
  * sin saber por que puerta entro la persona. Es la pieza que impide el acceso divergente.
  */
-class DirectorioDePrueba implements IPrincipalDirectory {
+class TestDirectory implements IPrincipalDirectory {
   private readonly entradas = new Map<string, DirectoryEntry>();
   lookups: string[] = [];
 
@@ -35,7 +35,7 @@ class DirectorioDePrueba implements IPrincipalDirectory {
   }
 }
 
-const entradaDirectorio: DirectoryEntry = {
+const directoryEntry: DirectoryEntry = {
   userId: 'u-ana',
   displayName: 'Ana Rodriguez',
   roles: ['colaborador'],
@@ -44,16 +44,16 @@ const entradaDirectorio: DirectoryEntry = {
 
 describe('LocalIdentityProvider (4.7.2)', () => {
   let store: InMemoryLocalIdentityStore;
-  let directory: DirectorioDePrueba;
+  let directory: TestDirectory;
   let auditLog: InMemoryAuditLog;
   let ahora: number;
   let provider: LocalIdentityProvider;
 
-  const crearCuenta = async (overrides: Partial<LocalCredentialRecord> = {}) => {
+  const createAccount = async (overrides: Partial<LocalCredentialRecord> = {}) => {
     const record: LocalCredentialRecord = {
       userId: 'u-ana',
       email: 'ana@externo.org',
-      passwordHash: await provider.hashPassword(CLAVE_BUENA),
+      passwordHash: await provider.hashPassword(GOOD_KEY),
       passwordHistory: [],
       failedAttempts: 0,
       emailVerified: true,
@@ -65,8 +65,8 @@ describe('LocalIdentityProvider (4.7.2)', () => {
 
   beforeEach(() => {
     store = new InMemoryLocalIdentityStore();
-    directory = new DirectorioDePrueba();
-    directory.add('ana@externo.org', entradaDirectorio);
+    directory = new TestDirectory();
+    directory.add('ana@externo.org', directoryEntry);
     auditLog = new InMemoryAuditLog();
     ahora = Date.UTC(2026, 8, 11, 8, 0, 0);
     provider = new LocalIdentityProvider({
@@ -86,20 +86,20 @@ describe('LocalIdentityProvider (4.7.2)', () => {
     });
 
     it('nunca guarda la contrasena en claro ni de forma reversible', async () => {
-      const record = await crearCuenta();
+      const record = await createAccount();
       expect(record.passwordHash).toMatch(/^\$argon2id\$/);
-      expect(record.passwordHash).not.toContain(CLAVE_BUENA);
-      expect(JSON.stringify(record)).not.toContain(CLAVE_BUENA);
+      expect(record.passwordHash).not.toContain(GOOD_KEY);
+      expect(JSON.stringify(record)).not.toContain(GOOD_KEY);
     });
 
     it('el mismo texto produce hashes distintos: hay sal unica por usuario', async () => {
-      const a = await provider.hashPassword(CLAVE_BUENA);
-      const b = await provider.hashPassword(CLAVE_BUENA);
+      const a = await provider.hashPassword(GOOD_KEY);
+      const b = await provider.hashPassword(GOOD_KEY);
       expect(a).not.toBe(b);
     });
 
     it('el pepper es necesario para verificar: un volcado de la base no basta', async () => {
-      const hash = await provider.hashPassword(CLAVE_BUENA);
+      const hash = await provider.hashPassword(GOOD_KEY);
       const sinPepper = new LocalIdentityProvider({
         store,
         directory,
@@ -116,7 +116,7 @@ describe('LocalIdentityProvider (4.7.2)', () => {
         emailVerified: true,
       });
       await expect(
-        sinPepper.authenticate({ email: 'ana@externo.org', password: CLAVE_BUENA }),
+        sinPepper.authenticate({ email: 'ana@externo.org', password: GOOD_KEY }),
       ).rejects.toThrow(AuthenticationError);
     });
   });
@@ -129,18 +129,18 @@ describe('LocalIdentityProvider (4.7.2)', () => {
     });
 
     it('acepta una contraseña que cumple', async () => {
-      expect((await provider.validateNewPassword(CLAVE_BUENA)).ok).toBe(true);
+      expect((await provider.validateNewPassword(GOOD_KEY)).ok).toBe(true);
     });
 
     it('impide reutilizar una de las ultimas N contraseñas', async () => {
-      const record = await crearCuenta();
-      const r = await provider.validateNewPassword(CLAVE_BUENA, record);
+      const record = await createAccount();
+      const r = await provider.validateNewPassword(GOOD_KEY, record);
       expect(r.ok).toBe(false);
       expect(r.violations.map((v) => v.rule)).toContain('historyReuse');
     });
 
     it('al cambiar la contraseña desplaza el historial y desbloquea la cuenta', async () => {
-      const record = await crearCuenta({ failedAttempts: 4, lockedUntil: ahora + 1000 });
+      const record = await createAccount({ failedAttempts: 4, lockedUntil: ahora + 1000 });
       const updated = await provider.setPassword(record, 'Audiencia#2027$Este');
       expect(updated.passwordHistory).toContain(record.passwordHash);
       expect(updated.failedAttempts).toBe(0);
@@ -150,19 +150,19 @@ describe('LocalIdentityProvider (4.7.2)', () => {
 
   describe('bloqueo con backoff progresivo', () => {
     it('bloquea la cuenta tras los intentos configurados', async () => {
-      await crearCuenta();
+      await createAccount();
       for (let i = 0; i < 5; i++) {
         await expect(
           provider.authenticate({ email: 'ana@externo.org', password: 'incorrecta' }),
         ).rejects.toThrow(AuthenticationError);
       }
       await expect(
-        provider.authenticate({ email: 'ana@externo.org', password: CLAVE_BUENA }),
+        provider.authenticate({ email: 'ana@externo.org', password: GOOD_KEY }),
       ).rejects.toMatchObject({ reason: 'cuenta-bloqueada' });
     });
 
     it('el bloqueo expira: siempre hay via de recuperacion, nunca es indefinido', async () => {
-      await crearCuenta();
+      await createAccount();
       for (let i = 0; i < 5; i++) {
         await provider
           .authenticate({ email: 'ana@externo.org', password: 'incorrecta' })
@@ -171,17 +171,17 @@ describe('LocalIdentityProvider (4.7.2)', () => {
       ahora += 31 * 60 * 1000;
       const principal = await provider.authenticate({
         email: 'ana@externo.org',
-        password: CLAVE_BUENA,
+        password: GOOD_KEY,
       });
       expect(principal.userId).toBe('u-ana');
     });
 
     it('un login correcto reinicia el contador de fallos', async () => {
-      await crearCuenta();
+      await createAccount();
       await provider
         .authenticate({ email: 'ana@externo.org', password: 'incorrecta' })
         .catch(() => undefined);
-      await provider.authenticate({ email: 'ana@externo.org', password: CLAVE_BUENA });
+      await provider.authenticate({ email: 'ana@externo.org', password: GOOD_KEY });
       const record = await store.findByEmail('ana@externo.org');
       expect(record?.failedAttempts).toBe(0);
     });
@@ -189,24 +189,24 @@ describe('LocalIdentityProvider (4.7.2)', () => {
 
   describe('TOTP obligatorio (compensa la ausencia de acceso condicional)', () => {
     const secreto = new Secret({ size: 20 }).base32;
-    const codigoValido = (t: number) =>
+    const validCode = (t: number) =>
       new TOTP({ secret: secreto, algorithm: 'SHA1', digits: 6, period: 30 }).generate({
         timestamp: t,
       });
 
     it('exige el segundo factor si la cuenta lo tiene configurado', async () => {
-      await crearCuenta({ totpSecret: secreto });
+      await createAccount({ totpSecret: secreto });
       await expect(
-        provider.authenticate({ email: 'ana@externo.org', password: CLAVE_BUENA }),
+        provider.authenticate({ email: 'ana@externo.org', password: GOOD_KEY }),
       ).rejects.toMatchObject({ reason: 'mfa-requerido' });
     });
 
     it('rechaza un codigo invalido y lo cuenta como intento fallido', async () => {
-      await crearCuenta({ totpSecret: secreto });
+      await createAccount({ totpSecret: secreto });
       await expect(
         provider.authenticate({
           email: 'ana@externo.org',
-          password: CLAVE_BUENA,
+          password: GOOD_KEY,
           totpCode: '000000',
         }),
       ).rejects.toMatchObject({ reason: 'mfa-invalido' });
@@ -214,11 +214,11 @@ describe('LocalIdentityProvider (4.7.2)', () => {
     });
 
     it('acepta un codigo valido', async () => {
-      await crearCuenta({ totpSecret: secreto });
+      await createAccount({ totpSecret: secreto });
       const principal = await provider.authenticate({
         email: 'ana@externo.org',
-        password: CLAVE_BUENA,
-        totpCode: codigoValido(ahora),
+        password: GOOD_KEY,
+        totpCode: validCode(ahora),
       });
       expect(principal.authProvider).toBe('local');
     });
@@ -226,13 +226,13 @@ describe('LocalIdentityProvider (4.7.2)', () => {
 
   describe('auditoria de acceso (seccion 7)', () => {
     it('registra exito y fallo con marca de tiempo, IP y resultado', async () => {
-      await crearCuenta();
+      await createAccount();
       await provider
         .authenticate({ email: 'ana@externo.org', password: 'mala', sourceIp: '10.0.0.5' })
         .catch(() => undefined);
       await provider.authenticate({
         email: 'ana@externo.org',
-        password: CLAVE_BUENA,
+        password: GOOD_KEY,
         sourceIp: '10.0.0.5',
       });
 
@@ -264,8 +264,8 @@ describe('AzureAdIdentityProvider (4.7.1)', () => {
   };
 
   const build = () => {
-    const directory = new DirectorioDePrueba();
-    directory.add('ana@institucion.gob', entradaDirectorio);
+    const directory = new TestDirectory();
+    directory.add('ana@institucion.gob', directoryEntry);
     const auditLog = new InMemoryAuditLog();
     return {
       directory,
@@ -305,7 +305,7 @@ describe('AzureAdIdentityProvider (4.7.1)', () => {
   });
 
   it('rechaza una identidad sin roles ni ambito en el directorio', async () => {
-    const directory = new DirectorioDePrueba();
+    const directory = new TestDirectory();
     const auditLog = new InMemoryAuditLog();
     const provider = new AzureAdIdentityProvider({ tokenValidator: validador, directory, auditLog });
     await expect(provider.authenticate({ token: 'token-valido' })).rejects.toMatchObject({
@@ -316,9 +316,9 @@ describe('AzureAdIdentityProvider (4.7.1)', () => {
 
 describe('normalizacion de identidad: los dos caminos convergen (4.7.3)', () => {
   it('ambos proveedores producen un principal con la MISMA forma', async () => {
-    const directory = new DirectorioDePrueba();
-    directory.add('ana@institucion.gob', entradaDirectorio);
-    directory.add('ana@externo.org', entradaDirectorio);
+    const directory = new TestDirectory();
+    directory.add('ana@institucion.gob', directoryEntry);
+    directory.add('ana@externo.org', directoryEntry);
     const auditLog = new InMemoryAuditLog();
 
     const local = new LocalIdentityProvider({
@@ -331,12 +331,12 @@ describe('normalizacion de identidad: los dos caminos convergen (4.7.3)', () => 
     await store.save({
       userId: 'u-ana',
       email: 'ana@externo.org',
-      passwordHash: await local.hashPassword(CLAVE_BUENA),
+      passwordHash: await local.hashPassword(GOOD_KEY),
       passwordHistory: [],
       failedAttempts: 0,
       emailVerified: true,
     });
-    const localConCuenta = new LocalIdentityProvider({ store, directory, auditLog, pepper: PEPPER });
+    const accountLocal = new LocalIdentityProvider({ store, directory, auditLog, pepper: PEPPER });
 
     const porAzure = await new AzureAdIdentityProvider({
       tokenValidator: {
@@ -348,9 +348,9 @@ describe('normalizacion de identidad: los dos caminos convergen (4.7.3)', () => 
       auditLog,
     }).authenticate({ token: 't' });
 
-    const porLocal = await localConCuenta.authenticate({
+    const porLocal = await accountLocal.authenticate({
       email: 'ana@externo.org',
-      password: CLAVE_BUENA,
+      password: GOOD_KEY,
     });
 
     // Misma forma exacta: ningun consumidor aguas abajo necesita ramificar.
@@ -364,8 +364,8 @@ describe('normalizacion de identidad: los dos caminos convergen (4.7.3)', () => 
   });
 
   it('ambos proveedores resuelven roles contra el MISMO directorio institucional', async () => {
-    const directory = new DirectorioDePrueba();
-    directory.add('ana@institucion.gob', entradaDirectorio);
+    const directory = new TestDirectory();
+    directory.add('ana@institucion.gob', directoryEntry);
     const auditLog = new InMemoryAuditLog();
     await new AzureAdIdentityProvider({
       tokenValidator: {

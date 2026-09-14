@@ -2,25 +2,25 @@ import { InMemoryCacheStore } from '@app/caching';
 import { describe, expect, it, vi } from 'vitest';
 import {
   AppConfiguration,
-  CLAVE_CONECTOR,
-  CLAVE_ULTIMA_INSTANTANEA,
-  ConfiguracionDeEntorno,
-  ResolutorDeConfiguracion,
-  banderaDeModulo,
-  moduloHabilitado,
-  modulosApagados,
+  CONNECTOR_KEY,
+  LAST_KEY_SNAPSHOT,
+  EnvironmentSettings,
+  SettingsResolver,
+  moduleFlag,
+  enabledModule,
+  disabledModules,
   type SettingsFont,
-  type InstantaneaDeConfiguracion,
+  type SettingsSnapshot,
 } from './index';
 
-const foto = (banderas: Record<string, boolean>, valores: Record<string, string> = {}): InstantaneaDeConfiguracion => ({
+const foto = (banderas: Record<string, boolean>, valores: Record<string, string> = {}): SettingsSnapshot => ({
   banderas,
   valores,
   leidaEn: '2026-09-13T00:00:00.000Z',
 });
 
 const sourceWhere = (
-  respuestas: (() => Promise<InstantaneaDeConfiguracion>)[],
+  respuestas: (() => Promise<SettingsSnapshot>)[],
 ): SettingsFont => {
   let i = 0;
   return {
@@ -37,17 +37,17 @@ describe('que cuenta como encendido', () => {
   it('una bandera ausente deja el modulo ENCENDIDO', () => {
     // Al reves, cada modulo nuevo naceria invisible hasta que alguien le creara su bandera en
     // Azure, y el sintoma seria «lo publique y no aparece».
-    expect(moduloHabilitado(foto({}), 'casos-pendientes')).toBe(true);
+    expect(enabledModule(foto({}), 'casos-pendientes')).toBe(true);
   });
 
   it('solo un false explicito lo apaga', () => {
-    expect(moduloHabilitado(foto({ [banderaDeModulo('x')]: false }), 'x')).toBe(false);
-    expect(moduloHabilitado(foto({ [banderaDeModulo('x')]: true }), 'x')).toBe(true);
+    expect(enabledModule(foto({ [moduleFlag('x')]: false }), 'x')).toBe(false);
+    expect(enabledModule(foto({ [moduleFlag('x')]: true }), 'x')).toBe(true);
   });
 
   it('sabe DECIR cuales estan apagados, no solo actuar', () => {
     const f = foto({ 'modulo.b': false, 'modulo.a': false, 'modulo.c': true, otra: false });
-    expect(modulosApagados(f)).toEqual(['a', 'b']);
+    expect(disabledModules(f)).toEqual(['a', 'b']);
   });
 });
 
@@ -55,25 +55,25 @@ describe('resolutor: refresco', () => {
   it('sirve de la cache mientras el TTL no vence, y vuelve a la fuente cuando vence', async () => {
     let ahora = 0;
     const leer = vi.fn(async () => foto({}));
-    const r = new ResolutorDeConfiguracion({
+    const r = new SettingsResolver({
       source: { nombre: 'p', leer },
       ttlMs: 30_000,
       ahora: () => ahora,
     });
 
-    await r.instantanea();
-    await r.instantanea();
+    await r.snapshot();
+    await r.snapshot();
     expect(leer).toHaveBeenCalledTimes(1);
 
     ahora = 30_001;
-    await r.instantanea();
+    await r.snapshot();
     expect(leer).toHaveBeenCalledTimes(2);
   });
 
   it('diez lecturas a la vez hacen UN viaje, no diez', async () => {
     const leer = vi.fn(async () => foto({}));
-    const r = new ResolutorDeConfiguracion({ source: { nombre: 'p', leer } });
-    await Promise.all(Array.from({ length: 10 }, () => r.instantanea()));
+    const r = new SettingsResolver({ source: { nombre: 'p', leer } });
+    await Promise.all(Array.from({ length: 10 }, () => r.snapshot()));
     expect(leer).toHaveBeenCalledTimes(1);
   });
 });
@@ -81,49 +81,49 @@ describe('resolutor: refresco', () => {
 describe('resolutor: degradacion', () => {
   it('ante un fallo sirve la ULTIMA foto buena, no una vacia', async () => {
     let ahora = 0;
-    const apagado = foto({ [banderaDeModulo('malo')]: false });
-    const r = new ResolutorDeConfiguracion({
+    const apagado = foto({ [moduleFlag('malo')]: false });
+    const r = new SettingsResolver({
       source: sourceWhere([async () => apagado, async () => Promise.reject(new Error('502'))]),
       ttlMs: 1_000,
       ahora: () => ahora,
     });
 
-    expect(moduloHabilitado(await r.instantanea(), 'malo')).toBe(false);
+    expect(enabledModule(await r.snapshot(), 'malo')).toBe(false);
 
     ahora = 2_000;
     // Lo que NO puede pasar: que un modulo apagado a proposito se reencienda porque el servicio
     // de banderas dejo de responder.
-    expect(moduloHabilitado(await r.instantanea(), 'malo')).toBe(false);
+    expect(enabledModule(await r.snapshot(), 'malo')).toBe(false);
   });
 
   it('tras reiniciar durante la caida, recupera la foto guardada', async () => {
     const memoria = new InMemoryCacheStore({ ttlMs: 60_000 });
-    const apagado = foto({ [banderaDeModulo('malo')]: false });
+    const apagado = foto({ [moduleFlag('malo')]: false });
 
-    const before = new ResolutorDeConfiguracion({ source: sourceWhere([async () => apagado]), memoria });
-    await before.instantanea();
+    const before = new SettingsResolver({ source: sourceWhere([async () => apagado]), memoria });
+    await before.snapshot();
     // Se guarda fuera del camino de lectura; se espera un tick para que la escritura cuaje.
     await new Promise((r) => setTimeout(r, 0));
-    expect((await memoria.get(CLAVE_ULTIMA_INSTANTANEA))?.value).toBeDefined();
+    expect((await memoria.get(LAST_KEY_SNAPSHOT))?.value).toBeDefined();
 
     // Proceso nuevo, mismo almacen compartido, y la fuente sigue caida. Sin memoria persistida
     // esta instancia reencenderia lo apagado — y un reinicio es justo lo que pasa en una caida.
-    const after = new ResolutorDeConfiguracion({
+    const after = new SettingsResolver({
       source: sourceWhere([async () => Promise.reject(new Error('caida'))]),
       memoria,
     });
-    expect(moduloHabilitado(await after.instantanea(), 'malo')).toBe(false);
+    expect(enabledModule(await after.snapshot(), 'malo')).toBe(false);
   });
 
   it('sin ninguna foto, ni fresca ni guardada, SE ABRE', async () => {
     const alFallar = vi.fn();
-    const r = new ResolutorDeConfiguracion({
+    const r = new SettingsResolver({
       source: sourceWhere([async () => Promise.reject(new Error('primer arranque'))]),
       alFallar,
     });
     // El estado por defecto de un modulo es encendido. Dejar el portal en blanco porque el
     // servicio de banderas no contesta convertiria una dependencia auxiliar en punto unico de fallo.
-    expect(moduloHabilitado(await r.instantanea(), 'cualquiera')).toBe(true);
+    expect(enabledModule(await r.snapshot(), 'cualquiera')).toBe(true);
     // Pero se registra: un fallo silencioso es como se descubre tarde.
     expect(alFallar).toHaveBeenCalled();
   });
@@ -131,22 +131,22 @@ describe('resolutor: degradacion', () => {
   it('un fallo al guardar la memoria no tumba la lectura', async () => {
     const memoria = new InMemoryCacheStore({ ttlMs: 1_000 });
     vi.spyOn(memoria, 'set').mockRejectedValue(new Error('disco lleno'));
-    const r = new ResolutorDeConfiguracion({ source: sourceWhere([async () => foto({})]), memoria });
-    await expect(r.instantanea()).resolves.toBeDefined();
+    const r = new SettingsResolver({ source: sourceWhere([async () => foto({})]), memoria });
+    await expect(r.snapshot()).resolves.toBeDefined();
   });
 });
 
 describe('fuente de entorno', () => {
   it('traduce MODULOS_APAGADOS y DATA_CONNECTOR', async () => {
-    const f = await new ConfiguracionDeEntorno({
+    const f = await new EnvironmentSettings({
       MODULOS_APAGADOS: 'uno, dos ,',
       DATA_CONNECTOR: 'sql',
     } as NodeJS.ProcessEnv).leer();
 
-    expect(moduloHabilitado(f, 'uno')).toBe(false);
-    expect(moduloHabilitado(f, 'dos')).toBe(false);
-    expect(moduloHabilitado(f, 'tres')).toBe(true);
-    expect(f.valores[CLAVE_CONECTOR]).toBe('sql');
+    expect(enabledModule(f, 'uno')).toBe(false);
+    expect(enabledModule(f, 'dos')).toBe(false);
+    expect(enabledModule(f, 'tres')).toBe(true);
+    expect(f.valores[CONNECTOR_KEY]).toBe('sql');
   });
 });
 
@@ -169,12 +169,12 @@ describe('fuente de App Configuration', () => {
 
     const f = await new AppConfiguration({
       endpoint: 'https://t.azconfig.io',
-      obtenerToken: async () => 'tok',
+      tokenGet: async () => 'tok',
       search: search as unknown as typeof fetch,
     }).leer();
 
-    expect(moduloHabilitado(f, 'casos-pendientes')).toBe(false);
-    expect(f.valores[CLAVE_CONECTOR]).toBe('xmla');
+    expect(enabledModule(f, 'casos-pendientes')).toBe(false);
+    expect(f.valores[CONNECTOR_KEY]).toBe('xmla');
   });
 
   it('sigue la paginacion', async () => {
@@ -191,13 +191,13 @@ describe('fuente de App Configuration', () => {
 
     const f = await new AppConfiguration({
       endpoint: 'https://t.azconfig.io',
-      obtenerToken: async () => 'tok',
+      tokenGet: async () => 'tok',
       search: search as unknown as typeof fetch,
     }).leer();
 
     // Quedarse en la primera pagina dejaria banderas fuera, y «ausente» significa encendido: un
     // modulo apagado volveria a servirse solo porque la tienda crecio.
-    expect(modulosApagados(f)).toEqual(['a', 'b']);
+    expect(disabledModules(f)).toEqual(['a', 'b']);
     expect(search).toHaveBeenCalledTimes(2);
   });
 
@@ -206,7 +206,7 @@ describe('fuente de App Configuration', () => {
     await expect(
       new AppConfiguration({
         endpoint: 'https://t.azconfig.io',
-        obtenerToken: async () => 'tok',
+        tokenGet: async () => 'tok',
         search: search as unknown as typeof fetch,
       }).leer(),
     ).rejects.toThrow('403');
@@ -218,10 +218,10 @@ describe('fuente de App Configuration', () => {
     );
     const f = await new AppConfiguration({
       endpoint: 'https://t.azconfig.io',
-      obtenerToken: async () => 'tok',
+      tokenGet: async () => 'tok',
       search: search as unknown as typeof fetch,
     }).leer();
     // Apagar por no saber leer un valor convertiria un error de formato en una caida de modulo.
-    expect(moduloHabilitado(f, 'x')).toBe(true);
+    expect(enabledModule(f, 'x')).toBe(true);
   });
 });

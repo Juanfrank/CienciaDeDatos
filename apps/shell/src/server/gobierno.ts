@@ -75,7 +75,7 @@ const clonar = <T>(valor: T): T => JSON.parse(JSON.stringify(valor)) as T;
 
 /** Adaptador sobre el almacen compartido. */
 export class StoreGovernanceRepository implements GovernanceStore {
-  private async instantanea(): Promise<InstantaneaDeGobierno> {
+  private async snapshot(): Promise<InstantaneaDeGobierno> {
     const guardada = await leer<InstantaneaDeGobierno>(CLAVE_GOBIERNO);
     // Sin nada guardado todavia se devuelve el estado sembrado SIN persistirlo. Escribir al
     // leer metia una escritura en el camino de lectura —el mas concurrido— y, con varias
@@ -84,19 +84,19 @@ export class StoreGovernanceRepository implements GovernanceStore {
     return guardada ?? initialStatus();
   }
 
-  private async guardar(cambio: (actual: InstantaneaDeGobierno) => InstantaneaDeGobierno): Promise<void> {
-    await escribir(CLAVE_GOBIERNO, cambio(await this.instantanea()));
+  private async guardar(change: (actual: InstantaneaDeGobierno) => InstantaneaDeGobierno): Promise<void> {
+    await escribir(CLAVE_GOBIERNO, change(await this.snapshot()));
   }
 
   async getTree(): Promise<ManagedTree> {
-    return (await this.instantanea()).tree;
+    return (await this.snapshot()).tree;
   }
   async setTree(tree: ManagedTree): Promise<void> {
     await this.guardar((actual) => ({ ...actual, tree: clonar(tree) }));
   }
 
   async listTeams(): Promise<Team[]> {
-    return (await this.instantanea()).teams;
+    return (await this.snapshot()).teams;
   }
   async getTeam(teamId: string): Promise<Team | undefined> {
     return (await this.listTeams()).find((t) => t.id === teamId);
@@ -119,7 +119,7 @@ export class StoreGovernanceRepository implements GovernanceStore {
   }
 
   async listPackages(): Promise<ModulePackage[]> {
-    return (await this.instantanea()).packages;
+    return (await this.snapshot()).packages;
   }
   async getPackage(packageId: string): Promise<ModulePackage | undefined> {
     return (await this.listPackages()).find((p) => p.id === packageId);
@@ -150,7 +150,7 @@ export class StoreGovernanceRepository implements GovernanceStore {
   }
 
   async listUsers(): Promise<GovernedUser[]> {
-    return (await this.instantanea()).users;
+    return (await this.snapshot()).users;
   }
   async getUser(userId: string): Promise<GovernedUser | undefined> {
     return (await this.listUsers()).find((u) => u.userId === userId);

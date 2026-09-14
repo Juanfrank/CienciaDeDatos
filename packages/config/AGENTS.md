@@ -5,8 +5,8 @@ Resuelve la configuracion efectiva desde varias fuentes, con precedencia declara
 | Archivo | Que es |
 |---|---|
 | `fonts.ts` | Entorno, App Configuration e instantanea |
-| `Resolutor.ts` | La precedencia y el valor efectivo |
-| `instantanea.ts` | Copia congelada, para que dos instancias no discrepen |
+| `Resolver.ts` | La precedencia y el valor efectivo |
+| `snapshot.ts` | Copia congelada, para que dos instancias no discrepen |
 
 ## Reglas
 

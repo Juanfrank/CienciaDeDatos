@@ -18,7 +18,7 @@ export interface InteractionPatternSpec {
   securityNote: string;
 }
 
-export const PATRONES_DE_INTERACCION: InteractionPatternSpec[] = [
+export const INTERACTION_PATTERNS: InteractionPatternSpec[] = [
   {
     id: 'segmentador',
     name: 'Segmentador',
@@ -151,19 +151,19 @@ export interface DrillThroughTarget {
 /** Construye la URL de destino de un drill-through desde el estado actual. */
 export function drillThroughUrl(
   target: DrillThroughTarget,
-  filtrosActuales: Record<string, string[]>,
-  seleccion?: { fieldName: string; valor: string },
+  currentFilters: Record<string, string[]>,
+  selection?: { fieldName: string; valor: string },
 ): string {
   const filters: Record<string, string[]> = {};
 
-  for (const [fieldName, valores] of Object.entries(filtrosActuales)) {
+  for (const [fieldName, valores] of Object.entries(currentFilters)) {
     if (target.carryDimensions && !target.carryDimensions.includes(fieldName)) continue;
     if (valores.length > 0) filters[fieldName] = valores;
   }
 
   // La seleccion que origino el drill-through sustituye a lo que hubiera para esa dimension:
   // el gesto fue "ver el detalle de ESTE valor".
-  if (seleccion) filters[seleccion.fieldName] = [seleccion.valor];
+  if (selection) filters[selection.fieldName] = [selection.valor];
 
   return bookmarkToUrl({
     moduleSlug: target.moduleSlug,

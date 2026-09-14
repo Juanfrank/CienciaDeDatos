@@ -1,7 +1,7 @@
 import { Algorithm, hash } from '@node-rs/argon2';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
-  CorreoInstitucionalNoDisponible,
+  InstitutionalMailNotAvailable,
   PasswordResetError,
   PasswordResetService,
   type IResetStore,
@@ -15,7 +15,7 @@ const PIMIENTA = 'pimienta-de-prueba';
 const PREVIOUS_KEY = 'Anterior-2026!';
 const NEW_KEY = 'Nueva-Clave-2026!';
 
-class AlmacenDeRestablecimientos implements IResetStore {
+class ResetsStore implements IResetStore {
   readonly registros = new Map<string, ResetRecord>();
 
   async save(record: ResetRecord): Promise<void> {
@@ -29,7 +29,7 @@ class AlmacenDeRestablecimientos implements IResetStore {
   }
 }
 
-let almacen: AlmacenDeRestablecimientos;
+let almacen: ResetsStore;
 let identidades: InMemoryLocalIdentityStore;
 let audit: InMemoryAuditLog;
 let revocadas: string[];
@@ -37,7 +37,7 @@ let ahora: number;
 let servicio: PasswordResetService;
 
 beforeEach(async () => {
-  almacen = new AlmacenDeRestablecimientos();
+  almacen = new ResetsStore();
   identidades = new InMemoryLocalIdentityStore();
   audit = new InMemoryAuditLog();
   revocadas = [];
@@ -251,7 +251,7 @@ describe('auditoria (seccion 7)', () => {
 
 describe('el canal de correo se declara y no se finge', () => {
   it('dice que no entrego, en vez de devolver exito', async () => {
-    const canal = new CorreoInstitucionalNoDisponible();
+    const canal = new InstitutionalMailNotAvailable();
     expect(await canal.deliver()).toBe(false);
     // Y su nombre lo dice, para que quien opera no crea que salio un correo.
     expect(canal.name).toContain('no configurado');

@@ -9,7 +9,7 @@ import type {
 } from '@app/ui-components';
 import { fieldKey } from '@app/ui-components';
 import { objectRegistry } from './context';
-import { agregacionesDeclaradas, columnasDisponiblesDe } from './data';
+import { declaredAggregations, columnasDisponiblesDe } from './data';
 
 /** Paleta del editor de modulos — seccion 4.2. */
 
@@ -80,7 +80,7 @@ export async function editorPalette(): Promise<EditorPalette> {
   });
 
   const datasets: PaletteDataset[] = [];
-  const declared = await agregacionesDeclaradas();
+  const declared = await declaredAggregations();
   for (const declarado of defaultRegistry.datasets) {
     /*
      * Un MAPA de nombre a tipo, no un conjunto de nombres.
@@ -97,7 +97,7 @@ export async function editorPalette(): Promise<EditorPalette> {
       aggregations: Object.fromEntries(
         (declarado.query.measures ?? [])
           .map((m) => [m, declared.get(m)] as const)
-          .filter((par): par is [string, Aggregation] => par[1] !== undefined),
+          .filter((pair): pair is [string, Aggregation] => pair[1] !== undefined),
       ),
       grain: declarado.grain,
     });

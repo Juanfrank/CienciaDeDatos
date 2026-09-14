@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { evaluarRegla, type AlertRule } from '@app/alerts';
+import { evaluateRule, type AlertRule } from '@app/alerts';
 import { observacionesDe } from './alerts';
 
 /** La decision de seguridad de toda la funcion, probada donde se toma. */
@@ -78,8 +78,8 @@ describe('una regla que ya no se puede evaluar se distingue de una que no dispar
 
   it('una lista vacia SI significa "no hay nada que cumpla", y eso resuelve la alerta', () => {
     // La distincion entre null y [] es lo que mantiene honesto el mensaje de "ya no se cumple".
-    const evaluacion = evaluarRegla(colorRule({}), [], new Date());
-    expect(evaluacion.triggered).toBe(false);
+    const evaluation = evaluateRule(colorRule({}), [], new Date());
+    expect(evaluation.triggered).toBe(false);
   });
 });
 

@@ -50,7 +50,7 @@ export function SidebarPanel({
   seleccionado: GridItem | null;
   saving: boolean;
   onAnadir: (objectId: string) => void;
-  onCambiar: (itemId: string, cambio: (item: GridItem) => GridItem) => void;
+  onCambiar: (itemId: string, change: (item: GridItem) => GridItem) => void;
   onQuitar: (itemId: string) => void;
 }) {
   const t = useTranslator();
@@ -161,8 +161,8 @@ export function SidebarPanel({
             <EditorObjectSettings
               instance={seleccionado.instance}
               saving={saving}
-              onCambiar={(cambio) =>
-                onCambiar(seleccionado.id, (i) => ({ ...i, instance: cambio(i.instance) }))
+              onCambiar={(change) =>
+                onCambiar(seleccionado.id, (i) => ({ ...i, instance: change(i.instance) }))
               }
             />
 
@@ -171,8 +171,8 @@ export function SidebarPanel({
               admitidas={definicion?.presentacion ?? []}
               kinds={dataset?.kinds ?? {}}
               saving={saving}
-              onCambiar={(cambio) =>
-                onCambiar(seleccionado.id, (i) => ({ ...i, instance: cambio(i.instance) }))
+              onCambiar={(change) =>
+                onCambiar(seleccionado.id, (i) => ({ ...i, instance: change(i.instance) }))
               }
             />
 
@@ -452,12 +452,12 @@ function Data({
   definicion: PaletteObject | undefined;
   datasets: PaletteDataset[];
   saving: boolean;
-  onCambiar: (itemId: string, cambio: (item: GridItem) => GridItem) => void;
+  onCambiar: (itemId: string, change: (item: GridItem) => GridItem) => void;
   onQuitar: (itemId: string) => void;
 }) {
   const dataset = datasets.find((d) => d.datasetId === item.instance.binding.datasetId);
-  const cambiarInstancia = (cambio: (i: ObjectInstance) => ObjectInstance) =>
-    onCambiar(item.id, (it) => ({ ...it, instance: cambio(it.instance) }));
+  const cambiarInstancia = (change: (i: ObjectInstance) => ObjectInstance) =>
+    onCambiar(item.id, (it) => ({ ...it, instance: change(it.instance) }));
 
   const declared = definicion?.wells ?? [];
   const slots =
@@ -673,7 +673,7 @@ function Addons({
   item: GridItem;
   objetos: PaletteObject[];
   saving: boolean;
-  onCambiar: (itemId: string, cambio: (item: GridItem) => GridItem) => void;
+  onCambiar: (itemId: string, change: (item: GridItem) => GridItem) => void;
 }) {
   const adjuntables = objetos.filter((o) => o.attachable);
   const puestos = item.instance.attachments ?? [];
@@ -827,7 +827,7 @@ function Size({
 }: {
   item: GridItem;
   saving: boolean;
-  onCambiar: (itemId: string, cambio: (item: GridItem) => GridItem) => void;
+  onCambiar: (itemId: string, change: (item: GridItem) => GridItem) => void;
 }) {
   const mover = (dx: number, dw: number) =>
     onCambiar(item.id, (it) => {

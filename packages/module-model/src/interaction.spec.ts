@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  PATRONES_DE_INTERACCION,
+  INTERACTION_PATTERNS,
   bookmarkToUrl,
   captureBookmark,
   drillThroughUrl,
@@ -9,7 +9,7 @@ import {
 
 describe('catalogo de patrones de interaccion (4.4)', () => {
   it('declara los cuatro patrones soportados, de forma explicita y no arbitraria', () => {
-    expect(PATRONES_DE_INTERACCION.map((p) => p.id).sort()).toEqual([
+    expect(INTERACTION_PATTERNS.map((p) => p.id).sort()).toEqual([
       'drill-through',
       'filtrado-cruzado',
       'marcador',
@@ -19,19 +19,19 @@ describe('catalogo de patrones de interaccion (4.4)', () => {
 
   it('los cuatro representan su estado en la URL, no en estado de componente', () => {
     // Es lo que hace que compartir, marcar y recargar salgan gratis (4.11).
-    for (const patron of PATRONES_DE_INTERACCION) {
-      expect(patron.stateRepresentation).toBe('query-string');
+    for (const pattern of INTERACTION_PATTERNS) {
+      expect(pattern.stateRepresentation).toBe('query-string');
     }
   });
 
   it('cada patron documenta que impide que amplie el acceso', () => {
-    for (const patron of PATRONES_DE_INTERACCION) {
-      expect(patron.securityNote.trim().length).toBeGreaterThan(0);
+    for (const pattern of INTERACTION_PATTERNS) {
+      expect(pattern.securityNote.trim().length).toBeGreaterThan(0);
     }
   });
 
   it('los ajustes incrementales usan replaceState y la navegacion pushState', () => {
-    const id = new Map(PATRONES_DE_INTERACCION.map((p) => [p.id, p]));
+    const id = new Map(INTERACTION_PATTERNS.map((p) => [p.id, p]));
     expect(id.get('segmentador')?.historyBehavior).toBe('replaceState');
     expect(id.get('filtrado-cruzado')?.historyBehavior).toBe('replaceState');
     expect(id.get('drill-through')?.historyBehavior).toBe('pushState');
@@ -94,13 +94,13 @@ describe('marcadores: una URL con nombre, nada mas (4.4)', () => {
 });
 
 describe('drill-through (4.4)', () => {
-  const filtrosActuales = {
+  const currentFilters = {
     'DimTribunal.Distrito': ['Distrito Norte'],
     'DimTribunal.Materia': ['Penal'],
   };
 
   it('lleva el contexto de filtros al modulo destino', () => {
-    const url = drillThroughUrl({ moduleSlug: 'audiencias' }, filtrosActuales);
+    const url = drillThroughUrl({ moduleSlug: 'audiencias' }, currentFilters);
     expect(url).toContain('/m/audiencias?');
     expect(url).toContain('DimTribunal.Materia=Penal');
   });
@@ -109,7 +109,7 @@ describe('drill-through (4.4)', () => {
     // Llevarlo todo suele arrastrar filtros sin sentido en el destino.
     const url = drillThroughUrl(
       { moduleSlug: 'audiencias', carryDimensions: ['DimTribunal.Materia'] },
-      filtrosActuales,
+      currentFilters,
     );
     expect(url).toContain('DimTribunal.Materia=Penal');
     expect(url).not.toContain('Distrito');
@@ -117,7 +117,7 @@ describe('drill-through (4.4)', () => {
 
   it('la seleccion que origino el gesto sustituye el filtro de esa dimension', () => {
     // El gesto fue "ver el detalle de ESTE valor", no "anadir otro valor mas".
-    const url = drillThroughUrl({ moduleSlug: 'audiencias' }, filtrosActuales, {
+    const url = drillThroughUrl({ moduleSlug: 'audiencias' }, currentFilters, {
       fieldName: 'DimTribunal.Materia',
       valor: 'Civil',
     });
@@ -129,7 +129,7 @@ describe('drill-through (4.4)', () => {
     // Que la interseccion con el ambito de quien LLEGA ocurra de verdad se prueba donde ambos
     // paquetes componen: apps/shell/src/server/marcadores.spec.ts y las pruebas de navegador.
     // Aqui solo se fija que el contexto sale en la URL y no en un canal aparte.
-    const url = drillThroughUrl({ moduleSlug: 'audiencias' }, filtrosActuales);
+    const url = drillThroughUrl({ moduleSlug: 'audiencias' }, currentFilters);
     const params = new URLSearchParams(url.split('?')[1] ?? '');
     expect(params.getAll('DimTribunal.Distrito')).toEqual(['Distrito Norte']);
   });

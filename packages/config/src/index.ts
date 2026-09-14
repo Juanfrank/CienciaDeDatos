@@ -1,15 +1,15 @@
 export {
-  CLAVE_CONECTOR,
-  INSTANTANEA_VACIA,
-  banderaDeModulo,
-  moduloHabilitado,
-  modulosApagados,
+  CONNECTOR_KEY,
+  EMPTY_SNAPSHOT,
+  moduleFlag,
+  enabledModule,
+  disabledModules,
   type SettingsFont,
-  type InstantaneaDeConfiguracion,
-} from './instantanea';
+  type SettingsSnapshot,
+} from './snapshot';
 export {
-  CLAVE_ULTIMA_INSTANTANEA,
-  ResolutorDeConfiguracion,
-  type OpcionesDelResolutor,
-} from './Resolutor';
-export { AppConfiguration, ConfiguracionDeEntorno } from './fonts';
+  LAST_KEY_SNAPSHOT,
+  SettingsResolver,
+  type ResolverOptions,
+} from './Resolver';
+export { AppConfiguration, EnvironmentSettings } from './fonts';

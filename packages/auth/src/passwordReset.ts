@@ -193,11 +193,11 @@ export class PasswordResetService {
       }
     }
 
-    const nuevoHash = await hash(`${input.newPassword}${this.options.pepper}`, ARGON2);
+    const newHash = await hash(`${input.newPassword}${this.options.pepper}`, ARGON2);
     const { lockedUntil: _bloqueo, ...sinBloqueo } = cuenta;
     await this.options.identities.save({
       ...sinBloqueo,
-      passwordHash: nuevoHash,
+      passwordHash: newHash,
       passwordHistory: [cuenta.passwordHash, ...cuenta.passwordHistory].slice(
         0,
         this.policy.historySize,
@@ -235,7 +235,7 @@ export class PasswordResetService {
 }
 
 /** Canal de correo: DECLARADO, no disponible. */
-export class CorreoInstitucionalNoDisponible implements IResetChannel {
+export class InstitutionalMailNotAvailable implements IResetChannel {
   readonly name = 'correo institucional (no configurado en este entorno)';
   async deliver(): Promise<boolean> {
     return false;

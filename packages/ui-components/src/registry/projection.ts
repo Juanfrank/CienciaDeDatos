@@ -133,9 +133,9 @@ export function projectObject(
  */
 export function breakdownOf(
   result: QueryResult,
-  seleccion: Record<string, string>,
+  selection: Record<string, string>,
 ): QueryResult {
-  const activos = Object.entries(seleccion)
+  const activos = Object.entries(selection)
     .map(([clave, valor]) => ({ index: result.columns.findIndex((c) => c.name === clave), valor }))
     // Una dimension que el dataset ya no expone no puede evaluarse fila a fila. Se ignora, y el
     // desglose queda MAS amplio, nunca mas estrecho: nada se oculta por un cambio de esquema.

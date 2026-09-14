@@ -13,7 +13,7 @@ export const runtime = 'nodejs';
 
 /** Transiciones del ciclo de vida — seccion 4.1. */
 const TRANSICIONES = ['enviar', 'publicar', 'devolver'] as const;
-type Transicion = (typeof TRANSICIONES)[number];
+type Transition = (typeof TRANSICIONES)[number];
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const sesion = await obtenerSesion();
@@ -32,7 +32,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   }
 
   const transicion = body['transicion'];
-  if (typeof transicion !== 'string' || !TRANSICIONES.includes(transicion as Transicion)) {
+  if (typeof transicion !== 'string' || !TRANSICIONES.includes(transicion as Transition)) {
     return NextResponse.json(
       { error: `Transicion no admitida. Use una de: ${TRANSICIONES.join(', ')}.` },
       { status: 400 },

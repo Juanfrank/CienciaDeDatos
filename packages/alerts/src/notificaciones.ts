@@ -1,5 +1,5 @@
 import type { CacheEntry, ICacheStore } from '@app/caching';
-import { claveBandeja, type Notification } from './types';
+import { inboxKey, type Notification } from './types';
 
 /** Canal de notificacion. */
 
@@ -11,7 +11,7 @@ export interface INotificationChannel {
 }
 
 /** Cuantas notificaciones se conservan por persona. Una bandeja infinita no la lee nadie. */
-export const MAXIMO_POR_BANDEJA = 50;
+export const INBOX_MAX = 50;
 
 export class InboxNotificationChannel implements INotificationChannel {
   constructor(private readonly store: ICacheStore) {}
@@ -22,12 +22,12 @@ export class InboxNotificationChannel implements INotificationChannel {
 
   async send(notification: Notification): Promise<void> {
     const actuales = await this.list(notification.recipientUserId);
-    const siguientes = [notification, ...actuales].slice(0, MAXIMO_POR_BANDEJA);
-    await this.store.set(claveBandeja(notification.recipientUserId), this.entrada(siguientes));
+    const siguientes = [notification, ...actuales].slice(0, INBOX_MAX);
+    await this.store.set(inboxKey(notification.recipientUserId), this.entrada(siguientes));
   }
 
   async list(userId: string): Promise<Notification[]> {
-    const entry = await this.store.get<Notification[]>(claveBandeja(userId));
+    const entry = await this.store.get<Notification[]>(inboxKey(userId));
     return entry?.value ?? [];
   }
 
@@ -38,7 +38,7 @@ export class InboxNotificationChannel implements INotificationChannel {
     const siguientes = actuales.map((n) =>
       marcar.has(n.id) && !n.readAt ? { ...n, readAt: ahora } : n,
     );
-    await this.store.set(claveBandeja(userId), this.entrada(siguientes));
+    await this.store.set(inboxKey(userId), this.entrada(siguientes));
   }
 }
 

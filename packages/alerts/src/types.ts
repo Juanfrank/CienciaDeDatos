@@ -91,9 +91,9 @@ export interface Notification {
 }
 
 export const KEY_RULES = 'alerts:rules';
-export const CLAVE_ESTADOS = 'alerts:states';
-export const CLAVE_SUSCRIPCIONES = 'alerts:subscriptions';
-export const claveBandeja = (userId: string): string => `alerts:inbox:${userId}`;
+export const STATES_KEY = 'alerts:states';
+export const SUBSCRIPTIONS_KEY = 'alerts:subscriptions';
+export const inboxKey = (userId: string): string => `alerts:inbox:${userId}`;
 
 /** Marca del ultimo latido ya procesado, para no reevaluar el mismo ciclo de poblacion. */
-export const CLAVE_ULTIMO_LATIDO = 'alerts:last-heartbeat';
+export const LAST_KEY_HEARTBEAT = 'alerts:last-heartbeat';

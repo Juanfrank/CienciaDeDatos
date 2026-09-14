@@ -424,7 +424,7 @@ export function validatePresentation(
       });
     }
     if (formato.tipo === 'personalizado') {
-      const issue = formato.patron === undefined ? 'falta la cadena.' : problemaDelPatron(formato.patron);
+      const issue = formato.pattern === undefined ? 'falta la cadena.' : problemaDelPatron(formato.pattern);
       if (issue) {
         problems.push({
           clave: `formatos.${nombre}.patron`,

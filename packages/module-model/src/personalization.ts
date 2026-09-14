@@ -33,12 +33,12 @@ export function applyPersonalization(
       }),
   }));
 
-  const cambio =
+  const change =
     personalization.hiddenItemIds.length > 0 ||
     Object.keys(personalization.positionOverrides).length > 0 ||
     Object.keys(personalization.columnOrder ?? {}).length > 0;
 
-  return { module: { ...module, pages }, isPersonalized: cambio };
+  return { module: { ...module, pages }, isPersonalized: change };
 }
 
 /** Comprueba que una personalizacion no intenta alterar la logica de calculo. */

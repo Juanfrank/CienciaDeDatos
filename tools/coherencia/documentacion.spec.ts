@@ -24,8 +24,8 @@ import { segmentarJsx } from '../rename/segmentos.mjs';
  */
 
 const raiz = execSync('git rev-parse --show-toplevel').toString().trim();
-const listar = (patron: string) =>
-  execSync(`git -C ${raiz} ls-files ${patron}`).toString().trim().split('\n').filter(Boolean);
+const listar = (pattern: string) =>
+  execSync(`git -C ${raiz} ls-files ${pattern}`).toString().trim().split('\n').filter(Boolean);
 
 const versionados = new Set(listar(''));
 const nombres = new Set([...versionados].map((f) => f.split('/').pop() as string));

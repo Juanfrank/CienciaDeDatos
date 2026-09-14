@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { measureFormat, numberFormatter, problemaDelPatron } from './number';
 
 const f = (formato: Parameters<typeof numberFormatter>[0]) => numberFormatter(formato);
-const p = (patron: string) => numberFormatter({ tipo: 'personalizado', patron });
+const p = (pattern: string) => numberFormatter({ tipo: 'personalizado', pattern });
 
 /*
  * Los separadores son los de `es-DO` —coma para millares, punto para decimales— y se comprueban

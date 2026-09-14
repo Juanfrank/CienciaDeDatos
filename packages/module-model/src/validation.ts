@@ -41,15 +41,15 @@ export interface ModuleDiagnostics {
 }
 
 /** Una columna disponible: su nombre Y SU TIPO. */
-export interface ColumnaDisponible {
+export interface AvailableColumn {
   name: string;
   type: string;
 }
 
-export const TIPO_DESCONOCIDO = 'desconocido';
+export const UNKNOWN_KIND = 'desconocido';
 
-export const normalizarColumna = (c: ColumnaDisponible | string): ColumnaDisponible =>
-  typeof c === 'string' ? { name: c, type: TIPO_DESCONOCIDO } : c;
+export const columnNormalize = (c: AvailableColumn | string): AvailableColumn =>
+  typeof c === 'string' ? { name: c, type: UNKNOWN_KIND } : c;
 
 /** Lo que hay que saber de un dataset, ademas de sus columnas, para validar la agregacion. */
 export interface DatasetInfo {
@@ -65,11 +65,11 @@ export interface ValidateModuleInput {
    * Columnas disponibles por dataset, tal como el job de poblacion las dejo en el cache.
    * Se pasan como dato y no se consultan aqui: la validacion es una funcion pura.
    */
-  columnsByDataset: Record<string, (ColumnaDisponible | string)[]>;
+  columnsByDataset: Record<string, (AvailableColumn | string)[]>;
   /** Grano y dimensiones de cada dataset, del registro. */
   datasets?: Record<string, DatasetInfo>;
   /** Que operador declara el esquema para cada medida. Sin el, cada medida cae en `suma`. */
-  agregacionesDeclaradas?: Record<string, Aggregation>;
+  declaredAggregations?: Record<string, Aggregation>;
 }
 
 function aggregationProblems(
@@ -79,7 +79,7 @@ function aggregationProblems(
   const info = input.datasets?.[instance.binding.datasetId];
   if (!info) return [];
 
-  const declared = new Map(Object.entries(input.agregacionesDeclaradas ?? {}));
+  const declared = new Map(Object.entries(input.declaredAggregations ?? {}));
   const aggregations = aggregationsOf(
     instance.binding.measures,
     declared,
@@ -157,8 +157,8 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         continue;
       }
 
-      const columnasCrudas = columnsByDataset[instance.binding.datasetId];
-      if (!columnasCrudas) {
+      const rawColumns = columnsByDataset[instance.binding.datasetId];
+      if (!rawColumns) {
         diagnostico.bindingProblems.push({
           slot: instance.binding.datasetId,
           kind: 'campo-inexistente',
@@ -170,7 +170,7 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         items.push(diagnostico);
         continue;
       }
-      const gridColumns = columnasCrudas.map(normalizarColumna);
+      const gridColumns = rawColumns.map(columnNormalize);
       const fieldKinds = Object.fromEntries(gridColumns.map((c) => [c.name, c.type]));
 
       diagnostico.bindingProblems = [

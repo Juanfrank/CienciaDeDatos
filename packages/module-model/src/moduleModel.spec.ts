@@ -126,9 +126,9 @@ describe('responsividad: una sola disposicion guardada', () => {
 
   it('ningun objeto se sale de la rejilla estrecha', () => {
     for (const bp of ['movil', 'tableta', 'escritorio'] as const) {
-      const columnasBp = bp === 'movil' ? 1 : bp === 'tableta' ? 6 : GRID_COLUMNS;
+      const bpColumns = bp === 'movil' ? 1 : bp === 'tableta' ? 6 : GRID_COLUMNS;
       for (const i of layoutForBreakpoint(items, bp)) {
-        expect(i.position.x + i.position.w).toBeLessThanOrEqual(columnasBp);
+        expect(i.position.x + i.position.w).toBeLessThanOrEqual(bpColumns);
       }
     }
   });

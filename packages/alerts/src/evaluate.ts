@@ -10,7 +10,7 @@ import type {
 
 const formatear = (n: number): string => new Intl.NumberFormat('es-DO').format(Math.round(n));
 
-export function evaluarRegla(
+export function evaluateRule(
   rule: AlertRule,
   observaciones: Observacion[],
   ahora: Date,
@@ -44,7 +44,7 @@ export function evaluarRegla(
   };
 }
 
-export interface Transicion {
+export interface Transition {
   /** Estado a guardar tras esta evaluacion. */
   estado: AlertState;
   /** La notificacion a enviar, si la hay. */
@@ -54,17 +54,17 @@ export interface Transicion {
 /** Decide si esta evaluacion merece aviso. */
 export function decidirNotificacion(
   rule: AlertRule,
-  evaluacion: AlertEvaluation,
+  evaluation: AlertEvaluation,
   estadoPrevio: AlertState | undefined,
   ahora: Date,
-): Transicion {
+): Transition {
   const before = estadoPrevio?.triggered ?? false;
-  const ahoraDispara = evaluacion.triggered;
+  const ahoraDispara = evaluation.triggered;
 
   const estado: AlertState = {
     ruleId: rule.id,
     triggered: ahoraDispara,
-    lastValue: evaluacion.total,
+    lastValue: evaluation.total,
     lastEvaluatedAt: ahora.toISOString(),
     ...(estadoPrevio?.lastNotifiedAt ? { lastNotifiedAt: estadoPrevio.lastNotifiedAt } : {}),
   };
@@ -79,41 +79,41 @@ export function decidirNotificacion(
       recipientUserId: rule.ownerUserId,
       kind: ahoraDispara ? 'alerta' : 'alerta-resuelta',
       subject: ahoraDispara ? `Alerta: ${rule.name}` : `Resuelta: ${rule.name}`,
-      body: mensajeDe(rule, evaluacion, ahoraDispara),
-      link: enlaceDe(rule),
+      body: messageOf(rule, evaluation, ahoraDispara),
+      link: linkOf(rule),
       createdAt: ahora.toISOString(),
     },
   };
 }
 
-export function mensajeDe(
+export function messageOf(
   rule: AlertRule,
-  evaluacion: AlertEvaluation,
+  evaluation: AlertEvaluation,
   dispara: boolean,
 ): string {
-  const condicion = describirCondicion(rule);
+  const condicion = conditionDescribe(rule);
 
   if (!dispara) {
-    return `${rule.measure} ya no cumple la condicion (${condicion}). Valor actual: ${formatear(evaluacion.total)}.`;
+    return `${rule.measure} ya no cumple la condicion (${condicion}). Valor actual: ${formatear(evaluation.total)}.`;
   }
 
   if (rule.condition.operator === 'cambia-mas-de') {
-    return `${rule.measure} cambio mas de ${formatear(rule.condition.threshold)}. Valor actual: ${formatear(evaluacion.total)}.`;
+    return `${rule.measure} cambio mas de ${formatear(rule.condition.threshold)}. Valor actual: ${formatear(evaluation.total)}.`;
   }
 
   // Se nombran las categorias que cumplen, no solo el total: "hay algo por encima del umbral"
   // obliga a abrir el modulo y buscarlo, y una alerta que no dice donde mirar vale poco.
-  const detalle = evaluacion.matches
+  const detalle = evaluation.matches
     .slice(0, 5)
     .map((m) => `${m.label}: ${formatear(m.value)}`)
     .join('; ');
   const resto =
-    evaluacion.matches.length > 5 ? ` y ${evaluacion.matches.length - 5} mas` : '';
+    evaluation.matches.length > 5 ? ` y ${evaluation.matches.length - 5} mas` : '';
 
   return `${rule.measure} ${condicion}. ${detalle}${resto}.`;
 }
 
-export function describirCondicion(rule: AlertRule): string {
+export function conditionDescribe(rule: AlertRule): string {
   const { operator, threshold } = rule.condition;
   const valor = formatear(threshold);
   if (operator === 'mayor-que') return `supera ${valor}`;
@@ -122,7 +122,7 @@ export function describirCondicion(rule: AlertRule): string {
 }
 
 /** Enlace al modulo vigilado, con los filtros de la regla: la URL es el estado (4.11). */
-export function enlaceDe(rule: Pick<AlertRule, 'moduleSlug' | 'pageSlug' | 'filters'>): string {
+export function linkOf(rule: Pick<AlertRule, 'moduleSlug' | 'pageSlug' | 'filters'>): string {
   const base = rule.pageSlug ? `/m/${rule.moduleSlug}/${rule.pageSlug}` : `/m/${rule.moduleSlug}`;
   const params = new URLSearchParams();
   for (const [fieldName, valores] of Object.entries(rule.filters)) {

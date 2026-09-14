@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import {
-  describirCadencia,
-  describirCondicion,
+  cadenceDescribe,
+  conditionDescribe,
   type AlertRule,
   type AlertState,
   type Notification,
@@ -104,7 +104,7 @@ export function Notices() {
                 <strong>{r.name}</strong>
                 <br />
                 <span className="notice__target">
-                  {r.measure} {describirCondicion(r)} · {r.moduleSlug}
+                  {r.measure} {conditionDescribe(r)} · {r.moduleSlug}
                   {r.estado?.triggered ? ' · disparada ahora mismo' : ''}
                 </span>
               </span>
@@ -134,7 +134,7 @@ export function Notices() {
                 <strong>{s.name}</strong>
                 <br />
                 <span className="notice__target">
-                  {describirCadencia(s)} · {s.format.toUpperCase()} · {s.moduleSlug}
+                  {cadenceDescribe(s)} · {s.format.toUpperCase()} · {s.moduleSlug}
                 </span>
               </span>
               <button

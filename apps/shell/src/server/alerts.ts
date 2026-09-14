@@ -1,9 +1,9 @@
 import {
   InboxNotificationChannel,
   StoreAlertRepository,
-  debeEntregarse,
+  deliverMust,
   decidirNotificacion,
-  evaluarRegla,
+  evaluateRule,
   type AlertRule,
   type Notification,
   type Observacion,
@@ -86,8 +86,8 @@ export async function evaluarAlertas(ahora = new Date()): Promise<ResultadoDeEva
     }
 
     const previo = await alertStore.getState(colorRule.id);
-    const evaluacion = evaluarRegla(colorRule, observaciones, ahora, previo);
-    const { estado, notificacion } = decidirNotificacion(colorRule, evaluacion, previo, ahora);
+    const evaluation = evaluateRule(colorRule, observaciones, ahora, previo);
+    const { estado, notificacion } = decidirNotificacion(colorRule, evaluation, previo, ahora);
 
     await alertStore.saveState(estado);
 
@@ -133,7 +133,7 @@ export async function atenderSuscripciones(ahora = new Date()): Promise<Resultad
       continue;
     }
 
-    if (!debeEntregarse(sub, ahora)) continue;
+    if (!deliverMust(sub, ahora)) continue;
 
     const job = await encolarExportacion({
       moduleSlug: sub.moduleSlug,

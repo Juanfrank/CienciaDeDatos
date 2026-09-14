@@ -1,9 +1,9 @@
 import type { CacheEntry, ICacheStore } from '@app/caching';
 import {
-  CLAVE_ESTADOS,
+  STATES_KEY,
   KEY_RULES,
-  CLAVE_SUSCRIPCIONES,
-  CLAVE_ULTIMO_LATIDO,
+  SUBSCRIPTIONS_KEY,
+  LAST_KEY_HEARTBEAT,
   type AlertRule,
   type AlertState,
   type Subscription,
@@ -47,8 +47,8 @@ export class StoreAlertRepository implements IAlertStore {
 
   async saveRule(rule: AlertRule): Promise<void> {
     const rules = await this.listRules();
-    const sinEsta = rules.filter((r) => r.id !== rule.id);
-    await this.store.set(KEY_RULES, entrada([...sinEsta, rule]));
+    const withoutThis = rules.filter((r) => r.id !== rule.id);
+    await this.store.set(KEY_RULES, entrada([...withoutThis, rule]));
   }
 
   /** Borrar exige el dueno, no solo el id. */
@@ -58,27 +58,27 @@ export class StoreAlertRepository implements IAlertStore {
     if (!objetivo || objetivo.ownerUserId !== ownerUserId) return false;
 
     await this.store.set(KEY_RULES, entrada(rules.filter((r) => r.id !== id)));
-    await this.store.delete(`${CLAVE_ESTADOS}:${id}`);
+    await this.store.delete(`${STATES_KEY}:${id}`);
     return true;
   }
 
   async getState(ruleId: string): Promise<AlertState | undefined> {
-    const entry = await this.store.get<AlertState>(`${CLAVE_ESTADOS}:${ruleId}`);
+    const entry = await this.store.get<AlertState>(`${STATES_KEY}:${ruleId}`);
     return entry?.value ?? undefined;
   }
 
   async saveState(state: AlertState): Promise<void> {
-    await this.store.set(`${CLAVE_ESTADOS}:${state.ruleId}`, entrada(state));
+    await this.store.set(`${STATES_KEY}:${state.ruleId}`, entrada(state));
   }
 
   async listSubscriptions(): Promise<Subscription[]> {
-    return this.leer<Subscription>(CLAVE_SUSCRIPCIONES);
+    return this.leer<Subscription>(SUBSCRIPTIONS_KEY);
   }
 
   async saveSubscription(sub: Subscription): Promise<void> {
     const subs = await this.listSubscriptions();
-    const sinEsta = subs.filter((s) => s.id !== sub.id);
-    await this.store.set(CLAVE_SUSCRIPCIONES, entrada([...sinEsta, sub]));
+    const withoutThis = subs.filter((s) => s.id !== sub.id);
+    await this.store.set(SUBSCRIPTIONS_KEY, entrada([...withoutThis, sub]));
   }
 
   async deleteSubscription(id: string, ownerUserId: string): Promise<boolean> {
@@ -86,16 +86,16 @@ export class StoreAlertRepository implements IAlertStore {
     const objetivo = subs.find((s) => s.id === id);
     if (!objetivo || objetivo.ownerUserId !== ownerUserId) return false;
 
-    await this.store.set(CLAVE_SUSCRIPCIONES, entrada(subs.filter((s) => s.id !== id)));
+    await this.store.set(SUBSCRIPTIONS_KEY, entrada(subs.filter((s) => s.id !== id)));
     return true;
   }
 
   async getLastHeartbeat(): Promise<string | undefined> {
-    const entry = await this.store.get<string>(CLAVE_ULTIMO_LATIDO);
+    const entry = await this.store.get<string>(LAST_KEY_HEARTBEAT);
     return entry?.value ?? undefined;
   }
 
   async setLastHeartbeat(finishedAt: string): Promise<void> {
-    await this.store.set(CLAVE_ULTIMO_LATIDO, entrada(finishedAt));
+    await this.store.set(LAST_KEY_HEARTBEAT, entrada(finishedAt));
   }
 }

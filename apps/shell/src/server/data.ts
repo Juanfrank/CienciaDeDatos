@@ -2,12 +2,12 @@ import type { Aggregation, DatasetGrain, QueryResult, SchemaDescriptor } from '@
 import { canTeamAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
 import { SCHEMA_CACHE_KEY, type ReadResult, getDataset } from '@app/caching';
 import {
-  type ColumnaDisponible,
+  type AvailableColumn,
   type DatasetInfo,
   type GridItem,
   type ModuleDefinition,
   type UserPersonalization,
-  TIPO_DESCONOCIDO,
+  UNKNOWN_KIND,
   applyPersonalization,
   datasetsConsumedBy,
   findPage,
@@ -87,7 +87,7 @@ async function readObjects(
   const objetos: ObjetoCargado[] = [];
   let masAntiguo: string | undefined;
   let degraded = false;
-  const declared = await agregacionesDeclaradas();
+  const declared = await declaredAggregations();
 
   for (const item of items) {
     const { instance } = item;
@@ -274,7 +274,7 @@ export async function diagnosticarModulo(module: ModuleDefinition, userId: strin
   const resolucion = await scopeFor(userId, teamId, module.moduleId);
   if (!resolucion) return null;
 
-  const columnsByDataset: Record<string, ColumnaDisponible[]> = {};
+  const columnsByDataset: Record<string, AvailableColumn[]> = {};
   const datasets = new Set(datasetsConsumedBy(module));
 
   for (const datasetId of datasets) {
@@ -289,13 +289,13 @@ export async function diagnosticarModulo(module: ModuleDefinition, userId: strin
     registry: objectRegistry,
     columnsByDataset,
     datasets: infoDeDatasets(datasets),
-    agregacionesDeclaradas: Object.fromEntries(await agregacionesDeclaradas()),
+    declaredAggregations: Object.fromEntries(await declaredAggregations()),
   });
 }
 
 /** Diagnosticos para el EDITOR, sin ambito de por medio. */
 export async function diagnosticarDefinicion(module: ModuleDefinition) {
-  const columnsByDataset: Record<string, ColumnaDisponible[]> = {};
+  const columnsByDataset: Record<string, AvailableColumn[]> = {};
 
   const datasets = new Set(datasetsConsumedBy(module));
 
@@ -308,14 +308,14 @@ export async function diagnosticarDefinicion(module: ModuleDefinition) {
     registry: objectRegistry,
     columnsByDataset,
     datasets: infoDeDatasets(datasets),
-    agregacionesDeclaradas: Object.fromEntries(await agregacionesDeclaradas()),
+    declaredAggregations: Object.fromEntries(await declaredAggregations()),
   });
 }
 
 /**
  * Columnas que un dataset ofrece HOY: lo que declara el registro y el esquema sigue reconociendo.
  */
-export async function columnasDisponiblesDe(datasetId: string): Promise<ColumnaDisponible[]> {
+export async function columnasDisponiblesDe(datasetId: string): Promise<AvailableColumn[]> {
   let declarado;
   try {
     declarado = getDataset(datasetId);
@@ -333,7 +333,7 @@ export async function columnasDisponiblesDe(datasetId: string): Promise<ColumnaD
   // Sin esquema en el cache no se conoce el tipo de nada. Se dice, en vez de suponer: una
   // validacion por tipo sobre un tipo inventado rechaza configuraciones correctas.
   if (!schema) {
-    return [...dimensiones, ...medidas].map((name) => ({ name, type: TIPO_DESCONOCIDO }));
+    return [...dimensiones, ...medidas].map((name) => ({ name, type: UNKNOWN_KIND }));
   }
 
   return [
@@ -390,7 +390,7 @@ function colapsaElDataset(datasetId: string, dimensiones: { table: string; field
 }
 
 /** Que operador declara el esquema para cada medida. */
-export async function agregacionesDeclaradas(): Promise<Map<string, Aggregation>> {
+export async function declaredAggregations(): Promise<Map<string, Aggregation>> {
   const schema = await cacheScheme();
   return new Map((schema?.measures ?? []).map((m) => [m.name, m.aggregation]));
 }
@@ -408,7 +408,7 @@ function schemeKind(schema: SchemaDescriptor, clave: string): string {
   const encontrado = schema.tables
     .find((t) => t.name === tabla)
     ?.fields.find((f) => f.name === fieldName);
-  return encontrado?.type ?? TIPO_DESCONOCIDO;
+  return encontrado?.type ?? UNKNOWN_KIND;
 }
 
 function campoExisteEnEsquema(schema: SchemaDescriptor, clave: string): boolean {

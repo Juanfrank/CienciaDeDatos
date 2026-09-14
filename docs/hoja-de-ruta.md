@@ -25,7 +25,7 @@ vida. Al canjearse desbloquea la cuenta, aplica la politica de contrasenas, impi
 ultimas cinco y **revoca las sesiones abiertas**. Todo ello registrado en el mismo log
 consolidado de acceso de la seccion 7.
 
-**Que falta.** El transporte. `IResetChannel` es el puerto; `CorreoInstitucionalNoDisponible` lo
+**Que falta.** El transporte. `IResetChannel` es el puerto; `InstitutionalMailNotAvailable` lo
 implementa devolviendo `false` — declarado y no disponible, el mismo patron que los conectores de
 datos pendientes y que Azure AD.
 

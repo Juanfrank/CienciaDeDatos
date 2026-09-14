@@ -5,10 +5,10 @@ Avisos basados en datos (4.9): una condicion sobre una medida, evaluada en un ca
 | Archivo | Que es |
 |---|---|
 | `types.ts` | Alerta, condicion y suscripcion |
-| `evaluar.ts` | Si la condicion se cumple con los datos vigentes |
+| `evaluate.ts` | Si la condicion se cumple con los datos vigentes |
 | `calendario.ts` | Cuando toca evaluar |
 | `notificaciones.ts` | Como se entrega |
-| `almacen.ts` | Persistencia |
+| `store.ts` | Persistencia |
 
 ## Reglas
 

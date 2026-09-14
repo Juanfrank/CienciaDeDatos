@@ -32,8 +32,8 @@ export function ReferenceLines({
   const cambiar = (siguiente: ReferenceLine[]) =>
     onCambiar(siguiente.length === 0 ? undefined : siguiente);
 
-  const editar = (i: number, cambio: Partial<ReferenceLine>) =>
-    cambiar(lineas.map((line, j) => (i === j ? { ...line, ...cambio } : line)));
+  const editar = (i: number, change: Partial<ReferenceLine>) =>
+    cambiar(lineas.map((line, j) => (i === j ? { ...line, ...change } : line)));
 
   return (
     <>

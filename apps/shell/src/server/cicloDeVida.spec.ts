@@ -367,12 +367,12 @@ describe('banderas por modulo (3.4)', () => {
 
   /*
    * La bandera se prueba contra la MISMA puerta que usa la aplicacion, no simulando el resolutor.
-   * `ConfiguracionDeEntorno` lee `MODULOS_APAGADOS`, asi que apagar aqui es exactamente lo que
+   * `EnvironmentSettings` lee `MODULOS_APAGADOS`, asi que apagar aqui es exactamente lo que
    * hace Azure en produccion: poner la bandera en false.
    */
-  const conApagados = async (apagados: string, prueba: () => Promise<void>) => {
+  const conApagados = async (disabled: string, prueba: () => Promise<void>) => {
     const before = process.env['MODULOS_APAGADOS'];
-    process.env['MODULOS_APAGADOS'] = apagados;
+    process.env['MODULOS_APAGADOS'] = disabled;
     // El resolutor cachea 30 s: sin reiniciarlo, la prueba leeria la foto de la prueba anterior.
     reiniciarConfiguracion();
     try {

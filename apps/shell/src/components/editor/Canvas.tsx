@@ -11,14 +11,14 @@ import { useDrag } from './useDrag';
 export function Canvas({
   items,
   objetos,
-  seleccion,
+  selection,
   editable,
   onSeleccionar,
   onColocar,
 }: {
   items: GridItem[];
   objetos: ObjetoSerializado[];
-  seleccion: string | null;
+  selection: string | null;
   /** Sin permiso de edicion no hay asas: el lienzo se mira, no se reordena. */
   editable: boolean;
   onSeleccionar: (itemId: string | null) => void;
@@ -101,7 +101,7 @@ export function Canvas({
 
         {items.map((item) => {
           const objeto = id.get(item.id);
-          const chosen = seleccion === item.id;
+          const chosen = selection === item.id;
           const arrastrando = enCurso?.itemId === item.id;
           return (
             <div

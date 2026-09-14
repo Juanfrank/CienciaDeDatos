@@ -1,6 +1,6 @@
 import { hash, Algorithm } from '@node-rs/argon2';
 import {
-  CorreoInstitucionalNoDisponible,
+  InstitutionalMailNotAvailable,
   LocalIdentityProvider,
   PasswordResetService,
   SessionService,
@@ -188,7 +188,7 @@ export const AZURE_AD_DISPONIBLE = Boolean(process.env['AZURE_AD_TENANT_ID']);
 const CLAVE_RESET = (resetId: string) => `auth:reset:${resetId}`;
 const CLAVE_RESET_INDICE = (email: string) => `auth:reset-indice:${email.toLowerCase()}`;
 
-class AlmacenDeRestablecimientos implements IResetStore {
+class ResetsStore implements IResetStore {
   async save(record: ResetRecord): Promise<void> {
     await escribir(CLAVE_RESET(record.resetId), record);
 
@@ -213,7 +213,7 @@ class AlmacenDeRestablecimientos implements IResetStore {
 }
 
 export const restablecimientos = new PasswordResetService({
-  store: new AlmacenDeRestablecimientos(),
+  store: new ResetsStore(),
   identities: almacenDeCredenciales,
   auditLog: auditoriaDeLogin,
   // Perezosa por lo mismo que el proveedor: `next build` no debe exigir el secreto de produccion.
@@ -227,7 +227,7 @@ export const restablecimientos = new PasswordResetService({
 
 /** Canal de entrega disponible en este entorno. */
 export const CORREO_DISPONIBLE = Boolean(process.env['SMTP_HOST']);
-export const canalDeRestablecimiento: IResetChannel = new CorreoInstitucionalNoDisponible();
+export const canalDeRestablecimiento: IResetChannel = new InstitutionalMailNotAvailable();
 
 /** Desbloqueo de una cuenta local, sin cambiar la contraseña. */
 export async function unlockAccount(email: string): Promise<boolean> {

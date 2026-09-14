@@ -50,7 +50,7 @@ export function CreateNotice({
   const measuresOf = (instanceId: string) =>
     vigilables.find((v) => v.instanceId === instanceId)?.measures ?? [];
 
-  const filtrosActuales = (): Record<string, string[]> => {
+  const currentFilters = (): Record<string, string[]> => {
     const filtros: Record<string, string[]> = {};
     for (const clave of new Set(searchParams.keys())) filtros[clave] = searchParams.getAll(clave);
     return filtros;
@@ -69,7 +69,7 @@ export function CreateNotice({
       nombre,
       modulo: moduleSlug,
       pagina: pageSlug,
-      filtros: filtrosActuales(),
+      filtros: currentFilters(),
     };
 
     const body =
