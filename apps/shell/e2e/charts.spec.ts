@@ -179,6 +179,45 @@ test.describe('la matriz, con jerarquia', () => {
   const totalOf = async (fila: import('@playwright/test').Locator) =>
     n(await fila.locator('td.is-total').last().innerText());
 
+  test('la franja cruza la fila ENTERA, encabezado incluido', async ({ page }) => {
+    /*
+     * El salteado se cortaba a media fila.
+     *
+     * La franja y el encabezado de fila llevaban el mismo color, asi que la primera columna salia
+     * teñida siempre y la franja solo existia a su derecha. En una tabla corriente casi no se ve;
+     * en la matriz, con la primera columna ancha y con jerarquia, lo que se lee es una
+     * intermitencia: filas que parecen empezar en un sitio y cambiar de color a medio camino.
+     *
+     * Se mide el color CALCULADO y no la clase: una regla de salteado que existe y que otra pisa
+     * es exactamente lo que habia, y comprobar que la regla esta escrita habria pasado en verde.
+     */
+    await expect(page.getByTestId('matriz')).toBeVisible();
+
+    const fondos = await page.evaluate(() => {
+      const filas = [...document.querySelectorAll('[data-testid="matriz"] tbody tr')].slice(0, 2);
+      return filas.map((fila) => ({
+        encabezado: getComputedStyle(fila.querySelector('th') as Element).backgroundColor,
+        dato: getComputedStyle(fila.querySelector('td') as Element).backgroundColor,
+      }));
+    });
+
+    const [primera, segunda] = fondos;
+    expect(primera).toBeDefined();
+    expect(segunda).toBeDefined();
+
+    // 1. La franja existe: dos filas seguidas no se pintan igual.
+    expect(primera?.dato).not.toBe(segunda?.dato);
+
+    // 2. Y LLEGA al encabezado. Es lo que fallaba: todos los encabezados eran del mismo color, y
+    //    por eso la franja parecia empezar en la segunda columna.
+    expect(primera?.encabezado).not.toBe(segunda?.encabezado);
+
+    // 3. Sin perder lo que el encabezado estaba para decir: dentro de su fila, sigue siendo otra
+    //    cosa que un dato. Sin esto, cuadrar la franja se podria «arreglar» borrando la columna.
+    expect(primera?.encabezado).not.toBe(primera?.dato);
+    expect(segunda?.encabezado).not.toBe(segunda?.dato);
+  });
+
   test('el subtotal de un padre es la suma de sus hijos', async ({ page }) => {
     await expect(page.getByTestId('matriz')).toBeVisible();
     const padre = await parentFirstPath(page);

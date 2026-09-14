@@ -2021,13 +2021,40 @@ body[data-sidebar='oculto'] .admin__nav { display: none; }
  * 3. **Encabezados fijos al desplazar.** Una tabla dentro de una tarjeta se desplaza en su caja,
  *    y sin esto los titulos de columna se van arriba a las tres filas.
  */
-.tabla tbody tr:nth-child(even) > td,
-.tabla tbody tr:nth-child(even) > th { background: var(--md-sys-color-surface-container); }
-.tabla tbody tr:hover > td,
-.tabla tbody tr:hover > th { background: var(--md-sys-color-surface-container); }
+/*
+ * La franja y la cabecera de fila son DOS cosas, y por eso no pueden llevar el mismo color.
+ *
+ * Llevaban los dos `surface-container`: la cabecera de fila teñida siempre, y las celdas de datos
+ * alternando. En una tabla corriente casi no se nota, pero en una matriz —donde la primera
+ * columna es alta y ancha, con su jerarquia y sus subtotales— se ve lo que de verdad pasa: la
+ * columna de la izquierda es un bloque continuo de color y la franja solo existe a su derecha, asi
+ * que el salteado parece cortarse a media fila. Lo que se lee es una intermitencia, no un asidero.
+ *
+ * Ahora cada fila lleva su par: la cabecera va SIEMPRE un escalon por encima de sus propias
+ * celdas, en las dos posiciones del salteado. Asi la columna se sigue distinguiendo —que es para
+ * lo que estaba— y la franja se lee entera, de un extremo al otro.
+ */
+.tabla tbody tr > td { background: var(--md-sys-color-surface); }
+.tabla tbody tr > th[scope='row'] { background: var(--md-sys-color-surface-container); }
+
+.tabla tbody tr:nth-child(even) > td { background: var(--md-sys-color-surface-container); }
+.tabla tbody tr:nth-child(even) > th[scope='row'] {
+  background: var(--md-sys-color-surface-container-high);
+}
+
+/* Al pasar por encima, la fila entera sube un escalon mas: se distingue de la franja de al lado. */
+.tabla tbody tr:hover > td { background: var(--md-sys-color-surface-container); }
+.tabla tbody tr:hover > th[scope='row'] {
+  background: var(--md-sys-color-surface-container-high);
+}
+.tabla tbody tr:nth-child(even):hover > td {
+  background: var(--md-sys-color-surface-container-high);
+}
+.tabla tbody tr:nth-child(even):hover > th[scope='row'] {
+  background: var(--md-sys-color-surface-container-highest);
+}
 
 .tabla tbody th[scope='row'] {
-  background: var(--md-sys-color-surface-container);
   font-weight: 500;
   color: var(--md-sys-color-on-surface);
   position: sticky;
