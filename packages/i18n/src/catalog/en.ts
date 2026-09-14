@@ -87,6 +87,8 @@ export const en: Record<MessageKey, string> = {
   'nav.pages': 'Module pages',
   'nav.fold': 'Collapse the navigator',
   'nav.unfold': 'Expand the navigator',
+  'nav.collapse': 'Collapse',
+  'nav.expand': 'Expand',
   'nav.filters': 'Filters',
   'nav.clear': 'Clear',
   'scope.restricted':

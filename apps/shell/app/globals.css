@@ -3723,8 +3723,21 @@ th[aria-sort='descending'] .table__flecha {
  */
 .embedded__body { flex: 1; padding: var(--space-md); min-width: 0; display: flex; }
 .embedded__body:has(.navegador--panel) { padding: 0; }
+/*
+ * Se pone el margen POR LADOS, nunca con el atajo `padding`.
+ *
+ * Con el atajo, esta regla —mas especifica— ponia a cero el lado del panel y se llevaba por
+ * delante la reserva, sin que nadie lo decidiera: el modulo arrancaba debajo del navegador y su
+ * titulo salia cortado. El lado del panel no se toca aqui; lo fija `--reserva`.
+ */
 .embedded__body:has(.navegador--panel) > .con-navegador > .modulo {
-  padding: var(--space-md) var(--space-md) var(--space-md) 0;
+  padding-block: var(--space-md);
+}
+.embedded__body:has(.navegador--panel) > .con-navegador[data-tipo='panel-izquierdo'] > .modulo {
+  padding-inline-end: var(--space-md);
+}
+.embedded__body:has(.navegador--panel) > .con-navegador[data-tipo='panel-derecho'] > .modulo {
+  padding-inline-start: var(--space-md);
 }
 /* El grid del navegador ocupa el cuerpo entero: sin esto el panel no tiene alto que llenar. */
 .embedded__body > .con-navegador,
@@ -4391,12 +4404,33 @@ th[aria-sort='descending'] .table__flecha {
   min-height: 100%;
 }
 .con-navegador > .modulo { align-self: start; }
-.con-navegador[data-tipo='panel-izquierdo'] { grid-template-columns: auto minmax(0, 1fr); }
-.navegador--panel[data-comportamiento='grilla'] { border-radius: 0; }
+/*
+ * El panel lateral va SUPERPUESTO: no pide columna.
+ *
+ * Antes se repartia el ancho con el contenido y era una columna mas de la rejilla. Ahora se pone
+ * ENCIMA, siempre, y el modulo ocupa el ancho entero; lo que el contenido deja libre lo dice
+ * `--reserva`, y eso si depende del comportamiento elegido. Al hueco se le suma un margen: pegado
+ * al panel, el titulo del modulo se lee como si fuera parte del navegador.
+ */
+.con-navegador[data-tipo='panel-izquierdo'],
 .con-navegador[data-tipo='panel-derecho'] {
-  grid-template-columns: minmax(0, 1fr) auto;
+  position: relative;
+  grid-template-columns: minmax(0, 1fr);
 }
-.con-navegador[data-tipo='panel-derecho'] > .navegador { order: 2; }
+.con-navegador[data-tipo='panel-izquierdo'] > .modulo {
+  padding-inline-start: calc(var(--reserva) + var(--space-md));
+}
+.con-navegador[data-tipo='panel-derecho'] > .modulo {
+  padding-inline-end: calc(var(--reserva) + var(--space-md));
+}
+
+.navegador--panel {
+  position: absolute;
+  inset-block: 0;
+  z-index: 3;
+}
+.con-navegador[data-tipo='panel-izquierdo'] > .navegador--panel { inset-inline-start: 0; }
+.con-navegador[data-tipo='panel-derecho'] > .navegador--panel { inset-inline-end: 0; }
 .con-navegador[data-tipo='pestanas-abajo'] { display: flex; flex-direction: column-reverse; }
 .con-navegador[data-tipo='menu'] { display: flex; flex-direction: column; }
 
@@ -4430,16 +4464,48 @@ th[aria-sort='descending'] .table__flecha {
  * a media altura se lee como una tarjeta que casualmente esta a un lado; lo que dice que es el
  * carril de este modulo es que lo acompana entero.
  */
+/*
+ * Tres medidas, y solo una la decide el comportamiento.
+ *
+ * `--panel` es lo que mide abierto; `--carril`, lo que mide colapsado; `--reserva` es lo unico
+ * que el contenido deja libre. Separarlas es lo que permite que el panel este SIEMPRE encima
+ * —nunca pide columna— y que aun asi `grilla` signifique lo que su nombre dice.
+ */
+.con-navegador { --carril: 3.5rem; --panel: 16rem; --reserva: var(--carril); }
+
 .navegador--panel {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  width: 16rem;
+  width: var(--panel);
   min-height: 100%;
   padding: var(--space-md) var(--space-sm);
   background: var(--md-sys-color-on-primary-container);
   color: var(--md-sys-color-primary-container);
+  /* Se superpone al contenido, asi que tiene que decir que esta encima. */
+  box-shadow: var(--md-sys-elevation-2);
 }
+
+/*
+ * Colapsado, un CARRIL de iconos. No desaparece.
+ *
+ * Desaparecer del todo deja a quien lo colapso sin forma de volver salvo recargar, y borra la
+ * unica pista de que el modulo tiene mas paginas. Con el carril, los enlaces siguen ahi —sin
+ * rotulo pero con su icono y su `title`— y el boton de expandir esta donde se quedo.
+ */
+.navegador--panel[data-abierto='no'] {
+  width: var(--carril);
+  align-items: center;
+  padding-inline: var(--space-xs);
+}
+.navegador--panel[data-abierto='no'] .navegador__pagina {
+  justify-content: center;
+  padding-inline: var(--space-xs);
+}
+.navegador--panel[data-abierto='no'] .navegador__pagina > span { display: none; }
+
+/* El contenido crece y empuja el control de plegar al fondo del panel. */
+.navegador__contenido { flex: 1; }
 
 .navegador--panel .navegador__pagina { color: inherit; }
 /* La capa de estado, como en Material: el fondo se aclara, no se cambia por otro color. */
@@ -4500,40 +4566,44 @@ th[aria-sort='descending'] .table__flecha {
 }
 
 /*
- * `overlay` se pone ENCIMA y no pide sitio: sale de la rejilla por completo.
- * Por eso su celda se colapsa a cero y el panel se posiciona sobre el contenido. Es lo que hace
- * falta en una pantalla estrecha, donde robarle ancho al contenido lo deja ilegible.
+ * `overlay` es el unico que NO reserva ni el carril: se pone encima del ancho entero.
+ *
+ * Los tres comportamientos siguen distinguiendose, y ahora en lo unico que de verdad los separa
+ * —cuanto sitio le quitan al contenido—: `grilla` reserva el carril y el panel se queda abierto,
+ * `drawer` reserva el carril y se pliega a el, y `overlay` no reserva nada.
  */
-.con-navegador:has(> .navegador[data-comportamiento='overlay']) {
-  position: relative;
-  grid-template-columns: minmax(0, 1fr);
+/*
+ * `grilla` reserva lo que el panel mide AHORA, no lo que mide colapsado.
+ *
+ * Es literalmente lo que su nombre promete —espacio consumido en la rejilla— y sin esto la
+ * primera columna de objetos se queda debajo del panel mientras esta abierto: se ve la mitad de
+ * una tarjeta y nadie sabe que hay media tarjeta mas. Colapsado vuelve al carril, que es lo que
+ * el panel ocupa entonces.
+ */
+.con-navegador:has(> .navegador[data-comportamiento='grilla'][data-abierto='si']) {
+  --reserva: var(--panel);
 }
-.navegador--panel[data-comportamiento='overlay'] {
-  position: absolute;
-  inset-block-start: 0;
-  z-index: 3;
-  box-shadow: var(--md-sys-elevation-2);
-}
-.con-navegador[data-tipo='panel-izquierdo'] .navegador--panel[data-comportamiento='overlay'] {
-  inset-inline-start: 0;
-}
-.con-navegador[data-tipo='panel-derecho'] .navegador--panel[data-comportamiento='overlay'] {
-  inset-inline-end: 0;
-}
-
-/* Plegado, el drawer deja solo el boton: devuelve el ancho al contenido, que es para lo que esta. */
-.navegador--panel[data-abierto='no'] { width: auto; }
+/* `drawer` se abre ENCIMA a proposito: reserva el carril y nada mas. */
+/* `overlay` es el unico que no reserva ni el carril: se pone encima del ancho entero. */
+.con-navegador:has(> .navegador[data-comportamiento='overlay']) { --reserva: 0rem; }
 
 .navegador__plegar {
-  align-self: flex-start;
-  padding: var(--space-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  margin-top: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
   border: none;
-  border-radius: var(--md-sys-shape-corner-full);
+  border-top: 1px solid color-mix(in srgb, var(--md-sys-color-primary-container) 30%, transparent);
+  border-radius: 0;
   background: none;
-  color: var(--md-sys-color-on-surface-variant);
+  color: var(--md-sys-color-primary-container);
+  font: inherit;
+  text-align: start;
   cursor: pointer;
 }
-.navegador__plegar:hover { background: var(--md-sys-color-surface-container-high); }
+.navegador--panel[data-abierto='no'] .navegador__plegar { justify-content: center; }
 
 .navegador__contenido { display: flex; flex-direction: column; gap: var(--space-md); min-width: 0; }
 
@@ -4586,13 +4656,20 @@ th[aria-sort='descending'] .table__flecha {
   background: var(--md-sys-color-surface-container-lowest);
 }
 
-/* En pantalla estrecha ningun panel se queda a un lado: no hay ancho que repartir. */
+/*
+ * En pantalla estrecha NINGUN comportamiento reserva el ancho del panel.
+ *
+ * Dieciseis rem sobre una pantalla de movil no dejan contenido que leer, asi que alli el panel
+ * se comporta como un drawer se mire como se mire: reserva el carril y se abre encima. Y se
+ * estrecha para no taparla entera.
+ */
 @media (max-width: 720px) {
-  .con-navegador[data-tipo='panel-izquierdo'],
-  .con-navegador[data-tipo='panel-derecho'] {
-    grid-template-columns: minmax(0, 1fr);
+  .con-navegador:has(> .navegador--panel) { --panel: min(16rem, 78vw); }
+  /* El MISMO selector que fija la reserva de `grilla`, para ganarle: una media query no suma
+     especificidad, asi que un selector mas corto aqui no llegaria a aplicarse nunca. */
+  .con-navegador:has(> .navegador[data-comportamiento='grilla'][data-abierto='si']) {
+    --reserva: var(--carril);
   }
-  .navegador--panel { width: auto; }
 }
 
 /* Los cuatro tipos, en columna: es una eleccion entre cuatro, no una lista de ajustes. */

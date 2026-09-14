@@ -67,6 +67,17 @@ export const ICON_STROKES = {
     'M12 5C5 5 2 12 2 12s3 7 10 7 10-7 10-7-3-7-10-7zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM4 4l16 16',
   // Una lupa. El buscador llevaba el icono de «ver» —una persona— porque no habia lupa en el
   // catalogo, y una persona delante de un campo de texto no dice «buscar», dice «usuario».
+  /*
+   * Plegar y desplegar un panel lateral: un rectangulo con su carril y una flecha.
+   *
+   * Dos iconos y no uno girado. El giro por CSS parece la economia obvia y no lo es: la flecha
+   * apunta hacia DENTRO al plegar y hacia FUERA al desplegar, y girar 180 grados el mismo dibujo
+   * deja el carril al otro lado — el panel de la izquierda pasaria a dibujarse como si estuviera
+   * a la derecha.
+   */
+  'plegar-panel': 'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM9 5v14M17 9l-3 3 3 3',
+  'desplegar-panel':
+    'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM9 5v14M14 9l3 3-3 3',
   lupa: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5 20 20',
   // Acciones sobre una fila del arbol: mover, configurar, permisos.
   'flecha-arriba': 'M12 20V5M6 11l6-6 6 6',

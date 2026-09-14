@@ -88,6 +88,8 @@ export const es = {
   'nav.pages': 'Paginas del modulo',
   'nav.fold': 'Plegar el navegador',
   'nav.unfold': 'Desplegar el navegador',
+  'nav.collapse': 'Colapsar',
+  'nav.expand': 'Expandir',
   'nav.filters': 'Filtros',
   'nav.clear': 'Limpiar',
   'scope.restricted':

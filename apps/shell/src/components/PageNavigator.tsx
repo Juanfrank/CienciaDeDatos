@@ -86,6 +86,10 @@ export function PageNavigator({
               */
               prefetch={false}
               className={`navegador__pagina ${es ? 'is-active' : ''}`}
+              /* Colapsado se esconde el rotulo, no el nombre: el `title` lo dice al posarse y el
+                 `aria-label` a quien no ve el icono. Un carril de iconos mudos no es navegacion. */
+              title={pagina.name}
+              aria-label={pagina.name}
               {...(es ? { 'aria-current': 'page' as const } : {})}
               data-testid={`nav-pagina-${pagina.slug}`}
             >
@@ -136,27 +140,35 @@ export function PageNavigator({
       data-abierto={abierto ? 'si' : 'no'}
     >
       {/*
-        El boton de plegar existe SOLO donde puede hacer algo.
-        En `grilla` el panel es fijo por definicion: un boton que no pliega nada es peor que no
-        tenerlo, porque quien lo pulsa cree que se rompio.
+        Colapsado el panel NO desaparece: se queda en un carril de iconos.
+        Desaparecer del todo deja a quien lo colapso sin forma de volver salvo recargar, y borra la
+        unica pista de que el modulo tiene mas paginas. Los enlaces siguen ahi, sin rotulo.
       */}
-      {comportamiento === 'grilla' ? null : (
-        <button
-          type="button"
-          className="navegador__plegar"
-          aria-expanded={abierto}
-          aria-label={abierto ? t('nav.fold') : t('nav.unfold')}
-          data-testid="navegador-plegar"
-          onClick={() => setAbierto((previo) => !previo)}
-        >
-          <Icon nombre="sandwich" tamano={18} />
-        </button>
-      )}
-
-      <div className="navegador__contenido" {...(abierto ? {} : { hidden: true })}>
+      <div className="navegador__contenido">
         {enlaces}
-        {filtros ? <SeccionDeFiltros {...filtros} /> : null}
+        {abierto && filtros ? <SeccionDeFiltros {...filtros} /> : null}
       </div>
+
+      {/*
+        El control va ABAJO, con icono y texto.
+        Abajo porque es lo ultimo que se hace con el panel, no lo primero: arriba compite con la
+        primera pagina, que es a donde se va a ir el noventa por ciento de las veces. Y con texto
+        porque un icono de flechas solo se interpreta al pulsarlo — «Colapsar» no hace falta
+        interpretarlo. Colapsado queda el icono, que es lo unico que cabe en el carril; el rotulo
+        sigue ahi para quien no lo ve.
+      */}
+      <button
+        type="button"
+        className="navegador__plegar"
+        aria-expanded={abierto}
+        data-testid="navegador-plegar"
+        onClick={() => setAbierto((previo) => !previo)}
+      >
+        <Icon nombre={abierto ? 'plegar-panel' : 'desplegar-panel'} tamano={18} />
+        <span className={abierto ? '' : 'visually-hidden'}>
+          {abierto ? t('nav.collapse') : t('nav.expand')}
+        </span>
+      </button>
     </nav>
   );
 }

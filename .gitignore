@@ -20,3 +20,6 @@ estado-de-modulos.json
 .cache-csp*/
 .cache-ui*/
 capturas/
+
+# Scripts de usar y tirar para capturar pantallas: no son del repositorio.
+tools/tmp/

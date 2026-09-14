@@ -38,8 +38,19 @@ describe('que modo se pide', () => {
 describe('el tema cubre todas las variables que la hoja de estilo usa', () => {
   const css = readFileSync(join(process.cwd(), 'apps/shell/app/globals.css'), 'utf8');
   const used = new Set([...css.matchAll(/var\(\s*(--[a-z0-9-]+)/g)].map((m) => m[1] as string));
+  /*
+   * Una variable definida EN UNA SOLA LINEA tambien esta definida.
+   *
+   * El patron pedia principio de linea, asi que `.x { --y: 1rem; }` —una regla corta escrita de
+   * corrido— contaba como no definida y la daba por huerfana. Es un falso positivo del guardian, y
+   * los falsos positivos de un guardian son peores que su ausencia: ensenan a saltarselo.
+   *
+   * Lo que separa una DEFINICION de una lectura es lo que hay delante: una declaracion empieza
+   * tras `{`, tras `;` o al principio de linea. En `var(--carril, 3rem)` delante hay un parentesis
+   * y detras una coma, no dos puntos, asi que no la confunde con una definicion.
+   */
   const definidasEnCss = new Set(
-    [...css.matchAll(/^\s*(--[a-z0-9-]+)\s*:/gm)].map((m) => m[1] as string),
+    [...css.matchAll(/(?:^|[{;])\s*(--[a-z0-9-]+)\s*:/gm)].map((m) => m[1] as string),
   );
 
   /** Las que rellena un componente al dibujar, no el tema. */

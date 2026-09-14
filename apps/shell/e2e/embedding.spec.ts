@@ -182,6 +182,19 @@ test.describe('las dos formas de incrustar (4.9)', () => {
     await expect(enlace).toHaveAttribute('href', /^\/embed\/m\/composicion/);
     await expect(enlace).toHaveAttribute('href', /cromo=limpio/);
 
+    /*
+     * Y el modulo EMPIEZA donde acaba el panel — se mide, no se confia.
+     *
+     * El margen del cuerpo incrustado estaba escrito con el atajo `padding`, que ponia a cero el
+     * lado del panel y se llevaba por delante la reserva sin que nadie lo decidiera: el titulo
+     * del modulo salia cortado por debajo del navegador y nadie lo veia hasta mirar la pantalla.
+     */
+    const panel = await page.getByTestId('navegador-de-pagina').boundingBox();
+    const titulo = await page.getByTestId('module-title').boundingBox();
+    expect(panel).not.toBeNull();
+    expect(titulo).not.toBeNull();
+    expect(titulo?.x ?? 0).toBeGreaterThanOrEqual((panel?.x ?? 0) + (panel?.width ?? 0));
+
     await enlace.click();
     await expect(page).toHaveURL(/\/embed\/m\/composicion\?pagina=graficos&cromo=limpio$/);
     // Y sigue sin encabezado despues de navegar: el cromo viaja con el enlace.

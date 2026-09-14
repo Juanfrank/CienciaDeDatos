@@ -435,16 +435,72 @@ test.describe('navegador de pagina: las paginas dejan de ser invisibles (4.2)', 
     await expect(page).not.toHaveURL(/DimTribunal\.Materia=Penal/);
   });
 
-  test('el panel fijo NO ofrece plegarse: un boton que no pliega nada parece roto', async ({
+  test('se colapsa a un CARRIL, no a la nada, y se vuelve a expandir', async ({ page }) => {
+    /*
+     * Desaparecer del todo deja a quien lo colapso sin forma de volver salvo recargar, y borra la
+     * unica pista de que el modulo tiene mas paginas. Por eso se comprueba que los enlaces siguen
+     * ahi, no solo que el panel se estrecha.
+     */
+    await page.goto('/m/composicion');
+
+    const navegador = page.getByTestId('navegador-de-pagina');
+    const ancho = async () => (await navegador.boundingBox())?.width ?? 0;
+    const abierto = await ancho();
+    expect(abierto).toBeGreaterThan(0);
+
+    await page.getByTestId('navegador-plegar').click();
+    await expect(navegador).toHaveAttribute('data-abierto', 'no');
+    await expect.poll(ancho).toBeLessThan(abierto);
+
+    // Y lo que queda sigue navegando: los once enlaces, con su nombre para quien no ve el icono.
+    await expect(navegador.locator('[data-testid^="nav-pagina-"]')).toHaveCount(11);
+    await expect(page.getByTestId('nav-pagina-graficos')).toHaveAttribute('title', 'Graficos');
+
+    await page.getByTestId('navegador-plegar').click();
+    await expect(navegador).toHaveAttribute('data-abierto', 'si');
+    await expect.poll(ancho).toBe(abierto);
+  });
+
+  test('el panel se SUPERPONE al contenido, y aun asi no le tapa ningun objeto', async ({
     page,
   }) => {
-    // `composicion` lo lleva en `grilla`, que es fijo por definicion.
+    /*
+     * Dos cosas a la vez, y las dos se miden en pixeles.
+     *
+     * SUPERPUESTO: el panel no pide columna — su caja cae dentro de la del modulo, cosa imposible
+     * si fueran dos columnas de una rejilla.
+     *
+     * Y AUN ASI NO TAPA NADA: con el comportamiento `grilla` —el de por defecto— lo que el
+     * contenido deja libre es lo que el panel mide AHORA, no lo que mediria colapsado. Sin esto
+     * la primera columna de objetos se queda debajo del panel mientras esta abierto: se ve media
+     * tarjeta y nadie sabe que hay media tarjeta mas. Al colapsar, ese sitio se recupera.
+     */
     await page.goto('/m/composicion');
-    await expect(page.getByTestId('navegador-de-pagina')).toHaveAttribute(
-      'data-comportamiento',
-      'grilla',
+
+    const navegador = page.getByTestId('navegador-de-pagina');
+    const primera = page.locator('.grid__cell').first();
+
+    const panel = await navegador.boundingBox();
+    const modulo = await page.locator('.con-navegador > .modulo').boundingBox();
+    const objeto = await primera.boundingBox();
+    expect(panel).not.toBeNull();
+    expect(modulo).not.toBeNull();
+    expect(objeto).not.toBeNull();
+
+    // Se solapan en horizontal: el panel empieza dentro de la caja del modulo.
+    expect(panel?.x ?? 0).toBeLessThan((modulo?.x ?? 0) + (modulo?.width ?? 0));
+    expect((panel?.x ?? 0) + (panel?.width ?? 0)).toBeGreaterThan(modulo?.x ?? 0);
+
+    // Pero ningun objeto queda debajo: el primero empieza donde acaba el panel.
+    const derecha = (panel?.x ?? 0) + (panel?.width ?? 0);
+    expect(objeto?.x ?? 0).toBeGreaterThanOrEqual(derecha);
+
+    // Y colapsado, el sitio vuelve al contenido.
+    await page.getByTestId('navegador-plegar').click();
+    await expect(navegador).toHaveAttribute('data-abierto', 'no');
+    await expect.poll(async () => (await primera.boundingBox())?.x ?? 0).toBeLessThan(
+      objeto?.x ?? 0,
     );
-    await expect(page.getByTestId('navegador-plegar')).toHaveCount(0);
   });
 
   test('un modulo de UNA pagina no dibuja navegador', async ({ page }) => {
