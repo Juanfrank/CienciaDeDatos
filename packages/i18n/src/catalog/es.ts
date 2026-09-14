@@ -190,6 +190,16 @@ export const es = {
   'admin.modules.column.version': 'Version',
   'admin.modules.column.pages': 'Paginas',
   'admin.modules.column.objects': 'Objetos',
+  // El arbol de modulos: carpetas, subcarpetas y los permisos de cada una.
+  'admin.modules.tree.intro':
+    'Un modulo hereda el ambito de la carpeta que lo contiene, asi que la tabla es el arbol y no una lista por nombre: dos modulos seguidos en orden alfabetico pueden verlos audiencias distintas.',
+  'admin.modules.folder.count': '{n, plural, =0 {sin modulos} one {# modulo} other {# modulos}}',
+  'admin.modules.folder.inherits': 'Hereda, sin restriccion propia',
+  'admin.modules.folder.restricts': 'Restringe por {cuales}',
+  'admin.modules.folder.configure': 'Configurar permisos',
+  'admin.modules.loose': 'Sin colocar ({n})',
+  'admin.modules.loose.intro':
+    'Todavia no cuelgan de ninguna carpeta. Un modulo entra en la organizacion general al publicarse; hasta entonces solo lo ve quien lo edita.',
   // El desplegable de la columna «Objetos»: que hay dentro del modulo y con que version.
   'admin.modules.objects.none': 'Ninguno',
   'admin.modules.objects.count': '{n, plural, one {# objeto} other {# objetos}}',

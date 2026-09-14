@@ -19,7 +19,12 @@ function carpetas(nodos: NavNode[], acumulado: ScopeTarget[] = []): ScopeTarget[
   return acumulado;
 }
 
-export default async function ScopesPage() {
+export default async function ScopesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ destino?: string }>;
+}) {
+  const { destino } = await searchParams;
   const targets: ScopeTarget[] = [
     ...(await listTeams()).map((t) => ({
       tipo: 'equipo' as const,
@@ -38,7 +43,7 @@ export default async function ScopesPage() {
         una justificacion explicita y queda registrada aparte: el valor por defecto de cualquier
         combinacion de reglas es siempre "mas restrictivo o igual".
       </p>
-      <ScopeEditor targets={targets} />
+      <ScopeEditor targets={targets} {...(destino ? { inicial: destino } : {})} />
     </section>
   );
 }

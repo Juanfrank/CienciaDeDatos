@@ -687,3 +687,58 @@ test.describe('los recursos que no son objetos (4.5)', () => {
     await expect(page.getByTestId('asset-balanza-estado')).not.toHaveText(/Deshabilitar/i);
   });
 });
+
+test.describe('los modulos se ven ANIDADOS, con los permisos de cada carpeta (4.1 y 4.10.6)', () => {
+  test('la tabla es el arbol: carpeta, subcarpeta y los modulos dentro', async ({ page }) => {
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    // Tres niveles de la siembra: Institucional > Regional > Distrito Norte.
+    await expect(page.getByTestId('carpeta-nodo-institucional')).toHaveAttribute('data-depth', '0');
+    await expect(page.getByTestId('carpeta-nodo-regional')).toHaveAttribute('data-depth', '1');
+    await expect(page.getByTestId('carpeta-nodo-norte')).toHaveAttribute('data-depth', '2');
+    // Y el modulo, un nivel mas adentro que su carpeta.
+    await expect(page.getByTestId('modulo-audiencias')).toHaveAttribute('data-depth', '3');
+  });
+
+  test('una carpeta dice si restringe por su cuenta o solo hereda', async ({ page }) => {
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    // `nodo-institucional` no lleva ambito propio en la siembra; `nodo-norte` si.
+    await expect(page.getByTestId('carpeta-nodo-institucional-ambito')).toHaveText(/Hereda/);
+    await expect(page.getByTestId('carpeta-nodo-norte-ambito')).toHaveText(/Restringe/);
+  });
+
+  test('desde la carpeta se llega al editor de ambitos CON esa carpeta ya elegida', async ({
+    page,
+  }) => {
+    /*
+     * El enlace existe para ahorrar un paso, y el paso que ahorra es encontrar la carpeta otra
+     * vez en un desplegable de quince destinos. Si llegara sin elegir, no ahorraria nada.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+    await page.getByTestId('permisos-nodo-norte').click();
+
+    await expect(page).toHaveURL(/\/admin\/scopes\?destino=nodo-norte/);
+    await expect(page.getByTestId('picker-target-scope')).toHaveValue('nodo-norte');
+  });
+
+  test('un borrador sin colocar sigue viendose, en su propia tabla', async ({ page }) => {
+    // Al pasar de lista plana a arbol, lo que el arbol no coloca desaparece de la pantalla. Un
+    // borrador entra en la organizacion general al publicarse, asi que son la mayoria.
+    await asLogin(page, 'u-admin');
+    const slug = `suelto-${Date.now()}`;
+    const creado = await page.request.post('/api/modules', {
+      data: { nombre: `Modulo ${slug}`, slug },
+    });
+    expect(creado.ok(), await creado.text()).toBe(true);
+
+    await page.goto('/admin/modules');
+    await expect(page.getByTestId('tabla-modulos-sueltos')).toBeVisible();
+    await expect(
+      page.getByTestId('tabla-modulos-sueltos').getByTestId(`modulo-${slug}`),
+    ).toBeVisible();
+  });
+});

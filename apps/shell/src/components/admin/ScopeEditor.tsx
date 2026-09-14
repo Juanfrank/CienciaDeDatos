@@ -17,9 +17,24 @@ export interface ScopeTarget {
   scope: AccessScope;
 }
 
-export function ScopeEditor({ targets }: { targets: ScopeTarget[] }) {
+export function ScopeEditor({
+  targets,
+  inicial,
+}: {
+  targets: ScopeTarget[];
+  /*
+   * El destino que llega ya elegido, desde el enlace de una carpeta del arbol de modulos.
+   *
+   * Sin esto, «configurar permisos» dejaba a quien lo pulsaba delante de un desplegable con
+   * quince destinos y la tarea de volver a encontrar la carpeta de la que venia — que es
+   * exactamente el paso que el enlace existia para ahorrar.
+   */
+  inicial?: string;
+}) {
   const [dimensiones, setDimensiones] = useState<Dimension[]>([]);
-  const [destinoId, setDestinoId] = useState(targets[0]?.id ?? '');
+  const [destinoId, setDestinoId] = useState(
+    (inicial && targets.some((d) => d.id === inicial) ? inicial : targets[0]?.id) ?? '',
+  );
   const [restricciones, setRestricciones] = useState<AccessScope['restrictions']>([]);
   const [justificacion, setJustificacion] = useState('');
   const [ampliacion, setAmpliacion] = useState<string[] | null>(null);

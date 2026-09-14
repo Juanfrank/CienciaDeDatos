@@ -190,6 +190,16 @@ export const en: Record<MessageKey, string> = {
   'admin.modules.column.version': 'Version',
   'admin.modules.column.pages': 'Pages',
   'admin.modules.column.objects': 'Objects',
+  // The module tree: folders, subfolders and each one's permissions.
+  'admin.modules.tree.intro':
+    'A module inherits the scope of the folder that holds it, so this table is the tree and not a list by name: two modules next to each other alphabetically may be seen by different audiences.',
+  'admin.modules.folder.count': '{n, plural, =0 {no modules} one {# module} other {# modules}}',
+  'admin.modules.folder.inherits': 'Inherits, no scope of its own',
+  'admin.modules.folder.restricts': 'Restricts by {cuales}',
+  'admin.modules.folder.configure': 'Configure permissions',
+  'admin.modules.loose': 'Not placed ({n})',
+  'admin.modules.loose.intro':
+    'These do not hang from any folder yet. A module enters the general organization when it is published; until then only its editor sees it.',
   // The dropdown behind the Objects column: what the module holds and at which version.
   'admin.modules.objects.none': 'None',
   'admin.modules.objects.count': '{n, plural, one {# object} other {# objects}}',
