@@ -1,13 +1,17 @@
 import type { Bookmark } from '@app/module-model';
-import { KEY_BOOKMARKS, write, readList } from './almacenCompartido';
+import { KEY_BOOKMARKS, mutar, readList } from './almacenCompartido';
 
 /** Almacen de marcadores. */
 
 const all = (): Promise<Bookmark[]> => readList<Bookmark>(KEY_BOOKMARKS);
 
 export async function saveBookmark(marcador: Bookmark): Promise<Bookmark> {
-  const actuales = await all();
-  await write(KEY_BOOKMARKS, [...actuales.filter((m) => m.id !== marcador.id), marcador]);
+  // Bajo turno: dos personas guardando un marcador a la vez leian la misma lista y la segunda
+  // en escribir borraba el de la primera.
+  await mutar<Bookmark[]>(KEY_BOOKMARKS, (actuales) => [
+    ...(actuales ?? []).filter((m) => m.id !== marcador.id),
+    marcador,
+  ]);
   return marcador;
 }
 
@@ -19,11 +23,16 @@ export async function bookmarksList(userId: string, teamId: string): Promise<Boo
 }
 
 export async function deleteBookmark(id: string, userId: string): Promise<boolean> {
-  const actuales = await all();
-  const marcador = actuales.find((m) => m.id === id);
-  // Solo quien lo creo puede borrarlo.
-  if (!marcador || marcador.ownerUserId !== userId) return false;
-
-  await write(KEY_BOOKMARKS, actuales.filter((m) => m.id !== id));
-  return true;
+  // La comprobacion de propiedad va DENTRO del turno: fuera, entre comprobar y borrar cabe otra
+  // escritura, y se borraria sobre una lista que ya no es la que se comprobo.
+  let borrado = false;
+  await mutar<Bookmark[]>(KEY_BOOKMARKS, (actuales) => {
+    const lista = actuales ?? [];
+    const marcador = lista.find((m) => m.id === id);
+    // Solo quien lo creo puede borrarlo.
+    if (!marcador || marcador.ownerUserId !== userId) return lista;
+    borrado = true;
+    return lista.filter((m) => m.id !== id);
+  });
+  return borrado;
 }

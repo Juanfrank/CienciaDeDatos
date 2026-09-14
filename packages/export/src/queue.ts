@@ -1,3 +1,4 @@
+import { mutate } from '@app/caching';
 import type { CacheEntry, ICacheStore } from '@app/caching';
 import { jobKey } from './types';
 import type { ExportJob, ExportRequest } from './types';
@@ -51,8 +52,11 @@ export class StoreExportQueue implements IExportQueue {
     };
 
     await this.store.set(jobKey(job.id), entrada(job, ahora));
-    const queue = await this.pendientes();
-    await this.store.set(KEY_QUEUE, entrada([...queue, job.id], ahora));
+    // La cola se toca bajo turno. Leerla y escribirla como dos pasos hacia que dos exportaciones
+    // pedidas a la vez leyeran la misma cola y la segunda borrara el id de la primera: el
+    // trabajo quedaba escrito pero nadie lo tomaba nunca, y quien lo pidio se quedaba viendo
+    // «En cola…» para siempre.
+    await mutate<string[]>(this.store, KEY_QUEUE, (cola) => [...(cola ?? []), job.id], { ahora });
     return job;
   }
 
@@ -66,22 +70,45 @@ export class StoreExportQueue implements IExportQueue {
     return entry?.value ?? [];
   }
 
+  /**
+   * Saca el siguiente pendiente y lo marca 'procesando'.
+   *
+   * Sacar es UNA operacion, no dos. Leyendo la cola y escribiendo el resto por separado, dos
+   * trabajadores —o el trabajador y una peticion que encola— leian la misma cabeza y los dos se
+   * llevaban el mismo trabajo: la exportacion se generaba dos veces y la que quedaba escrita era
+   * la que terminara la ultima.
+   *
+   * El id se saca dentro del turno; leer el trabajo y marcarlo se hace fuera, ya con el id en la
+   * mano: nadie mas lo tiene, asi que no hay con quien competir por el.
+   */
   async tomarSiguiente(ahora = this.now()): Promise<ExportJob | null> {
-    const queue = await this.pendientes();
-    if (queue.length === 0) return null;
+    for (;;) {
+      let tomado: string | undefined;
+      await mutate<string[]>(
+        this.store,
+        KEY_QUEUE,
+        (cola) => {
+          const [id, ...resto] = cola ?? [];
+          tomado = id;
+          // Sin nada que tomar se devuelve la MISMA cola: `mutate` no escribe lo que no cambia,
+          // y el trabajador mira esto dos veces por segundo.
+          return id === undefined ? (cola ?? []) : resto;
+        },
+        { ahora },
+      );
+      if (tomado === undefined) return null;
 
-    const [id, ...resto] = queue;
-    await this.store.set(KEY_QUEUE, entrada(resto, ahora));
-    if (!id) return null;
+      const job = await this.consultar(tomado);
+      // El trabajo pudo caducar en el store antes de que nadie lo tomara: se descarta el id
+      // huerfano y se sigue, en vez de dejar la cola atascada en una entrada que ya no existe.
+      // Se itera en vez de llamarse a si misma: la llamada recursiva volveria a pedir el mismo
+      // turno que todavia no se ha soltado.
+      if (!job) continue;
 
-    const job = await this.consultar(id);
-    // El trabajo pudo caducar en el store antes de que nadie lo tomara: se descarta el id
-    // huerfano y se sigue, en vez de dejar la cola atascada en una entrada que ya no existe.
-    if (!job) return this.tomarSiguiente(ahora);
-
-    const enCurso: ExportJob = { ...job, status: 'procesando', startedAt: ahora.toISOString() };
-    await this.store.set(jobKey(id), entrada(enCurso, ahora));
-    return enCurso;
+      const enCurso: ExportJob = { ...job, status: 'procesando', startedAt: ahora.toISOString() };
+      await this.store.set(jobKey(tomado), entrada(enCurso, ahora));
+      return enCurso;
+    }
   }
 
   async completar(

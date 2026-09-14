@@ -1,7 +1,7 @@
 import type { ConfigChangeLog } from '@app/observability';
 import { assertConfigChangeIsAuditable } from '@app/observability';
 import type { TreeAuditEvent } from '@app/access-control';
-import { KEY_AUDIT, write, readList } from './almacenCompartido';
+import { KEY_AUDIT, mutar, write, readList } from './almacenCompartido';
 
 /** Registro de auditoria de configuracion — secciones 4.10.7 y 7. */
 /** Los eventos viven en el almacen COMPARTIDO. */
@@ -34,7 +34,11 @@ export async function changeRecord(input: RecordChangeInput): Promise<ConfigChan
   };
 
   assertConfigChangeIsAuditable(evento);
-  await write(KEY_AUDIT, [...(await readEvents()), evento]);
+  // Anadir bajo turno, no leer-y-escribir: dos cambios de configuracion a la vez y uno de los
+  // dos no quedaba anotado. Un registro que a veces pierde la fila que importa no sirve para
+  // lo que existe, y la ampliacion de ambito —la que §4.10.4 obliga a justificar— es
+  // exactamente la fila que llega acompanada de otras.
+  await mutar<ConfigChangeLog[]>(KEY_AUDIT, (actuales) => [...(actuales ?? []), evento]);
   return evento;
 }
 

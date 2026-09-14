@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { FileCacheStore, InMemoryCacheStore, type ICacheStore } from '@app/caching';
+import { FileCacheStore, InMemoryCacheStore, mutate, type ICacheStore } from '@app/caching';
 
 /**
  * Estado de aplicacion compartido entre instancias — criterio de la seccion 9:
@@ -25,6 +25,18 @@ export async function leer<T>(clave: string): Promise<T | undefined> {
 
 export async function write<T>(clave: string, valor: T): Promise<void> {
   await store.set(clave, { value: valor, generatedAt: new Date().toISOString() });
+}
+
+/**
+ * Lee, transforma y escribe SIN que otra peticion se cuele en medio.
+ *
+ * Es lo que hay que usar siempre que el valor nuevo dependa del guardado: `leer` y luego `write`
+ * son dos operaciones, y entre las dos cabe otra peticion entera. No falla ni avisa — la segunda
+ * escritura pisa lo que anadio la primera y falta una fila que nadie echa en falta hasta que la
+ * busca.
+ */
+export async function mutar<T>(clave: string, cambio: (actual: T | undefined) => T): Promise<T> {
+  return mutate<T>(store, clave, cambio);
 }
 
 export async function borrar(clave: string): Promise<void> {

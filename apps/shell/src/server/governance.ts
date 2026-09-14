@@ -1,4 +1,4 @@
-import { GOVERNANCE_KEY, write, leer } from './almacenCompartido';
+import { GOVERNANCE_KEY, mutar, leer } from './almacenCompartido';
 import type {
   GovernedUser,
   ManagedTree,
@@ -98,7 +98,12 @@ export class StoreGovernanceRepository implements GovernanceStore {
   }
 
   private async guardar(change: (actual: GovernanceSnapshot) => GovernanceSnapshot): Promise<void> {
-    await write(GOVERNANCE_KEY, change(await this.snapshot()));
+    // Bajo turno: el gobierno entero es UN valor, asi que dos cambios simultaneos de cosas
+    // distintas —un equipo y una carpeta— se pisan igual que dos del mismo campo. El que
+    // escribiera segundo devolveria el arbol al estado anterior sin que nadie lo notara.
+    await mutar<GovernanceSnapshot>(GOVERNANCE_KEY, (guardada) =>
+      change(guardada ?? initialStatus()),
+    );
   }
 
   async getTree(): Promise<ManagedTree> {
@@ -227,7 +232,9 @@ export class StoreGovernanceRepository implements GovernanceStore {
 
   /** Solo para pruebas: devuelve el almacen a su estado sembrado. */
   async reset(): Promise<void> {
-    await write(GOVERNANCE_KEY, initialStatus());
+    // Tambien bajo turno: si no, un reset lanzado a la vez que una escritura puede quedar
+    // debajo de ella y dejar el almacen a medio sembrar.
+    await mutar<GovernanceSnapshot>(GOVERNANCE_KEY, () => initialStatus());
   }
 }
 

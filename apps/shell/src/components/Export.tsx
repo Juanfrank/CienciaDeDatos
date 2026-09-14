@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useUrlFilters } from '../hooks/useUrlFilters';
 import { IconButton } from './icons/IconButton';
+import { exportTracker, type ExportStatus } from './exportJob';
 
 /** Exportar — seccion 4.9, encolado como exige 5.3. */
 
@@ -13,14 +14,7 @@ const FORMATS = [
   { valor: 'svg', etiqueta: 'Imagen (SVG)' },
 ] as const;
 
-interface Status {
-  id: string;
-  estado: 'encolada' | 'procesando' | 'lista' | 'fallida';
-  error?: string;
-  archivo?: { nombre: string; bytes: number; descargarEn: string };
-}
-
-const TEXT: Record<Status['estado'], string> = {
+const TEXT: Record<ExportStatus['estado'], string> = {
   encolada: 'En cola…',
   procesando: 'Generando…',
   lista: 'Lista',
@@ -37,54 +31,28 @@ export function Export({
   const { searchParams } = useUrlFilters();
   const [formato, setFormato] = useState<string>('xlsx');
   const [abierto, setAbierto] = useState(false);
-  const [trabajo, setTrabajo] = useState<Status | null>(null);
-  const sondeo = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [trabajo, setTrabajo] = useState<ExportStatus | null>(null);
 
-  const detener = () => {
-    if (sondeo.current) clearInterval(sondeo.current);
-    sondeo.current = null;
-  };
+  /*
+   * El encolado y el sondeo viven en `exportJob`, fuera de React.
+   *
+   * No es orden por gusto: ahi dentro hay un intervalo y peticiones en vuelo, y esa mezcla se
+   * prueba con un reloj falso —que dos «Generar» seguidos no dejan un sondeo huerfano no se ve
+   * mirando la pantalla—. Aqui solo queda lo que si es del control: que se ensena.
+   */
+  const seguidor = useMemo(() => exportTracker(), []);
 
   // Sin esto, salir de la pagina con una exportacion en curso deja el intervalo corriendo.
-  useEffect(() => detener, []);
+  useEffect(() => seguidor.detener, [seguidor]);
 
-  const exportar = async () => {
-    detener();
+  const exportar = () => {
     const filtros: Record<string, string[]> = {};
     for (const clave of new Set(searchParams.keys())) filtros[clave] = searchParams.getAll(clave);
 
-    const respuesta = await fetch('/api/exports', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        modulo: moduleSlug,
-        pagina: pageSlug,
-        formato,
-        filtros,
-      }),
-    });
-
-    if (!respuesta.ok) {
-      setTrabajo({ id: '', estado: 'fallida', error: 'No se pudo encolar la exportacion.' });
-      return;
-    }
-
-    const { id } = (await respuesta.json()) as { id: string };
-    setTrabajo({ id, estado: 'encolada' });
-
-    sondeo.current = setInterval(() => {
-      void (async () => {
-        const r = await fetch(`/api/exports/${id}`);
-        if (!r.ok) {
-          detener();
-          setTrabajo({ id, estado: 'fallida', error: 'La exportacion ya no esta disponible.' });
-          return;
-        }
-        const estado = (await r.json()) as Status;
-        setTrabajo(estado);
-        if (estado.estado === 'lista' || estado.estado === 'fallida') detener();
-      })();
-    }, 600);
+    void seguidor.lanzar(
+      { modulo: moduleSlug, ...(pageSlug ? { pagina: pageSlug } : {}), formato, filtros },
+      setTrabajo,
+    );
   };
 
   /*

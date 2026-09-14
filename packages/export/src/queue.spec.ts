@@ -126,6 +126,93 @@ describe('StoreExportQueue', () => {
   });
 });
 
+describe('la cola con varios a la vez', () => {
+  /**
+   * Un store que tarda en escribir. Sin retardo la ventana entre leer la cola y escribirla es
+   * tan corta que la prueba no llega a caer en ella, y pasaria con la carrera puesta.
+   */
+  function lenta(): StoreExportQueue {
+    const almacen = new InMemoryCacheStore({ ttlMs: 60_000 });
+    const escribir = almacen.set.bind(almacen);
+    almacen.set = async (clave, entrada) => {
+      await new Promise((listo) => setTimeout(listo, 3));
+      return escribir(clave, entrada);
+    };
+    let n = 0;
+    return new StoreExportQueue({
+      store: almacen,
+      now: () => new Date('2026-03-01T12:00:00.000Z'),
+      nextId: () => `job-${++n}`,
+    });
+  }
+
+  it('cinco exportaciones pedidas a la vez se encolan las cinco', async () => {
+    // Sin turno, las cinco leen la misma cola vacia y la ultima en escribir deja UN id. Los
+    // otros cuatro trabajos quedan escritos pero nadie los toma nunca: quien los pidio se queda
+    // viendo «En cola…» para siempre, sondeando cada seis decimas hasta que cierre la pestana.
+    const cola = lenta();
+    const pedidos = await Promise.all(
+      Array.from({ length: 5 }, () => cola.encolar(peticion())),
+    );
+
+    const pendientes = await cola.pendientes();
+    expect(pendientes).toHaveLength(5);
+    expect([...pendientes].sort()).toEqual([...pedidos.map((j) => j.id)].sort());
+  });
+
+  it('dos trabajadores a la vez NO se llevan el mismo trabajo', async () => {
+    // Es el caso de varias instancias, que la seccion 9 exige: dos servidores con su trabajador
+    // mirando la misma cola. Tomado dos veces, el archivo se genera dos veces y el que queda
+    // escrito es el del que termine el ultimo.
+    const cola = lenta();
+    await cola.encolar(peticion());
+    await cola.encolar(peticion());
+
+    const tomados = await Promise.all([
+      cola.tomarSiguiente(),
+      cola.tomarSiguiente(),
+      cola.tomarSiguiente(),
+    ]);
+
+    const ids = tomados.filter((j) => j !== null).map((j) => j.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids).toHaveLength(2);
+    // Y el tercero se va con las manos vacias, que es lo correcto: no hay mas.
+    expect(tomados.filter((j) => j === null)).toHaveLength(1);
+    expect(await cola.pendientes()).toEqual([]);
+  });
+
+  it('encolar mientras un trabajador toma no pierde ni repite', async () => {
+    const cola = lenta();
+    await cola.encolar(peticion());
+
+    const [tomado, nuevo] = await Promise.all([cola.tomarSiguiente(), cola.encolar(peticion())]);
+
+    expect(tomado?.id).toBe('job-1');
+    // El recien llegado sigue en la cola: tomar no puede borrar lo que no llego a leer.
+    expect(await cola.pendientes()).toEqual([nuevo.id]);
+  });
+
+  it('mirar una cola vacia no escribe', async () => {
+    // El trabajador la mira dos veces por segundo. Si mirar escribiera, seria una escritura a
+    // disco cada 500 ms sin que nada hubiera pasado.
+    const almacen = new InMemoryCacheStore({ ttlMs: 60_000 });
+    const escribir = almacen.set.bind(almacen);
+    let escrituras = 0;
+    almacen.set = async (clave, entrada) => {
+      escrituras += 1;
+      return escribir(clave, entrada);
+    };
+    const cola = new StoreExportQueue({ store: almacen });
+
+    await cola.tomarSiguiente();
+    const primeras = escrituras;
+    await cola.tomarSiguiente();
+    await cola.tomarSiguiente();
+    expect(escrituras).toBe(primeras);
+  });
+});
+
 describe('generarArtefacto', () => {
   it('elige el tipo mime y la extension segun el formato pedido', async () => {
     const csv = await generarArtefacto(peticion(), [objeto], { ahora: new Date('2026-03-01') });

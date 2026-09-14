@@ -15,6 +15,7 @@ export {
   type CacheEntry,
   type ICacheStore,
 } from './ICacheStore';
+export { LOCK_PROCESS, keyedLock, mutate, type KeyedLock, type MutateOptions } from './keyedLock';
 export { InMemoryCacheStore, type InMemoryCacheStoreOptions } from './InMemoryCacheStore';
 export {
   SCHEMA_CACHE_KEY,

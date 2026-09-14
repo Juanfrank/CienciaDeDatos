@@ -1,5 +1,5 @@
 import type { ModuleDefinition } from '@app/module-model';
-import { write, leer } from './almacenCompartido';
+import { mutar, leer } from './almacenCompartido';
 import { demoModules } from './modules';
 
 /**
@@ -46,8 +46,21 @@ export class StoreModuleRepository implements ModuleStore {
     return (await leer<ModuleDefinition[]>(KEY_MODULES)) ?? clonar(demoModules);
   }
 
-  private async guardarTodos(modules: ModuleDefinition[]): Promise<void> {
-    await write(KEY_MODULES, modules);
+  /**
+   * Cambia la lista entera bajo turno.
+   *
+   * Los modulos son UN valor en el almacen, asi que dos ediciones simultaneas de modulos
+   * DISTINTOS se pisan igual que dos del mismo: cada una lee la lista, cambia lo suyo y la
+   * escribe entera. Con el autoguardado del editor esto no es hipotetico —basta con dos
+   * personas editando a la vez— y lo que se pierde no es un campo, es el modulo entero de quien
+   * escribio primero.
+   */
+  private async cambiarTodos(
+    cambio: (actuales: ModuleDefinition[]) => ModuleDefinition[],
+  ): Promise<void> {
+    await mutar<ModuleDefinition[]>(KEY_MODULES, (guardados) =>
+      cambio(guardados ?? clonar(demoModules)),
+    );
   }
 
   async list(): Promise<ModuleDefinition[]> {
@@ -63,18 +76,22 @@ export class StoreModuleRepository implements ModuleStore {
   }
 
   async save(module: ModuleDefinition): Promise<void> {
-    const actuales = await this.all();
-    await this.guardarTodos([
+    await this.cambiarTodos((actuales) => [
       ...actuales.filter((m) => m.moduleId !== module.moduleId),
       clonar(module),
     ]);
   }
 
   async remove(moduleId: string): Promise<boolean> {
-    const actuales = await this.all();
-    const quedan = actuales.filter((m) => m.moduleId !== moduleId);
-    if (quedan.length === actuales.length) return false;
-    await this.guardarTodos(quedan);
+    // El «existia?» se decide DENTRO del turno: fuera, entre mirar y borrar cabe otra escritura
+    // y se responderia sobre una lista que ya no es la que se borro.
+    let borrado = false;
+    await this.cambiarTodos((actuales) => {
+      const quedan = actuales.filter((m) => m.moduleId !== moduleId);
+      borrado = quedan.length !== actuales.length;
+      return quedan;
+    });
+    if (!borrado) return false;
     // El historial NO se borra con el modulo. Es el registro de lo que estuvo publicado, y sirve
     // justamente para responder «que veia la gente entonces» cuando el modulo ya no esta.
     return true;
@@ -90,13 +107,16 @@ export class StoreModuleRepository implements ModuleStore {
    * lo que hacia era sobrescribir con un contador al lado.
    */
   async versionRecord(entrada: PublishedVersion): Promise<void> {
-    const actuales = (await leer<PublishedVersion[]>(KEY_HISTORY)) ?? [];
-    // Misma version del mismo modulo dos veces: es un reintento, no una publicacion nueva.
-    const yaEsta = actuales.some(
-      (v) => v.moduleId === entrada.moduleId && v.version === entrada.version,
-    );
-    if (yaEsta) return;
-    await write(KEY_HISTORY, [...actuales, clonar(entrada)]);
+    await mutar<PublishedVersion[]>(KEY_HISTORY, (guardadas) => {
+      const actuales = guardadas ?? [];
+      // Misma version del mismo modulo dos veces: es un reintento, no una publicacion nueva.
+      // La comprobacion va dentro del turno; fuera, dos reintentos simultaneos la pasaban los
+      // dos y el historial —que es de solo anadir— acababa con la misma version repetida.
+      const yaEsta = actuales.some(
+        (v) => v.moduleId === entrada.moduleId && v.version === entrada.version,
+      );
+      return yaEsta ? actuales : [...actuales, clonar(entrada)];
+    });
   }
 
   async history(moduleId: string): Promise<PublishedVersion[]> {
