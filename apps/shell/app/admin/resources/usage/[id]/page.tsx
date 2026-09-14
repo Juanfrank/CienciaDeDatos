@@ -65,19 +65,8 @@ export default async function UsagePage({ params }: { params: Promise<{ id: stri
                       <BumpModule
                         slug={d.slug}
                         objectId={objeto.objectId}
+                        desde={d.version}
                         hasta={ultima}
-                        etiquetas={{
-                          subir: t('admin.resources.action.bump'),
-                          aviso: t('admin.bump.warn', { desde: d.version, hasta: ultima }),
-                          confirmar: t('admin.bump.confirm', { hasta: ultima }),
-                          subiendo: t('admin.bump.doing'),
-                          cancelar: t('action.cancel'),
-                          hecho: (n) => t('admin.bump.done', { n, hasta: ultima }),
-                          conserva: (claves) => t('admin.bump.kept', { claves }),
-                          nuevas: (claves) => t('admin.bump.new', { claves }),
-                          retiradas: (claves) => t('admin.bump.dropped', { claves }),
-                          fallo: t('admin.bump.failed'),
-                        }}
                       />
                     ) : (
                       <span className="muted-text">—</span>

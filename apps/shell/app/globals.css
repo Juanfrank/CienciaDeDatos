@@ -4217,3 +4217,23 @@ th[aria-sort='descending'] .table__flecha {
   white-space: nowrap;
   cursor: pointer;
 }
+
+/*
+ * Una tabla dentro de la celda de otra.
+ *
+ * Sin nada que la distinga, la tabla anidada se lee como una continuacion de la de fuera: mismas
+ * lineas, mismo peso de encabezado, y quien mira no sabe donde acaba una fila y empieza la otra.
+ * Se aparta hacia dentro, se aclara y se hace mas pequena, que es lo que dice «esto es el detalle
+ * de la fila de arriba» sin escribirlo.
+ */
+.tabla--anidada {
+  margin-block-start: var(--space-xs);
+  margin-inline-start: var(--space-md);
+  width: auto;
+  font-size: 0.92em;
+}
+
+.tabla--anidada th,
+.tabla--anidada td {
+  padding-block: var(--space-xs);
+}

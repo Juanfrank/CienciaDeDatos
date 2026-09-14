@@ -152,3 +152,60 @@ export async function usoDe(objectId: string): Promise<{
     uso: uso ?? { total: 0, modulos: 0, atrasados: 0, detalle: [] },
   };
 }
+
+/**
+ * La vuelta del uso: que objetos tiene UN modulo, y con que version cada uno.
+ *
+ * `usoPorObjeto` responde «donde esta este objeto»; esta responde «que hay dentro de este modulo».
+ * Son la misma informacion leida por el otro extremo, y hacen falta las dos porque las dos
+ * preguntas se hacen desde pantallas distintas: una desde el catalogo, al ir a retirar algo, y
+ * otra desde la lista de modulos, al preguntarse por que uno no se parece a los demas.
+ */
+export interface ObjetoEnModulo {
+  objectId: string;
+  /** El nombre del catalogo, no el titulo que le puso quien lo coloco. */
+  name: string;
+  category: ObjectCategory;
+  version: string;
+  ultima: string;
+  atrasada: boolean;
+  instancias: number;
+  /** Si el objeto ya no esta en el catalogo: la version fijada no se puede resolver. */
+  desconocido: boolean;
+}
+
+export function objectsOfModule(modulo: ModuleDefinition): ObjetoEnModulo[] {
+  const porClave = new Map<string, ObjetoEnModulo>();
+
+  for (const pagina of modulo.pages) {
+    for (const item of pagina.items) {
+      const { objectId, version } = item.instance;
+      const clave = `${objectId}@${version}`;
+      const previo = porClave.get(clave);
+      if (previo) {
+        porClave.set(clave, { ...previo, instancias: previo.instancias + 1 });
+        continue;
+      }
+      const definicion = initialCatalog.find((o) => o.objectId === objectId);
+      const ultima = definicion ? (latestVersion(definicion) ?? '') : '';
+      porClave.set(clave, {
+        objectId,
+        name: definicion?.name ?? objectId,
+        // Un objeto que ya no esta en el catalogo no tiene categoria; se le da la mas neutra para
+        // que la fila se pueda dibujar, y `desconocido` es lo que dice la verdad.
+        category: definicion?.category ?? 'elemento',
+        version,
+        ultima,
+        // Sin definicion no se puede saber si esta atrasada, y decir que si seria ofrecer un
+        // «subir a la ultima» que no lleva a ninguna parte.
+        atrasada: definicion !== undefined && version !== ultima,
+        instancias: 1,
+        desconocido: definicion === undefined,
+      });
+    }
+  }
+
+  return [...porClave.values()].sort(
+    (a, b) => a.name.localeCompare(b.name, 'es') || a.version.localeCompare(b.version),
+  );
+}

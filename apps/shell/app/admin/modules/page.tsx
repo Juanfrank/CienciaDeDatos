@@ -3,6 +3,8 @@ import type { MessageKey } from '@app/i18n';
 import { SectionIndex } from '../../../src/components/admin/SectionIndex';
 import { sectionOf } from '../../../src/components/admin/sections';
 import { modules } from '../../../src/server/moduleStore';
+import { objectsOfModule } from '../../../src/server/recursos';
+import { ModuleObjects } from '../../../src/components/admin/ModuleObjects';
 import { translator } from '../../../src/server/locale';
 
 export const dynamic = 'force-dynamic';
@@ -76,7 +78,9 @@ export default async function ModulosPage() {
                 </Link>
               </td>
               <td>{m.pages.length}</td>
-              <td>{m.pages.reduce((total, p) => total + p.items.length, 0)}</td>
+              <td>
+                <ModuleObjects slug={m.slug} objetos={objectsOfModule(m)} t={t} />
+              </td>
               <td>{m.ownerUserId ?? '—'}</td>
             </tr>
           ))}

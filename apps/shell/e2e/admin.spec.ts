@@ -541,3 +541,100 @@ test.describe('roles y permisos (4.10.1)', () => {
     await expect(page).toHaveURL(/admin-without-permission/);
   });
 });
+
+test.describe('que hay dentro de cada modulo, y subirlo de version (4.5)', () => {
+  /**
+   * Deja un modulo publicado con una tarjeta anclada a 1.0.0 y un ajuste puesto a mano.
+   *
+   * Se hace por la API y no por el editor porque lo que se comprueba no es colocar: es que subir
+   * de version respete lo que alguien configuro. Para eso hace falta partir de una version VIEJA
+   * con algo configurado, y el editor solo sabe colocar la ultima.
+   */
+  const conTarjetaVieja = async (page: import('@playwright/test').Page, slug: string) => {
+    const creado = await page.request.post('/api/modules', {
+      data: { nombre: `Modulo ${slug}`, slug },
+    });
+    expect(creado.ok(), await creado.text()).toBe(true);
+    const { modulo } = (await creado.json()) as { modulo: { pages: { pageId: string }[] } };
+
+    const guardado = await page.request.put(`/api/modules/${slug}/edit`, {
+      data: {
+        paginas: [
+          {
+            ...modulo.pages[0],
+            slug: 'general',
+            name: 'General',
+            items: [
+              {
+                id: 'kpi',
+                position: { x: 0, y: 0, w: 3, h: 2 },
+                instance: {
+                  instanceId: 'kpi',
+                  objectId: 'tarjeta-kpi',
+                  // 1.0.0 existe y NO es la ultima: es la unica forma de que la fila salga
+                  // atrasada y ofrezca el boton.
+                  version: '1.0.0',
+                  title: 'Pendientes',
+                  binding: {
+                    datasetId: 'casos-por-distrito-trimestre',
+                    dimensions: [],
+                    measures: ['CasosPendientes'],
+                  },
+                  // `formato` lo admiten 1.0.0 y la ultima: es lo que tiene que sobrevivir.
+                  presentacion: { formato: 'entero' },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+    expect(guardado.ok(), await guardado.text()).toBe(true);
+  };
+
+  test('la columna Objetos despliega cada objeto con su version', async ({ page }) => {
+    await asLogin(page, 'u-admin');
+    const slug = `objetos-${Date.now()}`;
+    await conTarjetaVieja(page, slug);
+
+    await page.goto('/admin/modules');
+    const desplegable = page.getByTestId(`objetos-${slug}`);
+    await expect(desplegable).toBeVisible();
+    // Plegado dice cuantos hay y cuantos estan atrasados: es lo que se lee sin abrir nada.
+    await expect(page.getByTestId(`objetos-atrasados-${slug}`)).toBeVisible();
+
+    await desplegable.click();
+    await expect(page.getByTestId(`objeto-${slug}-tarjeta-kpi-1.0.0`)).toBeVisible();
+  });
+
+  test('subir a la ultima CONSERVA lo configurado, y lo dice', async ({ page }) => {
+    /*
+     * El punto entero de subir de version.
+     *
+     * Una clave que la version nueva sigue admitiendo tiene que llegar intacta; solo lo que la
+     * version nueva anade cae a su valor por defecto. Si `formato` se perdiera, subir de version
+     * seria rehacer la configuracion de cada objeto a mano, y nadie subiria nunca.
+     */
+    await asLogin(page, 'u-admin');
+    const slug = `subir-${Date.now()}`;
+    await conTarjetaVieja(page, slug);
+
+    await page.goto('/admin/modules');
+    await page.getByTestId(`objetos-${slug}`).click();
+    await page.getByTestId(`bump-${slug}-tarjeta-kpi`).click();
+    await page.getByTestId(`bump-confirm-${slug}-tarjeta-kpi`).click();
+
+    const hecho = page.getByTestId(`bump-hecho-${slug}-tarjeta-kpi`);
+    await expect(hecho).toBeVisible();
+    // Y dice QUE conservo: sin eso, «hecho» es una promesa sin comprobante.
+    await expect(hecho).toContainText('formato');
+
+    // Lo que manda es el almacen, no el mensaje.
+    const { modulo } = (await (await page.request.get(`/api/modules/${slug}/edit`)).json()) as {
+      modulo: { pages: { items: { instance: { version: string; presentacion?: Record<string, unknown> } }[] }[] };
+    };
+    const instancia = modulo.pages[0]?.items[0]?.instance;
+    expect(instancia?.version).not.toBe('1.0.0');
+    expect(instancia?.presentacion?.['formato']).toBe('entero');
+  });
+});
