@@ -10,8 +10,13 @@ export const INSTITUTIONAL_SOURCE: ThemeSource = {
   neutro: '#5b6b87',
 };
 
-/** Montserrat, la tipografia institucional. */
-const FONTS = {
+/**
+ * Montserrat, la tipografia institucional.
+ *
+ * Se exporta porque la comparten TODOS los temas: el color se elige, la tipografia institucional
+ * no. Un tema nuevo cambia la paleta, no la letra con la que la institucion se escribe.
+ */
+export const FONTS = {
   sans: "var(--font-montserrat), Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
   mono: 'ui-monospace, SFMono-Regular, Menlo, monospace',
 };

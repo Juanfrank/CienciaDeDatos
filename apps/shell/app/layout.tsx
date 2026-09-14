@@ -3,16 +3,17 @@ import { Montserrat } from 'next/font/google';
 import {
   asThemeTokens,
   defaultIdentity,
-  themeForMode,
+  themeVersion,
   toCssVariables,
   materialVariables,
   type ColorMode,
+  type ThemeDefinition,
 } from '@app/design-tokens';
 import { Header } from '../src/components/Header';
 import { LocaleProvider } from '../src/components/Locale';
 import { sessionGet } from '../src/server/session';
 import { idioma } from '../src/server/locale';
-import { colorMode } from '../src/server/theme';
+import { activeTheme, colorMode } from '../src/server/theme';
 import './globals.css';
 
 /*
@@ -39,15 +40,26 @@ const montserrat = Montserrat({
   variable: '--font-montserrat',
 });
 
-/** El tema organizacional (4.3) se inyecta como variables CSS en la raiz del documento. */
-function themeVariables(mode: ColorMode): Record<string, string> {
-  const theme = themeForMode(mode);
+/**
+ * El tema organizacional (4.3) se inyecta como variables CSS en la raiz del documento.
+ *
+ * El tema ACTIVO y el modo son dos cosas distintas: el tema es la decision de la institucion —cual
+ * de los suyos se sirve— y el modo es la preferencia de quien mira. De ahi que la version se pida
+ * con los dos: todo tema tiene su claro y su oscuro, derivados del mismo origen.
+ */
+function themeVariables(definicion: ThemeDefinition, mode: ColorMode): Record<string, string> {
+  const theme = themeVersion(definicion, mode);
   return { ...materialVariables(theme), ...toCssVariables(asThemeTokens(theme)) };
 }
 
 /** Cromo comun a toda la aplicacion: documento, tema y cabecera. */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [sesion, mode, locale] = await Promise.all([sessionGet(), colorMode(), idioma()]);
+  const [sesion, mode, locale, tema] = await Promise.all([
+    sessionGet(),
+    colorMode(),
+    idioma(),
+    activeTheme(),
+  ]);
 
   /*
    * `colorScheme` no es decorativo: es lo que hace que el navegador dibuje en oscuro lo que no
@@ -57,7 +69,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale} className={montserrat.variable} data-theme={mode}>
       <body
-        style={{ ...themeVariables(mode), colorScheme: mode === 'dark' ? 'dark' : 'light' } as React.CSSProperties}
+        data-tema={tema.id}
+        style={
+          {
+            ...themeVariables(tema, mode),
+            colorScheme: mode === 'dark' ? 'dark' : 'light',
+          } as React.CSSProperties
+        }
       >
         <LocaleProvider locale={locale}>
           {sesion ? <Header sesion={sesion} /> : null}

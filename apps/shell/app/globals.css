@@ -4178,6 +4178,46 @@ th[aria-sort='descending'] .table__flecha {
   flex-wrap: wrap;
 }
 .theme__head h3 { margin: 0; }
+
+/*
+ * Las DOS versiones de un tema, una al lado de la otra.
+ *
+ * Es lo que dice que son el mismo tema y no dos: mismo origen, dos derivaciones. En pantalla
+ * estrecha se apilan, porque dos columnas de muestras de color a la mitad de ancho no se comparan
+ * mejor que una debajo de la otra.
+ */
+.theme__versiones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+.theme__version {
+  padding: var(--space-md);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: var(--md-sys-color-surface-container-lowest);
+}
+.theme__version h5 {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--md-sys-typescale-title-small-size);
+}
+
+/* El selector nativo y el hexadecimal, sobre el mismo valor: uno para mirar, otro para pegar. */
+.campo-de-color {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.campo-de-color input[type='color'] {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  background: none;
+  cursor: pointer;
+}
 .theme-source,
 .theme-palette {
   display: flex;

@@ -38,7 +38,9 @@ export interface ConfigChangeLog {
     | 'object'
     // Concesion directa a una PERSONA, que es un camino de acceso distinto del equipo y por eso
     // se audita aparte: leer el registro de un equipo no cuenta quien mas alcanza sus modulos.
-    | 'user-grant';
+    | 'user-grant'
+    // Un tema repinta la aplicacion entera, y de el sale el contraste que 4.9 promete.
+    | 'theme';
   entityId: string;
   action:
     | 'create'

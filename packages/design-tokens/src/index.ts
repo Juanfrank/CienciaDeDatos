@@ -48,8 +48,17 @@ export {
 } from './material3Tokens';
 export {
   INSTITUTIONAL_SOURCE,
+  FONTS,
   asThemeTokens,
   lightTheme,
   darkTheme,
   themeForMode,
 } from './institutionalTheme';
+export {
+  type ThemeDefinition,
+  INSTITUTIONAL_THEME,
+  SOURCE_ROLES,
+  sourceColorIs,
+  themeVersion,
+  themeVersions,
+} from './themeDefinition';

@@ -6,6 +6,7 @@ import type {
   NavNode,
   Team,
 } from '@app/access-control';
+import { INSTITUTIONAL_THEME, type ThemeDefinition } from '@app/design-tokens';
 import {
   buildNavTree,
   buildScopeLookup,
@@ -40,6 +41,14 @@ export interface GovernanceStore {
   listUsers(): Promise<GovernedUser[]>;
   getUser(userId: string): Promise<GovernedUser | undefined>;
   upsertUser(user: GovernedUser): Promise<void>;
+
+  listThemes(): Promise<ThemeDefinition[]>;
+  getTheme(themeId: string): Promise<ThemeDefinition | undefined>;
+  upsertTheme(theme: ThemeDefinition): Promise<void>;
+  deleteTheme(themeId: string): Promise<boolean>;
+  /** Cual se sirve. Es uno solo: el color de la institucion no se reparte por equipos. */
+  getActiveTheme(): Promise<string>;
+  setActiveTheme(themeId: string): Promise<void>;
 }
 
 /** Instantanea completa del gobierno, tal como viaja al almacen compartido. */
@@ -48,15 +57,17 @@ export interface GovernanceSnapshot {
   teams: Team[];
   users: GovernedUser[];
   packages: ModulePackage[];
+  /*
+   * Opcionales a proposito: una instantanea guardada ANTES de que existieran los temas se sigue
+   * leyendo, y cae al tema de fabrica. Hacerlos obligatorios habria dejado la aplicacion sin color
+   * al desplegar sobre lo que ya estaba escrito, que es el peor momento para descubrirlo.
+   */
+  themes?: ThemeDefinition[];
+  activeThemeId?: string;
 }
 
 /** Estado inicial, reconstruido desde el seed con los mapeadores reales. */
-export function initialStatus(): {
-  tree: ManagedTree;
-  teams: Team[];
-  users: GovernedUser[];
-  packages: ModulePackage[];
-} {
+export function initialStatus(): GovernanceSnapshot {
   const lookup = buildScopeLookup(seedScopes, seedRestrictions, []);
   const nodes: NavNode[] = buildNavTree(seedNavNodes, lookup);
 
@@ -67,6 +78,8 @@ export function initialStatus(): {
     ),
     users: seedUsers.map((row) => toGovernedUser(row, seedUserScopes, lookup)),
     packages: [],
+    themes: [INSTITUTIONAL_THEME],
+    activeThemeId: INSTITUTIONAL_THEME.id,
   };
 }
 
@@ -160,6 +173,56 @@ export class StoreGovernanceRepository implements GovernanceStore {
       ...actual,
       users: [...actual.users.filter((u) => u.userId !== user.userId), clonar(user)],
     }));
+  }
+
+  /*
+   * El tema de fabrica SIEMPRE esta en la lista, se haya guardado o no.
+   *
+   * Es lo que hace que borrar el ultimo tema no deje la aplicacion sin color, y lo que permite
+   * leer una instantanea escrita antes de que los temas existieran sin tratarla como un caso
+   * aparte en cada sitio que lea un tema.
+   */
+  async listThemes(): Promise<ThemeDefinition[]> {
+    const guardados = (await this.snapshot()).themes ?? [];
+    const propios = guardados.filter((t) => t.id !== INSTITUTIONAL_THEME.id);
+    return [INSTITUTIONAL_THEME, ...propios];
+  }
+  async getTheme(themeId: string): Promise<ThemeDefinition | undefined> {
+    return (await this.listThemes()).find((t) => t.id === themeId);
+  }
+  async upsertTheme(theme: ThemeDefinition): Promise<void> {
+    await this.guardar((actual) => ({
+      ...actual,
+      themes: [...(actual.themes ?? []).filter((t) => t.id !== theme.id), clonar(theme)],
+    }));
+  }
+  async deleteTheme(themeId: string): Promise<boolean> {
+    const existe = (await this.getTheme(themeId)) !== undefined;
+    if (!existe || themeId === INSTITUTIONAL_THEME.id) return false;
+
+    await this.guardar((actual) => ({
+      ...actual,
+      themes: (actual.themes ?? []).filter((t) => t.id !== themeId),
+      // Si el que se borra era el que se servia, la aplicacion vuelve al de fabrica en vez de
+      // quedarse apuntando a uno que ya no existe.
+      activeThemeId:
+        actual.activeThemeId === themeId ? INSTITUTIONAL_THEME.id : actual.activeThemeId,
+    }));
+    return true;
+  }
+
+  async getActiveTheme(): Promise<string> {
+    const snapshot = await this.snapshot();
+    const pedido = snapshot.activeThemeId;
+    // Uno que ya no existe cae al de fabrica: sin esto, borrar un tema activo desde otra
+    // instancia dejaria esta dibujando sin variables de color.
+    const existe = (snapshot.themes ?? []).some((t) => t.id === pedido);
+    return pedido && (existe || pedido === INSTITUTIONAL_THEME.id)
+      ? pedido
+      : INSTITUTIONAL_THEME.id;
+  }
+  async setActiveTheme(themeId: string): Promise<void> {
+    await this.guardar((actual) => ({ ...actual, activeThemeId: themeId }));
   }
 
   /** Solo para pruebas: devuelve el almacen a su estado sembrado. */

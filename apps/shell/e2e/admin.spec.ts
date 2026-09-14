@@ -1311,3 +1311,69 @@ test.describe('crear y editar desde la tabla de modulos (4.1 y 4.10.8)', () => {
     await expect(page.getByRole('heading', { name: 'Composicion' })).toBeVisible();
   });
 });
+
+
+test.describe('mas de un tema, cada uno con sus dos versiones (4.3)', () => {
+  test('el de fabrica ensena SUS DOS versiones, no dos temas', async ({ page }) => {
+    /*
+     * Antes la pantalla listaba «Institucional claro» e «Institucional oscuro» como si fueran dos
+     * temas. Con eso no habia forma de tener un segundo tema sin tener cuatro entradas, y nada
+     * impedia que alguien cambiara una version y no la otra.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/themes');
+
+    await expect(page.getByTestId('tema-institucional')).toBeVisible();
+    await expect(page.getByTestId('tema-institucional-light')).toBeVisible();
+    await expect(page.getByTestId('tema-institucional-dark')).toBeVisible();
+    // Y las dos pasan contraste: la que no corre tambien se mira.
+    await expect(page.getByTestId('tema-institucional-light-contraste')).toBeVisible();
+    await expect(page.getByTestId('tema-institucional-dark-contraste')).toBeVisible();
+  });
+
+  test('un tema nuevo se crea, se sirve, y REPINTA la aplicacion entera', async ({ page }) => {
+    /*
+     * Lo que importa no es que la fila aparezca: es que el color cambie donde se mira.
+     *
+     * Se compara el color CALCULADO de la marca antes y despues de servirlo, y en una pagina que
+     * no es la de temas. Una pantalla de temas que solo se dibuja a si misma es un catalogo, no
+     * una configuracion.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/');
+    const antes = await page.evaluate(() =>
+      getComputedStyle(document.body).getPropertyValue('--md-sys-color-primary').trim(),
+    );
+    expect(antes).not.toBe('');
+
+    await page.goto('/admin/themes');
+    await page.getByTestId('abrir-crear-tema').click();
+    await page.getByTestId('nuevo-tema-nombre').fill('Verde de prueba');
+    await page.getByTestId('nuevo-tema-primario').fill('#00695c');
+    await page.getByTestId('crear-tema').click();
+
+    const nuevo = page.locator('[data-testid^="tema-tema-"]').first();
+    await expect(nuevo).toContainText('Verde de prueba');
+    // Nace con sus DOS versiones, como cualquier tema.
+    await expect(nuevo.locator('[data-testid$="-light"]')).toBeVisible();
+    await expect(nuevo.locator('[data-testid$="-dark"]')).toBeVisible();
+
+    await nuevo.locator('[data-testid^="activar-"]').click();
+    await expect(nuevo.locator('[data-testid$="-activo"]')).toBeVisible();
+
+    await page.goto('/');
+    const despues = await page.evaluate(() =>
+      getComputedStyle(document.body).getPropertyValue('--md-sys-color-primary').trim(),
+    );
+    expect(despues).not.toBe(antes);
+  });
+
+  test('el de fabrica no se puede borrar: es el que queda', async ({ page }) => {
+    // Sin un tema que siempre este, borrar el ultimo dejaria la aplicacion sin color, y sin forma
+    // de volver a entrar a crear uno — el panel tambien se dibuja con el.
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/themes');
+    await expect(page.getByTestId('borrar-institucional')).toHaveCount(0);
+    await expect(page.getByTestId('tema-institucional-fabrica')).toBeVisible();
+  });
+});

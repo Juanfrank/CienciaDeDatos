@@ -1,80 +1,56 @@
 import {
-  INSTITUTIONAL_SOURCE,
+  SOURCE_ROLES,
   TYPOGRAPHY,
   asThemeTokens,
-  darkTheme,
   findContrastFailures,
   institutionalContrastChecks,
-  lightTheme,
+  themeVersions,
+  type ColorMode,
   type MaterialTheme,
+  type ThemeDefinition,
 } from '@app/design-tokens';
-import type { MessageKey, Translator } from '@app/i18n';
+import type { Translator } from '@app/i18n';
+import { ThemeActions, ThemeForm } from '../../../src/components/admin/ThemeForm';
+import { governance } from '../../../src/server/governance';
+import { INSTITUTIONAL_THEME } from '@app/design-tokens';
+import { COLOR_MODES } from '../../../src/server/theme';
 import { translator } from '../../../src/server/locale';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * Los temas disponibles y su configuracion — seccion 4.3.
+ * Los temas de la institucion — seccion 4.3.
  *
- * Un tema no se edita aqui con un selector de color. Se deriva de TRES colores de origen, y
- * Material Design 3 calcula el resto: tocar un token suelto rompe la relacion de contraste que
- * 4.9 exige, y la pantalla dejaria de poder prometer AA. Lo que si se ve es que sale de cada
- * origen, si pasa contraste y que version corre.
+ * Cada TEMA tiene sus dos versiones, clara y oscura, derivadas del mismo origen. Antes la pantalla
+ * listaba «Institucional claro» e «Institucional oscuro» como si fueran dos temas: con eso no
+ * habia forma de tener un segundo tema sin tener cuatro entradas, y nada impedia que alguien
+ * cambiara una version y no la otra —la aplicacion pasaria a oscuro con colores de otra marca—.
+ *
+ * Un tema tampoco se edita token a token. Se eligen TRES colores de origen y Material Design 3
+ * calcula el resto: tocar un token suelto rompe la relacion de contraste que 4.9 exige, y la
+ * pantalla dejaria de poder prometer AA.
  */
-
-interface ThemeRow {
-  id: string;
-  name: MessageKey;
-  desc: MessageKey;
-  theme: MaterialTheme;
-  /** Si es el que la aplicacion sirve hoy. */
-  active: boolean;
-}
-
-const TEMAS: ThemeRow[] = [
-  {
-    id: 'institucional-claro',
-    name: 'admin.themes.light',
-    desc: 'admin.themes.light.desc',
-    theme: lightTheme,
-    active: true,
-  },
-  {
-    id: 'institucional-oscuro',
-    name: 'admin.themes.dark',
-    desc: 'admin.themes.dark.desc',
-    theme: darkTheme,
-    active: false,
-  },
-];
-
-/** La version del tema acompana a la del paquete que lo publica. */
-const VERSION = '1.0.0';
-
 export default async function TemasPage() {
-  const t = await translator();
+  const [t, temas, activo] = await Promise.all([
+    translator(),
+    governance.listThemes(),
+    governance.getActiveTheme(),
+  ]);
 
   return (
     <section>
       <h2>{t('admin.themes.title')}</h2>
       <p className="muted-text">{t('admin.themes.intro')}</p>
 
-      <h3>{t('admin.themes.source')}</h3>
-      <ul className="theme-source" data-testid="origen-del-tema">
-        {Object.entries(INSTITUTIONAL_SOURCE).map(([rol, valor]) => (
-          <li key={rol} data-testid={`origen-${rol}`}>
-            <span className="theme-swatch" style={{ background: valor }} aria-hidden="true" />
-            <b>{rol}</b>
-            <code>{valor}</code>
-          </li>
-        ))}
-      </ul>
+      <ThemeForm base={INSTITUTIONAL_THEME.source} />
 
-      {TEMAS.map((fila) => (
-        <Theme key={fila.id} fila={fila} t={t} />
+      {temas.map((tema) => (
+        <Tema key={tema.id} tema={tema} t={t} activo={tema.id === activo} />
       ))}
 
       <h3>{t('admin.themes.typography')}</h3>
+      {/* La tipografia es una y la comparten todos: el color se elige, la letra institucional no. */}
+      <p className="muted-text">{t('admin.themes.typography.shared')}</p>
       <table className="tabla" data-testid="tabla-tipografia">
         <thead>
           <tr>
@@ -99,36 +75,93 @@ export default async function TemasPage() {
   );
 }
 
-function Theme({ fila, t }: { fila: ThemeRow; t: Translator }) {
-  const tokens = asThemeTokens(fila.theme);
+function Tema({
+  tema,
+  t,
+  activo,
+}: {
+  tema: ThemeDefinition;
+  t: Translator;
+  activo: boolean;
+}) {
+  const versiones = themeVersions(tema);
+
+  return (
+    <article className="theme" data-testid={`tema-${tema.id}`}>
+      <div className="theme__head">
+        <h3>{tema.name}</h3>
+        {tema.builtIn ? (
+          <span className="insignia" data-testid={`tema-${tema.id}-fabrica`}>
+            {t('admin.themes.builtIn')}
+          </span>
+        ) : null}
+        <ThemeActions
+          themeId={tema.id}
+          nombre={tema.name}
+          activo={activo}
+          builtIn={tema.builtIn === true}
+        />
+      </div>
+      {tema.description ? <p className="muted-text">{tema.description}</p> : null}
+
+      <h4>{t('admin.themes.source')}</h4>
+      <ul className="theme-source" data-testid={`tema-${tema.id}-origen`}>
+        {SOURCE_ROLES.map((rol) => (
+          <li key={rol} data-testid={`tema-${tema.id}-origen-${rol}`}>
+            <span
+              className="theme-swatch"
+              style={{ background: tema.source[rol] }}
+              aria-hidden="true"
+            />
+            <b>{rol}</b>
+            <code>{tema.source[rol]}</code>
+          </li>
+        ))}
+      </ul>
+
+      {/*
+        Las DOS versiones, una al lado de la otra.
+        Es lo que dice que son el mismo tema: el mismo origen, dos derivaciones. Enseñar solo la
+        que corre dejaria la otra sin mirar hasta que alguien cambiara de modo.
+      */}
+      <div className="theme__versiones">
+        {COLOR_MODES.map((modo) => (
+          <Version key={modo} id={tema.id} modo={modo} version={versiones[modo]} t={t} />
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function Version({
+  id,
+  modo,
+  version,
+  t,
+}: {
+  id: string;
+  modo: ColorMode;
+  version: MaterialTheme;
+  t: Translator;
+}) {
+  const tokens = asThemeTokens(version);
   const comprobaciones = institutionalContrastChecks(tokens);
   const fallos = findContrastFailures(comprobaciones);
 
   return (
-    <article className="theme" data-testid={`tema-${fila.id}`}>
-      <div className="theme__head">
-        <h3>{t(fila.name)}</h3>
-        <span className="insignia" data-testid={`tema-${fila.id}-version`}>
-          v{VERSION}
-        </span>
-        {fila.active ? (
-          <span className="insignia" data-testid={`tema-${fila.id}-activo`}>
-            {t('admin.themes.inUse')}
-          </span>
-        ) : null}
-      </div>
-      <p className="muted-text">{t(fila.desc)}</p>
+    <section className="theme__version" data-testid={`tema-${id}-${modo}`}>
+      <h5>{modo === 'light' ? t('admin.themes.light') : t('admin.themes.dark')}</h5>
 
       {/*
-        El contraste se comprueba AQUI y no solo en la prueba unitaria: quien cambie la norma de
-        marca manana entra por esta pantalla, no por el paquete de tokens.
+        El contraste se comprueba AQUI ademas de al guardar: quien cambie la norma de marca manana
+        entra por esta pantalla, no por el paquete de tokens.
       */}
       {fallos.length === 0 ? (
-        <p className="notice-ok" data-testid={`tema-${fila.id}-contraste`}>
+        <p className="notice-ok" data-testid={`tema-${id}-${modo}-contraste`}>
           {t('admin.themes.contrastPasses', { n: comprobaciones.length })}
         </p>
       ) : (
-        <ul className="notice-atencion" data-testid={`tema-${fila.id}-contraste-falla`}>
+        <ul className="notice-atencion" data-testid={`tema-${id}-${modo}-contraste-falla`}>
           {fallos.map((f) => (
             <li key={f.label}>
               {t('admin.themes.contrastFails', {
@@ -141,8 +174,7 @@ function Theme({ fila, t }: { fila: ThemeRow; t: Translator }) {
         </ul>
       )}
 
-      <h4>{t('admin.themes.categorical')}</h4>
-      <ul className="theme-palette" data-testid={`tema-${fila.id}-categoricos`}>
+      <ul className="theme-palette" data-testid={`tema-${id}-${modo}-categoricos`}>
         {tokens.color.categorical.map((color, i) => (
           <li key={color}>
             <span className="theme-swatch" style={{ background: color }} aria-hidden="true" />
@@ -153,7 +185,7 @@ function Theme({ fila, t }: { fila: ThemeRow; t: Translator }) {
         ))}
       </ul>
 
-      <details data-testid={`tema-${fila.id}-tokens`}>
+      <details data-testid={`tema-${id}-${modo}-tokens`}>
         <summary>{t('admin.themes.tokens')}</summary>
         <table className="tabla">
           <thead>
@@ -186,6 +218,6 @@ function Theme({ fila, t }: { fila: ThemeRow; t: Translator }) {
           </tbody>
         </table>
       </details>
-    </article>
+    </section>
   );
 }

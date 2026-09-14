@@ -14,6 +14,7 @@ export type Capability =
   | 'ver-panel-auditoria'
   | 'reorganizar-arbol-general'
   | 'gestionar-paquetes-visuales'
+  | 'gestionar-temas'
   | 'borrar-definitivamente';
 
 const MATRIX: Record<Capability, readonly AppRole[]> = {
@@ -32,6 +33,8 @@ const MATRIX: Record<Capability, readonly AppRole[]> = {
   // modulo, asi que esta reservado a Administrador aunque "mover" suene a algo cosmetico.
   'reorganizar-arbol-general': ['administrador'],
   'gestionar-paquetes-visuales': ['administrador'],
+  // Un tema cambia el color de TODA la institucion, y el contraste que 4.9 exige sale de el.
+  'gestionar-temas': ['administrador'],
   'borrar-definitivamente': ['administrador'],
 };
 
@@ -53,6 +56,7 @@ const ORDEN: readonly Capability[] = [
   'publicar-modulo-institucional',
   'reorganizar-arbol-general',
   'gestionar-paquetes-visuales',
+  'gestionar-temas',
   'gestionar-equipos',
   'gestionar-usuarios-y-roles',
   'configurar-ambitos',
