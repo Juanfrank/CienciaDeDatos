@@ -9,7 +9,7 @@ import type { MessageKey } from './es';
  * lo que el tipo no puede ver.
  */
 export const en: Record<MessageKey, string> = {
-  'app.nombre': 'Visualization layer',
+  'app.nombre': 'Data and Knowledge Management',
   'app.institucion': 'Judiciary of the Dominican Republic',
 
   'accion.guardar': 'Save',

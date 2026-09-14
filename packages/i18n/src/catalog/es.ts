@@ -10,8 +10,8 @@
  * sin contexto. Lo variable va como argumento ICU.
  */
 export const es = {
-  'app.nombre': 'Capa de visualizacion',
-  'app.institucion': 'Poder Judicial de la Republica Dominicana',
+  'app.nombre': 'Gestión de Datos y Conocimiento',
+  'app.institucion': 'Poder Judicial de la República Dominicana',
 
   'accion.guardar': 'Guardar',
   'accion.cancelar': 'Cancelar',

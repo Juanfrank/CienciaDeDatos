@@ -127,7 +127,6 @@ h1, h2, h3, h4 { margin: 0; }
 
 .md-body-medium,
 .muted-text,
-.header__subtitle,
 .admin__nav-label {
   font-size: var(--md-sys-typescale-body-medium-size);
   line-height: var(--md-sys-typescale-body-medium-line-height);
@@ -1170,7 +1169,7 @@ input[type='radio'] {
   flex-wrap: wrap;
 }
 .cabecera .header__title,
-.cabecera .header__subtitle,
+.cabecera .header__eyebrow,
 .cabecera .button-link,
 .cabecera .team-picker__label { color: var(--md-sys-color-on-primary); }
 .cabecera select {
@@ -1206,10 +1205,51 @@ input[type='radio'] {
   padding: 4px 6px;
 }
 .header__mark { display: flex; align-items: center; gap: var(--space-md); min-width: 0; }
-.header__texts { display: flex; flex-direction: column; min-width: 0; }
-.header__emblema { width: auto; height: 40px; flex-shrink: 0; }
-.header__title { text-decoration: none; color: var(--md-sys-color-on-surface); }
-.header__subtitle { color: var(--md-sys-color-on-surface-variant); }
+.header__emblema { width: auto; height: 44px; flex-shrink: 0; }
+
+/*
+ * La firma institucional.
+ *
+ * Antes eran dos lineas del mismo peso y el mismo color, y el conjunto no se leia como una
+ * marca sino como dos frases sueltas. Ahora hay jerarquia de verdad: la institucion arriba, en
+ * versalitas espaciadas y a media opacidad —es el respaldo, no el titular—, y el nombre de la
+ * aplicacion debajo, grande y firme. Un filete vertical los separa del emblema, que es lo que
+ * convierte dos elementos vecinos en un solo bloque.
+ */
+.header__texts {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding-left: var(--space-md);
+  border-left: 1px solid color-mix(in srgb, var(--md-sys-color-on-primary) 35%, transparent);
+}
+.header__eyebrow {
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+  line-height: 1.2;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  opacity: 0.82;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.header__title {
+  text-decoration: none;
+  color: var(--md-sys-color-on-surface);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+/* El subrayado se reserva al foco y al puntero: un titulo permanentemente subrayado es ruido. */
+.header__title:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* En movil el respaldo estorba: lo que hace falta saber es en que aplicacion se esta. */
+@media (max-width: 640px) {
+  .header__eyebrow { display: none; }
+  .header__texts { border-left: 0; padding-left: 0; }
+}
 .header__actions { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
 
 /*

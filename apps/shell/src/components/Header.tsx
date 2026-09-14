@@ -2,15 +2,15 @@ import Link from 'next/link';
 import { defaultIdentity } from '@app/design-tokens';
 import { can } from '@app/access-control';
 import { isAdministrator, roleMoreHeightOf } from '../server/admin';
-import { findTeam } from '../server/context';
 import type { ShellSession } from '../server/session';
 import { ToggleSidebar } from './ToggleSidebar';
 import { listUsers } from '../server/context';
 import { AccountMenu, type AccountEntry } from './AccountMenu';
+import { translator } from '../server/locale';
 
 /** Cromo de cabecera de la aplicacion. */
 export async function Header({ sesion }: { sesion: ShellSession }) {
-  const equipo = await findTeam(sesion.activeTeamId);
+  const t = await translator();
 
   // El enlace solo se dibuja para quien puede usarlo. Ocultarlo no protege nada —eso lo hace el
   // guardian del backend— pero no tiene sentido ofrecer una puerta cerrada.
@@ -46,14 +46,19 @@ export async function Header({ sesion }: { sesion: ShellSession }) {
           height={defaultIdentity.emblem.height}
           alt=""
         />
+        {/*
+          El nombre de la aplicacion manda y la institucion lo respalda: eso es una firma
+          institucional, y por eso van en ese orden y con pesos distintos. El equipo activo NO
+          esta aqui —cambia de una persona a otra y de un momento a otro— sino en el arbol de
+          navegacion, que es lo que de verdad acota.
+        */}
         <div className="header__texts">
-          <Link href="/" className="header__title">
-            Capa de visualizacion
-          </Link>
-          <span className="header__subtitle" data-testid="institucion">
+          <span className="header__eyebrow" data-testid="institucion">
             {defaultIdentity.name}
-            {equipo ? ` · ${equipo.name}` : ''}
           </span>
+          <Link href="/" className="header__title">
+            {t('app.nombre')}
+          </Link>
         </div>
       </div>
 
