@@ -946,7 +946,19 @@ input[type='radio'] {
 .form__pair { display: flex; gap: 8px; }
 .form__pair > * { flex: 1; min-width: 0; }
 
-.kpi { display: flex; flex-direction: column; min-height: 0; }
+/*
+ * El bloque de la cifra NO se comprime.
+ *
+ * El cuerpo de una tarjeta es una columna flexible para que un grafico pueda llenar el alto que
+ * le toque. Un texto no: con `flex-shrink` por defecto y `min-height: 0`, este bloque se encogia
+ * a cuatro pixeles y su cifra —que mide cuarenta y cuatro— se dibujaba ENCIMA de lo que viniera
+ * detras. En una tarjeta baja con comparacion, el delta quedaba escrito sobre el valor.
+ *
+ * Lo que tiene que pasar cuando no cabe esta decidido desde hace tiempo y es otra cosa: el cuerpo
+ * se desplaza por dentro, que es lo que hace `overflow: auto`.
+ */
+.kpi { display: flex; flex-direction: column; flex-shrink: 0; min-height: 0; }
+.kpi__delta { flex-shrink: 0; }
 .kpi__label {
   margin: 0;
   font-size: var(--md-sys-typescale-body-small-size);

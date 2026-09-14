@@ -393,7 +393,15 @@ test.describe('el alto de un objeto no depende de su contenido', () => {
    * largo, la fila entera crece para acomodar a la mas alta, y lo que alguien compuso cuadrado se
    * publica descuadrado. Se nota poco en el editor y mucho en pantalla.
    */
-  test('dos objetos de la misma fila miden exactamente lo mismo', async ({ page }) => {
+  test('dos objetos que declaran el mismo alto miden exactamente lo mismo', async ({ page }) => {
+    /*
+     * Se agrupa por fila Y POR ALTO DECLARADO, no solo por fila.
+     *
+     * Agrupando solo por fila, la prueba decia «todo lo que empieza en la misma fila mide igual»,
+     * que no es la regla: una rejilla existe precisamente para que un panel de cuatro filas
+     * conviva con una tarjeta de dos. Lo que se comprueba es lo que si es regla — que el alto sale
+     * de lo declarado y no del contenido—, y para eso hay que comparar lo comparable.
+     */
     await asLogin(page, 'u-admin');
     await page.goto('/m/casos-pendientes');
     await expect(page.locator('.grid__cell').first()).toBeVisible();
@@ -401,17 +409,31 @@ test.describe('el alto de un objeto no depende de su contenido', () => {
     const celdas = await page.locator('.grid__cell').evaluateAll((els) =>
       els.map((el) => {
         const r = el.getBoundingClientRect();
-        return { top: Math.round(r.top), alto: Math.round(r.height) };
+        return {
+          top: Math.round(r.top),
+          alto: Math.round(r.height),
+          /*
+           * `gridRowStart`, no `gridRowEnd`.
+           *
+           * La celda declara su alto con `grid-row: span N`, y ese atajo deja el `span` en el
+           * INICIO y el final en `auto`. Leyendo el final, todas las celdas dicen lo mismo y el
+           * agrupado vuelve a ser por fila a secas.
+           */
+          filas: getComputedStyle(el).gridRowStart,
+        };
       }),
     );
     expect(celdas.length).toBeGreaterThan(3);
 
-    const porFila = new Map<number, number[]>();
-    for (const c of celdas) porFila.set(c.top, [...(porFila.get(c.top) ?? []), c.alto]);
+    const porGrupo = new Map<string, number[]>();
+    for (const c of celdas) {
+      const clave = `${c.top}|${c.filas}`;
+      porGrupo.set(clave, [...(porGrupo.get(clave) ?? []), c.alto]);
+    }
 
-    // Al menos una fila con varios objetos, o la prueba no comprueba nada.
-    expect([...porFila.values()].some((altos) => altos.length > 1)).toBe(true);
-    for (const altos of porFila.values()) expect(new Set(altos).size).toBe(1);
+    // Al menos un grupo con varios objetos, o la prueba no comprueba nada.
+    expect([...porGrupo.values()].some((altos) => altos.length > 1)).toBe(true);
+    for (const altos of porGrupo.values()) expect(new Set(altos).size).toBe(1);
   });
 
   test('el alto es multiplo exacto de las filas declaradas, no del contenido', async ({ page }) => {
@@ -456,5 +478,63 @@ test.describe('el alto de un objeto no depende de su contenido', () => {
     const after = await page.getByTestId('tabla').first().locator('../..').boundingBox();
     expect(Math.round(after?.height ?? 0)).toBe(Math.round(before?.height ?? 0));
     expect(await contenedor.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  });
+});
+
+test.describe('dentro de una tarjeta, nada se dibuja encima de nada', () => {
+  /*
+   * Con un ancho FIJO, y no el que traiga el proyecto.
+   *
+   * El solape solo aparece cuando el titulo y el subtitulo ocupan dos lineas cada uno, que es lo
+   * que pasa a esta anchura: la cabecera se come el alto y al cuerpo le queda menos de lo que su
+   * contenido mide. Con una ventana mas ancha, el titulo cabe en una linea, sobra sitio y la
+   * prueba pasaria con el fallo puesto — verde por la razon equivocada.
+   */
+  test.use({ viewport: { width: 1280, height: 900 } });
+
+  test('la cifra y su comparacion no se superponen en una tarjeta baja', async ({ page }) => {
+    /*
+     * El cuerpo de una tarjeta es una columna FLEXIBLE, para que un grafico llene el alto que le
+     * toque. Un bloque de texto no puede tratarse igual: comprimido a cuatro pixeles, su cifra
+     * —que mide cuarenta y cuatro— se dibujaba encima de lo que viniera detras, y en una tarjeta
+     * baja con comparacion el delta quedaba escrito sobre el valor.
+     *
+     * Se mide en pixeles y sobre HERMANOS del mismo cuerpo: comparar cajas de tarjetas distintas
+     * habria dado verde con el fallo puesto.
+     */
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    /*
+     * Se comparan los TEXTOS, no las cajas que los contienen.
+     *
+     * El bloque de la cifra se encogia a cuatro pixeles y su `<p>` —de cuarenta y cuatro— se
+     * salia por abajo: las cajas hermanas no se tocaban y aun asi el delta quedaba escrito encima
+     * del valor. Mirando solo a los hermanos directos, esta prueba habria dado verde con el fallo
+     * delante.
+     */
+    const solapes = await page.evaluate(`(() => {
+      const malos = [];
+      for (const tarjeta of Array.from(document.querySelectorAll('.objeto'))) {
+        const textos = Array.from(tarjeta.querySelectorAll('.object__body p, .object__body span'))
+          .filter((el) => el.children.length === 0 && (el.textContent || '').trim() !== '')
+          .map((el) => ({ rotulo: el.textContent.trim().slice(0, 20), r: el.getBoundingClientRect() }))
+          .filter((t) => t.r.width > 0 && t.r.height > 0);
+
+        for (let i = 0; i < textos.length; i += 1) {
+          for (let j = i + 1; j < textos.length; j += 1) {
+            const a = textos[i].r;
+            const b = textos[j].r;
+            const seCruzan =
+              a.left < b.right - 1 && b.left < a.right - 1 &&
+              a.top < b.bottom - 1 && b.top < a.bottom - 1;
+            if (seCruzan) malos.push(textos[i].rotulo + ' / ' + textos[j].rotulo);
+          }
+        }
+      }
+      return malos;
+    })()`);
+
+    expect(solapes).toEqual([]);
   });
 });

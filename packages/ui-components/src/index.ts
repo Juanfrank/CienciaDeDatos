@@ -34,6 +34,7 @@ export {
 } from './presentation/conditional';
 export {
   ACCENTS,
+  AXIS_SCALES,
   FUNNEL_COMPARISONS,
   REFERENCE_STYLES,
   DATUM_POSITIONS,
@@ -66,6 +67,7 @@ export {
   type ComboSettings,
   type FunnelSettings,
   type AxisSettings,
+  type AxisScale,
   type GaugeSettings,
   type SortCriterion,
   type PieLabel,

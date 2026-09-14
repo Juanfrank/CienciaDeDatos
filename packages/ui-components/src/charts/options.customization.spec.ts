@@ -326,3 +326,52 @@ describe('giro de los rotulos del eje', () => {
     expect(o.xAxis.axisLabel.hideOverlap).toBe(false);
   });
 });
+
+describe('escala del eje de valores', () => {
+  it('lineal por omision, logaritmica cuando se pide', () => {
+    /*
+     * Logaritmica sirve para lo que cualquier herramienta de informes usa: comparar magnitudes
+     * muy distintas en el mismo grafico sin que la pequena se convierta en una raya pegada al eje.
+     */
+    expect(opciones().yAxis.type).toBe('value');
+    expect(opciones({ ejes: { escala: 'logaritmica' } }).yAxis.type).toBe('log');
+  });
+
+  it('un apilado al 100 % la IGNORA', () => {
+    // El apilado impone una escala de 0 a 100 y las series se suman sobre ella: repartida en
+    // logaritmos, los tramos dejan de sumar el total que el propio grafico promete.
+    const o = opciones(
+      { ejes: { escala: 'logaritmica' }, apilado: 'porcentaje' },
+      vm(['A', 'B'], [['x', 1, 2]]),
+    );
+    expect(o.yAxis.type).toBe('value');
+    expect(o.yAxis.max).toBe(100);
+  });
+});
+
+describe('zoom sobre el eje de categorias', () => {
+  it('sin pedirlo, no hay ningun control', () => {
+    expect(opciones().dataZoom).toBeUndefined();
+  });
+
+  it('son DOS controles: la barra y el gesto sobre el grafico', () => {
+    // Con solo la barra, arrastrar lo que se mira no hace nada; con solo el gesto, nada en
+    // pantalla dice que se esta viendo un tramo y no el total.
+    const o = opciones({ ejes: { zoom: true } });
+    expect(o.dataZoom.map((z: { type: string }) => z.type)).toEqual(['slider', 'inside']);
+  });
+
+  it('empieza mostrandolo TODO', () => {
+    // Un grafico que abre ya recortado esconde datos sin que nadie lo haya pedido.
+    const o = opciones({ ejes: { zoom: true } });
+    expect(o.dataZoom.every((z: { start: number; end: number }) => z.start === 0 && z.end === 100)).toBe(true);
+  });
+
+  it('le reserva margen, y sin comerse el del titulo del eje', () => {
+    // `containLabel` cuenta los rotulos del eje pero NO la barra: sin reservar, se dibuja encima
+    // de los nombres de las categorias.
+    const sinZoom = opciones({ ejes: { xTitle: 'Distrito' } });
+    const conZoom = opciones({ ejes: { xTitle: 'Distrito', zoom: true } });
+    expect(conZoom.grid.bottom).toBe(sinZoom.grid.bottom + 26);
+  });
+});

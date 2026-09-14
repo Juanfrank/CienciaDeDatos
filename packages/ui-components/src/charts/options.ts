@@ -331,16 +331,58 @@ function shiftLabelBorder(o: ChartOptions) {
   };
 }
 
+/**
+ * La barra para acercarse a un tramo del eje de categorias.
+ *
+ * Son DOS controles y hacen falta los dos: el `slider` es la barra visible de abajo, y el
+ * `inside` deja arrastrar y hacer rueda sobre el propio grafico. Con solo el primero, el gesto
+ * natural —arrastrar lo que se mira— no hace nada; con solo el segundo, nada en pantalla dice que
+ * se esta viendo un tramo y no el total.
+ *
+ * Empieza mostrandolo TODO (0 a 100): un grafico que abre ya recortado esconde datos sin que
+ * nadie lo haya pedido.
+ */
+const zoomOf = (o: ChartOptions) =>
+  o.ejes?.zoom === true
+    ? {
+        dataZoom: [
+          {
+            type: 'slider' as const,
+            start: 0,
+            end: 100,
+            height: 18,
+            bottom: 0,
+            borderColor: o.palette.line,
+            fillerColor: o.palette.superficieElevada,
+            handleStyle: { color: o.palette.mutedText },
+            textStyle: { color: o.palette.mutedText },
+          },
+          { type: 'inside' as const, start: 0, end: 100 },
+        ],
+      }
+    : {};
+
 function base(o: ChartOptions) {
   const { legend, margin } = legendOf(o);
+  const zoom = zoomOf(o);
+  // Se parte de lo que `marginOf` ya decidio —leyenda y titulo del eje X— y se le SUMA la barra.
+  // Calculando sobre `margin` a secas, un grafico con titulo de eje y zoom habria perdido el
+  // hueco del titulo.
+  const margenes = marginOf(o, margin);
   return {
     ...core(o, o.vm.series.length > 1),
     /*
-     * El margen inferior reserva sitio para la leyenda cuando la hay.
+     * El margen inferior reserva sitio para la leyenda cuando la hay, y para la barra de zoom
+     * cuando se pide: sin reservarlo, la barra se dibuja sobre los rotulos del eje.
      */
-    grid: { ...marginOf(o, margin), containLabel: true },
+    grid: {
+      ...margenes,
+      ...(o.ejes?.zoom === true ? { bottom: margenes.bottom + 26 } : {}),
+      containLabel: true,
+    },
     tooltip: tooltipOf(o),
     legend,
+    ...zoom,
   };
 }
 
@@ -421,7 +463,17 @@ const axisCategory = (o: ChartOptions) => ({
 });
 
 const valueAxis = (o: ChartOptions) => ({
-  type: 'value' as const,
+  /*
+   * Logaritmica cuando se pide, y NUNCA con un apilado de porcentaje.
+   *
+   * Un apilado al 100 % impone una escala de 0 a 100 y las series se suman sobre ella: repartida
+   * en logaritmos, los tramos dejan de sumar el total que el propio grafico promete. Se ignora en
+   * vez de dibujar una pila que no cuadra.
+   */
+  type:
+    o.ejes?.escala === 'logaritmica' && o.apilado !== 'porcentaje'
+      ? ('log' as const)
+      : ('value' as const),
   show: o.ejes?.mostrarY !== false,
   /*
    * Los limites, en orden de quien manda: el 100 % los impone (0 a 100), luego lo escrito a

@@ -666,10 +666,23 @@ export const demoModules: ModuleDefinition[] = [
                * las leia. Sirve de comprobacion en vivo de que ahora si.
                */
               presentacion: {
-                subtitulo: 'Leyenda a la derecha, cifras, sin cuadricula, ordenado por valor',
+                subtitulo: 'Leyenda a la derecha, cifras, ordenado por valor y escala logaritmica',
                 leyenda: 'derecha',
                 etiquetasDeDato: true,
-                ejes: { gridlines: false, tituloY: 'Casos' },
+                /*
+                 * Escala LOGARITMICA, y con su minimo puesto.
+                 *
+                 * Es para lo que sirve: comparar magnitudes muy distintas en el mismo grafico sin
+                 * que la pequena quede pegada al eje. El minimo va en uno porque el logaritmo de
+                 * cero no existe, y la validacion lo exige en vez de dejar una escala que miente.
+                 */
+                ejes: {
+                  gridlines: false,
+                  tituloY: 'Casos',
+                  escala: 'logaritmica',
+                  desdeCero: false,
+                  minimoY: 1,
+                },
                 orden: { por: 'valor', direction: 'desc' },
               },
             },
@@ -688,10 +701,12 @@ export const demoModules: ModuleDefinition[] = [
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
               presentacion: {
-                subtitulo: 'Leyenda arriba y cifra sobre cada punto',
+                subtitulo: 'Leyenda arriba, cifra sobre cada punto y barra de zoom',
                 leyenda: 'arriba',
                 etiquetasDeDato: true,
-                ejes: { tituloY: 'Casos' },
+                // La barra de zoom: deja acercarse a un tramo del eje sin perder de vista donde
+                // esta dentro del total. Empieza mostrandolo todo.
+                ejes: { tituloY: 'Casos', zoom: true },
               },
             },
           },

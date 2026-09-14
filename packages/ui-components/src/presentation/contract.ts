@@ -36,7 +36,32 @@ export interface AxisSettings {
   maximoY?: number;
   /** Cuanto se giran los rotulos del eje de categorias. */
   rotateX?: number;
+  /**
+   * Como se reparte la escala del eje de valores.
+   *
+   * Logaritmica sirve para lo que cualquier herramienta de informes usa: comparar magnitudes muy
+   * distintas en el mismo grafico —un distrito con doce mil expedientes junto a uno con ochenta—
+   * sin que el pequeno se convierta en una raya pegada al eje.
+   *
+   * No admite ceros ni negativos, y no es un capricho de la implementacion: el logaritmo de cero
+   * no existe. La validacion lo rechaza junto con un minimo de cero, en vez de dejar el grafico
+   * dibujando una escala que miente.
+   */
+  escala?: AxisScale;
+  /**
+   * Una barra para acercarse a un tramo del eje de categorias.
+   *
+   * Con cuarenta categorias, un grafico las dibuja todas y no se lee ninguna. El paginado parte
+   * en paginas; esto deja mirar un tramo sin perder de vista donde esta dentro del total, que es
+   * lo que hace falta cuando lo que se busca es un pico.
+   */
+  zoom?: boolean;
 }
+
+/** Lineal o logaritmica, como en cualquier herramienta de informes. */
+export const AXIS_SCALES = ['lineal', 'logaritmica'] as const;
+
+export type AxisScale = (typeof AXIS_SCALES)[number];
 
 /** ---- Lineas de referencia ---- */
 export const REFERENCE_STYLES = ['solida', 'discontinua', 'punteada'] as const;
@@ -461,6 +486,29 @@ export function validatePresentation(
     problems.push({
       clave: 'ejes.rotateX',
       issue: `El giro va de -90 a 90 grados, y ${ejes.rotateX} no esta en ese rango.`,
+    });
+  }
+  if (ejes?.escala !== undefined && !(AXIS_SCALES as readonly string[]).includes(ejes.escala)) {
+    problems.push({
+      clave: 'ejes.escala',
+      issue: `'${String(ejes.escala)}' no es una escala de eje.`,
+    });
+  }
+  /*
+   * Una escala logaritmica con un minimo de cero o negativo no se dibuja: el logaritmo de cero no
+   * existe. Se rechaza al guardar en vez de dejar un grafico con una escala que miente — que es
+   * como se descubriria, mirandolo.
+   */
+  if (ejes?.escala === 'logaritmica' && ejes.minimoY !== undefined && ejes.minimoY <= 0) {
+    problems.push({
+      clave: 'ejes.minimoY',
+      issue: `Una escala logaritmica no admite un minimo de ${ejes.minimoY}: tiene que ser mayor que cero.`,
+    });
+  }
+  if (ejes?.escala === 'logaritmica' && ejes.desdeCero === true) {
+    problems.push({
+      clave: 'ejes.desdeCero',
+      issue: 'Una escala logaritmica no puede empezar en cero: el logaritmo de cero no existe.',
     });
   }
   if (ejes?.minimoY !== undefined && ejes.maximoY !== undefined && ejes.minimoY >= ejes.maximoY) {

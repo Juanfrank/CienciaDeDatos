@@ -15,6 +15,7 @@ import {
   LABEL_POSITIONS,
   normalizedLabels,
   FORMAT_KINDS,
+  AXIS_SCALES,
   PICKER_KINDS,
   VALUE_ORDERS,
   patternProblem,
@@ -35,6 +36,7 @@ import {
   type IconName,
   type ObjectPresentation,
   type PickerKind,
+  type AxisScale,
   type DimensionPicker,
   type FilterMode,
   type ValueOrder,
@@ -980,6 +982,48 @@ export function Presentation({
             />{" "}
             Empezar en cero
           </label>
+
+          <label className="form__field">
+            <span>{t('pres.axis.scale')}</span>
+            <select
+              value={p.ejes?.escala ?? 'lineal'}
+              disabled={saving}
+              data-testid={`${prueba}-escala`}
+              onChange={(e) =>
+                set({
+                  ejes: {
+                    ...p.ejes,
+                    escala: e.target.value === 'lineal' ? undefined : (e.target.value as AxisScale),
+                    // Volver a lineal no puede dejar puesto lo que la logaritmica prohibia, ni al
+                    // reves: elegir logaritmica con «empezar en cero» encendido guardaria algo que
+                    // la validacion rechaza y que quien lo eligio no escribio.
+                    ...(e.target.value === 'logaritmica' ? { desdeCero: false } : {}),
+                  },
+                })
+              }
+            >
+              {AXIS_SCALES.map((escala) => (
+                <option key={escala} value={escala}>
+                  {t(ESCALA[escala])}
+                </option>
+              ))}
+            </select>
+          </label>
+          {p.ejes?.escala === 'logaritmica' ? (
+            <p className="field__pista">{t('pres.axis.scale.logHelp')}</p>
+          ) : null}
+
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.ejes?.zoom === true}
+              disabled={saving}
+              data-testid={`${prueba}-zoom`}
+              onChange={(e) => set({ ejes: { ...p.ejes, zoom: e.target.checked || undefined } })}
+            />{" "}
+            {t('pres.axis.zoom')}
+          </label>
+          <p className="field__pista">{t('pres.axis.zoom.help')}</p>
           <p className="field__pista">
             Un eje que no empieza en cero hace que una diferencia del 2 % parezca el triple.
             Apagarlo deberia ser una decision, no el comportamiento por omision.
@@ -1270,6 +1314,12 @@ function PanelPickers({
 }
 
 /** Como se rotula cada orden de valores, y cada forma de acotar. */
+/** Como se rotula cada escala de eje. */
+const ESCALA: Record<AxisScale, MessageKey> = {
+  lineal: 'pres.axis.scale.linear',
+  logaritmica: 'pres.axis.scale.log',
+};
+
 const ORDEN: Record<ValueOrder, MessageKey> = {
   origen: 'pres.pickers.order.source',
   alfabetico: 'pres.pickers.order.alphabetical',

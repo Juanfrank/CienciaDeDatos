@@ -252,3 +252,30 @@ describe('el catalogo de iconos', () => {
     expect(OBJECT_ICONS).not.toContain('sandwich');
   });
 });
+
+describe('la escala del eje de valores', () => {
+  const conEjes = (ejes: Record<string, unknown>) =>
+    validatePresentation({ ejes } as never, ['ejes']).map((p) => p.clave);
+
+  it('acepta una escala logaritmica con un minimo positivo', () => {
+    expect(conEjes({ escala: 'logaritmica', minimoY: 1 })).toEqual([]);
+  });
+
+  it('rechaza una escala que no existe', () => {
+    expect(conEjes({ escala: 'raiz-cuadrada' })).toEqual(['ejes.escala']);
+  });
+
+  it('rechaza una logaritmica que empiece en cero o por debajo', () => {
+    /*
+     * El logaritmo de cero no existe: el grafico se dibujaria con una escala que miente, y asi es
+     * como se descubriria — mirandolo. Se rechaza al guardar.
+     */
+    expect(conEjes({ escala: 'logaritmica', minimoY: 0 })).toEqual(['ejes.minimoY']);
+    expect(conEjes({ escala: 'logaritmica', minimoY: -5 })).toEqual(['ejes.minimoY']);
+    expect(conEjes({ escala: 'logaritmica', desdeCero: true })).toEqual(['ejes.desdeCero']);
+  });
+
+  it('un minimo de cero sigue valiendo en una escala lineal', () => {
+    expect(conEjes({ minimoY: 0, desdeCero: true })).toEqual([]);
+  });
+});
