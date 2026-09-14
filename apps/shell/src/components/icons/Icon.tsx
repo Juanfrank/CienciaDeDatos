@@ -1,4 +1,4 @@
-import { TRAZOS_DE_ICONO, type IconName } from '@app/ui-components';
+import { ICON_STROKES, type IconName } from '@app/ui-components';
 
 /** Los iconos de la interfaz. */
 export function Icon({ nombre, tamano = 20 }: { nombre: IconName; tamano?: number }) {
@@ -16,7 +16,7 @@ export function Icon({ nombre, tamano = 20 }: { nombre: IconName; tamano?: numbe
       aria-hidden="true"
       focusable="false"
     >
-      <path d={TRAZOS_DE_ICONO[nombre]} />
+      <path d={ICON_STROKES[nombre]} />
     </svg>
   );
 }

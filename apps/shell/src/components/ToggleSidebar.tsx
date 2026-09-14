@@ -29,13 +29,13 @@ export function ToggleSidebar() {
     // El estado inicial depende del ancho, que en el servidor no se conoce. En movil el panel
     // ocupaba toda la parte de arriba y habia que pasar por el entero antes de llegar al modulo
     // que se venia a ver.
-    const aplicar = (estrecha: boolean) => {
+    const apply = (estrecha: boolean) => {
       if (decidido.current) return;
       setAbierto(!estrecha);
     };
 
-    aplicar(consulta.matches);
-    const alCambiar = (e: MediaQueryListEvent) => aplicar(e.matches);
+    apply(consulta.matches);
+    const alCambiar = (e: MediaQueryListEvent) => apply(e.matches);
     consulta.addEventListener('change', alCambiar);
     return () => consulta.removeEventListener('change', alCambiar);
   }, []);

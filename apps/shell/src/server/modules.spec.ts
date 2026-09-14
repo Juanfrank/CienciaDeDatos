@@ -38,7 +38,7 @@ describe('ranuras de los modulos de demostracion', () => {
 
     /*
      * La presentacion cae en lo mismo. `icono: 'tabs'` es una cadena suelta contra las claves de
-     * `TRAZOS_DE_ICONO`, y aqui el campo no esta tipado, asi que el compilador no relaciona una
+     * `ICON_STROKES`, y aqui el campo no esta tipado, asi que el compilador no relaciona una
      * con otra: un icono que dejo de existir se dibuja vacio y nadie se entera.
      */
     it(`${modulo}/${item}: la presentacion usa claves e iconos que existen`, () => {

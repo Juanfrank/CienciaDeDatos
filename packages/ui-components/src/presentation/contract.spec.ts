@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { initialCatalog } from '../registry/catalog';
 import { OBJECT_FAMILIES } from '../registry/types';
-import { OBJECT_ICONS, ICON_NAMES, TRAZOS_DE_ICONO } from './icons';
+import { OBJECT_ICONS, ICON_NAMES, ICON_STROKES } from './icons';
 import {
   PRESENTATION_KEYS,
-  PRESENTACION_MINIMA,
+  MIN_PRESENTATION,
   formatterOf,
   validatePresentation,
   type PresentationKey,
@@ -19,7 +19,7 @@ describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
   it.each(versiones.map((v) => [`${v.objectId}@${v.version.version}`, v] as const))(
     '%s admite las cuatro claves basicas',
     (_nombre, { version }) => {
-      for (const clave of PRESENTACION_MINIMA) {
+      for (const clave of MIN_PRESENTATION) {
         expect(version.presentation).toContain(clave);
       }
     },
@@ -53,7 +53,7 @@ describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
 
 describe('validatePresentation', () => {
   const todas: PresentationKey[] = [
-    ...PRESENTACION_MINIMA,
+    ...MIN_PRESENTATION,
     'formato',
     'leyenda',
     'etiquetasDeDato',
@@ -77,7 +77,7 @@ describe('validatePresentation', () => {
   });
 
   it('rechaza una clave que el objeto no admite, y dice cuales admite', () => {
-    const [issue] = validatePresentation({ leyenda: 'abajo' }, PRESENTACION_MINIMA);
+    const [issue] = validatePresentation({ leyenda: 'abajo' }, MIN_PRESENTATION);
     expect(issue?.clave).toBe('leyenda');
     expect(issue?.issue).toContain('icono');
   });
@@ -85,7 +85,7 @@ describe('validatePresentation', () => {
   it('rechaza un icono que no esta en el catalogo', () => {
     const problems = validatePresentation(
       { icono: 'unicornio' as never },
-      PRESENTACION_MINIMA,
+      MIN_PRESENTATION,
     );
     expect(problems.map((p) => p.clave)).toEqual(['icono']);
   });
@@ -93,12 +93,12 @@ describe('validatePresentation', () => {
   it('rechaza un color en vez de un rol de acento', () => {
     // El punto de 4.3: si aqui entrara '#ff0000', la puerta de contraste dejaria de garantizar
     // nada sobre lo que se ve, porque ese color no sale de ningun par comprobado.
-    const problems = validatePresentation({ acento: '#ff0000' as never }, PRESENTACION_MINIMA);
+    const problems = validatePresentation({ acento: '#ff0000' as never }, MIN_PRESENTATION);
     expect(problems.map((p) => p.clave)).toEqual(['acento']);
   });
 
   it('rechaza un subtitulo que es un parrafo', () => {
-    const problems = validatePresentation({ subtitulo: 'x'.repeat(81) }, PRESENTACION_MINIMA);
+    const problems = validatePresentation({ subtitulo: 'x'.repeat(81) }, MIN_PRESENTATION);
     expect(problems.map((p) => p.clave)).toEqual(['subtitulo']);
   });
 
@@ -111,7 +111,7 @@ describe('validatePresentation', () => {
   });
 
   it('no se queja de una instancia sin presentacion', () => {
-    expect(validatePresentation(undefined, PRESENTACION_MINIMA)).toEqual([]);
+    expect(validatePresentation(undefined, MIN_PRESENTATION)).toEqual([]);
   });
 });
 
@@ -119,7 +119,7 @@ describe('formatterOf', () => {
   // `Intl` separa la cifra de su sufijo compacto con un espacio DURO, que es lo tipograficamente
   // correcto —no se parte de linea entre «12,5» y «k»— y no se ve en el codigo fuente. Se
   // normaliza para que una prueba que falla no muestre dos cadenas identicas.
-  const sinDuros = (s: string) => s.replace(/\u00a0/g, ' ');
+  const withoutHard = (s: string) => s.replace(/\u00a0/g, ' ');
 
   it('sin formato, entero con separador de miles', () => {
     expect(formatterOf(undefined)(12500)).toBe('12,500');
@@ -135,16 +135,16 @@ describe('formatterOf', () => {
 
   it('compacta cuando se le pide, sin comerse la precision', () => {
     // Con cero decimales, 12.500 salia «13 k»: el compacto redondea sobre la cifra ya reducida.
-    expect(sinDuros(formatterOf({ compacto: true })(12500))).toBe('12.5 k');
-    expect(sinDuros(formatterOf({ compacto: true })(12000))).toBe('12 k');
+    expect(withoutHard(formatterOf({ compacto: true })(12500))).toBe('12.5 k');
+    expect(withoutHard(formatterOf({ compacto: true })(12000))).toBe('12 k');
     // Y si alguien pide decimales explicitos, mandan los pedidos.
-    expect(sinDuros(formatterOf({ compacto: true, decimales: 0 })(12500))).toBe('13 k');
+    expect(withoutHard(formatterOf({ compacto: true, decimales: 0 })(12500))).toBe('13 k');
   });
 });
 
 describe('circular y medidor: lo que se rechaza al guardar', () => {
-  const withPie: PresentationKey[] = [...PRESENTACION_MINIMA, 'circular'];
-  const withGauge: PresentationKey[] = [...PRESENTACION_MINIMA, 'medidor'];
+  const withPie: PresentationKey[] = [...MIN_PRESENTATION, 'circular'];
+  const withGauge: PresentationKey[] = [...MIN_PRESENTATION, 'medidor'];
 
   it('un hueco fuera de rango no llega a guardarse', () => {
     // Por encima del limite no queda anillo: el grafico dejaria de decir nada sobre proporciones.
@@ -172,8 +172,8 @@ describe('circular y medidor: lo que se rechaza al guardar', () => {
 
   it('un objeto que no las admite las rechaza', () => {
     // Una tabla no tiene porciones ni aguja: la clave sobra y el editor tiene que decirlo.
-    expect(validatePresentation({ circular: { radioInterior: 10 } }, PRESENTACION_MINIMA)).toHaveLength(1);
-    expect(validatePresentation({ medidor: { maximo: 10 } }, PRESENTACION_MINIMA)).toHaveLength(1);
+    expect(validatePresentation({ circular: { radioInterior: 10 } }, MIN_PRESENTATION)).toHaveLength(1);
+    expect(validatePresentation({ medidor: { maximo: 10 } }, MIN_PRESENTATION)).toHaveLength(1);
   });
 });
 
@@ -240,7 +240,7 @@ describe('el catalogo de iconos', () => {
   });
 
   it('ningun trazo esta vacio', () => {
-    for (const [nombre, stroke] of Object.entries(TRAZOS_DE_ICONO)) {
+    for (const [nombre, stroke] of Object.entries(ICON_STROKES)) {
       expect(stroke.length, nombre).toBeGreaterThan(4);
     }
   });

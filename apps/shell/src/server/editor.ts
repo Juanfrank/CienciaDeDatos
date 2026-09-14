@@ -85,15 +85,15 @@ export async function editorPalette(): Promise<EditorPalette> {
     /*
      * Un MAPA de nombre a tipo, no un conjunto de nombres.
      */
-    const disponibles = new Map(
+    const available = new Map(
       (await columnasDisponiblesDe(declarado.datasetId)).map((c) => [c.name, c.type]),
     );
     datasets.push({
       datasetId: declarado.datasetId,
       description: declarado.description,
-      dimensiones: (declarado.query.dimensions ?? []).map(fieldKey).filter((c) => disponibles.has(c)),
-      medidas: (declarado.query.measures ?? []).filter((m) => disponibles.has(m)),
-      kinds: Object.fromEntries(disponibles),
+      dimensiones: (declarado.query.dimensions ?? []).map(fieldKey).filter((c) => available.has(c)),
+      medidas: (declarado.query.measures ?? []).filter((m) => available.has(m)),
+      kinds: Object.fromEntries(available),
       aggregations: Object.fromEntries(
         (declarado.query.measures ?? [])
           .map((m) => [m, declared.get(m)] as const)

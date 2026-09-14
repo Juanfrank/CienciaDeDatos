@@ -1,5 +1,5 @@
 import type { Aggregation, QueryResult } from '@app/data-contracts';
-import { type Acumulador, acumular, close, nuevoAcumulador } from './aggregation';
+import { type Accumulator, acumular, close, newAccumulator } from './aggregation';
 import { fieldKey } from './viewModel';
 
 /** La matriz, con jerarquia de verdad. */
@@ -60,26 +60,26 @@ export function buildMatrix(
 ): HierarchicalMatrix {
   const indice = (d: { table: string; field: string }) =>
     result.columns.findIndex((c) => c.name === fieldKey(d));
-  const iFila = rowDimensions.map(indice);
-  const iColumna = columnDimensions.map(indice);
-  const iMedida = medidas.map((m) => result.columns.findIndex((c) => c.name === m));
+  const rowI = rowDimensions.map(indice);
+  const columnI = columnDimensions.map(indice);
+  const measureI = medidas.map((m) => result.columns.findIndex((c) => c.name === m));
 
   const dataRows: MatrixNode[] = [];
   const gridColumns: MatrixNode[] = [];
-  const celdas = new Map<string, Acumulador[]>();
+  const celdas = new Map<string, Accumulator[]>();
 
-  const acumuladoresDe = (clave: string): Acumulador[] => {
+  const acumuladoresDe = (clave: string): Accumulator[] => {
     let accs = celdas.get(clave);
     if (!accs) {
-      accs = medidas.map((_, i) => nuevoAcumulador(aggregations[i] ?? 'suma'));
+      accs = medidas.map((_, i) => newAccumulator(aggregations[i] ?? 'suma'));
       celdas.set(clave, accs);
     }
     return accs;
   };
 
   for (const fila of result.rows) {
-    const labelRow = iFila.map((i) => (i >= 0 ? String(fila[i]) : '(sin dato)'));
-    const labelColumn = iColumna.map((i) => (i >= 0 ? String(fila[i]) : '(sin dato)'));
+    const labelRow = rowI.map((i) => (i >= 0 ? String(fila[i]) : '(sin dato)'));
+    const labelColumn = columnI.map((i) => (i >= 0 ? String(fila[i]) : '(sin dato)'));
     insertar(dataRows, labelRow);
     insertar(gridColumns, labelColumn);
 
@@ -87,10 +87,10 @@ export function buildMatrix(
      * Cada fila de origen alimenta su celda Y la de todos sus niveles por encima.
      */
     for (let f = 0; f <= labelRow.length; f += 1) {
-      const prefijoFila = labelRow.slice(0, f);
+      const rowPrefix = labelRow.slice(0, f);
       for (let c = 0; c <= labelColumn.length; c += 1) {
-        const accs = acumuladoresDe(cellKey(prefijoFila, labelColumn.slice(0, c)));
-        iMedida.forEach((column, m) => {
+        const accs = acumuladoresDe(cellKey(rowPrefix, labelColumn.slice(0, c)));
+        measureI.forEach((column, m) => {
           const acc = accs[m];
           if (acc && column >= 0) acumular(acc, fila[column]);
         });

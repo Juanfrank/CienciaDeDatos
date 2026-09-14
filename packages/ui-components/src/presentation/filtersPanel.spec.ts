@@ -3,7 +3,7 @@ import type { ObjectInstance } from '../registry/types';
 import {
   dateKindIs,
   defaultPicker,
-  selectoresEfectivos,
+  effectivePickers,
   validatePanelFilters,
 } from './filtersPanel';
 
@@ -105,11 +105,11 @@ describe('validatePanelFilters', () => {
   });
 });
 
-describe('selectoresEfectivos', () => {
+describe('effectivePickers', () => {
   it('da un selector a CADA dimension, aunque no este configurada', () => {
     // Lo importante de esta prueba: una dimension mapeada y no configurada seria una dimension
     // invisible, que es el peor fallo de un filtro — quien mira cree estar viendo el total.
-    const effective = selectoresEfectivos(
+    const effective = effectivePickers(
       objectInstance(['DimTribunal.Materia', 'DimTiempo.Fecha']),
       { pickers: [{ fieldName: 'DimTribunal.Materia', tipo: 'desplegable' }] },
       KINDS,
@@ -121,12 +121,12 @@ describe('selectoresEfectivos', () => {
   });
 
   it('la etiqueta por defecto es el campo sin la tabla', () => {
-    const [uno] = selectoresEfectivos(objectInstance(['DimTribunal.Materia']), undefined, KINDS);
+    const [uno] = effectivePickers(objectInstance(['DimTribunal.Materia']), undefined, KINDS);
     expect(uno?.etiqueta).toBe('Materia');
   });
 
   it('respeta la etiqueta configurada', () => {
-    const [uno] = selectoresEfectivos(
+    const [uno] = effectivePickers(
       objectInstance(['DimTribunal.Materia']),
       { pickers: [{ fieldName: 'DimTribunal.Materia', tipo: 'pastillas', etiqueta: 'Area' }] },
       KINDS,
@@ -137,7 +137,7 @@ describe('selectoresEfectivos', () => {
   it('mantiene el ORDEN del mapeo, no el de la configuracion', () => {
     // El orden en pantalla lo decide el binding, que es lo que el editor reordena. Si mandara el
     // de la configuracion, mover una dimension no cambiaria nada y nadie sabria por que.
-    const effective = selectoresEfectivos(
+    const effective = effectivePickers(
       objectInstance(['DimTribunal.Materia', 'DimTribunal.Distrito']),
       {
         pickers: [

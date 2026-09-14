@@ -3,7 +3,7 @@
 import {
   ACCENTS,
   FUNNEL_COMPARISONS,
-  ETIQUETAS_CIRCULARES,
+  CIRCULAR_LABELS,
   OBJECT_ICONS,
   MAX_RADIO_INTERIOR,
   STACKING_MODES,
@@ -14,14 +14,14 @@ import {
   type StackingMode,
   DATUM_POSITIONS,
   LABEL_POSITIONS,
-  etiquetasNormalizadas,
+  normalizedLabels,
   FORMAT_KINDS,
   PICKER_KINDS,
-  problemaDelPatron,
-  selectoresEfectivos,
+  patternProblem,
+  effectivePickers,
   type ObjectAccent,
   type PresentationKey,
-  type DestinoDeTexto,
+  type TextTarget,
   type TextStyle,
   type NumberFormat,
   type ObjectFormats,
@@ -69,7 +69,7 @@ export function Presentation({
   /*
    * El estilo de un texto se funde con lo que ya hubiera de los OTROS textos.
    */
-  const ponerTexto = (destino: DestinoDeTexto, style: TextStyle) =>
+  const ponerTexto = (destino: TextTarget, style: TextStyle) =>
     onCambiar((i) => ({
       ...i,
       presentacion: {
@@ -84,7 +84,7 @@ export function Presentation({
   const hayMedida = admite("formato") || admite("formatos");
   // La forma anterior era un booleano; se normaliza una vez aqui para que el panel no tenga que
   // preguntarse en cada control cual de las dos formas le ha llegado.
-  const labels = etiquetasNormalizadas(p.etiquetasDeDato);
+  const labels = normalizedLabels(p.etiquetasDeDato);
   const hayGrafico =
     admite("leyenda") || admite("etiquetasDeDato") || admite("orden") || admite("apilado");
   const isCard = instance.objectId === "tarjeta-kpi";
@@ -678,7 +678,7 @@ export function Presentation({
                 })
               }
             >
-              {ETIQUETAS_CIRCULARES.map((m) => (
+              {CIRCULAR_LABELS.map((m) => (
                 <option key={m} value={m}>
                   {PIE_LABEL[m]}
                 </option>
@@ -885,10 +885,10 @@ export function Presentation({
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.ejes?.mostrarX !== false}
+              checked={p.ejes?.showX !== false}
               disabled={saving}
               data-testid={`${prueba}-eje-x`}
-              onChange={(e) => poner({ ejes: { ...p.ejes, mostrarX: e.target.checked } })}
+              onChange={(e) => poner({ ejes: { ...p.ejes, showX: e.target.checked } })}
             />{" "}
             Mostrar el eje de categorias
           </label>
@@ -896,10 +896,10 @@ export function Presentation({
           <label className="form__field">
             <span>Titulo del eje de categorias</span>
             <input
-              defaultValue={p.ejes?.tituloX ?? ""}
+              defaultValue={p.ejes?.xTitle ?? ""}
               disabled={saving}
               data-testid={`${prueba}-titulo-x`}
-              onBlur={(e) => poner({ ejes: { ...p.ejes, tituloX: e.target.value || undefined } })}
+              onBlur={(e) => poner({ ejes: { ...p.ejes, xTitle: e.target.value || undefined } })}
             />
             {/*
               Se escribe a mano y no sale del nombre del campo: `DimTribunal.Distrito` en un
@@ -1017,14 +1017,14 @@ export function Presentation({
           <label className="form__field">
             <span>Girar los rotulos del eje de categorias</span>
             <select
-              value={String(p.ejes?.rotarX ?? 0)}
+              value={String(p.ejes?.rotateX ?? 0)}
               disabled={saving}
               data-testid={`${prueba}-rotar-x`}
               onChange={(e) =>
                 poner({
                   ejes: {
                     ...p.ejes,
-                    rotarX: e.target.value === "0" ? undefined : Number(e.target.value),
+                    rotateX: e.target.value === "0" ? undefined : Number(e.target.value),
                   },
                 })
               }
@@ -1078,7 +1078,7 @@ function PanelPickers({
     instance.settings?.objectId === "panel-de-filtros"
       ? instance.settings
       : undefined;
-  const effective = selectoresEfectivos(instance, settings, kinds);
+  const effective = effectivePickers(instance, settings, kinds);
   const prueba = `selectores-${instance.instanceId}`;
 
   const ponerTipo = (fieldName: string, tipo: PickerKind) =>
@@ -1246,7 +1246,7 @@ function RenglonDeFormato({
 }) {
   const tipo = formato.tipo ?? "general";
   const cambiar = (parcial: Partial<NumberFormat>) => onCambiar({ ...formato, ...parcial });
-  const issue = tipo === "personalizado" ? problemaDelPatron(formato.pattern ?? "") : null;
+  const issue = tipo === "personalizado" ? patternProblem(formato.pattern ?? "") : null;
 
   return (
     // El renglon entero lleva identificador, como la paleta y el estilo de texto: preguntar si un

@@ -115,7 +115,7 @@ export interface SelectorEfectivo {
   etiqueta: string;
 }
 
-export function selectoresEfectivos(
+export function effectivePickers(
   instance: ObjectInstance,
   settings: FiltersPanelSettings | undefined,
   fieldKinds: Record<string, string>,

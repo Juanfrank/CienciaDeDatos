@@ -21,7 +21,7 @@ export interface FieldSlot {
 export type FieldWell = FieldSlot;
 
 /** Asignacion de campos a ranuras. La clave es el id de la ranura. */
-export type AsignacionDeRanuras = Record<string, string[]>;
+export type SlotAssignment = Record<string, string[]>;
 
 export const aFieldRef = (clave: string): FieldRef => {
   const [table = '', field = ''] = clave.split('.');
@@ -64,16 +64,16 @@ export function slotsOf(
 }
 
 /** Los arrays que consumen el lector, la validacion y la proyeccion. */
-export function bindingDesdeRanuras(
-  asignacion: Map<string, string[]>,
+export function bindingFromSlots(
+  assignment: Map<string, string[]>,
   slots: FieldSlot[],
-): { dimensions: FieldRef[]; measures: string[]; slots: AsignacionDeRanuras } {
+): { dimensions: FieldRef[]; measures: string[]; slots: SlotAssignment } {
   const dimensions: FieldRef[] = [];
   const measures: string[] = [];
-  const mapa: AsignacionDeRanuras = {};
+  const mapa: SlotAssignment = {};
 
   for (const ranura of slots) {
-    const campos = asignacion.get(ranura.id) ?? [];
+    const campos = assignment.get(ranura.id) ?? [];
     mapa[ranura.id] = campos;
     if (ranura.tipo === 'dimension') dimensions.push(...campos.map(aFieldRef));
     else measures.push(...campos);
@@ -92,12 +92,12 @@ export function withSlotField(
   const ranura = slots.find((r) => r.id === slotId);
   if (!ranura) return instance;
 
-  const asignacion = slotsOf(instance, slots);
-  const actuales = asignacion.get(slotId) ?? [];
+  const assignment = slotsOf(instance, slots);
+  const actuales = assignment.get(slotId) ?? [];
   if (actuales.length >= ranura.max || actuales.includes(fieldName)) return instance;
 
-  asignacion.set(slotId, [...actuales, fieldName]);
-  return { ...instance, binding: { ...instance.binding, ...bindingDesdeRanuras(asignacion, slots) } };
+  assignment.set(slotId, [...actuales, fieldName]);
+  return { ...instance, binding: { ...instance.binding, ...bindingFromSlots(assignment, slots) } };
 }
 
 /** Quita un campo de UNA ranura, no de todas. */
@@ -107,13 +107,13 @@ export function slotFieldWithout(
   slotId: string,
   fieldName: string,
 ): ObjectInstance {
-  const asignacion = slotsOf(instance, slots);
-  asignacion.set(slotId, (asignacion.get(slotId) ?? []).filter((c) => c !== fieldName));
-  return { ...instance, binding: { ...instance.binding, ...bindingDesdeRanuras(asignacion, slots) } };
+  const assignment = slotsOf(instance, slots);
+  assignment.set(slotId, (assignment.get(slotId) ?? []).filter((c) => c !== fieldName));
+  return { ...instance, binding: { ...instance.binding, ...bindingFromSlots(assignment, slots) } };
 }
 
 /** Si cabe otro campo en esa ranura. */
-export function cabeEnRanura(
+export function slotFits(
   instance: ObjectInstance,
   slots: FieldSlot[],
   slotId: string,
@@ -144,10 +144,10 @@ export function validateSlots(
 ): SlotProblem[] {
   if (slots.length === 0) return [];
   const problems: SlotProblem[] = [];
-  const asignacion = slotsOf(instance, slots);
+  const assignment = slotsOf(instance, slots);
 
   for (const ranura of slots) {
-    const campos = asignacion.get(ranura.id) ?? [];
+    const campos = assignment.get(ranura.id) ?? [];
     const minimo = ranura.min ?? 0;
     if (campos.length < minimo) {
       problems.push({

@@ -10,19 +10,19 @@ import { Help } from './Help';
 export function Well({
   well,
   elegidos,
-  disponibles,
+  available,
   saving,
   lleno: llenoExterno,
   onAnadir,
   onQuitar,
   aggregationOf,
   onAgregacion,
-  posibles,
+  possible,
   prueba,
 }: {
   well: FieldWell;
   elegidos: string[];
-  disponibles: string[];
+  available: string[];
   saving: boolean;
   /** Si la ranura ya no admite mas. */
   lleno?: boolean;
@@ -32,7 +32,7 @@ export function Well({
   aggregationOf?: (fieldName: string) => Aggregation;
   onAgregacion?: (fieldName: string, aggregation: Aggregation) => void;
   /** Los operadores que se pueden aplicar aqui, del grano del dataset y de si el objeto colapsa. */
-  posibles?: Aggregation[];
+  possible?: Aggregation[];
   prueba: string;
 }) {
   const [abierto, setAbierto] = useState(false);
@@ -66,7 +66,7 @@ export function Well({
     };
   }, [abierto]);
 
-  const candidatos = disponibles.filter((c) =>
+  const candidatos = available.filter((c) =>
     busqueda ? c.toLowerCase().includes(busqueda.toLowerCase()) : true,
   );
 
@@ -117,7 +117,7 @@ export function Well({
                     title={`Se resume con ${AGGREGATION_LABEL[aggregationOf(fieldName)].toLowerCase()}`}
                     onChange={(e) => onAgregacion(fieldName, e.target.value as Aggregation)}
                   >
-                    {(posibles ?? AGGREGATIONS).map((a) => (
+                    {(possible ?? AGGREGATIONS).map((a) => (
                       <option key={a} value={a}>
                         {AGGREGATION_LABEL[a]}
                       </option>
@@ -128,7 +128,7 @@ export function Well({
                       ofrece —va deshabilitado— pero tiene que estar, o el `select` mostraria otro
                       valor distinto del guardado y quien edita creeria que ya lo arreglo.
                     */}
-                    {posibles && !posibles.includes(aggregationOf(fieldName)) ? (
+                    {possible && !possible.includes(aggregationOf(fieldName)) ? (
                       <option value={aggregationOf(fieldName)} disabled>
                         {AGGREGATION_LABEL[aggregationOf(fieldName)]} (no aplicable aqui)
                       </option>

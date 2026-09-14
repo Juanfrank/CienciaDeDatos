@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PRESENTACION_MINIMA } from '../presentation/contract';
+import { MIN_PRESENTATION } from '../presentation/contract';
 import { ObjectRegistry, ObjectRegistryError } from './ObjectRegistry';
 import { initialCatalog } from './catalog';
 import type { ObjectInstance, ObjectVersion, VisualObjectDefinition } from './types';
@@ -12,7 +12,7 @@ const version = (v: string, overrides: Partial<ObjectVersion> = {}): ObjectVersi
   changelog: `Cambios de ${v}.`,
   certification: certificado,
   dataContract: { dimensions: { min: 1, max: 1 }, measures: { min: 1, max: 1 } },
-  presentation: PRESENTACION_MINIMA,
+  presentation: MIN_PRESENTATION,
   ...overrides,
 });
 
@@ -170,7 +170,7 @@ describe('requisitos de publicacion (4.5)', () => {
 });
 
 describe('politica de deprecacion (4.5)', () => {
-  const conDeprecacion = () => {
+  const withDeprecation = () => {
     const registro = new ObjectRegistry([objeto([version('1.0.0')])]);
     registro.publish({ objectId: 'barras', version: version('2.0.0') });
     registro.deprecate('barras', '1.0.0', {
@@ -183,7 +183,7 @@ describe('politica de deprecacion (4.5)', () => {
   };
 
   it('avisa de forma ACTIVA a las instancias que usan una version deprecada', () => {
-    const notices = conDeprecacion().findDeprecationWarnings(
+    const notices = withDeprecation().findDeprecationWarnings(
       [objectInstance('barras', '1.0.0'), objectInstance('barras', '2.0.0')],
       new Date('2026-11-01'),
     );
@@ -197,7 +197,7 @@ describe('politica de deprecacion (4.5)', () => {
   });
 
   it('marca como vencida una instancia que paso la fecha limite', () => {
-    const notices = conDeprecacion().findDeprecationWarnings(
+    const notices = withDeprecation().findDeprecationWarnings(
       [objectInstance('barras', '1.0.0')],
       new Date('2027-01-15'),
     );
@@ -206,7 +206,7 @@ describe('politica de deprecacion (4.5)', () => {
   });
 
   it('ordena los avisos por urgencia', () => {
-    const registro = conDeprecacion();
+    const registro = withDeprecation();
     registro.publish({ objectId: 'barras', version: version('2.1.0') });
     registro.deprecate('barras', '2.0.0', {
       announcedAt: '2026-09-01',
@@ -234,7 +234,7 @@ describe('politica de deprecacion (4.5)', () => {
   });
 
   it('una instancia en una version sin deprecar no genera aviso', () => {
-    const notices = conDeprecacion().findDeprecationWarnings([objectInstance('barras', '2.0.0')]);
+    const notices = withDeprecation().findDeprecationWarnings([objectInstance('barras', '2.0.0')]);
     expect(notices).toEqual([]);
   });
 });

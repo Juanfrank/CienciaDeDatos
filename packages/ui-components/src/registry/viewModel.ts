@@ -1,5 +1,5 @@
 import type { Aggregation, QueryResult } from '@app/data-contracts';
-import { type Acumulador, acumular, close, nuevoAcumulador } from './aggregation';
+import { type Accumulator, acumular, close, newAccumulator } from './aggregation';
 import type { ObjectDataContract, ObjectInstance } from './types';
 
 /** Transformacion de un QueryResult en los datos que un objeto necesita para dibujarse. */
@@ -25,7 +25,7 @@ export function validateBinding(
   availableColumns: string[],
 ): BindingProblem[] {
   const problems: BindingProblem[] = [];
-  const disponibles = new Set(availableColumns);
+  const available = new Set(availableColumns);
   const { dimensions, measures } = instance.binding;
 
   if (dimensions.length < contract.dimensions.min || dimensions.length > contract.dimensions.max) {
@@ -49,7 +49,7 @@ export function validateBinding(
   }
 
   for (const dim of dimensions) {
-    if (!disponibles.has(fieldKey(dim))) {
+    if (!available.has(fieldKey(dim))) {
       problems.push({
         slot: fieldKey(dim),
         kind: 'campo-inexistente',
@@ -59,7 +59,7 @@ export function validateBinding(
   }
 
   for (const medida of measures) {
-    if (!disponibles.has(medida)) {
+    if (!available.has(medida)) {
       problems.push({
         slot: medida,
         kind: 'campo-inexistente',
@@ -109,34 +109,34 @@ export function aggregateBy(
   measures: string[],
   aggregations: Aggregation[],
 ): AggregatedRows {
-  const indiceDim = dimensions.map((d) => result.columns.findIndex((c) => c.name === fieldKey(d)));
-  const indiceMed = measures.map((m) => result.columns.findIndex((c) => c.name === m));
+  const dimIndex = dimensions.map((d) => result.columns.findIndex((c) => c.name === fieldKey(d)));
+  const medIndex = measures.map((m) => result.columns.findIndex((c) => c.name === m));
   const operador = (i: number): Aggregation => aggregations[i] ?? 'suma';
 
-  const acumulado = new Map<string, { labels: string[]; accs: Acumulador[] }>();
-  let filasAgregadas = 0;
+  const acumulado = new Map<string, { labels: string[]; accs: Accumulator[] }>();
+  let aggregatedRows = 0;
 
   /*
    * Sin dimensiones hay UN grupo, lo traiga filas o no.
    */
   if (dimensions.length === 0) {
-    acumulado.set('', { labels: [], accs: measures.map((_, i) => nuevoAcumulador(operador(i))) });
+    acumulado.set('', { labels: [], accs: measures.map((_, i) => newAccumulator(operador(i))) });
   }
 
   for (const row of result.rows) {
-    const labels = indiceDim.map((i) => (i >= 0 ? String(row[i]) : '(sin dato)'));
+    const labels = dimIndex.map((i) => (i >= 0 ? String(row[i]) : '(sin dato)'));
     const clave = labels.join(SEP);
     let grupo = acumulado.get(clave);
     if (grupo) {
-      filasAgregadas++;
+      aggregatedRows++;
     } else {
-      grupo = { labels, accs: measures.map((_, i) => nuevoAcumulador(operador(i))) };
+      grupo = { labels, accs: measures.map((_, i) => newAccumulator(operador(i))) };
       acumulado.set(clave, grupo);
     }
     // Una medida que no esta entre las columnas no se acumula: su acumulador queda vacio y se
     // cierra a 0 o a null segun el operador, en vez de contar un cero por cada fila leida — que
     // habria hecho que un promedio sobre una columna ausente devolviera 0 en vez de nada.
-    for (const [i, column] of indiceMed.entries()) {
+    for (const [i, column] of medIndex.entries()) {
       const acc = grupo.accs[i];
       if (acc && column >= 0) acumular(acc, row[column]);
     }
@@ -144,7 +144,7 @@ export function aggregateBy(
 
   return {
     rows: [...acumulado.values()].map((g) => ({ labels: g.labels, values: g.accs.map(close) })),
-    aggregated: filasAgregadas > 0,
+    aggregated: aggregatedRows > 0,
   };
 }
 
@@ -222,28 +222,28 @@ export function toMatrix(
   aggregation: Aggregation,
 ): MatrixViewModel {
   const [dimFila, dimColumna] = dimensions;
-  const iFila = dimFila ? result.columns.findIndex((c) => c.name === fieldKey(dimFila)) : -1;
+  const rowI = dimFila ? result.columns.findIndex((c) => c.name === fieldKey(dimFila)) : -1;
   const iCol = dimColumna ? result.columns.findIndex((c) => c.name === fieldKey(dimColumna)) : -1;
   const iMed = result.columns.findIndex((c) => c.name === measure);
 
   const dataRows: string[] = [];
   const gridColumns: string[] = [];
-  const celdas = new Map<string, Acumulador>();
-  const rowTotal = new Map<string, Acumulador>();
-  const columnTotal = new Map<string, Acumulador>();
-  const general = nuevoAcumulador(aggregation);
+  const celdas = new Map<string, Accumulator>();
+  const rowTotal = new Map<string, Accumulator>();
+  const columnTotal = new Map<string, Accumulator>();
+  const general = newAccumulator(aggregation);
 
-  const enMapa = (mapa: Map<string, Acumulador>, clave: string): Acumulador => {
+  const enMapa = (mapa: Map<string, Accumulator>, clave: string): Accumulator => {
     let acc = mapa.get(clave);
     if (!acc) {
-      acc = nuevoAcumulador(aggregation);
+      acc = newAccumulator(aggregation);
       mapa.set(clave, acc);
     }
     return acc;
   };
 
   for (const row of result.rows) {
-    const f = iFila >= 0 ? String(row[iFila]) : '(sin dato)';
+    const f = rowI >= 0 ? String(row[rowI]) : '(sin dato)';
     const c = iCol >= 0 ? String(row[iCol]) : '(sin dato)';
     if (!dataRows.includes(f)) dataRows.push(f);
     if (!gridColumns.includes(c)) gridColumns.push(c);
@@ -255,7 +255,7 @@ export function toMatrix(
     acumular(general, valor);
   }
 
-  const closeOf = (mapa: Map<string, Acumulador>, clave: string): number | null => {
+  const closeOf = (mapa: Map<string, Accumulator>, clave: string): number | null => {
     const acc = mapa.get(clave);
     return acc ? close(acc) : null;
   };

@@ -5,8 +5,8 @@ import type { Aggregation } from '@app/data-contracts';
 import { GRID_COLUMNS, type GridItem } from '@app/module-model';
 import {
   DEFAULT_AGGREGATION,
-  agregacionesPosibles,
-  cabeEnRanura,
+  possibleAggregations,
+  slotFits,
   fieldKey,
   withSlotField,
   slotsOf,
@@ -470,7 +470,7 @@ function Data({
 
   const deDimension = slots.filter((r) => r.tipo === 'dimension');
   const deMedida = slots.filter((r) => r.tipo === 'medida');
-  const asignacion = slotsOf(item.instance, slots);
+  const assignment = slotsOf(item.instance, slots);
 
   /*
    * Poner y quitar van POR RANURA, no por indice.
@@ -492,7 +492,7 @@ function Data({
   /*
    * Los operadores que el desplegable puede ofrecer, de la MISMA regla que valida al guardar.
    */
-  const posibles = agregacionesPosibles({
+  const possible = possibleAggregations({
     colapsa: (dataset?.dimensiones ?? []).some(
       (d) => !item.instance.binding.dimensions.map(fieldKey).includes(d),
     ),
@@ -565,8 +565,8 @@ function Data({
               ranura={ranura}
               todas={slots}
               item={item}
-              elegidos={asignacion.get(ranura.id) ?? []}
-              disponibles={dataset?.dimensiones ?? []}
+              elegidos={assignment.get(ranura.id) ?? []}
+              available={dataset?.dimensiones ?? []}
               saving={saving}
               onAnadir={poner}
               onQuitar={remove}
@@ -583,14 +583,14 @@ function Data({
               ranura={ranura}
               todas={slots}
               item={item}
-              elegidos={asignacion.get(ranura.id) ?? []}
-              disponibles={dataset?.medidas ?? []}
+              elegidos={assignment.get(ranura.id) ?? []}
+              available={dataset?.medidas ?? []}
               saving={saving}
               onAnadir={poner}
               onQuitar={remove}
               aggregationOf={aggregationOf}
               onAgregacion={cambiarAgregacion}
-              posibles={posibles}
+              possible={possible}
             />
           ))}
         </Section>
@@ -622,43 +622,43 @@ function RanuraDeEdicion({
   todas,
   item,
   elegidos,
-  disponibles,
+  available,
   saving,
   onAnadir,
   onQuitar,
   aggregationOf,
   onAgregacion,
-  posibles,
+  possible,
 }: {
   ranura: FieldSlot;
   /** TODAS las ranuras del objeto, no solo esta. */
   todas: FieldSlot[];
   item: GridItem;
   elegidos: string[];
-  disponibles: string[];
+  available: string[];
   saving: boolean;
   onAnadir: (slotId: string, fieldName: string) => void;
   onQuitar: (slotId: string, fieldName: string) => void;
   aggregationOf?: (fieldName: string) => Aggregation;
   onAgregacion?: (fieldName: string, aggregation: Aggregation) => void;
-  posibles?: Aggregation[];
+  possible?: Aggregation[];
 }) {
   return (
     <Well
       well={ranura}
       prueba={`well-${item.id}-${ranura.id}`}
       elegidos={elegidos}
-      disponibles={disponibles}
+      available={available}
       // Solo `guardando`. Pasar aqui tambien «esta llena» apagaba los botones de QUITAR de la
       // propia ranura, asi que una ranura completa no se podia vaciar. El componente ya sabe si
       // esta llena y apaga solo lo que corresponde: el `+`.
       saving={saving}
-      lleno={!cabeEnRanura(item.instance, todas, ranura.id)}
+      lleno={!slotFits(item.instance, todas, ranura.id)}
       onAnadir={(fieldName) => onAnadir(ranura.id, fieldName)}
       onQuitar={(fieldName) => onQuitar(ranura.id, fieldName)}
       {...(aggregationOf ? { aggregationOf } : {})}
       {...(onAgregacion ? { onAgregacion } : {})}
-      {...(posibles ? { posibles } : {})}
+      {...(possible ? { possible } : {})}
     />
   );
 }

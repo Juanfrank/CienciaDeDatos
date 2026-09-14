@@ -1343,17 +1343,17 @@ export function Table({ titulo, result, instance, aggregations, objectIcon }: Ob
 export function Matrix({ titulo, result, instance, slots, aggregations, objectIcon }: ObjetoProps) {
   const r = porRanura(instance, slots);
   // Varios niveles por pozo: es lo que convierte el cruce plano en una jerarquia.
-  const dimsFila = (r ? r.varios('filas') : instance.binding.dimensions.slice(0, 1).map(fieldKey))
+  const rowDims = (r ? r.varios('filas') : instance.binding.dimensions.slice(0, 1).map(fieldKey))
     .map(aFieldRef);
-  const dimsColumna = (
+  const columnDims = (
     r ? r.varios('columnas') : instance.binding.dimensions.slice(1, 2).map(fieldKey)
   ).map(aFieldRef);
   const medidas = r ? r.varios('valores') : instance.binding.measures;
 
   const vm = buildMatrix(
     result,
-    dimsFila,
-    dimsColumna,
+    rowDims,
+    columnDims,
     medidas,
     aggregationsFor(medidas, instance.binding.measures, aggregations),
   );

@@ -183,7 +183,7 @@ describe('toSlicerOptions', () => {
   it('solo ofrece los valores presentes en el dataset ya filtrado por el ambito', () => {
     // Consecuencia de seguridad: el segmentador no puede revelar valores fuera del ambito,
     // porque solo ve las filas que sobrevivieron al filtrado (4.11).
-    const soloNorte: QueryResult = { ...resultado, rows: [['Norte', 'Penal', 10, 5]] };
-    expect(toSlicerOptions(soloNorte, DISTRITO)).toEqual(['Norte']);
+    const onlyNorte: QueryResult = { ...resultado, rows: [['Norte', 'Penal', 10, 5]] };
+    expect(toSlicerOptions(onlyNorte, DISTRITO)).toEqual(['Norte']);
   });
 });

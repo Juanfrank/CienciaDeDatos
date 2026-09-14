@@ -1,6 +1,6 @@
 /** Catalogo de iconos, como DATO. */
 
-export const TRAZOS_DE_ICONO = {
+export const ICON_STROKES = {
   // Cromo de la aplicacion.
   sandwich: 'M4 7h16M4 12h16M4 17h16',
   close: 'M6 6l12 12M18 6 6 18',
@@ -62,12 +62,12 @@ export const TRAZOS_DE_ICONO = {
   lugar: 'M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
 } as const;
 
-export type IconName = keyof typeof TRAZOS_DE_ICONO;
+export type IconName = keyof typeof ICON_STROKES;
 
-export const ICON_NAMES = Object.keys(TRAZOS_DE_ICONO) as IconName[];
+export const ICON_NAMES = Object.keys(ICON_STROKES) as IconName[];
 
 export const iconNameIs = (valor: unknown): valor is IconName =>
-  typeof valor === 'string' && valor in TRAZOS_DE_ICONO;
+  typeof valor === 'string' && valor in ICON_STROKES;
 
 /** Los iconos que se ofrecen para rotular un objeto. */
 export const OBJECT_ICONS: IconName[] = [

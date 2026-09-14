@@ -21,7 +21,7 @@ export interface PosicionEnRejilla {
 }
 
 /** Un objeto dentro de un contenedor. */
-export interface ItemAnidado {
+export interface NestedItem {
   id: string;
   instance: ObjectInstance;
   position: PosicionEnRejilla;
@@ -32,7 +32,7 @@ export interface ContainerPanel {
   panelId: string;
   /** Rotulo de la pestana. Se ignora en los contenedores de un solo panel. */
   nombre: string;
-  items: ItemAnidado[];
+  items: NestedItem[];
 }
 
 /* ── Ejes, lados y tamanos ─────────────────────────────────────────────────────────────────── */
@@ -55,7 +55,7 @@ export interface ScrollableSettingsContainer extends SimpleSettingsContainer {
 /** Contenedor ampliable: ensena una parte y se abre a una ventana con su propia rejilla. */
 export interface ExpandableSettingsContainer extends SimpleSettingsContainer {
   /** Columnas de la rejilla de la ventana ampliada. */
-  columnasAmpliado?: number;
+  expandedColumns?: number;
   /** Texto del control que amplia. */
   textoDeAmpliar?: string;
 }
@@ -88,7 +88,7 @@ export type ContainerId = (typeof CONTAINERS)[number];
 export const isContainer = (objectId: string): objectId is ContainerId =>
   (CONTAINERS as readonly string[]).includes(objectId);
 
-export const COLUMNAS_INTERNAS_POR_DEFECTO = 6;
+export const DEFAULT_COLUMN_INTERNAL = 6;
 
 export const EMPTY_PANEL = (n = 1): ContainerPanel => ({
   panelId: `p${n}`,
@@ -163,7 +163,7 @@ export function validateContainer(
       for (let j = i + 1; j < panel.items.length; j += 1) {
         const a = panel.items[i];
         const b = panel.items[j];
-        if (a && b && seSolapanEnRejilla(a.position, b.position)) {
+        if (a && b && gridOverlapItself(a.position, b.position)) {
           problems.push({
             slot: `contenedor.${itemId}.${a.id}`,
             issue: `Se solapa con '${b.id}' dentro del contenedor.`,
@@ -186,7 +186,7 @@ export function validateContainer(
   return problems;
 }
 
-export const seSolapanEnRejilla = (a: PosicionEnRejilla, b: PosicionEnRejilla): boolean =>
+export const gridOverlapItself = (a: PosicionEnRejilla, b: PosicionEnRejilla): boolean =>
   a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
 /** Las columnas de la rejilla interna de un contenedor, sea cual sea su tipo. */
@@ -196,7 +196,7 @@ export function columnsOf(objectId: string, config: ContainerSettings | undefine
     config?.scrollable?.gridColumns ??
     config?.expandable?.gridColumns ??
     config?.tabs?.gridColumns;
-  return Math.max(1, Math.round(propia ?? COLUMNAS_INTERNAS_POR_DEFECTO));
+  return Math.max(1, Math.round(propia ?? DEFAULT_COLUMN_INTERNAL));
 }
 
 /* ── Lo que trae un objeto recien puesto ───────────────────────────────────────────────────── */
@@ -234,7 +234,7 @@ export function initialSettings(
     case 'contenedor-desplazable':
       return { objectId, panels, scrollable: { axis: 'y' } };
     case 'contenedor-ampliable':
-      return { objectId, panels, expandable: { columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' } };
+      return { objectId, panels, expandable: { expandedColumns: 12, textoDeAmpliar: 'Ampliar' } };
     case 'contenedor-con-pestanas':
       return { objectId, panels, tabs: { initialTab: 'p1' } };
     default:

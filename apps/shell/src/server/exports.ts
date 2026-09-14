@@ -7,7 +7,7 @@ import {
 } from '@app/export';
 import { describeProvenance } from '@app/module-model';
 import {
-  describirRegla,
+  ruleDescribe,
   measureFormatter,
   projectObject,
   type ObjectInstance,
@@ -146,7 +146,7 @@ function notasDe(instance: ObjectInstance): string[] {
   }
   for (const colorRule of p?.condicional?.rules ?? []) {
     const reach = colorRule.medida ? `${colorRule.medida} ` : '';
-    notas.push(`Marcado en pantalla: ${reach}${describirRegla(colorRule)}`);
+    notas.push(`Marcado en pantalla: ${reach}${ruleDescribe(colorRule)}`);
   }
   return notas;
 }

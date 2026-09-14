@@ -24,7 +24,7 @@ export function useUrlFilters() {
     pedido.current = null;
   }, [comprometidos]);
 
-  const aplicar = useCallback(
+  const apply = useCallback(
     (mutar: (params: URLSearchParams) => void) => {
       const params = new URLSearchParams(pedido.current ?? comprometidos);
       mutar(params);
@@ -38,7 +38,7 @@ export function useUrlFilters() {
 
   const toggle = useCallback(
     (fieldName: string, valor: string) => {
-      aplicar((params) => {
+      apply((params) => {
         const actuales = params.getAll(fieldName);
         params.delete(fieldName);
         const siguientes = actuales.includes(valor)
@@ -47,25 +47,25 @@ export function useUrlFilters() {
         for (const v of siguientes) params.append(fieldName, v);
       });
     },
-    [aplicar],
+    [apply],
   );
 
   /** Deja el campo con UN valor, o lo quita si el valor es vacio. */
   const fijar = useCallback(
     (fieldName: string, valor: string) => {
-      aplicar((params) => {
+      apply((params) => {
         params.delete(fieldName);
         if (valor !== '') params.append(fieldName, valor);
       });
     },
-    [aplicar],
+    [apply],
   );
 
   const clearField = useCallback(
     (fieldName: string) => {
-      aplicar((params) => params.delete(fieldName));
+      apply((params) => params.delete(fieldName));
     },
-    [aplicar],
+    [apply],
   );
 
   const limpiarTodo = useCallback(() => {

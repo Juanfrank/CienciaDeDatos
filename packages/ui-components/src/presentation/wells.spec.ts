@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { initialCatalog } from '../registry/catalog';
 import type { ObjectInstance } from '../registry/types';
 import {
-  cabeEnRanura,
+  slotFits,
   slotField,
   withSlotField,
   slotsOf,
@@ -32,22 +32,22 @@ describe('la ranura manda, no el orden', () => {
      * Es el caso que el reparto posicional no podia expresar: el primer campo caia siempre en la
      * primera ranura. Aqui el eje X se queda vacio y la medida va a su sitio.
      */
-    const puesta = withSlotField(objectInstance(), SLOTS, 'eje-y', 'CasosPendientes');
+    const setup = withSlotField(objectInstance(), SLOTS, 'eje-y', 'CasosPendientes');
 
-    expect(slotField(puesta, SLOTS, 'eje-x')).toBeUndefined();
-    expect(slotField(puesta, SLOTS, 'eje-y')).toBe('CasosPendientes');
-    expect(puesta.binding.measures).toEqual(['CasosPendientes']);
-    expect(puesta.binding.dimensions).toEqual([]);
+    expect(slotField(setup, SLOTS, 'eje-x')).toBeUndefined();
+    expect(slotField(setup, SLOTS, 'eje-y')).toBe('CasosPendientes');
+    expect(setup.binding.measures).toEqual(['CasosPendientes']);
+    expect(setup.binding.dimensions).toEqual([]);
   });
 
   it('SE PUEDE llenar solo la serie, con el eje X vacio', () => {
-    const puesta = withSlotField(objectInstance(), SLOTS, 'serie', 'DimTribunal.Materia');
+    const setup = withSlotField(objectInstance(), SLOTS, 'serie', 'DimTribunal.Materia');
 
-    expect(slotField(puesta, SLOTS, 'eje-x')).toBeUndefined();
-    expect(slotField(puesta, SLOTS, 'serie')).toBe('DimTribunal.Materia');
+    expect(slotField(setup, SLOTS, 'eje-x')).toBeUndefined();
+    expect(slotField(setup, SLOTS, 'serie')).toBe('DimTribunal.Materia');
     // Y el array derivado lleva UN campo: quien lo lea por posicion lo tomaria por el eje, que es
     // exactamente el motivo por el que los renderizadores preguntan por la ranura.
-    expect(puesta.binding.dimensions).toHaveLength(1);
+    expect(setup.binding.dimensions).toHaveLength(1);
   });
 
   it('los arrays derivados salen en el ORDEN DE DECLARACION de las ranuras', () => {
@@ -82,11 +82,11 @@ describe('la ranura manda, no el orden', () => {
     expect(slotField(sin, SLOTS, 'serie')).toBe('DimTiempo.Fecha');
   });
 
-  it('cabeEnRanura respeta el cupo de cada una', () => {
+  it('slotFits respeta el cupo de cada una', () => {
     const i = withSlotField(objectInstance(), SLOTS, 'eje-x', 'A');
-    expect(cabeEnRanura(i, SLOTS, 'eje-x')).toBe(false);
-    expect(cabeEnRanura(i, SLOTS, 'eje-y')).toBe(true);
-    expect(cabeEnRanura(i, SLOTS, 'inventada')).toBe(false);
+    expect(slotFits(i, SLOTS, 'eje-x')).toBe(false);
+    expect(slotFits(i, SLOTS, 'eje-y')).toBe(true);
+    expect(slotFits(i, SLOTS, 'inventada')).toBe(false);
   });
 });
 
@@ -96,7 +96,7 @@ describe('compatibilidad con lo guardado antes', () => {
      * Todo lo guardado antes de este cambio. Sin esta deduccion, cada modulo existente apareceria
      * con las ranuras vacias y sus campos perdidos de vista.
      */
-    const antigua = objectInstance({
+    const old = objectInstance({
       dimensions: [
         { table: 'DimTribunal', field: 'Distrito' },
         { table: 'DimTribunal', field: 'Materia' },
@@ -104,19 +104,19 @@ describe('compatibilidad con lo guardado antes', () => {
       measures: ['CasosPendientes'],
     });
 
-    expect(slotField(antigua, SLOTS, 'eje-x')).toBe('DimTribunal.Distrito');
-    expect(slotField(antigua, SLOTS, 'serie')).toBe('DimTribunal.Materia');
-    expect(slotsOf(antigua, SLOTS).get('eje-y')).toEqual(['CasosPendientes']);
+    expect(slotField(old, SLOTS, 'eje-x')).toBe('DimTribunal.Distrito');
+    expect(slotField(old, SLOTS, 'serie')).toBe('DimTribunal.Materia');
+    expect(slotsOf(old, SLOTS).get('eje-y')).toEqual(['CasosPendientes']);
   });
 
   it('el primer cambio sobre una instancia antigua la deja ya con mapa', () => {
-    const antigua = objectInstance({
+    const old = objectInstance({
       dimensions: [{ table: 'DimTribunal', field: 'Distrito' }],
       measures: [],
     });
-    const puesta = withSlotField(antigua, SLOTS, 'eje-y', 'CasosPendientes');
+    const setup = withSlotField(old, SLOTS, 'eje-y', 'CasosPendientes');
 
-    expect(puesta.binding.slots).toEqual({
+    expect(setup.binding.slots).toEqual({
       'eje-x': ['DimTribunal.Distrito'],
       serie: [],
       'eje-y': ['CasosPendientes'],
@@ -135,24 +135,24 @@ describe('compatibilidad con lo guardado antes', () => {
      * combinado sin asignacion guardada salia SIEMPRE roto, aunque el mapeo trajera medidas de
      * sobra. El valor por omision tiene que cumplir el contrato cuando hay campos suficientes.
      */
-    const dosPozos: FieldSlot[] = [
+    const wellTwo: FieldSlot[] = [
       { id: 'columnas', etiqueta: 'Columnas', tipo: 'medida', max: 3, min: 1 },
       { id: 'lineas', etiqueta: 'Lineas', tipo: 'medida', max: 3, min: 1 },
     ];
     const i = objectInstance({ measures: ['A', 'B', 'C'] });
-    const reparto = slotsOf(i, dosPozos);
+    const reparto = slotsOf(i, wellTwo);
 
     expect(reparto.get('columnas')).toEqual(['A', 'C']);
     expect(reparto.get('lineas')).toEqual(['B']);
-    expect(validateSlots(i, dosPozos)).toEqual([]);
+    expect(validateSlots(i, wellTwo)).toEqual([]);
   });
 
   it('y con campos justos para los minimos, los reparte uno a cada una', () => {
-    const dosPozos: FieldSlot[] = [
+    const wellTwo: FieldSlot[] = [
       { id: 'columnas', etiqueta: 'Columnas', tipo: 'medida', max: 3, min: 1 },
       { id: 'lineas', etiqueta: 'Lineas', tipo: 'medida', max: 3, min: 1 },
     ];
-    const reparto = slotsOf(objectInstance({ measures: ['A', 'B'] }), dosPozos);
+    const reparto = slotsOf(objectInstance({ measures: ['A', 'B'] }), wellTwo);
     expect(reparto.get('columnas')).toEqual(['A']);
     expect(reparto.get('lineas')).toEqual(['B']);
   });

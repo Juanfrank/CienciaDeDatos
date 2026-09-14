@@ -4,7 +4,7 @@ import { useId, useState } from 'react';
 import {
   type ContainerSettings,
   type Axis,
-  COLUMNAS_INTERNAS_POR_DEFECTO,
+  DEFAULT_COLUMN_INTERNAL,
   columnsOf,
 } from '@app/ui-components';
 import { Icon } from './icons/Icon';
@@ -115,7 +115,7 @@ export function ScrollableContainer({ objeto, titulo, config, draw }: PropsDeCon
 export function ExpandableContainer({ objeto, titulo, config, draw }: PropsDeContenedor) {
   const [ampliado, setAmpliado] = useState(false);
   const gridColumns = columnsOf('contenedor-ampliable', config);
-  const columnasAmpliado = Math.max(1, config?.expandable?.columnasAmpliado ?? COLUMNAS_INTERNAS_POR_DEFECTO * 2);
+  const expandedColumns = Math.max(1, config?.expandable?.expandedColumns ?? DEFAULT_COLUMN_INTERNAL * 2);
 
   return (
     <>
@@ -167,7 +167,7 @@ export function ExpandableContainer({ objeto, titulo, config, draw }: PropsDeCon
             <div className="contenedor contenedor--ampliado">
               <RejillaInterna
                 panel={objeto.panels?.[0]}
-                gridColumns={columnasAmpliado}
+                gridColumns={expandedColumns}
                 draw={draw}
               />
             </div>

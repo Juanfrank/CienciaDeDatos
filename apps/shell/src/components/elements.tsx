@@ -10,7 +10,7 @@ import {
   type TextColor,
   type Shape,
   estiloDeTexto,
-  grosorValido,
+  validThickness,
   lineStroke,
 } from '@app/ui-components';
 
@@ -31,7 +31,7 @@ const colorOf = (color: TextColor | undefined): string => VARIABLE[color ?? 'ate
 
 /** El borde CSS de una linea, en un solo sitio: las cuatro que hay deben verse iguales. */
 const borderOf = (line: LineSettings | undefined): string =>
-  `${grosorValido(line?.thickness)}px ${lineStroke(line?.style)} ${colorOf(line?.color)}`;
+  `${validThickness(line?.thickness)}px ${lineStroke(line?.style)} ${colorOf(line?.color)}`;
 
 /* ── Cuadro de texto ───────────────────────────────────────────────────────────────────────── */
 
@@ -142,7 +142,7 @@ export function FormaBasica({ config }: { config: ShapeSettings | undefined }) {
         style={{
           background: colorOf(config?.relleno ?? 'primario'),
           opacity: Math.min(100, Math.max(0, config?.opacidad ?? 100)) / 100,
-          ...(config?.stroke ? { border: `${grosorValido(config.strokeThickness)}px solid ${colorOf(config.stroke)}` } : {}),
+          ...(config?.stroke ? { border: `${validThickness(config.strokeThickness)}px solid ${colorOf(config.stroke)}` } : {}),
           ...(forma === 'circulo' ? { borderRadius: '50%' } : { borderRadius: `${config?.radio ?? 0}px` }),
           ...(recorte ? { clipPath: recorte } : {}),
           /*
@@ -186,7 +186,7 @@ export function Connection({
         : puntos.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
 
   const color = colorOf(config?.estiloDeLinea?.color ?? 'primario');
-  const thickness = grosorValido(config?.estiloDeLinea?.thickness ?? 2);
+  const thickness = validThickness(config?.estiloDeLinea?.thickness ?? 2);
   const id = `punta-${config?.desde ?? 'a'}-${config?.hasta ?? 'b'}`;
 
   return (
@@ -208,7 +208,7 @@ export function Connection({
               ? '2 5'
               : undefined
         }
-        {...(config?.extremoFinal === 'flecha' ? { markerEnd: `url(#${id})` } : {})}
+        {...(config?.finalEnd === 'flecha' ? { markerEnd: `url(#${id})` } : {})}
         {...(config?.initialEnd === 'flecha' ? { markerStart: `url(#${id})` } : {})}
       />
       {config?.content ? (

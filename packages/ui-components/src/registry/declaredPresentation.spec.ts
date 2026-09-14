@@ -38,8 +38,8 @@ const VALUES: Partial<Record<PresentationKey, unknown[]>> = {
   ],
   tooltip: [{ total: true }, { sortValue: true }],
   ejes: [
-    { tituloX: 'X', tituloY: 'Y' },
-    { gridlines: false, mostrarX: false },
+    { xTitle: 'X', tituloY: 'Y' },
+    { gridlines: false, showX: false },
   ],
   apilado: ['apilado', 'porcentaje'],
   circular: [{ radioInterior: 40 }, { labels: 'categoria', totalEnElCentro: true }],
@@ -59,7 +59,7 @@ const VALUES: Partial<Record<PresentationKey, unknown[]>> = {
 };
 
 /** Claves que NO decide el constructor de opciones, y que por tanto esta sonda no puede ver. */
-const FUERA_DEL_DIBUJO: PresentationKey[] = PRESENTATION_KEYS.filter(
+const DRAWING_OUTSIDE: PresentationKey[] = PRESENTATION_KEYS.filter(
   (c) => !(c in VALUES),
 );
 
@@ -181,7 +181,7 @@ describe('lo que el objeto declara es lo que su dibujo honra', () => {
     it(`${objeto.objectId}: no ofrece nada que su dibujo ignore`, () => {
       const declara = ultima(objeto.objectId)?.presentation ?? [];
       const muertas = declara.filter(
-        (c) => !FUERA_DEL_DIBUJO.includes(c) && !honra(tipo, c),
+        (c) => !DRAWING_OUTSIDE.includes(c) && !honra(tipo, c),
       );
 
       expect(muertas).toEqual([]);

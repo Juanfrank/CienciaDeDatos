@@ -3,7 +3,7 @@ import { AGGREGATIONS, type QueryResult } from '@app/data-contracts';
 import {
   aggregationsOf,
   aggregationsFor,
-  agregacionesPosibles,
+  possibleAggregations,
   validateAggregation,
 } from './aggregation';
 import { aggregateBy, toKpi, toMatrix } from './viewModel';
@@ -187,14 +187,14 @@ describe('validateAggregation: lo que no se puede guardar', () => {
   });
 });
 
-describe('agregacionesPosibles: lo que el editor puede OFRECER', () => {
+describe('possibleAggregations: lo que el editor puede OFRECER', () => {
   /*
    * La lista del desplegable y la validacion que rechaza al guardar salen de la misma funcion.
    * Con dos implementaciones, el editor acabaria ofreciendo algo que la validacion rechaza — o
    * peor, al reves: prohibiendo en el desplegable algo que si se puede.
    */
   it('sobre grano preagregado solo ofrece las aditivas', () => {
-    expect(agregacionesPosibles({ colapsa: true, dataGrain: 'preagregado' })).toEqual([
+    expect(possibleAggregations({ colapsa: true, dataGrain: 'preagregado' })).toEqual([
       'suma',
       'minimo',
       'maximo',
@@ -202,21 +202,21 @@ describe('agregacionesPosibles: lo que el editor puede OFRECER', () => {
   });
 
   it('sobre grano atomico ofrece todas menos «sin resumir»', () => {
-    const posibles = agregacionesPosibles({ colapsa: true, dataGrain: 'atomico' });
-    expect(posibles).toContain('promedio');
-    expect(posibles).toContain('recuento-distinto');
-    expect(posibles).not.toContain('ninguna');
+    const possible = possibleAggregations({ colapsa: true, dataGrain: 'atomico' });
+    expect(possible).toContain('promedio');
+    expect(possible).toContain('recuento-distinto');
+    expect(possible).not.toContain('ninguna');
   });
 
   it('sin colapso las ofrece todas: el objeto no combina nada', () => {
-    expect(agregacionesPosibles({ colapsa: false, dataGrain: 'preagregado' })).toHaveLength(7);
+    expect(possibleAggregations({ colapsa: false, dataGrain: 'preagregado' })).toHaveLength(7);
   });
 
   it('lo que NO se ofrece es exactamente lo que la validacion rechaza', () => {
     // La invariante que impide que las dos reglas se separen.
     for (const dataGrain of ['atomico', 'preagregado'] as const) {
       for (const colapsa of [true, false]) {
-        const posibles = agregacionesPosibles({ colapsa, dataGrain });
+        const possible = possibleAggregations({ colapsa, dataGrain });
         for (const aggregation of AGGREGATIONS) {
           const problems = validateAggregation({
             measures: ['m'],
@@ -224,7 +224,7 @@ describe('agregacionesPosibles: lo que el editor puede OFRECER', () => {
             colapsa,
             dataGrain,
           });
-          expect(problems.length === 0).toBe(posibles.includes(aggregation));
+          expect(problems.length === 0).toBe(possible.includes(aggregation));
         }
       }
     }

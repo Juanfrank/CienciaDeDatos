@@ -18,7 +18,7 @@ import {
   type ContainerSettings,
   aggregationsOf,
   isContainer,
-  noConsumeDatos,
+  notConsumesData,
   panelsOf,
   validateContainer,
   fieldKey,
@@ -109,7 +109,7 @@ async function readObjects(
     /*
      * Un objeto que no consume datos no consulta el cache.
      */
-    if (noConsumeDatos(contrato)) {
+    if (notConsumesData(contrato)) {
       const config = instance.settings;
       let panels: PanelCargado[] | undefined;
 

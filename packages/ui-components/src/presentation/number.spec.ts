@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { measureFormat, numberFormatter, problemaDelPatron } from './number';
+import { measureFormat, numberFormatter, patternProblem } from './number';
 
 const f = (formato: Parameters<typeof numberFormatter>[0]) => numberFormatter(formato);
 const p = (pattern: string) => numberFormatter({ tipo: 'personalizado', pattern });
@@ -99,10 +99,10 @@ describe('la cadena personalizada', () => {
 
 describe('un patron que no vale no rompe el objeto', () => {
   it('se dice POR QUE no vale', () => {
-    expect(problemaDelPatron('')).toMatch(/vacio/);
-    expect(problemaDelPatron('a;b;c;d')).toMatch(/tres secciones/);
-    expect(problemaDelPatron('casos')).toMatch(/marcador de digito/);
-    expect(problemaDelPatron('#,##0')).toBeNull();
+    expect(patternProblem('')).toMatch(/vacio/);
+    expect(patternProblem('a;b;c;d')).toMatch(/tres secciones/);
+    expect(patternProblem('casos')).toMatch(/marcador de digito/);
+    expect(patternProblem('#,##0')).toBeNull();
   });
 
   it('al dibujar se cae al formato general, no a un objeto en blanco', () => {

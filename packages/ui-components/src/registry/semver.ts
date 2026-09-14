@@ -8,10 +8,10 @@ export interface Semver {
 
 export type VersionBump = 'mayor' | 'menor' | 'parche' | 'ninguno' | 'invalido';
 
-const PATRON = /^(\d+)\.(\d+)\.(\d+)$/;
+const PATTERN = /^(\d+)\.(\d+)\.(\d+)$/;
 
 export function parseVersion(version: string): Semver | null {
-  const m = PATRON.exec(version.trim());
+  const m = PATTERN.exec(version.trim());
   if (!m) return null;
   return { major: Number(m[1]), minor: Number(m[2]), patch: Number(m[3]) };
 }

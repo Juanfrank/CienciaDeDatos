@@ -3,7 +3,7 @@
 import { useId, useMemo, useState } from "react";
 import type { QueryResult } from "@app/data-contracts";
 import {
-  selectoresEfectivos,
+  effectivePickers,
   toSlicerOptions,
   type IconName,
   type ObjectInstance,
@@ -41,7 +41,7 @@ export function FiltersPanel({
 
   const pickers = useMemo(
     () =>
-      selectoresEfectivos(
+      effectivePickers(
         instance,
         instance.settings?.objectId === "panel-de-filtros"
           ? instance.settings

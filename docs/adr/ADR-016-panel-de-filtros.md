@@ -36,7 +36,7 @@ Tres decisiones que conviene dejar escritas:
    no ha poblado— la validacion **se abstiene**: rechazar ahi bloquearia configuraciones
    correctas en un despliegue recien hecho.
 
-2. **Toda dimension mapeada tiene selector, este o no configurada.** `selectoresEfectivos` pone
+2. **Toda dimension mapeada tiene selector, este o no configurada.** `effectivePickers` pone
    el que corresponde a su tipo. Sin eso, una dimension mapeada y no configurada seria una
    dimension invisible: el peor fallo posible en un filtro, porque quien mira cree que esta
    viendo el total.

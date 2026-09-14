@@ -113,7 +113,7 @@ export interface ConnectionSettings {
   hasta?: string;
   dash?: Dash;
   initialEnd?: End;
-  extremoFinal?: End;
+  finalEnd?: End;
   estiloDeLinea?: LineSettings;
   /** Rotulo sobre el conector. */
   content?: string;
@@ -121,7 +121,7 @@ export interface ConnectionSettings {
 
 export const DEFAULT_CONNECTION: ConnectionSettings = {
   dash: 'angulo',
-  extremoFinal: 'flecha',
+  finalEnd: 'flecha',
   estiloDeLinea: { style: 'solida', thickness: 2, color: 'primario' },
 };
 
@@ -158,7 +158,7 @@ export const WITHOUT_CARD: readonly string[] = [
 ];
 
 /** Grosor util de una linea, acotado. Mas de esto deja de leerse como linea. */
-export const grosorValido = (thickness: number | undefined): number =>
+export const validThickness = (thickness: number | undefined): number =>
   Math.min(8, Math.max(1, Math.round(thickness ?? 1)));
 
 /** El trazo CSS de un estilo de linea. */

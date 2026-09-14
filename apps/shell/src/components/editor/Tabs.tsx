@@ -52,10 +52,10 @@ export function Tabs<T extends string>({
   const alPulsarTecla = (e: React.KeyboardEvent) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     e.preventDefault();
-    const posibles = tabs.filter((p) => p.habilitada);
-    const actual = posibles.findIndex((p) => p.id === activa);
+    const possible = tabs.filter((p) => p.habilitada);
+    const actual = possible.findIndex((p) => p.id === activa);
     const paso = e.key === 'ArrowRight' ? 1 : -1;
-    const siguiente = posibles[(actual + paso + posibles.length) % posibles.length];
+    const siguiente = possible[(actual + paso + possible.length) % possible.length];
     if (!siguiente) return;
     onElegir(siguiente.id);
     const button = rail.current?.querySelector<HTMLButtonElement>(

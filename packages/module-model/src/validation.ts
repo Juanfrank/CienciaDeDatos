@@ -12,7 +12,7 @@ import {
   validateSlots,
   validateAttachments,
   validateBinding,
-  noConsumeDatos,
+  notConsumesData,
   validateContainer,
 } from '@app/ui-components';
 import type { ModuleDefinition } from './ModuleDefinition';
@@ -135,7 +135,7 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
       /*
        * Un objeto que no consume datos no tiene dataset que comprobar.
        */
-      if (noConsumeDatos(contrato)) {
+      if (notConsumesData(contrato)) {
         // Se comprueba lo que SI tiene sentido sin dataset: los complementos y la presentacion.
         // Saltarselo todo dejaria a estos objetos como los unicos donde un icono inexistente o un
         // acento que no es rol del tema se descubre al dibujar.

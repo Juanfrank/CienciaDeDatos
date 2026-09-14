@@ -1,10 +1,10 @@
-import { PRESENTACION_MINIMA, type PresentationKey } from '../presentation/contract';
+import { MIN_PRESENTATION, type PresentationKey } from '../presentation/contract';
 import type { FieldSlot } from '../presentation/wells';
 import type { ObjectCertification, VisualObjectDefinition } from './types';
 
 /** Catalogo de objetos prediseñados — seccion 4.2. */
 
-const certificacionInicial: ObjectCertification = {
+const initialCertification: ObjectCertification = {
   testsPassed: true,
   reviewedBy: 'equipo-plataforma',
   reviewedAt: '2026-09-11',
@@ -12,7 +12,7 @@ const certificacionInicial: ObjectCertification = {
 
 /** Lo que admite cualquier objeto, mas lo que anada el suyo. */
 const presenta = (...propias: PresentationKey[]): PresentationKey[] => [
-  ...PRESENTACION_MINIMA,
+  ...MIN_PRESENTATION,
   ...propias,
 ];
 
@@ -27,12 +27,12 @@ const WITHOUT_DATA = (notes: string): VisualObjectDefinition['versions'][number]
 const v1 = (
   changelog: string,
   dataContract: VisualObjectDefinition['versions'][number]['dataContract'],
-  presentation: PresentationKey[] = PRESENTACION_MINIMA,
+  presentation: PresentationKey[] = MIN_PRESENTATION,
 ) => ({
   version: '1.0.0',
   publishedAt: '2026-09-11',
   changelog,
-  certification: certificacionInicial,
+  certification: initialCertification,
   dataContract,
   presentation,
 });
@@ -185,7 +185,7 @@ const CONTRACT_COMBO: VisualObjectDefinition['versions'][number]['dataContract']
 };
 
 /** Lo que admite presentar un combinado en su version inicial. */
-const PRESENTACION_COMBINADA = presenta(
+const COMBINED_PRESENTATION = presenta(
   'formato',
   'formatos',
   'leyenda',
@@ -223,7 +223,7 @@ const MATRIX_CONTRACT: VisualObjectDefinition['versions'][number]['dataContract'
  *
  * Mismo motivo: 1.0.0 y 1.1.0 piden los mismos campos y solo cambian en el formato condicional.
  */
-const CONTRATO_DE_BARRAS_H: VisualObjectDefinition['versions'][number]['dataContract'] = {
+const H_BAR_CONTRACT: VisualObjectDefinition['versions'][number]['dataContract'] = {
   dimensions: { min: 1, max: 2 },
   measures: { min: 1, max: 4 },
   notes: 'Cada medida es una serie. La segunda dimension, si existe, agrupa las barras.',
@@ -282,7 +282,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         version: '1.1.0',
         publishedAt: '2026-09-13',
         changelog: 'Admite la etiqueta que acompana al valor, encima o debajo.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: KPI_CONTRACT,
         presentation: presenta('formato', 'formatos', 'etiqueta'),
       },
@@ -293,7 +293,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         version: '1.2.0',
         publishedAt: '2026-09-13',
         changelog: 'Formato condicional: la cifra cambia de color segun su valor.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: KPI_CONTRACT,
         presentation: presenta('formato', 'formatos', 'etiqueta', 'condicional'),
       },
@@ -328,7 +328,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         changelog:
           'Orden ascendente y descendente pulsando el encabezado, filas alternas, y hasta ocho ' +
           'dimensiones y doce medidas.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: {
           dimensions: { min: 0, max: 8 },
           measures: { min: 0, max: 12 },
@@ -344,7 +344,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         version: '1.2.0',
         publishedAt: '2026-09-13',
         changelog: 'Formato condicional: el color de una cifra puede depender de su valor.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: {
           dimensions: { min: 0, max: 8 },
           measures: { min: 0, max: 12 },
@@ -362,7 +362,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         version: '1.3.0',
         publishedAt: '2026-09-13',
         changelog: 'Ayuda de mapeo en el editor: que va en cada pozo y que pasa si se deja vacio.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: {
           dimensions: { min: 0, max: 8 },
           measures: { min: 0, max: 12 },
@@ -409,7 +409,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         publishedAt: '2026-09-12',
         changelog:
           'Admite hasta cuatro medidas: una serie por medida, con leyenda y un patron por serie.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: {
           dimensions: { min: 1, max: 2 },
           measures: { min: 1, max: 4 },
@@ -427,7 +427,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         publishedAt: '2026-09-13',
         changelog:
           'Leyenda con posicion, etiquetas de dato formateadas, ejes configurables y orden del eje.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: {
           dimensions: { min: 1, max: 2 },
           measures: { min: 1, max: 4 },
@@ -444,7 +444,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         version: '1.3.0',
         publishedAt: '2026-09-13',
         changelog: 'Pequenos multiplos: el grafico se repite por cada valor de una dimension.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: {
           dimensions: { min: 1, max: 3 },
           measures: { min: 1, max: 4 },
@@ -462,7 +462,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         version: '1.4.0',
         publishedAt: '2026-09-13',
         changelog: 'Formato condicional: el color de cada barra puede depender de su valor.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: {
           dimensions: { min: 1, max: 3 },
           measures: { min: 1, max: 4 },
@@ -488,7 +488,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
     versions: [
       v1(
         'Version inicial: barras horizontales, hasta cuatro medidas, con apilado y 100 %.',
-        CONTRATO_DE_BARRAS_H,
+        H_BAR_CONTRACT,
         CHART_PRESENTATION,
       ),
       /*
@@ -498,8 +498,8 @@ export const initialCatalog: VisualObjectDefinition[] = [
         version: '1.1.0',
         publishedAt: '2026-09-13',
         changelog: 'Formato condicional: el color de una barra puede depender de su valor.',
-        certification: certificacionInicial,
-        dataContract: CONTRATO_DE_BARRAS_H,
+        certification: initialCertification,
+        dataContract: H_BAR_CONTRACT,
         presentation: CONDITIONAL_PRESENTATION_CHART,
       },
     ],
@@ -589,7 +589,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
       v1(
         'Version inicial: columnas y lineas por pozo, con eje secundario opcional.',
         CONTRACT_COMBO,
-        PRESENTACION_COMBINADA,
+        COMBINED_PRESENTATION,
       ),
       /*
        * 1.1.0 — apilado, que el constructor ya honraba.
@@ -598,9 +598,9 @@ export const initialCatalog: VisualObjectDefinition[] = [
         version: '1.1.0',
         publishedAt: '2026-09-13',
         changelog: 'Las columnas se pueden apilar, tambien al 100 %.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: CONTRACT_COMBO,
-        presentation: [...PRESENTACION_COMBINADA, 'apilado'],
+        presentation: [...COMBINED_PRESENTATION, 'apilado'],
       },
     ],
   },
@@ -829,7 +829,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         publishedAt: '2026-09-13',
         changelog:
           'Leyenda con posicion, etiquetas de dato formateadas, ejes configurables y orden del eje.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: {
           dimensions: { min: 1, max: 1 },
           measures: { min: 1, max: 4 },
@@ -842,7 +842,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         version: '1.2.0',
         publishedAt: '2026-09-13',
         changelog: 'Pequenos multiplos: una linea por panel, con escala comun.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: {
           dimensions: { min: 1, max: 2 },
           measures: { min: 1, max: 4 },
@@ -884,7 +884,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         changelog:
           'Jerarquia en filas y columnas (hasta tres y dos niveles), varias medidas, subtotales ' +
           'por nivel, colapsar y expandir, y orden por cualquier encabezado.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: MATRIX_CONTRACT,
         presentation: presenta('formato', 'formatos'),
       },
@@ -895,7 +895,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         version: '1.2.0',
         publishedAt: '2026-09-13',
         changelog: 'Formato condicional: el color de una cifra puede depender de su valor.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: MATRIX_CONTRACT,
         presentation: TABLE_PRESENTATION,
       },
@@ -1009,7 +1009,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         version: '1.1.0',
         publishedAt: '2026-09-13',
         changelog: 'Pozos con nombre: Territorio y Valor. El render sigue pendiente.',
-        certification: certificacionInicial,
+        certification: initialCertification,
         dataContract: {
           dimensions: { min: 1, max: 1 },
           measures: { min: 1, max: 1 },

@@ -63,7 +63,7 @@ export function conditionalColor(
 }
 
 /** Texto legible de una regla, para el panel y para el respaldo accesible. */
-export function describirRegla(colorRule: ColorRule): string {
+export function ruleDescribe(colorRule: ColorRule): string {
   const nombre: Record<Comparator, string> = {
     mayor: 'mayor que',
     'mayor-o-igual': 'mayor o igual que',

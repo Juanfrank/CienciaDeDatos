@@ -7,7 +7,7 @@ import type {
 
 /** Validacion de objetos adjuntados. */
 
-export type BuscarDefinicion = (objectId: string) => VisualObjectDefinition | undefined;
+export type SearchDefinition = (objectId: string) => VisualObjectDefinition | undefined;
 
 /** Un complemento de tabla con alcance de subobjeto necesita una dimension por la que desglosar. */
 function exigeDimension(attachment: AttachedObjectInstance): boolean {
@@ -16,7 +16,7 @@ function exigeDimension(attachment: AttachedObjectInstance): boolean {
 
 export function validateAttachments(
   instance: ObjectInstance,
-  search: BuscarDefinicion,
+  search: SearchDefinition,
 ): BindingProblem[] {
   const problems: BindingProblem[] = [];
 

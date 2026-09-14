@@ -4,7 +4,7 @@ import type { IconName } from '../presentation/icons';
 import type { ContainerSettings, ContainerId } from '../presentation/containers';
 import type { ElementSettings, ElementId } from '../presentation/elements';
 import type { FiltersPanelSettings } from '../presentation/filtersPanel';
-import type { AsignacionDeRanuras, FieldSlot } from '../presentation/wells';
+import type { SlotAssignment, FieldSlot } from '../presentation/wells';
 
 /**
  * Repositorio de objetos visuales versionados (4.5).
@@ -93,7 +93,7 @@ export interface ObjectVersion {
    * Claves de presentacion que admite esta version.
    *
    * El editor solo ofrece estas y la validacion rechaza el resto. Debe incluir
-   * `PRESENTACION_MINIMA` entera.
+   * `MIN_PRESENTATION` entera.
    */
   presentation: PresentationKey[];
   deprecation?: DeprecationNotice;
@@ -181,7 +181,7 @@ export interface ObjectInstance {
      * Opcional: sin el mapa el reparto se deduce del orden del array, que es como se guardaba
      * antes de que existiera.
      */
-    slots?: AsignacionDeRanuras;
+    slots?: SlotAssignment;
     /**
      * Agregacion por medida, solo cuando difiere de la que declara el esquema. Lo no dicho se
      * resuelve contra el esquema en cada lectura.
@@ -224,5 +224,5 @@ export type ObjectSettings =
  * una segunda fuente de verdad. Lo consultan la validacion de modulo, la lista de datasets
  * consumidos y el lector del cache.
  */
-export const noConsumeDatos = (contrato: ObjectDataContract): boolean =>
+export const notConsumesData = (contrato: ObjectDataContract): boolean =>
   contrato.dimensions.max === 0 && contrato.measures.max === 0;

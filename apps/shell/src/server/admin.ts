@@ -279,11 +279,11 @@ export async function dimensionesDisponibles(): Promise<
 
 /** Rechaza un ambito que referencie dimensiones que no existen en el esquema activo. */
 export async function validateDimensions(scope: AccessScope): Promise<string[]> {
-  const disponibles = new Set((await dimensionesDisponibles()).map((d) => d.key));
-  if (disponibles.size === 0) return [];
+  const available = new Set((await dimensionesDisponibles()).map((d) => d.key));
+  if (available.size === 0) return [];
   return scope.restrictions
     .map((r) => dimensionKey(r.dimension))
-    .filter((clave) => !disponibles.has(clave));
+    .filter((clave) => !available.has(clave));
 }
 
 // ---------------------------------------------------------------------------

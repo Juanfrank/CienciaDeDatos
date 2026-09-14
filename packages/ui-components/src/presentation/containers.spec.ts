@@ -4,12 +4,12 @@ import {
   initialSettings,
   nestedInstances,
   panelsOf,
-  seSolapanEnRejilla,
+  gridOverlapItself,
   validateContainer,
 } from './containers';
-import type { ContainerSettings, ItemAnidado } from './containers';
+import type { ContainerSettings, NestedItem } from './containers';
 
-const item = (id: string, x: number, y: number, w = 2, h = 2): ItemAnidado => ({
+const item = (id: string, x: number, y: number, w = 2, h = 2): NestedItem => ({
   id,
   position: { x, y, w, h },
   instance: {
@@ -129,9 +129,9 @@ describe('columnsOf', () => {
   });
 });
 
-describe('seSolapanEnRejilla', () => {
+describe('gridOverlapItself', () => {
   it('tocarse por el borde no es solaparse', () => {
-    expect(seSolapanEnRejilla({ x: 0, y: 0, w: 2, h: 2 }, { x: 2, y: 0, w: 2, h: 2 })).toBe(false);
-    expect(seSolapanEnRejilla({ x: 0, y: 0, w: 2, h: 2 }, { x: 1, y: 1, w: 2, h: 2 })).toBe(true);
+    expect(gridOverlapItself({ x: 0, y: 0, w: 2, h: 2 }, { x: 2, y: 0, w: 2, h: 2 })).toBe(false);
+    expect(gridOverlapItself({ x: 0, y: 0, w: 2, h: 2 }, { x: 1, y: 1, w: 2, h: 2 })).toBe(true);
   });
 });

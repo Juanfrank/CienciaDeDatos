@@ -73,7 +73,7 @@ function analizar(content: string): Section {
     porcentaje: false,
   };
   let enDecimales = false;
-  let cifraPuesta = false;
+  let setupFigure = false;
 
   for (let i = 0; i < content.length; i += 1) {
     const c = content[i] ?? '';
@@ -120,9 +120,9 @@ function analizar(content: string): Section {
         if (c === '0') section.enterosMin += 1;
         // UN solo marcador para toda la cifra. Uno por digito dejaba `####` en el esqueleto y
         // `aplicar` solo sustituia el primero: `0000` sobre 42 salia «42###».
-        if (!cifraPuesta) {
+        if (!setupFigure) {
           section.pattern += '\u0000';
-          cifraPuesta = true;
+          setupFigure = true;
         }
       }
       continue;
@@ -161,7 +161,7 @@ const agrupar = (entero: string): string =>
   entero.replace(/\B(?=(\d{3})+(?!\d))/g, SEP_MILLARES);
 
 /** Aplica una seccion analizada a un numero ya en positivo. */
-function aplicar(section: Section, valor: number): string {
+function apply(section: Section, valor: number): string {
   const n = section.porcentaje ? valor * 100 : valor;
   const fijado = n.toFixed(section.decimalsMax);
   const [crudo = '0', decimalesCrudos = ''] = fijado.split('.');
@@ -188,15 +188,15 @@ function aplicar(section: Section, valor: number): string {
   return section.pattern.replace('\u0000', figure);
 }
 
-export class PatronInvalidoError extends Error {
+export class PatternInvalidError extends Error {
   constructor(readonly pattern: string, readonly motivo: string) {
     super(`El patron '${pattern}' no se puede usar: ${motivo}`);
-    this.name = 'PatronInvalidoError';
+    this.name = 'PatternInvalidError';
   }
 }
 
 /** Por que un patron no vale. `null` si vale. */
-export function problemaDelPatron(pattern: string): string | null {
+export function patternProblem(pattern: string): string | null {
   if (!pattern.trim()) return 'esta vacio.';
   if (sections(pattern).length > 3) {
     return 'tiene mas de tres secciones. Son, como mucho: positivo ; negativo ; cero.';
@@ -218,17 +218,17 @@ export function problemaDelPatron(pattern: string): string | null {
 export function numberFormatter(formato: NumberFormat | undefined): (n: number | null) => string {
   const tipo = formato?.tipo ?? 'general';
 
-  if (tipo === 'personalizado' && formato?.pattern && !problemaDelPatron(formato.pattern)) {
+  if (tipo === 'personalizado' && formato?.pattern && !patternProblem(formato.pattern)) {
     const [positivo, negativo, cero] = sections(formato.pattern).map(analizar);
     // `secciones` siempre devuelve al menos una, pero el tipo no lo sabe: sin la guarda, el
     // formateador dependeria de un `!` que nadie vuelve a comprobar.
     if (positivo) {
       return (n) => {
         if (n === null) return '—';
-        if (n === 0 && cero) return aplicar(cero, 0);
-        if (n < 0 && negativo) return aplicar(negativo, Math.abs(n));
-        if (n < 0) return `-${aplicar(positivo, Math.abs(n))}`;
-        return aplicar(positivo, n);
+        if (n === 0 && cero) return apply(cero, 0);
+        if (n < 0 && negativo) return apply(negativo, Math.abs(n));
+        if (n < 0) return `-${apply(positivo, Math.abs(n))}`;
+        return apply(positivo, n);
       };
     }
   }

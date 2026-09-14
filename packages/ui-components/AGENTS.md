@@ -27,7 +27,7 @@ la instancia a mano.
 - **Toda version lleva changelog y certificacion.** El registro rechaza publicar sin ellos.
 - **Toda version vigente de un objeto de datos declara `pozos` y `notes`.**
 - **Todo objeto declara `icono`**, y los que consumen datos declaran ademas `familia`.
-- **`presentation` incluye `PRESENTACION_MINIMA` entera.**
+- **`presentation` incluye `MIN_PRESENTATION` entera.**
 
 ## Las funciones de grafico son puras
 

@@ -6,7 +6,7 @@ import {
   type ObjectFormats,
   measureFormat,
   numberFormatter,
-  problemaDelPatron,
+  patternProblem,
 } from './number';
 
 /** El minimo de personalizacion que TODO objeto visual admite — seccion 4.2 y 4.3. */
@@ -21,9 +21,9 @@ export type LegendMode = (typeof LEGEND_MODES)[number];
 
 /** Los ejes, como en cualquier herramienta de informes. */
 export interface AxisSettings {
-  mostrarX?: boolean;
+  showX?: boolean;
   mostrarY?: boolean;
-  tituloX?: string;
+  xTitle?: string;
   tituloY?: string;
   /** El titulo del eje de la derecha, cuando hay dos. */
   tituloY2?: string;
@@ -35,7 +35,7 @@ export interface AxisSettings {
   minimoY?: number;
   maximoY?: number;
   /** Cuanto se giran los rotulos del eje de categorias. */
-  rotarX?: number;
+  rotateX?: number;
 }
 
 /** ---- Lineas de referencia ---- */
@@ -57,14 +57,14 @@ export const STACKING_MODES = ['ninguno', 'apilado', 'porcentaje'] as const;
 export type StackingMode = (typeof STACKING_MODES)[number];
 
 /** ---- Circular: pastel y dona ---- */
-export const ETIQUETAS_CIRCULARES = [
+export const CIRCULAR_LABELS = [
   'ninguna',
   'categoria',
   'valor',
   'porcentaje',
   'categoria-porcentaje',
 ] as const;
-export type PieLabel = (typeof ETIQUETAS_CIRCULARES)[number];
+export type PieLabel = (typeof CIRCULAR_LABELS)[number];
 
 export interface PieSettings {
   /** El hueco del centro, en porcentaje del radio. 0 es un pastel; 55 es una dona. */
@@ -115,7 +115,7 @@ export interface CategorySort {
 }
 
 /** Compatibilidad: la forma anterior del formato, que era del OBJETO y no de la medida. */
-export interface FormatoNumerico {
+export interface NumericFormat {
   /** 0 a 4. Mas alla, la cifra deja de leerse y empieza a ser ruido de precision. */
   decimales?: number;
   /** Sufijo corto: «casos», «%», «dias». Ocho caracteres es una unidad; mas es una frase. */
@@ -152,10 +152,10 @@ export interface TextStyle {
 }
 
 /** A QUE textos se les puede poner estilo. Conjunto cerrado, como todo lo demas. */
-export const DESTINOS_DE_TEXTO = ['titulo', 'subtitulo', 'valor', 'etiqueta'] as const;
-export type DestinoDeTexto = (typeof DESTINOS_DE_TEXTO)[number];
+export const TEXT_TARGETS = ['titulo', 'subtitulo', 'valor', 'etiqueta'] as const;
+export type TextTarget = (typeof TEXT_TARGETS)[number];
 
-export type ObjectTexts = Partial<Record<DestinoDeTexto, TextStyle>>;
+export type ObjectTexts = Partial<Record<TextTarget, TextStyle>>;
 
 /** Variable CSS del rol, o nada para el color que ya tuviera el texto. */
 const VARIABLE_DE_COLOR: Record<TextColor, string | null> = {
@@ -207,7 +207,7 @@ export interface LabelSettings {
 /** La forma anterior era un `boolean`, y lo sigue siendo para lo ya guardado. */
 export type DatumLabels = boolean | LabelSettings;
 
-export function etiquetasNormalizadas(valor: DatumLabels | undefined): LabelSettings {
+export function normalizedLabels(valor: DatumLabels | undefined): LabelSettings {
   if (valor === undefined) return { mostrar: false };
   if (typeof valor === 'boolean') return { mostrar: valor };
   return { mostrar: true, ...valor };
@@ -254,7 +254,7 @@ export interface ObjectPresentation {
   etiqueta?: ValueLabel;
   /** Una linea bajo el titulo. Para la unidad, el periodo o la salvedad. */
   subtitulo?: string;
-  formato?: FormatoNumerico;
+  formato?: NumericFormat;
   /** Formato de numero POR MEDIDA, con un renglon general de respaldo. */
   formatos?: ObjectFormats;
   leyenda?: LegendMode;
@@ -313,7 +313,7 @@ export const PRESENTATION_KEYS = [
 export type PresentationKey = keyof ObjectPresentation;
 
 /** Las cinco que no son negociables. */
-export const PRESENTACION_MINIMA: PresentationKey[] = [
+export const MIN_PRESENTATION: PresentationKey[] = [
   'icono',
   'acento',
   'resaltado',
@@ -374,10 +374,10 @@ export function validatePresentation(
    * Los estilos de texto, destino a destino.
    */
   for (const [destino, style] of Object.entries(presentacion.textos ?? {})) {
-    if (!(DESTINOS_DE_TEXTO as readonly string[]).includes(destino)) {
+    if (!(TEXT_TARGETS as readonly string[]).includes(destino)) {
       problems.push({
         clave: `textos.${destino}`,
-        issue: `'${destino}' no es un texto configurable. Use: ${DESTINOS_DE_TEXTO.join(', ')}.`,
+        issue: `'${destino}' no es un texto configurable. Use: ${TEXT_TARGETS.join(', ')}.`,
       });
       continue;
     }
@@ -424,7 +424,7 @@ export function validatePresentation(
       });
     }
     if (formato.tipo === 'personalizado') {
-      const issue = formato.pattern === undefined ? 'falta la cadena.' : problemaDelPatron(formato.pattern);
+      const issue = formato.pattern === undefined ? 'falta la cadena.' : patternProblem(formato.pattern);
       if (issue) {
         problems.push({
           clave: `formatos.${nombre}.patron`,
@@ -457,10 +457,10 @@ export function validatePresentation(
    * Un maximo por debajo del minimo no es un rango: es una escala del reves.
    */
   const ejes = presentacion.ejes;
-  if (ejes?.rotarX !== undefined && (ejes.rotarX < -90 || ejes.rotarX > 90)) {
+  if (ejes?.rotateX !== undefined && (ejes.rotateX < -90 || ejes.rotateX > 90)) {
     problems.push({
-      clave: 'ejes.rotarX',
-      issue: `El giro va de -90 a 90 grados, y ${ejes.rotarX} no esta en ese rango.`,
+      clave: 'ejes.rotateX',
+      issue: `El giro va de -90 a 90 grados, y ${ejes.rotateX} no esta en ese rango.`,
     });
   }
   if (ejes?.minimoY !== undefined && ejes.maximoY !== undefined && ejes.minimoY >= ejes.maximoY) {
@@ -570,11 +570,11 @@ export function validatePresentation(
 
   if (
     circular?.labels !== undefined &&
-    !(ETIQUETAS_CIRCULARES as readonly string[]).includes(circular.labels)
+    !(CIRCULAR_LABELS as readonly string[]).includes(circular.labels)
   ) {
     problems.push({
       clave: 'circular.etiquetas',
-      issue: `'${String(circular.labels)}' no es un modo. Use: ${ETIQUETAS_CIRCULARES.join(', ')}.`,
+      issue: `'${String(circular.labels)}' no es un modo. Use: ${CIRCULAR_LABELS.join(', ')}.`,
     });
   }
 
@@ -626,7 +626,7 @@ export function validatePresentation(
 /** El formateador que sale de una presentacion. */
 /** @returns un formateador que acepta `null` y lo dibuja como raya. */
 /** Traduce la forma ANTERIOR del formato a la nueva. */
-export const numberFormatAs = (formato: FormatoNumerico | undefined): NumberFormat =>
+export const numberFormatAs = (formato: NumericFormat | undefined): NumberFormat =>
   formato
     ? {
         tipo: formato.decimales === undefined ? 'general' : 'decimal',
@@ -650,6 +650,6 @@ export function measureFormatter(
 }
 
 /** Compatibilidad: el formateador de la forma anterior, del objeto entero. */
-export function formatterOf(formato: FormatoNumerico | undefined): (n: number | null) => string {
+export function formatterOf(formato: NumericFormat | undefined): (n: number | null) => string {
   return numberFormatter(numberFormatAs(formato));
 }

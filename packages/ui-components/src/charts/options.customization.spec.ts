@@ -79,7 +79,7 @@ describe('ejes', () => {
   });
 
   it('se pueden ocultar y titular', () => {
-    const o = opciones({ ejes: { mostrarY: false, tituloX: 'Distrito', gridlines: false } });
+    const o = opciones({ ejes: { mostrarY: false, xTitle: 'Distrito', gridlines: false } });
     expect(o.yAxis.show).toBe(false);
     expect(o.xAxis.name).toBe('Distrito');
     expect(o.yAxis.splitLine.show).toBe(false);
@@ -321,7 +321,7 @@ describe('giro de los rotulos del eje', () => {
   });
 
   it('girados, se dejan de esconder: quien los gira lo hace para verlos todos', () => {
-    const o = opciones({ ejes: { rotarX: 45 } });
+    const o = opciones({ ejes: { rotateX: 45 } });
     expect(o.xAxis.axisLabel.rotate).toBe(45);
     expect(o.xAxis.axisLabel.hideOverlap).toBe(false);
   });

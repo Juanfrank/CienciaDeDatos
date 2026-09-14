@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { conditionalColor, describirRegla, type ConditionalFormat } from './conditional';
+import { conditionalColor, ruleDescribe, type ConditionalFormat } from './conditional';
 
 const rules = (...r: ConditionalFormat['rules']): ConditionalFormat => ({ rules: r });
 
@@ -72,10 +72,10 @@ describe('conditionalColor', () => {
   });
 });
 
-describe('describirRegla', () => {
+describe('ruleDescribe', () => {
   it('se lee como una frase, para el panel y para el respaldo accesible', () => {
-    expect(describirRegla({ comparator: 'mayor', valor: 90, color: 'error' })).toBe('mayor que 90');
-    expect(describirRegla({ comparator: 'entre', valor: 30, hasta: 90, color: 'error' })).toBe(
+    expect(ruleDescribe({ comparator: 'mayor', valor: 90, color: 'error' })).toBe('mayor que 90');
+    expect(ruleDescribe({ comparator: 'entre', valor: 30, hasta: 90, color: 'error' })).toBe(
       'entre 30 y 90',
     );
   });

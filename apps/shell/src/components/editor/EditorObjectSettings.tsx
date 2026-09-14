@@ -401,11 +401,11 @@ export function EditorObjectSettings({
         <label className="editor__interruptor">
           <input
             type="checkbox"
-            checked={c?.extremoFinal === 'flecha'}
+            checked={c?.finalEnd === 'flecha'}
             disabled={saving}
             data-testid={`${prueba}-flecha`}
             onChange={(e) =>
-              poner({ conexion: { ...c, extremoFinal: e.target.checked ? 'flecha' : 'ninguno' } })
+              poner({ conexion: { ...c, finalEnd: e.target.checked ? 'flecha' : 'ninguno' } })
             }
           />{' '}
           Punta de flecha al final
@@ -487,11 +487,11 @@ export function EditorObjectSettings({
         <label className="form__field">
           <span>Columnas al ampliar</span>
           <select
-            value={String(conf.expandable?.columnasAmpliado ?? 12)}
+            value={String(conf.expandable?.expandedColumns ?? 12)}
             disabled={saving}
             data-testid={`${prueba}-columnas-ampliado`}
             onChange={(e) =>
-              poner({ expandable: { ...conf.expandable, columnasAmpliado: Number(e.target.value) } })
+              poner({ expandable: { ...conf.expandable, expandedColumns: Number(e.target.value) } })
             }
           >
             {[6, 8, 12, 16].map((c) => (

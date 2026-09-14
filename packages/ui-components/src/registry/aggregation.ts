@@ -8,7 +8,7 @@ const aNumero = (v: unknown): number => {
 };
 
 /** El estado parcial de una agregacion en curso. */
-export interface Acumulador {
+export interface Accumulator {
   aggregation: Aggregation;
   suma: number;
   recuento: number;
@@ -21,7 +21,7 @@ export interface Acumulador {
   colapsado: boolean;
 }
 
-export function nuevoAcumulador(aggregation: Aggregation): Acumulador {
+export function newAccumulator(aggregation: Aggregation): Accumulator {
   return {
     aggregation,
     suma: 0,
@@ -34,7 +34,7 @@ export function nuevoAcumulador(aggregation: Aggregation): Acumulador {
   };
 }
 
-export function acumular(acc: Acumulador, valor: unknown): void {
+export function acumular(acc: Accumulator, valor: unknown): void {
   const n = aNumero(valor);
   if (acc.recuento > 0) acc.colapsado = true;
   if (acc.primero === null) acc.primero = n;
@@ -48,7 +48,7 @@ export function acumular(acc: Acumulador, valor: unknown): void {
 }
 
 /** Cierra el acumulador. */
-export function close(acc: Acumulador): number | null {
+export function close(acc: Accumulator): number | null {
   switch (acc.aggregation) {
     case 'suma':
       return acc.suma;
@@ -120,19 +120,19 @@ export interface AggregationContext {
 }
 
 /** Que operadores se pueden aplicar AQUI. Es la unica regla, y de ella sale todo lo demas. */
-export function agregacionesPosibles(ctx: AggregationContext): Aggregation[] {
+export function possibleAggregations(ctx: AggregationContext): Aggregation[] {
   if (!ctx.colapsa) return [...AGGREGATIONS];
   if (ctx.dataGrain === 'atomico') return AGGREGATIONS.filter((a) => a !== 'ninguna');
   return AGGREGATIONS.filter(esAditiva);
 }
 
 /** Por que NO se puede aplicar este operador aqui. `null` si si se puede. */
-function porQueNoSePuede(
+function canItselfNot(
   medida: string,
   aggregation: Aggregation,
   ctx: AggregationContext,
 ): string | null {
-  if (agregacionesPosibles(ctx).includes(aggregation)) return null;
+  if (possibleAggregations(ctx).includes(aggregation)) return null;
 
   if (aggregation === 'ninguna') {
     return (
@@ -157,7 +157,7 @@ export function validateAggregation(
   const problems: AggregationProblem[] = [];
   input.measures.forEach((medida, i) => {
     const aggregation = input.aggregations[i] ?? DEFAULT_AGGREGATION;
-    const issue = porQueNoSePuede(medida, aggregation, input);
+    const issue = canItselfNot(medida, aggregation, input);
     if (issue) problems.push({ medida, aggregation, issue });
   });
   return problems;

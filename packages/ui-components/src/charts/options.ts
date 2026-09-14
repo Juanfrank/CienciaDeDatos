@@ -1,7 +1,7 @@
 import {
   MAX_RADIO_INTERIOR,
   MAX_REFERENCES,
-  etiquetasNormalizadas,
+  normalizedLabels,
   type PieSettings,
   type FunnelComparison,
   type WaterfallSettings,
@@ -151,9 +151,9 @@ function tooltipOf(o: ChartOptions) {
  * de ECharts cuenta los rotulos del eje pero no la leyenda.
  */
 function legendOf(o: ChartOptions, hayQueDistinguir = o.vm.series.length > 1) {
-  const varias = hayQueDistinguir;
+  const several = hayQueDistinguir;
   const mode: LegendMode = o.leyenda ?? 'auto';
-  const visible = mode === 'auto' ? varias : mode !== 'oculta';
+  const visible = mode === 'auto' ? several : mode !== 'oculta';
   if (!visible) return { legend: { show: false }, margin: { bottom: 8, left: 8, right: 16, top: 24 } };
 
   /*
@@ -206,11 +206,11 @@ function legendOf(o: ChartOptions, hayQueDistinguir = o.vm.series.length > 1) {
  * `containLabel` reserva sitio para los rotulos del eje, pero no para la leyenda ni para los
  * titulos de los ejes: esos se suman aqui.
  */
-function marginOf(o: ChartOptions, deLaLeyenda: { top: number; bottom: number; left: number; right: number }) {
+function marginOf(o: ChartOptions, legendThe: { top: number; bottom: number; left: number; right: number }) {
   return {
-    ...deLaLeyenda,
-    left: deLaLeyenda.left + (o.ejes?.tituloY ? 44 : 0),
-    bottom: deLaLeyenda.bottom + (o.ejes?.tituloX ? 24 : 0),
+    ...legendThe,
+    left: legendThe.left + (o.ejes?.tituloY ? 44 : 0),
+    bottom: legendThe.bottom + (o.ejes?.xTitle ? 24 : 0),
   };
 }
 
@@ -320,7 +320,7 @@ function core(o: ChartOptions, conDecal: boolean) {
  * por su indice con `labelLayout`. Solo la primera y la ultima caen fuera del area.
  */
 function shiftLabelBorder(o: ChartOptions) {
-  if (etiquetasNormalizadas(o.etiquetasDeDato).mostrar !== true) return {};
+  if (normalizedLabels(o.etiquetasDeDato).mostrar !== true) return {};
   const last = o.vm.points.length - 1;
   return {
     labelLayout: (p: { dataIndex: number }) => {
@@ -345,7 +345,7 @@ function base(o: ChartOptions) {
 }
 
 /** La etiqueta sobre cada barra o punto. */
-const POSICION_ECHARTS: Record<string, string | undefined> = {
+const ECHARTS_POSITION: Record<string, string | undefined> = {
   auto: undefined,
   encima: 'top',
   debajo: 'bottom',
@@ -354,22 +354,22 @@ const POSICION_ECHARTS: Record<string, string | undefined> = {
 
 /** Los indices del maximo y el minimo de una serie. */
 function endsOf(o: ChartOptions, s: number): Set<number> {
-  let masAlto: number | undefined;
-  let masBajo: number | undefined;
+  let heightMore: number | undefined;
+  let underMore: number | undefined;
   o.vm.points.forEach((punto, i) => {
     const valor = punto.values[s];
     if (valor === null || valor === undefined) return;
-    if (masAlto === undefined || valor > (o.vm.points[masAlto]?.values[s] ?? 0)) masAlto = i;
-    if (masBajo === undefined || valor < (o.vm.points[masBajo]?.values[s] ?? 0)) masBajo = i;
+    if (heightMore === undefined || valor > (o.vm.points[heightMore]?.values[s] ?? 0)) heightMore = i;
+    if (underMore === undefined || valor < (o.vm.points[underMore]?.values[s] ?? 0)) underMore = i;
   });
-  return new Set([masAlto, masBajo].filter((i): i is number => i !== undefined));
+  return new Set([heightMore, underMore].filter((i): i is number => i !== undefined));
 }
 
 const seriesLabel = (o: ChartOptions, s: number, cellPosition: string) => {
-  const config: LabelSettings = etiquetasNormalizadas(o.etiquetasDeDato);
+  const config: LabelSettings = normalizedLabels(o.etiquetasDeDato);
   if (config.mostrar !== true) return { show: false };
 
-  const elegida = POSICION_ECHARTS[config.cellPosition ?? 'auto'] ?? cellPosition;
+  const elegida = ECHARTS_POSITION[config.cellPosition ?? 'auto'] ?? cellPosition;
   const ends = config.onlyEnds ? endsOf(o, s) : undefined;
 
   return {
@@ -389,7 +389,7 @@ const seriesLabel = (o: ChartOptions, s: number, cellPosition: string) => {
 
 const axisCategory = (o: ChartOptions) => ({
   type: 'category' as const,
-  show: o.ejes?.mostrarX !== false,
+  show: o.ejes?.showX !== false,
   data: o.vm.points.map((p) => p.label),
   axisLabel: {
     color: o.palette.mutedText,
@@ -399,17 +399,17 @@ const axisCategory = (o: ChartOptions) => ({
    * `hideOverlap` es lo correcto en horizontal, pero esconde sin avisar; quien gira los rotulos
    * lo hace para verlos todos.
    */
-    hideOverlap: !o.ejes?.rotarX,
-    ...(o.ejes?.rotarX ? { rotate: o.ejes.rotarX } : {}),
+    hideOverlap: !o.ejes?.rotateX,
+    ...(o.ejes?.rotateX ? { rotate: o.ejes.rotateX } : {}),
   },
   axisLine: { lineStyle: { color: o.palette.line } },
   axisTick: { show: false },
   /*
    * El titulo del eje se pone A MANO o no se pone.
    */
-  ...(o.ejes?.tituloX
+  ...(o.ejes?.xTitle
     ? {
-        name: o.ejes.tituloX,
+        name: o.ejes.xTitle,
         nameLocation: 'middle' as const,
         nameGap: 28,
         nameTextStyle: { color: o.palette.mutedText },
@@ -420,7 +420,7 @@ const axisCategory = (o: ChartOptions) => ({
    */
 });
 
-const ejeValor = (o: ChartOptions) => ({
+const valueAxis = (o: ChartOptions) => ({
   type: 'value' as const,
   show: o.ejes?.mostrarY !== false,
   /*
@@ -516,7 +516,7 @@ export function barOptions(o: ChartOptions): Record<string, unknown> {
   return {
     ...base(o),
     xAxis: axisCategory(o),
-    yAxis: ejeValor(o),
+    yAxis: valueAxis(o),
     series: barSeries(o, false),
   };
 }
@@ -527,10 +527,10 @@ export function barOptions(o: ChartOptions): Record<string, unknown> {
  * El mismo objeto que las columnas con los ejes intercambiados; cual es la categoria y cual el
  * valor lo decide quien construye, no ECharts.
  */
-export function opcionesDeBarrasHorizontales(o: ChartOptions): Record<string, unknown> {
+export function horizontalBarOptions(o: ChartOptions): Record<string, unknown> {
   return {
     ...base(o),
-    xAxis: ejeValor(o),
+    xAxis: valueAxis(o),
     yAxis: {
       ...axisCategory(o),
       /*
@@ -549,7 +549,7 @@ export function areaOptions(o: ChartOptions): Record<string, unknown> {
   return {
     ...base(o),
     xAxis: { ...axisCategory(o), boundaryGap: false },
-    yAxis: ejeValor(o),
+    yAxis: valueAxis(o),
     series: o.vm.series.map((nombre, s) => ({
       name: nombre,
       type: 'line',
@@ -577,7 +577,7 @@ export function lineOptions(o: ChartOptions): Record<string, unknown> {
   return {
     ...base(o),
     xAxis: { ...axisCategory(o), boundaryGap: false },
-    yAxis: ejeValor(o),
+    yAxis: valueAxis(o),
     series: o.vm.series.map((nombre, s) => ({
       name: nombre,
       type: 'line',
@@ -882,7 +882,7 @@ export function gaugeOptions(o: ChartOptions): Record<string, unknown> {
  * titulo (`tituloY2`). Todo lo demas se hereda para que los dos ejes se lean igual.
  */
 const axisValueSecondary = (o: ChartOptions) => ({
-  ...ejeValor(o),
+  ...valueAxis(o),
   position: 'right' as const,
   splitLine: { show: false },
   ...(o.ejes?.tituloY2
@@ -909,7 +909,7 @@ export function comboOptions(o: ChartOptions): Record<string, unknown> {
   return {
     ...base(o),
     xAxis: axisCategory(o),
-    yAxis: dos ? [ejeValor(o), axisValueSecondary(o)] : ejeValor(o),
+    yAxis: dos ? [valueAxis(o), axisValueSecondary(o)] : valueAxis(o),
     series: o.vm.series.map((nombre, s) => {
       const isColumn = s < gridColumns;
       return {
@@ -989,21 +989,21 @@ export function scatterOptions(o: ChartOptions): Record<string, unknown> {
       },
     },
     xAxis: {
-      ...ejeValor(o),
+      ...valueAxis(o),
       // Los dos ejes llevan cuadricula: sin las verticales, situar un punto en el eje horizontal
       // obliga a seguirlo con el dedo hasta abajo.
       splitLine: {
         show: o.ejes?.gridlines !== false,
         lineStyle: { color: o.palette.line, type: 'dashed' as const },
       },
-      show: o.ejes?.mostrarX !== false,
+      show: o.ejes?.showX !== false,
       /*
-       * El titulo del eje horizontal va horizontal y debajo. `ejeValor` lo escribe rotado 90
+       * El titulo del eje horizontal va horizontal y debajo. `valueAxis` lo escribe rotado 90
        * grados porque en los demas graficos ese eje es el vertical.
        */
-      ...(o.ejes?.tituloX
+      ...(o.ejes?.xTitle
         ? {
-            name: o.ejes.tituloX,
+            name: o.ejes.xTitle,
             nameLocation: 'middle' as const,
             nameRotate: 0,
             nameGap: 28,
@@ -1011,7 +1011,7 @@ export function scatterOptions(o: ChartOptions): Record<string, unknown> {
           }
         : { name: undefined }),
     },
-    yAxis: ejeValor(o),
+    yAxis: valueAxis(o),
     series: [
       {
         type: 'scatter',
@@ -1209,7 +1209,7 @@ export function waterfallOptions(o: ChartOptions): Record<string, unknown> {
       },
     },
     xAxis: { ...axisCategory(o), data: labels },
-    yAxis: ejeValor(o),
+    yAxis: valueAxis(o),
     series: [
       {
         // El zocalo: invisible, mudo y fuera de la leyenda. Solo empuja a la barra de arriba.
@@ -1351,7 +1351,7 @@ export type ChartKind =
 
 const CONSTRUCTORES: Record<ChartKind, (o: ChartOptions) => Record<string, unknown>> = {
   barras: barOptions,
-  'barras-horizontales': opcionesDeBarrasHorizontales,
+  'barras-horizontales': horizontalBarOptions,
   lineas: lineOptions,
   area: areaOptions,
   circular: pieOptions,

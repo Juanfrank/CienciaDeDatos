@@ -516,7 +516,7 @@ export const modulosDemo: ModuleDefinition[] = [
                   desde: 'flujo-origen',
                   hasta: 'flujo-destino',
                   dash: 'angulo',
-                  extremoFinal: 'flecha',
+                  finalEnd: 'flecha',
                   content: 'se resuelven',
                   estiloDeLinea: { style: 'solida', thickness: 2, color: 'primario' },
                 },
@@ -994,7 +994,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'Un punto por trimestre',
                 etiquetasDeDato: true,
-                ejes: { tituloX: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
+                ejes: { xTitle: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
               },
             },
           },
@@ -1014,7 +1014,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'Una tercera medida sin un tercer eje',
                 etiquetasDeDato: true,
-                ejes: { tituloX: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
+                ejes: { xTitle: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
               },
             },
           },
@@ -1323,7 +1323,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: {
                 subtitulo: 'En horizontal, los que no caben se esconden sin avisar',
                 leyenda: 'oculta',
-                ejes: { tituloY: 'Casos', rotarX: 45 },
+                ejes: { tituloY: 'Casos', rotateX: 45 },
               },
             },
           },
@@ -1756,7 +1756,7 @@ export const modulosDemo: ModuleDefinition[] = [
               presentacion: { icono: 'expandir', subtitulo: 'La ventana tiene su propia rejilla' },
               settings: {
                 objectId: 'contenedor-ampliable',
-                expandable: { gridColumns: 6, columnasAmpliado: 12, textoDeAmpliar: 'Ampliar' },
+                expandable: { gridColumns: 6, expandedColumns: 12, textoDeAmpliar: 'Ampliar' },
                 panels: [
                   {
                     panelId: 'p1',

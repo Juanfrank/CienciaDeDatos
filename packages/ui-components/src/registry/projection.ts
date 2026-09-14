@@ -13,7 +13,7 @@ const columnText = (name: string) => ({ name, type: 'string' });
 const dimensionsLabel = (instance: ObjectInstance): string =>
   instance.binding.dimensions.map(fieldKey).join(' / ') || 'Total';
 
-function mismaProcedencia(result: QueryResult, columns: QueryResult['columns'], rows: unknown[][]): QueryResult {
+function sameProvenance(result: QueryResult, columns: QueryResult['columns'], rows: unknown[][]): QueryResult {
   // `source` y `generatedAt` se conservan: una proyeccion no cambia de donde vino el dato ni
   // cuando se calculo, y 4.8 los necesita intactos rio abajo.
   return { columns, rows, source: result.source, generatedAt: result.generatedAt };
@@ -42,7 +42,7 @@ export function projectObject(
       const { rows } = aggregateBy(result, [], measures, aggregations);
       const valores = rows[0]?.values ?? measures.map(() => null);
       const columns = [columnText('Indicador'), ...measures.map(columnNumber)];
-      return mismaProcedencia(result, columns, [
+      return sameProvenance(result, columns, [
         [instance.title ?? instance.objectId, ...valores],
       ]);
     }
@@ -53,25 +53,25 @@ export function projectObject(
        */
       const nada = new Set<string>();
       const deRanura = (id: string): string[] | undefined => instance.binding.slots?.[id];
-      const dimsFila = (deRanura('filas') ?? dimensions.slice(0, 1).map(fieldKey)).map(aFieldRef);
-      const dimsColumna = (deRanura('columnas') ?? dimensions.slice(1, 2).map(fieldKey)).map(
+      const rowDims = (deRanura('filas') ?? dimensions.slice(0, 1).map(fieldKey)).map(aFieldRef);
+      const columnDims = (deRanura('columnas') ?? dimensions.slice(1, 2).map(fieldKey)).map(
         aFieldRef,
       );
       const medidas = deRanura('valores') ?? measures;
 
-      const vm = buildMatrix(result, dimsFila, dimsColumna, medidas, aggregations);
-      const columnasHoja = leaves(vm.gridColumns, nada);
+      const vm = buildMatrix(result, rowDims, columnDims, medidas, aggregations);
+      const sheetColumns = leaves(vm.gridColumns, nada);
 
       const columns = [
         columnText(vm.rowLevels.join(' / ') || dimensionsLabel(instance)),
-        ...columnasHoja.flatMap((c) =>
+        ...sheetColumns.flatMap((c) =>
           medidas.map((m) => columnNumber(medidas.length > 1 ? `${c.etiqueta} · ${m}` : c.etiqueta)),
         ),
         ...medidas.map((m) => columnNumber(medidas.length > 1 ? `Total · ${m}` : 'Total')),
       ];
 
       const cellsOf = (path: readonly string[]) => [
-        ...columnasHoja.flatMap((c) => medidas.map((_, i) => vm.valor(path, c.path, i))),
+        ...sheetColumns.flatMap((c) => medidas.map((_, i) => vm.valor(path, c.path, i))),
         ...medidas.map((_, i) => vm.valor(path, [], i)),
       ];
 
@@ -82,14 +82,14 @@ export function projectObject(
         ...cellsOf(node.path),
       ]);
       rows.push(['Total', ...cellsOf([])]);
-      return mismaProcedencia(result, columns, rows);
+      return sameProvenance(result, columns, rows);
     }
 
     case 'segmentador': {
       const dimension = dimensions[0];
-      if (!dimension) return mismaProcedencia(result, [], []);
+      if (!dimension) return sameProvenance(result, [], []);
       const opciones = toSlicerOptions(result, dimension);
-      return mismaProcedencia(
+      return sameProvenance(
         result,
         [columnText(fieldKey(dimension))],
         opciones.map((v) => [v]),
@@ -104,7 +104,7 @@ export function projectObject(
         ...dimensions.map((d) => columnText(fieldKey(d))),
         ...measures.map(columnNumber),
       ];
-      return mismaProcedencia(
+      return sameProvenance(
         result,
         columns,
         rows.map((f) => [...f.labels, ...f.values]),
@@ -118,7 +118,7 @@ export function projectObject(
         columnText(dimensionsLabel(instance)),
         ...measures.map(columnNumber),
       ];
-      return mismaProcedencia(
+      return sameProvenance(
         result,
         columns,
         rows.map((f) => [f.labels.join(' / '), ...f.values]),
