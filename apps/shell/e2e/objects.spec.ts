@@ -347,4 +347,26 @@ test.describe('contenedor expandible: se abre EN SU SITIO y empuja lo de abajo',
     const vecina = await page.getByTestId('cell-cont-simple').boundingBox();
     expect(celda?.height ?? 0).toBeLessThan(vecina?.height ?? 0);
   });
+
+  test('abierto, el contenedor LLENA las filas que reserva', async ({ page }) => {
+    /*
+     * La celda crece a las filas configuradas, y el contenedor se quedaba con el alto de su
+     * contenido: quedaba un hueco debajo del panel del tamano de lo que faltaba por llenar.
+     * Empujar lo de abajo para no ocupar el sitio que se gano es lo mismo que no empujarlo.
+     *
+     * Se compara el alto del contenedor con el de su CELDA, que es el espacio reservado; medir
+     * el panel contra un numero fijo ataria la prueba al alto de fila de hoy.
+     */
+    await page.goto('/m/composicion/contenedores');
+    await page.getByTestId('chiclet').click();
+    await expect(page.getByTestId('chiclet')).toHaveAttribute('aria-expanded', 'true');
+
+    const medidas = await page.evaluate(() => {
+      const contenedor = document.querySelector('.contenedor-expandible') as HTMLElement;
+      const celda = contenedor.closest('.grid__cell') as HTMLElement;
+      return { contenedor: contenedor.offsetHeight, celda: celda.offsetHeight };
+    });
+    expect(medidas.celda).toBeGreaterThan(0);
+    expect(medidas.contenedor).toBe(medidas.celda);
+  });
 });

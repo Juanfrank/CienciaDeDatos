@@ -4394,11 +4394,19 @@ th[aria-sort='descending'] .table__flecha {
   grid-row: span 1;
 }
 
+/*
+ * Llena la celda, no la deja a medias.
+ *
+ * La celda reserva las filas que se configuraron al expandir, pero el contenedor se quedaba con
+ * el alto de su contenido: el panel terminaba arriba y debajo quedaba un hueco del tamano de lo
+ * que faltaba por llenar. Reservar espacio y no ocuparlo se ve igual que un fallo de maquetacion.
+ */
 .contenedor-expandible {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
   min-height: 0;
+  height: 100%;
 }
 
 /* El chiclet: una pastilla con contorno, como la de las capturas. */
