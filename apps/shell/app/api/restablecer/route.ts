@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   }
 
   const resetId = typeof body['resetId'] === 'string' ? body['resetId'].trim() : '';
-  const code = typeof body['codigo'] === 'string' ? body['codigo'].trim() : '';
+  const code = typeof body['code'] === 'string' ? body['code'].trim() : '';
   const clave = typeof body['clave'] === 'string' ? body['clave'] : '';
 
   if (!resetId || !code || !clave) {

@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
   const correo = typeof body['correo'] === 'string' ? body['correo'].trim() : '';
   const clave = typeof body['clave'] === 'string' ? body['clave'] : '';
-  const code = typeof body['codigo'] === 'string' ? body['codigo'].trim() : undefined;
+  const code = typeof body['code'] === 'string' ? body['code'].trim() : undefined;
 
   if (!correo || !clave) {
     return NextResponse.json({ error: 'Faltan el correo o la contrasena.' }, { status: 400 });
