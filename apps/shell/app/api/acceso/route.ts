@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const mail = typeof body['correo'] === 'string' ? body['correo'].trim() : '';
+  const mail = typeof body['mail'] === 'string' ? body['mail'].trim() : '';
   const clave = typeof body['clave'] === 'string' ? body['clave'] : '';
   const code = typeof body['code'] === 'string' ? body['code'].trim() : undefined;
 

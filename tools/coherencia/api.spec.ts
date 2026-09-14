@@ -1,6 +1,8 @@
 import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+// @ts-expect-error -- herramienta en JavaScript, sin tipos.
+import { segmentar } from "../rename/segmentos.mjs";
 
 /**
  * Los nombres de campo que viajan por HTTP, leidos en un lado y escritos en el otro.
@@ -14,6 +16,12 @@ import { describe, expect, it } from "vitest";
  * `code` y las dos rutas seguian leyendo `body['codigo']`. Nada dejo de compilar, ninguna prueba
  * unitaria se inmuto, y la aplicacion entera se quedo sin poder iniciar sesion. Se vio nueve
  * minutos despues, cuando las 424 pruebas de navegador fallaron a la vez.
+ *
+ * La primera version de esta guarda no basto. Buscaba el nombre como clave de objeto en CUALQUIER
+ * parte de la aplicacion, y cuando `correo` paso a `mail` en los dos emisores, la ruta se quedo
+ * leyendo `body['correo']` y la comprobacion siguio en verde: `correo` seguia existiendo como
+ * clave en un tipo y en el estado de un formulario. Ahora solo cuentan las claves que estan
+ * DENTRO de un cuerpo que se envia, que es la unica pregunta que importa.
  */
 
 const raiz = execSync("git rev-parse --show-toplevel").toString().trim();
@@ -31,18 +39,89 @@ const contenido = new Map(
   fuentes.map((f) => [f, readFileSync(`${raiz}/${f}`, "utf8")]),
 );
 
+/**
+ * Lo mismo sin comentarios ni cadenas, para buscar CLAVES.
+ *
+ * Un comentario en espanol lleva dos puntos con la misma naturalidad que un objeto: `// sale un
+ * correo: de ese canal depende que el flujo sea seguro` hacia que `correo` contara como clave
+ * enviada, y con eso la guarda dejaba pasar el campo de acceso que ya nadie mandaba.
+ *
+ * Solo vale para las claves. La LECTURA vive dentro de una cadena —`body['correo']`— y sobre el
+ * texto limpio desaparece: eso es lo que hay que comparar, no lo que hay que limpiar. El
+ * segmentador es el mismo que usa el renombrador para no traducir prosa.
+ */
+const codigoDe = new Map(
+  fuentes.map((f) => [
+    f,
+    (segmentar(contenido.get(f) as string) as { tipo: string; texto: string }[])
+      .filter((s) => s.tipo === "codigo")
+      .map((s) => s.texto)
+      .join(""),
+  ]),
+);
+
 /** `body['campo']`, que es como una ruta lee lo que le mandaron. */
 const LECTURA = /\bbody\[\s*['"]([A-Za-z_$][\w$]*)['"]\s*\]/g;
 
 /**
- * Cualquier identificador usado como clave de objeto.
+ * Las claves de cualquier objeto del archivo que llama.
  *
- * Cubre las tres formas con las que se escribe un cuerpo —`{ code: valor }`, la abreviada
- * `{ code }` y la condicional `...(x ? { code } : {})`— sin intentar averiguar si ese objeto
- * concreto acaba en una peticion. La pregunta que importa es mas simple: si NADIE en toda la
- * aplicacion escribe ese nombre como clave, nadie puede estar mandandolo.
+ * No se intenta seguir QUE objeto acaba en el cuerpo: se arman en una variable, se componen con
+ * un spread —`{ ...comun, objeto, medida }`— y se serializan tres lineas mas abajo. Perseguir eso
+ * con expresiones regulares da falsos positivos, y un falso positivo en una guarda termina con
+ * alguien relajandola.
+ *
+ * El alcance ya lo pone `emisoresDe`: solo se miran los archivos que nombran la URL de ESTA ruta.
+ * Dentro de ellos basta con que el nombre exista como clave. Es generoso a proposito, y aun asi
+ * caza los dos fallos reales que hubo —`codigo` y `correo`—, porque el renombrado los cambio en
+ * el emisor entero y no quedo ni rastro del nombre viejo.
  */
-const CLAVE = /([A-Za-z_$][\w$]*)\s*:|[{,]\s*([A-Za-z_$][\w$]*)\s*[,}]/g;
+const CLAVE = /([A-Za-z_$][\w$]*)\s*:/g;
+const ABREVIADA = /(?:[{,]\s*)([A-Za-z_$][\w$]*)\s*(?=[,}])/g;
+
+/**
+ * Las rutas son lo unico que lee por cadena.
+ *
+ * Una prueba que hace `body['estado']` esta leyendo una RESPUESTA, que es otro contrato y con
+ * otros emisores. Aqui se compara lo que un `Route Handler` espera recibir.
+ */
+const rutas = fuentes.filter((f) => f.startsWith('apps/shell/app/api/'));
+
+/** `apps/shell/app/api/modulos/[slug]/estado/route.ts` es `/api/modulos/<lo-que-sea>/estado`. */
+function urlDe(ruta: string): RegExp {
+  const camino = ruta
+    .replace(/^apps\/shell\/app/, '')
+    .replace(/\/route\.tsx?$/, '')
+    .replace(/\[[^\]]+\]/g, 'SEGMENTO');
+  const patron = camino
+    .split('/')
+    .map((p) => (p === 'SEGMENTO' ? '[^/`\'"\\s]+' : p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+    .join('/');
+  return new RegExp(patron);
+}
+
+/**
+ * Quien manda a esta ruta: los archivos que nombran su URL.
+ *
+ * Es la diferencia entre esta guarda y la que no basto. La primera version preguntaba si el campo
+ * existia como clave en ALGUNA parte de la aplicacion, y `correo` seguia existiendo en un tipo y
+ * en el estado de un formulario mucho despues de que los dos emisores pasaran a mandar `mail`. La
+ * pregunta correcta es mas estrecha: lo que lee esta ruta, ¿lo manda quien llama a ESTA ruta?
+ */
+function emisoresDe(ruta: string): string[] {
+  const url = urlDe(ruta);
+  return [...contenido].filter(([f, texto]) => f !== ruta && url.test(texto)).map(([f]) => f);
+}
+
+function clavesEnviadas(archivos: string[]): Set<string> {
+  const claves = new Set<string>();
+  for (const archivo of archivos) {
+    const texto = codigoDe.get(archivo) as string;
+    for (const m of texto.matchAll(CLAVE)) claves.add(m[1] as string);
+    for (const m of texto.matchAll(ABREVIADA)) claves.add(m[1] as string);
+  }
+  return claves;
+}
 
 /**
  * Campos que se leen y que nadie manda todavia, con su motivo.
@@ -53,40 +132,39 @@ const CLAVE = /([A-Za-z_$][\w$]*)\s*:|[{,]\s*([A-Za-z_$][\w$]*)\s*[,}]/g;
  */
 const SIN_EMISOR = new Map<string, string>([
   [
-    "diaMes",
-    "la cadencia mensual existe en la API y todavia no la pide ni el formulario ni una prueba",
+    'diaMes',
+    'la cadencia mensual existe en la API y todavia no la pide ni el formulario ni una prueba',
   ],
 ]);
 
-describe("campos que viajan por HTTP", () => {
-  const leidos = new Map<string, Set<string>>();
-  for (const [ruta, fuente] of contenido) {
-    for (const m of fuente.matchAll(LECTURA)) {
-      const campo = m[1] as string;
-      if (!leidos.has(campo)) leidos.set(campo, new Set());
-      (leidos.get(campo) as Set<string>).add(ruta);
+describe('campos que viajan por HTTP', () => {
+  const rotos: string[] = [];
+  let comparadas = 0;
+
+  for (const ruta of rutas) {
+    const texto = contenido.get(ruta) as string;
+    const leidos = [...new Set([...texto.matchAll(LECTURA)].map((m) => m[1] as string))];
+    if (leidos.length === 0) continue;
+
+    // Una ruta a la que nadie llama desde aqui la llama un sistema de fuera: su contrato no vive
+    // en este repositorio y no hay con que compararlo.
+    const emisores = emisoresDe(ruta);
+    if (emisores.length === 0) continue;
+
+    comparadas += 1;
+    const enviadas = clavesEnviadas(emisores);
+    for (const campo of leidos) {
+      if (enviadas.has(campo) || SIN_EMISOR.has(campo)) continue;
+      rotos.push(`${campo} <- ${ruta} (lo llaman: ${emisores.join(', ')})`);
     }
   }
 
-  const escritos = new Set<string>();
-  for (const fuente of contenido.values()) {
-    for (const m of fuente.matchAll(CLAVE))
-      escritos.add((m[1] ?? m[2]) as string);
-  }
-
-  it("hay campos que comparar", () => {
-    expect(leidos.size).toBeGreaterThan(15);
-    expect(escritos.size).toBeGreaterThan(100);
+  it('hay rutas que comparar', () => {
+    expect(rutas.length).toBeGreaterThan(15);
+    expect(comparadas).toBeGreaterThan(8);
   });
 
-  it("todo campo que una ruta lee lo escribe alguien", () => {
-    const huerfanos = [...leidos.keys()]
-      .filter((campo) => !escritos.has(campo) && !SIN_EMISOR.has(campo))
-      .map(
-        (campo) =>
-          `${campo} <- ${[...(leidos.get(campo) as Set<string>)].join(", ")}`,
-      )
-      .sort();
-    expect(huerfanos).toEqual([]);
+  it('todo campo que una ruta lee lo manda quien la llama', () => {
+    expect(rotos.sort()).toEqual([]);
   });
 });
