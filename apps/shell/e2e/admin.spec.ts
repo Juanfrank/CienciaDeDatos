@@ -1070,3 +1070,62 @@ test.describe('la tabla del arbol se pliega y se despliega (4.1)', () => {
     await expect(page.getByTestId('modulo-composicion')).toBeVisible();
   });
 });
+
+test.describe('el carril dice el nivel con la sangria (4.10.8)', () => {
+  test('una subseccion empieza a la DERECHA de la seccion de la que cuelga', async ({ page }) => {
+    /*
+     * Se mide la posicion en pantalla, no la clase ni la regla.
+     *
+     * La sangria estaba escrita en `.admin__hijas` y no estaba en vigor: mas arriba hay un
+     * `.admin__nav ul { margin: 0 }` que gana por especificidad, asi que el submenu salia a
+     * cuatro pixeles de su madre. Comprobar que el `ul` lleva la clase habria pasado igual de
+     * verde con el fallo puesto; lo unico que lo distingue es donde empieza el texto.
+     *
+     * Se compara enlace con enlace y no caja con caja: la caja de la lista podria estar sangrada
+     * y el texto de dentro seguir alineado con el de arriba, que es justo lo que se ve.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/resources');
+
+    const submenu = page.getByTestId('submenu-resources');
+    await expect(submenu).toBeVisible();
+
+    const sangria = await page.evaluate(() => {
+      const hijas = document.querySelector('.admin__hijas') as HTMLElement;
+      const madre = hijas.parentElement as HTMLElement;
+      const izquierda = (e: Element) => e.getBoundingClientRect().left;
+      return (
+        izquierda(hijas.querySelector('a') as Element) -
+        izquierda(madre.querySelector('a') as Element)
+      );
+    });
+
+    // Un umbral, no una cifra exacta: lo que se afirma es que se ve, no cuanto mide el token.
+    expect(sangria).toBeGreaterThanOrEqual(16);
+  });
+
+  test('la portada de Recursos cuenta lo que hay, y el numero es el de la pantalla hija', async ({
+    page,
+  }) => {
+    /*
+     * El indice de tarjetas se quito y la portada se quedo sin nada debajo del titulo.
+     * Lo que la sustituye tiene que decir algo que el carril no diga, y para eso hay un numero.
+     *
+     * Se compara con la tabla de la pantalla hija, no con una cifra escrita aqui: un contador
+     * propio empezaria coincidiendo y dejaria de hacerlo la primera vez que entre un objeto al
+     * catalogo, y el que se ve primero es el que engana.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/resources');
+
+    const celda = page.getByTestId('familia-containers').locator('td').last();
+    const dice = Number((await celda.innerText()).trim().split(/\s+/)[0]);
+    expect(dice).toBeGreaterThan(0);
+
+    await page.getByTestId('familia-containers').getByRole('link').click();
+    await expect(page).toHaveURL(/\/admin\/resources\/containers$/);
+    expect(await page.locator('[data-testid^="recurso-"][data-testid$="-estado"]').count()).toBe(
+      dice,
+    );
+  });
+});

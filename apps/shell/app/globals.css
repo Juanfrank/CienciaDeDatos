@@ -4187,26 +4187,26 @@ th[aria-sort='descending'] .table__flecha {
 }
 
 /*
- * Las paginas que cuelgan de una seccion.
- *
- * Sangradas y mas pequenas: la sangria dice que dependen de la de arriba, y sin ella un submenu
- * abierto parece otro grupo de secciones al mismo nivel.
- */
-/*
  * Las subsecciones del carril, sangradas de verdad.
  *
- * Estaban a un `space-lg` de la madre y con la linea pegada al texto: a simple vista parecian
- * hermanas suyas, no hijas. La sangria es lo UNICO que dice el nivel en una lista, asi que se
- * separa la linea del texto y se aparta el bloque entero — el indice de tarjetas que repetia
- * estas mismas secciones arriba de cada pantalla ya no esta, y el carril tiene que decirlo solo.
+ * Va con `.admin__nav` delante, y no es adorno: mas arriba hay un `.admin__nav ul { margin: 0 }`
+ * que gana por especificidad a cualquier `.admin__hijas` suelto, se escriba donde se escriba. La
+ * sangria estaba puesta y no estaba en vigor — quedaba la linea, que sí se aplicaba, pegada al
+ * texto y a cuatro pixeles de la madre, que a simple vista son hermanas y no hijas.
+ *
+ * La sangria es lo UNICO que dice el nivel en una lista, y ahora es lo unico que lo dice: el
+ * indice de tarjetas que repetia estas mismas secciones arriba de cada pantalla ya no esta.
+ *
+ * `admin.spec.ts` mide en el navegador que el enlace hijo empiece a la derecha del de la madre,
+ * que es lo que se ve; una regla de sangria sin nadie que la mida es como estaba antes de esto.
  */
-.admin__hijas {
+.admin__nav .admin__hijas {
   list-style: none;
   margin: var(--space-xs) 0 var(--space-sm) var(--space-md);
   padding-inline-start: var(--space-md);
   border-left: 2px solid var(--md-sys-color-outline-variant);
 }
-.admin__hijas a {
+.admin__nav .admin__hijas a {
   padding-block: var(--space-xs);
   font-size: var(--md-sys-typescale-body-small-size);
 }
