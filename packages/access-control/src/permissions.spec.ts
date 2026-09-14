@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { PermissionError, assertCan, can, capabilitiesOf, denial, type Capability } from './permissions';
+import {
+  CAPABILITIES,
+  PermissionError,
+  assertCan,
+  can,
+  capabilitiesOf,
+  denial,
+  rolesThatCan,
+  type Capability,
+} from './permissions';
 import { APP_ROLES } from './Team';
 
 describe('matriz de permisos (4.10.1)', () => {
@@ -91,5 +100,43 @@ describe('capabilitiesOf', () => {
     expect(d.role).toBe('visor');
     expect(d.capability).toBe('gestionar-equipos');
     expect(d.reason).toContain('administrador');
+  });
+});
+
+/**
+ * La matriz tiene que poder DIBUJARSE, no solo consultarse.
+ *
+ * `can()` responde «¿puede este rol esto?», que es lo que necesita el guardian. Lo que no habia
+ * era manera de ensenar la tabla entera de 4.10.1 a quien administra: `MATRIX` es privada, y la
+ * unica alternativa era copiarla a mano en el panel. Una copia a mano de una matriz de permisos
+ * es exactamente la clase de cosa que se queda vieja sin que nadie se entere.
+ */
+describe('la matriz se puede dibujar', () => {
+  it('CAPABILITIES incluye TODAS las de la matriz, ninguna se queda fuera', () => {
+    // Se compara contra lo que `can` acepta de verdad, no contra una lista paralela.
+    const todas = CAPABILITIES;
+    expect(new Set(todas).size).toBe(todas.length);
+    for (const c of todas) {
+      expect(rolesThatCan(c).length).toBeGreaterThan(0);
+    }
+    // Y al reves: cada capacidad que algun rol tiene esta en la lista.
+    const desdeRoles = new Set([
+      ...capabilitiesOf('administrador'),
+      ...capabilitiesOf('colaborador'),
+      ...capabilitiesOf('visor'),
+    ]);
+    expect([...desdeRoles].sort()).toEqual([...todas].sort());
+  });
+
+  it('empieza por lo que puede todo el mundo y acaba en lo que solo puede administrar', () => {
+    const primera = CAPABILITIES[0] as Capability;
+    const ultima = CAPABILITIES[CAPABILITIES.length - 1] as Capability;
+    expect(rolesThatCan(primera)).toHaveLength(3);
+    expect(rolesThatCan(ultima)).toEqual(['administrador']);
+  });
+
+  it('la separacion de 4.10.1 se ve en la matriz: proponer no es publicar', () => {
+    expect(rolesThatCan('proponer-objetos-al-repositorio')).toContain('colaborador');
+    expect(rolesThatCan('publicar-modulo-institucional')).not.toContain('colaborador');
   });
 });

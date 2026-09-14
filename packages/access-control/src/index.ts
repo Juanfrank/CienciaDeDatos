@@ -44,11 +44,13 @@ export {
 export type { DanglingPackageNode, ModulePackage } from './ModulePackage';
 
 export {
+  CAPABILITIES,
   PermissionError,
   assertCan,
   can,
   capabilitiesOf,
   denial,
+  rolesThatCan,
   type Capability,
   type PermissionDenial,
 } from './permissions';

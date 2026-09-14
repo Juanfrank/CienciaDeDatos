@@ -65,6 +65,16 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   siempre. Lo que tapaba: las dos pantallas de auditoria mostraban `u-admin` donde deberia ir un
   nombre. Arreglado en las dos, y la prueba ahora provoca el cambio y comprueba las cuatro
   columnas sin condicion.
+- **La matriz de permisos de 4.10.1, visible (4.10.8).** Estaba escrita, probada y era invisible:
+  `MATRIX` es privada de `@app/access-control`, y `capabilitiesOf` no lo llamaba nadie desde
+  produccion. Quien administra no tenia forma de ver que puede cada rol. Ahora
+  `/admin/users/permissions` la dibuja recorriendo el codigo que DECIDE, no una copia: copiar una
+  matriz de permisos a mano es exactamente lo que se queda viejo sin que nadie se entere, y lo que
+  mas duele que lo haga. Los roles no se editan ahi, y no es un descuido: el contrato los fija en
+  tres y los declara no configurables — la pagina explica, no configura. Una guarda nueva ata cada
+  capacidad del tipo `Capability` con su rotulo del catalogo en los dos sentidos: anadir una
+  capacidad sin rotulo la dibujaria como `cap.<lo-que-sea>` en la tabla que explica quien puede
+  que, y quitarla dejaria el rotulo huerfano.
 - **La cola de revision, en el panel y con el cambio delante (4.1).** Aprobar ocurria en
   `/editor`, mezclado con los borradores propios de quien miraba: para revisar una propuesta habia
   que reconocerla entre los suyos, abrirla y acordarse de como estaba antes. Ahora

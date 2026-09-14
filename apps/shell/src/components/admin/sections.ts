@@ -131,6 +131,14 @@ export const GRUPOS: GrupoDeAdmin[] = [
         label: 'Usuarios',
         desc: 'Quien es cada quien, a que equipos pertenece y con que rol en cada uno.',
         icono: 'personas',
+        hijas: [
+          {
+            href: '/admin/users/permissions',
+            label: 'Roles y permisos',
+            desc: 'Que puede cada uno de los tres roles, dibujado desde el codigo que lo decide.',
+            icono: 'llave',
+          },
+        ],
       },
       {
         href: '/admin/teams',

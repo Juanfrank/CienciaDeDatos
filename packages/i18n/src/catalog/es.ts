@@ -323,6 +323,32 @@ export const es = {
   'action.back': 'Volver',
   'action.edit': 'Editar',
   'action.view': 'Ver',
+  // Matriz de permisos — seccion 4.10.1. Una clave por capacidad, atada por una guarda.
+  'admin.permissions.title': 'Roles y permisos',
+  'admin.permissions.intro':
+    'Los tres roles no son configurables: los fija el contrato. Esta tabla sale del codigo que decide de verdad, no de una copia, asi que no puede quedarse vieja.',
+  'admin.permissions.column.capability': 'Que se puede hacer',
+  'admin.permissions.yes': 'Si',
+  'admin.permissions.no': 'No',
+  'admin.permissions.separation':
+    'La separacion que mas importa: un Colaborador PROPONE y un Administrador PUBLICA. Nadie publica lo suyo sin que otro lo mire.',
+  'admin.permissions.lastAdmin':
+    'Nunca puede quedar la institucion sin ningun Administrador: el sistema rechaza el cambio que dejaria cero.',
+  'role.administrador': 'Administrador',
+  'role.colaborador': 'Colaborador',
+  'role.visor': 'Visor',
+  'cap.ver-modulos-de-sus-equipos': 'Ver los modulos de sus equipos',
+  'cap.personalizar-su-vista': 'Personalizar su propia vista',
+  'cap.crear-editar-modulos-borrador': 'Crear y editar modulos en borrador',
+  'cap.proponer-objetos-al-repositorio': 'Proponer objetos al repositorio',
+  'cap.publicar-modulo-institucional': 'Publicar un modulo institucional',
+  'cap.reorganizar-arbol-general': 'Reorganizar la organizacion general',
+  'cap.gestionar-paquetes-visuales': 'Gestionar paquetes visuales',
+  'cap.gestionar-equipos': 'Gestionar equipos',
+  'cap.gestionar-usuarios-y-roles': 'Gestionar usuarios y roles',
+  'cap.configurar-ambitos': 'Configurar ambitos de datos',
+  'cap.ver-panel-auditoria': 'Ver el registro de auditoria',
+  'cap.borrar-definitivamente': 'Borrar definitivamente',
 } as const;
 
 export type MessageKey = keyof typeof es;

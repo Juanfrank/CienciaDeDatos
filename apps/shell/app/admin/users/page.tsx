@@ -30,6 +30,13 @@ export default async function UsuariosPage() {
       <h2>{t('admin.users.title')}</h2>
       <p className="muted-text">{t('admin.users.intro')}</p>
 
+      {/* El rol de la columna no se explica solo: aqui se ve QUE puede cada uno. */}
+      <p>
+        <Link href="/admin/users/permissions" data-testid="ir-a-permisos">
+          {t('admin.permissions.title')}
+        </Link>
+      </p>
+
       <table className="tabla" data-testid="tabla-usuarios">
         <thead>
           <tr>

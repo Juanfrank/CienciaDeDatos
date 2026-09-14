@@ -495,3 +495,49 @@ test.describe('el carril de administracion', () => {
     await expect(filas.first().locator('td').nth(3)).toHaveText(/\w/);
   });
 });
+
+/**
+ * La matriz de permisos de 4.10.1, visible — y dibujada desde el codigo que decide.
+ *
+ * `MATRIX` estaba escrita, probada y era invisible. Quien administra no tenia forma de ver que
+ * puede cada rol, y la unica alternativa habria sido copiar la tabla a mano en el panel.
+ */
+test.describe('roles y permisos (4.10.1)', () => {
+  test.beforeEach(async ({ page }) => {
+    await asLogin(page, 'u-admin');
+  });
+
+  test('se llega desde Usuarios y la tabla dice si y no con palabras', async ({ page }) => {
+    await page.goto('/admin/users');
+    await page.getByTestId('ir-a-permisos').click();
+    await expect(page).toHaveURL(/\/admin\/users\/permissions/);
+
+    const matriz = page.getByTestId('permissions-matrix');
+    await expect(matriz).toBeVisible();
+    // Una marca «✓» sin texto no la lee un lector de pantalla (4.9): se escribe la palabra.
+    await expect(matriz).toContainText('Si');
+    await expect(matriz).toContainText('No');
+  });
+
+  /*
+   * Es LA separacion de 4.10.1, y la razon de que la tabla exista: un Colaborador propone y un
+   * Administrador publica. Si alguna vez deja de cumplirse, se ve aqui.
+   */
+  test('el Colaborador propone y NO publica', async ({ page }) => {
+    await page.goto('/admin/users/permissions');
+
+    const proponer = page.getByTestId('cap-proponer-objetos-al-repositorio');
+    const publicar = page.getByTestId('cap-publicar-modulo-institucional');
+
+    // La segunda columna es Colaborador: administrador, colaborador, visor.
+    await expect(proponer.locator('td').nth(1)).toHaveAttribute('data-puede', 'si');
+    await expect(publicar.locator('td').nth(1)).toHaveAttribute('data-puede', 'no');
+    await expect(publicar.locator('td').first()).toHaveAttribute('data-puede', 'si');
+  });
+
+  test('un Visor no la ve: es parte del panel', async ({ page }) => {
+    await asLogin(page, 'u-beto');
+    await page.goto('/admin/users/permissions');
+    await expect(page).toHaveURL(/admin-without-permission/);
+  });
+});

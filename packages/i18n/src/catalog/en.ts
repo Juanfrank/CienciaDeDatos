@@ -323,4 +323,31 @@ export const en: Record<MessageKey, string> = {
   'action.back': 'Back',
   'action.edit': 'Edit',
   'action.view': 'View',
+
+  // Permission matrix — section 4.10.1. One key per capability, bound by a guard.
+  'admin.permissions.title': 'Roles and permissions',
+  'admin.permissions.intro':
+    'The three roles are not configurable: the contract fixes them. This table comes from the code that actually decides, not from a copy, so it cannot go stale.',
+  'admin.permissions.column.capability': 'What can be done',
+  'admin.permissions.yes': 'Yes',
+  'admin.permissions.no': 'No',
+  'admin.permissions.separation':
+    'The separation that matters most: a Contributor PROPOSES and an Administrator PUBLISHES. Nobody publishes their own work unaudited.',
+  'admin.permissions.lastAdmin':
+    'The institution can never be left with no Administrator: the system rejects the change that would leave zero.',
+  'role.administrador': 'Administrator',
+  'role.colaborador': 'Contributor',
+  'role.visor': 'Viewer',
+  'cap.ver-modulos-de-sus-equipos': 'See the modules of their teams',
+  'cap.personalizar-su-vista': 'Personalize their own view',
+  'cap.crear-editar-modulos-borrador': 'Create and edit draft modules',
+  'cap.proponer-objetos-al-repositorio': 'Propose objects to the repository',
+  'cap.publicar-modulo-institucional': 'Publish an institutional module',
+  'cap.reorganizar-arbol-general': 'Reorganize the general structure',
+  'cap.gestionar-paquetes-visuales': 'Manage visual packages',
+  'cap.gestionar-equipos': 'Manage teams',
+  'cap.gestionar-usuarios-y-roles': 'Manage users and roles',
+  'cap.configurar-ambitos': 'Configure data scopes',
+  'cap.ver-panel-auditoria': 'See the audit log',
+  'cap.borrar-definitivamente': 'Delete permanently',
 };

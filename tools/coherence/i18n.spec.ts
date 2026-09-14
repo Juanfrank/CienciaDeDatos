@@ -118,3 +118,38 @@ describe('claves de catalogo armadas con plantilla', () => {
     expect([...new Set(huerfanos)].sort()).toEqual([]);
   });
 });
+
+/**
+ * Cada capacidad de la matriz de permisos, con su rotulo.
+ *
+ * La matriz de 4.10.1 se dibuja recorriendo `CAPABILITIES` y pidiendo `t('cap.<capacidad>')`. Es
+ * otra clave armada con plantilla, asi que el tipo no la cubre; pero aqui se puede comprobar algo
+ * mas fuerte que el prefijo, porque las capacidades son una lista CERRADA y conocida.
+ *
+ * Sin esto, anadir una capacidad a la matriz —que es una linea— la haria aparecer en el panel
+ * dibujada como `cap.exportar-lo-que-sea`, la llave cruda, en la tabla que explica quien puede
+ * que. Y al reves: quitarla dejaria el rotulo huerfano en el catalogo para siempre.
+ */
+describe('la matriz de permisos tiene rotulo para cada capacidad', () => {
+  const permisos = readFileSync(`${raiz}/packages/access-control/src/permissions.ts`, 'utf8');
+  const catalogo = readFileSync(`${raiz}/packages/i18n/src/catalog/es.ts`, 'utf8');
+
+  /** Las capacidades salen del TIPO, que es la unica lista que no puede quedarse corta. */
+  const declarado = /export type Capability =([\s\S]*?);/.exec(permisos)?.[1] ?? '';
+  const capacidades = [...declarado.matchAll(/'([a-z-]+)'/g)].map((m) => m[1] as string);
+  const rotulos = new Set(
+    [...catalogo.matchAll(/^\s*'cap\.([a-z-]+)':/gm)].map((m) => m[1] as string),
+  );
+
+  it('hay capacidades que comprobar', () => {
+    expect(capacidades.length).toBeGreaterThan(8);
+  });
+
+  it('ninguna capacidad se dibujaria con la llave a la vista', () => {
+    expect(capacidades.filter((c) => !rotulos.has(c)).sort()).toEqual([]);
+  });
+
+  it('ningun rotulo se queda huerfano de una capacidad que ya no existe', () => {
+    expect([...rotulos].filter((r) => !capacidades.includes(r)).sort()).toEqual([]);
+  });
+});
