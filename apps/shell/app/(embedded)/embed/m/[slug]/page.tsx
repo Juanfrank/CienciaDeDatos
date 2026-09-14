@@ -143,7 +143,10 @@ export default async function EmbeddedPage({
       )}
 
       <main className="embedded__body">
-        <div className="con-navegador" {...(navegador ? { 'data-tipo': navegador.tipo } : {})}>
+        <div
+          className={navegador ? 'con-navegador' : 'sin-navegador'}
+          {...(navegador ? { 'data-tipo': navegador.tipo } : {})}
+        >
         {navegador ? (
           <PageNavigator
             navegador={navegador}

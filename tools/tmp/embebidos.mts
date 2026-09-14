@@ -37,6 +37,7 @@ const CON_FILTROS = {
   },
 };
 const SIN_FILTROS = { tipo: 'panel-izquierdo', comportamiento: 'grilla' };
+const DERECHO = { ...CON_FILTROS, tipo: 'panel-derecho' };
 
 const configurar = async (navigator: unknown) => {
   const respuesta = await pagina.request.put(`${base}/api/modules/composicion/settings`, {
@@ -67,8 +68,11 @@ await foto('/embed/m/composicion', '40-embebido-con-encabezado-con-filtros');
 await foto('/embed/m/composicion?cromo=limpio', '41-embebido-sin-encabezado-con-filtros');
 
 await configurar(SIN_FILTROS);
-await foto('/embed/m/composicion', '42-embebido-con-encabezado-sin-filtros');
 await foto('/embed/m/composicion?cromo=limpio', '43-embebido-sin-encabezado-sin-filtros');
 
+await configurar(DERECHO);
+await foto('/embed/m/composicion?cromo=limpio', '44-embebido-panel-derecho');
+
 await configurar(CON_FILTROS);
+await foto('/m/composicion', '45-panel-en-la-aplicacion');
 await navegador.close();

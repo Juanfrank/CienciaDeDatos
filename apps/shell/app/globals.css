@@ -3694,14 +3694,41 @@ th[aria-sort='descending'] .table__flecha {
  * ambito de quien tiene la sesion abierta, y una vista que no lo diga se lee como la de todos.
  */
 .embedded__quien { margin-inline-start: auto; color: var(--md-sys-color-on-surface-variant); }
+/*
+ * Sin encabezado, la identidad NO ocupa un renglon propio: se posa sobre la esquina.
+ *
+ * Ocupando fila empujaba el modulo hacia abajo, y la version limpia existe precisamente para que
+ * lo que se incrusta empiece donde empieza el hueco. Encima y sin sitio propio, el modulo arranca
+ * arriba del todo y la identidad se sigue leyendo — que es lo unico que tenia que conservar.
+ */
+.incrustado:has(> .embedded__identidad) { position: relative; }
 .embedded__identidad {
-  display: flex;
-  justify-content: flex-end;
+  position: absolute;
+  inset-block-start: var(--space-sm);
+  inset-inline-end: var(--space-md);
+  z-index: 2;
   margin: 0;
-  padding: var(--space-sm) var(--space-md);
+  padding: 0;
 }
 
-.embedded__body { flex: 1; padding: var(--space-md); min-width: 0; }
+/* Y el cuerpo deja de reservar el hueco de arriba: el modulo empieza en el borde. */
+.incrustado:has(> .embedded__identidad) > .embedded__body { padding-block-start: 0; }
+
+/*
+ * Con un panel lateral, el cuerpo NO pone margen: lo pone el contenido.
+ *
+ * Un panel que va de arriba abajo pero se queda a dieciseis pixeles del borde no va de arriba
+ * abajo: se ve el hueco, y el marco del portal anfitrion se ve por debajo. El margen que hacia
+ * falta lo sigue teniendo lo que se lee, que es el modulo.
+ */
+.embedded__body { flex: 1; padding: var(--space-md); min-width: 0; display: flex; }
+.embedded__body:has(.navegador--panel) { padding: 0; }
+.embedded__body:has(.navegador--panel) > .con-navegador > .modulo {
+  padding: var(--space-md) var(--space-md) var(--space-md) 0;
+}
+/* El grid del navegador ocupa el cuerpo entero: sin esto el panel no tiene alto que llenar. */
+.embedded__body > .con-navegador,
+.embedded__body > .sin-navegador { flex: 1; min-width: 0; }
 .embedded__pie { margin-top: var(--space-md); font-size: var(--md-sys-typescale-body-medium-size); }
 /* Las dos formas de incrustar, una debajo de otra: son una eleccion, no una lista de ajustes. */
 .embed__cromo {
@@ -4351,12 +4378,21 @@ th[aria-sort='descending'] .table__flecha {
  * decir como lo ocupa: `grilla` se lo queda, `drawer` lo devuelve al plegarse y `overlay` no lo
  * pide nunca —se pone encima—.
  */
+/*
+ * `stretch` y no `start`: es lo que deja que el panel llegue de arriba abajo.
+ *
+ * Con `align-items: start` la celda del panel medía lo que su contenido y `min-height: 100%` no
+ * tenia contra que resolverse. El contenido del modulo si se alinea arriba, por su cuenta.
+ */
 .con-navegador {
   display: grid;
   gap: var(--space-md);
-  align-items: start;
+  align-items: stretch;
+  min-height: 100%;
 }
+.con-navegador > .modulo { align-self: start; }
 .con-navegador[data-tipo='panel-izquierdo'] { grid-template-columns: auto minmax(0, 1fr); }
+.navegador--panel[data-comportamiento='grilla'] { border-radius: 0; }
 .con-navegador[data-tipo='panel-derecho'] {
   grid-template-columns: minmax(0, 1fr) auto;
 }
@@ -4381,15 +4417,86 @@ th[aria-sort='descending'] .table__flecha {
   font-weight: 500;
 }
 
-/* El panel: una columna con su contorno, como el carril de administracion. */
+/*
+ * El panel: una columna oscura, de arriba abajo.
+ *
+ * El color es `on-primary-container`, que en el tema claro es el azul mas oscuro de la paleta
+ * primaria —#00174d con el origen institucional— y en el oscuro se invierte solo. No es un azul
+ * escrito a mano: de serlo, el dia que alguien sirva otro tema el panel se quedaria con el azul
+ * del anterior. Contra `primary-container` da 13:1 en claro y 7:1 en oscuro, asi que los dos
+ * modos pasan AA con margen.
+ *
+ * Y llega al borde de abajo, no solo hasta donde acaban sus enlaces. Un panel lateral que termina
+ * a media altura se lee como una tarjeta que casualmente esta a un lado; lo que dice que es el
+ * carril de este modulo es que lo acompana entero.
+ */
 .navegador--panel {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
   width: 16rem;
-  padding: var(--space-sm);
-  border-radius: var(--md-sys-shape-corner-large);
-  background: var(--md-sys-color-surface-container-low);
+  min-height: 100%;
+  padding: var(--space-md) var(--space-sm);
+  background: var(--md-sys-color-on-primary-container);
+  color: var(--md-sys-color-primary-container);
+}
+
+.navegador--panel .navegador__pagina { color: inherit; }
+/* La capa de estado, como en Material: el fondo se aclara, no se cambia por otro color. */
+.navegador--panel .navegador__pagina:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary-container) 12%, transparent);
+}
+.navegador--panel .navegador__pagina.is-active {
+  background: color-mix(in srgb, var(--md-sys-color-primary-container) 20%, transparent);
+  color: var(--md-sys-color-primary-container);
+}
+.navegador--panel .navegador__plegar { color: inherit; }
+.navegador--panel .navegador__plegar:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary-container) 12%, transparent);
+}
+
+/*
+ * Los CONTROLES de dentro se quedan claros.
+ *
+ * Los selectores son los mismos que el panel de filtros ordinario —esa es toda la gracia— y estan
+ * pensados para dibujarse sobre una superficie clara. Heredando el color del panel, un desplegable
+ * seria azul palido sobre azul oscuro y un campo de texto no se veria escribir. Lo que hereda el
+ * color oscuro son los ROTULOS; las cajas siguen siendo cajas.
+ */
+.navegador--panel input,
+.navegador--panel select,
+.navegador--panel .md-chip {
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
+  border-color: var(--md-sys-color-outline-variant);
+}
+.navegador--panel .md-chip--seleccionado {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+.navegador--panel .muted-text,
+.navegador--panel .filters-panel__label {
+  color: color-mix(in srgb, var(--md-sys-color-primary-container) 80%, transparent);
+}
+/*
+ * El rotulo de la seccion de filtros, sobre el panel oscuro.
+ *
+ * Lo llevaba a `on-surface-variant` —el gris de una superficie clara—, que sobre el azul oscuro se
+ * queda casi invisible. Es una regla escrita para el sitio donde nacio y heredada por uno que no
+ * existia entonces, que es como aparecen la mitad de los fallos de contraste.
+ */
+.navegador--panel .navegador__filtros-cabecera h2 {
+  color: var(--md-sys-color-primary-container);
+}
+.navegador--panel .navegador__filtros {
+  border-top-color: color-mix(in srgb, var(--md-sys-color-primary-container) 30%, transparent);
+}
+
+.navegador--panel .button-link { color: var(--md-sys-color-primary-container); }
+.navegador--panel .boton-contorno {
+  background: transparent;
+  color: var(--md-sys-color-primary-container);
+  border-color: color-mix(in srgb, var(--md-sys-color-primary-container) 45%, transparent);
 }
 
 /*
