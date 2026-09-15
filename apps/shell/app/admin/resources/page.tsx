@@ -4,6 +4,7 @@ import { Icon } from '../../../src/components/icons/Icon';
 import { iconRows, resourcesOf } from '../../../src/server/recursos';
 import { listProposals } from '../../../src/server/catalogo';
 import { translator } from '../../../src/server/locale';
+import { paginaDeAdmin } from '../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,9 @@ export const dynamic = 'force-dynamic';
  * caminos para el mismo dato terminan discrepando, y el que se ve primero es el que engana.
  */
 export default async function RecursosPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const seccion = sectionOf('/admin/resources');
   const [t, propuestas, visualizaciones, elementos, contenedores, complementos, iconos] =
     await Promise.all([

@@ -2,6 +2,7 @@ import { EmbedsTable, type FilaDeCodigo } from '../../../src/components/admin/Em
 import { listUsers } from '../../../src/server/context';
 import { embedsList } from '../../../src/server/incrustaciones';
 import { translator } from '../../../src/server/locale';
+import { paginaDeAdmin } from '../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,9 @@ export const dynamic = 'force-dynamic';
  * antes no tenia ninguna: donde estan las vistas de la institucion metidas en paginas de fuera.
  */
 export default async function EmbedsPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const [t, codigos, personas] = await Promise.all([translator(), embedsList(), listUsers()]);
 
   // El identificador de una persona no es su nombre: `u-ana` no dice quien genero el codigo.

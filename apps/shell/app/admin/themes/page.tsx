@@ -15,6 +15,7 @@ import { governance } from '../../../src/server/governance';
 import { INSTITUTIONAL_THEME } from '@app/design-tokens';
 import { COLOR_MODES } from '../../../src/server/theme';
 import { translator } from '../../../src/server/locale';
+import { paginaDeAdmin } from '../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +32,9 @@ export const dynamic = 'force-dynamic';
  * pantalla dejaria de poder prometer AA.
  */
 export default async function TemasPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const [t, temas, activo] = await Promise.all([
     translator(),
     governance.listThemes(),

@@ -15,6 +15,7 @@ import { folderRows, subfoldersOf, type FilaCarpeta } from '../../../../src/serv
 import { getManagedTree } from '../../../../src/server/context';
 import { modules } from '../../../../src/server/moduleStore';
 import { translator } from '../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +47,9 @@ function destinos(nodos: NavNode[], t: Translator, profundidad = 0): DestinoPosi
  * que se lleva consigo al moverla.
  */
 export default async function TreePage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const seccion = sectionOf('/admin/modules/tree');
   const [t, arbol, definiciones] = await Promise.all([
     translator(),

@@ -2,6 +2,7 @@ import { POPULATOR_HEARTBEAT_KEY, type PopulatorHeartbeat } from '@app/observabi
 import { activeScheme } from '../../../src/server/admin';
 import { activeConnector, cacheL2 } from '../../../src/server/context';
 import { translator } from '../../../src/server/locale';
+import { paginaDeAdmin } from '../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,9 @@ export const dynamic = 'force-dynamic';
  * donde seria tentador saltarselo para «probar la conexion».
  */
 export default async function OrigenesPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const [t, connector, schema, latido] = await Promise.all([
     translator(),
     activeConnector(),

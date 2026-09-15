@@ -8,6 +8,7 @@ import { getGeneralTree, listTeams } from '../../../../src/server/context';
 import { governance } from '../../../../src/server/governance';
 import { modules } from '../../../../src/server/moduleStore';
 import { translator } from '../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,9 @@ function modulosDe(nodos: NavNode[]): number {
  * la llamaba ninguna pantalla. Lo que faltaba eran los botones.
  */
 export default async function PackagesPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const [t, paquetes, generalTree, equipos, definiciones] = await Promise.all([
     translator(),
     governance.listPackages(),

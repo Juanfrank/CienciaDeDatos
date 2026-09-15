@@ -2,10 +2,14 @@ import { ResourceList } from '../../../../src/components/admin/ResourceList';
 import { resourcesOf } from '../../../../src/server/recursos';
 import { sectionOf } from '../../../../src/components/admin/sections';
 import { translator } from '../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ComplementosPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const seccion = sectionOf('/admin/resources/addons');
   const [t, filas] = await Promise.all([translator(), resourcesOf('complementos')]);
 

@@ -5,6 +5,7 @@ import { availableDimensions } from '../../../../../src/server/admin';
 import { editorPalette } from '../../../../../src/server/editor';
 import { modules } from '../../../../../src/server/moduleStore';
 import { translator } from '../../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,9 @@ export default async function ModuleSettingsPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const { slug } = await params;
   const [t, definiciones, dimensiones, paleta] = await Promise.all([
     translator(),

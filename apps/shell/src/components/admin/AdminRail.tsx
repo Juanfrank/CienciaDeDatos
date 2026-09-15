@@ -14,19 +14,43 @@ export interface Indicadores {
   borradores: number;
 }
 
-export function AdminRail({ indicadores, id }: { indicadores: Indicadores; id: string }) {
+export function AdminRail({
+  indicadores,
+  id,
+  soloModulos = false,
+}: {
+  indicadores: Indicadores;
+  id: string;
+  /*
+   * Quien entra solo para crear o editar borradores ve SOLO la seccion de modulos.
+   *
+   * Es lo que hace honesto el carril: ensenar equipos, ambitos y auditoria a quien va a recibir una
+   * pantalla de «no tiene permiso» al pulsarlos convierte el menu en una lista de puertas cerradas.
+   * Lo que de verdad guarda cada seccion es su propio guardian; esto es que el menu no prometa.
+   */
+  soloModulos?: boolean;
+}) {
   const path = usePathname();
   const actual = activeSectionIn(path);
 
+  const grupos = soloModulos
+    ? GRUPOS.map((g) => ({
+        ...g,
+        sections: g.sections.filter((sec) => sec.href.startsWith('/admin/modules')),
+      })).filter((g) => g.sections.length > 0)
+    : GRUPOS;
+
   return (
     <nav className="admin__nav" id={id} aria-label="Secciones de administracion">
-      <ul className="admin__grupo">
-        <li>
-          <SectionLink section={RESUMEN} activo={actual?.href === RESUMEN.href} cuenta={0} />
-        </li>
-      </ul>
+      {soloModulos ? null : (
+        <ul className="admin__grupo">
+          <li>
+            <SectionLink section={RESUMEN} activo={actual?.href === RESUMEN.href} cuenta={0} />
+          </li>
+        </ul>
+      )}
 
-      {GRUPOS.map((grupo) => (
+      {grupos.map((grupo) => (
         <div key={grupo.id} className="admin__grupo">
           {/*
             El titulo del grupo ETIQUETA la lista, no es solo un rotulo suelto: con

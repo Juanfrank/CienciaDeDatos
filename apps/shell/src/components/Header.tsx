@@ -28,22 +28,24 @@ export async function Header({ sesion }: { sesion: ShellSession }) {
       prueba: 'link-avisos',
       cuentaAvisos: true,
     },
-    ...(editCan
+    /*
+     * El editor NO tiene entrada propia aqui.
+     *
+     * Crear y editar modulos se hace desde el panel, en la tabla de modulos: el boton de crear y el
+     * lapiz de cada fila. Dos puertas al mismo sitio —una en este menu y otra en la tabla— obligan a
+     * elegir cual es la buena, y la de la tabla es la que ademas ensena el estado de cada modulo,
+     * quien lo tiene a su cargo y que se puede hacer con el.
+     *
+     * Por eso el panel admite ahora a quien puede crear borradores, aunque solo le ensene esa
+     * seccion: sin eso, quitar esta entrada habria dejado a un Colaborador con el permiso y sin
+     * ninguna pantalla donde usarlo.
+     */
+    ...(editCan || manageCan
       ? [
           {
-            href: '/editor',
-            label: t('chrome.editor'),
-            icono: 'content',
-            prueba: 'link-editor',
-          } as const,
-        ]
-      : []),
-    ...(manageCan
-      ? [
-          {
-            href: '/admin',
-            label: t('chrome.admin'),
-            icono: 'llave',
+            href: manageCan ? '/admin' : '/admin/modules',
+            label: manageCan ? t('chrome.admin') : t('chrome.editor'),
+            icono: manageCan ? ('llave' as const) : ('content' as const),
             prueba: 'link-admin',
           } as const,
         ]

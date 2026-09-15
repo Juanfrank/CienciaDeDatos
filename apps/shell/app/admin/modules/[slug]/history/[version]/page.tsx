@@ -7,6 +7,7 @@ import { pageSessionRequire } from '../../../../../../src/server/session';
 import { translator } from '../../../../../../src/server/locale';
 import { VersionAntigua } from '../../../../../../src/components/admin/VersionAntigua';
 import { RestoreVersion } from '../../../../../../src/components/admin/RestoreVersion';
+import { paginaDeAdmin } from '../../../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,9 @@ export default async function VersionPage({
 }: {
   params: Promise<{ slug: string; version: string }>;
 }) {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const { slug, version } = await params;
   const numero = Number(version);
   if (!Number.isInteger(numero)) notFound();

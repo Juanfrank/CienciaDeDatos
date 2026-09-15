@@ -5,6 +5,7 @@ import { translator } from '../../../../../src/server/locale';
 import { BumpModule } from '../../../../../src/components/admin/BumpModule';
 import { BumpTodos } from '../../../../../src/components/admin/BumpTodos';
 import type { Subida } from '../../../../../src/components/admin/bump';
+import { paginaDeAdmin } from '../../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,9 @@ export const dynamic = 'force-dynamic';
  * version que se retira el mes que viene. Aqui cada fila es un modulo, con la version que fija.
  */
 export default async function UsagePage({ params }: { params: Promise<{ id: string }> }) {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const { id } = await params;
   const [datos, t] = await Promise.all([usoDe(id), translator()]);
   if (!datos) notFound();

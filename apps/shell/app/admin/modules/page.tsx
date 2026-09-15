@@ -27,6 +27,7 @@ import {
 import { translator } from '../../../src/server/locale';
 import { actorDe, seeCan } from '../../../src/server/cicloDeVida';
 import { pageSessionRequire } from '../../../src/server/session';
+import { paginaDeModulos } from '../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +83,9 @@ function destinos(nodos: NavNode[], t: Translator, profundidad = 0): DestinoPosi
  * el arbol, y cada fila lleva sus seis acciones.
  */
 export default async function ModulosPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeModulos();
+
   const seccion = sectionOf('/admin/modules');
   const [sesion, t, definiciones, arbol, usuarios] = await Promise.all([
     pageSessionRequire(),

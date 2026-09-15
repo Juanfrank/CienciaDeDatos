@@ -5,6 +5,7 @@ import { TeamPermissions } from '../../../../../src/components/admin/TeamPermiss
 import { getGeneralTree, listTeams } from '../../../../../src/server/context';
 import { governance } from '../../../../../src/server/governance';
 import { translator } from '../../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,9 @@ export default async function TeamPermissionsPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const { id } = await params;
   const [t, equipos, arbol, paquetes] = await Promise.all([
     translator(),

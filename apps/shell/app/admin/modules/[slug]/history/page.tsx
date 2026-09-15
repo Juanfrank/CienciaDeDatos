@@ -4,6 +4,7 @@ import { listUsers } from '../../../../../src/server/context';
 import { modules, SEMILLA } from '../../../../../src/server/moduleStore';
 import { RestoreVersion } from '../../../../../src/components/admin/RestoreVersion';
 import { translator } from '../../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,9 @@ export const dynamic = 'force-dynamic';
  * misma lectura, sin un viaje de ida y vuelta que no anade nada.
  */
 export default async function HistoryPage({ params }: { params: Promise<{ slug: string }> }) {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const { slug } = await params;
   const modulo = await modules.bySlug(slug);
   if (!modulo) notFound();

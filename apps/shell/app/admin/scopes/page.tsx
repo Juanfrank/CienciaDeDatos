@@ -1,6 +1,7 @@
 import { ScopeEditor, type ScopeTarget } from '../../../src/components/admin/ScopeEditor';
 import { getGeneralTree, listTeams } from '../../../src/server/context';
 import type { NavNode } from '@app/access-control';
+import { paginaDeAdmin } from '../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,9 @@ export default async function ScopesPage({
 }: {
   searchParams: Promise<{ destino?: string }>;
 }) {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const { destino } = await searchParams;
   const targets: ScopeTarget[] = [
     ...(await listTeams()).map((t) => ({

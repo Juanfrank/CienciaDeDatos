@@ -3,6 +3,7 @@ import { modules } from './moduleStore';
 import { getManagedTree } from './context';
 import { expansionsCount } from './audit';
 import {
+  can,
   type AccessScope,
   type AppRole,
   type Actor,
@@ -33,7 +34,9 @@ import { SCHEMA_CACHE_KEY } from '@app/caching';
 import { cacheL2, getGeneralTree } from './context';
 import { governance } from './governance';
 import { changeRecord, treeEventRecord } from './audit';
+import { redirect } from 'next/navigation';
 import type { ShellSession } from './session';
+import { pageSessionRequire } from './session';
 
 /** Servicio del panel de administracion — seccion 4.10.8. */
 
@@ -57,6 +60,42 @@ export async function roleMoreHeightOf(userId: string): Promise<AppRole> {
   if (roles.includes('administrador')) return 'administrador';
   if (roles.includes('colaborador')) return 'colaborador';
   return 'visor';
+}
+
+/**
+ * Guardian de UNA PAGINA del panel, puesto en la pagina y no solo en el layout.
+ *
+ * El layout guardaba las veintinueve, y eso es un unico punto del que todas dependen sin decirlo:
+ * ninguna pagina declaraba quien puede verla, asi que abrir el layout un poco —para que quien crea
+ * borradores llegue a la tabla de modulos— habria abierto de golpe equipos, ambitos y auditoria.
+ * Con el guardian en cada pagina, abrir una no abre las demas.
+ *
+ * Redirige en vez de lanzar porque esto es una PAGINA: quien llega sin permiso se lleva una
+ * pantalla que lo explica. Lo que responde 403 es la API, que es la que importa cuando alguien se
+ * salta la interfaz.
+ */
+export async function paginaDeAdmin(): Promise<Actor> {
+  const sesion = await pageSessionRequire();
+  const role = await roleMoreHeightOf(sesion.userId);
+  if (!can(role, 'ver-panel-auditoria')) redirect('/admin-without-permission');
+  return { userId: sesion.userId, role };
+}
+
+/**
+ * Guardian de la tabla de modulos, que admite a quien puede CREAR BORRADORES.
+ *
+ * Es la unica seccion del panel que no es de gobierno: crear un modulo y editarlo es lo que hace
+ * un Colaborador, y desde que el editor dejo de tener entrada propia en el menu de usuario, esta
+ * es su puerta. Lo que ve cada quien lo decide la propia tabla, fila a fila; esto solo dice quien
+ * puede abrirla.
+ */
+export async function paginaDeModulos(): Promise<Actor> {
+  const sesion = await pageSessionRequire();
+  const role = await roleMoreHeightOf(sesion.userId);
+  if (!can(role, 'ver-panel-auditoria') && !can(role, 'crear-editar-modulos-borrador')) {
+    redirect('/admin-without-permission');
+  }
+  return { userId: sesion.userId, role };
 }
 
 /** Guardian de todas las rutas del panel. */

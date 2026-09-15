@@ -9,6 +9,7 @@ import {
   disabledResources,
 } from '../../../../../src/server/catalogo';
 import { translator } from '../../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,9 @@ export const dynamic = 'force-dynamic';
  * reaplicaba a mano en cada modulo, y salia distinta segun quien la recordara.
  */
 export default async function DefaultsPage({ params }: { params: Promise<{ id: string }> }) {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const { id } = await params;
   const [t, predeterminados, deshabilitados] = await Promise.all([
     translator(),

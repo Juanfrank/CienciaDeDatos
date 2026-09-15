@@ -5,6 +5,7 @@ import { listTeams, listUsers } from '../../../src/server/context';
 import { roleMoreHeightOf } from '../../../src/server/admin';
 import { AVAILABLE_MAIL, canalDeRestablecimiento, localesAccounts } from '../../../src/server/identity';
 import { translator } from '../../../src/server/locale';
+import { paginaDeAdmin } from '../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,9 @@ export const dynamic = 'force-dynamic';
  * local o institucional: es justo lo que viene a averiguar.
  */
 export default async function UsuariosPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const [t, usuarios, equipos, cuentas] = await Promise.all([
     translator(),
     listUsers(),

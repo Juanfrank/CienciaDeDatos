@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { MessageKey } from '@app/i18n';
 import { APP_ROLES, CAPABILITIES, rolesThatCan } from '@app/access-control';
 import { translator } from '../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +18,9 @@ export const dynamic = 'force-dynamic';
  * no configurables. Esta pagina explica, no configura.
  */
 export default async function PermissionsPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const t = await translator();
 
   return (

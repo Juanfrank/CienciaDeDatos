@@ -1,5 +1,6 @@
 import { expansionsCount, auditList } from '../../../src/server/audit';
 import { listUsers } from '../../../src/server/context';
+import { paginaDeAdmin } from '../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,9 @@ export default async function AuditPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const query = await searchParams;
   const onlyExpansions = query['onlyExpansions'] === '1';
   const onlyMoves = query['onlyMoves'] === '1';

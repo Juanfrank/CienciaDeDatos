@@ -15,10 +15,18 @@ test.describe('acceso al panel: ocultar no es proteger (criterio de la seccion 9
     }
   });
 
-  test('un Colaborador tampoco: crear borradores no es administrar', async ({ page }) => {
+  test('un Colaborador entra a la tabla de modulos, y a NADA mas del panel', async ({ page }) => {
+    /*
+     * Antes esta prueba decia que un Colaborador no tenia enlace al panel, y era cierto: el editor
+     * vivia en su propia entrada del menu. Al quedar una sola puerta —la tabla de modulos—, la
+     * entrada existe y lleva ahi. Lo que NO cambia es lo unico que protegia de verdad: la API de
+     * administracion le sigue respondiendo 403, y ocultar nunca fue lo que la guardaba.
+     */
     await asLogin(page, 'u-ana');
     await page.goto('/');
-    await expect(page.getByTestId('link-admin')).toHaveCount(0);
+    await page.getByTestId('account-trigger').click();
+    await expect(page.getByTestId('link-admin')).toHaveAttribute('href', '/admin/modules');
+
     expect((await page.request.get('/api/admin/tree')).status()).toBe(403);
   });
 
@@ -1908,5 +1916,52 @@ test.describe('el formato de salida de un objeto (4.2, 4.3 y 4.5)', () => {
     await expect(page.getByTestId('deshabilitar-icono:balanza')).toBeVisible();
     await expect(page.getByTestId('editar-icono:balanza')).toHaveCount(0);
     await expect(page.getByTestId('proponer-icono:balanza')).toHaveCount(0);
+  });
+});
+
+test.describe('una sola puerta para crear y editar modulos (4.1 y 4.10.8)', () => {
+  test('el menu de usuario ya no lleva al editor: lleva al panel', async ({ page }) => {
+    /*
+     * Habia dos puertas al mismo sitio —esta y la tabla de modulos—, y con dos hay que elegir cual
+     * es la buena. Gana la tabla, que ademas ensena el estado de cada modulo, quien lo tiene a su
+     * cargo y que se puede hacer con el.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/');
+    // El menu de la cuenta se despliega: sus enlaces existen siempre y se ven al abrirlo.
+    await page.getByTestId('account-trigger').click();
+    await expect(page.locator('.account__item[href="/editor"]')).toHaveCount(0);
+    await expect(page.getByTestId('link-admin')).toBeVisible();
+  });
+
+  test('un Colaborador conserva su puerta, y NO gana ninguna otra', async ({ page }) => {
+    /*
+     * La mitad que de verdad importa de este cambio.
+     *
+     * Quitar la entrada del menu sin mas habria dejado a un Colaborador con el permiso de crear
+     * borradores y sin ninguna pantalla donde usarlo. Entra al panel, pero solo a la tabla de
+     * modulos: el carril no le ensena equipos ni auditoria —un menu no promete puertas cerradas— y
+     * si escribe la direccion a mano tampoco entra, porque cada pagina lleva su propio guardian y
+     * ya no depende del layout.
+     */
+    await asLogin(page, 'u-ana');
+    await page.goto('/');
+    await page.getByTestId('account-trigger').click();
+    await expect(page.locator('.account__item[href="/editor"]')).toHaveCount(0);
+    await expect(page.getByTestId('link-admin')).toBeVisible();
+
+    await page.goto('/admin/modules');
+    await expect(page.getByTestId('abrir-crear-modulo')).toBeVisible();
+
+    // El carril, sin las secciones de gobierno.
+    await expect(page.getByTestId('admin-nav-teams')).toHaveCount(0);
+    await expect(page.getByTestId('admin-nav-audit')).toHaveCount(0);
+    await expect(page.getByTestId('admin-nav-modules')).toBeVisible();
+
+    // Y a mano tampoco: el guardian esta en la pagina, no en el marco.
+    await page.goto('/admin/teams');
+    await expect(page).toHaveURL(/admin-without-permission/);
+    await page.goto('/admin/audit');
+    await expect(page).toHaveURL(/admin-without-permission/);
   });
 });

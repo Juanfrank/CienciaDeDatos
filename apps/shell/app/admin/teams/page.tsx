@@ -2,6 +2,7 @@ import { TeamsTable } from '../../../src/components/admin/TeamsTable';
 import { administradores } from '../../../src/server/admin';
 import { listTeams } from '../../../src/server/context';
 import { translator } from '../../../src/server/locale';
+import { paginaDeAdmin } from '../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,9 @@ export const dynamic = 'force-dynamic';
  * pregunta que se hace al entrar —cuantos son— y las tres acciones que llevan al resto.
  */
 export default async function TeamPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const [t, equipos, quienesAdministran] = await Promise.all([
     translator(),
     listTeams(),

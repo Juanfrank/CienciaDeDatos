@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { SIDEBAR_ID } from '../../src/components/CollapsibleNavigation';
 import { AdminRail, CurrentSection } from '../../src/components/admin/AdminRail';
-import { isAdministrator } from '../../src/server/admin';
+import { can } from '@app/access-control';
+import { isAdministrator, roleMoreHeightOf } from '../../src/server/admin';
 import { indicadoresDeAdmin } from '../../src/server/admin';
 import { pageSessionRequire } from '../../src/server/session';
 
@@ -10,12 +11,23 @@ import { pageSessionRequire } from '../../src/server/session';
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const sesion = await pageSessionRequire();
 
-  if (!(await isAdministrator(sesion.userId))) {
-    // Sin permiso no se dibuja nada del panel. Se redirige a una ruta FUERA de este layout,
-    // porque redirigir a una ruta de dentro entraria en bucle.
-    //
-    // Para una pagina, redirigir es el comportamiento idiomatico; lo que devuelve 403 es la API
-    // (/api/admin/*), que es la que importa cuando alguien se salta la interfaz.
+  /*
+   * El layout ya no es el UNICO guardian.
+   *
+   * Lo era, y eso significaba que ninguna pagina declaraba quien puede verla: abrirlo un poco
+   * habria abierto de golpe equipos, ambitos y auditoria. Ahora cada pagina lleva el suyo
+   * —`paginaDeAdmin`, o `paginaDeModulos` en la tabla de modulos— y esto solo decide si se dibuja
+   * el marco. Dos puertas y no una: la de fuera deja pasar a quien tiene algo que hacer aqui
+   * dentro, y la de cada sala dice si esa sala es suya.
+   *
+   * Entra tambien quien puede crear borradores, porque la tabla de modulos es ahora su puerta: el
+   * editor dejo de tener entrada propia en el menu de usuario.
+   */
+  const esAdmin = await isAdministrator(sesion.userId);
+  const role = await roleMoreHeightOf(sesion.userId);
+  if (!esAdmin && !can(role, 'crear-editar-modulos-borrador')) {
+    // Se redirige a una ruta FUERA de este layout, porque redirigir a una de dentro entraria en
+    // bucle. Para una pagina, redirigir es lo idiomatico; lo que devuelve 403 es la API.
     redirect('/admin-without-permission');
   }
 
@@ -41,7 +53,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </header>
 
       <div className="admin__body">
-        <AdminRail id={SIDEBAR_ID} indicadores={await indicadoresDeAdmin()} />
+        <AdminRail id={SIDEBAR_ID} indicadores={await indicadoresDeAdmin()} soloModulos={!esAdmin} />
         <main className="admin__principal" id="contenido-admin" tabIndex={-1}>
           {children}
         </main>

@@ -6,6 +6,7 @@ import { listUsers } from '../../../../src/server/context';
 import { translator } from '../../../../src/server/locale';
 import { ProposalForm } from '../../../../src/components/admin/ProposalForm';
 import { ProposalActions } from '../../../../src/components/admin/ProposalActions';
+import { paginaDeAdmin } from '../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,9 @@ export default async function ProposalsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const query = await searchParams;
   const preseleccion = typeof query['objeto'] === 'string' ? query['objeto'] : '';
 

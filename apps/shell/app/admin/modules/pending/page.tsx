@@ -5,6 +5,7 @@ import { pageSessionRequire } from '../../../../src/server/session';
 import { ReviewActions } from '../../../../src/components/admin/ReviewActions';
 import type { ModuleDiff } from '@app/module-model';
 import { translator } from '../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -98,6 +99,9 @@ function Changes({
 }
 
 export default async function PendingPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const sesion = await pageSessionRequire();
   const actor = await actorDe(sesion);
   const [pendientes, personas, t] = await Promise.all([

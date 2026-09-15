@@ -6,6 +6,7 @@ import { iconRows } from '../../../../src/server/recursos';
 import { IMAGE_PREFIX, disabledResources } from '../../../../src/server/catalogo';
 import type { AssetRow } from '../../../../src/server/recursos';
 import { translator } from '../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,9 @@ export const dynamic = 'force-dynamic';
  * sirve para elegir ninguno; lo que se anade es todo lo demas.
  */
 export default async function OtrosRecursosPage() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const [t, iconos, deshabilitados] = await Promise.all([
     translator(),
     iconRows(),

@@ -3,11 +3,15 @@ import { notFound } from 'next/navigation';
 import { TeamMembers } from '../../../../../src/components/admin/TeamMembers';
 import { listTeams, listUsers } from '../../../../../src/server/context';
 import { translator } from '../../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
 /** Quien esta en un equipo, y con que rol — seccion 4.10.2. */
 export default async function MembersPage({ params }: { params: Promise<{ id: string }> }) {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const { id } = await params;
   const [t, equipos, personas] = await Promise.all([translator(), listTeams(), listUsers()]);
 

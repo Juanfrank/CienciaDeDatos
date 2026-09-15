@@ -5,6 +5,7 @@ import { accessToModule } from '../../../../../src/server/admin';
 import { listUsers } from '../../../../../src/server/context';
 import { modules } from '../../../../../src/server/moduleStore';
 import { translator } from '../../../../../src/server/locale';
+import { paginaDeAdmin } from '../../../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,9 @@ export default async function ModulePermissionsPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const { slug } = await params;
   const [t, definiciones, usuarios] = await Promise.all([translator(), modules.list(), listUsers()]);
 

@@ -3,11 +3,15 @@ import { expansionsCount, auditList } from '../../src/server/audit';
 import { getManagedTree, listTeams, listUsers } from '../../src/server/context';
 import { AuditEvent } from '../../src/components/admin/AuditEvent';
 import { Icon, type IconName } from '../../src/components/icons/Icon';
+import { paginaDeAdmin } from '../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
 /** Inicio del panel — el estado del gobierno de un vistazo. */
 export default async function HomeAdmin() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   const [arbol, equipos, personas, ampliaciones, recientes] = await Promise.all([
     getManagedTree(),
     listTeams(),

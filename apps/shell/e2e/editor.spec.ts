@@ -9,7 +9,9 @@ test.describe('quien entra al editor (4.10.1)', () => {
   test('un Visor no ve el enlace y la API le responde 403', async ({ page }) => {
     await asLogin(page, 'u-beto');
     await page.goto('/');
-    await expect(page.getByTestId('link-editor')).toHaveCount(0);
+    // Ya no hay enlace al editor en el menu: la puerta es el panel, y a un Visor no se le ofrece.
+    await page.getByTestId('account-trigger').click();
+    await expect(page.getByTestId('link-admin')).toHaveCount(0);
 
     // Lo que importa no es el enlace ausente: crear modulos a mano tampoco debe funcionar.
     const respuesta = await page.request.post('/api/modules', {
@@ -25,12 +27,13 @@ test.describe('quien entra al editor (4.10.1)', () => {
     await expect(page.getByTestId('module-list')).toHaveCount(0);
   });
 
-  test('un Colaborador si entra', async ({ page }) => {
+  test('un Colaborador si entra, por la puerta del panel', async ({ page }) => {
+    // El menu lleva a la tabla de modulos, que es donde estan crear y el lapiz de cada fila. El
+    // editor sigue existiendo como pantalla; lo que cambio es por donde se llega.
     await asLogin(page, 'u-ana');
     await page.goto('/');
-    // El enlace vive en el menu de la cuenta: existe siempre, se ve al desplegarlo.
     await page.getByTestId('account-trigger').click();
-    await expect(page.getByTestId('link-editor')).toBeVisible();
+    await expect(page.getByTestId('link-admin')).toHaveAttribute('href', '/admin/modules');
     await page.goto('/editor');
     await expect(page.getByRole('heading', { name: 'Editor de modulos' })).toBeVisible();
   });

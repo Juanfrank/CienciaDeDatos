@@ -1,6 +1,7 @@
 import { SeesWhoWhere } from '../../../src/components/admin/WhoSeesWhat';
 import { getGeneralTree, listTeams, listUsers } from '../../../src/server/context';
 import type { NavNode } from '@app/access-control';
+import { paginaDeAdmin } from '../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,9 @@ function treeModules(nodos: NavNode[], acumulado: { moduleId: string; name: stri
 }
 
 export default async function PageWhoSeesWhere() {
+  // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
+  await paginaDeAdmin();
+
   return (
     <section>
       <h2>Quien ve que</h2>
