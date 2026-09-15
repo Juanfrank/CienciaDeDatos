@@ -7,11 +7,51 @@ import { FileCacheStore, InMemoryCacheStore, mutate, type ICacheStore } from '@a
  * personalizacion en edicion".
  */
 
-/** Directorio del cache L2, compartido con el job de poblacion y entre instancias. */
-export const CACHE_DIR = process.env['CACHE_DIR'] ?? join(process.cwd(), '.cache-datos');
+/**
+ * Directorio del cache L2, compartido con el job de poblacion y entre instancias.
+ *
+ * Es una FUNCION y no una constante, y eso importa. Era
+ * `export const CACHE_DIR = process.env['CACHE_DIR'] ?? …`, que lee la variable UNA vez: cuando se
+ * evalua el modulo. En produccion da igual —la variable no cambia despues de arrancar—, pero en
+ * las pruebas cambia por cada archivo: `vitest.setup.mts` le da a cada uno su propio directorio
+ * temporal para que una prueba que escribe no deje huella en la siguiente. Con la constante, el
+ * segundo archivo que compartiera proceso seguia escribiendo en el directorio del primero, y el
+ * aislamiento quedaba anulado sin que nada fallara.
+ *
+ * Mientras cada archivo tuvo su proceso el problema no se veia. Al reutilizarlos —`isolate: false`,
+ * que baja la suite de doce segundos a cuatro— se veria, y en silencio. De ahi esto.
+ */
+export const cacheDir = (): string => process.env['CACHE_DIR'] ?? join(process.cwd(), '.cache-datos');
 
-/** El store se construye AQUI y no en `contexto.ts`. */
-export const cacheL2: ICacheStore = new FileCacheStore({ directory: CACHE_DIR });
+/** El almacen de disco vigente, reconstruido solo si el directorio cambio. */
+let vigente: { dir: string; store: FileCacheStore } | undefined;
+
+function enDisco(): ICacheStore {
+  const dir = cacheDir();
+  if (vigente?.dir !== dir) {
+    vigente = { dir, store: new FileCacheStore({ directory: dir }) };
+    // El L1 es la memoria DE ESE disco: si el disco cambia, lo que hay en memoria ya no le
+    // corresponde. Vaciarlo aqui es lo que evita que una lectura de otro archivo se sirva de
+    // memoria y ni siquiera llegue a mirar el directorio nuevo.
+    cacheL1.vaciar();
+  }
+  return vigente.store;
+}
+
+/**
+ * El almacen de disco, como fachada ESTABLE.
+ *
+ * Quien lo captura al importar —`exports.ts`, `alerts.ts`, `settings.ts`, `context.ts`— se queda
+ * con este objeto para siempre, y este objeto pregunta por el directorio en cada operacion. Asi
+ * ninguno de ellos tiene que enterarse de nada: el cambio es de una sola pieza.
+ */
+export const cacheL2: ICacheStore = {
+  get: <T,>(clave: string) => enDisco().get<T>(clave),
+  set: <T,>(clave: string, entrada: Parameters<ICacheStore['set']>[1]) =>
+    enDisco().set<T>(clave, entrada as never),
+  delete: (clave: string) => enDisco().delete(clave),
+  deleteByPrefix: (prefijo: string) => enDisco().deleteByPrefix(prefijo),
+};
 
 /** L1 por proceso con TTL corto, delante del L2 en disco. */
 export const cacheL1 = new InMemoryCacheStore({ ttlMs: 5_000 });

@@ -23,7 +23,7 @@ export const objectRegistry = new ObjectRegistry(initialCatalog);
 
 // El store y su directorio viven en `almacenCompartido`, que no depende de nadie: ponerlos
 // aqui creaba un ciclo de importacion con el gobierno.
-export { CACHE_DIR, cacheL2 } from './almacenCompartido';
+export { cacheDir, cacheL2 } from './almacenCompartido';
 
 /** Metricas del camino de lectura (8.3). */
 export const metricasDeCache = new CacheMetrics();

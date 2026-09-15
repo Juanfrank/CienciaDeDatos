@@ -806,6 +806,61 @@ maquina — si es eso, el arreglo no es subir el plazo sino que la consulta diga
 quedo, porque «se quedo en encolada» y «termino en lista» son dos fallos distintos que hoy se leen
 igual.
 
+### 2.19 La suite de unidad tardaba doce segundos importando lo mismo una y otra vez — HECHO
+
+Lo destapo un aviso del propio vitest al final de una pasada: *«at least ~427ms faster with
+`isolate: false`»*. Medido de verdad sobre los 103 archivos, el ahorro no eran 427 ms sino
+**12,0 s -> 4,2 s**, casi 3x. El aviso se quedaba corto porque mide una carpeta; la suite entera
+evaluaba **268 modulos 810 veces** y se le iba el 42% del tiempo solo en importar.
+
+Pero tomarlo tal cual habria roto en silencio lo que mas importa aqui. Con los procesos
+reutilizados, el registro de modulos deja de ser nuevo por archivo, y **cualquier modulo que
+capture algo al evaluarse se lo lleva puesto al archivo siguiente**. Habia uno, y era el peor:
+
+```ts
+export const CACHE_DIR = process.env['CACHE_DIR'] ?? join(process.cwd(), '.cache-datos');
+```
+
+`vitest.setup.mts` le da a cada archivo su propio directorio temporal justamente para que una
+prueba que escribe no deje huella en la siguiente. Con esa constante, el segundo archivo de cada
+proceso habria seguido escribiendo en el directorio del primero: el aislamiento anulado, la suite
+en verde. Comprobado con dos pruebas que comparan `CACHE_DIR` con `process.env.CACHE_DIR` — sin
+aislar, no coinciden.
+
+**Lo que se hizo, en este orden.**
+
+1. **La raiz, en una sola pieza.** `cacheDir()` es ahora una funcion y `cacheL2` una fachada
+   estable que pregunta por el directorio en cada operacion. Los cinco modulos que capturan el
+   almacen al importarse —`exports`, `alerts`, `settings`, `context`, `data`— no se enteran de
+   nada: siguen con el mismo objeto y el objeto sigue al directorio. El L1 se vacia al cambiar,
+   porque es la memoria DE ESE disco y si no una lectura del archivo siguiente se serviria de
+   memoria sin llegar a mirar el directorio nuevo.
+2. **La guarda de eso**, `almacenCompartido.spec.ts`, que lo comprueba DENTRO de un archivo
+   cambiando la variable a mano. Fiarlo a que dos archivos caigan en el mismo proceso no seria una
+   guarda, seria un sorteo. Verificada enrojeciendo: con la constante de vuelta, las tres fallan.
+3. **El barajado, que encontro lo que faltaba.** Con `isolate: false` a secas, `auth.spec.ts`
+   fallaba en **tres de cada cinco** pasadas con `sequence.shuffle`: `vi.mock` sustituye un modulo
+   antes de que se evalue el arbol que lo usa, y con el registro compartido ese arbol puede estar
+   evaluado ya. Contaba cero llamadas a `verify` donde espera una por rama.
+
+   Que falle es lo unico bueno del asunto: esa prueba afirma sobre las llamadas del doble. Una que
+   solo sustituyera para «no tocar disco» se habria quedado verde y muda. De ahi que los archivos
+   que simulan corran en su propio grupo con aislamiento, y que `tools/coherence/simulacros.spec.ts`
+   compare la lista con los archivos que de verdad escriben `vi.mock` — leyendola del archivo de
+   configuracion, no de una copia, y comprobando que la lectura encontro algo, porque una lista
+   vacia compara bien contra nada.
+4. **Y la otra pista del mismo aviso**, `fsModuleCache`: la transformacion se guardaba entre
+   pasadas. Era el 18% del tiempo, ahora el 6%.
+
+Verificado como el resto: `npm run verify` entero en verde, y **diez** pasadas con el orden
+barajado, las diez en verde.
+
+Lo que queda anotado por si vuelve: hay cuatro lecturas de `process.env` a nivel de modulo
+—`AZURE_AD_AVAILABLE`, `AVAILABLE_MAIL`, `SIEMBRA_PERMITIDA` y el punto final de App
+Configuration—. Hoy son inofensivas: son banderas de arranque, no cambian despues de arrancar y
+ninguna prueba las toca. Pero son la misma forma del fallo, y si alguna pasa a depender del
+entorno en ejecucion hay que convertirla en funcion, como `cacheDir()`.
+
 ---
 
 ## 3. Revisado y descartado

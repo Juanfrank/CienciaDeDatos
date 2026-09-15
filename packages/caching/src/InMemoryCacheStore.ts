@@ -62,6 +62,18 @@ export class InMemoryCacheStore implements ICacheStore {
     }
   }
 
+  /**
+   * Tira todo lo guardado.
+   *
+   * No es una operacion de `ICacheStore` a proposito: nada del camino de lectura debe poder vaciar
+   * el L1 entero —para eso esta `deleteByPrefix`, que invalida lo afectado y no lo demas—. Existe
+   * porque este cache es la memoria DE UN almacen de disco concreto, y cuando ese almacen cambia,
+   * lo que hay en memoria deja de corresponderle.
+   */
+  vaciar(): void {
+    this.map.clear();
+  }
+
   /** Solo para pruebas y metricas de salud. */
   get size(): number {
     return this.map.size;

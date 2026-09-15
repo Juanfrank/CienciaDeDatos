@@ -3,6 +3,29 @@ import { defineConfig } from 'vitest/config';
 
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
+/**
+ * Lo que vitest no ejecuta.
+ *
+ * Las pruebas de punta a punta las corre Playwright: necesitan un navegador y el servidor
+ * levantado.
+ */
+const EXCLUIDAS = [
+  '**/node_modules/**',
+  '**/dist/**',
+  '**/__boundary-fixture__/**',
+  '**/e2e/**',
+  '**/.next/**',
+];
+
+/**
+ * Los archivos que sustituyen un MODULO con `vi.mock`, y por eso necesitan registro nuevo.
+ *
+ * Hoy es uno solo. Si aparece otro tiene que venir aqui, y no hace falta acordarse: lo exige
+ * `tools/coherence/simulacros.spec.ts`, que compara esta lista con los archivos que escriben
+ * `vi.mock`. Se exporta para que esa guarda lea la lista de VERDAD y no una copia suya.
+ */
+export const CON_SIMULACRO = ['packages/auth/src/auth.spec.ts'];
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -31,26 +54,68 @@ export default defineConfig({
      * hubiera cambiado un archivo. Con la cache baja al 6%: doce segundos pasan a once, y eso en
      * una suite que corre en cada `npm run verify`.
      *
-     * Esto NO es lo mismo que `isolate: false`, que vitest sugiere en el mismo mensaje y que
-     * ahorraria mucho mas —de doce segundos a cuatro—. Ese no se puede tomar todavia: reutiliza el
-     * registro de modulos entre archivos, y `almacenCompartido.ts` lee `CACHE_DIR` AL EVALUARSE,
-     * asi que el segundo archivo de cada proceso seguiria escribiendo en el directorio del
-     * primero. El aislamiento que promete `vitest.setup.mts` quedaria anulado en silencio, y la
-     * suite seguiria en verde. Comprobado con dos pruebas que comparan `CACHE_DIR` con
-     * `process.env.CACHE_DIR`: sin aislar, no coinciden.
+     * Va junto con `isolate: false`, que es de donde sale el grueso del ahorro.
      */
     fsModuleCache: true,
-    include: ['**/*.spec.ts'],
+
     // Aisla el estado compartido de la aplicacion: ver vitest.setup.mts.
     setupFiles: ['./vitest.setup.mts'],
     // Las pruebas de punta a punta las ejecuta Playwright, no vitest: necesitan un navegador
     // y el servidor levantado. Se excluyen aqui para que `npm test` siga siendo rapido.
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/__boundary-fixture__/**',
-      '**/e2e/**',
-      '**/.next/**',
+    exclude: EXCLUIDAS,
+
+    /*
+     * Dos grupos, y la frontera es una sola cosa: quien sustituye un MODULO.
+     *
+     * `vi.mock` intercambia un modulo antes de que se evalue el arbol que lo usa. Con el registro
+     * compartido, ese arbol puede estar evaluado ya —lo trajo un archivo anterior del mismo
+     * proceso— y entonces el simulacro llega tarde: el codigo bajo prueba se quedo con el modulo
+     * de verdad. No es teorico. Con `isolate: false` a secas, `auth.spec.ts` fallaba en tres de
+     * cada cinco barajadas: contaba CERO llamadas a `verify` donde espera una por rama.
+     *
+     * Y falla con razon, que es lo unico bueno del asunto: esa prueba afirma sobre las llamadas
+     * del doble, asi que un simulacro que no se aplica la rompe en vez de dejarla pasar sin
+     * comprobar nada. Una que solo hubiera sustituido para «no tocar disco» se habria quedado
+     * verde y muda.
+     *
+     * Asi que el archivo que simula corre aparte y con su registro nuevo. Es un archivo de 1898
+     * pruebas: el ahorro se mantiene entero.
+     */
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'rapidas',
+          /*
+           * Los procesos se REUTILIZAN entre archivos: doce segundos pasan a cuatro.
+           *
+           * Con aislamiento, cada archivo evalua de cero todo su arbol de modulos: eran 268
+           * modulos evaluados 810 veces, y el 42% del tiempo de la suite se iba solo en importar.
+           * Reutilizando el proceso se evaluan una vez por proceso, y ese 42% desaparece.
+           *
+           * Lo que se paga a cambio, y lo que hubo que arreglar antes de poder cobrarlo: el
+           * registro de modulos deja de ser nuevo por archivo, asi que cualquier modulo que
+           * CAPTURE algo al evaluarse se lo lleva puesto al archivo siguiente. Habia uno, y era el
+           * peor posible: `almacenCompartido.ts` leia `CACHE_DIR` en un `const`, de modo que el
+           * segundo archivo de cada proceso habria seguido escribiendo en el directorio temporal
+           * del primero y el aislamiento que promete `vitest.setup.mts` habria quedado anulado EN
+           * SILENCIO —la suite en verde, las pruebas pisandose—. Ahora el almacen pregunta por el
+           * directorio en cada operacion, y `almacenCompartido.spec.ts` lo ata: enrojece si
+           * alguien vuelve a capturarlo.
+           */
+          isolate: false,
+          include: ['**/*.spec.ts'],
+          exclude: [...EXCLUIDAS, ...CON_SIMULACRO],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'con-simulacro',
+          isolate: true,
+          include: CON_SIMULACRO,
+        },
+      },
     ],
   },
 });
