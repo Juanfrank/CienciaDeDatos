@@ -49,9 +49,18 @@ const emptyContext: QueryContext = {
   securityContext: {},
 };
 
-/** Cuando corrio con exito por ultima vez cada dataset, segun el latido anterior. */
+/**
+ * Cuando corrio con exito por ultima vez cada dataset, segun el latido anterior.
+ *
+ * Se lee del mapa que el latido arrastra, y solo si no lo trae —un latido escrito antes de que
+ * el mapa existiera— se deduce de `datasets`. Deducirlo siempre era el fallo: `datasets` lleva
+ * unicamente lo de esa vuelta, asi que un dataset saltado por recurrencia desaparecia del
+ * latido, en la vuelta siguiente parecia no haber corrido nunca y se volvia a poblar. La
+ * recurrencia se cumplia una de cada dos veces.
+ */
 function lastSuccessByDataset(heartbeat: PopulatorHeartbeat | null | undefined): Record<string, string> {
   if (!heartbeat) return {};
+  if (heartbeat.lastSuccessByDataset) return { ...heartbeat.lastSuccessByDataset };
   const salida: Record<string, string> = {};
   for (const d of heartbeat.datasets) {
     if (d.outcome === 'ok') salida[d.datasetId] = heartbeat.finishedAt;
@@ -120,6 +129,13 @@ export async function populate(options: PopulateOptions): Promise<PopulateResult
   const finishedAt = now();
   const allOk = results.length > 0 && results.every((r) => r.outcome === 'ok');
 
+  // Lo de antes, con lo de esta vuelta encima: lo saltado conserva su fecha y lo poblado la
+  // actualiza. Un fallo no la mueve — no corrio bien, asi que sigue debiendo su vuelta.
+  const successes = { ...lastSuccess };
+  for (const r of results) {
+    if (r.outcome === 'ok') successes[r.datasetId] = finishedAt.toISOString();
+  }
+
   const heartbeat: PopulatorHeartbeat = {
     startedAt: startedAt.toISOString(),
     finishedAt: finishedAt.toISOString(),
@@ -132,6 +148,7 @@ export async function populate(options: PopulateOptions): Promise<PopulateResult
         ? { lastFullSuccessAt: previousHeartbeat.lastFullSuccessAt }
         : {}),
     ...(previousHeartbeat?.schemaRefreshedAt ? { schemaRefreshedAt: previousHeartbeat.schemaRefreshedAt } : {}),
+    lastSuccessByDataset: successes,
   };
 
   await cacheStore.set(POPULATOR_HEARTBEAT_KEY, {

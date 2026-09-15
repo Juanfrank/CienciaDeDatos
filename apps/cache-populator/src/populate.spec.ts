@@ -167,6 +167,50 @@ describe('populate: la unica via que invoca al conector', () => {
     });
     expect(skipped).toEqual(['casos']);
   });
+
+  it('saltar un dataset NO le borra su ultima ejecucion con exito', async () => {
+    /*
+     * La recurrencia se decide con «cuando corrio bien por ultima vez», y eso sale del latido.
+     * El latido solo listaba los datasets que se poblaron EN ESA VUELTA, asi que un dataset
+     * saltado desaparecia del latido y en la vuelta siguiente parecia no haber corrido nunca:
+     * se volvia a poblar de inmediato. Una recurrencia de cada cuatro horas acababa consultando
+     * la fuente cada dos vueltas, que es justo lo que la recurrencia existe para decidir (6.4).
+     */
+    const reloj = { ahora: new Date('2026-09-11T08:00:00.000Z') };
+    const comun = {
+      connector: new MockDataConnector(),
+      cacheStore,
+      registry,
+      connectorKind: 'mock' as const,
+      now: () => reloj.ahora,
+    };
+
+    // Primera vuelta: se puebla.
+    const primera = await populate({ ...comun, isDue: () => true });
+    expect(primera.skipped).toEqual([]);
+
+    // Segunda: todavia no toca, se salta.
+    reloj.ahora = new Date('2026-09-11T09:00:00.000Z');
+    const segunda = await populate({
+      ...comun,
+      previousHeartbeat: primera.heartbeat,
+      isDue: (_d, lastRunAt) => lastRunAt === undefined,
+    });
+    expect(segunda.skipped).toEqual(['casos']);
+
+    /*
+     * Tercera: la clave. `isDue` solo dice que si cuando NO consta ninguna ejecucion anterior,
+     * asi que si el latido de la segunda vuelta perdio la fecha, este se puebla — y eso es
+     * exactamente el fallo.
+     */
+    reloj.ahora = new Date('2026-09-11T10:00:00.000Z');
+    const tercera = await populate({
+      ...comun,
+      previousHeartbeat: segunda.heartbeat,
+      isDue: (_d, lastRunAt) => lastRunAt === undefined,
+    });
+    expect(tercera.skipped).toEqual(['casos']);
+  });
 });
 
 describe('repopulateTargeted: invalidacion dirigida (6.5)', () => {

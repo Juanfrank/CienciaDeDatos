@@ -27,6 +27,15 @@ export interface PopulatorHeartbeat {
   lastFullSuccessAt?: string;
   /** Cuando se refresco por ultima vez el SchemaDescriptor cacheado (6.4). */
   schemaRefreshedAt?: string;
+  /**
+   * Cuando corrio bien por ultima vez CADA dataset, se haya tocado en esta vuelta o no.
+   *
+   * `datasets` solo lleva lo de esta vuelta, asi que un dataset saltado por recurrencia no
+   * figura. Deduciendo de ahi la ultima ejecucion, el saltado parecia no haber corrido nunca y
+   * la vuelta siguiente lo poblaba: la recurrencia se cumplia una de cada dos veces. Este mapa
+   * se arrastra de un latido al siguiente y es lo que la decide.
+   */
+  lastSuccessByDataset?: Record<string, string>;
 }
 
 export function summarizeHeartbeat(hb: PopulatorHeartbeat): {
