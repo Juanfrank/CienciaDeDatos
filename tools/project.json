@@ -74,6 +74,13 @@
       "options": {
         "command": "eslint tools --ignore-pattern 'tools/coherence/**' --max-warnings 0"
       }
+    },
+    "barajado": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx tools/barajado.mts"
+      },
+      "cache": false
     }
   }
 }

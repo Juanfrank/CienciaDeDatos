@@ -17,6 +17,7 @@
     "start": "nx run shell:start",
     "lint": "nx run-many -t lint",
     "test": "nx run-many -t test",
+    "test:barajado": "nx run verification:barajado --",
     "typecheck": "nx run verification:typecheck",
     "e2e": "nx run shell:e2e",
     "populate": "tsx tools/populate-cache.mts",

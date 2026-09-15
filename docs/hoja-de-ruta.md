@@ -855,6 +855,20 @@ aislar, no coinciden.
 Verificado como el resto: `npm run verify` entero en verde, y **diez** pasadas con el orden
 barajado, las diez en verde.
 
+**Y el barajado queda como comando**, `npm run test:barajado` (`tools/barajado.mts`, tarea nx
+`verification:barajado`), porque una comprobacion que solo se hizo una vez a mano no protege de
+nada. Tres decisiones que lo hacen util en vez de molesto:
+
+- **No entra en `npm run verify`.** Barajar en cada verificacion convierte cada rojo en algo que
+  hay que reproducir a ciegas, y un rojo que no se reproduce se termina ignorando. Es para el pase
+  nocturno y para cuando se toca el estado de proceso.
+- **No se cachea.** Lo que comprueba es que el resultado no dependa del orden, y cada pasada elige
+  otro; un acierto de cache devolveria el verde de un orden ya probado.
+- **Imprime la SEMILLA de cada pasada** y, al fallar, la orden exacta que repite ese orden. Sin
+  eso seria un generador de rojos irrepetibles, que es peor que no tenerlo. El camino de fallo se
+  probo de verdad, con una prueba roja puesta a proposito: para en la primera, enseña la salida de
+  vitest y la orden que la reproduce — y la orden reproduce.
+
 Lo que queda anotado por si vuelve: hay cuatro lecturas de `process.env` a nivel de modulo
 —`AZURE_AD_AVAILABLE`, `AVAILABLE_MAIL`, `SIEMBRA_PERMITIDA` y el punto final de App
 Configuration—. Hoy son inofensivas: son banderas de arranque, no cambian despues de arrancar y

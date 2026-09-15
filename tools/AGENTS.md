@@ -12,6 +12,7 @@ Scripts que no forman parte de la aplicacion. `project.json` los declara como el
 | `nx run verification:infra` | Compila Bicep tratando toda advertencia como error |
 | `tsx tools/populate-cache.mts` | Puebla el cache |
 | `tsx tools/module-status.mts` | Valida cada modulo por separado y produce el informe |
+| `npm run test:barajado` | La suite de unidad N veces con el orden barajado; ver la regla de abajo |
 
 ## Reglas
 
@@ -21,6 +22,14 @@ Scripts que no forman parte de la aplicacion. `project.json` los declara como el
   ignora en silencio, y eso ya paso una vez.
 - **Cada target declara sus entradas y salidas.** Sin salidas declaradas, un acierto de cache
   deja el directorio sin construir y la verificacion siguiente mide algo viejo.
+- **El barajado no se cachea, y es deliberado.** `verification:barajado` lleva `"cache": false`
+  porque lo que comprueba es que el resultado NO dependa del orden, y cada pasada elige otro. Un
+  acierto de cache devolveria el verde de un orden que ya se probo, que es justo lo que esa tarea
+  no quiere. Tampoco entra en `npm run verify`: barajar en cada verificacion convierte cada rojo en
+  algo que hay que reproducir a ciegas, y un rojo que no se reproduce se termina ignorando. Es para
+  el pase nocturno y para cuando se toca el estado de proceso. Cada pasada imprime su SEMILLA y, al
+  fallar, la orden exacta que repite ese orden — sin eso seria un generador de rojos irrepetibles.
+
 - **Lo afectado es la via normal.** `npm run affected` en local y `nx affected` en los PR. Lo
   que decide si una tarea corre de verdad son los `inputs` de `nx.json`, no `affected`: el input
   `pruebas` excluye los `.md`, asi que tocar una especificacion marca el proyecto como afectado
