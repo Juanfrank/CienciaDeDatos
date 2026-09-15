@@ -29,6 +29,7 @@ import {
   validateSlots,
   validateBinding,
 } from '@app/ui-components';
+import { modules } from './moduleStore';
 import {
   cacheL2,
   datasetReader,
@@ -357,6 +358,15 @@ function navigatorFiltersItem(module: ModuleDefinition): GridItem | undefined {
   };
 }
 
+/**
+ * Las direcciones de todos los modulos, para comprobar a donde apuntan los saltos de 4.4.
+ *
+ * Sin filtrar por estado ni por quien mira, y a proposito: un salto a un borrador ajeno no es un
+ * salto roto —el borrador existe y se publicara—, y un salto a un modulo que no es de tu equipo
+ * tampoco: ahi el destino esta, lo que falta es tu concesion, y eso lo resuelve quien dibuja.
+ */
+const slugsDeModulo = async (): Promise<string[]> => (await modules.list()).map((m) => m.slug);
+
 /** Diagnosticos del modulo para el editor, con las columnas realmente presentes en el cache. */
 export async function moduleDiagnose(module: ModuleDefinition, userId: string, teamId: string) {
   const resolucion = await scopeFor(userId, teamId, module.moduleId);
@@ -378,6 +388,7 @@ export async function moduleDiagnose(module: ModuleDefinition, userId: string, t
     columnsByDataset,
     datasets: infoDeDatasets(datasets),
     declaredAggregations: Object.fromEntries(await declaredAggregations()),
+    moduleSlugs: await slugsDeModulo(),
   });
 }
 
@@ -397,6 +408,7 @@ export async function definitionDiagnose(module: ModuleDefinition) {
     columnsByDataset,
     datasets: infoDeDatasets(datasets),
     declaredAggregations: Object.fromEntries(await declaredAggregations()),
+    moduleSlugs: await slugsDeModulo(),
   });
 }
 

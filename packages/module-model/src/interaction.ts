@@ -1,4 +1,12 @@
+import type { DrillThroughTarget, ObjectInstance } from '@app/ui-components';
+
 /** Interactividad — seccion 4.4. */
+
+/*
+ * El destino se define con `ObjectInstance`, en `@app/ui-components`, porque es un campo suyo.
+ * Se reexporta aqui para que quien trabaja con la interaccion lo encuentre donde lo busca.
+ */
+export type { DrillThroughTarget };
 
 export type InteractionPattern =
   | 'segmentador'
@@ -135,24 +143,17 @@ export function captureBookmark(input: {
   };
 }
 
-/** Destino de drill-through declarado en un objeto del modulo. */
-export interface DrillThroughTarget {
-  /** Modulo al que se navega. */
-  moduleSlug: string;
-  pageSlug?: string;
-  /**
-   * Dimensiones cuyo valor se lleva al destino. Si se omite, se llevan todos los filtros
-   * activos. Acotarlo es lo habitual: llevarlo todo suele arrastrar filtros sin sentido alla.
-   */
-  carryDimensions?: string[];
-  label?: string;
-}
-
-/** Construye la URL de destino de un drill-through desde el estado actual. */
+/**
+ * Construye la URL de destino de un drill-through desde el estado actual.
+ *
+ * Lo que viaja es el CONTEXTO DE FILTROS, y no hay un segundo canal para «el valor que se
+ * pulso»: en esta aplicacion el estado visible vive en la URL, asi que pulsar una categoria ya
+ * la deja escrita como filtro. Un parametro aparte para la seleccion seria una segunda fuente de
+ * verdad sobre lo mismo, y las dos se contradirian el dia que una se olvidara de actualizarse.
+ */
 export function drillThroughUrl(
   target: DrillThroughTarget,
   currentFilters: Record<string, string[]>,
-  selection?: { fieldName: string; valor: string },
 ): string {
   const filters: Record<string, string[]> = {};
 
@@ -161,13 +162,60 @@ export function drillThroughUrl(
     if (valores.length > 0) filters[fieldName] = valores;
   }
 
-  // La seleccion que origino el drill-through sustituye a lo que hubiera para esa dimension:
-  // el gesto fue "ver el detalle de ESTE valor".
-  if (selection) filters[selection.fieldName] = [selection.valor];
-
   return bookmarkToUrl({
     moduleSlug: target.moduleSlug,
     ...(target.pageSlug ? { pageSlug: target.pageSlug } : {}),
     filters,
   });
+}
+
+/**
+ * Lo que impide que un salto declarado lleve a alguna parte.
+ *
+ * Se comprueba porque el camino de lectura lo DESCARTA EN SILENCIO: un destino que ya no existe
+ * —o que apunta a la pagina en la que uno ya esta— no se dibuja, y quien lo configuro ve un
+ * objeto normal sin forma de enterarse de que su salto no esta. Es la peor manera de fallar,
+ * porque no parece un fallo.
+ *
+ * Que el destino este CONCEDIDO no se comprueba aqui y es a proposito: eso depende de quien
+ * mire, no de como este configurado el modulo. Un salto a un modulo que existe pero que no es
+ * de tu equipo no es un error del modulo; sencillamente a ti no se te ofrece.
+ */
+export function drillProblems(
+  instance: Pick<ObjectInstance, 'drillThrough'>,
+  contexto: { moduleSlug: string; slugsExistentes: readonly string[] },
+): string[] {
+  const destinos = instance.drillThrough ?? [];
+  if (destinos.length === 0) return [];
+
+  const problemas: string[] = [];
+  const existentes = new Set(contexto.slugsExistentes);
+  const vistos = new Set<string>();
+
+  for (const destino of destinos) {
+    const clave = `${destino.moduleSlug}/${destino.pageSlug ?? ''}`;
+
+    if (destino.moduleSlug.trim() === '') {
+      problemas.push('Hay un salto sin modulo destino: asi no lleva a ninguna parte.');
+      continue;
+    }
+    if (!existentes.has(destino.moduleSlug)) {
+      problemas.push(
+        `El salto apunta a «${destino.moduleSlug}», que no es ningun modulo. Si se renombro su ` +
+          'direccion, hay que apuntar a la nueva.',
+      );
+    }
+    if (destino.moduleSlug === contexto.moduleSlug && !destino.pageSlug) {
+      problemas.push(
+        'El salto lleva al modulo en el que ya se esta. Para ir a otra pagina del mismo modulo ' +
+          'hay que decir cual.',
+      );
+    }
+    if (vistos.has(clave)) {
+      problemas.push(`El salto a «${clave.replace(/\/$/, '')}» esta declarado dos veces.`);
+    }
+    vistos.add(clave);
+  }
+
+  return problemas;
 }

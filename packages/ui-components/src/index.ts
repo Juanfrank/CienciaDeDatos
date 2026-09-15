@@ -191,6 +191,7 @@ export type {
   AttachedObjectInstance,
   AttachmentScope,
   DeprecationNotice,
+  DrillThroughTarget,
   ObjectSettings,
   ObjectFamily,
   ObjectCategory,

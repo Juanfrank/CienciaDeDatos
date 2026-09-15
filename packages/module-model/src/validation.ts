@@ -17,6 +17,7 @@ import {
 } from '@app/ui-components';
 import type { ModuleDefinition } from './ModuleDefinition';
 import { navigatorProblems } from './pageNavigator';
+import { drillProblems } from './interaction';
 import { type GridProblem, validateLayout } from './grid';
 
 /** Validacion de esquema en cada carga del editor — seccion 4.2. */
@@ -46,6 +47,14 @@ export interface ModuleDiagnostics {
    * que estan ahi.
    */
   navigationProblems: string[];
+  /**
+   * Lo que impide que un salto a otro modulo (4.4) lleve a alguna parte.
+   *
+   * Aparte de `items` porque no rompe el objeto: la tarjeta se dibuja igual y la cifra es
+   * correcta; lo que no esta es el camino que alguien declaro. Marcarla rota escondería la cifra
+   * por un problema que no es suyo.
+   */
+  drillProblems: string[];
   /** true si algo impide que el modulo se dibuje integro. */
   hasBrokenItems: boolean;
 }
@@ -80,6 +89,16 @@ export interface ValidateModuleInput {
   datasets?: Record<string, DatasetInfo>;
   /** Que operador declara el esquema para cada medida. Sin el, cada medida cae en `suma`. */
   declaredAggregations?: Record<string, Aggregation>;
+  /**
+   * Direcciones de modulo que existen hoy, para comprobar a donde apuntan los saltos de 4.4.
+   *
+   * Se pasa como dato —igual que las columnas— porque la validacion es una funcion pura: quien
+   * la llama sabe consultar el catalogo de modulos, ella no.
+   *
+   * Ausente significa «no se comprueba», no «ninguno existe»: sin esto, validar un modulo desde
+   * una prueba que no monta el catalogo marcaria todos sus saltos como rotos.
+   */
+  moduleSlugs?: readonly string[];
 }
 
 function aggregationProblems(
@@ -230,8 +249,32 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
     items,
     layoutProblems,
     navigationProblems: navigatorProblems(module),
+    drillProblems: saltosProblems(input),
     hasBrokenItems: items.some((i) => i.broken),
   };
+}
+
+/**
+ * Los saltos de todas las paginas, con el objeto que los declara delante.
+ *
+ * Sin el nombre del objeto el aviso diria «el salto apunta a un modulo que no existe» sobre un
+ * modulo de veinte tarjetas, y habria que abrirlas una a una para encontrar cual.
+ */
+function saltosProblems(input: ValidateModuleInput): string[] {
+  if (input.moduleSlugs === undefined) return [];
+
+  const problemas: string[] = [];
+  const contexto = { moduleSlug: input.module.slug, slugsExistentes: input.moduleSlugs };
+
+  for (const page of input.module.pages) {
+    for (const item of page.items) {
+      for (const problema of drillProblems(item.instance, contexto)) {
+        problemas.push(`'${item.instance.title ?? item.id}': ${problema}`);
+      }
+    }
+  }
+
+  return problemas;
 }
 
 /** Puerta de publicacion institucional. */
@@ -261,6 +304,12 @@ export function findPublishBlockers(
 
   for (const detail of diagnostics.navigationProblems) {
     locks.push({ reason: 'navegacion', detail });
+  }
+
+  // Un salto roto bloquea igual que la navegacion: publicar un modulo con un camino que no lleva
+  // a ningun sitio es publicar una promesa que se rompe al pulsarla.
+  for (const detail of diagnostics.drillProblems) {
+    locks.push({ reason: 'salto', detail });
   }
 
   for (const instanceId of expiredInstanceIds) {

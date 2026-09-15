@@ -22,7 +22,7 @@ igual con la fuente caida y lo que impide que una consulta de negocio la sature.
 ## En local
 
 ```bash
-npm run poblar              # conector mock, directorio .cache
+npm run populate              # conector mock, directorio .cache
 npx tsx tools/populate-cache.mts --connector mock --dir .cache-e2e
 ```
 

@@ -71,7 +71,7 @@ declaradas, y `shell:e2e` construye antes de arrancar.
 
 ```bash
 nvm use && npm ci
-npm run poblar     # puebla .cache con el conector mock
+npm run populate     # puebla .cache con el conector mock
 npm run dev        # http://localhost:4300
 ```
 

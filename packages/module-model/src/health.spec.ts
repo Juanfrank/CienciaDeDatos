@@ -10,6 +10,7 @@ const diagnostico = (
   hasBrokenItems: items.some((i) => i.roto),
   layoutProblems,
   navigationProblems: [],
+  drillProblems: [],
   items: items.map((i, n) => ({
     itemId: `i${n}`,
     objectId: 'tarjeta-kpi',

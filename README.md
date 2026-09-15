@@ -66,7 +66,7 @@ El job de poblacion y el servidor son **procesos distintos**, igual que en produ
 escribe el cache y el servidor solo lee lo que encuentre ya poblado.
 
 ```bash
-npm run poblar              # puebla el cache contra MockDataConnector
+npm run populate              # puebla el cache contra MockDataConnector
 npm run dev                 # http://localhost:4300
 npm run e2e                 # 40 pruebas en Chromium real
 ```
@@ -74,7 +74,7 @@ npm run e2e                 # 40 pruebas en Chromium real
 Cambiar de conector es **un valor de configuracion**, no un cambio de codigo:
 
 ```bash
-npm run poblar -- --connector sql    # falla limpio: Sql se implementa en Fase 4
+npm run populate -- --connector sql    # falla limpio: Sql se implementa en Fase 4
 ```
 
 ### Las cuentas de demostracion NO se siembran solas

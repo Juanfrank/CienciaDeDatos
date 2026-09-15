@@ -115,11 +115,16 @@ describe('drill-through (4.4)', () => {
     expect(url).not.toContain('Distrito');
   });
 
-  it('la seleccion que origino el gesto sustituye el filtro de esa dimension', () => {
-    // El gesto fue "ver el detalle de ESTE valor", no "anadir otro valor mas".
-    const url = drillThroughUrl({ moduleSlug: 'audiencias' }, currentFilters, {
-      fieldName: 'DimTribunal.Materia',
-      valor: 'Civil',
+  it('la seleccion viaja por los filtros, no por un canal aparte', () => {
+    /*
+     * El gesto «ver el detalle de ESTE valor» se hace pulsando la categoria, y eso ya escribe el
+     * filtro en la URL. Habia un tercer parametro para decirlo otra vez, y dos sitios que dicen
+     * lo mismo acaban diciendo cosas distintas: aqui se fija que el unico que queda es el estado
+     * de filtros.
+     */
+    const url = drillThroughUrl({ moduleSlug: 'audiencias' }, {
+      ...currentFilters,
+      'DimTribunal.Materia': ['Civil'],
     });
     expect(url).toContain('DimTribunal.Materia=Civil');
     expect(url).not.toContain('Materia=Penal');

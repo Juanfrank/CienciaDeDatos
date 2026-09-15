@@ -280,6 +280,37 @@ export interface ObjectInstance {
    * fecha se filtre con calendario o con rango no lo es.
    */
   settings?: ObjectSettings;
+  /**
+   * A donde se puede saltar desde este objeto llevando el contexto de filtros (4.4).
+   *
+   * Es una LISTA y no un destino unico porque una misma cifra suele tener mas de un detalle
+   * detras —las audiencias de ese distrito, los casos de esa materia— y obligar a elegir uno
+   * dejaria el otro sin camino. Vacia o ausente: el objeto no ofrece salto.
+   *
+   * Se declara en la INSTANCIA y no en el objeto publicado: a donde lleva una cifra depende de
+   * que modulos existan al lado, no de que clase de objeto la dibuja.
+   */
+  drillThrough?: DrillThroughTarget[];
+}
+
+/**
+ * Destino de drill-through declarado en un objeto del modulo — seccion 4.4.
+ *
+ * Vive aqui, con `ObjectInstance`, y no con el resto de la interaccion: es un campo de la
+ * instancia, y el paquete que define la instancia no puede depender del que define el modulo sin
+ * cerrar un ciclo. `drillThroughUrl`, que es quien lo convierte en una direccion, si vive alla.
+ */
+export interface DrillThroughTarget {
+  /** Modulo al que se navega. */
+  moduleSlug: string;
+  pageSlug?: string;
+  /**
+   * Dimensiones cuyo valor se lleva al destino. Si se omite, se llevan todos los filtros
+   * activos. Acotarlo es lo habitual: llevarlo todo suele arrastrar filtros sin sentido alla.
+   */
+  carryDimensions?: string[];
+  /** Como se lee la entrada en el menu. Sin el, el nombre del modulo destino. */
+  label?: string;
 }
 
 /** Configuracion especifica de un tipo de objeto. Anadir un tipo anade un miembro aqui. */

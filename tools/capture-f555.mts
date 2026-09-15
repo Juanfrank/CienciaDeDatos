@@ -53,14 +53,13 @@ const otra = await b.request.post(`${base}/api/sign-in`, {
 if (!otra.ok()) throw new Error(`no se pudo entrar: ${otra.status()}`);
 await b.goto(`${base}/m/composicion`);
 await b.waitForLoadState('networkidle');
-const cuanto = await b.locator('.modulo').evaluate((n) => {
-  n.scrollBy(0, 600);
-  return n.scrollTop;
-});
-if (cuanto === 0) throw new Error('el modulo no se desplazo: la captura no ensenaria nada');
+// Con la rueda y no con `evaluate`: aqui no hay tipos del DOM, y que el modulo se desplace de
+// verdad ya lo fija la prueba de navegador. Esto solo tiene que ensenarlo.
+await b.locator('.modulo').hover();
+await b.mouse.wheel(0, 600);
 await b.waitForTimeout(300);
 await b.screenshot({ path: `${dir}/67-desplazado.png` });
-console.log(`67-desplazado (desplazado ${cuanto}px)`);
+console.log('67-desplazado');
 
 // 5. Los dos comportamientos que quedan, en la pantalla que los elige. Otra sesion, porque
 // configurar un modulo es cosa de quien administra.

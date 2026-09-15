@@ -38,6 +38,7 @@ export {
   INTERACTION_PATTERNS,
   bookmarkToUrl,
   captureBookmark,
+  drillProblems,
   drillThroughUrl,
   type Bookmark,
   type DrillThroughTarget,
