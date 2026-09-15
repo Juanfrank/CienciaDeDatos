@@ -5,6 +5,7 @@ import { useState } from 'react';
 import type { IconName, ObjectInstance, ObjectPresentation, PresentationKey } from '@app/ui-components';
 import { Presentation } from '../editor/Presentation';
 import { pedir, motivoDeFallo } from '../pedir';
+import { useTranslator } from '../Locale';
 
 /**
  * Con que presentacion NACE un objeto recien colocado — secciones 4.2, 4.3 y 4.5.
@@ -39,6 +40,7 @@ export function ResourceDefaults({
   iconos: IconName[];
   inicial: ObjectPresentation;
 }) {
+  const t = useTranslator();
   const router = useRouter();
   const [presentation, setPresentation] = useState<ObjectPresentation>(inicial);
   const [enCurso, setEnCurso] = useState(false);
@@ -107,7 +109,7 @@ export function ResourceDefaults({
           data-testid="predeterminar-guardar"
           onClick={() => void guardar(presentation)}
         >
-          Guardar
+          {t('action.save')}
         </button>
         {/*
           Volver al punto de partida del catalogo, que es lo que hace falta cuando lo que se
@@ -121,7 +123,7 @@ export function ResourceDefaults({
           data-testid="predeterminar-limpiar"
           onClick={() => void guardar({})}
         >
-          Quitar el predeterminado
+          {t('admin.resources.clearDefault')}
         </button>
       </p>
 

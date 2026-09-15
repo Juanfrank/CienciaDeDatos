@@ -10,6 +10,7 @@ import {
   type TextStyle,
 } from '@app/ui-components';
 import { Help } from './Help';
+import { useTranslator } from '../Locale';
 
 /** Peso, estilo, alineacion y color de un texto — el mismo control para los tres destinos. */
 
@@ -108,6 +109,7 @@ export function EditorTextStyle({
   saving: boolean;
   onCambiar: (style: TextStyle) => void;
 }) {
+  const t = useTranslator();
   const cambiar = (parcial: Partial<TextStyle>) => onCambiar({ ...style, ...parcial });
 
   const interruptor = (
@@ -154,7 +156,7 @@ export function EditorTextStyle({
       </div>
 
       <label className="form__field">
-        <span>Alineacion</span>
+        <span>{t('editor.align')}</span>
         <select
           value={style.alignment ?? 'izquierda'}
           disabled={saving}
@@ -171,7 +173,7 @@ export function EditorTextStyle({
 
       {withVertical ? (
         <label className="form__field">
-          <span>Alineacion vertical</span>
+          <span>{t('editor.alignVertical')}</span>
           <select
             value={style.verticalAlignment ?? 'arriba'}
             disabled={saving}
@@ -188,7 +190,7 @@ export function EditorTextStyle({
       ) : null}
 
       <div className="form__field">
-        <span>Color</span>
+        <span>{t('color.rules.color')}</span>
         <ColorPalette
           valor={style.color ?? 'predeterminado'}
           nombre={titulo}

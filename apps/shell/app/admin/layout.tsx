@@ -6,9 +6,11 @@ import { can } from '@app/access-control';
 import { isAdministrator, roleMoreHeightOf } from '../../src/server/admin';
 import { indicadoresDeAdmin } from '../../src/server/admin';
 import { pageSessionRequire } from '../../src/server/session';
+import { translator } from '../../src/server/locale';
 
 /** Panel de administracion — seccion 4.10.8. */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const t = await translator();
   const sesion = await pageSessionRequire();
 
   /*
@@ -43,12 +45,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         */}
         <div className="admin__path">
           <h1>
-            <Link href="/admin">Administracion</Link>
+            <Link href="/admin">{t('chrome.admin')}</Link>
           </h1>
           <CurrentSection />
         </div>
         <Link href="/" className="boton-contorno" data-testid="volver-a-modulos">
-          Volver a los modulos
+          {t('chrome.backToModules')}
         </Link>
       </header>
 

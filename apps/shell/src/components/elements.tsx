@@ -13,6 +13,7 @@ import {
   validThickness,
   lineStroke,
 } from '@app/ui-components';
+import { useTranslator } from './Locale';
 
 export { trazar, type ObjectBox } from '@app/ui-components';
 
@@ -169,10 +170,11 @@ export function Connection({
   config: ConnectionSettings | undefined;
   puntos: [number, number][];
 }) {
+  const t = useTranslator();
   if (puntos.length < 2) {
     return (
       <p className="connection__without-ends" data-testid="connection-without-ends">
-        Elija un objeto de origen y uno de destino.
+        {t('editor.pickSourceAndTarget')}
       </p>
     );
   }

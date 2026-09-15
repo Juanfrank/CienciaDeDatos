@@ -5,6 +5,7 @@ import { useUrlFilters } from '../hooks/useUrlFilters';
 import { IconButton } from './icons/IconButton';
 import { emergente } from './emergentes';
 import { exportTracker, type ExportStatus } from './exportJob';
+import { useTranslator } from './Locale';
 
 /** Exportar — seccion 4.9, encolado como exige 5.3. */
 
@@ -29,6 +30,7 @@ export function Export({
   moduleSlug: string;
   pageSlug?: string;
 }) {
+  const t = useTranslator();
   const { searchParams } = useUrlFilters();
   const [formato, setFormato] = useState<string>('xlsx');
   const [abierto, setAbierto] = useState(false);
@@ -116,7 +118,7 @@ export function Export({
       {abierto ? (
         <div className="exportar__panel" data-testid="export-panel">
           <label className="exportar__label" htmlFor="formato-exportacion">
-            Formato
+            {t('notice.format')}
           </label>
           <select
             id="formato-exportacion"

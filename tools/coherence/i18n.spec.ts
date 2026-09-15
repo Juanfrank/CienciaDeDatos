@@ -10,17 +10,22 @@ import { describe, expect, it } from 'vitest';
  * incumpliendose casi entera: 53 claves en el catalogo contra mas de trescientas cadenas escritas
  * dentro de los componentes.
  *
- * El numero solo puede BAJAR. Quien anada una cadena suelta rompe la prueba; quien migre una baja
- * el tope en el mismo commit. Empezo en 322 con 53 claves; va por 54, y ninguna pantalla acumula ya
- * mas de tres: la crema, el registro de auditoria, las reglas de color, los objetos, la bandeja de
- * avisos, «quien ve que», la tabla de datos, el editor de ambitos, las lineas de referencia y el
- * restablecimiento han pasado enteras al catalogo.
+ * El numero solo podia BAJAR, y llego a CERO: 322 al principio, 54 despues de las primeras tandas,
+ * ninguna hoy. La prueba pasa de trinquete a puerta: una cadena nueva escrita dentro de un
+ * componente la rompe.
  *
- * Lo que queda son sobre todo cadenas de una sola palabra repartidas de tres en tres, y algun falso
- * positivo: la expresion regular de la prosa cuenta como texto una condicion de JSX escrita en
- * linea. Donde ha aparecido, la condicion se ha extraido a una constante con nombre —se lee mejor y
- * ademas deja de contarse—, pero relajar la expresion regular seria peor: se comeria texto de
- * verdad.
+ * Cero de LO QUE ESTA PRUEBA MIDE, que no es lo mismo que cero en absoluto y conviene no
+ * confundirlo: `PROSA` exige que el texto quepa en una linea, asi que un parrafo que el
+ * formateador parte en dos le pasa por delante. Es un limite conocido, no un descuido; ampliarlo
+ * a varias lineas es otra tanda, con su propio recuento y su propio tope.
+ *
+ * De los 54 ultimos, 45 eran texto de verdad y se migraron; los otros 9 eran falsos positivos de
+ * este mismo extractor. Los que eran una condicion de JSX escrita en linea se arreglaron sacando
+ * la condicion a una constante con nombre —se lee mejor y ademas deja de contarse—. Los que eran
+ * una anotacion de tipo partida en varias lineas se arreglaron ESTRECHANDO la deteccion con
+ * `NO_ES_PROSA`, que descarta formas que la prosa no tiene nunca. Relajar la expresion de la
+ * prosa —admitir llaves, por ejemplo— seria lo contrario y es lo que no se hace: se comeria texto
+ * de verdad y el numero bajaria solo.
  */
 
 const raiz = execSync('git rev-parse --show-toplevel').toString().trim();
@@ -39,18 +44,41 @@ const ATRIBUTO = /(?:aria-label|title|placeholder)="([^"]{3,})"/g;
 const PALABRA = /[A-Za-zÀ-ÿ]{3,}/;
 
 /**
- * El tope de hoy.
+ * Lo que NO puede ser texto que alguien lea, aunque caiga entre `>` y `<`.
  *
- * Es una foto, no un objetivo: cada cadena que se migre al catalogo puede bajarlo. Subirlo
- * requiere explicar por que una cadena nueva no puede ir al catalogo.
+ * El extractor busca prosa entre la etiqueta que cierra y la que abre, y una anotacion de tipo
+ * que ocupa varias lineas le pone un `>` de un generico delante y un `<` de otro detras: `):
+ * Record` sale contado como si fuera una frase. Igual una entidad HTML, que es un simbolo escrito
+ * con letras.
+ *
+ * Esto ESTRECHA la deteccion, no la relaja, y por eso se puede hacer: son formas que la prosa no
+ * tiene nunca. `): ` y `=>` son sintaxis; `${` es una plantilla, que ademas ya deberia haber
+ * caido por las llaves; `&algo;` es una entidad. Aflojar la expresion de la prosa —admitir llaves,
+ * por ejemplo— si seria peligroso, porque se comeria texto de verdad y el trinquete bajaria solo.
  */
-const TOPE = 54;
+const NO_ES_PROSA = [/\)\s*:/, /=>/, /\$\{/, /^&[a-z]+;$/i];
+
+/**
+ * El tope, que llego a CERO.
+ *
+ * Empezo en 322 cadenas sueltas contra 53 claves de catalogo, y era una foto que solo podia bajar.
+ * Ya no es una foto: es la regla de `AGENTS.md` cumplida entera, y de trinquete pasa a puerta. Una
+ * cadena nueva escrita dentro de un componente rompe esta prueba, que es exactamente lo que la
+ * regla decia que garantizaba una prueba y no garantizaba nadie.
+ *
+ * Subirlo de cero exige explicar por que una cadena no puede ir al catalogo — y la respuesta no
+ * es «es corta» ni «es una sola»: las dos ultimas que quedaban eran «Administracion» y la leyenda
+ * del formato de cifra, y las dos entraron sin dificultad.
+ */
+const TOPE = 0;
 
 function cadenasDe(ruta: string): string[] {
   const fuente = readFileSync(`${raiz}/${ruta}`, 'utf8');
   const prosa = [...fuente.matchAll(PROSA)].map((m) => (m[1] as string).trim());
   const atributos = [...fuente.matchAll(ATRIBUTO)].map((m) => m[1] as string);
-  return [...prosa, ...atributos].filter((t) => PALABRA.test(t));
+  return [...prosa, ...atributos].filter(
+    (t) => PALABRA.test(t) && !NO_ES_PROSA.some((re) => re.test(t)),
+  );
 }
 
 describe('el texto visible sale del catalogo', () => {

@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { pedir } from './pedir';
+import { useTranslator } from './Locale';
 
 /** Selector de espacio de trabajo — seccion 4.10.2. */
 export function TeamPicker({
@@ -12,6 +13,7 @@ export function TeamPicker({
   equipos: { id: string; name: string; role: string }[];
   equipoActivo: string;
 }) {
+  const t = useTranslator();
   const router = useRouter();
   const [pendiente, iniciarTransicion] = useTransition();
 
@@ -32,7 +34,7 @@ export function TeamPicker({
   return (
     <div className="team-picker" data-pendiente={pendiente}>
       <label className="team-picker__field">
-        <span className="team-picker__label">Equipo activo</span>
+        <span className="team-picker__label">{t('chrome.activeTeam')}</span>
         <select
           value={equipoActivo}
           data-testid="team-picker"

@@ -64,9 +64,11 @@ export function TablaBuscable({
   const casa = (fila: FilaBuscable) => buscado === '' || normalizar(fila.texto).includes(buscado);
   const visibles = filas.filter(casa).length;
 
+  const conBuscador = filas.length >= desde;
+
   return (
     <>
-      {filas.length >= desde ? (
+      {conBuscador ? (
         <p className="buscador">
           <label className="buscador__campo" htmlFor={`${id}-buscar`}>
             <Icon nombre="lupa" tamano={16} />

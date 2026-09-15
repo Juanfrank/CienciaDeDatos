@@ -1,4 +1,5 @@
 import type { ConfigChangeLog } from '@app/observability';
+import { translator } from '../../server/locale';
 
 /** Una fila del registro de auditoria, en castellano. */
 
@@ -46,7 +47,14 @@ const cuando = (iso: string): string =>
  * Es opcional y cae al identificador: un directorio que no traiga nombre deja lo que se veia
  * antes, que es lo correcto, en vez de dejar la columna vacia.
  */
-export function AuditEvent({ evento, actor }: { evento: ConfigChangeLog; actor?: string }) {
+export async function AuditEvent({
+  evento,
+  actor,
+}: {
+  evento: ConfigChangeLog;
+  actor?: string;
+}) {
+  const t = await translator();
   return (
     <li className="log__row" data-ampliacion={evento.isScopeExpansion ? 'si' : undefined}>
       <span className="log__cuando">
@@ -59,7 +67,7 @@ export function AuditEvent({ evento, actor }: { evento: ConfigChangeLog; actor?:
       </span>
       {evento.isScopeExpansion ? (
         <span className="insignia badge--error" data-testid="insignia-ampliacion">
-          Ampliacion
+          {t('admin.audit.expansion')}
         </span>
       ) : null}
       {/*

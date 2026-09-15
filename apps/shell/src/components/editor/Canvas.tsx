@@ -188,7 +188,7 @@ export function Canvas({
                 {objeto ? (
                   <ModuleObject objeto={objeto} />
                 ) : (
-                  <p className="muted-text">Sin datos todavia.</p>
+                  <p className="muted-text">{t('editor.noDataYet')}</p>
                 )}
               </div>
               {editable ? (
@@ -255,7 +255,7 @@ export function Canvas({
 
       {items.length === 0 ? (
         <p className="canvas__empty" data-testid="empty-canvas">
-          Este modulo esta vacio. Elija una visualizacion en el panel de la derecha.
+          {t('editor.emptyModule')}
         </p>
       ) : null}
 

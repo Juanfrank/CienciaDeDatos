@@ -7,6 +7,7 @@ import { type Bookmark, bookmarkToUrl } from '@app/module-model';
 import { useUrlFilters } from '../hooks/useUrlFilters';
 import { IconButton } from './icons/IconButton';
 import { pedir } from './pedir';
+import { useTranslator } from './Locale';
 
 /** Marcadores — seccion 4.4. */
 export function Bookmarks({
@@ -16,6 +17,7 @@ export function Bookmarks({
   moduleSlug: string;
   pageSlug?: string;
 }) {
+  const t = useTranslator();
   const router = useRouter();
   const { searchParams } = useUrlFilters();
   const [bookmarks, setMarcadores] = useState<Bookmark[]>([]);
@@ -69,7 +71,7 @@ export function Bookmarks({
             <input
               type="text"
               value={nombre}
-              placeholder="Nombre del marcador"
+              placeholder={t('bookmark.name')}
               data-testid="bookmark-name"
               onChange={(e) => setNombre(e.target.value)}
               onKeyDown={(e) => {
@@ -77,12 +79,12 @@ export function Bookmarks({
               }}
             />
             <button type="button" data-testid="save-bookmark" onClick={() => void guardar()}>
-              Guardar vista actual
+              {t('bookmark.saveCurrent')}
             </button>
           </div>
 
           {moduleEste.length === 0 ? (
-            <p className="muted-text">Sin marcadores en este modulo.</p>
+            <p className="muted-text">{t('bookmark.none')}</p>
           ) : (
             <ul className="bookmarks__list">
               {moduleEste.map((m) => (

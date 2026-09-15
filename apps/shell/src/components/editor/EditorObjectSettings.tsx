@@ -202,7 +202,7 @@ export function EditorObjectSettings({
     return (
       <Section titulo="Titulo de seccion" nivel={2} prueba={prueba}>
         <label className="form__field">
-          <span>Texto</span>
+          <span>{t('panel.text')}</span>
           <input
             defaultValue={sectionTitle?.content ?? ''}
             disabled={saving}

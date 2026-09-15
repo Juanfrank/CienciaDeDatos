@@ -13,6 +13,7 @@ import { Login } from '../../../../src/components/Login';
 import { initialsOf } from '../../../../src/components/initials';
 import { ModuleView } from '../../../../src/components/ModuleView';
 import { PageNavigator } from '../../../../src/components/PageNavigator';
+import { translator } from '../../../../src/server/locale';
 
 /**
  * Modulo incrustado en otro portal, por su CODIGO — seccion 4.9.
@@ -34,6 +35,7 @@ export default async function EmbeddedPage({
   params: Promise<{ code: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const t = await translator();
   const { code } = await params;
   const query = await searchParams;
   const codigo = await embedFind(code);
@@ -77,7 +79,7 @@ export default async function EmbeddedPage({
         <Login azureAdAvailable={AZURE_AD_AVAILABLE} identity={defaultIdentity} destino={volverAqui} />
         <p className="embedded__pie" data-testid="embedded-without-session">
           <a href="/sign-in" target="_blank" rel="noopener noreferrer">
-            Si no puede entrar aqui, abra la aplicacion en otra pestana
+            {t('embed.openElsewhere')}
           </a>
         </p>
       </main>
@@ -235,7 +237,7 @@ export default async function EmbeddedPage({
                 rel="noopener"
                 data-testid="see-completo"
               >
-                Ver en la capa de visualizacion
+                {t('embed.seeInApp')}
               </Link>
             </p>
           ) : null}

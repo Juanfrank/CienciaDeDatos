@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon, type IconName } from '../icons/Icon';
+import { useTranslator } from '../Locale';
 
 /** La barra de pestanas del panel, con paginado. */
 
@@ -21,6 +22,7 @@ export function Tabs<T extends string>({
   activa: T;
   onElegir: (id: T) => void;
 }) {
+  const t = useTranslator();
   const rail = useRef<HTMLDivElement>(null);
   const [desbordaIzquierda, setDesbordaIzquierda] = useState(false);
   const [desbordaDerecha, setDesbordaDerecha] = useState(false);
@@ -75,7 +77,7 @@ export function Tabs<T extends string>({
       <div
         className="editor-panel__tabs"
         role="tablist"
-        aria-label="Herramientas del editor"
+        aria-label={t('chrome.editorTools')}
         ref={rail}
         onScroll={resize}
         onKeyDown={toClickKeystroke}

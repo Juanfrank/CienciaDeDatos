@@ -2,6 +2,7 @@ import { ScopeEditor, type ScopeTarget } from '../../../src/components/admin/Sco
 import { getGeneralTree, listTeams } from '../../../src/server/context';
 import type { NavNode } from '@app/access-control';
 import { paginaDeAdmin } from '../../../src/server/admin';
+import { translator } from '../../../src/server/locale';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,7 @@ export default async function ScopesPage({
 }: {
   searchParams: Promise<{ destino?: string }>;
 }) {
+  const t = await translator();
   // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
   await paginaDeAdmin();
 
@@ -41,7 +43,7 @@ export default async function ScopesPage({
 
   return (
     <section>
-      <h2>Ambitos de acceso</h2>
+      <h2>{t('admin.scopes.title')}</h2>
       <p className="muted-text">
         Cada capa solo puede RESTRINGIR respecto de la anterior. Ampliar es posible, pero exige
         una justificacion explicita y queda registrada aparte: el valor por defecto de cualquier

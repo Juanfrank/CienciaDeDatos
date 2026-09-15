@@ -2,9 +2,11 @@
 
 import { useEffect, useId, useState } from 'react';
 import { Icon } from './icons/Icon';
+import { useTranslator } from './Locale';
 
 /** El ambito que impone el RLS, reducido a una insignia. */
 export function ScopeBadge({ restricciones }: { restricciones: [string, string[]][] }) {
+  const t = useTranslator();
   const id = useId();
   const [visible, setVisible] = useState(false);
 
@@ -39,7 +41,7 @@ export function ScopeBadge({ restricciones }: { restricciones: [string, string[]
         onClick={() => setVisible((v) => !v)}
       >
         <Icon nombre="ambito" tamano={14} />
-        Ambito limitado por RLS
+        {t('scope.badge')}
       </button>
 
       {visible ? (

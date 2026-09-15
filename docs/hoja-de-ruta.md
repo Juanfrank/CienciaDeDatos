@@ -409,31 +409,43 @@ y se retiraron: una prueba que no corre se desincroniza en silencio y hay que re
 el dia que se reactive. Viven en el historial de git.
 
 
-### 2.10 El texto visible sale del componente, no del catalogo
+### 2.10 El texto visible sale del componente, no del catalogo — HECHO
 
 `AGENTS.md` lo pone entre las reglas que no se negocian y dice que lo garantiza una prueba. No
 habia tal prueba, y la regla llevaba incumpliendose casi entera: **53 claves en el catalogo de
 `@app/i18n` contra 322 cadenas escritas dentro de 56 componentes**. Solo tres archivos importaban
 el traductor.
 
-No es cosmetico. Mientras el texto viva en el componente, la aplicacion no puede cambiar de
+No era cosmetico. Mientras el texto viva en el componente, la aplicacion no puede cambiar de
 idioma —que es lo que el propio paquete existe para permitir—, cada cadena repetida en dos
 pantallas puede discrepar, y nada impide que una palabra en ingles se cuele donde una persona la
-lea. Ha pasado cinco veces durante el renombrado.
+lea. Paso cinco veces durante el renombrado.
 
-Hay un trinquete: `tools/coherence/i18n.spec.ts` cuenta las cadenas sueltas y falla si suben del
-tope. El numero solo puede bajar, y quien migre una cadena baja el tope en el mismo commit.
+**Cerrado en cero.** `tools/coherence/i18n.spec.ts` pasa de trinquete a PUERTA: el tope es 0 y una
+cadena nueva escrita dentro de un componente la rompe. De las 54 ultimas, 45 eran texto de verdad
+y fueron al catalogo —35 claves nuevas, mas una decena que ya existian y solo habia que usar—; las
+otras 9 eran falsos positivos del propio extractor.
 
-Va por **54**, desde las 322 del principio. Han pasado enteras al catalogo la crema del modulo con
-«Mi vista», el registro de auditoria, las reglas de color, los objetos, la bandeja de avisos y su
-creacion, «quien ve que», la tabla de datos de origen, el editor de ambitos, las lineas de
-referencia y el restablecimiento de contrasena. Ninguna pantalla acumula ya mas de tres.
+Los falsos positivos se cerraron por los dos caminos que el apartado ya proponia, y en ese orden:
 
-Sigue abierto porque cincuenta y cuatro no es cero, pero lo que queda ya no son pantallas: son
-palabras sueltas repartidas de tres en tres, y algun falso positivo de la propia guarda —la
-expresion regular de la prosa cuenta como texto una condicion de JSX escrita en linea—. Donde han
-aparecido, la condicion se ha extraido a una constante con nombre: se lee mejor y ademas deja de
-contarse. Relajar la expresion regular seria peor, porque se comeria texto de verdad.
+- Una condicion de JSX escrita en linea se saca a una CONSTANTE CON NOMBRE. Se lee mejor y ademas
+  deja de contarse. Asi salieron las de `NavigationTree`, `AdminRail` y `TablaBuscable`.
+- Una anotacion de tipo partida en varias lineas pone un `>` de un generico delante y un `<` de
+  otro detras, y no hay constante que arregle eso. Se cerro ESTRECHANDO la deteccion con
+  `NO_ES_PROSA`, que descarta `): `, `=>`, `${` y las entidades HTML: formas que la prosa no tiene
+  nunca. Estrechar se puede; relajar la expresion de la prosa —admitir llaves, por ejemplo— seria
+  lo contrario, se comeria texto de verdad y el numero bajaria solo.
+
+**Cero de lo que la prueba MIDE**, que no es cero en absoluto y conviene no confundirlo: `PROSA`
+exige que el texto quepa en una linea, asi que un parrafo que el formateador parte en dos le pasa
+por delante. Es un limite conocido y esta escrito en la guarda. Ampliarla a varias lineas es otra
+tanda, con su propio recuento y su propio tope.
+
+Una leccion de cablear el traductor en veintiseis archivos: **`'use client'` no se deduce de si el
+archivo lo declara, sino de quien lo monta.** `EditorHeader` no lo declaraba y lo dibujan los dos
+lados —`apps/shell/app/editor/page.tsx`, que es de servidor, y `ModuleEditor`, que es de cliente—. Con el
+hook puesto, la construccion paso y el navegador reviento en tiempo de ejecucion. Lo caza la suite
+de navegador, no el compilador.
 
 Dos erratas del renombrado salieron a la luz al migrar, y estan corregidas en el catalogo:
 «Anadir colorRule de color» y «Ver dataRows».

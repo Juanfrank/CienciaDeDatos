@@ -1524,8 +1524,7 @@ function FormatRow({
             </span>
           ) : (
             <span className="field__pista">
-              <code>0</code> rellena · <code>#</code> no · <code>,</code> millares ·{" "}
-              <code>%</code> porcentaje · <code>;</code> separa positivo, negativo y cero
+              {t('pres.numberFormat.help')}
             </span>
           )}
         </label>

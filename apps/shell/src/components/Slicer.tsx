@@ -4,6 +4,7 @@ import type { QueryResult } from "@app/data-contracts";
 import type { IconName, ObjectInstance } from "@app/ui-components";
 import { useUrlFilters } from "../hooks/useUrlFilters";
 import { Frame } from "./objects";
+import { useTranslator } from './Locale';
 
 /** Segmentador — seccion 4.2, con su seleccion reflejada en la URL (4.11). */
 export function Slicer({
@@ -23,6 +24,7 @@ export function Slicer({
   /** El icono que declara la version del objeto en el catalogo. */
   objectIcon?: IconName;
 }) {
+  const t = useTranslator();
   const { valuesOf, toggle, clearField } = useUrlFilters();
   const seleccionados = valuesOf(fieldName);
 
@@ -39,7 +41,7 @@ export function Slicer({
             className="button-link"
             onClick={() => clearField(fieldName)}
           >
-            Limpiar
+            {t('nav.clear')}
           </button>
         ) : null
       }

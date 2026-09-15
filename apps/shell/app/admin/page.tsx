@@ -4,11 +4,13 @@ import { getManagedTree, listTeams, listUsers } from '../../src/server/context';
 import { AuditEvent } from '../../src/components/admin/AuditEvent';
 import { Icon, type IconName } from '../../src/components/icons/Icon';
 import { paginaDeAdmin } from '../../src/server/admin';
+import { translator } from '../../src/server/locale';
 
 export const dynamic = 'force-dynamic';
 
 /** Inicio del panel — el estado del gobierno de un vistazo. */
 export default async function HomeAdmin() {
+  const t = await translator();
   // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
   await paginaDeAdmin();
 
@@ -50,14 +52,14 @@ export default async function HomeAdmin() {
 
       <section className="admin-home__log">
         <div className="admin-home__header-log">
-          <h2>Ultimos cambios</h2>
+          <h2>{t('admin.home.lastChanges')}</h2>
           <Link href="/admin/audit" className="button-link">
-            Ver el registro completo
+            {t('admin.home.fullLog')}
           </Link>
         </div>
 
         {recientes.length === 0 ? (
-          <p className="muted-text">Sin cambios de configuracion registrados.</p>
+          <p className="muted-text">{t('admin.home.noChanges')}</p>
         ) : (
           <ul className="registro">
             {recientes.map((e, i) => (

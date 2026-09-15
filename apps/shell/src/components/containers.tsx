@@ -13,6 +13,7 @@ import { useUrlFilters } from '../hooks/useUrlFilters';
 import { Icon } from './icons/Icon';
 import { Frame } from './objects';
 import type { SerializedObject, SerializedPanel } from '../server/serialize';
+import { useTranslator } from './Locale';
 
 /** Los contenedores: objetos que llevan otros objetos dentro. */
 
@@ -42,12 +43,13 @@ function InternalGrid({
   gridColumns: number;
   draw: (objeto: SerializedObject) => React.ReactNode;
 }) {
+  const t = useTranslator();
   const items = panel?.objetos ?? [];
 
   if (items.length === 0) {
     return (
       <p className="container__empty" data-testid="empty-container">
-        Sin contenido. Arrastre objetos aqui desde el panel.
+        {t('editor.dropHere')}
       </p>
     );
   }
@@ -132,6 +134,7 @@ export function ScrollableContainer({ objeto, titulo, config, draw }: ContainerP
 
 /** Ensena parte de su contenido y se amplia a una ventana con SU PROPIA rejilla. */
 export function ExpandableContainer({ objeto, titulo, config, draw }: ContainerProps) {
+  const t = useTranslator();
   const [ampliado, setAmpliado] = useState(false);
   const gridColumns = columnsOf('contenedor-ampliable', config);
   const expandedColumns = Math.max(1, config?.expandable?.expandedColumns ?? DEFAULT_COLUMN_INTERNAL * 2);
@@ -180,7 +183,7 @@ export function ExpandableContainer({ objeto, titulo, config, draw }: ContainerP
                 autoFocus
                 onClick={() => setAmpliado(false)}
               >
-                Cerrar
+                {t('action.close')}
               </button>
             </div>
             <div className="contenedor container--expanded">

@@ -17,6 +17,7 @@ import {
   type ConditionalFormat,
 } from '@app/ui-components';
 import { Icon } from './icons/Icon';
+import { useTranslator } from './Locale';
 
 /** El cuerpo de la matriz: jerarquia, colapso y orden. */
 
@@ -65,6 +66,7 @@ export function MatrixTable({
   titulo: string;
   instance: ObjectInstance;
 }) {
+  const t = useTranslator();
   const [plegadas, setPlegadas] = useState<ReadonlySet<string>>(new Set());
   const [plegadasColumna, setPlegadasColumna] = useState<ReadonlySet<string>>(new Set());
   const [orden, setOrden] = useState<{ por: string | null; direction: Direction }>({
@@ -185,7 +187,7 @@ export function MatrixTable({
             />
           ))}
           <tr className="table__total-row">
-            <th scope="row">Total</th>
+            <th scope="row">{t('chart.total')}</th>
             {gridColumns.map((column) =>
               vm.medidas.map((medida, i) => (
                 <FigureCell

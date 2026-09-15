@@ -81,8 +81,9 @@ function Rama({
 
   return (
     <ul className="arbol" data-level={nivel}>
-      {nodos.map((node) =>
-        node.type === 'folder' ? (
+      {nodos.map((node) => {
+        const esCarpeta = node.type === 'folder';
+        return esCarpeta ? (
           <li key={node.id} className="tree__folder">
             {/*
               El boton ENVUELVE el nombre de la carpeta, no va al lado.
@@ -124,8 +125,8 @@ function Rama({
               <span className="tree__nombre">{node.moduleRef.name}</span>
             </Link>
           </li>
-        ),
-      )}
+        );
+      })}
     </ul>
   );
 }

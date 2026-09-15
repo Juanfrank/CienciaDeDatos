@@ -5,6 +5,7 @@ import { AGGREGATIONS, type Aggregation } from '@app/data-contracts';
 import { AGGREGATION_LABEL, type FieldWell } from '@app/ui-components';
 import { Icon } from '../icons/Icon';
 import { Help } from './Help';
+import { useTranslator } from '../Locale';
 
 /** Un pozo de campos, al estilo de Power BI. */
 export function Well({
@@ -35,6 +36,7 @@ export function Well({
   possible?: Aggregation[];
   prueba: string;
 }) {
+  const t = useTranslator();
   const [abierto, setAbierto] = useState(false);
   const [busqueda, setBusqueda] = useState('');
   const contenedor = useRef<HTMLDivElement>(null);
@@ -87,7 +89,7 @@ export function Well({
               <span className="well__obligatorio" aria-hidden="true">
                 *
               </span>
-              <span className="visualmente-oculto">(obligatorio)</span>
+              <span className="visualmente-oculto">{t('editor.required')}</span>
             </>
           ) : null}
           {well.help ? <Help content={well.help} de={well.etiqueta} /> : null}
@@ -188,7 +190,7 @@ export function Well({
           <input
             type="search"
             className="well__search"
-            placeholder="Buscar campo…"
+            placeholder={t('editor.searchField')}
             aria-label={`Buscar un campo para ${well.etiqueta}`}
             autoFocus
             value={busqueda}
@@ -216,7 +218,7 @@ export function Well({
               );
             })}
             {candidatos.length === 0 ? (
-              <li className="muted-text">Ningun fieldName coincide.</li>
+              <li className="muted-text">{t('editor.noFieldMatches')}</li>
             ) : null}
           </ul>
         </div>

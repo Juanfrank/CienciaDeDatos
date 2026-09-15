@@ -3,9 +3,11 @@ import { CollapsibleNavigation } from '../../src/components/CollapsibleNavigatio
 import { navigationOf } from '../../src/server/cicloDeVida';
 import { findTeam, roleOf, teamsOf } from '../../src/server/context';
 import { pageSessionRequire } from '../../src/server/session';
+import { translator } from '../../src/server/locale';
 
 /** Disposicion de los modulos de negocio. */
 export default async function LayoutModules({ children }: { children: React.ReactNode }) {
+  const t = await translator();
   const sesion = await pageSessionRequire();
   const equipo = await findTeam(sesion.activeTeamId);
   const navigation = await navigationOf(sesion);
@@ -21,11 +23,11 @@ export default async function LayoutModules({ children }: { children: React.Reac
   return (
     <div className="cuerpo">
       <CollapsibleNavigation equipos={equipos} equipoActivo={sesion.activeTeamId}>
-        <nav aria-label="Navegacion de modulos">
+        <nav aria-label={t('chrome.moduleNav')}>
           <p className="sidebar__title">{equipo?.name ?? 'Sin equipo'}</p>
           <NavigationTree nodos={navigation.tree} />
           {navigation.tree.length === 0 ? (
-            <p className="muted-text">Este equipo no tiene modulos concedidos.</p>
+            <p className="muted-text">{t('chrome.noGrantedModules')}</p>
           ) : null}
         </nav>
       </CollapsibleNavigation>

@@ -2,6 +2,7 @@ import { SeesWhoWhere } from '../../../src/components/admin/WhoSeesWhat';
 import { getGeneralTree, listTeams, listUsers } from '../../../src/server/context';
 import type { NavNode } from '@app/access-control';
 import { paginaDeAdmin } from '../../../src/server/admin';
+import { translator } from '../../../src/server/locale';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,12 +15,13 @@ function treeModules(nodos: NavNode[], acumulado: { moduleId: string; name: stri
 }
 
 export default async function PageWhoSeesWhere() {
+  const t = await translator();
   // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
   await paginaDeAdmin();
 
   return (
     <section>
-      <h2>Quien ve que</h2>
+      <h2>{t('admin.whoSeesWhat.title')}</h2>
       <p className="muted-text">
         Resuelve el ambito efectivo de una persona sobre un modulo y muestra que capa lo causo.
         Sirve para depurar una configuracion ANTES de publicarla, no para descubrir el issue

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon } from '../icons/Icon';
 import { GRUPOS, RESUMEN, type AdminSection, activeSectionIn, sectionOf } from './sections';
+import { useTranslator } from '../Locale';
 
 /** El carril de administracion. */
 
@@ -30,6 +31,10 @@ export function AdminRail({
    */
   soloModulos?: boolean;
 }) {
+  const t = useTranslator();
+  /** Una hija que se lista. Con nombre y no en linea: en linea, el extractor de 2.10 la
+   * cuenta como texto visible, y ademas se lee peor. */
+  const visible = (h: { oculta?: boolean }) => !h.oculta;
   const path = usePathname();
   const actual = activeSectionIn(path);
 
@@ -41,7 +46,7 @@ export function AdminRail({
     : GRUPOS;
 
   return (
-    <nav className="admin__nav" id={id} aria-label="Secciones de administracion">
+    <nav className="admin__nav" id={id} aria-label={t('chrome.adminSections')}>
       {soloModulos ? null : (
         <ul className="admin__grupo">
           <li>
@@ -75,7 +80,7 @@ export function AdminRail({
                     Listarlas siempre convertiria el carril en catorce enlaces donde hoy hay
                     nueve, y las de Recursos no sirven de nada mientras se administran equipos.
                   */}
-                  {dentro && s.hijas?.some((h) => !h.oculta) ? (
+                  {dentro && s.hijas?.some(visible) ? (
                     <ul className="admin__hijas" data-testid={`submenu-${s.href.split('/').pop()}`}>
                       {s.hijas.filter((h) => !h.oculta).map((hija) => (
                         <li key={hija.href}>

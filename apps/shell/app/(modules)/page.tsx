@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { isModule, type NavNode } from '@app/access-control';
 import { navigationOf } from '../../src/server/cicloDeVida';
 import { pageSessionRequire } from '../../src/server/session';
+import { translator } from '../../src/server/locale';
 
 /** Primer modulo accesible del arbol visible, o null si el equipo no tiene ninguno. */
 function moduleFirst(nodos: NavNode[]): string | null {
@@ -14,6 +15,7 @@ function moduleFirst(nodos: NavNode[]): string | null {
 }
 
 export default async function Home() {
+  const t = await translator();
   const sesion = await pageSessionRequire();
   const slug = moduleFirst((await navigationOf(sesion)).tree);
 
@@ -21,9 +23,9 @@ export default async function Home() {
 
   return (
     <div className="vacio">
-      <h1>Sin modulos disponibles</h1>
+      <h1>{t('chrome.noModules')}</h1>
       <p className="muted-text">
-        El equipo activo no tiene ningun modulo concedido en la organizacion general.
+        {t('chrome.noModules.detail')}
       </p>
     </div>
   );
