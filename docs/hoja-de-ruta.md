@@ -551,6 +551,26 @@ Verificado enrojeciendo la puerta: con la comprobacion desactivada, la escritura
 La pagina incrustada sigue sin dibujar un formulario de contrasena dentro del marco ajeno, que
 ensenaria a la gente a escribir su clave donde no debe.
 
+### 2.17 La prueba del tiempo de respuesta del acceso es intermitente
+
+Salio a la luz corriendo las verificaciones completas, y conviene anotarla antes de que alguien la
+redescubra como «fallo raro que se arregla repitiendo».
+
+`ni por el tiempo que tarda en contestar`, en `packages/auth/src/auth.spec.ts`, compara dos
+medidas de reloj: lo que tarda el acceso con un correo que existe y con uno que no. Es la prueba
+que demostro el fallo real —la rama «esta cuenta no existe» salia en microsegundos y revelaba por
+el reloj que correos hay— y el arreglo es bueno: ahora se verifica contra un hash de relleno y se
+paga el mismo coste.
+
+Lo fragil es la MEDIDA, no lo medido. Con las veintiuna tareas de `nx run-many` compitiendo por la
+maquina, una de las dos llamadas a Argon2 puede tardar el triple que la otra sin que nada este mal:
+se vio 39,7 ms contra 14,6 ms, con el margen puesto en la mitad. Aislada pasa siempre.
+
+Arreglarlo no es subir el margen —eso la convierte en una prueba que ya no distingue nada— sino
+medir de una forma que no dependa del reloj de pared: varias repeticiones y comparar medianas, o
+mejor, comprobar lo que de verdad importa —que el camino de «no existe» EJECUTA la verificacion de
+relleno— en vez de cuanto tarda.
+
 ---
 
 ## 3. Revisado y descartado
