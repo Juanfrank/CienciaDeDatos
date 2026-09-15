@@ -20,6 +20,7 @@
     "typecheck": "nx run verification:typecheck",
     "e2e": "nx run shell:e2e",
     "populate": "tsx tools/populate-cache.mts",
+    "demo-code": "tsx tools/demo-code.mts",
     "verify": "nx run-many -t typecheck lint test boundaries schema && nx run shell:e2e && nx run shell:e2e-catalog",
     "verify:boundaries": "nx run verification:boundaries",
     "verify:schema": "nx run verification:schema",

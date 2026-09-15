@@ -83,6 +83,17 @@ No hace falta Azure, ni SQL Server, ni Docker. Usuarios sembrados:
 `u-ana@poderjudicial.gob.do` (colaborador), `u-admin@…` (administrador), `u-beto@…` (visor);
 clave `Demostracion-2026!` y TOTP del secreto `JBSWY3DPEHPK3PXP`.
 
+El segundo factor es obligatorio tambien en desarrollo (4.7.2). Para no depender de una
+aplicacion de autenticacion ni de que su reloj coincida con el del servidor:
+
+```bash
+npm run demo-code    # el codigo de ahora mismo, calculado con el reloj de esta maquina
+```
+
+Un codigo mal escrito CUENTA como intento fallido, y a los cinco la cuenta queda bloqueada con
+espera creciente. Las credenciales viven en el cache, asi que reiniciar no lo levanta: se borran
+los archivos `auth:*` de `.cache-datos` y al arrancar se siembran de nuevo.
+
 `npm start` si exige `AUTH_PEPPER`: `next build` pone `NODE_ENV=production` y la aplicacion se
 niega a arrancar con la pimienta de desarrollo. `npm run e2e` necesita
 `npx playwright install --with-deps chromium`.
