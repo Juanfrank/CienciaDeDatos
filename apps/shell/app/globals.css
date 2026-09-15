@@ -705,6 +705,19 @@ input[type='radio'] {
   gap: var(--space-sm);
   padding: var(--space-md) var(--space-md) 0;
 }
+/*
+ * Los complementos se salen del margen de la cabecera, hacia arriba y hacia la derecha.
+ *
+ * Con el margen completo quedaban a la misma distancia del borde que el titulo, y dos cosas
+ * alineadas se leen como del mismo rango. Un margen negativo los acerca a la esquina sin tocar el
+ * del titulo, que es lo que se pidio: menos aire arriba y a la derecha, el mismo a la izquierda.
+ */
+.object__header > .complementos,
+.object__header > .addon__icon,
+.object__header > .complemento {
+  margin-top: calc(var(--space-sm) * -1);
+  margin-right: calc(var(--space-sm) * -1);
+}
 .object__titulos { flex: 1; min-width: 0; }
 .object__subtitle {
   margin: 2px 0 0;
@@ -3908,9 +3921,15 @@ th[aria-sort='descending'] .table__flecha {
  * parece un boton. El circulo de `surface-container-high` los declara pulsables antes de
  * tocarlos, que es lo que MD3 llama un boton de icono con contenedor.
  */
+/*
+ * Los complementos son SECUNDARIOS al dato, y a 32 px con el margen de la tarjeta competian con
+ * el titulo. Bajan a 26 y se acercan a la esquina: quien mira la tarjeta viene por la cifra, y lo
+ * que la rodea tiene que estar disponible sin reclamar el sitio. Siguen por encima del minimo de
+ * area tactil util porque el `::before` de la capa de estado se extiende mas alla del circulo.
+ */
 .addon__icon {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5825,4 +5844,40 @@ th[aria-sort='descending'] .table__flecha {
 .editor__pagina:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+/*
+ * El aviso de un vinculo suprimido ocupa lo que dice, no la pantalla.
+ *
+ * `.embedded__body` es un contenedor flexible que llena el alto, asi que un unico hijo se estiraba
+ * con el: una frase de una linea salia como un bloque de color de arriba abajo. Lo que se anuncia
+ * con tanta superficie se lee como un fallo grave de la aplicacion, que es justo la lectura que
+ * este mensaje viene a evitar.
+ */
+.embedded__body > [data-testid='embed-revocado'] {
+  align-self: flex-start;
+  max-width: 60ch;
+}
+
+/* El boton de anadir pagina se distingue de las pestanas: no es una pagina, la crea. */
+.editor__pagina--anadir {
+  border-style: dashed;
+  font-weight: 400;
+}
+
+/*
+ * El rotulo de la pagina abierta y su papelera, dentro de la misma barra.
+ *
+ * `margin-left: auto` los manda al extremo derecho: separados de las pestanas se leen como lo que
+ * son —acciones sobre la que esta abierta— y no como una pestana mas.
+ */
+.editor__pagina-rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-left: auto;
+}
+.editor__pagina-rotulo input {
+  max-width: 24ch;
+  padding: var(--space-xs) var(--space-sm);
 }

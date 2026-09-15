@@ -16,6 +16,7 @@ import type { SerializedObject } from '../../server/serialize';
 import { EditorHeader } from './EditorHeader';
 import { Canvas } from './Canvas';
 import { SidebarPanel } from './SidebarPanel';
+import { Icon } from '../icons/Icon';
 import { useTranslator } from '../Locale';
 
 /*
@@ -174,6 +175,61 @@ export function ModuleEditor({
     },
     [dibujar, slugActual],
   );
+
+  /*
+   * Una pagina nueva, al final y ya abierta.
+   *
+   * Nace vacia y con nombre provisional: lo que hace falta al crearla es tener donde poner algo,
+   * y bautizarla antes de saber que lleva dentro es una pregunta que no se puede contestar
+   * todavia. El rotulo se cambia aqui mismo, en el campo de al lado.
+   *
+   * El slug sale del reloj y no del nombre: dos paginas llamadas igual darian el mismo slug, y el
+   * slug es lo que las distingue en la URL y lo que fija a cual apunta un salto.
+   */
+  const anadirPagina = () => {
+    const n = paginas.length + 1;
+    const nueva = {
+      pageId: `pag-${crypto.randomUUID()}`,
+      slug: `pagina-${Date.now().toString(36)}`,
+      name: `Pagina ${n}`,
+      items: [],
+    };
+    const siguientes = [...paginas, nueva];
+    setSlugActual(nueva.slug);
+    setSeleccion(null);
+    setPaginas(siguientes);
+    void dibujar(siguientes, nueva.slug);
+  };
+
+  /*
+   * La barra se ensena si hay entre que elegir, o si se puede crear.
+   *
+   * En una constante con nombre y no dentro del JSX: el trinquete de cadenas sueltas busca prosa
+   * entre `>` y `<`, y una comparacion dentro de una llave se le parece lo suficiente como para
+   * contarla. Ademas se lee mejor el nombre que la condicion.
+   */
+  const hayBarraDePaginas = paginas.length > 1 || editable;
+
+  /** Renombrar la pagina abierta. El slug NO cambia: hay saltos y marcadores que lo apuntan. */
+  const renombrarPagina = (name: string) =>
+    editar(paginas.map((p) => (p.slug === slugActual ? { ...p, name } : p)));
+
+  /*
+   * Quitar la pagina abierta, con lo que tenga dentro.
+   *
+   * La ultima no se puede quitar: un modulo sin ninguna pagina no se puede dibujar, y el editor
+   * se quedaria sin lienzo donde volver a empezar.
+   */
+  const quitarPagina = () => {
+    if (paginas.length < 2) return;
+    const siguientes = paginas.filter((p) => p.slug !== slugActual);
+    const destino = siguientes[0];
+    if (!destino) return;
+    setSlugActual(destino.slug);
+    setSeleccion(null);
+    setPaginas(siguientes);
+    void dibujar(siguientes, destino.slug);
+  };
 
   /*
    * Cambiar de pagina: se redibuja y se suelta lo elegido.
@@ -561,7 +617,7 @@ export function ModuleEditor({
         Solo aparece con mas de una: un modulo de una pagina no tiene entre que elegir, y una barra
         con un unico boton pulsado sugiere que falta algo.
       */}
-      {paginas.length > 1 ? (
+      {hayBarraDePaginas ? (
         <nav className="editor__paginas" aria-label={t('editor.pages')} data-testid="paginas-editor">
           {paginas.map((p) => (
             <button
@@ -576,6 +632,59 @@ export function ModuleEditor({
               {p.name}
             </button>
           ))}
+
+          {editable ? (
+            <button
+              type="button"
+              className="editor__pagina editor__pagina--anadir"
+              disabled={saving}
+              data-testid="anadir-pagina"
+              onClick={anadirPagina}
+            >
+              {t('editor.pages.add')}
+            </button>
+          ) : null}
+
+          {/*
+            El rotulo de la pagina abierta y su papelera, en la MISMA fila que las pestanas.
+
+            En una fila aparte quedaban mejor repartidos, y costaban una linea entera encima del
+            lienzo: el editor se mira de arriba abajo y cada franja que se interpone empuja el
+            lienzo hacia el pliegue. Aqui ocupan el hueco que ya sobraba a la derecha.
+
+            `key` con el slug: el campo no es controlado —escribir en un controlado con autoguardado
+            de por medio devuelve el cursor al principio en cada rebote—, asi que al cambiar de
+            pagina hay que rehacerlo para que tome el nombre de la nueva.
+          */}
+          {editable && pagina ? (
+            <span className="editor__pagina-rotulo">
+              <input
+                key={pagina.slug}
+                type="text"
+                defaultValue={pagina.name}
+                disabled={saving}
+                aria-label={t('editor.pages.name')}
+                data-testid="pagina-nombre"
+                onChange={(e) => renombrarPagina(e.target.value)}
+              />
+              {/*
+                La ultima pagina no se puede quitar: un modulo sin ninguna no se puede dibujar, y
+                el editor se quedaria sin lienzo. Deshabilitado y no escondido — que exista y no se
+                pueda explica la regla; que desaparezca deja pensando donde estaba.
+              */}
+              <button
+                type="button"
+                className="button-link"
+                disabled={saving || paginas.length < 2}
+                title={paginas.length < 2 ? t('editor.pages.last') : t('editor.pages.remove')}
+                aria-label={t('editor.pages.remove')}
+                data-testid="quitar-pagina"
+                onClick={quitarPagina}
+              >
+                <Icon nombre="papelera" tamano={16} />
+              </button>
+            </span>
+          ) : null}
         </nav>
       ) : null}
 

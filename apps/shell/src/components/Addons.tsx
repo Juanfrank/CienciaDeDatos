@@ -119,7 +119,7 @@ export function TooltipExplicativo({ content, titulo }: { content: string; titul
         // Con el dedo no hay «pasar por encima»: el toque lo abre y lo vuelve a cerrar.
         onClick={() => setVisible((v) => !v)}
       >
-        <Icon nombre="informacion" tamano={18} />
+        <Icon nombre="informacion" tamano={15} />
       </button>
       {visible ? (
         <span
@@ -190,7 +190,7 @@ export function DataTable({
         data-testid={`data-table-open-${titulo}`}
         onClick={() => setAbierto(true)}
       >
-        <Icon nombre="datos" tamano={18} />
+        <Icon nombre="datos" tamano={15} />
       </button>
 
       <dialog
@@ -342,7 +342,7 @@ export function VisualFilter({
         data-testid={`visual-filter-open-${titulo}`}
         onClick={() => dialogo.current?.showModal()}
       >
-        <Icon nombre="filtro" tamano={18} />
+        <Icon nombre="filtro" tamano={15} />
       </button>
 
       <dialog
@@ -399,6 +399,10 @@ export function VisualFilter({
  * a adivinar cual de los dos va a pasar. Ademas de que sobre un objeto que no sea un grafico no
  * habria donde pulsar.
  *
+ * El icono es el de ampliar y no el de exportar, que era el que llevaba: una flecha entrando en
+ * una bandeja se lee «descargar este grafico», no «ir al detalle», y estaba justo al lado del
+ * complemento que SI descarga.
+ *
  * Son ENLACES de verdad, no botones que navegan: se abren en otra pestana con el boton central,
  * se copian con el derecho, y un lector de pantalla los anuncia como lo que son. Con un solo
  * destino se ofrece el enlace directamente, sin menu: un desplegable de un elemento es un clic de
@@ -424,7 +428,7 @@ export function DrillThrough({
         aria-label={`${uno.etiqueta} — desde «${titulo}»`}
         data-testid={`drill-${titulo}`}
       >
-        <Icon nombre="exportar" tamano={18} />
+        <Icon nombre="expandir" tamano={15} />
       </Link>
     );
   }
@@ -439,7 +443,7 @@ export function DrillThrough({
         data-testid={`drill-open-${titulo}`}
         onClick={() => dialogo.current?.showModal()}
       >
-        <Icon nombre="exportar" tamano={18} />
+        <Icon nombre="expandir" tamano={15} />
       </button>
 
       <dialog

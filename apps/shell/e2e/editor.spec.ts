@@ -757,13 +757,56 @@ test.describe('las demas paginas del modulo (4.2)', () => {
     await expect(page.getByTestId(`block-${id}`)).toBeVisible();
   });
 
-  test('un modulo de una sola pagina no ensena la barra', async ({ page }) => {
-    // Una barra con un unico boton pulsado sugiere que falta algo que elegir.
+  test('se crean, se rebautizan y se quitan desde la misma barra', async ({ page }) => {
+    /*
+     * Cambiar de pagina no sirve de nada si no hay forma de crear la segunda: el editor abria
+     * siempre un modulo de una pagina y ahi se acababa. Las tres acciones van juntas en una prueba
+     * porque juntas son el ciclo: crear algo que no se puede rebautizar deja una fila de «Pagina 2,
+     * Pagina 3», y crear algo que no se puede quitar convierte un clic de mas en permanente.
+     */
+    await asLogin(page, 'u-admin');
+    const slug = newSlug('crear-paginas');
+    await objectDraft(page, slug);
+    await page.goto(`/editor/${slug}`);
+    await alDia(page);
+
+    await page.getByTestId('anadir-pagina').click();
+    await alDia(page);
+
+    // Nace abierta y vacia: es donde se va a poner algo a continuacion.
+    const nueva = page.locator('[data-testid^="pagina-"][aria-current="page"]');
+    await expect(nueva).toHaveText('Pagina 2');
+    await expect(page.locator('[data-testid^="block-"]')).toHaveCount(0);
+
+    // Y se rebautiza desde el campo de al lado, sin pasar por ninguna otra pantalla.
+    await page.getByTestId('pagina-nombre').fill('Detalle por materia');
+    await alDia(page);
+    await expect(nueva).toHaveText('Detalle por materia');
+
+    // Sobrevive a recargar: el autoguardado la escribio de verdad.
+    await page.reload();
+    await alDia(page);
+    await expect(page.locator('[data-testid^="pagina-"]')).toHaveCount(3); // dos paginas y «anadir»
+    await expect(page.getByText('Detalle por materia')).toBeVisible();
+
+    // Quitarla devuelve a la primera.
+    await page.locator('[data-testid^="pagina-"]', { hasText: 'Detalle por materia' }).click();
+    await alDia(page);
+    await page.getByTestId('quitar-pagina').click();
+    await alDia(page);
+    await expect(page.getByText('Detalle por materia')).toHaveCount(0);
+  });
+
+  test('la ultima pagina no se puede quitar: un modulo sin ninguna no se dibuja', async ({
+    page,
+  }) => {
+    // Deshabilitado y no escondido: que exista y no se pueda explica la regla; que desaparezca
+    // deja pensando donde estaba.
     await asLogin(page, 'u-admin');
     const slug = newSlug('una-pagina');
     await objectDraft(page, slug);
     await page.goto(`/editor/${slug}`);
     await alDia(page);
-    await expect(page.getByTestId('paginas-editor')).toHaveCount(0);
+    await expect(page.getByTestId('quitar-pagina')).toBeDisabled();
   });
 });
