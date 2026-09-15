@@ -576,8 +576,14 @@ tambien la clave de una orden de exportacion, `textos` la de una hoja exportable
 `icono`, `etiqueta` y `acento` aparecen como clave en decenas de sitios que no son la
 presentacion—, asi que cada una obliga a elegir: renombrar tambien la del otro contrato —que es
 otra superficie guardada, con su propia migracion— o anotarla en `CONVIVEN`, que es admitir que
-esa guarda ya no mira ese archivo. No es una decision tecnica que se pueda tomar sola, y por eso
-esta tanda para aqui.
+esa guarda ya no mira ese archivo.
+
+**Decidido: 2.11 PARA AQUI**, y las 88 se quedan como deuda escrita en vez de como trabajo a
+medias. Lo que importa es que lo que queda no es «seguir renombrando»: es elegir entre ensanchar
+cada tanda hasta el otro contrato o debilitar la guarda, y esa eleccion se toma cuando se retome,
+no ahora. Lo entregado esta cerrado y verificado: veinticuatro claves, la migracion con su tabla y
+su orden probado, y tres guardas —la de las claves en disco, la del esparcido que apagaba al
+compilador y la del identificador de prueba que no se mueve con la clave—.
 
 Dos detalles que la primera pasada enseno, y que valen para las siguientes:
 
