@@ -13,7 +13,7 @@ export const KEY_CONTROL: Record<PresentationKey, string> = {
   textos: 'texto-titulo',
   formato: 'formato-general',
   formatos: 'medida',
-  leyenda: 'leyenda',
+  legend: 'leyenda',
   datumLabels: 'etiquetas',
   // El identificador de prueba NO se renombra con la clave: es otro contrato, el que tienen las
   // pruebas de navegador con el marcado, y moverlo aqui sin moverlo alli deja la seccion de los
@@ -23,11 +23,11 @@ export const KEY_CONTROL: Record<PresentationKey, string> = {
   apilado: 'apilado',
   circular: 'circular',
   combinado: 'combinado',
-  referencias: 'referencias',
+  references: 'referencias',
   seriesColors: 'colores',
   tooltip: 'tooltip',
-  multiplos: 'multiplos',
-  condicional: 'condicional',
+  multiples: 'multiplos',
+  conditional: 'condicional',
   embudo: 'embudo',
   cascada: 'cascada',
   medidor: 'medidor',

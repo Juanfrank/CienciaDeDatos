@@ -107,7 +107,7 @@ export function Presentation({
   // preguntarse en cada control cual de las dos formas le ha llegado.
   const labels = normalizedLabels(p.datumLabels);
   const chartHas =
-    admite("leyenda") || admite("datumLabels") || admite("orden") || admite("apilado");
+    admite("legend") || admite("datumLabels") || admite("orden") || admite("apilado");
   const isCard = instance.objectId === "tarjeta-kpi";
   const showTitle = p.showTitle !== false;
 
@@ -354,14 +354,14 @@ export function Presentation({
         <Section
           keys={['leyenda', 'etiquetas de dato', 'apilado', '100 %', 'orden', 'ordenar', 'cifra sobre la barra']}
           titulo="Grafico" nivel={2} abierta={false} prueba={`${prueba}-grafico`}>
-          {admite("leyenda") ? (
+          {admite("legend") ? (
             <label className="form__field">
               <span>{t('pres.legend')}</span>
               <select
-                value={p.leyenda ?? "auto"}
+                value={p.legend ?? "auto"}
                 disabled={saving}
                 data-testid={`${prueba}-leyenda`}
-                onChange={(e) => set({ leyenda: e.target.value as LegendMode })}
+                onChange={(e) => set({ legend: e.target.value as LegendMode })}
               >
                 {LEGEND_MODES.map((m) => (
                   <option key={m} value={m}>
@@ -503,7 +503,7 @@ export function Presentation({
         </Section>
       ) : null}
 
-      {admite("multiplos") ? (
+      {admite("multiples") ? (
         <Section
           keys={['paneles', 'repetir', 'por cada', 'escala comun', 'columnas']}
           titulo="Multiplos" nivel={2} abierta={false} prueba={`${prueba}-multiplos`}>
@@ -515,13 +515,13 @@ export function Presentation({
           <label className="form__field">
             <span>{t('pres.columns')}</span>
             <select
-              value={String(p.multiplos?.gridColumns ?? 0)}
+              value={String(p.multiples?.gridColumns ?? 0)}
               disabled={saving}
               data-testid={`${prueba}-multiplos-columnas`}
               onChange={(e) =>
                 set({
-                  multiplos: {
-                    ...p.multiplos,
+                  multiples: {
+                    ...p.multiples,
                     gridColumns: e.target.value === "0" ? undefined : Number(e.target.value),
                   },
                 })
@@ -543,11 +543,11 @@ export function Presentation({
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.multiplos?.sameScale !== false}
+              checked={p.multiples?.sameScale !== false}
               disabled={saving}
               data-testid={`${prueba}-misma-escala`}
               onChange={(e) =>
-                set({ multiplos: { ...p.multiplos, sameScale: e.target.checked } })
+                set({ multiples: { ...p.multiples, sameScale: e.target.checked } })
               }
             />{" "}
             Misma escala en todos los paneles
@@ -592,29 +592,29 @@ export function Presentation({
         </Section>
       ) : null}
 
-      {admite("condicional") ? (
+      {admite("conditional") ? (
         <Section
           keys={['condicional', 'regla', 'umbral', 'semaforo', 'alerta', 'rojo']}
           titulo="Color por valor" nivel={2} abierta={false} prueba={`${prueba}-condicional`}>
           <ColorRules
-            rules={p.condicional?.rules ?? []}
+            rules={p.conditional?.rules ?? []}
             medidas={instance.binding.measures}
             saving={saving}
             prueba={`${prueba}-cond`}
-            onCambiar={(rules) => set({ condicional: rules ? { rules } : undefined })}
+            onCambiar={(rules) => set({ conditional: rules ? { rules } : undefined })}
           />
         </Section>
       ) : null}
 
-      {admite("referencias") ? (
+      {admite("references") ? (
         <Section
           keys={['meta', 'umbral', 'objetivo', 'promedio', 'raya', 'constante']}
           titulo="Lineas de referencia" nivel={2} abierta={false} prueba={`${prueba}-referencias`}>
           <ReferenceLines
-            lineas={p.referencias ?? []}
+            lineas={p.references ?? []}
             saving={saving}
             prueba={`${prueba}-ref`}
-            onCambiar={(referencias) => set({ referencias })}
+            onCambiar={(references) => set({ references })}
           />
         </Section>
       ) : null}

@@ -367,7 +367,7 @@ export function KpiCard({ titulo, result, instance, slots, aggregations, objectI
   const delta = kpi.delta;
   const formatear = measureFormatter(instance.presentation, medidas[0]);
   const valueColor = conditionalColor(
-    instance.presentation?.condicional,
+    instance.presentation?.conditional,
     kpi.value,
     medidas[0],
   );
@@ -513,7 +513,7 @@ export function Bars({
           titulo={titulo}
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
-          gridColumns={columnsFor(partition.panels.length, instance.presentation?.multiplos?.gridColumns)}
+          gridColumns={columnsFor(partition.panels.length, instance.presentation?.multiples?.gridColumns)}
           {...(onFiltrar ? { onFiltrar } : {})}
         />
       ) : (
@@ -617,7 +617,7 @@ export function Lines({
           titulo={titulo}
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
-          gridColumns={columnsFor(partition.panels.length, instance.presentation?.multiplos?.gridColumns)}
+          gridColumns={columnsFor(partition.panels.length, instance.presentation?.multiples?.gridColumns)}
           {...(onFiltrar ? { onFiltrar } : {})}
         />
       ) : (
@@ -733,7 +733,7 @@ function Multiples({
                   /*
                    * La leyenda, SOLO en el primer panel.
                    */
-                  presentation: i === 0 ? presentation : { ...presentation, leyenda: 'oculta' },
+                  presentation: i === 0 ? presentation : { ...presentation, legend: 'oculta' },
                 }
               : {})}
             formatear={formatear}
@@ -802,7 +802,7 @@ function panelPresentation(
   presentation: ObjectPresentation | undefined,
   panels: MultiplePanel[],
 ): ObjectPresentation | undefined {
-  if (presentation?.multiplos?.sameScale === false) return presentation;
+  if (presentation?.multiples?.sameScale === false) return presentation;
   const maximo = maxCommon(panels);
   if (maximo === undefined || presentation?.axes?.yMax !== undefined) return presentation;
   /*
@@ -1461,8 +1461,8 @@ export function Table({ titulo, result, instance, aggregations, objectIcon }: Pr
         projected={projected}
         titulo={titulo}
         formatColumn={(nombre) => measureFormatter(instance.presentation, nombre)}
-        {...(instance.presentation?.condicional
-          ? { condicional: instance.presentation.condicional }
+        {...(instance.presentation?.conditional
+          ? { conditional: instance.presentation.conditional }
           : {})}
       />
     </Frame>

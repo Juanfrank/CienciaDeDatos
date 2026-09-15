@@ -49,13 +49,13 @@ function cumple(colorRule: ColorRule, valor: number): boolean {
 
 /** El color que le toca a un valor, o nada. */
 export function conditionalColor(
-  condicional: ConditionalFormat | undefined,
+  conditional: ConditionalFormat | undefined,
   valor: number | null | undefined,
   medida?: string,
 ): TextColor | undefined {
-  if (!condicional || valor === null || valor === undefined) return undefined;
+  if (!conditional || valor === null || valor === undefined) return undefined;
 
-  for (const colorRule of condicional.rules.slice(0, MAX_RULES)) {
+  for (const colorRule of conditional.rules.slice(0, MAX_RULES)) {
     if (colorRule.medida !== undefined && colorRule.medida !== medida) continue;
     if (cumple(colorRule, valor)) return colorRule.color;
   }

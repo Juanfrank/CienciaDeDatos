@@ -52,7 +52,7 @@ describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
       .filter(({ categoria }) => categoria !== 'grafico')
       .flatMap(({ version, objectId }) =>
         version.presentation
-          .filter((c) => (['leyenda', 'datumLabels'] as PresentationKey[]).includes(c))
+          .filter((c) => (['legend', 'datumLabels'] as PresentationKey[]).includes(c))
           .map((clave) => `${objectId}: ${clave}`),
       );
 
@@ -64,7 +64,7 @@ describe('validatePresentation', () => {
   const todas: PresentationKey[] = [
     ...MIN_PRESENTATION,
     'formato',
-    'leyenda',
+    'legend',
     'datumLabels',
   ];
 
@@ -77,7 +77,7 @@ describe('validatePresentation', () => {
           highlight: true,
           subtitulo: 'Cierre del trimestre',
           formato: { decimales: 1, unit: '%' },
-          leyenda: 'oculta',
+          legend: 'oculta',
           datumLabels: true,
         },
         todas,
@@ -86,8 +86,8 @@ describe('validatePresentation', () => {
   });
 
   it('rechaza una clave que el objeto no admite, y dice cuales admite', () => {
-    const [issue] = validatePresentation({ leyenda: 'abajo' }, MIN_PRESENTATION);
-    expect(issue?.clave).toBe('leyenda');
+    const [issue] = validatePresentation({ legend: 'abajo' }, MIN_PRESENTATION);
+    expect(issue?.clave).toBe('legend');
     expect(issue?.issue).toContain('icono');
   });
 

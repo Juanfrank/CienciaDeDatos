@@ -700,7 +700,7 @@ export const demoModules: ModuleDefinition[] = [
                */
               presentation: {
                 subtitulo: 'Leyenda a la derecha, cifras, ordenado por valor y escala logaritmica',
-                leyenda: 'derecha',
+                legend: 'derecha',
                 datumLabels: true,
                 /*
                  * Escala LOGARITMICA, y con su minimo puesto.
@@ -735,7 +735,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Leyenda arriba, cifra sobre cada punto y barra de zoom',
-                leyenda: 'arriba',
+                legend: 'arriba',
                 datumLabels: true,
                 // La barra de zoom: deja acercarse a un tramo del eje sin perder de vista donde
                 // esta dentro del total. Empieza mostrandolo todo.
@@ -784,7 +784,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [MATERIA],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentation: { subtitulo: 'El total y de que se compone', leyenda: 'abajo', apilado: 'apilado' },
+              presentation: { subtitulo: 'El total y de que se compone', legend: 'abajo', apilado: 'apilado' },
             },
           },
           {
@@ -800,7 +800,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [MATERIA],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentation: { subtitulo: 'La composicion, no la magnitud', leyenda: 'abajo', apilado: 'porcentaje' },
+              presentation: { subtitulo: 'La composicion, no la magnitud', legend: 'abajo', apilado: 'porcentaje' },
             },
           },
           {
@@ -816,7 +816,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [DISTRITO],
                 measures: ['CasosPendientes'],
               },
-              presentation: { subtitulo: 'Los nombres largos caben enteros', leyenda: 'abajo', datumLabels: true },
+              presentation: { subtitulo: 'Los nombres largos caben enteros', legend: 'abajo', datumLabels: true },
             },
           },
           {
@@ -832,7 +832,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [MATERIA],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentation: { subtitulo: 'Reparto por materia', leyenda: 'abajo', apilado: 'porcentaje' },
+              presentation: { subtitulo: 'Reparto por materia', legend: 'abajo', apilado: 'porcentaje' },
             },
           },
           {
@@ -848,7 +848,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos'],
               },
-              presentation: { subtitulo: 'Volumen a lo largo del tiempo', leyenda: 'abajo' },
+              presentation: { subtitulo: 'Volumen a lo largo del tiempo', legend: 'abajo' },
             },
           },
           {
@@ -864,7 +864,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentation: { subtitulo: 'De que se compone el total', leyenda: 'abajo', apilado: 'apilado' },
+              presentation: { subtitulo: 'De que se compone el total', legend: 'abajo', apilado: 'apilado' },
             },
           },
         ],
@@ -906,7 +906,7 @@ export const demoModules: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [MATERIA], measures: ['CasosPendientes'] },
               presentation: {
                 subtitulo: 'Cuanto pesa cada materia',
-                leyenda: 'abajo',
+                legend: 'abajo',
                 circular: { labels: 'porcentaje' },
               },
             },
@@ -922,7 +922,7 @@ export const demoModules: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [MATERIA], measures: ['CasosPendientes'] },
               presentation: {
                 subtitulo: 'El hueco deja sitio a la cifra',
-                leyenda: 'abajo',
+                legend: 'abajo',
                 circular: { totalEnElCentro: true, labels: 'porcentaje' },
               },
             },
@@ -938,7 +938,7 @@ export const demoModules: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosPendientes'] },
               presentation: {
                 subtitulo: 'Etiquetas con nombre y parte',
-                leyenda: 'oculta',
+                legend: 'oculta',
                 circular: { radioInterior: 40, labels: 'categoria-porcentaje' },
               },
             },
@@ -1037,7 +1037,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Una sola escala: la comparacion es directa',
-                leyenda: 'abajo',
+                legend: 'abajo',
                 axes: { yTitle: 'Casos' },
               },
             },
@@ -1062,7 +1062,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'La linea se mide en la escala de la derecha',
-                leyenda: 'abajo',
+                legend: 'abajo',
                 combinado: { axisSecondary: true },
                 axes: { yTitle: 'Casos', y2Title: 'Pendientes', fromZero: false },
               },
@@ -1147,7 +1147,7 @@ export const demoModules: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosIngresados'] },
               presentation: {
                 subtitulo: 'Ordenado de mayor a menor: el embudo clasico',
-                leyenda: 'oculta',
+                legend: 'oculta',
                 orden: { por: 'valor', direction: 'desc' },
               },
             },
@@ -1166,7 +1166,7 @@ export const demoModules: ModuleDefinition[] = [
                 // un fallo de dibujo: es la anomalia, y esconderla ordenando seria la version
                 // bonita de no contarla.
                 subtitulo: 'Una etapa que crece se ve, no se disimula',
-                leyenda: 'oculta',
+                legend: 'oculta',
                 embudo: { compare: 'anterior' },
               },
             },
@@ -1256,10 +1256,10 @@ export const demoModules: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosResueltos'] },
               presentation: {
                 subtitulo: 'La raya es lo que convierte la cifra en respuesta',
-                leyenda: 'oculta',
+                legend: 'oculta',
                 datumLabels: true,
                 axes: { yTitle: 'Casos' },
-                referencias: [
+                references: [
                   { valor: 900, etiqueta: 'Meta trimestral', color: 'error', style: 'discontinua' },
                 ],
               },
@@ -1280,11 +1280,11 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Minimo y maximo a mano: comparable con el de al lado',
-                leyenda: 'abajo',
+                legend: 'abajo',
                 // Los mismos limites en los dos objetos: dos graficos de la misma medida con
                 // escalas distintas se leen como si dijeran cosas distintas.
                 axes: { yTitle: 'Casos', yMin: 0, yMax: 2400 },
-                referencias: [
+                references: [
                   { valor: 600, etiqueta: 'Minimo', color: 'atenuado', style: 'punteada' },
                   { valor: 1200, etiqueta: 'Meta', color: 'error' },
                   { valor: 1800, etiqueta: 'Tope', color: 'primario', style: 'solida' },
@@ -1307,7 +1307,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Del tema, no libres: se elige cual de los ocho le toca a cada una',
-                leyenda: 'abajo',
+                legend: 'abajo',
                 seriesColors: [3, 2, 1],
               },
             },
@@ -1323,10 +1323,10 @@ export const demoModules: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [MATERIA], measures: ['CasosResueltos'] },
               presentation: {
                 subtitulo: 'Por materia, con el mismo 0-2400 que el de al lado',
-                leyenda: 'oculta',
+                legend: 'oculta',
                 datumLabels: true,
                 axes: { yTitle: 'Casos', yMin: 0, yMax: 2400 },
-                referencias: [{ valor: 1200, etiqueta: 'Meta', color: 'error' }],
+                references: [{ valor: 1200, etiqueta: 'Meta', color: 'error' }],
               },
             },
           },
@@ -1373,7 +1373,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'La tercera opcion entre «todas» y «ninguna»',
-                leyenda: 'abajo',
+                legend: 'abajo',
                 datumLabels: { mostrar: true, onlyEnds: true },
                 axes: { yTitle: 'Casos' },
               },
@@ -1394,7 +1394,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Con cuatro categorias cabe; con veinte, no',
-                leyenda: 'abajo',
+                legend: 'abajo',
                 datumLabels: { mostrar: true, cellPosition: 'encima' },
                 axes: { yTitle: 'Casos' },
               },
@@ -1415,7 +1415,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'En horizontal, los que no caben se esconden sin avisar',
-                leyenda: 'oculta',
+                legend: 'oculta',
                 axes: { yTitle: 'Casos', rotateX: 45 },
               },
             },
@@ -1435,7 +1435,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Senale una columna: la suma ya no hay que hacerla de cabeza',
-                leyenda: 'abajo',
+                legend: 'abajo',
                 apilado: 'apilado',
                 tooltip: { total: true, sortValue: true },
                 axes: { yTitle: 'Casos' },
@@ -1491,7 +1491,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Misma escala: los paneles se pueden comparar',
-                leyenda: 'oculta',
+                legend: 'oculta',
                 axes: { gridlines: true },
               },
             },
@@ -1516,8 +1516,8 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Dos medidas por panel, en una sola configuracion',
-                leyenda: 'abajo',
-                multiplos: { gridColumns: 1 },
+                legend: 'abajo',
+                multiples: { gridColumns: 1 },
               },
             },
           },
@@ -1561,7 +1561,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'Roja por encima de 2.000',
                 etiqueta: { content: 'Al cierre del trimestre', cellPosition: 'debajo' },
-                condicional: { rules: [{ comparator: 'mayor', valor: 2000, color: 'error' }] },
+                conditional: { rules: [{ comparator: 'mayor', valor: 2000, color: 'error' }] },
               },
             },
           },
@@ -1577,7 +1577,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'La misma regla, y esta no salta',
                 etiqueta: { content: 'Al cierre del trimestre', cellPosition: 'debajo' },
-                condicional: { rules: [{ comparator: 'menor', valor: 1000, color: 'error' }] },
+                conditional: { rules: [{ comparator: 'menor', valor: 1000, color: 'error' }] },
               },
             },
           },
@@ -1596,7 +1596,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Tres reglas, evaluadas en orden',
-                condicional: {
+                conditional: {
                   rules: [
                     { medida: 'CasosPendientes', comparator: 'mayor', valor: 600, color: 'error' },
                     { medida: 'CasosPendientes', comparator: 'menor', valor: 400, color: 'terciario' },
@@ -1617,11 +1617,11 @@ export const demoModules: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosPendientes'] },
               presentation: {
                 subtitulo: 'La barra que se pasa del umbral se pinta sola',
-                leyenda: 'oculta',
+                legend: 'oculta',
                 datumLabels: { mostrar: true },
                 axes: { yTitle: 'Casos' },
-                referencias: [{ valor: 600, etiqueta: 'Umbral', color: 'error' }],
-                condicional: { rules: [{ comparator: 'mayor', valor: 600, color: 'error' }] },
+                references: [{ valor: 600, etiqueta: 'Umbral', color: 'error' }],
+                conditional: { rules: [{ comparator: 'mayor', valor: 600, color: 'error' }] },
               },
             },
           },
@@ -1639,9 +1639,9 @@ export const demoModules: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [DISTRITO], measures: ['CasosPendientes'] },
               presentation: {
                 subtitulo: 'La misma regla, en horizontal',
-                leyenda: 'oculta',
+                legend: 'oculta',
                 datumLabels: { mostrar: true },
-                condicional: { rules: [{ comparator: 'mayor', valor: 600, color: 'error' }] },
+                conditional: { rules: [{ comparator: 'mayor', valor: 600, color: 'error' }] },
               },
             },
           },
@@ -1668,7 +1668,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'El color tambien llega a los subtotales',
-                condicional: { rules: [{ comparator: 'mayor', valor: 300, color: 'error' }] },
+                conditional: { rules: [{ comparator: 'mayor', valor: 300, color: 'error' }] },
               },
             },
           },
@@ -2045,7 +2045,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'No se mueve cuando se acota la tabla',
-                leyenda: 'oculta',
+                legend: 'oculta',
                 axes: { yTitle: 'Casos' },
               },
             },
@@ -2065,7 +2065,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'El pie referencia las medidas por su orden de mapeo',
-                leyenda: 'abajo',
+                legend: 'abajo',
                 axes: { yTitle: 'Casos' },
               },
               attachments: [

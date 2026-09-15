@@ -545,11 +545,39 @@ nombre legitimo de otra cosa: `ejes` son tambien los seis ejes de ESTILO de un t
 paquete. Es la leccion de `tipo` —la misma palabra quiere decir cosas distintas en sitios
 distintos— dicha donde una guarda que mira archivos, y no rutas, puede aplicarla.
 
-**Lo que queda** son **92 claves** mas en `ui-components` y `module-model` —`icono`, `acento`,
-`etiqueta`, `leyenda`, `formato`, `formatos`, `textos`, `orden`, `referencias`, `multiplos`,
-`condicional`…—, mas las seis con gemelo de valor, que van aparte. Se sigue yendo por grupos que se
-leen juntos —el formato de cifra, la leyenda, los textos— y no de una vez: una pasada de noventa
-claves no se revisa.
+**Cuarta tanda, hecha: las cuatro SIN GEMELO** —`leyenda` -> `legend`, `referencias` ->
+`references`, `condicional` -> `conditional`, `multiplos` -> `multiples`—. Se eligieron juntas por
+lo que NO tienen: ninguna es tambien la clave de otro tipo del repositorio ni un valor de una union
+guardada. Esa comprobacion, que antes se hacia sobre los valores, ahora se hace tambien sobre las
+CLAVES, y es lo que separo estas cuatro del resto.
+
+**Y la leccion de esta tanda es sobre el metodo, no sobre las claves.** Una expresion regular
+sobre el archivo entero no sirve: al aplicarla, reescribio prosa espanola de los comentarios («la
+legend, SOLO en el primer panel»), una clase CSS, un identificador de prueba, dos slugs de pagina
+y los terminos de BUSQUEDA del panel, que estan en espanol porque los teclea quien edita. Se
+deshizo entera y se rehizo en dos pasadas:
+
+1. **En la zona de CODIGO**, con el escaner de `tools/rename/segmentos.mjs` —el mismo que usa el
+   renombrador y, desde esta tanda, la guarda—. Comentarios y cadenas quedan fuera por
+   construccion.
+2. **Y luego las cadenas que SI son la clave**: `PRESENTATION_KEYS`, `presenta(...)`,
+   `admite("...")`. Se excluye lo que va detras de un `=`, que en JSX es un atributo
+   —`className`, `data-testid`—, y se excluye `apps/shell/e2e`, donde una cadena igual a la clave
+   casi siempre es un identificador de prueba o un slug.
+
+Lo que quedo fuera de las dos pasadas lo nombro el compilador, una a una, y lo que se colo pese a
+todo lo cazaron las guardas: `interfaz.spec.ts` encontro el testid `multiplos` convertido en
+`multiples`, que es justo para lo que esta. **El identificador de prueba y el slug no se mueven con
+la clave**: son otros contratos.
+
+**Lo que queda** son **88 claves**, y las que quedan son las dificiles: `formato`, `formatos`,
+`textos`, `icono`, `etiqueta`, `acento`, `orden`, `tipo`… Todas tienen gemelo —`formato` es
+tambien la clave de una orden de exportacion, `textos` la de una hoja exportable, y `tipo`,
+`icono`, `etiqueta` y `acento` aparecen como clave en decenas de sitios que no son la
+presentacion—, asi que cada una obliga a elegir: renombrar tambien la del otro contrato —que es
+otra superficie guardada, con su propia migracion— o anotarla en `CONVIVEN`, que es admitir que
+esa guarda ya no mira ese archivo. No es una decision tecnica que se pueda tomar sola, y por eso
+esta tanda para aqui.
 
 Dos detalles que la primera pasada enseno, y que valen para las siguientes:
 

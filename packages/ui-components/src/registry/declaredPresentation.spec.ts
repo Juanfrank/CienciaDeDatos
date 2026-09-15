@@ -31,7 +31,7 @@ const BASE: ChartOptions = { vm, palette: PALETTE, titulo: 'T', dimension: 'Trib
 
 /** DOS valores validos y distintos por clave. */
 const VALUES: Partial<Record<PresentationKey, unknown[]>> = {
-  leyenda: ['oculta', 'derecha'],
+  legend: ['oculta', 'derecha'],
   datumLabels: [
     { mostrar: true, cellPosition: 'dentro' },
     { mostrar: true, onlyEnds: true },
@@ -47,12 +47,12 @@ const VALUES: Partial<Record<PresentationKey, unknown[]>> = {
   combinado: [{ axisSecondary: true }, { axisSecondary: false }],
   embudo: [{ compare: 'anterior' }, { compare: 'ninguna' }],
   cascada: [{ showTotal: false }, { showTotal: true }],
-  referencias: [[{ valor: 15, etiqueta: 'meta', style: 'discontinua', color: 'primario' }], [{ valor: 5 }]],
+  references: [[{ valor: 15, etiqueta: 'meta', style: 'discontinua', color: 'primario' }], [{ valor: 5 }]],
   seriesColors: [
     [3, 5],
     [7, 0],
   ],
-  condicional: [
+  conditional: [
     { rules: [{ medida: 'Casos', comparator: 'mayor', valor: 15, color: 'exito' }] },
     { rules: [{ medida: 'Dias', comparator: 'menor', valor: 5, color: 'peligro' }] },
   ],
@@ -101,7 +101,7 @@ const EXCEPCIONES: { objeto: string; clave: PresentationKey; porque: string }[] 
   },
   {
     objeto: 'dispersion',
-    clave: 'leyenda',
+    clave: 'legend',
     porque:
       'Una dispersion tiene UNA serie, que ademas se llama como el grafico: las medidas son los ' +
       'ejes, no series. La leyenda repetiria el titulo de la tarjeta debajo de ella.',

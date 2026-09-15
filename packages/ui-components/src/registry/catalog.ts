@@ -69,7 +69,7 @@ const BAR_WELLS = (medidas: number): FieldSlot[] => [
 
 /** El contrato de datos de la tarjeta KPI, compartido por sus dos versiones. */
 /** Lo que admite presentar una tabla o una matriz. El color por valor es aqui donde mas se usa. */
-const TABLE_PRESENTATION = presenta('formato', 'formatos', 'condicional');
+const TABLE_PRESENTATION = presenta('formato', 'formatos', 'conditional');
 
 const KPI_CONTRACT: VisualObjectDefinition['versions'][number]['dataContract'] = {
   dimensions: { min: 0, max: 1 },
@@ -122,31 +122,31 @@ const MULTIPLE_WELL: FieldSlot = {
 const CHART_PRESENTATION = presenta(
   'formato',
   'formatos',
-  'leyenda',
+  'legend',
   'datumLabels',
   'axes',
   'orden',
   'apilado',
-  'referencias',
+  'references',
   'seriesColors',
   'tooltip',
-  'multiplos',
+  'multiples',
 );
 
 /** CONGELADA. Lo que admite presentar una version YA PUBLICADA no vuelve a crecer. */
 const CONDITIONAL_PRESENTATION_CHART = presenta(
   'formato',
   'formatos',
-  'leyenda',
+  'legend',
   'datumLabels',
   'axes',
   'orden',
   'apilado',
-  'referencias',
+  'references',
   'seriesColors',
   'tooltip',
-  'multiplos',
-  'condicional',
+  'multiples',
+  'conditional',
 );
 
 /** El contrato de un combinado, compartido por sus versiones. */
@@ -188,12 +188,12 @@ const CONTRACT_COMBO: VisualObjectDefinition['versions'][number]['dataContract']
 const COMBINED_PRESENTATION = presenta(
   'formato',
   'formatos',
-  'leyenda',
+  'legend',
   'datumLabels',
   'axes',
   'orden',
   'combinado',
-  'referencias',
+  'references',
   'seriesColors',
   'tooltip',
 );
@@ -231,7 +231,7 @@ const H_BAR_CONTRACT: VisualObjectDefinition['versions'][number]['dataContract']
 };
 
 /** Lo que un circular admite presentar. */
-const PIE_PRESENTATION = presenta('formato', 'formatos', 'leyenda', 'circular');
+const PIE_PRESENTATION = presenta('formato', 'formatos', 'legend', 'circular');
 
 /** El contrato de un circular, compartido por el pastel y la dona. */
 const PIE_CONTRACT: VisualObjectDefinition['versions'][number]['dataContract'] = {
@@ -295,7 +295,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         changelog: 'Formato condicional: la cifra cambia de color segun su valor.',
         certification: initialCertification,
         dataContract: KPI_CONTRACT,
-        presentation: presenta('formato', 'formatos', 'etiqueta', 'condicional'),
+        presentation: presenta('formato', 'formatos', 'etiqueta', 'conditional'),
       },
     ],
   },
@@ -399,7 +399,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
           notes: 'La segunda dimension, si existe, agrupa las barras por serie.',
           wells: BAR_WELLS(1),
         },
-        presenta('formato', 'formatos', 'leyenda', 'datumLabels'),
+        presenta('formato', 'formatos', 'legend', 'datumLabels'),
       ),
       /*
        * 1.1.0 — varias medidas, como ya admitia `lineas`.
@@ -417,7 +417,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
             'Cada medida es una serie. La segunda dimension, si existe, agrupa las barras por serie.',
           wells: BAR_WELLS(4),
         },
-        presentation: presenta('formato', 'formatos', 'leyenda', 'datumLabels'),
+        presentation: presenta('formato', 'formatos', 'legend', 'datumLabels'),
       },
       /*
        * 1.2.0 — la personalizacion que se configuraba y no llegaba al grafico.
@@ -655,7 +655,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
             },
           ],
         },
-        presenta('formato', 'formatos', 'datumLabels', 'axes', 'referencias'),
+        presenta('formato', 'formatos', 'datumLabels', 'axes', 'references'),
       ),
     ],
   },
@@ -695,7 +695,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
             },
           ],
         },
-        presenta('formato', 'formatos', 'leyenda', 'orden', 'embudo'),
+        presenta('formato', 'formatos', 'legend', 'orden', 'embudo'),
       ),
     ],
   },
@@ -735,7 +735,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
             },
           ],
         },
-        presenta('formato', 'formatos', 'axes', 'orden', 'cascada', 'referencias'),
+        presenta('formato', 'formatos', 'axes', 'orden', 'cascada', 'references'),
       ),
     ],
   },
@@ -821,7 +821,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
           measures: { min: 1, max: 4 },
           wells: LINE_WELLS,
         },
-        presenta('formato', 'formatos', 'leyenda', 'datumLabels'),
+        presenta('formato', 'formatos', 'legend', 'datumLabels'),
       ),
       /* 1.1.0 — la misma personalizacion que columnas, por el mismo motivo. */
       {

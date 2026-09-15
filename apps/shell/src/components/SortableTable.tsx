@@ -29,14 +29,14 @@ export function SortableTable({
   projected,
   titulo,
   formatColumn,
-  condicional,
+  conditional,
 }: {
   projected: QueryResult;
   titulo: string;
   /** Un formateador POR COLUMNA: cada medida puede tener el suyo. */
   formatColumn: (nombre: string) => (n: number | null) => string;
   /** Reglas de color por valor. La celda que se sale es lo que se busca en una tabla. */
-  condicional?: ConditionalFormat;
+  conditional?: ConditionalFormat;
 }) {
   const [orden, setOrden] = useState<{ column: number; direction: Direction } | null>(null);
 
@@ -103,7 +103,7 @@ export function SortableTable({
                  * por columna — en una tabla larga eso son miles de llamadas.
                  */
                 const color = isFigure
-                  ? conditionalColor(condicional, cell, projected.columns[j]?.name)
+                  ? conditionalColor(conditional, cell, projected.columns[j]?.name)
                   : undefined;
                 return (
                   <td

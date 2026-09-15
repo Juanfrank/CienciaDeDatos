@@ -282,20 +282,20 @@ export interface ObjectPresentation {
   formato?: NumericFormat;
   /** Formato de numero POR MEDIDA, con un renglon general de respaldo. */
   formatos?: ObjectFormats;
-  leyenda?: LegendMode;
+  legend?: LegendMode;
   /** La cifra encima de cada barra o punto, con el formato de SU medida. */
   datumLabels?: DatumLabels;
   tooltip?: TooltipSettings;
-  multiplos?: MultipleSettings;
+  multiples?: MultipleSettings;
   /** Que el color dependa del dato: reglas evaluadas en orden, gana la primera que casa. */
-  condicional?: ConditionalFormat;
+  conditional?: ConditionalFormat;
   axes?: AxisSettings;
   orden?: CategorySort;
   apilado?: StackingMode;
   circular?: PieSettings;
   combinado?: ComboSettings;
   /** La meta, el promedio, el umbral: hasta tres rayas sobre el area de dibujo. */
-  referencias?: ReferenceLine[];
+  references?: ReferenceLine[];
   /** Que color de la paleta usa cada serie, por indice. */
   seriesColors?: number[];
   embudo?: FunnelSettings;
@@ -318,18 +318,18 @@ export const PRESENTATION_KEYS = [
   'textos',
   'formato',
   'formatos',
-  'leyenda',
+  'legend',
   'datumLabels',
   'axes',
   'orden',
   'apilado',
   'circular',
   'combinado',
-  'referencias',
+  'references',
   'seriesColors',
   'tooltip',
-  'multiplos',
-  'condicional',
+  'multiples',
+  'conditional',
   'embudo',
   'cascada',
   'medidor',
@@ -518,17 +518,17 @@ export function validatePresentation(
     });
   }
 
-  if (presentation.referencias !== undefined) {
-    if (presentation.referencias.length > MAX_REFERENCES) {
+  if (presentation.references !== undefined) {
+    if (presentation.references.length > MAX_REFERENCES) {
       problems.push({
-        clave: 'referencias',
+        clave: 'references',
         issue:
-          `${presentation.referencias.length} lineas de referencia. El maximo es ` +
+          `${presentation.references.length} lineas de referencia. El maximo es ` +
           `${MAX_REFERENCES}: mas rayas sobre un grafico dejan de ser referencias y pasan a ser ` +
           `una rejilla.`,
       });
     }
-    presentation.referencias.forEach((line, i) => {
+    presentation.references.forEach((line, i) => {
       if (!Number.isFinite(line.valor)) {
         problems.push({
           clave: `referencias.${i}.valor`,
@@ -553,11 +553,11 @@ export function validatePresentation(
     });
   }
 
-  const rules = presentation.condicional?.rules;
+  const rules = presentation.conditional?.rules;
   if (rules !== undefined) {
     if (rules.length > MAX_RULES) {
       problems.push({
-        clave: 'condicional',
+        clave: 'conditional',
         issue:
           `${rules.length} reglas de color. El maximo es ${MAX_RULES}: mas dejan de ser ` +
           `excepciones y pasan a ser una escala, que es otra herramienta.`,
@@ -645,12 +645,12 @@ export function validatePresentation(
   }
 
   if (
-    presentation.leyenda !== undefined &&
-    !(LEGEND_MODES as readonly string[]).includes(presentation.leyenda)
+    presentation.legend !== undefined &&
+    !(LEGEND_MODES as readonly string[]).includes(presentation.legend)
   ) {
     problems.push({
-      clave: 'leyenda',
-      issue: `'${String(presentation.leyenda)}' no es un modo. Use: ${LEGEND_MODES.join(', ')}.`,
+      clave: 'legend',
+      issue: `'${String(presentation.legend)}' no es un modo. Use: ${LEGEND_MODES.join(', ')}.`,
     });
   }
 

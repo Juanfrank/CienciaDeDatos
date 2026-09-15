@@ -53,6 +53,10 @@ const guardado = () => ({
                 // Una que ya estaba en ingles: la migracion no la toca y tiene que seguir ahi.
                 gridlines: false,
               },
+              leyenda: 'abajo',
+              referencias: [{ valor: 100, etiqueta: 'Meta' }],
+              condicional: { rules: [] },
+              multiplos: { gridColumns: 2 },
             },
             attachments: [
               {
@@ -132,6 +136,12 @@ describe('migrar las claves de una definicion guardada', () => {
         scale: 'logaritmica',
         gridlines: false,
       },
+      legend: 'abajo',
+      // Lo de DENTRO de la raya sigue en espanol, y a proposito: `valor` y `etiqueta` son de las
+      // palabras mas repetidas del codigo y entran en su propia tanda.
+      references: [{ valor: 100, etiqueta: 'Meta' }],
+      conditional: { rules: [] },
+      multiples: { gridColumns: 2 },
     });
   });
 

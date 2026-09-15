@@ -83,7 +83,7 @@ export default function Canvas({
         palette,
         titulo,
         ...(dimension ? { dimension } : {}),
-        ...comun('leyenda'),
+        ...comun('legend'),
         // Se pasa TAL CUAL: la forma anterior era un booleano y la nueva es un objeto, y quien
         // normaliza es el constructor de opciones, en una sola funcion pura.
         ...comun('datumLabels'),
@@ -95,9 +95,9 @@ export default function Canvas({
         ...comun('combinado'),
         ...comun('embudo'),
         ...comun('cascada'),
-        ...comun('referencias'),
+        ...comun('references'),
         ...comun('seriesColors'),
-        ...comun('condicional'),
+        ...comun('conditional'),
         ...(columnSeries === undefined ? {} : { columnSeries }),
         ...(formatear ? { formatear } : {}),
       }),

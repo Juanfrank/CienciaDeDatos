@@ -148,11 +148,11 @@ function notasDe(instance: ObjectInstance): string[] {
   const p = instance.presentation;
   const notas: string[] = [];
 
-  for (const line of p?.referencias ?? []) {
+  for (const line of p?.references ?? []) {
     const nombre = line.etiqueta ?? 'Referencia';
     notas.push(`${nombre}: ${line.valor}`);
   }
-  for (const colorRule of p?.condicional?.rules ?? []) {
+  for (const colorRule of p?.conditional?.rules ?? []) {
     const reach = colorRule.medida ? `${colorRule.medida} ` : '';
     notas.push(`Marcado en pantalla: ${reach}${ruleDescribe(colorRule)}`);
   }

@@ -33,16 +33,16 @@ function FigureCell({
   valor,
   medida,
   formatear,
-  condicional,
+  conditional,
   total,
 }: {
   valor: number | null;
   medida: string;
   formatear: (n: number | null) => string;
-  condicional?: ConditionalFormat;
+  conditional?: ConditionalFormat;
   total?: boolean;
 }) {
-  const color = valor === null ? undefined : conditionalColor(condicional, valor, medida);
+  const color = valor === null ? undefined : conditionalColor(conditional, valor, medida);
   return (
     <td
       className={total ? 'is-number is-total' : 'is-number'}
@@ -80,7 +80,7 @@ export function MatrixTable({
     [vm.medidas, instance.presentation],
   );
   const gridColumns = useMemo(() => leaves(vm.gridColumns, plegadasColumna), [vm, plegadasColumna]);
-  const condicional = instance.presentation?.condicional;
+  const conditional = instance.presentation?.conditional;
 
   /*
    * El orden se aplica ENTRE HERMANOS, no sobre la tabla entera.
@@ -182,7 +182,7 @@ export function MatrixTable({
               gridColumns={gridColumns}
               collapsed={plegadas.has(pathKey(node.path))}
               formatear={formatear}
-              {...(condicional ? { condicional } : {})}
+              {...(conditional ? { conditional } : {})}
               onPlegar={() => setPlegadas((p) => toggle(p, pathKey(node.path)))}
             />
           ))}
@@ -195,7 +195,7 @@ export function MatrixTable({
                   valor={vm.valor([], column.path, i)}
                   medida={medida}
                   formatear={formatear[i] ?? String}
-                  {...(condicional ? { condicional } : {})}
+                  {...(conditional ? { conditional } : {})}
                   total
                 />
               )),
@@ -206,7 +206,7 @@ export function MatrixTable({
                 valor={vm.valor([], [], i)}
                 medida={medida}
                 formatear={formatear[i] ?? String}
-                {...(condicional ? { condicional } : {})}
+                {...(conditional ? { conditional } : {})}
                 total
               />
             ))}
@@ -223,7 +223,7 @@ function MatrixRow({
   gridColumns,
   collapsed,
   formatear,
-  condicional,
+  conditional,
   onPlegar,
 }: {
   node: MatrixNode;
@@ -231,7 +231,7 @@ function MatrixRow({
   gridColumns: MatrixNode[];
   collapsed: boolean;
   formatear: ((n: number | null) => string)[];
-  condicional?: ConditionalFormat;
+  conditional?: ConditionalFormat;
   onPlegar: () => void;
 }) {
   const tieneHijos = node.hijos.length > 0;
@@ -267,7 +267,7 @@ function MatrixRow({
             valor={vm.valor(node.path, column.path, i)}
             medida={medida}
             formatear={formatear[i] ?? String}
-            {...(condicional ? { condicional } : {})}
+            {...(conditional ? { conditional } : {})}
           />
         )),
       )}
@@ -277,7 +277,7 @@ function MatrixRow({
           valor={vm.valor(node.path, [], i)}
           medida={medida}
           formatear={formatear[i] ?? String}
-          {...(condicional ? { condicional } : {})}
+          {...(conditional ? { conditional } : {})}
           total
         />
       ))}

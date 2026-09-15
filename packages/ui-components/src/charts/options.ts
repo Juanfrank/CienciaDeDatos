@@ -44,7 +44,7 @@ export interface ChartOptions {
   titulo: string;
   /** Nombre de la dimension del eje, para el rotulo accesible. */
   dimension?: string;
-  leyenda?: LegendMode;
+  legend?: LegendMode;
   /** La cifra sobre cada barra o punto. `true` es la forma anterior y se sigue admitiendo. */
   datumLabels?: DatumLabels;
   tooltip?: TooltipSettings;
@@ -54,9 +54,9 @@ export interface ChartOptions {
   apilado?: StackingMode;
   circular?: PieSettings;
   combinado?: ComboSettings;
-  referencias?: ReferenceLine[];
+  references?: ReferenceLine[];
   seriesColors?: number[];
-  condicional?: ConditionalFormat;
+  conditional?: ConditionalFormat;
   embudo?: FunnelSettings;
   cascada?: WaterfallSettings;
   medidor?: GaugeSettings;
@@ -152,7 +152,7 @@ function tooltipOf(o: ChartOptions) {
  */
 function legendOf(o: ChartOptions, hayQueDistinguir = o.vm.series.length > 1) {
   const several = hayQueDistinguir;
-  const mode: LegendMode = o.leyenda ?? 'auto';
+  const mode: LegendMode = o.legend ?? 'auto';
   const visible = mode === 'auto' ? several : mode !== 'oculta';
   if (!visible) return { legend: { show: false }, margin: { bottom: 8, left: 8, right: 16, top: 24 } };
 
@@ -243,7 +243,7 @@ const REFERENCE_STROKE: Record<ReferenceStyle, 'solid' | 'dashed' | 'dotted'> = 
  * `silent: true` por lo mismo. El eje al que se anclan lo decide `horizontal`.
  */
 function referencesOf(o: ChartOptions, horizontal = false) {
-  const lineas = (o.referencias ?? []).slice(0, MAX_REFERENCES);
+  const lineas = (o.references ?? []).slice(0, MAX_REFERENCES);
   if (lineas.length === 0) return {};
 
   return {
@@ -524,13 +524,13 @@ const valueAxis = (o: ChartOptions) => ({
  * y no sobre la parte, porque habla de casos y no de cuanto ocupa la barra.
  */
 function colorBars(o: ChartOptions, datos: (number | null)[], s: number) {
-  if (!o.condicional || o.condicional.rules.length === 0) return datos;
+  if (!o.conditional || o.conditional.rules.length === 0) return datos;
   const medida = o.vm.series[s];
 
   let alguna = false;
   const withColor = datos.map((valor, i) => {
     const original = o.vm.points[i]?.values[s] ?? null;
-    const color = conditionalColor(o.condicional, original, medida);
+    const color = conditionalColor(o.conditional, original, medida);
     if (color === undefined) return valor;
     alguna = true;
     return { value: valor, itemStyle: { color: roleColor(o, color) } };
@@ -1243,7 +1243,7 @@ export function waterfallOptions(o: ChartOptions): Record<string, unknown> {
      * La base se construye con la leyenda ya oculta, no se oculta despues: apagarla tras `base(o)`
      * dejaria el margen que `legendOf` ya habia reservado para ella.
      */
-    ...base({ ...o, leyenda: 'oculta' }),
+    ...base({ ...o, legend: 'oculta' }),
     legend: { show: false },
     tooltip: {
       trigger: 'axis' as const,

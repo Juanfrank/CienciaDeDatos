@@ -121,6 +121,26 @@ export const RENAMES: KeyRename[] = [
       ['escala', 'scale'],
     ] as const
   ).flatMap(([from, to]) => enLaPresentacion(from, to, 'axes')),
+  /*
+   * Cuarta tanda: cuatro claves SIN GEMELO en ninguna parte.
+   *
+   * `leyenda`, `referencias`, `condicional` y `multiplos` se eligieron juntas por lo que NO tienen:
+   * ninguna de las cuatro es tambien la clave de otro tipo del repositorio, ni un valor de una
+   * union que se guarde. Es la comprobacion que la tanda anterior obligo a hacer antes de escribir
+   * nada, porque `formato` si lo es —lo es tambien de una orden de exportacion— y `etiqueta`,
+   * `icono` y `acento` aparecen como clave en decenas de sitios que no son la presentacion.
+   *
+   * Sus hijos se quedan para despues por lo mismo: dentro de una raya de referencia viven `valor`
+   * y `etiqueta`, que son de las palabras mas repetidas del codigo.
+   */
+  ...(
+    [
+      ['leyenda', 'legend'],
+      ['referencias', 'references'],
+      ['condicional', 'conditional'],
+      ['multiplos', 'multiples'],
+    ] as const
+  ).flatMap(([from, to]) => enLaPresentacion(from, to)),
 ];
 
 type Json = Record<string, unknown>;

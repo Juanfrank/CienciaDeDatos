@@ -35,18 +35,18 @@ describe('leyenda', () => {
   it('cada posicion la ancla a su lado Y le reserva margen', () => {
     // `containLabel` de ECharts cuenta los rotulos del eje pero NO la leyenda: sin reservar, se
     // dibuja encima de los nombres de las categorias y quedan ilegibles los dos.
-    const derecha = opciones({ leyenda: 'derecha' });
+    const derecha = opciones({ legend: 'derecha' });
     expect(derecha.legend.right).toBe(0);
     expect(derecha.legend.orient).toBe('vertical');
     expect(derecha.grid.right).toBeGreaterThan(opciones().grid.right);
 
-    const arriba = opciones({ leyenda: 'arriba' });
+    const arriba = opciones({ legend: 'arriba' });
     expect(arriba.legend.top).toBe(0);
     expect(arriba.grid.top).toBeGreaterThan(opciones().grid.top);
   });
 
   it('oculta la quita aunque haya varias series', () => {
-    expect(opciones({ leyenda: 'oculta' }, vm(['A', 'B'], [['x', 1, 2]])).legend.show).toBe(false);
+    expect(opciones({ legend: 'oculta' }, vm(['A', 'B'], [['x', 1, 2]])).legend.show).toBe(false);
   });
 });
 
@@ -133,15 +133,15 @@ describe('el margen reserva sitio para lo que vive fuera del area de dibujo', ()
   });
 
   it('la leyenda lateral y el titulo del eje SUMAN margen, no compiten por el', () => {
-    const onlyLegend = opciones({ leyenda: 'izquierda' });
-    const ambos = opciones({ leyenda: 'izquierda', axes: { yTitle: 'Casos' } });
+    const onlyLegend = opciones({ legend: 'izquierda' });
+    const ambos = opciones({ legend: 'izquierda', axes: { yTitle: 'Casos' } });
     expect(ambos.grid.left).toBeGreaterThan(onlyLegend.grid.left);
   });
 });
 
 describe('lineas de referencia', () => {
   const conRef = (extra: Record<string, unknown> = {}, v = vm(['A'], [['x', 1]])) =>
-    opciones({ referencias: [{ valor: 900, etiqueta: 'Meta' }], ...extra }, v);
+    opciones({ references: [{ valor: 900, etiqueta: 'Meta' }], ...extra }, v);
 
   it('cuelgan de la PRIMERA serie, no de una serie propia', () => {
     /*
@@ -162,7 +162,7 @@ describe('lineas de referencia', () => {
       vm: vm(['A'], [['x', 1]]),
       palette,
       titulo: 'T',
-      referencias: [{ valor: 900 }],
+      references: [{ valor: 900 }],
     }) as any;
     expect(horizontal.series[0].markLine.data[0].xAxis).toBe(900);
   });
@@ -173,13 +173,13 @@ describe('lineas de referencia', () => {
   });
 
   it('sin rotulo, la raya se dibuja pero no escribe nada', () => {
-    const o = opciones({ referencias: [{ valor: 900 }] });
+    const o = opciones({ references: [{ valor: 900 }] });
     expect(o.series[0].markLine.data[0].label.show).toBe(false);
   });
 
   it('se recortan al maximo: mas de tres dejan de ser referencias', () => {
     const o = opciones({
-      referencias: [{ valor: 1 }, { valor: 2 }, { valor: 3 }, { valor: 4 }],
+      references: [{ valor: 1 }, { valor: 2 }, { valor: 3 }, { valor: 4 }],
     });
     expect(o.series[0].markLine.data).toHaveLength(3);
   });
@@ -207,7 +207,7 @@ describe('lineas de referencia', () => {
         palette,
         titulo: 'T',
         columnSeries: 1,
-        referencias: [{ valor: 5, etiqueta: 'Meta' }],
+        references: [{ valor: 5, etiqueta: 'Meta' }],
       }) as any;
       const withMark = o.series.filter((s: { markLine?: unknown }) => s.markLine !== undefined);
       expect(withMark, tipo).toHaveLength(1);

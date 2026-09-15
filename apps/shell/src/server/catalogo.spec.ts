@@ -89,11 +89,11 @@ describe('el formato de salida de un objeto', () => {
     const antes = await editorPalette();
     expect(antes.objetos.find((o) => o.objectId === 'barras')?.defaultPresentation).toBeUndefined();
 
-    await setDefaultPresentation(admin, 'barras', { leyenda: 'abajo' });
+    await setDefaultPresentation(admin, 'barras', { legend: 'abajo' });
 
     const despues = await editorPalette();
     expect(despues.objetos.find((o) => o.objectId === 'barras')?.defaultPresentation).toEqual({
-      leyenda: 'abajo',
+      legend: 'abajo',
     });
     // Y solo a ese: fijar el de uno no puede repartirlo entre los demas.
     expect(
@@ -102,7 +102,7 @@ describe('el formato de salida de un objeto', () => {
   });
 
   it('guardar uno vacio lo QUITA, en vez de dejar un predeterminado que no dice nada', async () => {
-    await setDefaultPresentation(admin, 'barras', { leyenda: 'abajo' });
+    await setDefaultPresentation(admin, 'barras', { legend: 'abajo' });
     await setDefaultPresentation(admin, 'barras', {});
 
     const palette = await editorPalette();

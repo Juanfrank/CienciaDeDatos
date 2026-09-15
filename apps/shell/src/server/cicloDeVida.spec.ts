@@ -822,7 +822,7 @@ describe('subir un objeto de version dentro de un modulo', () => {
     expect(r.preserved).toEqual(['acento', 'subtitulo']);
     // `etiqueta` y `condicional` son las que anadieron 1.1.0 y 1.2.0: quedan sin escribir.
     expect(r.nuevas).toContain('etiqueta');
-    expect(r.nuevas).toContain('condicional');
+    expect(r.nuevas).toContain('conditional');
     expect(r.retiradas).toEqual([]);
   });
 
