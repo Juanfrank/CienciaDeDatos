@@ -188,11 +188,9 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   - **«Linea grafica», el segundo.** La capa visual de la linea grafica del tablero de casos
     penales: azul de accion, el rojo de la norma como acento, gris azulado, su verde y su ambar,
     Poppins en escala compacta —que jerarquiza por peso y no por tamano—, tres radios, borde tenue
-    y sombra difusa con tinte de marca. Dos apartes deliberados de la guia. Su «Acento secundario»
-    es un morado descrito como «series alternas en graficos», y el rol de acento aqui hace otro
-    trabajo —tine avisos, formas y la segunda serie de todo grafico—, asi que con el morado ahi la
-    aplicacion perdia el rojo donde el rojo es la marca. Y sus componentes y reglas de maqueta no
-    entran: un tema decide como se VE la aplicacion, no que objetos existen.
+    y sombra difusa con tinte de marca. Dos apartes deliberados de la guia, los dos cerrados y
+    anotados abajo: su morado de «Acento secundario» no entra, y sus componentes y reglas de
+    maqueta tampoco —un tema decide como se VE la aplicacion, no que objetos existen—.
   - **El borde se copio por CONTRASTE, no por hexadecimal.** `--line: #e3e8f3` sobre blanco da
     1,23; la derivacion de Material a tono 80 daba 1,70, que es la diferencia entre una tarjeta
     perfilada y una enmarcada. El eje `borderTone` mueve el tono de `outlineVariant` al 92, que da
@@ -656,3 +654,12 @@ Se anota para que no se vuelva a proponer sin argumento nuevo.
 - **Cachear por usuario para acelerar el camino de lectura.** Multiplica las entradas de cache
   por el numero de personas y rompe 6.6, que pide cachear el dataset una vez y reutilizarlo. El
   ambito se aplica al leer, no al poblar.
+- **El morado `#7c5cfc` de la linea grafica, en cualquier forma.** Aquella guia lo pone en
+  «Acento secundario» y lo describe como «series alternas en graficos». Como ACENTO ya se probo y
+  se retiro: el rol de acento tine los avisos, las formas y la segunda serie de todo grafico, y
+  con el morado ahi la aplicacion perdia el rojo en los sitios donde el rojo es la marca. Y como
+  color de serie tampoco: pedia darle a un tema su propia paleta de series —una lista libre de
+  colores que ninguna derivacion comprueba—, y eso abre por la puerta de atras justo lo que 4.9
+  cierra por la de delante, porque las series SI tienen que alcanzar 3:1 sobre la superficie.
+  Las series salen de las paletas tonales y se comprueban. El acento de los dos temas de fabrica
+  es el rojo de la norma.

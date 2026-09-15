@@ -136,9 +136,9 @@ export const INSTITUTIONAL_THEME: ThemeDefinition = {
  * El acento es ROJO y no el morado que aquella guia pone en «Acento secundario». El morado que
  * documenta esta descrito como «series alternas en graficos», que aqui no es el trabajo del
  * acento: el rol de acento tine los avisos, las formas y la segunda serie de todo grafico, y con
- * el morado ahi la aplicacion perdia el rojo en sitios donde el rojo es la marca. Las series son
- * otra cosa, y hoy salen de las paletas tonales; darle a un tema su propia paleta de series es
- * una decision aparte y no se toma aqui de rebote.
+ * el morado ahi la aplicacion perdia el rojo en sitios donde el rojo es la marca.
+ *
+ * El morado queda fuera y no vuelve. Ver «Revisado y descartado» en la hoja de ruta.
  */
 export const GRAPHIC_LINE_THEME: ThemeDefinition = {
   id: 'linea-grafica',
