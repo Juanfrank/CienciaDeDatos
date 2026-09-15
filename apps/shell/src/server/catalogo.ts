@@ -188,7 +188,7 @@ export async function defaultPresentations(): Promise<Record<string, ObjectPrese
 export async function setDefaultPresentation(
   actor: Actor,
   objectId: string,
-  presentacion: ObjectPresentation,
+  presentation: ObjectPresentation,
 ): Promise<ObjectPresentation> {
   permiso(actor, 'proponer-objetos-al-repositorio');
 
@@ -196,7 +196,7 @@ export async function setDefaultPresentation(
   if (!admitidas) {
     throw new CatalogError(`El catalogo no tiene ningun objeto '${objectId}'.`, 404);
   }
-  const problemas = validatePresentation(presentacion, admitidas);
+  const problemas = validatePresentation(presentation, admitidas);
   if (problemas.length > 0) {
     throw new CatalogError(
       `La presentacion no vale para '${objectId}': ` +
@@ -208,13 +208,13 @@ export async function setDefaultPresentation(
   // Vacio BORRA la entrada en vez de dejar un `{}` guardado: un objeto sin predeterminado y un
   // objeto con un predeterminado que no dice nada son lo mismo, y guardar los dos hace que la
   // tabla ensene «configurado» sobre algo que no configura nada.
-  const vacia = Object.keys(presentacion).length === 0;
+  const vacia = Object.keys(presentation).length === 0;
   const gobierno = await leerGobierno();
   await mutar<CatalogGovernance>(KEY_CATALOG, (guardado) => {
     const actual = { ...VACIO, ...guardado };
     const defaults = { ...actual.defaults };
     if (vacia) delete defaults[objectId];
-    else defaults[objectId] = presentacion;
+    else defaults[objectId] = presentation;
     return { ...actual, defaults };
   });
 
@@ -224,10 +224,10 @@ export async function setDefaultPresentation(
     entityId: objectId,
     action: 'update',
     before: { predeterminado: gobierno.defaults[objectId] ?? null },
-    after: { predeterminado: vacia ? null : presentacion },
+    after: { predeterminado: vacia ? null : presentation },
   });
 
-  return presentacion;
+  return presentation;
 }
 
 // ---------------------------------------------------------------------------

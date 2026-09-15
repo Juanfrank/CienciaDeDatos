@@ -43,7 +43,7 @@ describe('ranuras de los modulos de demostracion', () => {
      */
     it(`${modulo}/${item}: la presentacion usa claves e iconos que existen`, () => {
       const version = objectRegistry.resolve(instance.objectId, instance.version);
-      expect(validatePresentation(instance.presentacion, version.presentation)).toEqual([]);
+      expect(validatePresentation(instance.presentation, version.presentation)).toEqual([]);
     });
   }
 });

@@ -194,14 +194,14 @@ export function Frame({
   /*
    * La presentacion se dibuja AQUI, en el marco comun, y no en cada objeto.
    */
-  const presentacion = instance?.presentacion;
+  const presentation = instance?.presentation;
   // El icono por defecto lo declara el objeto y viaja con el; la presentacion solo lo anula.
-  const icono = presentacion?.icono ?? objectIcon;
-  const acento = presentacion?.acento ?? 'primario';
+  const icono = presentation?.icono ?? objectIcon;
+  const acento = presentation?.acento ?? 'primario';
   /*
    * La cabecera entera se puede ocultar.
    */
-  const withHeader = presentacion?.mostrarTitulo !== false;
+  const withHeader = presentation?.mostrarTitulo !== false;
   const body = useOverflows<HTMLDivElement>();
 
   /*
@@ -260,18 +260,18 @@ export function Frame({
       ref={tarjeta}
       className="objeto"
       data-accent={acento}
-      data-highlight={presentacion?.resaltado ? 'si' : undefined}
+      data-highlight={presentation?.resaltado ? 'si' : undefined}
       // El color del resaltado, cuando debe decir algo distinto del acento. Es una variable y no
       // una clase porque el valor sale de un rol del tema, no de un conjunto de estados.
       style={
-        presentacion?.colorDeResaltado
-          ? ({ '--color-de-resaltado': HIGHLIGHT_VARIABLE[presentacion.colorDeResaltado] } as React.CSSProperties)
+        presentation?.colorDeResaltado
+          ? ({ '--color-de-resaltado': HIGHLIGHT_VARIABLE[presentation.colorDeResaltado] } as React.CSSProperties)
           : undefined
       }
     >
       {withHeader ? (
       <div className="object__header">
-        {icono && presentacion?.mostrarIcono !== false ? (
+        {icono && presentation?.mostrarIcono !== false ? (
           // Decorativo: el nombre del objeto esta a su lado como texto. Darle tambien nombre
           // accesible haria que un lector leyera dos veces lo mismo.
           <span className="object__icon" aria-hidden="true">
@@ -284,16 +284,16 @@ export function Frame({
             uno traduciendo por su cuenta, «negrita» en una tarjeta y «negrita» en una tabla
             acabarian siendo pesos distintos.
           */}
-          <h3 style={estiloDeTexto(presentacion?.textos?.titulo)} data-testid="title-object">
+          <h3 style={estiloDeTexto(presentation?.textos?.titulo)} data-testid="title-object">
             {titulo}
           </h3>
-          {presentacion?.subtitulo ? (
+          {presentation?.subtitulo ? (
             <p
               className="object__subtitle"
               data-testid="subtitle-object"
-              style={estiloDeTexto(presentacion.textos?.subtitulo)}
+              style={estiloDeTexto(presentation.textos?.subtitulo)}
             >
-              {presentacion.subtitulo}
+              {presentation.subtitulo}
             </p>
           ) : null}
         </div>
@@ -365,14 +365,14 @@ export function KpiCard({ titulo, result, instance, slots, aggregations, objectI
     aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
   const delta = kpi.delta;
-  const formatear = measureFormatter(instance.presentacion, medidas[0]);
+  const formatear = measureFormatter(instance.presentation, medidas[0]);
   const valueColor = conditionalColor(
-    instance.presentacion?.condicional,
+    instance.presentation?.condicional,
     kpi.value,
     medidas[0],
   );
-  const etiqueta = instance.presentacion?.etiqueta?.content;
-  const labelPosition = instance.presentacion?.etiqueta?.cellPosition ?? 'debajo';
+  const etiqueta = instance.presentation?.etiqueta?.content;
+  const labelPosition = instance.presentation?.etiqueta?.cellPosition ?? 'debajo';
 
   return (
     <Frame
@@ -388,12 +388,12 @@ export function KpiCard({ titulo, result, instance, slots, aggregations, objectI
         etiqueta dice que mide la cifra. Con uno solo no se puede tener una tarjeta titulada
         «Casos pendientes» cuya cifra se rotule «al cierre del trimestre».
       */}
-      <div className="kpi" style={estiloDeTexto(instance.presentacion?.textos?.valor)}>
+      <div className="kpi" style={estiloDeTexto(instance.presentation?.textos?.valor)}>
         {etiqueta && labelPosition === 'encima' ? (
           <p
             className="kpi__label"
             data-testid="label-kpi"
-            style={estiloDeTexto(instance.presentacion?.textos?.etiqueta)}
+            style={estiloDeTexto(instance.presentation?.textos?.etiqueta)}
           >
             {etiqueta}
           </p>
@@ -408,7 +408,7 @@ export function KpiCard({ titulo, result, instance, slots, aggregations, objectI
           className="kpi__value"
           data-testid="value-kpi"
           style={estiloDeTexto({
-            ...instance.presentacion?.textos?.valor,
+            ...instance.presentation?.textos?.valor,
             ...(valueColor ? { color: valueColor } : {}),
           })}
         >
@@ -418,7 +418,7 @@ export function KpiCard({ titulo, result, instance, slots, aggregations, objectI
           <p
             className="kpi__label"
             data-testid="label-kpi"
-            style={estiloDeTexto(instance.presentacion?.textos?.etiqueta)}
+            style={estiloDeTexto(instance.presentation?.textos?.etiqueta)}
           >
             {etiqueta}
           </p>
@@ -482,7 +482,7 @@ export function Bars({
       medidas,
       aggregationsFor(medidas, instance.binding.measures, aggregations),
     ),
-    instance.presentacion?.orden,
+    instance.presentation?.orden,
   );
   // Los huecos no entran en el maximo: `Math.max` con un null lo convierte en 0, y con todos los
   // valores en hueco daria 0 y todas las barras a escala completa.
@@ -492,7 +492,7 @@ export function Bars({
   );
   const dimension = ejeX ? aFieldRef(ejeX) : undefined;
   const formatear = (valor: number, s: number) =>
-    measureFormatter(instance.presentacion, medidas[s] ?? '')(valor);
+    measureFormatter(instance.presentation, medidas[s] ?? '')(valor);
 
   const partition = multiple ? splitMultiples(vm) : undefined;
 
@@ -508,12 +508,12 @@ export function Bars({
           panels={partition.panels}
           omitted={partition.omitted}
           instance={instance}
-          presentacion={panelPresentation(instance.presentacion, partition.panels)}
+          presentation={panelPresentation(instance.presentation, partition.panels)}
           tipo={horizontal ? 'barras-horizontales' : 'barras'}
           titulo={titulo}
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
-          gridColumns={columnsFor(partition.panels.length, instance.presentacion?.multiplos?.gridColumns)}
+          gridColumns={columnsFor(partition.panels.length, instance.presentation?.multiplos?.gridColumns)}
           {...(onFiltrar ? { onFiltrar } : {})}
         />
       ) : (
@@ -522,11 +522,11 @@ export function Bars({
         tipo={horizontal ? 'barras-horizontales' : 'barras'}
         vm={vm}
         titulo={titulo}
-        presentacion={instance.presentacion}
+        presentation={instance.presentation}
         // Un formateador POR MEDIDA, el mismo que usa la tabla de datos adjunta: sin esto, la
         // cifra sobre la barra y la de la tabla dirian el mismo numero de dos formas distintas.
         formatear={(valor, serie) =>
-          measureFormatter(instance.presentacion, medidas[serie] ?? '')(valor)
+          measureFormatter(instance.presentation, medidas[serie] ?? '')(valor)
         }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
         {...(dimension && onFiltrar
@@ -593,10 +593,10 @@ export function Lines({
       medidas,
       aggregationsFor(medidas, instance.binding.measures, aggregations),
     ),
-    instance.presentacion?.orden,
+    instance.presentation?.orden,
   );
   const formatear = (valor: number, s: number) =>
-    measureFormatter(instance.presentacion, medidas[s] ?? '')(valor);
+    measureFormatter(instance.presentation, medidas[s] ?? '')(valor);
   const partition = multiple ? splitMultiples(vm) : undefined;
 
   return (
@@ -612,12 +612,12 @@ export function Lines({
           panels={partition.panels}
           omitted={partition.omitted}
           instance={instance}
-          presentacion={panelPresentation(instance.presentacion, partition.panels)}
+          presentation={panelPresentation(instance.presentation, partition.panels)}
           tipo={area ? 'area' : 'lineas'}
           titulo={titulo}
           formatear={formatear}
           {...(dimension ? { dimension: fieldKey(dimension) } : {})}
-          gridColumns={columnsFor(partition.panels.length, instance.presentacion?.multiplos?.gridColumns)}
+          gridColumns={columnsFor(partition.panels.length, instance.presentation?.multiplos?.gridColumns)}
           {...(onFiltrar ? { onFiltrar } : {})}
         />
       ) : (
@@ -629,9 +629,9 @@ export function Lines({
         tipo={area ? 'area' : 'lineas'}
         vm={vm}
         titulo={titulo}
-        presentacion={instance.presentacion}
+        presentation={instance.presentation}
         formatear={(valor, serie) =>
-          measureFormatter(instance.presentacion, medidas[serie] ?? '')(valor)
+          measureFormatter(instance.presentation, medidas[serie] ?? '')(valor)
         }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
         {...(dimension && onFiltrar
@@ -686,7 +686,7 @@ function Multiples({
   panels,
   omitted,
   instance,
-  presentacion,
+  presentation,
   tipo,
   titulo,
   formatear,
@@ -699,7 +699,7 @@ function Multiples({
   /** Cuantos valores de la dimension no caben en el limite. Se dicen; no se ocultan. */
   omitted: number;
   instance: ObjectInstance;
-  presentacion: ObjectPresentation | undefined;
+  presentation: ObjectPresentation | undefined;
   tipo: ChartKind;
   titulo: string;
   formatear: (valor: number, serie: number) => string;
@@ -728,12 +728,12 @@ function Multiples({
             tipo={tipo}
             vm={panel.vm}
             titulo={`${titulo} — ${panel.titulo}`}
-            {...(presentacion
+            {...(presentation
               ? {
                   /*
                    * La leyenda, SOLO en el primer panel.
                    */
-                  presentacion: i === 0 ? presentacion : { ...presentacion, leyenda: 'oculta' },
+                  presentation: i === 0 ? presentation : { ...presentation, leyenda: 'oculta' },
                 }
               : {})}
             formatear={formatear}
@@ -799,16 +799,16 @@ function Multiples({
 
 /** La presentacion con la que se dibuja CADA panel. */
 function panelPresentation(
-  presentacion: ObjectPresentation | undefined,
+  presentation: ObjectPresentation | undefined,
   panels: MultiplePanel[],
 ): ObjectPresentation | undefined {
-  if (presentacion?.multiplos?.sameScale === false) return presentacion;
+  if (presentation?.multiplos?.sameScale === false) return presentation;
   const maximo = maxCommon(panels);
-  if (maximo === undefined || presentacion?.ejes?.maximoY !== undefined) return presentacion;
+  if (maximo === undefined || presentation?.ejes?.maximoY !== undefined) return presentation;
   /*
    * El maximo se REDONDEA hacia arriba a un numero de escala.
    */
-  return { ...presentacion, ejes: { ...presentacion?.ejes, maximoY: niceScale(maximo) } };
+  return { ...presentation, ejes: { ...presentation?.ejes, maximoY: niceScale(maximo) } };
 }
 
 /** La celda de categoria del respaldo, que ademas FILTRA. */
@@ -875,7 +875,7 @@ export function Combo({
       medidas,
       aggregationsFor(medidas, instance.binding.measures, aggregations),
     ),
-    instance.presentacion?.orden,
+    instance.presentation?.orden,
   );
 
   return (
@@ -891,10 +891,10 @@ export function Combo({
         tipo="combinado"
         vm={vm}
         titulo={titulo}
-        presentacion={instance.presentacion}
+        presentation={instance.presentation}
         columnSeries={deColumnas.length}
         formatear={(valor, serie) =>
-          measureFormatter(instance.presentacion, medidas[serie] ?? '')(valor)
+          measureFormatter(instance.presentation, medidas[serie] ?? '')(valor)
         }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
         {...(dimension && onFiltrar
@@ -930,7 +930,7 @@ export function Combo({
                   />
                   {vm.series.map((serie, s) => (
                     <td key={serie} className="is-number">
-                      {measureFormatter(instance.presentacion, serie)(punto.values[s] ?? null)}
+                      {measureFormatter(instance.presentation, serie)(punto.values[s] ?? null)}
                     </td>
                   ))}
                 </tr>
@@ -980,9 +980,9 @@ export function Scatter({
         tipo="dispersion"
         vm={vm}
         titulo={titulo}
-        presentacion={instance.presentacion}
+        presentation={instance.presentation}
         formatear={(valor, serie) =>
-          measureFormatter(instance.presentacion, medidas[serie] ?? '')(valor)
+          measureFormatter(instance.presentation, medidas[serie] ?? '')(valor)
         }
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
         {...(dimension && onFiltrar
@@ -1011,7 +1011,7 @@ export function Scatter({
                   />
                   {vm.series.map((serie, s) => (
                     <td key={serie} className="is-number">
-                      {measureFormatter(instance.presentacion, serie)(p.values[s] ?? null)}
+                      {measureFormatter(instance.presentation, serie)(p.values[s] ?? null)}
                     </td>
                   ))}
                 </tr>
@@ -1055,9 +1055,9 @@ function MeasureDimension({
     ),
     // El embudo NO admite `orden` en su presentacion; llega siempre `undefined` y el orden es el
     // del dataset, que es el del proceso. La cascada si lo admite.
-    instance.presentacion?.orden,
+    instance.presentation?.orden,
   );
-  const formatear = measureFormatter(instance.presentacion, medidas[0] ?? '');
+  const formatear = measureFormatter(instance.presentation, medidas[0] ?? '');
   const valores = vm.points.map((p) => p.values[0] ?? 0);
 
   return (
@@ -1073,7 +1073,7 @@ function MeasureDimension({
         tipo={tipo}
         vm={vm}
         titulo={titulo}
-        presentacion={instance.presentacion}
+        presentation={instance.presentation}
         formatear={(valor) => formatear(valor)}
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
         {...(dimension && onFiltrar
@@ -1114,7 +1114,7 @@ function MeasureDimension({
 }
 
 export function Funnel(props: PropsObject) {
-  const compare = props.instance.presentacion?.embudo?.compare ?? 'primero';
+  const compare = props.instance.presentation?.embudo?.compare ?? 'primero';
   return (
     <MeasureDimension
       {...props}
@@ -1176,7 +1176,7 @@ export function TreeMap({
     medidas,
     aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
-  const formatear = measureFormatter(instance.presentacion, medidas[0] ?? '');
+  const formatear = measureFormatter(instance.presentation, medidas[0] ?? '');
   const principal = dimensiones[0];
 
   /*
@@ -1200,7 +1200,7 @@ export function TreeMap({
         tipo="mapa-de-arbol"
         vm={vm}
         titulo={titulo}
-        presentacion={instance.presentacion}
+        presentation={instance.presentation}
         formatear={(valor) => formatear(valor)}
         {...(principal ? { dimension: fieldKey(principal) } : {})}
         {...(principal && onFiltrar
@@ -1265,16 +1265,16 @@ export function Pie({
     medidas,
     aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
-  const formatear = measureFormatter(instance.presentacion, medidas[0] ?? '');
+  const formatear = measureFormatter(instance.presentation, medidas[0] ?? '');
 
   /*
    * El hueco por defecto del objeto, que la presentacion anula.
    */
   const circular = {
     ...(hole === undefined ? {} : { radioInterior: hole }),
-    ...instance.presentacion?.circular,
+    ...instance.presentation?.circular,
   };
-  const presentacion = { ...instance.presentacion, circular };
+  const presentation = { ...instance.presentation, circular };
 
   // El total se calcula sobre lo que de verdad se dibuja: los nulos no entran, igual que en el
   // grafico. Si entraran como cero, el porcentaje del respaldo no cuadraria con el del dibujo.
@@ -1296,7 +1296,7 @@ export function Pie({
         tipo="circular"
         vm={vm}
         titulo={titulo}
-        presentacion={presentacion}
+        presentation={presentation}
         formatear={(valor) => formatear(valor)}
         {...(dimension ? { dimension: fieldKey(dimension) } : {})}
         {...(dimension && onFiltrar
@@ -1371,11 +1371,11 @@ export function Gauge({
     medidas,
     aggregationsFor(medidas, instance.binding.measures, aggregations),
   );
-  const formatear = measureFormatter(instance.presentacion, medidas[0] ?? '');
+  const formatear = measureFormatter(instance.presentation, medidas[0] ?? '');
   const punto = vm.points[0];
   const valor = punto?.values[0] ?? null;
-  const objetivo = punto?.values[1] ?? instance.presentacion?.medidor?.objetivo ?? null;
-  const scale = gaugeScale(instance.presentacion?.medidor, valor, objetivo);
+  const objetivo = punto?.values[1] ?? instance.presentation?.medidor?.objetivo ?? null;
+  const scale = gaugeScale(instance.presentation?.medidor, valor, objetivo);
 
   return (
     <Frame
@@ -1390,7 +1390,7 @@ export function Gauge({
         tipo="medidor"
         vm={vm}
         titulo={titulo}
-        presentacion={instance.presentacion}
+        presentation={instance.presentation}
         formatear={(v) => formatear(v)}
       >
         {/*
@@ -1460,9 +1460,9 @@ export function Table({ titulo, result, instance, aggregations, objectIcon }: Pr
       <SortableTable
         projected={projected}
         titulo={titulo}
-        formatColumn={(nombre) => measureFormatter(instance.presentacion, nombre)}
-        {...(instance.presentacion?.condicional
-          ? { condicional: instance.presentacion.condicional }
+        formatColumn={(nombre) => measureFormatter(instance.presentation, nombre)}
+        {...(instance.presentation?.condicional
+          ? { condicional: instance.presentation.condicional }
           : {})}
       />
     </Frame>

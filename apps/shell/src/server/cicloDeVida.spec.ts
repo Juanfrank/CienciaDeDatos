@@ -792,7 +792,7 @@ describe('subir un objeto de version dentro de un modulo', () => {
                 instance: {
                   ...validItem().instance,
                   version: '1.0.0',
-                  presentacion: { acento: 'secundario', subtitulo: 'Al cierre del trimestre' },
+                  presentation: { acento: 'secundario', subtitulo: 'Al cierre del trimestre' },
                 },
               },
             ],
@@ -815,7 +815,7 @@ describe('subir un objeto de version dentro de un modulo', () => {
     const item = r.module.pages[0]?.items[0];
     expect(item?.instance.version).toBe('1.2.0');
     // Lo que alguien eligio a mano sigue ahi, con el mismo valor.
-    expect(item?.instance.presentacion).toEqual({
+    expect(item?.instance.presentation).toEqual({
       acento: 'secundario',
       subtitulo: 'Al cierre del trimestre',
     });

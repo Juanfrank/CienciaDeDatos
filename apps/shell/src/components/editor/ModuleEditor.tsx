@@ -464,8 +464,8 @@ export function ModuleEditor({
          * que la misma correccion —la leyenda abajo, la rejilla fuera— se repita una vez por cada
          * grafico que alguien coloque, y que salga distinta segun quien se acuerde.
          */
-        ...(definicion.presentacionPorDefecto
-          ? { presentacion: definicion.presentacionPorDefecto }
+        ...(definicion.defaultPresentation
+          ? { presentation: definicion.defaultPresentation }
           : {}),
         ...(config ? { settings: config } : {}),
       },

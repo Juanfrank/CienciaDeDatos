@@ -30,7 +30,7 @@ export interface PaletteObject {
   dimensiones: { min: number; max: number };
   medidas: { min: number; max: number };
   /** Claves de presentacion que ESTA version admite. El editor solo ofrece estas. */
-  presentacion: PresentationKey[];
+  presentation: PresentationKey[];
   /** Ranuras con nombre. Vacio si el objeto no las declara: el editor usa las genericas. */
   wells: FieldWell[];
   /**
@@ -40,7 +40,7 @@ export interface PaletteObject {
    * colocar: pedirla en otra llamada abriria la ventana en la que un objeto nace con el
    * predeterminado viejo porque la segunda respuesta todavia no habia llegado.
    */
-  presentacionPorDefecto?: ObjectPresentation;
+  defaultPresentation?: ObjectPresentation;
   notas?: string;
 }
 
@@ -118,10 +118,10 @@ export async function editorPalette(): Promise<EditorPalette> {
         attachable: definicion.attachable ?? false,
         dimensiones: version.dataContract.dimensions,
         medidas: version.dataContract.measures,
-        presentacion: version.presentation,
+        presentation: version.presentation,
         wells: version.dataContract.wells ?? [],
         ...(predeterminados[definicion.objectId]
-          ? { presentacionPorDefecto: predeterminados[definicion.objectId] }
+          ? { defaultPresentation: predeterminados[definicion.objectId] }
           : {}),
         ...(version.dataContract.notes ? { notas: version.dataContract.notes } : {}),
       };

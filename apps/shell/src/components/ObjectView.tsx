@@ -189,7 +189,7 @@ export function useObjectView(objeto: SerializedObject): {
         visto,
         aggregations,
         (medida, valor) =>
-          valor === null ? '—' : measureFormatter(instance.presentacion, medida)(valor),
+          valor === null ? '—' : measureFormatter(instance.presentation, medida)(valor),
         avisoDeAgregacion,
       );
     }

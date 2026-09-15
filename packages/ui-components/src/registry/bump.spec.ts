@@ -35,13 +35,13 @@ const objeto = (versions: ObjectVersion[]): VisualObjectDefinition => ({
 
 const instancia = (
   v: string,
-  presentacion?: ObjectInstance['presentacion'],
+  presentation?: ObjectInstance['presentation'],
 ): ObjectInstance => ({
   instanceId: 'i1',
   objectId: 'tarjeta-kpi',
   version: v,
   binding: { datasetId: 'd', dimensions: [], measures: ['M'] },
-  ...(presentacion ? { presentacion } : {}),
+  ...(presentation ? { presentation } : {}),
 });
 
 describe('bumpInstance', () => {
@@ -58,7 +58,7 @@ describe('bumpInstance', () => {
 
     expect(r.instance.version).toBe('1.1.0');
     // Lo elegido a mano sigue ahi, con el MISMO valor.
-    expect(r.instance.presentacion).toEqual({
+    expect(r.instance.presentation).toEqual({
       icono: 'balanza',
       acento: 'secundario',
       subtitulo: 'Al cierre',
@@ -80,8 +80,8 @@ describe('bumpInstance', () => {
     const r = bumpInstance(instancia('1.0.0', { icono: 'balanza' }), def, '1.1.0');
 
     expect(r.nuevas.sort()).toEqual(['mostrarTitulo', 'textos']);
-    expect(r.instance.presentacion).toEqual({ icono: 'balanza' });
-    expect(Object.keys(r.instance.presentacion ?? {})).not.toContain('mostrarTitulo');
+    expect(r.instance.presentation).toEqual({ icono: 'balanza' });
+    expect(Object.keys(r.instance.presentation ?? {})).not.toContain('mostrarTitulo');
   });
 
   it('lo que la version nueva ya no admite se quita, pero se DICE con su valor anterior', () => {
@@ -96,7 +96,7 @@ describe('bumpInstance', () => {
     );
 
     expect(r.retiradas).toEqual([{ clave: 'resaltado', valor: true }]);
-    expect(r.instance.presentacion).toEqual({ icono: 'balanza', acento: 'secundario' });
+    expect(r.instance.presentation).toEqual({ icono: 'balanza', acento: 'secundario' });
   });
 
   it('no toca la instancia original: devuelve una copia', () => {
@@ -112,7 +112,7 @@ describe('bumpInstance', () => {
     const def = objeto([version('1.0.0', ['icono']), version('1.1.0', ['icono', 'acento'])]);
     const r = bumpInstance(instancia('1.0.0'), def, '1.1.0');
 
-    expect(r.instance.presentacion).toBeUndefined();
+    expect(r.instance.presentation).toBeUndefined();
     expect(r.preserved).toEqual([]);
   });
 

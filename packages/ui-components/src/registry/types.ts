@@ -272,7 +272,7 @@ export interface ObjectInstance {
    * De la instancia y no del objeto, para que dos tarjetas del mismo tipo puedan verse distinto
    * sin publicar dos objetos.
    */
-  presentacion?: ObjectPresentation;
+  presentation?: ObjectPresentation;
   /**
    * Configuracion propia del tipo de objeto, discriminada por `objectId`.
    *

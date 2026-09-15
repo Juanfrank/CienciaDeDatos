@@ -38,7 +38,7 @@ export const demoModules: ModuleDefinition[] = [
               /*
                * La primera instancia del seed que configura su presentacion.
                */
-              presentacion: {
+              presentation: {
                 icono: 'expediente',
                 acento: 'primario',
                 resaltado: true,
@@ -78,7 +78,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [],
                 measures: ['CasosIngresados', 'CasosResueltos'],
               },
-              presentacion: {
+              presentation: {
                 icono: 'balanza',
                 acento: 'terciario',
                 resaltado: true,
@@ -100,7 +100,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Filtros',
               binding: { datasetId: DATASET, dimensions: [MATERIA, DISTRITO], measures: [] },
-              presentacion: { icono: 'filtro', acento: 'secundario' },
+              presentation: { icono: 'filtro', acento: 'secundario' },
               settings: {
                 objectId: 'panel-de-filtros',
                 pickers: [
@@ -229,7 +229,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Materia',
               binding: { datasetId: DATASET, dimensions: [MATERIA], measures: [] },
-              presentacion: { icono: 'filtro', acento: 'neutro' },
+              presentation: { icono: 'filtro', acento: 'neutro' },
             },
           },
           {
@@ -453,7 +453,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Nota metodologica',
               binding: WITHOUT_DATA,
-              presentacion: { icono: 'content', acento: 'terciario' },
+              presentation: { icono: 'content', acento: 'terciario' },
               settings: {
                 objectId: 'cuadro-de-texto',
                 textBox: {
@@ -564,7 +564,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.1.0',
               title: 'Ingresados',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosIngresados'] },
-              presentacion: { icono: 'expediente', etiqueta: { content: 'en el periodo', cellPosition: 'debajo' } },
+              presentation: { icono: 'expediente', etiqueta: { content: 'en el periodo', cellPosition: 'debajo' } },
             },
           },
           {
@@ -603,7 +603,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.1.0',
               title: 'Resueltos',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosResueltos'] },
-              presentacion: { icono: 'balanza', acento: 'secundario', etiqueta: { content: 'en el periodo', cellPosition: 'debajo' } },
+              presentation: { icono: 'balanza', acento: 'secundario', etiqueta: { content: 'en el periodo', cellPosition: 'debajo' } },
             },
           },
           {
@@ -677,7 +677,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [MATERIA],
                 measures: ['CasosIngresados', 'CasosResueltos'],
               },
-              presentacion: { subtitulo: 'Sin tocar nada' },
+              presentation: { subtitulo: 'Sin tocar nada' },
             },
           },
           {
@@ -698,7 +698,7 @@ export const demoModules: ModuleDefinition[] = [
                * grafico: la leyenda y las etiquetas se guardaban y el constructor de opciones no
                * las leia. Sirve de comprobacion en vivo de que ahora si.
                */
-              presentacion: {
+              presentation: {
                 subtitulo: 'Leyenda a la derecha, cifras, ordenado por valor y escala logaritmica',
                 leyenda: 'derecha',
                 etiquetasDeDato: true,
@@ -733,7 +733,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Leyenda arriba, cifra sobre cada punto y barra de zoom',
                 leyenda: 'arriba',
                 etiquetasDeDato: true,
@@ -784,7 +784,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [MATERIA],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentacion: { subtitulo: 'El total y de que se compone', leyenda: 'abajo', apilado: 'apilado' },
+              presentation: { subtitulo: 'El total y de que se compone', leyenda: 'abajo', apilado: 'apilado' },
             },
           },
           {
@@ -800,7 +800,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [MATERIA],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentacion: { subtitulo: 'La composicion, no la magnitud', leyenda: 'abajo', apilado: 'porcentaje' },
+              presentation: { subtitulo: 'La composicion, no la magnitud', leyenda: 'abajo', apilado: 'porcentaje' },
             },
           },
           {
@@ -816,7 +816,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [DISTRITO],
                 measures: ['CasosPendientes'],
               },
-              presentacion: { subtitulo: 'Los nombres largos caben enteros', leyenda: 'abajo', etiquetasDeDato: true },
+              presentation: { subtitulo: 'Los nombres largos caben enteros', leyenda: 'abajo', etiquetasDeDato: true },
             },
           },
           {
@@ -832,7 +832,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [MATERIA],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentacion: { subtitulo: 'Reparto por materia', leyenda: 'abajo', apilado: 'porcentaje' },
+              presentation: { subtitulo: 'Reparto por materia', leyenda: 'abajo', apilado: 'porcentaje' },
             },
           },
           {
@@ -848,7 +848,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos'],
               },
-              presentacion: { subtitulo: 'Volumen a lo largo del tiempo', leyenda: 'abajo' },
+              presentation: { subtitulo: 'Volumen a lo largo del tiempo', leyenda: 'abajo' },
             },
           },
           {
@@ -864,7 +864,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentacion: { subtitulo: 'De que se compone el total', leyenda: 'abajo', apilado: 'apilado' },
+              presentation: { subtitulo: 'De que se compone el total', leyenda: 'abajo', apilado: 'apilado' },
             },
           },
         ],
@@ -904,7 +904,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Reparto por materia',
               binding: { datasetId: DATASET, dimensions: [MATERIA], measures: ['CasosPendientes'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Cuanto pesa cada materia',
                 leyenda: 'abajo',
                 circular: { labels: 'porcentaje' },
@@ -920,7 +920,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Lo mismo, con el total',
               binding: { datasetId: DATASET, dimensions: [MATERIA], measures: ['CasosPendientes'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'El hueco deja sitio a la cifra',
                 leyenda: 'abajo',
                 circular: { totalEnElCentro: true, labels: 'porcentaje' },
@@ -936,7 +936,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Pendientes por trimestre',
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosPendientes'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Etiquetas con nombre y parte',
                 leyenda: 'oculta',
                 circular: { radioInterior: 40, labels: 'categoria-porcentaje' },
@@ -956,7 +956,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [],
                 measures: ['CasosResueltos', 'CasosIngresados'],
               },
-              presentacion: { subtitulo: 'El objetivo sale del dataset' },
+              presentation: { subtitulo: 'El objetivo sale del dataset' },
             },
           },
           {
@@ -968,7 +968,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Pendientes contra el tope',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosPendientes'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Escala fija: dos capturas se pueden comparar',
                 medidor: { minimo: 0, maximo: 3000, objetivo: 2000 },
               },
@@ -983,7 +983,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Ingresados, sin meta',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosIngresados'] },
-              presentacion: { subtitulo: 'Sin objetivo no hay marca; la escala se deduce' },
+              presentation: { subtitulo: 'Sin objetivo no hay marca; la escala se deduce' },
             },
           },
         ],
@@ -1035,7 +1035,7 @@ export const demoModules: ModuleDefinition[] = [
                   lineas: ['CasosPendientes'],
                 },
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Una sola escala: la comparacion es directa',
                 leyenda: 'abajo',
                 ejes: { tituloY: 'Casos' },
@@ -1060,7 +1060,7 @@ export const demoModules: ModuleDefinition[] = [
                   lineas: ['CasosPendientes'],
                 },
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'La linea se mide en la escala de la derecha',
                 leyenda: 'abajo',
                 combinado: { axisSecondary: true },
@@ -1081,7 +1081,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Un punto por trimestre',
                 etiquetasDeDato: true,
                 ejes: { xTitle: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
@@ -1101,7 +1101,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Una tercera medida sin un tercer eje',
                 etiquetasDeDato: true,
                 ejes: { xTitle: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
@@ -1145,7 +1145,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Carga por trimestre',
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosIngresados'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Ordenado de mayor a menor: el embudo clasico',
                 leyenda: 'oculta',
                 orden: { por: 'valor', direction: 'desc' },
@@ -1161,7 +1161,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Sin ordenar: el proceso tal cual',
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosIngresados'] },
-              presentacion: {
+              presentation: {
                 // Una etapa mayor que la anterior ensancha el embudo en vez de estrecharlo. No es
                 // un fallo de dibujo: es la anomalia, y esconderla ordenando seria la version
                 // bonita de no contarla.
@@ -1184,7 +1184,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [MATERIA, TRIMESTRE],
                 measures: ['CasosPendientes'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Dos niveles: la materia agrupa y el trimestre reparte',
                 etiquetasDeDato: true,
               },
@@ -1199,7 +1199,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'De que se compone el pendiente',
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosPendientes'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Cada barra empieza donde acabo la anterior',
                 ejes: { tituloY: 'Casos' },
               },
@@ -1214,7 +1214,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Un solo nivel',
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosIngresados'] },
-              presentacion: { subtitulo: 'Sin jerarquia, el area es la medida', etiquetasDeDato: true },
+              presentation: { subtitulo: 'Sin jerarquia, el area es la medida', etiquetasDeDato: true },
             },
           },
         ],
@@ -1254,7 +1254,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.2.0',
               title: 'Resueltos por trimestre, contra la meta',
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosResueltos'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'La raya es lo que convierte la cifra en respuesta',
                 leyenda: 'oculta',
                 etiquetasDeDato: true,
@@ -1278,7 +1278,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Minimo y maximo a mano: comparable con el de al lado',
                 leyenda: 'abajo',
                 // Los mismos limites en los dos objetos: dos graficos de la misma medida con
@@ -1305,7 +1305,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Del tema, no libres: se elige cual de los ocho le toca a cada una',
                 leyenda: 'abajo',
                 coloresDeSerie: [3, 2, 1],
@@ -1321,7 +1321,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.2.0',
               title: 'La misma medida, la misma escala',
               binding: { datasetId: DATASET, dimensions: [MATERIA], measures: ['CasosResueltos'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Por materia, con el mismo 0-2400 que el de al lado',
                 leyenda: 'oculta',
                 etiquetasDeDato: true,
@@ -1371,7 +1371,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'La tercera opcion entre «todas» y «ninguna»',
                 leyenda: 'abajo',
                 etiquetasDeDato: { mostrar: true, onlyEnds: true },
@@ -1392,7 +1392,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Con cuatro categorias cabe; con veinte, no',
                 leyenda: 'abajo',
                 etiquetasDeDato: { mostrar: true, cellPosition: 'encima' },
@@ -1413,7 +1413,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [DISTRITO, MATERIA],
                 measures: ['CasosPendientes'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'En horizontal, los que no caben se esconden sin avisar',
                 leyenda: 'oculta',
                 ejes: { tituloY: 'Casos', rotateX: 45 },
@@ -1433,7 +1433,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos', 'CasosPendientes'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Senale una columna: la suma ya no hay que hacerla de cabeza',
                 leyenda: 'abajo',
                 apilado: 'apilado',
@@ -1489,7 +1489,7 @@ export const demoModules: ModuleDefinition[] = [
                   'eje-y': ['CasosIngresados'],
                 },
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Misma escala: los paneles se pueden comparar',
                 leyenda: 'oculta',
                 ejes: { gridlines: true },
@@ -1514,7 +1514,7 @@ export const demoModules: ModuleDefinition[] = [
                   'eje-y': ['CasosIngresados', 'CasosResueltos'],
                 },
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Dos medidas por panel, en una sola configuracion',
                 leyenda: 'abajo',
                 multiplos: { gridColumns: 1 },
@@ -1558,7 +1558,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.2.0',
               title: 'Pendientes',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosPendientes'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Roja por encima de 2.000',
                 etiqueta: { content: 'Al cierre del trimestre', cellPosition: 'debajo' },
                 condicional: { rules: [{ comparator: 'mayor', valor: 2000, color: 'error' }] },
@@ -1574,7 +1574,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.2.0',
               title: 'Resueltos',
               binding: { datasetId: DATASET, dimensions: [], measures: ['CasosResueltos'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'La misma regla, y esta no salta',
                 etiqueta: { content: 'Al cierre del trimestre', cellPosition: 'debajo' },
                 condicional: { rules: [{ comparator: 'menor', valor: 1000, color: 'error' }] },
@@ -1594,7 +1594,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosResueltos', 'CasosPendientes'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'Tres reglas, evaluadas en orden',
                 condicional: {
                   rules: [
@@ -1615,7 +1615,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.4.0',
               title: 'Pendientes por trimestre',
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosPendientes'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'La barra que se pasa del umbral se pinta sola',
                 leyenda: 'oculta',
                 etiquetasDeDato: { mostrar: true },
@@ -1637,7 +1637,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.1.0',
               title: 'Pendientes por distrito',
               binding: { datasetId: DATASET, dimensions: [DISTRITO], measures: ['CasosPendientes'] },
-              presentacion: {
+              presentation: {
                 subtitulo: 'La misma regla, en horizontal',
                 leyenda: 'oculta',
                 etiquetasDeDato: { mostrar: true },
@@ -1666,7 +1666,7 @@ export const demoModules: ModuleDefinition[] = [
                   valores: ['CasosPendientes'],
                 },
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'El color tambien llega a los subtotales',
                 condicional: { rules: [{ comparator: 'mayor', valor: 300, color: 'error' }] },
               },
@@ -1749,7 +1749,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Contenedor simple',
               binding: WITHOUT_DATA,
-              presentacion: { icono: 'contenedor', subtitulo: 'Rejilla propia de seis columnas' },
+              presentation: { icono: 'contenedor', subtitulo: 'Rejilla propia de seis columnas' },
               settings: {
                 objectId: 'contenedor-simple',
                 simple: { gridColumns: 6 },
@@ -1799,7 +1799,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Contenedor desplazable',
               binding: WITHOUT_DATA,
-              presentacion: { icono: 'contenedor', subtitulo: 'Se desplaza solo en vertical' },
+              presentation: { icono: 'contenedor', subtitulo: 'Se desplaza solo en vertical' },
               settings: {
                 objectId: 'contenedor-desplazable',
                 scrollable: { axis: 'y', gridColumns: 4 },
@@ -1838,7 +1838,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Contenedor con pestanas',
               binding: WITHOUT_DATA,
-              presentacion: { icono: 'tabs', subtitulo: 'Cada pestana con su propia disposicion' },
+              presentation: { icono: 'tabs', subtitulo: 'Cada pestana con su propia disposicion' },
               settings: {
                 objectId: 'contenedor-con-pestanas',
                 tabs: { gridColumns: 8, initialTab: 'p1' },
@@ -1909,7 +1909,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Contenedor ampliable',
               binding: WITHOUT_DATA,
-              presentacion: { icono: 'expandir', subtitulo: 'La ventana tiene su propia rejilla' },
+              presentation: { icono: 'expandir', subtitulo: 'La ventana tiene su propia rejilla' },
               settings: {
                 objectId: 'contenedor-ampliable',
                 expandable: { gridColumns: 6, expandedColumns: 12, textoDeAmpliar: 'Ampliar' },
@@ -1995,7 +1995,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosPendientes'],
               },
-              presentacion: { subtitulo: 'Paginada, acotable y con su total al pie' },
+              presentation: { subtitulo: 'Paginada, acotable y con su total al pie' },
               attachments: [
                 {
                   instanceId: 'comp-tabla-paginado',
@@ -2043,7 +2043,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosPendientes'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'No se mueve cuando se acota la tabla',
                 leyenda: 'oculta',
                 ejes: { tituloY: 'Casos' },
@@ -2063,7 +2063,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [TRIMESTRE],
                 measures: ['CasosIngresados', 'CasosResueltos'],
               },
-              presentacion: {
+              presentation: {
                 subtitulo: 'El pie referencia las medidas por su orden de mapeo',
                 leyenda: 'abajo',
                 ejes: { tituloY: 'Casos' },

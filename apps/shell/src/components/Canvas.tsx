@@ -19,7 +19,7 @@ export interface PropsCanvas {
   palette: ChartPalette;
   titulo: string;
   dimension?: string;
-  presentacion?: ObjectPresentation;
+  presentation?: ObjectPresentation;
   formatear?: (valor: number, serie: number) => string;
   /** Solo el combinado: cuantas series iniciales son columnas. Sale del mapeo, no del formato. */
   columnSeries?: number;
@@ -35,7 +35,7 @@ export default function Canvas({
   palette,
   titulo,
   dimension,
-  presentacion,
+  presentation,
   formatear,
   columnSeries,
   onSeleccionar,
@@ -62,29 +62,29 @@ export default function Canvas({
         palette,
         titulo,
         ...(dimension ? { dimension } : {}),
-        ...(presentacion?.leyenda ? { leyenda: presentacion.leyenda } : {}),
+        ...(presentation?.leyenda ? { leyenda: presentation.leyenda } : {}),
         // Se pasa TAL CUAL: la forma anterior era un booleano y la nueva es un objeto, y quien
         // normaliza es el constructor de opciones, en una sola funcion pura.
-        ...(presentacion?.etiquetasDeDato === undefined
+        ...(presentation?.etiquetasDeDato === undefined
           ? {}
-          : { etiquetasDeDato: presentacion.etiquetasDeDato }),
-        ...(presentacion?.tooltip ? { tooltip: presentacion.tooltip } : {}),
-        ...(presentacion?.ejes ? { ejes: presentacion.ejes } : {}),
-        ...(presentacion?.apilado ? { apilado: presentacion.apilado } : {}),
-        ...(presentacion?.circular ? { circular: presentacion.circular } : {}),
-        ...(presentacion?.medidor ? { medidor: presentacion.medidor } : {}),
-        ...(presentacion?.combinado ? { combinado: presentacion.combinado } : {}),
-        ...(presentacion?.embudo ? { embudo: presentacion.embudo } : {}),
-        ...(presentacion?.cascada ? { cascada: presentacion.cascada } : {}),
-        ...(presentacion?.referencias ? { referencias: presentacion.referencias } : {}),
-        ...(presentacion?.coloresDeSerie ? { coloresDeSerie: presentacion.coloresDeSerie } : {}),
-        ...(presentacion?.condicional ? { condicional: presentacion.condicional } : {}),
+          : { etiquetasDeDato: presentation.etiquetasDeDato }),
+        ...(presentation?.tooltip ? { tooltip: presentation.tooltip } : {}),
+        ...(presentation?.ejes ? { ejes: presentation.ejes } : {}),
+        ...(presentation?.apilado ? { apilado: presentation.apilado } : {}),
+        ...(presentation?.circular ? { circular: presentation.circular } : {}),
+        ...(presentation?.medidor ? { medidor: presentation.medidor } : {}),
+        ...(presentation?.combinado ? { combinado: presentation.combinado } : {}),
+        ...(presentation?.embudo ? { embudo: presentation.embudo } : {}),
+        ...(presentation?.cascada ? { cascada: presentation.cascada } : {}),
+        ...(presentation?.referencias ? { referencias: presentation.referencias } : {}),
+        ...(presentation?.coloresDeSerie ? { coloresDeSerie: presentation.coloresDeSerie } : {}),
+        ...(presentation?.condicional ? { condicional: presentation.condicional } : {}),
         ...(columnSeries === undefined ? {} : { columnSeries }),
         ...(formatear ? { formatear } : {}),
       }),
     // `formatear` se redefine en cada render del padre, asi que NO entra en las dependencias: lo
     // que de verdad decide como se formatea es la presentacion, y esa si esta.
-    [tipo, vm, palette, titulo, dimension, presentacion, columnSeries],
+    [tipo, vm, palette, titulo, dimension, presentation, columnSeries],
   );
   const clave = useMemo(() => JSON.stringify(opciones), [opciones]);
   const porDefecto: 'canvas' | 'svg' = elementsOf(vm) >= ELEMENT_THRESHOLD ? 'canvas' : 'svg';

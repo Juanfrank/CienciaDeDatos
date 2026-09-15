@@ -26,7 +26,7 @@ interface Cuerpo {
   decision?: 'aprobar' | 'devolver';
   motivo?: string;
   disabled?: boolean;
-  presentacion?: ObjectPresentation;
+  presentation?: ObjectPresentation;
 }
 
 export async function POST(request: Request) {
@@ -69,11 +69,11 @@ export async function POST(request: Request) {
     }
 
     if (body.accion === 'predeterminar') {
-      if (!body.objectId || typeof body.presentacion !== 'object' || body.presentacion === null) {
+      if (!body.objectId || typeof body.presentation !== 'object' || body.presentation === null) {
         throw new CatalogError('Se requieren el objeto y la presentacion.', 400);
       }
       return {
-        presentacion: await setDefaultPresentation(actor, body.objectId, body.presentacion),
+        presentation: await setDefaultPresentation(actor, body.objectId, body.presentation),
       };
     }
 

@@ -74,11 +74,11 @@ export function MatrixTable({
 
   // Un formateador por medida: la matriz puede llevar hasta cuatro, cada una con su formato.
   const formatear = useMemo(
-    () => vm.medidas.map((m) => measureFormatter(instance.presentacion, m)),
-    [vm.medidas, instance.presentacion],
+    () => vm.medidas.map((m) => measureFormatter(instance.presentation, m)),
+    [vm.medidas, instance.presentation],
   );
   const gridColumns = useMemo(() => leaves(vm.gridColumns, plegadasColumna), [vm, plegadasColumna]);
-  const condicional = instance.presentacion?.condicional;
+  const condicional = instance.presentation?.condicional;
 
   /*
    * El orden se aplica ENTRE HERMANOS, no sobre la tabla entera.

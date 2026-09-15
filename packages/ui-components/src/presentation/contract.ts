@@ -362,14 +362,14 @@ export const MAX_RADIO_INTERIOR = 80;
 
 /** Valida una presentacion contra lo que el objeto declara admitir. */
 export function validatePresentation(
-  presentacion: ObjectPresentation | undefined,
+  presentation: ObjectPresentation | undefined,
   admitidas: PresentationKey[],
 ): PresentationProblem[] {
-  if (!presentacion) return [];
+  if (!presentation) return [];
   const problems: PresentationProblem[] = [];
   const admite = new Set<string>(admitidas);
 
-  for (const clave of Object.keys(presentacion)) {
+  for (const clave of Object.keys(presentation)) {
     if (!admite.has(clave)) {
       problems.push({
         clave,
@@ -378,27 +378,27 @@ export function validatePresentation(
     }
   }
 
-  if (presentacion.icono !== undefined && !iconNameIs(presentacion.icono)) {
+  if (presentation.icono !== undefined && !iconNameIs(presentation.icono)) {
     problems.push({
       clave: 'icono',
-      issue: `'${String(presentacion.icono)}' no es un icono del catalogo.`,
+      issue: `'${String(presentation.icono)}' no es un icono del catalogo.`,
     });
   }
 
   if (
-    presentacion.acento !== undefined &&
-    !(ACCENTS as readonly string[]).includes(presentacion.acento)
+    presentation.acento !== undefined &&
+    !(ACCENTS as readonly string[]).includes(presentation.acento)
   ) {
     problems.push({
       clave: 'acento',
-      issue: `'${String(presentacion.acento)}' no es un acento. Use: ${ACCENTS.join(', ')}.`,
+      issue: `'${String(presentation.acento)}' no es un acento. Use: ${ACCENTS.join(', ')}.`,
     });
   }
 
   /*
    * Los estilos de texto, destino a destino.
    */
-  for (const [destino, style] of Object.entries(presentacion.textos ?? {})) {
+  for (const [destino, style] of Object.entries(presentation.textos ?? {})) {
     if (!(TEXT_TARGETS as readonly string[]).includes(destino)) {
       problems.push({
         clave: `textos.${destino}`,
@@ -437,8 +437,8 @@ export function validatePresentation(
    * El formato de numero, renglon a renglon.
    */
   const renglones: [string, NumberFormat | undefined][] = [
-    ['general', presentacion.formatos?.general],
-    ...Object.entries(presentacion.formatos?.porMedida ?? {}),
+    ['general', presentation.formatos?.general],
+    ...Object.entries(presentation.formatos?.porMedida ?? {}),
   ];
   for (const [nombre, formato] of renglones) {
     if (!formato) continue;
@@ -467,7 +467,7 @@ export function validatePresentation(
     }
   }
 
-  const circular = presentacion.circular;
+  const circular = presentation.circular;
   if (circular?.radioInterior !== undefined) {
     if (circular.radioInterior < 0 || circular.radioInterior > MAX_RADIO_INTERIOR) {
       problems.push({
@@ -481,7 +481,7 @@ export function validatePresentation(
   /*
    * Un maximo por debajo del minimo no es un rango: es una escala del reves.
    */
-  const ejes = presentacion.ejes;
+  const ejes = presentation.ejes;
   if (ejes?.rotateX !== undefined && (ejes.rotateX < -90 || ejes.rotateX > 90)) {
     problems.push({
       clave: 'ejes.rotateX',
@@ -518,17 +518,17 @@ export function validatePresentation(
     });
   }
 
-  if (presentacion.referencias !== undefined) {
-    if (presentacion.referencias.length > MAX_REFERENCES) {
+  if (presentation.referencias !== undefined) {
+    if (presentation.referencias.length > MAX_REFERENCES) {
       problems.push({
         clave: 'referencias',
         issue:
-          `${presentacion.referencias.length} lineas de referencia. El maximo es ` +
+          `${presentation.referencias.length} lineas de referencia. El maximo es ` +
           `${MAX_REFERENCES}: mas rayas sobre un grafico dejan de ser referencias y pasan a ser ` +
           `una rejilla.`,
       });
     }
-    presentacion.referencias.forEach((line, i) => {
+    presentation.referencias.forEach((line, i) => {
       if (!Number.isFinite(line.valor)) {
         problems.push({
           clave: `referencias.${i}.valor`,
@@ -553,7 +553,7 @@ export function validatePresentation(
     });
   }
 
-  const rules = presentacion.condicional?.rules;
+  const rules = presentation.condicional?.rules;
   if (rules !== undefined) {
     if (rules.length > MAX_RULES) {
       problems.push({
@@ -595,7 +595,7 @@ export function validatePresentation(
     });
   }
 
-  for (const [i, indice] of (presentacion.coloresDeSerie ?? []).entries()) {
+  for (const [i, indice] of (presentation.coloresDeSerie ?? []).entries()) {
     if (!Number.isInteger(indice) || indice < 0 || indice > 7) {
       problems.push({
         clave: `coloresDeSerie.${i}`,
@@ -605,13 +605,13 @@ export function validatePresentation(
   }
 
   if (
-    presentacion.embudo?.compare !== undefined &&
-    !(FUNNEL_COMPARISONS as readonly string[]).includes(presentacion.embudo.compare)
+    presentation.embudo?.compare !== undefined &&
+    !(FUNNEL_COMPARISONS as readonly string[]).includes(presentation.embudo.compare)
   ) {
     problems.push({
       clave: 'embudo.comparar',
       issue:
-        `'${String(presentacion.embudo.compare)}' no es una comparacion. ` +
+        `'${String(presentation.embudo.compare)}' no es una comparacion. ` +
         `Use: ${FUNNEL_COMPARISONS.join(', ')}.`,
     });
   }
@@ -629,7 +629,7 @@ export function validatePresentation(
   /*
    * Un minimo por encima del maximo no es un rango: es una escala del reves.
    */
-  const medidor = presentacion.medidor;
+  const medidor = presentation.medidor;
   if (medidor?.minimo !== undefined && medidor.maximo !== undefined && medidor.minimo >= medidor.maximo) {
     problems.push({
       clave: 'medidor.maximo',
@@ -637,7 +637,7 @@ export function validatePresentation(
     });
   }
 
-  if (presentacion.subtitulo !== undefined && presentacion.subtitulo.length > MAX_SUBTITLE) {
+  if (presentation.subtitulo !== undefined && presentation.subtitulo.length > MAX_SUBTITLE) {
     problems.push({
       clave: 'subtitulo',
       issue: `El subtitulo pasa de ${MAX_SUBTITLE} caracteres. Es una linea, no un parrafo.`,
@@ -645,16 +645,16 @@ export function validatePresentation(
   }
 
   if (
-    presentacion.leyenda !== undefined &&
-    !(LEGEND_MODES as readonly string[]).includes(presentacion.leyenda)
+    presentation.leyenda !== undefined &&
+    !(LEGEND_MODES as readonly string[]).includes(presentation.leyenda)
   ) {
     problems.push({
       clave: 'leyenda',
-      issue: `'${String(presentacion.leyenda)}' no es un modo. Use: ${LEGEND_MODES.join(', ')}.`,
+      issue: `'${String(presentation.leyenda)}' no es un modo. Use: ${LEGEND_MODES.join(', ')}.`,
     });
   }
 
-  const { decimales, unit } = presentacion.formato ?? {};
+  const { decimales, unit } = presentation.formato ?? {};
   if (decimales !== undefined && (!Number.isInteger(decimales) || decimales < 0 || decimales > MAX_DECIMALS)) {
     problems.push({
       clave: 'formato.decimales',
@@ -686,15 +686,15 @@ export const numberFormatAs = (formato: NumericFormat | undefined): NumberFormat
 
 /** El formateador de UNA medida del objeto. */
 export function measureFormatter(
-  presentacion: ObjectPresentation | undefined,
+  presentation: ObjectPresentation | undefined,
   medida?: string,
 ): (n: number | null) => string {
-  const porMedida = presentacion?.formatos
-    ? measureFormat(presentacion.formatos, medida)
+  const porMedida = presentation?.formatos
+    ? measureFormat(presentation.formatos, medida)
     : undefined;
   // `formatos` manda sobre `formato` por ser lo mas especifico; `formato` es la forma anterior y
   // se interpreta como el renglon general, que es justo lo que era.
-  return numberFormatter(porMedida ?? numberFormatAs(presentacion?.formato));
+  return numberFormatter(porMedida ?? numberFormatAs(presentation?.formato));
 }
 
 /** Compatibilidad: el formateador de la forma anterior, del objeto entero. */

@@ -80,18 +80,18 @@ export function bumpInstance(
   const admiteDestino = new Set<PresentationKey>(destino.presentation);
   const admiteOrigen = new Set<PresentationKey>(origen?.presentation ?? []);
 
-  const puestas = Object.entries(instance.presentacion ?? {}) as [PresentationKey, unknown][];
+  const puestas = Object.entries(instance.presentation ?? {}) as [PresentationKey, unknown][];
 
   const preserved: PresentationKey[] = [];
   const retiradas: { clave: PresentationKey; valor: unknown }[] = [];
-  const presentacion: Record<string, unknown> = {};
+  const presentation: Record<string, unknown> = {};
 
   for (const [clave, valor] of puestas) {
     // Una clave sin valor no esta configurada: no hay nada que conservar ni que avisar.
     if (valor === undefined) continue;
     if (admiteDestino.has(clave)) {
       preserved.push(clave);
-      presentacion[clave] = valor;
+      presentation[clave] = valor;
     } else {
       retiradas.push({ clave, valor });
     }
@@ -104,11 +104,11 @@ export function bumpInstance(
   const subida: ObjectInstance = {
     ...instance,
     version: hasta,
-    ...(Object.keys(presentacion).length > 0
-      ? { presentacion: presentacion as ObjectInstance['presentacion'] }
+    ...(Object.keys(presentation).length > 0
+      ? { presentation: presentation as ObjectInstance['presentation'] }
       : {}),
   };
-  if (Object.keys(presentacion).length === 0) delete subida.presentacion;
+  if (Object.keys(presentation).length === 0) delete subida.presentation;
 
   return { instance: subida, preserved, retiradas, nuevas };
 }

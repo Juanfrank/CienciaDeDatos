@@ -170,8 +170,8 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         // acento que no es rol del tema se descubre al dibujar.
         diagnostico.bindingProblems = [
           ...validateAttachments(instance, (objectId) => registry.get(objectId)),
-          ...validatePresentation(instance.presentacion, version.presentation).map((p) => ({
-            slot: `presentacion.${p.clave}`,
+          ...validatePresentation(instance.presentation, version.presentation).map((p) => ({
+            slot: `presentation.${p.clave}`,
             kind: 'contrato-incumplido' as const,
             problem: p.issue,
           })),
@@ -219,8 +219,8 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
           kind: p.kind,
           problem: p.issue,
         })),
-        ...validatePresentation(instance.presentacion, version.presentation).map((p) => ({
-          slot: `presentacion.${p.clave}`,
+        ...validatePresentation(instance.presentation, version.presentation).map((p) => ({
+          slot: `presentation.${p.clave}`,
           kind: 'contrato-incumplido' as const,
           problem: p.issue,
         })),

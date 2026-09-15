@@ -5,7 +5,7 @@ export interface ModulePackage {
   id: string;
   name: string;
   /**
-   * Arbol de presentacion: usa los mismos moduleId que la organizacion general, pero puede
+   * Arbol de presentation: usa los mismos moduleId que la organizacion general, pero puede
    * agruparlos en carpetas distintas, con otro nombre/icono, y en otro orden.
    */
   visualTree: NavNode[];

@@ -135,7 +135,7 @@ export async function exportEnqueue(input: InputEnqueue) {
 function textsOf(instance: ObjectInstance, projected: QueryResult): string[][] {
   // Un formateador POR COLUMNA y no por celda: en una tabla larga son miles de llamadas, y el
   // formato depende de la medida, que es la columna.
-  const porColumna = projected.columns.map((c) => measureFormatter(instance.presentacion, c.name));
+  const porColumna = projected.columns.map((c) => measureFormatter(instance.presentation, c.name));
   return projected.rows.map((fila) =>
     fila.map((cell, i) =>
       typeof cell === 'number' ? (porColumna[i] ?? String)(cell) : String(cell ?? ''),
@@ -145,7 +145,7 @@ function textsOf(instance: ObjectInstance, projected: QueryResult): string[][] {
 
 /** Lo que el objeto dice ademas de sus cifras. */
 function notasDe(instance: ObjectInstance): string[] {
-  const p = instance.presentacion;
+  const p = instance.presentation;
   const notas: string[] = [];
 
   for (const line of p?.referencias ?? []) {

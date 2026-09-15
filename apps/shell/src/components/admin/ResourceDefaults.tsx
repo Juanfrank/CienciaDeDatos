@@ -40,7 +40,7 @@ export function ResourceDefaults({
   inicial: ObjectPresentation;
 }) {
   const router = useRouter();
-  const [presentacion, setPresentacion] = useState<ObjectPresentation>(inicial);
+  const [presentation, setPresentation] = useState<ObjectPresentation>(inicial);
   const [enCurso, setEnCurso] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
@@ -60,12 +60,12 @@ export function ResourceDefaults({
     version,
     title: nombre,
     binding: { datasetId: '', dimensions: [], measures: [] },
-    presentacion,
+    presentation,
   };
 
   const aplicar = (cambio: (i: ObjectInstance) => ObjectInstance) => {
     setGuardado(false);
-    setPresentacion(cambio(instancia).presentacion ?? {});
+    setPresentation(cambio(instancia).presentation ?? {});
   };
 
   async function guardar(cual: ObjectPresentation) {
@@ -74,14 +74,14 @@ export function ResourceDefaults({
     const respuesta = await pedir('/api/admin/resources', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ accion: 'predeterminar', objectId, presentacion: cual }),
+      body: JSON.stringify({ accion: 'predeterminar', objectId, presentation: cual }),
     });
     setEnCurso(false);
     if (!respuesta?.ok) {
       setError(await motivoDeFallo(respuesta, 'No se pudo guardar.'));
       return;
     }
-    setPresentacion(cual);
+    setPresentation(cual);
     setGuardado(true);
     // Para que la tabla de recursos ensene «configurado» sin recargar a mano.
     router.refresh();
@@ -105,7 +105,7 @@ export function ResourceDefaults({
           className="pastilla"
           disabled={enCurso}
           data-testid="predeterminar-guardar"
-          onClick={() => void guardar(presentacion)}
+          onClick={() => void guardar(presentation)}
         >
           Guardar
         </button>
@@ -117,7 +117,7 @@ export function ResourceDefaults({
         <button
           type="button"
           className="button-link"
-          disabled={enCurso || Object.keys(presentacion).length === 0}
+          disabled={enCurso || Object.keys(presentation).length === 0}
           data-testid="predeterminar-limpiar"
           onClick={() => void guardar({})}
         >

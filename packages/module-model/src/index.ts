@@ -27,6 +27,7 @@ export {
   type GridPosition,
   type GridProblem,
 } from './grid';
+export { RENAMES, migrateDefinition, type KeyRename } from './migrateDefinition';
 export {
   applyModuleOperation,
   applyModuleOperations,

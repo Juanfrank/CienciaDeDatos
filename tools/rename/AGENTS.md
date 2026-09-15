@@ -41,6 +41,8 @@ Cada caso de esta lista tiene hoy una guarda en la herramienta o una prueba en e
 | Import sin destino | El archivo ya estaba movido, no habia nada que mover, y el especificador se quedo en espanol | `especificadoresRotos()` tras aplicar |
 | Nombre de argumento ICU | Se renombro la clave del objeto y no el `{campo}` del mensaje | Los nombres ICU van en `PROTEGIDOS` |
 | Campo que cruza la API | `body['clave']` es cadena y la clave del emisor es codigo: el acceso devolvio 400 | Pendiente de una pasada dedicada al contrato HTTP |
+| Propiedad guardada en disco | La definicion de un modulo es JSON: renombrar la clave en el tipo compila y deja de leerse lo ya guardado, sin error | `migrateDefinition` y `tools/coherence/claves-guardadas.spec.ts` |
+| Acceso indexado por cadena | `ObjectInstance['presentacion']` es una cadena para la herramienta y se quedo sin mover | El aviso «cadenas en posicion de propiedad» al terminar |
 | Id de ranura | `ranuras: { filas: … }` paso a `dataRows` y el objeto salio marcado como roto | `apps/shell/src/server/modules.spec.ts` |
 | Texto de un JSX | `<h1>Editor de modulos</h1>` quedo diciendo «Editor de modules» | La zona `prosa` de `segmentarJsx`, y `tools/texto-visible.spec.ts` |
 | Atributo `data-*` | El TSX escribia `data-axis` y el CSS seguia buscando `data-eje` | `apps/shell/src/server/atributos-de-datos.spec.ts` |

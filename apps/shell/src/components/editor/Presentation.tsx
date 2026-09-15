@@ -77,14 +77,14 @@ export function Presentation({
   onCambiar: (change: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
   const t = useTranslator();
-  const p = instance.presentacion ?? {};
+  const p = instance.presentation ?? {};
   const admite = (clave: PresentationKey) => admitidas.includes(clave);
   const prueba = `pres-${instance.instanceId}`;
 
   const set = (parcial: Partial<ObjectPresentation>) =>
     onCambiar((i) => ({
       ...i,
-      presentacion: { ...i.presentacion, ...parcial },
+      presentation: { ...i.presentation, ...parcial },
     }));
 
   /*
@@ -93,9 +93,9 @@ export function Presentation({
   const textSet = (destino: TextTarget, style: TextStyle) =>
     onCambiar((i) => ({
       ...i,
-      presentacion: {
-        ...i.presentacion,
-        textos: { ...i.presentacion?.textos, [destino]: style },
+      presentation: {
+        ...i.presentation,
+        textos: { ...i.presentation?.textos, [destino]: style },
       },
     }));
 
@@ -1390,11 +1390,11 @@ function MeasureFormat({
   prueba: string;
   onCambiar: (change: (i: ObjectInstance) => ObjectInstance) => void;
 }) {
-  const formatos = instance.presentacion?.formatos;
+  const formatos = instance.presentation?.formatos;
   const medidas = instance.binding.measures;
 
   const formatSet = (siguiente: ObjectFormats) =>
-    onCambiar((i) => ({ ...i, presentacion: { ...i.presentacion, formatos: siguiente } }));
+    onCambiar((i) => ({ ...i, presentation: { ...i.presentation, formatos: siguiente } }));
 
   const generalSet = (formato: NumberFormat) =>
     formatSet({ ...formatos, general: formato });

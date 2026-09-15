@@ -391,23 +391,50 @@ contarse. Relajar la expresion regular seria peor, porque se comeria texto de ve
 Dos erratas del renombrado salieron a la luz al migrar, y estan corregidas en el catalogo:
 «Anadir colorRule de color» y «Ver dataRows».
 
-### 2.11 Las propiedades siguen en espanol
+### 2.11 Las propiedades siguen en espanol — EN CURSO, con lo que bloqueaba ya resuelto
 
-El renombrado al ingles cubrio declaraciones, archivos, clases CSS e identificadores de prueba.
-Se dejo fuera, sin darse cuenta, la clase mas leida desde fuera: **las propiedades**. Son 167
-nombres distintos en 478 sitios —`definicion.dimensiones`, `instancia.presentacion`, `objeto.
-titulo`—, y hasta ahora el detector ni siquiera las miraba porque solo buscaba declaraciones.
+El renombrado al ingles cubrio declaraciones, archivos, clases CSS e identificadores de prueba. Se
+dejo fuera, sin darse cuenta, la clase mas leida desde fuera: **las propiedades**. `node
+tools/rename/detect.mjs` ya las cuenta.
 
-Ahora `node tools/rename/detect.mjs` las cuenta. Renombrarlas NO es equivalente a lo ya hecho: la
-definicion de un modulo se guarda como JSON en el almacen, asi que las claves estan en disco. Un
-renombrado sin migracion deja de leer los modulos ya guardados.
+Renombrarlas NO es equivalente a lo ya hecho, y ese es el punto entero: la definicion de un modulo
+se guarda como JSON en el almacen, asi que las claves estan **en disco**. Renombrar una propiedad
+en el tipo compila perfectamente —el JSON es `unknown` para el compilador— y deja de leerse el
+campo en todos los modulos que ya existen. No hay error ni prueba roja; lo que hay es un grafico
+que sale sin formato y nadie sabe por que.
 
-Hace falta, por ese orden:
+**Hecho lo que bloqueaba:**
 
-1. Una migracion que lea la forma vieja y escriba la nueva, con su prueba sobre un fixture real.
-2. El renombrado, paquete a paquete, como los anteriores.
-3. Una guarda que compare las claves del JSON guardado con las del tipo, que es el contrato que
-   hoy no ata nadie.
+1. **La migracion**, `packages/module-model/src/migrateDefinition.ts`. Una tabla de renombrados,
+   cada uno con la RUTA donde vive la clave —`tipo` aparece en sitios que quieren decir cosas
+   distintas, y renombrarlos todos porque se llaman igual es el error que una migracion tiene que
+   no cometer—. Se aplica al LEER, en `moduleStore`, y tambien sobre el historial, que es de donde
+   sale lo que se restaura. Es idempotente, asi que se queda puesta en vez de borrarse «cuando ya
+   no haga falta», que es una fecha que nadie decide. Su prueba corre sobre un fixture con la
+   estructura real: paginas, objetos, instancias y complementos anidados.
+2. **La guarda**, `tools/coherence/claves-guardadas.spec.ts`. Ata lo que hoy no ataba nadie: una
+   clave ya renombrada no se puede volver a escribir con su nombre viejo en ningun archivo —ni la
+   semilla, ni una prueba, ni un componente—, porque lo que se escriba asi nace ya invisible para
+   el codigo que lo lee. Busca la clave escrita COMO CLAVE y no la palabra suelta: la aplicacion
+   habla espanol y su prosa esta llena de la palabra. Verificada enrojeciendo con la clave vieja
+   devuelta a la semilla.
+3. **El primer renombrado, de punta a punta:** `presentacion` -> `presentation`, la mas leida de
+   todas —vive en la instancia de cada objeto y en la de cada complemento adjuntado—. 24 archivos,
+   con las tres suites de navegador en verde.
+
+**Lo que queda** son **106 claves** mas en `ui-components` y `module-model` —`icono`, `acento`,
+`etiqueta`, `leyenda`, `apilado`, `medidor`…—. Es trabajo mecanico, y ahora es trabajo mecanico
+SEGURO: cada tanda es una fila en la tabla, una pasada de `tools/rename/renombrar.mjs` y la guarda
+diciendo si quedo algo sin mover. Conviene ir por grupos que se leen juntos —el formato de cifra,
+los ejes, la leyenda— y no de una vez: una pasada de cien claves no se revisa.
+
+Dos detalles que la primera pasada enseno, y que valen para las siguientes:
+
+- `renombrar.mjs` no toca un acceso indexado por cadena —`ObjectInstance['presentacion']`—, porque
+  para el es una cadena. Los avisa al terminar; hay que mirarlos.
+- La clave que aparece dentro de un diagnostico (`slot: \`presentacion.${clave}\``) se renombra
+  tambien: es el nombre del campo dicho a quien edita, y dejarlo en espanol seria senalar un campo
+  que ya no se llama asi.
 
 ### 2.14 Clases de CSS que nadie escribe, y nada lo comprueba
 

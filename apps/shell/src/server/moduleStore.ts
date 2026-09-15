@@ -1,4 +1,5 @@
 import type { ModuleDefinition } from '@app/module-model';
+import { migrateDefinition } from '@app/module-model';
 import { mutar, leer } from './almacenCompartido';
 import { demoModules } from './modules';
 
@@ -68,7 +69,21 @@ export class StoreModuleRepository implements ModuleStore {
   private async all(): Promise<ModuleDefinition[]> {
     // Igual que el gobierno: sin nada guardado se devuelve la semilla SIN persistirla, para no
     // meter una escritura en el camino de lectura.
-    return (await leer<ModuleDefinition[]>(KEY_MODULES)) ?? clonar(demoModules);
+    const guardados = (await leer<ModuleDefinition[]>(KEY_MODULES)) ?? clonar(demoModules);
+
+    /*
+     * La migracion de claves va AQUI, en el camino de lectura — apartado 2.11.
+     *
+     * Las definiciones se guardan como JSON, asi que renombrar una propiedad en el tipo deja de
+     * leer lo que ya esta escrito sin que el compilador diga nada: el JSON es `unknown` para el.
+     * Lo que se ve es un modulo que pierde su formato, no un error.
+     *
+     * Al leer y no en un comando de una vez: un comando hay que acordarse de ejecutarlo en cada
+     * entorno, y el que se olvide se descubre cuando alguien abre un modulo. Es idempotente, asi
+     * que se queda puesto para siempre en vez de borrarse «cuando ya no haga falta», que es una
+     * fecha que nadie decide.
+     */
+    return guardados.map((m) => migrateDefinition(m));
   }
 
   /**
@@ -148,7 +163,15 @@ export class StoreModuleRepository implements ModuleStore {
     // Sin nada guardado se devuelve la semilla SIN persistirla, igual que `all()`: una lectura
     // que escribe convierte abrir una pantalla en un cambio de estado.
     const actuales = (await leer<PublishedVersion[]>(KEY_HISTORY)) ?? demoHistory();
-    return actuales.filter((v) => v.moduleId === moduleId).sort((a, b) => b.version - a.version);
+    return actuales
+      .filter((v) => v.moduleId === moduleId)
+      /*
+       * El historial tambien migra, y por una razon mas fuerte que la lista: de aqui sale lo que
+       * se RESTAURA. Sin esto, volver a una version de antes del renombrado devolveria el modulo
+       * a la forma vieja y lo dejaria sin formato justo despues de restaurarlo.
+       */
+      .map((v) => ({ ...v, definition: migrateDefinition(v.definition) }))
+      .sort((a, b) => b.version - a.version);
   }
 }
 

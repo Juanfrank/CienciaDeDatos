@@ -701,7 +701,7 @@ test.describe('que hay dentro de cada modulo, y subirlo de version (4.5)', () =>
                     measures: ['CasosPendientes'],
                   },
                   // `formato` lo admiten 1.0.0 y la ultima: es lo que tiene que sobrevivir.
-                  presentacion: { formato: 'entero' },
+                  presentation: { formato: 'entero' },
                 },
               },
             ],
@@ -802,11 +802,11 @@ test.describe('que hay dentro de cada modulo, y subirlo de version (4.5)', () =>
 
     // Lo que manda es el almacen, no el mensaje.
     const { modulo } = (await (await page.request.get(`/api/modules/${slug}/edit`)).json()) as {
-      modulo: { pages: { items: { instance: { version: string; presentacion?: Record<string, unknown> } }[] }[] };
+      modulo: { pages: { items: { instance: { version: string; presentation?: Record<string, unknown> } }[] }[] };
     };
     const instancia = modulo.pages[0]?.items[0]?.instance;
     expect(instancia?.version).not.toBe('1.0.0');
-    expect(instancia?.presentacion?.['formato']).toBe('entero');
+    expect(instancia?.presentation?.['formato']).toBe('entero');
   });
 
   test('«subir todos» deja UN mensaje por objeto, no uno para todos', async ({ page }) => {

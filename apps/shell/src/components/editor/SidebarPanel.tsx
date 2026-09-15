@@ -206,7 +206,7 @@ export function SidebarPanel({
               <Presentation
                 iconos={iconos}
                 instance={selected.instance}
-                admitidas={definicion?.presentacion ?? []}
+                admitidas={definicion?.presentation ?? []}
                 kinds={dataset?.kinds ?? {}}
                 saving={saving}
                 onCambiar={(change) =>

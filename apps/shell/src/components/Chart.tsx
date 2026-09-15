@@ -23,7 +23,7 @@ export function Chart({
   vm,
   titulo,
   dimension,
-  presentacion,
+  presentation,
   formatear,
   columnSeries,
   onSeleccionar,
@@ -36,7 +36,7 @@ export function Chart({
   titulo: string;
   dimension?: string;
   /** Leyenda, etiquetas de dato, ejes y orden — lo que el editor configura. */
-  presentacion?: ObjectPresentation;
+  presentation?: ObjectPresentation;
   /** Formatea una cifra de la serie `s` con el formato de SU medida. */
   formatear?: (valor: number, serie: number) => string;
   /** Solo el combinado: cuantas series iniciales son columnas. */
@@ -83,7 +83,7 @@ export function Chart({
           palette={palette}
           titulo={titulo}
           {...(dimension ? { dimension } : {})}
-          {...(presentacion ? { presentacion } : {})}
+          {...(presentation ? { presentation } : {})}
           {...(formatear ? { formatear } : {})}
           {...(columnSeries === undefined ? {} : { columnSeries })}
           {...(onSeleccionar ? { onSeleccionar } : {})}

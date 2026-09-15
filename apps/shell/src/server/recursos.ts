@@ -270,7 +270,7 @@ export async function iconUsage(): Promise<Map<string, UsoDeRecurso>> {
       for (const item of pagina.items) {
         // El icono elegido a mano vive en la presentacion de la instancia; lo demas de esa
         // presentacion aqui no importa.
-        const elegido = item.instance.presentacion?.['icono'];
+        const elegido = item.instance.presentation?.['icono'];
         if (typeof elegido !== 'string' || elegido.length === 0) continue;
         porIcono.set(elegido, (porIcono.get(elegido) ?? 0) + 1);
       }

@@ -87,17 +87,17 @@ describe('deshabilitar un icono', () => {
 describe('el formato de salida de un objeto', () => {
   it('llega a la paleta, que es de donde el editor lo copia al colocar', async () => {
     const antes = await editorPalette();
-    expect(antes.objetos.find((o) => o.objectId === 'barras')?.presentacionPorDefecto).toBeUndefined();
+    expect(antes.objetos.find((o) => o.objectId === 'barras')?.defaultPresentation).toBeUndefined();
 
     await setDefaultPresentation(admin, 'barras', { leyenda: 'abajo' });
 
     const despues = await editorPalette();
-    expect(despues.objetos.find((o) => o.objectId === 'barras')?.presentacionPorDefecto).toEqual({
+    expect(despues.objetos.find((o) => o.objectId === 'barras')?.defaultPresentation).toEqual({
       leyenda: 'abajo',
     });
     // Y solo a ese: fijar el de uno no puede repartirlo entre los demas.
     expect(
-      despues.objetos.filter((o) => o.presentacionPorDefecto !== undefined).map((o) => o.objectId),
+      despues.objetos.filter((o) => o.defaultPresentation !== undefined).map((o) => o.objectId),
     ).toEqual(['barras']);
   });
 
@@ -106,7 +106,7 @@ describe('el formato de salida de un objeto', () => {
     await setDefaultPresentation(admin, 'barras', {});
 
     const palette = await editorPalette();
-    expect(palette.objetos.find((o) => o.objectId === 'barras')?.presentacionPorDefecto).toBeUndefined();
+    expect(palette.objetos.find((o) => o.objectId === 'barras')?.defaultPresentation).toBeUndefined();
     expect(await defaultPresentations()).toEqual({});
   });
 
