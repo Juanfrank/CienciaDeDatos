@@ -53,6 +53,9 @@ export interface ModuleActor {
 export function seeCan(module: ModuleDefinition, actor: ModuleActor): boolean {
   if (module.status === 'publicado') return true;
   if (module.ownerUserId === actor.userId) return true;
+  // Un retirado se ensena a quien puede volver a ponerlo, y a nadie mas: dejarlo visible al
+  // resto anularia la retirada, que es justamente lo que se pidio.
+  if (module.status === 'retirado') return actor.role === 'administrador';
   return module.status === 'pendiente-de-aprobacion' && actor.role === 'administrador';
 }
 
@@ -82,11 +85,14 @@ function permission(actor: ModuleActor, capacidad: Parameters<typeof assertCan>[
 const TRANSICIONES: Record<ModuleStatus, ModuleStatus[]> = {
   borrador: ['pendiente-de-aprobacion'],
   'pendiente-de-aprobacion': ['publicado', 'borrador'],
-  // Un publicado se puede RETIRAR a borrador. Es la unica salida, y existe porque la
-  // alternativa —que un modulo publicado con un fallo no se pueda quitar de la vista de todos
-  // sin desplegar codigo— es peor que el riesgo de que alguien lo retire por error, que queda
-  // registrado y es reversible.
-  publicado: ['borrador'],
+  // Un publicado se puede RETIRAR. Es la unica salida, y existe porque la alternativa —que un
+  // modulo publicado con un fallo no se pueda quitar de la vista de todos sin desplegar codigo—
+  // es peor que el riesgo de que alguien lo retire por error, que queda registrado y es
+  // reversible.
+  publicado: ['retirado'],
+  // Y de retirado se vuelve, con las mismas paginas y el mismo numero de version: no es una
+  // publicacion nueva, es la misma que se habia quitado de en medio.
+  retirado: ['publicado'],
 };
 
 function transitionRequire(desde: ModuleStatus, hasta: ModuleStatus): void {
@@ -752,7 +758,7 @@ async function missingIfTreeAttach(
   for (const evento of resultado.audit) await treeEventRecord(evento);
 }
 
-/** Vuelta a borrador: rechazo de una propuesta, o retirada de algo publicado. */
+/** Vuelta a borrador: rechazo de una propuesta, o retirada de la propuesta por quien la hizo. */
 export async function revertDraft(input: InputTransition): Promise<ModuleDefinition> {
   const modulo = await modules.get(input.moduleId);
   if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
@@ -766,21 +772,13 @@ export async function revertDraft(input: InputTransition): Promise<ModuleDefinit
     );
   }
 
-  // Retirar algo PUBLICADO afecta a todos los equipos que lo ven, asi que es de Administrador.
-  // Retirar la propia propuesta, en cambio, lo puede hacer quien la hizo.
-  if (modulo.status === 'publicado') {
-    permission(input.actor, 'publicar-modulo-institucional');
-  } else {
-    // Rechazar una propuesta es cosa de quien aprueba; retirarla, de quien la hizo.
-    if (input.actor.role !== 'administrador') authorshipRequire(modulo, input.actor);
-    permission(input.actor, 'crear-editar-modulos-borrador');
-  }
+  // Rechazar una propuesta es cosa de quien aprueba; retirarla, de quien la hizo.
+  if (input.actor.role !== 'administrador') authorshipRequire(modulo, input.actor);
+  permission(input.actor, 'crear-editar-modulos-borrador');
 
   const actualizado: ModuleDefinition = {
     ...modulo,
     status: 'borrador',
-    // Quien lo retira se queda a cargo del borrador si no tenia autor —un publicado no lo tiene—,
-    // para que no quede un borrador sin dueño que nadie pueda editar.
     ownerUserId: modulo.ownerUserId ?? input.actor.userId,
     updatedAt: ahora(),
   };
@@ -794,6 +792,86 @@ export async function revertDraft(input: InputTransition): Promise<ModuleDefinit
     before: { status: modulo.status },
     after: { status: actualizado.status },
     justification: motivo,
+  });
+
+  return actualizado;
+}
+
+/**
+ * publicado -> retirado. Deja de servirse, sin perder lo que fue.
+ *
+ * No vuelve a borrador: lo publicado no es de nadie, y convertirlo en borrador le habria puesto
+ * un autor —quien lo retiro— y lo habria dejado editable en el sitio, que es justo lo que 4.5
+ * prohibe. Un retirado se vuelve a poner o se borra; para cambiarlo esta la revision.
+ */
+export async function retirar(input: InputTransition): Promise<ModuleDefinition> {
+  // Afecta a todos los equipos que lo ven, asi que es de Administrador.
+  permission(input.actor, 'publicar-modulo-institucional');
+
+  const modulo = await modules.get(input.moduleId);
+  if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
+  transitionRequire(modulo.status, 'retirado');
+
+  const motivo = input.motivo?.trim();
+  if (!motivo) {
+    throw new CicloDeVidaError(
+      'Hace falta un motivo: es lo unico que les dice a los equipos que lo usaban por que ' +
+        'desaparecio.',
+      400,
+    );
+  }
+
+  const actualizado: ModuleDefinition = { ...modulo, status: 'retirado', updatedAt: ahora() };
+
+  await modules.save(actualizado);
+  await changeRecord({
+    actorId: input.actor.userId,
+    entityType: 'module',
+    entityId: modulo.moduleId,
+    action: 'withdraw',
+    before: { status: modulo.status },
+    after: { status: actualizado.status },
+    justification: motivo,
+  });
+
+  return actualizado;
+}
+
+/**
+ * retirado -> publicado. La misma version, otra vez en servicio.
+ *
+ * No pasa por `publicar` a proposito: publicar sube la version y guarda una foto nueva en el
+ * historial, y aqui no hay contenido nuevo que fotografiar. Contarlo como publicacion habria
+ * dejado el historial con dos versiones identicas y un numero que ya no cuenta publicaciones.
+ *
+ * Tampoco se comprueban las cerraduras de publicacion, y eso es deliberado.
+ *
+ * Restablecer es DESHACER la retirada: el modulo se estaba sirviendo con este mismo contenido un
+ * momento antes, asi que negarle la vuelta por un problema que ya tenia entonces no protege a
+ * nadie — deja el modulo fuera de servicio y sin camino de regreso, que es peor que el estado del
+ * que se venia. Las cerraduras guardan la puerta por la que entra contenido NUEVO: proponer y
+ * publicar. Esta no lo es.
+ */
+export async function restablecer(input: InputTransition): Promise<ModuleDefinition> {
+  permission(input.actor, 'publicar-modulo-institucional');
+
+  const modulo = await modules.get(input.moduleId);
+  if (!modulo) throw new CicloDeVidaError('Modulo no encontrado.', 404);
+  transitionRequire(modulo.status, 'publicado');
+
+  const actualizado: ModuleDefinition = { ...modulo, status: 'publicado', updatedAt: ahora() };
+
+  await modules.save(actualizado);
+  // Puede que su nodo ya no este: se retiro, y alguien limpio el arbol mientras tanto.
+  await missingIfTreeAttach(actualizado, input.actor);
+  await changeRecord({
+    actorId: input.actor.userId,
+    entityType: 'module',
+    entityId: modulo.moduleId,
+    action: 'restore',
+    before: { status: modulo.status },
+    after: { status: actualizado.status, version: actualizado.version },
+    ...(input.motivo?.trim() ? { justification: input.motivo.trim() } : {}),
   });
 
   return actualizado;
@@ -814,6 +892,10 @@ export async function deleteModule(input: InputTransition): Promise<void> {
   }
 
   await modules.remove(input.moduleId);
+  // Y su nodo del arbol con el. Sin esto, borrar algo que estuvo publicado dejaba en la
+  // organizacion general una hoja que apunta a un modulo inexistente: el menu la dibuja, quien
+  // la pulsa se encuentra un 404, y lo unico que lo decia era el aviso de nodos colgantes.
+  await detachTreeNode(modulo, input.actor);
   await changeRecord({
     actorId: input.actor.userId,
     entityType: 'module',
@@ -821,6 +903,51 @@ export async function deleteModule(input: InputTransition): Promise<void> {
     action: 'delete',
     before: { slug: modulo.slug, name: modulo.name, status: modulo.status },
   });
+}
+
+/**
+ * Quita del arbol la hoja de un modulo que ya no existe.
+ *
+ * Pasa por la papelera y de ahi al borrado definitivo porque son las dos operaciones que el
+ * arbol tiene, y las dos dejan su evento: el registro cuenta la misma historia que contaria si
+ * alguien lo hubiera hecho a mano desde el editor del arbol.
+ */
+async function detachTreeNode(module: ModuleDefinition, actor: ModuleActor): Promise<void> {
+  const arbol = await governance.getTree();
+
+  /*
+   * El id del nodo se BUSCA, no se compone.
+   *
+   * `missingIfTreeAttach` crea los suyos como `nodo-{moduleId}`, pero los de la semilla y los
+   * que alguien creo a mano desde el editor del arbol no siguen esa forma. Dar por hecho el
+   * nombre habria dejado sin quitar justo los nodos mas antiguos.
+   */
+  const idDelNodo = (nodos: NavNode[]): string | null => {
+    for (const nodo of nodos) {
+      if (isFolder(nodo)) {
+        const dentro = idDelNodo(nodo.children);
+        if (dentro) return dentro;
+      } else if (nodo.moduleRef.moduleId === module.moduleId) {
+        return nodo.id;
+      }
+    }
+    return null;
+  };
+
+  const nodeId = idDelNodo(arbol.nodes);
+  if (!nodeId) return;
+
+  const aPapelera = applyTreeOperation(arbol, { type: 'enviar-a-papelera', nodeId }, actor);
+  if (!aPapelera.ok) return;
+  const borrado = applyTreeOperation(
+    aPapelera.tree,
+    { type: 'borrar-definitivamente', trashedNodeId: nodeId },
+    actor,
+  );
+  if (!borrado.ok) return;
+
+  await governance.setTree(borrado.tree);
+  for (const evento of [...aPapelera.audit, ...borrado.audit]) await treeEventRecord(evento);
 }
 
 /** El modulo de un slug, SOLO si este actor puede verlo. */
@@ -840,6 +967,15 @@ export async function slugServableModule(
 ): Promise<ModuleDefinition | undefined> {
   const modulo = await visibleModuleSlug(slug, actor);
   if (!modulo) return undefined;
+  /*
+   * Retirado quiere decir RETIRADO DEL SERVICIO, tambien para quien lo retiro.
+   *
+   * Un Administrador si lo ve —lo necesita, es quien puede volver a ponerlo—, pero verlo en la
+   * tabla no es lo mismo que servirlo en su direccion: si `/m/{slug}` siguiera respondiendo para
+   * el, la unica prueba de que la retirada funciona seria mirarla con otra cuenta, y una retirada
+   * que solo se nota desde fuera se parece demasiado a una que no se ha hecho.
+   */
+  if (modulo.status === 'retirado') return undefined;
   return (await moduloEncendido(modulo.slug)) ? modulo : undefined;
 }
 

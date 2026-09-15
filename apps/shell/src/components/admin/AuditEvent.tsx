@@ -11,6 +11,7 @@ const ACTION: Record<ConfigChangeLog['action'], string> = {
   submit: 'envio a aprobacion',
   publish: 'publico',
   withdraw: 'retiro',
+  restore: 'volvio a poner en servicio',
   disable: 'dejo de ofrecer',
   enable: 'volvio a ofrecer',
 };

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import type { MessageKey } from '@app/i18n';
 import type { ObjetoEnModulo } from '../../server/recursos';
 import { BumpModule } from './BumpModule';
+import { BumpTodos } from './BumpTodos';
+import type { Subida } from './bump';
 import { Icon } from '../icons/Icon';
 import { useTranslator } from '../Locale';
 
@@ -28,7 +30,16 @@ export function ModuleObjects({ slug, objetos }: { slug: string; objetos: Objeto
     return <span className="muted-text">—</span>;
   }
 
-  const atrasados = objetos.filter((o) => o.atrasada).length;
+  const pendientes: Subida[] = objetos
+    .filter((o) => o.atrasada)
+    .map((o) => ({
+      slug,
+      objectId: o.objectId,
+      nombre: o.name,
+      desde: o.version,
+      hasta: o.ultima,
+    }));
+  const atrasados = pendientes.length;
   const instancias = objetos.reduce((n, o) => n + o.instancias, 0);
 
   return (
@@ -75,6 +86,10 @@ export function ModuleObjects({ slug, objetos }: { slug: string; objetos: Objeto
           {t('admin.modules.objects.summary', { n: objetos.length, instancias })}
         </p>
 
+        {/* Subirlos todos, arriba y una vez. Con ocho objetos atrasados, ocho gestos iguales son
+            la clase de trabajo que se acaba no haciendo. */}
+        <BumpTodos subidas={pendientes} testid={slug} />
+
         <div className="container-table">
           <table className="tabla">
             <thead>
@@ -108,6 +123,7 @@ export function ModuleObjects({ slug, objetos }: { slug: string; objetos: Objeto
                       <BumpModule
                         slug={slug}
                         objectId={o.objectId}
+                        nombre={o.name}
                         desde={o.version}
                         hasta={o.ultima}
                       />

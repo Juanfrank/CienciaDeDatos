@@ -10,6 +10,8 @@ import {
   deleteModule,
   createDraft,
   createRevision,
+  restablecer,
+  retirar,
   revertDraft,
   sendApproval,
   saveDraft,
@@ -234,13 +236,42 @@ describe('retirar y rechazar', () => {
 
     expect(await visibleModuleSlug('retirable', visor)).toBeDefined();
 
-    await revertDraft({
+    const retirado = await retirar({
       actor: admin,
       moduleId: modulo.moduleId,
       motivo: 'La medida esta mal calculada para el trimestre en curso.',
     });
 
+    // Retirado NO es borrador: no vuelve a tener autor ni se puede editar en el sitio, y por eso
+    // lo unico que se ofrece sobre el es volver a ponerlo o borrarlo.
+    expect(retirado.status).toBe('retirado');
+    expect(retirado.ownerUserId).toBeUndefined();
     expect(await visibleModuleSlug('retirable', visor)).toBeUndefined();
+  });
+
+  it('lo retirado se vuelve a poner con la MISMA version: no es una publicacion nueva', async () => {
+    const modulo = await readyDraft(colaborador, 'restablecible');
+    await sendApproval({ actor: colaborador, moduleId: modulo.moduleId });
+    const publicado = await publicar({ actor: admin, moduleId: modulo.moduleId });
+    await retirar({ actor: admin, moduleId: modulo.moduleId, motivo: 'Se revisa el calculo.' });
+
+    const vuelto = await restablecer({ actor: admin, moduleId: modulo.moduleId });
+
+    expect(vuelto.status).toBe('publicado');
+    expect(vuelto.version).toBe(publicado.version);
+    // Y el historial no gana una foto: no hay contenido nuevo que fotografiar.
+    expect(await historialDe(admin, modulo.moduleId)).toHaveLength(1);
+    expect(await visibleModuleSlug('restablecible', visor)).toBeDefined();
+  });
+
+  it('retirar sin motivo no se puede: es lo que explica la desaparicion', async () => {
+    const modulo = await readyDraft(colaborador, 'retirada-sin-motivo');
+    await sendApproval({ actor: colaborador, moduleId: modulo.moduleId });
+    await publicar({ actor: admin, moduleId: modulo.moduleId });
+
+    await expect(retirar({ actor: admin, moduleId: modulo.moduleId })).rejects.toMatchObject({
+      status: 400,
+    });
   });
 
   it('un Colaborador NO retira lo publicado: afecta a todos los equipos que lo ven', async () => {
@@ -249,8 +280,18 @@ describe('retirar y rechazar', () => {
     await publicar({ actor: admin, moduleId: modulo.moduleId });
 
     await expect(
-      revertDraft({ actor: colaborador, moduleId: modulo.moduleId, motivo: 'me arrepiento' }),
+      retirar({ actor: colaborador, moduleId: modulo.moduleId, motivo: 'me arrepiento' }),
     ).rejects.toMatchObject({ status: 403 });
+  });
+
+  it('lo retirado SI se borra: es lo unico que se puede borrar de lo que estuvo publicado', async () => {
+    const modulo = await readyDraft(colaborador, 'retirado-y-borrado');
+    await sendApproval({ actor: colaborador, moduleId: modulo.moduleId });
+    await publicar({ actor: admin, moduleId: modulo.moduleId });
+    await retirar({ actor: admin, moduleId: modulo.moduleId, motivo: 'Ya no se usa.' });
+
+    await expect(deleteModule({ actor: admin, moduleId: modulo.moduleId })).resolves.toBeUndefined();
+    expect(await modules.get(modulo.moduleId)).toBeUndefined();
   });
 
   it('un publicado no se edita en el sitio: primero se retira', async () => {
@@ -317,7 +358,7 @@ describe('cada transicion queda en la auditoria', () => {
     const modulo = await readyDraft(colaborador, 'auditado');
     await sendApproval({ actor: colaborador, moduleId: modulo.moduleId });
     await publicar({ actor: admin, moduleId: modulo.moduleId });
-    await revertDraft({
+    await retirar({
       actor: admin,
       moduleId: modulo.moduleId,
       motivo: 'Se retira mientras se revisa el calculo.',
@@ -461,6 +502,27 @@ const secondItem = (): GridItem => {
   };
 };
 
+/**
+ * Publica una segunda version de algo ya publicado, por el camino que existe.
+ *
+ * Lo publicado no se devuelve a borrador para editarlo: se abre una REVISION, que es un borrador
+ * aparte con su propio identificador, y al aprobarla se publica SOBRE el original. Antes estas
+ * dos pruebas lo hacian con `revertDraft`, que retiraba el modulo de la vista de toda la
+ * institucion mientras se editaba — justamente lo que la revision existe para evitar.
+ */
+async function segundaPublicacion(primera: ModuleDefinition): Promise<ModuleDefinition> {
+  const revision = await createRevision({ actor: admin, moduleId: primera.moduleId });
+  const pagina = revision.pages[0];
+  if (!pagina) throw new Error('fixture inesperado');
+  await saveDraft({
+    actor: admin,
+    moduleId: revision.moduleId,
+    cambios: { pages: [{ ...pagina, items: [validItem(), secondItem()] }] },
+  });
+  await sendApproval({ actor: admin, moduleId: revision.moduleId });
+  return publicar({ actor: admin, moduleId: revision.moduleId });
+}
+
 describe('historial de versiones publicadas', () => {
   async function publicado(slug: string): Promise<ModuleDefinition> {
     const borrador = await readyDraft(colaborador, slug);
@@ -471,16 +533,9 @@ describe('historial de versiones publicadas', () => {
   it('publicar guarda una foto, y la siguiente publicacion no la pisa', async () => {
     const primera = await publicado('historial-uno');
 
-    await revertDraft({ actor: admin, moduleId: primera.moduleId, motivo: 'falta una medida' });
-    const pagina = primera.pages[0];
-    if (!pagina) throw new Error('fixture inesperado');
-    await saveDraft({
-      actor: admin,
-      moduleId: primera.moduleId,
-      cambios: { pages: [{ ...pagina, items: [validItem(), secondItem()] }] },
-    });
-    await sendApproval({ actor: admin, moduleId: primera.moduleId });
-    const segunda = await publicar({ actor: admin, moduleId: primera.moduleId });
+    // La segunda publicacion va por una REVISION, que es el unico camino para cambiar algo
+    // publicado: lo publicado no se devuelve a borrador para editarlo en el sitio.
+    const segunda = await segundaPublicacion(primera);
 
     const historial = await historialDe(admin, primera.moduleId);
     expect(historial.map((v) => v.version)).toEqual([segunda.version, primera.version]);
@@ -520,16 +575,7 @@ describe('volver a una version anterior', () => {
     await sendApproval({ actor: colaborador, moduleId: borrador.moduleId });
     const primera = await publicar({ actor: admin, moduleId: borrador.moduleId });
 
-    await revertDraft({ actor: admin, moduleId: primera.moduleId, motivo: 'anadir un objeto' });
-    const pagina = primera.pages[0];
-    if (!pagina) throw new Error('fixture inesperado');
-    await saveDraft({
-      actor: admin,
-      moduleId: primera.moduleId,
-      cambios: { pages: [{ ...pagina, items: [validItem(), secondItem()] }] },
-    });
-    await sendApproval({ actor: admin, moduleId: primera.moduleId });
-    return { segunda: await publicar({ actor: admin, moduleId: primera.moduleId }), primera: primera.version };
+    return { segunda: await segundaPublicacion(primera), primera: primera.version };
   }
 
   /*

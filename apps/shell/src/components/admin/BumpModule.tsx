@@ -2,170 +2,52 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { isMajorJump } from '@app/ui-components';
 import { useTranslator } from '../Locale';
-import { pedir, motivoDeFallo } from '../pedir';
+import { subirObjeto, type Subida } from './bump';
 
 /**
  * Subir un objeto a la ultima version dentro de un modulo — seccion 4.5.
  *
- * Pide confirmacion y ensena lo que va a pasar, porque lo que cambia es lo que ve toda la
- * institucion. Despues de hacerlo dice cuantas instancias subieron y, sobre todo, QUE se quedo
- * por el camino: si la version nueva ya no admite una clave que alguien habia configurado, eso no
- * puede enterarse nadie tres semanas mas tarde mirando la pantalla.
+ * Un solo boton y un solo gesto: se pulsa y sube. Antes habia una confirmacion que ensenaba
+ * «v1.0.0 → v1.4.0, lo que ya estaba configurado se conserva» y el resultado se escribia DENTRO
+ * de la celda, que ensanchaba la columna y descuadraba la tabla. Las dos cosas se fueron al mismo
+ * sitio: el informe sale por un mensaje emergente, con el nombre del objeto delante para que tres
+ * mensajes seguidos digan cual fue cual.
  *
- * Traduce por su cuenta, con `useTranslator`, y no recibe las etiquetas ya hechas. Antes las
- * recibia, y tres de ellas eran funciones porque llevan un numero o una lista dentro — y una
- * funcion no cruza de un componente de servidor a uno de cliente: React aborta el renderizado
- * entero con «Functions cannot be passed directly to Client Components». El fallo estuvo desde el
- * primer dia en la pagina de «donde se usa» sin que se notase, porque el boton solo se dibuja en
- * una fila atrasada y ninguna captura ni prueba llego a tener una.
+ * Traduce por su cuenta, con `useTranslator`, y no recibe las etiquetas ya hechas: tres de ellas
+ * llevan un numero o una lista dentro, y una funcion no cruza de un componente de servidor a uno
+ * de cliente — React aborta el renderizado entero con «Functions cannot be passed directly to
+ * Client Components».
  */
-interface Resultado {
-  instancias: number;
-  preserved: string[];
-  retiradas: { instanceId: string; clave: string; valor: unknown }[];
-  nuevas: string[];
-}
-
-/*
- * Los identificadores de prueba llevan modulo Y objeto.
- *
- * Con el modulo solo bastaba mientras el boton salia una vez por fila en «donde se usa» —ahi la
- * fila ES un modulo—. En la tabla de modulos sale uno por cada objeto atrasado del mismo modulo,
- * y `getByTestId` encontraria varios: una prueba que pulse «el» boton pulsaria el primero que
- * haya, que no tiene por que ser el que la prueba cree.
- */
-export function BumpModule({
-  slug,
-  objectId,
-  desde,
-  hasta,
-}: {
-  slug: string;
-  objectId: string;
-  /** La version que el modulo fija hoy, para poder decir de donde a donde va. */
-  desde: string;
-  hasta: string;
-}) {
+export function BumpModule({ slug, objectId, nombre, desde, hasta }: Subida) {
   const t = useTranslator();
   const router = useRouter();
-  const [confirmando, setConfirmando] = useState(false);
   const [enCurso, setEnCurso] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hecho, setHecho] = useState<Resultado | null>(null);
-  const clave = `${slug}-${objectId}`;
-
-  async function subir() {
-    setEnCurso(true);
-    setError(null);
-    const respuesta = await pedir(`/api/modules/${slug}/bump`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ objectId, hasta }),
-    });
-    setEnCurso(false);
-    if (!respuesta?.ok) {
-      setError(await motivoDeFallo(respuesta, t('admin.bump.failed')));
-      return;
-    }
-    setHecho((await respuesta.json()) as Resultado);
-    setConfirmando(false);
-  }
 
   /*
-   * El refresco espera a que alguien haya LEIDO lo que paso.
+   * Los identificadores de prueba llevan modulo Y objeto.
    *
-   * Antes se lanzaba nada mas subir la version, y eso borraba el informe con el mismo gesto que
-   * lo producia: al refrescar, el objeto ya no esta atrasado, el servidor deja de dibujar este
-   * boton entero, y con el se va el unico sitio donde constaba que claves se conservaron y
-   * cuales se perdieron. En una pantalla rapida se alcanzaba a leer; en una lenta, no — y lo que
-   * se pierde ahi es justo lo que hay que revisar despues de subir de version.
+   * Con el modulo solo bastaba mientras el boton salia una vez por fila en «donde se usa» —ahi la
+   * fila ES un modulo—. En la tabla de modulos sale uno por cada objeto atrasado del mismo
+   * modulo, y `getByTestId` encontraria varios.
    */
-  if (hecho) {
-    return (
-      <div data-testid={`bump-hecho-${clave}`}>
-        <p>{t('admin.bump.done', { n: hecho.instancias, hasta })}</p>
-        {hecho.preserved.length > 0 ? (
-          <p className="muted-text">
-            {t('admin.bump.kept', { claves: t.lista(hecho.preserved) })}
-          </p>
-        ) : null}
-        {hecho.nuevas.length > 0 ? (
-          <p className="muted-text">{t('admin.bump.new', { claves: t.lista(hecho.nuevas) })}</p>
-        ) : null}
-        {hecho.retiradas.length > 0 ? (
-          <p className="aviso notice-atencion" data-testid={`bump-retiradas-${clave}`}>
-            {t('admin.bump.dropped', { claves: t.lista(hecho.retiradas.map((r) => r.clave)) })}
-          </p>
-        ) : null}
-        <button
-          type="button"
-          className="boton-contorno"
-          data-testid={`bump-cerrar-${clave}`}
-          onClick={() => router.refresh()}
-        >
-          {t('action.close')}
-        </button>
-      </div>
-    );
-  }
-
-  const aviso = error ? (
-    <p className="aviso notice-error" role="alert" data-testid={`bump-error-${clave}`}>
-      {error}
-    </p>
-  ) : null;
-
-  if (!confirmando) {
-    return (
-      <>
-        <button
-          type="button"
-          className="boton-contorno"
-          data-testid={`bump-${clave}`}
-          onClick={() => setConfirmando(true)}
-        >
-          {t('admin.resources.action.bump')}
-        </button>
-        {aviso}
-      </>
-    );
-  }
+  const clave = `${slug}-${objectId}`;
 
   return (
-    <div role="group" aria-label={`${t('admin.resources.action.bump')}: ${objectId} · ${slug}`}>
-      <p className="muted-text">{t('admin.bump.warn', { desde, hasta })}</p>
-      {/*
-        Un salto de MAYOR avisa mas fuerte, que es para lo que `isMajorJump` se escribio.
-        Estaba en el repositorio de objetos, documentada como «para que la interfaz pueda avisar
-        con mas fuerza», y no la llamaba nadie: subir de 1.0.0 a 1.0.1 y subir de 1.0.0 a 2.0.0
-        se confirmaban con el mismo texto, y el numero mayor existe justamente para decir que
-        una de las dos cosas no es como la otra.
-      */}
-      {isMajorJump(desde, hasta) ? (
-        <p className="aviso notice-atencion" data-testid={`bump-mayor-${clave}`}>
-          {t('admin.bump.major')}
-        </p>
-      ) : null}
-      <button
-        type="button"
-        className="pastilla"
-        disabled={enCurso}
-        data-testid={`bump-confirm-${clave}`}
-        onClick={() => void subir()}
-      >
-        {enCurso ? t('admin.bump.doing') : t('admin.bump.confirm', { hasta })}
-      </button>{' '}
-      <button
-        type="button"
-        className="boton-contorno"
-        data-testid={`bump-cancel-${clave}`}
-        onClick={() => setConfirmando(false)}
-      >
-        {t('action.cancel')}
-      </button>
-      {aviso}
-    </div>
+    <button
+      type="button"
+      className="boton-contorno"
+      disabled={enCurso}
+      data-testid={`bump-${clave}`}
+      onClick={() => {
+        setEnCurso(true);
+        void subirObjeto({ slug, objectId, nombre, desde, hasta }, t).then(() => {
+          setEnCurso(false);
+          router.refresh();
+        });
+      }}
+    >
+      {enCurso ? t('admin.bump.doing') : t('admin.resources.action.bump')}
+    </button>
   );
 }

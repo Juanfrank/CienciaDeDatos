@@ -13,7 +13,20 @@ import type { PageNavigatorSettings } from './pageNavigator';
  * Ciclo de vida de 4.1: los borradores son personales; publicar a nivel institucional requiere
  * aprobacion de un Administrador (matriz de 4.10.1).
  */
-export type ModuleStatus = 'borrador' | 'pendiente-de-aprobacion' | 'publicado';
+export type ModuleStatus =
+  | 'borrador'
+  | 'pendiente-de-aprobacion'
+  | 'publicado'
+  /**
+   * Retirado: estuvo publicado y ya no se sirve, pero no se ha borrado.
+   *
+   * Es un estado propio y no una vuelta a borrador. Un borrador es algo que aun no ha estado en
+   * manos de nadie; un retirado SI estuvo, tiene historial publicado y equipos que lo usaban, y
+   * lo que se quiere de el es volver a ponerlo o borrarlo — no editarlo. Mezclarlos dejaba la
+   * tabla sin poder decir cual de los dos tenia delante, y ofrecia «restablecer» sobre
+   * borradores que nunca se publicaron.
+   */
+  | 'retirado';
 
 export interface GridItem {
   id: string;

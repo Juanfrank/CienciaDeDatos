@@ -115,6 +115,20 @@ export const ICON_STROKES = {
    */
   tuerca:
     'M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
+  /*
+   * Ciclo de vida de un modulo publicado.
+   *
+   * Los tres se dibujan aparte y no se reaprovechan de los que ya hay. `ojo-tachado` ya
+   * significa «oculto en la navegacion», que es reversible y no cambia el estado del modulo;
+   * usarlo tambien para retirar habria puesto el mismo dibujo en dos acciones que un
+   * Administrador tiene que poder distinguir de un vistazo.
+   */
+  // Una caja con una flecha que entra: sale de la vista y queda guardado.
+  retirar: 'M4 8.5h16M5.5 8.5V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V8.5M6 8.5 8 4.5h8l2 4M12 11.5v4.5m0 0 2-2m-2 2-2-2',
+  // Una flecha que vuelve sobre un arco: deshacer lo retirado.
+  restablecer: 'M4 12a8 8 0 1 1 2.5 5.8M4 8v4.5h4.5',
+  // Una papelera: borrado definitivo, del que no se vuelve.
+  papelera: 'M4.5 7h15M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2M6.5 7v12a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V7M10 11v6M14 11v6',
   // Una persona con un ojo: gestionar QUIEN ve esto. El `view` de al lado es solo la persona.
   'persona-ojo':
     'M9.5 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 20a6.5 6.5 0 0 1 11-4.7M14 18.5s2-3 4.5-3 4.5 3 4.5 3-2 3-4.5 3-4.5-3-4.5-3zM18.5 19v.4',

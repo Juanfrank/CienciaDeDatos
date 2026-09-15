@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
+import type { ModuleDefinition } from '@app/module-model';
 import {
   actorDe,
+  type InputTransition,
+  restablecer,
+  retirar,
   revertDraft,
   sendApproval,
   visibleModuleSlug,
@@ -11,9 +15,20 @@ import { sessionGet } from '../../../../../src/server/session';
 
 export const runtime = 'nodejs';
 
-/** Transiciones del ciclo de vida — seccion 4.1. */
-const TRANSICIONES = ['enviar', 'publicar', 'devolver'] as const;
-type Transition = (typeof TRANSICIONES)[number];
+/**
+ * Transiciones del ciclo de vida — seccion 4.1.
+ *
+ * Cada nombre es UNA funcion del ciclo de vida, y la tabla es la unica que las relaciona: sin
+ * ella el encadenado de ternarios que habia aqui obligaba a leer el orden de las ramas para
+ * saber que hacia cada nombre, y anadir una quinta habria sido anadir un nivel mas.
+ */
+const TRANSICIONES: Record<string, (entrada: InputTransition) => Promise<ModuleDefinition>> = {
+  enviar: sendApproval,
+  publicar,
+  devolver: revertDraft,
+  retirar,
+  restablecer,
+};
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const sesion = await sessionGet();
@@ -32,9 +47,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   }
 
   const transition = body['transition'];
-  if (typeof transition !== 'string' || !TRANSICIONES.includes(transition as Transition)) {
+  // Por `Object.hasOwn` y no por `TRANSICIONES[nombre]`: con la segunda, pedir `constructor` o
+  // `toString` habria encontrado una funcion del prototipo y la habria llamado con la entrada.
+  const aplicar =
+    typeof transition === 'string' && Object.hasOwn(TRANSICIONES, transition)
+      ? TRANSICIONES[transition]
+      : undefined;
+  if (!aplicar) {
     return NextResponse.json(
-      { error: `Transicion no admitida. Use una de: ${TRANSICIONES.join(', ')}.` },
+      { error: `Transicion no admitida. Use una de: ${Object.keys(TRANSICIONES).join(', ')}.` },
       { status: 400 },
     );
   }
@@ -46,14 +67,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   };
 
   try {
-    const modulo =
-      transition === 'enviar'
-        ? await sendApproval(entrada)
-        : transition === 'publicar'
-          ? await publicar(entrada)
-          : await revertDraft(entrada);
-
-    return NextResponse.json({ modulo });
+    return NextResponse.json({ modulo: await aplicar(entrada) });
   } catch (error) {
     return errorResponse(error);
   }

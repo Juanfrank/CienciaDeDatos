@@ -482,6 +482,28 @@ test.describe('lo publicado se guarda, no se pisa (4.5)', () => {
     await expect(page.getByTestId(`history-v${segunda}`)).toBeVisible();
   });
 
+  test('la v1 de un modulo de la semilla tambien consta, y se puede MIRAR', async ({ page }) => {
+    /*
+     * Un modulo de la semilla nace publicado en la v1 sin pasar por `publicar`, asi que no dejaba
+     * fila en el historial: la pantalla decia «no hay versiones» de algo que llevaba meses
+     * sirviendose. Lo que estuvo publicado tiene que constar, lo publicara una persona o la
+     * semilla.
+     *
+     * Y se puede VER sin restaurar. Antes lo unico que se ofrecia era restaurar —es decir,
+     * publicar—: para saber si una version servia habia que ponerla en produccion y juzgar
+     * despues.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules/audiencias/history');
+
+    await expect(page.getByTestId('history-empty')).toHaveCount(0);
+    await expect(page.getByTestId('history-v1')).toBeVisible();
+
+    await page.getByTestId('ver-v1').click();
+    // La disposicion es la de aquella version: se dibujan sus objetos, no una lista de metadatos.
+    await expect(page.locator('.rejilla .grid__cell').first()).toBeVisible();
+  });
+
   test('un Colaborador no ve el historial: es informacion de gobierno', async ({ page }) => {
     const slug = newSlug('historial-permiso');
     await asLogin(page, 'u-admin');

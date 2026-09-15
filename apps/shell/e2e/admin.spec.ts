@@ -604,6 +604,47 @@ test.describe('que hay dentro de cada modulo, y subirlo de version (4.5)', () =>
     expect(guardado.ok(), await guardado.text()).toBe(true);
   };
 
+  /** Lo mismo con DOS objetos atrasados, que es lo que «subir todos» tiene que resolver. */
+  const conDosViejas = async (page: import('@playwright/test').Page, slug: string) => {
+    const creado = await page.request.post('/api/modules', {
+      data: { nombre: `Modulo ${slug}`, slug },
+    });
+    expect(creado.ok(), await creado.text()).toBe(true);
+    const { modulo } = (await creado.json()) as { modulo: { pages: { pageId: string }[] } };
+
+    // Dos objetos DISTINTOS: con dos instancias del mismo, subir una subiria las dos —la subida
+    // es por objeto, no por instancia— y el boton de «todos» pasaria la prueba sin recorrer nada.
+    const viejo = (id: string, objectId: string, x: number) => ({
+      id,
+      position: { x, y: 0, w: 3, h: 2 },
+      instance: {
+        instanceId: id,
+        objectId,
+        version: '1.0.0',
+        title: id,
+        binding: {
+          datasetId: 'casos-por-distrito-trimestre',
+          dimensions: objectId === 'tarjeta-kpi' ? [] : [{ table: 'DimTribunal', field: 'Distrito' }],
+          measures: ['CasosPendientes'],
+        },
+      },
+    });
+
+    const guardado = await page.request.put(`/api/modules/${slug}/edit`, {
+      data: {
+        paginas: [
+          {
+            ...modulo.pages[0],
+            slug: 'general',
+            name: 'General',
+            items: [viejo('kpi', 'tarjeta-kpi', 0), viejo('barras', 'barras', 3)],
+          },
+        ],
+      },
+    });
+    expect(guardado.ok(), await guardado.text()).toBe(true);
+  };
+
   test('la columna Objetos despliega cada objeto con su version', async ({ page }) => {
     await asLogin(page, 'u-admin');
     const slug = `objetos-${Date.now()}`;
@@ -633,22 +674,23 @@ test.describe('que hay dentro de cada modulo, y subirlo de version (4.5)', () =>
 
     await page.goto('/admin/modules');
     await page.getByTestId(`objetos-${slug}`).click();
+    // Un solo gesto: ya no hay pantalla de confirmacion que repita de antemano lo que el informe
+    // dice despues y con datos reales.
     await page.getByTestId(`bump-${slug}-tarjeta-kpi`).click();
-    await page.getByTestId(`bump-confirm-${slug}-tarjeta-kpi`).click();
 
     /*
-     * El informe se queda hasta que alguien lo cierra.
+     * El informe sale ARRIBA, en un mensaje emergente, no dentro de la celda.
      *
-     * Antes el propio refresco que seguia a subir la version lo borraba: el objeto dejaba de
-     * estar atrasado, el servidor dejaba de dibujar el boton, y con el se iba el unico sitio
-     * donde constaba que se conservo. La prueba pasaba porque le daba tiempo a mirar, que es
-     * pasar por un motivo que no es el suyo.
+     * Escrito en la celda ensanchaba la columna y descuadraba la tabla entera, y ademas se
+     * borraba con el refresco que seguia a subir la version: el objeto dejaba de estar atrasado,
+     * el servidor dejaba de dibujar el boton, y con el se iba el unico sitio donde constaba que
+     * se conservo. Fuera de la tabla sobrevive al refresco y no la deforma.
      */
-    const hecho = page.getByTestId(`bump-hecho-${slug}-tarjeta-kpi`);
-    await expect(hecho).toBeVisible();
-    // Y dice QUE conservo: sin eso, «hecho» es una promesa sin comprobante.
-    await expect(hecho).toContainText('formato');
-    await page.getByTestId(`bump-cerrar-${slug}-tarjeta-kpi`).click();
+    const aviso = page.getByTestId('emergente').first();
+    await expect(aviso).toBeVisible();
+    // Y dice QUE conservo, con el nombre del objeto delante: sin eso, «hecho» es una promesa sin
+    // comprobante, y tres mensajes seguidos no dirian cual fue cual.
+    await expect(aviso).toContainText('formato');
 
     // Lo que manda es el almacen, no el mensaje.
     const { modulo } = (await (await page.request.get(`/api/modules/${slug}/edit`)).json()) as {
@@ -657,6 +699,34 @@ test.describe('que hay dentro de cada modulo, y subirlo de version (4.5)', () =>
     const instancia = modulo.pages[0]?.items[0]?.instance;
     expect(instancia?.version).not.toBe('1.0.0');
     expect(instancia?.presentacion?.['formato']).toBe('entero');
+  });
+
+  test('«subir todos» deja UN mensaje por objeto, no uno para todos', async ({ page }) => {
+    /*
+     * Con ocho objetos atrasados, ocho gestos iguales son la clase de trabajo que se acaba no
+     * haciendo: lo que queda entonces es un modulo sirviendo versiones viejas porque subirlas era
+     * tedioso, no porque nadie decidiera no subirlas.
+     *
+     * Y el aviso es UNO POR OBJETO. Un solo «se subieron dos» no dice cual de los dos perdio una
+     * clave por el camino, que es justamente lo que hay que mirar despues.
+     */
+    await asLogin(page, 'u-admin');
+    const slug = `subir-todos-${Date.now()}`;
+    await conDosViejas(page, slug);
+
+    await page.goto('/admin/modules');
+    await page.getByTestId(`objetos-${slug}`).click();
+    await page.getByTestId(`bump-todos-${slug}`).click();
+
+    await expect(page.getByTestId('emergente')).toHaveCount(2);
+
+    // Lo que manda es el almacen, no el mensaje: los dos objetos suben, no solo el primero.
+    const { modulo } = (await (await page.request.get(`/api/modules/${slug}/edit`)).json()) as {
+      modulo: { pages: { items: { instance: { version: string } }[] }[] };
+    };
+    const versiones = (modulo.pages[0]?.items ?? []).map((i) => i.instance.version);
+    expect(versiones).toHaveLength(2);
+    expect(versiones.filter((v) => v === '1.0.0')).toEqual([]);
   });
 });
 
@@ -954,6 +1024,101 @@ test.describe('las seis acciones de una fila del arbol (4.1 y 4.10.8)', () => {
     await page.goto('/admin/modules');
     await page.getByTestId('ocultar-nodo-m-audiencias').click();
     await expect(page.getByTestId('modulo-audiencias')).toHaveAttribute('data-hidden', 'no');
+  });
+
+  test('las dos tablas de modulos reparten las columnas IGUAL', async ({ page }) => {
+    /*
+     * El ancho de una columna es lo que permite leer dos tablas seguidas sin reorientarse.
+     *
+     * Las dos dibujan la misma cabecera, pero el reparto lo decidia el contenido de cada una: la
+     * de vigentes lleva sangrias y nombres largos, la de sueltos no, y las mismas seis columnas
+     * acababan en sitios distintos. Se comparan los bordes reales, no las clases: una clase
+     * puesta y un `table-layout` que no llega a aplicarse se ven identicos en el codigo.
+     */
+    await asLogin(page, 'u-admin');
+
+    // Hace falta que haya una tabla de sueltos: se crea un borrador, que nace sin colocar.
+    const slug = `ancho-${Date.now()}`;
+    const creado = await page.request.post('/api/modules', {
+      data: { nombre: `Modulo ${slug}`, slug },
+    });
+    expect(creado.ok(), await creado.text()).toBe(true);
+
+    await page.goto('/admin/modules');
+    await expect(page.getByTestId('tabla-modulos-sueltos')).toBeVisible();
+
+    const anchos = async (testid: string): Promise<number[]> => {
+      // Hijos DIRECTOS: dentro de una celda hay otra tabla —la de objetos del modulo— y con el
+      // selector de descendencia sus encabezados, que estan ocultos, entraban en la cuenta.
+      const celdas = page.getByTestId(testid).locator('> thead > tr > th');
+      const total = await celdas.count();
+      const salida: number[] = [];
+      for (let i = 0; i < total; i++) {
+        const caja = await celdas.nth(i).boundingBox();
+        salida.push(Math.round(caja?.width ?? -1));
+      }
+      return salida;
+    };
+
+    expect(await anchos('tabla-modulos-sueltos')).toEqual(await anchos('tabla-modulos'));
+  });
+
+  test('una carpeta tambien tiene lapiz, apagado: la columna no se descuadra', async ({ page }) => {
+    /*
+     * El lapiz desaparecia en las carpetas y con el se corria un sitio toda la fila de iconos.
+     * Se comprueba que ESTA y que esta APAGADO: si solo se comprobara que esta, un boton activo
+     * que no hace nada pasaria la prueba.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    const lapiz = page.getByTestId('editar-nodo-norte');
+    await expect(lapiz).toBeVisible();
+    await expect(lapiz).toBeDisabled();
+  });
+
+  test('retirar, restablecer y eliminar un modulo publicado', async ({ page }) => {
+    /*
+     * El ciclo entero de 4.1 desde la tabla, en una sola prueba.
+     *
+     * Van juntos a proposito: retirar sin poder volver deja un modulo inalcanzable, y borrar sin
+     * haber retirado antes es justo lo que el ciclo de vida impide. Lo que se comprueba en cada
+     * paso es que el modulo DEJA DE SERVIRSE o vuelve a servirse en `/m/{slug}`, no solo que la
+     * tabla cambia de rotulo: el rotulo es interfaz, y ocultar en la interfaz no es retirar.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules');
+
+    await page.getByTestId('retirar-nodo-m-audiencias').click();
+    await page.getByTestId('retirar-motivo-nodo-m-audiencias').fill('La medida esta mal.');
+    await page.getByTestId('retirar-confirmar-nodo-m-audiencias').click();
+    await expect(page.getByTestId('restablecer-nodo-m-audiencias')).toBeVisible();
+
+    await page.goto('/m/audiencias');
+    await expect(page.getByTestId('module-title')).toHaveCount(0);
+
+    await page.goto('/admin/modules');
+    await page.getByTestId('restablecer-nodo-m-audiencias').click();
+    await expect(page.getByTestId('retirar-nodo-m-audiencias')).toBeVisible();
+
+    await page.goto('/m/audiencias');
+    await expect(page.getByTestId('module-title')).toBeVisible();
+
+    // Y borrar exige retirar antes: el boton de la papelera solo existe sobre lo retirado.
+    await page.goto('/admin/modules');
+    await expect(page.getByTestId('eliminar-nodo-m-audiencias')).toHaveCount(0);
+
+    await page.getByTestId('retirar-nodo-m-audiencias').click();
+    await page.getByTestId('retirar-motivo-nodo-m-audiencias').fill('Ya no se usa.');
+    await page.getByTestId('retirar-confirmar-nodo-m-audiencias').click();
+    await page.getByTestId('eliminar-nodo-m-audiencias').click();
+    await page.getByTestId('eliminar-confirmar-nodo-m-audiencias').click();
+
+    // Se va el modulo Y su nodo del arbol: un nodo que apunta a nada dibuja un enlace roto en el
+    // menu de todo el mundo.
+    await expect(page.getByTestId('modulo-audiencias')).toHaveCount(0);
+    await page.goto('/');
+    await expect(page.getByTestId('nav-audiencias')).toHaveCount(0);
   });
 });
 

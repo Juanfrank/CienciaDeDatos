@@ -1,9 +1,13 @@
 import Link from 'next/link';
 import type { MessageKey, Translator } from '@app/i18n';
-import { isFolder, type NavNode } from '@app/access-control';
+import { can, isFolder, type NavNode } from '@app/access-control';
 import { sectionOf } from '../../../src/components/admin/sections';
 import { ModuleObjects } from '../../../src/components/admin/ModuleObjects';
-import { TreeActions, type DestinoPosible } from '../../../src/components/admin/TreeActions';
+import {
+  TreeActions,
+  type CicloDeModulo,
+  type DestinoPosible,
+} from '../../../src/components/admin/TreeActions';
 import { CrearEnElArbol } from '../../../src/components/admin/CrearEnElArbol';
 import {
   ArbolPlegable,
@@ -21,6 +25,8 @@ import {
   type FilaOrganizacion,
 } from '../../../src/server/organizacion';
 import { translator } from '../../../src/server/locale';
+import { actorDe, seeCan } from '../../../src/server/cicloDeVida';
+import { pageSessionRequire } from '../../../src/server/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +34,25 @@ const ESTADO: Record<string, MessageKey> = {
   borrador: 'admin.modules.status.draft',
   'pendiente-de-aprobacion': 'admin.modules.status.pending',
   publicado: 'admin.modules.status.published',
+  retirado: 'admin.modules.status.withdrawn',
 };
+
+/**
+ * Las seis columnas, con su rotulo y su ancho, en un solo sitio.
+ *
+ * El ancho estaba sin declarar y cada tabla se lo repartia segun lo que le tocaba dentro: la de
+ * vigentes lleva nombres largos y sangrias, la de sueltos no, y las dos acababan con las
+ * columnas en sitios distintos aunque la cabecera fuera literalmente el mismo componente.
+ * Leerlas una debajo de otra obligaba a volver a buscar donde estaba cada cosa.
+ */
+const COLUMNAS: { clave: MessageKey; ancho: string }[] = [
+  { clave: 'admin.modules.column.module', ancho: 'auto' },
+  { clave: 'admin.modules.column.status', ancho: '12rem' },
+  { clave: 'admin.modules.column.version', ancho: '5rem' },
+  { clave: 'admin.modules.column.pages', ancho: '5rem' },
+  { clave: 'admin.modules.column.objects', ancho: '14rem' },
+  { clave: 'admin.resources.column.actions', ancho: '15rem' },
+];
 
 /** Sangria de un nivel del arbol, en la primera columna. */
 const SANGRIA = (profundidad: number) => ({ paddingInlineStart: `${profundidad * 1.5}rem` });
@@ -59,12 +83,14 @@ function destinos(nodos: NavNode[], t: Translator, profundidad = 0): DestinoPosi
  */
 export default async function ModulosPage() {
   const seccion = sectionOf('/admin/modules');
-  const [t, definiciones, arbol, usuarios] = await Promise.all([
+  const [sesion, t, definiciones, arbol, usuarios] = await Promise.all([
+    pageSessionRequire(),
     translator(),
     modules.list(),
     getGeneralTree(),
     listUsers(),
   ]);
+  const actor = await actorDe(sesion);
 
   const porId = new Map(definiciones.map((m) => [m.moduleId, m]));
   const filas = organizationRows(arbol, porId);
@@ -85,6 +111,21 @@ export default async function ModulosPage() {
   };
 
   const posibles = destinos(arbol, t);
+
+  /*
+   * Que puede hacer ESTE actor con el estado de ESTE modulo.
+   *
+   * Se decide en el servidor, donde estan el papel y la matriz de 4.10.1, y baja como tres
+   * banderas. Que el boton no se dibuje no protege nada —el camino de escritura vuelve a
+   * comprobarlo—, pero ofrecer una accion que va a devolver 403 es peor que no ofrecerla.
+   */
+  const cicloDe = (m: (typeof definiciones)[number]): CicloDeModulo => ({
+    slug: m.slug,
+    status: m.status,
+    verPuede: seeCan(m, actor),
+    retirarPuede: can(actor.role, 'publicar-modulo-institucional'),
+    borrarPuede: can(actor.role, 'borrar-definitivamente'),
+  });
 
   return (
     <section>
@@ -121,6 +162,7 @@ export default async function ModulosPage() {
         lado, que es lo que impide repetir el fallo de pasar funciones a un componente de cliente.
       */}
       <ArbolPlegable
+        clase="tabla--modulos"
         filas={filas.map(
           (fila): FilaDelArbol => ({
             id: fila.id,
@@ -144,6 +186,7 @@ export default async function ModulosPage() {
             t={t}
             destinos={posibles}
             autor={fila.tipo === 'modulo' ? nombreDe(fila.modulo.ownerUserId) : null}
+            cicloDe={cicloDe}
           />
         ))}
       </ArbolPlegable>
@@ -158,7 +201,7 @@ export default async function ModulosPage() {
           <h3>{t('admin.modules.loose', { n: sueltos.length })}</h3>
           <p className="muted-text">{t('admin.modules.loose.intro')}</p>
           <div className="container-table">
-            <table className="tabla" data-testid="tabla-modulos-sueltos">
+            <table className="tabla tabla--modulos" data-testid="tabla-modulos-sueltos">
               <Cabecera t={t} />
               <tbody>
                 {sueltos.map((m) => (
@@ -177,6 +220,7 @@ export default async function ModulosPage() {
                     t={t}
                     destinos={posibles}
                     autor={nombreDe(m.ownerUserId)}
+                    ciclo={cicloDe(m)}
                     // Un modulo que no esta en el arbol no se puede mover dentro de el: los tres
                     // primeros iconos no tendrian sobre que actuar.
                     enElArbol={false}
@@ -198,16 +242,22 @@ export default async function ModulosPage() {
 /** Las seis columnas, iguales en las dos tablas: una cabecera, un solo sitio que mantener. */
 function Cabecera({ t }: { t: Translator }) {
   return (
-    <thead>
-      <tr>
-        <th scope="col">{t('admin.modules.column.module')}</th>
-        <th scope="col">{t('admin.modules.column.status')}</th>
-        <th scope="col">{t('admin.modules.column.version')}</th>
-        <th scope="col">{t('admin.modules.column.pages')}</th>
-        <th scope="col">{t('admin.modules.column.objects')}</th>
-        <th scope="col">{t('admin.resources.column.actions')}</th>
-      </tr>
-    </thead>
+    <>
+      <colgroup>
+        {COLUMNAS.map((columna) => (
+          <col key={columna.clave} style={{ width: columna.ancho }} />
+        ))}
+      </colgroup>
+      <thead>
+        <tr>
+          {COLUMNAS.map((columna) => (
+            <th key={columna.clave} scope="col">
+              {t(columna.clave)}
+            </th>
+          ))}
+        </tr>
+      </thead>
+    </>
   );
 }
 
@@ -216,14 +266,32 @@ function Fila({
   t,
   destinos: posibles,
   autor,
+  cicloDe,
 }: {
   fila: FilaOrganizacion;
   t: Translator;
   destinos: DestinoPosible[];
   autor: string | null;
+  /*
+   * La funcion, no el resultado.
+   *
+   * Solo una fila de MODULO tiene ciclo de vida, y pasar `CicloDeModulo | null` obligaba a este
+   * componente a admitir un modulo sin ciclo —que no existe— y a decidir que hacer con el.
+   * Se queda en el servidor: no cruza a ningun componente de cliente.
+   */
+  cicloDe: (modulo: FilaModulo['modulo']) => CicloDeModulo;
 }) {
   if (fila.tipo === 'carpeta') return <Carpeta fila={fila} t={t} destinos={posibles} />;
-  return <Modulo fila={fila} t={t} destinos={posibles} autor={autor} enElArbol />;
+  return (
+    <Modulo
+      fila={fila}
+      t={t}
+      destinos={posibles}
+      autor={autor}
+      ciclo={cicloDe(fila.modulo)}
+      enElArbol
+    />
+  );
 }
 
 function Modulo({
@@ -231,12 +299,14 @@ function Modulo({
   t,
   destinos: posibles,
   autor,
+  ciclo,
   enElArbol,
 }: {
   fila: FilaModulo;
   t: Translator;
   destinos: DestinoPosible[];
   autor: string | null;
+  ciclo: CicloDeModulo;
   enElArbol: boolean;
 }) {
   const m = fila.modulo;
@@ -281,6 +351,7 @@ function Modulo({
           destinos={posibles}
           hrefConfigurar={`/admin/modules/${m.slug}/settings`}
           hrefPermisos={`/admin/modules/${m.slug}/permissions`}
+          ciclo={ciclo}
           {...(m.status === 'publicado' ? { editable: m.slug } : {})}
         />
       </td>

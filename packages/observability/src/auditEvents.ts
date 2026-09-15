@@ -57,7 +57,11 @@ export interface ConfigChangeLog {
     // Administrador busca cuando revisa que se publico y quien lo aprobo.
     | 'submit'
     | 'publish'
-    | 'withdraw';
+    | 'withdraw'
+    // Volver a poner en servicio algo retirado. No es 'publish': no hay version nueva ni
+    // contenido nuevo, y contarlo como publicacion haria que el registro dijera que se publico
+    // algo que nadie escribio.
+    | 'restore';
   before?: unknown;
   after?: unknown;
   /** Obligatoria cuando isScopeExpansion es true. */

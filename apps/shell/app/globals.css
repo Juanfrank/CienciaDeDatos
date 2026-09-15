@@ -425,11 +425,22 @@ code {
  * Se veia identico a uno activo, y quien lo pulsaba no entendia por que no pasaba nada. Lo
  * descubrio una captura del editor, no una prueba; ahora hay prueba.
  */
-.button-link:disabled {
+.button-link:disabled,
+.button-link--disabled {
   color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
   text-decoration: none;
   cursor: not-allowed;
 }
+
+/*
+ * Un ENLACE apagado.
+ *
+ * `disabled` no existe en `<a>`, asi que el apagado es `aria-disabled` mas esta clase: el rotulo
+ * accesible sigue estando y el lector lo anuncia como no disponible, pero el clic no llega a
+ * ninguna parte. El `tabIndex: -1` lo pone el componente, para que el tabulador no se pare en un
+ * enlace que no lleva a ningun sitio.
+ */
+.button-link--disabled { pointer-events: none; }
 
 /* ------------------------------------------------------------------ *
  * Chips                                                               *
@@ -2353,6 +2364,22 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
 }
 .tabla .is-number { text-align: right; font-variant-numeric: tabular-nums; }
 .tabla .is-total { font-weight: 500; }
+
+/*
+ * Las dos tablas de modulos reparten el ancho IGUAL.
+ *
+ * Con el reparto automatico cada una lo decide segun lo que le toco dentro —la de vigentes lleva
+ * sangrias y nombres largos, la de sueltos no—, asi que las mismas seis columnas acababan en
+ * sitios distintos y leerlas una debajo de otra obligaba a reorientarse. Con `fixed` mandan los
+ * `<col>`, que son los mismos en las dos.
+ *
+ * `overflow-wrap` es la contrapartida: en `fixed`, una celda no ensancha su columna, asi que un
+ * nombre largo sin espacios se saldria de ella si no se parte.
+ */
+.tabla--modulos { table-layout: fixed; }
+.tabla--modulos > thead > tr > th,
+.tabla--modulos > tbody > tr > th,
+.tabla--modulos > tbody > tr > td { overflow-wrap: anywhere; }
 
 /*
  * ---- Legibilidad de una tabla larga ----

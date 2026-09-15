@@ -55,6 +55,7 @@ export function ArbolPlegable({
   cabecera,
   children,
   testid = 'tabla-modulos',
+  clase,
 }: {
   filas: FilaDelArbol[];
   /*
@@ -68,6 +69,8 @@ export function ArbolPlegable({
   children: React.ReactNode;
   /** Identifica la tabla: en los `data-testid` y en la clave con la que se recuerda el plegado. */
   testid?: string;
+  /** Clase extra de la tabla, para que comparta anchos con otra que este debajo. */
+  clase?: string;
 }) {
   const t = useTranslator();
   const [plegadas, setPlegadas] = useState<Set<string>>(new Set());
@@ -222,7 +225,7 @@ export function ArbolPlegable({
       </div>
 
       <div className="container-table">
-        <table className="tabla" data-testid={testid}>
+        <table className={clase ? `tabla ${clase}` : 'tabla'} data-testid={testid}>
           {cabecera}
           <tbody>
             {filas.map((fila, i) => (seVe(fila) ? hijas[i] : null))}

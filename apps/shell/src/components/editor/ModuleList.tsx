@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { PublishBlocker } from "@app/module-model";
+import type { ModuleStatus, PublishBlocker } from "@app/module-model";
+import type { MessageKey } from '@app/i18n';
 import { useTranslator } from '../Locale';
 
 /** Lista de modulos del editor — secciones 4.1 y 4.2. */
@@ -12,7 +13,7 @@ export interface ModuleRow {
   moduleId: string;
   slug: string;
   name: string;
-  status: "borrador" | "pendiente-de-aprobacion" | "publicado";
+  status: ModuleStatus;
   version: number;
   autor: string | null;
   own: boolean;
@@ -20,10 +21,12 @@ export interface ModuleRow {
   locks: PublishBlocker[];
 }
 
-const LABEL: Record<ModuleRow["status"], string> = {
-  borrador: "Borrador",
-  "pendiente-de-aprobacion": "Pendiente de aprobacion",
-  publicado: "Publicado",
+/** El rotulo de cada estado sale del catalogo, igual que en el panel de administracion. */
+const LABEL: Record<ModuleRow["status"], MessageKey> = {
+  borrador: 'admin.modules.status.draft',
+  "pendiente-de-aprobacion": 'admin.modules.status.pending',
+  publicado: 'admin.modules.status.published',
+  retirado: 'admin.modules.status.withdrawn',
 };
 
 export function ModuleList({
@@ -89,15 +92,17 @@ export function ModuleList({
 
   const transition = async (
     fila: ModuleRow,
-    cual: "enviar" | "publicar" | "devolver",
+    cual: "enviar" | "publicar" | "devolver" | "retirar" | "restablecer",
   ) => {
     // Se pide en la propia interfaz porque el servidor lo exige: es lo unico que le dice a quien
-    // lo propuso que tiene que cambiar.
-    const motivo =
-      cual === "devolver"
-        ? (window.prompt("Motivo de la devolucion (obligatorio):") ?? "")
-        : "";
-    if (cual === "devolver" && !motivo.trim()) return;
+    // lo propuso —o a los equipos que lo usaban— por que dejo de estar.
+    const explica = cual === "devolver" || cual === "retirar";
+    const motivo = explica
+      ? (window.prompt(
+          cual === "retirar" ? t('list.withdraw.reason') : t('list.revert.reason'),
+        ) ?? "")
+      : "";
+    if (explica && !motivo.trim()) return;
 
     await pedir(`/api/modules/${fila.slug}/status`, {
       method: "POST",
@@ -187,10 +192,16 @@ export function ModuleList({
                   m.status === "borrador" && m.autor === user;
                 const publishCan =
                   m.status === "pendiente-de-aprobacion" && isAdmin;
+                // Devolver, retirar y restablecer son TRES acciones, no una con tres rotulos.
+                // Salian de una sola condicion —«todo lo que no es borrador»— y por eso al
+                // aparecer el estado retirado ese boton habria ofrecido «Retirar» sobre algo
+                // que ya estaba retirado.
                 const revertCan =
-                  m.status !== "borrador" && (isAdmin || m.autor === user);
+                  m.status === "pendiente-de-aprobacion" && (isAdmin || m.autor === user);
+                const withdrawCan = m.status === "publicado" && isAdmin;
+                const restoreCan = m.status === "retirado" && isAdmin;
                 const withoutActions =
-                  !sendCan && !publishCan && !revertCan;
+                  !sendCan && !publishCan && !revertCan && !withdrawCan && !restoreCan;
                 return (
                   <tr key={m.moduleId} data-testid={`row-${m.slug}`}>
                     <th scope="row">
@@ -202,7 +213,7 @@ export function ModuleList({
                     </th>
                     <td>
                       <span className="pastilla-estado" data-status={m.status}>
-                        {LABEL[m.status]}
+                        {t(LABEL[m.status])}
                       </span>
                       {m.locks.length > 0 ? (
                         <ul
@@ -217,7 +228,7 @@ export function ModuleList({
                     </td>
                     <td>
                       {m.autor ?? (
-                        <span className="muted-text">Institucional</span>
+                        <span className="muted-text">{t('list.institutional')}</span>
                       )}
                     </td>
                     <td>{m.objetos}</td>
@@ -255,9 +266,31 @@ export function ModuleList({
                             disabled={trabajando}
                             onClick={() => void transition(m, "devolver")}
                           >
-                            {m.status === "publicado"
-                              ? "Retirar"
-                              : "Devolver a borrador"}
+                            {t('list.revert')}
+                          </button>
+                        ) : null}
+
+                        {withdrawCan ? (
+                          <button
+                            type="button"
+                            className="button-link"
+                            data-testid={`withdraw-${m.slug}`}
+                            disabled={trabajando}
+                            onClick={() => void transition(m, "retirar")}
+                          >
+                            {t('list.withdraw')}
+                          </button>
+                        ) : null}
+
+                        {restoreCan ? (
+                          <button
+                            type="button"
+                            className="pastilla"
+                            data-testid={`restore-${m.slug}`}
+                            disabled={trabajando}
+                            onClick={() => void transition(m, "restablecer")}
+                          >
+                            {t('list.restore')}
                           </button>
                         ) : null}
 

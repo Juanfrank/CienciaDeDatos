@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { usoDe } from '../../../../../src/server/recursos';
 import { translator } from '../../../../../src/server/locale';
 import { BumpModule } from '../../../../../src/components/admin/BumpModule';
+import { BumpTodos } from '../../../../../src/components/admin/BumpTodos';
+import type { Subida } from '../../../../../src/components/admin/bump';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +22,18 @@ export default async function UsagePage({ params }: { params: Promise<{ id: stri
 
   const { objeto, ultima, uso } = datos;
 
+  // Los modulos anclados a una version vieja de ESTE objeto. La referencia de cada mensaje es el
+  // modulo: aqui todas las filas son el mismo objeto, y su nombre no distinguiria una de otra.
+  const pendientes: Subida[] = uso.detalle
+    .filter((d) => d.atrasada)
+    .map((d) => ({
+      slug: d.slug,
+      objectId: objeto.objectId,
+      nombre: d.name ?? d.slug,
+      desde: d.version,
+      hasta: ultima,
+    }));
+
   return (
     <section>
       <h2>{t('admin.usage.title', { recurso: objeto.name })}</h2>
@@ -28,6 +42,8 @@ export default async function UsagePage({ params }: { params: Promise<{ id: stri
       <p>
         <Link href="/admin/resources">← {t('admin.resources.title')}</Link>
       </p>
+
+      <BumpTodos subidas={pendientes} testid={objeto.objectId} />
 
       {uso.detalle.length === 0 ? (
         <p className="muted-text" data-testid="usage-empty">
@@ -65,6 +81,10 @@ export default async function UsagePage({ params }: { params: Promise<{ id: stri
                       <BumpModule
                         slug={d.slug}
                         objectId={objeto.objectId}
+                        // La REFERENCIA del mensaje es el modulo, no el objeto: aqui todas las
+                        // filas son el mismo objeto en modulos distintos, y repetir su nombre en
+                        // cada mensaje no diria cual fue cual.
+                        nombre={d.name ?? d.slug}
                         desde={d.version}
                         hasta={ultima}
                       />

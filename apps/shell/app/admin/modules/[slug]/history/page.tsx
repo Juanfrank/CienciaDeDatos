@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { listUsers } from '../../../../../src/server/context';
-import { modules } from '../../../../../src/server/moduleStore';
+import { modules, SEMILLA } from '../../../../../src/server/moduleStore';
 import { RestoreVersion } from '../../../../../src/components/admin/RestoreVersion';
 import { translator } from '../../../../../src/server/locale';
 
@@ -24,8 +24,12 @@ export default async function HistoryPage({ params }: { params: Promise<{ slug: 
     listUsers(),
     translator(),
   ]);
+  /*
+   * Quien publico. La semilla no es una persona, y por eso no se busca en el directorio: poner
+   * ahi un nombre de usuario seria atribuirle a alguien un acto que no hizo.
+   */
   const nombreDe = (id: string) =>
-    personas.find((u) => u.userId === id)?.displayName ?? id;
+    id === SEMILLA ? t('admin.history.bySystem') : (personas.find((u) => u.userId === id)?.displayName ?? id);
 
   return (
     <section>
@@ -88,11 +92,24 @@ export default async function HistoryPage({ params }: { params: Promise<{ slug: 
                       {v.definition.pages.reduce((n, p) => n + p.items.length, 0)}
                     </td>
                     <td>
-                      {vigente ? (
-                        <span className="muted-text">—</span>
-                      ) : (
-                        <RestoreVersion slug={modulo.slug} version={v.version} />
-                      )}
+                      {/*
+                        Ver y restaurar, en ese orden.
+                        Solo se ofrecia restaurar, que es publicar: para saber si una version
+                        servia habia que ponerla en produccion y juzgar despues. Mirar tiene que
+                        poder hacerse sin consecuencias, y la que las tiene va detras.
+                      */}
+                      <span className="fila-acciones">
+                        <Link
+                          href={`/admin/modules/${modulo.slug}/history/${v.version}`}
+                          className="button-link"
+                          data-testid={`ver-v${v.version}`}
+                        >
+                          {t('action.view')}
+                        </Link>
+                        {vigente ? null : (
+                          <RestoreVersion slug={modulo.slug} version={v.version} />
+                        )}
+                      </span>
                     </td>
                   </tr>
                 );

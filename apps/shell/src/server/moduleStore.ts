@@ -39,6 +39,31 @@ export const KEY_HISTORY = 'app:modulos:historial';
 
 const clonar = <T>(valor: T): T => JSON.parse(JSON.stringify(valor)) as T;
 
+/**
+ * La version con la que nacio cada modulo publicado de la semilla.
+ *
+ * El historial solo se escribia al PUBLICAR, y los modulos de la semilla no pasan por ahi: nacen
+ * ya publicados en la version 1. El resultado era un historial que empezaba en la v2 —o vacio,
+ * si nadie habia vuelto a publicar— y una pantalla que decia «no hay versiones» de un modulo que
+ * llevaba meses sirviendose. Lo que estuvo publicado tiene que constar, lo haya publicado una
+ * persona o la semilla.
+ *
+ * `publishedBy` es el sistema y no una persona: nadie pulso publicar, y poner ahi al primer
+ * Administrador seria atribuirle un acto que no hizo.
+ */
+export const SEMILLA = 'sistema';
+
+const demoHistory = (): PublishedVersion[] =>
+  demoModules
+    .filter((m) => m.status === 'publicado')
+    .map((m) => ({
+      moduleId: m.moduleId,
+      version: m.version,
+      publishedAt: m.updatedAt,
+      publishedBy: SEMILLA,
+      definition: clonar(m),
+    }));
+
 export class StoreModuleRepository implements ModuleStore {
   private async all(): Promise<ModuleDefinition[]> {
     // Igual que el gobierno: sin nada guardado se devuelve la semilla SIN persistirla, para no
@@ -108,7 +133,7 @@ export class StoreModuleRepository implements ModuleStore {
    */
   async versionRecord(entrada: PublishedVersion): Promise<void> {
     await mutar<PublishedVersion[]>(KEY_HISTORY, (guardadas) => {
-      const actuales = guardadas ?? [];
+      const actuales = guardadas ?? demoHistory();
       // Misma version del mismo modulo dos veces: es un reintento, no una publicacion nueva.
       // La comprobacion va dentro del turno; fuera, dos reintentos simultaneos la pasaban los
       // dos y el historial —que es de solo anadir— acababa con la misma version repetida.
@@ -120,7 +145,9 @@ export class StoreModuleRepository implements ModuleStore {
   }
 
   async history(moduleId: string): Promise<PublishedVersion[]> {
-    const actuales = (await leer<PublishedVersion[]>(KEY_HISTORY)) ?? [];
+    // Sin nada guardado se devuelve la semilla SIN persistirla, igual que `all()`: una lectura
+    // que escribe convierte abrir una pantalla en un cambio de estado.
+    const actuales = (await leer<PublishedVersion[]>(KEY_HISTORY)) ?? demoHistory();
     return actuales.filter((v) => v.moduleId === moduleId).sort((a, b) => b.version - a.version);
   }
 }

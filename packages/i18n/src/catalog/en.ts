@@ -279,6 +279,12 @@ export const en: Record<MessageKey, string> = {
   'list.submitForApproval': "Send for approval",
   'list.publish': "Publish",
   'list.noActions': "No actions available",
+  'list.revert': 'Send back to draft',
+  'list.revert.reason': 'Reason for sending it back (required):',
+  'list.withdraw': 'Withdraw',
+  'list.withdraw.reason': 'Reason for withdrawing (required):',
+  'list.restore': 'Put back',
+  'list.institutional': 'Institutional',
   'action.signOut': "Sign out",
 
   'admin.modules.title': 'Modules',
@@ -341,6 +347,15 @@ export const en: Record<MessageKey, string> = {
   'admin.tree.action.configure': 'Configure',
   'admin.tree.action.permissions': 'Manage permissions',
   'admin.tree.action.failed': 'That could not be done.',
+  'admin.tree.action.edit.disabled': 'A folder is not edited: the modules inside it are',
+  'admin.tree.action.view': 'View',
+  'admin.tree.action.view.disabled': 'A draft is only visible to whoever is writing it',
+  'admin.tree.action.withdraw': 'Withdraw from service',
+  'admin.tree.action.withdraw.reason': 'Reason for withdrawing (required)',
+  'admin.tree.action.withdraw.confirm': 'Withdraw',
+  'admin.tree.action.restore': 'Put back into service',
+  'admin.tree.action.delete': 'Delete permanently',
+  'admin.tree.action.delete.confirm': 'The module and its tree node are deleted. The record of what was published is kept. This cannot be undone.',
   'admin.tree.move.changesScope': 'Moving to "{destino}" changes the scope of {n, plural, one {{cuales}} other {{cuales}}}: other people will see it, right away.',
   'admin.tree.move.confirm': 'Move anyway',
   'admin.tree.move.warn':
@@ -466,6 +481,7 @@ export const en: Record<MessageKey, string> = {
   'admin.modules.status.draft': 'Draft',
   'admin.modules.status.pending': 'Awaiting approval',
   'admin.modules.status.published': 'Published',
+  'admin.modules.status.withdrawn': 'Withdrawn',
   'admin.modules.footer': 'Creating and editing happens in the module editor, where the canvas is. This screen governs what surrounds them: where they hang, who sees them and which version runs.',
   'admin.modules.footer.link': 'module editor',
 
@@ -603,6 +619,11 @@ export const en: Record<MessageKey, string> = {
   'admin.history.restoreConfirm': 'Publish the content of v{version}',
   'admin.history.restoring': 'Publishing…',
   'admin.history.restoreFailed': 'Could not restore.',
+  'admin.history.back': 'History',
+  'admin.history.bySystem': 'The system seed',
+  'admin.history.version.title': '{modulo}, version {version}',
+  'admin.history.version.intro':
+    'The layout and objects are those of that version. The figures are today\'s: what publishing stores is the module definition, not the contents of the cache.',
   'action.back': 'Back',
   'action.edit': 'Edit',
   'action.view': 'View',
@@ -691,15 +712,13 @@ export const en: Record<MessageKey, string> = {
   'admin.proposals.field.summary': 'What changes',
   'admin.proposals.submit': 'Propose',
 
-  'admin.bump.warn':
-    'v{desde} → v{hasta}. Everything already configured is kept; only what the new version adds falls back to its default.',
-  'admin.bump.confirm': 'Bump to v{hasta}',
   'admin.bump.doing': 'Bumping…',
   'admin.bump.done': '{n, plural, one {# instance bumped} other {# instances bumped}} to v{hasta}.',
   'admin.bump.kept': 'Kept: {claves}.',
   'admin.bump.new': 'New, at its default value: {claves}.',
   'admin.bump.dropped': 'The new version no longer supports: {claves}.',
   'admin.bump.failed': 'Could not bump.',
+  'admin.bump.all': 'Update all {n} to the latest version',
   'admin.bump.major': 'This is a MAJOR version jump: it may change what is displayed. Review the object after upgrading.',
 
   // Editor: explicit save, discard and submit — section 4.2.
