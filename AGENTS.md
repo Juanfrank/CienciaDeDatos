@@ -75,6 +75,10 @@ npm run populate     # puebla .cache-datos con el conector mock
 npm run dev        # http://localhost:4300
 ```
 
+En Windows, `nvm use` pide la version: `nvm install 22` y `nvm use 22`. `nvm-windows` no lee
+`.nvmrc`, y encadenado con `&&` el fallo se lleva por delante el `npm ci` de al lado — lo que deja
+`nx` y `tsx` sin instalar y las ordenes de despues diciendo «no se reconoce como un comando».
+
 No hace falta Azure, ni SQL Server, ni Docker. Usuarios sembrados:
 `u-ana@poderjudicial.gob.do` (colaborador), `u-admin@…` (administrador), `u-beto@…` (visor);
 clave `Demostracion-2026!` y TOTP del secreto `JBSWY3DPEHPK3PXP`.
