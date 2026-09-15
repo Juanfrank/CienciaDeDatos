@@ -1,6 +1,6 @@
 import { InMemoryCacheStore } from '@app/caching';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { KEY_QUEUE, StoreExportQueue } from './queue';
+import { KEY_QUEUE, KEY_TERMINADAS, StoreExportQueue, TTL_JOB_MS } from './queue';
 import { generarArtefacto, pendientesProcess, jobProcess } from './process';
 import type { ResolverObjects } from './process';
 import { jobKey } from './types';
@@ -209,6 +209,118 @@ describe('la cola con varios a la vez', () => {
     const primeras = escrituras;
     await cola.tomarSiguiente();
     await cola.tomarSiguiente();
+    expect(escrituras).toBe(primeras);
+  });
+});
+
+describe('el plazo del artefacto (5.3)', () => {
+  /**
+   * `TTL_JOB_MS` estaba escrito, exportado y documentado —«el artefacto ocupa sitio»— y no lo
+   * leia nadie. Un artefacto es un PDF o un Excel ENTERO en base64 dentro de la entrada: sin
+   * plazo, cada exportacion que alguien haya pedido se queda en el almacen para siempre. No es
+   * solo sitio; son datos judiciales ya filtrados, guardados sin fecha de caducidad.
+   */
+  const artefacto = {
+    filename: 'casos.csv',
+    contentType: 'text/csv',
+    contentBase64: 'YQ==',
+    bytes: 1,
+  };
+
+  function conReloj(reloj: { ahora: Date }) {
+    const almacen = new InMemoryCacheStore({ ttlMs: 24 * 60 * 60 * 1000 });
+    let n = 0;
+    return {
+      almacen,
+      cola: new StoreExportQueue({
+        store: almacen,
+        now: () => reloj.ahora,
+        nextId: () => `job-${++n}`,
+      }),
+    };
+  }
+
+  it('un trabajo terminado desaparece cuando pasa su plazo, artefacto incluido', async () => {
+    const reloj = { ahora: new Date('2026-03-01T12:00:00.000Z') };
+    const { almacen, cola } = conReloj(reloj);
+
+    const job = await cola.encolar(peticion());
+    await cola.tomarSiguiente();
+    await cola.completar(job.id, artefacto);
+    expect(await cola.consultar(job.id)).not.toBeNull();
+
+    // Justo antes del plazo sigue disponible: quien acaba de pedirlo tiene que poder bajarlo.
+    reloj.ahora = new Date(reloj.ahora.getTime() + TTL_JOB_MS - 1000);
+    expect(await cola.purgarCaducados()).toBe(0);
+    expect(await cola.consultar(job.id)).not.toBeNull();
+
+    reloj.ahora = new Date(reloj.ahora.getTime() + 2000);
+    expect(await cola.purgarCaducados()).toBe(1);
+    expect(await cola.consultar(job.id)).toBeNull();
+    // Y la entrada entera se va del almacen, no solo el estado: el archivo iba dentro.
+    expect(await almacen.get(jobKey(job.id))).toBeNull();
+  });
+
+  it('un trabajo fallido tambien caduca', async () => {
+    const reloj = { ahora: new Date('2026-03-01T12:00:00.000Z') };
+    const { cola } = conReloj(reloj);
+
+    const job = await cola.encolar(peticion());
+    await cola.tomarSiguiente();
+    await cola.fallar(job.id, 'no salio');
+
+    reloj.ahora = new Date(reloj.ahora.getTime() + TTL_JOB_MS + 1000);
+    expect(await cola.purgarCaducados()).toBe(1);
+    expect(await cola.consultar(job.id)).toBeNull();
+  });
+
+  it('lo que esta en cola o procesandose NO se toca', async () => {
+    // Purgar un trabajo en curso seria peor que no purgar: quien lo pidio veria «ya no esta
+    // disponible» de algo que se esta generando en ese momento.
+    const reloj = { ahora: new Date('2026-03-01T12:00:00.000Z') };
+    const { cola } = conReloj(reloj);
+
+    const enCola = await cola.encolar(peticion());
+    const enCurso = await cola.encolar(peticion());
+    await cola.tomarSiguiente();
+    void enCurso;
+
+    reloj.ahora = new Date(reloj.ahora.getTime() + TTL_JOB_MS * 10);
+    expect(await cola.purgarCaducados()).toBe(0);
+    expect(await cola.consultar(enCola.id)).not.toBeNull();
+  });
+
+  it('el indice de terminados no crece sin fin', async () => {
+    // Si el indice se quedara con la entrada de lo ya borrado, cambiaria un almacen que crece
+    // por una lista que crece, que es el mismo problema con otra forma.
+    const reloj = { ahora: new Date('2026-03-01T12:00:00.000Z') };
+    const { almacen, cola } = conReloj(reloj);
+
+    for (let i = 0; i < 5; i += 1) {
+      const job = await cola.encolar(peticion());
+      await cola.tomarSiguiente();
+      await cola.completar(job.id, artefacto);
+    }
+
+    reloj.ahora = new Date(reloj.ahora.getTime() + TTL_JOB_MS + 1000);
+    expect(await cola.purgarCaducados()).toBe(5);
+    expect((await almacen.get<unknown[]>(KEY_TERMINADAS))?.value).toEqual([]);
+  });
+
+  it('mirar sin nada que purgar no escribe', async () => {
+    // El trabajador la llama cada diez minutos. Mirar no puede ser una escritura.
+    const almacen = new InMemoryCacheStore({ ttlMs: 60_000 });
+    const escribir = almacen.set.bind(almacen);
+    let escrituras = 0;
+    almacen.set = async (clave, entry) => {
+      escrituras += 1;
+      return escribir(clave, entry);
+    };
+    const cola = new StoreExportQueue({ store: almacen });
+
+    await cola.purgarCaducados();
+    const primeras = escrituras;
+    await cola.purgarCaducados();
     expect(escrituras).toBe(primeras);
   });
 });

@@ -7,6 +7,8 @@ import { queueExports, resolverObjects } from './exports';
 const INTERVAL_QUEUE_MS = 500;
 const INTERVAL_ALERTS_MS = 5_000;
 const INTERVAL_SUBSCRIPTIONS_MS = 60_000;
+/** El plazo de un artefacto es de una hora; mirarlo cada diez minutos lo cumple de sobra. */
+const INTERVAL_LIMPIEZA_MS = 10 * 60_000;
 
 /** Los temporizadores se cuelgan de globalThis: la recarga en caliente crearia uno por recarga. */
 const KEY = '__trabajadorDeFondo';
@@ -42,5 +44,10 @@ export function backgroundWorkerStart(): void {
     ),
     enBucle('alertas', INTERVAL_ALERTS_MS, () => evaluateIfHasDatumNew()),
     enBucle('suscripciones', INTERVAL_SUBSCRIPTIONS_MS, () => subscriptionsServe()),
+    // Aplica el plazo de 5.3: un artefacto es un PDF o un Excel entero en base64, y sin esto se
+    // quedaban todos en el almacen para siempre.
+    enBucle('limpieza-de-exportaciones', INTERVAL_LIMPIEZA_MS, () =>
+      queueExports.purgarCaducados(),
+    ),
   ];
 }

@@ -5,6 +5,7 @@ import { readPersonalization } from '../../../../src/server/personalization';
 import { objectSerialize } from '../../../../src/server/serialize';
 import { withoutSession } from '../../../../src/server/respuestas';
 import { sessionGet } from '../../../../src/server/session';
+import { filtersOfQuery } from '../../../../src/server/filters';
 
 export const runtime = 'nodejs';
 
@@ -23,12 +24,9 @@ export async function GET(
     return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
   }
 
-  const url = new URL(request.url);
-  const requestedFilters: Record<string, string | string[]> = {};
-  for (const clave of new Set(url.searchParams.keys())) {
-    const valores = url.searchParams.getAll(clave);
-    requestedFilters[clave] = valores.length > 1 ? valores : (valores[0] ?? '');
-  }
+  // Por el helper y no a mano: asignar una clave que viene de la URL con `objeto[clave] =`
+  // trata `__proto__` como propiedad del lenguaje y el filtro desaparece sin dejar rastro.
+  const requestedFilters = filtersOfQuery(new URL(request.url).searchParams);
 
   const loaded = await moduleLoad({
     module,

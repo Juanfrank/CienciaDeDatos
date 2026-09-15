@@ -55,6 +55,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'La hora debe estar entre 0 y 23.' }, { status: 400 });
   }
 
+  // El dia se valida igual que la hora, que era lo que faltaba. Sin esto, un `diaSemana` que no
+  // fuera un numero producia una fecha invalida en el calendario, y una fecha invalida compara
+  // falso con todo: la suscripcion se entregaba la primera vez que el trabajador la mirara, a
+  // cualquier hora. Un 99 la mandaba tres meses por delante y no se entregaba nunca.
+  const diaSemana = Number(body['diaSemana'] ?? 1);
+  const diaMes = Number(body['diaMes'] ?? 1);
+  if (cadencia === 'semanal' && (!Number.isInteger(diaSemana) || diaSemana < 0 || diaSemana > 6)) {
+    return NextResponse.json(
+      { error: 'El dia de la semana debe estar entre 0 (domingo) y 6 (sabado).' },
+      { status: 400 },
+    );
+  }
+  if (cadencia === 'mensual' && (!Number.isInteger(diaMes) || diaMes < 1 || diaMes > 31)) {
+    return NextResponse.json({ error: 'El dia del mes debe estar entre 1 y 31.' }, { status: 400 });
+  }
+
   const module = await slugServableModule(moduleSlug, await actorDe(sesion));
   if (!module) return NextResponse.json({ error: 'Modulo no encontrado.' }, { status: 404 });
 
@@ -69,8 +85,8 @@ export async function POST(request: Request) {
     format: formato,
     cadence: cadencia,
     hour: hora,
-    ...(cadencia === 'semanal' ? { weekday: Number(body['diaSemana'] ?? 1) } : {}),
-    ...(cadencia === 'mensual' ? { monthday: Number(body['diaMes'] ?? 1) } : {}),
+    ...(cadencia === 'semanal' ? { weekday: diaSemana } : {}),
+    ...(cadencia === 'mensual' ? { monthday: diaMes } : {}),
     enabled: true,
   };
 

@@ -4,6 +4,7 @@ export {
   KEY_QUEUE,
   StoreExportQueue,
   TTL_JOB_MS,
+  KEY_TERMINADAS,
   type IExportQueue,
   type StoreExportQueueOptions,
 } from './queue';

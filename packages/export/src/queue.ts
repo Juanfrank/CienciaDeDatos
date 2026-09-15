@@ -7,8 +7,24 @@ import type { ExportJob, ExportRequest } from './types';
 
 export const KEY_QUEUE = 'export:queue:pendientes';
 
-/** Un trabajo terminado deja de ser interesante bastante rapido; el artefacto ocupa sitio. */
+/**
+ * Un trabajo terminado deja de ser interesante bastante rapido; el artefacto ocupa sitio.
+ *
+ * Esto lo APLICA `purgarCaducados`, que el trabajador de fondo llama cada tanto. Antes era una
+ * constante exportada que no leia nadie: cada exportacion —un PDF o un Excel enteros, en base64
+ * dentro de la entrada— se quedaba en el almacen para siempre. No es solo sitio: son datos
+ * judiciales ya filtrados, guardados sin plazo, que es justo lo que un plazo existe para evitar.
+ */
 export const TTL_JOB_MS = 60 * 60 * 1000;
+
+/** Indice de trabajos terminados, con la hora en que terminaron. El almacen es de clave-valor y
+ *  no se puede recorrer, asi que el plazo necesita saber a quien mirar. */
+export const KEY_TERMINADAS = 'export:queue:terminadas';
+
+interface Terminada {
+  id: string;
+  at: string;
+}
 
 export interface IExportQueue {
   encolar(request: ExportRequest, ahora?: Date): Promise<ExportJob>;
@@ -18,6 +34,8 @@ export interface IExportQueue {
   completar(id: string, artifact: NonNullable<ExportJob['artifact']>, ahora?: Date): Promise<void>;
   fallar(id: string, error: string, ahora?: Date): Promise<void>;
   pendientes(): Promise<string[]>;
+  /** Borra los trabajos terminados que ya pasaron su plazo. Devuelve cuantos borro. */
+  purgarCaducados(ahora?: Date): Promise<number>;
 }
 
 function entrada<T>(value: T, ahora: Date): CacheEntry<T> {
@@ -125,6 +143,7 @@ export class StoreExportQueue implements IExportQueue {
       artifact,
     };
     await this.store.set(jobKey(id), entrada(ready, ahora));
+    await this.anotarTerminada(id, ahora);
   }
 
   async fallar(id: string, error: string, ahora = this.now()): Promise<void> {
@@ -137,5 +156,50 @@ export class StoreExportQueue implements IExportQueue {
       error,
     };
     await this.store.set(jobKey(id), entrada(fallido, ahora));
+    await this.anotarTerminada(id, ahora);
+  }
+
+  /** Apunta un trabajo en el indice de terminados, para que el plazo sepa a quien mirar. */
+  private async anotarTerminada(id: string, ahora: Date): Promise<void> {
+    await mutate<Terminada[]>(
+      this.store,
+      KEY_TERMINADAS,
+      (previas) => [...(previas ?? []).filter((t) => t.id !== id), { id, at: ahora.toISOString() }],
+      { ahora },
+    );
+  }
+
+  /**
+   * Borra los trabajos terminados que ya pasaron su plazo.
+   *
+   * El artefacto se borra CON el trabajo: guardar el trabajo sin su archivo dejaria a quien lo
+   * consulta viendo «Lista» y un enlace que no descarga nada, que dice menos que «ya no esta
+   * disponible». Quien consulta un trabajo purgado recibe eso ultimo, y el sondeo se para — el
+   * camino ya estaba escrito y hasta ahora no lo recorria nadie.
+   */
+  async purgarCaducados(ahora = this.now()): Promise<number> {
+    const limite = ahora.getTime() - TTL_JOB_MS;
+    const vencida = (t: Terminada): boolean => {
+      const cuando = new Date(t.at).getTime();
+      // Una fecha ilegible se purga: dejarla seria una entrada que nunca vence.
+      return !Number.isFinite(cuando) || cuando <= limite;
+    };
+
+    let caducadas: Terminada[] = [];
+    await mutate<Terminada[]>(
+      this.store,
+      KEY_TERMINADAS,
+      (previas) => {
+        const todas = previas ?? [];
+        caducadas = todas.filter(vencida);
+        // Sin nada que purgar se devuelve la MISMA lista: esto corre cada pocos minutos y no
+        // tiene por que escribir en disco para decir que no habia nada que hacer.
+        return caducadas.length === 0 ? todas : todas.filter((t) => !vencida(t));
+      },
+      { ahora },
+    );
+
+    for (const t of caducadas) await this.store.delete(jobKey(t.id));
+    return caducadas.length;
   }
 }
