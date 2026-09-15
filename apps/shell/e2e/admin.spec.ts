@@ -1774,3 +1774,41 @@ test.describe('el carril colapsado no se superpone al contenido', () => {
     await expect(page.getByTestId('settings-mensaje')).toBeVisible();
   });
 });
+
+test.describe('las personas, y como entran, en una sola tabla (4.10.1 y 4.7.2)', () => {
+  test('los equipos son un NUMERO que abre el detalle, no una lista en la celda', async ({
+    page,
+  }) => {
+    /*
+     * Con cuatro equipos, una fila ocupaba cuatro renglones y la tabla dejaba de leerse de un
+     * vistazo. El numero responde «en cuantos esta» sin abrir nada, y el detalle —que equipo y
+     * con que rol— esta a un clic.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/users');
+
+    // Ana esta en los dos equipos de la semilla.
+    await expect(page.getByTestId('usuario-u-ana-equipos')).toHaveText('2');
+    await page.getByTestId('usuario-u-ana-equipos').click();
+
+    const dialogo = page.getByTestId('usuario-u-ana-equipos-dialogo');
+    await expect(dialogo.getByTestId('usuario-u-ana-equipo-equipo-norte')).toContainText(
+      'colaborador',
+    );
+    await expect(dialogo.getByTestId('usuario-u-ana-equipo-equipo-este')).toContainText('visor');
+  });
+
+  test('la columna «Ambito propio» ya no esta, y la de cuenta si', async ({ page }) => {
+    /*
+     * «Ambito propio» decia «hereda» en casi todas las filas —es lo normal— y llevaba a una
+     * pantalla que ya esta en el carril: una columna que casi siempre dice lo mismo no informa.
+     * En su sitio va lo que si cambia de una fila a otra y no se sabia sin cambiar de pantalla:
+     * si la persona entra por Azure AD o con una cuenta local.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/users');
+
+    await expect(page.getByTestId('usuario-u-ana-ambito')).toHaveCount(0);
+    await expect(page.getByTestId('usuario-u-ana-tipo')).toBeVisible();
+  });
+});

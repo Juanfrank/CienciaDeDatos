@@ -93,7 +93,6 @@ test.describe('panel de administracion (4.10.8)', () => {
     '/admin/modules/packages',
     '/admin/scopes',
     '/admin/who-sees-what',
-    '/admin/accounts',
     '/admin/audit',
   ]) {
     test(`${path} no tiene infracciones WCAG 2.1 AA`, async ({ page }) => {

@@ -327,7 +327,7 @@ Migrar de golpe es un cambio grande y mecanico. El orden sensato sigue siendo po
 empezando por las que mas acumulan hoy:
 `apps/shell/src/components/CreateNotice.tsx` (13),
 `apps/shell/app/admin/audit/page.tsx` (12),
-`apps/shell/src/components/admin/LocalAccounts.tsx` (11) y
+`apps/shell/src/components/admin/AuditEvent.tsx` (11) y
 `apps/shell/src/components/editor/ColorRules.tsx` (11).
 
 ### 2.11 Las propiedades siguen en espanol

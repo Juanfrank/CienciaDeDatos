@@ -42,7 +42,6 @@ const SECCIONES: readonly (readonly [string, string])[] = [
   ['/admin/users', '12-usuarios'],
   ['/admin/users/permissions', '13-usuarios-permisos'],
   ['/admin/teams', '14-equipos'],
-  ['/admin/accounts', '15-cuentas'],
   ['/admin/scopes', '16-ambitos'],
   ['/admin/who-sees-what', '17-quien-ve-que'],
   ['/admin/audit', '18-auditoria'],

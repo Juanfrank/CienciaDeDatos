@@ -172,12 +172,6 @@ export const GRUPOS: GrupoDeAdmin[] = [
         desc: 'La unidad de agrupacion para el acceso a modulos y el ambito de datos.',
         icono: 'personas',
       },
-      {
-        href: '/admin/accounts',
-        label: 'Cuentas locales',
-        desc: 'La excepcion, no la via por defecto.',
-        icono: 'llave',
-      },
     ],
   },
   {

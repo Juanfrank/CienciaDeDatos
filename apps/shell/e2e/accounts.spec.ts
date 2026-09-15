@@ -30,21 +30,30 @@ async function bloquear(page: import('@playwright/test').Page): Promise<void> {
   }
 }
 
+/*
+ * Las cuentas locales ya no tienen seccion propia: viven en la tabla de USUARIOS.
+ *
+ * Eran dos tablas de las mismas personas en dos pantallas, y quien busca por que alguien no puede
+ * entrar no tiene por que saber de antemano si su cuenta es local o institucional — es justo lo
+ * que viene a averiguar.
+ */
 test.describe('la superficie de cuentas locales (4.7.2)', () => {
   test('un Visor no entra, ni por la pagina ni por la API', async ({ page }) => {
     await asLogin(page, 'u-beto');
     expect((await page.request.get('/api/admin/accounts')).status()).toBe(403);
-    await page.goto('/admin/accounts');
-    await expect(page.getByTestId('table-accounts')).toHaveCount(0);
+    await page.goto('/admin/users');
+    await expect(page.getByTestId('tabla-usuarios')).toHaveCount(0);
   });
 
   test('un Administrador ve cuantas cuentas locales hay y cual es el canal de entrega', async ({
     page,
   }) => {
     await asLogin(page, 'u-admin');
-    await page.goto('/admin/accounts');
+    await page.goto('/admin/users');
 
-    await expect(page.getByTestId('table-accounts')).toBeVisible();
+    await expect(page.getByTestId('tabla-usuarios')).toBeVisible();
+    // La cuenta local se distingue de la institucional en la propia fila.
+    await expect(page.getByTestId(`usuario-${ACCOUNT}-tipo`)).toHaveText('Local');
     // Sin correo institucional configurado, la pantalla lo dice en vez de dar a entender que
     // sale un correo: de ese canal depende que el flujo sea seguro.
     await expect(page.getByTestId('canal-restablecimiento')).toContainText('no configurado');
@@ -57,11 +66,11 @@ test.describe('la superficie de cuentas locales (4.7.2)', () => {
     await asLogin(page, 'u-admin');
     await bloquear(page);
 
-    await page.goto('/admin/accounts');
-    await expect(page.getByTestId(`account-${ACCOUNT}`)).toContainText('Bloqueada');
+    await page.goto('/admin/users');
+    await expect(page.getByTestId(`usuario-${ACCOUNT}`)).toContainText('Bloqueada');
 
     await page.getByTestId(`unlock-${ACCOUNT}`).click();
-    await expect(page.getByTestId(`account-${ACCOUNT}`)).toContainText('Activa');
+    await expect(page.getByTestId(`usuario-${ACCOUNT}`)).toContainText('Activa');
 
     // Y la contrasena de siempre vuelve a servir: un error de dedos no obliga a cambiarla.
     const entrada = await page.request.post('/api/sign-in', {
@@ -213,7 +222,7 @@ test.describe('la pantalla de restablecimiento', () => {
 
   test('desde la pantalla, con el codigo que da el panel', async ({ page }) => {
     await asLogin(page, 'u-admin');
-    await page.goto('/admin/accounts');
+    await page.goto('/admin/users');
     await page.getByTestId(`reset-${ACCOUNT}`).click();
 
     const resetId = await page.getByTestId('reset-id').innerText();

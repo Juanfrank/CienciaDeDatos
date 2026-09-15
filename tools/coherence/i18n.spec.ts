@@ -37,7 +37,7 @@ const PALABRA = /[A-Za-zÀ-ÿ]{3,}/;
  * Es una foto, no un objetivo: cada cadena que se migre al catalogo puede bajarlo. Subirlo
  * requiere explicar por que una cadena nueva no puede ir al catalogo.
  */
-const TOPE = 190;
+const TOPE = 170;
 
 function cadenasDe(ruta: string): string[] {
   const fuente = readFileSync(`${raiz}/${ruta}`, 'utf8');
