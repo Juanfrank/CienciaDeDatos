@@ -679,6 +679,7 @@ export const es = {
   'admin.bump.failed': 'No se pudo subir.',
   // Editor: autoguardado, guardado manual, descartar y enviar — seccion 4.2.
   'editor.saving': 'Guardando…',
+  'editor.withoutNetwork': 'No se pudo guardar: no hay conexion con el servidor. Se reintenta solo.',
   'editor.unsaved': 'Sin guardar',
   'editor.saved': 'Guardado',
   'editor.saveDraft': 'Guardar borrador',

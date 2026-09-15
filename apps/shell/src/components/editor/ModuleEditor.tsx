@@ -158,11 +158,23 @@ export function ModuleEditor({
         setBloq(body.locks);
         setObjetos(body.objetos);
         router.refresh();
+      } catch {
+        /*
+         * Si `fetch` lanza —no hay red, el servidor se cayo, la maquina desperto del suspendido—
+         * no hay respuesta que mirar. Sin esto, el editor se quedaba diciendo «Sin guardar» y sin
+         * decir por que: la promesa rechazada subia sin dueno y el mensaje de error se habia
+         * limpiado al empezar.
+         *
+         * Lo que estaba escrito NO se pierde: `sucio` se deduce comparando lo que hay con lo
+         * guardado, no es una marca que se baje al terminar. Como sigue en cierto, el
+         * autoguardado se rearma y lo vuelve a intentar solo. Eso es lo que dice el mensaje.
+         */
+        setError(t('editor.withoutNetwork'));
       } finally {
         setGuardando(false);
       }
     },
-    [modulo.slug, router],
+    [modulo.slug, router, t],
   );
 
   /*

@@ -684,6 +684,7 @@ export const en: Record<MessageKey, string> = {
 
   // Editor: explicit save, discard and submit — section 4.2.
   'editor.saving': 'Saving…',
+  'editor.withoutNetwork': 'Could not save: no connection to the server. It will retry on its own.',
   'editor.unsaved': 'Unsaved',
   'editor.saved': 'Saved',
   'editor.saveDraft': 'Save draft',

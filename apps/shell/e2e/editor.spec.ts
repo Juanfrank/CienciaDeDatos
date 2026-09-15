@@ -80,6 +80,38 @@ test.describe('quien entra al editor (4.10.1)', () => {
   });
 });
 
+test.describe('cuando el servidor no contesta, el editor lo dice', () => {
+  test('una caida de red deja el aviso, y lo escrito sigue ahi', async ({ page }) => {
+    /*
+     * `fetch` no devuelve una respuesta con error cuando no hay red: LANZA. Sin recoger eso, el
+     * editor se quedaba diciendo «Sin guardar» sin decir por que —el mensaje de error se limpia
+     * al empezar a guardar— y la promesa rechazada subia sin dueno.
+     *
+     * Se corta la peticion de verdad, con `route.abort`, en vez de devolver un 500: un 500 es
+     * una respuesta y ya tenia camino. Lo que no lo tenia es que no hubiera respuesta ninguna.
+     */
+    const slug = newSlug('sin-red');
+    await asLogin(page, 'u-ana');
+    await objectDraft(page, slug);
+    await page.goto(`/editor/${slug}`);
+    await expect(page.getByTestId('add-tarjeta-kpi')).toBeVisible();
+    await alDia(page);
+
+    await page.route(`**/api/modules/${slug}/edit`, (ruta) => ruta.abort('failed'));
+
+    // Un cambio cualquiera dispara el autoguardado.
+    await page.getByTestId('add-tarjeta-kpi').click();
+
+    await expect(page.getByTestId('editor-error')).toContainText('no hay conexion');
+    // Y sigue marcado como sin guardar: lo escrito no se da por guardado por haberlo intentado.
+    await expect(page.locator('.editor')).toHaveAttribute('data-dirty', 'si');
+
+    // Restablecida la conexion, el autoguardado se rearma solo y acaba guardando.
+    await page.unroute(`**/api/modules/${slug}/edit`);
+    await expect(page.locator('.editor')).toHaveAttribute('data-dirty', 'no', { timeout: 15_000 });
+  });
+});
+
 test.describe('un modulo se construye con objetos prediseñados, no con consultas (4.2)', () => {
   test('crear un borrador y colocarle un objeto desde el catalogo', async ({ page }) => {
     const slug = newSlug('construido');

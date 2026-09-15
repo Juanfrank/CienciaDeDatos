@@ -21,7 +21,15 @@ export function useUrlFilters() {
    */
   const pedido = useRef<string | null>(null);
   useEffect(() => {
-    pedido.current = null;
+    /*
+     * Se olvida lo pedido solo cuando la URL ya DICE lo pedido.
+     *
+     * Olvidandolo en cualquier cambio, el compromiso de un gesto anterior borraba la memoria de
+     * uno posterior que todavia estaba en vuelo: el gesto siguiente partia de una URL que ya no
+     * era la ultima pedida y el de en medio se perdia. Pasa al encadenar dos gestos dentro del
+     * mismo ciclo de render, que es lo que hace cualquiera marcando casillas de una lista.
+     */
+    if (pedido.current === comprometidos) pedido.current = null;
   }, [comprometidos]);
 
   const apply = useCallback(
