@@ -167,6 +167,12 @@ export const GRUPOS: GrupoDeAdmin[] = [
         ],
       },
       {
+        href: '/admin/embeds',
+        label: 'Codigos de incrustacion',
+        desc: 'Donde estan las vistas de la institucion metidas en paginas de fuera, y quien las puso.',
+        icono: 'embed',
+      },
+      {
         href: '/admin/teams',
         label: 'Equipos',
         desc: 'La unidad de agrupacion para el acceso a modulos y el ambito de datos.',

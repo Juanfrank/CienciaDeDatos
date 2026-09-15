@@ -40,7 +40,7 @@ export function PageNavigator({
   moduleSlug,
   actual,
   filtros,
-  embedded,
+  embedCode,
 }: {
   navegador: PageNavigatorSettings;
   paginas: PaginaNavegable[];
@@ -57,7 +57,14 @@ export function PageNavigator({
    * exactamente lo que la vista incrustada existe para no hacer—. Ir de una pagina a otra del
    * mismo modulo es moverse dentro de lo que se incrusto, y eso si.
    */
-  embedded?: 'completo' | 'limpio';
+  /**
+   * El codigo por el que se entro, cuando la vista esta incrustada.
+   *
+   * Sustituye a la bandera de cromo que habia aqui: el cromo ya no viaja en el enlace —lo fija el
+   * codigo— asi que el navegador no tiene por que saber cual es. Lo unico que necesita es no
+   * perder el codigo al cambiar de pagina.
+   */
+  embedCode?: string;
 }) {
   const t = useTranslator();
   // Por el normalizador y no en crudo: hay modulos guardados con el `drawer` de antes, y se
@@ -67,10 +74,16 @@ export function PageNavigator({
   // vez, que es justo cuando mas falta hace saber que hay mas paginas.
   const [abierto, setAbierto] = useState(true);
 
+  /*
+   * Dentro de un marco, el enlace conserva el CODIGO.
+   *
+   * Antes componia `/embed/m/{slug}?pagina=…&cromo=…`, es decir, reconstruia a mano la direccion
+   * incrustada a partir del slug del modulo. Con los codigos eso seria salirse del codigo por el
+   * que se entro: la pagina se pasa como parametro y el codigo sigue siendo el mismo, que es lo
+   * que mantiene la vista atada a quien la genero.
+   */
   const hrefDe = (slug: string) =>
-    embedded
-      ? `/embed/m/${moduleSlug}?pagina=${slug}${embedded === 'limpio' ? '&cromo=limpio' : ''}`
-      : `/m/${moduleSlug}/${slug}`;
+    embedCode ? `/embed/${embedCode}?pagina=${slug}` : `/m/${moduleSlug}/${slug}`;
 
   const enlaces = (
     <ul className="navegador__paginas">

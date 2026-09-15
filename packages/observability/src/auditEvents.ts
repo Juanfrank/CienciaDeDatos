@@ -40,7 +40,11 @@ export interface ConfigChangeLog {
     // se audita aparte: leer el registro de un equipo no cuenta quien mas alcanza sus modulos.
     | 'user-grant'
     // Un tema repinta la aplicacion entera, y de el sale el contraste que 4.9 promete.
-    | 'theme';
+    | 'theme'
+    // Un codigo de incrustacion abre una vista de la institucion DENTRO de otro portal. Quien lo
+    // genero responde de ese portal, asi que el codigo es una entidad con dueno y no un parametro
+    // de una URL que cualquiera podia componer.
+    | 'embed';
   entityId: string;
   action:
     | 'create'

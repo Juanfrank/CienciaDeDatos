@@ -2,10 +2,18 @@
 
 import { useRef, useState } from 'react';
 import { useUrlFilters } from '../hooks/useUrlFilters';
+import { useTranslator } from './Locale';
 import { IconButton } from './icons/IconButton';
+import { pedir, motivoDeFallo } from './pedir';
 
 /**
  * Codigo para incrustar esta vista en otro portal — seccion 4.9.
+ *
+ * El codigo lo GENERA EL SERVIDOR y queda registrado con quien lo pidio. Antes se componia aqui,
+ * en el navegador, pegando el slug del modulo y los filtros en una URL: cualquiera que supiera el
+ * slug la escribia a mano, y despues no habia forma de responder las dos preguntas que importan
+ * cuando un dato de la institucion aparece en la pagina de otro —quien lo puso ahi, y como se
+ * quita—. Ahora hay una respuesta a las dos, y un Administrador puede revocarlo.
  *
  * Dos formas, y la diferencia no es cosmetica. CON ENCABEZADO lleva el emblema y el nombre de la
  * institucion: es lo que se pone en un portal ajeno, donde la vista tiene que decir de donde salen
@@ -17,39 +25,54 @@ import { IconButton } from './icons/IconButton';
  * como si fuera la de todo el mundo.
  */
 export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?: string }) {
+  const t = useTranslator();
   const { searchParams } = useUrlFilters();
   const dialogo = useRef<HTMLDialogElement>(null);
   const [copiado, setCopiado] = useState(false);
   const [cromo, setCromo] = useState<'completo' | 'limpio'>('completo');
-
-  const buildCode = (cual: 'completo' | 'limpio'): string => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (pageSlug) params.set('pagina', pageSlug);
-    if (cual === 'limpio') params.set('cromo', 'limpio');
-    const cadena = params.toString();
-    const url = `${window.location.origin}/embed/m/${moduleSlug}${cadena ? `?${cadena}` : ''}`;
-
-    return [
-      `<iframe src="${url}"`,
-      `        title="${moduleSlug}"`,
-      '        width="100%" height="640" style="border:0"',
-      '        allow="" loading="lazy"></iframe>',
-    ].join('\n');
-  };
-
   const [code, setCodigo] = useState('');
+  const [enCurso, setEnCurso] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const elegir = (cual: 'completo' | 'limpio') => {
+  const generar = async (cual: 'completo' | 'limpio') => {
     setCromo(cual);
-    setCodigo(buildCode(cual));
     setCopiado(false);
-  };
+    setCodigo('');
+    setEnCurso(true);
+    setError(null);
 
-  const open = () => {
-    setCromo('completo');
-    setCodigo(buildCode('completo'));
-    setCopiado(false);
-    dialogo.current?.showModal();
+    // Los filtros que hay AHORA delante: lo que se incrusta es esta vista, no el modulo entero.
+    const filtros: Record<string, string[]> = {};
+    for (const clave of new Set(searchParams.keys())) {
+      filtros[clave] = searchParams.getAll(clave);
+    }
+
+    const respuesta = await pedir('/api/embeds', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        modulo: moduleSlug,
+        ...(pageSlug ? { pagina: pageSlug } : {}),
+        cromo: cual,
+        filtros,
+      }),
+    });
+    setEnCurso(false);
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('embed.failed')));
+      return;
+    }
+
+    const { codigo } = (await respuesta.json()) as { codigo: { code: string } };
+    const url = `${window.location.origin}/embed/${codigo.code}`;
+    setCodigo(
+      [
+        `<iframe src="${url}"`,
+        `        title="${moduleSlug}"`,
+        '        width="100%" height="640" style="border:0"',
+        '        allow="" loading="lazy"></iframe>',
+      ].join('\n'),
+    );
   };
 
   const copiar = async () => {
@@ -65,41 +88,50 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
 
   return (
     <>
-      <IconButton icono="embed" etiqueta="Incrustar" data-testid="incrustar" onClick={open} />
+      <IconButton
+        icono="embed"
+        etiqueta={t('embed.action')}
+        data-testid="incrustar"
+        onClick={() => {
+          dialogo.current?.showModal();
+          void generar('completo');
+        }}
+      />
 
-      <dialog ref={dialogo} className="emergente" aria-label="Codigo de incrustacion" data-testid="dialogo-incrustar">
+      <dialog
+        ref={dialogo}
+        className="emergente"
+        aria-label={t('embed.title')}
+        data-testid="dialogo-incrustar"
+      >
         <div className="popover__header">
-          <h2>Incrustar esta vista</h2>
+          <h2>{t('embed.title')}</h2>
           <button
             type="button"
             className="button-link"
             onClick={() => dialogo.current?.close()}
             data-testid="embed-close"
           >
-            Cerrar
+            {t('action.close')}
           </button>
         </div>
 
-        <p className="muted-text">
-          Pegue este codigo en el portal. Lleva los filtros que tiene ahora delante.
-        </p>
+        <p className="muted-text">{t('embed.intro')}</p>
 
         <fieldset className="embed__cromo">
-          <legend>Que se incrusta</legend>
+          <legend>{t('embed.what')}</legend>
           <label>
             <input
               type="radio"
               name="cromo"
               value="completo"
               checked={cromo === 'completo'}
+              disabled={enCurso}
               data-testid="cromo-completo"
-              onChange={() => elegir('completo')}
+              onChange={() => void generar('completo')}
             />{' '}
-            Con el encabezado institucional
-            <span className="muted-text">
-              {' '}
-              — el emblema y el nombre. Para un portal de otra institucion.
-            </span>
+            {t('embed.withHeader')}
+            <span className="muted-text"> — {t('embed.withHeader.hint')}</span>
           </label>
           <label>
             <input
@@ -107,20 +139,17 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
               name="cromo"
               value="limpio"
               checked={cromo === 'limpio'}
+              disabled={enCurso}
               data-testid="cromo-limpio"
-              onChange={() => elegir('limpio')}
+              onChange={() => void generar('limpio')}
             />{' '}
-            Sin encabezado
-            <span className="muted-text">
-              {' '}
-              — solo el modulo y quien lo mira, y sin salida a la aplicacion. Para incrustarlo
-              dentro de un sistema del propio Poder Judicial.
-            </span>
+            {t('embed.withoutHeader')}
+            <span className="muted-text"> — {t('embed.withoutHeader.hint')}</span>
           </label>
         </fieldset>
 
         <label className="visualmente-oculto" htmlFor="codigo-incrustacion">
-          Codigo de incrustacion
+          {t('embed.title')}
         </label>
         <textarea
           id="codigo-incrustacion"
@@ -130,14 +159,24 @@ export function Embed({ moduleSlug, pageSlug }: { moduleSlug: string; pageSlug?:
           value={code}
         />
 
+        {error ? (
+          <p className="aviso notice-error" role="alert" data-testid="embed-error">
+            {error}
+          </p>
+        ) : null}
+
         <p className="active-scope" data-testid="embed-notice">
-          Quien vea el portal tiene que haber iniciado sesion aqui, y vera los datos que su propio
-          ambito de acceso permita — nunca los del equipo de quien incrusto la vista. El portal
-          anfitrion tambien debe estar autorizado por un Administrador.
+          {t('embed.notice')}
         </p>
 
-        <button type="button" className="pastilla" data-testid="incrustar-copiar" onClick={() => void copiar()}>
-          {copiado ? 'Copiado' : 'Copiar codigo'}
+        <button
+          type="button"
+          className="pastilla"
+          disabled={enCurso || !code}
+          data-testid="incrustar-copiar"
+          onClick={() => void copiar()}
+        >
+          {copiado ? t('embed.copied') : t('embed.copy')}
         </button>
       </dialog>
     </>

@@ -2,34 +2,58 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { defaultIdentity } from '@app/design-tokens';
 import { describeProvenance } from '@app/module-model';
-import { moduleLoad } from '../../../../../src/server/data';
-import { actorDe, slugServableModule } from '../../../../../src/server/cicloDeVida';
-import { embedChromeOf } from '../../../../../src/server/embedding';
-import { objectSerialize } from '../../../../../src/server/serialize';
-import { sessionGet } from '../../../../../src/server/session';
-import { findUser } from '../../../../../src/server/context';
-import { AZURE_AD_AVAILABLE } from '../../../../../src/server/identity';
-import { Login } from '../../../../../src/components/Login';
-import { initialsOf } from '../../../../../src/components/initials';
-import { ModuleView } from '../../../../../src/components/ModuleView';
-import { PageNavigator } from '../../../../../src/components/PageNavigator';
+import { moduleLoad } from '../../../../src/server/data';
+import { actorDe, slugServableModule } from '../../../../src/server/cicloDeVida';
+import { embedFind } from '../../../../src/server/incrustaciones';
+import { objectSerialize } from '../../../../src/server/serialize';
+import { sessionGet } from '../../../../src/server/session';
+import { findUser } from '../../../../src/server/context';
+import { AZURE_AD_AVAILABLE } from '../../../../src/server/identity';
+import { Login } from '../../../../src/components/Login';
+import { initialsOf } from '../../../../src/components/initials';
+import { ModuleView } from '../../../../src/components/ModuleView';
+import { PageNavigator } from '../../../../src/components/PageNavigator';
 
-/** Modulo incrustado en otro portal — seccion 4.9. */
+/**
+ * Modulo incrustado en otro portal, por su CODIGO — seccion 4.9.
+ *
+ * La URL no dice el modulo: dice el codigo. De el cuelgan el modulo, la pagina, el cromo y los
+ * filtros con los que se genero, ademas de quien lo genero y cuando. Antes era `/embed/m/{slug}`
+ * con los filtros en la query, es decir, una URL que cualquiera componia a mano y que despues no
+ * respondia la pregunta que importa cuando un dato de la institucion aparece en la pagina de
+ * otro: quien lo puso ahi.
+ *
+ * Y un codigo REVOCADO no responde 404. Sigue existiendo y lo dice: un 404 dentro del portal de
+ * otra institucion se lee como que la aplicacion se cayo, y quien la mantiene no tiene por donde
+ * empezar a preguntar.
+ */
 export default async function EmbeddedPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ code: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { slug } = await params;
+  const { code } = await params;
   const query = await searchParams;
-  const cromo = embedChromeOf(query['cromo']);
+  const codigo = await embedFind(code);
+  if (!codigo) notFound();
 
-  const filtros: Record<string, string | string[]> = {};
-  for (const [clave, valor] of Object.entries(query)) {
-    if (valor !== undefined && clave !== 'cromo') filtros[clave] = valor;
+  if (codigo.revokedAt) {
+    return (
+      <main className="embedded__body">
+        <p className="aviso notice-atencion" data-testid="embed-revocado">
+          {codigo.reason
+            ? `Este vinculo fue suprimido: ${codigo.reason}`
+            : 'Este vinculo fue suprimido por la institucion y ya no muestra datos.'}
+        </p>
+      </main>
+    );
   }
+
+  const slug = codigo.moduleSlug;
+  const cromo = codigo.chrome;
+  const filtros: Record<string, string | string[]> = { ...codigo.filters };
 
   const sesion = await sessionGet();
   if (!sesion) {
@@ -47,7 +71,7 @@ export default async function EmbeddedPage({
      * escribir la cookie de sesion —los navegadores bloquean la de terceros—, y sin esa salida
      * entrar aqui fallaria en silencio y sin explicacion.
      */
-    const volverAqui = `/embed/m/${slug}${cromo === 'limpio' ? '?cromo=limpio' : ''}`;
+    const volverAqui = `/embed/${code}`;
     return (
       <main className="embedded__body">
         <Login azureAdAvailable={AZURE_AD_AVAILABLE} identity={defaultIdentity} destino={volverAqui} />
@@ -65,9 +89,18 @@ export default async function EmbeddedPage({
   const module = await slugServableModule(slug, await actorDe(sesion));
   if (!module) notFound();
 
+  /*
+   * La pagina puede venir del codigo o del enlace del navegador, y el enlace manda.
+   *
+   * Moverse de una pagina a otra es moverse DENTRO de lo que se incrusto, asi que no hace falta
+   * un codigo por pagina: el modulo y el cromo siguen siendo los del codigo, y lo unico que
+   * cambia es cual de sus paginas se dibuja.
+   */
+  const pagina = typeof query['pagina'] === 'string' ? query['pagina'] : codigo.pageSlug;
+
   const loaded = await moduleLoad({
     module,
-    ...(typeof query['pagina'] === 'string' ? { pageSlug: query['pagina'] } : {}),
+    ...(pagina ? { pageSlug: pagina } : {}),
     userId: sesion.userId,
     teamId: sesion.activeTeamId,
     requestedFilters: filtros,
@@ -157,7 +190,7 @@ export default async function EmbeddedPage({
             }))}
             moduleSlug={module.slug}
             actual={loaded.pageSlug}
-            embedded={cromo}
+            embedCode={code}
             {...(filtrosDelPanel ? { filtros: filtrosDelPanel } : {})}
           />
         ) : null}

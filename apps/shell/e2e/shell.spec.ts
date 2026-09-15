@@ -311,7 +311,9 @@ test.describe('la politica de contenido no rompe la pagina', () => {
   });
 
   test('la vista incrustable conserva su propia politica de enmarcado', async ({ page }) => {
-    const respuesta = await page.goto('/embed/m/casos-pendientes');
+    // Cualquier ruta bajo /embed sirve: la politica la decide el PREFIJO, no el codigo, y asi la
+    // prueba no depende de que exista ninguno.
+    const respuesta = await page.goto('/embed/inc-inexistente');
     const csp = respuesta?.headers()['content-security-policy'] ?? '';
     // Sin origenes configurados se deniega, que es el valor por defecto y lo correcto.
     expect(csp).toContain('frame-ancestors');

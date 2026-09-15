@@ -23,7 +23,7 @@ describe('politica de contenido', () => {
   });
 
   it('una ruta incrustable conserva SU politica de enmarcado', () => {
-    const csp = politica('/embed/m/casos-pendientes', ['https://portal.gob.do']);
+    const csp = politica('/embed/inc-abc123', ['https://portal.gob.do']);
     expect(directiva(csp, 'frame-ancestors')).toBe('frame-ancestors https://portal.gob.do');
     expect(csp).toContain("default-src 'self'");
   });

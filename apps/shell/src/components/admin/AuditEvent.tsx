@@ -27,6 +27,7 @@ const ENTIDAD: Record<ConfigChangeLog['entityType'], string> = {
   module: 'el modulo',
   'user-grant': 'el acceso individual de',
   theme: 'el tema',
+  embed: 'el codigo de incrustacion',
 };
 
 /** Fecha corta y legible. La hora importa: dos cambios del mismo dia se distinguen por ella. */
