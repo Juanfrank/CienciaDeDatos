@@ -654,3 +654,116 @@ test.describe('el panel de filtros se personaliza sin escribir codigo (4.2)', ()
     await expect(page.getByTestId(`${campo}-modo-valores`)).toBeChecked();
   });
 });
+
+test.describe('las demas paginas del modulo (4.2)', () => {
+  /** Un borrador de DOS paginas, cada una con su objeto, para poder distinguirlas. */
+  async function dosPaginas(page: import('@playwright/test').Page, slug: string): Promise<void> {
+    await objectDraft(page, slug);
+    const actual = await page.request.get(`/api/modules/${slug}/edit`);
+    expect(actual.ok(), await actual.text()).toBe(true);
+    const { modulo } = (await actual.json()) as {
+      modulo: { pages: { pageId: string; slug: string; name: string; items: unknown[] }[] };
+    };
+    const primera = modulo.pages[0];
+
+    const guardado = await page.request.put(`/api/modules/${slug}/edit`, {
+      data: {
+        paginas: [
+          primera,
+          {
+            pageId: 'p-segunda',
+            slug: 'segunda',
+            name: 'Segunda',
+            items: [
+              {
+                id: 'kpi-segunda',
+                position: { x: 0, y: 0, w: 3, h: 2 },
+                instance: {
+                  instanceId: 'kpi-segunda',
+                  objectId: 'tarjeta-kpi',
+                  version: '1.0.0',
+                  title: 'Ingresados',
+                  binding: {
+                    datasetId: 'casos-por-distrito-trimestre',
+                    dimensions: [],
+                    measures: ['CasosIngresados'],
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+    expect(guardado.ok(), await guardado.text()).toBe(true);
+  }
+
+  test('se puede abrir cada pagina, y lo que se edita cae en LA QUE ESTA ABIERTA', async ({
+    page,
+  }) => {
+    /*
+     * El editor se abria siempre en la primera pagina y no habia forma de llegar a las demas: la
+     * definicion las guardaba enteras, el lienzo dibujaba la primera y el resto quedaba escrito y
+     * fuera de alcance. Un modulo de once paginas se editaba en una.
+     *
+     * Lo que se comprueba no es solo que la barra cambie de pestana —eso lo haria igual con el
+     * fallo puesto—, sino que el objeto de CADA pagina sale en su lienzo, y sobre todo que anadir
+     * algo estando en la segunda lo deja en la segunda. Esa era la otra mitad: el cambio se
+     * aplicaba a `paginas[0]` fijo, asi que sin esto se podria cambiar de pestana y seguir
+     * editando la primera sin que nada lo dijera.
+     */
+    await asLogin(page, 'u-admin');
+    const slug = newSlug('paginas');
+    await dosPaginas(page, slug);
+
+    await page.goto(`/editor/${slug}`);
+    await alDia(page);
+
+    // La primera, con su objeto y no el de la otra.
+    await expect(page.getByTestId('block-kpi')).toBeVisible();
+    await expect(page.getByTestId('block-kpi-segunda')).toHaveCount(0);
+
+    await page.getByTestId('pagina-segunda').click();
+    await alDia(page);
+    await expect(page.getByTestId('block-kpi-segunda')).toBeVisible();
+    await expect(page.getByTestId('block-kpi')).toHaveCount(0);
+
+    /*
+     * Y el objeto se DIBUJA, con su cifra.
+     *
+     * El bloque de la rejilla sale del borrador que vive en el navegador, asi que aparece aunque el
+     * servidor devuelva los objetos de otra pagina; lo que no aparece entonces es el objeto dentro,
+     * porque no hay ninguno leido para ese identificador. Sin esta comprobacion, la mitad de
+     * servidor de este arreglo —decirle QUE pagina dibujar— quedaba sin guarda.
+     */
+    await expect(
+      page.getByTestId('block-kpi-segunda').getByTestId('title-object'),
+    ).toHaveText('Ingresados');
+
+    // Y lo que se anade aqui se queda aqui.
+    await page.getByTestId('add-titulo-de-seccion').click();
+    await alDia(page);
+    const puesto = page.locator('[data-testid^="block-obj-"]').first();
+    await expect(puesto).toBeVisible();
+    const id = ((await puesto.getAttribute('data-testid')) ?? '').replace('block-', '');
+
+    await page.getByTestId('pagina-general').click();
+    await alDia(page);
+    await expect(page.getByTestId(`block-${id}`)).toHaveCount(0);
+
+    // Y sigue ahi al volver: se guardo en la pagina que estaba abierta, no en la primera.
+    await page.getByTestId('pagina-segunda').click();
+    await alDia(page);
+    await expect(page.getByTestId(`block-${id}`)).toBeVisible();
+  });
+
+  test('un modulo de una sola pagina no ensena la barra', async ({ page }) => {
+    // Una barra con un unico boton pulsado sugiere que falta algo que elegir.
+    await asLogin(page, 'u-admin');
+    const slug = newSlug('una-pagina');
+    await objectDraft(page, slug);
+    await page.goto(`/editor/${slug}`);
+    await alDia(page);
+    await expect(page.getByTestId('paginas-editor')).toHaveCount(0);
+  });
+});

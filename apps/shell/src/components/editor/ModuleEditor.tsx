@@ -87,7 +87,20 @@ export function ModuleEditor({
   const sucio = JSON.stringify(paginas) !== JSON.stringify(modulo.pages);
   const desviado = JSON.stringify(paginas) !== JSON.stringify(puntoDeRetorno);
 
-  const pagina = paginas[0];
+  /*
+   * Que pagina se esta editando.
+   *
+   * Por SLUG y no por indice: el indice sobrevive a que alguien reordene o quite una pagina
+   * apuntando a otra distinta, sin avisar, y lo que se estaria editando no seria lo que la pantalla
+   * dice. Con el slug, si la pagina deja de existir se cae a la primera, que es visible.
+   *
+   * Hasta ahora era `paginas[0]` fijo: un modulo de once paginas se editaba en la primera y las
+   * otras diez no tenian forma de abrirse desde aqui. La definicion las guardaba enteras, asi que
+   * lo que faltaba era exactamente esto.
+   */
+  const [slugActual, setSlugActual] = useState<string>(modulo.pages[0]?.slug ?? '');
+  const indice = Math.max(0, paginas.findIndex((p) => p.slug === slugActual));
+  const pagina = paginas[indice];
   const items = pagina?.items ?? [];
   const chosen = items.find((i) => i.id === selection) ?? null;
 
@@ -127,13 +140,15 @@ export function ModuleEditor({
    * escribe nada, asi que puede correr en cada cambio sin que nadie pierda nada.
    */
   const dibujar = useCallback(
-    async (cuales: ModuleDefinition['pages']) => {
+    async (cuales: ModuleDefinition['pages'], cual: string) => {
       setDibujando(true);
       try {
         const r = await fetch(`/api/modules/${modulo.slug}/preview`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ paginas: cuales }),
+          // QUE pagina dibujar. Sin esto el servidor devolvia siempre la primera, asi que cambiar
+          // de pagina movia los huecos de la rejilla y dejaba debajo los objetos de la otra.
+          body: JSON.stringify({ paginas: cuales, pagina: cual }),
         });
         if (!r.ok) return;
         const body = (await r.json()) as {
@@ -155,10 +170,23 @@ export function ModuleEditor({
   const editar = useCallback(
     (cuales: ModuleDefinition['pages']) => {
       setPaginas(cuales);
-      void dibujar(cuales);
+      void dibujar(cuales, slugActual);
     },
-    [dibujar],
+    [dibujar, slugActual],
   );
+
+  /*
+   * Cambiar de pagina: se redibuja y se suelta lo elegido.
+   *
+   * La seleccion es de un objeto de la pagina que se deja, y arrastrarla a la siguiente dejaria el
+   * panel lateral configurando algo que ya no esta en pantalla.
+   */
+  const irAPagina = (cual: string) => {
+    if (cual === slugActual) return;
+    setSlugActual(cual);
+    setSeleccion(null);
+    void dibujar(paginas, cual);
+  };
 
   const guardar = useCallback(
     async (cuales: ModuleDefinition['pages']) => {
@@ -240,7 +268,7 @@ export function ModuleEditor({
   }, [editable, sucio, saving, paginas, guardar]);
 
   const conItems = (nuevos: GridItem[]): ModuleDefinition['pages'] =>
-    paginas.map((p, i) => (i === 0 ? { ...p, items: nuevos } : p));
+    paginas.map((p, i) => (i === indice ? { ...p, items: nuevos } : p));
 
   const add = async (objectId: string) => {
     const definicion = palette.objetos.find((o) => o.objectId === objectId);
@@ -522,6 +550,34 @@ export function ModuleEditor({
       <p className="aviso-error" role="alert" data-testid="editor-error">
         {error}
       </p>
+
+      {/*
+        Las paginas del modulo, y cual se esta editando.
+
+        Son BOTONES y no un desplegable: con dos o tres paginas —que es lo normal— un desplegable
+        esconde tras un clic lo que cabe a la vista, y ademas no deja ver de un vistazo en cual se
+        esta. Va encima del lienzo porque es lo que manda sobre el lienzo.
+
+        Solo aparece con mas de una: un modulo de una pagina no tiene entre que elegir, y una barra
+        con un unico boton pulsado sugiere que falta algo.
+      */}
+      {paginas.length > 1 ? (
+        <nav className="editor__paginas" aria-label={t('editor.pages')} data-testid="paginas-editor">
+          {paginas.map((p) => (
+            <button
+              key={p.slug}
+              type="button"
+              className="editor__pagina"
+              aria-current={p.slug === pagina?.slug ? 'page' : undefined}
+              disabled={saving}
+              data-testid={`pagina-${p.slug}`}
+              onClick={() => irAPagina(p.slug)}
+            >
+              {p.name}
+            </button>
+          ))}
+        </nav>
+      ) : null}
 
       <div className="editor__banco">
         <Canvas

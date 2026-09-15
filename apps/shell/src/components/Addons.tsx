@@ -29,6 +29,7 @@ export function TooltipExplicativo({ content, titulo }: { content: string; titul
   const id = useId();
   const [visible, setVisible] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
+  const burbuja = useRef<HTMLSpanElement>(null);
   const [sitio, setSitio] = useState<{ top: number; left: number } | null>(null);
 
   useEffect(() => {
@@ -41,47 +42,54 @@ export function TooltipExplicativo({ content, titulo }: { content: string; titul
   }, [visible]);
 
   /*
-   * El globo se coloca FUERA de la tarjeta que explica.
+   * El globo sale PEGADO al icono, proyectado hacia arriba y a la derecha.
+   *
+   * Antes se colocaba fuera de la tarjeta ENTERA, eligiendo el lado que no cayera sobre otra: con
+   * la tarjeta a la derecha de la pantalla, la explicacion acababa al otro extremo, encima del
+   * arbol de navegacion y a medio metro del icono que la habia abierto. Un globo que no toca a su
+   * disparador deja de leerse como su explicacion y pasa a leerse como otra cosa de la pantalla.
+   *
+   * La regla que lo mandaba lejos —«no tapar la tarjeta»— nacio de un problema real: caia hacia
+   * abajo desde el icono, o sea justo sobre la cifra, y para leer que significaba habia que
+   * taparla. Pero lo que no se puede tapar es el CUERPO, que es donde esta el dato; el encabezado
+   * es el titulo y los iconos, y que el globo se apoye sobre esa franja no esconde ningun numero.
+   * Asi que la regla se afina en vez de mandarlo al otro lado de la pantalla.
+   *
+   * Se mide el globo en vez de suponer su alto: el texto es de largo variable —dos lineas o seis—
+   * y con una altura fija el que se pasara acabaria montado sobre la cifra, que es justo lo que
+   * esto viene a evitar.
    */
   useEffect(() => {
     if (!visible) return;
 
     const colocar = () => {
       const el = button.current;
+      const globo = burbuja.current;
       const card = el?.closest('.objeto');
-      if (!el || !card) return;
+      if (!el || !globo || !card) return;
 
       const icono = el.getBoundingClientRect();
       const box = card.getBoundingClientRect();
-      const ancho = 260;
-      const hole = 12;
+      const { width: ancho, height: alto } = globo.getBoundingClientRect();
+      const hole = 8;
+
+      // A la derecha desde el icono, y si no cabe se desliza hasta que quepa. Nunca al otro lado:
+      // deslizar conserva la cercania, saltar de lado la pierde.
+      const left = Math.max(hole, Math.min(icono.left, window.innerWidth - ancho - hole));
+      const arriba = icono.top - hole - alto;
+
+      if (arriba >= 0) {
+        setSitio({ top: arriba, left });
+        return;
+      }
 
       /*
-       * Se prefiere el lado que NO cae sobre otra tarjeta.
+       * Sin sitio arriba —la tarjeta esta pegada al borde superior—, DEBAJO DE LA TARJETA entera.
+       *
+       * Debajo del icono seria lo mas cercano y es justo lo que no se puede hacer: ahi esta la
+       * cifra. Este es el unico caso en el que el globo se aleja, y se aleja lo minimo.
        */
-      const otras = Array.from(document.querySelectorAll('.objeto')).filter((o) => o !== card);
-      const tapa = (izquierda: number) =>
-        otras.filter((o) => {
-          const r = o.getBoundingClientRect();
-          return !(izquierda + ancho <= r.left || izquierda >= r.right);
-        }).length;
-
-      const derecha = box.right + hole;
-      const izquierda = box.left - hole - ancho;
-      const rightFits = derecha + ancho <= window.innerWidth;
-      const leftFits = izquierda >= 0;
-
-      if (rightFits && leftFits) {
-        const elegida = tapa(derecha) <= tapa(izquierda) ? derecha : izquierda;
-        setSitio({ top: icono.top, left: elegida });
-      } else if (rightFits) {
-        setSitio({ top: icono.top, left: derecha });
-      } else if (leftFits) {
-        setSitio({ top: icono.top, left: izquierda });
-      } else {
-        // Sin sitio a los lados: debajo de la tarjeta entera, no encima de su contenido.
-        setSitio({ top: box.bottom + hole, left: Math.max(hole, box.left) });
-      }
+      setSitio({ top: box.bottom + hole, left });
     };
 
     colocar();
@@ -117,6 +125,7 @@ export function TooltipExplicativo({ content, titulo }: { content: string; titul
         <span
           role="tooltip"
           id={id}
+          ref={burbuja}
           className="addon__tooltip"
           data-testid={`tooltip-${titulo}`}
           style={sitio ? { top: `${sitio.top}px`, left: `${sitio.left}px` } : { visibility: 'hidden' }}

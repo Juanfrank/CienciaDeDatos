@@ -752,6 +752,7 @@ export const en: Record<MessageKey, string> = {
   'admin.resources.usage.behind': '{n} on an old version',
   'admin.resources.state.active': 'Active',
   'admin.resources.state.deprecated': 'Withdrawn',
+  'editor.pages': 'Module pages',
   'drill.panel.title': 'Jumps',
   'drill.panel.empty': 'This object offers no jump.',
   'drill.panel.module': 'Destination module',

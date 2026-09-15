@@ -5791,3 +5791,38 @@ th[aria-sort='descending'] .table__flecha {
   border-top: 1px solid var(--md-sys-color-outline-variant);
   padding-top: var(--space-md);
 }
+
+/*
+  Las paginas del modulo dentro del editor.
+
+  Pestanas, con la actual marcada por `aria-current` y no por una clase: el estado que lee un
+  lector de pantalla y el que se ve son el mismo, asi que no pueden discrepar.
+*/
+.editor__paginas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.editor__pagina {
+  padding: var(--space-xs) var(--space-md);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface-variant);
+  font: inherit;
+  cursor: pointer;
+}
+
+.editor__pagina[aria-current='page'] {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.editor__pagina:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

@@ -750,6 +750,7 @@ export const es = {
   'admin.resources.usage.behind': '{n} con version antigua',
   'admin.resources.state.active': 'Vigente',
   'admin.resources.state.deprecated': 'Retirada',
+  'editor.pages': 'Paginas del modulo',
   'drill.panel.title': 'Saltos',
   'drill.panel.empty': 'Este objeto no ofrece ningun salto.',
   'drill.panel.module': 'Modulo destino',

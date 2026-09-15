@@ -46,15 +46,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     pages: body['paginas'] as ModulePage[],
   };
 
+  // Que pagina se esta editando. Sin esto se devolvia siempre la primera, asi que el editor no
+  // podia dibujar ninguna otra —y por tanto tampoco editarlas—. `draftPreviousView` ya sabia
+  // recibirla; lo que faltaba era que alguien se la dijera.
+  const pagina = typeof body['pagina'] === 'string' ? body['pagina'] : undefined;
+
   return NextResponse.json({
     diagnosticos: await definitionDiagnose(borrador),
     locks: await publicationLocks(borrador),
-    objetos: await previsualizar(borrador, sesion.userId, sesion.activeTeamId),
+    objetos: await previsualizar(borrador, sesion.userId, sesion.activeTeamId, pagina),
   });
 }
 
 /** La misma proyeccion que usa el camino de edicion, para que el dibujo no difiera. */
-async function previsualizar(modulo: ModuleDefinition, userId: string, teamId: string) {
-  const previa = await draftPreviousView({ module: modulo, userId, teamId });
+async function previsualizar(
+  modulo: ModuleDefinition,
+  userId: string,
+  teamId: string,
+  pageSlug?: string,
+) {
+  const previa = await draftPreviousView({
+    module: modulo,
+    userId,
+    teamId,
+    ...(pageSlug ? { pageSlug } : {}),
+  });
   return (previa?.objetos ?? []).map(objectSerialize);
 }

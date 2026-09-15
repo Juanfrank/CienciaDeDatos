@@ -139,28 +139,46 @@ test.describe('un complemento no amplia lo que se puede ver (principio 5)', () =
 });
 
 test.describe('donde se coloca el tooltip', () => {
-  test('NUNCA tapa la tarjeta que explica', async ({ page }) => {
+  test('sale PEGADO a su icono, y nunca sobre la cifra que explica', async ({ page }) => {
     /*
-     * Caia hacia abajo desde el icono, o sea justo sobre el contenido: para leer que significa la
-     * cifra habia que tapar la cifra. Es el peor sitio posible para una explicacion, porque lo
-     * explicado y la explicacion no se pueden mirar a la vez.
+     * Las dos mitades de la regla, juntas, porque cada una sola admite la version rota de la otra.
+     *
+     * Caia hacia abajo desde el icono, o sea justo sobre el contenido: para leer que significaba
+     * la cifra habia que tapar la cifra. La primera version de esta prueba lo arreglo exigiendo
+     * que no tocara la tarjeta ENTERA, y eso lo mandaba al otro extremo de la pantalla —encima del
+     * arbol de navegacion— cuando la tarjeta estaba a la derecha. Un globo a medio metro de su
+     * icono deja de leerse como su explicacion.
+     *
+     * Lo que no se puede tapar es el CUERPO, que es donde esta el dato. El encabezado es el titulo
+     * y los iconos, y apoyarse en esa franja no esconde ningun numero.
      */
     await page.goto('/m/casos-pendientes');
-    await page.locator('.addon__icon').first().hover();
+    const icono = page.locator('.addon__icon').first();
+    await icono.hover();
     await expect(page.getByRole('tooltip').first()).toBeVisible();
 
-    const cruza = await page.evaluate(() => {
+    const medidas = await page.evaluate(() => {
       const globo = document.querySelector('[role="tooltip"]')?.getBoundingClientRect();
-      const card = document.querySelector('.objeto')?.getBoundingClientRect();
-      if (!globo || !card) return null;
-      return !(
-        globo.right <= card.left ||
-        globo.left >= card.right ||
-        globo.bottom <= card.top ||
-        globo.top >= card.bottom
-      );
+      const boton = document.querySelector('.addon__icon')?.getBoundingClientRect();
+      const cuerpo = document.querySelector('.object__body')?.getBoundingClientRect();
+      if (!globo || !boton || !cuerpo) return null;
+      return {
+        // Lo que separa el globo del icono que lo abrio, en los dos ejes.
+        lejosX: Math.max(boton.left - globo.right, globo.left - boton.right, 0),
+        lejosY: Math.max(boton.top - globo.bottom, globo.top - boton.bottom, 0),
+        tapaCuerpo: !(
+          globo.right <= cuerpo.left ||
+          globo.left >= cuerpo.right ||
+          globo.bottom <= cuerpo.top ||
+          globo.top >= cuerpo.bottom
+        ),
+      };
     });
-    expect(cruza).toBe(false);
+
+    // Adyacente: a un hueco de distancia, no a un panel de distancia.
+    expect(medidas?.lejosX).toBeLessThanOrEqual(16);
+    expect(medidas?.lejosY).toBeLessThanOrEqual(16);
+    expect(medidas?.tapaCuerpo).toBe(false);
   });
 
   test('se descarta con Escape, sin mover el puntero (1.4.13)', async ({ page }) => {
