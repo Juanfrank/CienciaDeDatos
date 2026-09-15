@@ -1313,7 +1313,17 @@ input[type='radio'] {
 
 .account__menu {
   position: absolute;
-  top: calc(100% + var(--space-xs));
+  /*
+   * Pegado al boton, con el hueco hecho de borde TRANSPARENTE.
+   *
+   * Estaba a `calc(100% + var(--space-xs))`, y ese hueco era tierra de nadie: el puntero salia de
+   * la caja al cruzarlo y el menu se cerraba a mitad de camino. Con el borde superior transparente
+   * el menu LLEGA hasta el boton —el puntero nunca sale— y se sigue viendo separado, porque
+   * `background-clip: padding-box` deja el fondo por dentro del borde.
+   */
+  top: 100%;
+  border-top: var(--space-xs) solid transparent;
+  background-clip: padding-box;
   right: 0;
   z-index: 30;
   min-width: 15rem;
@@ -1653,12 +1663,46 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
 .arbol { list-style: none; margin: 0; padding: 0; }
 .arbol[data-level='0'] > li { margin-bottom: 2px; }
 .arbol:not([data-level='0']) { padding-left: var(--space-md); }
+/*
+ * La carpeta es un BOTON que ocupa la linea entera: pulsar en cualquier sitio pliega.
+ *
+ * El chevron gira en vez de cambiar de icono: dos dibujos para un estado son dos sitios donde
+ * puede quedarse el que no toca, y el giro ademas dice hacia donde va.
+ */
 .tree__folder-name {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
   padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
   color: var(--md-sys-color-on-surface-variant);
+  font-family: inherit;
   font-size: var(--md-sys-typescale-label-large-size);
   font-weight: var(--md-sys-typescale-label-large-weight);
+  text-align: start;
+  cursor: pointer;
+}
+.tree__folder-name:hover {
+  background: color-mix(in srgb, currentColor var(--md-sys-state-hover-opacity), transparent);
+}
+/* El chevron: al final de la linea, y apuntando arriba cuando esta desplegada. */
+.tree__folder-name > .icono:last-child {
+  margin-inline-start: auto;
+  transition: rotate var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.tree__folder-name[aria-expanded='true'] > .icono:last-child { rotate: 180deg; }
+/* El icono no se encoge cuando el nombre no cabe; lo que se recorta es el nombre. */
+.tree__folder-name > .icono:first-child,
+.tree__link > .icono { flex: none; }
+.tree__nombre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /*
@@ -1669,7 +1713,9 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
  * contenido.
  */
 .tree__link {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--md-sys-shape-corner-full);
   text-decoration: none;

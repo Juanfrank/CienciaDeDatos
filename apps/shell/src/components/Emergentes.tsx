@@ -1,6 +1,7 @@
 'use client';
 
 import { Icon } from './icons/Icon';
+import { useTranslator } from './Locale';
 import { descartarEmergente, useEmergentes } from './emergentes';
 
 /**
@@ -15,6 +16,7 @@ import { descartarEmergente, useEmergentes } from './emergentes';
  * «se subieron 3 objetos» no dice CUALES y es justo lo que hay que poder comprobar.
  */
 export function Emergentes() {
+  const t = useTranslator();
   const mensajes = useEmergentes();
 
   return (
@@ -25,7 +27,7 @@ export function Emergentes() {
           <button
             type="button"
             className="emergente__cerrar"
-            aria-label="Descartar"
+            aria-label={t('action.close')}
             data-testid={`emergente-cerrar-${m.id}`}
             onClick={() => descartarEmergente(m.id)}
           >

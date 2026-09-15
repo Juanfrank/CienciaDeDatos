@@ -26,6 +26,14 @@ export interface AccountEntry {
 /** Cada cuanto se pregunta por los avisos sin leer. */
 const MS_INTERVAL = 5_000;
 
+/**
+ * Cuanto aguanta abierto el menu despues de que el puntero salga.
+ *
+ * Suficiente para cruzar un hueco o rodear una esquina; poco para que un menu que se dejo atras no
+ * se quede estorbando encima de lo que se quiere leer.
+ */
+const MS_MARGEN = 300;
+
 export function AccountMenu({
   user,
   displayName,
@@ -105,6 +113,37 @@ export function AccountMenu({
     };
   }, [abierto]);
 
+  /*
+   * El menu no se cierra en cuanto el puntero sale: espera un momento.
+   *
+   * Entre el boton y el menu hay un hueco, y bajar en diagonal hacia la tercera entrada sale y
+   * vuelve a entrar por el camino. Sin margen, el menu se cerraba a mitad del gesto y habia que
+   * empezar otra vez pegandose al borde — un menu que castiga no apuntar recto.
+   *
+   * Son dos arreglos y hacen falta los dos: este perdona el gesto, y el `::before` de la hoja de
+   * estilo tapa el hueco para que la mayoria de las veces ni se salga.
+   */
+  const cierre = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelarCierre = () => {
+    if (cierre.current === null) return;
+    clearTimeout(cierre.current);
+    cierre.current = null;
+  };
+
+  const abrirYa = () => {
+    cancelarCierre();
+    setAbierto(true);
+  };
+
+  const cerrarConMargen = () => {
+    cancelarCierre();
+    cierre.current = setTimeout(() => setAbierto(false), MS_MARGEN);
+  };
+
+  // Un temporizador vivo al desmontar dejaria un `setAbierto` sobre un componente que ya no esta.
+  useEffect(() => cancelarCierre, []);
+
   const salir = async () => {
     setSaliendo(true);
     await pedir('/api/sign-in', { method: 'DELETE' });
@@ -118,8 +157,8 @@ export function AccountMenu({
       className="account"
       ref={caja}
       data-testid="account"
-      onMouseEnter={() => setAbierto(true)}
-      onMouseLeave={() => setAbierto(false)}
+      onMouseEnter={abrirYa}
+      onMouseLeave={cerrarConMargen}
     >
       <button
         type="button"
@@ -142,6 +181,7 @@ export function AccountMenu({
            * `detail === 0` es la activacion por teclado, donde no hubo puntero y alternar es lo
            * correcto. Con puntero solo abre; se cierra al salir, con Escape o pulsando fuera.
            */
+          cancelarCierre();
           if (e.detail === 0) setAbierto((v) => !v);
           else setAbierto(true);
         }}

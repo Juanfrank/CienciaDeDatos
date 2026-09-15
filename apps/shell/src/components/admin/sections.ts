@@ -24,6 +24,14 @@ export interface AdminSection {
   indicador?: 'ampliaciones' | 'papelera' | 'borradores';
   /** Las paginas que cuelgan de esta seccion y comparten su entrada en el carril. */
   hijas?: AdminSection[];
+  /**
+   * La seccion EXISTE pero no se lista en el carril.
+   *
+   * No es lo mismo que borrarla: la ruta sigue sirviendo, quien tenga el enlace sigue entrando y
+   * la migaja de pan sigue sabiendo como se llama. Es para lo que se retira de la vista sin
+   * retirarlo del sistema — una pantalla que confunde mas de lo que ayuda, por ejemplo.
+   */
+  oculta?: boolean;
 }
 
 export interface GrupoDeAdmin {
@@ -54,17 +62,29 @@ export const GRUPOS: GrupoDeAdmin[] = [
         icono: 'carpeta',
         indicador: 'papelera',
         hijas: [
+          /*
+           * «Propuestas por revisar» y «Organizacion general» salen del carril.
+           *
+           * Las dos ensenaban desde otro angulo lo que la tabla de Modulos ya ensena: la primera,
+           * los modulos que esperan decision —que estan en la propia tabla, marcados—; la segunda,
+           * el arbol donde viven —que es la primera columna de esa tabla—. Tres entradas para el
+           * mismo objeto obligan a recordar en cual de las tres estaba lo que uno busca.
+           *
+           * Las rutas siguen sirviendo: se retiran de la vista, no del sistema.
+           */
           {
             href: '/admin/modules/pending',
             label: 'Propuestas por revisar',
             desc: 'Lo que espera una decision, con quien lo propuso y que cambia respecto a lo publicado.',
             icono: 'reloj',
+            oculta: true,
           },
           {
             href: '/admin/modules/tree',
             label: 'Organizacion general',
             desc: 'La estructura canonica: donde vive cada modulo y que ambito hereda.',
             icono: 'carpeta',
+            oculta: true,
           },
           {
             href: '/admin/modules/packages',
@@ -182,11 +202,21 @@ export const GRUPOS: GrupoDeAdmin[] = [
     id: 'supervision',
     titulo: 'Supervision',
     sections: [
+      /*
+       * «Quien ve que» se retira de la vista.
+       *
+       * Lo que responde —el ambito efectivo de una persona sobre un modulo y que carpeta lo
+       * origino— es cierto y util, pero pide entender la herencia de ambitos ANTES de poder
+       * formular la pregunta, y quien no la entiende lee la respuesta al reves. La ruta y su API
+       * se quedan: la traza de `resolveEffectiveScope` sigue siendo la unica forma de explicar
+       * por que alguien ve lo que ve, y hara falta el dia que alguien lo pregunte.
+       */
       {
         href: '/admin/who-sees-what',
         label: 'Quien ve que',
         desc: 'El ambito efectivo de una persona sobre un modulo, y que carpeta lo origino.',
         icono: 'view',
+        oculta: true,
       },
       {
         href: '/admin/audit',

@@ -681,3 +681,49 @@ test.describe('los dos navegadores son un solo borde', () => {
       .toBe(0);
   });
 });
+
+test.describe('el navegador de modulos se lee como un arbol', () => {
+  test('una carpeta se pliega y esconde lo que cuelga de ella', async ({ page }) => {
+    /*
+     * Un equipo con seis carpetas de cuatro modulos son treinta lineas en un carril de 280 px.
+     * Sin plegar, hay que desplazarse para saber si existe lo que uno busca.
+     */
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    const carpeta = page.getByTestId('nav-carpeta-nodo-norte');
+    await expect(carpeta).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByTestId('nav-casos-pendientes')).toBeVisible();
+
+    await carpeta.click();
+    await expect(carpeta).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.getByTestId('nav-casos-pendientes')).toHaveCount(0);
+
+    await carpeta.click();
+    await expect(page.getByTestId('nav-casos-pendientes')).toBeVisible();
+  });
+
+  test('lo plegado se recuerda al volver, y es de quien mira', async ({ page }) => {
+    // Vive en el navegador de esta persona y no en el almacen: no es una decision sobre la
+    // organizacion, es como prefiere leer el carril.
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId('nav-carpeta-nodo-norte').click();
+
+    await page.goto('/m/audiencias');
+    await expect(page.getByTestId('nav-carpeta-nodo-norte')).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+  });
+
+  test('una carpeta y un modulo no se distinguen solo por la sangria', async ({ page }) => {
+    // Cada uno lleva su icono: una carpeta, la carpeta; un modulo, un grafico de barras mientras
+    // nadie le ponga otro.
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    await expect(page.getByTestId('nav-carpeta-nodo-norte').locator('svg').first()).toBeVisible();
+    await expect(page.getByTestId('nav-casos-pendientes').locator('svg')).toHaveCount(1);
+  });
+});

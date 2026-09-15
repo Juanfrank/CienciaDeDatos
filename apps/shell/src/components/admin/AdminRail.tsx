@@ -37,7 +37,7 @@ export function AdminRail({ indicadores, id }: { indicadores: Indicadores; id: s
             {grupo.titulo}
           </h2>
           <ul aria-labelledby={`grupo-${grupo.id}`}>
-            {grupo.sections.map((s) => {
+            {grupo.sections.filter((s) => !s.oculta).map((s) => {
               const dentro = actual?.href === s.href;
               return (
                 <li key={s.href}>
@@ -51,9 +51,9 @@ export function AdminRail({ indicadores, id }: { indicadores: Indicadores; id: s
                     Listarlas siempre convertiria el carril en catorce enlaces donde hoy hay
                     nueve, y las de Recursos no sirven de nada mientras se administran equipos.
                   */}
-                  {dentro && s.hijas ? (
+                  {dentro && s.hijas?.some((h) => !h.oculta) ? (
                     <ul className="admin__hijas" data-testid={`submenu-${s.href.split('/').pop()}`}>
-                      {s.hijas.map((hija) => (
+                      {s.hijas.filter((h) => !h.oculta).map((hija) => (
                         <li key={hija.href}>
                           <SectionLink section={hija} activo={path === hija.href} cuenta={0} />
                         </li>
