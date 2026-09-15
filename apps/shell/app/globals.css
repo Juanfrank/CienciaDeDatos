@@ -1460,7 +1460,25 @@ input[type='radio'] {
 .team-picker__field { margin-bottom: 0; }
 .team-picker select { min-height: 40px; }
 
-.cuerpo { display: flex; flex: 1; min-width: 0; min-height: 0; }
+/*
+ * El navegador de MODULOS va superpuesto, como el de paginas.
+ *
+ * `--lateral-carril` es lo que mide colapsado y lo unico que el contenido reserva SIEMPRE; el
+ * panel abierto se pone encima sin mover nada. Antes se repartia el ancho —era una columna mas
+ * del flex— y desplegarlo empujaba el modulo entero medio segundo despues de pulsar.
+ *
+ * `position: relative` es lo que hace de ancla: sin el, el panel absoluto se colgaria de la
+ * ventana y no del cuerpo, y se metería debajo de la cabecera.
+ */
+.cuerpo {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  --lateral-panel: 280px;
+  --lateral-carril: 3.5rem;
+}
 
 /*
  * Carril de navegacion de MD3, CON superficie propia.
@@ -1471,7 +1489,7 @@ input[type='radio'] {
  */
 .lateral,
 .admin__nav {
-  width: 280px;
+  width: var(--lateral-panel, 280px);
   flex-shrink: 0;
   padding: var(--space-md) var(--space-sm);
   background: var(--md-sys-color-surface-container);
@@ -1495,17 +1513,86 @@ input[type='radio'] {
  *
  * Sin el atributo —es decir, sin JavaScript— el panel se queda visible a cualquier ancho.
  */
-body[data-sidebar='oculto'] .lateral,
+/*
+ * El panel de administracion se sigue ocultando ENTERO: no comparte lienzo con un modulo, asi
+ * que no hay nada debajo que pueda quedar medio tapado y un carril alli solo restaria ancho.
+ */
 body[data-sidebar='oculto'] .admin__nav { display: none; }
+
+/*
+ * El de modulos, en cambio, se queda en un CARRIL. No desaparece.
+ *
+ * Desaparecer del todo deja a quien lo colapso sin forma de volver desde el propio panel —habria
+ * que subir al sandwich de la cabecera— y borra la unica pista de que hay un arbol de modulos.
+ * En el carril se queda el boton de desplegar, que es lo que cabe.
+ */
+body[data-sidebar='oculto'] .lateral {
+  width: var(--lateral-carril);
+  padding-inline: var(--space-xs);
+  align-items: center;
+  overflow: hidden;
+}
+body[data-sidebar='oculto'] .sidebar__contenido,
+body[data-sidebar='oculto'] .sidebar__pie .team-picker { display: none; }
+body[data-sidebar='oculto'] .sidebar__pie { border-top: 0; padding-top: 0; }
 
 /* El arbol arriba y el equipo abajo, con el hueco entre medias. */
 .lateral {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  /* Superpuesto: no pide columna. Lo que el contenido reserva lo fija `.principal`. */
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  /*
+   * POR ENCIMA del navegador de paginas, que tambien se superpone y va en el 3.
+   *
+   * Los dos paneles se solapan cuando el de modulos esta desplegado: el de paginas empieza
+   * pasado el carril de este, y este desplegado mide bastante mas que su carril. Empatados en
+   * z-index ganaba el de paginas por venir despues en el documento, y se ponia delante del de
+   * modulos — incluido su boton de plegar, que dejaba de poder pulsarse. Manda el de fuera: es
+   * el que contiene al otro.
+   */
+  z-index: 4;
+  /* Se pone encima del contenido, asi que tiene que decir que esta encima. */
+  box-shadow: var(--md-sys-elevation-2);
 }
+
+/*
+ * El control de plegar, al pie del panel.
+ *
+ * Mismo sitio y mismo gesto que en el navegador de paginas, y a proposito: son dos paneles
+ * distintos, pero para quien mira son «el de la izquierda», y aprender dos formas de plegar lo
+ * mismo es aprender una de mas.
+ */
+.sidebar__plegar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  margin-top: var(--space-sm);
+  padding: var(--space-sm);
+  border: 0;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.sidebar__plegar:hover { background: var(--md-sys-color-surface-container-high); }
+body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-inline: 0; }
 .sidebar__contenido { flex: 1; min-height: 0; }
+/*
+ * `margin-top: auto` y no solo el `flex: 1` del contenido.
+ *
+ * El contenido de arriba es quien empuja el pie hacia abajo, y colapsado ese contenido esta
+ * oculto: sin el empujon, el boton de desplegar se subia al borde de arriba del carril. El
+ * gesto tiene que estar donde estaba, este el panel como este — si no, plegar y desplegar se
+ * hacen en dos sitios distintos.
+ */
 .sidebar__pie {
+  margin-top: auto;
   padding-top: var(--space-sm);
   border-top: 1px solid var(--md-sys-color-outline-variant);
 }
@@ -1608,6 +1695,14 @@ body[data-sidebar='oculto'] .admin__nav { display: none; }
 .principal {
   flex: 1;
   padding: var(--space-lg);
+  /*
+   * El hueco del carril, SIEMPRE. Ni mas al desplegar ni menos al plegar.
+   *
+   * Es lo mismo que hace el navegador de paginas: la version colapsada no se superpone nunca
+   * —el contenido empieza donde acaba el carril— y lo unico que se pone encima es lo que el
+   * panel crece al abrirse.
+   */
+  padding-inline-start: calc(var(--lateral-carril) + var(--space-lg));
   min-width: 0;
   /* El contenido se desplaza dentro de su region, para que el carril de al lado no se mueva. */
   min-height: 0;
@@ -2211,6 +2306,22 @@ th[aria-sort='descending'] .table__flecha {
   color: var(--md-sys-color-on-surface-variant);
 }
 .filters-panel__clear { font-size: var(--md-sys-typescale-label-small-size); }
+
+/*
+ * El interruptor Basico/Avanzado, al final de la linea del campo.
+ *
+ * `margin-inline-start: auto` lo manda a la derecha, lejos de «Quitar»: son dos acciones muy
+ * distintas —una cambia que controles se ven, la otra borra el filtro— y pegadas se pulsa la que
+ * no era. Marcado, se ve que esta activo sin tener que leerlo.
+ */
+.filters-panel__avanzado {
+  margin-inline-start: auto;
+  font-size: var(--md-sys-typescale-label-small-size);
+}
+.filters-panel__avanzado[aria-pressed='true'] {
+  font-weight: 600;
+  text-decoration: underline;
+}
 .filters-panel__field select,
 .filters-panel__search { width: 100%; min-height: 40px; }
 .filters-panel__search {
@@ -4443,8 +4554,8 @@ th[aria-sort='descending'] .table__flecha {
  *
  * Cuatro formas de lo mismo, y la disposicion es lo unico que las diferencia de verdad. El panel
  * lateral es el unico que compite por ANCHO con el contenido, asi que es el unico que tiene que
- * decir como lo ocupa: `grilla` se lo queda, `drawer` lo devuelve al plegarse y `overlay` no lo
- * pide nunca —se pone encima—.
+ * decir como lo ocupa: su carril siempre esta reservado, y al abrirse `grilla` empuja el
+ * contenido mientras que `drawer` y `overlay` se abren encima.
  */
 /*
  * `stretch` y no `start`: es lo que deja que el panel llegue de arriba abajo.
@@ -4621,11 +4732,16 @@ th[aria-sort='descending'] .table__flecha {
 }
 
 /*
- * `overlay` es el unico que NO reserva ni el carril: se pone encima del ancho entero.
+ * El carril COLAPSADO nunca se superpone. Lo que se superpone es lo que el panel crece.
  *
- * Los tres comportamientos siguen distinguiendose, y ahora en lo unico que de verdad los separa
- * —cuanto sitio le quitan al contenido—: `grilla` reserva el carril y el panel se queda abierto,
- * `drawer` reserva el carril y se pliega a el, y `overlay` no reserva nada.
+ * `--reserva` vale siempre al menos `--carril`, los tres comportamientos incluidos. Antes
+ * `overlay` reservaba cero y el carril se ponia encima del contenido: el modulo empezaba debajo
+ * de una franja de iconos, con su primera columna medio tapada y sin que nadie lo hubiera
+ * pedido. Superponer la version colapsada no aporta ancho —son tres centimetros y medio— y se
+ * lleva por delante lo primero que se mira.
+ *
+ * Asi, la unica diferencia entre los comportamientos es que pasa al ABRIR: `grilla` empuja el
+ * contenido hasta el ancho entero del panel; `drawer` y `overlay` se abren encima sin moverlo.
  */
 /*
  * `grilla` reserva lo que el panel mide AHORA, no lo que mide colapsado.
@@ -4638,9 +4754,7 @@ th[aria-sort='descending'] .table__flecha {
 .con-navegador:has(> .navegador[data-comportamiento='grilla'][data-abierto='si']) {
   --reserva: var(--panel);
 }
-/* `drawer` se abre ENCIMA a proposito: reserva el carril y nada mas. */
-/* `overlay` es el unico que no reserva ni el carril: se pone encima del ancho entero. */
-.con-navegador:has(> .navegador[data-comportamiento='overlay']) { --reserva: 0rem; }
+/* `drawer` y `overlay` se abren ENCIMA: reservan el carril y nada mas, abiertos o cerrados. */
 
 .navegador__plegar {
   display: flex;

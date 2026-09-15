@@ -538,3 +538,72 @@ test.describe('dentro de una tarjeta, nada se dibuja encima de nada', () => {
     expect(solapes).toEqual([]);
   });
 });
+
+
+test.describe('el navegador de MODULOS se colapsa desde el propio panel', () => {
+  test('el control al pie lo pliega a un carril, y lo devuelve', async ({ page }) => {
+    /*
+     * El sandwich de la cabecera existia desde el principio; lo que faltaba era poder plegarlo
+     * desde donde se esta mirando. Y plegado se queda en un CARRIL, no en la nada: desaparecer
+     * del todo deja sin forma de volver desde el propio panel y borra la pista de que hay un
+     * arbol de modulos detras.
+     */
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    const lateral = page.locator('#navegacion-lateral');
+    const ancho = async () => (await lateral.boundingBox())?.width ?? 0;
+    const desplegado = await ancho();
+    expect(desplegado).toBeGreaterThan(100);
+
+    await page.getByTestId('lateral-plegar').click();
+    await expect.poll(ancho).toBeLessThan(desplegado);
+    // Sigue ahi, y con el su boton: es lo que garantiza el camino de vuelta.
+    await expect(lateral).toBeVisible();
+    await expect(page.getByTestId('lateral-plegar')).toBeVisible();
+
+    await page.getByTestId('lateral-plegar').click();
+    await expect.poll(ancho).toBe(desplegado);
+  });
+
+  test('el sandwich de la cabecera y el boton del pie son EL MISMO estado', async ({ page }) => {
+    // Con el estado dentro de cada componente, plegar desde abajo dejaba al sandwich diciendo
+    // `aria-expanded="true"` sobre un panel colapsado — y eso es lo que un lector de pantalla lee.
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    const sandwich = page.getByTestId('open-navigation');
+    await expect(sandwich).toHaveAttribute('aria-expanded', 'true');
+
+    await page.getByTestId('lateral-plegar').click();
+    await expect(sandwich).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.getByTestId('lateral-plegar')).toHaveAttribute('aria-expanded', 'false');
+
+    // Y al reves: se despliega desde la cabecera y el de abajo se entera.
+    await sandwich.click();
+    await expect(page.getByTestId('lateral-plegar')).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('superpuesto, pero su carril NO se superpone', async ({ page }) => {
+    /*
+     * Lo mismo que el navegador de paginas: el contenido empieza donde acaba el carril, y lo unico
+     * que se pone encima es lo que el panel crece al abrirse.
+     */
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    const lateral = page.locator('#navegacion-lateral');
+    const principal = page.locator('.principal');
+
+    // Desplegado se superpone: el panel invade la caja del contenido.
+    const abierto = await lateral.boundingBox();
+    const contenido = await principal.boundingBox();
+    expect((abierto?.x ?? 0) + (abierto?.width ?? 0)).toBeGreaterThan(contenido?.x ?? 0);
+
+    // Plegado, el modulo empieza pasado el carril: nada queda por debajo.
+    await page.getByTestId('lateral-plegar').click();
+    const carril = await lateral.boundingBox();
+    const titulo = await page.locator('.principal h1, .principal h2').first().boundingBox();
+    expect(titulo?.x ?? 0).toBeGreaterThanOrEqual((carril?.x ?? 0) + (carril?.width ?? 0));
+  });
+});

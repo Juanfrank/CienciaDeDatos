@@ -1,3 +1,4 @@
+import { CollapseLateral } from './CollapseLateral';
 import { TeamPicker } from './TeamPicker';
 
 /** El panel lateral de los modulos. */
@@ -28,6 +29,12 @@ export function CollapsibleNavigation({
       */}
       <div className="sidebar__pie">
         <TeamPicker equipos={equipos} equipoActivo={equipoActivo} />
+        {/*
+          Y debajo del equipo, el control de plegar: lo ultimo que se hace con el panel.
+          Colapsado, el equipo se esconde —no cabe— y este se queda, que es lo que garantiza que
+          siempre haya forma de volver sin recargar la pagina.
+        */}
+        <CollapseLateral />
       </div>
     </aside>
   );

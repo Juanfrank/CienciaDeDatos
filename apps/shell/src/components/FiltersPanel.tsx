@@ -36,6 +36,18 @@ const MODO: Record<FilterMode, MessageKey> = {
   vacios: "filters.mode.vacios",
 };
 
+/**
+ * Los modos que son AVANZADOS, es decir, todos menos elegir valores.
+ *
+ * Elegir de una lista es lo que hace casi todo el mundo casi siempre; excluir, buscar por texto,
+ * acotar un rango o pedir los vacios son casos de uno de cada veinte. Teniendolos todos al mismo
+ * nivel, cada campo abria con un desplegable de cinco opciones delante de la lista — un control
+ * que hay que leer y descartar antes de llegar a lo que se venia a hacer.
+ */
+const AVANZADO: readonly FilterMode[] = ["excluir", "texto", "rango", "vacios"];
+
+export const isAdvancedMode = (modo: FilterMode): boolean => AVANZADO.includes(modo);
+
 /** El modo con el que abrir: el que YA esta puesto, para que un enlace compartido no mienta. */
 function modoInicial(estado: EstadoDeCampo, modos: FilterMode[]): FilterMode {
   const puesto: FilterMode | undefined =
@@ -162,9 +174,17 @@ export function FieldPicker({
   const t = useTranslator();
   const id = useId();
   const [busqueda, setBusqueda] = useState("");
-  const [modo, setModo] = useState<FilterMode>(() =>
-    modoInicial(estado, picker.modos),
-  );
+  const inicial = modoInicial(estado, picker.modos);
+  const [modo, setModo] = useState<FilterMode>(inicial);
+  /*
+   * Basico por defecto, salvo que lo que YA esta puesto sea avanzado.
+   *
+   * Abrir en basico un campo que llega con un «contiene» de la URL escondería el filtro que esta
+   * acotando lo que se ve: la lista de valores diria «ninguno elegido» sobre unos datos
+   * recortados, y quien mira no tendria de donde deducirlo. Un enlace compartido no puede mentir
+   * sobre lo que ensena.
+   */
+  const [avanzado, setAvanzado] = useState(() => isAdvancedMode(inicial));
   const [abierto, setAbierto] = useState(!picker.plegado);
   const prueba = `filter-${picker.fieldName}`;
 
@@ -178,11 +198,28 @@ export function FieldPicker({
       )
     : ordenadas;
 
+  /*
+   * El modo EFECTIVO: en basico siempre «valores», se haya elegido lo que se haya elegido antes.
+   *
+   * Se deriva en vez de guardarse para que volver a basico no pueda dejar un modo avanzado vivo
+   * por debajo: el estado del campo se limpia al cambiar de modo, pero el modo en si se recuerda
+   * para que volver a «Avanzado» devuelva donde se estaba.
+   */
+  /*
+   * El interruptor exige que haya las DOS cosas: algo avanzado que ensenar y un basico al que
+   * volver. Un campo configurado solo con formas avanzadas —«texto» y nada mas, por ejemplo— no
+   * tiene basico: ofrecerle el interruptor llevaria a una lista de valores que quien lo configuro
+   * decidio no dar. Ahi se queda en avanzado, que es lo unico que se pidio.
+   */
+  const hayBasico = picker.modos.includes("valores");
+  const puedeAvanzar = hayBasico && picker.modos.some(isAdvancedMode);
+  const modoEfectivo: FilterMode = avanzado || !hayBasico ? modo : "valores";
+
   const puesto = !sinNada(estado);
-  const elegidos = modo === "excluir" ? estado.excluye : estado.incluye;
+  const elegidos = modoEfectivo === "excluir" ? estado.excluye : estado.incluye;
   const conValores = (siguientes: string[]) =>
     onCambiar(
-      modo === "excluir"
+      modoEfectivo === "excluir"
         ? { ...SIN_NADA, excluye: siguientes }
         : { ...SIN_NADA, incluye: siguientes },
     );
@@ -200,7 +237,8 @@ export function FieldPicker({
     <fieldset
       className="filters-panel__field"
       data-kind={picker.tipo}
-      data-modo={modo}
+      data-modo={modoEfectivo}
+      data-avanzado={avanzado ? "si" : "no"}
       data-abierto={abierto ? "si" : "no"}
       data-testid={prueba}
     >
@@ -234,6 +272,27 @@ export function FieldPicker({
             {t("action.remove")}
           </button>
         ) : null}
+        {/*
+          El interruptor Basico/Avanzado, y solo si hay algo avanzado que ensenar.
+          Un campo configurado unicamente con «valores» no tiene segundo modo: el interruptor
+          seria un control que no cambia nada.
+        */}
+        {puedeAvanzar ? (
+          <button
+            type="button"
+            className="button-link filters-panel__avanzado"
+            aria-pressed={avanzado}
+            data-testid={`${prueba}-avanzado`}
+            onClick={() => {
+              // Cambiar de nivel LIMPIA lo puesto, por lo mismo que cambiar de modo: volver a
+              // basico con un rango vivo deja la lista diciendo «ninguno» sobre datos acotados.
+              setAvanzado((v) => !v);
+              if (puesto) onCambiar(SIN_NADA);
+            }}
+          >
+            {avanzado ? t("filters.basic") : t("filters.advanced")}
+          </button>
+        ) : null}
       </legend>
 
       {abierto ? (
@@ -243,7 +302,7 @@ export function FieldPicker({
             Con una sola, el desplegable seria un control que nunca cambia nada — ruido con aspecto
             de opcion.
           */}
-          {picker.modos.length > 1 ? (
+          {avanzado && picker.modos.length > 1 ? (
             <label className="filters-panel__modo">
               <span className="visualmente-oculto">
                 Como filtrar {picker.etiqueta}
@@ -267,7 +326,7 @@ export function FieldPicker({
             </label>
           ) : null}
 
-          {modo === "valores" || modo === "excluir" ? (
+          {modoEfectivo === "valores" || modoEfectivo === "excluir" ? (
             <>
               {picker.todos ? (
                 <div className="filters-panel__todos">
@@ -390,7 +449,7 @@ export function FieldPicker({
             </>
           ) : null}
 
-          {modo === "texto" ? (
+          {modoEfectivo === "texto" ? (
             <div className="filters-panel__texto">
               <label htmlFor={`${id}-contiene`}>{t("filters.contains")}</label>
               <input
@@ -425,7 +484,7 @@ export function FieldPicker({
             </div>
           ) : null}
 
-          {modo === "rango" ? (
+          {modoEfectivo === "rango" ? (
             <Rango
               id={id}
               prueba={prueba}
@@ -435,7 +494,7 @@ export function FieldPicker({
             />
           ) : null}
 
-          {modo === "vacios" ? (
+          {modoEfectivo === "vacios" ? (
             <label className="filters-panel__vacios">
               <span className="visualmente-oculto">
                 Valores de {picker.etiqueta}

@@ -1488,3 +1488,42 @@ test.describe('mas de un tema, cada uno con sus dos versiones (4.3)', () => {
     await expect(page.getByTestId('tema-institucional-fabrica')).toBeVisible();
   });
 });
+
+
+test.describe('el carril colapsado no se superpone al contenido', () => {
+  test('ni con `overlay`, que era el unico que lo hacia', async ({ page }) => {
+    /*
+     * `overlay` no reservaba NADA: el carril se ponia encima del ancho entero y el modulo
+     * arrancaba debajo de una franja de iconos, con su titulo y su primera columna medio tapados.
+     * Superponer la version colapsada no gana ancho —son tres centimetros y medio— y se lleva por
+     * delante lo primero que se mira.
+     *
+     * Se prueba con `overlay` y no con el comportamiento por defecto: `grilla` ya reservaba el
+     * carril al plegarse, asi que una prueba sobre el habria pasado con el fallo puesto.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/modules/composicion/settings');
+    await page.getByTestId('elegir-comportamiento-overlay').check();
+    await page.getByTestId('guardar-settings').click();
+    await expect(page.getByTestId('settings-mensaje')).toBeVisible();
+
+    await page.goto('/m/composicion');
+    const navegador = page.getByTestId('navegador-de-pagina');
+    await expect(navegador).toHaveAttribute('data-comportamiento', 'overlay');
+
+    await page.getByTestId('navegador-plegar').click();
+    await expect(navegador).toHaveAttribute('data-abierto', 'no');
+
+    const carril = await navegador.boundingBox();
+    const primera = await page.locator('.grid__cell').first().boundingBox();
+    expect(carril).not.toBeNull();
+    expect(primera).not.toBeNull();
+    expect(primera?.x ?? 0).toBeGreaterThanOrEqual((carril?.x ?? 0) + (carril?.width ?? 0));
+
+    // Se deja como estaba: la siguiente prueba no hereda lo que esta puso.
+    await page.goto('/admin/modules/composicion/settings');
+    await page.getByTestId('elegir-comportamiento-grilla').check();
+    await page.getByTestId('guardar-settings').click();
+    await expect(page.getByTestId('settings-mensaje')).toBeVisible();
+  });
+});

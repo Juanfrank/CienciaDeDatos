@@ -31,12 +31,17 @@ export const NAVIGATOR_IS_PANEL = (tipo: NavigatorKind): boolean =>
 /**
  * Como ocupa el sitio un panel. Solo aplica a los dos paneles laterales.
  *
- * - `grilla`: el panel se queda fijo y el contenido ocupa lo que sobra. Es lo que se espera de un
- *   menu lateral permanente, y lo que se ve en un sistema que se usa todo el dia.
- * - `drawer`: se puede plegar y desplegar; plegado deja solo una franja, y el contenido se
- *   ensancha. Para pantallas donde el ancho es lo escaso.
- * - `overlay`: aparece ENCIMA del contenido y lo tapa mientras esta abierto, sin moverlo. Para
- *   pantallas estrechas, donde robar ancho al contenido lo deja ilegible.
+ * El carril COLAPSADO esta siempre reservado, en los tres: el contenido empieza donde acaba el
+ * carril y nunca por debajo de el. Lo que distingue a los comportamientos es que pasa al ABRIR.
+ *
+ * - `grilla`: al abrirse EMPUJA el contenido hasta el ancho entero del panel. Es lo que se espera
+ *   de un menu lateral permanente, y lo que se ve en un sistema que se usa todo el dia.
+ * - `drawer`: al abrirse se pone ENCIMA del contenido, sin moverlo. Para pantallas donde el ancho
+ *   es lo escaso.
+ * - `overlay`: hoy hace lo mismo que `drawer`. Se distinguian en que `overlay` no reservaba ni el
+ *   carril —se ponia encima del ancho entero—, y eso dejaba el modulo empezando debajo de una
+ *   franja de iconos. Quitado eso, los dos nombres describen el mismo comportamiento; se
+ *   conserva `overlay` para no romper los modulos que ya lo tienen configurado.
  */
 export const PANEL_BEHAVIORS = ['grilla', 'drawer', 'overlay'] as const;
 

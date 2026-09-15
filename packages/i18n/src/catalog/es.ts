@@ -26,6 +26,8 @@ export const es = {
   'action.remove': 'Quitar',
   'action.search': 'Buscar',
   'filters.mode.valores': "Es",
+  'filters.basic': 'Basico',
+  'filters.advanced': 'Avanzado',
   'filters.mode.excluir': "No es",
   'filters.mode.texto': "Texto",
   'filters.mode.rango': "Entre",

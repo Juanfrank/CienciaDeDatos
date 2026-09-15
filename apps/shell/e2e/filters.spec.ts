@@ -113,6 +113,7 @@ test.describe('las cinco formas de acotar, y no solo «es» (4.4)', () => {
      * menos una» obligaba a pulsar cuatro pastillas y a acordarse de cual faltaba.
      */
     await page.goto('/m/casos-pendientes');
+    await page.getByTestId(`${MATERIA}-avanzado`).click();
     await page.getByTestId(`${MATERIA}-modo`).selectOption('excluir');
     await page.getByTestId(`${MATERIA}-Penal`).click();
 
@@ -123,6 +124,7 @@ test.describe('las cinco formas de acotar, y no solo «es» (4.4)', () => {
 
   test('«contiene» acota por texto, sin distinguir mayusculas', async ({ page }) => {
     await page.goto('/m/casos-pendientes');
+    await page.getByTestId(`${MATERIA}-avanzado`).click();
     await page.getByTestId(`${MATERIA}-modo`).selectOption('texto');
     await page.getByTestId(`${MATERIA}-contiene`).fill('pen');
     // Al salir del campo: cada tecla reescribiria la URL y volveria a dibujar la pagina.
@@ -135,6 +137,7 @@ test.describe('las cinco formas de acotar, y no solo «es» (4.4)', () => {
 
   test('«vacios» distingue lo que tiene valor de lo que no', async ({ page }) => {
     await page.goto('/m/casos-pendientes');
+    await page.getByTestId(`${MATERIA}-avanzado`).click();
     await page.getByTestId(`${MATERIA}-modo`).selectOption('vacios');
     await page.getByTestId(`${MATERIA}-vacios`).selectOption('si');
 
@@ -150,6 +153,7 @@ test.describe('las cinco formas de acotar, y no solo «es» (4.4)', () => {
     await page.getByTestId(`${MATERIA}-Penal`).click();
     await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
 
+    await page.getByTestId(`${MATERIA}-avanzado`).click();
     await page.getByTestId(`${MATERIA}-modo`).selectOption('excluir');
     await expect(page).not.toHaveURL(/DimTribunal\.Materia=Penal/);
   });
@@ -160,6 +164,62 @@ test.describe('las cinco formas de acotar, y no solo «es» (4.4)', () => {
     await page.goto('/m/casos-pendientes?DimTribunal.Materia.no=Penal');
     await expect(page.getByTestId(`${MATERIA}-modo`)).toHaveValue('excluir');
     await expect(page.getByTestId(`${MATERIA}-Penal`)).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+test.describe('Basico por defecto, Avanzado a un toque', () => {
+  const MATERIA = 'filter-DimTribunal.Materia';
+
+  test('de entrada NO hay desplegable de formas: solo los valores', async ({ page }) => {
+    /*
+     * Elegir de una lista es lo que hace casi todo el mundo casi siempre. Con las cinco formas al
+     * mismo nivel, cada campo abria con un desplegable delante de la lista: un control que hay que
+     * leer y descartar antes de llegar a lo que se venia a hacer.
+     */
+    await page.goto('/m/casos-pendientes');
+
+    await expect(page.getByTestId(`${MATERIA}-modo`)).toHaveCount(0);
+    // Y lo basico sigue estando entero: los valores se eligen igual que siempre.
+    await expect(page.getByTestId(`${MATERIA}-Penal`)).toBeVisible();
+  });
+
+  test('el interruptor lo trae, y lo devuelve', async ({ page }) => {
+    await page.goto('/m/casos-pendientes');
+    const interruptor = page.getByTestId(`${MATERIA}-avanzado`);
+    await expect(interruptor).toHaveAttribute('aria-pressed', 'false');
+
+    await interruptor.click();
+    await expect(interruptor).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId(`${MATERIA}-modo`)).toBeVisible();
+
+    await interruptor.click();
+    await expect(page.getByTestId(`${MATERIA}-modo`)).toHaveCount(0);
+  });
+
+  test('volver a Basico no deja vivo un filtro avanzado', async ({ page }) => {
+    /*
+     * Es lo unico que el interruptor no puede hacer mal: dejar puesto un «no es Penal» y ensenar
+     * la lista de valores con ninguno marcado. Quien mira leeria una tabla recortada sin nada en
+     * pantalla que diga por que.
+     */
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId(`${MATERIA}-avanzado`).click();
+    await page.getByTestId(`${MATERIA}-modo`).selectOption('excluir');
+    await page.getByTestId(`${MATERIA}-Penal`).click();
+    await expect(page).toHaveURL(/DimTribunal\.Materia\.no=Penal/);
+
+    await page.getByTestId(`${MATERIA}-avanzado`).click();
+    await expect(page).not.toHaveURL(/DimTribunal\.Materia\.no=Penal/);
+  });
+
+  test('un enlace que trae un filtro avanzado ABRE en avanzado', async ({ page }) => {
+    // Abrir en basico esconderia el filtro que esta acotando lo que se ve: la lista diria
+    // «ninguno elegido» sobre unos datos recortados. Un enlace compartido no puede mentir.
+    await page.goto('/m/casos-pendientes?DimTribunal.Materia.contiene=pen');
+
+    await expect(page.getByTestId(`${MATERIA}-avanzado`)).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId(`${MATERIA}-modo`)).toHaveValue('texto');
+    await expect(page.getByTestId(`${MATERIA}-contiene`)).toHaveValue('pen');
   });
 });
 

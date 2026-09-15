@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { SIDEBAR_ID } from './CollapsibleNavigation';
 import { Icon } from './icons/Icon';
+import { sidebarSet, sidebarToggle, useSidebar } from './sidebarState';
 
 /** Pliega y despliega el panel lateral desde la cabecera. */
 
@@ -13,7 +14,14 @@ export const MOBILE_QUERY = '(max-width: 640px)';
 export function ToggleSidebar() {
   const path = usePathname();
   const [hayPanel, setHayPanel] = useState(false);
-  const [abierto, setAbierto] = useState(true);
+  /*
+   * El estado vive FUERA del componente, en `sidebarState`.
+   *
+   * Lo comparte con el boton al pie del propio panel, que hace lo mismo. Teniendolo aqui, plegar
+   * desde abajo dejaba a este diciendo `aria-expanded="true"` sobre un panel colapsado — y eso es
+   * lo que un lector de pantalla lee en voz alta.
+   */
+  const abierto = useSidebar() === 'visible';
   /*
    * Si la persona ya decidio, el ancho deja de opinar.
    */
@@ -31,7 +39,7 @@ export function ToggleSidebar() {
     // que se venia a ver.
     const apply = (estrecha: boolean) => {
       if (decidido.current) return;
-      setAbierto(!estrecha);
+      sidebarSet(estrecha ? 'oculto' : 'visible');
     };
 
     apply(consulta.matches);
@@ -39,10 +47,6 @@ export function ToggleSidebar() {
     consulta.addEventListener('change', changeTo);
     return () => consulta.removeEventListener('change', changeTo);
   }, []);
-
-  useEffect(() => {
-    document.body.dataset.sidebar = abierto ? 'visible' : 'oculto';
-  }, [abierto]);
 
   if (!hayPanel) return null;
 
@@ -56,7 +60,7 @@ export function ToggleSidebar() {
       data-testid="open-navigation"
       onClick={() => {
         decidido.current = true;
-        setAbierto((v) => !v);
+        sidebarToggle();
       }}
     >
       <Icon nombre="sandwich" tamano={22} />

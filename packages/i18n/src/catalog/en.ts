@@ -25,6 +25,8 @@ export const en: Record<MessageKey, string> = {
   'action.remove': 'Remove',
   'action.search': 'Search',
   'filters.mode.valores': "Is",
+  'filters.basic': 'Basic',
+  'filters.advanced': 'Advanced',
   'filters.mode.excluir': "Is not",
   'filters.mode.texto': "Text",
   'filters.mode.rango': "Between",
