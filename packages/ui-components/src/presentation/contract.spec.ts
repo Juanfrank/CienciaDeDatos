@@ -263,15 +263,15 @@ describe('el catalogo de iconos', () => {
 });
 
 describe('la escala del eje de valores', () => {
-  const conEjes = (ejes: Record<string, unknown>) =>
-    validatePresentation({ ejes } as never, ['ejes']).map((p) => p.clave);
+  const conEjes = (axes: Record<string, unknown>) =>
+    validatePresentation({ axes } as never, ['axes']).map((p) => p.clave);
 
   it('acepta una escala logaritmica con un minimo positivo', () => {
-    expect(conEjes({ escala: 'logaritmica', minimoY: 1 })).toEqual([]);
+    expect(conEjes({ scale: 'logaritmica', yMin: 1 })).toEqual([]);
   });
 
   it('rechaza una escala que no existe', () => {
-    expect(conEjes({ escala: 'raiz-cuadrada' })).toEqual(['ejes.escala']);
+    expect(conEjes({ scale: 'raiz-cuadrada' })).toEqual(['axes.scale']);
   });
 
   it('rechaza una logaritmica que empiece en cero o por debajo', () => {
@@ -279,12 +279,12 @@ describe('la escala del eje de valores', () => {
      * El logaritmo de cero no existe: el grafico se dibujaria con una escala que miente, y asi es
      * como se descubriria — mirandolo. Se rechaza al guardar.
      */
-    expect(conEjes({ escala: 'logaritmica', minimoY: 0 })).toEqual(['ejes.minimoY']);
-    expect(conEjes({ escala: 'logaritmica', minimoY: -5 })).toEqual(['ejes.minimoY']);
-    expect(conEjes({ escala: 'logaritmica', desdeCero: true })).toEqual(['ejes.desdeCero']);
+    expect(conEjes({ scale: 'logaritmica', yMin: 0 })).toEqual(['axes.yMin']);
+    expect(conEjes({ scale: 'logaritmica', yMin: -5 })).toEqual(['axes.yMin']);
+    expect(conEjes({ scale: 'logaritmica', fromZero: true })).toEqual(['axes.fromZero']);
   });
 
   it('un minimo de cero sigue valiendo en una escala lineal', () => {
-    expect(conEjes({ minimoY: 0, desdeCero: true })).toEqual([]);
+    expect(conEjes({ yMin: 0, fromZero: true })).toEqual([]);
   });
 });

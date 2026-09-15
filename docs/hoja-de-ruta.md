@@ -508,10 +508,48 @@ quitando la de `resaltado` y la guarda seguia verde. Ahora el fixture de
 leerlas con la nueva: sin su fila, el valor no llega y enrojece, que es exactamente lo que le
 pasaria a un modulo guardado antes del renombrado.
 
-**Lo que queda** son **100 claves** mas en `ui-components` y `module-model` —`icono`, `acento`,
-`etiqueta`, `leyenda`, `formato`, `ejes`, `textos`…—, mas las seis con gemelo de valor, que van
-aparte. Conviene ir por grupos que se leen juntos —el formato de cifra, los ejes, la leyenda— y no
-de una vez: una pasada de cien claves no se revisa.
+**Tercera tanda, hecha: los EJES**, que son la primera clave con hijos. `ejes` -> `axes` y las
+siete de dentro —`mostrarY` -> `showY`, `tituloY` -> `yTitle`, `tituloY2` -> `y2Title`,
+`desdeCero` -> `fromZero`, `minimoY` -> `yMin`, `maximoY` -> `yMax`, `escala` -> `scale`—, en
+grupo porque se leen en grupo: quien abre la seccion «Ejes» del panel las ve todas a la vez.
+
+Tres cosas que esta tanda enseno, y las tres cambian algo para las siguientes:
+
+**1. El ORDEN de la tabla importa, y solo aqui.** Las filas se aplican en orden. La de `ejes` ->
+`axes` tiene que ir ANTES que las siete de dentro: al reves, esas siete buscarian en
+`presentation.axes` cuando lo guardado todavia dice `ejes`, no encontrarian nada —renombrar lo que
+no esta no falla— y la definicion quedaria con el eje migrado y su contenido en espanol. Lo ata una
+prueba que compara las posiciones en `RENAMES`, porque un comentario que pide no reordenar no
+sobrevive a la primera reordenacion. Y las dos filas de cada clave las escribe ahora
+`enLaPresentacion(...)`: once lineas copiadas por clave eran once sitios donde perder un `[]` de la
+ruta del complemento, y una ruta que no alcanza nada no falla.
+
+**2. Un `...` dentro de un objeto literal APAGA la comprobacion de propiedades sobrantes.** Es el
+hallazgo que mas vale de la tanda. `Canvas.tsx` pasaba la presentacion al grafico con doce lineas
+de la forma `...(presentation?.ejes ? { ejes: presentation.ejes } : {})`, y cuando `ejes` paso a
+`axes` en las dos puntas —en el tipo de la presentacion y en el de las opciones— esa linea
+**siguio compilando**: TypeScript no revisa propiedades sobrantes en un literal que lleva un
+esparcido. El grafico se habria quedado sin sus ejes sin que nada protestara, que es exactamente el
+fallo del que va este apartado, pero dentro del propio codigo y no en el disco. Ahora pasan por
+`comun('axes')`, cuya clave tiene que existir en LOS DOS tipos: el mismo renombrado a medias ya no
+compila. Verificado enrojeciendo con una clave que solo esta en uno.
+
+**3. `claves-guardadas.spec.ts` solo mira el CODIGO.** Mientras las claves eran compuestas
+—`presentacion`, `colorDeResaltado`— buscar «nombre:» bastaba: nadie escribe eso en una frase.
+`ejes` y `escala` son palabras corrientes, y de golpe acuso a cuatro inocentes —«titulos de los
+ejes: esos se suman aqui» en un comentario, «Una sola escala: la comparacion es directa» dentro de
+un subtitulo—. Ninguna era un error y las cuatro empujaban a relajar la guarda. Usa el escaner de
+`tools/rename/segmentos.mjs`, que ya sabia partir un archivo en codigo, comentario y cadena. Y
+lleva `CONVIVEN`, una excepcion por archivo y con motivo, para la clave vieja que es a la vez el
+nombre legitimo de otra cosa: `ejes` son tambien los seis ejes de ESTILO de un tema, en otro
+paquete. Es la leccion de `tipo` —la misma palabra quiere decir cosas distintas en sitios
+distintos— dicha donde una guarda que mira archivos, y no rutas, puede aplicarla.
+
+**Lo que queda** son **92 claves** mas en `ui-components` y `module-model` —`icono`, `acento`,
+`etiqueta`, `leyenda`, `formato`, `formatos`, `textos`, `orden`, `referencias`, `multiplos`,
+`condicional`…—, mas las seis con gemelo de valor, que van aparte. Se sigue yendo por grupos que se
+leen juntos —el formato de cifra, la leyenda, los textos— y no de una vez: una pasada de noventa
+claves no se revisa.
 
 Dos detalles que la primera pasada enseno, y que valen para las siguientes:
 

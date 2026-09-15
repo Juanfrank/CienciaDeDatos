@@ -709,12 +709,12 @@ export const demoModules: ModuleDefinition[] = [
                  * que la pequena quede pegada al eje. El minimo va en uno porque el logaritmo de
                  * cero no existe, y la validacion lo exige en vez de dejar una escala que miente.
                  */
-                ejes: {
+                axes: {
                   gridlines: false,
-                  tituloY: 'Casos',
-                  escala: 'logaritmica',
-                  desdeCero: false,
-                  minimoY: 1,
+                  yTitle: 'Casos',
+                  scale: 'logaritmica',
+                  fromZero: false,
+                  yMin: 1,
                 },
                 orden: { por: 'valor', direction: 'desc' },
               },
@@ -739,7 +739,7 @@ export const demoModules: ModuleDefinition[] = [
                 datumLabels: true,
                 // La barra de zoom: deja acercarse a un tramo del eje sin perder de vista donde
                 // esta dentro del total. Empieza mostrandolo todo.
-                ejes: { tituloY: 'Casos', zoom: true },
+                axes: { yTitle: 'Casos', zoom: true },
               },
             },
           },
@@ -1038,7 +1038,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'Una sola escala: la comparacion es directa',
                 leyenda: 'abajo',
-                ejes: { tituloY: 'Casos' },
+                axes: { yTitle: 'Casos' },
               },
             },
           },
@@ -1064,7 +1064,7 @@ export const demoModules: ModuleDefinition[] = [
                 subtitulo: 'La linea se mide en la escala de la derecha',
                 leyenda: 'abajo',
                 combinado: { axisSecondary: true },
-                ejes: { tituloY: 'Casos', tituloY2: 'Pendientes', desdeCero: false },
+                axes: { yTitle: 'Casos', y2Title: 'Pendientes', fromZero: false },
               },
             },
           },
@@ -1084,7 +1084,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'Un punto por trimestre',
                 datumLabels: true,
-                ejes: { xTitle: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
+                axes: { xTitle: 'Ingresados', yTitle: 'Resueltos', fromZero: false },
               },
             },
           },
@@ -1104,7 +1104,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'Una tercera medida sin un tercer eje',
                 datumLabels: true,
-                ejes: { xTitle: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
+                axes: { xTitle: 'Ingresados', yTitle: 'Resueltos', fromZero: false },
               },
             },
           },
@@ -1201,7 +1201,7 @@ export const demoModules: ModuleDefinition[] = [
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosPendientes'] },
               presentation: {
                 subtitulo: 'Cada barra empieza donde acabo la anterior',
-                ejes: { tituloY: 'Casos' },
+                axes: { yTitle: 'Casos' },
               },
             },
           },
@@ -1258,7 +1258,7 @@ export const demoModules: ModuleDefinition[] = [
                 subtitulo: 'La raya es lo que convierte la cifra en respuesta',
                 leyenda: 'oculta',
                 datumLabels: true,
-                ejes: { tituloY: 'Casos' },
+                axes: { yTitle: 'Casos' },
                 referencias: [
                   { valor: 900, etiqueta: 'Meta trimestral', color: 'error', style: 'discontinua' },
                 ],
@@ -1283,7 +1283,7 @@ export const demoModules: ModuleDefinition[] = [
                 leyenda: 'abajo',
                 // Los mismos limites en los dos objetos: dos graficos de la misma medida con
                 // escalas distintas se leen como si dijeran cosas distintas.
-                ejes: { tituloY: 'Casos', minimoY: 0, maximoY: 2400 },
+                axes: { yTitle: 'Casos', yMin: 0, yMax: 2400 },
                 referencias: [
                   { valor: 600, etiqueta: 'Minimo', color: 'atenuado', style: 'punteada' },
                   { valor: 1200, etiqueta: 'Meta', color: 'error' },
@@ -1325,7 +1325,7 @@ export const demoModules: ModuleDefinition[] = [
                 subtitulo: 'Por materia, con el mismo 0-2400 que el de al lado',
                 leyenda: 'oculta',
                 datumLabels: true,
-                ejes: { tituloY: 'Casos', minimoY: 0, maximoY: 2400 },
+                axes: { yTitle: 'Casos', yMin: 0, yMax: 2400 },
                 referencias: [{ valor: 1200, etiqueta: 'Meta', color: 'error' }],
               },
             },
@@ -1375,7 +1375,7 @@ export const demoModules: ModuleDefinition[] = [
                 subtitulo: 'La tercera opcion entre «todas» y «ninguna»',
                 leyenda: 'abajo',
                 datumLabels: { mostrar: true, onlyEnds: true },
-                ejes: { tituloY: 'Casos' },
+                axes: { yTitle: 'Casos' },
               },
             },
           },
@@ -1396,7 +1396,7 @@ export const demoModules: ModuleDefinition[] = [
                 subtitulo: 'Con cuatro categorias cabe; con veinte, no',
                 leyenda: 'abajo',
                 datumLabels: { mostrar: true, cellPosition: 'encima' },
-                ejes: { tituloY: 'Casos' },
+                axes: { yTitle: 'Casos' },
               },
             },
           },
@@ -1416,7 +1416,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'En horizontal, los que no caben se esconden sin avisar',
                 leyenda: 'oculta',
-                ejes: { tituloY: 'Casos', rotateX: 45 },
+                axes: { yTitle: 'Casos', rotateX: 45 },
               },
             },
           },
@@ -1438,7 +1438,7 @@ export const demoModules: ModuleDefinition[] = [
                 leyenda: 'abajo',
                 apilado: 'apilado',
                 tooltip: { total: true, sortValue: true },
-                ejes: { tituloY: 'Casos' },
+                axes: { yTitle: 'Casos' },
               },
             },
           },
@@ -1492,7 +1492,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'Misma escala: los paneles se pueden comparar',
                 leyenda: 'oculta',
-                ejes: { gridlines: true },
+                axes: { gridlines: true },
               },
             },
           },
@@ -1619,7 +1619,7 @@ export const demoModules: ModuleDefinition[] = [
                 subtitulo: 'La barra que se pasa del umbral se pinta sola',
                 leyenda: 'oculta',
                 datumLabels: { mostrar: true },
-                ejes: { tituloY: 'Casos' },
+                axes: { yTitle: 'Casos' },
                 referencias: [{ valor: 600, etiqueta: 'Umbral', color: 'error' }],
                 condicional: { rules: [{ comparator: 'mayor', valor: 600, color: 'error' }] },
               },
@@ -2046,7 +2046,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'No se mueve cuando se acota la tabla',
                 leyenda: 'oculta',
-                ejes: { tituloY: 'Casos' },
+                axes: { yTitle: 'Casos' },
               },
             },
           },
@@ -2066,7 +2066,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'El pie referencia las medidas por su orden de mapeo',
                 leyenda: 'abajo',
-                ejes: { tituloY: 'Casos' },
+                axes: { yTitle: 'Casos' },
               },
               attachments: [
                 {

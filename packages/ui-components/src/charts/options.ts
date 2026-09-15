@@ -48,7 +48,7 @@ export interface ChartOptions {
   /** La cifra sobre cada barra o punto. `true` es la forma anterior y se sigue admitiendo. */
   datumLabels?: DatumLabels;
   tooltip?: TooltipSettings;
-  ejes?: AxisSettings;
+  axes?: AxisSettings;
   /** Como formatear una cifra de la serie `s`. */
   formatear?: (valor: number, serie: number) => string;
   apilado?: StackingMode;
@@ -209,8 +209,8 @@ function legendOf(o: ChartOptions, hayQueDistinguir = o.vm.series.length > 1) {
 function marginOf(o: ChartOptions, legendThe: { top: number; bottom: number; left: number; right: number }) {
   return {
     ...legendThe,
-    left: legendThe.left + (o.ejes?.tituloY ? 44 : 0),
-    bottom: legendThe.bottom + (o.ejes?.xTitle ? 24 : 0),
+    left: legendThe.left + (o.axes?.yTitle ? 44 : 0),
+    bottom: legendThe.bottom + (o.axes?.xTitle ? 24 : 0),
   };
 }
 
@@ -343,7 +343,7 @@ function shiftLabelBorder(o: ChartOptions) {
  * nadie lo haya pedido.
  */
 const zoomOf = (o: ChartOptions) =>
-  o.ejes?.zoom === true
+  o.axes?.zoom === true
     ? {
         dataZoom: [
           {
@@ -377,7 +377,7 @@ function base(o: ChartOptions) {
      */
     grid: {
       ...margenes,
-      ...(o.ejes?.zoom === true ? { bottom: margenes.bottom + 26 } : {}),
+      ...(o.axes?.zoom === true ? { bottom: margenes.bottom + 26 } : {}),
       containLabel: true,
     },
     tooltip: tooltipOf(o),
@@ -431,7 +431,7 @@ const seriesLabel = (o: ChartOptions, s: number, cellPosition: string) => {
 
 const axisCategory = (o: ChartOptions) => ({
   type: 'category' as const,
-  show: o.ejes?.showX !== false,
+  show: o.axes?.showX !== false,
   data: o.vm.points.map((p) => p.label),
   axisLabel: {
     color: o.palette.mutedText,
@@ -441,17 +441,17 @@ const axisCategory = (o: ChartOptions) => ({
    * `hideOverlap` es lo correcto en horizontal, pero esconde sin avisar; quien gira los rotulos
    * lo hace para verlos todos.
    */
-    hideOverlap: !o.ejes?.rotateX,
-    ...(o.ejes?.rotateX ? { rotate: o.ejes.rotateX } : {}),
+    hideOverlap: !o.axes?.rotateX,
+    ...(o.axes?.rotateX ? { rotate: o.axes.rotateX } : {}),
   },
   axisLine: { lineStyle: { color: o.palette.line } },
   axisTick: { show: false },
   /*
    * El titulo del eje se pone A MANO o no se pone.
    */
-  ...(o.ejes?.xTitle
+  ...(o.axes?.xTitle
     ? {
-        name: o.ejes.xTitle,
+        name: o.axes.xTitle,
         nameLocation: 'middle' as const,
         nameGap: 28,
         nameTextStyle: { color: o.palette.mutedText },
@@ -471,10 +471,10 @@ const valueAxis = (o: ChartOptions) => ({
    * vez de dibujar una pila que no cuadra.
    */
   type:
-    o.ejes?.escala === 'logaritmica' && o.apilado !== 'porcentaje'
+    o.axes?.scale === 'logaritmica' && o.apilado !== 'porcentaje'
       ? ('log' as const)
       : ('value' as const),
-  show: o.ejes?.mostrarY !== false,
+  show: o.axes?.showY !== false,
   /*
    * Los limites, en orden de quien manda: el 100 % los impone (0 a 100), luego lo escrito a
    * mano, y si no hay nada, ECharts.
@@ -482,15 +482,15 @@ const valueAxis = (o: ChartOptions) => ({
   ...(o.apilado === 'porcentaje'
     ? { max: 100, min: 0 }
     : {
-        ...(o.ejes?.minimoY === undefined ? {} : { min: o.ejes.minimoY }),
-        ...(o.ejes?.maximoY === undefined ? {} : { max: o.ejes.maximoY }),
+        ...(o.axes?.yMin === undefined ? {} : { min: o.axes.yMin }),
+        ...(o.axes?.yMax === undefined ? {} : { max: o.axes.yMax }),
       }),
   axisLabel: {
     color: o.palette.mutedText,
     ...(o.apilado === 'porcentaje' ? { formatter: '{value} %' } : {}),
   },
   splitLine: {
-    show: o.ejes?.gridlines !== false,
+    show: o.axes?.gridlines !== false,
     lineStyle: { color: o.palette.line, type: 'dashed' as const },
   },
   /*
@@ -499,14 +499,14 @@ const valueAxis = (o: ChartOptions) => ({
    * `scale: true` de ECharts ajusta el minimo a los datos, y con eso una diferencia del 2 % entre
    * dos barras parece el triple.
    */
-  scale: o.ejes?.desdeCero === false,
+  scale: o.axes?.fromZero === false,
   /*
    * El titulo del eje de valores va rotado y a media altura: arriba, que es donde ECharts lo pone
    * por omision, se dibuja encima del rotulo mas alto de la escala.
    */
-  ...(o.ejes?.tituloY
+  ...(o.axes?.yTitle
     ? {
-        name: o.ejes.tituloY,
+        name: o.axes.yTitle,
         nameLocation: 'middle' as const,
         nameRotate: 90,
         nameGap: 44,
@@ -931,15 +931,15 @@ export function gaugeOptions(o: ChartOptions): Record<string, unknown> {
 
 /**
  * El eje de la derecha: la misma escala de valores, sin repetir la cuadricula y con su propio
- * titulo (`tituloY2`). Todo lo demas se hereda para que los dos ejes se lean igual.
+ * titulo (`y2Title`). Todo lo demas se hereda para que los dos ejes se lean igual.
  */
 const axisValueSecondary = (o: ChartOptions) => ({
   ...valueAxis(o),
   position: 'right' as const,
   splitLine: { show: false },
-  ...(o.ejes?.tituloY2
+  ...(o.axes?.y2Title
     ? {
-        name: o.ejes.tituloY2,
+        name: o.axes.y2Title,
         nameLocation: 'middle' as const,
         nameRotate: 90,
         nameGap: 44,
@@ -1045,17 +1045,17 @@ export function scatterOptions(o: ChartOptions): Record<string, unknown> {
       // Los dos ejes llevan cuadricula: sin las verticales, situar un punto en el eje horizontal
       // obliga a seguirlo con el dedo hasta abajo.
       splitLine: {
-        show: o.ejes?.gridlines !== false,
+        show: o.axes?.gridlines !== false,
         lineStyle: { color: o.palette.line, type: 'dashed' as const },
       },
-      show: o.ejes?.showX !== false,
+      show: o.axes?.showX !== false,
       /*
        * El titulo del eje horizontal va horizontal y debajo. `valueAxis` lo escribe rotado 90
        * grados porque en los demas graficos ese eje es el vertical.
        */
-      ...(o.ejes?.xTitle
+      ...(o.axes?.xTitle
         ? {
-            name: o.ejes.xTitle,
+            name: o.axes.xTitle,
             nameLocation: 'middle' as const,
             nameRotate: 0,
             nameGap: 28,

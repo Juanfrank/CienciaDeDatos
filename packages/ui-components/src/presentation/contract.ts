@@ -22,18 +22,18 @@ export type LegendMode = (typeof LEGEND_MODES)[number];
 /** Los ejes, como en cualquier herramienta de informes. */
 export interface AxisSettings {
   showX?: boolean;
-  mostrarY?: boolean;
+  showY?: boolean;
   xTitle?: string;
-  tituloY?: string;
+  yTitle?: string;
   /** El titulo del eje de la derecha, cuando hay dos. */
-  tituloY2?: string;
+  y2Title?: string;
   /** Las lineas horizontales de fondo. Con pocas barras estorban mas que ayudan. */
   gridlines?: boolean;
   /** Empezar el eje de valores en cero. */
-  desdeCero?: boolean;
+  fromZero?: boolean;
   /** Los limites del eje de valores, a mano. */
-  minimoY?: number;
-  maximoY?: number;
+  yMin?: number;
+  yMax?: number;
   /** Cuanto se giran los rotulos del eje de categorias. */
   rotateX?: number;
   /**
@@ -47,7 +47,7 @@ export interface AxisSettings {
    * no existe. La validacion lo rechaza junto con un minimo de cero, en vez de dejar el grafico
    * dibujando una escala que miente.
    */
-  escala?: AxisScale;
+  scale?: AxisScale;
   /**
    * Una barra para acercarse a un tramo del eje de categorias.
    *
@@ -289,7 +289,7 @@ export interface ObjectPresentation {
   multiplos?: MultipleSettings;
   /** Que el color dependa del dato: reglas evaluadas en orden, gana la primera que casa. */
   condicional?: ConditionalFormat;
-  ejes?: AxisSettings;
+  axes?: AxisSettings;
   orden?: CategorySort;
   apilado?: StackingMode;
   circular?: PieSettings;
@@ -320,7 +320,7 @@ export const PRESENTATION_KEYS = [
   'formatos',
   'leyenda',
   'datumLabels',
-  'ejes',
+  'axes',
   'orden',
   'apilado',
   'circular',
@@ -481,17 +481,17 @@ export function validatePresentation(
   /*
    * Un maximo por debajo del minimo no es un rango: es una escala del reves.
    */
-  const ejes = presentation.ejes;
-  if (ejes?.rotateX !== undefined && (ejes.rotateX < -90 || ejes.rotateX > 90)) {
+  const axes = presentation.axes;
+  if (axes?.rotateX !== undefined && (axes.rotateX < -90 || axes.rotateX > 90)) {
     problems.push({
-      clave: 'ejes.rotateX',
-      issue: `El giro va de -90 a 90 grados, y ${ejes.rotateX} no esta en ese rango.`,
+      clave: 'axes.rotateX',
+      issue: `El giro va de -90 a 90 grados, y ${axes.rotateX} no esta en ese rango.`,
     });
   }
-  if (ejes?.escala !== undefined && !(AXIS_SCALES as readonly string[]).includes(ejes.escala)) {
+  if (axes?.scale !== undefined && !(AXIS_SCALES as readonly string[]).includes(axes.scale)) {
     problems.push({
-      clave: 'ejes.escala',
-      issue: `'${String(ejes.escala)}' no es una escala de eje.`,
+      clave: 'axes.scale',
+      issue: `'${String(axes.scale)}' no es una escala de eje.`,
     });
   }
   /*
@@ -499,22 +499,22 @@ export function validatePresentation(
    * existe. Se rechaza al guardar en vez de dejar un grafico con una escala que miente — que es
    * como se descubriria, mirandolo.
    */
-  if (ejes?.escala === 'logaritmica' && ejes.minimoY !== undefined && ejes.minimoY <= 0) {
+  if (axes?.scale === 'logaritmica' && axes.yMin !== undefined && axes.yMin <= 0) {
     problems.push({
-      clave: 'ejes.minimoY',
-      issue: `Una escala logaritmica no admite un minimo de ${ejes.minimoY}: tiene que ser mayor que cero.`,
+      clave: 'axes.yMin',
+      issue: `Una escala logaritmica no admite un minimo de ${axes.yMin}: tiene que ser mayor que cero.`,
     });
   }
-  if (ejes?.escala === 'logaritmica' && ejes.desdeCero === true) {
+  if (axes?.scale === 'logaritmica' && axes.fromZero === true) {
     problems.push({
-      clave: 'ejes.desdeCero',
+      clave: 'axes.fromZero',
       issue: 'Una escala logaritmica no puede empezar en cero: el logaritmo de cero no existe.',
     });
   }
-  if (ejes?.minimoY !== undefined && ejes.maximoY !== undefined && ejes.minimoY >= ejes.maximoY) {
+  if (axes?.yMin !== undefined && axes.yMax !== undefined && axes.yMin >= axes.yMax) {
     problems.push({
-      clave: 'ejes.maximoY',
-      issue: `El maximo del eje (${ejes.maximoY}) tiene que ser mayor que el minimo (${ejes.minimoY}).`,
+      clave: 'axes.yMax',
+      issue: `El maximo del eje (${axes.yMax}) tiene que ser mayor que el minimo (${axes.yMin}).`,
     });
   }
 

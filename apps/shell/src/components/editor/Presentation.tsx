@@ -899,17 +899,17 @@ export function Presentation({
         </Section>
       ) : null}
 
-      {admite("ejes") ? (
+      {admite("axes") ? (
         <Section
           keys={['eje', 'cuadricula', 'titulo del eje', 'empezar en cero', 'minimo', 'maximo', 'girar', 'rotar']}
           titulo="Ejes" nivel={2} abierta={false} prueba={`${prueba}-ejes`}>
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.ejes?.showX !== false}
+              checked={p.axes?.showX !== false}
               disabled={saving}
               data-testid={`${prueba}-eje-x`}
-              onChange={(e) => set({ ejes: { ...p.ejes, showX: e.target.checked } })}
+              onChange={(e) => set({ axes: { ...p.axes, showX: e.target.checked } })}
             />{" "}
             Mostrar el eje de categorias
           </label>
@@ -917,10 +917,10 @@ export function Presentation({
           <label className="form__field">
             <span>{t('pres.axis.categories.title')}</span>
             <input
-              defaultValue={p.ejes?.xTitle ?? ""}
+              defaultValue={p.axes?.xTitle ?? ""}
               disabled={saving}
               data-testid={`${prueba}-titulo-x`}
-              onBlur={(e) => set({ ejes: { ...p.ejes, xTitle: e.target.value || undefined } })}
+              onBlur={(e) => set({ axes: { ...p.axes, xTitle: e.target.value || undefined } })}
             />
             {/*
               Se escribe a mano y no sale del nombre del campo: `DimTribunal.Distrito` en un
@@ -933,10 +933,10 @@ export function Presentation({
             <label className="form__field">
               <span>{t('pres.axis.right.title')}</span>
               <input
-                defaultValue={p.ejes?.tituloY2 ?? ""}
+                defaultValue={p.axes?.y2Title ?? ""}
                 disabled={saving}
                 data-testid={`${prueba}-titulo-y2`}
-                onBlur={(e) => set({ ejes: { ...p.ejes, tituloY2: e.target.value || undefined } })}
+                onBlur={(e) => set({ axes: { ...p.axes, y2Title: e.target.value || undefined } })}
               />
               <span className="field__pista">{t('pres.axis.right.help')}</span>
             </label>
@@ -945,10 +945,10 @@ export function Presentation({
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.ejes?.mostrarY !== false}
+              checked={p.axes?.showY !== false}
               disabled={saving}
               data-testid={`${prueba}-eje-y`}
-              onChange={(e) => set({ ejes: { ...p.ejes, mostrarY: e.target.checked } })}
+              onChange={(e) => set({ axes: { ...p.axes, showY: e.target.checked } })}
             />{" "}
             Mostrar el eje de valores
           </label>
@@ -956,20 +956,20 @@ export function Presentation({
           <label className="form__field">
             <span>{t('pres.axis.values.title')}</span>
             <input
-              defaultValue={p.ejes?.tituloY ?? ""}
+              defaultValue={p.axes?.yTitle ?? ""}
               disabled={saving}
               data-testid={`${prueba}-titulo-y`}
-              onBlur={(e) => set({ ejes: { ...p.ejes, tituloY: e.target.value || undefined } })}
+              onBlur={(e) => set({ axes: { ...p.axes, yTitle: e.target.value || undefined } })}
             />
           </label>
 
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.ejes?.gridlines !== false}
+              checked={p.axes?.gridlines !== false}
               disabled={saving}
               data-testid={`${prueba}-cuadricula`}
-              onChange={(e) => set({ ejes: { ...p.ejes, gridlines: e.target.checked } })}
+              onChange={(e) => set({ axes: { ...p.axes, gridlines: e.target.checked } })}
             />{" "}
             Lineas de cuadricula
           </label>
@@ -977,10 +977,10 @@ export function Presentation({
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.ejes?.desdeCero !== false}
+              checked={p.axes?.fromZero !== false}
               disabled={saving}
               data-testid={`${prueba}-desde-cero`}
-              onChange={(e) => set({ ejes: { ...p.ejes, desdeCero: e.target.checked } })}
+              onChange={(e) => set({ axes: { ...p.axes, fromZero: e.target.checked } })}
             />{" "}
             Empezar en cero
           </label>
@@ -988,18 +988,18 @@ export function Presentation({
           <label className="form__field">
             <span>{t('pres.axis.scale')}</span>
             <select
-              value={p.ejes?.escala ?? 'lineal'}
+              value={p.axes?.scale ?? 'lineal'}
               disabled={saving}
               data-testid={`${prueba}-escala`}
               onChange={(e) =>
                 set({
-                  ejes: {
-                    ...p.ejes,
-                    escala: e.target.value === 'lineal' ? undefined : (e.target.value as AxisScale),
+                  axes: {
+                    ...p.axes,
+                    scale: e.target.value === 'lineal' ? undefined : (e.target.value as AxisScale),
                     // Volver a lineal no puede dejar puesto lo que la logaritmica prohibia, ni al
                     // reves: elegir logaritmica con «empezar en cero» encendido guardaria algo que
                     // la validacion rechaza y que quien lo eligio no escribio.
-                    ...(e.target.value === 'logaritmica' ? { desdeCero: false } : {}),
+                    ...(e.target.value === 'logaritmica' ? { fromZero: false } : {}),
                   },
                 })
               }
@@ -1011,17 +1011,17 @@ export function Presentation({
               ))}
             </select>
           </label>
-          {p.ejes?.escala === 'logaritmica' ? (
+          {p.axes?.scale === 'logaritmica' ? (
             <p className="field__pista">{t('pres.axis.scale.logHelp')}</p>
           ) : null}
 
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.ejes?.zoom === true}
+              checked={p.axes?.zoom === true}
               disabled={saving}
               data-testid={`${prueba}-zoom`}
-              onChange={(e) => set({ ejes: { ...p.ejes, zoom: e.target.checked || undefined } })}
+              onChange={(e) => set({ axes: { ...p.axes, zoom: e.target.checked || undefined } })}
             />{" "}
             {t('pres.axis.zoom')}
           </label>
@@ -1041,14 +1041,14 @@ export function Presentation({
               <span>{t('pres.axis.min')}</span>
               <input
                 type="number"
-                defaultValue={p.ejes?.minimoY ?? ""}
+                defaultValue={p.axes?.yMin ?? ""}
                 disabled={saving}
                 data-testid={`${prueba}-minimo-y`}
                 onBlur={(e) =>
                   set({
-                    ejes: {
-                      ...p.ejes,
-                      minimoY: e.target.value === "" ? undefined : Number(e.target.value),
+                    axes: {
+                      ...p.axes,
+                      yMin: e.target.value === "" ? undefined : Number(e.target.value),
                     },
                   })
                 }
@@ -1058,14 +1058,14 @@ export function Presentation({
               <span>{t('pres.axis.max')}</span>
               <input
                 type="number"
-                defaultValue={p.ejes?.maximoY ?? ""}
+                defaultValue={p.axes?.yMax ?? ""}
                 disabled={saving}
                 data-testid={`${prueba}-maximo-y`}
                 onBlur={(e) =>
                   set({
-                    ejes: {
-                      ...p.ejes,
-                      maximoY: e.target.value === "" ? undefined : Number(e.target.value),
+                    axes: {
+                      ...p.axes,
+                      yMax: e.target.value === "" ? undefined : Number(e.target.value),
                     },
                   })
                 }
@@ -1080,13 +1080,13 @@ export function Presentation({
           <label className="form__field">
             <span>{t('pres.tickLabels.rotate')}</span>
             <select
-              value={String(p.ejes?.rotateX ?? 0)}
+              value={String(p.axes?.rotateX ?? 0)}
               disabled={saving}
               data-testid={`${prueba}-rotar-x`}
               onChange={(e) =>
                 set({
-                  ejes: {
-                    ...p.ejes,
+                  axes: {
+                    ...p.axes,
                     rotateX: e.target.value === "0" ? undefined : Number(e.target.value),
                   },
                 })

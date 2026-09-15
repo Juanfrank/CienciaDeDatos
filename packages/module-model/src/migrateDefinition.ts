@@ -42,6 +42,26 @@ export interface KeyRename {
  * de ella, y «ya no queda ninguno con la clave vieja» es una afirmacion sobre el disco de
  * produccion que desde aqui no se puede comprobar.
  */
+/**
+ * Las DOS filas de una clave que vive dentro de la presentacion.
+ *
+ * Dos y no una porque hay dos sitios: la instancia de cada objeto del modulo y la de cada
+ * complemento adjuntado —un pie de pagina o un tooltip tienen su propia presentacion—. Escribirlas
+ * a mano era copiar once lineas por clave, y lo que se copia once veces se copia mal la doceava:
+ * la ruta del complemento es larga y basta con que falte un `[]` para que la fila no encuentre
+ * nada y no falle nada.
+ *
+ * `dentro` baja un nivel mas, para las claves que cuelgan de otra —`axes.scale` y sus hermanas—.
+ */
+function enLaPresentacion(from: string, to: string, ...dentro: string[]): KeyRename[] {
+  const item = ['pages', '[]', 'items', '[]', 'instance'];
+  const adjunto = [...item, 'attachments', '[]', 'instance'];
+  return [
+    { path: [...item, 'presentation', ...dentro], from, to },
+    { path: [...adjunto, 'presentation', ...dentro], from, to },
+  ];
+}
+
 export const RENAMES: KeyRename[] = [
   /*
    * `presentacion` -> `presentation`, la mas leida de todas.
@@ -79,24 +99,28 @@ export const RENAMES: KeyRename[] = [
       ['etiquetasDeDato', 'datumLabels'],
       ['coloresDeSerie', 'seriesColors'],
     ] as const
-  ).flatMap(([from, to]) => [
-    { path: ['pages', '[]', 'items', '[]', 'instance', 'presentation'], from, to },
-    {
-      path: [
-        'pages',
-        '[]',
-        'items',
-        '[]',
-        'instance',
-        'attachments',
-        '[]',
-        'instance',
-        'presentation',
-      ],
-      from,
-      to,
-    },
-  ]),
+  ).flatMap(([from, to]) => enLaPresentacion(from, to)),
+  /*
+   * Tercera tanda: los EJES, que son la primera clave con hijos.
+   *
+   * `ejes` -> `axes` primero, y solo despues las siete de dentro, porque el orden de esta tabla es
+   * el orden en que se aplica: una fila que dijera `presentation.ejes` DESPUES de haber renombrado
+   * el padre no encontraria nada, y una definicion guardada se quedaria con el eje a medias —el
+   * objeto migrado, su contenido no—. Es el unico sitio donde el orden de las filas importa, y por
+   * eso se dice aqui en vez de confiarlo a que nadie las reordene.
+   */
+  ...enLaPresentacion('ejes', 'axes'),
+  ...(
+    [
+      ['mostrarY', 'showY'],
+      ['tituloY', 'yTitle'],
+      ['tituloY2', 'y2Title'],
+      ['desdeCero', 'fromZero'],
+      ['minimoY', 'yMin'],
+      ['maximoY', 'yMax'],
+      ['escala', 'scale'],
+    ] as const
+  ).flatMap(([from, to]) => enLaPresentacion(from, to, 'axes')),
 ];
 
 type Json = Record<string, unknown>;

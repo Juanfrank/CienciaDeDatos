@@ -804,11 +804,11 @@ function panelPresentation(
 ): ObjectPresentation | undefined {
   if (presentation?.multiplos?.sameScale === false) return presentation;
   const maximo = maxCommon(panels);
-  if (maximo === undefined || presentation?.ejes?.maximoY !== undefined) return presentation;
+  if (maximo === undefined || presentation?.axes?.yMax !== undefined) return presentation;
   /*
    * El maximo se REDONDEA hacia arriba a un numero de escala.
    */
-  return { ...presentation, ejes: { ...presentation?.ejes, maximoY: niceScale(maximo) } };
+  return { ...presentation, axes: { ...presentation?.axes, yMax: niceScale(maximo) } };
 }
 
 /** La celda de categoria del respaldo, que ademas FILTRA. */

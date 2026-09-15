@@ -41,6 +41,18 @@ const guardado = () => ({
               mostrarIcono: true,
               etiquetasDeDato: { mostrar: true },
               coloresDeSerie: [0, 3],
+              // Los ejes, que son la primera clave con HIJOS: se migra el padre y su contenido.
+              ejes: {
+                mostrarY: false,
+                tituloY: 'Casos',
+                tituloY2: 'Tasa',
+                desdeCero: true,
+                minimoY: 10,
+                maximoY: 90,
+                escala: 'logaritmica',
+                // Una que ya estaba en ingles: la migracion no la toca y tiene que seguir ahi.
+                gridlines: false,
+              },
             },
             attachments: [
               {
@@ -110,7 +122,34 @@ describe('migrar las claves de una definicion guardada', () => {
       showIcon: true,
       datumLabels: { mostrar: true },
       seriesColors: [0, 3],
+      axes: {
+        showY: false,
+        yTitle: 'Casos',
+        y2Title: 'Tasa',
+        fromZero: true,
+        yMin: 10,
+        yMax: 90,
+        scale: 'logaritmica',
+        gridlines: false,
+      },
     });
+  });
+
+  /*
+   * El orden de la tabla, que es lo unico de ella que se puede romper sin que nada avise.
+   *
+   * Las filas se aplican en orden. Si la de `ejes` -> `axes` fuera DESPUES de las siete de dentro,
+   * esas siete buscarian en `presentation.axes` cuando lo guardado todavia dice `ejes`, no
+   * encontrarian nada —renombrar lo que no esta no falla— y el objeto quedaria migrado con su
+   * contenido sin migrar: el eje en ingles y sus siete claves en espanol dentro.
+   */
+  it('y migra el padre ANTES que sus hijos, o el eje se quedaria a medias', () => {
+    const conEjes = (r: (typeof RENAMES)[number]) => r.path.includes('axes');
+    const padre = RENAMES.findIndex((r) => r.from === 'ejes');
+    const primerHijo = RENAMES.findIndex(conEjes);
+
+    expect(padre).toBeGreaterThanOrEqual(0);
+    expect(primerHijo).toBeGreaterThan(padre);
   });
 
   /*

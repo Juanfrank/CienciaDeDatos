@@ -37,8 +37,8 @@ const VALUES: Partial<Record<PresentationKey, unknown[]>> = {
     { mostrar: true, onlyEnds: true },
   ],
   tooltip: [{ total: true }, { sortValue: true }],
-  ejes: [
-    { xTitle: 'X', tituloY: 'Y' },
+  axes: [
+    { xTitle: 'X', yTitle: 'Y' },
     { gridlines: false, showX: false },
   ],
   apilado: ['apilado', 'porcentaje'],

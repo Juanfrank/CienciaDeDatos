@@ -70,16 +70,16 @@ describe('etiquetas de dato', () => {
   });
 });
 
-describe('ejes', () => {
+describe('axes', () => {
   it('empiezan en cero salvo que alguien lo decida', () => {
     // `scale: true` de ECharts ajusta el minimo a los datos, y con eso una diferencia del 2 %
     // parece el triple. Que sea explicito es la diferencia entre un grafico y uno enganoso.
     expect(opciones().yAxis.scale).toBe(false);
-    expect(opciones({ ejes: { desdeCero: false } }).yAxis.scale).toBe(true);
+    expect(opciones({ axes: { fromZero: false } }).yAxis.scale).toBe(true);
   });
 
   it('se pueden ocultar y titular', () => {
-    const o = opciones({ ejes: { mostrarY: false, xTitle: 'Distrito', gridlines: false } });
+    const o = opciones({ axes: { showY: false, xTitle: 'Distrito', gridlines: false } });
     expect(o.yAxis.show).toBe(false);
     expect(o.xAxis.name).toBe('Distrito');
     expect(o.yAxis.splitLine.show).toBe(false);
@@ -128,13 +128,13 @@ describe('el margen reserva sitio para lo que vive fuera del area de dibujo', ()
     // Sin reservarlo, `nameGap` dibujaba el titulo 44 px a la izquierda del eje: fuera de la
     // tarjeta. Un titulo que se configura y no aparece es peor que no ofrecerlo.
     const sin = opciones();
-    const con = opciones({ ejes: { tituloY: 'Casos' } });
+    const con = opciones({ axes: { yTitle: 'Casos' } });
     expect(con.grid.left).toBeGreaterThan(sin.grid.left);
   });
 
   it('la leyenda lateral y el titulo del eje SUMAN margen, no compiten por el', () => {
     const onlyLegend = opciones({ leyenda: 'izquierda' });
-    const ambos = opciones({ leyenda: 'izquierda', ejes: { tituloY: 'Casos' } });
+    const ambos = opciones({ leyenda: 'izquierda', axes: { yTitle: 'Casos' } });
     expect(ambos.grid.left).toBeGreaterThan(onlyLegend.grid.left);
   });
 });
@@ -217,14 +217,14 @@ describe('lineas de referencia', () => {
 
 describe('limites del eje y color por serie', () => {
   it('los limites escritos a mano mandan sobre el automatico', () => {
-    const o = opciones({ ejes: { minimoY: 100, maximoY: 500 } });
+    const o = opciones({ axes: { yMin: 100, yMax: 500 } });
     expect(o.yAxis.min).toBe(100);
     expect(o.yAxis.max).toBe(500);
   });
 
   it('pero el 100 % los impone: el eje va de 0 a 100 porque eso es lo que mide', () => {
     // Dejar cambiarlos produciria un «100 %» que no llega al borde.
-    const o = opciones({ apilado: 'porcentaje', ejes: { minimoY: 40, maximoY: 60 } });
+    const o = opciones({ apilado: 'porcentaje', axes: { yMin: 40, yMax: 60 } });
     expect(o.yAxis.min).toBe(0);
     expect(o.yAxis.max).toBe(100);
   });
@@ -321,7 +321,7 @@ describe('giro de los rotulos del eje', () => {
   });
 
   it('girados, se dejan de esconder: quien los gira lo hace para verlos todos', () => {
-    const o = opciones({ ejes: { rotateX: 45 } });
+    const o = opciones({ axes: { rotateX: 45 } });
     expect(o.xAxis.axisLabel.rotate).toBe(45);
     expect(o.xAxis.axisLabel.hideOverlap).toBe(false);
   });
@@ -334,14 +334,14 @@ describe('escala del eje de valores', () => {
      * muy distintas en el mismo grafico sin que la pequena se convierta en una raya pegada al eje.
      */
     expect(opciones().yAxis.type).toBe('value');
-    expect(opciones({ ejes: { escala: 'logaritmica' } }).yAxis.type).toBe('log');
+    expect(opciones({ axes: { scale: 'logaritmica' } }).yAxis.type).toBe('log');
   });
 
   it('un apilado al 100 % la IGNORA', () => {
     // El apilado impone una escala de 0 a 100 y las series se suman sobre ella: repartida en
     // logaritmos, los tramos dejan de sumar el total que el propio grafico promete.
     const o = opciones(
-      { ejes: { escala: 'logaritmica' }, apilado: 'porcentaje' },
+      { axes: { scale: 'logaritmica' }, apilado: 'porcentaje' },
       vm(['A', 'B'], [['x', 1, 2]]),
     );
     expect(o.yAxis.type).toBe('value');
@@ -357,21 +357,21 @@ describe('zoom sobre el eje de categorias', () => {
   it('son DOS controles: la barra y el gesto sobre el grafico', () => {
     // Con solo la barra, arrastrar lo que se mira no hace nada; con solo el gesto, nada en
     // pantalla dice que se esta viendo un tramo y no el total.
-    const o = opciones({ ejes: { zoom: true } });
+    const o = opciones({ axes: { zoom: true } });
     expect(o.dataZoom.map((z: { type: string }) => z.type)).toEqual(['slider', 'inside']);
   });
 
   it('empieza mostrandolo TODO', () => {
     // Un grafico que abre ya recortado esconde datos sin que nadie lo haya pedido.
-    const o = opciones({ ejes: { zoom: true } });
+    const o = opciones({ axes: { zoom: true } });
     expect(o.dataZoom.every((z: { start: number; end: number }) => z.start === 0 && z.end === 100)).toBe(true);
   });
 
   it('le reserva margen, y sin comerse el del titulo del eje', () => {
     // `containLabel` cuenta los rotulos del eje pero NO la barra: sin reservar, se dibuja encima
     // de los nombres de las categorias.
-    const sinZoom = opciones({ ejes: { xTitle: 'Distrito' } });
-    const conZoom = opciones({ ejes: { xTitle: 'Distrito', zoom: true } });
+    const sinZoom = opciones({ axes: { xTitle: 'Distrito' } });
+    const conZoom = opciones({ axes: { xTitle: 'Distrito', zoom: true } });
     expect(conZoom.grid.bottom).toBe(sinZoom.grid.bottom + 26);
   });
 });

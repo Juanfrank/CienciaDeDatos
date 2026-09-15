@@ -6,6 +6,7 @@ import {
   ELEMENT_THRESHOLD,
   elementsOf,
   optionsOf,
+  type ChartOptions,
   type ChartPalette,
   type ObjectPresentation,
   type ChartKind,
@@ -52,6 +53,26 @@ export default function Canvas({
   const montado = useRef(onMontado);
   montado.current = onMontado;
 
+  /**
+   * Pasa una clave de la presentacion a las opciones del grafico, CON EL NOMBRE COMPROBADO.
+   *
+   * Antes eran doce lineas de la forma `...(presentation?.ejes ? { ejes: presentation.ejes } : {})`
+   * y tenian un agujero: un objeto literal que lleva un `...` dentro NO recibe la comprobacion de
+   * propiedades sobrantes de TypeScript. El dia que `ejes` paso a llamarse `axes` en las dos
+   * puntas —el tipo de la presentacion y el de las opciones—, esta linea siguio compilando, y el
+   * grafico se habria quedado sin ejes en silencio. Es exactamente el fallo del que va el
+   * apartado 2.11: la clave vive en dos sitios y el compilador solo mira uno.
+   *
+   * Exigiendo que la clave este en LOS DOS tipos, el mismo renombrado no compila hasta hacerlo
+   * entero.
+   */
+  const comun = <K extends keyof ChartOptions & keyof ObjectPresentation>(
+    clave: K,
+  ): Partial<ChartOptions> =>
+    presentation?.[clave] === undefined
+      ? {}
+      : ({ [clave]: presentation[clave] } as Partial<ChartOptions>);
+
   /*
    * Las opciones se comparan por CONTENIDO, no por identidad.
    */
@@ -62,23 +83,21 @@ export default function Canvas({
         palette,
         titulo,
         ...(dimension ? { dimension } : {}),
-        ...(presentation?.leyenda ? { leyenda: presentation.leyenda } : {}),
+        ...comun('leyenda'),
         // Se pasa TAL CUAL: la forma anterior era un booleano y la nueva es un objeto, y quien
         // normaliza es el constructor de opciones, en una sola funcion pura.
-        ...(presentation?.datumLabels === undefined
-          ? {}
-          : { datumLabels: presentation.datumLabels }),
-        ...(presentation?.tooltip ? { tooltip: presentation.tooltip } : {}),
-        ...(presentation?.ejes ? { ejes: presentation.ejes } : {}),
-        ...(presentation?.apilado ? { apilado: presentation.apilado } : {}),
-        ...(presentation?.circular ? { circular: presentation.circular } : {}),
-        ...(presentation?.medidor ? { medidor: presentation.medidor } : {}),
-        ...(presentation?.combinado ? { combinado: presentation.combinado } : {}),
-        ...(presentation?.embudo ? { embudo: presentation.embudo } : {}),
-        ...(presentation?.cascada ? { cascada: presentation.cascada } : {}),
-        ...(presentation?.referencias ? { referencias: presentation.referencias } : {}),
-        ...(presentation?.seriesColors ? { seriesColors: presentation.seriesColors } : {}),
-        ...(presentation?.condicional ? { condicional: presentation.condicional } : {}),
+        ...comun('datumLabels'),
+        ...comun('tooltip'),
+        ...comun('axes'),
+        ...comun('apilado'),
+        ...comun('circular'),
+        ...comun('medidor'),
+        ...comun('combinado'),
+        ...comun('embudo'),
+        ...comun('cascada'),
+        ...comun('referencias'),
+        ...comun('seriesColors'),
+        ...comun('condicional'),
         ...(columnSeries === undefined ? {} : { columnSeries }),
         ...(formatear ? { formatear } : {}),
       }),

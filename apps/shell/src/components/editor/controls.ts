@@ -15,7 +15,10 @@ export const KEY_CONTROL: Record<PresentationKey, string> = {
   formatos: 'medida',
   leyenda: 'leyenda',
   datumLabels: 'etiquetas',
-  ejes: 'ejes',
+  // El identificador de prueba NO se renombra con la clave: es otro contrato, el que tienen las
+  // pruebas de navegador con el marcado, y moverlo aqui sin moverlo alli deja la seccion de los
+  // ejes sin control que encontrar. La clave es `axes`; la seccion sigue siendo `…-ejes`.
+  axes: 'ejes',
   orden: 'orden-por',
   apilado: 'apilado',
   circular: 'circular',
