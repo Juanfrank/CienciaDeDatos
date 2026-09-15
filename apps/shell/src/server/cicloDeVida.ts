@@ -425,11 +425,18 @@ export async function pendingReviews(actor: ModuleActor): Promise<PendingReview[
 
   return Promise.all(
     esperando.map(async (module) => {
-      // El evento de propuesta mas reciente de ESTE modulo. Se busca del final hacia atras
-      // porque un modulo puede haberse propuesto, devuelto y vuelto a proponer.
-      const propuesta = [...eventos]
-        .reverse()
-        .find((e) => e.entityId === module.moduleId && e.action === 'submit');
+      /*
+       * El evento de propuesta mas reciente de ESTE modulo.
+       *
+       * `auditList` ya devuelve lo mas reciente primero, asi que el primero que coincide es el
+       * bueno. Antes se le daba la vuelta a la lista «para buscar del final hacia atras»: las
+       * dos vueltas se anulaban y lo que salia era la propuesta MAS ANTIGUA. Se nota cuando un
+       * modulo se propone, se devuelve y se vuelve a proponer —que es el caso para el que se
+       * escribio—: quien aprueba veia la fecha de la primera vez.
+       */
+      const propuesta = eventos.find(
+        (e) => e.entityId === module.moduleId && e.action === 'submit',
+      );
 
       /*
        * Una REVISION se compara con el modulo que revisa, no consigo misma.

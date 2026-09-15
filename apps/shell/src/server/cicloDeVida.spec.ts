@@ -22,6 +22,7 @@ import {
   historialDe,
   restaurarVersion,
   seeCan,
+  pendingReviews,
 } from './cicloDeVida';
 
 /** Ciclo de vida de un modulo — seccion 4.1. */
@@ -853,5 +854,47 @@ describe('editar lo publicado abre una REVISION, no lo despublica (4.1)', () => 
     await expect(
       createRevision({ actor: colaborador, moduleId: borrador.moduleId }),
     ).rejects.toBeInstanceOf(CicloDeVidaError);
+  });
+});
+
+describe('la cola de revision nombra la propuesta VIGENTE', () => {
+  it('tras devolver y volver a proponer, se ve la segunda propuesta y no la primera', async () => {
+    /*
+     * Un modulo se propone, se devuelve a borrador y se vuelve a proponer. Lo que la pantalla de
+     * revision tiene que decir es quien lo propuso ESTA vez y cuando: quien aprueba decide con
+     * eso delante, y una fecha de hace tres semanas con el nombre de otra persona invita a
+     * aprobar algo que ya no es lo que se miro.
+     *
+     * El codigo decia buscar «del final hacia atras» y hacia lo contrario: `auditList` devuelve
+     * lo mas reciente primero, y darle la vuelta otra vez lo dejaba en lo mas antiguo primero.
+     * Las dos vueltas se anulaban y `find` se traia la propuesta vieja.
+     */
+    const modulo = await readyDraft(colaborador, 'propuesto-dos-veces');
+
+    await sendApproval({ actor: colaborador, moduleId: modulo.moduleId });
+    await revertDraft({
+      actor: admin,
+      moduleId: modulo.moduleId,
+      motivo: 'Faltaba el pie de pagina.',
+    });
+    // Proponer es del autor, asi que las dos propuestas son suyas y lo que las distingue es la
+    // HORA. Se separan para que las dos marcas no caigan en el mismo milisegundo: con la misma
+    // marca, la prueba pasaria eligiera la que eligiera, que es no probar nada.
+    await new Promise((listo) => setTimeout(listo, 5));
+    await sendApproval({ actor: colaborador, moduleId: modulo.moduleId });
+
+    const submits = (await auditList()).filter(
+      (e) => e.entityId === modulo.moduleId && e.action === 'submit',
+    );
+    expect(submits).toHaveLength(2);
+    // `auditList` devuelve lo mas reciente primero.
+    const reciente = submits[0]?.timestamp;
+    const vieja = submits[1]?.timestamp;
+    expect(reciente).not.toBe(vieja);
+
+    const cola = await pendingReviews(admin);
+    const fila = cola.find((r) => r.module.moduleId === modulo.moduleId);
+    expect(fila).toBeDefined();
+    expect(fila?.proposedAt).toBe(reciente);
   });
 });

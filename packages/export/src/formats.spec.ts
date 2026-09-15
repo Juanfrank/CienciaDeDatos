@@ -84,6 +84,44 @@ describe('escaparCsv', () => {
   });
 });
 
+describe('el CSV no se convierte en un programa al abrirlo', () => {
+  /**
+   * Una celda que empieza por `=`, `+`, `-`, `@` o tabulador la EVALUA la hoja de calculo.
+   *
+   * No es una curiosidad de formato: el CSV sale de datos que escribio alguien en el sistema de
+   * origen, y un nombre de parte o un titulo de expediente admiten cualquier texto. Un
+   * `=HYPERLINK(...)` en una celda convierte el archivo que se descarga un juez en una peticion
+   * a un servidor ajeno llevandose las cifras de al lado.
+   *
+   * Entrecomillar NO lo evita: el RFC 4180 dice como se delimita el campo, y la hoja de calculo
+   * decide despues que hacer con lo que hay dentro.
+   */
+  it('desactiva lo que una hoja de calculo evaluaria', () => {
+    expect(escaparCsv('=HYPERLINK("http://ajeno","ver")')).toBe(
+      '"\'=HYPERLINK(""http://ajeno"",""ver"")"',
+    );
+    expect(escaparCsv('@SUM(A1:A9)')).toBe("'@SUM(A1:A9)");
+    expect(escaparCsv('+1-809-555-0100')).toBe("'+1-809-555-0100");
+    expect(escaparCsv('\tcomando')).toBe("'\tcomando");
+  });
+
+  it('a un numero no se le toca, negativos incluidos', () => {
+    // El CSV lleva los VALORES para poder volver a calcular con ellos. Una comilla de mas los
+    // convierte en texto, y entonces el archivo deja de servir para lo que se exporto.
+    expect(escaparCsv(-5)).toBe('-5');
+    expect(escaparCsv('-5')).toBe('-5');
+    expect(escaparCsv('-12.5')).toBe('-12.5');
+    expect(escaparCsv('+3')).toBe('+3');
+    expect(escaparCsv('-1.2e3')).toBe('-1.2e3');
+    expect(escaparCsv(0)).toBe('0');
+  });
+
+  it('un texto corriente sigue saliendo tal cual', () => {
+    expect(escaparCsv('Camara Penal')).toBe('Camara Penal');
+    expect(escaparCsv('La Vega - Norte')).toBe('La Vega - Norte');
+  });
+});
+
 describe('aCsv', () => {
   it('empieza con BOM para que Excel abra bien los acentos', () => {
     expect(aCsv(doc([objeto], peticion()))).toMatch(/^\uFEFF/);
