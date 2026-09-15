@@ -160,6 +160,10 @@ describe('las credenciales de demostracion no se siembran solas', () => {
       'las mismas instrucciones, para las capturas del editor',
     ],
     [
+      'tools/capture-f69.mts',
+      'las mismas instrucciones, para las capturas del acceso y el menu contextual',
+    ],
+    [
       'tools/capture-f6.mts',
       'las mismas instrucciones, para las capturas de la tanda F6',
     ],
