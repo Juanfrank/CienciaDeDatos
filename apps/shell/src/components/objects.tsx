@@ -504,7 +504,6 @@ export function Bars({
       instance={instance}
       result={result}
       objectIcon={objectIcon}
-      pie={vm.aggregated ? <span className="muted-text">Agregado sobre el dataset cacheado</span> : null}
     >
       {partition ? (
         <Multiples

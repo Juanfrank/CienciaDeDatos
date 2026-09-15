@@ -19,6 +19,7 @@ import {
 } from '@app/ui-components';
 import { drillLinks, type DrillLink } from '@app/module-model';
 import { useUrlFilters } from '../hooks/useUrlFilters';
+import { useTranslator } from './Locale';
 import { estadoDe, valueStats, type EstadoDeCampo } from './fieldFilterState';
 import type { SerializedObject } from '../server/serialize';
 
@@ -114,6 +115,13 @@ export function useObjectView(objeto: SerializedObject): {
 } {
   const { searchParams } = useUrlFilters();
   const alcanzables = useDrillTargets();
+  /*
+   * El aviso de agregacion, del catalogo.
+   *
+   * Se resuelve aqui y se pasa hacia abajo: `footerText` vive en un paquete que no sabe en que
+   * idioma esta la pantalla, y una frase escrita alli seria prosa sin traducir.
+   */
+  const avisoDeAgregacion = useTranslator()('addon.footer.aggregated');
   const { instance, result, aggregations } = objeto;
 
   // La dependencia es la CADENA de la query, no el objeto: `useSearchParams` devuelve una
@@ -175,8 +183,14 @@ export function useObjectView(objeto: SerializedObject): {
 
     const pie = attachmentOf(instance, 'pie-de-pagina');
     if (pie) {
-      chrome.pie = footerText(pie.texto, instance, visto, aggregations, (medida, valor) =>
-        valor === null ? '—' : measureFormatter(instance.presentacion, medida)(valor),
+      chrome.pie = footerText(
+        pie.texto,
+        instance,
+        visto,
+        aggregations,
+        (medida, valor) =>
+          valor === null ? '—' : measureFormatter(instance.presentacion, medida)(valor),
+        avisoDeAgregacion,
       );
     }
 
@@ -200,5 +214,5 @@ export function useObjectView(objeto: SerializedObject): {
     }
 
     return { result: visto, chrome };
-  }, [instance, result, aggregations, query, destinos]);
+  }, [instance, result, aggregations, query, destinos, avisoDeAgregacion]);
 }

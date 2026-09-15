@@ -760,6 +760,7 @@ export const es = {
   'menu.object.configure': 'Configurar',
   'menu.object.duplicate': 'Duplicar',
   'menu.object.remove': 'Quitar del modulo',
+  'addon.footer.aggregated': 'Agregado sobre el dataset cacheado',
   'drill.panel.title': 'Saltos',
   'drill.panel.empty': 'Este objeto no ofrece ningun salto.',
   'drill.panel.module': 'Modulo destino',

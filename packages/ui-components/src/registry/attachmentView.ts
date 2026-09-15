@@ -129,6 +129,20 @@ export function footerReferences(texto: string): number[] {
 }
 
 /**
+ * La marca que avisa de que lo que se ve esta AGREGADO.
+ *
+ * Es una marca del pie y no una linea que el objeto escriba por su cuenta. Antes el grafico de
+ * barras —y solo el— estampaba «Agregado sobre el dataset cacheado» en la ranura del pie: no se
+ * podia cambiar, no se podia quitar, competia con el complemento de pie de pagina si alguien lo
+ * ponia, y los demas objetos agregaban igual y se callaban. Un texto que sale en pantalla y no se
+ * configura desde ninguna parte rompe la regla de 4.2.
+ *
+ * Como marca, quien configura el objeto decide SI aparece, DONDE y con que alrededor; y solo se
+ * sustituye cuando el objeto agrego de verdad, asi que no miente en los que no lo hacen.
+ */
+const MARCA_AGREGADO = /\{\{\s*agregado\s*\}\}/g;
+
+/**
  * El pie de pagina, con sus referencias ya sustituidas.
  *
  * `{{1}}` es la PRIMERA MEDIDA MAPEADA, no una medida llamada «1» ni la primera columna. Se
@@ -142,15 +156,37 @@ export function footerText(
   result: QueryResult,
   aggregations: Aggregation[],
   format?: (medida: string, valor: number | null) => string,
+  /*
+   * Con que se sustituye `{{agregado}}`. Lo trae quien dibuja, no este modulo: el texto visible
+   * sale del catalogo de mensajes, y una frase escrita aqui volveria a ser prosa sin traducir
+   * dentro de un paquete que no sabe en que idioma esta la pantalla.
+   */
+  avisoDeAgregacion?: string,
 ): string {
   const measures = instance.binding.measures;
-  if (footerReferences(texto).length === 0) return texto;
+
+  /*
+   * La marca se resuelve ANTES del atajo de abajo.
+   *
+   * Un pie que solo diga `{{agregado}}` no tiene ninguna referencia `{{n}}`, asi que el atajo lo
+   * devolvia tal cual y la marca salia escrita en pantalla.
+   */
+  const conMarca = texto.replace(MARCA_AGREGADO, () => {
+    if (!avisoDeAgregacion) return '';
+    // Las dimensiones REALES del objeto, que son con las que agrega al dibujarse. Con la lista
+    // vacia —como en el total de mas abajo— todo colapsa en un grupo y siempre diria que si.
+    const { aggregated } = aggregateBy(result, instance.binding.dimensions, measures, aggregations);
+    return aggregated ? avisoDeAgregacion : '';
+  });
+
+  if (footerReferences(conMarca).length === 0) return conMarca.trim();
+  const texto2 = conMarca;
 
   // Sin dimensiones hay UN grupo: el total de cada medida sobre lo que el objeto tiene delante.
   // Delante, no en el dataset: un pie bajo un objeto filtrado tiene que decir la cifra filtrada.
   const totales = aggregateBy(result, [], measures, aggregations).rows[0]?.values ?? [];
 
-  return texto.replace(/\{\{\s*(\d+)\s*\}\}/g, (entero, digitos: string) => {
+  return texto2.replace(/\{\{\s*(\d+)\s*\}\}/g, (entero, digitos: string) => {
     const posicion = Number(digitos);
     const medida = measures[posicion - 1];
     if (medida === undefined) return entero;

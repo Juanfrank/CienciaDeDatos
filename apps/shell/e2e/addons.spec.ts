@@ -222,7 +222,16 @@ test.describe('menu contextual de un objeto (visor)', () => {
      * una prueba no llega a la pagina — comprobarla aqui solo mediria al navegador.
      */
     await page.goto('/m/casos-pendientes');
+    /*
+     * Se espera a que la tarjeta RESPONDA antes de pulsar la tecla.
+     *
+     * El oyente del teclado se engancha al hidratar, y `goto` vuelve antes de eso: sin esperar, la
+     * tecla llegaba a una pagina que todavia era HTML y la prueba fallaba dos de cada tres veces.
+     * Enfocar el icono abre su globo, y que el globo aparezca es la senal de que el JavaScript de
+     * esta tarjeta ya esta puesto.
+     */
     await page.getByTestId('icon-tooltip-Pendientes por distrito').focus();
+    await expect(page.getByTestId('tooltip-Pendientes por distrito')).toBeVisible();
     await page.keyboard.press('ContextMenu');
 
     await expect(page.locator('.menu-objeto')).toBeVisible();

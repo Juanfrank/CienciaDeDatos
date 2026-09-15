@@ -168,6 +168,21 @@ export const demoModules: ModuleDefinition[] = [
                   version: '1.0.0',
                   scope: 'subobjeto',
                 },
+                /*
+                 * El aviso de agregacion, ahora COMO PIE y no estampado por el grafico.
+                 *
+                 * Antes lo escribia el objeto de barras por su cuenta: no se podia cambiar, no se
+                 * podia quitar, ocupaba la ranura de este mismo complemento y los demas objetos
+                 * agregaban igual y se callaban. Aqui es una marca del pie —`{{agregado}}`— que
+                 * solo se sustituye si el objeto agrego de verdad, y que quien configure el modulo
+                 * puede mover, acompanar o quitar.
+                 */
+                {
+                  instanceId: 'pie-barras-distrito',
+                  objectId: 'pie-de-pagina',
+                  version: '1.0.0',
+                  texto: '{{agregado}}',
+                },
               ],
             },
           },

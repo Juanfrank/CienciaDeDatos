@@ -762,6 +762,7 @@ export const en: Record<MessageKey, string> = {
   'menu.object.configure': 'Configure',
   'menu.object.duplicate': 'Duplicate',
   'menu.object.remove': 'Remove from the module',
+  'addon.footer.aggregated': 'Aggregated over the cached dataset',
   'drill.panel.title': 'Jumps',
   'drill.panel.empty': 'This object offers no jump.',
   'drill.panel.module': 'Destination module',

@@ -164,6 +164,35 @@ describe('pie de pagina', () => {
     expect(footerText('Total: {{1}}.', instance, result, ['suma'])).toBe('Total: 70.');
   });
 
+  it('la marca de agregacion solo aparece si el objeto AGREGO de verdad', () => {
+    /*
+     * El aviso lo estampaba el grafico de barras por su cuenta, y solo el: no se podia cambiar, no
+     * se podia quitar, competia con este mismo complemento y los demas objetos agregaban igual y
+     * se callaban. Como marca del pie, quien configura decide si aparece y con que alrededor.
+     *
+     * Y no puede mentir. `instance` mapea `DimTribunal.Distrito`, que tiene filas repetidas, asi
+     * que agrega; con una dimension que no repita ninguna fila, la marca se va y no deja hueco.
+     */
+    expect(footerText('{{agregado}}', instance, result, ['suma'], undefined, 'Agregado.')).toBe(
+      'Agregado.',
+    );
+
+    // Una fila por categoria: no hay nada que agregar, y el pie no lo dice.
+    const unaPorCategoria = { ...result, rows: [result.rows[0] as unknown[]] };
+    expect(
+      footerText('{{agregado}}', instance, unaPorCategoria, ['suma'], undefined, 'Agregado.'),
+    ).toBe('');
+  });
+
+  it('la marca convive con las referencias, y sin aviso no deja el hueco escrito', () => {
+    // Un pie que solo llevara la marca no tiene ninguna referencia `{{n}}`: sin resolverla antes
+    // del atajo de las referencias, la marca salia escrita tal cual en pantalla.
+    expect(
+      footerText('Total: {{1}}. {{agregado}}', instance, result, ['suma'], undefined, 'Agregado.'),
+    ).toBe('Total: 70. Agregado.');
+    expect(footerText('Total: {{1}}. {{agregado}}', instance, result, ['suma'])).toBe('Total: 70. ');
+  });
+
   it('resuelve sobre lo que el objeto tiene delante, no sobre el dataset entero', () => {
     // Un pie bajo un objeto filtrado que dijera el total sin filtrar contradice a la visual que
     // acompaña, y quien lo lee no tiene forma de saber cual de las dos cifras vale.
