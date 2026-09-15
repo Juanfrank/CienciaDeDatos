@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   GridItem,
   ModuleDefinition,
@@ -25,6 +25,20 @@ import { useTranslator } from '../Locale';
  * poco para que nadie llegue a cerrar la pestana creyendo que lo suyo se perdio.
  */
 const MS_AUTOGUARDADO = 800;
+
+/**
+ * Si el foco esta escribiendo en algun sitio.
+ *
+ * Dentro de un campo, Suprimir borra un caracter. Un atajo global que no lo compruebe se lleva el
+ * objeto entero mientras alguien corrige un titulo — y eso no se deshace solo, porque el objeto ya
+ * salio del borrador.
+ */
+function escribiendo(destino: EventTarget | null): boolean {
+  const el = destino as HTMLElement | null;
+  if (!el || typeof el.tagName !== 'string') return false;
+  if (el.isContentEditable) return true;
+  return ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName);
+}
 
 /** Editor de un modulo — seccion 4.2. */
 export function ModuleEditor({
@@ -77,11 +91,29 @@ export function ModuleEditor({
   const items = pagina?.items ?? [];
   const chosen = items.find((i) => i.id === selection) ?? null;
 
-  // Escape deselecciona, como en cualquier editor de bloques. Va en el documento y no en el
-  // lienzo porque el foco suele estar en el panel cuando hace falta.
+  /*
+   * Escape deselecciona y Suprimir quita el objeto elegido, como en cualquier editor de bloques.
+   *
+   * Van en el documento y no en el lienzo porque el foco suele estar en el panel cuando hacen
+   * falta. Y Suprimir se DESCARTA si el foco esta escribiendo: dentro de un campo de texto o de un
+   * `contenteditable`, esa tecla borra un caracter, y llevarse el objeto entero mientras alguien
+   * corrige un titulo es la peor forma de obedecer.
+   */
   useEffect(() => {
     const clickTo = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSeleccion(null);
+      if (e.key === 'Escape') {
+        setSeleccion(null);
+        return;
+      }
+      if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+      if (escribiendo(e.target)) return;
+
+      // El estado vive en una referencia porque este oyente se registra UNA vez: leerlo de la
+      // clausura daria siempre la seleccion que hubiera en el primer dibujo, que es ninguna.
+      const elegido = seleccionViva.current;
+      if (!elegido || !editableViva.current) return;
+      e.preventDefault();
+      void quitarViva.current(elegido);
     };
     document.addEventListener('keydown', clickTo);
     return () => document.removeEventListener('keydown', clickTo);
@@ -230,10 +262,20 @@ export function ModuleEditor({
           // Cadena vacia cuando no consume datos: es lo que lee `datasetsConsumedBy` para no
           // pedirle al cache un dataset que este objeto nunca declaro.
           datasetId: withoutData ? '' : (dataset?.datasetId ?? ''),
-          // Se mapea el minimo que exige el contrato: asi el objeto nace valido y dibujando algo,
-          // no bloqueando y en blanco.
-          dimensions: (dataset?.dimensiones ?? []).slice(0, definicion.dimensiones.min).map(aFieldRef),
-          measures: (dataset?.medidas ?? []).slice(0, definicion.medidas.min),
+          /*
+           * NADA mapeado: el objeto nace vacio y dice que le falta.
+           *
+           * Antes se le metia el primer campo del dataset para que naciera valido y dibujando
+           * algo. Lo que dibujaba era una respuesta a una pregunta que nadie habia hecho —el
+           * primer campo del dataset, por orden alfabetico de la tabla—, y quien la veia tenia que
+           * adivinar si ese era el campo que queria o el que le tocaba por estar primero. Peor: si
+           * era el que le tocaba, el modulo se podia publicar asi.
+           *
+           * Vacio, el objeto se dibuja como marcador de posicion diciendo que falta, no se puede
+           * publicar, y la eleccion la hace quien sabe cual es.
+           */
+          dimensions: [],
+          measures: [],
         },
         ...(config ? { settings: config } : {}),
       },
@@ -252,6 +294,20 @@ export function ModuleEditor({
     setSeleccion(null);
     editar(conItems(items.filter((i) => i.id !== itemId)));
   };
+
+  /*
+   * Lo que el oyente de teclado necesita leer, en referencias vivas.
+   *
+   * El oyente se registra una sola vez —si se volviera a registrar en cada cambio de seleccion,
+   * escribir en el panel lo desmontaria y montaria en cada pulsacion—, asi que lo que lea de la
+   * clausura seria siempre el primer valor. Las referencias se actualizan en cada dibujo.
+   */
+  const seleccionViva = useRef(selection);
+  seleccionViva.current = selection;
+  const editableViva = useRef(editable);
+  editableViva.current = editable;
+  const quitarViva = useRef(remove);
+  quitarViva.current = remove;
 
   /**
    * Deshace todo lo hecho desde que se abrio el editor.
@@ -501,8 +557,3 @@ export function ModuleEditor({
   );
 }
 
-/** 'Tabla.Campo' -> FieldRef. El editor trabaja con la clave, que es lo que se ve en pantalla. */
-function aFieldRef(clave: string): { table: string; field: string } {
-  const [table = '', field = ''] = clave.split('.');
-  return { table, field };
-}

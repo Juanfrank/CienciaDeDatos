@@ -6,13 +6,31 @@ import {
   type Axis,
   DEFAULT_COLUMN_INTERNAL,
   columnsOf,
+  fieldKey,
   rowsOnExpand,
 } from '@app/ui-components';
+import { useUrlFilters } from '../hooks/useUrlFilters';
 import { Icon } from './icons/Icon';
 import { Frame } from './objects';
 import type { SerializedObject, SerializedPanel } from '../server/serialize';
 
 /** Los contenedores: objetos que llevan otros objetos dentro. */
+
+/**
+ * Si algun objeto de dentro esta acotando lo que se ve.
+ *
+ * Se mira por las DIMENSIONES que mapea cada objeto de dentro contra lo que hay en la URL, que es
+ * donde vive el estado de filtros. Preguntarle a cada tipo de objeto si «esta filtrando» habria
+ * exigido un metodo en los dieciseis renderizadores; el mapeo ya dice de que campo va cada uno.
+ */
+function algoFiltraDentro(objeto: SerializedObject, params: URLSearchParams): boolean {
+  const puestos = new Set(params.keys());
+  const dentro = (o: SerializedObject): boolean =>
+    o.instance.binding.dimensions.some((d) => puestos.has(fieldKey(d))) ||
+    (o.panels ?? []).some((p) => p.objetos.some(dentro));
+
+  return (objeto.panels ?? []).some((p) => p.objetos.some(dentro));
+}
 
 /** La rejilla interna. La misma para los cinco: un contenedor es una rejilla con una cabecera. */
 function InternalGrid({
@@ -200,6 +218,7 @@ export function ExpandableInPlaceContainer({ objeto, titulo, config, draw }: Con
   const [abierto, setAbierto] = useState(ajustes?.abiertoAlCargar === true);
   const id = useId();
   const filas = rowsOnExpand(config);
+  const filtrado = algoFiltraDentro(objeto, useUrlFilters().searchParams);
 
   return (
     <div
@@ -210,11 +229,23 @@ export function ExpandableInPlaceContainer({ objeto, titulo, config, draw }: Con
       data-expandido={abierto ? 'si' : 'no'}
       style={{ '--filas-al-expandir': filas } as React.CSSProperties}
     >
+      {/*
+        Plegado, el chiclet dice SI HAY algo elegido dentro.
+
+        Un chiclet cerrado tapa lo que lleva: si dentro hay un filtro con «Penal» puesto, las
+        cifras de alrededor estan recortadas y en la pantalla no queda ni una senal de por que.
+        Con el color puesto, se ve antes de abrirlo.
+
+        El color no es lo unico que lo dice: `aria-pressed` lleva la misma informacion para quien
+        no lo ve, que es lo que pide 4.9.
+      */}
       <button
         type="button"
         className="chiclet"
         aria-expanded={abierto}
+        aria-pressed={filtrado}
         aria-controls={`${id}-panel`}
+        data-filtrado={filtrado ? 'si' : 'no'}
         data-testid="chiclet"
         onClick={() => setAbierto((previo) => !previo)}
       >

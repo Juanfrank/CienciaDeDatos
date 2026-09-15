@@ -35,6 +35,7 @@ import {
   GeneratingObject,
   ObjectNotAvailable,
   BrokenObject,
+  PlaceholderObject,
   Frame,
   Table,
   KpiCard,
@@ -91,6 +92,31 @@ function ObjectBody({
    * Los elementos y los contenedores se resuelven ANTES de exigir `result`.
    */
   const conf = objeto.instance.settings;
+
+  /*
+   * Falta por mapear NO es lo mismo que roto.
+   *
+   * Si todo lo que le pasa al objeto es que aun no tiene sus campos elegidos, se dibuja un
+   * marcador de posicion que dice cuales faltan. Un objeto recien colocado en el lienzo estaria
+   * siempre en ese caso, y salia como una tarjeta de error en rojo nada mas soltarlo.
+   *
+   * Basta con que UNO de los problemas sea de otra clase para volver al aviso de roto: si ademas
+   * de faltar un campo hay otro que desaparecio del esquema, eso si es algo que se rompio.
+   */
+  const soloFaltaMapear =
+    !objeto.unresolvedObject &&
+    objeto.problems.length > 0 &&
+    objeto.problems.every((p) => p.kind === 'sin-mapear');
+
+  if (soloFaltaMapear) {
+    return (
+      <PlaceholderObject
+        titulo={titulo}
+        problems={objeto.problems}
+        {...(objeto.icono ? { objectIcon: objeto.icono } : {})}
+      />
+    );
+  }
 
   if (objeto.unresolvedObject || objeto.problems.length > 0) {
     return (

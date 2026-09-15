@@ -1014,6 +1014,31 @@ input[type='radio'] {
 .object--generating { outline: 1px dashed var(--md-sys-color-outline); outline-offset: -1px; }
 
 /*
+ * El objeto a medio configurar: contorno discontinuo, NO el rojo de roto.
+ *
+ * Discontinuo porque es exactamente lo que dice —un hueco reservado, todavia sin llenar— y porque
+ * lo distingue de una tarjeta de verdad sin gritar. En rojo, un objeto recien colocado parece un
+ * error nada mas soltarlo.
+ */
+.object--placeholder {
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px dashed var(--md-sys-color-outline);
+  box-shadow: none;
+}
+.placeholder__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-xs);
+  text-align: center;
+}
+.placeholder__falta {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+/*
  * Cinco cifras en una fila, no en cinco.
  *
  * `.tarjetas` no tenia ninguna regla, asi que las tarjetas caian como bloques a todo lo ancho y el
@@ -5511,6 +5536,27 @@ th[aria-sort='descending'] .table__flecha {
 
 .chiclet:hover {
   background: var(--md-sys-color-surface-container);
+}
+
+/*
+ * Con algo elegido dentro, el chiclet se rellena.
+ *
+ * Plegado tapa lo que lleva: si dentro hay un filtro puesto, las cifras de alrededor estan
+ * recortadas y no queda una sola senal de por que. El relleno se ve sin abrirlo. Es el mismo par
+ * —`secondary-container`— que marca una pastilla elegida, para que «esto esta puesto» se vea
+ * igual en toda la aplicacion.
+ */
+.chiclet[data-filtrado='si'] {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  border-color: transparent;
+}
+.chiclet[data-filtrado='si']:hover {
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-on-secondary-container) var(--md-sys-state-hover-opacity),
+    var(--md-sys-color-secondary-container)
+  );
 }
 
 .chiclet__rotulo {

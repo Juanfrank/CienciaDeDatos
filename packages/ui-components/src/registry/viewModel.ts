@@ -11,8 +11,15 @@ export interface BindingProblem {
   /** Ranura afectada: el campo mapeado que ya no se puede resolver. */
   slot: string;
   problem: string;
-  /** Distingue "el campo desaparecio del esquema" de "el mapeo incumple el contrato". */
-  kind: 'campo-inexistente' | 'contrato-incumplido';
+  /**
+   * Que clase de problema es. Los tres se cuentan igual para publicar; se dibujan distinto.
+   *
+   * - `campo-inexistente`: el campo estaba y ya no esta. Algo se rompio por debajo.
+   * - `contrato-incumplido`: hay mas de lo que el objeto admite. Alguien mapeo de mas.
+   * - `sin-mapear`: todavia FALTAN campos por elegir. No es un fallo, es un objeto a medio
+   *   configurar — y dibujarlo como si estuviera roto asusta a quien lo acaba de colocar.
+   */
+  kind: 'campo-inexistente' | 'contrato-incumplido' | 'sin-mapear';
 }
 
 /**
@@ -28,7 +35,25 @@ export function validateBinding(
   const available = new Set(availableColumns);
   const { dimensions, measures } = instance.binding;
 
-  if (dimensions.length < contract.dimensions.min || dimensions.length > contract.dimensions.max) {
+  /*
+   * FALTAR no es lo mismo que SOBRAR.
+   *
+   * Un objeto recien colocado no tiene nada mapeado todavia, y eso es el estado normal de algo que
+   * se acaba de poner: quien lo puso va a elegir sus campos a continuacion. Marcarlo igual que un
+   * mapeo que incumple el contrato lo dibujaba como un objeto roto —tarjeta de error, texto en
+   * rojo— nada mas soltarlo en el lienzo.
+   *
+   * Los dos siguen impidiendo publicar: la diferencia es lo que se ve, no lo que se permite.
+   */
+  if (dimensions.length < contract.dimensions.min) {
+    problems.push({
+      slot: 'dimensiones',
+      kind: 'sin-mapear',
+      problem:
+        `Faltan dimensiones: el objeto necesita al menos ${contract.dimensions.min} y hay ` +
+        `${dimensions.length}.`,
+    });
+  } else if (dimensions.length > contract.dimensions.max) {
     problems.push({
       slot: 'dimensiones',
       kind: 'contrato-incumplido',
@@ -38,7 +63,13 @@ export function validateBinding(
     });
   }
 
-  if (measures.length < contract.measures.min || measures.length > contract.measures.max) {
+  if (measures.length < contract.measures.min) {
+    problems.push({
+      slot: 'medidas',
+      kind: 'sin-mapear',
+      problem: `Faltan medidas: el objeto necesita al menos ${contract.measures.min} y hay ${measures.length}.`,
+    });
+  } else if (measures.length > contract.measures.max) {
     problems.push({
       slot: 'medidas',
       kind: 'contrato-incumplido',

@@ -28,6 +28,9 @@ export const en: Record<MessageKey, string> = {
   'access.restricted': 'Restricted access',
   'access.rights': '© {year} {institution}',
 
+  /* Half-configured object on the canvas (4.2). */
+  'object.placeholderHint': 'Pick them in the panel\'s Data tab.',
+
   'chrome.notices': 'Notices',
   'chrome.editor': 'Module editor',
   'chrome.admin': 'Administration',

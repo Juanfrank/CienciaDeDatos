@@ -29,6 +29,9 @@ export const es = {
   'access.restricted': 'Acceso restringido',
   'access.rights': '© {year} {institution}',
 
+  /* Objeto a medio configurar en el lienzo (4.2). */
+  'object.placeholderHint': 'Eligalos en la pestana Datos del panel.',
+
   'chrome.notices': 'Avisos',
   'chrome.editor': 'Editor de módulos',
   'chrome.admin': 'Administración',

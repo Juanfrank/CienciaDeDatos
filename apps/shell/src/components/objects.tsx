@@ -38,6 +38,7 @@ import { SortableTable } from './SortableTable';
 import { Chart } from './Chart';
 import { Slicer } from './Slicer';
 import { Icon } from './icons/Icon';
+import { useTranslator } from './Locale';
 
 /** Objetos prediseñados — seccion 4.2. */
 
@@ -66,6 +67,48 @@ const HIGHLIGHT_VARIABLE: Record<string, string> = {
 
 /** Icono por defecto de cada tipo, cuando la instancia no elige otro. */
 /** Un objeto cuyo mapeo ya no se puede resolver se dibuja MARCADO, nunca omitido (4.2). */
+/**
+ * Un objeto colocado al que todavia le faltan campos por elegir.
+ *
+ * No es lo mismo que uno roto y no se dibuja como tal. Roto quiere decir que algo se rompio por
+ * debajo —un campo que estaba y ya no esta—; esto quiere decir que quien lo puso no ha terminado.
+ * Ensenarlo en rojo nada mas soltarlo en el lienzo hace pensar que se hizo algo mal, cuando lo
+ * unico que pasa es que el siguiente paso todavia no se ha dado.
+ *
+ * Dice QUE falta, no «configure el objeto»: quien acaba de colocar un grafico de barras necesita
+ * saber que le faltan una dimension y una medida, no que le falta algo.
+ */
+export function PlaceholderObject({
+  titulo,
+  problems,
+  objectIcon,
+}: {
+  titulo: string;
+  problems: BindingProblem[];
+  objectIcon?: IconName;
+}) {
+  const t = useTranslator();
+
+  return (
+    <div className="objeto object--placeholder" data-testid="object-placeholder">
+      <div className="object__header">
+        {objectIcon ? (
+          <span className="object__icon" aria-hidden="true">
+            <Icon nombre={objectIcon} tamano={18} />
+          </span>
+        ) : null}
+        <h3>{titulo}</h3>
+      </div>
+      <div className="object__body placeholder__body">
+        <p className="placeholder__falta">
+          {problems.map((p) => p.problem).join(' ')}
+        </p>
+        <p className="muted-text">{t('object.placeholderHint')}</p>
+      </div>
+    </div>
+  );
+}
+
 export function BrokenObject({
   titulo,
   problems,
