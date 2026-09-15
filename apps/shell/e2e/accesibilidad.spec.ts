@@ -204,9 +204,20 @@ test.describe('avisos (4.9)', () => {
     // El contador se sondea despues de la primera pintura: sin esperarlo se mira un menu vacio.
     await page.waitForResponse((r) => r.url().includes('/api/notifications'));
 
-    if ((await page.getByTestId('account-dot').count()) > 0) {
-      await expect(disparador).toContainText(/\d+ avisos? sin leer/);
-    }
+    /*
+     * Se afirma la EQUIVALENCIA, no el caso con avisos. Metido dentro de `if (hay punto)` esto
+     * quedaba en verde el dia que no hubiera ninguno —que es la mayoria de los dias— y en verde
+     * tambien si alguien separaba el punto de su texto y el sembrado dejaba de traer avisos. Asi
+     * se rompe por los dos lados: punto mudo, y texto sin punto.
+     */
+    const punto = (await page.getByTestId('account-dot').count()) > 0;
+    const dice = /\d+ avisos? sin leer/.test((await disparador.textContent()) ?? '');
+    expect(
+      dice,
+      punto
+        ? 'hay punto de avisos y el disparador no dice cuantos: quien no ve el punto no se entera'
+        : 'el disparador anuncia avisos sin leer y no hay punto que lo acompane',
+    ).toBe(punto);
 
     await disparador.click();
     await expect(page.getByTestId('link-avisos')).toContainText('Avisos');

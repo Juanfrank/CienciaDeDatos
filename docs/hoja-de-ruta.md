@@ -521,7 +521,7 @@ Dos detalles que la primera pasada enseno, y que valen para las siguientes:
   tambien: es el nombre del campo dicho a quien edita, y dejarlo en espanol seria senalar un campo
   que ya no se llama asi.
 
-### 2.14 Clases de CSS que nadie escribe, y nada lo comprueba — GUARDA PUESTA, deuda medida
+### 2.14 Clases de CSS que nadie escribe, y nada lo comprueba — DOS GUARDAS PUESTAS, deuda medida
 
 Las guardas de `tools/coherence` atan los atributos `data-*`, los identificadores de prueba, las
 rutas y los campos del cable. Faltaba la de los nombres de CLASE, y faltaba justo donde mas duele:
@@ -558,10 +558,38 @@ encabezaban una lista de selectores sin aportar nada —`.md-display-small, .vac
 { … }`—. Quitar el alias no cambia un pixel porque el estilo lo llevan los otros selectores, y por
 eso se podian quitar de golpe. Las que quedan tienen bloque propio y hay que mirarlas una a una.
 
-Y lo que sigue faltando, que es otra cosa: una guarda sobre la **asercion condicional**. Un
-`expect` dentro de un `if` puede no ejecutarse nunca, y una prueba que no se ejecuta no se
-distingue de una que pasa. Fue lo que dejo la del registro de auditoria en verde desde el primer
-dia sin comprobar nada.
+**La asercion condicional ya tiene su guarda, y esa SI nace en cero.** Es otra clase de fallo: un
+`expect` dentro de un `if` puede no ejecutarse nunca, y una prueba que no comprueba nada no se
+distingue de una que pasa. Es peor que no tenerla —una que falta se ve en la lista, y esta ocupa su
+sitio y da confianza—. Fue lo que dejo la del registro de auditoria en verde desde el primer dia
+mientras las dos pantallas mostraban `u-admin` donde deberia ir un nombre.
+
+`tools/coherence/aserciones.spec.ts` recorre cada archivo de prueba carácter a carácter llevando la
+cuenta de en cuantos `if` esta metido. Con una expresion regular no se puede: hace falta saber
+donde CIERRA cada bloque, y eso es contar llaves. Se salta lo que va dentro de una cadena o un
+comentario, porque esta misma guarda escribe `if` y `expect` entre comillas para explicarse y sin
+eso se acusaria a si misma.
+
+Mira el `expect` y no el `if`, y por eso **no toca el patron sano**: recoger en un bucle con
+condiciones y afirmar DESPUES, fuera de toda rama —`for (…) if (malo(x)) problemas.push(x);` y
+luego `expect(problemas).toEqual([])`—, que es como esta escrita media carpeta `tools/coherence`.
+
+Al medir aparecieron tres casos, y los tres se cerraron antes de subir la guarda:
+
+- `contract.spec.ts` afirmaba dentro de un `if` por cada objeto del catalogo; pasa a recoger
+  `conLeyendaSinSerlo` y afirmar una vez.
+- `accesibilidad.spec.ts` comprobaba el texto del punto de avisos **solo si habia punto**, o sea en
+  verde la mayoria de los dias. Ahora afirma la EQUIVALENCIA entre punto y texto, que se ejecuta
+  haya avisos o no y se rompe por los dos lados. Es lo que el componente garantiza: el punto y su
+  texto para lector de pantalla son hermanos dentro del mismo condicional.
+- `full-editor.spec.ts` si tiene una rama de verdad —solo algunas claves traen interruptor— y la
+  declara con `// rama-declarada: <motivo>`, la unica valvula. Va en la LINEA y no en una lista
+  aparte: se lee junto a lo que excusa y se mueve con el codigo, en vez de quedarse apuntando a una
+  linea que ya es otra cosa. Y exige motivo, porque una excepcion sin motivo no la puede revisar
+  nadie.
+
+Verificado enrojeciendo por los dos lados: reintroducido el `if` del punto de avisos, la guarda lo
+nombra con su linea; quitada la marca de `full-editor.spec.ts`, tambien.
 
 ### 2.15 No hay forma de crear el PRIMER Administrador en un despliegue real — HECHO
 

@@ -165,6 +165,7 @@ test.describe('configurable: lo que cada objeto declara sale en su panel @catalo
          * PUEDE llegar a el, no que este siempre dibujado.
          */
         const interruptor = FIRST_OPENS[clave];
+        // rama-declarada: solo algunas claves traen interruptor; el `expect` de abajo corre igual
         if (interruptor) {
           /*
            * Se espera al guardado ANTES de pulsar, y se afirma el estado despues.

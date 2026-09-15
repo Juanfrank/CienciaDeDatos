@@ -40,14 +40,23 @@ describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
   it('solo los graficos admiten leyenda y etiquetas de dato', () => {
     // Una tabla con `leyenda` guardaria una opcion que no dibuja nada, y esa es la clase de
     // configuracion muerta que luego nadie se atreve a quitar por si acaso hace algo.
-    for (const { categoria, version, objectId } of versiones) {
-      const chart = version.presentation.filter((c) =>
-        (['leyenda', 'datumLabels'] as PresentationKey[]).includes(c),
+    /*
+     * Se RECOGE y se afirma despues, fuera de toda rama.
+     *
+     * Estaba como `if (categoria !== 'grafico') expect(...)`, y eso no comprueba nada el dia que
+     * el catalogo no tenga ningun objeto que no sea grafico: cero vueltas con la condicion cierta,
+     * cero aserciones, verde. Es la misma forma que dejo la prueba del registro de auditoria sin
+     * mirar nada durante meses. Lo ata `tools/coherence/aserciones.spec.ts`.
+     */
+    const conLeyendaSinSerlo = versiones
+      .filter(({ categoria }) => categoria !== 'grafico')
+      .flatMap(({ version, objectId }) =>
+        version.presentation
+          .filter((c) => (['leyenda', 'datumLabels'] as PresentationKey[]).includes(c))
+          .map((clave) => `${objectId}: ${clave}`),
       );
-      if (categoria !== 'grafico') {
-        expect(chart, `${objectId} no es un grafico`).toEqual([]);
-      }
-    }
+
+    expect(conLeyendaSinSerlo).toEqual([]);
   });
 });
 
