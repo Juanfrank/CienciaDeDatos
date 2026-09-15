@@ -10,7 +10,24 @@ interface EstadoExportacion {
   archivo?: { nombre: string; bytes: number; descargarEn: string };
 }
 
-/** Encola y espera a que el trabajador termine. Devuelve el estado final. */
+/** Cuanto se espera a que el trabajador termine. Mira la cola dos veces por segundo. */
+const PLAZO = 15_000;
+
+/**
+ * Encola y espera a que el trabajador termine. Devuelve el estado final.
+ *
+ * Si no termina, el error dice QUE paso — apartado 2.18.
+ *
+ * Lo hacia con `expect.poll`, y eso mezclaba dos fallos que no se parecen en nada. Uno es «el
+ * trabajo termino en un estado que no esperaba la prueba», que es un fallo de verdad. El otro es
+ * «el trabajo seguia en cola cuando se acabo el plazo», que con tres workers compitiendo por la
+ * maquina puede no ser un fallo de nada. Los dos salian como la misma linea roja, bajo el titulo
+ * de la prueba y sin decir en que estado quedo, asi que la unica forma de saber cual era los dos
+ * era volver a reproducirlo — y uno de los dos no se reproduce.
+ *
+ * Ahora la espera es propia y el mensaje lleva el id, el ultimo estado visto, cuantas veces se
+ * pregunto y el error que el trabajo traiga. Con eso, la proxima vez que falle no empieza de cero.
+ */
 async function exportar(page: Page, body: Record<string, unknown>): Promise<EstadoExportacion> {
   const encolada = await page.request.post('/api/exports', { data: body });
   expect(encolada.status()).toBe(202);
@@ -19,9 +36,24 @@ async function exportar(page: Page, body: Record<string, unknown>): Promise<Esta
   const consultar = async (): Promise<EstadoExportacion> =>
     (await (await page.request.get(`/api/exports/${id}`)).json()) as EstadoExportacion;
 
-  await expect.poll(async () => (await consultar()).estado, { timeout: 15_000 }).toMatch(/lista|fallida/);
+  const desde = Date.now();
+  let consultas = 0;
+  let estado = await consultar();
 
-  return consultar();
+  while (estado.estado !== 'lista' && estado.estado !== 'fallida') {
+    if (Date.now() - desde > PLAZO) {
+      throw new Error(
+        `La exportacion ${id} no termino en ${PLAZO} ms: se quedo en '${estado.estado}' tras ` +
+          `${consultas} consultas. Esto NO es «termino en el estado equivocado»: es que el ` +
+          `trabajador no la saco de la cola a tiempo. Ver 2.18 en la hoja de ruta.`,
+      );
+    }
+    await page.waitForTimeout(250);
+    consultas += 1;
+    estado = await consultar();
+  }
+
+  return estado;
 }
 
 /** El archivo de un trabajo que la prueba espera terminado; falla si no lo esta. */

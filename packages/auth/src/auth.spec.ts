@@ -1,5 +1,6 @@
+import { verify } from '@node-rs/argon2';
 import { Secret, TOTP } from 'otpauth';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AzureAdIdentityProvider, type ITokenValidator } from './AzureAdIdentityProvider';
 import {
   AuthenticationError,
@@ -14,6 +15,18 @@ import {
   InMemorySessionStore,
   type LocalCredentialRecord,
 } from './stores';
+
+/**
+ * Argon2 de verdad, contando las veces que se verifica — apartado 2.17.
+ *
+ * `importOriginal` mantiene la implementacion real: lo que se envuelve es la cuenta de llamadas,
+ * no el algoritmo. Una prueba de autenticacion que no hashea de verdad no comprueba nada, y aqui
+ * hay otras diez que dependen de que `hash` y `verify` hagan su trabajo.
+ */
+vi.mock('@node-rs/argon2', async (importOriginal) => {
+  const real = await importOriginal<typeof import('@node-rs/argon2')>();
+  return { ...real, verify: vi.fn(real.verify) };
+});
 
 const PEPPER = 'pepper-de-key-vault-solo-para-pruebas';
 const GOOD_KEY = 'Tribunal#2026$Norte';
@@ -328,31 +341,51 @@ describe('LocalIdentityProvider (4.7.2)', () => {
      * que tarda la respuesta separa las cuentas de la institucion de las que no lo son, sin
      * acertar ni una contraseña y sin dejar mas rastro que intentos fallidos normales.
      *
-     * Se comparan las dos ramas, no un umbral en milisegundos: una cifra absoluta depende de la
-     * maquina y acaba relajandose hasta no comprobar nada. La proporcion no: antes del arreglo
-     * era del orden de 0,01 —dos ordenes de magnitud— y ahora ronda 1.
+     * No se mide el RELOJ, se cuentan las verificaciones — apartado 2.17.
+     *
+     * Antes se cronometraban las dos ramas y se exigia que la proporcion no bajara de la mitad.
+     * Media lo correcto y lo medio mal: con las veintiuna tareas de `nx run-many` compitiendo por
+     * la maquina, una de las dos llamadas a Argon2 puede tardar el triple que la otra sin que
+     * nada este roto —se vio 39,7 ms contra 14,6 ms—, y la prueba fallaba sin haber ningun fallo.
+     * Subir el margen no era el arreglo: la habria convertido en una prueba que ya no distingue
+     * nada, que es el estado en el que estaba ANTES de encontrarse el agujero.
+     *
+     * Lo que de verdad protege la garantia es que la rama de «esta cuenta no existe» EJECUTE la
+     * verificacion contra el hash de relleno. Eso no depende de la carga de la maquina: o llama a
+     * `verify` o no llama. Una vez cada rama, exactamente igual, y el coste se sigue de ahi
+     * porque los parametros Argon2 son los mismos —es la razon por la que el relleno existe—.
      */
-    it('ni por el tiempo que tarda en contestar', async () => {
+    it('ni por el tiempo que tarda en contestar: las dos ramas verifican igual', async () => {
       await createAccount();
-      // El primer Argon2 del proceso paga la inicializacion, y el hash de relleno se calcula una
-      // sola vez: sin calentar, la primera medicion mide otra cosa.
-      await expect(
-        provider.authenticate({ email: 'ana@externo.org', password: 'mal' }),
-      ).rejects.toThrow();
+
+      const verificacionesDe = async (email: string) => {
+        vi.mocked(verify).mockClear();
+        await expect(provider.authenticate({ email, password: 'mal' })).rejects.toThrow();
+        return vi.mocked(verify).mock.calls.length;
+      };
+
+      const existe = await verificacionesDe('ana@externo.org');
+      const noExiste = await verificacionesDe('nadie@externo.org');
+
+      expect({ existe, noExiste }).toEqual({ existe: 1, noExiste: 1 });
+    });
+
+    /*
+     * Y contra QUE se verifica cuando no hay cuenta: un hash con los mismos parametros.
+     *
+     * Contar las llamadas no basta por si solo. Alguien podria «igualar» las ramas verificando
+     * contra una cadena cualquiera: seria una llamada, fallaria al instante por no ser un hash
+     * valido, y el reloj volveria a delatar que correos existen. Lo que iguala el coste es que el
+     * segundo argumento sea un hash Argon2id legible con la misma memoria y el mismo tiempo.
+     */
+    it('y lo hace contra un hash Argon2id con los parametros de la norma', async () => {
+      vi.mocked(verify).mockClear();
       await expect(
         provider.authenticate({ email: 'nadie@externo.org', password: 'mal' }),
       ).rejects.toThrow();
 
-      const mide = async (email: string) => {
-        const desde = performance.now();
-        await expect(provider.authenticate({ email, password: 'mal' })).rejects.toThrow();
-        return performance.now() - desde;
-      };
-
-      const existe = await mide('ana@externo.org');
-      const noExiste = await mide('nadie@externo.org');
-
-      expect(noExiste).toBeGreaterThan(existe * 0.5);
+      const [relleno] = vi.mocked(verify).mock.calls[0] ?? [];
+      expect(String(relleno)).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
     });
   });
 });
