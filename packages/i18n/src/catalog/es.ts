@@ -95,8 +95,6 @@ export const es = {
   'nav.behavior': 'Comportamiento del panel',
   'nav.behavior.grid': 'Espacio en la grilla',
   'nav.behavior.grid.desc': 'El panel se queda fijo y el contenido ocupa lo que sobra.',
-  'nav.behavior.drawer': 'Drawer',
-  'nav.behavior.drawer.desc': 'Se pliega y se despliega; plegado devuelve el ancho al contenido.',
   'nav.behavior.overlay': 'Overlay',
   'nav.behavior.overlay.desc': 'Aparece encima del contenido sin moverlo. Para pantallas estrechas.',
   'nav.pages.title': 'Paginas',

@@ -621,3 +621,63 @@ test.describe('el navegador de MODULOS se colapsa desde el propio panel', () => 
       .toBeGreaterThanOrEqual((carril?.x ?? 0) + (carril?.width ?? 0));
   });
 });
+
+test.describe('los dos navegadores son un solo borde', () => {
+  /*
+   * Los dos hacen lo mismo —llevan de un sitio a otro— y estan uno al lado del otro. Cualquier
+   * hueco entre ellos, o entre ellos y los bordes de la ventana, los convierte en dos cosas
+   * distintas a los ojos de quien mira, sin que nadie lo haya decidido.
+   */
+  const caja = async (loc: import('@playwright/test').Locator) => {
+    const b = await loc.boundingBox();
+    if (!b) throw new Error('sin caja');
+    return b;
+  };
+
+  test('el panel de pagina va del encabezado al borde de abajo', async ({ page }) => {
+    // Antes se quedaba a veinticuatro pixeles por arriba y por abajo: un panel lateral que no
+    // llega a los bordes no se lee como el lado de la pantalla, se lee como una tarjeta suelta.
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/composicion');
+
+    const cabecera = await caja(page.locator('.cabecera'));
+    const panel = await caja(page.getByTestId('navegador-de-pagina'));
+    const alto = page.viewportSize()?.height ?? 0;
+
+    expect(panel.y).toBeCloseTo(cabecera.y + cabecera.height, 0);
+    expect(panel.y + panel.height).toBeCloseTo(alto, 0);
+
+    // Y sigue ahi con el modulo desplazado: si se fuera con el contenido, llegaria al borde de
+    // abajo solo en las paginas que caben enteras, que son justo en las que no importa.
+    const desplazado = await page.locator('.modulo').evaluate((n) => {
+      n.scrollBy(0, 400);
+      return n.scrollTop;
+    });
+    // Sin esto la comprobacion de abajo pasaria sola en cuanto el modulo dejara de desplazarse.
+    expect(desplazado).toBeGreaterThan(0);
+    await expect
+      .poll(async () => {
+        const ahora = await caja(page.getByTestId('navegador-de-pagina'));
+        return [Math.round(ahora.y), Math.round(ahora.y + ahora.height)].join('-');
+      })
+      .toBe(`${Math.round(panel.y)}-${Math.round(panel.y + panel.height)}`);
+  });
+
+  test('colapsados los dos, el carril de modulos y el de paginas se tocan', async ({ page }) => {
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/composicion');
+
+    await page.getByTestId('navegador-plegar').click();
+    await page.getByTestId('lateral-plegar').click();
+
+    // Se mide la SEPARACION entre los dos en una sola lectura: leer uno antes y otro despues
+    // los pilla a mitad de camino y da un hueco que nadie llega a ver.
+    await expect
+      .poll(async () => {
+        const modulos = await caja(page.locator('#navegacion-lateral'));
+        const paginas = await caja(page.getByTestId('navegador-de-pagina'));
+        return Math.round(paginas.x - (modulos.x + modulos.width));
+      })
+      .toBe(0);
+  });
+});

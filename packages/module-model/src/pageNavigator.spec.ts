@@ -5,7 +5,9 @@ import {
   PANEL_BEHAVIORS,
   navigatorByDefault,
   navigatorProblems,
+  panelBehavior,
   type PageNavigatorSettings,
+  type PanelBehavior,
 } from './pageNavigator';
 
 /** Navegador de pagina — seccion 4.2. */
@@ -74,10 +76,52 @@ describe('solo los paneles ocupan un lado', () => {
     expect(NAVIGATOR_IS_PANEL('menu')).toBe(false);
   });
 
-  it('los tres comportamientos siguen siendo tres, y con estos nombres', () => {
+  it('los comportamientos son DOS, y con estos nombres', () => {
     // El CSS los lee de `data-comportamiento`: un nombre que cambie aqui y no alli deja el panel
     // dibujandose con el estilo por defecto y sin que falle nada.
-    expect([...PANEL_BEHAVIORS]).toEqual(['grilla', 'drawer', 'overlay']);
+    expect([...PANEL_BEHAVIORS]).toEqual(['grilla', 'overlay']);
+  });
+});
+
+describe('`drawer`, que era un tercero y ya no existe', () => {
+  /**
+   * Se distinguia de `overlay` en que este ultimo no reservaba ni el carril. Quitado eso, los dos
+   * nombres describian exactamente lo mismo: dos maneras de configurar una unica cosa, que es la
+   * forma mas segura de que dos modulos iguales se vean distintos sin que nadie sepa por que.
+   *
+   * Lo que NO se puede hacer es borrarlo a secas: hay modulos guardados con `drawer` puesto, y
+   * dejarlos sin comportamiento valido los deja sin poder publicarse por una decision que nadie
+   * tomo sobre ellos.
+   */
+  it('se lee como `overlay`, que es lo que siempre quiso decir', () => {
+    expect(panelBehavior('drawer')).toBe('overlay');
+  });
+
+  it('un modulo guardado con `drawer` se sigue pudiendo publicar', () => {
+    expect(
+      navigatorProblems({
+        pages: [{ pageId: 'p1' }, { pageId: 'p2' }],
+        navigator: { tipo: 'panel-izquierdo', comportamiento: 'drawer' as PanelBehavior },
+      }),
+    ).toEqual([]);
+  });
+
+  it('pero ya no se OFRECE: el catalogo tiene dos, no tres', () => {
+    expect([...PANEL_BEHAVIORS]).not.toContain('drawer');
+  });
+
+  it('un comportamiento inventado sigue siendo un problema', () => {
+    // El paso de tres a dos no puede convertir la validacion en un «todo vale».
+    const problemas = navigatorProblems({
+      pages: [{ pageId: 'p1' }, { pageId: 'p2' }],
+      navigator: { tipo: 'panel-izquierdo', comportamiento: 'flotante' as PanelBehavior },
+    });
+    expect(problemas).toHaveLength(1);
+    expect(problemas[0]).toContain('flotante');
+  });
+
+  it('sin comportamiento, `grilla`: es lo que se asume al dibujar', () => {
+    expect(panelBehavior(undefined)).toBe('grilla');
   });
 });
 

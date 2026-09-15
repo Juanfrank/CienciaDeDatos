@@ -68,5 +68,7 @@ export {
   type NavigatorKind,
   type NavigatorFilters,
   type PageNavigatorSettings,
+  isPanelBehavior,
+  panelBehavior,
   type PanelBehavior,
 } from './pageNavigator';

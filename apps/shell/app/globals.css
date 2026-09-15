@@ -1715,8 +1715,66 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
    * modulo y lo que quede debajo deja de poder pulsarse.
    */
   padding-inline-start: calc(var(--reserva-lateral) + var(--space-lg));
+  /* Este margen se lo cede al modulo cuando hay panel de pagina: ver `.principal:has(...)`. */
   min-width: 0;
   /* El contenido se desplaza dentro de su region, para que el carril de al lado no se mueva. */
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/*
+ * Con panel de pagina, el contenedor NO pone margen: lo pone el modulo.
+ *
+ * Es el mismo criterio que ya seguia la vista incrustada, y por el mismo motivo: un panel que va
+ * de arriba abajo pero se queda a veinticuatro pixeles del borde no va de arriba abajo — se ve el
+ * hueco. Y entre los dos carriles, ese mismo margen dejaba una franja de fondo que los separaba
+ * sin que nadie lo hubiera decidido: dos carriles que hacen lo mismo se leen como uno solo cuando
+ * se tocan, y como dos cosas distintas cuando no.
+ *
+ * El lado del carril de modulos se queda en `--reserva-lateral` PELADO, sin sumarle el margen:
+ * asi el borde izquierdo del panel de pagina cae exactamente donde acaba el de modulos.
+ */
+.principal:has(> .con-navegador[data-tipo='panel-izquierdo']),
+.principal:has(> .con-navegador[data-tipo='panel-derecho']) {
+  padding-block: 0;
+}
+.principal:has(> .con-navegador[data-tipo='panel-izquierdo']) {
+  padding-inline-start: var(--reserva-lateral);
+}
+.principal:has(> .con-navegador[data-tipo='panel-derecho']) {
+  padding-inline-end: 0;
+}
+/*
+ * El margen que el contenedor deja de poner lo pone lo que se lee, que es el modulo.
+ *
+ * Va por los DOS tipos de panel y no por `.con-navegador` a secas: unas pestanas o un menu no
+ * mueven el margen del contenedor a ningun lado, asi que ahi esta regla solo lo sumaria dos veces.
+ */
+.principal > .con-navegador[data-tipo='panel-izquierdo'] > .modulo,
+.principal > .con-navegador[data-tipo='panel-derecho'] > .modulo {
+  padding-block: var(--space-lg);
+}
+
+/*
+ * Con panel de pagina, quien se desplaza es el MODULO, no el contenedor.
+ *
+ * El panel se dibuja a la altura entera de `.con-navegador`, asi que mientras el contenedor fuera
+ * el que se desplazaba, un modulo mas alto que la ventana hacia crecer esa altura y el panel se
+ * iba hacia arriba con el contenido: llegaba al borde de abajo solo en las paginas cortas. Aqui se
+ * hace lo mismo que ya hace la cabecera con el navegador de modulos —la region se queda quieta y
+ * lo que se lee se desplaza dentro— y entonces «del encabezado al borde inferior» vale siempre.
+ */
+.principal:has(> .con-navegador[data-tipo='panel-izquierdo']),
+.principal:has(> .con-navegador[data-tipo='panel-derecho']) {
+  overflow: hidden;
+}
+.principal > .con-navegador[data-tipo='panel-izquierdo'],
+.principal > .con-navegador[data-tipo='panel-derecho'] {
+  height: 100%;
+}
+.principal > .con-navegador[data-tipo='panel-izquierdo'] > .modulo,
+.principal > .con-navegador[data-tipo='panel-derecho'] > .modulo {
+  align-self: stretch;
   min-height: 0;
   overflow-y: auto;
 }
@@ -4567,7 +4625,7 @@ th[aria-sort='descending'] .table__flecha {
  * Cuatro formas de lo mismo, y la disposicion es lo unico que las diferencia de verdad. El panel
  * lateral es el unico que compite por ANCHO con el contenido, asi que es el unico que tiene que
  * decir como lo ocupa: su carril siempre esta reservado, y al abrirse `grilla` empuja el
- * contenido mientras que `drawer` y `overlay` se abren encima.
+ * contenido mientras que `overlay` se abre encima.
  */
 /*
  * `stretch` y no `start`: es lo que deja que el panel llegue de arriba abajo.
@@ -4682,8 +4740,13 @@ th[aria-sort='descending'] .table__flecha {
 }
 .navegador--panel[data-abierto='no'] .navegador__pagina > span { display: none; }
 
-/* El contenido crece y empuja el control de plegar al fondo del panel. */
-.navegador__contenido { flex: 1; }
+/*
+ * El contenido crece y empuja el control de plegar al fondo del panel.
+ *
+ * Y se desplaza por dentro: con el panel atado al alto de la ventana, un modulo de muchas
+ * paginas se comia el boton de plegar por abajo y no habia forma de volver.
+ */
+.navegador__contenido { flex: 1; min-height: 0; overflow-y: auto; }
 
 .navegador--panel .navegador__pagina { color: inherit; }
 /* La capa de estado, como en Material: el fondo se aclara, no se cambia por otro color. */
@@ -4753,7 +4816,7 @@ th[aria-sort='descending'] .table__flecha {
  * lleva por delante lo primero que se mira.
  *
  * Asi, la unica diferencia entre los comportamientos es que pasa al ABRIR: `grilla` empuja el
- * contenido hasta el ancho entero del panel; `drawer` y `overlay` se abren encima sin moverlo.
+ * contenido hasta el ancho entero del panel; `overlay` se abre encima sin moverlo.
  */
 /*
  * `grilla` reserva lo que el panel mide AHORA, no lo que mide colapsado.
@@ -4766,7 +4829,7 @@ th[aria-sort='descending'] .table__flecha {
 .con-navegador:has(> .navegador[data-comportamiento='grilla'][data-abierto='si']) {
   --reserva: var(--panel);
 }
-/* `drawer` y `overlay` se abren ENCIMA: reservan el carril y nada mas, abiertos o cerrados. */
+/* `overlay` se abre ENCIMA: reserva el carril y nada mas, abierto o cerrado. */
 
 .navegador__plegar {
   display: flex;
@@ -4841,7 +4904,7 @@ th[aria-sort='descending'] .table__flecha {
  * En pantalla estrecha NINGUN comportamiento reserva el ancho del panel.
  *
  * Dieciseis rem sobre una pantalla de movil no dejan contenido que leer, asi que alli el panel
- * se comporta como un drawer se mire como se mire: reserva el carril y se abre encima. Y se
+ * se comporta como `overlay` se mire como se mire: reserva el carril y se abre encima. Y se
  * estrecha para no taparla entera.
  */
 @media (max-width: 720px) {

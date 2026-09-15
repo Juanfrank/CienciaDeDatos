@@ -31,21 +31,41 @@ export const NAVIGATOR_IS_PANEL = (tipo: NavigatorKind): boolean =>
 /**
  * Como ocupa el sitio un panel. Solo aplica a los dos paneles laterales.
  *
- * El carril COLAPSADO esta siempre reservado, en los tres: el contenido empieza donde acaba el
- * carril y nunca por debajo de el. Lo que distingue a los comportamientos es que pasa al ABRIR.
+ * El carril COLAPSADO esta siempre reservado en los dos: el contenido empieza donde acaba el
+ * carril y nunca por debajo de el. Lo que los distingue es que pasa al ABRIR.
  *
  * - `grilla`: al abrirse EMPUJA el contenido hasta el ancho entero del panel. Es lo que se espera
  *   de un menu lateral permanente, y lo que se ve en un sistema que se usa todo el dia.
- * - `drawer`: al abrirse se pone ENCIMA del contenido, sin moverlo. Para pantallas donde el ancho
+ * - `overlay`: al abrirse se pone ENCIMA del contenido, sin moverlo. Para pantallas donde el ancho
  *   es lo escaso.
- * - `overlay`: hoy hace lo mismo que `drawer`. Se distinguian en que `overlay` no reservaba ni el
- *   carril —se ponia encima del ancho entero—, y eso dejaba el modulo empezando debajo de una
- *   franja de iconos. Quitado eso, los dos nombres describen el mismo comportamiento; se
- *   conserva `overlay` para no romper los modulos que ya lo tienen configurado.
  */
-export const PANEL_BEHAVIORS = ['grilla', 'drawer', 'overlay'] as const;
+export const PANEL_BEHAVIORS = ['grilla', 'overlay'] as const;
 
 export type PanelBehavior = (typeof PANEL_BEHAVIORS)[number];
+
+/**
+ * `drawer` fue un tercer comportamiento, y ya no existe.
+ *
+ * Se distinguia de `overlay` en que este ultimo no reservaba ni el carril —se ponia encima del
+ * ancho entero—, y eso dejaba el modulo empezando debajo de una franja de iconos. Quitado eso,
+ * los dos nombres describian exactamente lo mismo: dos maneras de configurar una unica cosa, que
+ * es la forma mas segura de que dos modulos iguales se vean distintos sin que nadie sepa por que.
+ *
+ * No se borra a secas porque hay modulos guardados con `drawer` puesto: borrarlo los dejaria sin
+ * comportamiento valido y sin poder publicarse. Se lee como lo que siempre quiso decir.
+ */
+const HEREDADOS: Record<string, PanelBehavior> = { drawer: 'overlay' };
+
+/** true si el valor guardado se puede interpretar: uno de los dos, o el heredado. */
+export const isPanelBehavior = (valor: string): boolean =>
+  PANEL_BEHAVIORS.includes(valor as PanelBehavior) || valor in HEREDADOS;
+
+/** El comportamiento efectivo de lo que haya guardado. `grilla` es el que se asume sin nada. */
+export function panelBehavior(valor: string | undefined): PanelBehavior {
+  if (valor === undefined) return 'grilla';
+  if (PANEL_BEHAVIORS.includes(valor as PanelBehavior)) return valor as PanelBehavior;
+  return HEREDADOS[valor] ?? 'grilla';
+}
 
 export interface PageNavigatorSettings {
   tipo: NavigatorKind;
@@ -108,7 +128,7 @@ export function navigatorProblems(modulo: {
   if (
     NAVIGATOR_IS_PANEL(modulo.navigator.tipo) &&
     modulo.navigator.comportamiento !== undefined &&
-    !PANEL_BEHAVIORS.includes(modulo.navigator.comportamiento)
+    !isPanelBehavior(modulo.navigator.comportamiento)
   ) {
     return [`«${modulo.navigator.comportamiento}» no es un comportamiento de panel.`];
   }

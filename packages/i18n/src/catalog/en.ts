@@ -94,8 +94,6 @@ export const en: Record<MessageKey, string> = {
   'nav.behavior': 'Panel behavior',
   'nav.behavior.grid': 'Space in the grid',
   'nav.behavior.grid.desc': 'The panel stays put and the content takes what is left.',
-  'nav.behavior.drawer': 'Drawer',
-  'nav.behavior.drawer.desc': 'Folds and unfolds; folded it gives the width back to the content.',
   'nav.behavior.overlay': 'Overlay',
   'nav.behavior.overlay.desc': 'Appears over the content without moving it. For narrow screens.',
   'nav.pages.title': 'Pages',

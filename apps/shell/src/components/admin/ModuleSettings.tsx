@@ -76,7 +76,6 @@ const NAVEGADOR: Record<NavigatorKind, MessageKey> = {
 /** Y cada comportamiento de panel, que es lo que decide si le quita ancho al contenido. */
 const COMPORTAMIENTO: Record<PanelBehavior, { titulo: MessageKey; desc: MessageKey }> = {
   grilla: { titulo: 'nav.behavior.grid', desc: 'nav.behavior.grid.desc' },
-  drawer: { titulo: 'nav.behavior.drawer', desc: 'nav.behavior.drawer.desc' },
   overlay: { titulo: 'nav.behavior.overlay', desc: 'nav.behavior.overlay.desc' },
 };
 

@@ -6,6 +6,7 @@ import type { QueryResult } from '@app/data-contracts';
 import { effectivePickers, type IconName, type ObjectInstance } from '@app/ui-components';
 import {
   NAVIGATOR_IS_PANEL,
+  panelBehavior,
   type PageNavigatorSettings,
   type PanelBehavior,
 } from '@app/module-model';
@@ -59,9 +60,11 @@ export function PageNavigator({
   embedded?: 'completo' | 'limpio';
 }) {
   const t = useTranslator();
-  const comportamiento: PanelBehavior = navegador.comportamiento ?? 'grilla';
-  // Un drawer empieza abierto: plegado por defecto esconde la navegacion entera a quien entra por
-  // primera vez, que es justo cuando mas falta hace saber que hay mas paginas.
+  // Por el normalizador y no en crudo: hay modulos guardados con el `drawer` de antes, y se
+  // leen como lo que siempre quisieron decir.
+  const comportamiento: PanelBehavior = panelBehavior(navegador.comportamiento);
+  // Empieza abierto: plegado por defecto esconde la navegacion entera a quien entra por primera
+  // vez, que es justo cuando mas falta hace saber que hay mas paginas.
   const [abierto, setAbierto] = useState(true);
 
   const hrefDe = (slug: string) =>
