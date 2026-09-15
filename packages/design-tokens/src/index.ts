@@ -49,6 +49,9 @@ export {
 export {
   INSTITUTIONAL_SOURCE,
   FONTS,
+  TYPEFACES,
+  TYPEFACE_NAMES,
+  type TypefaceId,
   asThemeTokens,
   lightTheme,
   darkTheme,
@@ -56,6 +59,9 @@ export {
 } from './institutionalTheme';
 export {
   type ThemeDefinition,
+  type SourceRole,
+  BUILT_IN_THEMES,
+  GRAPHIC_LINE_THEME,
   INSTITUTIONAL_THEME,
   SOURCE_ROLES,
   sourceColorIs,

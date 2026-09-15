@@ -6,7 +6,7 @@ import type {
   NavNode,
   Team,
 } from '@app/access-control';
-import { INSTITUTIONAL_THEME, type ThemeDefinition } from '@app/design-tokens';
+import { BUILT_IN_THEMES, INSTITUTIONAL_THEME, type ThemeDefinition } from '@app/design-tokens';
 import {
   buildNavTree,
   buildScopeLookup,
@@ -78,7 +78,7 @@ export function initialStatus(): GovernanceSnapshot {
     ),
     users: seedUsers.map((row) => toGovernedUser(row, seedUserScopes, lookup)),
     packages: [],
-    themes: [INSTITUTIONAL_THEME],
+    themes: [...BUILT_IN_THEMES],
     activeThemeId: INSTITUTIONAL_THEME.id,
   };
 }
@@ -189,8 +189,17 @@ export class StoreGovernanceRepository implements GovernanceStore {
    */
   async listThemes(): Promise<ThemeDefinition[]> {
     const guardados = (await this.snapshot()).themes ?? [];
-    const propios = guardados.filter((t) => t.id !== INSTITUTIONAL_THEME.id);
-    return [INSTITUTIONAL_THEME, ...propios];
+    /*
+     * Los de fabrica se anteponen SIEMPRE, y desde el codigo, no desde lo guardado.
+     *
+     * Es lo que hace que borrar el ultimo tema no deje la aplicacion sin color, y ademas lo que
+     * permite anadir uno de fabrica sin migrar los almacenes que ya existen: una instantanea
+     * escrita antes de que existiera lo trae igual, con su definicion de hoy y no con una copia
+     * congelada del dia que se guardo.
+     */
+    const deFabrica = new Set(BUILT_IN_THEMES.map((t) => t.id));
+    const propios = guardados.filter((t) => !deFabrica.has(t.id));
+    return [...BUILT_IN_THEMES, ...propios];
   }
   async getTheme(themeId: string): Promise<ThemeDefinition | undefined> {
     return (await this.listThemes()).find((t) => t.id === themeId);
@@ -203,7 +212,7 @@ export class StoreGovernanceRepository implements GovernanceStore {
   }
   async deleteTheme(themeId: string): Promise<boolean> {
     const existe = (await this.getTheme(themeId)) !== undefined;
-    if (!existe || themeId === INSTITUTIONAL_THEME.id) return false;
+    if (!existe || BUILT_IN_THEMES.some((t) => t.id === themeId)) return false;
 
     await this.guardar((actual) => ({
       ...actual,
@@ -221,10 +230,10 @@ export class StoreGovernanceRepository implements GovernanceStore {
     const pedido = snapshot.activeThemeId;
     // Uno que ya no existe cae al de fabrica: sin esto, borrar un tema activo desde otra
     // instancia dejaria esta dibujando sin variables de color.
-    const existe = (snapshot.themes ?? []).some((t) => t.id === pedido);
-    return pedido && (existe || pedido === INSTITUTIONAL_THEME.id)
-      ? pedido
-      : INSTITUTIONAL_THEME.id;
+    const existe =
+      (snapshot.themes ?? []).some((t) => t.id === pedido) ||
+      BUILT_IN_THEMES.some((t) => t.id === pedido);
+    return pedido && existe ? pedido : INSTITUTIONAL_THEME.id;
   }
   async setActiveTheme(themeId: string): Promise<void> {
     await this.guardar((actual) => ({ ...actual, activeThemeId: themeId }));

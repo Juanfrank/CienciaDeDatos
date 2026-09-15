@@ -57,15 +57,32 @@ export const SHAPE = {
   full: '9999px',
 } as const;
 
-/** Elevacion: seis niveles, cada uno con su sombra. */
-export const ELEVATION = {
-  0: 'none',
-  1: '0 1px 2px 0 rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15)',
-  2: '0 1px 2px 0 rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15)',
-  3: '0 4px 8px 3px rgba(0,0,0,.15), 0 1px 3px 0 rgba(0,0,0,.30)',
-  4: '0 6px 10px 4px rgba(0,0,0,.15), 0 2px 3px 0 rgba(0,0,0,.30)',
-  5: '0 8px 12px 6px rgba(0,0,0,.15), 0 4px 4px 0 rgba(0,0,0,.30)',
-} as const;
+/**
+ * Elevacion: seis niveles, cada uno con su sombra, sobre un tinte.
+ *
+ * El tinte es lo unico que varia. Una sombra negra sobre una superficie que tira a azul se ve
+ * gris sucia, y es lo que hace que una pantalla «no termine de verse limpia» sin que se pueda
+ * senalar que falla. Tenida con el color de la marca, la sombra se integra con el fondo en vez de
+ * ensuciarlo.
+ *
+ * Las OPACIDADES no cambian: son las de la especificacion y son las que hacen que los seis
+ * niveles se distingan entre si. Lo que se elige es de que color es la sombra, no cuanto pesa.
+ */
+export const elevationFor = (tinte: string) =>
+  ({
+    0: 'none',
+    1: `0 1px 2px 0 rgba(${tinte},.30), 0 1px 3px 1px rgba(${tinte},.15)`,
+    2: `0 1px 2px 0 rgba(${tinte},.30), 0 2px 6px 2px rgba(${tinte},.15)`,
+    3: `0 4px 8px 3px rgba(${tinte},.15), 0 1px 3px 0 rgba(${tinte},.30)`,
+    4: `0 6px 10px 4px rgba(${tinte},.15), 0 2px 3px 0 rgba(${tinte},.30)`,
+    5: `0 8px 12px 6px rgba(${tinte},.15), 0 4px 4px 0 rgba(${tinte},.30)`,
+  }) as const;
+
+/** El tinte neutro: negro, que es lo que dice la especificacion y lo que habia. */
+export const TINTE_NEUTRO = '0,0,0';
+
+/** Elevacion con el tinte de siempre. */
+export const ELEVATION = elevationFor(TINTE_NEUTRO);
 
 /** Opacidad de las capas de estado. */
 export const STATUS = { hover: 0.08, focus: 0.1, pressed: 0.1, dragged: 0.16, disabled: 0.38 } as const;
@@ -107,7 +124,7 @@ export interface MaterialTheme {
   categorical: string[];
   typography: Record<TypographicRole, TypographicStyle>;
   shape: typeof SHAPE;
-  elevation: typeof ELEVATION;
+  elevation: ReturnType<typeof elevationFor>;
   state: typeof STATUS;
   motion: typeof MOVIMIENTO;
   font: { sans: string; mono: string; serif: string };
@@ -117,6 +134,8 @@ export function materialTheme(
   source: ThemeSource,
   mode: ColorMode,
   fonts: { sans: string; mono: string; serif: string },
+  /** El tinte de las sombras. Ausente: el neutro de la especificacion. */
+  tinte: string = TINTE_NEUTRO,
 ): MaterialTheme {
   return {
     mode,
@@ -124,11 +143,26 @@ export function materialTheme(
     categorical: categoricalFor(source, mode),
     typography: TYPOGRAPHY,
     shape: SHAPE,
-    elevation: ELEVATION,
+    elevation: elevationFor(tinte),
     state: STATUS,
     motion: MOVIMIENTO,
     font: fonts,
   };
+}
+
+/**
+ * El tinte de sombra de un tema, sacado de su PROPIO primario.
+ *
+ * Tono 30 y no el primario tal cual: un azul de accion a plena luz usado como sombra sale azul
+ * electrico y parece un resplandor, no una sombra. El tono 30 es el mismo color en su version
+ * profunda, que es lo que la luz deja debajo de una tarjeta.
+ *
+ * Se deriva y no se guarda: un tema no tiene que contestar de que color es su sombra, y si lo
+ * contestara podria contestar algo que no tiene nada que ver con su marca.
+ */
+export function tintOf(source: ThemeSource): string {
+  const argb = palettesFor(source).primary.tone(30);
+  return [(argb >> 16) & 255, (argb >> 8) & 255, argb & 255].join(',');
 }
 
 /** Variables CSS con los nombres de MD3 (`--md-sys-*`). */

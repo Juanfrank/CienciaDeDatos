@@ -30,6 +30,35 @@ export const FONTS = {
   serif: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif",
 };
 
+/**
+ * Las tipografias que un tema puede elegir. Conjunto CERRADO, y por dos razones.
+ *
+ * La primera es que una fuente no es un nombre: es un archivo que hay que servir. El principio 1
+ * no admite pedirsela a un dominio ajeno, asi que cada una de estas la carga la aplicacion desde
+ * su propio origen y declara su variable. Un nombre libre escrito en una pantalla nombraria una
+ * fuente que nadie sirve, y el navegador caeria a la de sistema sin decir nada.
+ *
+ * La segunda es que el valor entra en una variable CSS. Una cadena libre ahi es una superficie de
+ * inyeccion que no hace falta abrir para elegir entre dos letras.
+ *
+ * `mono` y `serif` no cambian: la primera es para cifras y codigo —donde lo que importa es que
+ * todos los digitos midan igual— y la segunda es el membrete de la pantalla de acceso.
+ */
+export const TYPEFACES = {
+  institucional: FONTS,
+  poppins: {
+    ...FONTS,
+    sans: "var(--font-poppins), Poppins, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+  },
+} as const;
+
+export type TypefaceId = keyof typeof TYPEFACES;
+
+export const TYPEFACE_NAMES: Record<TypefaceId, string> = {
+  institucional: 'Montserrat (institucional)',
+  poppins: 'Poppins',
+};
+
 export const lightTheme: MaterialTheme = materialTheme(INSTITUTIONAL_SOURCE, 'light', FONTS);
 
 /** El esquema oscuro existe y esta verificado, y NO esta aplicado. */

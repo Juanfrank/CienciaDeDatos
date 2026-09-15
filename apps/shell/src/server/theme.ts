@@ -100,6 +100,17 @@ export async function saveTheme(
     }
   }
 
+  /*
+   * El rojo del error solo se valida si VIENE: ausente, sale del acento, que es lo normal.
+   */
+  const rojo = definicion.source.error?.trim();
+  if (rojo !== undefined && rojo !== '' && !sourceColorIs(rojo)) {
+    throw new ThemeError(
+      `El color «error» tiene que ser hexadecimal de seis digitos, como #ef3340. Llego «${rojo}».`,
+      400,
+    );
+  }
+
   const limpio: ThemeDefinition = {
     id: definicion.id,
     name: nombre,
@@ -107,8 +118,18 @@ export async function saveTheme(
       primario: definicion.source.primario.trim().toLowerCase(),
       acento: definicion.source.acento.trim().toLowerCase(),
       neutro: definicion.source.neutro.trim().toLowerCase(),
+      ...(rojo ? { error: rojo.toLowerCase() } : {}),
     },
     ...(definicion.description?.trim() ? { description: definicion.description.trim() } : {}),
+    /*
+     * La letra y la sombra se conservan al guardar.
+     *
+     * Sin esto, copiar un tema y cambiarle el nombre devolvia un tema con sus colores y la letra
+     * de otro: el campo se perdia en el saneado, que es la clase de fallo que no da error y solo
+     * se ve mirando la pantalla con atencion.
+     */
+    ...(definicion.typeface ? { typeface: definicion.typeface } : {}),
+    ...(definicion.shadow ? { shadow: definicion.shadow } : {}),
   };
 
   const versiones = themeVersions(limpio);

@@ -162,6 +162,15 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   token de restablecimiento son 24 bytes aleatorios, de un solo uso y con caducidad; la descarga
   de una exportacion comprueba de quien es y no toca el disco; la personalizacion toma el usuario
   de la sesion, nunca del cuerpo. `npm audit` da cero vulnerabilidades.
+- **Segundo tema de fabrica: «Linea grafica».** La capa visual de la linea grafica del tablero de
+  casos penales —azul de accion, morado de series, gris azulado, Poppins y sombra con tinte de
+  marca—, y nada mas: los componentes y las reglas de maqueta de aquella guia no entran, porque un
+  tema decide como se VE la aplicacion, no que objetos existen. Obligo a tres extensiones del
+  modelo de tema, todas opcionales y todas de estilo: `error` como origen aparte (atado al acento,
+  un tema de acento morado tendria los errores morados), `typeface` sobre un conjunto CERRADO de
+  tipografias que la aplicacion sirve desde su propio origen, y `shadow: 'de-marca'`. Lo comprueba
+  `packages/design-tokens/src/graphicLineTheme.spec.ts`: AA en los dos modos, la letra, la sombra,
+  el rojo pese al acento morado, y —lo que mas importa— que el tema institucional no cambio.
 
 **2.2 sigue pendiente** aunque dependia de 2.1: el reposicionamiento existe en el editor, no en
 el dialogo «Mi vista» de la personalizacion.
@@ -570,6 +579,26 @@ Arreglarlo no es subir el margen —eso la convierte en una prueba que ya no dis
 medir de una forma que no dependa del reloj de pared: varias repeticiones y comparar medianas, o
 mejor, comprobar lo que de verdad importa —que el camino de «no existe» EJECUTA la verificacion de
 relleno— en vez de cuanto tarda.
+
+### 2.18 `no se puede exportar un modulo que el equipo no tiene concedido` fallo una vez
+
+Sin diagnostico, y se anota precisamente por eso: es la unica forma de que la proxima vez que
+falle no empiece de cero.
+
+Esta en `apps/shell/e2e/exportacion.spec.ts:108`. Fallo una vez en el pase `parallel` con tres
+workers —323 de 324— y volvio a pasar las dos veces siguientes, la suite entera y el archivo solo.
+No se capturo el mensaje, que es el error de metodo a no repetir: sin el no se puede saber si lo
+que fallo fue la espera del helper `exportar` (`expect.poll`, 15 s, hasta `lista|fallida`) o la
+propia afirmacion de que el trabajo termino en `fallida`.
+
+Lo que ya se descarto: no es contaminacion entre pruebas. Los cinco archivos que escriben en
+`/api/admin/*` estan los cinco en `SECUENCIALES`, y cada worker levanta su propio almacen.
+
+Por donde seguir, y en este orden: guardar el informe del pase completo (`--reporter=list,json`)
+para tener el mensaje la proxima vez, y mirar si 15 s bastan cuando tres workers compiten por la
+maquina — si es eso, el arreglo no es subir el plazo sino que la consulta diga en que estado
+quedo, porque «se quedo en encolada» y «termino en lista» son dos fallos distintos que hoy se leen
+igual.
 
 ---
 

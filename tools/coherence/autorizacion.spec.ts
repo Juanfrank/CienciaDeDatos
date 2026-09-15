@@ -167,6 +167,10 @@ describe('las credenciales de demostracion no se siembran solas', () => {
       'tools/capture-f6.mts',
       'las mismas instrucciones, para las capturas de la tanda F6',
     ],
+    [
+      'tools/capture-tema.mts',
+      'las mismas instrucciones, para las capturas de un tema sobre el modulo de doce paginas',
+    ],
     ['tools/coherence/autorizacion.spec.ts', 'esta misma guarda'],
   ]);
 

@@ -17,8 +17,17 @@ export interface ThemeSource {
   primario: string;
   /** Gris institucional. De el salen las superficies y los bordes. */
   neutro: string;
-  /** Segundo color de marca. Ocupa el rol `tertiary` Y el rol `error`. */
+  /** Segundo color de marca. Ocupa el rol `tertiary`, y el rol `error` si no se dice otra cosa. */
   acento: string;
+  /**
+   * El rojo del error, cuando el acento NO sirve para eso.
+   *
+   * Ausente, el error sale del acento: es lo correcto para el tema institucional, cuyo acento ya
+   * es el rojo de la norma. Pero atarlos siempre hace que un tema con acento morado tenga los
+   * errores en morado, y entonces un error deja de leerse como un error —que es la unica cosa que
+   * un color tiene que hacer aqui—. Un tema que elige otro acento dice tambien cual es su rojo.
+   */
+  error?: string;
 }
 
 /** Croma de las paletas derivadas. */
@@ -27,6 +36,7 @@ const CROMA = { secondary: 18, neutral: 8, neutralVariant: 16 } as const;
 export function palettesFor(source: ThemeSource): TonalPalettes {
   const primario = Hct.fromInt(argbFromHex(source.primario));
   const acento = Hct.fromInt(argbFromHex(source.acento));
+  const rojo = source.error ? Hct.fromInt(argbFromHex(source.error)) : acento;
   // El matiz de los neutros sale del GRIS de la norma, no del primario. Ver `neutro`.
   const neutro = Hct.fromInt(argbFromHex(source.neutro));
 
@@ -36,8 +46,8 @@ export function palettesFor(source: ThemeSource): TonalPalettes {
     tertiary: TonalPalette.fromInt(argbFromHex(source.acento)),
     neutral: TonalPalette.fromHueAndChroma(neutro.hue, CROMA.neutral),
     neutralVariant: TonalPalette.fromHueAndChroma(neutro.hue, CROMA.neutralVariant),
-    // El rojo institucional tambien para el error. Ver la nota de `acento`.
-    error: TonalPalette.fromHueAndChroma(acento.hue, Math.max(acento.chroma, 48)),
+    // El rojo del tema, o el acento. Ver la nota de `error` en `ThemeSource`.
+    error: TonalPalette.fromHueAndChroma(rojo.hue, Math.max(rojo.chroma, 48)),
   };
 }
 

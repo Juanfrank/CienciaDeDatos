@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Montserrat } from 'next/font/google';
+import { Montserrat, Poppins } from 'next/font/google';
 import { defaultIdentity } from '@app/design-tokens';
 import { Emergentes } from '../src/components/Emergentes';
 import { Header } from '../src/components/Header';
@@ -36,6 +36,25 @@ const montserrat = Montserrat({
   variable: '--font-montserrat',
 });
 
+/**
+ * Poppins, la letra de la linea grafica del tablero de casos penales.
+ *
+ * Las dos se cargan SIEMPRE, no la del tema activo. Cargar solo una obligaria a volver a pintar el
+ * documento entero al cambiar de tema —la fuente se declara en `<html>`, fuera de las variables
+ * que el tema escribe en `<body>`— y ademas dejaria la pantalla de vista previa de temas mintiendo:
+ * ensenaria todos los temas con la letra del que esta puesto.
+ *
+ * `next/font` las sirve desde el PROPIO origen: descarga los archivos en el build y los publica
+ * bajo `/_next`. No hay ninguna peticion a un dominio ajeno, que es lo que exige el principio 1 y
+ * lo que la politica de contenido no dejaria pasar de todas formas.
+ */
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-poppins',
+});
+
 /** Cromo comun a toda la aplicacion: documento, tema y cabecera. */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [sesion, mode, locale, tema, cabeceras] = await Promise.all([
@@ -64,7 +83,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
    * evita una casilla blanca sobre una tarjeta oscura, que ademas de feo es un fallo de contraste.
    */
   return (
-    <html lang={locale} className={montserrat.variable} data-theme={mode}>
+    <html lang={locale} className={`${montserrat.variable} ${poppins.variable}`} data-theme={mode}>
       <body
         data-tema={tema.id}
         style={
