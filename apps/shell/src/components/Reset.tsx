@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTranslator } from './Locale';
+import { SIN_RED, pedir } from './pedir';
 
 /** Restablecimiento de contraseña — seccion 4.7.2. */
 export function Reset() {
@@ -28,18 +29,25 @@ export function Reset() {
 
     setEnviando(true);
     try {
-      const r = await fetch('/api/reset', {
+      const r = await pedir('/api/reset', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ resetId, code, clave }),
       });
 
-      if (r.ok) {
+      if (r?.ok) {
         setHecho(true);
         return;
       }
+      if (!r) {
+        setError(SIN_RED);
+        return;
+      }
 
-      const body = (await r.json()) as { error?: string; detalle?: { message: string }[] };
+      const body = (await r.json().catch(() => ({}))) as {
+        error?: string;
+        detalle?: { message: string }[];
+      };
       const detalle = Array.isArray(body.detalle)
         ? ` ${body.detalle.map((d) => d.message).join(' ')}`
         : '';

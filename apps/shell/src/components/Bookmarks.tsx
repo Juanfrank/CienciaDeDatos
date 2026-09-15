@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { type Bookmark, bookmarkToUrl } from '@app/module-model';
 import { useUrlFilters } from '../hooks/useUrlFilters';
 import { IconButton } from './icons/IconButton';
+import { pedir } from './pedir';
 
 /** Marcadores — seccion 4.4. */
 export function Bookmarks({
@@ -33,7 +34,7 @@ export function Bookmarks({
 
   const guardar = async () => {
     if (!nombre.trim()) return;
-    await fetch('/api/bookmarks', {
+    await pedir('/api/bookmarks', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({

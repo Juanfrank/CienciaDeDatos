@@ -6,6 +6,7 @@ import type { AlertOperator, Cadence } from '@app/alerts';
 import { useUrlFilters } from '../hooks/useUrlFilters';
 import { IconButton } from './icons/IconButton';
 import { useTranslator } from './Locale';
+import { motivoDeFallo, pedir } from './pedir';
 
 /** Crear una alerta o una suscripcion desde el modulo que se esta viendo. */
 
@@ -79,15 +80,14 @@ export function CreateNotice({
         ? { ...common, objeto, medida, operador, umbral: Number(umbral) }
         : { ...common, formato, cadencia, hora: Number(hora) };
 
-    const respuesta = await fetch(pestana === 'alerta' ? '/api/alerts' : '/api/subscriptions', {
+    const respuesta = await pedir(pestana === 'alerta' ? '/api/alerts' : '/api/subscriptions', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
     });
 
-    if (!respuesta.ok) {
-      const { error: motivo } = (await respuesta.json()) as { error?: string };
-      setError(motivo ?? 'No se pudo guardar.');
+    if (!respuesta || !respuesta.ok) {
+      setError(await motivoDeFallo(respuesta, 'No se pudo guardar.'));
       return;
     }
 

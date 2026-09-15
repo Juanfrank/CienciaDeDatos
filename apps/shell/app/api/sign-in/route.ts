@@ -8,6 +8,7 @@ import {
 } from '../../../src/server/identity';
 import { teamsOf } from '../../../src/server/context';
 import { SESSION_COOKIE, closeSession, sessionGet } from '../../../src/server/session';
+import { CSRF_COOKIE, cookiePolicy, tokenOf } from '../../../src/server/csrf';
 
 export const runtime = 'nodejs';
 
@@ -82,13 +83,42 @@ export async function POST(request: Request) {
       equipoActivo: sesion.activeTeamId,
       proveedor: principal.authProvider,
     });
+    /*
+     * Las DOS cookies, con la MISMA politica — apartado 2.16.
+     *
+     * La politica se decide en un solo sitio (`cookiePolicy`) porque con politicas distintas el
+     * navegador mandaria una y no la otra, y toda escritura quedaria rechazada sin que nada
+     * explicara por que.
+     */
+    const politica = cookiePolicy({
+      embedOrigins: process.env['EMBED_ALLOWED_ORIGINS'],
+      nodeEnv: process.env['NODE_ENV'],
+    });
+
     respuesta.cookies.set(SESSION_COOKIE, sesion.sessionId, {
       httpOnly: true,
-      sameSite: 'lax',
       path: '/',
-      // Sin HTTPS en desarrollo la cookie con `secure` no se enviaria y no habria sesion.
-      secure: process.env['NODE_ENV'] === 'production',
+      ...politica,
     });
+
+    /*
+     * El token, legible por el cliente a proposito.
+     *
+     * Es lo que hace el doble envio: el navegador manda la cookie sola en una peticion que nazca
+     * en otro sitio, pero solo el codigo de ESTA aplicacion puede leerla y devolverla en una
+     * cabecera. Una pagina ajena no puede hacer ni lo uno ni lo otro.
+     *
+     * Es un HMAC de la sesion, asi que no dice nada que no se sepa ya y no hay nada que guardar.
+     */
+    const pimienta = process.env['AUTH_PEPPER'];
+    if (pimienta) {
+      respuesta.cookies.set(CSRF_COOKIE, await tokenOf(sesion.sessionId, pimienta), {
+        httpOnly: false,
+        path: '/',
+        ...politica,
+      });
+    }
+
     return respuesta;
   } catch (error) {
     if (error instanceof AuthenticationError) {
@@ -109,5 +139,8 @@ export async function DELETE() {
 
   const respuesta = NextResponse.json({ cerrada: true });
   respuesta.cookies.delete(SESSION_COOKIE);
+  // El token se va con la sesion: dejarlo puesto no abre nada —sin sesion no vale— pero deja al
+  // cliente creyendo que tiene uno bueno y mandandolo en cada escritura.
+  respuesta.cookies.delete(CSRF_COOKIE);
   return respuesta;
 }

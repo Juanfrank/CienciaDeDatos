@@ -373,3 +373,45 @@ test.describe('los codigos se registran y se pueden suprimir (4.9 y 4.10.7)', ()
     expect((await page.request.get('/api/embeds')).status()).toBe(403);
   });
 });
+
+test.describe('la puerta anti-CSRF (2.16)', () => {
+  /*
+   * Es lo que permite que la cookie pueda cruzar de sitio sin quedarse sin proteccion.
+   *
+   * `sameSite: 'lax'` era la UNICA defensa contra la falsificacion de peticiones, y es tambien lo
+   * que impedia que un portal externo viera datos: el navegador no manda la cookie a un iframe de
+   * otro sitio. Levantar lo segundo sin poner otra cosa en el sitio de lo primero seria cambiar un
+   * problema por uno peor.
+   */
+  test('una escritura sin token se rechaza, aunque la sesion sea buena', async ({ page }) => {
+    // Se quita la cabecera que `asLogin` dejo puesta: asi es como llega una peticion falsificada
+    // —con la cookie, porque la manda el navegador, y sin token, porque no se puede leer desde
+    // otro sitio—.
+    await page.context().setExtraHTTPHeaders({});
+
+    const respuesta = await page.request.post('/api/bookmarks', {
+      data: { name: 'falsificado', moduleSlug: 'casos-pendientes', query: '' },
+    });
+
+    expect(respuesta.status()).toBe(403);
+    expect(await respuesta.text()).toContain('token');
+  });
+
+  test('con el token puesto, la misma escritura pasa', async ({ page }) => {
+    // El contraste importa: un 403 constante tambien lo daria una ruta rota.
+    const respuesta = await page.request.post('/api/bookmarks', {
+      data: { name: 'legitimo', moduleSlug: 'casos-pendientes', query: '' },
+    });
+
+    expect(respuesta.ok(), await respuesta.text()).toBe(true);
+  });
+
+  test('leer no necesita token', async ({ page }) => {
+    await page.context().setExtraHTTPHeaders({});
+
+    // Una lectura no cambia nada, asi que falsificarla no consigue nada: exigir token ahi seria
+    // ruido, y ademas rompe la navegacion normal del navegador.
+    const respuesta = await page.request.get('/api/bookmarks');
+    expect(respuesta.ok()).toBe(true);
+  });
+});

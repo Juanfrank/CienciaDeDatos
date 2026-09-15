@@ -1,3 +1,5 @@
+import { CSRF_COOKIE, CSRF_HEADER } from '../server/cookies';
+
 /**
  * `fetch` que no lanza.
  *
@@ -14,12 +16,44 @@
  */
 export const SIN_RED = 'No hay conexion con el servidor. Intentelo de nuevo.';
 
+/**
+ * El token anti-CSRF, leido de su cookie — apartado 2.16.
+ *
+ * La cookie NO es `httpOnly` justamente para esto: el doble envio consiste en devolver por una
+ * cabecera lo que el navegador manda por la cookie. Una pagina de otro sitio no puede hacer
+ * ninguna de las dos cosas —ni leer la cookie ni poner una cabecera propia—, y ahi esta la
+ * proteccion.
+ */
+function tokenDeLaCookie(): string {
+  if (typeof document === 'undefined') return '';
+  const encontrada = document.cookie
+    .split(';')
+    .map((c) => c.trim())
+    .find((c) => c.startsWith(`${CSRF_COOKIE}=`));
+  return encontrada ? decodeURIComponent(encontrada.slice(CSRF_COOKIE.length + 1)) : '';
+}
+
+const SEGUROS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
+/**
+ * `fetch` que no lanza, y que ademas firma lo que escribe.
+ *
+ * El token se pone AQUI y en ningun otro sitio. Repartirlo por los cuarenta y seis sitios que
+ * escriben seria cuarenta y seis ocasiones de olvidarlo, y el olvido no se ve al escribir el
+ * codigo —se ve como un 403 en produccion, en la pantalla de alguien—. Lo que impide que aparezca
+ * el cuarenta y siete es la guarda de `tools/coherence`, que no deja escribir con `fetch` a pelo.
+ */
 export async function pedir(
   entrada: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<Response | null> {
+  const metodo = (init?.method ?? 'GET').toUpperCase();
+  const conToken: RequestInit | undefined = SEGUROS.has(metodo)
+    ? init
+    : { ...init, headers: { ...(init?.headers as Record<string, string>), [CSRF_HEADER]: tokenDeLaCookie() } };
+
   try {
-    return await fetch(entrada, init);
+    return await fetch(entrada, conToken);
   } catch {
     return null;
   }

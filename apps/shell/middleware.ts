@@ -1,6 +1,15 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { PATH_HEADER, NONCE_HEADER, contentSecurityPolicy, nuevoNonce } from './src/server/csp';
 import { framedHeaders, parsearOrigenes } from './src/server/embedding';
+import {
+  CSRF_COOKIE,
+  CSRF_HEADER,
+  SESSION_COOKIE,
+  equalTokens,
+  exemptPath,
+  safeMethod,
+  tokenOf,
+} from './src/server/csrf';
 
 /**
  * Cabeceras que valen para toda respuesta.
@@ -20,8 +29,69 @@ const CABECERAS = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
 } as const;
 
+/**
+ * La puerta anti-CSRF: UNA, y en el camino de toda peticion — apartado 2.16.
+ *
+ * En el middleware y no repartida por los cuarenta manejadores de ruta. Una comprobacion por
+ * manejador es cuarenta sitios donde acordarse, y el que se olvide es justamente el que nadie
+ * mira: la ruta nueva, escrita con prisa, que no aparece en ninguna revision de seguridad porque
+ * todavia no existia cuando se hizo.
+ *
+ * Devuelve la respuesta de rechazo, o `null` si la peticion puede seguir.
+ */
+async function puertaCsrf(request: NextRequest): Promise<NextResponse | null> {
+  if (safeMethod(request.method)) return null;
+  if (!request.nextUrl.pathname.startsWith('/api/')) return null;
+  if (exemptPath(request.nextUrl.pathname)) return null;
+
+  /*
+   * Sin sesion no hay nada que falsificar.
+   *
+   * El token impide que un tercero MONTE sobre una sesion ajena; sin cookie de sesion no hay
+   * ninguna sobre la que montar, y quien llega asi se lleva el 401 del propio manejador, que
+   * explica lo que pasa mucho mejor que un 403 hablando de un token.
+   */
+  const sesion = request.cookies.get(SESSION_COOKIE)?.value;
+  if (!sesion) return null;
+
+  const secreto = process.env['AUTH_PEPPER'];
+  if (!secreto) {
+    /*
+     * Sin secreto no se puede verificar, y seguir adelante seria dejar la puerta abierta creyendo
+     * que esta cerrada. Se cierra: un despliegue sin `AUTH_PEPPER` ya no puede autenticar a nadie
+     * de todas formas, asi que esto no rompe nada que funcionara.
+     */
+    return NextResponse.json(
+      { error: 'El servidor no tiene configurado el secreto de sesion.' },
+      { status: 500 },
+    );
+  }
+
+  const enviado = request.headers.get(CSRF_HEADER) ?? '';
+  const esperado = await tokenOf(sesion, secreto);
+  if (equalTokens(enviado, esperado)) return null;
+
+  /*
+   * La cookie del token se comprueba tambien, y no es redundante: si falta, lo que pasa es que la
+   * sesion es de antes de que esto existiera. Decirlo aparte ahorra el rato de buscar un fallo
+   * que se arregla volviendo a entrar.
+   */
+  const sinCookie = !request.cookies.get(CSRF_COOKIE)?.value;
+  return NextResponse.json(
+    {
+      error: sinCookie
+        ? 'Su sesion es anterior a esta version. Vuelva a iniciar sesion.'
+        : 'Falta el token de la peticion o no corresponde a esta sesion.',
+    },
+    { status: 403 },
+  );
+}
+
 /** Politica de enmarcado y cabeceras de seguridad de toda la aplicacion — secciones 4.9 y 7. */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+  const rechazo = await puertaCsrf(request);
+  if (rechazo) return rechazo;
+
   const origenes = parsearOrigenes(process.env['EMBED_ALLOWED_ORIGINS']);
   const enDesarrollo = process.env['NODE_ENV'] !== 'production';
   const nonce = nuevoNonce();

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { IconButton } from './icons/IconButton';
 import { useTranslator } from './Locale';
+import { motivoDeFallo, pedir } from './pedir';
 
 /** Personalizacion de la vista — seccion 4.6. */
 export function MyView({
@@ -38,13 +39,13 @@ export function MyView({
     setError('');
     setTrabajando(true);
     try {
-      const r = await fetch(`/api/modules/${moduleSlug}/view`, {
+      const r = await pedir(`/api/modules/${moduleSlug}/view`, {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ ocultos }),
       });
-      if (!r.ok) {
-        setError(((await r.json()) as { error?: string }).error ?? 'No se pudo guardar.');
+      if (!r || !r.ok) {
+        setError(await motivoDeFallo(r, 'No se pudo guardar.'));
         return;
       }
       dialogo.current?.close();
@@ -58,7 +59,7 @@ export function MyView({
     setError('');
     setTrabajando(true);
     try {
-      await fetch(`/api/modules/${moduleSlug}/view`, { method: 'DELETE' });
+      await pedir(`/api/modules/${moduleSlug}/view`, { method: 'DELETE' });
       dialogo.current?.close();
       router.refresh();
     } finally {

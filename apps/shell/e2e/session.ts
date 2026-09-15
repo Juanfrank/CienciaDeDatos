@@ -24,7 +24,24 @@ export async function asLogin(page: Page, userId: string, base = ''): Promise<vo
     `No se pudo iniciar sesion como ${userId}: ${respuesta.status()} ${await respuesta.text()}`,
   ).toBe(true);
 
+  await tokenAlContexto(page);
   await page.goto(`${base || '/'}`);
+}
+
+/**
+ * El token anti-CSRF, puesto en el contexto — apartado 2.16.
+ *
+ * En el navegador lo pone `pedir` leyendo la cookie; las pruebas escriben con el cliente de
+ * Playwright, que no pasa por ahi. Se hace AQUI, una vez, y no en las decenas de llamadas
+ * repartidas por las suites: con una cabecera por llamada, la que se olvidara seria la de la
+ * prueba que alguien escriba manana, y el sintoma —un 403 sin explicacion— no dice que falta.
+ *
+ * `setExtraHTTPHeaders` es del CONTEXTO, asi que cubre tanto lo que pide la pagina como lo que
+ * pide `page.request`.
+ */
+async function tokenAlContexto(page: Page): Promise<void> {
+  const cookie = (await page.context().cookies()).find((c) => c.name === 'csrf');
+  if (cookie) await page.context().setExtraHTTPHeaders({ 'x-csrf-token': cookie.value });
 }
 
 /** Cierra la sesion del contexto, revocandola tambien del lado servidor. */

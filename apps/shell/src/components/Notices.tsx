@@ -12,6 +12,7 @@ import {
 } from '@app/alerts';
 import { kindLabel } from './noticeKinds';
 import { useTranslator } from './Locale';
+import { pedir } from './pedir';
 
 /** Bandeja de avisos: lo recibido, y lo que lo genera. */
 
@@ -43,7 +44,7 @@ export function Notices() {
   useEffect(() => {
     const withoutRead = inbox.filter((n) => !n.readAt).map((n) => n.id);
     if (withoutRead.length === 0) return;
-    void fetch('/api/notifications', {
+    void pedir('/api/notifications', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ ids: withoutRead }),
@@ -51,7 +52,7 @@ export function Notices() {
   }, [inbox]);
 
   const borrar = async (tipo: 'alertas' | 'suscripciones', id: string) => {
-    await fetch(`/api/${tipo}?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+    await pedir(`/api/${tipo}?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
     await recargar();
   };
 

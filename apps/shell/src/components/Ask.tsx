@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTranslator } from './Locale';
+import { pedir } from './pedir';
 
 /** Caja de pregunta en lenguaje natural — seccion 4.9. */
 export function Ask({ moduleSlug }: { moduleSlug: string }) {
@@ -18,12 +19,12 @@ export function Ask({ moduleSlug }: { moduleSlug: string }) {
 
   const preguntar = async () => {
     if (!pregunta.trim()) return;
-    const r = await fetch('/api/query', {
+    const r = await pedir('/api/query', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ pregunta, modulo: moduleSlug }),
     });
-    if (!r.ok) {
+    if (!r || !r.ok) {
       setRespuesta({ entendido: 'No se pudo resolver la pregunta.', resoluble: false, noEntendido: [], url: '' });
       return;
     }

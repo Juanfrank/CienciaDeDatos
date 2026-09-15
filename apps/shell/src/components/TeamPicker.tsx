@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
+import { pedir } from './pedir';
 
 /** Selector de espacio de trabajo — seccion 4.10.2. */
 export function TeamPicker({
@@ -15,7 +16,7 @@ export function TeamPicker({
   const [pendiente, iniciarTransicion] = useTransition();
 
   const cambiar = async (teamId: string) => {
-    await fetch('/api/session/active-team', {
+    await pedir('/api/session/active-team', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ teamId }),

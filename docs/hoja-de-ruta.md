@@ -508,23 +508,48 @@ El procedimiento esta en `docs/operations/primer-administrador.md`, junto al de
 `acceso-de-emergencia.md`, que describe la situacion inversa —quedarse sin Administradores— y
 comparte con este la pregunta de fondo: quien puede crear el acceso cuando no hay acceso.
 
-### 2.16 La incorporacion en otros portales no funciona fuera del propio dominio
+### 2.16 La incorporacion en otros portales fuera del propio dominio — HECHO
 
-Decidido dejarlo asi, y anotado para que no se redescubra.
+La cookie de sesion era `sameSite: 'lax'`. Un navegador NO la manda a un iframe de otro sitio, asi
+que un portal externo de verdad no veia datos nunca: veia «Se requiere iniciar sesion», incluso con
+la sesion abierta en otra pestana.
 
-La cookie de sesion es `sameSite: 'lax'`. Un navegador NO la manda a un iframe de otro sitio, asi
-que un portal externo de verdad no vera datos nunca: vera el mensaje «Se requiere iniciar sesion»,
-incluso con la sesion abierta en otra pestana. Lo que SI funciona es el mismo sitio —subdominios
-del propio portal—, y la pagina incrustada ya se comporta bien en el caso que no funciona: no
-dibuja un formulario de contrasena dentro del marco ajeno, que ensenaria a la gente a escribir su
-clave donde no debe, sino un enlace que abre la aplicacion en otra pestana.
+Y `lax` era, a la vez, la **unica** proteccion contra la falsificacion de peticiones que la
+aplicacion tenia. Ponerlo en `none` a secas habria cambiado un problema por uno peor. De ahi el
+orden en que se hizo, que es lo que importa de este apartado:
 
-Arreglarlo es `sameSite: 'none'`, y eso quita la UNICA proteccion CSRF que hoy tiene la
-aplicacion: no hay token anti-CSRF, la proteccion es `lax`. Hacerlo bien es `none` **mas** un
-token en todas las escrituras, y es un cambio que toca toda la superficie de escritura.
+**1. Primero el token, en todas las escrituras.** `apps/shell/src/server/csrf.ts`. Es un HMAC de la
+sesion con el secreto del servidor, no un valor guardado aparte: nada que almacenar, nada que
+caducar, nada que quede huerfano al revocar la sesion. Y ata el token A ESA sesion —un doble envio
+sin firmar lo rompe quien pueda escribir una cookie en el dominio, por ejemplo desde un subdominio
+comprometido—.
 
-No se hace hasta que haya un portal externo real que lo pida. Hacerlo antes seria debilitar algo
-que funciona para habilitar algo que nadie esta usando.
+**2. Una sola puerta, en el middleware.** No cuarenta comprobaciones repartidas por los manejadores
+de ruta: cuarenta sitios donde acordarse, y el que se olvide es justamente el que nadie mira —la
+ruta nueva, escrita con prisa, que no existia cuando se hizo la ultima revision de seguridad—.
+Exentas solo dos rutas, y cada una con su motivo escrito: entrar, que es de donde SALE el token, y
+restablecer, que lo ejecuta quien no tiene sesion.
+
+**3. Una sola puerta tambien en el cliente.** `pedir` pone la cabecera. Las diecisiete escrituras
+que iban con `fetch` a pelo pasan por ahi, y lo que impide que aparezca la numero cuarenta y siete
+es `tools/coherence/escrituras.spec.ts`: si escribe, va por `pedir`. El compilador no puede ver esa
+diferencia —las dos funciones existen y las dos devuelven una respuesta— y una revision tampoco,
+porque lo que hay que notar es la AUSENCIA de algo.
+
+**4. Y solo entonces, la cookie puede cruzar.** `cookiePolicy` decide en un sitio, para las dos
+cookies: con origenes de incrustacion declarados y en produccion, `sameSite: 'none'` con `secure`;
+en cualquier otro caso, `lax`. Las dos juntas porque con politicas distintas el navegador mandaria
+una y no la otra, y toda escritura quedaria rechazada sin que nada lo explicara. Y `none` solo con
+HTTPS porque un navegador RECHAZA `SameSite=None` sin `Secure`: ponerlo en desarrollo no relajaria
+la proteccion, dejaria la aplicacion sin sesion.
+
+El token NO es condicional: se exige tambien con `lax`. Una proteccion que se enciende con una
+variable de entorno es una proteccion que en algun entorno esta apagada.
+
+Verificado enrojeciendo la puerta: con la comprobacion desactivada, la escritura falsificada pasa.
+
+La pagina incrustada sigue sin dibujar un formulario de contrasena dentro del marco ajeno, que
+ensenaria a la gente a escribir su clave donde no debe.
 
 ---
 

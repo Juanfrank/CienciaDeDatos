@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslator } from '../Locale';
 import type { AccessScope } from '@app/access-control';
+import { SIN_RED, pedir } from '../pedir';
 
 /** Editor de ambitos — seccion 4.10.8, y la puerta de 4.10.4. */
 interface Dimension {
@@ -70,11 +71,15 @@ export function ScopeEditor({
       ...(justificacion.trim() ? { justificacion: justificacion.trim() } : {}),
     };
 
-    const r = await fetch('/api/admin/scopes', {
+    const r = await pedir('/api/admin/scopes', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
     });
+    if (!r) {
+      setMensaje({ tipo: 'error', content: SIN_RED });
+      return;
+    }
     const respuesta = await r.json();
 
     if (r.status === 422 && respuesta.detail?.dimensiones) {

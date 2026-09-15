@@ -1,10 +1,11 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { sessions } from './identity';
+import { SESSION_COOKIE } from './cookies';
 
 /** Sesion del shell — secciones 4.7 y 6.7. */
 
-export const SESSION_COOKIE = 'sesion';
+export { SESSION_COOKIE } from './cookies';
 
 export interface ShellSession {
   sessionId: string;

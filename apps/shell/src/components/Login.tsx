@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTranslator } from './Locale';
+import { motivoDeFallo, pedir } from './pedir';
 
 /**
  * Pantalla de acceso — seccion 4.7.
@@ -57,22 +58,21 @@ export function Login({
     setError('');
     setEnviando(true);
     try {
-      const r = await fetch('/api/sign-in', {
+      const r = await pedir('/api/sign-in', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ mail, clave, ...(code ? { code } : {}) }),
       });
 
-      if (r.ok) {
+      if (r?.ok) {
         router.push(destino);
         router.refresh();
         return;
       }
 
-      const { error: motivo } = (await r.json()) as { error?: string };
       // 428 es "falta el segundo factor": no es un fallo de credenciales, es un paso mas.
-      if (r.status === 428) setPideCodigo(true);
-      setError(motivo ?? 'No se pudo iniciar sesion.');
+      if (r?.status === 428) setPideCodigo(true);
+      setError(await motivoDeFallo(r, 'No se pudo iniciar sesion.'));
     } finally {
       setEnviando(false);
     }
@@ -80,13 +80,12 @@ export function Login({
 
   const conAzureAd = async () => {
     setError('');
-    const r = await fetch('/api/sign-in', {
+    const r = await pedir('/api/sign-in', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ proveedor: 'azure-ad' }),
     });
-    const { error: motivo } = (await r.json()) as { error?: string };
-    setError(motivo ?? 'Azure AD no esta disponible.');
+    setError(await motivoDeFallo(r, 'Azure AD no esta disponible.'));
   };
 
   return (

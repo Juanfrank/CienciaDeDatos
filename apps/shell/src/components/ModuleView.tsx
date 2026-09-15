@@ -19,6 +19,7 @@ import { IconLink } from './icons/IconLink';
 import { Reorganizar } from './Reorganizar';
 import { moduleOptionOn, type GridPosition, type ModuleDefinition } from '@app/module-model';
 import type { SerializedObject } from '../server/serialize';
+import { motivoDeFallo, pedir } from './pedir';
 
 /** Interruptor de la consulta en lenguaje natural (4.9). */
 const VISIBLE_QUERY = false;
@@ -102,15 +103,13 @@ export function ModuleView({
       const cuerpo = Object.fromEntries(
         objetos.map((o) => [o.itemId, posiciones[o.itemId] ?? o.position]),
       );
-      const r = await fetch(`/api/modules/${moduleSlug}/view`, {
+      const r = await pedir(`/api/modules/${moduleSlug}/view`, {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ posiciones: cuerpo }),
       });
-      if (!r.ok) {
-        setErrorAlColocar(
-          ((await r.json()) as { error?: string }).error ?? t('module.place.failed'),
-        );
+      if (!r || !r.ok) {
+        setErrorAlColocar(await motivoDeFallo(r, t('module.place.failed')));
         return;
       }
       setColocando(false);

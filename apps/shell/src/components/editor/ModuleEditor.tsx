@@ -19,6 +19,7 @@ import { Canvas } from './Canvas';
 import { SidebarPanel } from './SidebarPanel';
 import { Icon } from '../icons/Icon';
 import { useTranslator } from '../Locale';
+import { motivoDeFallo, pedir } from '../pedir';
 
 /*
  * Lo que espera el autoguardado antes de escribir.
@@ -146,14 +147,14 @@ export function ModuleEditor({
     async (cuales: ModuleDefinition['pages'], cual: string) => {
       setDibujando(true);
       try {
-        const r = await fetch(`/api/modules/${modulo.slug}/preview`, {
+        const r = await pedir(`/api/modules/${modulo.slug}/preview`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           // QUE pagina dibujar. Sin esto el servidor devolvia siempre la primera, asi que cambiar
           // de pagina movia los huecos de la rejilla y dejaba debajo los objetos de la otra.
           body: JSON.stringify({ paginas: cuales, pagina: cual }),
         });
-        if (!r.ok) return;
+        if (!r || !r.ok) return;
         const body = (await r.json()) as {
           diagnosticos: ModuleDiagnostics;
           locks: PublishBlocker[];
@@ -330,11 +331,15 @@ export function ModuleEditor({
         const cola = pendientes.current;
         if (!vuelta && cola.length === 0) return;
 
-        const r = await fetch(`/api/modules/${modulo.slug}/edit`, {
+        const r = await pedir(`/api/modules/${modulo.slug}/edit`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(vuelta ? { paginas: vuelta } : { operaciones: cola }),
         });
+        if (!r) {
+          setError(t('editor.withoutNetwork'));
+          return;
+        }
         if (!r.ok) {
           /*
            * El cuerpo de un error puede no ser JSON.
@@ -540,27 +545,25 @@ export function ModuleEditor({
       if (sucio) {
         const vuelta = reemplazo.current;
         const cola = pendientes.current;
-        const guardado = await fetch(`/api/modules/${modulo.slug}/edit`, {
+        const guardado = await pedir(`/api/modules/${modulo.slug}/edit`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(vuelta ? { paginas: vuelta } : { operaciones: cola }),
         });
-        if (!guardado.ok) {
-          const body = (await guardado.json().catch(() => ({}))) as { error?: string };
-          setError(body.error ?? 'No se pudo guardar antes de enviar.');
+        if (!guardado || !guardado.ok) {
+          setError(await motivoDeFallo(guardado, 'No se pudo guardar antes de enviar.'));
           return;
         }
         reemplazo.current = null;
         pendientes.current = pendientes.current.slice(cola.length);
       }
-      const r = await fetch(`/api/modules/${modulo.slug}/status`, {
+      const r = await pedir(`/api/modules/${modulo.slug}/status`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ transition: cual }),
       });
-      if (!r.ok) {
-        const body = (await r.json().catch(() => ({}))) as { error?: string };
-        setError(body.error ?? `No se pudo ${cual}.`);
+      if (!r || !r.ok) {
+        setError(await motivoDeFallo(r, `No se pudo ${cual}.`));
         return;
       }
       const body = (await r.json()) as { modulo: ModuleDefinition };
