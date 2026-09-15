@@ -250,10 +250,12 @@ editando el mismo borrador se pisarian —hoy no ocurre porque un borrador es de
 y el dia que haya modulos grandes sera caro. La forma correcta es una operacion por cambio, como
 `applyTreeOperation` en el arbol.
 
-### 2.5 Paginas multiples en el editor
+### 2.5 Paginas multiples en el editor — CERRADO
 
-Un modulo admite varias paginas —el modelo, la validacion y el ruteo `/m/{slug}/{pagina}` estan
-hechos— y el editor solo edita la primera.
+El editor abre todas las paginas, y las crea, rebautiza y quita desde la barra que hay sobre el
+lienzo. Eran tres cables y no uno: elegir la pagina, que el cambio caiga en la ABIERTA —`conItems`
+escribia en `paginas[0]` fijo— y que `/preview` sepa cual dibujar, porque devolvia siempre la
+primera y los bloques de las demas salian vacios.
 
 ---
 
@@ -309,9 +311,13 @@ el dia que se reactive. Viven en el historial de git.
 ### 2.10 El texto visible sale del componente, no del catalogo
 
 `AGENTS.md` lo pone entre las reglas que no se negocian y dice que lo garantiza una prueba. No
-habia tal prueba, y la regla lleva incumpliendose casi entera: **53 claves en el catalogo de
-`@app/i18n` contra 322 cadenas escritas dentro de 56 componentes**. Solo tres archivos importan el
-traductor.
+habia tal prueba, y la regla llevaba incumpliendose casi entera: **53 claves en el catalogo de
+`@app/i18n` contra 322 cadenas escritas dentro de 56 componentes**. Solo tres archivos importaban
+el traductor.
+
+Ahora hay prueba —`tools/coherence/i18n.spec.ts`— y es un trinquete: cuenta las cadenas sueltas y
+solo admite que el numero baje. Va por **167**, desde las 322 del principio. Sigue abierto porque
+ciento sesenta y siete no es cero.
 
 No es cosmetico. Mientras el texto viva en el componente, la aplicacion no puede cambiar de
 idioma —que es lo que el propio paquete existe para permitir—, cada cadena repetida en dos
