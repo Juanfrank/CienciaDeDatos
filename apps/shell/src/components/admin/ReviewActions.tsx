@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
 import { useTranslator } from '../Locale';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /**
  * Aprobar o devolver una propuesta, desde el panel.
@@ -25,15 +26,14 @@ export function ReviewActions({ slug, publicable }: { slug: string; publicable: 
   async function transicion(cual: 'publicar' | 'devolver') {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch(`/api/modules/${slug}/status`, {
+    const respuesta = await pedir(`/api/modules/${slug}/status`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ transition: cual, ...(cual === 'devolver' ? { motivo } : {}) }),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(cuerpo.error ?? t('admin.review.failed'));
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.review.failed')));
       return;
     }
     router.refresh();

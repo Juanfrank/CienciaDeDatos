@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTranslator } from '../Locale';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /**
  * Volver a publicar el contenido de una version anterior — seccion 4.5.
@@ -21,15 +22,14 @@ export function RestoreVersion({ slug, version }: { slug: string; version: numbe
   async function restaurar() {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch(`/api/modules/${slug}/history`, {
+    const respuesta = await pedir(`/api/modules/${slug}/history`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ version }),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(cuerpo.error ?? t('admin.history.restoreFailed'));
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.history.restoreFailed')));
       return;
     }
     setConfirmando(false);

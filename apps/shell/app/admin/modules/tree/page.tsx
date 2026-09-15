@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Translator } from '@app/i18n';
-import { isFolder, type NavNode } from '@app/access-control';
+import { depthWarning, isFolder, type NavNode } from '@app/access-control';
 import { sectionOf } from '../../../../src/components/admin/sections';
 import { TreeActions, type DestinoPosible } from '../../../../src/components/admin/TreeActions';
 import { FolderActions } from '../../../../src/components/admin/FolderActions';
@@ -57,10 +57,26 @@ export default async function TreePage() {
   const filas = folderRows(arbol.nodes, porId);
   const posibles = destinos(arbol.nodes, t);
 
+  /*
+   * El aviso de profundidad (4.1.1) se ENSENA.
+   *
+   * `depthWarning` existia desde que se escribio el arbol y no la llamaba nadie: la regla estaba
+   * escrita, probada y sin llegar nunca a una pantalla, asi que quien anida la sexta carpeta no
+   * se entera de nada. Avisa, no bloquea: hay organizaciones que necesitan ese nivel, y quien
+   * decide es el Administrador — pero decidiendo, no sin saberlo.
+   */
+  const profundidad = depthWarning(arbol);
+
   return (
     <section>
       <h2>{t('admin.tree.title')}</h2>
       <p className="muted-text">{seccion?.desc}</p>
+
+      {profundidad ? (
+        <p className="aviso notice-atencion" data-testid="aviso-profundidad">
+          {profundidad}
+        </p>
+      ) : null}
 
       <CrearEnElArbol destinos={posibles} soloCarpeta />
 

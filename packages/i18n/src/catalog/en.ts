@@ -681,6 +681,7 @@ export const en: Record<MessageKey, string> = {
   'admin.bump.new': 'New, at its default value: {claves}.',
   'admin.bump.dropped': 'The new version no longer supports: {claves}.',
   'admin.bump.failed': 'Could not bump.',
+  'admin.bump.major': 'This is a MAJOR version jump: it may change what is displayed. Review the object after upgrading.',
 
   // Editor: explicit save, discard and submit — section 4.2.
   'editor.saving': 'Saving…',

@@ -677,6 +677,7 @@ export const es = {
   'admin.bump.new': 'Nuevo, en su valor por defecto: {claves}.',
   'admin.bump.dropped': 'La version nueva ya no admite: {claves}.',
   'admin.bump.failed': 'No se pudo subir.',
+  'admin.bump.major': 'Es un salto de version MAYOR: puede cambiar lo que se ve. Revise el objeto despues de subirlo.',
   // Editor: autoguardado, guardado manual, descartar y enviar — seccion 4.2.
   'editor.saving': 'Guardando…',
   'editor.withoutNetwork': 'No se pudo guardar: no hay conexion con el servidor. Se reintenta solo.',

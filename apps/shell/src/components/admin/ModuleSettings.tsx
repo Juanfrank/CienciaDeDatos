@@ -24,6 +24,7 @@ import {
 } from '@app/ui-components';
 import type { MessageKey } from '@app/i18n';
 import { useTranslator } from '../Locale';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /**
  * Configuracion de un modulo — secciones 4.1 y 4.11.
@@ -124,15 +125,17 @@ export function ModuleSettings({
   const guardar = async () => {
     setEnCurso(true);
     setMensaje(null);
-    const respuesta = await fetch(`/api/modules/${slugOriginal}/settings`, {
+    const respuesta = await pedir(`/api/modules/${slugOriginal}/settings`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ settings: form }),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setMensaje({ tipo: 'error', texto: cuerpo.error ?? t('admin.settings.failed') });
+    if (!respuesta?.ok) {
+      setMensaje({
+        tipo: 'error',
+        texto: await motivoDeFallo(respuesta, t('admin.settings.failed')),
+      });
       return;
     }
     setMensaje({ tipo: 'ok', texto: t('admin.settings.saved') });

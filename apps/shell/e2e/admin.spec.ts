@@ -660,6 +660,48 @@ test.describe('que hay dentro de cada modulo, y subirlo de version (4.5)', () =>
   });
 });
 
+test.describe('una caida de red no deja el panel inservible', () => {
+  test('el boton vuelve a estar disponible y dice que no hubo conexion', async ({ page }) => {
+    /*
+     * Dieciseis controles del panel tenian la misma forma: encender la bandera de «en curso»,
+     * esperar al servidor, apagarla. `fetch` no devuelve error cuando no hay red: LANZA, y
+     * entonces la linea que apaga la bandera no llega a correr. El boton se quedaba
+     * deshabilitado para siempre, sin decir nada, y la unica salida era recargar la pagina.
+     *
+     * Se corta la peticion de verdad con `route.abort`: un 500 es una respuesta y ya tenia
+     * camino; lo que no lo tenia es que no hubiera respuesta ninguna.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/resources/other');
+
+    const boton = page.getByTestId('deshabilitar-icono:balanza');
+    await expect(boton).toBeEnabled();
+
+    await page.route('**/api/admin/resources', (ruta) => ruta.abort('failed'));
+    await boton.click();
+
+    await expect(page.getByTestId('error-icono:balanza')).toContainText('No hay conexion');
+    // Y sobre todo: se puede volver a intentar sin recargar la pagina.
+    await expect(boton).toBeEnabled();
+
+    // Restablecida la conexion, el mismo boton funciona sin recargar nada.
+    await page.unroute('**/api/admin/resources');
+    await boton.click();
+    await expect(page.getByTestId('asset-balanza-estado')).toHaveText(/Deshabilitar/i);
+
+    /*
+     * Y se deja el mundo como se encontro.
+     *
+     * El proyecto «sequential» comparte almacen entre pruebas: dejar el icono deshabilitado hace
+     * fallar a la de mas abajo, que lo necesita disponible para comprobar que deshabilitarlo lo
+     * retira del desplegable. Una prueba que rompe a la siguiente no es una prueba, es una
+     * bomba de relojeria.
+     */
+    await boton.click();
+    await expect(page.getByTestId('asset-balanza-estado')).not.toHaveText(/Deshabilitar/i);
+  });
+});
+
 test.describe('los recursos que no son objetos (4.5)', () => {
   test('los iconos salen en tabla, con quien los usa y su estado', async ({ page }) => {
     await asLogin(page, 'u-admin');

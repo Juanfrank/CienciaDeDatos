@@ -38,18 +38,6 @@ export const paginationKey = (instanceId: string): string => `${PREFIJO_PAGINA}$
 export const attachmentKeyIs = (clave: string): boolean =>
   clave.startsWith(PREFIJO_FILTRO) || clave.startsWith(PREFIJO_PAGINA);
 
-/** Los valores distintos de un campo, en el orden en que aparecen. */
-export function visualFilterOptions(result: QueryResult, fieldName: string): string[] {
-  const i = result.columns.findIndex((c) => c.name === fieldName);
-  if (i < 0) return [];
-  const vistos = new Set<string>();
-  for (const row of result.rows) {
-    const valor = row[i];
-    if (valor !== null && valor !== undefined) vistos.add(String(valor));
-  }
-  return [...vistos];
-}
-
 /**
  * Las filas que quedan tras aplicar lo que se pidio en el filtro de visualizacion.
  *

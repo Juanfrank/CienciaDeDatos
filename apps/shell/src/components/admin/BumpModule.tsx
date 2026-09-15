@@ -2,7 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { isMajorJump } from '@app/ui-components';
 import { useTranslator } from '../Locale';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /**
  * Subir un objeto a la ultima version dentro de un modulo — seccion 4.5.
@@ -57,15 +59,14 @@ export function BumpModule({
   async function subir() {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch(`/api/modules/${slug}/bump`, {
+    const respuesta = await pedir(`/api/modules/${slug}/bump`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ objectId, hasta }),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(cuerpo.error ?? t('admin.bump.failed'));
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.bump.failed')));
       return;
     }
     setHecho((await respuesta.json()) as Resultado);
@@ -135,6 +136,18 @@ export function BumpModule({
   return (
     <div role="group" aria-label={`${t('admin.resources.action.bump')}: ${objectId} · ${slug}`}>
       <p className="muted-text">{t('admin.bump.warn', { desde, hasta })}</p>
+      {/*
+        Un salto de MAYOR avisa mas fuerte, que es para lo que `isMajorJump` se escribio.
+        Estaba en el repositorio de objetos, documentada como «para que la interfaz pueda avisar
+        con mas fuerza», y no la llamaba nadie: subir de 1.0.0 a 1.0.1 y subir de 1.0.0 a 2.0.0
+        se confirmaban con el mismo texto, y el numero mayor existe justamente para decir que
+        una de las dos cosas no es como la otra.
+      */}
+      {isMajorJump(desde, hasta) ? (
+        <p className="aviso notice-atencion" data-testid={`bump-mayor-${clave}`}>
+          {t('admin.bump.major')}
+        </p>
+      ) : null}
       <button
         type="button"
         className="pastilla"

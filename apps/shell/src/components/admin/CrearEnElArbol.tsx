@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslator } from '../Locale';
 import type { DestinoPosible } from './TreeActions';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /**
  * Crear un modulo y crear una carpeta, desde la propia tabla — secciones 4.1 y 4.10.8.
@@ -43,13 +44,6 @@ export function CrearEnElArbol({
   const [nombreCarpeta, setNombreCarpeta] = useState('');
   const [padre, setPadre] = useState<string>('__raiz__');
 
-  const fallo = async (respuesta: Response): Promise<boolean> => {
-    if (respuesta.ok) return false;
-    const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-    setError(cuerpo.error ?? t('admin.tree.action.failed'));
-    return true;
-  };
-
   /*
    * Crear el modulo lleva AL EDITOR, no de vuelta a la tabla.
    *
@@ -59,13 +53,16 @@ export function CrearEnElArbol({
   const crearModulo = async () => {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch('/api/modules', {
+    const respuesta = await pedir('/api/modules', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ nombre, slug }),
     });
     setEnCurso(false);
-    if (await fallo(respuesta)) return;
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.tree.action.failed')));
+      return;
+    }
 
     const cuerpo = (await respuesta.json()) as { modulo: { slug: string } };
     dialogoModulo.current?.close();
@@ -75,7 +72,7 @@ export function CrearEnElArbol({
   const crearCarpeta = async () => {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch('/api/admin/tree', {
+    const respuesta = await pedir('/api/admin/tree', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -89,7 +86,10 @@ export function CrearEnElArbol({
       }),
     });
     setEnCurso(false);
-    if (await fallo(respuesta)) return;
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.tree.action.failed')));
+      return;
+    }
 
     dialogoCarpeta.current?.close();
     setNombreCarpeta('');

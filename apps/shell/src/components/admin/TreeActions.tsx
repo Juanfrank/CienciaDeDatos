@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslator } from '../Locale';
 import { Icon } from '../icons/Icon';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /**
  * Las acciones de una fila del arbol — secciones 4.1 y 4.10.8.
@@ -83,15 +84,14 @@ export function TreeActions({
   const enviar = async (operacion: Record<string, unknown>) => {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch('/api/admin/tree', {
+    const respuesta = await pedir('/api/admin/tree', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(operacion),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(cuerpo.error ?? t('admin.tree.action.failed'));
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.tree.action.failed')));
       return;
     }
     setMoviendo(false);
@@ -103,15 +103,14 @@ export function TreeActions({
   const pedirMovimiento = async (destino: DestinoPosible) => {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch('/api/admin/tree?previsualizar=1', {
+    const respuesta = await pedir('/api/admin/tree?previsualizar=1', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ type: 'mover', nodeId, newParentId: destino.id }),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(cuerpo.error ?? t('admin.tree.action.failed'));
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.tree.action.failed')));
       return;
     }
 
@@ -138,8 +137,14 @@ export function TreeActions({
   const editar = async () => {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch(`/api/modules/${editable}/revision`, { method: 'POST' });
+    const respuesta = await pedir(`/api/modules/${editable}/revision`, { method: 'POST' });
     setEnCurso(false);
+    // Sin respuesta no hay cuerpo que leer: se sale por el mismo camino de error, diciendo que
+    // no hubo conexion en vez de intentar interpretar una respuesta que no existe.
+    if (!respuesta) {
+      setError(await motivoDeFallo(null, t('admin.tree.action.failed')));
+      return;
+    }
     const cuerpo = (await respuesta.json().catch(() => ({}))) as {
       error?: string;
       modulo?: { slug: string };

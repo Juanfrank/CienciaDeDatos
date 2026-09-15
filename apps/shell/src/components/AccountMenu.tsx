@@ -6,6 +6,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Icon, type IconName } from './icons/Icon';
 import { useTranslator } from './Locale';
 import { initialsOf } from './initials';
+import { pedir } from './pedir';
 
 /** Quien esta dentro, a donde puede ir y como se sale (4.7 y 4.9). */
 
@@ -57,8 +58,8 @@ export function AccountMenu({
   const consultar = useCallback(async () => {
     if (!hayAvisos) return;
     try {
-      const r = await fetch('/api/notifications');
-      if (!r.ok) return;
+      const r = await pedir('/api/notifications');
+      if (!r?.ok) return;
       const { withoutRead: n } = (await r.json()) as { withoutRead: number };
       setSinLeer(n);
     } catch {
@@ -106,7 +107,7 @@ export function AccountMenu({
 
   const salir = async () => {
     setSaliendo(true);
-    await fetch('/api/sign-in', { method: 'DELETE' });
+    await pedir('/api/sign-in', { method: 'DELETE' });
     // replace y no push: volver atras no debe devolver a una pagina de dentro.
     router.replace('/sign-in');
     router.refresh();

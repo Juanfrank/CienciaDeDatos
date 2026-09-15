@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslator } from '../Locale';
 import { Icon } from '../icons/Icon';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /**
  * Las dos acciones que solo tiene una carpeta: renombrar y mandar a la papelera.
@@ -35,15 +36,14 @@ export function FolderActions({
   const enviar = async (operacion: Record<string, unknown>) => {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch('/api/admin/tree', {
+    const respuesta = await pedir('/api/admin/tree', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(operacion),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(cuerpo.error ?? t('admin.tree.action.failed'));
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.tree.action.failed')));
       return;
     }
     dialogo.current?.close();

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { ModulePackage } from '@app/access-control';
 import { useTranslator } from '../Locale';
 import { Icon } from '../icons/Icon';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /**
  * Los paquetes visuales, en tabla y EDITABLES — secciones 4.1.3 y 4.10.6.
@@ -51,15 +52,14 @@ export function PackageTable({
   const enviar = async (cuerpo: { paquete?: ModulePackage; borrar?: string }) => {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch('/api/admin/packages', {
+    const respuesta = await pedir('/api/admin/packages', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(cuerpo),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const body = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(body.error ?? t('admin.packages.failed'));
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.packages.failed')));
       return false;
     }
     setEditando(null);

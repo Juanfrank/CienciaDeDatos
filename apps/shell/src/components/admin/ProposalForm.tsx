@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /** Proponer que una version de un objeto se certifique — seccion 4.5. */
 export function ProposalForm({
@@ -24,15 +25,14 @@ export function ProposalForm({
   async function proponer() {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch('/api/admin/resources', {
+    const respuesta = await pedir('/api/admin/resources', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ accion: 'proponer', objectId: objeto, version, summary: resumen }),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(cuerpo.error ?? 'No se pudo proponer.');
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, 'No se pudo proponer.'));
       return;
     }
     setVersion('');

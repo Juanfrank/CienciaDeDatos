@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /** Aprobar o devolver una propuesta del catalogo — seccion 4.5. */
 export function ProposalActions({
@@ -21,15 +22,14 @@ export function ProposalActions({
   async function decidir(decision: 'aprobar' | 'devolver') {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch('/api/admin/resources', {
+    const respuesta = await pedir('/api/admin/resources', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ accion: 'decidir', id, decision, motivo }),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(cuerpo.error ?? 'No se pudo decidir.');
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, 'No se pudo decidir.'));
       return;
     }
     router.refresh();

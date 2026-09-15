@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { AccesoAlModulo } from '../../server/admin';
 import { useTranslator } from '../Locale';
 import { Icon } from '../icons/Icon';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /**
  * Quien ve este modulo, por equipo y por persona — secciones 4.10.6 y 4.10.8.
@@ -235,15 +236,14 @@ function useAcceso(slug: string) {
   const enviar = async (cuerpo: Record<string, unknown>) => {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch(`/api/admin/modules/${slug}/access`, {
+    const respuesta = await pedir(`/api/admin/modules/${slug}/access`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(cuerpo),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const body = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(body.error ?? t('admin.access.failed'));
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.access.failed')));
       return;
     }
     // `router.refresh()` no vale aqui: se llama una vez por elemento marcado y el refresco de

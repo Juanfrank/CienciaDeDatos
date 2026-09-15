@@ -9,7 +9,6 @@ import {
   paginationLegend,
   paginationKey,
   visualFilterKey,
-  visualFilterOptions,
 } from './attachmentView';
 import type { ObjectInstance } from './types';
 
@@ -76,10 +75,6 @@ describe('las claves de la URL', () => {
 });
 
 describe('filtro de visualizacion', () => {
-  it('ofrece los valores distintos del campo, sin repetirlos', () => {
-    expect(visualFilterOptions(result, 'DimTribunal.Distrito')).toEqual(['Este', 'Norte', 'Sur']);
-  });
-
   it('sin seleccion no toca nada: no es un filtro que empiece filtrando', () => {
     expect(applyVisualFilter(result, 'DimTribunal.Distrito', SIN_PEDIR)).toBe(result);
   });

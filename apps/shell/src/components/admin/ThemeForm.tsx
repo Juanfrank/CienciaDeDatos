@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SOURCE_ROLES, type ThemeDefinition, type ThemeSource } from '@app/design-tokens';
 import { useTranslator } from '../Locale';
+import { pedir, motivoDeFallo } from '../pedir';
 
 /**
  * Crear un tema, activarlo y borrarlo — seccion 4.3.
@@ -36,15 +37,14 @@ export function ThemeForm({ base }: { base: ThemeSource }) {
       source: origen,
       ...(descripcion.trim() ? { description: descripcion } : {}),
     };
-    const respuesta = await fetch('/api/admin/themes', {
+    const respuesta = await pedir('/api/admin/themes', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ accion: 'guardar', tema }),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const cuerpo = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(cuerpo.error ?? t('admin.themes.failed'));
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.themes.failed')));
       return;
     }
     dialogo.current?.close();
@@ -172,15 +172,14 @@ export function ThemeActions({
   const enviar = async (cuerpo: Record<string, unknown>) => {
     setEnCurso(true);
     setError(null);
-    const respuesta = await fetch('/api/admin/themes', {
+    const respuesta = await pedir('/api/admin/themes', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(cuerpo),
     });
     setEnCurso(false);
-    if (!respuesta.ok) {
-      const body = (await respuesta.json().catch(() => ({}))) as { error?: string };
-      setError(body.error ?? t('admin.themes.failed'));
+    if (!respuesta?.ok) {
+      setError(await motivoDeFallo(respuesta, t('admin.themes.failed')));
       return;
     }
     router.refresh();

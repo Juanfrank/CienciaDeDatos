@@ -19,7 +19,6 @@ export {
   paginationKey,
   paginationLegend,
   visualFilterKey,
-  visualFilterOptions,
   type PaginationView,
 } from './registry/attachmentView';
 export { initialCatalog } from './registry/catalog';
