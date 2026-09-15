@@ -265,12 +265,33 @@ Dos cosas cambiaron en el servidor y las dos importan:
 `columnOrder` sigue sin gesto: el orden de columnas de una tabla es una superficie distinta y se
 hara con el resto de la personalizacion de tablas.
 
-### 2.3 El editor reescribe la definicion entera en cada cambio
+### 2.3 El editor reescribe la definicion entera en cada cambio — HECHO
 
-Cada casilla marcada manda las paginas completas. Funciona y es simple, pero dos personas
-editando el mismo borrador se pisarian —hoy no ocurre porque un borrador es de una sola persona—
-y el dia que haya modulos grandes sera caro. La forma correcta es una operacion por cambio, como
-`applyTreeOperation` en el arbol.
+Cada casilla marcada mandaba las paginas completas. Funcionaba y era simple, y tenia dos problemas
+que no se ven con un modulo pequeno y una sola persona: dos personas sobre el mismo borrador se
+pisan, y el coste crece con el modulo en vez de con el cambio.
+
+`applyModuleOperation` en `packages/module-model/src/moduleOperations.ts`, con la misma forma que
+`applyTreeOperation` en el arbol y por el mismo motivo: es PURA y vive en el modelo, de modo que
+el editor y el servidor aplican exactamente lo mismo. Dos implementaciones —una para dibujar y
+otra para guardar— acaban difiriendo, y la diferencia aparece como «lo que veia no es lo que se
+guardo».
+
+Siete operaciones: anadir, renombrar y quitar pagina; anadir, quitar y reemplazar objeto; y mover,
+que va aparte porque es la mas frecuente —cada arrastre— y lleva cuatro numeros en vez de la
+instancia entera.
+
+Lo que arregla el pisarse es DONDE se aplican: `saveDraft` las aplica sobre el borrador GUARDADO,
+no sobre la foto que el editor tenia en pantalla. Dos cambios sobre cosas distintas se componen.
+Una tanda es todo o nada y un rechazo es 409 —un conflicto, no una averia—, con el numero de la
+operacion que fallo, porque «no se pudo guardar» sobre una tanda de seis no dice donde mirar.
+
+`paginas` sigue aceptandose, y no es un descuido: reemplazar el borrador entero es exactamente lo
+que hacen restaurar una version del historial, sembrar un modulo de prueba y el boton de descartar
+del editor —volver al punto de retorno es declarar un estado, no una secuencia de cambios—.
+Mandar las dos cosas a la vez se rechaza: no hay forma de saber cual gana.
+
+Verificado enrojeciendo la acumulacion entre operaciones y el todo-o-nada.
 
 ### 2.5 Paginas multiples en el editor — CERRADO
 

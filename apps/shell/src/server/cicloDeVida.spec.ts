@@ -69,6 +69,83 @@ beforeEach(async () => {
   await clearAudit();
 });
 
+describe('una operacion por cambio (2.3)', () => {
+  /*
+   * Lo que se comprueba no es que sepa aplicar una operacion —eso es del modelo, y tiene su
+   * prueba— sino sobre QUE la aplica: sobre el borrador guardado, no sobre la foto que quien
+   * editaba tenia en pantalla. Ahi esta la diferencia entera con mandar las paginas completas.
+   */
+  it('dos cambios que no se solapan se componen en vez de pisarse', async () => {
+    const modulo = await readyDraft(colaborador, 'compuesto');
+    const primera = modulo.pages[0];
+    if (!primera) throw new Error('fixture inesperado');
+
+    const segunda = {
+      pageId: 'pag-dos',
+      slug: 'segunda',
+      name: 'Segunda',
+      items: [],
+    };
+    await saveDraft({
+      actor: colaborador,
+      moduleId: modulo.moduleId,
+      cambios: {},
+      operaciones: [{ kind: 'page-add', page: segunda }],
+    });
+
+    /*
+     * Este envio sale de un editor que NO sabe que existe la segunda pagina: su foto es la de
+     * antes. Mandando las paginas completas, la segunda desapareceria sin que nadie lo pidiera.
+     */
+    const despues = await saveDraft({
+      actor: colaborador,
+      moduleId: modulo.moduleId,
+      cambios: {},
+      operaciones: [{ kind: 'page-rename', pageSlug: primera.slug, name: 'Resumen' }],
+    });
+
+    expect(despues.pages.map((p) => p.slug)).toEqual([primera.slug, 'segunda']);
+    expect(despues.pages[0]?.name).toBe('Resumen');
+  });
+
+  it('una operacion imposible se rechaza con 409 y no deja nada a medias', async () => {
+    const modulo = await readyDraft(colaborador, 'imposible');
+    const primera = modulo.pages[0];
+    if (!primera) throw new Error('fixture inesperado');
+
+    const fallo = await saveDraft({
+      actor: colaborador,
+      moduleId: modulo.moduleId,
+      cambios: {},
+      operaciones: [
+        { kind: 'page-rename', pageSlug: primera.slug, name: 'Resumen' },
+        { kind: 'item-remove', pageSlug: primera.slug, itemId: 'inventado' },
+      ],
+    }).catch((e: unknown) => e);
+
+    expect((fallo as CicloDeVidaError).status).toBe(409);
+    // Y el renombrado de la primera operacion NO quedo escrito: la tanda es todo o nada.
+    const sigue = await modules.get(modulo.moduleId);
+    expect(sigue?.pages[0]?.name).toBe(primera.name);
+  });
+
+  it('operaciones y paginas completas a la vez se rechazan', async () => {
+    const modulo = await readyDraft(colaborador, 'ambas');
+    const primera = modulo.pages[0];
+    if (!primera) throw new Error('fixture inesperado');
+
+    // No hay forma de saber cual gana, y adivinarlo seria peor que preguntarlo.
+    await expect(
+      saveDraft({
+        actor: colaborador,
+        moduleId: modulo.moduleId,
+        cambios: { pages: [primera] },
+        operaciones: [{ kind: 'page-rename', pageSlug: primera.slug, name: 'Resumen' }],
+      }),
+    ).rejects.toThrow(/a la vez/);
+  });
+});
+
 describe('crear un borrador', () => {
   it('un Colaborador puede, y nace como borrador suyo', async () => {
     const modulo = await createDraft({ actor: colaborador, name: 'Mi analisis', slug: 'mi-analisis' });

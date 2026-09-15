@@ -28,6 +28,12 @@ export {
   type GridProblem,
 } from './grid';
 export {
+  applyModuleOperation,
+  applyModuleOperations,
+  type ModuleOperation,
+  type ModuleOperationResult,
+} from './moduleOperations';
+export {
   applyPersonalization,
   assertPersonalizationIsPresentationOnly,
   describeProvenance,

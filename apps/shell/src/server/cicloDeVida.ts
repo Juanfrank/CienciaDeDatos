@@ -18,6 +18,8 @@ import {
   type ModuleOption,
   type ModuleStatus,
   type PublishBlocker,
+  type ModuleOperation,
+  applyModuleOperations,
   diffModules,
   findPublishBlockers,
 } from '@app/module-model';
@@ -227,6 +229,19 @@ export interface SaveDraftInput {
   actor: ModuleActor;
   moduleId: string;
   cambios: Partial<Pick<ModuleDefinition, 'name' | 'icon' | 'pages'>>;
+  /**
+   * Cambios expresados como OPERACIONES, que se aplican sobre el borrador guardado — 2.3.
+   *
+   * Es la diferencia entera con `cambios.pages`. Mandar las paginas completas dice «el modulo es
+   * exactamente esto», asi que el segundo en llegar borra lo que hizo el primero aunque tocaran
+   * paginas distintas. Una operacion dice lo que CAMBIA, y se aplica sobre lo que hay: dos
+   * cambios sobre cosas distintas se componen.
+   *
+   * Se aplican antes que `cambios.pages`, que sigue existiendo para reemplazar el borrador
+   * entero —restaurar una version, sembrar un modulo de prueba—. Las dos cosas a la vez se
+   * rechazan: no hay forma de saber cual gana, y adivinarlo seria peor que preguntarlo.
+   */
+  operaciones?: ModuleOperation[];
 }
 
 /** Guarda cambios en un borrador. */
@@ -248,11 +263,32 @@ export async function saveDraft(input: SaveDraftInput): Promise<ModuleDefinition
 
   authorshipRequire(modulo, input.actor);
 
+  if (input.operaciones && input.cambios.pages !== undefined) {
+    throw new CicloDeVidaError(
+      'No se pueden mandar operaciones y paginas completas a la vez: no hay forma de saber cual gana.',
+      400,
+    );
+  }
+
+  /*
+   * Las operaciones se aplican sobre lo GUARDADO, no sobre lo que el editor tenia en pantalla.
+   *
+   * Ahi esta el arreglo: si alguien mas cambio el borrador entretanto, sus cambios siguen puestos
+   * y encima caen estos. Un rechazo se devuelve como 409 —el editor ya no esta de acuerdo con el
+   * almacen— y no como 500: es un conflicto, no una averia.
+   */
+  let paginas = input.cambios.pages;
+  if (input.operaciones) {
+    const resultado = applyModuleOperations(modulo.pages, input.operaciones);
+    if (!resultado.ok) throw new CicloDeVidaError(resultado.error, 409);
+    paginas = resultado.pages;
+  }
+
   const actualizado: ModuleDefinition = {
     ...modulo,
     ...(input.cambios.name !== undefined ? { name: input.cambios.name.trim() } : {}),
     ...(input.cambios.icon !== undefined ? { icon: input.cambios.icon } : {}),
-    ...(input.cambios.pages !== undefined ? { pages: input.cambios.pages } : {}),
+    ...(paginas !== undefined ? { pages: paginas } : {}),
     updatedAt: ahora(),
   };
 

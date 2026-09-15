@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import type { ModuleDefinition, ModulePage } from '@app/module-model';
+import type { ModuleDefinition, ModuleOperation, ModulePage } from '@app/module-model';
 import {
   actorDe,
   publicationLocks,
@@ -51,9 +51,23 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
   }
 
   try {
+    /*
+     * Dos formas de decir un cambio, y no son intercambiables — 2.3.
+     *
+     * `operaciones` dice lo que CAMBIA y se aplica sobre el borrador guardado, asi que dos
+     * cambios de dos personas sobre cosas distintas se componen. Es lo que manda el editor.
+     *
+     * `paginas` dice lo que QUEDA y reemplaza el borrador entero. Sigue existiendo porque hay
+     * cosas que son exactamente eso —restaurar una version del historial, sembrar un modulo de
+     * prueba—, pero usarlo para editar es lo que hacia que el segundo en guardar borrara al
+     * primero. Mandar las dos a la vez se rechaza en `saveDraft`.
+     */
     const modulo = await saveDraft({
       actor,
       moduleId: existente.moduleId,
+      ...(Array.isArray(body['operaciones'])
+        ? { operaciones: body['operaciones'] as ModuleOperation[] }
+        : {}),
       cambios: {
         ...(typeof body['nombre'] === 'string' ? { name: body['nombre'] } : {}),
         ...(Array.isArray(body['paginas'])

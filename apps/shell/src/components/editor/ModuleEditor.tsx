@@ -7,9 +7,10 @@ import type {
   GridItem,
   ModuleDefinition,
   ModuleDiagnostics,
+  ModuleOperation,
   PublishBlocker,
 } from '@app/module-model';
-import { findFreeSlot } from '@app/module-model';
+import { applyModuleOperation, findFreeSlot } from '@app/module-model';
 import { defaultSize, initialSettings } from '@app/ui-components';
 import type { EditorPalette } from '../../server/editor';
 import type { SerializedObject } from '../../server/serialize';
@@ -170,11 +171,55 @@ export function ModuleEditor({
 
   /** Cambia el borrador y redibuja. No escribe. */
   const editar = useCallback(
-    (cuales: ModuleDefinition['pages']) => {
+    (cuales: ModuleDefinition['pages'], pagina?: string) => {
       setPaginas(cuales);
-      void dibujar(cuales, slugActual);
+      void dibujar(cuales, pagina ?? slugActual);
     },
     [dibujar, slugActual],
+  );
+
+  /*
+   * Lo que falta por mandar, como OPERACIONES y no como la definicion entera — apartado 2.3.
+   *
+   * Cada gesto encola lo que CAMBIA. El servidor las aplica sobre el borrador guardado, asi que
+   * dos personas que tocan cosas distintas ya no se pisan: antes cada envio decia «el modulo es
+   * exactamente esto» y el segundo en llegar borraba al primero. Y lo que viaja deja de crecer
+   * con el tamano del modulo: mover una caja mandaba las doce paginas.
+   *
+   * En una referencia y no en estado: encolar no tiene que redibujar nada —lo que se dibuja es el
+   * borrador, que ya cambio— y con estado cada gesto daria dos pinturas en vez de una.
+   */
+  const pendientes = useRef<ModuleOperation[]>([]);
+
+  /*
+   * Reemplazo del borrador ENTERO, que es otra cosa y tiene su sitio.
+   *
+   * Solo lo usa «descartar»: volver al punto de retorno no es una secuencia de cambios, es decir
+   * cual es el estado. Expresarlo como operaciones seria inventar un historial inverso que nadie
+   * pidio, y aplicarlo sobre un borrador que otro haya tocado daria un resultado que no es ni lo
+   * de uno ni lo del otro.
+   */
+  const reemplazo = useRef<ModuleDefinition['pages'] | null>(null);
+
+  /**
+   * Aplica UNA operacion: al borrador que se ve y a la cola que se enviara.
+   *
+   * La misma funcion pura que corre el servidor, para que lo que se dibuja y lo que se guarda no
+   * puedan diferir. Si la operacion no se puede, se dice y no se encola: encolar algo que el
+   * servidor va a rechazar deja el editor ensenando un estado que nunca existira.
+   */
+  const operar = useCallback(
+    (op: ModuleOperation, pagina?: string): boolean => {
+      const resultado = applyModuleOperation(paginas, op);
+      if (!resultado.ok) {
+        setError(resultado.error);
+        return false;
+      }
+      pendientes.current = [...pendientes.current, op];
+      editar(resultado.pages, pagina);
+      return true;
+    },
+    [editar, paginas],
   );
 
   /*
@@ -195,11 +240,9 @@ export function ModuleEditor({
       name: `Pagina ${n}`,
       items: [],
     };
-    const siguientes = [...paginas, nueva];
+    if (!operar({ kind: 'page-add', page: nueva }, nueva.slug)) return;
     setSlugActual(nueva.slug);
     setSeleccion(null);
-    setPaginas(siguientes);
-    void dibujar(siguientes, nueva.slug);
   };
 
   /*
@@ -217,17 +260,13 @@ export function ModuleEditor({
     if (!original) return;
     const id = `obj-${crypto.randomUUID().slice(0, 8)}`;
     const { w, h } = original.position;
-    editar(
-      conItems([
-        ...items,
-        {
-          ...original,
-          id,
-          position: findFreeSlot(items, w, h),
-          instance: { ...original.instance, instanceId: id },
-        },
-      ]),
-    );
+    const copia = {
+      ...original,
+      id,
+      position: findFreeSlot(items, w, h),
+      instance: { ...original.instance, instanceId: id },
+    };
+    if (!operar({ kind: 'item-add', pageSlug: slugActual, item: copia })) return;
     setSeleccion(id);
   };
 
@@ -241,8 +280,9 @@ export function ModuleEditor({
   const hayBarraDePaginas = paginas.length > 1 || editable;
 
   /** Renombrar la pagina abierta. El slug NO cambia: hay saltos y marcadores que lo apuntan. */
-  const renombrarPagina = (name: string) =>
-    editar(paginas.map((p) => (p.slug === slugActual ? { ...p, name } : p)));
+  const renombrarPagina = (name: string) => {
+    operar({ kind: 'page-rename', pageSlug: slugActual, name });
+  };
 
   /*
    * Quitar la pagina abierta, con lo que tenga dentro.
@@ -251,14 +291,11 @@ export function ModuleEditor({
    * se quedaria sin lienzo donde volver a empezar.
    */
   const quitarPagina = () => {
-    if (paginas.length < 2) return;
-    const siguientes = paginas.filter((p) => p.slug !== slugActual);
-    const destino = siguientes[0];
+    const destino = paginas.find((p) => p.slug !== slugActual);
     if (!destino) return;
+    if (!operar({ kind: 'page-remove', pageSlug: slugActual }, destino.slug)) return;
     setSlugActual(destino.slug);
     setSeleccion(null);
-    setPaginas(siguientes);
-    void dibujar(siguientes, destino.slug);
   };
 
   /*
@@ -279,10 +316,24 @@ export function ModuleEditor({
       setError('');
       setGuardando(true);
       try {
+        /*
+         * Lo que se manda es la COLA, no las paginas — 2.3.
+         *
+         * Se toma una foto de la cola ANTES de enviar y solo se quita esa foto al terminar: lo
+         * que se encole mientras la peticion viaja tiene que sobrevivir, o el gesto que alguien
+         * hizo durante ese segundo se perderia sin decir nada.
+         *
+         * `paginas` sigue siendo el cuerpo de «descartar», que no es una secuencia de cambios
+         * sino la declaracion de un estado.
+         */
+        const vuelta = reemplazo.current;
+        const cola = pendientes.current;
+        if (!vuelta && cola.length === 0) return;
+
         const r = await fetch(`/api/modules/${modulo.slug}/edit`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ paginas: cuales }),
+          body: JSON.stringify(vuelta ? { paginas: vuelta } : { operaciones: cola }),
         });
         if (!r.ok) {
           /*
@@ -298,6 +349,10 @@ export function ModuleEditor({
           locks: PublishBlocker[];
           objetos: SerializedObject[];
         };
+        // Lo enviado ya esta guardado: sale de la cola, y lo encolado despues se queda.
+        if (vuelta) reemplazo.current = null;
+        else pendientes.current = pendientes.current.slice(cola.length);
+
         setModulo(body.modulo);
         /*
          * Lo guardado se adopta SOLO si nadie escribio mientras la peticion viajaba.
@@ -352,9 +407,6 @@ export function ModuleEditor({
     const temporizador = setTimeout(() => void guardar(paginas), MS_AUTOGUARDADO);
     return () => clearTimeout(temporizador);
   }, [editable, sucio, saving, paginas, guardar]);
-
-  const conItems = (nuevos: GridItem[]): ModuleDefinition['pages'] =>
-    paginas.map((p, i) => (i === indice ? { ...p, items: nuevos } : p));
 
   const add = async (objectId: string) => {
     const definicion = palette.objetos.find((o) => o.objectId === objectId);
@@ -419,18 +471,34 @@ export function ModuleEditor({
       },
     };
 
-    editar(conItems([...items, nuevo]));
+    if (!operar({ kind: 'item-add', pageSlug: slugActual, item: nuevo })) return;
     // Lo recien puesto queda elegido: es lo que se va a configurar a continuacion.
     setSeleccion(id);
   };
 
   const cambiar = async (itemId: string, change: (item: GridItem) => GridItem) => {
-    editar(conItems(items.map((i) => (i.id === itemId ? change(i) : i))));
+    const actual = items.find((i) => i.id === itemId);
+    if (!actual) return;
+    const siguiente = change(actual);
+
+    /*
+     * Mover se manda como `item-move` y no como un reemplazo entero.
+     *
+     * Es la operacion mas frecuente —cada arrastre emite decenas— y la mas barata de todas: lleva
+     * cuatro numeros en vez de la instancia completa con su binding y su presentacion.
+     */
+    const soloPosicion =
+      JSON.stringify({ ...siguiente, position: actual.position }) === JSON.stringify(actual);
+    operar(
+      soloPosicion
+        ? { kind: 'item-move', pageSlug: slugActual, itemId, position: siguiente.position }
+        : { kind: 'item-replace', pageSlug: slugActual, item: siguiente },
+    );
   };
 
   const remove = async (itemId: string) => {
     setSeleccion(null);
-    editar(conItems(items.filter((i) => i.id !== itemId)));
+    operar({ kind: 'item-remove', pageSlug: slugActual, itemId });
   };
 
   /*
@@ -458,6 +526,9 @@ export function ModuleEditor({
   const descartar = () => {
     setSeleccion(null);
     setError('');
+    // Lo encolado deja de valer: se vuelve a un estado, no se deshace paso a paso.
+    pendientes.current = [];
+    reemplazo.current = puntoDeRetorno;
     editar(puntoDeRetorno);
   };
 
@@ -467,16 +538,20 @@ export function ModuleEditor({
     setGuardando(true);
     try {
       if (sucio) {
+        const vuelta = reemplazo.current;
+        const cola = pendientes.current;
         const guardado = await fetch(`/api/modules/${modulo.slug}/edit`, {
           method: 'PUT',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ paginas }),
+          body: JSON.stringify(vuelta ? { paginas: vuelta } : { operaciones: cola }),
         });
         if (!guardado.ok) {
           const body = (await guardado.json().catch(() => ({}))) as { error?: string };
           setError(body.error ?? 'No se pudo guardar antes de enviar.');
           return;
         }
+        reemplazo.current = null;
+        pendientes.current = pendientes.current.slice(cola.length);
       }
       const r = await fetch(`/api/modules/${modulo.slug}/status`, {
         method: 'POST',
@@ -489,6 +564,8 @@ export function ModuleEditor({
         return;
       }
       const body = (await r.json()) as { modulo: ModuleDefinition };
+      pendientes.current = [];
+      reemplazo.current = null;
       setModulo(body.modulo);
       setPaginas(body.modulo.pages);
       router.refresh();
