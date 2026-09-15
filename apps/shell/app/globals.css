@@ -1988,6 +1988,20 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
   padding-bottom: var(--space-sm);
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
+
+/*
+ * La barra del modo de colocacion — 4.6, apartado 2.2.
+ *
+ * Misma barra, con la explicacion a la izquierda y las acciones a la derecha: el modo cambia lo
+ * que se puede hacer con el lienzo, y una barra distinta haria pensar que se ha entrado en otra
+ * pantalla. Lo que se esta mirando es el mismo modulo.
+ */
+.module-bar--colocando {
+  justify-content: space-between;
+  border-bottom: none;
+}
+
+.module-bar--colocando > .muted-text { flex: 1 1 24ch; margin: 0; }
 .module-bar__actions {
   display: flex;
   align-items: center;

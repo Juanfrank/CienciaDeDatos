@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { IconButton } from './icons/IconButton';
+import { useTranslator } from './Locale';
 
 /** Personalizacion de la vista — seccion 4.6. */
 export function MyView({
@@ -12,6 +13,7 @@ export function MyView({
   moduleSlug: string;
   personalizada: boolean;
 }) {
+  const t = useTranslator();
   const router = useRouter();
   const dialogo = useRef<HTMLDialogElement>(null);
   const [objetos, setObjetos] = useState<{ id: string; titulo: string }[]>([]);
@@ -68,22 +70,22 @@ export function MyView({
     <>
       <IconButton
         icono="view"
-        etiqueta="Mi vista"
+        etiqueta={t('myView.title')}
         presionado={personalizada}
         data-testid="my-view"
         onClick={() => void open()}
       />
 
-      <dialog ref={dialogo} className="emergente" aria-label="Mi vista" data-testid="dialogo-my-view">
+      <dialog ref={dialogo} className="emergente" aria-label={t('myView.title')} data-testid="dialogo-my-view">
         <div className="popover__header">
-          <h2>Mi vista de este modulo</h2>
+          <h2>{t('myView.heading')}</h2>
           <button
             type="button"
             className="button-link"
             data-testid="my-view-close"
             onClick={() => dialogo.current?.close()}
           >
-            Cerrar
+            {t('action.close')}
           </button>
         </div>
 
@@ -93,7 +95,7 @@ export function MyView({
         </p>
 
         <fieldset className="my-view__objects">
-          <legend>Objetos visibles</legend>
+          <legend>{t('myView.visible')}</legend>
           {objetos.map((o) => (
             <label key={o.id}>
               <input
@@ -123,7 +125,7 @@ export function MyView({
             disabled={trabajando}
             onClick={() => void guardar()}
           >
-            Guardar mi vista
+            {t('myView.save')}
           </button>
 
           {/*
@@ -139,7 +141,7 @@ export function MyView({
               disabled={trabajando}
               onClick={() => void discard()}
             >
-              Volver a la vista institucional
+              {t('myView.discard')}
             </button>
           ) : null}
         </div>

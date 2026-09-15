@@ -237,11 +237,33 @@ cuenta concreta. Vive en Front Door o en App Service, no en el codigo de la apli
 
 Nada las bloquea. Estan aqui porque se identificaron y no se hicieron.
 
-### 2.2 Reposicionamiento en la personalizacion (4.6)
+### 2.2 Reposicionamiento en la personalizacion (4.6) — HECHO
 
-`UserPersonalization` admite `positionOverrides` y `columnOrder`, y `applyPersonalization` los
-aplica. El dialogo "Mi vista" solo ofrece ocultar y mostrar. El modelo esta; falta el gesto, y
-ya no depende de nada: el gesto existe en el editor (seccion 0) y falta portarlo aqui.
+`UserPersonalization` admitia `positionOverrides` y `applyPersonalization` los aplicaba; el
+dialogo «Mi vista» solo ofrecia ocultar y mostrar. El modelo estaba; faltaba el gesto.
+
+Portado del editor, no reescrito: `Reorganizar.tsx` usa el MISMO `useDrag` y las mismas clases del
+lienzo. Dos arrastres distintos acaban divergiendo, y el que se usa menos es el que se rompe. Para
+que el arrastre pueda medir, el modo dibuja la rejilla con filas de alto fijo y colocacion
+absoluta —la del editor—; al guardar se vuelve a la del visor.
+
+El teclado hace lo mismo sobre la misma operacion: las flechas mueven, Mayus con las flechas
+redimensiona, y la etiqueta accesible dice columna y fila despues de cada movimiento. La prueba de
+navegador va por ahi a proposito: el camino del teclado es el que se rompe sin que nadie lo note.
+
+Dos cosas cambiaron en el servidor y las dos importan:
+
+1. `savePersonalization` ahora cambia **solo lo que se envia**. Ocultar y colocar son gestos en
+   pantallas distintas y ninguna conoce lo de la otra —la que coloca no puede enumerar los objetos
+   ocultos porque ya no los ve—, asi que reescribir el registro entero convertia dos gestos
+   independientes en uno destructivo.
+2. Se valida la disposicion **resultante**, no cada posicion suelta: puesta encima de otra, una
+   posicion es valida por si misma y la vista queda rota. Pero solo se rechaza lo que la
+   personalizacion ROMPE: un modulo publicado con objetos pisandose es problema de quien lo
+   publico, y bloquear por eso quitaria justamente la herramienta con la que apartarlos.
+
+`columnOrder` sigue sin gesto: el orden de columnas de una tabla es una superficie distinta y se
+hara con el resto de la personalizacion de tablas.
 
 ### 2.3 El editor reescribe la definicion entera en cada cambio
 

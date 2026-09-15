@@ -11,9 +11,9 @@ import { describe, expect, it } from 'vitest';
  * dentro de los componentes.
  *
  * El numero solo puede BAJAR. Quien anada una cadena suelta rompe la prueba; quien migre una baja
- * el tope en el mismo commit. Empezo en 322 con 53 claves; va por 191, y las cinco pantallas que
- * mas acumulaban —el panel de formato, los ajustes de objeto, el panel lateral, la lista de
- * modulos y la de acceso— ya no estan entre las peores.
+ * el tope en el mismo commit. Empezo en 322 con 53 claves; va por 158, y las pantallas que mas
+ * acumulaban —el panel de formato, los ajustes de objeto, el panel lateral, la lista de modulos, la
+ * de acceso y ahora la barra del modulo con «Mi vista»— ya no estan entre las peores.
  */
 
 const raiz = execSync('git rev-parse --show-toplevel').toString().trim();
@@ -37,7 +37,7 @@ const PALABRA = /[A-Za-zÀ-ÿ]{3,}/;
  * Es una foto, no un objetivo: cada cadena que se migre al catalogo puede bajarlo. Subirlo
  * requiere explicar por que una cadena nueva no puede ir al catalogo.
  */
-const TOPE = 167;
+const TOPE = 158;
 
 function cadenasDe(ruta: string): string[] {
   const fuente = readFileSync(`${raiz}/${ruta}`, 'utf8');

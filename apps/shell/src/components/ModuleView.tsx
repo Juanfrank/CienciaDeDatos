@@ -1,6 +1,9 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useUrlFilters } from '../hooks/useUrlFilters';
+import { useTranslator } from './Locale';
 import { CreateNotice, type WatchableObject } from './CreateNotice';
 import { Export } from './Export';
 import { Embed } from './Embed';
@@ -11,8 +14,10 @@ import { MyView } from './MyView';
 import { ModuleObject } from './ModuleObject';
 import { DrillTargetsProvider } from './ObjectView';
 import { Grid } from './Grid';
+import { IconButton } from './icons/IconButton';
 import { IconLink } from './icons/IconLink';
-import { moduleOptionOn, type ModuleDefinition } from '@app/module-model';
+import { Reorganizar } from './Reorganizar';
+import { moduleOptionOn, type GridPosition, type ModuleDefinition } from '@app/module-model';
 import type { SerializedObject } from '../server/serialize';
 
 /** Interruptor de la consulta en lenguaje natural (4.9). */
@@ -65,8 +70,56 @@ export function ModuleView({
 }) {
   const ofrece = (opcion: Parameters<typeof moduleOptionOn>[1]) =>
     moduleOptionOn({ ...(options ? { options } : {}) }, opcion);
+  const t = useTranslator();
   const { toggle, clearAll, searchParams } = useUrlFilters();
   const filtersHas = [...searchParams.keys()].length > 0;
+
+  /*
+   * Colocar los objetos en la propia vista — 4.6, apartado 2.2.
+   *
+   * El estado arranca de las posiciones que YA se estan viendo, que son las institucionales con la
+   * personalizacion aplicada. Partir de las institucionales habria hecho que abrir el modo
+   * deshiciera de golpe una colocacion anterior, sin tocar nada.
+   */
+  const router = useRouter();
+  const [colocando, setColocando] = useState(false);
+  const [posiciones, setPosiciones] = useState<Record<string, GridPosition>>({});
+  const [errorAlColocar, setErrorAlColocar] = useState('');
+  const [guardando, setGuardando] = useState(false);
+
+  const guardarPosiciones = async () => {
+    setErrorAlColocar('');
+    setGuardando(true);
+    try {
+      /*
+       * Se manda la disposicion ENTERA, no solo lo que se movio.
+       *
+       * Un objeto que no se toco tiene la posicion que se esta viendo, y esa ya puede venir de una
+       * colocacion anterior. Mandando solo lo movido, el servidor conservaria las de antes para
+       * todo lo demas —que es lo mismo— salvo si el modulo institucional cambio entretanto: ahi
+       * la vista guardada y la que se acaba de ver dejarian de coincidir sin que nadie lo pidiera.
+       */
+      const cuerpo = Object.fromEntries(
+        objetos.map((o) => [o.itemId, posiciones[o.itemId] ?? o.position]),
+      );
+      const r = await fetch(`/api/modules/${moduleSlug}/view`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ posiciones: cuerpo }),
+      });
+      if (!r.ok) {
+        setErrorAlColocar(
+          ((await r.json()) as { error?: string }).error ?? t('module.place.failed'),
+        );
+        return;
+      }
+      setColocando(false);
+      setPosiciones({});
+      router.refresh();
+    } finally {
+      setGuardando(false);
+    }
+  };
 
   const items = objetos.map((o) => ({ id: o.itemId, position: o.position }));
 
@@ -117,9 +170,26 @@ export function ModuleView({
         <div className="module-bar">
           {insignias}
 
-          <div className="module-bar__actions" role="toolbar" aria-label="Acciones del modulo">
+          <div className="module-bar__actions" role="toolbar" aria-label={t('module.actions')}>
             {ofrece('personalizacion') ? (
-              <MyView moduleSlug={moduleSlug} personalizada={provenance.isPersonalized} />
+              <>
+                <MyView moduleSlug={moduleSlug} personalizada={provenance.isPersonalized} />
+                {/*
+                  Colocar es un gesto sobre el LIENZO, no una casilla en un dialogo: se hace
+                  mirando el modulo y viendo donde cae cada cosa. Por eso entra desde aqui y no
+                  desde «Mi vista», que es donde se decide QUE se ve, no donde.
+                */}
+                <IconButton
+                  icono="mover"
+                  etiqueta={t('module.place')}
+                  presionado={colocando}
+                  data-testid="colocar"
+                  onClick={() => {
+                    setErrorAlColocar('');
+                    setColocando((antes) => !antes);
+                  }}
+                />
+              </>
             ) : null}
             {ofrece('marcadores') ? (
               <Bookmarks moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
@@ -186,7 +256,7 @@ export function ModuleView({
               data-testid="clear-filters"
               onClick={clearAll}
             >
-              Limpiar todos los filtros
+              {t('module.clearFilters')}
             </button>
           ) : null}
         </div>
@@ -203,13 +273,59 @@ export function ModuleView({
         </div>
       ) : null}
 
-      <Grid items={items}>
-        {(id) => {
-          const objeto = byId.get(id);
-          if (!objeto) return null;
-          return <ModuleObject objeto={objeto} onFiltrar={toggle} />;
-        }}
-      </Grid>
+      {colocando ? (
+        <>
+          <div className="module-bar module-bar--colocando">
+            <p className="muted-text">{t('module.place.intro')}</p>
+            <div className="module-bar__actions">
+              <button
+                type="button"
+                className="pastilla"
+                data-testid="colocar-guardar"
+                disabled={guardando}
+                onClick={() => void guardarPosiciones()}
+              >
+                {t('module.place.save')}
+              </button>
+              <button
+                type="button"
+                className="button-link"
+                data-testid="colocar-cancelar"
+                disabled={guardando}
+                onClick={() => {
+                  setPosiciones({});
+                  setErrorAlColocar('');
+                  setColocando(false);
+                }}
+              >
+                {t('action.cancel')}
+              </button>
+            </div>
+          </div>
+
+          {errorAlColocar ? (
+            <p className="aviso-error" role="alert" data-testid="colocar-error">
+              {errorAlColocar}
+            </p>
+          ) : null}
+
+          <Reorganizar
+            objetos={objetos}
+            posiciones={posiciones}
+            onColocar={(itemId, position) =>
+              setPosiciones((actuales) => ({ ...actuales, [itemId]: position }))
+            }
+          />
+        </>
+      ) : (
+        <Grid items={items}>
+          {(id) => {
+            const objeto = byId.get(id);
+            if (!objeto) return null;
+            return <ModuleObject objeto={objeto} onFiltrar={toggle} />;
+          }}
+        </Grid>
+      )}
     </DrillTargetsProvider>
   );
 }

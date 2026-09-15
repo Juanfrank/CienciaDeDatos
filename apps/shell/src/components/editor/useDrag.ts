@@ -1,11 +1,23 @@
 'use client';
 
-import { GRID_COLUMNS, overlapItself, type GridItem, type GridPosition } from '@app/module-model';
+import { GRID_COLUMNS, overlapItself, type GridPosition } from '@app/module-model';
 import { useCallback, useRef, useState } from 'react';
 
 /** Arrastrar para mover y para redimensionar, sobre la rejilla del editor. */
 
 export type DragMode = 'mover' | 'redimensionar';
+
+/**
+ * Lo unico que el arrastre necesita saber de un objeto: quien es y donde esta.
+ *
+ * Llevaba `GridItem`, que ademas trae la instancia entera. Pedirla obligaba a tenerla a mano para
+ * mover una caja, y es lo que impedia reutilizar esto en la colocacion de la vista propia (4.6),
+ * donde lo que hay son objetos ya serializados y no items de la definicion.
+ */
+export interface Colocable {
+  id: string;
+  position: GridPosition;
+}
 
 export interface ProgressDrag {
   itemId: string;
@@ -86,7 +98,7 @@ export function useDrag({
   rejilla,
   onSoltar,
 }: {
-  items: GridItem[];
+  items: Colocable[];
   rejilla: React.RefObject<HTMLDivElement | null>;
   onSoltar: (itemId: string, position: GridPosition) => void;
 }) {
@@ -130,7 +142,7 @@ export function useDrag({
   );
 
   const alEmpezar = useCallback(
-    (e: React.PointerEvent, item: GridItem, mode: DragMode) => {
+    (e: React.PointerEvent, item: Colocable, mode: DragMode) => {
       // Solo el boton principal: con el secundario se abre el menu contextual y el arrastre se
       // quedaria pegado al cursor sin que nada lo suelte.
       if (e.button !== 0) return;

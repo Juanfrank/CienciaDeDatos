@@ -50,6 +50,82 @@ test.describe('la vista se distingue de la institucional (4.6)', () => {
   });
 });
 
+test.describe('colocar los objetos en la propia vista (2.2)', () => {
+  /*
+   * Se prueba por el TECLADO, no arrastrando.
+   *
+   * No es una comodidad de la prueba: 4.9 dice que la accesibilidad no se pospone, y el camino del
+   * teclado es el que se rompe sin que nadie lo note, porque no es el que se usa al mirar la
+   * pantalla. Si funciona por aqui, el arrastre —que corre sobre la misma operacion— tiene donde
+   * apoyarse; al reves no.
+   */
+  /** El ultimo objeto de la pagina: debajo siempre hay sitio, porque la rejilla crece. */
+  const ULTIMO = 'tabla-detalle';
+
+  test('las flechas mueven el objeto, y la posicion se guarda', async ({ page }) => {
+    await page.goto(`/m/${MODULE}`);
+    await page.getByTestId('colocar').click();
+
+    const foco = page.getByTestId(`reorganizar-foco-${ULTIMO}`);
+    await expect(foco).toBeVisible();
+    const antes = await foco.getAttribute('aria-label');
+
+    await foco.focus();
+    await page.keyboard.press('ArrowDown');
+
+    // La etiqueta dice donde esta: es lo unico que anuncia el movimiento a quien no ve la rejilla,
+    // asi que si no cambia, el gesto no existe para esa persona aunque el objeto se haya movido.
+    await expect(foco).not.toHaveAttribute('aria-label', antes ?? '');
+
+    await page.getByTestId('colocar-guardar').click();
+    await expect(page.getByTestId('procedencia')).toContainText('personalizada');
+
+    // Y lo guardado es la posicion, no un texto: se lee del propio registro.
+    const guardada = await (await page.request.get(`/api/modules/${MODULE}/view`)).json();
+    expect(guardada.posiciones[ULTIMO]).toBeDefined();
+
+    await withoutCustomize(page);
+  });
+
+  test('Mayus con las flechas cambia el tamano', async ({ page }) => {
+    await page.goto(`/m/${MODULE}`);
+    await page.getByTestId('colocar').click();
+
+    // Este objeto tiene vecinos a los cuatro lados, asi que no se puede mover — y estrecharlo si.
+    // Sirve ademas de comprobacion de que los dos gestos son distintos y no uno disfrazado.
+    const foco = page.getByTestId(`reorganizar-foco-${OCULTABLE}`);
+    await expect(foco).toHaveAttribute('aria-label', /columna 4 a 6 de 12/);
+
+    await foco.focus();
+    await page.keyboard.press('ArrowRight');
+    // Sigue igual: a la derecha esta el panel de filtros, y colocar no puede pisar.
+    await expect(foco).toHaveAttribute('aria-label', /columna 4 a 6 de 12/);
+
+    await page.keyboard.press('Shift+ArrowLeft');
+    await expect(foco).toHaveAttribute('aria-label', /columna 4 a 5 de 12/);
+  });
+
+  test('el servidor no acepta una colocacion que pise otro objeto', async ({ page }) => {
+    await page.goto(`/m/${MODULE}`);
+
+    /*
+     * A mano, saltandose la pantalla: dentro del modo, la comprobacion de solapamiento impide
+     * llegar aqui. Lo que se comprueba es que la puerta este en el servidor, no en la interfaz —el
+     * criterio de la seccion 9—, porque la interfaz es lo que se puede rodear.
+     */
+    const r = await page.request.put(`/api/modules/${MODULE}/view`, {
+      data: {
+        posiciones: {
+          [OCULTABLE]: { x: 0, y: 0, w: 12, h: 40 },
+        },
+      },
+    });
+
+    expect(r.status()).toBe(400);
+    await expect(page.getByTestId('procedencia')).toContainText('institucional oficial');
+  });
+});
+
 test.describe('la personalizacion es de quien la hace', () => {
   test('la vista de otra persona no cambia', async ({ page }) => {
     await page.request.put(`/api/modules/${MODULE}/view`, { data: { ocultos: [OCULTABLE] } });
