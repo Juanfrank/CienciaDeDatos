@@ -54,10 +54,13 @@
     "e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "playwright test --config playwright.config.mts --project=parallel && E2E_WORKERS=1 playwright test --config playwright.config.mts --project=sequential"
+        "command": "playwright test --config playwright.config.mts --project=sequential",
+        "env": {
+          "E2E_WORKERS": "1"
+        }
       },
       "dependsOn": [
-        "build"
+        "e2e-parallel"
       ]
     },
     "e2e-catalog": {
@@ -82,6 +85,15 @@
         "{workspaceRoot}/test-results"
       ],
       "cache": true
+    },
+    "e2e-parallel": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "playwright test --config playwright.config.mts --project=parallel"
+      },
+      "dependsOn": [
+        "build"
+      ]
     }
   }
 }

@@ -1,53 +1,9 @@
 import { expect, test } from './instance';
-import { alDia, asLogin, newModule } from './session';
+import { alDia, asLogin, newModule, objectDraft } from './session';
 
 /** Editor de modulos y ciclo de vida — secciones 4.1, 4.2 y criterios de la seccion 9. */
 
 const newSlug = (prefijo: string) => `${prefijo}-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
-
-/** Crea un borrador con un objeto valido, por API, que es lo que hace la interfaz. */
-async function objectDraft(
-  page: import('@playwright/test').Page,
-  slug: string,
-): Promise<void> {
-  const creado = await page.request.post('/api/modules', {
-    data: { nombre: `Modulo ${slug}`, slug },
-  });
-  expect(creado.ok(), await creado.text()).toBe(true);
-
-  const { modulo } = (await creado.json()) as { modulo: { pages: { pageId: string }[] } };
-  const pagina = modulo.pages[0];
-
-  const guardado = await page.request.put(`/api/modules/${slug}/edit`, {
-    data: {
-      paginas: [
-        {
-          ...pagina,
-          slug: 'general',
-          name: 'General',
-          items: [
-            {
-              id: 'kpi',
-              position: { x: 0, y: 0, w: 3, h: 2 },
-              instance: {
-                instanceId: 'kpi',
-                objectId: 'tarjeta-kpi',
-                version: '1.0.0',
-                title: 'Pendientes',
-                binding: {
-                  datasetId: 'casos-por-distrito-trimestre',
-                  dimensions: [],
-                  measures: ['CasosPendientes'],
-                },
-              },
-            },
-          ],
-        },
-      ],
-    },
-  });
-  expect(guardado.ok(), await guardado.text()).toBe(true);
-}
 
 test.describe('quien entra al editor (4.10.1)', () => {
   test('un Visor no ve el enlace y la API le responde 403', async ({ page }) => {

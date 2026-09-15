@@ -129,6 +129,54 @@ export async function moduleWithObject(
   return id;
 }
 
+/**
+ * Un borrador con un objeto VALIDO, listo para enviar a aprobacion y publicar.
+ *
+ * Vive aqui porque lo necesitan dos archivos. `newModule` deja el modulo vacio, y un modulo con un
+ * objeto sin mapear no se puede publicar —la validacion lo bloquea, y con razon—, asi que toda
+ * prueba del ciclo de vida necesita exactamente esto. Copiado en el segundo archivo se habria
+ * quedado atras en cuanto cambiara el contrato de `tarjeta-kpi`.
+ */
+export async function objectDraft(page: Page, slug: string): Promise<void> {
+  const creado = await page.request.post('/api/modules', {
+    data: { nombre: `Modulo ${slug}`, slug },
+  });
+  expect(creado.ok(), await creado.text()).toBe(true);
+
+  const { modulo } = (await creado.json()) as { modulo: { pages: { pageId: string }[] } };
+  const pagina = modulo.pages[0];
+
+  const guardado = await page.request.put(`/api/modules/${slug}/edit`, {
+    data: {
+      paginas: [
+        {
+          ...pagina,
+          slug: 'general',
+          name: 'General',
+          items: [
+            {
+              id: 'kpi',
+              position: { x: 0, y: 0, w: 3, h: 2 },
+              instance: {
+                instanceId: 'kpi',
+                objectId: 'tarjeta-kpi',
+                version: '1.0.0',
+                title: 'Pendientes',
+                binding: {
+                  datasetId: DATASET_DEMO,
+                  dimensions: [],
+                  measures: ['CasosPendientes'],
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
+  expect(guardado.ok(), await guardado.text()).toBe(true);
+}
+
 /** La ultima version publicada de un objeto del catalogo. */
 function ultimaVersion(objectId: string): string {
   const definicion = initialCatalog.find((o) => o.objectId === objectId);

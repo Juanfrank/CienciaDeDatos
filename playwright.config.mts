@@ -71,24 +71,38 @@ function servidoresDe(indice: number) {
   const principal = 4310 + indice * 2;
   const segunda = principal + 1;
   const cache = `.cache-e2e-${indice}`;
-  // `SEED_DEMO_CREDENTIALS` enciende la siembra de las cuentas de demostracion, que es contra lo
-  // que entra `session.ts`. Es una puerta explicita justamente porque `next start` es produccion:
-  // sin decirlo aqui, estas pruebas no tendrian con que iniciar sesion, y un despliegue real
-  // —que no lleva la variable— no siembra nada.
-  const entorno = `CACHE_DIR=${cache} AUTH_PEPPER=${PIMIENTA} SEED_DEMO_CREDENTIALS=1 `;
+  /*
+   * Las variables van por `env` y no pegadas delante del comando.
+   *
+   * `VAR=valor comando` es sintaxis de shell POSIX: en `cmd.exe` no asigna nada y el comando
+   * arranca sin ellas, asi que la suite entera no se podia correr en Windows. Playwright admite
+   * `env` por servidor y lo funde con el del proceso, que hace lo mismo en los dos sitios.
+   *
+   * `SEED_DEMO_CREDENTIALS` enciende la siembra de las cuentas de demostracion, que es contra lo
+   * que entra `session.ts`. Es una puerta explicita justamente porque `next start` es produccion:
+   * sin decirlo aqui, estas pruebas no tendrian con que iniciar sesion, y un despliegue real
+   * —que no lleva la variable— no siembra nada.
+   */
+  const entorno = { CACHE_DIR: cache, AUTH_PEPPER: PIMIENTA, SEED_DEMO_CREDENTIALS: '1' };
 
   return [
     {
-      // Se borra el almacen antes de poblar. Desde que el estado de aplicacion —gobierno,
-      // sesiones, marcadores, auditoria— vive en disco y no en el proceso, sobrevive entre
-      // ejecuciones: sin esto, una prueba que amplia un ambito deja esa ampliacion puesta para
-      // la siguiente ejecucion y las que asumen el estado sembrado empiezan a fallar sin
-      // motivo aparente.
+      /*
+       * Se borra el almacen antes de poblar. Desde que el estado de aplicacion —gobierno,
+       * sesiones, marcadores, auditoria— vive en disco y no en el proceso, sobrevive entre
+       * ejecuciones: sin esto, una prueba que amplia un ambito deja esa ampliacion puesta para
+       * la siguiente ejecucion y las que asumen el estado sembrado empiezan a fallar sin motivo
+       * aparente.
+       *
+       * Se borra con `node -e` y no con `rm -rf`, por lo mismo que el entorno: `rm` no existe en
+       * Windows. `&&` si encadena igual en los dos, asi que la forma de la cadena no cambia.
+       */
       command:
-        `rm -rf ${cache} && ` +
+        `node -e "require('fs').rmSync('${cache}',{recursive:true,force:true})" && ` +
         `npx tsx tools/populate-cache.mts --connector mock --dir ${cache} && ` +
-        `${entorno}npx next start apps/shell --port ${principal}`,
+        `npx next start apps/shell --port ${principal}`,
       url: `http://localhost:${principal}/health`,
+      env: entorno,
       reuseExistingServer: false,
       timeout: 180_000,
     },
@@ -96,8 +110,9 @@ function servidoresDe(indice: number) {
       // La MISMA pimienta que la otra instancia: con dos distintas, los hashes escritos por una
       // no verificarian en la otra y la sesion se perderia al cambiar de instancia — que es
       // precisamente lo que las pruebas de multiinstancia comprueban que no pasa.
-      command: `${entorno}npx next start apps/shell --port ${segunda}`,
+      command: `npx next start apps/shell --port ${segunda}`,
       url: `http://localhost:${segunda}/health`,
+      env: entorno,
       reuseExistingServer: false,
       timeout: 180_000,
     },

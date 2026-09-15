@@ -1,5 +1,5 @@
 import { expect, test } from './instance';
-import { alDia, asLogin, newModule } from './session';
+import { alDia, asLogin, newModule, objectDraft } from './session';
 
 /** Panel de administracion — verificacion en navegador (4.10.8). */
 
@@ -1159,14 +1159,19 @@ test.describe('las seis acciones de una fila del arbol (4.1 y 4.10.8)', () => {
     await expect(lapiz).toBeDisabled();
   });
 
-  test('retirar, restablecer y eliminar un modulo publicado', async ({ page }) => {
+  test('retirar un modulo publicado lo saca de servicio, y restablecerlo lo devuelve', async ({
+    page,
+  }) => {
     /*
-     * El ciclo entero de 4.1 desde la tabla, en una sola prueba.
+     * Lo que se comprueba es que el modulo DEJA DE SERVIRSE en `/m/{slug}` y vuelve, no que la
+     * tabla cambie de rotulo: el rotulo es interfaz, y ocultar en la interfaz no es retirar.
      *
-     * Van juntos a proposito: retirar sin poder volver deja un modulo inalcanzable, y borrar sin
-     * haber retirado antes es justo lo que el ciclo de vida impide. Lo que se comprueba en cada
-     * paso es que el modulo DEJA DE SERVIRSE o vuelve a servirse en `/m/{slug}`, no solo que la
-     * tabla cambia de rotulo: el rotulo es interfaz, y ocultar en la interfaz no es retirar.
+     * Sobre `audiencias`, que es semilla, y termina restablecido: el estado con el que empieza es
+     * el mismo con el que acaba. Borrarlo —que es lo que hacia la primera version de esta prueba—
+     * dejaba sin modulo a `editor.spec`, que mira justamente su historial. No se veia porque con
+     * varios workers cada uno tiene su almacen y las dos caian en almacenes distintos; en el pase
+     * secuencial de verdad —un worker, un almacen— la segunda fallaba. Una prueba que destruye
+     * algo sembrado no falla ella: hace fallar a otra, y en otro archivo.
      */
     await asLogin(page, 'u-admin');
     await page.goto('/admin/modules');
@@ -1185,23 +1190,49 @@ test.describe('las seis acciones de una fila del arbol (4.1 y 4.10.8)', () => {
 
     await page.goto('/m/audiencias');
     await expect(page.getByTestId('module-title')).toBeVisible();
-
-    // Y borrar exige retirar antes: el boton de la papelera solo existe sobre lo retirado.
-    await page.goto('/admin/modules');
-    await expect(page.getByTestId('eliminar-nodo-m-audiencias')).toHaveCount(0);
-
-    await page.getByTestId('retirar-nodo-m-audiencias').click();
-    await page.getByTestId('retirar-motivo-nodo-m-audiencias').fill('Ya no se usa.');
-    await page.getByTestId('retirar-confirmar-nodo-m-audiencias').click();
-    await page.getByTestId('eliminar-nodo-m-audiencias').click();
-    await page.getByTestId('eliminar-confirmar-nodo-m-audiencias').click();
-
-    // Se va el modulo Y su nodo del arbol: un nodo que apunta a nada dibuja un enlace roto en el
-    // menu de todo el mundo.
-    await expect(page.getByTestId('modulo-audiencias')).toHaveCount(0);
-    await page.goto('/');
-    await expect(page.getByTestId('nav-audiencias')).toHaveCount(0);
   });
+
+  test('borrar exige retirar antes, y se lleva tambien el nodo del arbol', async ({ page }) => {
+    /*
+     * La otra mitad del ciclo, sobre un modulo PROPIO: esta prueba destruye, asi que lo que
+     * destruye tiene que ser suyo.
+     *
+     * No mira `/m/{slug}`: un modulo recien publicado no esta concedido al equipo de quien lo
+     * publico, asi que ahi respondería 404 por falta de acceso y no por el estado — y una
+     * comprobacion que pasa por dos motivos distintos no comprueba ninguno. Lo que se mira aqui es
+     * el guardian —la papelera no existe sobre lo publicado— y que al borrar se va tambien el nodo:
+     * un nodo que apunta a nada dibuja un enlace roto en el menu de todo el mundo.
+     *
+     * El boton se busca DENTRO de la fila y no por el id del nodo: el nodo lo pone el arbol al
+     * publicar y no hay por que saber como lo compone.
+     */
+    await asLogin(page, 'u-admin');
+    const slug = `ciclo-${Date.now()}`;
+    await objectDraft(page, slug);
+    for (const transition of ['enviar', 'publicar']) {
+      const paso = await page.request.post(`/api/modules/${slug}/status`, { data: { transition } });
+      expect(paso.ok(), `No se pudo ${transition} ${slug}: ${await paso.text()}`).toBe(true);
+    }
+
+    await page.goto('/admin/modules');
+    const fila = page.getByTestId(`modulo-${slug}`);
+    const boton = (accion: string) => fila.locator(`[data-testid^="${accion}-"]`).first();
+    const panel = (accion: string) => page.locator(`[data-testid^="${accion}-"]`).first();
+
+    await expect(fila.locator('[data-testid^="eliminar-"]')).toHaveCount(0);
+
+    await boton('retirar').click();
+    await panel('retirar-motivo').fill('Ya no se usa.');
+    await panel('retirar-confirmar').click();
+    await boton('eliminar').click();
+    await panel('eliminar-confirmar').click();
+
+    await expect(page.getByTestId(`modulo-${slug}`)).toHaveCount(0);
+    await page.goto('/');
+    await expect(page.getByTestId(`nav-${slug}`)).toHaveCount(0);
+  });
+
+
 });
 
 test.describe('configuracion de un modulo (4.1 y 4.11)', () => {
