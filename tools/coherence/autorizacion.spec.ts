@@ -159,6 +159,10 @@ describe('las credenciales de demostracion no se siembran solas', () => {
       'tools/capture-editor.mts',
       'las mismas instrucciones, para las capturas del editor',
     ],
+    [
+      'tools/capture-f6.mts',
+      'las mismas instrucciones, para las capturas de la tanda F6',
+    ],
     ['tools/coherence/autorizacion.spec.ts', 'esta misma guarda'],
   ]);
 
