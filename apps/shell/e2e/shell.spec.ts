@@ -584,26 +584,40 @@ test.describe('el navegador de MODULOS se colapsa desde el propio panel', () => 
     await expect(page.getByTestId('lateral-plegar')).toHaveAttribute('aria-expanded', 'true');
   });
 
-  test('superpuesto, pero su carril NO se superpone', async ({ page }) => {
+  test('superpuesto, pero sin tapar nada: ni desplegado ni en carril', async ({ page }) => {
     /*
-     * Lo mismo que el navegador de paginas: el contenido empieza donde acaba el carril, y lo unico
-     * que se pone encima es lo que el panel crece al abrirse.
+     * «Superpuesto» quiere decir que no pide columna, no que tape.
+     *
+     * Reservando solo el carril con el panel desplegado, los 224 px de diferencia caian sobre el
+     * modulo: el segmentador, el navegador de paginas y los marcadores quedaban debajo del arbol
+     * y dejaban de poder pulsarse. No es que se vieran mal — es que no respondian.
      */
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     const lateral = page.locator('#navegacion-lateral');
     const principal = page.locator('.principal');
+    const titulo = page.locator('.principal h1, .principal h2').first();
 
-    // Desplegado se superpone: el panel invade la caja del contenido.
+    // Se superpone: se dibuja DENTRO de la caja del contenido, cosa imposible si pidiera columna.
     const abierto = await lateral.boundingBox();
     const contenido = await principal.boundingBox();
     expect((abierto?.x ?? 0) + (abierto?.width ?? 0)).toBeGreaterThan(contenido?.x ?? 0);
 
-    // Plegado, el modulo empieza pasado el carril: nada queda por debajo.
+    // Y aun asi no tapa: el modulo empieza pasado el panel.
+    const conPanel = await titulo.boundingBox();
+    expect(conPanel?.x ?? 0).toBeGreaterThanOrEqual((abierto?.x ?? 0) + (abierto?.width ?? 0));
+
+    // La prueba de fuego: lo que hay en esa franja se puede PULSAR.
+    await expect(page.getByTestId('slicer-Penal')).toBeVisible();
+    await page.getByTestId('slicer-Penal').click({ timeout: 10_000 });
+    await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
+
+    // Plegado, el modulo empieza pasado el carril: la version colapsada tampoco se superpone.
     await page.getByTestId('lateral-plegar').click();
     const carril = await lateral.boundingBox();
-    const titulo = await page.locator('.principal h1, .principal h2').first().boundingBox();
-    expect(titulo?.x ?? 0).toBeGreaterThanOrEqual((carril?.x ?? 0) + (carril?.width ?? 0));
+    await expect
+      .poll(async () => (await titulo.boundingBox())?.x ?? 0)
+      .toBeGreaterThanOrEqual((carril?.x ?? 0) + (carril?.width ?? 0));
   });
 });

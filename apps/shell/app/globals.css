@@ -1478,7 +1478,19 @@ input[type='radio'] {
   position: relative;
   --lateral-panel: 280px;
   --lateral-carril: 3.5rem;
+  /*
+   * Lo que el contenido deja libre: lo que el panel mide AHORA.
+   *
+   * Superpuesto NO quiere decir que tape. Quiere decir que no pide columna — se dibuja encima,
+   * con su sombra, y el hueco lo fija esta variable. Reservando solo el carril con el panel
+   * desplegado, los 224 px de diferencia caian sobre el modulo: el segmentador, el navegador de
+   * paginas y los marcadores quedaban debajo del arbol y dejaban de poder pulsarse. No es que se
+   * vieran mal; es que no respondian.
+   */
+  --reserva-lateral: var(--lateral-panel);
 }
+/* Colapsado el panel mide el carril, asi que eso es lo unico que reserva. */
+body[data-sidebar='oculto'] .cuerpo { --reserva-lateral: var(--lateral-carril); }
 
 /*
  * Carril de navegacion de MD3, CON superficie propia.
@@ -1696,11 +1708,11 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
   flex: 1;
   padding: var(--space-lg);
   /*
-   * El hueco del carril, SIEMPRE. Ni mas al desplegar ni menos al plegar.
+   * El hueco que deja el navegador de modulos, que es lo que mide en cada momento.
    *
-   * Es lo mismo que hace el navegador de paginas: la version colapsada no se superpone nunca
-   * —el contenido empieza donde acaba el carril— y lo unico que se pone encima es lo que el
-   * panel crece al abrirse.
+   * Colapsado, el carril: el contenido empieza donde acaba el carril y la version colapsada no
+   * se superpone nunca. Desplegado, el panel entero: si no, lo que el panel crece cae ENCIMA del
+   * modulo y lo que quede debajo deja de poder pulsarse.
    */
   padding-inline-start: calc(var(--lateral-carril) + var(--space-lg));
   min-width: 0;
