@@ -1714,7 +1714,7 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
    * se superpone nunca. Desplegado, el panel entero: si no, lo que el panel crece cae ENCIMA del
    * modulo y lo que quede debajo deja de poder pulsarse.
    */
-  padding-inline-start: calc(var(--lateral-carril) + var(--space-lg));
+  padding-inline-start: calc(var(--reserva-lateral) + var(--space-lg));
   min-width: 0;
   /* El contenido se desplaza dentro de su region, para que el carril de al lado no se mueva. */
   min-height: 0;
