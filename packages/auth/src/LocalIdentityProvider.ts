@@ -40,9 +40,23 @@ export interface LocalIdentityProviderOptions {
   pepper: string;
   passwordPolicy?: PasswordPolicy;
   lockoutPolicy?: LockoutPolicy;
+  /**
+   * Cuantos pasos de treinta segundos se toleran a cada lado del actual.
+   *
+   * Uno es el valor estandar y el unico admisible en produccion: absorbe el desfase de reloj
+   * entre el telefono y el servidor y nada mas. Subirlo alarga la vida de cada codigo —con
+   * veinte, un codigo vale veinte minutos— y por tanto la ventana en la que uno robado sirve.
+   * Existe para el desarrollo, donde el codigo se teclea a mano y caducar en treinta segundos
+   * convierte entrar en una carrera; quien lo sube se lo tiene que decir al sistema a proposito,
+   * y `apps/shell/src/server/identity.ts` se niega a hacerlo en produccion.
+   */
+  totpToleranceSteps?: number;
   /** Reloj inyectable, para poder probar el bloqueo y su expiracion sin esperar. */
   now?: () => number;
 }
+
+/** Un paso a cada lado: el desfase de reloj que cabe esperar, y nada mas. */
+export const TOLERANCIA_TOTP_POR_DEFECTO = 1;
 
 /** Parametros Argon2id. m=19456 KiB, t=2, p=1: la linea base recomendada por OWASP. */
 const ARGON2_OPTIONS = {
@@ -74,6 +88,7 @@ export class LocalIdentityProvider implements IIdentityProvider {
   private readonly pepper: string;
   private readonly passwordPolicy: PasswordPolicy;
   private readonly lockoutPolicy: LockoutPolicy;
+  private readonly totpToleranceSteps: number;
   private readonly now: () => number;
 
   constructor(options: LocalIdentityProviderOptions) {
@@ -88,6 +103,7 @@ export class LocalIdentityProvider implements IIdentityProvider {
     this.pepper = options.pepper;
     this.passwordPolicy = options.passwordPolicy ?? DEFAULT_PASSWORD_POLICY;
     this.lockoutPolicy = options.lockoutPolicy ?? DEFAULT_LOCKOUT_POLICY;
+    this.totpToleranceSteps = options.totpToleranceSteps ?? TOLERANCIA_TOTP_POR_DEFECTO;
     this.now = options.now ?? Date.now;
   }
 
@@ -252,8 +268,12 @@ export class LocalIdentityProvider implements IIdentityProvider {
     // El TOTP se valida contra el MISMO reloj inyectado que usa el bloqueo. Usar el reloj
     // real aqui haria que el segundo factor y el backoff discreparan en las pruebas, y
     // —mas importante— impediria probar la tolerancia al desfase de reloj.
-    // window: 1 tolera un paso (30 s) de desfase en cualquier direccion.
-    return totp.validate({ token: code, window: 1, timestamp: this.now() }) !== null;
+    // La ventana va en PASOS de 30 s a cada lado. Uno es lo estandar; el desarrollo la ensancha
+    // a proposito y produccion se niega a ensancharla.
+    return (
+      totp.validate({ token: code, window: this.totpToleranceSteps, timestamp: this.now() }) !==
+      null
+    );
   }
 
   private async registerFailure(record: LocalCredentialRecord): Promise<void> {

@@ -4,6 +4,7 @@ import {
   LocalIdentityProvider,
   PasswordResetService,
   SessionService,
+  TOLERANCIA_TOTP_POR_DEFECTO,
   type AppSession,
   type DirectoryEntry,
   type IAuditLog,
@@ -48,6 +49,44 @@ function pimienta(): string {
     );
   }
   return 'pimienta-de-desarrollo-no-usar-en-produccion';
+}
+
+/**
+ * Cuanto se tolera que un codigo TOTP llegue tarde o pronto, en PASOS de treinta segundos.
+ *
+ * Un codigo estandar vive treinta segundos, y eso en desarrollo convierte entrar en una carrera:
+ * se lee, se teclea, y para cuando se pulsa ya es otro. `TOTP_TOLERANCE_MINUTES` ensancha la
+ * ventana a cada lado —diez minutos son veinte pasos— para que tecleandolo con calma entre.
+ *
+ * En produccion NO se ensancha, y se dice en voz alta en vez de ignorarse en silencio: alargar la
+ * vida de un codigo alarga exactamente igual la ventana en la que uno robado sirve, y un ajuste
+ * de comodidad que se cuela en un despliegue real es peor que no tenerlo, porque nadie lo busca.
+ * Mismo criterio que la pimienta de aqui arriba.
+ */
+function toleranciaTotp(): number {
+  const pedida = process.env['TOTP_TOLERANCE_MINUTES'];
+  if (!pedida) return TOLERANCIA_TOTP_POR_DEFECTO;
+
+  const minutos = Number(pedida);
+  if (!Number.isFinite(minutos) || minutos < 0) {
+    throw new Error(
+      `TOTP_TOLERANCE_MINUTES tiene que ser un numero de minutos; llego '${pedida}'.`,
+    );
+  }
+
+  // Los pasos son de 30 s, asi que cada minuto son dos. Nunca por debajo del estandar: acortarlo
+  // no protege de nada y rompe el desfase de reloj que el estandar da por hecho.
+  const pasos = Math.max(TOLERANCIA_TOTP_POR_DEFECTO, Math.round(minutos * 2));
+  if (pasos === TOLERANCIA_TOTP_POR_DEFECTO) return pasos;
+
+  if (process.env['NODE_ENV'] === 'production') {
+    throw new Error(
+      'TOTP_TOLERANCE_MINUTES ensancha la ventana del segundo factor y no se admite en ' +
+        'produccion (4.7.2): un codigo que vale diez minutos es un codigo robado que sirve diez ' +
+        'minutos. Quitela del entorno del despliegue.',
+    );
+  }
+  return pasos;
 }
 
 class CredentialsStore implements ILocalIdentityStore {
@@ -154,6 +193,7 @@ export function localProvider(): LocalIdentityProvider {
     directory: new GovernanceDirectory(),
     auditLog: loginAudit,
     pepper: pimienta(),
+    totpToleranceSteps: toleranciaTotp(),
   });
   return memoizedProvider;
 }

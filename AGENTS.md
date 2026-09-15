@@ -90,6 +90,13 @@ aplicacion de autenticacion ni de que su reloj coincida con el del servidor:
 npm run demo-code    # el codigo de ahora mismo, calculado con el reloj de esta maquina
 ```
 
+Y en desarrollo ese codigo vale **diez minutos**, no treinta segundos: `npm run dev` pone
+`TOTP_TOLERANCE_MINUTES=10`, que ensancha la ventana a cada lado. Es comodidad, no politica —
+alargar la vida de un codigo alarga igual la ventana en la que uno robado sirve—, asi que la
+aplicacion **se niega a arrancar con esa variable si `NODE_ENV=production`**, igual que hace con
+la pimienta de desarrollo. Sin la variable, la ventana es la estandar: un paso de treinta
+segundos a cada lado.
+
 Un codigo mal escrito CUENTA como intento fallido, y a los cinco la cuenta queda bloqueada con
 espera creciente. Las credenciales viven en el cache, asi que reiniciar no lo levanta: se borran
 los archivos `auth:*` de `.cache-datos` y al arrancar se siembran de nuevo.

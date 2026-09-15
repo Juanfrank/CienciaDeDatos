@@ -6,7 +6,7 @@ import {
   type DirectoryEntry,
   type IPrincipalDirectory,
 } from './IIdentityProvider';
-import { LocalIdentityProvider } from './LocalIdentityProvider';
+import { LocalIdentityProvider, TOLERANCIA_TOTP_POR_DEFECTO } from './LocalIdentityProvider';
 import { SessionService } from './session';
 import {
   InMemoryAuditLog,
@@ -221,6 +221,72 @@ describe('LocalIdentityProvider (4.7.2)', () => {
         totpCode: validCode(ahora),
       });
       expect(principal.authProvider).toBe('local');
+    });
+
+    /*
+     * La ventana se ensancha a proposito, y solo fuera de produccion.
+     *
+     * En desarrollo el codigo se lee de la pantalla y se teclea a mano, y treinta segundos
+     * convierten entrar en una carrera. Alargarlo alarga exactamente igual la ventana en la que
+     * un codigo robado sirve, asi que es un ajuste que hay que pedir a proposito: por defecto
+     * sigue siendo un paso, y `apps/shell/src/server/identity.ts` se niega a ensancharlo con
+     * `NODE_ENV=production`.
+     */
+    const HACE_CINCO_MINUTOS = 5 * 60 * 1000;
+
+    it('por defecto, un codigo de hace cinco minutos ya no vale', async () => {
+      await createAccount({ totpSecret: secreto });
+      await expect(
+        provider.authenticate({
+          email: 'ana@externo.org',
+          password: GOOD_KEY,
+          totpCode: validCode(ahora - HACE_CINCO_MINUTOS),
+        }),
+      ).rejects.toMatchObject({ reason: 'mfa-invalido' });
+    });
+
+    it('con la tolerancia ensanchada a diez minutos, si', async () => {
+      await createAccount({ totpSecret: secreto });
+      const tolerante = new LocalIdentityProvider({
+        store,
+        directory,
+        auditLog,
+        pepper: PEPPER,
+        totpToleranceSteps: 20,
+        now: () => ahora,
+      });
+
+      const principal = await tolerante.authenticate({
+        email: 'ana@externo.org',
+        password: GOOD_KEY,
+        totpCode: validCode(ahora - HACE_CINCO_MINUTOS),
+      });
+      expect(principal.authProvider).toBe('local');
+    });
+
+    it('y aun ensanchada, uno de hace media hora sigue sin valer', async () => {
+      // Ensanchar no es apagar: la ventana crece hasta donde se dijo y ni un paso mas.
+      await createAccount({ totpSecret: secreto });
+      const tolerante = new LocalIdentityProvider({
+        store,
+        directory,
+        auditLog,
+        pepper: PEPPER,
+        totpToleranceSteps: 20,
+        now: () => ahora,
+      });
+
+      await expect(
+        tolerante.authenticate({
+          email: 'ana@externo.org',
+          password: GOOD_KEY,
+          totpCode: validCode(ahora - 30 * 60 * 1000),
+        }),
+      ).rejects.toMatchObject({ reason: 'mfa-invalido' });
+    });
+
+    it('el valor por defecto es UN paso, y esta dicho en un solo sitio', () => {
+      expect(TOLERANCIA_TOTP_POR_DEFECTO).toBe(1);
     });
   });
 
@@ -531,8 +597,20 @@ describe('fuerza bruta en paralelo (4.7.2)', () => {
   });
 
   it('cuentas distintas no se esperan entre si', async () => {
-    // Serializar por cuenta es lo correcto; serializarlo todo convertiria el inicio de sesion
-    // de la institucion entera en una fila detras de quien se equivoque de contrasena.
+    /*
+     * Serializar por cuenta es lo correcto; serializarlo todo convertiria el inicio de sesion de
+     * la institucion entera en una fila detras de quien se equivoque de contrasena.
+     *
+     * Se comprueba por CONCURRENCIA OBSERVADA y no por reloj. La version anterior cronometraba
+     * tres verificaciones Argon2 en paralelo contra tres en fila y exigia que las primeras
+     * tardaran menos; con la maquina cargada —el resto de proyectos corriendo a la vez— no hay
+     * nucleos que repartir, la medida se invierte y la prueba falla sin que nada este roto. Una
+     * prueba que depende de cuanta carga tiene la maquina no dice nada sobre el codigo.
+     *
+     * Aqui el almacen se queda parado a proposito: si el turno fuera global, solo UNA de las tres
+     * llegaria a pedir su registro y las otras dos esperarian a que esta terminara. Que lleguen
+     * las tres es exactamente la propiedad que se quiere.
+     */
     const store = new InMemoryLocalIdentityStore();
     const directory = new TestDirectory();
     const auditLog = new InMemoryAuditLog();
@@ -544,7 +622,8 @@ describe('fuerza bruta en paralelo (4.7.2)', () => {
       now: () => Date.UTC(2026, 8, 11, 8, 0, 0),
     });
 
-    for (const email of ['a@externo.org', 'b@externo.org', 'c@externo.org']) {
+    const correos = ['a@externo.org', 'b@externo.org', 'c@externo.org'];
+    for (const email of correos) {
       directory.add(email, directoryEntry);
       await store.save({
         userId: `u-${email}`,
@@ -556,23 +635,34 @@ describe('fuerza bruta en paralelo (4.7.2)', () => {
       });
     }
 
-    const inicio = Date.now();
-    await Promise.all(
-      ['a@externo.org', 'b@externo.org', 'c@externo.org'].map((email) =>
-        provider.authenticate({ email, password: GOOD_KEY }),
-      ),
+    // El almacen se para en la primera lectura de cada cuenta y no sigue hasta que se le diga.
+    let dentro = 0;
+    let soltar!: () => void;
+    const puerta = new Promise<void>((listo) => {
+      soltar = listo;
+    });
+    const original = store.findByEmail.bind(store);
+    const llegaron = new Promise<void>((cumplido) => {
+      store.findByEmail = async (email: string) => {
+        dentro += 1;
+        if (dentro === correos.length) cumplido();
+        await puerta;
+        return original(email);
+      };
+    });
+
+    const vuelo = Promise.all(
+      correos.map((email) => provider.authenticate({ email, password: GOOD_KEY })),
     );
-    const enParalelo = Date.now() - inicio;
 
-    const enSerie = await (async () => {
-      const desde = Date.now();
-      for (const email of ['a@externo.org', 'b@externo.org', 'c@externo.org']) {
-        await provider.authenticate({ email, password: GOOD_KEY });
-      }
-      return Date.now() - desde;
-    })();
+    // Si el turno fuera global esto no se cumpliria nunca y la prueba moriria por tiempo, que es
+    // la forma de fallar que corresponde a «se estan esperando».
+    await llegaron;
+    expect(dentro).toBe(correos.length);
 
-    // Tres verificaciones Argon2 en paralelo tardan claramente menos que en fila.
-    expect(enParalelo).toBeLessThan(enSerie);
+    soltar();
+    const principales = await vuelo;
+    // Y las tres terminan bien: soltar la puerta no deja a ninguna a medias.
+    expect(principales.map((p) => p.authProvider)).toEqual(['local', 'local', 'local']);
   });
 });

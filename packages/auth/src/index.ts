@@ -17,6 +17,7 @@ export {
 } from './IIdentityProvider';
 export {
   LocalIdentityProvider,
+  TOLERANCIA_TOTP_POR_DEFECTO,
   type LocalCredentials,
   type LocalIdentityProviderOptions,
 } from './LocalIdentityProvider';
