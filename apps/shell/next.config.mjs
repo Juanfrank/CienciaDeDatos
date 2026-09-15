@@ -20,6 +20,16 @@ const nextConfig = {
     '@app/ui-components',
   ],
   typescript: { ignoreBuildErrors: true },
+  /*
+   * `next dev` NO escribe en `apps/shell/AGENTS.md`.
+   *
+   * Next 16 le anade por su cuenta un bloque de instrucciones para agentes cada vez que arranca
+   * en desarrollo. Ese archivo es la especificacion local de esta carpeta, esta versionado, y lo
+   * escribe quien trabaja aqui: una herramienta que lo reescribe al arrancar mete en el
+   * repositorio un texto que nadie reviso y rompe la comprobacion que exige que toda ruta citada
+   * en un `.md` exista, porque las suyas apuntan a `node_modules`.
+   */
+  agentRules: false,
 };
 
 export default nextConfig;

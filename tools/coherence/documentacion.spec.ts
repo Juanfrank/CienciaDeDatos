@@ -189,7 +189,7 @@ describe('cada carpeta declara sus reglas', () => {
     for (const doc of listar("'*.md'")) {
       const texto = readFileSync(join(raiz, doc), 'utf8');
       for (const [, nombre] of texto.matchAll(/npm run ([a-z][a-z0-9:-]*)/g)) {
-        if (!scripts.has(nombre!)) rotos.push(`${doc}: npm run ${nombre}`);
+        if (nombre !== undefined && !scripts.has(nombre)) rotos.push(`${doc}: npm run ${nombre}`);
       }
     }
 
