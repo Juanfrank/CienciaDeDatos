@@ -33,6 +33,7 @@ import {
 import { SCHEMA_CACHE_KEY } from '@app/caching';
 import { cacheL2, getGeneralTree } from './context';
 import { governance } from './governance';
+import { AZURE_AD_AVAILABLE, localesAccounts } from './identity';
 import { changeRecord, treeEventRecord } from './audit';
 import { redirect } from 'next/navigation';
 import type { ShellSession } from './session';
@@ -378,6 +379,64 @@ export async function deleteTeam(actor: Actor, teamId: string): Promise<void> {
 /** Quienes administran ahora mismo. La superficie de equipos lo muestra (4.10.1). */
 export async function administradores(): Promise<string[]> {
   return administratorsOf(await governance.listTeams());
+}
+
+/** Lo que impide a un Administrador entrar por su cuenta local. */
+export type ImpedimentoDeAcceso = 'sin-cuenta' | 'bloqueada' | 'sin-segundo-factor';
+
+export interface AccesoDeAdministrador {
+  userId: string;
+  /** Ausente cuando puede entrar sin depender de que Azure AD responda. */
+  impedimento?: ImpedimentoDeAcceso;
+}
+
+export interface AccesoDeQuienesAdministran {
+  quienes: AccesoDeAdministrador[];
+  /** Cuantos pueden entrar por cuenta local ahora mismo. */
+  conAccesoPropio: number;
+  /** Si hay federacion configurada en este despliegue. */
+  federacion: boolean;
+  gravedad: 'ok' | 'atencion' | 'grave';
+}
+
+/**
+ * Si quienes administran pueden ademas AUTENTICARSE — apartado 2.8 de la hoja de ruta.
+ *
+ * `wouldLeaveNoAdministrator` comprueba el gobierno: que alguien conserva el rol. No comprueba que
+ * esa persona pueda entrar, y una cuenta bloqueada satisface la invariante mientras la institucion
+ * sigue de hecho sin acceso. Cruzar las dos cosas es lo que falta, y por eso vive AQUI y no en
+ * `access-control`: ese paquete es `type:lib` y no sabe nada de credenciales, a proposito.
+ *
+ * Es un AVISO y no un bloqueo. Lo unico que se puede comprobar desde dentro es la cuenta local; si
+ * alguien entra por Azure AD, que su identidad siga activa lo sabe Azure y no esta aplicacion.
+ * Bloquear un cambio sobre una comprobacion que solo ve la mitad del cuadro dejaria a quien
+ * administra sin poder reorganizar nada por una cuenta que quiza si funciona.
+ *
+ * Lo que SI se ve entero es el caso 2 del procedimiento de acceso de emergencia: que Azure AD deje
+ * de responder y ninguna de las personas que administran tenga cuenta local. Ese es el aviso.
+ */
+export async function accesoDeQuienesAdministran(): Promise<AccesoDeQuienesAdministran> {
+  const [nombres, cuentas] = await Promise.all([administradores(), localesAccounts()]);
+  const porUsuario = new Map(cuentas.map((c) => [c.userId, c]));
+
+  const quienes = nombres.map((userId): AccesoDeAdministrador => {
+    const cuenta = porUsuario.get(userId);
+    if (!cuenta) return { userId, impedimento: 'sin-cuenta' };
+    if (cuenta.bloqueada) return { userId, impedimento: 'bloqueada' };
+    // Una cuenta local sin TOTP no es utilizable: 4.7.2 lo exige, y el inicio de sesion lo pide.
+    if (!cuenta.tieneSegundoFactor) return { userId, impedimento: 'sin-segundo-factor' };
+    return { userId };
+  });
+
+  const conAccesoPropio = quienes.filter((q) => q.impedimento === undefined).length;
+
+  return {
+    quienes,
+    conAccesoPropio,
+    federacion: AZURE_AD_AVAILABLE,
+    gravedad:
+      conAccesoPropio > 0 ? 'ok' : AZURE_AD_AVAILABLE ? 'atencion' : 'grave',
+  };
 }
 
 export async function saveTeam(actor: Actor, equipo: Team): Promise<Team> {

@@ -270,19 +270,30 @@ Al anadir uno, la pregunta que hay que contestar es **cual es su respaldo accesi
 barras son botones, para las lineas una tabla. No es un detalle de implementacion, es parte de
 decidir que significa el objeto.
 
-### 2.8 Comprobar que el ultimo Administrador puede AUTENTICARSE, no solo que existe
+### 2.8 Comprobar que el ultimo Administrador puede AUTENTICARSE, no solo que existe — HECHO
 
 `wouldLeaveNoAdministrator` comprueba el gobierno: que alguien conserva el rol. No comprueba que
 esa persona pueda entrar. Una cuenta local bloqueada, o alguien cuya cuenta de Azure AD se
 desactivo, satisface la invariante mientras la institucion sigue de hecho sin acceso.
 
-Hacerlo bien exige que la comprobacion de gobierno consulte el estado de identidad, y son dos
-capas que hoy estan separadas a proposito: `access-control` es `type:lib` y no sabe nada de
-credenciales. Lo razonable es un aviso —no un bloqueo— en `/admin/teams` y en
-`/admin/accounts`, cruzando quienes administran con el estado de sus cuentas locales.
+Resuelto como **aviso y no como bloqueo**, que era lo razonable: `accesoDeQuienesAdministran` en
+`apps/shell/src/server/admin.ts` cruza quienes administran con el estado de sus cuentas locales y
+lo muestra el componente `AdminAccess` en `/admin/teams` —junto a quienes administran— y en
+`/admin/users` —junto al estado de las cuentas—. Vive en el shell y no en `access-control` porque
+ese paquete es `type:lib` y no sabe nada de credenciales, a proposito.
 
-Mientras tanto, el aviso de "conviene que haya al menos dos" y el procedimiento de acceso de
-emergencia cubren el caso.
+Bloquear habria sido prometer mas de lo que se comprueba: desde dentro solo se ve la cuenta local,
+y que una identidad de Azure AD siga activa lo sabe Azure. Rechazar un cambio sobre media
+comprobacion dejaria a quien administra sin poder reorganizar nada por una cuenta que quiza si
+funciona. Lo que SI se ve entero es el caso 2 del procedimiento de emergencia —Azure AD deja de
+responder y ninguno de los que administran tiene cuenta local—, y ese es el aviso.
+
+Tres impedimentos, los tres comprobables: sin cuenta local, cuenta bloqueada, y cuenta sin segundo
+factor —4.7.2 lo exige, asi que una cuenta sin TOTP no es utilizable—. La gravedad es `grave` si
+ademas no hay federacion configurada, porque entonces nadie puede entrar de ninguna forma.
+
+Se comprobo enrojeciendo la comprobacion de cuenta bloqueada, que es el caso que da nombre al
+apartado.
 
 ### 2.9 La consulta en lenguaje natural, retirada de la interfaz
 

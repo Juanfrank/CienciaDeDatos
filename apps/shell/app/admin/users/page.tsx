@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { roleInTeam } from '@app/access-control';
+import { AdminAccess } from '../../../src/components/admin/AdminAccess';
 import { UsersTable, type FilaDeUsuario } from '../../../src/components/admin/UsersTable';
 import { listTeams, listUsers } from '../../../src/server/context';
-import { roleMoreHeightOf } from '../../../src/server/admin';
+import { accesoDeQuienesAdministran, roleMoreHeightOf } from '../../../src/server/admin';
 import { AVAILABLE_MAIL, canalDeRestablecimiento, localesAccounts } from '../../../src/server/identity';
 import { translator } from '../../../src/server/locale';
 import { paginaDeAdmin } from '../../../src/server/admin';
@@ -24,11 +25,12 @@ export default async function UsuariosPage() {
   // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
   await paginaDeAdmin();
 
-  const [t, usuarios, equipos, cuentas] = await Promise.all([
+  const [t, usuarios, equipos, cuentas, acceso] = await Promise.all([
     translator(),
     listUsers(),
     listTeams(),
     localesAccounts(),
+    accesoDeQuienesAdministran(),
   ]);
 
   const porUsuario = new Map(cuentas.map((c) => [c.userId, c]));
@@ -83,6 +85,16 @@ export default async function UsuariosPage() {
         {t('admin.accounts.channel', { canal: canalDeRestablecimiento.name })}{' '}
         {AVAILABLE_MAIL ? t('admin.accounts.channel.mail') : t('admin.accounts.channel.mediated')}
       </p>
+
+      {/*
+        Quienes administran, y si pueden entrar.
+
+        Es la pantalla donde vive el estado de las cuentas, asi que es donde se nota si el aviso
+        contradice lo que se ve en la tabla. La comprobacion del servidor que impide quedarse sin
+        Administradores mira el gobierno y no la cuenta: conservar el rol con la cuenta bloqueada
+        la satisface, y deja a la institucion sin acceso igual.
+      */}
+      <AdminAccess acceso={acceso} t={t} />
 
       <UsersTable usuarios={filas} />
 

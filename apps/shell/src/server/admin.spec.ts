@@ -20,8 +20,11 @@ import {
   roleMoreHeightOf,
   LastAdministratorError,
   administradores,
+  accesoDeQuienesAdministran,
   deleteTeam,
 } from './admin';
+import { borrar } from './almacenCompartido';
+import { credentialsStore, mailUser } from './identity';
 import { expansionsCount, clearAudit, auditList } from './audit';
 import { governance } from './governance';
 import type { ShellSession } from './session';
@@ -422,6 +425,88 @@ describe('la institucion no se puede quedar sin Administrador (4.10.1)', () => {
     expect(await administradores()).toEqual(['u-admin']);
     await membershipChange(admin, 'equipo-este', 'u-ana', 'administrador');
     expect(await administradores()).toEqual(['u-admin', 'u-ana']);
+  });
+});
+
+describe('quien administra, ¿puede ademas ENTRAR? (2.8)', () => {
+  /*
+   * `wouldLeaveNoAdministrator` comprueba el gobierno: que alguien conserva el rol. Lo que aqui se
+   * comprueba es la otra mitad —que esa persona pueda iniciar sesion—, que es lo que esa invariante
+   * NO mira y lo que hace que la institucion se quede sin acceso sin que ningun cambio se rechace.
+   */
+  const CLAVE = (userId: string) => `auth:credencial:${mailUser(userId).toLowerCase()}`;
+
+  const darCuenta = async (
+    userId: string,
+    opciones: { bloqueada?: boolean; conSegundoFactor?: boolean } = {},
+  ) => {
+    await credentialsStore.save({
+      userId,
+      email: mailUser(userId),
+      passwordHash: 'no-se-verifica-aqui',
+      passwordHistory: [],
+      ...(opciones.conSegundoFactor === false ? {} : { totpSecret: 'ABCDEFGHIJKLMNOPQRST' }),
+      ...(opciones.bloqueada ? { lockedUntil: Date.now() + 60_000 } : {}),
+      failedAttempts: 0,
+      emailVerified: true,
+    });
+  };
+
+  beforeEach(async () => {
+    for (const userId of ['u-admin', 'u-ana', 'u-beto']) await borrar(CLAVE(userId));
+  });
+
+  it('sin ninguna cuenta local y sin Azure AD, nadie puede entrar', async () => {
+    const acceso = await accesoDeQuienesAdministran();
+
+    expect(acceso.quienes).toEqual([{ userId: 'u-admin', impedimento: 'sin-cuenta' }]);
+    expect(acceso.conAccesoPropio).toBe(0);
+    expect(acceso.gravedad).toBe('grave');
+  });
+
+  it('con cuenta local y segundo factor, puede', async () => {
+    await darCuenta('u-admin');
+
+    const acceso = await accesoDeQuienesAdministran();
+    expect(acceso.quienes).toEqual([{ userId: 'u-admin' }]);
+    expect(acceso.conAccesoPropio).toBe(1);
+    expect(acceso.gravedad).toBe('ok');
+  });
+
+  /*
+   * El caso entero del apartado: el gobierno dice que u-admin administra —y por eso ningun cambio
+   * de configuracion se rechaza— mientras su cuenta esta bloqueada y no puede entrar.
+   */
+  it('la cuenta bloqueada satisface el gobierno y no deja entrar igual', async () => {
+    await darCuenta('u-admin', { bloqueada: true });
+
+    expect(await administradores()).toEqual(['u-admin']);
+
+    const acceso = await accesoDeQuienesAdministran();
+    expect(acceso.quienes).toEqual([{ userId: 'u-admin', impedimento: 'bloqueada' }]);
+    expect(acceso.gravedad).toBe('grave');
+  });
+
+  // Una cuenta local sin TOTP no es utilizable: 4.7.2 lo exige y el inicio de sesion lo pide.
+  it('la cuenta sin segundo factor tampoco cuenta', async () => {
+    await darCuenta('u-admin', { conSegundoFactor: false });
+
+    const acceso = await accesoDeQuienesAdministran();
+    expect(acceso.quienes).toEqual([{ userId: 'u-admin', impedimento: 'sin-segundo-factor' }]);
+    expect(acceso.gravedad).toBe('grave');
+  });
+
+  it('basta con que UNO de los que administran pueda entrar', async () => {
+    await membershipChange(admin, 'equipo-este', 'u-ana', 'administrador');
+    await darCuenta('u-ana');
+
+    const acceso = await accesoDeQuienesAdministran();
+    expect(acceso.quienes).toEqual([
+      { userId: 'u-admin', impedimento: 'sin-cuenta' },
+      { userId: 'u-ana' },
+    ]);
+    expect(acceso.conAccesoPropio).toBe(1);
+    expect(acceso.gravedad).toBe('ok');
   });
 });
 

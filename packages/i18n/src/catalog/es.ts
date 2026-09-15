@@ -399,6 +399,16 @@ export const es = {
   'admin.teams.onlyOneAdmin':
     'Solo {quien} administra la aplicacion. Conviene que haya al menos dos: si esa cuenta se pierde, restituir el acceso exige entrar en la base de gobierno.',
   'admin.teams.admins': 'Administran la aplicacion: {quienes}.',
+  'admin.adminAccess.ok':
+    '{n, plural, one {Uno de ellos puede} other {# de ellos pueden}} entrar con cuenta local propia, sin depender de que Azure AD responda.',
+  'admin.adminAccess.federated':
+    'Ninguno de ellos tiene cuenta local utilizable ({detalle}). Hoy entran por Azure AD; si Azure AD deja de responder, nadie puede administrar. Conviene que al menos uno tenga cuenta local con segundo factor.',
+  'admin.adminAccess.none':
+    'Ninguno de ellos puede entrar ({detalle}), y este despliegue no tiene Azure AD configurado. Restituir el acceso exige el procedimiento de acceso de emergencia.',
+  'admin.adminAccess.impeded': '{quien}, {motivo}',
+  'admin.adminAccess.reason.noAccount': 'sin cuenta local',
+  'admin.adminAccess.reason.locked': 'con la cuenta bloqueada',
+  'admin.adminAccess.reason.noSecondFactor': 'sin segundo factor',
   'admin.teams.members.title': 'Miembros de {equipo}',
   'admin.teams.members.intro':
     'El rol decide que puede hacer cada persona DENTRO de este equipo. La misma persona puede tener roles distintos en equipos distintos.',

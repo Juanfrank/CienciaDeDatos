@@ -504,6 +504,24 @@ test.describe('la institucion no se puede quedar sin Administrador (4.10.1)', ()
     await expect(page.getByTestId('administradores')).toContainText('u-admin');
     await expect(page.getByTestId('administradores')).toContainText('al menos dos');
   });
+
+  test('y dice ademas si quien administra puede ENTRAR', async ({ page }) => {
+    /*
+     * Tener el rol y poder iniciar sesion son dos cosas distintas, y hasta ahora ninguna pantalla
+     * las cruzaba: la comprobacion del servidor mira el gobierno, asi que una cuenta bloqueada la
+     * satisface mientras la institucion se queda sin acceso.
+     *
+     * En este entorno hay cuentas locales sembradas con segundo factor, de modo que lo que se ve
+     * es el caso bueno. Los casos malos —bloqueada, sin cuenta, sin TOTP— estan en la prueba
+     * unitaria, que es donde se puede poner el almacen en ese estado sin tirar la sesion.
+     */
+    await page.goto('/admin/teams');
+    await expect(page.getByTestId('acceso-administradores')).toContainText('cuenta local propia');
+
+    // La misma pregunta, en la pantalla donde vive el estado de las cuentas.
+    await page.goto('/admin/users');
+    await expect(page.getByTestId('acceso-administradores')).toBeVisible();
+  });
 });
 
 test.describe('el carril de administracion', () => {

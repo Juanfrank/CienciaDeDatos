@@ -399,6 +399,16 @@ export const en: Record<MessageKey, string> = {
   'admin.teams.onlyOneAdmin':
     'Only {quien} administers the application. There should be at least two: if that account is lost, restoring access means going into the governance database.',
   'admin.teams.admins': 'Administering the application: {quienes}.',
+  'admin.adminAccess.ok':
+    '{n, plural, one {One of them can} other {# of them can}} sign in with their own local account, without depending on Azure AD being up.',
+  'admin.adminAccess.federated':
+    'None of them has a usable local account ({detalle}). They sign in through Azure AD today; if Azure AD stops responding, nobody can administer. At least one of them should have a local account with a second factor.',
+  'admin.adminAccess.none':
+    'None of them can sign in ({detalle}), and this deployment has no Azure AD configured. Restoring access requires the emergency access procedure.',
+  'admin.adminAccess.impeded': '{quien}, {motivo}',
+  'admin.adminAccess.reason.noAccount': 'no local account',
+  'admin.adminAccess.reason.locked': 'account locked',
+  'admin.adminAccess.reason.noSecondFactor': 'no second factor',
   'admin.teams.members.title': 'Members of {equipo}',
   'admin.teams.members.intro':
     'The role decides what each person can do WITHIN this team. The same person can hold different roles in different teams.',

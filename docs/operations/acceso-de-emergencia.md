@@ -97,5 +97,9 @@ queda otro Administrador, no es una emergencia —se lo restituye el—; si no q
 comprobacion no habria dejado hacer el cambio. Por eso los relevos se hacen nombrando primero y
 retirando despues.
 
-**Pendiente**: que la comprobacion verifique que el Administrador que queda puede AUTENTICARSE,
-no solo que existe en el gobierno. Anotado en `docs/hoja-de-ruta.md`, apartado 2.6.
+**Avisa**, desde el apartado 2.8, cuando quien administra no puede AUTENTICARSE aunque conserve el
+rol: `/admin/teams` y `/admin/users` cruzan a quienes administran con el estado de sus cuentas
+locales y dicen si alguno puede entrar sin depender de que Azure AD responda —el caso 2 de arriba—.
+Es un aviso y no un bloqueo a proposito: desde dentro solo se ve la cuenta local, y que una
+identidad de Azure AD siga activa lo sabe Azure. Rechazar un cambio sobre media comprobacion
+dejaria a quien administra sin poder reorganizar nada por una cuenta que quiza si funciona.

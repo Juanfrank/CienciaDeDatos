@@ -1,5 +1,6 @@
+import { AdminAccess } from '../../../src/components/admin/AdminAccess';
 import { TeamsTable } from '../../../src/components/admin/TeamsTable';
-import { administradores } from '../../../src/server/admin';
+import { accesoDeQuienesAdministran, administradores } from '../../../src/server/admin';
 import { listTeams } from '../../../src/server/context';
 import { translator } from '../../../src/server/locale';
 import { paginaDeAdmin } from '../../../src/server/admin';
@@ -16,10 +17,11 @@ export default async function TeamPage() {
   // Quien puede ver ESTA pagina, dicho aqui y no heredado del layout.
   await paginaDeAdmin();
 
-  const [t, equipos, quienesAdministran] = await Promise.all([
+  const [t, equipos, quienesAdministran, acceso] = await Promise.all([
     translator(),
     listTeams(),
     administradores(),
+    accesoDeQuienesAdministran(),
   ]);
 
   return (
@@ -43,6 +45,15 @@ export default async function TeamPage() {
           ? t('admin.teams.onlyOneAdmin', { quien: quienesAdministran[0] ?? '' })
           : t('admin.teams.admins', { quienes: t.lista(quienesAdministran) })}
       </p>
+
+      {/*
+        Y si ademas pueden ENTRAR, que es otra pregunta.
+
+        Conservar el rol satisface la invariante del servidor mientras la institucion sigue de
+        hecho sin acceso: una cuenta bloqueada cuenta como Administrador para
+        `wouldLeaveNoAdministrator` y no puede iniciar sesion.
+      */}
+      <AdminAccess acceso={acceso} t={t} />
 
       <TeamsTable
         equipos={equipos.map((e) => ({
