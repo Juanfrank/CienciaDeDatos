@@ -162,15 +162,38 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   token de restablecimiento son 24 bytes aleatorios, de un solo uso y con caducidad; la descarga
   de una exportacion comprueba de quien es y no toca el disco; la personalizacion toma el usuario
   de la sesion, nunca del cuerpo. `npm audit` da cero vulnerabilidades.
-- **Segundo tema de fabrica: «Linea grafica».** La capa visual de la linea grafica del tablero de
-  casos penales —azul de accion, morado de series, gris azulado, Poppins y sombra con tinte de
-  marca—, y nada mas: los componentes y las reglas de maqueta de aquella guia no entran, porque un
-  tema decide como se VE la aplicacion, no que objetos existen. Obligo a tres extensiones del
-  modelo de tema, todas opcionales y todas de estilo: `error` como origen aparte (atado al acento,
-  un tema de acento morado tendria los errores morados), `typeface` sobre un conjunto CERRADO de
-  tipografias que la aplicacion sirve desde su propio origen, y `shadow: 'de-marca'`. Lo comprueba
-  `packages/design-tokens/src/graphicLineTheme.spec.ts`: AA en los dos modos, la letra, la sombra,
-  el rojo pese al acento morado, y —lo que mas importa— que el tema institucional no cambio.
+- **Un tema pasa a ser la identidad visual COMPLETA, y hay un segundo de fabrica.** Antes un tema
+  eran tres colores de origen y punto: la letra, los tamanos, los radios y la sombra eran
+  constantes globales que compartian todos, asi que lo que se servia como «tema institucional» era
+  en realidad «esos tres colores mas lo que quedara en cuatro constantes». Ahora un tema declara
+  seis colores —los tres de marca y los tres semanticos— y cinco ejes de estilo, cada uno sobre un
+  conjunto CERRADO (`typeface`, `typeScale`, `cornerRadius`, `shadowShape`, `shadowTint`). Cerrado
+  por dos razones que valen para todos: una letra es un archivo que hay que servir desde el propio
+  origen —el principio 1 no admite pedirsela a un dominio ajeno— y el valor termina en una
+  variable CSS, donde una cadena libre es superficie de inyeccion.
+  - **Los dos semanticos que no existian.** El exito se pintaba con `secondary` —un AZUL— y la
+    advertencia con `tertiary`, que en el tema institucional es el rojo de la norma. Es decir: «va
+    bien» salia azul y «ojo con esto» salia igual que un error. Ahora son roles propios de la
+    paleta MD3, con sus ocho tokens y sus parejas de contraste, y lo consumen `.notice-ok`,
+    `.notice-atencion` y el delta de un indicador.
+  - **El tema institucional, escrito entero.** Declara sus cinco ejes aunque todos sean el valor
+    por omision: un tema de fabrica es la referencia que se copia, y lo que no diga no se hereda,
+    se adivina. Lo unico que cambia de como se veia es el verde y el ambar, que antes no eran ni
+    verde ni ambar.
+  - **«Linea grafica», el segundo.** La capa visual de la linea grafica del tablero de casos
+    penales, entera: azul de accion, morado de series, gris azulado, su verde y su ambar, Poppins
+    en escala compacta —que jerarquiza por peso y no por tamano—, tres radios en vez de siete y su
+    sombra difusa con tinte de marca. Lo que aquella guia llama componentes y reglas de maqueta no
+    entra: un tema decide como se VE la aplicacion, no que objetos existen.
+  - **Lo comprueba** `packages/design-tokens/src/graphicLineTheme.spec.ts` — veinte pruebas: AA en
+    los dos modos por las dos listas, la letra, que la escala no se cruce, los tres radios, la
+    forma de la sombra, que en oscuro pierda el tinte, que el error sea rojo pese al acento
+    morado, que el exito sea verde en los DOS temas, y que ninguno de los dos deje un eje sin
+    declarar.
+  - **Y lo puede expresar la pantalla.** El dialogo de crear tema ofrece los tres semanticos y los
+    cinco ejes; el panel ensena la especificacion completa de cada tema. Un tema que solo se
+    pudiera escribir tocando el codigo convertiria el panel en la forma facil de administrar en
+    vez de en la forma de administrar.
 
 **2.2 sigue pendiente** aunque dependia de 2.1: el reposicionamiento existe en el editor, no en
 el dialogo «Mi vista» de la personalizacion.

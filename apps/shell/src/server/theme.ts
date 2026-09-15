@@ -1,8 +1,17 @@
 import { cookies } from 'next/headers';
 import {
+  CONTRAST_PAIRS,
   INSTITUTIONAL_THEME,
+  SEMANTIC_ROLES,
+  SHADOW_SHAPES,
+  SHAPE_SCALES,
   SOURCE_ROLES,
+  TYPEFACES,
+  TYPE_SCALES,
   type ColorMode,
+  type ContrastCheck,
+  type MaterialTheme,
+  type SemanticRole,
   type ThemeDefinition,
   asThemeTokens,
   findContrastFailures,
@@ -62,6 +71,52 @@ export async function colorMode(): Promise<ColorMode> {
  */
 
 /**
+ * Un eje de estilo, si su valor es uno de los que existen; nada, si no.
+ *
+ * Silenciosa a proposito: un identificador que no esta en el conjunto es el que manda un cliente
+ * viejo o un cuerpo escrito a mano, y para eso «se queda con el institucional» es mejor que un
+ * 400. Lo que NO puede pasar es que entre: el valor termina en una variable CSS, y una cadena
+ * cualquiera ahi es inyeccion. Por eso se comprueba contra el conjunto y no contra el tipo, que
+ * aqui no sabe nada —esto llega de `JSON.parse`—.
+ */
+function enConjunto<K extends string, V extends string>(
+  clave: K,
+  valor: V | undefined,
+  conjunto: Record<string, unknown>,
+): Partial<Record<K, V>> {
+  return valor !== undefined && Object.hasOwn(conjunto, valor)
+    ? ({ [clave]: valor } as Partial<Record<K, V>>)
+    : {};
+}
+
+/**
+ * Todo lo que una version de un tema tiene que superar. Dos listas, porque miran cosas distintas.
+ *
+ * `institutionalContrastChecks` mira la forma aplanada del tema: las combinaciones concretas que
+ * la aplicacion dibuja —el enlace sobre la superficie, las ocho series sobre la tarjeta—. No
+ * llega a lo semantico, porque en esa forma hay un `danger` suelto y ni siquiera un hueco donde
+ * poner el verde y el ambar.
+ *
+ * Las parejas de MD3 miran el esquema completo, cada `onX` sobre su `X`. Ahi si entran el exito y
+ * la advertencia, y con su color de texto derivado, que es la unica comparacion que significa
+ * algo: lo que se lee en pantalla no es el verde, es lo que se escribe encima.
+ *
+ * Es una sola funcion y la usan las DOS puertas —la de guardar y la que la pantalla ensena— para
+ * que el numero que se lee ahi sea el numero que de verdad se exige. Con dos listas distintas, la
+ * pantalla prometeria una cosa y el servidor comprobaria otra.
+ */
+export function contrastChecksFor(version: MaterialTheme): ContrastCheck[] {
+  return [
+    ...institutionalContrastChecks(asThemeTokens(version)),
+    ...CONTRAST_PAIRS.map(([frente, fondo]) => ({
+      label: `${frente} sobre ${fondo}`,
+      foreground: version.color[frente],
+      background: version.color[fondo],
+    })),
+  ];
+}
+
+/**
  * Guarda un tema, comprobando el CONTRASTE de sus dos versiones antes de dejarlo entrar.
  *
  * Conviene decir exactamente que protege esta comprobacion, porque no es lo que parece. Hoy NO
@@ -101,14 +156,22 @@ export async function saveTheme(
   }
 
   /*
-   * El rojo del error solo se valida si VIENE: ausente, sale del acento, que es lo normal.
+   * Los semanticos solo se validan si VIENEN: ausentes, salen de su respaldo, que es lo normal.
+   *
+   * Vacio cuenta como ausente y no como error. La pantalla manda cadena vacia cuando alguien
+   * borra el campo, y «lo he dejado en blanco» es exactamente pedir el de por defecto.
    */
-  const rojo = definicion.source.error?.trim();
-  if (rojo !== undefined && rojo !== '' && !sourceColorIs(rojo)) {
-    throw new ThemeError(
-      `El color «error» tiene que ser hexadecimal de seis digitos, como #ef3340. Llego «${rojo}».`,
-      400,
-    );
+  const semanticos: Partial<Record<SemanticRole, string>> = {};
+  for (const rol of SEMANTIC_ROLES) {
+    const valor = definicion.source[rol]?.trim();
+    if (valor === undefined || valor === '') continue;
+    if (!sourceColorIs(valor)) {
+      throw new ThemeError(
+        `El color «${rol}» tiene que ser hexadecimal de seis digitos, como #ef3340. Llego «${valor}».`,
+        400,
+      );
+    }
+    semanticos[rol] = valor.toLowerCase();
   }
 
   const limpio: ThemeDefinition = {
@@ -118,25 +181,30 @@ export async function saveTheme(
       primario: definicion.source.primario.trim().toLowerCase(),
       acento: definicion.source.acento.trim().toLowerCase(),
       neutro: definicion.source.neutro.trim().toLowerCase(),
-      ...(rojo ? { error: rojo.toLowerCase() } : {}),
+      ...semanticos,
     },
     ...(definicion.description?.trim() ? { description: definicion.description.trim() } : {}),
     /*
-     * La letra y la sombra se conservan al guardar.
+     * Los cinco ejes de estilo se conservan al guardar.
      *
      * Sin esto, copiar un tema y cambiarle el nombre devolvia un tema con sus colores y la letra
      * de otro: el campo se perdia en el saneado, que es la clase de fallo que no da error y solo
-     * se ve mirando la pantalla con atencion.
+     * se ve mirando la pantalla con atencion. Se comprueba que el valor este en su conjunto
+     * cerrado, y no basta con que el tipo lo diga: esto llega de un cuerpo JSON, que para el
+     * compilador es `unknown` por mucho que la firma prometa otra cosa.
      */
-    ...(definicion.typeface ? { typeface: definicion.typeface } : {}),
-    ...(definicion.shadow ? { shadow: definicion.shadow } : {}),
+    ...enConjunto('typeface', definicion.typeface, TYPEFACES),
+    ...enConjunto('typeScale', definicion.typeScale, TYPE_SCALES),
+    ...enConjunto('cornerRadius', definicion.cornerRadius, SHAPE_SCALES),
+    ...enConjunto('shadowShape', definicion.shadowShape, SHADOW_SHAPES),
+    ...enConjunto('shadowTint', definicion.shadowTint, { neutra: 1, 'de-marca': 1 }),
   };
 
   const versiones = themeVersions(limpio);
   for (const modo of COLOR_MODES) {
     const version = versiones[modo];
     if (!version) continue;
-    const fallos = findContrastFailures(institutionalContrastChecks(asThemeTokens(version)));
+    const fallos = findContrastFailures(contrastChecksFor(version));
     if (fallos.length > 0) {
       throw new ThemeError(
         `En su version ${modo === 'light' ? 'clara' : 'oscura'} no alcanza el contraste que exige ` +

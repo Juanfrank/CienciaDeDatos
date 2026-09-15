@@ -1187,13 +1187,21 @@ input[type='radio'] {
   background: var(--md-sys-color-error-container);
   color: var(--md-sys-color-on-error-container);
 }
+/*
+ * Los dos avisos, cada uno de SU color.
+ *
+ * Iban en `tertiary-container` y en `secondary-container`, que es decir: la advertencia salia del
+ * color de acento del tema —aqui, el rojo de la norma— y el acierto salia de un azul. Un «ojo con
+ * esto» del mismo color que un error no distingue nada, y un «listo» en azul no se lee como
+ * listo. Ahora salen del ambar y del verde del tema, que existen para esto.
+ */
 .notice-atencion {
-  background: var(--md-sys-color-tertiary-container);
-  color: var(--md-sys-color-on-tertiary-container);
+  background: var(--md-sys-color-warning-container);
+  color: var(--md-sys-color-on-warning-container);
 }
 .notice-ok {
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
+  background: var(--md-sys-color-success-container);
+  color: var(--md-sys-color-on-success-container);
 }
 .notice__actions { display: flex; gap: var(--space-sm); align-items: center; margin-top: var(--space-sm); flex-wrap: wrap; }
 
@@ -2247,7 +2255,11 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
  */
 .kpi__value { margin: 0; color: var(--md-sys-color-primary); }
 .kpi__delta { margin: var(--space-xs) 0 0; font-size: var(--md-sys-typescale-body-medium-size); }
-.kpi__delta.es-positivo { color: var(--md-sys-color-secondary); }
+/*
+ * El signo del delta, en verde y en rojo. El color NO es lo unico que lo dice: el numero lleva su
+ * signo delante, que es lo que exige 4.9 y lo que hace que se lea igual sin distinguir los tonos.
+ */
+.kpi__delta.es-positivo { color: var(--md-sys-color-success); }
 .kpi__delta.es-negativo { color: var(--md-sys-color-error); }
 
 .leyenda {

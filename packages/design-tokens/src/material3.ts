@@ -2,7 +2,14 @@ import { Hct, TonalPalette, argbFromHex, hexFromArgb } from '@material/material-
 
 /** Sistema de color de Material Design 3 — seccion 4.3. */
 
-/** Los seis roles de paleta de MD3. */
+/**
+ * Los roles de paleta: los seis de MD3 y los dos semanticos que la especificacion no trae.
+ *
+ * Material solo define `error`. Un tablero necesita ademas decir «esto va bien» y «esto necesita
+ * atencion», y hasta ahora los decia con `secondary` y `tertiary` —es decir, con AZUL y con el
+ * color de acento—. Un incremento positivo pintado de azul no dice nada, y un aviso pintado del
+ * mismo color que los adornos de la marca tampoco.
+ */
 export interface TonalPalettes {
   primary: TonalPalette;
   secondary: TonalPalette;
@@ -10,6 +17,8 @@ export interface TonalPalettes {
   neutral: TonalPalette;
   neutralVariant: TonalPalette;
   error: TonalPalette;
+  success: TonalPalette;
+  warning: TonalPalette;
 }
 
 export interface ThemeSource {
@@ -28,17 +37,44 @@ export interface ThemeSource {
    * un color tiene que hacer aqui—. Un tema que elige otro acento dice tambien cual es su rojo.
    */
   error?: string;
+  /** El verde del exito. Ausente: el de `SEMANTICA_POR_DEFECTO`. */
+  exito?: string;
+  /** El ambar de la advertencia. Ausente: el de `SEMANTICA_POR_DEFECTO`. */
+  advertencia?: string;
 }
 
-/** Croma de las paletas derivadas. */
-const CROMA = { secondary: 18, neutral: 8, neutralVariant: 16 } as const;
+/**
+ * El verde y el ambar de respaldo, para un tema que no diga los suyos.
+ *
+ * No se derivan de la marca A PROPOSITO, y es la diferencia con los otros roles. El primario, el
+ * acento y los neutros son decisiones de marca: cada institucion tiene los suyos y cambiarlos es
+ * justo lo que un tema sirve para hacer. «Bien» y «cuidado» no lo son —son convenciones que el
+ * lector trae puestas antes de abrir la pantalla—, y derivarlos de la marca produce el verde que
+ * no es verde y el ambar que es rosa, que ya no significan nada.
+ *
+ * Que sean elegibles es por lo contrario: un tema PUEDE afinarlos para que convivan con su paleta,
+ * y estos dos ya vienen afinados para hacerlo sin dejar de leerse.
+ */
+export const SEMANTICA_POR_DEFECTO = { exito: '#128a5e', advertencia: '#d97706' } as const;
+
+/** Croma de las paletas derivadas. `semantico` es el minimo para que un rol se lea como su color. */
+const CROMA = { secondary: 18, neutral: 8, neutralVariant: 16, semantico: 48 } as const;
 
 export function palettesFor(source: ThemeSource): TonalPalettes {
   const primario = Hct.fromInt(argbFromHex(source.primario));
   const acento = Hct.fromInt(argbFromHex(source.acento));
-  const rojo = source.error ? Hct.fromInt(argbFromHex(source.error)) : acento;
   // El matiz de los neutros sale del GRIS de la norma, no del primario. Ver `neutro`.
   const neutro = Hct.fromInt(argbFromHex(source.neutro));
+
+  /**
+   * Un rol semantico, con croma suficiente.
+   *
+   * El minimo importa: un verde desvaido derivado de un origen casi gris sale de la paleta tonal
+   * como otro gris, y entonces «va bien» y «esto es un dato mas» se pintan igual.
+   */
+  const semantico = (hct: Hct) =>
+    TonalPalette.fromHueAndChroma(hct.hue, Math.max(hct.chroma, CROMA.semantico));
+  const declarado = (hex: string) => Hct.fromInt(argbFromHex(hex));
 
   return {
     primary: TonalPalette.fromInt(argbFromHex(source.primario)),
@@ -47,7 +83,9 @@ export function palettesFor(source: ThemeSource): TonalPalettes {
     neutral: TonalPalette.fromHueAndChroma(neutro.hue, CROMA.neutral),
     neutralVariant: TonalPalette.fromHueAndChroma(neutro.hue, CROMA.neutralVariant),
     // El rojo del tema, o el acento. Ver la nota de `error` en `ThemeSource`.
-    error: TonalPalette.fromHueAndChroma(rojo.hue, Math.max(rojo.chroma, 48)),
+    error: semantico(source.error ? declarado(source.error) : acento),
+    success: semantico(declarado(source.exito ?? SEMANTICA_POR_DEFECTO.exito)),
+    warning: semantico(declarado(source.advertencia ?? SEMANTICA_POR_DEFECTO.advertencia)),
   };
 }
 
@@ -69,6 +107,14 @@ export interface MaterialScheme {
   onError: string;
   errorContainer: string;
   onErrorContainer: string;
+  success: string;
+  onSuccess: string;
+  successContainer: string;
+  onSuccessContainer: string;
+  warning: string;
+  onWarning: string;
+  warningContainer: string;
+  onWarningContainer: string;
   background: string;
   onBackground: string;
   surface: string;
@@ -115,6 +161,18 @@ const TONOS: Record<keyof MaterialScheme, { palette: keyof TonalPalettes; light:
   onError: { palette: 'error', light: 100, dark: 20 },
   errorContainer: { palette: 'error', light: 90, dark: 30 },
   onErrorContainer: { palette: 'error', light: 10, dark: 90 },
+
+  // Los dos semanticos usan los MISMOS tonos que el error: son roles de la misma clase, y con
+  // otra tabla un aviso y un fallo pesarian distinto en la pantalla sin que nadie lo decidiera.
+  success: { palette: 'success', light: 40, dark: 80 },
+  onSuccess: { palette: 'success', light: 100, dark: 20 },
+  successContainer: { palette: 'success', light: 90, dark: 30 },
+  onSuccessContainer: { palette: 'success', light: 10, dark: 90 },
+
+  warning: { palette: 'warning', light: 40, dark: 80 },
+  onWarning: { palette: 'warning', light: 100, dark: 20 },
+  warningContainer: { palette: 'warning', light: 90, dark: 30 },
+  onWarningContainer: { palette: 'warning', light: 10, dark: 90 },
 
   background: { palette: 'neutral', light: 98, dark: 6 },
   onBackground: { palette: 'neutral', light: 10, dark: 90 },
@@ -166,6 +224,10 @@ export const CONTRAST_PAIRS: readonly [keyof MaterialScheme, keyof MaterialSchem
   ['onTertiaryContainer', 'tertiaryContainer'],
   ['onError', 'error'],
   ['onErrorContainer', 'errorContainer'],
+  ['onSuccess', 'success'],
+  ['onSuccessContainer', 'successContainer'],
+  ['onWarning', 'warning'],
+  ['onWarningContainer', 'warningContainer'],
   ['onBackground', 'background'],
   ['onSurface', 'surface'],
   ['onSurfaceVariant', 'surfaceVariant'],

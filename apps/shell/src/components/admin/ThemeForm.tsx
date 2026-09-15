@@ -2,16 +2,55 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { SOURCE_ROLES, type ThemeDefinition, type ThemeSource } from '@app/design-tokens';
+import {
+  SEMANTIC_ROLES,
+  SHADOW_SHAPE_NAMES,
+  SHAPE_SCALE_NAMES,
+  SOURCE_ROLES,
+  TYPEFACE_NAMES,
+  TYPE_SCALE_NAMES,
+  type ShadowShapeId,
+  type ShapeScaleId,
+  type ThemeDefinition,
+  type ThemeSource,
+  type TypeScaleId,
+  type TypefaceId,
+} from '@app/design-tokens';
 import { useTranslator } from '../Locale';
 import { pedir, motivoDeFallo } from '../pedir';
+
+/** Los cinco ejes de estilo, tal como se guardan. */
+interface Estilo {
+  typeface: TypefaceId;
+  typeScale: TypeScaleId;
+  cornerRadius: ShapeScaleId;
+  shadowShape: ShadowShapeId;
+  shadowTint: 'neutra' | 'de-marca';
+}
+
+const ESTILO_INSTITUCIONAL: Estilo = {
+  typeface: 'institucional',
+  typeScale: 'material',
+  cornerRadius: 'material',
+  shadowShape: 'material',
+  shadowTint: 'neutra',
+};
 
 /**
  * Crear un tema, activarlo y borrarlo — seccion 4.3.
  *
- * Lo que se elige son los TRES colores de origen, no los tokens: Material Design 3 deriva de ellos
- * los de cada modo, y editar un token suelto rompe la relacion de contraste que 4.9 exige. Por eso
- * el formulario tiene tres campos y no cuarenta.
+ * Del color se eligen los ORIGENES, no los tokens: Material Design 3 deriva de ellos los de cada
+ * modo, y editar un token suelto rompe la relacion de contraste que 4.9 exige. Por eso hay tres
+ * campos de color obligatorios y no cuarenta.
+ *
+ * Del resto —la letra, la escala, los radios y la sombra— se elige de listas CERRADAS y no se
+ * escribe nada. Cada una de esas listas existe por su propia razon, escritas donde se declaran,
+ * y todas terminan en la misma: el valor acaba en una variable CSS, y un campo libre ahi es una
+ * superficie de inyeccion abierta para poder elegir entre dos opciones.
+ *
+ * Que esta pantalla pueda expresar TODO lo que un tema de fabrica expresa no es un detalle. El
+ * dia que no pueda, habra temas que solo se pueden escribir tocando el codigo, y el panel dejara
+ * de ser la forma de administrar para pasar a ser la forma facil de administrar.
  *
  * Y por eso el servidor RECHAZA —no avisa— un origen cuyo contraste no llegue: una pantalla que
  * solo avisara dejaria el tema entrar igual, y a partir de ahi la aplicacion entera incumpliria AA
@@ -25,6 +64,7 @@ export function ThemeForm({ base }: { base: ThemeSource }) {
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [origen, setOrigen] = useState<ThemeSource>(base);
+  const [estilo, setEstilo] = useState<Estilo>(ESTILO_INSTITUCIONAL);
   const [enCurso, setEnCurso] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,6 +75,7 @@ export function ThemeForm({ base }: { base: ThemeSource }) {
       id: `tema-${crypto.randomUUID()}`,
       name: nombre,
       source: origen,
+      ...estilo,
       ...(descripcion.trim() ? { description: descripcion } : {}),
     };
     const respuesta = await pedir('/api/admin/themes', {
@@ -66,6 +107,7 @@ export function ThemeForm({ base }: { base: ThemeSource }) {
             // tres colores antes de poder ver nada, y casi siempre lo que se quiere es una
             // variante de lo que ya hay.
             setOrigen(base);
+            setEstilo(ESTILO_INSTITUCIONAL);
             dialogo.current?.showModal();
           }}
         >
@@ -137,6 +179,63 @@ export function ThemeForm({ base }: { base: ThemeSource }) {
           </label>
         ))}
 
+        <h3>{t('admin.themes.semantic')}</h3>
+        <p className="muted-text">{t('admin.themes.semantic.intro')}</p>
+
+        {/*
+          Aqui NO hay selector nativo de color, y es a proposito.
+          Un `input type="color"` no sabe estar vacio: nada mas dibujarse ya vale negro, y
+          entonces «no lo he dicho» —que es lo normal y lo que hay que poder expresar— seria
+          imposible de escribir en esta pantalla.
+        */}
+        {SEMANTIC_ROLES.map((rol) => (
+          <label key={rol} className="form__field">
+            <span>{t(`admin.themes.source.${rol}` as never)}</span>
+            <input
+              value={origen[rol] ?? ''}
+              placeholder={t('admin.themes.semantic.default')}
+              data-testid={`nuevo-tema-${rol}`}
+              onChange={(e) => setOrigen((previo) => ({ ...previo, [rol]: e.target.value }))}
+            />
+          </label>
+        ))}
+
+        <h3>{t('admin.themes.style')}</h3>
+
+        <EjeDeEstilo
+          eje="typeface"
+          opciones={TYPEFACE_NAMES}
+          valor={estilo.typeface}
+          alElegir={(v) => setEstilo((previo) => ({ ...previo, typeface: v }))}
+        />
+        <EjeDeEstilo
+          eje="typeScale"
+          opciones={TYPE_SCALE_NAMES}
+          valor={estilo.typeScale}
+          alElegir={(v) => setEstilo((previo) => ({ ...previo, typeScale: v }))}
+        />
+        <EjeDeEstilo
+          eje="cornerRadius"
+          opciones={SHAPE_SCALE_NAMES}
+          valor={estilo.cornerRadius}
+          alElegir={(v) => setEstilo((previo) => ({ ...previo, cornerRadius: v }))}
+        />
+        <EjeDeEstilo
+          eje="shadowShape"
+          opciones={SHADOW_SHAPE_NAMES}
+          valor={estilo.shadowShape}
+          alElegir={(v) => setEstilo((previo) => ({ ...previo, shadowShape: v }))}
+        />
+        <EjeDeEstilo
+          eje="shadowTint"
+          opciones={{
+            neutra: t('admin.themes.shadowTint.neutra'),
+            'de-marca': t('admin.themes.shadowTint.de-marca'),
+          }}
+          valor={estilo.shadowTint}
+          alElegir={(v) => setEstilo((previo) => ({ ...previo, shadowTint: v }))}
+        />
+
         <button
           type="button"
           className="pastilla"
@@ -148,6 +247,43 @@ export function ThemeForm({ base }: { base: ThemeSource }) {
         </button>
       </dialog>
     </>
+  );
+}
+
+/**
+ * Un eje de estilo, como lista desplegable.
+ *
+ * Desplegable y no campo de texto: el conjunto es cerrado, y una lista es la unica forma de que
+ * quien elige VEA que opciones hay sin tener que ir a leer el codigo que las declara.
+ */
+function EjeDeEstilo<V extends string>({
+  eje,
+  opciones,
+  valor,
+  alElegir,
+}: {
+  eje: 'typeface' | 'typeScale' | 'cornerRadius' | 'shadowShape' | 'shadowTint';
+  opciones: Record<V, string>;
+  valor: V;
+  alElegir: (valor: V) => void;
+}) {
+  const t = useTranslator();
+
+  return (
+    <label className="form__field">
+      <span>{t(`admin.themes.style.${eje}` as never)}</span>
+      <select
+        value={valor}
+        data-testid={`nuevo-tema-${eje}`}
+        onChange={(e) => alElegir(e.target.value as V)}
+      >
+        {(Object.entries(opciones) as [V, string][]).map(([id, nombre]) => (
+          <option key={id} value={id}>
+            {nombre}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 

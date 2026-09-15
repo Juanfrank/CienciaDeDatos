@@ -1,9 +1,14 @@
 import {
+  SEMANTICA_POR_DEFECTO,
+  SEMANTIC_ROLES,
+  SHADOW_SHAPE_NAMES,
+  SHAPE_SCALE_NAMES,
   SOURCE_ROLES,
-  TYPOGRAPHY,
+  TYPEFACE_NAMES,
+  TYPE_SCALE_NAMES,
   asThemeTokens,
   findContrastFailures,
-  institutionalContrastChecks,
+  themeVersion,
   themeVersions,
   type ColorMode,
   type MaterialTheme,
@@ -13,7 +18,7 @@ import type { Translator } from '@app/i18n';
 import { ThemeActions, ThemeForm } from '../../../src/components/admin/ThemeForm';
 import { governance } from '../../../src/server/governance';
 import { INSTITUTIONAL_THEME } from '@app/design-tokens';
-import { COLOR_MODES } from '../../../src/server/theme';
+import { COLOR_MODES, contrastChecksFor } from '../../../src/server/theme';
 import { translator } from '../../../src/server/locale';
 import { paginaDeAdmin } from '../../../src/server/admin';
 
@@ -41,6 +46,16 @@ export default async function TemasPage() {
     governance.getActiveTheme(),
   ]);
 
+  /*
+   * La escala que se ENSENA es la del tema que se sirve, no una constante global.
+   *
+   * Antes esta tabla dibujaba `TYPOGRAPHY` y el pie decia «una sola, comun a todos los temas». Con
+   * un tema que trae la suya, eso pasaria a ser una tabla que describe algo que no esta en
+   * pantalla —y nadie sospecharia de ella, porque los numeros son ciertos para otro tema—.
+   */
+  const servido = temas.find((tema) => tema.id === activo) ?? INSTITUTIONAL_THEME;
+  const escala = themeVersion(servido, 'light').typography;
+
   return (
     <section>
       <h2>{t('admin.themes.title')}</h2>
@@ -53,8 +68,7 @@ export default async function TemasPage() {
       ))}
 
       <h3>{t('admin.themes.typography')}</h3>
-      {/* La tipografia es una y la comparten todos: el color se elige, la letra institucional no. */}
-      <p className="muted-text">{t('admin.themes.typography.shared')}</p>
+      <p className="muted-text">{t('admin.themes.typography.shared', { tema: servido.name })}</p>
       <table className="tabla" data-testid="tabla-tipografia">
         <thead>
           <tr>
@@ -65,7 +79,7 @@ export default async function TemasPage() {
           </tr>
         </thead>
         <tbody>
-          {Object.entries(TYPOGRAPHY).map(([rol, estilo]) => (
+          {Object.entries(escala).map(([rol, estilo]) => (
             <tr key={rol} data-testid={`tipografia-${rol}`}>
               <th scope="row">{rol}</th>
               <td>{estilo.size}</td>
@@ -124,6 +138,47 @@ function Tema({
       </ul>
 
       {/*
+        Los semanticos se ensenan SIEMPRE, tambien cuando el tema no los dice.
+        Lo que interesa saber mirando aqui es de que color sale un error en esta pantalla, no si
+        alguien se molesto en escribirlo: la marca «Por defecto» contesta las dos cosas a la vez.
+      */}
+      <h4>{t('admin.themes.semantic')}</h4>
+      <ul className="theme-source" data-testid={`tema-${tema.id}-semantico`}>
+        {SEMANTIC_ROLES.map((rol) => {
+          const declarado = tema.source[rol];
+          const valor = declarado ?? respaldoDe(rol, tema);
+          return (
+            <li key={rol} data-testid={`tema-${tema.id}-semantico-${rol}`}>
+              <span className="theme-swatch" style={{ background: valor }} aria-hidden="true" />
+              <b>{t(`admin.themes.source.${rol}` as never)}</b>
+              <code>{valor}</code>
+              {declarado ? null : (
+                <span className="muted-text">{t('admin.themes.semantic.default')}</span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
+      <h4>{t('admin.themes.style')}</h4>
+      <ul className="theme-source" data-testid={`tema-${tema.id}-estilo`}>
+        {(
+          [
+            ['typeface', TYPEFACE_NAMES[tema.typeface ?? 'institucional']],
+            ['typeScale', TYPE_SCALE_NAMES[tema.typeScale ?? 'material']],
+            ['cornerRadius', SHAPE_SCALE_NAMES[tema.cornerRadius ?? 'material']],
+            ['shadowShape', SHADOW_SHAPE_NAMES[tema.shadowShape ?? 'material']],
+            ['shadowTint', t(`admin.themes.shadowTint.${tema.shadowTint ?? 'neutra'}` as never)],
+          ] as const
+        ).map(([eje, valor]) => (
+          <li key={eje} data-testid={`tema-${tema.id}-estilo-${eje}`}>
+            <b>{t(`admin.themes.style.${eje}` as never)}</b>
+            <span>{valor}</span>
+          </li>
+        ))}
+      </ul>
+
+      {/*
         Las DOS versiones, una al lado de la otra.
         Es lo que dice que son el mismo tema: el mismo origen, dos derivaciones. Enseñar solo la
         que corre dejaria la otra sin mirar hasta que alguien cambiara de modo.
@@ -135,6 +190,18 @@ function Tema({
       </div>
     </article>
   );
+}
+
+/**
+ * El color del que sale un rol semantico que el tema no declara.
+ *
+ * El error sale del acento del PROPIO tema; el verde y el ambar, de los comunes. Se escribe aqui
+ * la misma regla que aplica `palettesFor`, y es duplicacion con un motivo: sin ella la pantalla
+ * ensenaria un hueco donde hay un color, y «no lo he dicho» se leeria como «no hay ninguno».
+ */
+function respaldoDe(rol: (typeof SEMANTIC_ROLES)[number], tema: ThemeDefinition): string {
+  if (rol === 'error') return tema.source.acento;
+  return SEMANTICA_POR_DEFECTO[rol];
 }
 
 function Version({
@@ -149,7 +216,11 @@ function Version({
   t: Translator;
 }) {
   const tokens = asThemeTokens(version);
-  const comprobaciones = institutionalContrastChecks(tokens);
+  /*
+   * La MISMA lista que usa la puerta de guardar.
+   * Si esta pantalla comprobara menos, el numero que promete seria mayor que la garantia real.
+   */
+  const comprobaciones = contrastChecksFor(version);
   const fallos = findContrastFailures(comprobaciones);
 
   return (
@@ -209,6 +280,8 @@ function Version({
                 ['textOnBrand', tokens.color.textOnBrand],
                 ['border', tokens.color.border],
                 ['danger', tokens.color.danger],
+                ['success', tokens.color.success],
+                ['warning', tokens.color.warning],
               ] as const
             ).map(([nombre, valor]) => (
               <tr key={nombre}>

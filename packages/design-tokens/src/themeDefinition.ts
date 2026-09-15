@@ -1,5 +1,16 @@
 import { type ColorMode, type ThemeSource } from './material3';
-import { type MaterialTheme, materialTheme, tintOf, TINTE_NEUTRO } from './material3Tokens';
+import {
+  type MaterialTheme,
+  type ShadowShapeId,
+  type ShapeScaleId,
+  type ThemeStyle,
+  type TypeScaleId,
+  SHAPE_SCALES,
+  TINTE_NEUTRO,
+  TYPE_SCALES,
+  materialTheme,
+  tintOf,
+} from './material3Tokens';
 import { INSTITUTIONAL_SOURCE, TYPEFACES, type TypefaceId } from './institutionalTheme';
 
 /**
@@ -40,21 +51,53 @@ export interface ThemeDefinition {
    */
   typeface?: TypefaceId;
   /**
+   * Con que tamanos y pesos se escribe. Ausente: la escala de Material.
+   *
+   * La letra y su escala son dos cosas distintas y por eso se eligen aparte: Poppins en la escala
+   * de Material sigue siendo una aplicacion de Material escrita en Poppins. Lo que hace que una
+   * pantalla se reconozca como de otra linea grafica es tanto el tamano de los rotulos y el peso
+   * de los titulos como la forma de las letras. Ver `TYPE_SCALES`.
+   */
+  typeScale?: TypeScaleId;
+  /** Con que radios se redondean las esquinas. Ausente: los siete de Material. Ver `SHAPE_SCALES`. */
+  cornerRadius?: ShapeScaleId;
+  /**
+   * Que FORMA tiene la sombra: cuantas capas, con que desenfoque y con que opacidad.
+   *
+   * Ausente: la de la especificacion. Ver `SHADOW_SHAPES`.
+   */
+  shadowShape?: ShadowShapeId;
+  /**
    * De que color es la sombra. Ausente: el negro de la especificacion.
    *
    * `de-marca` la tine con el propio primario del tema. No es un adorno: una sombra negra sobre
    * superficies que tiran a azul se ve gris sucia, y es lo que hace que una pantalla no termine de
    * verse limpia sin que se pueda senalar que falla.
    */
-  shadow?: 'neutra' | 'de-marca';
+  shadowTint?: 'neutra' | 'de-marca';
 }
 
-/** El tema institucional, el que viene de fabrica. */
+/**
+ * El tema institucional, el que viene de fabrica.
+ *
+ * Dice sus cinco ejes de estilo aunque todos sean el valor por omision, y eso es lo que cambio:
+ * antes no los decia porque no existian —eran constantes globales que compartian todos los temas—
+ * y lo que servia de tema institucional era «lo que quedara en esas constantes». Escritos, este
+ * tema es una declaracion completa y no el residuo de otras; y el dia que alguien toque un valor
+ * global, tendra que venir aqui a decir que tambien cambia el tema de la institucion.
+ */
 export const INSTITUTIONAL_THEME: ThemeDefinition = {
   id: 'institucional',
   name: 'Institucional',
-  description: 'La norma de marca del Poder Judicial: azul, rojo de acento y el gris de la portada.',
+  description:
+    'La norma de marca del Poder Judicial: azul, rojo de acento y el gris de la portada, ' +
+    'en Montserrat y con la escala, los radios y la sombra de Material.',
   source: INSTITUTIONAL_SOURCE,
+  typeface: 'institucional',
+  typeScale: 'material',
+  cornerRadius: 'material',
+  shadowShape: 'material',
+  shadowTint: 'neutra',
   builtIn: true,
 };
 
@@ -72,21 +115,31 @@ export const INSTITUTIONAL_THEME: ThemeDefinition = {
  * - `acento`, el morado con el que esa linea dibuja las series alternas de un grafico.
  * - `neutro`, su gris azulado, del que salen el fondo de pagina y los bordes.
  *
- * Y `error` se dice aparte porque hace falta: atado al acento, los errores saldrian morados.
+ * Y los tres semanticos se dicen aparte porque los tres hacen falta. El rojo, porque atado al
+ * acento los errores saldrian morados. El verde y el ambar, porque son los de su seccion
+ * «Semantico» y no se parecen a los de respaldo por casualidad: la guia los eligio para convivir
+ * con este azul y este morado sin competir con ellos.
  */
 export const GRAPHIC_LINE_THEME: ThemeDefinition = {
   id: 'linea-grafica',
   name: 'Linea grafica',
   description:
-    'La linea grafica del tablero de casos penales: azul de accion, morado de series, gris azulado, Poppins y sombra con tinte de marca.',
+    'La linea grafica del tablero de casos penales: azul de accion, morado de series, gris ' +
+    'azulado, verde y ambar semanticos, Poppins en escala compacta, tres radios y sombra difusa ' +
+    'con tinte de marca.',
   source: {
     primario: '#0050dd',
     acento: '#7c5cfc',
     neutro: '#5c6580',
     error: '#ef3340',
+    exito: '#128a5e',
+    advertencia: '#d97706',
   },
   typeface: 'poppins',
-  shadow: 'de-marca',
+  typeScale: 'compacta',
+  cornerRadius: 'tres-radios',
+  shadowShape: 'difusa',
+  shadowTint: 'de-marca',
   builtIn: true,
 };
 
@@ -96,9 +149,25 @@ export const BUILT_IN_THEMES: readonly ThemeDefinition[] = [
   GRAPHIC_LINE_THEME,
 ];
 
-/** El tinte de sombra que le toca a un tema. */
-const tinteDe = (definicion: ThemeDefinition): string =>
-  definicion.shadow === 'de-marca' ? tintOf(definicion.source) : TINTE_NEUTRO;
+/**
+ * El estilo de un tema, con lo que no diga resuelto al valor institucional.
+ *
+ * Es el UNICO sitio donde se decide que significa «ausente», y por eso esta aqui y no repartido
+ * entre quienes derivan tokens. Con la resolucion en varios sitios, un tema sin letra podria
+ * salir en Montserrat desde una pantalla y en otra cosa desde la exportacion.
+ *
+ * Depende del modo por la sombra, que en oscuro pierde el tinte de marca. Ver `tintOf`.
+ */
+export function themeStyle(definicion: ThemeDefinition, mode: ColorMode): ThemeStyle {
+  return {
+    fonts: TYPEFACES[definicion.typeface ?? 'institucional'],
+    typography: TYPE_SCALES[definicion.typeScale ?? 'material'],
+    shape: SHAPE_SCALES[definicion.cornerRadius ?? 'material'],
+    shadowShape: definicion.shadowShape ?? 'material',
+    shadowTint:
+      definicion.shadowTint === 'de-marca' ? tintOf(definicion.source, mode) : TINTE_NEUTRO,
+  };
+}
 
 /** Las dos versiones de un tema, derivadas de su origen. Todo tema tiene las dos. */
 export function themeVersions(definicion: ThemeDefinition): Record<ColorMode, MaterialTheme> {
@@ -107,23 +176,28 @@ export function themeVersions(definicion: ThemeDefinition): Record<ColorMode, Ma
 
 /** Una version concreta. */
 export function themeVersion(definicion: ThemeDefinition, mode: ColorMode): MaterialTheme {
-  return materialTheme(
-    definicion.source,
-    mode,
-    TYPEFACES[definicion.typeface ?? 'institucional'],
-    tinteDe(definicion),
-  );
+  return materialTheme(definicion.source, mode, themeStyle(definicion, mode));
 }
 
 /**
  * Los tres roles de origen OBLIGATORIOS, en el orden en que se explican y se editan.
  *
- * `error` no esta aqui a proposito: es opcional —ausente, el error sale del acento— y meterlo en
- * esta lista lo convertiria en un campo mas que la pantalla pide siempre, cuando lo normal es no
- * tener que contestarlo.
+ * Los semanticos no estan aqui a proposito: los tres son opcionales y los tres tienen respaldo,
+ * asi que meterlos en esta lista los convertiria en campos que la pantalla exige siempre, cuando
+ * lo normal es no tener que contestarlos. Van en `SEMANTIC_ROLES`, que la pantalla ofrece aparte.
  */
 export const SOURCE_ROLES = ['primario', 'acento', 'neutro'] as const;
 export type SourceRole = (typeof SOURCE_ROLES)[number];
+
+/**
+ * Los tres roles semanticos, opcionales, en el orden en que se leen.
+ *
+ * Se pueden decir y casi nunca hace falta. `error` sale del acento; el verde y el ambar salen de
+ * `SEMANTICA_POR_DEFECTO`, que no son de marca justamente porque «bien» y «cuidado» no son
+ * decisiones de marca. Un tema los toca cuando los suyos conviven mejor con su paleta.
+ */
+export const SEMANTIC_ROLES = ['error', 'exito', 'advertencia'] as const;
+export type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 
 /** Un color de origen valido: hexadecimal de seis digitos. Es lo que el derivador sabe leer. */
 export function sourceColorIs(valor: string): boolean {

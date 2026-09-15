@@ -1,13 +1,36 @@
 import type { ThemeTokens } from './tokens';
-import { type ColorMode, type ThemeSource } from './material3';
-import { type MaterialTheme, materialTheme } from './material3Tokens';
+import { type ColorMode, type ThemeSource, SEMANTICA_POR_DEFECTO } from './material3';
+import {
+  type MaterialTheme,
+  type ThemeStyle,
+  SHAPE,
+  TINTE_NEUTRO,
+  TYPOGRAPHY,
+  materialTheme,
+} from './material3Tokens';
 
-/** El tema de la institucion, expresado en Material Design 3. */
+/**
+ * El tema de la institucion, expresado en Material Design 3.
+ *
+ * Dice sus seis colores, los dos semanticos incluidos. Antes decia tres y los otros salian de
+ * donde podian: el exito se pintaba con `secondary` —un AZUL— y la advertencia con el acento, que
+ * aqui es el rojo de la norma. Es decir, «va bien» salia azul y «ojo con esto» salia del mismo
+ * color que un error. Ninguno de los dos era una decision; eran el hueco que quedaba.
+ */
 export const INSTITUTIONAL_SOURCE: ThemeSource = {
   primario: '#0050dd',
   acento: '#ef3340',
   // El gris de la norma de marca, el mismo que rotula la institucion en la portada de un informe.
   neutro: '#5b6b87',
+  /*
+   * Se escriben aunque coincidan con el respaldo, y a proposito.
+   *
+   * Un tema de fabrica es la referencia que se copia para hacer los demas: lo que no diga no se
+   * hereda, se adivina. Con los seis escritos, abrir este archivo contesta de que color es cada
+   * cosa sin tener que ir a buscar de donde sale lo que falta.
+   */
+  exito: SEMANTICA_POR_DEFECTO.exito,
+  advertencia: SEMANTICA_POR_DEFECTO.advertencia,
 };
 
 /**
@@ -59,10 +82,35 @@ export const TYPEFACE_NAMES: Record<TypefaceId, string> = {
   poppins: 'Poppins',
 };
 
-export const lightTheme: MaterialTheme = materialTheme(INSTITUTIONAL_SOURCE, 'light', FONTS);
+/**
+ * El estilo institucional, escrito entero: Montserrat, la escala de Material, sus siete radios y
+ * la sombra neutra de la especificacion.
+ *
+ * Es lo que la aplicacion ya tenia, pero antes lo tenia por OMISION —eran las constantes globales
+ * que compartian todos los temas— y ahora lo tiene por declaracion. La diferencia importa el dia
+ * que alguien cambia un valor global: entonces cambiaba en silencio el tema de la institucion, y
+ * ahora hay que venir aqui y decirlo.
+ */
+export const INSTITUTIONAL_STYLE: ThemeStyle = {
+  fonts: FONTS,
+  typography: TYPOGRAPHY,
+  shape: SHAPE,
+  shadowShape: 'material',
+  shadowTint: TINTE_NEUTRO,
+};
+
+export const lightTheme: MaterialTheme = materialTheme(
+  INSTITUTIONAL_SOURCE,
+  'light',
+  INSTITUTIONAL_STYLE,
+);
 
 /** El esquema oscuro existe y esta verificado, y NO esta aplicado. */
-export const darkTheme: MaterialTheme = materialTheme(INSTITUTIONAL_SOURCE, 'dark', FONTS);
+export const darkTheme: MaterialTheme = materialTheme(
+  INSTITUTIONAL_SOURCE,
+  'dark',
+  INSTITUTIONAL_STYLE,
+);
 
 export const themeForMode = (mode: ColorMode): MaterialTheme =>
   mode === 'light' ? lightTheme : darkTheme;
@@ -97,8 +145,9 @@ export function asThemeTokens(theme: MaterialTheme): ThemeTokens {
         700: c.onSurfaceVariant,
         900: c.onSurface,
       },
-      success: c.secondary,
-      warning: c.tertiary,
+      // Los tres semanticos, cada uno del SUYO. Ver la nota de `TonalPalettes`.
+      success: c.success,
+      warning: c.warning,
       danger: c.error,
       background: c.background,
       surface: c.surfaceContainerLowest,
