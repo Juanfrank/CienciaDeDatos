@@ -139,6 +139,20 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Pendientes por distrito',
               binding: { datasetId: DATASET, dimensions: [DISTRITO], measures: ['CasosPendientes'] },
+              /*
+               * El salto de 4.4, declarado en la semilla para que exista uno que mirar.
+               *
+               * Son DOS y a proposito, porque lo que enseñan juntos es la regla entera: el
+               * contexto se interseca con el ambito de quien LLEGA. «Audiencias» cuelga del nodo
+               * Norte y se le ofrece a quien tiene ese equipo; «Estadisticas» vive fuera de lo
+               * concedido y a esa misma persona no se le ofrece, aunque el salto este configurado
+               * igual de bien. Quien lo configura declara el destino; quien alcanza que es otra
+               * pregunta, y la responde el camino de lectura cuando alguien abre el modulo.
+               */
+              drillThrough: [
+                { moduleSlug: 'audiencias', label: 'Ver las audiencias de este distrito' },
+                { moduleSlug: 'estadisticas' },
+              ],
               attachments: [
                 {
                   instanceId: 'tooltip-barras-distrito',

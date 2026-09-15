@@ -10,6 +10,7 @@ import type {
 import type { ObjectPresentation } from '@app/ui-components';
 import { OBJECT_ICONS, fieldKey } from '@app/ui-components';
 import { objectRegistry } from './context';
+import { modules } from './moduleStore';
 import { ICON_PREFIX, defaultPresentations, disabledResources } from './catalogo';
 import { declaredAggregations, availableColumnsOf } from './data';
 
@@ -58,6 +59,18 @@ export interface PaletteDataset {
 
 export interface EditorPalette {
   objetos: PaletteObject[];
+  /**
+   * Los modulos a los que un salto puede apuntar, de slug a nombre (4.4).
+   *
+   * Es una lista para ELEGIR, no una comprobacion de acceso: aqui se declara a donde lleva el
+   * salto, y quien lo sigue es otra persona con otro ambito. Quien decide si se le ofrece o no es
+   * el camino de lectura, cuando alguien abra el modulo.
+   *
+   * Se ofrecen todos los que existen, incluidos los borradores: un modulo se suele montar junto
+   * con el detalle al que salta, y exigir que el destino ya este publicado obligaria a publicar
+   * primero y volver despues a declarar el salto.
+   */
+  modulos: { slug: string; name: string }[];
   /*
    * Los iconos que el editor puede ofrecer.
    *
@@ -142,5 +155,9 @@ export async function editorPalette(): Promise<EditorPalette> {
   // retirar—: deja de ofrecerse para elegir uno nuevo, igual que con los objetos.
   const iconos = OBJECT_ICONS.filter((nombre) => !deshabilitados.has(`${ICON_PREFIX}${nombre}`));
 
-  return { objetos, datasets, iconos };
+  const modulos = (await modules.list())
+    .map((m) => ({ slug: m.slug, name: m.name }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+
+  return { objetos, datasets, iconos, modulos };
 }

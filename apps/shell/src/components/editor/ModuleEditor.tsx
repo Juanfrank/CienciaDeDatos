@@ -570,6 +570,9 @@ export function ModuleEditor({
           objetos={palette.objetos}
           datasets={palette.datasets}
           iconos={palette.iconos}
+          // Sin el modulo que se esta editando: un salto a la misma pagina no lleva a ninguna
+          // parte, y ofrecerlo invita a declarar el salto que `drillProblems` marca como roto.
+          modulos={palette.modulos.filter((m) => m.slug !== modulo.slug)}
           selected={chosen}
           saving={saving}
           onAnadir={(objectId) => void add(objectId)}

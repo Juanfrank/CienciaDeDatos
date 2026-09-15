@@ -232,6 +232,73 @@ test.describe('la interfaz distingue lo elegido de lo impuesto por el ambito', (
   });
 });
 
+test.describe('saltos al detalle — drill-through (4.4)', () => {
+  test('el salto se lleva los filtros puestos, y solo ofrece lo que quien mira alcanza', async ({
+    page,
+  }) => {
+    /*
+     * La prueba que cierra el hueco: el modelo del drill-through estaba entero y no tenia ni un
+     * consumidor, asi que no habia forma de seguir un salto desde la pantalla.
+     *
+     * «Pendientes por distrito» declara DOS destinos. «Audiencias» cuelga del nodo Norte, que es
+     * el equipo de Ana; «Estadisticas» vive fuera de lo concedido. Los dos estan configurados
+     * igual de bien: lo que los distingue no es el modulo, es quien mira. Por eso se comprueban
+     * juntos — comprobar solo el que se ve dejaria pasar la version que los ofrece todos.
+     */
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    // Con un solo destino alcanzable no hay menu: el enlace va directo. Un desplegable de un
+    // elemento es un clic de mas para llegar al mismo sitio.
+    const salto = page.getByTestId('drill-Pendientes por distrito');
+    await expect(salto).toBeVisible();
+    await expect(salto).toHaveAttribute('aria-label', /audiencias de este distrito/i);
+    await expect(page.getByTestId('drill-open-Pendientes por distrito')).toHaveCount(0);
+
+    // Y lo que viaja es el CONTEXTO: se pone un filtro y el destino lo hereda.
+    await page.getByTestId('slicer-Penal').click();
+    await expect(page.getByTestId('filtros-activos')).toContainText('Penal');
+    await expect(salto).toHaveAttribute('href', /^\/m\/audiencias\?/);
+    await expect(salto).toHaveAttribute('href', /DimTribunal\.Materia=Penal/);
+
+    // Y llega de verdad, con el filtro puesto al otro lado.
+    await salto.click();
+    await expect(page).toHaveURL(/\/m\/audiencias\?.*Materia=Penal/);
+    await expect(page.getByTestId('module-title')).toContainText('Audiencias');
+    await expect(page.getByTestId('filtros-activos')).toContainText('Penal');
+  });
+
+  test('un destino que quien mira NO alcanza no se ofrece, y su direccion tampoco le responde', async ({
+    page,
+  }) => {
+    // Las dos mitades de la regla. Ocultar el enlace no es proteger: lo que de verdad guarda el
+    // destino es su propia puerta, y por eso se prueba tambien la direccion escrita a mano.
+    await asLogin(page, 'u-ana');
+    await page.goto('/m/casos-pendientes');
+
+    const salto = page.getByTestId('drill-Pendientes por distrito');
+    await expect(salto).toHaveAttribute('href', /audiencias/);
+    await expect(salto).not.toHaveAttribute('href', /estadisticas/);
+
+    expect((await page.goto('/m/estadisticas'))?.status()).toBe(404);
+  });
+
+  test('en una vista incrustada no hay saltos: sacarian a quien mira del marco', async ({
+    page,
+  }) => {
+    // Moverse entre paginas del modulo si se puede —eso es moverse DENTRO de lo incrustado—, pero
+    // un salto lleva a otro modulo, es decir, mete la aplicacion entera en un hueco de 640 px.
+    await asLogin(page, 'u-ana');
+    const respuesta = await page.request.post('/api/embeds', { data: { modulo: 'casos-pendientes' } });
+    expect(respuesta.ok(), await respuesta.text()).toBe(true);
+    const { codigo } = (await respuesta.json()) as { codigo: { code: string } };
+
+    await page.goto(`/embed/${codigo.code}`);
+    await expect(page.getByTestId('module-title')).toBeVisible();
+    await expect(page.getByTestId('drill-Pendientes por distrito')).toHaveCount(0);
+  });
+});
+
 test.describe('marcadores (4.4)', () => {
   test('guardar el estado actual como marcador y volver a el', async ({ page }) => {
     await asLogin(page, 'u-ana');

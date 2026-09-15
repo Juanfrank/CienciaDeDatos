@@ -19,6 +19,7 @@ import {
   slotFieldWithout,
   type AttachedObjectInstance,
   type AttachmentId,
+  type DrillThroughTarget,
   type ObjectInstance,
   type FieldSlot,
   type PaginationLegend,
@@ -50,6 +51,7 @@ export function SidebarPanel({
   objetos,
   datasets,
   iconos,
+  modulos,
   selected,
   saving,
   onAnadir,
@@ -58,6 +60,8 @@ export function SidebarPanel({
 }: {
   objetos: PaletteObject[];
   datasets: PaletteDataset[];
+  /** A donde puede apuntar un salto (4.4). Viene de la paleta, que la trae del servidor. */
+  modulos: { slug: string; name: string }[];
   /** Los iconos que se pueden elegir hoy: el panel de administracion puede haber apagado alguno. */
   iconos: IconName[];
   selected: GridItem | null;
@@ -136,6 +140,7 @@ export function SidebarPanel({
             item={selected}
             definicion={definicion}
             datasets={datasets}
+            modulos={modulos}
             saving={saving}
             onCambiar={onCambiar}
             onQuitar={onQuitar}
@@ -461,6 +466,7 @@ function Data({
   item,
   definicion,
   datasets,
+  modulos,
   saving,
   onCambiar,
   onQuitar,
@@ -468,6 +474,8 @@ function Data({
   item: GridItem;
   definicion: PaletteObject | undefined;
   datasets: PaletteDataset[];
+  /** A donde puede apuntar un salto, de la paleta. */
+  modulos: { slug: string; name: string }[];
   saving: boolean;
   onCambiar: (itemId: string, change: (item: GridItem) => GridItem) => void;
   onQuitar: (itemId: string) => void;
@@ -613,6 +621,28 @@ function Data({
           ))}
         </Section>
       ) : null}
+
+      {/*
+        A donde se salta desde este objeto.
+
+        Vive en «Datos» y no en «Formato» porque un salto no es como se ve el objeto: es que
+        contexto se lleva y a donde. Lo que viaja son los filtros que haya puestos al pulsarlo, y
+        por eso no hay nada que declarar sobre «el valor que se pulso» — en esta aplicacion el
+        estado visible ya vive en la URL.
+      */}
+      <Section
+        titulo={t('drill.panel.title')}
+        abierta={false}
+        keys={['drill', 'detalle', 'ir a', 'destino', 'navegar']}
+        prueba={`section-drill-${item.id}`}
+      >
+        <DrillTargets
+          item={item}
+          modulos={modulos}
+          saving={saving}
+          onCambiar={instanceChange}
+        />
+      </Section>
 
       {/*
         Quitar es DESTRUCTIVO, y lo parecia menos que cualquier otra cosa del panel.
@@ -1080,3 +1110,125 @@ function Paso({
   );
 }
 
+
+/**
+ * A donde salta este objeto — drill-through de 4.4.
+ *
+ * Lo que se declara es el DESTINO, no quien puede seguirlo: el salto lo sigue otra persona, con su
+ * propio ambito, y quien decide si se le ofrece es el camino de lectura cuando abra el modulo.
+ * Filtrar aqui por lo que alcanza quien edita daria una lista distinta para cada persona que
+ * configure el mismo modulo.
+ *
+ * El rotulo es opcional y cae al nombre del modulo: «Ir a Audiencias» dice mas que «Ir al
+ * destino», y ahorra rellenar un campo para que el menu se lea.
+ */
+function DrillTargets({
+  item,
+  modulos,
+  saving,
+  onCambiar,
+}: {
+  item: GridItem;
+  modulos: { slug: string; name: string }[];
+  saving: boolean;
+  onCambiar: (change: (i: ObjectInstance) => ObjectInstance) => void;
+}) {
+  const t = useTranslator();
+  const destinos = item.instance.drillThrough ?? [];
+
+  const escribir = (siguientes: DrillThroughTarget[]) =>
+    onCambiar((i) => {
+      // Vacio se QUITA en vez de guardarse como lista vacia: un objeto sin saltos y uno con una
+      // lista de cero saltos son lo mismo, y guardar los dos deja dos formas de decir nada.
+      const { drillThrough: _fuera, ...resto } = i;
+      return siguientes.length > 0 ? { ...resto, drillThrough: siguientes } : resto;
+    });
+
+  const cambiar = (indice: number, parcial: Partial<DrillThroughTarget>) =>
+    escribir(destinos.map((d, i) => (i === indice ? { ...d, ...parcial } : d)));
+
+  return (
+    <>
+      {destinos.length === 0 ? (
+        <p className="muted-text" data-testid={`drill-empty-${item.id}`}>
+          {t('drill.panel.empty')}
+        </p>
+      ) : null}
+
+      <ol className="editor__saltos">
+        {destinos.map((destino, indice) => (
+          // Por indice y no por slug: dos saltos al mismo modulo con distinta pagina son
+          // legitimos, y con el slug de clave React los trataria como uno.
+          <li key={`${destino.moduleSlug}-${indice}`} data-testid={`drill-${item.id}-${indice}`}>
+            <label className="form__field">
+              <span>{t('drill.panel.module')}</span>
+              <select
+                value={destino.moduleSlug}
+                disabled={saving}
+                data-testid={`drill-modulo-${item.id}-${indice}`}
+                onChange={(e) => cambiar(indice, { moduleSlug: e.target.value })}
+              >
+                {/*
+                  Un modulo que ya no existe se queda en la lista como opcion suya.
+                  Sin esto, el desplegable ensenaria el primero de la lista y quien abriera el panel
+                  creeria que el salto apunta ahi: el aviso de `drillProblems` diria que el destino
+                  no existe y el control estaria diciendo que si.
+                */}
+                {modulos.some((m) => m.slug === destino.moduleSlug) ? null : (
+                  <option value={destino.moduleSlug}>
+                    {t('drill.panel.gone', { slug: destino.moduleSlug })}
+                  </option>
+                )}
+                {modulos.map((m) => (
+                  <option key={m.slug} value={m.slug}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="form__field">
+              <span>{t('drill.panel.label')}</span>
+              <input
+                type="text"
+                value={destino.label ?? ''}
+                placeholder={
+                  modulos.find((m) => m.slug === destino.moduleSlug)?.name ?? t('drill.action')
+                }
+                disabled={saving}
+                data-testid={`drill-rotulo-${item.id}-${indice}`}
+                onChange={(e) => {
+                  const texto = e.target.value.trim();
+                  cambiar(indice, texto === '' ? { label: undefined } : { label: e.target.value });
+                }}
+              />
+            </label>
+
+            <button
+              type="button"
+              className="button-link"
+              disabled={saving}
+              data-testid={`drill-quitar-${item.id}-${indice}`}
+              onClick={() => escribir(destinos.filter((_, i) => i !== indice))}
+            >
+              {t('drill.panel.remove')}
+            </button>
+          </li>
+        ))}
+      </ol>
+
+      <button
+        type="button"
+        className="pastilla"
+        disabled={saving || modulos.length === 0}
+        data-testid={`drill-anadir-${item.id}`}
+        onClick={() => {
+          const primero = modulos[0];
+          if (primero) escribir([...destinos, { moduleSlug: primero.slug }]);
+        }}
+      >
+        {t('drill.panel.add')}
+      </button>
+    </>
+  );
+}

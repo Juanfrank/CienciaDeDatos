@@ -1,6 +1,12 @@
 import { splitFilterKey } from '@app/data-contracts';
 import type { Aggregation, DatasetGrain, QueryResult, SchemaDescriptor } from '@app/data-contracts';
-import { canAccessModule, intersectRequestedFilters, type AccessScope } from '@app/access-control';
+import {
+  canAccessModule,
+  intersectRequestedFilters,
+  type AccessScope,
+  type GovernedUser,
+  type Team,
+} from '@app/access-control';
 import { NAVIGATOR_IS_PANEL } from '@app/module-model';
 import { SCHEMA_CACHE_KEY, type ReadResult, getDataset } from '@app/caching';
 import {
@@ -87,6 +93,19 @@ export interface LoadedModule {
    * aplicarlo el panel ofreceria valores que quien mira no puede ver.
    */
   navigatorFilters?: LoadedObject;
+  /**
+   * Los modulos a los que los saltos de esta pagina pueden llevar a QUIEN MIRA, de slug a nombre.
+   *
+   * Es la mitad visible de la regla de 4.4: el contexto se interseca con el ambito de quien LLEGA,
+   * no con el de quien navego, asi que un salto a un modulo que esta persona no tiene concedido
+   * sencillamente no se le ofrece. La otra mitad la pone `/m/{slug}`, que lo rechaza aunque la
+   * direccion se escriba a mano — ocultar un enlace no es proteger.
+   *
+   * Se calcula aqui y no en el navegador porque quien decide que alcanza una persona es el
+   * servidor. Solo se miran los slugs que los objetos de esta pagina declaran como destino: no
+   * hace falta recorrer la institucion entera para dibujar dos enlaces.
+   */
+  drillTargets: Record<string, string>;
 }
 
 /**
@@ -322,7 +341,58 @@ export async function moduleLoad(input: {
     degraded,
     isPersonalized,
     ...(filtrosDelNavegador ? { navigatorFilters: filtrosDelNavegador } : {}),
+    drillTargets: await drillReachable(page.items, {
+      team,
+      ...(user ? { user } : {}),
+      moduleSlug: module.slug,
+    }),
   };
+}
+
+/**
+ * De los destinos que los objetos de esta pagina declaran, los que quien mira alcanza de verdad.
+ *
+ * Se comprueban solo los slugs declarados y no el catalogo entero: dibujar dos enlaces no tiene
+ * por que costar una comprobacion de acceso por cada modulo de la institucion.
+ *
+ * Pasa por `canAccessModule`, la MISMA puerta que `moduleLoad` aplica unas lineas mas arriba. Un
+ * segundo criterio para decidir a que alcanza una persona es un segundo sitio donde equivocarse, y
+ * el dia que uno de los dos se quedara atras el menu ofreceria un salto que la pagina rechaza.
+ */
+async function drillReachable(
+  items: readonly GridItem[],
+  ctx: { team: Team; user?: GovernedUser; moduleSlug: string },
+): Promise<Record<string, string>> {
+  const pedidos = new Set<string>();
+  for (const item of items) {
+    for (const destino of item.instance.drillThrough ?? []) {
+      if (destino.moduleSlug.trim() !== '') pedidos.add(destino.moduleSlug);
+    }
+  }
+  if (pedidos.size === 0) return {};
+
+  const arbol = await getGeneralTree();
+  const definiciones = new Map((await modules.list()).map((m) => [m.slug, m]));
+  const alcanzables: Record<string, string> = {};
+
+  for (const slug of pedidos) {
+    const destino = definiciones.get(slug);
+    // Un borrador o algo retirado no se sirve, asi que tampoco se ofrece como salto: el enlace
+    // llevaria a una pagina que responde que no existe.
+    if (!destino || destino.status !== 'publicado') continue;
+    if (
+      canAccessModule({
+        generalTree: arbol,
+        team: ctx.team,
+        ...(ctx.user ? { user: ctx.user } : {}),
+        moduleId: destino.moduleId,
+      })
+    ) {
+      alcanzables[slug] = destino.name;
+    }
+  }
+
+  return alcanzables;
 }
 
 /**

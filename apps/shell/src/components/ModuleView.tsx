@@ -9,6 +9,7 @@ import { Ask } from './Ask';
 import { Bookmarks } from './Bookmarks';
 import { MyView } from './MyView';
 import { ModuleObject } from './ModuleObject';
+import { DrillTargetsProvider } from './ObjectView';
 import { Grid } from './Grid';
 import { IconLink } from './icons/IconLink';
 import { moduleOptionOn, type ModuleDefinition } from '@app/module-model';
@@ -27,6 +28,7 @@ export function ModuleView({
   options,
   embedded = false,
   administracion,
+  drillTargets,
 }: {
   objetos: SerializedObject[];
   provenance: { isPersonalized: boolean; label: string };
@@ -52,6 +54,14 @@ export function ModuleView({
    * de verdad guarda cada destino es su propia puerta.
    */
   administracion?: { editar?: string; configuracion?: string; permisos?: string };
+  /**
+   * Los modulos a los que los saltos de esta pagina llevan a QUIEN MIRA, de slug a nombre (4.4).
+   *
+   * Los decide el servidor. Si el cliente decidiera a que alcanza una persona, un salto a un
+   * modulo no concedido se dibujaria igual y la pagina de destino lo rechazaria al llegar: una
+   * puerta cerrada anunciada como abierta es peor que no anunciarla.
+   */
+  drillTargets?: Record<string, string>;
 }) {
   const ofrece = (opcion: Parameters<typeof moduleOptionOn>[1]) =>
     moduleOptionOn({ ...(options ? { options } : {}) }, opcion);
@@ -73,7 +83,14 @@ export function ModuleView({
   const byId = new Map(objetos.map((o) => [o.itemId, o]));
 
   return (
-    <>
+    /*
+      Los destinos bajan por contexto y se ponen UNA vez aqui.
+
+      El marco de un objeto lo dibujan los dieciseis renderizadores, y pasarlos de mano en mano
+      seria tocarlos todos y confiar en que ninguno se olvide: el que se olvidara dejaria un objeto
+      con su salto configurado y sin ofrecerlo, que es la forma de fallar que no se nota.
+    */
+    <DrillTargetsProvider value={drillTargets ?? {}}>
       {/*
         La consulta en lenguaje natural queda FUERA de la vista mientras no responda de verdad.
 
@@ -193,6 +210,6 @@ export function ModuleView({
           return <ModuleObject objeto={objeto} onFiltrar={toggle} />;
         }}
       </Grid>
-    </>
+    </DrillTargetsProvider>
   );
 }

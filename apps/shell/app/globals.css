@@ -5763,3 +5763,31 @@ th[aria-sort='descending'] .table__flecha {
   outline: 2px solid var(--md-sys-color-primary);
   outline-offset: 2px;
 }
+
+/*
+  Los saltos de 4.4: la lista del menu y los destinos declarados en el editor.
+
+  Sin vinetas ni sangria heredada — son una lista de acciones, no una enumeracion de prosa. Cada
+  destino del editor se separa del siguiente con una linea: son fichas con tres controles cada una,
+  y pegadas se leen como un solo formulario largo.
+*/
+.drill__destinos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.editor__saltos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-md);
+}
+
+.editor__saltos > li + li {
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  padding-top: var(--space-md);
+}

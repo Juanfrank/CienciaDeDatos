@@ -12,6 +12,7 @@ import {
   projectObject,
   type ObjectInstance,
 } from '@app/ui-components';
+import Link from 'next/link';
 import { useUrlFilters } from '../hooks/useUrlFilters';
 import { useTranslator } from './Locale';
 import { FieldPicker } from './FiltersPanel';
@@ -370,6 +371,101 @@ export function VisualFilter({
             }
           />
         </div>
+      </dialog>
+    </>
+  );
+}
+
+
+/**
+ * Los saltos de un objeto — drill-through de 4.4.
+ *
+ * El modelo estaba entero —a donde lleva cada salto, con que filtros y cual de ellos alcanza quien
+ * mira— y no habia forma de seguir ninguno desde la pantalla: la funcion que los resuelve no tenia
+ * ni un consumidor. Un camino de navegacion que solo existe en el modelo es un camino que nadie
+ * recorre.
+ *
+ * Va en la cabecera, junto a los demas controles del objeto, y no como un clic sobre el dibujo: un
+ * clic sobre una barra ya significa otra cosa —filtrar en cruz— y darle dos significados obligaria
+ * a adivinar cual de los dos va a pasar. Ademas de que sobre un objeto que no sea un grafico no
+ * habria donde pulsar.
+ *
+ * Son ENLACES de verdad, no botones que navegan: se abren en otra pestana con el boton central,
+ * se copian con el derecho, y un lector de pantalla los anuncia como lo que son. Con un solo
+ * destino se ofrece el enlace directamente, sin menu: un desplegable de un elemento es un clic de
+ * mas para llegar al mismo sitio.
+ */
+export function DrillThrough({
+  titulo,
+  saltos,
+}: {
+  titulo: string;
+  saltos: NonNullable<ObjectViewChrome['saltos']>;
+}) {
+  const t = useTranslator();
+  const dialogo = useRef<HTMLDialogElement>(null);
+  const uno = saltos.length === 1 ? saltos[0] : undefined;
+
+  if (uno) {
+    return (
+      <Link
+        href={uno.href}
+        className="addon__icon"
+        title={uno.etiqueta}
+        aria-label={`${uno.etiqueta} — desde «${titulo}»`}
+        data-testid={`drill-${titulo}`}
+      >
+        <Icon nombre="exportar" tamano={18} />
+      </Link>
+    );
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        className="addon__icon"
+        aria-label={`${t('drill.action')} — «${titulo}»`}
+        title={t('drill.action')}
+        data-testid={`drill-open-${titulo}`}
+        onClick={() => dialogo.current?.showModal()}
+      >
+        <Icon nombre="exportar" tamano={18} />
+      </button>
+
+      <dialog
+        ref={dialogo}
+        className="emergente"
+        aria-label={`${t('drill.action')} — ${titulo}`}
+        data-testid={`drill-${titulo}`}
+      >
+        <div className="popover__header">
+          <h2>
+            {t('drill.action')} — {titulo}
+          </h2>
+          <button
+            type="button"
+            className="button-link"
+            data-testid="drill-close"
+            onClick={() => dialogo.current?.close()}
+          >
+            {t('action.close')}
+          </button>
+        </div>
+
+        {/* Que los filtros de ahora viajan con el salto no es evidente, y cambia lo que se va a
+            encontrar al llegar: se dice antes de pulsar, no despues. */}
+        <p className="muted-text">{t('drill.note')}</p>
+
+        <ul className="drill__destinos">
+          {saltos.map((salto) => (
+            <li key={`${salto.moduleSlug}-${salto.href}`}>
+              <Link href={salto.href} data-testid={`drill-ir-${salto.moduleSlug}`}>
+                {salto.etiqueta}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </dialog>
     </>
   );

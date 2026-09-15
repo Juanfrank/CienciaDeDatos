@@ -31,7 +31,7 @@ import {
 } from '@app/ui-components';
 import type { ObjectInstance } from '@app/ui-components';
 import { useOverflows } from '../hooks/useOverflows';
-import { Addons, Pagination, VisualFilter } from './Addons';
+import { Addons, DrillThrough, Pagination, VisualFilter } from './Addons';
 import { useObjectChrome } from './ObjectView';
 import { MatrixTable } from './MatrixTable';
 import { SortableTable } from './SortableTable';
@@ -257,6 +257,7 @@ export function Frame({
           />
         ) : null}
         {chrome.filtro ? <VisualFilter titulo={titulo} filtro={chrome.filtro} /> : null}
+        {chrome.saltos ? <DrillThrough titulo={titulo} saltos={chrome.saltos} /> : null}
         {accion}
       </div>
       ) : null}

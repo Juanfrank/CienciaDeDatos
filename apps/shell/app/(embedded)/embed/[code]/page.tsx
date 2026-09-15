@@ -204,6 +204,14 @@ export default async function EmbeddedPage({
             </p>
           </header>
 
+          {/*
+            Sin `drillTargets`, y no por olvido.
+
+            Un salto lleva a OTRO modulo, es decir, saca a quien lo pulsa de lo que se incrusto y lo
+            mete en la aplicacion entera dentro de un hueco de 640 px. Es la misma razon por la que
+            el enlace de salida solo existe en la version completa y abre en pestana nueva. Moverse
+            entre paginas del modulo si se puede: eso es moverse DENTRO de lo incrustado.
+          */}
           <ModuleView
             objetos={loaded.objetos.map(objectSerialize)}
             provenance={describeProvenance(false)}

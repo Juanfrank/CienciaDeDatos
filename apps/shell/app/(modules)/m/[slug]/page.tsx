@@ -157,6 +157,7 @@ export default async function PaginaModulo({
         pageSlug={loaded.pageSlug}
         {...(module.options ? { options: module.options } : {})}
         {...(Object.keys(administracion).length > 0 ? { administracion } : {})}
+        drillTargets={loaded.drillTargets}
       />
     </article>
   );

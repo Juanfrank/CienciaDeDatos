@@ -17,6 +17,7 @@ import {
   type SelectorEfectivo,
   type ValueCount,
 } from '@app/ui-components';
+import { drillLinks, type DrillLink } from '@app/module-model';
 import { useUrlFilters } from '../hooks/useUrlFilters';
 import { estadoDe, valueStats, type EstadoDeCampo } from './fieldFilterState';
 import type { SerializedObject } from '../server/serialize';
@@ -50,6 +51,37 @@ export interface ObjectViewChrome {
   };
   /** El pie, con sus referencias `{{n}}` ya resueltas. */
   pie?: string;
+  /**
+   * Los saltos que este objeto ofrece a quien mira, ya convertidos en direcciones (4.4).
+   *
+   * Solo los que alcanza: la lista de modulos alcanzables la decide el servidor y baja por
+   * `DrillTargetsProvider`. Lo que viaja en cada direccion es el CONTEXTO DE FILTROS de ahora
+   * mismo, porque en esta aplicacion el estado visible vive en la URL — pulsar una categoria ya la
+   * deja escrita como filtro, y un segundo canal para «el valor que se pulso» seria una segunda
+   * fuente de verdad sobre lo mismo.
+   */
+  saltos?: DrillLink[];
+}
+
+/**
+ * Los modulos a los que los saltos de esta pagina pueden llevar a quien mira, de slug a nombre.
+ *
+ * Es de la PAGINA y no de cada objeto, asi que va en su propio contexto y lo pone `ModuleView` una
+ * sola vez. Vacio por defecto: un objeto dibujado fuera de una vista de modulo —la vista previa
+ * del editor— no ofrece saltos, que es lo correcto; ahi no se navega.
+ */
+const Destinos = createContext<Record<string, string>>({});
+
+export const useDrillTargets = (): Record<string, string> => useContext(Destinos);
+
+export function DrillTargetsProvider({
+  value,
+  children,
+}: {
+  value: Record<string, string>;
+  children: React.ReactNode;
+}) {
+  return <Destinos.Provider value={value}>{children}</Destinos.Provider>;
 }
 
 const Contexto = createContext<ObjectViewChrome>({});
@@ -81,19 +113,35 @@ export function useObjectView(objeto: SerializedObject): {
   chrome: ObjectViewChrome;
 } {
   const { searchParams } = useUrlFilters();
+  const alcanzables = useDrillTargets();
   const { instance, result, aggregations } = objeto;
 
   // La dependencia es la CADENA de la query, no el objeto: `useSearchParams` devuelve una
   // instancia nueva en cada render y compararla por identidad recalcularia siempre.
   const query = searchParams.toString();
+  // Lo mismo con los destinos: es un objeto que baja por contexto y su identidad cambia en cada
+  // dibujo de la vista, asi que la dependencia es su contenido.
+  const destinos = JSON.stringify(alcanzables);
 
   return useMemo(() => {
-    if (!result) return { result, chrome: {} };
-
-    const chrome: ObjectViewChrome = {};
-    let visto = result;
-
     const params = new URLSearchParams(query);
+
+    /*
+     * Los saltos se calculan ANTES del corte por resultado.
+     *
+     * Un contenedor o un elemento no tiene `result` y sale por la rama de arriba; si los saltos se
+     * calcularan despues, declarar uno sobre un contenedor lo guardaria y no lo dibujaria nunca,
+     * que es la forma de fallar que no se nota.
+     */
+    const actuales: Record<string, string[]> = {};
+    for (const clave of new Set(params.keys())) actuales[clave] = params.getAll(clave);
+    const saltos = drillLinks(instance, actuales, JSON.parse(destinos) as Record<string, string>);
+    const conSaltos = saltos.length > 0 ? { saltos } : {};
+
+    if (!result) return { result, chrome: conSaltos };
+
+    const chrome: ObjectViewChrome = { ...conSaltos };
+    let visto = result;
 
     const filtro = attachmentOf(instance, 'filtro-de-visualizacion');
     if (filtro) {
@@ -152,5 +200,5 @@ export function useObjectView(objeto: SerializedObject): {
     }
 
     return { result: visto, chrome };
-  }, [instance, result, aggregations, query]);
+  }, [instance, result, aggregations, query, destinos]);
 }
