@@ -41,7 +41,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 icono: 'expediente',
                 acento: 'primario',
-                resaltado: true,
+                highlight: true,
                 subtitulo: 'Al cierre del trimestre',
                 formato: { unit: 'casos' },
               },
@@ -81,7 +81,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 icono: 'balanza',
                 acento: 'terciario',
-                resaltado: true,
+                highlight: true,
                 subtitulo: 'Frente al periodo anterior',
               },
             },
@@ -701,7 +701,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'Leyenda a la derecha, cifras, ordenado por valor y escala logaritmica',
                 leyenda: 'derecha',
-                etiquetasDeDato: true,
+                datumLabels: true,
                 /*
                  * Escala LOGARITMICA, y con su minimo puesto.
                  *
@@ -736,7 +736,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'Leyenda arriba, cifra sobre cada punto y barra de zoom',
                 leyenda: 'arriba',
-                etiquetasDeDato: true,
+                datumLabels: true,
                 // La barra de zoom: deja acercarse a un tramo del eje sin perder de vista donde
                 // esta dentro del total. Empieza mostrandolo todo.
                 ejes: { tituloY: 'Casos', zoom: true },
@@ -816,7 +816,7 @@ export const demoModules: ModuleDefinition[] = [
                 dimensions: [DISTRITO],
                 measures: ['CasosPendientes'],
               },
-              presentation: { subtitulo: 'Los nombres largos caben enteros', leyenda: 'abajo', etiquetasDeDato: true },
+              presentation: { subtitulo: 'Los nombres largos caben enteros', leyenda: 'abajo', datumLabels: true },
             },
           },
           {
@@ -1083,7 +1083,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Un punto por trimestre',
-                etiquetasDeDato: true,
+                datumLabels: true,
                 ejes: { xTitle: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
               },
             },
@@ -1103,7 +1103,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Una tercera medida sin un tercer eje',
-                etiquetasDeDato: true,
+                datumLabels: true,
                 ejes: { xTitle: 'Ingresados', tituloY: 'Resueltos', desdeCero: false },
               },
             },
@@ -1186,7 +1186,7 @@ export const demoModules: ModuleDefinition[] = [
               },
               presentation: {
                 subtitulo: 'Dos niveles: la materia agrupa y el trimestre reparte',
-                etiquetasDeDato: true,
+                datumLabels: true,
               },
             },
           },
@@ -1214,7 +1214,7 @@ export const demoModules: ModuleDefinition[] = [
               version: '1.0.0',
               title: 'Un solo nivel',
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosIngresados'] },
-              presentation: { subtitulo: 'Sin jerarquia, el area es la medida', etiquetasDeDato: true },
+              presentation: { subtitulo: 'Sin jerarquia, el area es la medida', datumLabels: true },
             },
           },
         ],
@@ -1257,7 +1257,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'La raya es lo que convierte la cifra en respuesta',
                 leyenda: 'oculta',
-                etiquetasDeDato: true,
+                datumLabels: true,
                 ejes: { tituloY: 'Casos' },
                 referencias: [
                   { valor: 900, etiqueta: 'Meta trimestral', color: 'error', style: 'discontinua' },
@@ -1308,7 +1308,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'Del tema, no libres: se elige cual de los ocho le toca a cada una',
                 leyenda: 'abajo',
-                coloresDeSerie: [3, 2, 1],
+                seriesColors: [3, 2, 1],
               },
             },
           },
@@ -1324,7 +1324,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'Por materia, con el mismo 0-2400 que el de al lado',
                 leyenda: 'oculta',
-                etiquetasDeDato: true,
+                datumLabels: true,
                 ejes: { tituloY: 'Casos', minimoY: 0, maximoY: 2400 },
                 referencias: [{ valor: 1200, etiqueta: 'Meta', color: 'error' }],
               },
@@ -1374,7 +1374,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'La tercera opcion entre «todas» y «ninguna»',
                 leyenda: 'abajo',
-                etiquetasDeDato: { mostrar: true, onlyEnds: true },
+                datumLabels: { mostrar: true, onlyEnds: true },
                 ejes: { tituloY: 'Casos' },
               },
             },
@@ -1395,7 +1395,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'Con cuatro categorias cabe; con veinte, no',
                 leyenda: 'abajo',
-                etiquetasDeDato: { mostrar: true, cellPosition: 'encima' },
+                datumLabels: { mostrar: true, cellPosition: 'encima' },
                 ejes: { tituloY: 'Casos' },
               },
             },
@@ -1618,7 +1618,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'La barra que se pasa del umbral se pinta sola',
                 leyenda: 'oculta',
-                etiquetasDeDato: { mostrar: true },
+                datumLabels: { mostrar: true },
                 ejes: { tituloY: 'Casos' },
                 referencias: [{ valor: 600, etiqueta: 'Umbral', color: 'error' }],
                 condicional: { rules: [{ comparator: 'mayor', valor: 600, color: 'error' }] },
@@ -1640,7 +1640,7 @@ export const demoModules: ModuleDefinition[] = [
               presentation: {
                 subtitulo: 'La misma regla, en horizontal',
                 leyenda: 'oculta',
-                etiquetasDeDato: { mostrar: true },
+                datumLabels: { mostrar: true },
                 condicional: { rules: [{ comparator: 'mayor', valor: 600, color: 'error' }] },
               },
             },

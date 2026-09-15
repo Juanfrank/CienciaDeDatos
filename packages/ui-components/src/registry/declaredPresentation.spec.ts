@@ -32,7 +32,7 @@ const BASE: ChartOptions = { vm, palette: PALETTE, titulo: 'T', dimension: 'Trib
 /** DOS valores validos y distintos por clave. */
 const VALUES: Partial<Record<PresentationKey, unknown[]>> = {
   leyenda: ['oculta', 'derecha'],
-  etiquetasDeDato: [
+  datumLabels: [
     { mostrar: true, cellPosition: 'dentro' },
     { mostrar: true, onlyEnds: true },
   ],
@@ -48,7 +48,7 @@ const VALUES: Partial<Record<PresentationKey, unknown[]>> = {
   embudo: [{ compare: 'anterior' }, { compare: 'ninguna' }],
   cascada: [{ showTotal: false }, { showTotal: true }],
   referencias: [[{ valor: 15, etiqueta: 'meta', style: 'discontinua', color: 'primario' }], [{ valor: 5 }]],
-  coloresDeSerie: [
+  seriesColors: [
     [3, 5],
     [7, 0],
   ],
@@ -83,7 +83,7 @@ const OBJECT_KIND: Record<string, ChartKind> = {
 const EXCEPCIONES: { objeto: string; clave: PresentationKey; porque: string }[] = [
   ...['pastel', 'dona', 'medidor', 'embudo', 'cascada', 'mapa-de-arbol'].map((objeto) => ({
     objeto,
-    clave: 'coloresDeSerie' as PresentationKey,
+    clave: 'seriesColors' as PresentationKey,
     porque:
       'La paleta se remapea, pero estos objetos colorean por CATEGORIA y no por medida: una ' +
       'porcion, una etapa, un rectangulo. El control del panel lista una fila por medida, y aqui ' +
@@ -92,7 +92,7 @@ const EXCEPCIONES: { objeto: string; clave: PresentationKey; porque: string }[] 
   })),
   {
     objeto: 'dispersion',
-    clave: 'coloresDeSerie',
+    clave: 'seriesColors',
     porque:
       'Una dispersion dibuja UNA nube de puntos: sus dos o tres medidas son los ejes y el tamano, ' +
       'no series con color propio. El color sale del primer hueco de la paleta, asi que el ' +

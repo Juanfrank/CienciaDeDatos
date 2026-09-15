@@ -201,7 +201,7 @@ export function Frame({
   /*
    * La cabecera entera se puede ocultar.
    */
-  const withHeader = presentation?.mostrarTitulo !== false;
+  const withHeader = presentation?.showTitle !== false;
   const body = useOverflows<HTMLDivElement>();
 
   /*
@@ -260,18 +260,18 @@ export function Frame({
       ref={tarjeta}
       className="objeto"
       data-accent={acento}
-      data-highlight={presentation?.resaltado ? 'si' : undefined}
+      data-highlight={presentation?.highlight ? 'si' : undefined}
       // El color del resaltado, cuando debe decir algo distinto del acento. Es una variable y no
       // una clase porque el valor sale de un rol del tema, no de un conjunto de estados.
       style={
-        presentation?.colorDeResaltado
-          ? ({ '--color-de-resaltado': HIGHLIGHT_VARIABLE[presentation.colorDeResaltado] } as React.CSSProperties)
+        presentation?.highlightColor
+          ? ({ '--color-de-resaltado': HIGHLIGHT_VARIABLE[presentation.highlightColor] } as React.CSSProperties)
           : undefined
       }
     >
       {withHeader ? (
       <div className="object__header">
-        {icono && presentation?.mostrarIcono !== false ? (
+        {icono && presentation?.showIcon !== false ? (
           // Decorativo: el nombre del objeto esta a su lado como texto. Darle tambien nombre
           // accesible haria que un lector leyera dos veces lo mismo.
           <span className="object__icon" aria-hidden="true">

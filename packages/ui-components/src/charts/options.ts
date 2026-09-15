@@ -46,7 +46,7 @@ export interface ChartOptions {
   dimension?: string;
   leyenda?: LegendMode;
   /** La cifra sobre cada barra o punto. `true` es la forma anterior y se sigue admitiendo. */
-  etiquetasDeDato?: DatumLabels;
+  datumLabels?: DatumLabels;
   tooltip?: TooltipSettings;
   ejes?: AxisSettings;
   /** Como formatear una cifra de la serie `s`. */
@@ -55,7 +55,7 @@ export interface ChartOptions {
   circular?: PieSettings;
   combinado?: ComboSettings;
   referencias?: ReferenceLine[];
-  coloresDeSerie?: number[];
+  seriesColors?: number[];
   condicional?: ConditionalFormat;
   embudo?: FunnelSettings;
   cascada?: WaterfallSettings;
@@ -222,7 +222,7 @@ function marginOf(o: ChartOptions, legendThe: { top: number; bottom: number; lef
  * conserva el color que le tocaba por orden.
  */
 function paletteOf(o: ChartOptions): string[] {
-  const elegidos = o.coloresDeSerie;
+  const elegidos = o.seriesColors;
   if (!elegidos || elegidos.length === 0) return o.palette.series;
   return o.palette.series.map((porOrden, s) => {
     const indice = elegidos[s];
@@ -320,7 +320,7 @@ function core(o: ChartOptions, conDecal: boolean) {
  * por su indice con `labelLayout`. Solo la primera y la ultima caen fuera del area.
  */
 function shiftLabelBorder(o: ChartOptions) {
-  if (normalizedLabels(o.etiquetasDeDato).mostrar !== true) return {};
+  if (normalizedLabels(o.datumLabels).mostrar !== true) return {};
   const last = o.vm.points.length - 1;
   return {
     labelLayout: (p: { dataIndex: number }) => {
@@ -408,7 +408,7 @@ function endsOf(o: ChartOptions, s: number): Set<number> {
 }
 
 const seriesLabel = (o: ChartOptions, s: number, cellPosition: string) => {
-  const config: LabelSettings = normalizedLabels(o.etiquetasDeDato);
+  const config: LabelSettings = normalizedLabels(o.datumLabels);
   if (config.mostrar !== true) return { show: false };
 
   const elegida = ECHARTS_POSITION[config.cellPosition ?? 'auto'] ?? cellPosition;
@@ -1015,7 +1015,7 @@ export function scatterOptions(o: ChartOptions): Record<string, unknown> {
    * Se reserva alto por el radio del punto mas grande: `scale` ajusta el eje a los valores, pero
    * el eje no sabe nada del tamano del simbolo.
    */
-  const holgura = (withSize ? MAX_SIZE : 12) / 2 + (o.etiquetasDeDato ? 14 : 0);
+  const holgura = (withSize ? MAX_SIZE : 12) / 2 + (o.datumLabels ? 14 : 0);
 
   return {
     ...core(o, false),
@@ -1083,7 +1083,7 @@ export function scatterOptions(o: ChartOptions): Record<string, unknown> {
           : 12,
         itemStyle: { opacity: 0.8 },
         ...referencesOf(o),
-        label: o.etiquetasDeDato
+        label: o.datumLabels
           ? {
               show: true,
               position: 'top' as const,
@@ -1373,7 +1373,7 @@ export function treeMapOptions(o: ChartOptions): Record<string, unknown> {
           color: '#fff',
           fontSize: 12,
           formatter: (p: { name: string; value: number }) =>
-            o.etiquetasDeDato ? `${p.name}\n${formatear(p.value)}` : p.name,
+            o.datumLabels ? `${p.name}\n${formatear(p.value)}` : p.name,
         },
         upperLabel: jerarquico
           ? { show: true, height: 22, color: '#fff', fontSize: 11 }

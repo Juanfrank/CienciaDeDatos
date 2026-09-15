@@ -105,11 +105,11 @@ export function Presentation({
   const measureHas = admite("formato") || admite("formatos");
   // La forma anterior era un booleano; se normaliza una vez aqui para que el panel no tenga que
   // preguntarse en cada control cual de las dos formas le ha llegado.
-  const labels = normalizedLabels(p.etiquetasDeDato);
+  const labels = normalizedLabels(p.datumLabels);
   const chartHas =
-    admite("leyenda") || admite("etiquetasDeDato") || admite("orden") || admite("apilado");
+    admite("leyenda") || admite("datumLabels") || admite("orden") || admite("apilado");
   const isCard = instance.objectId === "tarjeta-kpi";
-  const mostrarTitulo = p.mostrarTitulo !== false;
+  const showTitle = p.showTitle !== false;
 
   return (
     <div className="editor__presentation" data-testid={prueba}>
@@ -119,10 +119,10 @@ export function Presentation({
         <label className="editor__interruptor">
           <input
             type="checkbox"
-            checked={mostrarTitulo}
+            checked={showTitle}
             disabled={saving}
             data-testid={`${prueba}-mostrar-titulo`}
-            onChange={(e) => set({ mostrarTitulo: e.target.checked })}
+            onChange={(e) => set({ showTitle: e.target.checked })}
           />{" "}
           Mostrar titulo
         </label>
@@ -136,7 +136,7 @@ export function Presentation({
           <span>{t('pres.title')}</span>
           <input
             defaultValue={instance.title ?? ""}
-            disabled={saving || !mostrarTitulo}
+            disabled={saving || !showTitle}
             data-testid={`${prueba}-titulo-texto`}
             // `onBlur` y no `onChange`: cada cambio guarda el modulo entero contra el servidor.
             onBlur={(e) => onCambiar((i) => ({ ...i, title: e.target.value }))}
@@ -148,7 +148,7 @@ export function Presentation({
             titulo="Estilo del titulo"
             style={p.textos?.titulo ?? {}}
             prueba={`${prueba}-texto-titulo`}
-            saving={saving || !mostrarTitulo}
+            saving={saving || !showTitle}
             onCambiar={(style) => textSet("titulo", style)}
           />
         ) : null}
@@ -176,14 +176,14 @@ export function Presentation({
           />
         ) : null}
 
-        {admite("mostrarIcono") ? (
+        {admite("showIcon") ? (
           <label className="editor__interruptor">
             <input
               type="checkbox"
-              checked={p.mostrarIcono !== false}
+              checked={p.showIcon !== false}
               disabled={saving}
               data-testid={`${prueba}-mostrar-icono`}
-              onChange={(e) => set({ mostrarIcono: e.target.checked })}
+              onChange={(e) => set({ showIcon: e.target.checked })}
             />{" "}
             Mostrar icono
           </label>
@@ -196,7 +196,7 @@ export function Presentation({
               {p.icono ? <Icon nombre={p.icono} tamano={18} /> : null}
               <select
                 value={p.icono ?? ""}
-                disabled={saving || p.mostrarIcono === false}
+                disabled={saving || p.showIcon === false}
                 data-testid={`${prueba}-icono`}
                 onChange={(e) =>
                   set({ icono: (e.target.value || undefined) as IconName | undefined })
@@ -214,7 +214,7 @@ export function Presentation({
         ) : null}
       </Section>
 
-      {admite("resaltado") || admite("acento") ? (
+      {admite("highlight") || admite("acento") ? (
         <Section
           keys={['resaltado', 'acento', 'color', 'linea', 'marco']}
           titulo="Borde" nivel={2} abierta={false} prueba={`${prueba}-borde`}>
@@ -236,19 +236,19 @@ export function Presentation({
             </label>
           ) : null}
 
-          {admite("resaltado") ? (
+          {admite("highlight") ? (
             <>
               <label className="editor__interruptor">
                 <input
                   type="checkbox"
-                  checked={p.resaltado === true}
+                  checked={p.highlight === true}
                   disabled={saving}
                   data-testid={`${prueba}-resaltado`}
-                  onChange={(e) => set({ resaltado: e.target.checked })}
+                  onChange={(e) => set({ highlight: e.target.checked })}
                 />{" "}
                 Linea de resaltado
               </label>
-              {p.resaltado ? (
+              {p.highlight ? (
                 <div className="form__field">
                   <span>{t('pres.highlight.color')}</span>
                   {/*
@@ -257,11 +257,11 @@ export function Presentation({
                     decir algo distinto. «Predeterminado» es «el del acento».
                   */}
                   <ColorPalette
-                    valor={p.colorDeResaltado ?? "predeterminado"}
+                    valor={p.highlightColor ?? "predeterminado"}
                     nombre="la linea de resaltado"
                     prueba={`${prueba}-color-resaltado`}
                     onCambiar={(color) =>
-                      set({ colorDeResaltado: color === "predeterminado" ? undefined : color })
+                      set({ highlightColor: color === "predeterminado" ? undefined : color })
                     }
                   />
                 </div>
@@ -372,7 +372,7 @@ export function Presentation({
             </label>
           ) : null}
 
-          {admite("etiquetasDeDato") ? (
+          {admite("datumLabels") ? (
             <>
               <label className="editor__interruptor">
                 <input
@@ -382,7 +382,7 @@ export function Presentation({
                   data-testid={`${prueba}-etiquetas`}
                   // Se guarda como objeto en cuanto se toca, aunque venga de la forma antigua:
                   // asi la posicion y «solo los extremos» tienen donde vivir desde el primer clic.
-                  onChange={(e) => set({ etiquetasDeDato: { mostrar: e.target.checked } })}
+                  onChange={(e) => set({ datumLabels: { mostrar: e.target.checked } })}
                 />{" "}
                 Cifra sobre cada barra o punto
               </label>
@@ -397,7 +397,7 @@ export function Presentation({
                       data-testid={`${prueba}-posicion-dato`}
                       onChange={(e) =>
                         set({
-                          etiquetasDeDato: {
+                          datumLabels: {
                             ...labels,
                             cellPosition: e.target.value as DatumPosition,
                           },
@@ -425,7 +425,7 @@ export function Presentation({
                       data-testid={`${prueba}-solo-extremos`}
                       onChange={(e) =>
                         set({
-                          etiquetasDeDato: { ...labels, onlyEnds: e.target.checked },
+                          datumLabels: { ...labels, onlyEnds: e.target.checked },
                         })
                       }
                     />{" "}
@@ -619,7 +619,7 @@ export function Presentation({
         </Section>
       ) : null}
 
-      {admite("coloresDeSerie") ? (
+      {admite("seriesColors") ? (
         <Section
           keys={['paleta', 'color de serie', 'tema']}
           titulo="Colores de las series" nivel={2} abierta={false} prueba={`${prueba}-colores`}>
@@ -636,16 +636,16 @@ export function Presentation({
               <label key={medida} className="form__field">
                 <span>{medida}</span>
                 <select
-                  value={p.coloresDeSerie?.[s] ?? s}
+                  value={p.seriesColors?.[s] ?? s}
                   disabled={saving}
                   data-testid={`${prueba}-color-serie-${s}`}
                   onChange={(e) => {
-                    const siguiente = [...(p.coloresDeSerie ?? [])];
+                    const siguiente = [...(p.seriesColors ?? [])];
                     while (siguiente.length < instance.binding.measures.length) {
                       siguiente.push(siguiente.length);
                     }
                     siguiente[s] = Number(e.target.value);
-                    set({ coloresDeSerie: siguiente });
+                    set({ seriesColors: siguiente });
                   }}
                 >
                   {PALETTE_COLORS.map((n) => (

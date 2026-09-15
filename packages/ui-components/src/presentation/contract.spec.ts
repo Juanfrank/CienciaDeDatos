@@ -42,7 +42,7 @@ describe('el minimo de personalizacion lo cumple TODO el catalogo', () => {
     // configuracion muerta que luego nadie se atreve a quitar por si acaso hace algo.
     for (const { categoria, version, objectId } of versiones) {
       const chart = version.presentation.filter((c) =>
-        (['leyenda', 'etiquetasDeDato'] as PresentationKey[]).includes(c),
+        (['leyenda', 'datumLabels'] as PresentationKey[]).includes(c),
       );
       if (categoria !== 'grafico') {
         expect(chart, `${objectId} no es un grafico`).toEqual([]);
@@ -56,7 +56,7 @@ describe('validatePresentation', () => {
     ...MIN_PRESENTATION,
     'formato',
     'leyenda',
-    'etiquetasDeDato',
+    'datumLabels',
   ];
 
   it('acepta una presentacion completa y valida', () => {
@@ -65,11 +65,11 @@ describe('validatePresentation', () => {
         {
           icono: 'balanza',
           acento: 'terciario',
-          resaltado: true,
+          highlight: true,
           subtitulo: 'Cierre del trimestre',
           formato: { decimales: 1, unit: '%' },
           leyenda: 'oculta',
-          etiquetasDeDato: true,
+          datumLabels: true,
         },
         todas,
       ),

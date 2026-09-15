@@ -33,10 +33,11 @@ describe('el panel de Formato ofrece todo lo que el catalogo declara', () => {
      * un cuadro de texto ofreceria «Apilado» —opciones que su objeto no entiende y que la
      * validacion rechaza al guardar—.
      */
-    const SIEMPRE: PresentationKey[] = ['mostrarTitulo', 'colorDeResaltado', 'etiqueta'];
-    const withoutGuard = PRESENTATION_KEYS.filter(
-      (c) => !SIEMPRE.includes(c) && !PANEL.includes(`admite("${c}")`),
-    );
+    const SIEMPRE: PresentationKey[] = ['showTitle', 'highlightColor', 'etiqueta'];
+    // Sin depender de la comilla: una guarda que falla por el estilo de comillas se «arregla»
+    // cambiando la comilla, y entonces deja de comprobar lo que dice comprobar.
+    const conGuarda = (c: string) => new RegExp(`admite\\(['"]${c}['"]\\)`).test(PANEL);
+    const withoutGuard = PRESENTATION_KEYS.filter((c) => !SIEMPRE.includes(c) && !conGuarda(c));
 
     expect(withoutGuard).toEqual([]);
   });

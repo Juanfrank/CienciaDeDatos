@@ -32,7 +32,16 @@ const guardado = () => ({
             objectId: 'tarjeta-kpi',
             version: '1.0.0',
             binding: { datasetId: 'd', dimensions: [], measures: ['M'] },
-            presentacion: { icono: 'balanza', acento: 'primario' },
+            presentacion: {
+              icono: 'balanza',
+              acento: 'primario',
+              resaltado: true,
+              colorDeResaltado: 'error',
+              mostrarTitulo: false,
+              mostrarIcono: true,
+              etiquetasDeDato: { mostrar: true },
+              coloresDeSerie: [0, 3],
+            },
             attachments: [
               {
                 instance: {
@@ -66,13 +75,42 @@ describe('migrar las claves de una definicion guardada', () => {
     const migrado = migrateDefinition(guardado());
 
     const instancia = instanciaDe(migrado);
-    expect(instancia['presentation']).toEqual({ icono: 'balanza', acento: 'primario' });
+    expect(instancia['presentation']).toBeDefined();
     expect(instancia).not.toHaveProperty('presentacion');
 
     // El complemento tiene su propia presentacion, y esta dos niveles mas adentro.
     const adjunta = adjuntaDe(migrado);
     expect(adjunta['presentation']).toEqual({ texto: 'Fuente: el caché' });
     expect(adjunta).not.toHaveProperty('presentacion');
+  });
+
+  /**
+   * Y las claves de DENTRO de la presentacion, una a una.
+   *
+   * Esta es la que faltaba, y el hueco importaba. `claves-guardadas.spec.ts` recorre `RENAMES` y
+   * comprueba que ninguna clave ya renombrada se vuelva a escribir con su nombre viejo — pero
+   * renombrar en el codigo y OLVIDAR la fila de la tabla le pasa por delante sin que se entere:
+   * sin fila no hay nada que recorrer. Se probo quitando la fila de `resaltado` y la guarda seguia
+   * en verde.
+   *
+   * Aqui no: el fixture guarda la clave vieja y esta prueba exige leerla con la nueva. Sin su fila
+   * en la tabla, el valor no llega y la prueba enrojece, que es lo que le pasaria a un modulo de
+   * verdad guardado antes del renombrado.
+   */
+  it('renombra tambien las claves de dentro de la presentacion', () => {
+    const instancia = instanciaDe(migrateDefinition(guardado()));
+    const p = instancia['presentation'] as Record<string, unknown>;
+
+    expect(p).toEqual({
+      icono: 'balanza',
+      acento: 'primario',
+      highlight: true,
+      highlightColor: 'error',
+      showTitle: false,
+      showIcon: true,
+      datumLabels: { mostrar: true },
+      seriesColors: [0, 3],
+    });
   });
 
   /*

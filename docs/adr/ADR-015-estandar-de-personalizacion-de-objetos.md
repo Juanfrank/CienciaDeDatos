@@ -20,7 +20,7 @@ una ruta SVG, entra contenido sin revisar en el documento.
 Un contrato de presentacion **cerrado**, comun a todo objeto visual, con tres propiedades:
 
 1. **Conjunto cerrado de claves.** `icono`, `acento`, `resaltado`, `subtitulo`, `formato`,
-   `leyenda`, `etiquetasDeDato`. No hay una octava que alguien pueda anadir desde un JSON.
+   `leyenda`, `datumLabels`. No hay una octava que alguien pueda anadir desde un JSON.
 2. **Conjunto cerrado de valores.** El acento es un ROL del tema (`primario`, `secundario`,
    `terciario`, `neutro`), no un color; el icono es un nombre del catalogo, no una ruta. Los dos
    se resuelven contra el tema, que ya tiene un par de contraste comprobado para cada rol.

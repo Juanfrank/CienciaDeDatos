@@ -268,13 +268,13 @@ export interface ObjectPresentation {
   /** Rol del tema que tine el icono y la linea de resaltado. */
   acento?: ObjectAccent;
   /** Linea de color en el borde superior de la tarjeta. */
-  resaltado?: boolean;
+  highlight?: boolean;
   /** Color de la linea de resaltado, si debe ser otro que el acento. */
-  colorDeResaltado?: TextColor;
+  highlightColor?: TextColor;
   /** Mostrar la cabecera con el titulo. Por defecto si. */
-  mostrarTitulo?: boolean;
+  showTitle?: boolean;
   /** Mostrar el icono junto al titulo. Por defecto si. */
-  mostrarIcono?: boolean;
+  showIcon?: boolean;
   /** El rotulo que acompana a la cifra en una tarjeta. */
   etiqueta?: ValueLabel;
   /** Una linea bajo el titulo. Para la unidad, el periodo o la salvedad. */
@@ -284,7 +284,7 @@ export interface ObjectPresentation {
   formatos?: ObjectFormats;
   leyenda?: LegendMode;
   /** La cifra encima de cada barra o punto, con el formato de SU medida. */
-  etiquetasDeDato?: DatumLabels;
+  datumLabels?: DatumLabels;
   tooltip?: TooltipSettings;
   multiplos?: MultipleSettings;
   /** Que el color dependa del dato: reglas evaluadas en orden, gana la primera que casa. */
@@ -297,7 +297,7 @@ export interface ObjectPresentation {
   /** La meta, el promedio, el umbral: hasta tres rayas sobre el area de dibujo. */
   referencias?: ReferenceLine[];
   /** Que color de la paleta usa cada serie, por indice. */
-  coloresDeSerie?: number[];
+  seriesColors?: number[];
   embudo?: FunnelSettings;
   cascada?: WaterfallSettings;
   medidor?: GaugeSettings;
@@ -309,24 +309,24 @@ export interface ObjectPresentation {
 export const PRESENTATION_KEYS = [
   'icono',
   'acento',
-  'resaltado',
-  'colorDeResaltado',
-  'mostrarTitulo',
-  'mostrarIcono',
+  'highlight',
+  'highlightColor',
+  'showTitle',
+  'showIcon',
   'subtitulo',
   'etiqueta',
   'textos',
   'formato',
   'formatos',
   'leyenda',
-  'etiquetasDeDato',
+  'datumLabels',
   'ejes',
   'orden',
   'apilado',
   'circular',
   'combinado',
   'referencias',
-  'coloresDeSerie',
+  'seriesColors',
   'tooltip',
   'multiplos',
   'condicional',
@@ -341,10 +341,10 @@ export type PresentationKey = keyof ObjectPresentation;
 export const MIN_PRESENTATION: PresentationKey[] = [
   'icono',
   'acento',
-  'resaltado',
-  'colorDeResaltado',
-  'mostrarTitulo',
-  'mostrarIcono',
+  'highlight',
+  'highlightColor',
+  'showTitle',
+  'showIcon',
   'subtitulo',
   'textos',
 ];
@@ -595,10 +595,10 @@ export function validatePresentation(
     });
   }
 
-  for (const [i, indice] of (presentation.coloresDeSerie ?? []).entries()) {
+  for (const [i, indice] of (presentation.seriesColors ?? []).entries()) {
     if (!Number.isInteger(indice) || indice < 0 || indice > 7) {
       problems.push({
-        clave: `coloresDeSerie.${i}`,
+        clave: `seriesColors.${i}`,
         issue: `'${String(indice)}' no es un color de la paleta. La paleta del tema tiene ocho, de 0 a 7.`,
       });
     }

@@ -65,9 +65,9 @@ export default function Canvas({
         ...(presentation?.leyenda ? { leyenda: presentation.leyenda } : {}),
         // Se pasa TAL CUAL: la forma anterior era un booleano y la nueva es un objeto, y quien
         // normaliza es el constructor de opciones, en una sola funcion pura.
-        ...(presentation?.etiquetasDeDato === undefined
+        ...(presentation?.datumLabels === undefined
           ? {}
-          : { etiquetasDeDato: presentation.etiquetasDeDato }),
+          : { datumLabels: presentation.datumLabels }),
         ...(presentation?.tooltip ? { tooltip: presentation.tooltip } : {}),
         ...(presentation?.ejes ? { ejes: presentation.ejes } : {}),
         ...(presentation?.apilado ? { apilado: presentation.apilado } : {}),
@@ -77,7 +77,7 @@ export default function Canvas({
         ...(presentation?.embudo ? { embudo: presentation.embudo } : {}),
         ...(presentation?.cascada ? { cascada: presentation.cascada } : {}),
         ...(presentation?.referencias ? { referencias: presentation.referencias } : {}),
-        ...(presentation?.coloresDeSerie ? { coloresDeSerie: presentation.coloresDeSerie } : {}),
+        ...(presentation?.seriesColors ? { seriesColors: presentation.seriesColors } : {}),
         ...(presentation?.condicional ? { condicional: presentation.condicional } : {}),
         ...(columnSeries === undefined ? {} : { columnSeries }),
         ...(formatear ? { formatear } : {}),

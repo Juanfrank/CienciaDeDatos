@@ -48,7 +48,7 @@ describe('bumpInstance', () => {
   it('conserva lo configurado que la version nueva sigue admitiendo', () => {
     const def = objeto([
       version('1.0.0', ['icono', 'acento', 'subtitulo']),
-      version('1.1.0', ['icono', 'acento', 'subtitulo', 'mostrarTitulo']),
+      version('1.1.0', ['icono', 'acento', 'subtitulo', 'showTitle']),
     ]);
     const r = bumpInstance(
       instancia('1.0.0', { icono: 'balanza', acento: 'secundario', subtitulo: 'Al cierre' }),
@@ -75,27 +75,27 @@ describe('bumpInstance', () => {
   it('lo que la version nueva anade se queda en su defecto, sin escribirlo', () => {
     const def = objeto([
       version('1.0.0', ['icono']),
-      version('1.1.0', ['icono', 'mostrarTitulo', 'textos']),
+      version('1.1.0', ['icono', 'showTitle', 'textos']),
     ]);
     const r = bumpInstance(instancia('1.0.0', { icono: 'balanza' }), def, '1.1.0');
 
-    expect(r.nuevas.sort()).toEqual(['mostrarTitulo', 'textos']);
+    expect(r.nuevas.sort()).toEqual(['showTitle', 'textos']);
     expect(r.instance.presentation).toEqual({ icono: 'balanza' });
-    expect(Object.keys(r.instance.presentation ?? {})).not.toContain('mostrarTitulo');
+    expect(Object.keys(r.instance.presentation ?? {})).not.toContain('showTitle');
   });
 
   it('lo que la version nueva ya no admite se quita, pero se DICE con su valor anterior', () => {
     const def = objeto([
-      version('1.0.0', ['icono', 'acento', 'resaltado']),
+      version('1.0.0', ['icono', 'acento', 'highlight']),
       version('2.0.0', ['icono', 'acento']),
     ]);
     const r = bumpInstance(
-      instancia('1.0.0', { icono: 'balanza', acento: 'secundario', resaltado: true }),
+      instancia('1.0.0', { icono: 'balanza', acento: 'secundario', highlight: true }),
       def,
       '2.0.0',
     );
 
-    expect(r.retiradas).toEqual([{ clave: 'resaltado', valor: true }]);
+    expect(r.retiradas).toEqual([{ clave: 'highlight', valor: true }]);
     expect(r.instance.presentation).toEqual({ icono: 'balanza', acento: 'secundario' });
   });
 

@@ -469,11 +469,37 @@ que sale sin formato y nadie sabe por que.
    todas —vive en la instancia de cada objeto y en la de cada complemento adjuntado—. 24 archivos,
    con las tres suites de navegador en verde.
 
-**Lo que queda** son **106 claves** mas en `ui-components` y `module-model` —`icono`, `acento`,
-`etiqueta`, `leyenda`, `apilado`, `medidor`…—. Es trabajo mecanico, y ahora es trabajo mecanico
-SEGURO: cada tanda es una fila en la tabla, una pasada de `tools/rename/renombrar.mjs` y la guarda
-diciendo si quedo algo sin mover. Conviene ir por grupos que se leen juntos —el formato de cifra,
-los ejes, la leyenda— y no de una vez: una pasada de cien claves no se revisa.
+**Segunda tanda, hecha:** las seis del marco comun —`resaltado`, `colorDeResaltado`,
+`mostrarTitulo`, `mostrarIcono`, `etiquetasDeDato`, `coloresDeSerie`—, con sus doce filas en la
+tabla y las tres suites de navegador en verde.
+
+**Lo que enseno, que cambia el metodo para las siguientes.** Se intento con catorce claves de una
+vez y el compilador saco a la luz que cinco de ellas no son solo claves: `apilado` es tambien un
+valor de `StackingMode`, y `combinado`, `medidor`, `embudo` y `cascada` lo son de `ChartKind`. Las
+dos cosas se guardan y el renombrador solo ve identificadores, asi que movia las dos a la vez y
+dejaba el catalogo de graficos sin poder despachar. `subtitulo` es peor: es una clave de
+presentacion Y el nombre de una ranura dentro de `textos`.
+
+De ahi la regla para las tandas que quedan: **antes de meter una clave en el plan, comprobar que
+su nombre no es ademas un valor de una union guardada.** Si lo es, no entra en la pasada del
+renombrador; se hace a mano desde el tipo, dejando que el compilador senale cada sitio.
+
+El renombrador tampoco es reversible: deshacer la pasada con el mapa invertido convirtio
+`data-highlight` en `data-resaltado`, porque `highlight` aparece dentro del atributo. Lo que
+protege no es poder deshacer, es que el arbol este limpio antes de empezar.
+
+**Y una guarda que faltaba.** `claves-guardadas.spec.ts` recorre `RENAMES` y comprueba que ninguna
+clave ya renombrada se vuelva a escribir con su nombre viejo — pero renombrar en el codigo y
+OLVIDAR la fila de la tabla le pasa por delante: sin fila no hay nada que recorrer. Se probo
+quitando la de `resaltado` y la guarda seguia verde. Ahora el fixture de
+`migrateDefinition.spec.ts` guarda las seis claves viejas DENTRO de la presentacion y exige
+leerlas con la nueva: sin su fila, el valor no llega y enrojece, que es exactamente lo que le
+pasaria a un modulo guardado antes del renombrado.
+
+**Lo que queda** son **100 claves** mas en `ui-components` y `module-model` —`icono`, `acento`,
+`etiqueta`, `leyenda`, `formato`, `ejes`, `textos`…—, mas las seis con gemelo de valor, que van
+aparte. Conviene ir por grupos que se leen juntos —el formato de cifra, los ejes, la leyenda— y no
+de una vez: una pasada de cien claves no se revisa.
 
 Dos detalles que la primera pasada enseno, y que valen para las siguientes:
 

@@ -55,6 +55,48 @@ export const RENAMES: KeyRename[] = [
     from: 'presentacion',
     to: 'presentation',
   },
+  /*
+   * Segunda tanda: seis claves DENTRO de la presentacion.
+   *
+   * Las seis del marco comun —lo que se dibuja alrededor de cualquier objeto— mas las dos que
+   * eligen como se rotulan los datos. Se hacen juntas porque se leen juntas: quien abre la
+   * seccion «Borde» del panel las ve todas en la misma pantalla.
+   *
+   * Van SEIS y no las veintiseis que quedan, y esa es la leccion de esta tanda. Se intento con
+   * catorce y el compilador saco a la luz que cinco de ellas —`apilado`, `combinado`, `medidor`,
+   * `embudo`, `cascada`— no son solo claves: son tambien VALORES de una union que se guarda
+   * —`ChartKind`, `StackingMode`— y el renombrador, que solo ve identificadores, tocaba las dos
+   * cosas a la vez. `subtitulo` es peor todavia: es una clave de presentacion Y el nombre de una
+   * ranura de texto dentro de `textos`, dos cosas distintas con el mismo nombre. Renombrar un
+   * valor guardado es otra migracion, con su propia ruta y su propio riesgo; aqui solo van claves.
+   */
+  ...(
+    [
+      ['resaltado', 'highlight'],
+      ['colorDeResaltado', 'highlightColor'],
+      ['mostrarTitulo', 'showTitle'],
+      ['mostrarIcono', 'showIcon'],
+      ['etiquetasDeDato', 'datumLabels'],
+      ['coloresDeSerie', 'seriesColors'],
+    ] as const
+  ).flatMap(([from, to]) => [
+    { path: ['pages', '[]', 'items', '[]', 'instance', 'presentation'], from, to },
+    {
+      path: [
+        'pages',
+        '[]',
+        'items',
+        '[]',
+        'instance',
+        'attachments',
+        '[]',
+        'instance',
+        'presentation',
+      ],
+      from,
+      to,
+    },
+  ]),
 ];
 
 type Json = Record<string, unknown>;

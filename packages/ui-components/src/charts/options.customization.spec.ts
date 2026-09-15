@@ -58,7 +58,7 @@ describe('etiquetas de dato', () => {
   it('usan el formateador de SU medida, no el numero crudo', () => {
     const o = opciones(
       {
-        etiquetasDeDato: true,
+        datumLabels: true,
         formatear: (v: number, s: number) => `${s}:${v.toFixed(1)}`,
       },
       vm(['A', 'B'], [['x', 1, 2]]),
@@ -234,12 +234,12 @@ describe('limites del eje y color por serie', () => {
      * Escribiendo `itemStyle.color` en cada serie, la barra cambiaba de color y la muestra de la
      * leyenda se quedaba con el de antes.
      */
-    const o = opciones({ coloresDeSerie: [1, 0] }, vm(['A', 'B'], [['x', 1, 2]]));
+    const o = opciones({ seriesColors: [1, 0] }, vm(['A', 'B'], [['x', 1, 2]]));
     expect(o.color).toEqual(['#2', '#1']);
   });
 
   it('una serie sin asignacion se queda con el color que le tocaba por orden', () => {
-    const o = opciones({ coloresDeSerie: [1] }, vm(['A', 'B'], [['x', 1, 2]]));
+    const o = opciones({ seriesColors: [1] }, vm(['A', 'B'], [['x', 1, 2]]));
     expect(o.color).toEqual(['#2', '#2']);
   });
 });
@@ -248,10 +248,10 @@ describe('etiquetas de dato: las tres opciones, no dos', () => {
   const withLabels = (
     valor: unknown,
     v = vm(['A'], [['x', 10], ['y', 50], ['z', 30]]),
-  ) => opciones({ etiquetasDeDato: valor, formatear: (n: number) => `${n} c` }, v);
+  ) => opciones({ datumLabels: valor, formatear: (n: number) => `${n} c` }, v);
 
   it('la forma anterior —un booleano— se sigue leyendo', () => {
-    // Un modulo publicado antes de esto lleva `etiquetasDeDato: true` y tiene que dibujarse igual.
+    // Un modulo publicado antes de esto lleva `datumLabels: true` y tiene que dibujarse igual.
     expect(withLabels(true).series[0].label.show).toBe(true);
     expect(withLabels(false).series[0].label.show).toBe(false);
   });
