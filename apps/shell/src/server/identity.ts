@@ -5,6 +5,8 @@ import {
   PasswordResetService,
   SessionService,
   TOLERANCIA_TOTP_POR_DEFECTO,
+  decryptTotpSecret,
+  encryptTotpSecret,
   type AppSession,
   type DirectoryEntry,
   type IAuditLog,
@@ -17,7 +19,7 @@ import {
   type LoginAuditEvent,
   type ResetRecord,
 } from '@app/auth';
-import { borrar, mutar, write, leer, readList } from './almacenCompartido';
+import { borrar, cacheL2, mutar, write, leer, readList } from './almacenCompartido';
 import { DEMO_KEY, SECRETO_TOTP_DEMO, userMail, mailUser } from './demoCredentials';
 import { governance } from './governance';
 
@@ -31,7 +33,8 @@ export {
 
 /** Cableado de la autenticacion — seccion 4.7. */
 
-const CREDENTIAL_KEY = (email: string) => `auth:credencial:${email.toLowerCase()}`;
+const CREDENTIAL_PREFIX = 'auth:credencial:';
+const CREDENTIAL_KEY = (email: string) => `${CREDENTIAL_PREFIX}${email.toLowerCase()}`;
 const KEY_SESSION = (id: string) => `auth:sesion:${id}`;
 const SESSIONS_KEY_OF = (userId: string) => `auth:sesiones-de:${userId}`;
 const KEY_AUDIT_LOGIN = 'auth:auditoria-login';
@@ -89,13 +92,65 @@ function toleranciaTotp(): number {
   return pasos;
 }
 
+/**
+ * La credencial tal y como se GUARDA.
+ *
+ * El secreto TOTP no llega al almacen en claro: va cifrado con una clave derivada de la pimienta.
+ * El campo cifrado lleva otro nombre a proposito — un registro escrito antes del cifrado se
+ * reconoce por traer `totpSecret`, y esa es la senal que dispara su migracion.
+ */
+type StoredCredentialRecord = Omit<LocalCredentialRecord, 'totpSecret'> & {
+  totpSecretCipher?: string;
+  /** Solo en registros anteriores al cifrado. */
+  totpSecret?: string;
+};
+
 class CredentialsStore implements ILocalIdentityStore {
   async findByEmail(email: string): Promise<LocalCredentialRecord | null> {
-    return (await leer<LocalCredentialRecord>(CREDENTIAL_KEY(email))) ?? null;
+    const guardado = await leer<StoredCredentialRecord>(CREDENTIAL_KEY(email));
+    if (!guardado) return null;
+
+    const { totpSecretCipher, totpSecret: sinCifrar, ...resto } = guardado;
+
+    if (totpSecretCipher) {
+      /*
+       * Un secreto ilegible LANZA, no se devuelve ausente: el proveedor exige el segundo factor
+       * por la presencia del secreto, asi que devolverlo vacio dejaria entrar sin el.
+       */
+      return {
+        ...resto,
+        totpSecret: decryptTotpSecret(totpSecretCipher, {
+          pepper: pimienta(),
+          boundTo: guardado.email,
+        }),
+      };
+    }
+
+    // Un registro anterior al cifrado se reescribe cifrado la primera vez que se lee. Es
+    // idempotente y no depende de que nadie se acuerde de ejecutar nada.
+    if (sinCifrar) {
+      const migrado: LocalCredentialRecord = { ...resto, totpSecret: sinCifrar };
+      await this.save(migrado);
+      return migrado;
+    }
+
+    return resto;
   }
 
   async save(record: LocalCredentialRecord): Promise<void> {
-    await write(CREDENTIAL_KEY(record.email), record);
+    const { totpSecret, ...resto } = record;
+    const guardado: StoredCredentialRecord = {
+      ...resto,
+      ...(totpSecret
+        ? {
+            totpSecretCipher: encryptTotpSecret(totpSecret, {
+              pepper: pimienta(),
+              boundTo: record.email,
+            }),
+          }
+        : {}),
+    };
+    await write(CREDENTIAL_KEY(record.email), guardado);
   }
 }
 
@@ -183,6 +238,30 @@ export const credentialsStore = new CredentialsStore();
 export const loginAudit = new LoginAudit();
 
 export const sessions = new SessionService({ store: new SessionsStore() });
+
+/**
+ * Cifra los secretos TOTP que quedaran escritos en claro.
+ *
+ * El almacen migra cada registro al leerlo, de modo que una cuenta que entra se pone al dia sola.
+ * Una cuenta dormida no, y es justo la que importa: nadie la lee y su secreto sigue en claro
+ * indefinidamente. Esto las recorre todas.
+ */
+export async function encryptStoredTotpSecrets(): Promise<{ reviewed: number; migrated: number }> {
+  const claves = await cacheL2.keysByPrefix(CREDENTIAL_PREFIX);
+  let migrated = 0;
+
+  for (const clave of claves) {
+    const guardado = await leer<StoredCredentialRecord>(clave);
+    if (!guardado?.totpSecret) continue;
+
+    // La lectura es la que migra: una sola forma de hacerlo, no dos que puedan divergir.
+    await credentialsStore.findByEmail(guardado.email);
+    migrated += 1;
+  }
+
+  return { reviewed: claves.length, migrated };
+}
+
 
 /** El proveedor se construye PEREZOSAMENTE, en el primer inicio de sesion. */
 let memoizedProvider: LocalIdentityProvider | undefined;

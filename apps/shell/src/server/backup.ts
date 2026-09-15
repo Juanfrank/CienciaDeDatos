@@ -92,8 +92,9 @@ export const CLASSES: ClassifiedPrefix[] = [
     prefix: 'auth:credencial:',
     kind: 'no-respaldar',
     reason:
-      'Lleva el secreto TOTP en claro: un respaldo con esto seria el segundo factor de toda la ' +
-      'institucion en un archivo. Se recupera con `npm run crear-administrador` y el ' +
+      'La identidad local entera: hashes, bloqueos y el segundo factor. El secreto TOTP va ' +
+      'cifrado, pero el archivo seguiria siendo cuanto hace falta para suplantar a cualquiera a ' +
+      'quien ademas se le tenga la pimienta. Se recupera con `npm run crear-administrador` y el ' +
       'restablecimiento mediado.',
   },
   {

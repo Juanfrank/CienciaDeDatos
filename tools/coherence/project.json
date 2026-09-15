@@ -22,6 +22,7 @@
         "{workspaceRoot}/apps/shell/e2e/**/*",
         "{workspaceRoot}/**/*.md",
         "{workspaceRoot}/**/AGENTS.md",
+        "{workspaceRoot}/packages/**/*.ts",
         "{workspaceRoot}/packages/i18n/src/catalog/*.ts",
         "{workspaceRoot}/packages/ui-components/src/**/*",
         "{workspaceRoot}/tools/*.sh",

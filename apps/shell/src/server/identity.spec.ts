@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { AuthenticatedPrincipal } from '@app/auth';
-import { unlockAccount, sessions } from './identity';
+import { TotpSecretUnreadable, type AuthenticatedPrincipal } from '@app/auth';
+import { encryptStoredTotpSecrets, unlockAccount, sessions } from './identity';
 import { credentialsStore } from './identity';
+import { borrar, cacheL2, leer, write } from './almacenCompartido';
 
 /** Cableado de identidad en el shell — seccion 4.7. */
 
@@ -71,5 +72,121 @@ describe('desbloquear una cuenta', () => {
 
   it('una cuenta que no existe devuelve false, no lanza', async () => {
     expect(await unlockAccount('no-existe@poderjudicial.gob.do')).toBe(false);
+  });
+});
+
+describe('el secreto TOTP en el almacen', () => {
+  const EMAIL = 'u-cifrado@poderjudicial.gob.do';
+  const SECRET = 'JBSWY3DPEHPK3PXPJBSW';
+  const CLAVE = `auth:credencial:${EMAIL}`;
+
+  const cuenta = (totpSecret?: string) => ({
+    userId: 'u-cifrado',
+    email: EMAIL,
+    passwordHash: '$argon2id$no-importa',
+    passwordHistory: [],
+    failedAttempts: 0,
+    emailVerified: true,
+    ...(totpSecret ? { totpSecret } : {}),
+  });
+
+  beforeEach(async () => {
+    await borrar(CLAVE);
+  });
+
+  it('se guarda cifrado, y lo que toca el disco no lo contiene', async () => {
+    await credentialsStore.save(cuenta(SECRET));
+
+    const guardado = await leer<Record<string, unknown>>(CLAVE);
+    expect(guardado?.['totpSecretCipher']).toEqual(expect.any(String));
+    expect(guardado).not.toHaveProperty('totpSecret');
+    expect(JSON.stringify(guardado)).not.toContain(SECRET);
+  });
+
+  it('vuelve en claro a quien lo pide por el almacen, que es quien verifica el codigo', async () => {
+    await credentialsStore.save(cuenta(SECRET));
+
+    expect((await credentialsStore.findByEmail(EMAIL))?.totpSecret).toBe(SECRET);
+  });
+
+  it('un registro anterior al cifrado se migra la primera vez que se lee', async () => {
+    await write(CLAVE, cuenta(SECRET));
+
+    expect((await credentialsStore.findByEmail(EMAIL))?.totpSecret).toBe(SECRET);
+
+    const guardado = await leer<Record<string, unknown>>(CLAVE);
+    expect(guardado).not.toHaveProperty('totpSecret');
+    expect(guardado?.['totpSecretCipher']).toEqual(expect.any(String));
+  });
+
+  it('un sobre copiado a otra cuenta LANZA, en vez de dejarla sin segundo factor', async () => {
+    const AJENA = 'u-ajena@poderjudicial.gob.do';
+    await credentialsStore.save(cuenta(SECRET));
+    const suyo = await leer<Record<string, unknown>>(CLAVE);
+
+    // Devolver el registro con el secreto ausente seria peor que fallar: el proveedor exige el
+    // codigo solo cuando el secreto esta, asi que la cuenta ajena pasaria a entrar con la
+    // contrasena sola.
+    await write(`auth:credencial:${AJENA}`, { ...suyo, userId: 'u-ajena', email: AJENA });
+
+    await expect(credentialsStore.findByEmail(AJENA)).rejects.toThrow(TotpSecretUnreadable);
+    await borrar(`auth:credencial:${AJENA}`);
+  });
+
+  it('una cuenta sin segundo factor se guarda sin sobre y se lee sin secreto', async () => {
+    await credentialsStore.save(cuenta());
+
+    expect(await leer<Record<string, unknown>>(CLAVE)).not.toHaveProperty('totpSecretCipher');
+    expect((await credentialsStore.findByEmail(EMAIL))?.totpSecret).toBeUndefined();
+  });
+});
+
+describe('cifrar los secretos que quedaron en claro', () => {
+  const cuenta = (userId: string, totpSecret?: string) => ({
+    userId,
+    email: `${userId}@poderjudicial.gob.do`,
+    passwordHash: '$argon2id$no-importa',
+    passwordHistory: [],
+    failedAttempts: 0,
+    emailVerified: true,
+    ...(totpSecret ? { totpSecret } : {}),
+  });
+
+  const claveDe = (userId: string) => `auth:credencial:${userId}@poderjudicial.gob.do`;
+
+  beforeEach(async () => {
+    for (const clave of await cacheL2.keysByPrefix('auth:credencial:')) await borrar(clave);
+  });
+
+  it('recorre las cuentas dormidas, que son las que la lectura nunca alcanza', async () => {
+    await write(claveDe('u-dormida'), cuenta('u-dormida', 'JBSWY3DPEHPK3PXPJBSW'));
+    await write(claveDe('u-dormida-dos'), cuenta('u-dormida-dos', 'KRSXG5BAMZQWY3DPFZZA'));
+    await credentialsStore.save(cuenta('u-al-dia', 'MFRGGZDFMZTWQ2LKNNWA'));
+    await write(claveDe('u-sin-factor'), cuenta('u-sin-factor'));
+
+    expect(await encryptStoredTotpSecrets()).toEqual({ reviewed: 4, migrated: 2 });
+
+    for (const userId of ['u-dormida', 'u-dormida-dos', 'u-al-dia']) {
+      const guardado = await leer<Record<string, unknown>>(claveDe(userId));
+      expect(guardado).not.toHaveProperty('totpSecret');
+      expect(guardado?.['totpSecretCipher']).toEqual(expect.any(String));
+    }
+    // Una cuenta sin segundo factor no gana uno por pasar el comando.
+    expect(await leer<Record<string, unknown>>(claveDe('u-sin-factor'))).not.toHaveProperty(
+      'totpSecretCipher',
+    );
+  });
+
+  it('es idempotente: la segunda pasada no encuentra nada que cifrar', async () => {
+    await write(claveDe('u-dormida'), cuenta('u-dormida', 'JBSWY3DPEHPK3PXPJBSW'));
+    const sobre = async () =>
+      (await leer<Record<string, unknown>>(claveDe('u-dormida')))?.['totpSecretCipher'];
+
+    await encryptStoredTotpSecrets();
+    const primero = await sobre();
+
+    expect(await encryptStoredTotpSecrets()).toEqual({ reviewed: 1, migrated: 0 });
+    // Y no se vuelve a cifrar lo ya cifrado: el sobre es el mismo.
+    expect(await sobre()).toBe(primero);
   });
 });

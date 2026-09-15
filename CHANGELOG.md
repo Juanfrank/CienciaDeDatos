@@ -12,6 +12,13 @@ como adiciones y jamas como rupturas.
 ## [Sin publicar]
 
 ### Seguridad
+- **El secreto TOTP se guarda cifrado.** Se escribia en claro pese a un comentario que prometia lo
+  contrario. Es una credencial completa y permanente: quien leyera el almacen podria generar codigos
+  validos indefinidamente. Ahora va en un sobre AES-256-GCM cuya clave se deriva de `AUTH_PEPPER`,
+  ligado ademas a la cuenta, de modo que un sobre copiado de una cuenta a otra no descifra. No hace
+  falta configurar nada: los registros existentes se cifran la primera vez que se leen, y
+  `npm run cifrar-totp` alcanza las cuentas que nadie lee. Un secreto que no se pueda descifrar
+  impide entrar en vez de dejar entrar sin segundo factor.
 - El webhook de refresco de datasets RECHAZA cuando `WEBHOOK_SECRET` no esta configurado, en vez
   de dejar pasar. Antes, sin la variable puesta, cualquiera podia invalidar entradas del cache.
   La comparacion del secreto pasa a ser de tiempo constante.

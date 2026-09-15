@@ -21,9 +21,9 @@ sospechar que los equipos que esta mirando no son los de la institucion.
 
 ## Lo que NO se hace
 
-- **El respaldo no lleva las credenciales locales.** Llevan el secreto TOTP, y un archivo con ellas
-  seria el segundo factor de toda la institucion en un solo sitio. Se recuperan por otro camino,
-  mas abajo.
+- **El respaldo no lleva las credenciales locales.** El secreto TOTP va cifrado en el almacen
+  (ADR-023), pero el archivo seguiria llevando los hashes de contrasena y los sobres, y la pimienta
+  que los abre viaja en este mismo kit de recuperacion. Se recuperan por otro camino, mas abajo.
 - **El respaldo no lleva sesiones ni tokens de un solo uso.** Devolverlos resucitaria sesiones que
   alguien revoco a proposito y enlaces de restablecimiento ya gastados. `restaurar` los rechaza
   aunque aparezcan en el archivo: la exclusion es una regla, no un descuido de quien volco.
@@ -40,7 +40,7 @@ la que usan los dos comandos. `npm run respaldo` la imprime al terminar. En resu
 
 | Se respalda | No se respalda, y por que |
 |---|---|
-| Gobierno, modulos y su historial, auditoria de configuracion, catalogo, incrustaciones, marcadores, personalizacion, reglas y suscripciones de alerta, auditoria de acceso | Credenciales (segundo factor en claro) · sesiones y tokens (resucitarlos es un agujero) · exportaciones (plazo de 1 h) · datasets, esquema y latido (los repuebla el job) · centinelas |
+| Gobierno, modulos y su historial, auditoria de configuracion, catalogo, incrustaciones, marcadores, personalizacion, reglas y suscripciones de alerta, auditoria de acceso | Credenciales (la identidad local entera, y la pimienta va en el mismo kit) · sesiones y tokens (resucitarlos es un agujero) · exportaciones (plazo de 1 h) · datasets, esquema y latido (los repuebla el job) · centinelas |
 
 Que ninguna clave se quede fuera de esa lista sin que nadie lo decida lo comprueba
 `tools/coherence/respaldo.spec.ts`: una clave nueva sin clasificar pone la suite en rojo.
@@ -60,7 +60,8 @@ Sin las tres cosas no se vuelve:
 1. **El archivo de respaldo.**
 2. **`AUTH_PEPPER`**, la misma con la que corria la aplicacion. Vive en Key Vault, que tiene
    borrado suave de 90 dias y proteccion de purga. Sin ella, las credenciales que se creen despues
-   no verificaran contra nada de lo anterior.
+   no verificaran contra nada de lo anterior, y los secretos TOTP ya guardados **no se pueden
+   descifrar**: una cuenta con segundo factor deja de poder leerse en vez de entrar sin el.
 3. **`CACHE_DIR`**, el directorio del almacen al que se restaura.
 
 ## Procedimiento de respaldo
@@ -127,6 +128,15 @@ Requisitos previos: dos personas, quien ejecuta y quien atestigua, igual que en
   borrado dirigido, ahi esta quien lo hizo.
 - **Avisar de las sesiones.** Todas las sesiones anteriores quedaron invalidadas —no se
   restauran— y quien estuviera dentro tendra que entrar de nuevo. Es deliberado.
+- **Cifrar lo que quedara en claro**, si el almacen restaurado viene de una version anterior a
+  ADR-023:
+
+  ```bash
+  CACHE_DIR=/ruta/al/almacen AUTH_PEPPER=... npm run cifrar-totp
+  ```
+
+  La aplicacion cifra cada credencial la primera vez que la lee; el comando alcanza ademas las
+  cuentas dormidas, que son las que nadie lee.
 
 ## Lo que el codigo ya impide, y lo que no
 

@@ -5,7 +5,7 @@ exportaciones.
 
 | Archivo | Responsabilidad |
 |---|---|
-| `session.ts`, `identity.ts` | Sesion, credenciales locales y TOTP |
+| `session.ts`, `identity.ts` | Sesion, credenciales locales y TOTP. `identity.ts` es la UNICA puerta del almacen de credenciales: es donde el secreto TOTP se cifra y se descifra |
 | `data.ts` | Lectura del cache y recorte por ambito. Es el unico camino a los datos |
 | `context.ts`, `governance.ts` | Arbol, equipos, paquetes y usuarios |
 | `admin.ts` | `assertAdmin`, la guarda de todas las rutas de administracion |

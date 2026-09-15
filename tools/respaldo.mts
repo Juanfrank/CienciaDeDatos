@@ -8,8 +8,8 @@
  *   CACHE_DIR=/ruta/al/almacen npm run respaldo -- /ruta/al/respaldo.json
  *
  * Solo LEE. Lo que se lleva y lo que deja fuera esta declarado, con su motivo, en
- * `apps/shell/src/server/backup.ts`. No se lleva las credenciales locales: llevan el secreto TOTP
- * en claro y el archivo seria el segundo factor de toda la institucion.
+ * `apps/shell/src/server/backup.ts`. No se lleva las credenciales locales: el archivo seria la
+ * identidad local de toda la institucion en un sitio.
  */
 import { writeFileSync } from 'node:fs';
 import { backupState, CLASSES } from '../apps/shell/src/server/backup';

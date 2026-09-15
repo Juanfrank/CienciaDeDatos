@@ -22,6 +22,7 @@
     "e2e": "nx run shell:e2e",
     "populate": "tsx tools/populate-cache.mts",
     "crear-administrador": "tsx tools/crear-administrador.mts",
+    "cifrar-totp": "tsx tools/cifrar-totp.mts",
     "respaldo": "tsx tools/respaldo.mts",
     "restaurar": "tsx tools/restaurar.mts",
     "demo-code": "tsx tools/demo-code.mts",

@@ -23,6 +23,13 @@ export {
 } from './LocalIdentityProvider';
 export { SessionService, type SessionServiceOptions } from './session';
 export {
+  TotpSecretUnreadable,
+  decryptTotpSecret,
+  encryptTotpSecret,
+  isEncryptedTotpSecret,
+  type TotpCipherContext,
+} from './totpCipher';
+export {
   DEFAULT_LOCKOUT_POLICY,
   DEFAULT_PASSWORD_POLICY,
   checkPasswordPolicy,

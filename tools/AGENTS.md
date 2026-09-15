@@ -15,6 +15,7 @@ Scripts que no forman parte de la aplicacion. `project.json` los declara como el
 | `npm run test:barajado` | La suite de unidad N veces con el orden barajado; ver la regla de abajo |
 | `npm run respaldo -- <archivo>` | Vuelca el estado autoritativo; `docs/operations/contingencia.md` |
 | `npm run restaurar -- <archivo> [--aplicar]` | Lo devuelve. En seco si no se pasa `--aplicar` |
+| `npm run cifrar-totp` | Cifra los secretos TOTP que quedaran en claro; `docs/adr/ADR-023-cifrado-del-secreto-totp.md` |
 
 ## Reglas
 

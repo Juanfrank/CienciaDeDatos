@@ -210,8 +210,8 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
     pudiera escribir tocando el codigo convertiria el panel en la forma facil de administrar en
     vez de en la forma de administrar.
 
-**2.2 sigue pendiente** aunque dependia de 2.1: el reposicionamiento existe en el editor, no en
-el dialogo «Mi vista» de la personalizacion.
+**2.2 quedo cerrado** con el reposicionamiento portado al dialogo «Mi vista»; lo unico que sigue
+sin gesto ahi es `columnOrder`, que va con el resto de la personalizacion de tablas.
 
 ---
 
@@ -912,11 +912,10 @@ semilla en lugar del equipo real, sin una sola senal.
 7. **`docs/operations/contingencia.md`**, el procedimiento, con el RPO dicho como es.
 
 **Dos decisiones que cuestan RTO y se toman a proposito.** Las credenciales locales no entran en el
-respaldo —`totpSecret` se guarda EN CLARO pese al comentario de `packages/auth/src/stores.ts:13`,
-asi que el archivo seria el segundo factor de toda la institucion— y al restaurar hay que recrear
-el primer Administrador y pasar el resto por el restablecimiento mediado. Y las sesiones y los
-tokens de un solo uso no vuelven nunca: restaurarlos resucita sesiones revocadas y enlaces ya
-gastados.
+respaldo —el archivo seria la identidad local entera, y la pimienta que la abre viaja en el mismo
+kit de recuperacion—, asi que al restaurar hay que recrear el primer Administrador y pasar el resto
+por el restablecimiento mediado. Y las sesiones y los tokens de un solo uso no vuelven nunca:
+restaurarlos resucita sesiones revocadas y enlaces ya gastados.
 
 **Lo que NO arregla, y hay que decirlo:**
 
@@ -932,9 +931,55 @@ gastados.
   quiere proteger no protege de nada.
 - **Infraestructura**: Storage en `Standard_LRS` sin versionado ni retencion, base de identidad sin
   politica de respaldo declarada, una sola region.
-- **El secreto TOTP sigue en claro.** Cifrarlo lleva migracion de datos y una segunda pieza critica
-  en el arranque; va en su propia tanda. El comentario de `stores.ts` se corrige para que deje de
-  prometer lo que no hace.
+- **El secreto TOTP seguia en claro.** Cerrado en el apartado 2.21, y sin la segunda pieza critica
+  que se daba por descontada.
+
+
+### 2.21 El secreto TOTP se guardaba en claro — HECHO
+
+`LocalCredentialRecord.totpSecret` llegaba al almacen tal cual, con un comentario que prometia
+«cifrado en reposo». No es un dato de perfil: es una credencial completa y permanente. Quien lee el
+almacen genera codigos validos indefinidamente, sin dejar rastro, y el segundo factor deja de serlo
+para esa cuenta. Y no se puede hashear como la contrasena —verificar un codigo exige el secreto
+original—, asi que la unica proteccion posible es cifrarlo.
+
+**Lo que cambia el encuadre respecto a lo que este apartado daba por descontado.** Se anoto como
+«migracion de datos mas una segunda pieza critica en el arranque», y la segunda pieza no hace falta.
+La clave se DERIVA de `AUTH_PEPPER` con HKDF y una etiqueta propia, por el mismo argumento con el
+que 2.16 se nego a hacer condicional el token anti-CSRF: *una proteccion que se enciende con una
+variable de entorno es una proteccion que en algun entorno esta apagada*. Una clave separada seria
+opcional de hecho, y el modo de fallo de su ausencia es guardar en claro — que es justo lo que se
+viene a arreglar. Las alternativas, en la ADR-023.
+
+**Lo que se hizo:**
+
+1. **`packages/auth/src/totpCipher.ts`.** AES-256-GCM, vector de inicializacion aleatorio por
+   escritura y el correo de la cuenta como dato autenticado: un sobre copiado de una cuenta a otra
+   no descifra, aunque quien lo copie pueda escribir en el almacen.
+2. **El cifrado vive en la frontera de la PERSISTENCIA.** `totpSecret` sigue siendo el secreto en
+   claro en el dominio, porque es lo que el proveedor necesita para verificar; quien decide como se
+   escribe es `CredentialsStore`. El proveedor no se entera de nada y sus pruebas no cambian.
+3. **Un secreto ilegible LANZA, no se degrada a ausente.** Es la decision de la que cuelga todo lo
+   demas: el proveedor exige el codigo cuando el secreto esta presente, asi que un descifrado
+   fallido convertido en `undefined` seria una cuenta que entra con la contrasena sola. Con la
+   pimienta equivocada no entra nadie, en vez de entrar todos sin segundo factor.
+4. **El campo en disco se llama distinto** —`totpSecretCipher`—, de modo que un registro anterior se
+   reconoce por su nombre viejo y no por una heuristica sobre la forma de la cadena. Esa es la senal
+   que dispara su migracion.
+5. **La migracion ocurre al leer**, asi que una cuenta que entra se pone al dia sola. Y
+   **`npm run cifrar-totp`** recorre las dormidas, que son las que nadie lee y las que mas tiempo
+   pasarian en claro. Reutiliza el `keysByPrefix` que 2.20 anadio al puerto.
+6. **`tools/coherence/credenciales.spec.ts`**, la guarda: solo `identity.ts` nombra la clave del
+   almacen, solo el conoce el campo cifrado, y el prefijo sigue clasificado como `no-respaldar` —el
+   unico cambio de una linea que convertiria el respaldo en un volcado de credenciales—.
+
+Verificado enrojeciendo las cinco: un cifrado que no cifra, una tienda que guarda en claro, un
+descifrado fallido que devuelve la cuenta sin segundo factor, una escritura de credencial en otro
+archivo, y la clase del prefijo cambiada. Las cinco nombran al culpable.
+
+**Lo que NO arregla:** la pimienta pasa a hacer falta tambien para LEER una credencial con segundo
+factor, y sigue sin poder rotarse por separado —rotarla ya invalidaba todas las contrasenas—. La
+separacion de verdad es que la identidad viva en su propia base, que es 1.4.
 
 ---
 
