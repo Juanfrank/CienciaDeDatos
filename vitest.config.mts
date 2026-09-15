@@ -24,6 +24,22 @@ export default defineConfig({
     },
   },
   test: {
+    /*
+     * La transformacion se guarda entre ejecuciones, en `node_modules/.vitest-cache`.
+     *
+     * Transformar era el 18% del tiempo de la suite y se rehacia entero en cada pasada, aunque no
+     * hubiera cambiado un archivo. Con la cache baja al 6%: doce segundos pasan a once, y eso en
+     * una suite que corre en cada `npm run verify`.
+     *
+     * Esto NO es lo mismo que `isolate: false`, que vitest sugiere en el mismo mensaje y que
+     * ahorraria mucho mas —de doce segundos a cuatro—. Ese no se puede tomar todavia: reutiliza el
+     * registro de modulos entre archivos, y `almacenCompartido.ts` lee `CACHE_DIR` AL EVALUARSE,
+     * asi que el segundo archivo de cada proceso seguiria escribiendo en el directorio del
+     * primero. El aislamiento que promete `vitest.setup.mts` quedaria anulado en silencio, y la
+     * suite seguiria en verde. Comprobado con dos pruebas que comparan `CACHE_DIR` con
+     * `process.env.CACHE_DIR`: sin aislar, no coinciden.
+     */
+    fsModuleCache: true,
     include: ['**/*.spec.ts'],
     // Aisla el estado compartido de la aplicacion: ver vitest.setup.mts.
     setupFiles: ['./vitest.setup.mts'],
