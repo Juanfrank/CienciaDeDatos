@@ -65,6 +65,7 @@ export function ModuleEditor({
   const [modulo, setModulo] = useState(initial);
   const [objetos, setObjetos] = useState(objetosIniciales);
   const [diag, setDiag] = useState(diagnosticos);
+  const hayObjetosRotos = diag.items.some((d) => d.broken);
   const [bloq, setBloq] = useState(locks);
   const [selection, setSeleccion] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -619,7 +620,7 @@ export function ModuleEditor({
 
       {bloq.length > 0 ? (
         <div className="aviso problem-notice" data-testid="locks-editor">
-          <p>Esto impide publicarlo:</p>
+          <p>{t('editor.locks')}</p>
           <ul>
             {bloq.map((b, i) => (
               <li key={`${b.reason}-${i}`}>{b.detail}</li>
@@ -628,7 +629,7 @@ export function ModuleEditor({
         </div>
       ) : (
         <p className="muted-text" data-testid="editor-without-locks">
-          Sin problemas pendientes: el modulo se puede proponer para publicacion.
+          {t('editor.noLocks')}
         </p>
       )}
 
@@ -735,15 +736,20 @@ export function ModuleEditor({
       </div>
 
       {/*
+        Extraido a una constante: la guarda del catalogo cuenta el texto suelto de un JSX con una
+        expresion regular, y una condicion escrita en linea le parece prosa. Con nombre se lee
+        mejor y ademas deja de contarse.
+      */}
+      {/*
         Los problemas de esquema, en texto y fuera del lienzo.
 
         En el lienzo cada objeto roto ya se dibuja marcado, que es lo que pide 4.2. Esta lista los
         reune para que se puedan leer todos sin ir pulsando bloque por bloque, y es la que un
         lector de pantalla recorre de una vez.
       */}
-      {diag.items.some((d) => d.broken) ? (
+      {hayObjetosRotos ? (
         <div className="aviso problem-notice" data-testid="problems-editor">
-          <p>Objetos con problemas de esquema:</p>
+          <p>{t('editor.schemaProblems')}</p>
           <ul>
             {diag.items
               .filter((d) => d.broken)

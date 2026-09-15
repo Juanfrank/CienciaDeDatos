@@ -1,5 +1,6 @@
 import { expansionsCount, auditList } from '../../../src/server/audit';
 import { listUsers } from '../../../src/server/context';
+import { translator } from '../../../src/server/locale';
 import { paginaDeAdmin } from '../../../src/server/admin';
 
 export const dynamic = 'force-dynamic';
@@ -32,45 +33,48 @@ export default async function AuditPage({
    * directorio no trae nombre, se cae al identificador, que es lo que se veia antes.
    */
   const nombreDe = new Map((await listUsers()).map((u) => [u.userId, u.displayName ?? u.userId]));
+  const t = await translator();
 
   return (
     <section>
-      <h2>Auditoria de configuracion</h2>
+      <h2>{t('admin.audit.title')}</h2>
 
       <p
         className={`aviso ${ampliaciones > 0 ? 'notice-atencion' : 'notice-ok'}`}
         data-testid="resumen-ampliaciones"
       >
-        <strong>{ampliaciones}</strong> ampliacion(es) de ambito vigentes.{' '}
+        {t('admin.audit.expansions', { n: ampliaciones })}{' '}
         {ampliaciones === 0
-          ? 'Es el valor deseable.'
-          : 'Deberia tender a cero: un numero creciente indica que el modelo de RLS se relaja por acumulacion de excepciones.'}
+          ? t('admin.audit.expansions.none')
+          : t('admin.audit.expansions.some')}
       </p>
 
-      <nav className="audit-filters" aria-label="Filtros del registro">
-        <a href="/admin/audit" data-testid="all-filter">Todos</a>
+      <nav className="audit-filters" aria-label={t('admin.audit.filters')}>
+        <a href="/admin/audit" data-testid="all-filter">
+          {t('admin.audit.filter.all')}
+        </a>
         <a href="/admin/audit?onlyExpansions=1" data-testid="filter-expansions">
-          Solo ampliaciones
+          {t('admin.audit.filter.expansions')}
         </a>
         <a href="/admin/audit?onlyMoves=1" data-testid="filter-moves">
-          Solo movimientos
+          {t('admin.audit.filter.moves')}
         </a>
       </nav>
 
       {eventos.length === 0 ? (
         <p className="muted-text" data-testid="audit-empty">
-          Sin cambios registrados con este filtro.
+          {t('admin.audit.empty')}
         </p>
       ) : (
         <div className="container-table">
           <table className="tabla" data-testid="audit-table">
             <thead>
               <tr>
-                <th>Cuando</th>
-                <th>Quien</th>
-                <th>Que</th>
-                <th>Accion</th>
-                <th>Justificacion</th>
+                <th>{t('admin.audit.column.when')}</th>
+                <th>{t('admin.audit.column.who')}</th>
+                <th>{t('admin.audit.column.what')}</th>
+                <th>{t('admin.audit.column.action')}</th>
+                <th>{t('admin.audit.column.justification')}</th>
               </tr>
             </thead>
             <tbody>
@@ -84,7 +88,9 @@ export default async function AuditPage({
                   <td>
                     {e.action}
                     {e.isScopeExpansion ? (
-                      <span className="insignia badge--error">Ampliacion</span>
+                      <span className="insignia badge--error">
+                        {t('admin.audit.expansion')}
+                      </span>
                     ) : null}
                   </td>
                   <td>{e.justification ?? '—'}</td>

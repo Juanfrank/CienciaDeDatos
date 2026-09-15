@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import type { AlertOperator, Cadence } from '@app/alerts';
 import { useUrlFilters } from '../hooks/useUrlFilters';
 import { IconButton } from './icons/IconButton';
+import { useTranslator } from './Locale';
 
 /** Crear una alerta o una suscripcion desde el modulo que se esta viendo. */
 
@@ -36,6 +37,7 @@ export function CreateNotice({
   const { searchParams } = useUrlFilters();
   const dialogo = useRef<HTMLDialogElement>(null);
 
+  const t = useTranslator();
   const [pestana, setPestana] = useState<'alerta' | 'suscripcion'>('alerta');
   const [nombre, setNombre] = useState('');
   const [objeto, setObjeto] = useState(vigilables[0]?.instanceId ?? '');
@@ -98,40 +100,45 @@ export function CreateNotice({
 
   return (
     <>
-      <IconButton icono="notice" etiqueta="Avisarme" data-testid="create-notice" onClick={open} />
+      <IconButton
+        icono="notice"
+        etiqueta={t('notice.warnMe')}
+        data-testid="create-notice"
+        onClick={open}
+      />
 
-      <dialog ref={dialogo} className="emergente" aria-label="Crear un aviso" data-testid="dialogo-aviso">
+      <dialog ref={dialogo} className="emergente" aria-label={t('notice.create')} data-testid="dialogo-aviso">
         <div className="popover__header">
-          <h2>Avisarme de este modulo</h2>
+          <h2>{t('notice.watchThis')}</h2>
           <button type="button" className="button-link" onClick={close} data-testid="close-notice">
-            Cerrar
+            {t('action.close')}
           </button>
         </div>
 
-        <div className="segmentador" role="tablist" aria-label="Tipo de aviso">
-          {(['alerta', 'suscripcion'] as const).map((t) => (
+        <div className="segmentador" role="tablist" aria-label={t('notice.kind')}>
+          {(['alerta', 'suscripcion'] as const).map((tipo) => (
             <button
-              key={t}
+              key={tipo}
               type="button"
               role="tab"
-              aria-selected={pestana === t}
-              className={`pastilla ${pestana === t ? 'pastilla--activa' : ''}`}
-              data-testid={`tab-${t}`}
-              onClick={() => setPestana(t)}
+              aria-selected={pestana === tipo}
+              className={`pastilla ${pestana === tipo ? 'pastilla--activa' : ''}`}
+              data-testid={`tab-${tipo}`}
+              onClick={() => setPestana(tipo)}
             >
-              {t === 'alerta' ? 'Alerta cuando cambie el dato' : 'Envio programado'}
+              {tipo === 'alerta' ? t('notice.kind.alert') : t('notice.kind.subscription')}
             </button>
           ))}
         </div>
 
         <p className="muted-text">
           {pestana === 'alerta'
-            ? 'Se evalua cada vez que se repueblan los datos, con su ambito de acceso, y avisa solo cuando la condicion empieza o deja de cumplirse.'
-            : 'Se genera en segundo plano y llega a su bandeja de avisos.'}
+            ? t('notice.kind.alert.desc')
+            : t('notice.kind.subscription.desc')}
         </p>
 
         <p className="form__field">
-          <label htmlFor="name-notice">Nombre</label>
+          <label htmlFor="name-notice">{t('notice.name')}</label>
           <input
             id="name-notice"
             value={nombre}
@@ -143,7 +150,7 @@ export function CreateNotice({
         {pestana === 'alerta' ? (
           <>
             <p className="form__field">
-              <label htmlFor="object-notice">Objeto vigilado</label>
+              <label htmlFor="object-notice">{t('notice.object')}</label>
               <select
                 id="object-notice"
                 value={objeto}
@@ -162,7 +169,7 @@ export function CreateNotice({
             </p>
 
             <p className="form__field">
-              <label htmlFor="measure-notice">Medida</label>
+              <label htmlFor="measure-notice">{t('notice.measure')}</label>
               <select
                 id="measure-notice"
                 value={medida}
@@ -178,7 +185,7 @@ export function CreateNotice({
             </p>
 
             <p className="form__field">
-              <label htmlFor="aviso-operador">Condicion</label>
+              <label htmlFor="aviso-operador">{t('notice.condition')}</label>
               <select
                 id="aviso-operador"
                 value={operador}
@@ -194,7 +201,7 @@ export function CreateNotice({
             </p>
 
             <p className="form__field">
-              <label htmlFor="threshold-notice">Umbral</label>
+              <label htmlFor="threshold-notice">{t('notice.threshold')}</label>
               <input
                 id="threshold-notice"
                 type="number"
@@ -207,7 +214,7 @@ export function CreateNotice({
         ) : (
           <>
             <p className="form__field">
-              <label htmlFor="format-notice">Formato</label>
+              <label htmlFor="format-notice">{t('notice.format')}</label>
               <select
                 id="format-notice"
                 value={formato}
@@ -223,7 +230,7 @@ export function CreateNotice({
             </p>
 
             <p className="form__field">
-              <label htmlFor="aviso-cadencia">Cadencia</label>
+              <label htmlFor="aviso-cadencia">{t('notice.cadence')}</label>
               <select
                 id="aviso-cadencia"
                 value={cadencia}
@@ -239,7 +246,7 @@ export function CreateNotice({
             </p>
 
             <p className="form__field">
-              <label htmlFor="aviso-hora">Hora</label>
+              <label htmlFor="aviso-hora">{t('notice.hour')}</label>
               <input
                 id="aviso-hora"
                 type="number"
@@ -260,7 +267,7 @@ export function CreateNotice({
         ) : null}
 
         <button type="button" className="pastilla" data-testid="save-notice" onClick={() => void guardar()}>
-          Guardar
+          {t('action.save')}
         </button>
       </dialog>
     </>

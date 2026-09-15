@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import type { Aggregation } from '@app/data-contracts';
-import { GRID_COLUMNS, type GridItem } from '@app/module-model';
+import { useEffect, useState } from "react";
+import type { Aggregation } from "@app/data-contracts";
+import { GRID_COLUMNS, type GridItem } from "@app/module-model";
 import {
   ATTACHMENT_BY_DEFAULT,
   DATE_PICKERS,
@@ -24,7 +24,7 @@ import {
   type FieldSlot,
   type PaginationLegend,
   type PickerKind,
-} from '@app/ui-components';
+} from "@app/ui-components";
 import {
   type ObjectFamily,
   type ObjectCategory,
@@ -32,20 +32,20 @@ import {
   isContainer,
   isElement,
   placeable,
-} from '@app/ui-components';
-import type { PaletteDataset, PaletteObject } from '../../server/editor';
-import { Icon } from '../icons/Icon';
-import { EditorObjectSettings } from './EditorObjectSettings';
-import { Tabs, type TabDefinition } from './Tabs';
-import { Well } from './Well';
-import { Presentation } from './Presentation';
-import type { MessageKey } from '@app/i18n';
-import { useTranslator } from '../Locale';
-import { FilterProvider, Section } from './Section';
+} from "@app/ui-components";
+import type { PaletteDataset, PaletteObject } from "../../server/editor";
+import { Icon } from "../icons/Icon";
+import { EditorObjectSettings } from "./EditorObjectSettings";
+import { Tabs, type TabDefinition } from "./Tabs";
+import { Well } from "./Well";
+import { Presentation } from "./Presentation";
+import type { MessageKey } from "@app/i18n";
+import { useTranslator } from "../Locale";
+import { FilterProvider, Section } from "./Section";
 
 /** El panel del editor: la tienda y el banco de trabajo, en uno. */
 
-type Tab = 'objetos' | 'datos' | 'formato' | 'complementos';
+type Tab = "objetos" | "datos" | "formato" | "complementos";
 
 export function SidebarPanel({
   objetos,
@@ -71,8 +71,8 @@ export function SidebarPanel({
   onQuitar: (itemId: string) => void;
 }) {
   const t = useTranslator();
-  const [pestana, setPestana] = useState<Tab>('objetos');
-  const [filtro, setFiltro] = useState('');
+  const [pestana, setPestana] = useState<Tab>("objetos");
+  const [filtro, setFiltro] = useState("");
 
   /*
    * Al elegir un objeto, el panel salta a «Datos».
@@ -81,13 +81,15 @@ export function SidebarPanel({
   const selectedObject = selected?.instance.objectId ?? null;
   useEffect(() => {
     if (!selectedId) {
-      setPestana('objetos');
+      setPestana("objetos");
       return;
     }
     // Lo que no lee datos salta a «Formato»: es su primera pestana util, y mandarlo a una
     // deshabilitada dejaria el panel en blanco justo despues de colocar algo.
-    const withoutData = selectedObject !== null && (isElement(selectedObject) || isContainer(selectedObject));
-    setPestana(withoutData ? 'formato' : 'datos');
+    const withoutData =
+      selectedObject !== null &&
+      (isElement(selectedObject) || isContainer(selectedObject));
+    setPestana(withoutData ? "formato" : "datos");
   }, [selectedId, selectedObject]);
 
   const objectHas = selected !== null;
@@ -101,21 +103,33 @@ export function SidebarPanel({
   /*
    * «Datos» se deshabilita para lo que no consume datos.
    */
-  const dataConsumes = (definicion?.dimensiones.max ?? 0) > 0 || (definicion?.medidas.max ?? 0) > 0;
+  const dataConsumes =
+    (definicion?.dimensiones.max ?? 0) > 0 ||
+    (definicion?.medidas.max ?? 0) > 0;
 
   const TABS: TabDefinition<Tab>[] = [
-    { id: 'objetos', etiqueta: t('editor.tab.objects'), icono: 'barras', habilitada: true },
     {
-      id: 'datos',
-      etiqueta: t('editor.tab.data'),
-      icono: 'tabla',
+      id: "objetos",
+      etiqueta: t("editor.tab.objects"),
+      icono: "barras",
+      habilitada: true,
+    },
+    {
+      id: "datos",
+      etiqueta: t("editor.tab.data"),
+      icono: "tabla",
       habilitada: objectHas && dataConsumes,
     },
-    { id: 'formato', etiqueta: t('editor.tab.format'), icono: 'indicador', habilitada: objectHas },
     {
-      id: 'complementos',
-      etiqueta: t('editor.tab.addons'),
-      icono: 'informacion',
+      id: "formato",
+      etiqueta: t("editor.tab.format"),
+      icono: "indicador",
+      habilitada: objectHas,
+    },
+    {
+      id: "complementos",
+      etiqueta: t("editor.tab.addons"),
+      icono: "informacion",
       habilitada: objectHas,
     },
   ];
@@ -131,11 +145,11 @@ export function SidebarPanel({
         aria-labelledby={`pestana-${pestana}`}
         tabIndex={0}
       >
-        {pestana === 'objetos' ? (
+        {pestana === "objetos" ? (
           <Palette objetos={objetos} saving={saving} onAnadir={onAnadir} />
         ) : null}
 
-        {pestana === 'datos' && selected ? (
+        {pestana === "datos" && selected ? (
           <Data
             item={selected}
             definicion={definicion}
@@ -147,7 +161,7 @@ export function SidebarPanel({
           />
         ) : null}
 
-        {pestana === 'formato' && selected ? (
+        {pestana === "formato" && selected ? (
           <div className="editor__format">
             {/*
               El buscador, PRIMERO y para la pestana ENTERA.
@@ -163,53 +177,69 @@ export function SidebarPanel({
               No se guarda: el filtro es un gesto de un momento, no una preferencia.
             */}
             <label className="editor__search-box">
-              <span className="editor__label-search-box">{t('panel.searchSetting')}</span>
+              <span className="editor__label-search-box">
+                {t("panel.searchSetting")}
+              </span>
               <input
                 type="search"
                 value={filtro}
-                placeholder={t('panel.searchSetting.example')}
+                placeholder={t("panel.searchSetting.example")}
                 data-testid="buscar-ajuste"
                 onChange={(e) => setFiltro(e.target.value)}
               />
             </label>
 
             <FilterProvider filtro={filtro}>
-            {/* `Presentacion` ya trae sus propias subsecciones: envolverlo en otra repetiria el
+              {/* `Presentacion` ya trae sus propias subsecciones: envolverlo en otra repetiria el
                 rotulo «Presentacion» dos veces seguidas. */}
-            <EditorObjectSettings
-              instance={selected.instance}
-              saving={saving}
-              onCambiar={(change) =>
-                onCambiar(selected.id, (i) => ({ ...i, instance: change(i.instance) }))
-              }
-            />
+              <EditorObjectSettings
+                instance={selected.instance}
+                saving={saving}
+                onCambiar={(change) =>
+                  onCambiar(selected.id, (i) => ({
+                    ...i,
+                    instance: change(i.instance),
+                  }))
+                }
+              />
 
-            <Presentation
-              iconos={iconos}
-              instance={selected.instance}
-              admitidas={definicion?.presentacion ?? []}
-              kinds={dataset?.kinds ?? {}}
-              saving={saving}
-              onCambiar={(change) =>
-                onCambiar(selected.id, (i) => ({ ...i, instance: change(i.instance) }))
-              }
-            />
+              <Presentation
+                iconos={iconos}
+                instance={selected.instance}
+                admitidas={definicion?.presentacion ?? []}
+                kinds={dataset?.kinds ?? {}}
+                saving={saving}
+                onCambiar={(change) =>
+                  onCambiar(selected.id, (i) => ({
+                    ...i,
+                    instance: change(i.instance),
+                  }))
+                }
+              />
 
-            {/*
+              {/*
               El tamano y la posicion viven aqui, no en «Datos».
               Cuanto ocupa un objeto en la rejilla no cambia lo que mide: es como se ve.
             */}
-            {/*
+              {/*
               Abierta por defecto: redimensionar es lo que mas se hace en esta pestana, y llegar a
               ella para encontrarse un titulo plegado anade un clic a cada ajuste.
             */}
-            <Section
-              titulo="Tamano y posicion"
-              keys={['ancho', 'alto', 'columnas', 'filas', 'mover', 'rejilla', 'redimensionar']}
-              prueba={`section-size-${selected.id}`}
-            >
-              <Size item={selected} saving={saving} onCambiar={onCambiar} />
-            </Section>
+              <Section
+                titulo="Tamano y posicion"
+                keys={[
+                  "ancho",
+                  "alto",
+                  "columnas",
+                  "filas",
+                  "mover",
+                  "rejilla",
+                  "redimensionar",
+                ]}
+                prueba={`section-size-${selected.id}`}
+              >
+                <Size item={selected} saving={saving} onCambiar={onCambiar} />
+              </Section>
             </FilterProvider>
 
             {/*
@@ -219,23 +249,23 @@ export function SidebarPanel({
               repetir la lista de que secciones admite cada objeto, y dos listas que hay que
               mantener iguales acaban desincronizandose.
             */}
-            {filtro.trim() !== '' ? (
+            {filtro.trim() !== "" ? (
               <div className="editor__empty" data-testid="without-results">
                 <p>Nada coincide con «{filtro.trim()}».</p>
                 <button
                   type="button"
                   className="md-boton md-boton--texto"
                   data-testid="limpiar-busqueda"
-                  onClick={() => setFiltro('')}
+                  onClick={() => setFiltro("")}
                 >
-                  {t('panel.seeSettings')}
+                  {t("panel.seeSettings")}
                 </button>
               </div>
             ) : null}
           </div>
         ) : null}
 
-        {pestana === 'complementos' && selected ? (
+        {pestana === "complementos" && selected ? (
           <Addons
             item={selected}
             objetos={objetos}
@@ -258,22 +288,34 @@ export function SidebarPanel({
  * deliberado: es una decision de producto, no una cadena.
  */
 const FAMILIES: { family: ObjectFamily; que: string }[] = [
-  { family: 'value', que: 'El dato que hay que ver de un vistazo.' },
-  { family: 'comparison', que: 'Cuanto mide cada distrito, cada materia, cada tribunal.' },
-  { family: 'trend', que: 'La trayectoria de una medida a lo largo de una dimension ordenada.' },
-  { family: 'proportion', que: 'Que parte aporta cada categoria, y donde se pierde.' },
-  { family: 'relation', que: 'Si dos cifras se mueven juntas, o cada una en su escala.' },
-  { family: 'detail', que: 'Cuando hace falta la cifra exacta.' },
-  { family: 'location', que: 'La dimension geografica.' },
-  { family: 'control', que: 'No dibujan datos: eligen cuales se ven.' },
+  { family: "value", que: "El dato que hay que ver de un vistazo." },
+  {
+    family: "comparison",
+    que: "Cuanto mide cada distrito, cada materia, cada tribunal.",
+  },
+  {
+    family: "trend",
+    que: "La trayectoria de una medida a lo largo de una dimension ordenada.",
+  },
+  {
+    family: "proportion",
+    que: "Que parte aporta cada categoria, y donde se pierde.",
+  },
+  {
+    family: "relation",
+    que: "Si dos cifras se mueven juntas, o cada una en su escala.",
+  },
+  { family: "detail", que: "Cuando hace falta la cifra exacta." },
+  { family: "location", que: "La dimension geografica." },
+  { family: "control", que: "No dibujan datos: eligen cuales se ven." },
 ];
 
 /** Sin acentos y en minusculas, como el buscador del panel de formato y por lo mismo. */
 const normalizar = (content: string): string =>
   content
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 
 function Palette({
   objetos,
@@ -291,45 +333,50 @@ function Palette({
   // navegador de pagina se elige en la configuracion del modulo, y los dos tienen que quedar
   // fuera de la paleta por el mismo sitio.
   const colocables = objetos.filter(placeable);
-  const [busqueda, setBusqueda] = useState('');
+  const [busqueda, setBusqueda] = useState("");
 
   /*
    * Se busca por nombre Y por descripcion.
    */
   const filtro = normalizar(busqueda.trim());
   const coincide = (o: PaletteObject) =>
-    filtro === '' ||
+    filtro === "" ||
     normalizar(o.name).includes(filtro) ||
     normalizar(o.description).includes(filtro);
 
   const visibles = colocables.filter(coincide);
   const de = (...categories: ObjectCategory[]) =>
     visibles.filter((o) => categories.includes(o.category));
-  const withData = de('grafico', 'tabla', 'indicador', 'filtro', 'mapa');
+  const withData = de("grafico", "tabla", "indicador", "filtro", "mapa");
 
   return (
     <>
       <label className="editor__search-box">
-        <span className="editor__label-search-box">{t('editor.searchObject')}</span>
+        <span className="editor__label-search-box">
+          {t("editor.searchObject")}
+        </span>
         <input
           type="search"
           value={busqueda}
-          placeholder={t('panel.searchObject.example')}
+          placeholder={t("panel.searchObject.example")}
           data-testid="search-object"
           onChange={(e) => setBusqueda(e.target.value)}
         />
       </label>
 
       {visibles.length === 0 ? (
-        <div className="editor__empty editor__empty-visible" data-testid="without-objects">
-          <p>{t('editor.noObjects', { consulta: busqueda.trim() })}</p>
+        <div
+          className="editor__empty editor__empty-visible"
+          data-testid="without-objects"
+        >
+          <p>{t("editor.noObjects", { consulta: busqueda.trim() })}</p>
           <button
             type="button"
             className="md-boton md-boton--texto"
             data-testid="limpiar-busqueda-objeto"
-            onClick={() => setBusqueda('')}
+            onClick={() => setBusqueda("")}
           >
-            {t('panel.seeObjects')}
+            {t("panel.seeObjects")}
           </button>
         </div>
       ) : null}
@@ -337,7 +384,7 @@ function Palette({
       {withData.length > 0 ? (
         <Section titulo="Visualizaciones" prueba="visualization-section">
           <p className="muted-text editor-panel__nota">
-            {t('panel.visualizations.help')}
+            {t("panel.visualizations.help")}
           </p>
 
           {/*
@@ -386,13 +433,13 @@ function Palette({
         </Section>
       ) : null}
 
-      {de('elemento').length > 0 ? (
+      {de("elemento").length > 0 ? (
         <Section titulo="Elementos" prueba="element-section">
           <p className="muted-text editor-panel__nota">
-            {t('panel.elements.help')}
+            {t("panel.elements.help")}
           </p>
           <ObjectList
-            objetos={de('elemento')}
+            objetos={de("elemento")}
             prueba="element-palette"
             saving={saving}
             onAnadir={onAnadir}
@@ -400,13 +447,13 @@ function Palette({
         </Section>
       ) : null}
 
-      {de('contenedor').length > 0 ? (
+      {de("contenedor").length > 0 ? (
         <Section titulo="Contenedores" prueba="container-section">
           <p className="muted-text editor-panel__nota">
-            {t('panel.containers.help')}
+            {t("panel.containers.help")}
           </p>
           <ObjectList
-            objetos={de('contenedor')}
+            objetos={de("contenedor")}
             prueba="container-palette"
             saving={saving}
             onAnadir={onAnadir}
@@ -451,7 +498,8 @@ function ObjectList({
             <span className="palette__name">{o.name}</span>
             {withContract ? (
               <span className="palette__contract">
-                {o.dimensiones.min}–{o.dimensiones.max} dim · {o.medidas.min}–{o.medidas.max} med
+                {o.dimensiones.min}–{o.dimensiones.max} dim · {o.medidas.min}–
+                {o.medidas.max} med
               </span>
             ) : null}
           </button>
@@ -481,7 +529,9 @@ function Data({
   onQuitar: (itemId: string) => void;
 }) {
   const t = useTranslator();
-  const dataset = datasets.find((d) => d.datasetId === item.instance.binding.datasetId);
+  const dataset = datasets.find(
+    (d) => d.datasetId === item.instance.binding.datasetId,
+  );
   const instanceChange = (change: (i: ObjectInstance) => ObjectInstance) =>
     onCambiar(item.id, (it) => ({ ...it, instance: change(it.instance) }));
 
@@ -494,8 +544,8 @@ function Data({
           measures: definicion?.medidas ?? { min: 0, max: 0 },
         });
 
-  const deDimension = slots.filter((r) => r.tipo === 'dimension');
-  const deMedida = slots.filter((r) => r.tipo === 'medida');
+  const deDimension = slots.filter((r) => r.tipo === "dimension");
+  const deMedida = slots.filter((r) => r.tipo === "medida");
   const assignment = slotsOf(item.instance, slots);
 
   /*
@@ -522,7 +572,7 @@ function Data({
     colapsa: (dataset?.dimensiones ?? []).some(
       (d) => !item.instance.binding.dimensions.map(fieldKey).includes(d),
     ),
-    dataGrain: dataset?.grain ?? 'atomico',
+    dataGrain: dataset?.grain ?? "atomico",
   });
 
   const aggregationChange = (fieldName: string, aggregation: Aggregation) =>
@@ -530,7 +580,10 @@ function Data({
       const resto = { ...(i.binding.aggregations ?? {}) };
       // Volver a la del esquema se guarda BORRANDO la anulacion, no copiando el mismo valor: si
       // se copiara, el modulo dejaria de seguir a la fuente sin que nadie lo hubiera pedido.
-      if (aggregation === (dataset?.aggregations[fieldName] ?? DEFAULT_AGGREGATION)) {
+      if (
+        aggregation ===
+        (dataset?.aggregations[fieldName] ?? DEFAULT_AGGREGATION)
+      ) {
         delete resto[fieldName];
       } else {
         resto[fieldName] = aggregation;
@@ -550,17 +603,19 @@ function Data({
     <>
       <Section titulo="Origen" prueba={`section-source-${item.id}`}>
         <label className="form__field">
-          <span>Titulo</span>
+          <span>{t("panel.title")}</span>
           <input
             defaultValue={item.instance.title}
             disabled={saving}
             data-testid={`title-${item.id}`}
-            onBlur={(e) => instanceChange((i) => ({ ...i, title: e.target.value }))}
+            onBlur={(e) =>
+              instanceChange((i) => ({ ...i, title: e.target.value }))
+            }
           />
         </label>
 
         <label className="form__field">
-          <span>{t('panel.dataset')}</span>
+          <span>{t("panel.dataset")}</span>
           <select
             value={item.instance.binding.datasetId}
             disabled={saving}
@@ -570,7 +625,11 @@ function Data({
                 ...i,
                 // Al cambiar de dataset se limpia el mapeo: los campos del anterior no existen en
                 // el nuevo, y conservarlos dejaria el objeto roto sin que nadie hiciera nada mal.
-                binding: { datasetId: e.target.value, dimensions: [], measures: [] },
+                binding: {
+                  datasetId: e.target.value,
+                  dimensions: [],
+                  measures: [],
+                },
               }))
             }
           >
@@ -631,9 +690,9 @@ function Data({
         estado visible ya vive en la URL.
       */}
       <Section
-        titulo={t('drill.panel.title')}
+        titulo={t("drill.panel.title")}
         abierta={false}
-        keys={['drill', 'detalle', 'ir a', 'destino', 'navegar']}
+        keys={["drill", "detalle", "ir a", "destino", "navegar"]}
         prueba={`section-drill-${item.id}`}
       >
         <DrillTargets
@@ -658,7 +717,7 @@ function Data({
         onClick={() => onQuitar(item.id)}
       >
         <Icon nombre="close" tamano={14} />
-        {t('panel.removeFromModule')}
+        {t("panel.removeFromModule")}
       </button>
     </>
   );
@@ -745,7 +804,11 @@ function Addons({
     if (!nacer) return;
     withAttachments([
       ...puestos,
-      nacer({ instanceId: `${objectId}-${item.id}`, version, host: item.instance }),
+      nacer({
+        instanceId: `${objectId}-${item.id}`,
+        version,
+        host: item.instance,
+      }),
     ]);
   };
 
@@ -753,7 +816,10 @@ function Addons({
   const cambiarUno = (
     instanceId: string,
     cambio: (a: AttachedObjectInstance) => AttachedObjectInstance,
-  ) => withAttachments(puestos.map((x) => (x.instanceId === instanceId ? cambio(x) : x)));
+  ) =>
+    withAttachments(
+      puestos.map((x) => (x.instanceId === instanceId ? cambio(x) : x)),
+    );
 
   const remove = (instanceId: string) =>
     withAttachments(puestos.filter((a) => a.instanceId !== instanceId));
@@ -761,21 +827,24 @@ function Addons({
   return (
     <>
       <p className="muted-text editor-panel__nota">
-        Acompanan a este objeto y no ocupan celda en la rejilla. Se dibujan como iconos en su
-        pageHeader.
+        Acompanan a este objeto y no ocupan celda en la rejilla. Se dibujan como
+        iconos en su pageHeader.
       </p>
 
       <Section titulo="Puestos" prueba={`section-addons-${item.id}`}>
         {puestos.length === 0 ? (
           <p className="muted-text" data-testid={`without-addons-${item.id}`}>
-            {t('panel.noDataset')}
+            {t("panel.noDataset")}
           </p>
         ) : (
           <ul className="editor-panel__attachments">
             {puestos.map((a) => (
               <li key={a.instanceId}>
                 <Section
-                  titulo={objetos.find((o) => o.objectId === a.objectId)?.name ?? a.objectId}
+                  titulo={
+                    objetos.find((o) => o.objectId === a.objectId)?.name ??
+                    a.objectId
+                  }
                   nivel={2}
                   prueba={`attachment-${item.id}-${a.objectId}`}
                 >
@@ -793,7 +862,7 @@ function Addons({
                     data-testid={`remove-attachment-${item.id}-${a.objectId}`}
                     onClick={() => remove(a.instanceId)}
                   >
-                    Quitar
+                    {t("action.remove")}
                   </button>
                 </Section>
               </li>
@@ -820,7 +889,9 @@ function Addons({
                 >
                   <Icon nombre={o.icono} tamano={22} />
                   <span className="palette__name">{o.name}</span>
-                  <span className="palette__contract">{yaPuesto ? 'ya puesto' : 'anadir'}</span>
+                  <span className="palette__contract">
+                    {yaPuesto ? "ya puesto" : "anadir"}
+                  </span>
                 </button>
               </li>
             );
@@ -854,14 +925,15 @@ function AttachmentSettings({
   ) => void;
 }) {
   const t = useTranslator();
-  const cambiar = (cambio: (a: AttachedObjectInstance) => AttachedObjectInstance) =>
-    onCambiar(attachment.instanceId, cambio);
+  const cambiar = (
+    cambio: (a: AttachedObjectInstance) => AttachedObjectInstance,
+  ) => onCambiar(attachment.instanceId, cambio);
 
   switch (attachment.objectId) {
-    case 'tooltip-explicativo':
+    case "tooltip-explicativo":
       return (
         <label className="form__field">
-          <span>Texto</span>
+          <span>{t("panel.text")}</span>
           <textarea
             rows={3}
             defaultValue={attachment.text}
@@ -869,50 +941,52 @@ function AttachmentSettings({
             data-testid={`text-${item.id}`}
             onBlur={(e) =>
               cambiar((x) =>
-                x.objectId === 'tooltip-explicativo' ? { ...x, text: e.target.value } : x,
+                x.objectId === "tooltip-explicativo"
+                  ? { ...x, text: e.target.value }
+                  : x,
               )
             }
           />
         </label>
       );
 
-    case 'tabla-de-datos':
+    case "tabla-de-datos":
       return (
         <label className="form__field">
-          <span>{t('panel.extent')}</span>
+          <span>{t("panel.extent")}</span>
           <select
             value={attachment.scope}
             disabled={saving}
             data-testid={`reach-${item.id}`}
             onChange={(e) =>
               cambiar((x) =>
-                x.objectId === 'tabla-de-datos'
-                  ? { ...x, scope: e.target.value as 'objeto' | 'subobjeto' }
+                x.objectId === "tabla-de-datos"
+                  ? { ...x, scope: e.target.value as "objeto" | "subobjeto" }
                   : x,
               )
             }
           >
-            <option value="objeto">{t('panel.extent.object')}</option>
-            <option value="subobjeto">{t('panel.extent.category')}</option>
+            <option value="objeto">{t("panel.extent.object")}</option>
+            <option value="subobjeto">{t("panel.extent.category")}</option>
           </select>
         </label>
       );
 
-    case 'filtro-de-visualizacion': {
+    case "filtro-de-visualizacion": {
       // Solo lo que el objeto YA mapea: un campo cualquiera del dataset convertiria el
       // complemento en un filtro general disfrazado, y la validacion lo rechaza.
       const campos = filterableFields(item.instance);
       return (
         <>
           <label className="form__field">
-            <span>{t('panel.addon.field')}</span>
+            <span>{t("panel.addon.field")}</span>
             <select
               value={attachment.fieldName}
               disabled={saving || campos.length === 0}
               data-testid={`filter-field-${item.id}`}
               onChange={(e) =>
                 cambiar((x) =>
-                  x.objectId === 'filtro-de-visualizacion'
+                  x.objectId === "filtro-de-visualizacion"
                     ? { ...x, fieldName: e.target.value }
                     : x,
                 )
@@ -926,40 +1000,42 @@ function AttachmentSettings({
             </select>
           </label>
           <label className="form__field">
-            <span>{t('panel.addon.picker')}</span>
+            <span>{t("panel.addon.picker")}</span>
             <select
-              value={attachment.tipo ?? ''}
+              value={attachment.tipo ?? ""}
               disabled={saving}
               data-testid={`filter-kind-${item.id}`}
               onChange={(e) =>
                 cambiar((x) =>
-                  x.objectId === 'filtro-de-visualizacion'
-                    ? e.target.value === ''
+                  x.objectId === "filtro-de-visualizacion"
+                    ? e.target.value === ""
                       ? (({ tipo: _quitado, ...resto }) => resto)(x)
                       : { ...x, tipo: e.target.value as PickerKind }
                     : x,
                 )
               }
             >
-              <option value="">{t('panel.addon.picker.auto')}</option>
+              <option value="">{t("panel.addon.picker.auto")}</option>
               {/* Los de fecha NO se ofrecen: este complemento compara por valor, y la validacion
                   los rechaza. Ofrecerlos seria ofrecer un control que no acota nada. */}
-              {PICKER_KINDS.filter((k) => !DATE_PICKERS.includes(k)).map((kind) => (
-                <option key={kind} value={kind}>
-                  {kind}
-                </option>
-              ))}
+              {PICKER_KINDS.filter((k) => !DATE_PICKERS.includes(k)).map(
+                (kind) => (
+                  <option key={kind} value={kind}>
+                    {kind}
+                  </option>
+                ),
+              )}
             </select>
           </label>
         </>
       );
     }
 
-    case 'pie-de-pagina':
+    case "pie-de-pagina":
       return (
         <>
           <label className="form__field">
-            <span>{t('panel.addon.footer')}</span>
+            <span>{t("panel.addon.footer")}</span>
             <textarea
               rows={2}
               defaultValue={attachment.texto}
@@ -967,23 +1043,27 @@ function AttachmentSettings({
               data-testid={`footer-text-${item.id}`}
               onBlur={(e) =>
                 cambiar((x) =>
-                  x.objectId === 'pie-de-pagina' ? { ...x, texto: e.target.value } : x,
+                  x.objectId === "pie-de-pagina"
+                    ? { ...x, texto: e.target.value }
+                    : x,
                 )
               }
             />
           </label>
           <p className="muted-text editor-panel__nota">
-            {t('panel.addon.footer.help')}
-            {item.instance.binding.measures.map((m, i) => ` {{${i + 1}}} = ${m}.`).join('')}
+            {t("panel.addon.footer.help")}
+            {item.instance.binding.measures
+              .map((m, i) => ` {{${i + 1}}} = ${m}.`)
+              .join("")}
           </p>
         </>
       );
 
-    case 'paginado':
+    case "paginado":
       return (
         <>
           <label className="form__field">
-            <span>{t('panel.addon.perPage')}</span>
+            <span>{t("panel.addon.perPage")}</span>
             <input
               type="number"
               min={1}
@@ -993,7 +1073,7 @@ function AttachmentSettings({
               data-testid={`per-page-${item.id}`}
               onChange={(e) =>
                 cambiar((x) =>
-                  x.objectId === 'paginado'
+                  x.objectId === "paginado"
                     ? { ...x, porPagina: Number(e.target.value) }
                     : x,
                 )
@@ -1008,21 +1088,23 @@ function AttachmentSettings({
               data-testid={`page-selector-${item.id}`}
               onChange={(e) =>
                 cambiar((x) =>
-                  x.objectId === 'paginado' ? { ...x, selector: e.target.checked } : x,
+                  x.objectId === "paginado"
+                    ? { ...x, selector: e.target.checked }
+                    : x,
                 )
               }
             />
-            <span>{t('panel.addon.pageSelector')}</span>
+            <span>{t("panel.addon.pageSelector")}</span>
           </label>
           <label className="form__field">
-            <span>{t('panel.addon.legend')}</span>
+            <span>{t("panel.addon.legend")}</span>
             <select
-              value={attachment.coletilla ?? 'ninguna'}
+              value={attachment.coletilla ?? "ninguna"}
               disabled={saving}
               data-testid={`legend-${item.id}`}
               onChange={(e) =>
                 cambiar((x) =>
-                  x.objectId === 'paginado'
+                  x.objectId === "paginado"
                     ? { ...x, coletilla: e.target.value as PaginationLegend }
                     : x,
                 )
@@ -1070,17 +1152,51 @@ function Size({
 
   return (
     <>
-      <p className="muted-text editor-panel__nota" data-testid={`position-${item.id}`}>
-        Columna {item.position.x + 1}–{item.position.x + item.position.w} de {GRID_COLUMNS} ·{' '}
-        {item.position.h} {item.position.h === 1 ? 'fila' : 'filas'}
+      <p
+        className="muted-text editor-panel__nota"
+        data-testid={`position-${item.id}`}
+      >
+        Columna {item.position.x + 1}–{item.position.x + item.position.w} de{" "}
+        {GRID_COLUMNS} · {item.position.h}{" "}
+        {item.position.h === 1 ? "fila" : "filas"}
       </p>
       <div className="editor-panel__pasos">
-        <Paso etiqueta="Menos ancho" prueba={`narrow-${item.id}`} desactivado={saving || item.position.w <= 1} onPulsar={() => mover(0, -1)} />
-        <Paso etiqueta="Mas ancho" prueba={`widen-${item.id}`} desactivado={saving || borderThe} onPulsar={() => mover(0, 1)} />
-        <Paso etiqueta="Mover a la izquierda" prueba={`left-${item.id}`} desactivado={saving || item.position.x <= 0} onPulsar={() => mover(-1, 0)} />
-        <Paso etiqueta="Mover a la derecha" prueba={`right-${item.id}`} desactivado={saving || borderThe} onPulsar={() => mover(1, 0)} />
-        <Paso etiqueta="Menos alto" prueba={`down-${item.id}`} desactivado={saving || item.position.h <= 1} onPulsar={() => alto(-1)} />
-        <Paso etiqueta="Mas alto" prueba={`up-${item.id}`} desactivado={saving} onPulsar={() => alto(1)} />
+        <Paso
+          etiqueta="Menos ancho"
+          prueba={`narrow-${item.id}`}
+          desactivado={saving || item.position.w <= 1}
+          onPulsar={() => mover(0, -1)}
+        />
+        <Paso
+          etiqueta="Mas ancho"
+          prueba={`widen-${item.id}`}
+          desactivado={saving || borderThe}
+          onPulsar={() => mover(0, 1)}
+        />
+        <Paso
+          etiqueta="Mover a la izquierda"
+          prueba={`left-${item.id}`}
+          desactivado={saving || item.position.x <= 0}
+          onPulsar={() => mover(-1, 0)}
+        />
+        <Paso
+          etiqueta="Mover a la derecha"
+          prueba={`right-${item.id}`}
+          desactivado={saving || borderThe}
+          onPulsar={() => mover(1, 0)}
+        />
+        <Paso
+          etiqueta="Menos alto"
+          prueba={`down-${item.id}`}
+          desactivado={saving || item.position.h <= 1}
+          onPulsar={() => alto(-1)}
+        />
+        <Paso
+          etiqueta="Mas alto"
+          prueba={`up-${item.id}`}
+          desactivado={saving}
+          onPulsar={() => alto(1)}
+        />
       </div>
     </>
   );
@@ -1109,7 +1225,6 @@ function Paso({
     </button>
   );
 }
-
 
 /**
  * A donde salta este objeto — drill-through de 4.4.
@@ -1141,7 +1256,9 @@ function DrillTargets({
       // Vacio se QUITA en vez de guardarse como lista vacia: un objeto sin saltos y uno con una
       // lista de cero saltos son lo mismo, y guardar los dos deja dos formas de decir nada.
       const { drillThrough: _fuera, ...resto } = i;
-      return siguientes.length > 0 ? { ...resto, drillThrough: siguientes } : resto;
+      return siguientes.length > 0
+        ? { ...resto, drillThrough: siguientes }
+        : resto;
     });
 
   const cambiar = (indice: number, parcial: Partial<DrillThroughTarget>) =>
@@ -1151,70 +1268,90 @@ function DrillTargets({
     <>
       {destinos.length === 0 ? (
         <p className="muted-text" data-testid={`drill-empty-${item.id}`}>
-          {t('drill.panel.empty')}
+          {t("drill.panel.empty")}
         </p>
       ) : null}
 
       <ol className="editor__saltos">
-        {destinos.map((destino, indice) => (
-          // Por indice y no por slug: dos saltos al mismo modulo con distinta pagina son
-          // legitimos, y con el slug de clave React los trataria como uno.
-          <li key={`${destino.moduleSlug}-${indice}`} data-testid={`drill-${item.id}-${indice}`}>
-            <label className="form__field">
-              <span>{t('drill.panel.module')}</span>
-              <select
-                value={destino.moduleSlug}
-                disabled={saving}
-                data-testid={`drill-modulo-${item.id}-${indice}`}
-                onChange={(e) => cambiar(indice, { moduleSlug: e.target.value })}
-              >
-                {/*
+        {destinos.map((destino, indice) => {
+          // Extraido a una constante y no escrito en linea: la guarda del catalogo cuenta el texto
+          // suelto de un JSX con una expresion regular, y una condicion en linea le parece prosa.
+          const destinoSigueEnLaLista = modulos.some(
+            (m) => m.slug === destino.moduleSlug,
+          );
+          return (
+            // Por indice y no por slug: dos saltos al mismo modulo con distinta pagina son
+            // legitimos, y con el slug de clave React los trataria como uno.
+            <li
+              key={`${destino.moduleSlug}-${indice}`}
+              data-testid={`drill-${item.id}-${indice}`}
+            >
+              <label className="form__field">
+                <span>{t("drill.panel.module")}</span>
+                <select
+                  value={destino.moduleSlug}
+                  disabled={saving}
+                  data-testid={`drill-modulo-${item.id}-${indice}`}
+                  onChange={(e) =>
+                    cambiar(indice, { moduleSlug: e.target.value })
+                  }
+                >
+                  {/*
                   Un modulo que ya no existe se queda en la lista como opcion suya.
                   Sin esto, el desplegable ensenaria el primero de la lista y quien abriera el panel
                   creeria que el salto apunta ahi: el aviso de `drillProblems` diria que el destino
                   no existe y el control estaria diciendo que si.
                 */}
-                {modulos.some((m) => m.slug === destino.moduleSlug) ? null : (
-                  <option value={destino.moduleSlug}>
-                    {t('drill.panel.gone', { slug: destino.moduleSlug })}
-                  </option>
-                )}
-                {modulos.map((m) => (
-                  <option key={m.slug} value={m.slug}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+                  {destinoSigueEnLaLista ? null : (
+                    <option value={destino.moduleSlug}>
+                      {t("drill.panel.gone", { slug: destino.moduleSlug })}
+                    </option>
+                  )}
+                  {modulos.map((m) => (
+                    <option key={m.slug} value={m.slug}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-            <label className="form__field">
-              <span>{t('drill.panel.label')}</span>
-              <input
-                type="text"
-                value={destino.label ?? ''}
-                placeholder={
-                  modulos.find((m) => m.slug === destino.moduleSlug)?.name ?? t('drill.action')
-                }
+              <label className="form__field">
+                <span>{t("drill.panel.label")}</span>
+                <input
+                  type="text"
+                  value={destino.label ?? ""}
+                  placeholder={
+                    modulos.find((m) => m.slug === destino.moduleSlug)?.name ??
+                    t("drill.action")
+                  }
+                  disabled={saving}
+                  data-testid={`drill-rotulo-${item.id}-${indice}`}
+                  onChange={(e) => {
+                    const texto = e.target.value.trim();
+                    cambiar(
+                      indice,
+                      texto === ""
+                        ? { label: undefined }
+                        : { label: e.target.value },
+                    );
+                  }}
+                />
+              </label>
+
+              <button
+                type="button"
+                className="button-link"
                 disabled={saving}
-                data-testid={`drill-rotulo-${item.id}-${indice}`}
-                onChange={(e) => {
-                  const texto = e.target.value.trim();
-                  cambiar(indice, texto === '' ? { label: undefined } : { label: e.target.value });
-                }}
-              />
-            </label>
-
-            <button
-              type="button"
-              className="button-link"
-              disabled={saving}
-              data-testid={`drill-quitar-${item.id}-${indice}`}
-              onClick={() => escribir(destinos.filter((_, i) => i !== indice))}
-            >
-              {t('drill.panel.remove')}
-            </button>
-          </li>
-        ))}
+                data-testid={`drill-quitar-${item.id}-${indice}`}
+                onClick={() =>
+                  escribir(destinos.filter((_, i) => i !== indice))
+                }
+              >
+                {t("drill.panel.remove")}
+              </button>
+            </li>
+          );
+        })}
       </ol>
 
       <button
@@ -1227,7 +1364,7 @@ function DrillTargets({
           if (primero) escribir([...destinos, { moduleSlug: primero.slug }]);
         }}
       >
-        {t('drill.panel.add')}
+        {t("drill.panel.add")}
       </button>
     </>
   );

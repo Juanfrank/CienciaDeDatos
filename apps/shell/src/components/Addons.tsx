@@ -159,6 +159,7 @@ export function DataTable({
    */
   mando?: React.MutableRefObject<(() => void) | null>;
 }) {
+  const t = useTranslator();
   const dialogo = useRef<HTMLDialogElement>(null);
   const [abierto, setAbierto] = useState(false);
   const [selection, setSeleccion] = useState<Record<string, string> | null>(null);
@@ -221,16 +222,19 @@ export function DataTable({
         <div className="popover__header">
           <h2>Datos de origen — {titulo}</h2>
           <button type="button" className="button-link" onClick={close} data-testid="table-data-close">
-            Cerrar
+            {t('action.close')}
           </button>
         </div>
 
         {scope === 'subobjeto' && !selection ? (
           <>
-            <p className="muted-text">
-              Elija una categoria para ver las dataRows que hay detras de su cifra.
-            </p>
-            <div className="container-table" tabIndex={0} role="region" aria-label="Categorias">
+            <p className="muted-text">{t('dataTable.pickCategory')}</p>
+            <div
+              className="container-table"
+              tabIndex={0}
+              role="region"
+              aria-label={t('dataTable.categories')}
+            >
               <table className="tabla">
                 <thead>
                   <tr>
@@ -239,7 +243,7 @@ export function DataTable({
                         {c.name}
                       </th>
                     ))}
-                    <th scope="col">Origen</th>
+                    <th scope="col">{t('dataTable.origin')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -266,7 +270,7 @@ export function DataTable({
                               )
                             }
                           >
-                            Ver dataRows
+                            {t('dataTable.seeRows')}
                           </button>
                         </td>
                       </tr>
@@ -290,10 +294,15 @@ export function DataTable({
                 data-testid="data-table-volver"
                 onClick={() => setSeleccion(null)}
               >
-                Volver a las categorias
+                {t('dataTable.back')}
               </button>
             ) : null}
-            <div className="container-table" tabIndex={0} role="region" aria-label="Filas de origen">
+            <div
+              className="container-table"
+              tabIndex={0}
+              role="region"
+              aria-label={t('dataTable.sourceRows')}
+            >
               <table className="tabla" data-testid="table-data-rows">
                 <thead>
                   <tr>

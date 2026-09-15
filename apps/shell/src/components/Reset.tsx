@@ -2,9 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useTranslator } from './Locale';
 
 /** Restablecimiento de contraseña — seccion 4.7.2. */
 export function Reset() {
+  const t = useTranslator();
   const router = useRouter();
   const [resetId, setResetId] = useState('');
   const [code, setCodigo] = useState('');
@@ -20,7 +22,7 @@ export function Reset() {
     if (clave !== repetida) {
       // Se comprueba aqui y no en el servidor: no es una regla de seguridad, es evitar que una
       // errata deje a alguien fuera con una contraseña que no sabe cual es.
-      setError('Las dos contraseñas no coinciden.');
+      setError(t('reset.mismatch'));
       return;
     }
 
@@ -41,7 +43,7 @@ export function Reset() {
       const detalle = Array.isArray(body.detalle)
         ? ` ${body.detalle.map((d) => d.message).join(' ')}`
         : '';
-      setError(`${body.error ?? 'No se pudo restablecer la contraseña.'}${detalle}`);
+      setError(`${body.error ?? t('reset.failed')}${detalle}`);
     } finally {
       setEnviando(false);
     }
@@ -51,18 +53,15 @@ export function Reset() {
     return (
       <main className="pantalla">
         <div className="pantalla__tarjeta">
-          <h1>Contraseña restablecida</h1>
-          <p className="muted-text">
-            Ya puede iniciar sesión con la contraseña nueva y su código de verificación. Las
-            sesiones que estuvieran abiertas con la anterior se han cerrado.
-          </p>
+          <h1>{t('reset.done')}</h1>
+          <p className="muted-text">{t('reset.done.detail')}</p>
           <button
             type="button"
             className="pastilla"
             data-testid="reset-ir-a-acceso"
             onClick={() => router.push('/sign-in')}
           >
-            Iniciar sesión
+            {t('reset.signIn')}
           </button>
         </div>
       </main>
@@ -78,14 +77,11 @@ export function Reset() {
           void enviar();
         }}
       >
-        <h1>Restablecer contraseña</h1>
-        <p className="muted-text">
-          Con el identificador y el código que le entregó un Administrador. El código solo sirve
-          una vez y caduca a los quince minutos.
-        </p>
+        <h1>{t('reset.title')}</h1>
+        <p className="muted-text">{t('reset.intro')}</p>
 
         <p className="form__field">
-          <label htmlFor="reset-id">Identificador del restablecimiento</label>
+          <label htmlFor="reset-id">{t('reset.id')}</label>
           <input
             id="reset-id"
             value={resetId}
@@ -95,7 +91,7 @@ export function Reset() {
         </p>
 
         <p className="form__field">
-          <label htmlFor="reset-code">Código</label>
+          <label htmlFor="reset-code">{t('reset.code')}</label>
           <input
             id="reset-code"
             value={code}
@@ -105,7 +101,7 @@ export function Reset() {
         </p>
 
         <p className="form__field">
-          <label htmlFor="reset-clave">Contraseña nueva</label>
+          <label htmlFor="reset-clave">{t('reset.newPassword')}</label>
           <input
             id="reset-clave"
             type="password"
@@ -116,13 +112,12 @@ export function Reset() {
             onChange={(e) => setClave(e.target.value)}
           />
           <span id="reset-requisitos" className="muted-text">
-            Al menos 12 caracteres, con mayúscula, minúscula, dígito y símbolo. No puede ser
-            ninguna de sus últimas cinco contraseñas.
+            {t('reset.requirements')}
           </span>
         </p>
 
         <p className="form__field">
-          <label htmlFor="reset-repetida">Repita la contraseña nueva</label>
+          <label htmlFor="reset-repetida">{t('reset.repeat')}</label>
           <input
             id="reset-repetida"
             type="password"
@@ -143,7 +138,7 @@ export function Reset() {
           data-testid="reset-send"
           disabled={enviando}
         >
-          {enviando ? 'Comprobando…' : 'Restablecer'}
+          {enviando ? t('access.checking') : t('reset.submit')}
         </button>
       </form>
     </main>

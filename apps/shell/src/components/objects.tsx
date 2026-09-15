@@ -127,16 +127,15 @@ export function BrokenObject({
   problems: BindingProblem[];
   unresolvedObject?: string;
 }) {
+  const t = useTranslator();
   return (
     <div className="objeto object--broken" data-testid="object-broken">
       <div className="object__header">
         <h3>{titulo}</h3>
-        <span className="insignia badge--error">Roto</span>
+        <span className="insignia badge--error">{t('object.broken.badge')}</span>
       </div>
       <div className="object__body">
-        <p className="muted-text">
-          Este objeto no se puede dibujar. El resto del modulo sigue funcionando.
-        </p>
+        <p className="muted-text">{t('object.broken.detail')}</p>
         <ul className="problems-list">
           {unresolvedObject ? <li>{unresolvedObject}</li> : null}
           {problems.map((p) => (
@@ -152,16 +151,15 @@ export function BrokenObject({
 
 /** Estado explicito de 6.3: el dato aun no esta. Nunca un error, nunca una consulta a la fuente. */
 export function GeneratingObject({ titulo }: { titulo: string }) {
+  const t = useTranslator();
   return (
     <div className="objeto object--generating" data-testid="object-generating">
       <div className="object__header">
         <h3>{titulo}</h3>
-        <span className="insignia">Generandose</span>
+        <span className="insignia">{t('object.generating')}</span>
       </div>
       <div className="object__body">
-        <p className="muted-text">
-          El dato aun no esta disponible. El proceso de poblacion lo esta generando.
-        </p>
+        <p className="muted-text">{t('object.generating.detail')}</p>
       </div>
     </div>
   );
@@ -1255,6 +1253,7 @@ export function Pie({
   objectIcon,
   hole,
 }: PropsObject & { hole?: number }) {
+  const t = useTranslator();
   const r = porRanura(instance, slots);
   const categoria = r ? r.one('categoria') : fieldKeyDe(instance.binding.dimensions[0]);
   const medidas = r ? r.varios('valor') : instance.binding.measures;
@@ -1320,7 +1319,7 @@ export function Pie({
                   {medidas[0] ?? 'Valor'}
                 </th>
                 <th scope="col" className="is-number">
-                  Parte
+                  {t('chart.part')}
                 </th>
               </tr>
             </thead>
@@ -1360,6 +1359,7 @@ export function Gauge({
   aggregations,
   objectIcon,
 }: PropsObject) {
+  const t = useTranslator();
   const r = porRanura(instance, slots);
   const medidas = r
     ? [r.one('valor'), r.one('objetivo')].filter((m): m is string => m !== undefined)
@@ -1412,7 +1412,7 @@ export function Gauge({
             la misma funcion que el dibujo, para que el respaldo no afirme un limite distinto.
           */}
           <div>
-            <dt>Escala</dt>
+            <dt>{t('chart.scale')}</dt>
             <dd>
               {formatear(scale.minimo)} – {formatear(scale.maximo)}
             </dd>
@@ -1420,11 +1420,11 @@ export function Gauge({
           {objetivo === null ? null : (
             <>
               <div>
-                <dt>Objetivo</dt>
+                <dt>{t('chart.target')}</dt>
                 <dd>{formatear(objetivo)}</dd>
               </div>
               <div>
-                <dt>Diferencia</dt>
+                <dt>{t('chart.difference')}</dt>
                 <dd>{valor === null ? '—' : formatear(valor - objetivo)}</dd>
               </div>
             </>
@@ -1520,17 +1520,15 @@ const fieldKeyDe = (ref: { table: string; field: string } | undefined): string |
 
 /** Objeto declarado en el catalogo pero sin render disponible todavia (el mapa). */
 export function ObjectNotAvailable({ titulo, objectId }: { titulo: string; objectId: string }) {
+  const t = useTranslator();
   return (
     <div className="objeto object--not-available">
       <div className="object__header">
         <h3>{titulo}</h3>
-        <span className="insignia">No disponible</span>
+        <span className="insignia">{t('object.notAvailable')}</span>
       </div>
       <div className="object__body">
-        <p className="muted-text">
-          El objeto <code>{objectId}</code> esta declarado en el catalogo pero su render aun no
-          esta implementado.
-        </p>
+        <p className="muted-text">{t('object.notAvailable.detail', { objeto: objectId })}</p>
       </div>
     </div>
   );

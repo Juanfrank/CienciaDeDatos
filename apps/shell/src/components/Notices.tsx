@@ -11,12 +11,14 @@ import {
   type Subscription,
 } from '@app/alerts';
 import { kindLabel } from './noticeKinds';
+import { useTranslator } from './Locale';
 
 /** Bandeja de avisos: lo recibido, y lo que lo genera. */
 
 type StatusRule = AlertRule & { estado: AlertState | null };
 
 export function Notices() {
+  const t = useTranslator();
   const [inbox, setBandeja] = useState<Notification[]>([]);
   const [rules, setReglas] = useState<StatusRule[]>([]);
   const [suscripciones, setSuscripciones] = useState<Subscription[]>([]);
@@ -55,9 +57,9 @@ export function Notices() {
 
   return (
     <article className="avisos">
-      <h1>Avisos</h1>
+      <h1>{t('chrome.notices')}</h1>
 
-      <h2>Bandeja</h2>
+      <h2>{t('notice.inbox')}</h2>
       {inbox.length === 0 ? (
         <p className="muted-text" data-testid="inbox-empty">
           No hay avisos. Los de una alerta llegan cuando su condicion empieza a cumplirse, y
@@ -81,7 +83,7 @@ export function Notices() {
                   {n.link ? (
                     <>
                       {' · '}
-                      <Link href={n.link}>Abrir</Link>
+                      <Link href={n.link}>{t('notice.open')}</Link>
                     </>
                   ) : null}
                 </p>
@@ -91,11 +93,9 @@ export function Notices() {
         </ul>
       )}
 
-      <h2>Mis alertas</h2>
+      <h2>{t('notice.myAlerts')}</h2>
       {rules.length === 0 ? (
-        <p className="muted-text">
-          Ninguna. Se crean desde un objeto del modulo que se quiera vigilar.
-        </p>
+        <p className="muted-text">{t('notice.myAlerts.empty')}</p>
       ) : (
         <ul className="simple-list" data-testid="alerts-list">
           {rules.map((r) => (
@@ -114,18 +114,16 @@ export function Notices() {
                 data-testid={`delete-alert-${r.name}`}
                 onClick={() => void borrar('alertas', r.id)}
               >
-                Eliminar
+                {t('action.delete')}
               </button>
             </li>
           ))}
         </ul>
       )}
 
-      <h2>Mis suscripciones</h2>
+      <h2>{t('notice.mySubscriptions')}</h2>
       {suscripciones.length === 0 ? (
-        <p className="muted-text">
-          Ninguna. Se crean desde el modulo que se quiera recibir.
-        </p>
+        <p className="muted-text">{t('notice.mySubscriptions.empty')}</p>
       ) : (
         <ul className="simple-list" data-testid="list-subscriptions">
           {suscripciones.map((s) => (
@@ -143,7 +141,7 @@ export function Notices() {
                 data-testid={`delete-subscription-${s.name}`}
                 onClick={() => void borrar('suscripciones', s.id)}
               >
-                Eliminar
+                {t('action.delete')}
               </button>
             </li>
           ))}

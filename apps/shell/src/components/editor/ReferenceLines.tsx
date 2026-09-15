@@ -7,6 +7,7 @@ import {
   type ReferenceLine,
 } from "@app/ui-components";
 import { ColorPalette } from "./EditorTextStyle";
+import { useTranslator } from "../Locale";
 
 /** Editor de lineas de referencia — la meta, el promedio, el umbral. */
 
@@ -29,6 +30,7 @@ export function ReferenceLines({
 }) {
   // Una lista vacia se guarda como `undefined`: «sin lineas» y «una lista de cero lineas» son lo
   // mismo para quien dibuja, y dejar el array vacio ensuciaria la presentacion guardada.
+  const t = useTranslator();
   const cambiar = (siguiente: ReferenceLine[]) =>
     onCambiar(siguiente.length === 0 ? undefined : siguiente);
 
@@ -43,7 +45,7 @@ export function ReferenceLines({
 
           <div className="form__pair">
             <label className="form__field">
-              <span>Valor</span>
+              <span>{t('reference.value')}</span>
               <input
                 type="number"
                 defaultValue={line.valor}
@@ -53,7 +55,7 @@ export function ReferenceLines({
               />
             </label>
             <label className="form__field">
-              <span>Rotulo</span>
+              <span>{t('reference.label')}</span>
               <input
                 defaultValue={line.etiqueta ?? ""}
                 disabled={saving}
@@ -66,10 +68,10 @@ export function ReferenceLines({
             Una raya sin rotulo obliga a adivinar que significa. No se impone —a veces el titulo
             del objeto ya lo dice— pero se recomienda donde se escribe.
           */}
-          <span className="field__pista">Sin rotulo, la raya no dice que representa.</span>
+          <span className="field__pista">{t('reference.label.hint')}</span>
 
           <label className="form__field">
-            <span>Trazo</span>
+            <span>{t('reference.stroke')}</span>
             <select
               value={line.style ?? "discontinua"}
               disabled={saving}
@@ -85,7 +87,7 @@ export function ReferenceLines({
           </label>
 
           <div className="form__field">
-            <span>Color</span>
+            <span>{t('reference.color')}</span>
             <ColorPalette
               valor={line.color ?? "predeterminado"}
               nombre={`la linea ${i + 1}`}
@@ -103,7 +105,7 @@ export function ReferenceLines({
             data-testid={`${prueba}-quitar-${i}`}
             onClick={() => cambiar(lineas.filter((_, j) => j !== i))}
           >
-            Quitar esta linea
+            {t('reference.remove')}
           </button>
         </fieldset>
       ))}
@@ -116,7 +118,7 @@ export function ReferenceLines({
           data-testid={`${prueba}-anadir`}
           onClick={() => cambiar([...lineas, { valor: 0, style: "discontinua" }])}
         >
-          Anadir linea de referencia
+          {t('reference.add')}
         </button>
       ) : (
         <p className="field__pista">

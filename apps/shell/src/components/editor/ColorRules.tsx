@@ -7,6 +7,7 @@ import {
   type ColorRule,
 } from "@app/ui-components";
 import { ColorPalette } from "./EditorTextStyle";
+import { useTranslator } from "../Locale";
 
 /** Editor de formato condicional — que el color dependa del DATO. */
 
@@ -33,6 +34,7 @@ export function ColorRules({
   prueba: string;
   onCambiar: (rules: ColorRule[] | undefined) => void;
 }) {
+  const t = useTranslator();
   const cambiar = (siguiente: ColorRule[]) =>
     onCambiar(siguiente.length === 0 ? undefined : siguiente);
 
@@ -52,7 +54,7 @@ export function ColorRules({
     <>
       {rules.length > 1 ? (
         <p className="field__pista">
-          Se aplica la PRIMERA que se cumple. Use las flechas para cambiar cual manda.
+          {t('color.rules.first')}
         </p>
       ) : null}
 
@@ -61,14 +63,14 @@ export function ColorRules({
           <legend className="reference__title">Regla {i + 1}</legend>
 
           <label className="form__field">
-            <span>Se aplica a</span>
+            <span>{t('color.rules.appliesTo')}</span>
             <select
               value={colorRule.medida ?? ""}
               disabled={saving}
               data-testid={`${prueba}-medida-${i}`}
               onChange={(e) => edit(i, { medida: e.target.value || undefined })}
             >
-              <option value="">Todas las medidas</option>
+              <option value="">{t('color.rules.allMeasures')}</option>
               {medidas.map((medida) => (
                 <option key={medida} value={medida}>
                   {medida}
@@ -83,7 +85,7 @@ export function ColorRules({
 
           <div className="form__pair">
             <label className="form__field">
-              <span>Cuando el valor es</span>
+              <span>{t('color.rules.when')}</span>
               <select
                 value={colorRule.comparator}
                 disabled={saving}
@@ -111,7 +113,7 @@ export function ColorRules({
 
           {colorRule.comparator === "entre" ? (
             <label className="form__field">
-              <span>Hasta</span>
+              <span>{t('color.rules.until')}</span>
               <input
                 type="number"
                 defaultValue={colorRule.hasta ?? ""}
@@ -122,12 +124,12 @@ export function ColorRules({
                 }
               />
               {/* Sin el otro extremo la regla no casa nunca, y se rechaza al guardar. */}
-              <span className="field__pista">Los dos extremos entran.</span>
+              <span className="field__pista">{t('color.rules.bothEnds')}</span>
             </label>
           ) : null}
 
           <div className="form__field">
-            <span>Color</span>
+            <span>{t('color.rules.color')}</span>
             <ColorPalette
               valor={colorRule.color}
               nombre={`la regla ${i + 1}`}
@@ -144,7 +146,7 @@ export function ColorRules({
               data-testid={`${prueba}-subir-${i}`}
               onClick={() => mover(i, -1)}
             >
-              Subir
+              {t('action.up')}
             </button>
             <button
               type="button"
@@ -153,7 +155,7 @@ export function ColorRules({
               data-testid={`${prueba}-bajar-${i}`}
               onClick={() => mover(i, 1)}
             >
-              Bajar
+              {t('action.down')}
             </button>
             <button
               type="button"
@@ -162,7 +164,7 @@ export function ColorRules({
               data-testid={`${prueba}-quitar-${i}`}
               onClick={() => cambiar(rules.filter((_, j) => j !== i))}
             >
-              Quitar
+              {t('action.remove')}
             </button>
           </div>
         </fieldset>
@@ -176,7 +178,7 @@ export function ColorRules({
           data-testid={`${prueba}-anadir`}
           onClick={() => cambiar([...rules, { comparator: "mayor", valor: 0, color: "error" }])}
         >
-          Anadir colorRule de color
+          {t('color.rules.add')}
         </button>
       ) : (
         <p className="field__pista">

@@ -11,9 +11,16 @@ import { describe, expect, it } from 'vitest';
  * dentro de los componentes.
  *
  * El numero solo puede BAJAR. Quien anada una cadena suelta rompe la prueba; quien migre una baja
- * el tope en el mismo commit. Empezo en 322 con 53 claves; va por 158, y las pantallas que mas
- * acumulaban —el panel de formato, los ajustes de objeto, el panel lateral, la lista de modulos, la
- * de acceso y ahora la barra del modulo con «Mi vista»— ya no estan entre las peores.
+ * el tope en el mismo commit. Empezo en 322 con 53 claves; va por 54, y ninguna pantalla acumula ya
+ * mas de tres: la crema, el registro de auditoria, las reglas de color, los objetos, la bandeja de
+ * avisos, «quien ve que», la tabla de datos, el editor de ambitos, las lineas de referencia y el
+ * restablecimiento han pasado enteras al catalogo.
+ *
+ * Lo que queda son sobre todo cadenas de una sola palabra repartidas de tres en tres, y algun falso
+ * positivo: la expresion regular de la prosa cuenta como texto una condicion de JSX escrita en
+ * linea. Donde ha aparecido, la condicion se ha extraido a una constante con nombre —se lee mejor y
+ * ademas deja de contarse—, pero relajar la expresion regular seria peor: se comeria texto de
+ * verdad.
  */
 
 const raiz = execSync('git rev-parse --show-toplevel').toString().trim();
@@ -37,7 +44,7 @@ const PALABRA = /[A-Za-zÀ-ÿ]{3,}/;
  * Es una foto, no un objetivo: cada cadena que se migre al catalogo puede bajarlo. Subirlo
  * requiere explicar por que una cadena nueva no puede ir al catalogo.
  */
-const TOPE = 158;
+const TOPE = 54;
 
 function cadenasDe(ruta: string): string[] {
   const fuente = readFileSync(`${raiz}/${ruta}`, 'utf8');

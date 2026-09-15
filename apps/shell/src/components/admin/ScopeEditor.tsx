@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslator } from '../Locale';
 import type { AccessScope } from '@app/access-control';
 
 /** Editor de ambitos — seccion 4.10.8, y la puerta de 4.10.4. */
@@ -31,6 +32,7 @@ export function ScopeEditor({
    */
   inicial?: string;
 }) {
+  const t = useTranslator();
   const [dimensiones, setDimensiones] = useState<Dimension[]>([]);
   const [destinoId, setDestinoId] = useState(
     (inicial && targets.some((d) => d.id === inicial) ? inicial : targets[0]?.id) ?? '',
@@ -93,7 +95,7 @@ export function ScopeEditor({
   return (
     <div className="scope-editor">
       <label className="campo">
-        <span>Ambito de</span>
+        <span>{t('scope.of')}</span>
         <select
           value={destinoId}
           data-testid="picker-target-scope"
@@ -133,14 +135,14 @@ export function ScopeEditor({
               className="button-link"
               onClick={() => setRestricciones((prev) => prev.filter((_, j) => j !== i))}
             >
-              Quitar
+              {t('action.remove')}
             </button>
           </li>
         ))}
       </ul>
 
       <label className="campo">
-        <span>Añadir restriccion sobre</span>
+        <span>{t('scope.addRestriction')}</span>
         {/* Solo dimensiones del esquema real: nunca texto libre sin validar (4.10.8). */}
         <select
           defaultValue=""
@@ -155,7 +157,7 @@ export function ScopeEditor({
             e.target.value = '';
           }}
         >
-          <option value="">Elegir dimension…</option>
+          <option value="">{t('scope.pickDimension')}</option>
           {dimensiones.map((d) => (
             <option key={d.key} value={d.key}>
               {d.key}
@@ -167,13 +169,11 @@ export function ScopeEditor({
       {ampliacion ? (
         <div className="aviso notice-atencion" role="alert" data-testid="notice-ampliacion">
           <p>
-            <strong>Esto AMPLIA el acceso</strong> en: <code>{ampliacion.join(', ')}</code>
+            <strong>{t('scope.expands')}</strong> en: <code>{ampliacion.join(', ')}</code>
           </p>
-          <p className="muted-text">
-            Una ampliacion exige justificacion y queda registrada aparte en el panel de auditoria.
-          </p>
+          <p className="muted-text">{t('scope.expands.detail')}</p>
           <label className="campo">
-            <span>Justificacion</span>
+            <span>{t('scope.justification')}</span>
             <textarea
               value={justificacion}
               rows={2}

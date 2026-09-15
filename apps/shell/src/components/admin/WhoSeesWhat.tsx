@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslator } from '../Locale';
 
 /** Vista de "quien ve que" — seccion 4.10.8. */
 interface Paso {
@@ -43,6 +44,7 @@ export function SeesWhoWhere({
   equipos: { id: string; name: string }[];
   modules: { moduleId: string; name: string }[];
 }) {
+  const t = useTranslator();
   const [userId, setUserId] = useState(usuarios[0] ?? '');
   const [teamId, setTeamId] = useState(equipos[0]?.id ?? '');
   const [moduleId, setModuleId] = useState(modules[0]?.moduleId ?? '');
@@ -59,7 +61,7 @@ export function SeesWhoWhere({
     <div className="sees-who-where">
       <div className="sees-who-where__filters">
         <label className="campo">
-          <span>Persona</span>
+          <span>{t('whoSees.person')}</span>
           <select value={userId} data-testid="qvq-usuario" onChange={(e) => setUserId(e.target.value)}>
             {usuarios.map((u) => (
               <option key={u} value={u}>{u}</option>
@@ -67,7 +69,7 @@ export function SeesWhoWhere({
           </select>
         </label>
         <label className="campo">
-          <span>Equipo activo</span>
+          <span>{t('whoSees.activeTeam')}</span>
           <select value={teamId} data-testid="qvq-equipo" onChange={(e) => setTeamId(e.target.value)}>
             {equipos.map((t) => (
               <option key={t.id} value={t.id}>{t.name}</option>
@@ -75,7 +77,7 @@ export function SeesWhoWhere({
           </select>
         </label>
         <label className="campo">
-          <span>Modulo</span>
+          <span>{t('whoSees.module')}</span>
           <select value={moduleId} data-testid="qvq-modulo" onChange={(e) => setModuleId(e.target.value)}>
             {modules.map((m) => (
               <option key={m.moduleId} value={m.moduleId}>{m.name}</option>
@@ -83,7 +85,7 @@ export function SeesWhoWhere({
           </select>
         </label>
         <button type="button" data-testid="qvq-consultar" onClick={() => void consultar()}>
-          Resolutor
+          {t('whoSees.resolve')}
         </button>
       </div>
 
@@ -100,21 +102,19 @@ export function SeesWhoWhere({
           {resultado.tieneAcceso ? (
             <>
               <p>
-                <strong>Ambito efectivo:</strong>{' '}
+                <strong>{t('whoSees.effectiveScope')}</strong>{' '}
                 <span data-testid="qvq-ambito">{describe(resultado.scope)}</span>
               </p>
               {resultado.noVeNada ? (
-                <p className="aviso notice-atencion">
-                  El ambito resuelto no permite ver ninguna fila.
-                </p>
+                <p className="aviso notice-atencion">{t('whoSees.noRows')}</p>
               ) : null}
               {resultado.usoAmpliacion ? (
                 <p className="aviso notice-error" data-testid="qvq-ampliacion">
-                  Este ambito proviene de una AMPLIACION autorizada.
+                  {t('whoSees.expansion')}
                 </p>
               ) : null}
 
-              <h3>Como se llego a ese ambito</h3>
+              <h3>{t('whoSees.how')}</h3>
               <ol className="sees-who-where__pasos" data-testid="qvq-pasos">
                 {resultado.pasos.map((p, i) => (
                   <li key={i} className={p.amplio ? 'es-ampliacion' : ''}>

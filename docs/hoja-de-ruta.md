@@ -348,26 +348,27 @@ habia tal prueba, y la regla llevaba incumpliendose casi entera: **53 claves en 
 `@app/i18n` contra 322 cadenas escritas dentro de 56 componentes**. Solo tres archivos importaban
 el traductor.
 
-Ahora hay prueba —`tools/coherence/i18n.spec.ts`— y es un trinquete: cuenta las cadenas sueltas y
-solo admite que el numero baje. Va por **167**, desde las 322 del principio. Sigue abierto porque
-ciento sesenta y siete no es cero.
-
 No es cosmetico. Mientras el texto viva en el componente, la aplicacion no puede cambiar de
 idioma —que es lo que el propio paquete existe para permitir—, cada cadena repetida en dos
 pantallas puede discrepar, y nada impide que una palabra en ingles se cuele donde una persona la
 lea. Ha pasado cinco veces durante el renombrado.
 
-Hoy hay un trinquete: `tools/coherence/i18n.spec.ts` cuenta las cadenas sueltas y falla si suben
-del tope. El numero solo puede bajar, y quien migre una cadena baja el tope en el mismo commit.
-Empezo en 322 con 53 claves; va por **203 con 331 claves**, y las cuatro pantallas que mas
-acumulaban ya no estan entre las peores.
+Hay un trinquete: `tools/coherence/i18n.spec.ts` cuenta las cadenas sueltas y falla si suben del
+tope. El numero solo puede bajar, y quien migre una cadena baja el tope en el mismo commit.
 
-Migrar de golpe es un cambio grande y mecanico. El orden sensato sigue siendo por pantalla,
-empezando por las que mas acumulan hoy:
-`apps/shell/src/components/CreateNotice.tsx` (13),
-`apps/shell/app/admin/audit/page.tsx` (12),
-`apps/shell/src/components/admin/AuditEvent.tsx` (11) y
-`apps/shell/src/components/editor/ColorRules.tsx` (11).
+Va por **54**, desde las 322 del principio. Han pasado enteras al catalogo la crema del modulo con
+«Mi vista», el registro de auditoria, las reglas de color, los objetos, la bandeja de avisos y su
+creacion, «quien ve que», la tabla de datos de origen, el editor de ambitos, las lineas de
+referencia y el restablecimiento de contrasena. Ninguna pantalla acumula ya mas de tres.
+
+Sigue abierto porque cincuenta y cuatro no es cero, pero lo que queda ya no son pantallas: son
+palabras sueltas repartidas de tres en tres, y algun falso positivo de la propia guarda —la
+expresion regular de la prosa cuenta como texto una condicion de JSX escrita en linea—. Donde han
+aparecido, la condicion se ha extraido a una constante con nombre: se lee mejor y ademas deja de
+contarse. Relajar la expresion regular seria peor, porque se comeria texto de verdad.
+
+Dos erratas del renombrado salieron a la luz al migrar, y estan corregidas en el catalogo:
+«Anadir colorRule de color» y «Ver dataRows».
 
 ### 2.11 Las propiedades siguen en espanol
 

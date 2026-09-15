@@ -2,9 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useTranslator } from './Locale';
 
 /** Caja de pregunta en lenguaje natural — seccion 4.9. */
 export function Ask({ moduleSlug }: { moduleSlug: string }) {
+  const t = useTranslator();
   const router = useRouter();
   const [pregunta, setPregunta] = useState('');
   const [respuesta, setRespuesta] = useState<{
@@ -31,13 +33,13 @@ export function Ask({ moduleSlug }: { moduleSlug: string }) {
   return (
     <div className="preguntar">
       <label className="visualmente-oculto" htmlFor="pregunta">
-        Pregunte por estos datos
+        {t('ask.label')}
       </label>
       <input
         id="pregunta"
         className="ask__field"
         value={pregunta}
-        placeholder="Pregunte: casos pendientes en Penal"
+        placeholder={t('ask.placeholder')}
         data-testid="pregunta"
         onChange={(e) => setPregunta(e.target.value)}
         onKeyDown={(e) => {
@@ -45,7 +47,7 @@ export function Ask({ moduleSlug }: { moduleSlug: string }) {
         }}
       />
       <button type="button" className="button-link" data-testid="preguntar" onClick={() => void preguntar()}>
-        Preguntar
+        {t('ask.submit')}
       </button>
 
       {/* Region viva: la respuesta aparece sin recargar y hay que anunciarla. */}
@@ -53,7 +55,7 @@ export function Ask({ moduleSlug }: { moduleSlug: string }) {
         {respuesta ? (
           <>
             <p data-testid="pregunta-entendido">
-              <strong>Entendi:</strong> {respuesta.entendido}
+              <strong>{t('ask.understood')}</strong> {respuesta.entendido}
             </p>
             {respuesta.noEntendido.length > 0 ? (
               <p className="muted-text" data-testid="pregunta-no-entendido">
@@ -68,7 +70,7 @@ export function Ask({ moduleSlug }: { moduleSlug: string }) {
                 data-testid="pregunta-aplicar"
                 onClick={() => router.push(respuesta.url)}
               >
-                Ver esta vista
+                {t('ask.apply')}
               </button>
             ) : null}
           </>
