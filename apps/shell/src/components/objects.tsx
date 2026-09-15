@@ -1522,7 +1522,7 @@ const fieldKeyDe = (ref: { table: string; field: string } | undefined): string |
 export function ObjectNotAvailable({ titulo, objectId }: { titulo: string; objectId: string }) {
   const t = useTranslator();
   return (
-    <div className="objeto object--not-available">
+    <div className="objeto">
       <div className="object__header">
         <h3>{titulo}</h3>
         <span className="insignia">{t('object.notAvailable')}</span>

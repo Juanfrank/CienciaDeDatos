@@ -454,7 +454,7 @@ export function TreeActions({
           role="group"
           aria-label={`${t('admin.tree.action.withdraw')}: ${nombre}`}
         >
-          <label className="field" htmlFor={`motivo-retirada-${nodeId}`}>
+          <label className="form__field" htmlFor={`motivo-retirada-${nodeId}`}>
             {t('admin.tree.action.withdraw.reason')}
           </label>
           <input

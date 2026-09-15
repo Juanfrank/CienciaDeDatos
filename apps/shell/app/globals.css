@@ -103,8 +103,6 @@ h1, h2, h3, h4 { margin: 0; }
 }
 
 .admin__principal h3,
-.editor__palette h3,
-.editor__object h4,
 .sidebar__title {
   font-size: var(--md-sys-typescale-title-medium-size);
   line-height: var(--md-sys-typescale-title-medium-line-height);
@@ -127,23 +125,15 @@ h1, h2, h3, h4 { margin: 0; }
   letter-spacing: var(--md-sys-typescale-body-medium-tracking);
 }
 
-.admin__nav-desc,
 .card__label,
 .problems-list,
 .editor__locks,
-.editor__problems,
 .embedded__institucion {
   font-size: var(--md-sys-typescale-body-small-size);
   line-height: var(--md-sys-typescale-body-small-line-height);
   letter-spacing: var(--md-sys-typescale-body-small-tracking);
 }
 
-.md-label-large {
-  font-size: var(--md-sys-typescale-label-large-size);
-  line-height: var(--md-sys-typescale-label-large-line-height);
-  font-weight: var(--md-sys-typescale-label-large-weight);
-  letter-spacing: var(--md-sys-typescale-label-large-tracking);
-}
 
 .muted-text { color: var(--md-sys-color-on-surface-variant); margin: 0; }
 
@@ -184,24 +174,6 @@ code {
  * El elemento tiene que ser `position: relative` y llevar `isolation` para que la capa no se
  * cuele por encima del texto.
  */
-.md-estado {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-}
-.md-estado::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: currentColor;
-  opacity: 0;
-  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
-  pointer-events: none;
-  z-index: -1;
-}
-.md-estado:hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); }
-.md-estado:focus-visible:not(:disabled)::before { opacity: var(--md-sys-state-focus-opacity); }
-.md-estado:active:not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
 
 /* ------------------------------------------------------------------ *
  * Botones                                                             *
@@ -243,10 +215,6 @@ code {
 .pastilla {
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
-}
-.md-boton--tonal {
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
 }
 .md-boton--contorno {
   background: transparent;
@@ -565,8 +533,6 @@ code {
  * recibieron su estilo y caian en el tamaño heredado, `body-large`. Se notaba sobre todo en el
  * panel del editor, donde cada rotulo pesaba visualmente mas que el control que rotula.
  */
-.md-campo > span,
-.md-campo > label,
 .campo > span,
 .form__field > span,
 .form__field label,
@@ -649,10 +615,7 @@ input[type='radio'] {
  */
 .objeto,
 .tarjeta,
-.equipo,
 .regla,
-.editor__object,
-.editor__palette,
 .editor__create,
 .bookmarks__panel {
   background: var(--md-sys-color-surface-container-lowest);
@@ -953,6 +916,23 @@ input[type='radio'] {
 .form__pair > * { flex: 1; min-width: 0; }
 
 /*
+ * La fila de una casilla: el cuadrito y su rotulo, alineados y pulsables juntos.
+ *
+ * Es la misma forma que ya tienen `.lista-casillas label` y `.editor__fields label`; lo que
+ * faltaba era la clase suelta, la que se usa cuando la casilla no vive dentro de una lista. Se
+ * escribia en seis sitios y NINGUNA regla la estilaba: el `<label>` caia en `display: inline` y
+ * el rotulo se partia por debajo del cuadrito cuando no cabia en la linea. Lo encontro la guarda
+ * de 2.14, que es exactamente para lo que esta.
+ */
+.form__check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) 0;
+  cursor: pointer;
+}
+
+/*
  * El bloque de la cifra NO se comprime.
  *
  * El cuerpo de una tarjeta es una columna flexible para que un grafico pueda llenar el alto que
@@ -1139,21 +1119,6 @@ input[type='radio'] {
 }
 .admin-home__header-log h2 { margin: 0 0 var(--space-sm); }
 
-.equipo { margin-bottom: var(--space-sm); }
-.team__detail { padding: 0 var(--space-md) var(--space-md); }
-.team__title {
-  width: 100%;
-  text-align: left;
-  font-family: inherit;
-  font-size: var(--md-sys-typescale-title-medium-size);
-  font-weight: var(--md-sys-typescale-title-medium-weight);
-  padding: var(--space-md);
-  background: transparent;
-  border: none;
-  color: var(--md-sys-color-on-surface);
-  cursor: pointer;
-  border-radius: var(--md-sys-shape-corner-medium);
-}
 
 .regla { padding: var(--space-md); margin-bottom: var(--space-sm); }
 
@@ -1193,13 +1158,11 @@ input[type='radio'] {
   background: var(--md-sys-color-success-container);
   color: var(--md-sys-color-on-success-container);
 }
-.notice__actions { display: flex; gap: var(--space-sm); align-items: center; margin-top: var(--space-sm); flex-wrap: wrap; }
 
 /* ------------------------------------------------------------------ *
  * Estructura: cabecera, navegacion, contenido                         *
  * ------------------------------------------------------------------ */
 
-.disposicion { min-height: 100vh; display: flex; flex-direction: column; }
 
 /*
  * Barra superior EN AZUL INSTITUCIONAL.
@@ -1704,7 +1667,6 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
 .header__sandwich:hover::before { opacity: var(--md-sys-state-hover-opacity); }
 .header__sandwich:active::before { opacity: var(--md-sys-state-pressed-opacity); }
 
-.sidebar__resumen { display: none; }
 .sidebar__title { margin: 0 0 var(--space-sm); padding: 0 var(--space-md); color: var(--md-sys-color-on-surface-variant); }
 
 .arbol { list-style: none; margin: 0; padding: 0; }
@@ -2088,13 +2050,6 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
  * `position: relative` en el envoltorio es lo que ancla el globo; sin el se posicionaria contra
  * la pagina y aparecería en una esquina.
  */
-.module__provenance {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  flex-wrap: wrap;
-  margin: var(--space-sm) 0 0;
-}
 .ambito { position: relative; display: inline-flex; }
 .scope-badge {
   border: none;
@@ -2252,18 +2207,6 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
 .kpi__delta.es-positivo { color: var(--md-sys-color-success); }
 .kpi__delta.es-negativo { color: var(--md-sys-color-error); }
 
-.leyenda {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-md);
-  margin: var(--space-sm) 0 0;
-  padding: 0;
-  font-size: var(--md-sys-typescale-body-small-size);
-  color: var(--md-sys-color-on-surface-variant);
-}
-.leyenda li { display: flex; align-items: center; gap: var(--space-xs); }
-.legend__mark { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 
 .problems-list { margin: var(--space-sm) 0 0; padding-left: var(--space-lg); }
 .problems-list li { margin-bottom: var(--space-xs); }
@@ -2326,7 +2269,6 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
   color: var(--md-sys-color-on-surface);
 }
 
-.lineas { width: 100%; height: 160px; }
 
 /* ------------------------------------------------------------------ *
  * Tablas                                                              *
@@ -2594,14 +2536,6 @@ th[aria-sort='descending'] .table__flecha {
  * distintas —una cambia que controles se ven, la otra borra el filtro— y pegadas se pulsa la que
  * no era. Marcado, se ve que esta activo sin tener que leerlo.
  */
-.filters-panel__avanzado {
-  margin-inline-start: auto;
-  font-size: var(--md-sys-typescale-label-small-size);
-}
-.filters-panel__avanzado[aria-pressed='true'] {
-  font-weight: 600;
-  text-decoration: underline;
-}
 .filters-panel__field select,
 .filters-panel__search { width: 100%; min-height: 40px; }
 .filters-panel__search {
@@ -2769,9 +2703,6 @@ th[aria-sort='descending'] .table__flecha {
   color: var(--md-sys-color-on-secondary-container);
   font-weight: var(--md-sys-typescale-label-large-weight);
 }
-.admin__nav a[aria-current='page'] .admin__nav-desc {
-  color: var(--md-sys-color-on-secondary-container);
-}
 .admin__principal { flex: 1; padding: var(--space-lg); min-width: 0; min-height: 0; overflow-y: auto; }
 .admin__principal h2 { margin-bottom: var(--space-xs); }
 .admin__principal h3 { margin: var(--space-lg) 0 var(--space-xs); }
@@ -2839,8 +2770,7 @@ th[aria-sort='descending'] .table__flecha {
  */
 .editor__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; }
 .editor__without-actions { color: var(--md-sys-color-outline); }
-.editor__locks,
-.editor__problems { margin: var(--space-xs) 0 0; padding-left: var(--space-lg); }
+.editor__locks { margin: var(--space-xs) 0 0; padding-left: var(--space-lg); }
 /* ------------------------------------------------------------------ *
  * Editor: lienzo y panel                                              *
  * ------------------------------------------------------------------ */
@@ -3721,7 +3651,6 @@ th[aria-sort='descending'] .table__flecha {
 
 .editor__actions-header { display: flex; align-items: center; gap: var(--space-md); }
 
-.editor__palette { padding: var(--space-md); margin-bottom: var(--space-md); }
 
 /*
  * La presentacion, dentro de la ficha del objeto.
@@ -3776,41 +3705,16 @@ th[aria-sort='descending'] .table__flecha {
   align-items: end;
 }
 .editor__pickers > p { grid-column: 1 / -1; margin: 0; }
-.editor__mapeo > [data-testid^='remove'] { grid-column: 1 / -1; justify-self: start; }
-.editor__palette h3 { margin-bottom: var(--space-xs); }
-.editor__catalog {
-  list-style: none;
-  margin: var(--space-sm) 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--space-xs);
-  font-size: var(--md-sys-typescale-body-medium-size);
-}
-.editor__objects { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-md); }
-.editor__object { padding: var(--space-md); }
-.editor__object--roto { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
-.editor__object h4 { margin-bottom: var(--space-xs); }
-.editor__mapeo {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-md);
-  align-items: start;
-  margin-top: var(--space-sm);
-}
-.editor__fields,
 .my-view__objects {
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-small);
   padding: var(--space-sm) var(--space-md);
 }
-.editor__fields legend,
 .my-view__objects legend {
   font-size: var(--md-sys-typescale-body-small-size);
   color: var(--md-sys-color-on-surface-variant);
   padding: 0 var(--space-xs);
 }
-.editor__fields label,
 .my-view__objects label {
   display: flex;
   align-items: center;
@@ -3820,30 +3724,6 @@ th[aria-sort='descending'] .table__flecha {
   cursor: pointer;
 }
 
-.tree-editor__list { list-style: none; margin: 0; padding: 0; }
-.tree-editor__list[data-level]:not([data-level='0']) { padding-left: var(--space-lg); }
-.tree-editor__node {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  flex-wrap: wrap;
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--md-sys-shape-corner-small);
-}
-.tree-editor__node:hover { background: var(--md-sys-color-surface-container); }
-.tree-editor__node.is-active { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
-.tree-editor__name {
-  font: inherit;
-  font-size: var(--md-sys-typescale-body-medium-size);
-  background: transparent;
-  border: none;
-  min-height: 0;
-  padding: 0;
-  color: inherit;
-  cursor: pointer;
-  text-align: left;
-}
-.tree-editor__actions { display: flex; gap: var(--space-sm); align-items: center; flex-wrap: wrap; }
 
 .simple-list { list-style: none; margin: 0 0 var(--space-sm); padding: 0; font-size: var(--md-sys-typescale-body-medium-size); }
 .simple-list li { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-xs) 0; flex-wrap: wrap; }
@@ -4864,47 +4744,6 @@ th[aria-sort='descending'] .table__flecha {
  * Son tarjetas y no una lista de enlaces porque lo que se decide aqui es A CUAL entrar, y para
  * eso hace falta leer la descripcion: un enlace suelto obliga a entrar para averiguarlo.
  */
-.section-index {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--space-md);
-  list-style: none;
-  padding: 0;
-  margin: var(--space-lg) 0;
-}
-.section-index__card {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-md);
-  height: 100%;
-  padding: var(--space-md);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--md-sys-shape-corner-medium);
-  background: var(--md-sys-color-surface-container-low);
-  color: var(--md-sys-color-on-surface);
-  text-decoration: none;
-}
-.section-index__card:hover {
-  background: var(--md-sys-color-surface-container);
-  border-color: var(--md-sys-color-outline);
-}
-.section-index__card > span:last-child {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  min-width: 0;
-}
-.section-index__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--md-sys-shape-corner-full);
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
-}
 
 .resource-list {
   list-style: none;
@@ -5014,14 +4853,6 @@ th[aria-sort='descending'] .table__flecha {
   margin-right: var(--space-xs);
 }
 
-.inline-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs) var(--space-sm);
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
 
 /*
  * Las subsecciones del carril, sangradas de verdad.
@@ -5427,17 +5258,7 @@ th[aria-sort='descending'] .table__flecha {
  * Se aparta hacia dentro, se aclara y se hace mas pequena, que es lo que dice «esto es el detalle
  * de la fila de arriba» sin escribirlo.
  */
-.tabla--anidada {
-  margin-block-start: var(--space-xs);
-  margin-inline-start: var(--space-md);
-  width: auto;
-  font-size: 0.92em;
-}
 
-.tabla--anidada th,
-.tabla--anidada td {
-  padding-block: var(--space-xs);
-}
 
 /* El icono y su nombre, en la misma linea de la celda. */
 .asset__vista {

@@ -241,7 +241,7 @@ export function FieldPicker({
         {picker.plegado ? (
           <button
             type="button"
-            className="button-link filters-panel__plegar"
+            className="button-link"
             aria-expanded={abierto}
             data-testid={`${prueba}-plegar`}
             onClick={() => setAbierto((v) => !v)}
@@ -272,7 +272,7 @@ export function FieldPicker({
             de opcion.
           */}
           {!basico && picker.modos.length > 1 ? (
-            <label className="filters-panel__modo">
+            <label>
               <span className="visualmente-oculto">
                 Como filtrar {picker.etiqueta}
               </span>
@@ -298,7 +298,7 @@ export function FieldPicker({
           {modoEfectivo === "valores" || modoEfectivo === "excluir" ? (
             <>
               {picker.todos ? (
-                <div className="filters-panel__todos">
+                <div>
                   <button
                     type="button"
                     className="button-link"
@@ -419,7 +419,7 @@ export function FieldPicker({
           ) : null}
 
           {modoEfectivo === "texto" ? (
-            <div className="filters-panel__texto">
+            <div>
               <label htmlFor={`${id}-contiene`}>{t("filters.contains")}</label>
               <input
                 id={`${id}-contiene`}
@@ -464,7 +464,7 @@ export function FieldPicker({
           ) : null}
 
           {modoEfectivo === "vacios" ? (
-            <label className="filters-panel__vacios">
+            <label>
               <span className="visualmente-oculto">
                 Valores de {picker.etiqueta}
               </span>

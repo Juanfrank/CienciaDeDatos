@@ -98,7 +98,7 @@ export function ScopeEditor({
   };
 
   return (
-    <div className="scope-editor">
+    <div>
       <label className="campo">
         <span>{t('scope.of')}</span>
         <select

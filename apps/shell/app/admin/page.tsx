@@ -26,7 +26,7 @@ export default async function HomeAdmin() {
     nodos.reduce((n, node) => n + 1 + (node.type === 'folder' ? nodesCount(node.children) : 0), 0);
 
   return (
-    <div className="admin-home">
+    <div>
       <div className="tarjetas" data-testid="resumen-gobierno">
         <Resumen
           etiqueta="Nodos en la organizacion"
@@ -50,7 +50,7 @@ export default async function HomeAdmin() {
         />
       </div>
 
-      <section className="admin-home__log">
+      <section>
         <div className="admin-home__header-log">
           <h2>{t('admin.home.lastChanges')}</h2>
           <Link href="/admin/audit" className="button-link">

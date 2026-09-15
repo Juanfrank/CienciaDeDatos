@@ -151,7 +151,7 @@ export function EmbedsTable({ codigos }: { codigos: FilaDeCodigo[] }) {
                           data-testid={`revocar-aviso-${c.code}`}
                         >
                           <p>{t('admin.embeds.revoke.confirm')}</p>
-                          <label className="field" htmlFor={`motivo-${c.code}`}>
+                          <label className="form__field" htmlFor={`motivo-${c.code}`}>
                             {t('admin.embeds.revoke.reason')}
                           </label>
                           <input

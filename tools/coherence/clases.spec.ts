@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
-import { clasesDefinidas, clasesEscritas, leer } from './clases.mjs';
+import { clasesDefinidas, clasesEscritas, leer, prefijosEscritos } from './clases.mjs';
 
 /**
  * Las clases de CSS, por los dos sentidos — apartado 2.14.
@@ -19,16 +19,24 @@ import { clasesDefinidas, clasesEscritas, leer } from './clases.mjs';
  *   - El CSS define una regla que NINGUN componente escribe. Eso es CSS muerto: no rompe nada,
  *     pero se lee, se mantiene y se copia.
  *
- * TRINQUETE Y NO PUERTA, por ahora. Los dos sentidos nacen con deuda —diecinueve clases sin regla
- * y treinta y cuatro reglas sin clase—, y un trinquete que nace rojo no lo mira nadie: se salta la
- * primera vez y se borra la segunda. Los numeros solo pueden bajar; quien limpie una baja el tope
- * en el mismo commit, igual que en 2.10, que asi llego a cero.
+ * **PUERTA, y no trinquete.** Nacio con deuda medida —19 clases sin regla y 34 reglas sin
+ * componente— y se limpio entera en la tanda siguiente, asi que los dos numeros son CERO y lo que
+ * entra en rojo es lo que se acaba de escribir. Un trinquete solo vale mientras hay deuda; con
+ * deuda cero es una puerta, que es lo que se queria desde el principio.
  *
- * De las reglas muertas ya se fueron once en esta misma tanda: los alias `md-*` de la escala
- * tipografica, que encabezaban una lista de selectores sin aportar nada —`.md-display-small,
- * .vacio h1, .kpi__value { … }`—. Quitar el alias no cambia un pixel, porque el estilo lo llevan
- * los otros selectores, y por eso se podian quitar de golpe. Las que quedan tienen bloque propio
- * y hay que mirar cada una: eso es la siguiente tanda, no esta.
+ * Al limpiar aparecieron tres fallos de verdad, que es el argumento entero a favor de la guarda:
+ *
+ *   - `object__addon`, el boton de ampliar de un contenedor, no tenia regla: se dibujaba como el
+ *     boton gris del navegador dentro de la cabecera de la tarjeta.
+ *   - `field`, en dos dialogos de administracion, donde la clase de verdad es `form__field`.
+ *   - `form__check`, la fila de una casilla, escrita en seis sitios y sin ninguna regla: el
+ *     `<label>` caia en `display: inline` y el rotulo se partia por debajo del cuadrito.
+ *
+ * Las demas eran ganchos sin estilo, y quitarlos no cambia un pixel: una clase sin regla no pinta
+ * nada por definicion. De las reglas muertas se fueron primero once alias `md-*` que solo
+ * encabezaban listas de selectores, y despues las 34 con bloque propio: el editor de antes de
+ * F5.11, el arbol de antes de F5.43, las tarjetas de equipo de antes de F6.4, la leyenda que hoy
+ * dibuja ECharts.
  *
  * Lo que hizo posible escribir esto es `clases.mts`, que entiende una plantilla. Un extractor
  * ingenuo saca de `className={`x ${cond ? 'a' : 'b'}`}` las palabras `cond`, `a` y `b` como si
@@ -46,15 +54,14 @@ const componentes = listar(
 
 const hojas = listar("'*.css'");
 
-/** Los topes de hoy. Una foto, no un objetivo: solo pueden bajar. */
-const TOPE_SIN_REGLA = 19;
-const TOPE_SIN_TSX = 34;
-
 const escritas = new Map<string, string>();
+const prefijos = new Set<string>();
 for (const ruta of componentes) {
-  for (const clase of clasesEscritas(leer(`${raiz}/${ruta}`))) {
+  const fuente = leer(`${raiz}/${ruta}`);
+  for (const clase of clasesEscritas(fuente)) {
     if (!escritas.has(clase)) escritas.set(clase, ruta);
   }
+  for (const prefijo of prefijosEscritos(fuente)) prefijos.add(prefijo);
 }
 
 const definidas = new Set<string>();
@@ -62,30 +69,41 @@ for (const ruta of hojas) {
   for (const clase of clasesDefinidas(leer(`${raiz}/${ruta}`))) definidas.add(clase);
 }
 
+/** Lo que se arma con una variable: `navegador--${tipo}` escribe `navegador--pestanas-abajo`. */
+const laEscribeUnaPlantilla = (clase: string) =>
+  [...prefijos].some((p) => clase.startsWith(p) && clase !== p);
+
 describe('los nombres de clase casan por los dos lados (2.14)', () => {
   it('hay clases que comprobar en los dos lados', () => {
     expect(escritas.size).toBeGreaterThan(200);
     expect(definidas.size).toBeGreaterThan(200);
   });
 
-  it(`las clases que el TSX escribe sin regla no pasan de ${TOPE_SIN_REGLA}`, () => {
+  it('toda clase que el TSX escribe tiene una regla que la estiliza', () => {
     const sinRegla = [...escritas.entries()]
       .filter(([clase]) => !definidas.has(clase))
       .map(([clase, ruta]) => `${clase} (${ruta})`)
       .sort();
 
     // Con el archivo: una clase sin regla no dice nada si no se sabe quien la escribe.
-    expect(sinRegla.length, `sin regla:\n  ${sinRegla.join('\n  ')}`).toBeLessThanOrEqual(
-      TOPE_SIN_REGLA,
-    );
+    expect(
+      sinRegla,
+      'esa clase no la estiliza nadie: la pagina se dibuja sin ella y nada protesta.\n' +
+        'O es un nombre equivocado —`button-primario` por `pastilla`— o sobra en el marcado.\n',
+    ).toEqual([]);
   });
 
-  it(`las reglas que ningun componente escribe no pasan de ${TOPE_SIN_TSX}`, () => {
-    const muertas = [...definidas].filter((clase) => !escritas.has(clase)).sort();
+  it('toda regla del CSS la escribe algun componente', () => {
+    const muertas = [...definidas]
+      .filter((clase) => !escritas.has(clase) && !laEscribeUnaPlantilla(clase))
+      .sort();
 
-    expect(muertas.length, `CSS muerto:\n  ${muertas.join(', ')}`).toBeLessThanOrEqual(
-      TOPE_SIN_TSX,
-    );
+    expect(
+      muertas,
+      'CSS muerto: una regla que ningun componente escribe no rompe nada, pero se lee,\n' +
+        'se mantiene y se copia. Si la escribe una plantilla, el prefijo tiene que verse\n' +
+        'en el `className` para que esta guarda pueda saberlo.\n',
+    ).toEqual([]);
   });
 });
 
@@ -137,5 +155,36 @@ describe('el extractor entiende una plantilla', () => {
     expect([...clasesDefinidas('/* .vieja { color: red; } */ .nueva { color: blue; }')]).toEqual([
       'nueva',
     ]);
+  });
+});
+
+/**
+ * El prefijo, que es lo mismo mirado desde el otro lado.
+ *
+ * `clasesEscritas` NO cuenta `navegador--`, y hace bien. Pero entonces las reglas
+ * `.navegador--pestanas-abajo` y sus tres hermanas quedaban como CSS muerto, y un numero que dice
+ * «borra esto» estando vivo es peor que un numero que se queda corto.
+ */
+describe('el prefijo de una clase armada con una variable', () => {
+  it('se saca aparte, con su trozo fijo', () => {
+    expect([...prefijosEscritos('<nav className={`navegador navegador--${tipo}`} />')]).toEqual([
+      'navegador--',
+    ]);
+  });
+
+  it('y no se saca de lo que no lleva variable', () => {
+    expect([...prefijosEscritos('<p className={`a b`} />')]).toEqual([]);
+  });
+
+  it('un hueco que ocupa la clase entera no es prefijo de nada', () => {
+    // `${todo}` taparia la hoja completa: cualquier regla empezaria por la cadena vacia.
+    expect([...prefijosEscritos('<p className={`${todo}`} />')]).toEqual([]);
+  });
+
+  it('y el de verdad cubre la clase que la plantilla llega a escribir', () => {
+    const cubre = [...prefijosEscritos('<nav className={`navegador--${tipo}`} />')].some((p) =>
+      'navegador--pestanas-abajo'.startsWith(p),
+    );
+    expect(cubre).toBe(true);
   });
 });

@@ -58,7 +58,7 @@ export function SeesWhoWhere({
   };
 
   return (
-    <div className="sees-who-where">
+    <div>
       <div className="sees-who-where__filters">
         <label className="campo">
           <span>{t('whoSees.person')}</span>
@@ -90,7 +90,7 @@ export function SeesWhoWhere({
       </div>
 
       {resultado ? (
-        <div className="sees-who-where__result" data-testid="qvq-resultado">
+        <div data-testid="qvq-resultado">
           {!resultado.tieneAcceso ? (
             <p className="aviso notice-error" data-testid="qvq-sin-acceso">
               {resultado.treeTheExists

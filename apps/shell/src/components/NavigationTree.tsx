@@ -84,7 +84,7 @@ function Rama({
       {nodos.map((node) => {
         const esCarpeta = node.type === 'folder';
         return esCarpeta ? (
-          <li key={node.id} className="tree__folder">
+          <li key={node.id}>
             {/*
               El boton ENVUELVE el nombre de la carpeta, no va al lado.
 

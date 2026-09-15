@@ -546,17 +546,51 @@ Resuelve cuatro casos que se vieron de verdad al medir, y cada uno tiene su prue
    `navegador--` era acusar a una clase que si existe.
 4. **Del CSS, solo los SELECTORES**: dentro de un bloque, un `.` es el decimal de una medida.
 
-**La guarda nace VERDE, con la deuda medida.** `tools/coherence/clases.spec.ts` es un trinquete
-por los dos sentidos: 19 clases que el TSX escribe sin regla y 34 reglas que ningun componente
-escribe. Un trinquete que nace rojo no lo mira nadie —se salta la primera vez y se borra la
-segunda—, y los numeros solo pueden bajar: quien limpie una baja el tope en el mismo commit, que
-es como 2.10 llego a cero. Verificado enrojeciendo: `button-primario` en un componente la rompe, y
-el mensaje nombra la clase y el archivo.
+**Nacio como trinquete con la deuda medida —19 y 34— y hoy es una PUERTA en CERO por los dos
+sentidos.** `tools/coherence/clases.spec.ts`. Un trinquete solo vale mientras hay deuda que bajar;
+con deuda cero es una puerta, que es lo que se queria desde el principio. Verificado enrojeciendo
+por los dos lados: `button-primario` en un componente rompe un sentido y una regla que nadie
+escribe rompe el otro, y los dos mensajes nombran la clase y el archivo.
 
-**Once reglas muertas se fueron ya**, de 43 a 34: los alias `md-*` de la escala tipografica, que
-encabezaban una lista de selectores sin aportar nada —`.md-display-small, .vacio h1, .kpi__value
-{ … }`—. Quitar el alias no cambia un pixel porque el estilo lo llevan los otros selectores, y por
-eso se podian quitar de golpe. Las que quedan tienen bloque propio y hay que mirarlas una a una.
+**Lo que aparecio al limpiar, que es el argumento entero a favor de la guarda.** De las 19 clases
+sin regla, tres eran fallos de verdad:
+
+- `object__addon`, el boton de ampliar de un contenedor, se dibujaba como el **boton gris del
+  navegador** dentro de la cabecera de la tarjeta. Es exactamente el fallo de `button-primario`,
+  vivo y sin que nadie lo hubiera visto. Pasa a `button-link`, que es lo que usa la otra accion de
+  cabecera que hay en el repositorio.
+- `field`, en dos dialogos de administracion, donde la clase de verdad es `form__field`. Esos
+  rotulos caian en el tamano heredado.
+- `form__check`, la fila de una casilla, escrita en **seis** sitios y sin ninguna regla: el
+  `<label>` quedaba en `display: inline` y el rotulo se partia por debajo del cuadrito. Se le
+  escribio la regla, la misma forma que ya tienen `.lista-casillas label` y `.editor__fields
+  label`.
+
+Las otras dieciseis eran ganchos sin estilo, y quitarlos no cambia un pixel: una clase sin regla
+no pinta nada, por definicion. Esa es tambien la garantia de que borrar CSS no rompio nada — el
+OTRO sentido de la guarda, en cero, dice que toda clase que el TSX sigue escribiendo tiene su
+regla.
+
+**Y las 43 reglas muertas, fuera.** Once se fueron en la primera tanda: los alias `md-*` de la
+escala tipografica, que encabezaban una lista de selectores sin aportar nada —`.md-display-small,
+.vacio h1, .kpi__value { … }`—. Las 34 restantes tenian bloque propio y se miraron una a una:
+casi todas son capas anteriores que se quedaron sin inquilino —el editor de antes de F5.11, el
+arbol de antes de F5.43, las tarjetas de equipo de antes de F6.4, la leyenda que hoy dibuja
+ECharts— mas cuatro utilidades MD3 (`md-estado`, `md-campo`, `md-label-large`, `md-boton--tonal`)
+que nadie llego a usar.
+
+**El prefijo, que es la unica excepcion y esta en el extractor, no en una lista.**
+`navegador--${tipo}` escribe `navegador--pestanas-abajo` el dia que el tipo sea ese, y
+`clasesEscritas` hace bien en no contar `navegador--`. Pero eso dejaba sus cuatro reglas como CSS
+muerto, y un numero que dice «borra esto» estando vivo es peor que uno que se queda corto: el
+falso positivo que se ve molesta, el que dice que borres hace dano. `prefijosEscritos` saca el
+trozo fijo aparte y sirve para una sola cosa —una regla que empieza por un prefijo escrito no
+cuenta como muerta—, con la salvaguarda de que `${todo}` entero no es prefijo de nada.
+
+**`interfaz.spec.ts` deja de tener su propio extractor.** Leia el mismo marcado con una expresion
+regular mas basta que se quedaba con toda palabra dentro de un `className={…}`, nombres de
+variable incluidos: nunca daba un falso positivo y por eso mismo dejaba pasar al fantasma que se
+llamara igual que cualquier variable. Ahora usa `clases.mts`, con los prefijos.
 
 **La asercion condicional ya tiene su guarda, y esa SI nace en cero.** Es otra clase de fallo: un
 `expect` dentro de un `if` puede no ejecutarse nunca, y una prueba que no comprueba nada no se

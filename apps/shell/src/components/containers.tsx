@@ -147,7 +147,7 @@ export function ExpandableContainer({ objeto, titulo, config, draw }: ContainerP
         accion={
           <button
             type="button"
-            className="object__addon"
+            className="button-link"
             aria-label={`Ampliar ${titulo}`}
             title={config?.expandable?.textoDeAmpliar ?? 'Ampliar'}
             data-testid="ampliar"
@@ -294,7 +294,7 @@ export function TabContainer({ objeto, titulo, config, draw }: ContainerProps) {
 
   return (
     <Frame titulo={titulo} instance={objeto.instance}>
-      <div className="contenedor tab-container" data-testid="contenedor-con-pestanas">
+      <div className="contenedor" data-testid="contenedor-con-pestanas">
         <div className="container__tabs" role="tablist" aria-label={titulo}>
           {panels.map((panel) => (
             <button

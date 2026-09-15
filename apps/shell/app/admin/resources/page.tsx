@@ -91,7 +91,7 @@ export default async function RecursosPage() {
                 {f.pendiente > 0 ? (
                   <>
                     {' '}
-                    <span className="chip" data-testid="familia-pendientes">
+                    <span className="insignia" data-testid="familia-pendientes">
                       {t('admin.resources.awaiting', { n: f.pendiente })}
                     </span>
                   </>

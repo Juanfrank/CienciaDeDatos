@@ -1205,7 +1205,7 @@ function PanelPickers({
         const columnKind = kinds[s.fieldName] ?? "";
         const posibles = modesByDefault(columnKind);
         return (
-          <fieldset key={s.fieldName} className="editor__picker">
+          <fieldset key={s.fieldName}>
             <legend>{s.fieldName}</legend>
 
             <label className="form__field">
@@ -1276,7 +1276,7 @@ function PanelPickers({
               se ensenan, para no proponer algo que despues bloquea la publicacion.
             */}
             {/* En basico no se ofrece ninguna forma de acotar: solo hay una, la lista. */}
-            <div className="editor__modos" hidden={s.nivel === 'basico'}>
+            <div hidden={s.nivel === 'basico'}>
               <span className="filters-panel__label">{t('pres.pickers.modes')}</span>
               {posibles.map((modo) => {
                 const puestos = s.modos;

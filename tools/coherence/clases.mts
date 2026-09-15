@@ -46,6 +46,34 @@ export function clasesEscritas(fuente: string): Set<string> {
 }
 
 /**
+ * Los PREFIJOS de las clases que se arman con una variable.
+ *
+ * `` className={`navegador navegador--${navegador.tipo}`} `` escribe `navegador--pestanas-abajo`
+ * el dia que el tipo sea ese, y ningun extractor puede saberlo desde aqui. `clasesEscritas` hace
+ * lo correcto y no la cuenta —contar `navegador--` acusaria a una clase que si existe—, pero eso
+ * deja el OTRO sentido mintiendo: las cuatro reglas `.navegador--…` quedaban como CSS muerto, y
+ * alguien que se fie del numero borra una regla viva. Peor que un falso positivo que se ve: uno
+ * que dice que borres.
+ *
+ * Asi que el prefijo se saca aparte y solo sirve para eso: una regla definida que empieza por un
+ * prefijo escrito NO se cuenta como muerta. Es deliberadamente generoso en ese unico sentido.
+ */
+export function prefijosEscritos(fuente: string): Set<string> {
+  const prefijos = new Set<string>();
+  for (const m of fuente.matchAll(/className=\{/g)) {
+    const expresion = expresionDesde(fuente, m.index + m[0].length);
+    for (const plantilla of expresion.matchAll(/`([^`]*)`/g)) {
+      for (const trozo of (plantilla[1] ?? '').split(/\s+/)) {
+        const fijo = trozo.split('${')[0] ?? '';
+        // Un prefijo tiene que serlo: `${x}` entero no acota nada y taparia la hoja completa.
+        if (trozo.includes('${') && /^[a-zA-Z_-][\w-]*$/.test(fijo)) prefijos.add(fijo);
+      }
+    }
+  }
+  return prefijos;
+}
+
+/**
  * La expresion de un `className={…}`, del `{` a su `}` pareja.
  *
  * Contando llaves y no con una expresion regular, porque las plantillas se ANIDAN:

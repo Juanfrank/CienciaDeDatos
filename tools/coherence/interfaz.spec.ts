@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 import { initialCatalog } from '@app/ui-components';
+import { clasesEscritas, prefijosEscritos } from './clases.mjs';
 
 /**
  * Los nombres con los que el TSX, el CSS y las pruebas de navegador se buscan entre si.
@@ -308,18 +309,26 @@ describe('el carril de administracion', () => {
  * preguntarlo aparte.
  */
 describe('clases que usan las pruebas de navegador', () => {
-  const clasesEscritas = new Set<string>();
+  /*
+   * Con el MISMO extractor que 2.14, no con uno propio.
+   *
+   * El de antes se quedaba con toda palabra que hubiera dentro de un `className={…}`, nombres de
+   * variable incluidos. Nunca daba un falso positivo, y por eso mismo dejaba pasar al fantasma
+   * que se llamara igual que una variable cualquiera: una guarda que acepta de mas es una guarda
+   * que un dia no avisa. Y eran dos lecturas del mismo marcado que podian separarse.
+   */
+  const escritas = new Set<string>();
+  const prefijos = new Set<string>();
   for (const archivo of listar(
     "'apps/shell/src/**/*.tsx' 'apps/shell/app/**/*.tsx' 'packages/ui-components/src/**/*.tsx'",
   )) {
     const texto = readFileSync(`${raiz}/${archivo}`, 'utf8');
-    // `className="a b"`, y tambien lo que haya dentro de un `className={...}` con plantillas.
-    for (const m of texto.matchAll(/className=(?:"([^"]*)"|\{([^}]*)\})/g)) {
-      for (const palabra of ((m[1] ?? m[2]) as string).split(/[^A-Za-z0-9_-]+/)) {
-        if (palabra) clasesEscritas.add(palabra);
-      }
-    }
+    for (const clase of clasesEscritas(texto)) escritas.add(clase);
+    for (const prefijo of prefijosEscritos(texto)) prefijos.add(prefijo);
   }
+  // `navegador--pestanas-abajo` la escribe `navegador--${tipo}`, y una prueba puede elegirla.
+  const laEscribeAlguien = (clase: string) =>
+    escritas.has(clase) || [...prefijos].some((p) => clase.startsWith(p) && clase !== p);
 
   const usadas: { archivo: string; clase: string }[] = [];
   for (const archivo of listar("'apps/shell/e2e/*.ts'")) {
@@ -334,13 +343,13 @@ describe('clases que usan las pruebas de navegador', () => {
   }
 
   it('hay clases que comparar', () => {
-    expect(clasesEscritas.size).toBeGreaterThan(50);
+    expect(escritas.size).toBeGreaterThan(50);
     expect(usadas.length).toBeGreaterThan(10);
   });
 
   it('toda clase que una prueba selecciona la escribe algun componente', () => {
     const fantasmas = usadas
-      .filter(({ clase }) => !clasesEscritas.has(clase))
+      .filter(({ clase }) => !laEscribeAlguien(clase))
       .map(({ archivo, clase }) => `${archivo}: .${clase}`);
     expect([...new Set(fantasmas)].sort()).toEqual([]);
   });
