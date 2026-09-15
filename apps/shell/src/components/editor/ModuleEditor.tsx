@@ -291,6 +291,16 @@ export function ModuleEditor({
           dimensions: [],
           measures: [],
         },
+        /*
+         * La presentacion de salida que fijo la institucion, si hay alguna.
+         *
+         * No congela nada: quien edita la cambia objeto por objeto como siempre. Lo que evita es
+         * que la misma correccion —la leyenda abajo, la rejilla fuera— se repita una vez por cada
+         * grafico que alguien coloque, y que salga distinta segun quien se acuerde.
+         */
+        ...(definicion.presentacionPorDefecto
+          ? { presentacion: definicion.presentacionPorDefecto }
+          : {}),
         ...(config ? { settings: config } : {}),
       },
     };

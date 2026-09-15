@@ -14,8 +14,19 @@ import { pedir, motivoDeFallo } from '../pedir';
  * el `title`, asi que un lector de pantalla lo anuncia entero y el raton lo ensena al pasar por
  * encima — que es lo que 4.9 exige y lo que un «✓» suelto no da.
  *
- * «Editar» no edita el objeto: el catalogo es codigo (4.5). Lleva a proponer una version, que es
- * lo que una persona SI puede hacer desde aqui.
+ * «Editar» no edita el OBJETO: el catalogo es codigo (4.5). Lleva a su configuracion de salida —
+ * con que formato nace cada uno que se coloque—, que es metadato de gobierno y no codigo, igual
+ * que «este objeto ya no se ofrece». Cambiar el objeto es lo otro, «proponer», que va aparte
+ * porque pasa por revision de pares y una version nueva.
+ *
+ * Las dos son acciones distintas y por eso son dos botones. Con el lapiz llevando a proponer, lo
+ * unico que se podia hacer desde una fila era pedir que alguien reescribiera el objeto, para algo
+ * —el formato de salida— que no necesita tocarlo.
+ *
+ * Las dos son OPCIONALES porque esta misma columna sirve a la tabla de iconos e imagenes, y un
+ * icono no tiene ni panel de Formato ni versiones que proponer: lo unico que se decide sobre el es
+ * si se ofrece. Antes las llevaba igual, y el lapiz de un icono abria el formulario de proponer
+ * una version de un objeto que no existe.
  */
 export function ResourceActions({
   id,
@@ -24,7 +35,7 @@ export function ResourceActions({
 }: {
   id: string;
   disabled: boolean;
-  etiquetas: { editar: string; deshabilitar: string; habilitar: string };
+  etiquetas: { editar?: string; proponer?: string; deshabilitar: string; habilitar: string };
 }) {
   const router = useRouter();
   const [enCurso, setEnCurso] = useState(false);
@@ -51,15 +62,28 @@ export function ResourceActions({
   return (
     <>
       <span className="fila-acciones">
-        <Link
-          href={`/admin/resources/proposals?objeto=${encodeURIComponent(id)}`}
-          className="button-link"
-          title={etiquetas.editar}
-          aria-label={`${etiquetas.editar}: ${id}`}
-          data-testid={`editar-${id}`}
-        >
-          <Icon nombre="editar" tamano={18} />
-        </Link>
+        {etiquetas.editar ? (
+          <Link
+            href={`/admin/resources/defaults/${encodeURIComponent(id)}`}
+            className="button-link"
+            title={etiquetas.editar}
+            aria-label={`${etiquetas.editar}: ${id}`}
+            data-testid={`editar-${id}`}
+          >
+            <Icon nombre="editar" tamano={18} />
+          </Link>
+        ) : null}
+        {etiquetas.proponer ? (
+          <Link
+            href={`/admin/resources/proposals?objeto=${encodeURIComponent(id)}`}
+            className="button-link"
+            title={etiquetas.proponer}
+            aria-label={`${etiquetas.proponer}: ${id}`}
+            data-testid={`proponer-${id}`}
+          >
+            <Icon nombre="registro" tamano={18} />
+          </Link>
+        ) : null}
         <button
           type="button"
           className="button-link"

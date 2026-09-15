@@ -78,7 +78,7 @@ export function AssetTable({
                     id={fila.id}
                     disabled={fila.disabled}
                     etiquetas={{
-                      editar: t('admin.resources.action.edit'),
+                      // Ni editar ni proponer: un icono no tiene panel de Formato ni versiones.
                       deshabilitar: t('admin.resources.action.disable'),
                       habilitar: t('admin.resources.action.enable'),
                     }}

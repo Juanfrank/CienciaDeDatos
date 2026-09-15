@@ -1,9 +1,11 @@
+import type { ObjectPresentation } from '@app/ui-components';
 import { withAdmin } from '../guardia';
 import {
   CatalogError,
   decideProposal,
   listProposals,
   proposeResource,
+  setDefaultPresentation,
   setResourceDisabled,
 } from '../../../../src/server/catalogo';
 
@@ -16,7 +18,7 @@ export async function GET() {
 }
 
 interface Cuerpo {
-  accion: 'proponer' | 'decidir' | 'deshabilitar';
+  accion: 'proponer' | 'decidir' | 'deshabilitar' | 'predeterminar';
   objectId?: string;
   version?: string;
   summary?: string;
@@ -24,6 +26,7 @@ interface Cuerpo {
   decision?: 'aprobar' | 'devolver';
   motivo?: string;
   disabled?: boolean;
+  presentacion?: ObjectPresentation;
 }
 
 export async function POST(request: Request) {
@@ -65,6 +68,18 @@ export async function POST(request: Request) {
       return { objectId: body.objectId, disabled: body.disabled };
     }
 
-    throw new CatalogError("Accion no admitida. Use 'proponer', 'decidir' o 'deshabilitar'.", 400);
+    if (body.accion === 'predeterminar') {
+      if (!body.objectId || typeof body.presentacion !== 'object' || body.presentacion === null) {
+        throw new CatalogError('Se requieren el objeto y la presentacion.', 400);
+      }
+      return {
+        presentacion: await setDefaultPresentation(actor, body.objectId, body.presentacion),
+      };
+    }
+
+    throw new CatalogError(
+      "Accion no admitida. Use 'proponer', 'decidir', 'deshabilitar' o 'predeterminar'.",
+      400,
+    );
   });
 }

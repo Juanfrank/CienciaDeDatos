@@ -7,9 +7,10 @@ import type {
   ObjectCategory,
   FieldWell,
 } from '@app/ui-components';
+import type { ObjectPresentation } from '@app/ui-components';
 import { OBJECT_ICONS, fieldKey } from '@app/ui-components';
 import { objectRegistry } from './context';
-import { ICON_PREFIX, disabledResources } from './catalogo';
+import { ICON_PREFIX, defaultPresentations, disabledResources } from './catalogo';
 import { declaredAggregations, availableColumnsOf } from './data';
 
 /** Paleta del editor de modulos — seccion 4.2. */
@@ -31,6 +32,14 @@ export interface PaletteObject {
   presentacion: PresentationKey[];
   /** Ranuras con nombre. Vacio si el objeto no las declara: el editor usa las genericas. */
   wells: FieldWell[];
+  /**
+   * Con que presentacion nace este objeto al colocarlo, si la institucion fijo una.
+   *
+   * Viaja con la paleta y no se pide aparte porque es parte de lo que el editor necesita para
+   * colocar: pedirla en otra llamada abriria la ventana en la que un objeto nace con el
+   * predeterminado viejo porque la segunda respuesta todavia no habia llegado.
+   */
+  presentacionPorDefecto?: ObjectPresentation;
   notas?: string;
 }
 
@@ -70,6 +79,7 @@ export async function editorPalette(): Promise<EditorPalette> {
    * queda creyendo que ya esta.
    */
   const deshabilitados = await disabledResources();
+  const predeterminados = await defaultPresentations();
 
   const objetos: PaletteObject[] = objectRegistry
     .list()
@@ -97,6 +107,9 @@ export async function editorPalette(): Promise<EditorPalette> {
         medidas: version.dataContract.measures,
         presentacion: version.presentation,
         wells: version.dataContract.wells ?? [],
+        ...(predeterminados[definicion.objectId]
+          ? { presentacionPorDefecto: predeterminados[definicion.objectId] }
+          : {}),
         ...(version.dataContract.notes ? { notas: version.dataContract.notes } : {}),
       };
     });

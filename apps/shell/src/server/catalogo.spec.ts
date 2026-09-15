@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Actor } from '@app/access-control';
-import { ICON_PREFIX, disabledResources, setResourceDisabled } from './catalogo';
+import {
+  ICON_PREFIX,
+  defaultPresentations,
+  disabledResources,
+  setDefaultPresentation,
+  setResourceDisabled,
+} from './catalogo';
 import { editorPalette } from './editor';
 import { borrar } from './almacenCompartido';
 import { KEY_CATALOG } from './catalogo';
@@ -67,5 +73,53 @@ describe('deshabilitar un icono', () => {
   it('un icono que no existe no se puede deshabilitar', async () => {
     await expect(setResourceDisabled(admin, `${ICON_PREFIX}no-existe`, true)).rejects.toThrow();
     expect(await disabledResources()).not.toContain(`${ICON_PREFIX}no-existe`);
+  });
+});
+
+/**
+ * El formato de salida de un objeto — secciones 4.2, 4.3 y 4.5.
+ *
+ * La misma leccion que el interruptor de arriba: la decision se guardaba, la tabla la dibujaba, y
+ * lo que el editor colocaba seguia naciendo igual que siempre. Por eso lo que se comprueba aqui no
+ * es que la escritura vuelva a leerse —eso no dice nada—, sino que un objeto RECIEN COLOCADO nace
+ * con ella.
+ */
+describe('el formato de salida de un objeto', () => {
+  it('llega a la paleta, que es de donde el editor lo copia al colocar', async () => {
+    const antes = await editorPalette();
+    expect(antes.objetos.find((o) => o.objectId === 'barras')?.presentacionPorDefecto).toBeUndefined();
+
+    await setDefaultPresentation(admin, 'barras', { leyenda: 'abajo' });
+
+    const despues = await editorPalette();
+    expect(despues.objetos.find((o) => o.objectId === 'barras')?.presentacionPorDefecto).toEqual({
+      leyenda: 'abajo',
+    });
+    // Y solo a ese: fijar el de uno no puede repartirlo entre los demas.
+    expect(
+      despues.objetos.filter((o) => o.presentacionPorDefecto !== undefined).map((o) => o.objectId),
+    ).toEqual(['barras']);
+  });
+
+  it('guardar uno vacio lo QUITA, en vez de dejar un predeterminado que no dice nada', async () => {
+    await setDefaultPresentation(admin, 'barras', { leyenda: 'abajo' });
+    await setDefaultPresentation(admin, 'barras', {});
+
+    const palette = await editorPalette();
+    expect(palette.objetos.find((o) => o.objectId === 'barras')?.presentacionPorDefecto).toBeUndefined();
+    expect(await defaultPresentations()).toEqual({});
+  });
+
+  it('no admite una clave que el objeto no ensena, que no habria por donde quitar', async () => {
+    // `barras` no declara `circular`: el panel no lo dibujaria nunca, asi que guardarlo dejaria un
+    // predeterminado invisible y permanente.
+    await expect(
+      setDefaultPresentation(admin, 'barras', { circular: { radioInterior: 40 } }),
+    ).rejects.toThrow(/circular/);
+    expect(await defaultPresentations()).toEqual({});
+  });
+
+  it('un objeto que no existe no tiene formato de salida', async () => {
+    await expect(setDefaultPresentation(admin, 'no-existe', { acento: 'primario' })).rejects.toThrow();
   });
 });

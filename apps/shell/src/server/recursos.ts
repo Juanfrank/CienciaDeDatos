@@ -2,7 +2,7 @@ import { ICON_NAMES, OBJECT_ICONS, initialCatalog, latestVersion } from '@app/ui
 import type { ObjectCategory } from '@app/ui-components';
 import type { ModuleDefinition } from '@app/module-model';
 import type { ResourceRow } from '../components/admin/ResourceList';
-import { ICON_PREFIX, disabledResources } from './catalogo';
+import { ICON_PREFIX, defaultPresentations, disabledResources } from './catalogo';
 import { modules } from './moduleStore';
 
 /**
@@ -102,7 +102,11 @@ export async function usoPorObjeto(): Promise<Map<string, UsoDeObjeto>> {
 
 export async function resourcesOf(familia: Familia): Promise<ResourceRow[]> {
   const categorias = FAMILIAS[familia] as readonly ObjectCategory[];
-  const [usos, deshabilitados] = await Promise.all([usoPorObjeto(), disabledResources()]);
+  const [usos, deshabilitados, predeterminados] = await Promise.all([
+    usoPorObjeto(),
+    disabledResources(),
+    defaultPresentations(),
+  ]);
 
   return initialCatalog
     .filter((o) => categorias.includes(o.category))
@@ -117,6 +121,7 @@ export async function resourcesOf(familia: Familia): Promise<ResourceRow[]> {
         modulos: usos.get(o.objectId)?.modulos ?? 0,
         atrasados: usos.get(o.objectId)?.atrasados ?? 0,
         ...(deshabilitados.has(o.objectId) ? { disabled: true } : {}),
+        ...(predeterminados[o.objectId] ? { predeterminado: true } : {}),
         versions: o.versions.map((v) => ({
           version: v.version,
           publishedAt: v.publishedAt,

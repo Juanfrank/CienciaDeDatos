@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { ICON_NAMES, initialCatalog } from '@app/ui-components';
+import { ICON_NAMES, initialCatalog, validatePresentation } from '@app/ui-components';
+import type { ObjectPresentation, PresentationKey } from '@app/ui-components';
 import { PermissionError, assertCan } from '@app/access-control';
 import type { Actor } from '@app/access-control';
 import { leer, mutar } from './almacenCompartido';
@@ -19,6 +20,7 @@ import { changeRecord } from './audit';
  * 1. Que una version propuesta se acepte o se devuelva, con quien lo decidio y por que.
  * 2. Que un objeto certificado deje de ofrecerse en el editor sin desaparecer de los modulos que
  *    ya lo tienen — retirar y romper no son lo mismo.
+ * 3. Con QUE presentacion nace un objeto recien colocado.
  */
 
 export const KEY_CATALOG = 'app:catalogo:gobierno';
@@ -55,9 +57,18 @@ interface CatalogGovernance {
   /** Objetos que el editor no ofrece, aunque sigan certificados. */
   disabled: string[];
   proposals: ResourceProposal[];
+  /**
+   * La presentacion con la que NACE cada objeto colocado, por `objectId`.
+   *
+   * Es una decision de la institucion, no de cada persona que edita: si aqui todas las barras
+   * llevan la leyenda abajo y sin rejilla, eso se decide UNA vez y no quince, una por cada quien
+   * que coloque un grafico y se acuerde. Lo que no hace es congelar nada — quien edita sigue
+   * cambiandolo objeto por objeto; esto solo mueve el punto de partida.
+   */
+  defaults: Record<string, ObjectPresentation>;
 }
 
-const VACIO: CatalogGovernance = { disabled: [], proposals: [] };
+const VACIO: CatalogGovernance = { disabled: [], proposals: [], defaults: {} };
 
 async function leerGobierno(): Promise<CatalogGovernance> {
   const guardado = await leer<CatalogGovernance>(KEY_CATALOG);
@@ -146,6 +157,77 @@ export async function setResourceDisabled(
     before: { deshabilitado: gobierno.disabled.includes(objectId) },
     after: { deshabilitado: disabled },
   });
+}
+
+// ---------------------------------------------------------------------------
+// La presentacion de salida de cada objeto
+// ---------------------------------------------------------------------------
+
+/**
+ * Las claves que la ULTIMA version del objeto admite.
+ *
+ * Del catalogo y no del registro de `context.ts`, que importa de aqui: pedirlo del otro lado
+ * cerraria el ciclo entre los dos modulos. Es la misma lectura que ya hace `recursoConocido`.
+ */
+function admitidasDe(objectId: string): PresentationKey[] | undefined {
+  const definicion = initialCatalog.find((o) => o.objectId === objectId);
+  return definicion?.versions[definicion.versions.length - 1]?.presentation;
+}
+
+export async function defaultPresentations(): Promise<Record<string, ObjectPresentation>> {
+  return (await leerGobierno()).defaults;
+}
+
+/**
+ * Fija con que presentacion nace un objeto recien colocado.
+ *
+ * Se valida contra lo que la version declara admitir, y no por formalidad: una clave que el objeto
+ * no ensena se guardaria sin que el panel la dibujara nunca, y entonces no habria por donde
+ * quitarla. Guardar `{}` es borrar el predeterminado, que es como se vuelve atras.
+ */
+export async function setDefaultPresentation(
+  actor: Actor,
+  objectId: string,
+  presentacion: ObjectPresentation,
+): Promise<ObjectPresentation> {
+  permiso(actor, 'proponer-objetos-al-repositorio');
+
+  const admitidas = admitidasDe(objectId);
+  if (!admitidas) {
+    throw new CatalogError(`El catalogo no tiene ningun objeto '${objectId}'.`, 404);
+  }
+  const problemas = validatePresentation(presentacion, admitidas);
+  if (problemas.length > 0) {
+    throw new CatalogError(
+      `La presentacion no vale para '${objectId}': ` +
+        problemas.map((p) => `${p.clave} — ${p.issue}`).join(' '),
+      400,
+    );
+  }
+
+  // Vacio BORRA la entrada en vez de dejar un `{}` guardado: un objeto sin predeterminado y un
+  // objeto con un predeterminado que no dice nada son lo mismo, y guardar los dos hace que la
+  // tabla ensene «configurado» sobre algo que no configura nada.
+  const vacia = Object.keys(presentacion).length === 0;
+  const gobierno = await leerGobierno();
+  await mutar<CatalogGovernance>(KEY_CATALOG, (guardado) => {
+    const actual = { ...VACIO, ...guardado };
+    const defaults = { ...actual.defaults };
+    if (vacia) delete defaults[objectId];
+    else defaults[objectId] = presentacion;
+    return { ...actual, defaults };
+  });
+
+  await changeRecord({
+    actorId: actor.userId,
+    entityType: 'object',
+    entityId: objectId,
+    action: 'update',
+    before: { predeterminado: gobierno.defaults[objectId] ?? null },
+    after: { predeterminado: vacia ? null : presentacion },
+  });
+
+  return presentacion;
 }
 
 // ---------------------------------------------------------------------------

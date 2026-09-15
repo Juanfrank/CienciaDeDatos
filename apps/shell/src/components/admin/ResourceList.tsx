@@ -39,6 +39,13 @@ export interface ResourceRow {
   atrasados: number;
   /** Deshabilitado: sigue en los modulos que ya lo tienen, pero el editor no lo ofrece. */
   disabled?: boolean;
+  /**
+   * La institucion fijo con que formato nace este objeto al colocarlo.
+   *
+   * Se ensena en la tabla porque, sin decirlo, un objeto que sale de fabrica con la leyenda abajo
+   * y otro que no son indistinguibles hasta que se coloca uno de cada.
+   */
+  predeterminado?: boolean;
 }
 
 
@@ -171,6 +178,11 @@ export function ResourceList({
 
                     <td data-testid={`recurso-${r.id}-estado`}>
                       <Estado disabled={r.disabled === true} retirada={retirada} t={t} />
+                      {r.predeterminado ? (
+                        <p className="muted-text" data-testid={`recurso-${r.id}-predeterminado`}>
+                          {t('admin.resources.state.customized')}
+                        </p>
+                      ) : null}
                     </td>
 
                     <td>
@@ -179,6 +191,7 @@ export function ResourceList({
                         disabled={r.disabled === true}
                         etiquetas={{
                           editar: t('admin.resources.action.edit'),
+                          proponer: t('admin.resources.action.propose'),
                           deshabilitar: t('admin.resources.action.disable'),
                           habilitar: t('admin.resources.action.enable'),
                         }}

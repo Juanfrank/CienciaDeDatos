@@ -1812,3 +1812,70 @@ test.describe('las personas, y como entran, en una sola tabla (4.10.1 y 4.7.2)',
     await expect(page.getByTestId('usuario-u-ana-tipo')).toBeVisible();
   });
 });
+
+test.describe('el formato de salida de un objeto (4.2, 4.3 y 4.5)', () => {
+  test('el lapiz del recurso fija con que formato NACE lo que se coloque despues', async ({
+    page,
+  }) => {
+    /*
+     * La prueba que impide que esto sea un formulario que guarda y ya.
+     *
+     * La leccion es la del interruptor de iconos de mas arriba: la decision se guardaba, la tabla
+     * la dibujaba, y lo que el editor colocaba seguia naciendo igual. Por eso lo que se mira no es
+     * que la pantalla vuelva a ensenar lo guardado —eso pasaria igual con el cable cortado—, sino
+     * un objeto RECIEN COLOCADO en el editor.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/resources/visualizations');
+    await page.getByTestId('editar-barras').click();
+    await expect(page).toHaveURL(/\/admin\/resources\/defaults\/barras$/);
+
+    // El mismo panel de Formato del editor, con sus secciones y sus testids: «Grafico» nace
+    // plegada alli y aqui tambien, porque es el mismo componente y no una copia suya.
+    await page.getByTestId('pres-barras-grafico').locator('summary').click();
+    await page.getByTestId('pres-barras-leyenda').selectOption('abajo');
+    await page.getByTestId('predeterminar-guardar').click();
+    await expect(page.getByTestId('predeterminar-guardado')).toBeVisible();
+
+    // Y la tabla lo dice, que es como se distingue un objeto configurado de uno de fabrica.
+    await page.goto('/admin/resources/visualizations');
+    await expect(page.getByTestId('recurso-barras-predeterminado')).toBeVisible();
+
+    const slug = `salida-${Date.now()}`;
+    await newModule(page, slug);
+    await page.getByTestId('add-barras').click();
+    await alDia(page);
+
+    const bloque = page.locator('[data-testid^="block-obj-"]').first();
+    const id = ((await bloque.getAttribute('data-testid')) ?? '').replace('block-', '');
+    await page.getByTestId(`select-${id}`).click();
+    await page.getByTestId('tab-formato').click();
+    await expect(page.getByTestId(`pres-${id}-leyenda`)).toHaveValue('abajo');
+
+    // Quitarlo devuelve el objeto a como salia de fabrica, sin tener que deshacer control a mano.
+    await page.goto('/admin/resources/defaults/barras');
+    await page.getByTestId('predeterminar-limpiar').click();
+    await expect(page.getByTestId('predeterminar-guardado')).toBeVisible();
+
+    const otro = `salida-${Date.now()}-b`;
+    await newModule(page, otro);
+    await page.getByTestId('add-barras').click();
+    await alDia(page);
+    const segundo = page.locator('[data-testid^="block-obj-"]').first();
+    const idB = ((await segundo.getAttribute('data-testid')) ?? '').replace('block-', '');
+    await page.getByTestId(`select-${idB}`).click();
+    await page.getByTestId('tab-formato').click();
+    await expect(page.getByTestId(`pres-${idB}-leyenda`)).not.toHaveValue('abajo');
+  });
+
+  test('un icono no lleva ni lapiz ni propuesta: no tiene formato ni versiones', async ({
+    page,
+  }) => {
+    // El lapiz de un icono abria el formulario de proponer una version de un objeto que no existe.
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/resources/other');
+    await expect(page.getByTestId('deshabilitar-icono:balanza')).toBeVisible();
+    await expect(page.getByTestId('editar-icono:balanza')).toHaveCount(0);
+    await expect(page.getByTestId('proponer-icono:balanza')).toHaveCount(0);
+  });
+});
