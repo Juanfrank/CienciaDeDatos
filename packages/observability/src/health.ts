@@ -25,6 +25,17 @@ export interface HealthProbeInput {
   cacheStoreReachable: boolean;
   /** Conectividad a la base de identidad: sin ella no hay sesion ni autorizacion. */
   identityDbReachable: boolean;
+  /**
+   * Que le paso al estado autoritativo: en marcha, nuevo sin configurar, o PERDIDO.
+   *
+   * Es la mitad de la contingencia que ningun respaldo sustituye. El gobierno y los modulos caen
+   * a la semilla cuando no hay nada guardado, asi que un almacen que pierde datos no hace fallar
+   * nada: la aplicacion vuelve a los datos de demostracion y parece sana. Si nadie se entera,
+   * nadie restaura.
+   */
+  stateStatus: 'en-marcha' | 'nueva' | 'estado-perdido';
+  /** Las claves ancla que se esperaban y no estan, para que el detalle diga cuales. */
+  missingState?: string[];
   /** Latido del job (6.4). null si nunca se ha ejecutado o no se pudo leer. */
   heartbeat: PopulatorHeartbeat | null;
   /** Antiguedad maxima tolerada del latido antes de considerar el job atrasado. */
@@ -51,6 +62,27 @@ export function buildHealthReport(input: HealthProbeInput): HealthReport {
     name: 'base-de-identidad',
     status: input.identityDbReachable ? 'ok' : 'caido',
     ...(input.identityDbReachable ? {} : { detail: 'No se alcanza la base de identidad.' }),
+  });
+
+  /*
+   * El estado perdido es CAIDO, y es la unica comprobacion nueva que lo es aparte de la base de
+   * identidad. No sirve para nada seguir respondiendo 200 mientras se enseña la semilla de
+   * demostracion en lugar del gobierno de la institucion: quien mire vera una aplicacion que
+   * funciona con los datos equivocados, que es peor que una que no responde. Un despliegue NUEVO
+   * que todavia no tiene gobierno propio no es eso, y se dice sin alarma.
+   */
+  checks.push({
+    name: 'estado-de-gobierno',
+    status: input.stateStatus === 'estado-perdido' ? 'caido' : 'ok',
+    ...(input.stateStatus === 'estado-perdido'
+      ? {
+          detail:
+            `Este despliegue tuvo estado propio y ya no lo encuentra: falta ` +
+            `${(input.missingState ?? []).join(', ')}. Ver docs/operations/contingencia.md.`,
+        }
+      : input.stateStatus === 'nueva'
+        ? { detail: 'Despliegue sin gobierno propio todavia: se sirve la semilla.' }
+        : {}),
   });
 
   // El Storage del cache caido es DEGRADADO, no caido: la aplicacion sigue sirviendo desde L1

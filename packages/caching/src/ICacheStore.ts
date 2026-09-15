@@ -14,6 +14,16 @@ export interface ICacheStore {
   delete(key: string): Promise<void>;
   /** Invalidacion dirigida por etiqueta: repuebla solo lo afectado, no vacia todo el cache. */
   deleteByPrefix(prefix: string): Promise<void>;
+  /**
+   * Las claves que empiezan por un prefijo. Es el gemelo de LECTURA de `deleteByPrefix`.
+   *
+   * Existe para el respaldo del estado autoritativo, que tiene que alcanzar claves por entidad
+   * —`app:personalizacion:{userId}:{moduleId}`, una por persona y modulo— que nadie puede
+   * enumerar de memoria. Va en el puerto y no en una implementacion porque el dia que el almacen
+   * sea Blob o SQL es justo el dia en que la continuidad importa, y un respaldo atado al sistema
+   * de archivos no serviria entonces.
+   */
+  keysByPrefix(prefix: string): Promise<string[]>;
 }
 
 /**

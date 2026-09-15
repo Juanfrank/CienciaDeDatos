@@ -42,6 +42,21 @@ describe('InMemoryCacheStore (L1, 6.3)', () => {
     expect((await store.get<string>('ds:b:1'))?.value).toBe('3');
   });
 
+  it('enumera por prefijo, que es como el respaldo alcanza las claves por entidad', async () => {
+    // `app:personalizacion:{userId}:{moduleId}` es una clave por persona y modulo: nadie puede
+    // enumerarla de memoria, y sin esto un respaldo se dejaria fuera lo que no supiera nombrar.
+    const store = new InMemoryCacheStore();
+    await store.set('app:personalizacion:u-ana:m1', entrada('1'));
+    await store.set('app:personalizacion:u-beto:m1', entrada('2'));
+    await store.set('app:gobierno', entrada('3'));
+
+    expect(await store.keysByPrefix('app:personalizacion:')).toEqual([
+      'app:personalizacion:u-ana:m1',
+      'app:personalizacion:u-beto:m1',
+    ]);
+    expect(await store.keysByPrefix('no-esta:')).toEqual([]);
+  });
+
   it('acota la memoria del proceso descartando la entrada mas antigua', async () => {
     const store = new InMemoryCacheStore({ maxEntries: 2 });
     await store.set('a', entrada('1'));

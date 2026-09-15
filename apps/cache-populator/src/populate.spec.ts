@@ -341,6 +341,7 @@ describe('de punta a punta: poblar, leer y filtrar por ambito', () => {
       configuredConnector: 'mock',
       cacheStoreReachable: true,
       identityDbReachable: true,
+      stateStatus: 'en-marcha',
       heartbeat: latido ?? null,
     });
 

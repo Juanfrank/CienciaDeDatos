@@ -13,6 +13,8 @@ Scripts que no forman parte de la aplicacion. `project.json` los declara como el
 | `tsx tools/populate-cache.mts` | Puebla el cache |
 | `tsx tools/module-status.mts` | Valida cada modulo por separado y produce el informe |
 | `npm run test:barajado` | La suite de unidad N veces con el orden barajado; ver la regla de abajo |
+| `npm run respaldo -- <archivo>` | Vuelca el estado autoritativo; `docs/operations/contingencia.md` |
+| `npm run restaurar -- <archivo> [--aplicar]` | Lo devuelve. En seco si no se pasa `--aplicar` |
 
 ## Reglas
 

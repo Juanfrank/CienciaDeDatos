@@ -87,6 +87,10 @@ export class FileCacheStore implements ICacheStore {
     }
   }
 
+  async keysByPrefix(prefix: string): Promise<string[]> {
+    return (await this.keys()).filter((clave) => clave.startsWith(prefix));
+  }
+
   /** Claves presentes. Solo para diagnostico y pruebas. */
   async keys(): Promise<string[]> {
     const files = await readdir(this.directory).catch((error: NodeJS.ErrnoException) => {

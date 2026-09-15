@@ -62,6 +62,10 @@ export class InMemoryCacheStore implements ICacheStore {
     }
   }
 
+  async keysByPrefix(prefix: string): Promise<string[]> {
+    return [...this.map.keys()].filter((clave) => clave.startsWith(prefix)).sort();
+  }
+
   /**
    * Tira todo lo guardado.
    *

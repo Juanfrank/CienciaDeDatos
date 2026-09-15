@@ -1,6 +1,7 @@
 import type { ModuleDefinition } from '@app/module-model';
 import { migrateDefinition } from '@app/module-model';
-import { mutar, leer } from './almacenCompartido';
+import { KEY_HISTORY, KEY_MODULES, mutar, leer } from './almacenCompartido';
+import { markInstalled } from './installation';
 import { demoModules } from './modules';
 
 /**
@@ -34,9 +35,6 @@ export interface ModuleStore {
   /** El historial de un modulo, de la version mas nueva a la mas vieja. */
   history(moduleId: string): Promise<PublishedVersion[]>;
 }
-
-export const KEY_MODULES = 'app:modulos';
-export const KEY_HISTORY = 'app:modulos:historial';
 
 const clonar = <T>(valor: T): T => JSON.parse(JSON.stringify(valor)) as T;
 
@@ -101,6 +99,7 @@ export class StoreModuleRepository implements ModuleStore {
     await mutar<ModuleDefinition[]>(KEY_MODULES, (guardados) =>
       cambio(guardados ?? clonar(demoModules)),
     );
+    await markInstalled(KEY_MODULES);
   }
 
   async list(): Promise<ModuleDefinition[]> {

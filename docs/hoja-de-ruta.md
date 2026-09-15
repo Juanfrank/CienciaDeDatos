@@ -875,6 +875,67 @@ Configuration—. Hoy son inofensivas: son banderas de arranque, no cambian desp
 ninguna prueba las toca. Pero son la misma forma del fallo, y si alguna pasa a depender del
 entorno en ejecucion hay que convertirla en funcion, como `cacheDir()`.
 
+### 2.20 No habia contingencia contra desastres — HECHA la del estado autoritativo
+
+El gobierno de la aplicacion —quien ve que, que modulos hay, que se publico y cuando, que cambio y
+quien lo autorizo— no se puede reconstruir, y **nada lo respaldaba**. No estaba pendiente ni
+descartado: no se habia planteado. El contrato de ingenieria tampoco lo pide en ninguna de sus
+secciones recuperables.
+
+**El hallazgo que ordena todo lo demas: el modo de fallo no es perder el estado, es no enterarse.**
+`app:gobierno`, `app:modulos` y `app:modulos:historial` caen a la semilla de demostracion cuando no
+hay nada guardado. Es correcto para un despliegue nuevo y desastroso despues: si el almacen pierde
+datos, la aplicacion no falla — arranca con los datos de demostracion, responde 200 y parece sana.
+Se comprobo a mano: borrado `app:gobierno`, la aplicacion servia «Equipo Distrito Norte» de la
+semilla en lugar del equipo real, sin una sola senal.
+
+**Lo que se hizo**, con el detalle y las alternativas descartadas en la ADR-022:
+
+1. **`ICacheStore.keysByPrefix`**, el gemelo de lectura de `deleteByPrefix`. El respaldo enumera
+   por el puerto y no leyendo el directorio: el dia que el almacen sea Blob o SQL —el dia en que la
+   continuidad importa— una copia atada al sistema de archivos no serviria.
+2. **`apps/shell/src/server/backup.ts`**: una tabla que clasifica CADA prefijo del almacen como
+   `respaldar` o `no-respaldar`, con su motivo escrito, y de la que leen el volcado, la
+   restauracion y la guarda.
+3. **`npm run respaldo` y `npm run restaurar`**, con la restauracion **en seco por defecto** y un
+   rechazo en bloque si la suma de comprobacion no cuadra: media restauracion deja el gobierno en
+   un estado que nadie tuvo nunca.
+4. **El centinela `app:instalacion`**, que recuerda que claves llego a escribir este despliegue.
+   Con el, `/health` reporta **caido** cuando falta lo que existio — la primera comprobacion
+   distinta de la base de identidad que lo hace, y por la misma razon que sostiene la tabla de
+   `docs/observabilidad.md`.
+5. **La prueba de ida y vuelta**: siembra, cambia por los caminos reales, vuelca, **borra el
+   almacen entero**, restaura y compara por los lectores publicos. Verificada sacando tres
+   prefijos de la tabla, uno a uno: los tres la ponen en rojo.
+6. **`tools/coherence/respaldo.spec.ts`**, que obliga a DECIDIR: una clave nueva sin clasificar
+   enrojece; `no-respaldar` con motivo es una respuesta valida.
+7. **`docs/operations/contingencia.md`**, el procedimiento, con el RPO dicho como es.
+
+**Dos decisiones que cuestan RTO y se toman a proposito.** Las credenciales locales no entran en el
+respaldo —`totpSecret` se guarda EN CLARO pese al comentario de `packages/auth/src/stores.ts:13`,
+asi que el archivo seria el segundo factor de toda la institucion— y al restaurar hay que recrear
+el primer Administrador y pasar el resto por el restablecimiento mediado. Y las sesiones y los
+tokens de un solo uso no vuelven nunca: restaurarlos resucita sesiones revocadas y enlaces ya
+gastados.
+
+**Lo que NO arregla, y hay que decirlo:**
+
+- **`BlobCacheStore` no lo instancia nadie.** Esta escrito, probado y exportado; la infraestructura
+  ya crea el contenedor y concede el RBAC; y la fachada de `almacenCompartido.ts` esta hecha para
+  ese cambio de una pieza. Mientras tanto **todo el estado vive en el disco local de la
+  instancia**: con el autoescalado a cinco, cada una tendria su propio gobierno, y un reciclaje o
+  un swap de slot lo borra. Es la accion que mas riesgo quita y no se puede verificar sin Azure.
+- **La perdida TOTAL del almacen no se detecta desde dentro**: el centinela se va con todo lo
+  demas. Lo cubre el procedimiento.
+- **El respaldo es manual**, asi que el RPO es «desde la ultima vez que alguien se acordo».
+  Programarlo va fuera de la aplicacion: escribirlo desde el propio proceso en el mismo disco que
+  quiere proteger no protege de nada.
+- **Infraestructura**: Storage en `Standard_LRS` sin versionado ni retencion, base de identidad sin
+  politica de respaldo declarada, una sola region.
+- **El secreto TOTP sigue en claro.** Cifrarlo lleva migracion de datos y una segunda pieza critica
+  en el arranque; va en su propia tanda. El comentario de `stores.ts` se corrige para que deje de
+  prometer lo que no hace.
+
 ---
 
 ## 3. Revisado y descartado

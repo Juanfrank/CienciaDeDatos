@@ -1,4 +1,5 @@
 import { GOVERNANCE_KEY, mutar, leer } from './almacenCompartido';
+import { markInstalled } from './installation';
 import type {
   GovernedUser,
   ManagedTree,
@@ -104,6 +105,9 @@ export class StoreGovernanceRepository implements GovernanceStore {
     await mutar<GovernanceSnapshot>(GOVERNANCE_KEY, (guardada) =>
       change(guardada ?? initialStatus()),
     );
+    // A partir de aqui este despliegue ya no depende de la semilla, y encontrar el gobierno
+    // ausente pasa a significar que se perdio. Ver `installation.ts`.
+    await markInstalled(GOVERNANCE_KEY);
   }
 
   async getTree(): Promise<ManagedTree> {

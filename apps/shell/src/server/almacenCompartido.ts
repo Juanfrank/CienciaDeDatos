@@ -51,6 +51,7 @@ export const cacheL2: ICacheStore = {
     enDisco().set<T>(clave, entrada as never),
   delete: (clave: string) => enDisco().delete(clave),
   deleteByPrefix: (prefijo: string) => enDisco().deleteByPrefix(prefijo),
+  keysByPrefix: (prefijo: string) => enDisco().keysByPrefix(prefijo),
 };
 
 /** L1 por proceso con TTL corto, delante del L2 en disco. */
@@ -87,6 +88,10 @@ export async function borrar(clave: string): Promise<void> {
 export const GOVERNANCE_KEY = 'app:gobierno';
 export const KEY_BOOKMARKS = 'app:marcadores';
 export const KEY_AUDIT = 'app:auditoria';
+export const KEY_MODULES = 'app:modulos';
+export const KEY_HISTORY = 'app:modulos:historial';
+/** El centinela que distingue un despliegue nuevo de uno que perdio el estado. */
+export const KEY_INSTALLATION = 'app:instalacion';
 
 /** Lista con valor por defecto, para las colecciones que empiezan vacias. */
 export async function readList<T>(clave: string): Promise<T[]> {

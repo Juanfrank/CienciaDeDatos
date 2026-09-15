@@ -78,6 +78,9 @@ class FakeL2 implements ICacheStore {
   async deleteByPrefix(prefix: string): Promise<void> {
     for (const k of [...this.map.keys()]) if (k.startsWith(prefix)) this.map.delete(k);
   }
+  async keysByPrefix(prefix: string): Promise<string[]> {
+    return [...this.map.keys()].filter((k) => k.startsWith(prefix)).sort();
+  }
 }
 
 const scopeOf = (user: typeof anaUser, team: typeof norteTeam, moduleId: string) =>

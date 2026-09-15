@@ -26,6 +26,15 @@ como adiciones y jamas como rupturas.
 - El panel lateral no se plegaba: el selector del CSS esperaba un atributo con otro nombre.
 
 ### Anadido
+- **Contingencia contra desastres del estado de gobierno.** `npm run respaldo` vuelca a un archivo
+  todo lo que no se puede reconstruir —organizacion, equipos, ambitos, paquetes, modulos y su
+  historial, auditoria, marcadores, personalizacion, incrustaciones y alertas— y `npm run restaurar`
+  lo devuelve, en seco por defecto. El procedimiento esta en `docs/operations/contingencia.md`.
+  El respaldo NO se lleva las credenciales locales, ni las sesiones, ni los tokens de un solo uso:
+  devolverlos resucitaria sesiones revocadas y enlaces ya gastados.
+- **`/health` avisa cuando el estado se perdio.** Hasta ahora, un almacen que perdiera datos no
+  hacia fallar nada: la aplicacion volvia a los datos de demostracion y respondia 200. Ahora la
+  comprobacion `estado-de-gobierno` lo reporta como caido y dice que falta.
 - Licencia de uso interno sin redistribucion, aviso de componentes de terceros y
   declaracion de autoria.
 - Este registro de cambios.

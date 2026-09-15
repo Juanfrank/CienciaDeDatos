@@ -15,7 +15,19 @@ import { join } from 'node:path';
  * Se copian, no se comparten, para que tampoco puedan escribirse encima.
  */
 const destino = mkdtempSync(join(tmpdir(), 'capa-visualizacion-pruebas-'));
-const source = process.env['CACHE_DIR'] ?? join(process.cwd(), '.cache-datos');
+
+/**
+ * El origen se fija UNA vez por proceso, y eso es lo que lo hace correcto.
+ *
+ * Esto se ejecuta una vez por archivo de prueba, y con los procesos reutilizados
+ * (`isolate: false`) el segundo archivo encontraba `CACHE_DIR` apuntando al directorio temporal
+ * del primero — y copiaba los datasets DE AHI. Mientras nadie borraba nada no se notaba. Una
+ * prueba que vacia el almacen para simular un disco perdido dejaba sin datos a la siguiente que
+ * cayera en su mismo proceso, y el fallo aparecia en un archivo que no tenia nada que ver.
+ */
+const global = globalThis as typeof globalThis & { __fuenteDelCache?: string };
+const source = (global.__fuenteDelCache ??=
+  process.env['CACHE_DIR'] ?? join(process.cwd(), '.cache-datos'));
 
 if (existsSync(source)) {
   for (const archivo of readdirSync(source)) {

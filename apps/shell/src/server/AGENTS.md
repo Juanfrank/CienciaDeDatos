@@ -15,6 +15,7 @@ exportaciones.
 | `exports.ts`, `worker.ts` | Documento exportable y cola |
 | `theme.ts` | Modo de color pedido por cookie |
 | `almacenCompartido.ts` | Estado que sobrevive a mas de una instancia |
+| `backup.ts`, `installation.ts` | Respaldo del estado autoritativo y deteccion de que se perdio |
 
 ## Reglas
 

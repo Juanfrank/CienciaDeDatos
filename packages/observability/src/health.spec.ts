@@ -20,6 +20,7 @@ const base = {
   configuredConnector: 'mock',
   cacheStoreReachable: true,
   identityDbReachable: true,
+  stateStatus: 'en-marcha' as const,
   now,
 };
 
@@ -40,6 +41,35 @@ describe('buildHealthReport (seccion 7)', () => {
     const r = buildHealthReport({ ...base, heartbeat: latido({ connector: 'sql' }) });
     // La conectividad viene del latido que dejo el job, no de un testConnection() del proceso web.
     expect(check(r, 'conector-de-datos').detail).toContain("'sql'");
+  });
+
+  /*
+   * El estado perdido es la contingencia contra desastres vista desde la sonda.
+   *
+   * El gobierno y los modulos caen a la semilla cuando no hay nada guardado, asi que un almacen
+   * que pierde datos no hace fallar nada: la aplicacion vuelve a los datos de demostracion y
+   * parece sana. Seguir respondiendo 200 mientras se enseña la semilla en lugar del gobierno de
+   * la institucion es peor que no responder, porque nadie se entera de que hay que restaurar.
+   */
+  describe('estado de gobierno', () => {
+    it('un despliegue nuevo sin gobierno propio no es una alarma', () => {
+      const r = buildHealthReport({ ...base, stateStatus: 'nueva', heartbeat: latido() });
+      expect(check(r, 'estado-de-gobierno').status).toBe('ok');
+      expect(r.status).toBe('ok');
+    });
+
+    it('pero un despliegue que TUVO estado y ya no lo encuentra esta CAIDO', () => {
+      const r = buildHealthReport({
+        ...base,
+        stateStatus: 'estado-perdido',
+        missingState: ['app:gobierno'],
+        heartbeat: latido(),
+      });
+      expect(check(r, 'estado-de-gobierno').status).toBe('caido');
+      expect(check(r, 'estado-de-gobierno').detail).toContain('app:gobierno');
+      // Y arrastra al informe entero, que es lo que hace que la sonda deje de mandarle trafico.
+      expect(r.status).toBe('caido');
+    });
   });
 
   describe('degradado frente a caido: importa para las sondas de App Service', () => {

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { GridItem, ModuleDefinition } from '@app/module-model';
-import { KEY_HISTORY, KEY_MODULES, modules } from './moduleStore';
+import { modules } from './moduleStore';
+import { KEY_HISTORY, KEY_MODULES } from './almacenCompartido';
 import { borrar } from './almacenCompartido';
 import { clearAudit, auditList } from './audit';
 import { settingsRestart } from './settings';

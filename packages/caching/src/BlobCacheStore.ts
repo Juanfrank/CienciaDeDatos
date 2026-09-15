@@ -15,6 +15,13 @@ export interface BlobCacheStoreOptions {
  */
 const encodeKey = (key: string): string => key.replace(/:/g, '__');
 
+/**
+ * La vuelta, para `keysByPrefix`. Da por hecho que ninguna clave lleva `__` por si misma, que es
+ * lo mismo que ya daba por hecho la codificacion: si alguna lo llevara, el nombre del blob seria
+ * ambiguo en los dos sentidos.
+ */
+const decodeKey = (name: string): string => name.replace(/__/g, ':');
+
 async function readAll(stream: NodeJS.ReadableStream): Promise<string> {
   const chunks: Buffer[] = [];
   for await (const chunk of stream) {
@@ -85,12 +92,27 @@ export class BlobCacheStore implements ICacheStore {
    */
   async deleteByPrefix(prefix: string): Promise<void> {
     try {
-      const listado = this.container.listBlobsFlat({ prefix: `${this.prefix}${encodeKey(prefix)}` });
-      for await (const blob of listado) {
+      for await (const blob of this.listar(prefix)) {
         await this.container.getBlockBlobClient(blob.name).deleteIfExists();
       }
     } catch (error) {
       throw new CacheStoreUnavailableError('BlobCacheStore', error);
     }
+  }
+
+  async keysByPrefix(prefix: string): Promise<string[]> {
+    try {
+      const claves: string[] = [];
+      for await (const blob of this.listar(prefix)) {
+        claves.push(decodeKey(blob.name.slice(this.prefix.length)));
+      }
+      return claves.sort();
+    } catch (error) {
+      throw new CacheStoreUnavailableError('BlobCacheStore', error);
+    }
+  }
+
+  private listar(prefix: string) {
+    return this.container.listBlobsFlat({ prefix: `${this.prefix}${encodeKey(prefix)}` });
   }
 }

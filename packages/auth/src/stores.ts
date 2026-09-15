@@ -10,7 +10,13 @@ export interface LocalCredentialRecord {
   passwordHash: string;
   /** Hashes anteriores, para la no reutilizacion de las ultimas N (4.7.2). */
   passwordHistory: string[];
-  /** Secreto TOTP cifrado en reposo. Segundo factor obligatorio para cuentas locales. */
+  /*
+   * Secreto TOTP. Segundo factor obligatorio para cuentas locales.
+   *
+   * SE GUARDA EN CLARO. Decia «cifrado en reposo» y no lo estaba: no hay cifrado en ninguna parte
+   * y `verifyTotp` lo recibe tal cual. Por eso el respaldo del estado autoritativo deja las
+   * credenciales fuera —ver ADR-022— y por eso cifrarlo esta anotado en el apartado 2.20.
+   */
   totpSecret?: string;
   failedAttempts: number;
   /** Instante hasta el que la cuenta esta bloqueada, en epoch ms. */
