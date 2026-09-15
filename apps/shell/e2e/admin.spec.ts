@@ -298,6 +298,88 @@ test.describe('paquetes visuales (4.10.6)', () => {
   });
 });
 
+test.describe('los equipos, en tabla (4.10.2)', () => {
+  test('la tabla dice cuantos miembros tiene cada equipo, sin abrir nada', async ({ page }) => {
+    /*
+     * Era un acordeon: cada equipo abria la lista entera de nodos del arbol, el desplegable de
+     * paquete y un selector de rol por cada persona del directorio. La pregunta que se hace al
+     * entrar —cuantos son— obligaba a desplegar equipo por equipo y contar a ojo.
+     */
+    await asLogin(page, 'u-admin');
+    await page.goto('/admin/teams');
+
+    const norte = page.getByTestId('equipo-equipo-norte');
+    await expect(norte).toBeVisible();
+    // El numero sale de la membresia de verdad, no de un rotulo escrito a mano.
+    const { equipos } = (await (await page.request.get('/api/admin/teams')).json()) as {
+      equipos: { id: string; members: unknown[] }[];
+    };
+    const cuantos = equipos.find((e) => e.id === 'equipo-norte')?.members.length ?? -1;
+    await expect(page.getByTestId('equipo-equipo-norte-miembros')).toHaveText(String(cuantos));
+  });
+
+  test('miembros y permisos son DOS pantallas, y cada una hace lo suyo', async ({ page }) => {
+    /*
+     * Son dos preguntas distintas —QUIEN esta dentro y QUE alcanza— y juntas obligaban a recorrer
+     * el arbol entero para cambiarle el rol a una persona. Se comprueba que cada pantalla escribe
+     * de verdad, no solo que se abre.
+     */
+    await asLogin(page, 'u-admin');
+    // Sobre un equipo PROPIO: cambiar la membresia de uno de la semilla mueve el acceso de
+    // personas que otras pruebas usan, y el almacen es el mismo para toda la suite.
+    const id = `equipo-dos-pantallas-${Date.now()}`;
+    const creado = await page.request.post('/api/admin/teams', {
+      data: { accion: 'guardar', equipo: { id, name: 'Dos pantallas', grantedNodes: [], members: [] } },
+    });
+    expect(creado.ok(), await creado.text()).toBe(true);
+
+    await page.goto('/admin/teams');
+    await page.getByTestId(`miembros-${id}`).click();
+    await expect(page.getByTestId('tabla-miembros')).toBeVisible();
+    await page.getByTestId(`role-${id}-u-beto`).selectOption('colaborador');
+    await expect(page.getByTestId(`role-${id}-u-beto`)).toHaveValue('colaborador');
+
+    await page.goto('/admin/teams');
+    await page.getByTestId(`permisos-equipo-${id}`).click();
+    await expect(page.getByTestId(`package-${id}`)).toBeVisible();
+    // Y la membresia no se toca desde aqui: es la otra pantalla.
+    await expect(page.getByTestId('tabla-miembros')).toHaveCount(0);
+
+    // Lo que manda es el almacen, no la pantalla.
+    const { equipos } = (await (await page.request.get('/api/admin/teams')).json()) as {
+      equipos: { id: string; members: { userId: string; role: string }[] }[];
+    };
+    const equipo = equipos.find((e) => e.id === id);
+    expect(equipo?.members.find((m) => m.userId === 'u-beto')?.role).toBe('colaborador');
+
+    await page.request.post('/api/admin/teams', { data: { accion: 'borrar', teamId: id } });
+  });
+
+  test('eliminar un equipo PREGUNTA, y dice a cuantos deja sin acceso', async ({ page }) => {
+    await asLogin(page, 'u-admin');
+    const id = `equipo-prueba-${Date.now()}`;
+    const creado = await page.request.post('/api/admin/teams', {
+      data: {
+        accion: 'guardar',
+        equipo: { id, name: 'Equipo de prueba', grantedNodes: [], members: [] },
+      },
+    });
+    expect(creado.ok(), await creado.text()).toBe(true);
+
+    await page.goto('/admin/teams');
+    await page.getByTestId(`borrar-equipo-${id}`).click();
+    // Pregunta antes: quitar un equipo quita el acceso de todos sus miembros a la vez.
+    await expect(page.getByTestId(`borrar-equipo-aviso-${id}`)).toBeVisible();
+    await page.getByTestId(`borrar-equipo-confirmar-${id}`).click();
+
+    await expect(page.getByTestId(`equipo-${id}`)).toHaveCount(0);
+    const { equipos } = (await (await page.request.get('/api/admin/teams')).json()) as {
+      equipos: { id: string }[];
+    };
+    expect(equipos.map((e) => e.id)).not.toContain(id);
+  });
+});
+
 test.describe('membresia (4.10.2)', () => {
   test('anadir y quitar a una persona de un equipo cambia lo que ve', async ({ page }) => {
     await asLogin(page, 'u-admin');

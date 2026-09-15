@@ -1,6 +1,13 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from './instance';
-import { alDia, asLogin, newModule } from './session';
+import {
+  alDia,
+  asLogin,
+  DATASET_DEMO,
+  DISTRITO_DEMO,
+  moduleWithObject,
+  newModule,
+} from './session';
 
 /** El lienzo del editor — seccion 4.2, con la accesibilidad de 4.9. */
 
@@ -17,79 +24,31 @@ test.beforeEach(async ({ page }) => {
   await asLogin(page, 'u-admin');
 });
 
-/**
- * Un modulo con UN objeto ya mapeado, puesto por la API, y el editor abierto encima.
- *
- * Colocar desde la paleta ya no mapea nada: el editor elegia la primera medida y la primera
- * dimension del dataset y las ponia solas, asi que el objeto nacia ensenando una cifra que nadie
- * habia pedido. Las pruebas que necesitan un objeto YA mapeado —casi todas las del panel— parten
- * de aqui.
- *
- * Se escribe por la API y no a golpe de clic en los pozos. Encadenar «anadir» y «elegir» por cada
- * campo deja abierta la lista de opciones del ultimo pozo tocado, que se cierra al abrir la del
- * siguiente: el panel se encoge DESPUES de que el editor diga que no queda nada pendiente, y el
- * clic que venga a continuacion cae en el hueco que el boton acaba de dejar. Ademas, lo que esas
- * pruebas miran no es como se mapea, sino que pasa con un objeto ya mapeado.
- */
-const conObjeto = async (
-  page: Page,
-  slug: string,
-  instancia: Record<string, unknown>,
-): Promise<string> => {
-  const creado = await page.request.post('/api/modules', {
-    data: { nombre: `Modulo ${slug}`, slug },
-  });
-  expect(creado.ok(), await creado.text()).toBe(true);
-  const { modulo } = (await creado.json()) as { modulo: { pages: { pageId: string }[] } };
-
-  const id = 'obj-fijo';
-  const guardado = await page.request.put(`/api/modules/${slug}/edit`, {
-    data: {
-      paginas: [
-        {
-          ...modulo.pages[0],
-          slug: 'general',
-          name: 'General',
-          items: [{ id, position: { x: 0, y: 0, w: 6, h: 4 }, instance: { instanceId: id, ...instancia } }],
-        },
-      ],
-    },
-  });
-  expect(guardado.ok(), await guardado.text()).toBe(true);
-
-  await page.goto(`/editor/${slug}`);
-  // Seleccionado, que es de donde cuelga el panel lateral entero.
-  await page.getByTestId(`select-${id}`).click();
-  await alDia(page);
-  return id;
-};
-
 /** Una tarjeta KPI con su medida puesta, que es lo que casi toda prueba del lienzo necesita. */
 const conMedida = (page: Page, slug: string, medida: string): Promise<string> =>
-  conObjeto(page, slug, {
+  moduleWithObject(page, slug, {
     objectId: 'tarjeta-kpi',
-    version: '1.0.0',
     title: 'Tarjeta KPI',
-    binding: { datasetId: DATASET, dimensions: [], measures: [medida], slots: { valor: [medida] } },
+    binding: {
+      datasetId: DATASET_DEMO,
+      dimensions: [],
+      measures: [medida],
+      slots: { valor: [medida] },
+    },
   });
 
 /** Un grafico de columnas con eje y cifra, como nacia antes. */
 const conBarras = (page: Page, slug: string): Promise<string> =>
-  conObjeto(page, slug, {
+  moduleWithObject(page, slug, {
     objectId: 'barras',
-    version: '1.0.0',
     title: 'Grafico de columnas',
     binding: {
-      datasetId: DATASET,
-      dimensions: [DISTRITO],
+      datasetId: DATASET_DEMO,
+      dimensions: [DISTRITO_DEMO],
       measures: ['CasosIngresados'],
       slots: { 'eje-x': ['DimTribunal.Distrito'], serie: [], 'eje-y': ['CasosIngresados'], multiplo: [] },
     },
   });
-
-/** El dataset y la dimension que usan los fixtures. Los mismos que la semilla. */
-const DATASET = 'casos-por-distrito-trimestre';
-const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };
 
 test.describe('se edita el modulo, no un formulario', () => {
   test('un objeto recien colocado ESPERA sus campos, y luego dibuja datos reales', async ({ page }) => {

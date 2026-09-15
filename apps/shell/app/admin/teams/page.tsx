@@ -1,39 +1,51 @@
-import { TeamEditor } from '../../../src/components/admin/TeamEditor';
+import { TeamsTable } from '../../../src/components/admin/TeamsTable';
 import { administradores } from '../../../src/server/admin';
-import { getGeneralTree, listTeams, listUsers } from '../../../src/server/context';
-import { governance } from '../../../src/server/governance';
-import type { NavNode } from '@app/access-control';
+import { listTeams } from '../../../src/server/context';
+import { translator } from '../../../src/server/locale';
 
 export const dynamic = 'force-dynamic';
 
-function aplanar(nodos: NavNode[], acumulado: { id: string; nombre: string; tipo: string }[] = [], nivel = 0) {
-  for (const node of nodos) {
-    const sangria = '\u00a0\u00a0'.repeat(nivel);
-    if (node.type === 'folder') {
-      acumulado.push({ id: node.id, nombre: `${sangria}${node.name}`, tipo: 'folder' });
-      aplanar(node.children, acumulado, nivel + 1);
-    } else {
-      acumulado.push({ id: node.id, nombre: `${sangria}${node.moduleRef.name}`, tipo: 'module' });
-    }
-  }
-  return acumulado;
-}
-
+/**
+ * Los equipos, en tabla — secciones 4.10.2 y 4.10.8.
+ *
+ * Lo que cada equipo alcanza y quien esta dentro viven en su propia pantalla. Aqui solo estan la
+ * pregunta que se hace al entrar —cuantos son— y las tres acciones que llevan al resto.
+ */
 export default async function TeamPage() {
+  const [t, equipos, quienesAdministran] = await Promise.all([
+    translator(),
+    listTeams(),
+    administradores(),
+  ]);
+
   return (
     <section>
-      <h2>Equipos y membresia</h2>
-      <p className="muted-text">
-        Un equipo es la unidad de agrupacion tanto para el acceso a modulos como para el ambito de
-        datos por defecto. Su acceso se concede otorgando nodos del arbol real, para que el acceso
-        y la estructura nunca diverjan.
+      <h2>{t('admin.teams.title')}</h2>
+      <p className="muted-text">{t('admin.teams.intro')}</p>
+
+      {/*
+        Quien administra, a la vista y antes de tocar nada.
+
+        El servidor impide dejar la aplicacion sin ningun Administrador, pero eso solo avisa
+        cuando ya se esta intentando. Con uno solo, el sistema esta a un cambio de configuracion
+        —o a una baja— de necesitar el procedimiento de acceso de emergencia, y eso no se ve en
+        ninguna otra pantalla.
+      */}
+      <p
+        className={quienesAdministran.length < 2 ? 'aviso notice-atencion' : 'aviso'}
+        data-testid="administradores"
+      >
+        {quienesAdministran.length === 1
+          ? t('admin.teams.onlyOneAdmin', { quien: quienesAdministran[0] ?? '' })
+          : t('admin.teams.admins', { quienes: t.lista(quienesAdministran) })}
       </p>
-      <TeamEditor
-        administradores={await administradores()}
-        equipos={await listTeams()}
-        nodos={aplanar(await getGeneralTree())}
-        usuarios={(await listUsers()).map((u) => u.userId)}
-        paquetes={(await governance.listPackages()).map((p) => ({ id: p.id, name: p.name }))}
+
+      <TeamsTable
+        equipos={equipos.map((e) => ({
+          id: e.id,
+          nombre: e.name,
+          miembros: e.members.length,
+        }))}
       />
     </section>
   );

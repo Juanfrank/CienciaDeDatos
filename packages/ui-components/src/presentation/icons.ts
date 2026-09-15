@@ -129,6 +129,15 @@ export const ICON_STROKES = {
   restablecer: 'M4 12a8 8 0 1 1 2.5 5.8M4 8v4.5h4.5',
   // Una papelera: borrado definitivo, del que no se vuelve.
   papelera: 'M4.5 7h15M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2M6.5 7v12a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V7M10 11v6M14 11v6',
+  /*
+   * Una persona con un engranaje: gestionar QUIEN esta dentro de un equipo.
+   *
+   * Distinto de `persona-ojo`, que es quien VE algo, y de `tuerca` a secas, que es lo que ese
+   * algo puede hacer. Las tres van juntas en la misma fila de la tabla de equipos, asi que
+   * tienen que distinguirse a dieciocho pixeles.
+   */
+  'persona-tuerca':
+    'M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 20a6 6 0 0 1 9-5.2M17.5 14.2a1.4 1.4 0 0 1 2.8 0 1.4 1.4 0 0 0 2 1.15 1.4 1.4 0 0 1-1.4 2.42 1.4 1.4 0 0 0 0 2.3 1.4 1.4 0 0 1-2 1.16 1.4 1.4 0 0 0-2.8 0 1.4 1.4 0 0 1-2-1.15 1.4 1.4 0 0 0 0-2.3 1.4 1.4 0 0 1 1.4-2.43 1.4 1.4 0 0 0 2-1.15M18.9 17.4v.01',
   // Una persona con un ojo: gestionar QUIEN ve esto. El `view` de al lado es solo la persona.
   'persona-ojo':
     'M9.5 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 20a6.5 6.5 0 0 1 11-4.7M14 18.5s2-3 4.5-3 4.5 3 4.5 3-2 3-4.5 3-4.5-3-4.5-3zM18.5 19v.4',

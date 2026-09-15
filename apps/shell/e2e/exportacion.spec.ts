@@ -197,7 +197,14 @@ test.describe('los tres formatos salen con contenido valido', () => {
   for (const [formato, firma, tipo] of [
     ['xlsx', 'PK', 'spreadsheetml'],
     ['pdf', '%PDF-', 'application/pdf'],
-    ['csv', '\uFEFF', 'text/csv'],
+    /*
+     * El CSV se reconoce por su BOM, y el BOM son TRES BYTES.
+     *
+     * La firma se compara sobre los bytes crudos, leidos como latin1, asi que aqui va la forma en
+     * que esos tres bytes se leen —`ï»¿`— y no el caracter U+FEFF que representan: escrito como
+     * caracter, la comparacion tomaba un solo byte y nunca podia coincidir con nada.
+     */
+    ['csv', '\u00ef\u00bb\u00bf', 'text/csv'],
   ] as const) {
     test(`${formato} se descarga con su tipo y su firma`, async ({ page }) => {
       await asLogin(page, 'u-ana');

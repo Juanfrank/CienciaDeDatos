@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import { initialCatalog } from '@app/ui-components';
 import {
   DEMO_KEY,
   SECRETO_TOTP_DEMO,
@@ -65,4 +66,73 @@ export async function alDia(page: Page): Promise<void> {
   await expect(page.locator('.editor')).toHaveAttribute('data-dirty', 'no');
   await expect(page.locator('.editor')).toHaveAttribute('data-saving', 'no');
   await expect(page.locator('.editor')).toHaveAttribute('data-drawing', 'no');
+}
+
+/** El dataset y los campos de la semilla que usan los montajes de abajo. */
+export const DATASET_DEMO = 'casos-por-distrito-trimestre';
+export const DISTRITO_DEMO = { table: 'DimTribunal', field: 'Distrito' };
+
+/**
+ * Un modulo con UN objeto YA mapeado, y el editor abierto encima con ese objeto seleccionado.
+ *
+ * Colocar desde la paleta no mapea nada: el editor elegia la primera medida y la primera
+ * dimension del dataset y las ponia solas, asi que el objeto nacia ensenando una cifra que nadie
+ * habia pedido, y quien lo colocaba no tenia por que sospechar que no era la suya. Las pruebas
+ * que necesitan un objeto configurado parten de aqui.
+ *
+ * Se escribe por la API y no a golpe de clic en los pozos. Encadenar «anadir» y «elegir» por cada
+ * campo deja abierta la lista de opciones del ultimo pozo tocado, que se cierra al abrir la del
+ * siguiente: el panel se encoge DESPUES de que el editor diga que no queda nada pendiente, y el
+ * clic que venga a continuacion cae en el hueco que el boton acaba de dejar. Ademas, lo que esas
+ * pruebas miran no es como se mapea, sino que pasa con un objeto ya mapeado.
+ */
+export async function moduleWithObject(
+  page: Page,
+  slug: string,
+  instancia: { objectId: string } & Record<string, unknown>,
+): Promise<string> {
+  const creado = await page.request.post('/api/modules', {
+    data: { nombre: `Modulo ${slug}`, slug },
+  });
+  expect(creado.ok(), `No se pudo crear el modulo ${slug}: ${await creado.text()}`).toBe(true);
+  const { modulo } = (await creado.json()) as { modulo: { pages: { pageId: string }[] } };
+
+  const id = 'obj-fijo';
+  const guardado = await page.request.put(`/api/modules/${slug}/edit`, {
+    data: {
+      paginas: [
+        {
+          ...modulo.pages[0],
+          slug: 'general',
+          name: 'General',
+          items: [
+            {
+              id,
+              position: { x: 0, y: 0, w: 6, h: 4 },
+              // La ULTIMA version del catalogo, que es la que el editor pone al colocar.
+              // Fijarla a mano en cada montaje dejaba las pruebas contra una version vieja: los
+              // multiplos, por ejemplo, no existen en la 1.0.0 de `barras`, y el objeto se
+              // dibujaba entero en vez de repartido sin que nada dijera por que.
+              instance: { instanceId: id, version: ultimaVersion(instancia.objectId), ...instancia },
+            },
+          ],
+        },
+      ],
+    },
+  });
+  expect(guardado.ok(), `No se pudo montar el objeto: ${await guardado.text()}`).toBe(true);
+
+  await page.goto(`/editor/${slug}`);
+  // Seleccionado, que es de donde cuelga el panel lateral entero.
+  await page.getByTestId(`select-${id}`).click();
+  await alDia(page);
+  return id;
+}
+
+/** La ultima version publicada de un objeto del catalogo. */
+function ultimaVersion(objectId: string): string {
+  const definicion = initialCatalog.find((o) => o.objectId === objectId);
+  const version = definicion?.versions[definicion.versions.length - 1]?.version;
+  expect(version, `El catalogo no tiene ningun '${objectId}'`).toBeDefined();
+  return version ?? '1.0.0';
 }

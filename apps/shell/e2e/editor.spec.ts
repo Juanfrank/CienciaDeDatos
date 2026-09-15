@@ -188,7 +188,7 @@ test.describe('borrador -> pendiente -> publicado (4.1)', () => {
 
     await page.goto('/editor');
     await page.getByTestId(`send-${slug}`).click();
-    await expect(page.getByTestId(`row-${slug}`)).toContainText('Pendiente de aprobacion');
+    await expect(page.getByTestId(`row-${slug}`)).toContainText('Esperando aprobacion');
 
     // Ana no puede publicar lo que ella misma propuso.
     await expect(page.getByTestId(`publish-${slug}`)).toHaveCount(0);
@@ -346,7 +346,7 @@ test.describe('retirar un modulo lo quita de la vista de todos', () => {
       // Y al retirarlo deja de servir, aunque el nodo siga concedido: el estado manda.
       await asLogin(page, 'u-admin');
       const retirada = await page.request.post(`/api/modules/${slug}/status`, {
-        data: { transition: 'devolver', motivo: 'La medida esta mal calculada.' },
+        data: { transition: 'retirar', motivo: 'La medida esta mal calculada.' },
       });
       expect(retirada.ok(), await retirada.text()).toBe(true);
 
@@ -417,19 +417,25 @@ test.describe('lo publicado se guarda, no se pisa (4.5)', () => {
     return modulo.version;
   }
 
-  test('cada publicacion deja una fila, y volver atras publica una NUEVA', async ({ page }) => {
-    const slug = newSlug('historial');
-    await asLogin(page, 'u-admin');
-    await objectDraft(page, slug);
-    const primera = await publicar(page, slug);
+  /**
+   * Anade un objeto a algo YA publicado y lo vuelve a publicar, por el camino que existe.
+   *
+   * Lo publicado no se devuelve a borrador para editarlo: se abre una REVISION, que es un
+   * borrador aparte con su propio slug, y al aprobarla se publica sobre el original conservando
+   * el suyo. Antes estas pruebas lo hacian con «devolver», que retiraba el modulo de la vista de
+   * toda la institucion mientras se editaba.
+   */
+  async function segundaVersion(
+    page: import('@playwright/test').Page,
+    slug: string,
+  ): Promise<string> {
+    const abierta = await page.request.post(`/api/modules/${slug}/revision`, {});
+    expect(abierta.ok(), await abierta.text()).toBe(true);
+    const { modulo } = (await abierta.json()) as { modulo: { slug: string } };
 
-    // Un segundo objeto, y otra publicacion.
-    await page.request.post(`/api/modules/${slug}/status`, {
-      data: { transition: 'devolver', motivo: 'falta la segunda cifra' },
-    });
-    const actual = await (await page.request.get(`/api/modules/${slug}/edit`)).json();
+    const actual = await (await page.request.get(`/api/modules/${modulo.slug}/edit`)).json();
     const pagina = actual.modulo.pages[0];
-    await page.request.put(`/api/modules/${slug}/edit`, {
+    await page.request.put(`/api/modules/${modulo.slug}/edit`, {
       data: {
         paginas: [
           {
@@ -456,7 +462,17 @@ test.describe('lo publicado se guarda, no se pisa (4.5)', () => {
         ],
       },
     });
-    const segunda = await publicar(page, slug);
+    return modulo.slug;
+  }
+
+  test('cada publicacion deja una fila, y volver atras publica una NUEVA', async ({ page }) => {
+    const slug = newSlug('historial');
+    await asLogin(page, 'u-admin');
+    await objectDraft(page, slug);
+    const primera = await publicar(page, slug);
+
+    // Un segundo objeto, y otra publicacion. La revision se publica SOBRE el original.
+    const segunda = await publicar(page, await segundaVersion(page, slug));
     expect(segunda).toBeGreaterThan(primera);
 
     await page.goto(`/admin/modules/${slug}/history`);
@@ -533,13 +549,20 @@ test.describe('cola de revision (4.1)', () => {
     await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'enviar' } });
     await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'publicar' } });
 
-    // Y ahora se propone un cambio: un objeto mas.
-    await page.request.post(`/api/modules/${slug}/status`, {
-      data: { transition: 'devolver', motivo: 'falta la segunda cifra' },
-    });
-    const actual = await (await page.request.get(`/api/modules/${slug}/edit`)).json();
+    /*
+     * Y ahora se propone un cambio: un objeto mas, en una REVISION.
+     *
+     * Lo publicado no se devuelve a borrador para editarlo — eso lo retiraria de la vista de toda
+     * la institucion mientras se edita—, y la revision es un borrador APARTE con su propio slug.
+     * La cola habla de ese slug, que es el que espera decision.
+     */
+    const abierta = await page.request.post(`/api/modules/${slug}/revision`, {});
+    expect(abierta.ok(), await abierta.text()).toBe(true);
+    const { modulo: revision } = (await abierta.json()) as { modulo: { slug: string } };
+
+    const actual = await (await page.request.get(`/api/modules/${revision.slug}/edit`)).json();
     const pagina = actual.modulo.pages[0];
-    await page.request.put(`/api/modules/${slug}/edit`, {
+    await page.request.put(`/api/modules/${revision.slug}/edit`, {
       data: {
         paginas: [
           {
@@ -566,21 +589,23 @@ test.describe('cola de revision (4.1)', () => {
         ],
       },
     });
-    await page.request.post(`/api/modules/${slug}/status`, { data: { transition: 'enviar' } });
+    await page.request.post(`/api/modules/${revision.slug}/status`, {
+      data: { transition: 'enviar' },
+    });
 
     // El aviso de la lista LLEVA a la cola: antes decia cuantas habia y no iba a ninguna parte.
     await page.goto('/admin/modules');
     await page.getByTestId('ir-a-pendientes').click();
     await expect(page).toHaveURL(/\/admin\/modules\/pending/);
 
-    const fila = page.getByTestId(`pending-${slug}`);
+    const fila = page.getByTestId(`pending-${revision.slug}`);
     await expect(fila).toBeVisible();
     await expect(fila).toContainText('Juan F. Medina C.');
     // Y el cambio, en palabras: el objeto nuevo por su titulo, no por su identificador.
-    await expect(page.getByTestId(`pending-diff-${slug}`)).toContainText('Resueltos');
+    await expect(page.getByTestId(`pending-diff-${revision.slug}`)).toContainText('Resueltos');
 
-    await page.getByTestId(`approve-${slug}`).click();
-    await expect(page.getByTestId(`pending-${slug}`)).toHaveCount(0);
+    await page.getByTestId(`approve-${revision.slug}`).click();
+    await expect(page.getByTestId(`pending-${revision.slug}`)).toHaveCount(0);
   });
 
   test('devolver exige el motivo, en un campo de verdad y no en un prompt', async ({ page }) => {
@@ -654,6 +679,17 @@ test.describe('el panel de filtros se personaliza sin escribir codigo (4.2)', ()
 
     await expect(page.getByTestId(`${campo}-recuento`)).toBeChecked();
     await expect(page.getByTestId(`${campo}-orden`)).toHaveValue('alfabetico');
+
+    /*
+     * Las formas de acotar solo se eligen en AVANZADO.
+     *
+     * En basico hay una sola —la lista de valores— y ofrecer las otras cinco seria configurar
+     * algo que el campo no va a ensenar. El nivel es lo primero que se decide, y de el cuelga
+     * todo lo demas.
+     */
+    await expect(page.getByTestId(`${campo}-modo-vacios`)).not.toBeVisible();
+    await page.getByTestId(`${campo}-nivel`).selectOption('avanzado');
+    await alDia(page);
 
     // Quitar formas de acotar deja el campo con las que queden, y nunca con ninguna.
     await page.getByTestId(`${campo}-modo-vacios`).uncheck();

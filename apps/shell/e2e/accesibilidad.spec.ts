@@ -234,9 +234,18 @@ test.describe('navegacion solo con teclado', () => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
-    // Se recorre el orden de tabulacion y se comprueba que los controles clave estan en el.
+    /*
+     * Se recorre el orden de tabulacion hasta dar con los tres controles, no un numero fijo de
+     * veces.
+     *
+     * Eran cuarenta pulsaciones, y cada control que se anade delante —los botones de plegar
+     * carpeta del navegador, por ejemplo— empuja al ultimo fuera de la cuenta: la prueba pasaba a
+     * decir «no se llega al segmentador con el teclado» cuando lo que habia cambiado era la
+     * longitud del camino. El tope sigue existiendo para que un orden roto no deje esto girando.
+     */
+    const buscados = ['nav-casos-pendientes', 'slicer-Penal', 'open-export'];
     const alcanzados: string[] = [];
-    for (let i = 0; i < 40; i += 1) {
+    for (let i = 0; i < 120 && !buscados.every((b) => alcanzados.includes(b)); i += 1) {
       await page.keyboard.press('Tab');
       const testId = await page.evaluate(() =>
         document.activeElement?.getAttribute('data-testid'),

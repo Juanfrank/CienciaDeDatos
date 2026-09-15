@@ -1,7 +1,14 @@
 import { expect, test, type Page } from './instance';
 import { initialCatalog, placeable } from '@app/ui-components';
 import { FIRST_OPENS, KEY_CONTROL } from '../src/components/editor/controls';
-import { alDia, asLogin, newModule } from './session';
+import {
+  alDia,
+  asLogin,
+  DATASET_DEMO,
+  DISTRITO_DEMO,
+  moduleWithObject,
+  newModule,
+} from './session';
 
 /** Todo objeto del catalogo se COLOCA y se CONFIGURA desde el editor — seccion 4.2. */
 
@@ -188,14 +195,19 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
   test('el medidor: fijar el maximo desde el panel cambia la escala del respaldo', async ({
     page,
   }) => {
-    await newModule(page, `usar-medidor-${Date.now()}`);
-    await page.getByTestId('add-medidor').click();
-    await alDia(page);
-    const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
-    const item = (id ?? '').replace('block-', '');
+    // Ya mapeado: colocar desde la paleta no mapea nada, y un medidor sin cifra no tiene escala
+    // que fijar. Lo que esta prueba mira es la escala, no como se mapea.
+    const item = await moduleWithObject(page, `usar-medidor-${Date.now()}`, {
+      objectId: 'medidor',
+      title: 'Medidor',
+      binding: {
+        datasetId: DATASET_DEMO,
+        dimensions: [],
+        measures: ['CasosIngresados'],
+        slots: { valor: ['CasosIngresados'] },
+      },
+    });
 
-    // El objeto llega ya mapeado a la primera medida del dataset: colocar algo que no dibuja nada
-    // seria empezar por una tarjeta vacia. Aqui solo hace falta la escala.
     await page.getByTestId('tab-formato').click();
     await openSections(page);
     // La escala deducida se ve antes de tocar nada: el respaldo la dice siempre.
@@ -215,10 +227,15 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
   });
 
   test('el embudo: cambiar contra que compara cambia la columna del respaldo', async ({ page }) => {
-    await newModule(page, `usar-embudo-${Date.now()}`);
-    await page.getByTestId('add-embudo').click();
-    const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
-    const item = (id ?? '').replace('block-', '');
+    const item = await moduleWithObject(page, `usar-embudo-${Date.now()}`, {
+      objectId: 'embudo',
+      title: 'Embudo',
+      binding: {
+        datasetId: DATASET_DEMO,
+        dimensions: [DISTRITO_DEMO],
+        measures: ['CasosIngresados'],
+      },
+    });
 
     await page.getByTestId('tab-formato').click();
     await openSections(page);
@@ -235,11 +252,21 @@ test.describe('utilizable: configurar desde el panel cambia lo que se dibuja', (
   });
 
   test('los multiplos: elegir dos columnas desde el panel reparte los paneles', async ({ page }) => {
-    await newModule(page, `usar-multiplos-${Date.now()}`);
-    await page.getByTestId('add-barras').click();
-    await alDia(page);
-    const id = await page.locator('[data-testid^="block"]').first().getAttribute('data-testid');
-    const item = (id ?? '').replace('block-', '');
+    const item = await moduleWithObject(page, `usar-multiplos-${Date.now()}`, {
+      objectId: 'barras',
+      title: 'Grafico de columnas',
+      binding: {
+        datasetId: DATASET_DEMO,
+        dimensions: [DISTRITO_DEMO],
+        measures: ['CasosIngresados'],
+        slots: {
+          'eje-x': ['DimTribunal.Distrito'],
+          serie: [],
+          'eje-y': ['CasosIngresados'],
+          multiplo: [],
+        },
+      },
+    });
 
     // El eje ya viene mapeado; lo unico que hay que anadir es la dimension que reparte los paneles.
     await page.getByTestId('tab-datos').click();

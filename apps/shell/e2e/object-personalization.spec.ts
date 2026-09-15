@@ -1,5 +1,5 @@
 import { expect, test } from './instance';
-import { alDia, asLogin } from './session';
+import { alDia, asLogin, DATASET_DEMO, DISTRITO_DEMO, moduleWithObject } from './session';
 
 /** Personalizar un objeto SIN escribir codigo — secciones 4.2 y 4.3. */
 
@@ -22,6 +22,19 @@ const open = async (page: Pagina, prueba: string) => {
   }
 };
 
+/** Un panel de filtros con una dimension ya puesta, que es lo minimo para que tenga selectores. */
+const panelDeFiltros = (page: Pagina, slug: string): Promise<string> =>
+  moduleWithObject(page, slug, {
+    objectId: 'panel-de-filtros',
+    title: 'Filtros',
+    binding: {
+      datasetId: DATASET_DEMO,
+      dimensions: [DISTRITO_DEMO],
+      measures: [],
+      slots: { filtros: ['DimTribunal.Distrito'] },
+    },
+  });
+
 const createModule = async (page: Pagina, slug: string) => {
   await page.goto('/editor');
   await page.getByTestId('new-module-name').fill(slug);
@@ -34,11 +47,18 @@ const createModule = async (page: Pagina, slug: string) => {
 test.describe('el editor configura como se ve un objeto', () => {
   test('icono, acento, resaltado, subtitulo y formato llegan al modulo', async ({ page }) => {
     await asLogin(page, 'u-admin');
-    await createModule(page, 'pers-kpi');
-
-    await page.getByTestId('add-tarjeta-kpi').click();
-    await alDia(page);
-    const id = await blockFirstId(page);
+    // Ya mapeado: colocar desde la paleta no mapea nada, y lo que esta prueba mira es la
+    // presentacion de un objeto que dibuja algo.
+    const id = await moduleWithObject(page, 'pers-kpi', {
+      objectId: 'tarjeta-kpi',
+      title: 'Tarjeta KPI',
+      binding: {
+        datasetId: DATASET_DEMO,
+        dimensions: [],
+        measures: ['CasosIngresados'],
+        slots: { valor: ['CasosIngresados'] },
+      },
+    });
     await page.getByTestId('tab-formato').click();
 
     await page.getByTestId(`pres-${id}-icono`).selectOption('balanza');
@@ -138,11 +158,7 @@ test.describe('el editor configura como se ve un objeto', () => {
 
   test('el panel de filtros deja elegir el selector de cada dimension', async ({ page }) => {
     await asLogin(page, 'u-admin');
-    await createModule(page, 'pers-panel');
-
-    await page.getByTestId('add-panel-de-filtros').click();
-    await alDia(page);
-    const id = await blockFirstId(page);
+    const id = await panelDeFiltros(page, 'pers-panel');
 
     // Se anade una segunda dimension desde su pozo: tiene que aparecer su fila de selector sola.
     await page.getByTestId(`well-${id}-filtros-anadir`).click();
@@ -180,10 +196,7 @@ test.describe('el editor configura como se ve un objeto', () => {
     // Esconderlo dejaria a quien edita preguntandose por que el calendario existe en otro panel
     // y no en este. Deshabilitado con su motivo, la respuesta esta donde surge la pregunta.
     await asLogin(page, 'u-admin');
-    await createModule(page, 'pers-fecha');
-    await page.getByTestId('add-panel-de-filtros').click();
-    await alDia(page);
-    const id = await blockFirstId(page);
+    const id = await panelDeFiltros(page, 'pers-fecha');
     await page.getByTestId('tab-formato').click();
     await open(page, `pres-${id}-selectores`);
 
