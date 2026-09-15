@@ -30,6 +30,14 @@ function fileOf(estado: EstadoExportacion): NonNullable<EstadoExportacion['archi
   return estado.archivo as NonNullable<EstadoExportacion['archivo']>;
 }
 
+/** El contenido de un archivo descargado por el navegador, como texto. */
+async function textoDe(descarga: import('@playwright/test').Download): Promise<string> {
+  const flujo = await descarga.createReadStream();
+  const trozos: Buffer[] = [];
+  for await (const trozo of flujo) trozos.push(Buffer.from(trozo as Buffer));
+  return Buffer.concat(trozos).toString('utf8');
+}
+
 /** Toda prueba empieza con una sesion de verdad; las que necesiten otra persona la piden. */
 test.beforeEach(async ({ page }) => {
   await asLogin(page, 'u-ana');
@@ -143,17 +151,6 @@ test.describe('cada objeto exporta LO QUE MUESTRA, no el dataset entero', () => 
     const cabeceras = csv.split('\r\n').filter((l) => l.startsWith('DimTribunal.Distrito,'));
     expect(new Set(cabeceras).size).toBe(cabeceras.length);
   });
-
-  test('la imagen dibuja el primer GRAFICO, no la primera celda del modulo', async ({ page }) => {
-    await asLogin(page, 'u-ana');
-    const estado = await exportar(page, { modulo: 'casos-pendientes', formato: 'svg' });
-    const svg = await (await page.request.get(fileOf(estado).descargarEn)).text();
-
-    // La primera celda del modulo es una tarjeta KPI. Antes salia un grafico de barras de un
-    // solo numero con la etiqueta repetida; ahora sale el grafico de verdad.
-    expect(svg).toContain('aria-label="Pendientes por distrito"');
-    expect(svg).toContain('>Distrito Norte<');
-  });
 });
 
 test.describe('la procedencia de la vista sobrevive a la exportacion (4.6)', () => {
@@ -196,11 +193,11 @@ test.describe('la procedencia de la vista sobrevive a la exportacion (4.6)', () 
   });
 });
 
-test.describe('los cuatro formatos salen con contenido valido', () => {
+test.describe('los tres formatos salen con contenido valido', () => {
   for (const [formato, firma, tipo] of [
     ['xlsx', 'PK', 'spreadsheetml'],
     ['pdf', '%PDF-', 'application/pdf'],
-    ['svg', '<svg ', 'image/svg+xml'],
+    ['csv', '\uFEFF', 'text/csv'],
   ] as const) {
     test(`${formato} se descarga con su tipo y su firma`, async ({ page }) => {
       await asLogin(page, 'u-ana');
@@ -235,35 +232,43 @@ test.describe('un archivo exportado no es alcanzable por otra persona', () => {
 });
 
 test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => {
-  test('pulsar Generar muestra el estado y luego el enlace de descarga', async ({ page }) => {
+  test('pulsar Generar DESCARGA el archivo, sin pedir un segundo clic', async ({ page }) => {
+    /*
+     * Antes aparecia un enlace «Descargar …» dentro de la barra de iconos y habia que pulsarlo.
+     * Quien pulso «Generar» ya dijo lo que queria: el segundo clic le hace repetir la misma
+     * decision, y mientras tanto el archivo espera a que alguien se acuerde de el.
+     */
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('open-export').click();
     await page.getByLabel('Formato').selectOption('csv');
-    await page.getByTestId('exportar').click();
 
-    // El estado es una region viva: cambia sin recargar y se anuncia a un lector de pantalla.
-    await expect(page.getByTestId('export-status')).toHaveText(/Lista/, { timeout: 15_000 });
+    const [descarga] = await Promise.all([
+      page.waitForEvent('download', { timeout: 20_000 }),
+      page.getByTestId('exportar').click(),
+    ]);
 
-    const enlace = page.getByTestId('descargar-exportacion');
-    await expect(enlace).toBeVisible();
-    await expect(enlace).toContainText('casos-pendientes');
+    expect(descarga.suggestedFilename()).toContain('casos-pendientes');
+    // Y se dice arriba, en el emergente, no dentro de la barra.
+    await expect(page.getByTestId('emergente')).toContainText('casos-pendientes');
   });
 
-  test('cerrar el panel no se lleva por delante el estado ni la descarga', async ({ page }) => {
-    // Una exportacion tarda, y lo normal es cerrar el panel mientras tanto. Si la region viva
-    // viviera dentro, el anuncio de «lista» se perderia justo para quien depende de el.
+  test('cerrar el panel no se lleva por delante la descarga ni el aviso', async ({ page }) => {
+    // Una exportacion tarda, y lo normal es cerrar el panel mientras tanto. El emergente vive en
+    // la disposicion raiz justamente para que cerrar el panel no se lo lleve.
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
 
     await page.getByTestId('open-export').click();
+
+    const espera = page.waitForEvent('download', { timeout: 20_000 });
     await page.getByTestId('exportar').click();
     await page.getByTestId('open-export').click();
     await expect(page.getByTestId('export-panel')).toHaveCount(0);
 
-    await expect(page.getByTestId('export-status')).toHaveText(/Lista/, { timeout: 15_000 });
-    await expect(page.getByTestId('descargar-exportacion')).toBeVisible();
+    await espera;
+    await expect(page.getByTestId('emergente')).toContainText('descargando');
   });
 
   test('exporta lo que se ve: el filtro elegido viaja al archivo', async ({ page }) => {
@@ -274,11 +279,12 @@ test.describe('la interfaz refleja el ciclo encolar-consultar-descargar', () => 
 
     await page.getByTestId('open-export').click();
     await page.getByLabel('Formato').selectOption('csv');
-    await page.getByTestId('exportar').click();
-    await expect(page.getByTestId('export-status')).toHaveText(/Lista/, { timeout: 15_000 });
 
-    const href = await page.getByTestId('descargar-exportacion').getAttribute('href');
-    const csv = await (await page.request.get(href ?? '')).text();
+    const [descarga] = await Promise.all([
+      page.waitForEvent('download', { timeout: 20_000 }),
+      page.getByTestId('exportar').click(),
+    ]);
+    const csv = await textoDe(descarga);
     expect(csv).toContain('DimTribunal.Materia = Penal');
     /*
      * Ni rastro de «Civil», y eso incluye a los objetos de FILTRO.
@@ -334,34 +340,5 @@ test.describe('lo exportado dice lo mismo que la pantalla', () => {
     // reciba el archivo tiene que poder saber contra que se leian esas cifras.
     expect(csv).toContain('# Umbral: 600');
     expect(csv).toContain('# Marcado en pantalla: mayor que 600');
-  });
-
-  test('el SVG dibuja la cifra con el formato de la pantalla', async ({ page }) => {
-    // Aqui si va formateada, porque un SVG se LEE: es una imagen que acaba en una presentacion o
-    // en un correo, no una columna que alguien vaya a sumar.
-    const estado = await exportar(page, {
-      modulo: 'composicion',
-      pagina: 'familia',
-      formato: 'svg',
-    });
-    const svg = await (await page.request.get(fileOf(estado).descargarEn)).text();
-
-    // Con separador de millares, como en pantalla. Sin el formateador saldria «1888».
-    expect(svg).toMatch(/>\d{1,3},\d{3}</);
-  });
-
-  test('y el SVG tampoco pierde la meta: va escrita bajo el grafico', async ({ page }) => {
-    /*
-     * En pantalla la meta es una raya sobre las barras. Fuera del `viewBox` no se veria, y encima
-     * del area de dibujo taparia las barras: por eso se le reserva alto debajo.
-     */
-    const estado = await exportar(page, {
-      modulo: 'composicion',
-      pagina: 'referencia',
-      formato: 'svg',
-    });
-    const svg = await (await page.request.get(fileOf(estado).descargarEn)).text();
-
-    expect(svg).toContain('Meta trimestral: 900');
   });
 });

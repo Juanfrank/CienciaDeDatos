@@ -158,7 +158,7 @@ export function ModuleList({
         </button>
       </form>
 
-      <p className="login__error" role="alert" data-testid="editor-error">
+      <p className="aviso-error" role="alert" data-testid="editor-error">
         {error}
       </p>
 

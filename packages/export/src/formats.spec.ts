@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { aExcel, aPdf } from './binarios';
 import { buildDocument } from './document';
 import { buildHeading } from './heading';
-import { aCsv, aSvg, escaparCsv } from './formats';
+import { aCsv, escaparCsv } from './formats';
 import type { ExportRequest, ExportableObject } from './types';
 
 /**
@@ -137,31 +137,6 @@ describe('aCsv', () => {
 
   it('escapa los valores de las filas', () => {
     expect(aCsv(doc([objeto], peticion()))).toContain('"Civil, comercial",80');
-  });
-});
-
-describe('aSvg', () => {
-  it('produce un svg con una barra por fila y la procedencia escrita', () => {
-    const svg = aSvg(doc([objeto], peticion({ format: 'svg' })));
-    expect(svg).toMatch(/^<svg /);
-    expect(svg.match(/<rect /g)?.length).toBe(1 + objeto.result.rows.length); // fondo + barras
-    expect(svg).toContain('Vista institucional oficial');
-  });
-
-  it('escapa el texto de las etiquetas para no romper el xml', () => {
-    const withAngles: ExportableObject = {
-      title: 'Casos',
-      result: { ...objeto.result, rows: [['<script>', 5]] },
-    };
-    const svg = aSvg(doc([withAngles], peticion({ format: 'svg' })));
-    expect(svg).not.toContain('<script>');
-    expect(svg).toContain('&lt;script&gt;');
-  });
-
-  it('lleva rol de imagen y etiqueta accesible (4.9)', () => {
-    const svg = aSvg(doc([objeto], peticion({ format: 'svg' })));
-    expect(svg).toContain('role="img"');
-    expect(svg).toContain('aria-label="Casos por materia"');
   });
 });
 

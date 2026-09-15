@@ -111,7 +111,7 @@ export function MyView({
           ))}
         </fieldset>
 
-        <p className="login__error" role="alert" data-testid="my-view-error">
+        <p className="aviso-error" role="alert" data-testid="my-view-error">
           {error}
         </p>
 

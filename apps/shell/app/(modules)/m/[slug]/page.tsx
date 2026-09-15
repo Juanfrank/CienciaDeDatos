@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { can } from '@app/access-control';
 import { describeProvenance } from '@app/module-model';
 import { attachmentKeyIs } from '@app/ui-components';
 import { readPersonalization } from '../../../../src/server/personalization';
@@ -97,6 +98,27 @@ export default async function PaginaModulo({
         }
       : undefined;
 
+  /*
+   * A que pantallas de gestion de ESTE modulo puede llegar quien lo esta mirando.
+   *
+   * Se resuelve en el servidor, con el rol de verdad, y solo se envia lo concedido: el cliente no
+   * decide que puede administrar. Y aun asi ninguna de las tres depende de esto para protegerse
+   * —`/admin/*` redirige a quien no sea Administrador y `/editor/*` exige ser el autor—, porque
+   * esconder un enlace no es proteger una ruta.
+   */
+  const actor = await actorDe(sesion);
+  const administracion: { editar?: string; configuracion?: string; permisos?: string } = {
+    ...(can(actor.role, 'crear-editar-modulos-borrador')
+      ? { editar: `/editor/${module.slug}` }
+      : {}),
+    ...(actor.role === 'administrador'
+      ? {
+          configuracion: `/admin/modules/${module.slug}/settings`,
+          permisos: `/admin/modules/${module.slug}/permissions`,
+        }
+      : {}),
+  };
+
   const contenido = (
     <article className="modulo">
       <header className="module__header">
@@ -134,6 +156,7 @@ export default async function PaginaModulo({
         moduleSlug={module.slug}
         pageSlug={loaded.pageSlug}
         {...(module.options ? { options: module.options } : {})}
+        {...(Object.keys(administracion).length > 0 ? { administracion } : {})}
       />
     </article>
   );

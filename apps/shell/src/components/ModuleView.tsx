@@ -10,6 +10,7 @@ import { Bookmarks } from './Bookmarks';
 import { MyView } from './MyView';
 import { ModuleObject } from './ModuleObject';
 import { Grid } from './Grid';
+import { IconLink } from './icons/IconLink';
 import { moduleOptionOn, type ModuleDefinition } from '@app/module-model';
 import type { SerializedObject } from '../server/serialize';
 
@@ -25,6 +26,7 @@ export function ModuleView({
   pageSlug,
   options,
   embedded = false,
+  administracion,
 }: {
   objetos: SerializedObject[];
   provenance: { isPersonalized: boolean; label: string };
@@ -42,6 +44,14 @@ export function ModuleView({
   options?: ModuleDefinition['options'];
   /** true cuando la vista se dibuja dentro del portal de otra institucion (4.9). */
   embedded?: boolean;
+  /**
+   * Las pantallas de gestion de ESTE modulo a las que quien mira tiene permiso.
+   *
+   * Las decide el servidor y llegan ya resueltas: si el cliente decidiera que puede administrar,
+   * estaria escondiendo un enlace en vez de proteger una ruta, y ocultar no es proteger. Lo que
+   * de verdad guarda cada destino es su propia puerta.
+   */
+  administracion?: { editar?: string; configuracion?: string; permisos?: string };
 }) {
   const ofrece = (opcion: Parameters<typeof moduleOptionOn>[1]) =>
     moduleOptionOn({ ...(options ? { options } : {}) }, opcion);
@@ -109,6 +119,46 @@ export function ModuleView({
             ) : null}
             {ofrece('embebido') ? (
               <Embed moduleSlug={moduleSlug} {...(pageSlug ? { pageSlug } : {})} />
+            ) : null}
+
+            {/*
+              Lo de ADMINISTRAR el modulo, separado de lo que se hace con sus datos.
+
+              Van aqui y no solo en el panel de administracion porque es donde se descubre que
+              hacen falta: se esta mirando el modulo, se ve que un objeto sobra o que el nombre
+              esta mal, y buscarlo otra vez desde una tabla de treinta filas para cambiarlo es un
+              rodeo que nadie da — lo que se hace es dejarlo como esta.
+
+              Llevan a la MISMA pantalla que el panel, no a una copia: un segundo formulario de
+              configuracion seria un segundo sitio donde arreglar el dia que algo cambie.
+            */}
+            {administracion ? (
+              <span className="module-bar__gestion">
+                {administracion.editar ? (
+                  <IconLink
+                    icono="editar"
+                    etiqueta="Editar el modulo"
+                    href={administracion.editar}
+                    data-testid="modulo-editar"
+                  />
+                ) : null}
+                {administracion.configuracion ? (
+                  <IconLink
+                    icono="tuerca"
+                    etiqueta="Configuracion del modulo"
+                    href={administracion.configuracion}
+                    data-testid="modulo-configuracion"
+                  />
+                ) : null}
+                {administracion.permisos ? (
+                  <IconLink
+                    icono="llave"
+                    etiqueta="Permisos del modulo"
+                    href={administracion.permisos}
+                    data-testid="modulo-permisos"
+                  />
+                ) : null}
+              </span>
             ) : null}
           </div>
 

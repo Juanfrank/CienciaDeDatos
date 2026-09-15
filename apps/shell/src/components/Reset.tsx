@@ -20,7 +20,7 @@ export function Reset() {
     if (clave !== repetida) {
       // Se comprueba aqui y no en el servidor: no es una regla de seguridad, es evitar que una
       // errata deje a alguien fuera con una contraseña que no sabe cual es.
-      setError('Las dos contrasenas no coinciden.');
+      setError('Las dos contraseñas no coinciden.');
       return;
     }
 
@@ -41,7 +41,7 @@ export function Reset() {
       const detalle = Array.isArray(body.detalle)
         ? ` ${body.detalle.map((d) => d.message).join(' ')}`
         : '';
-      setError(`${body.error ?? 'No se pudo restablecer la contrasena.'}${detalle}`);
+      setError(`${body.error ?? 'No se pudo restablecer la contraseña.'}${detalle}`);
     } finally {
       setEnviando(false);
     }
@@ -49,12 +49,12 @@ export function Reset() {
 
   if (hecho) {
     return (
-      <main className="acceso">
-        <div className="login__card">
-          <h1>Contrasena restablecida</h1>
+      <main className="pantalla">
+        <div className="pantalla__tarjeta">
+          <h1>Contraseña restablecida</h1>
           <p className="muted-text">
-            Ya puede iniciar sesion con la contrasena new y su code de verificacion. Las
-            sessions que estuvieran abiertas con la anterior se han cerrado.
+            Ya puede iniciar sesión con la contraseña nueva y su código de verificación. Las
+            sesiones que estuvieran abiertas con la anterior se han cerrado.
           </p>
           <button
             type="button"
@@ -62,7 +62,7 @@ export function Reset() {
             data-testid="reset-ir-a-acceso"
             onClick={() => router.push('/sign-in')}
           >
-            Iniciar sesion
+            Iniciar sesión
           </button>
         </div>
       </main>
@@ -70,17 +70,17 @@ export function Reset() {
   }
 
   return (
-    <main className="acceso">
+    <main className="pantalla">
       <form
-        className="login__card"
+        className="pantalla__tarjeta"
         onSubmit={(e) => {
           e.preventDefault();
           void enviar();
         }}
       >
-        <h1>Restablecer contrasena</h1>
+        <h1>Restablecer contraseña</h1>
         <p className="muted-text">
-          Con el identificador y el codigo que le entrego un Administrador. El codigo solo sirve
+          Con el identificador y el código que le entregó un Administrador. El código solo sirve
           una vez y caduca a los quince minutos.
         </p>
 
@@ -95,7 +95,7 @@ export function Reset() {
         </p>
 
         <p className="form__field">
-          <label htmlFor="reset-code">Codigo</label>
+          <label htmlFor="reset-code">Código</label>
           <input
             id="reset-code"
             value={code}
@@ -105,7 +105,7 @@ export function Reset() {
         </p>
 
         <p className="form__field">
-          <label htmlFor="reset-clave">Contrasena new</label>
+          <label htmlFor="reset-clave">Contraseña nueva</label>
           <input
             id="reset-clave"
             type="password"
@@ -116,13 +116,13 @@ export function Reset() {
             onChange={(e) => setClave(e.target.value)}
           />
           <span id="reset-requisitos" className="muted-text">
-            Al menos 12 caracteres, con mayuscula, minuscula, digito y simbolo. No puede ser
-            ninguna de sus ultimas cinco contrasenas.
+            Al menos 12 caracteres, con mayúscula, minúscula, dígito y símbolo. No puede ser
+            ninguna de sus últimas cinco contraseñas.
           </span>
         </p>
 
         <p className="form__field">
-          <label htmlFor="reset-repetida">Repita la contrasena new</label>
+          <label htmlFor="reset-repetida">Repita la contraseña nueva</label>
           <input
             id="reset-repetida"
             type="password"
@@ -133,7 +133,7 @@ export function Reset() {
           />
         </p>
 
-        <p className="login__error" role="alert" data-testid="reset-error">
+        <p className="aviso-error" role="alert" data-testid="reset-error">
           {error}
         </p>
 

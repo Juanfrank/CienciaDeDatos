@@ -16,7 +16,7 @@ export {
   type ExportPalette,
 } from './document';
 export { buildHeading, type Heading } from './heading';
-export { aCsv, aSvg, escaparCsv } from './formats';
+export { aCsv, escaparCsv } from './formats';
 export {
   generarArtefacto,
   pendientesProcess,

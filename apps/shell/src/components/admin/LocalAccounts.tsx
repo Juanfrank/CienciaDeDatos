@@ -78,7 +78,7 @@ export function LocalesAccounts({
             "su identidad. Usted responde de esa verificacion."}
       </p>
 
-      <p className="login__error" role="alert" data-testid="accounts-error">
+      <p className="aviso-error" role="alert" data-testid="accounts-error">
         {error}
       </p>
 

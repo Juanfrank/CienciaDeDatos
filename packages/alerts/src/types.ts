@@ -61,8 +61,14 @@ export interface Subscription {
   moduleSlug: string;
   pageSlug?: string;
   filters: Record<string, string[]>;
-  /** Formato del archivo entregado. Se genera por la cola de exportacion (5.3). */
-  format: 'csv' | 'xlsx' | 'pdf' | 'svg';
+  /**
+   * Formato del archivo entregado. Se genera por la cola de exportacion (5.3).
+   *
+   * Los mismos tres que ofrece la exportacion a mano, escritos aqui y no importados de
+   * `@app/export`: este paquete no depende de aquel, y hacerlo depender para una union de tres
+   * cadenas invertiria la direccion del grafo. Que no se separen lo comprueba una prueba.
+   */
+  format: 'csv' | 'xlsx' | 'pdf';
   cadence: Cadence;
   /** Hora de entrega, 0-23. */
   hour: number;

@@ -1,7 +1,7 @@
 import { defaultTheme, lightTheme } from '@app/design-tokens';
 import { describe, expect, it } from 'vitest';
 import { buildDocument, paletteOf, cellText, type ExportableSheet } from './document';
-import { aCsv, aSvg } from './formats';
+import { aCsv } from './formats';
 import type { ExportRequest, ExportableObject } from './types';
 
 /**
@@ -12,7 +12,7 @@ import type { ExportRequest, ExportableObject } from './types';
 const peticion: ExportRequest = {
   moduleSlug: 'casos',
   moduleName: 'Casos pendientes',
-  format: 'svg',
+  format: 'pdf',
   requestedBy: 'ana',
   teamId: 'equipo-norte',
   provenance: { isPersonalized: false, label: 'Vista institucional oficial' },
@@ -55,15 +55,14 @@ describe('buildDocument', () => {
     expect(document.grafico?.title).toBe('Pendientes por distrito');
   });
 
-  it('sin ningun grafico deja el campo vacio y el SVG cae en la primera hoja', () => {
+  it('sin ningun objeto marcado como grafico, el campo se queda vacio', () => {
     const document = buildDocument([kpi], peticion);
     expect(document.grafico).toBeUndefined();
-
-    // Mejor una imagen pobre que un archivo vacio; el encabezado dice de que objeto sale.
-    expect(aSvg(document)).toContain('Casos pendientes');
+    // Y las hojas siguen ahi: lo que no hay es una figura que destacar, no datos.
+    expect(document.leaves[0]?.title).toBe('Casos pendientes');
   });
 
-  it('construye el encabezado una sola vez, para los cuatro formatos', () => {
+  it('construye el encabezado una sola vez, para los tres formatos', () => {
     const document = buildDocument([barras], peticion);
     expect(document.heading.titulo).toBe('Casos pendientes');
     expect(document.heading.personalizada).toBe(false);
@@ -79,21 +78,6 @@ describe('buildDocument', () => {
   });
 });
 
-describe('aSvg sobre el documento', () => {
-  it('dibuja una barra por fila del grafico elegido, con sus etiquetas reales', () => {
-    const svg = aSvg(buildDocument([kpi, barras], peticion));
-
-    expect(svg.match(/<rect /g)?.length).toBe(3); // fondo + dos barras
-    expect(svg).toContain('>Norte<');
-    expect(svg).toContain('>Sur<');
-    expect(svg).toContain('aria-label="Pendientes por distrito"');
-  });
-
-  it('un documento sin ninguna hoja no se dibuja a medias: falla y lo dice', () => {
-    expect(() => aSvg(buildDocument([], peticion))).toThrow(/dibujar/i);
-  });
-});
-
 describe('la marca institucional llega al archivo exportado', () => {
   it('las series del documento son las del tema, no una paleta propia del exportador', () => {
     // Era el hueco: los cuatro generadores tenian sus colores escritos a mano, asi que un PDF
@@ -105,12 +89,6 @@ describe('la marca institucional llega al archivo exportado', () => {
     expect(document.palette.series[0]).toBe(lightTheme.color.primary);
   });
 
-  it('el SVG se dibuja con el azul institucional', () => {
-    const svg = aSvg(buildDocument([kpi, barras], peticion));
-    expect(svg).toContain(`fill="${lightTheme.color.primary}"`);
-    expect(svg).toContain(`fill="${defaultTheme.color.surface}"`);
-  });
-
   it('un tema distinto cambia el archivo sin tocar el generador', () => {
     // Es la prueba de que el color esta centralizado de verdad: el dia que la institucion
     // cambie su paleta, no hay que entrar en los generadores.
@@ -118,7 +96,7 @@ describe('la marca institucional llega al archivo exportado', () => {
       ...defaultTheme,
       color: { ...defaultTheme.color, categorical: ['#123456', '#654321'] },
     };
-    expect(aSvg(buildDocument([barras], peticion, other))).toContain('fill="#123456"');
+    expect(buildDocument([barras], peticion, other).palette.series[0]).toBe('#123456');
   });
 });
 
@@ -170,14 +148,4 @@ describe('lo que se lee y lo que se calcula no son lo mismo', () => {
     expect(csv).toContain('# Meta: 900');
   });
 
-  it('el SVG dibuja la cifra formateada y escribe las notas', () => {
-    const svg = aSvg({
-      heading: { titulo: 'T', lineas: [], personalizada: false, autor: 'u-admin' },
-      leaves: [sheet()],
-      palette: paletteOf(),
-      grafico: sheet(),
-    });
-    expect(svg).toContain('2,216 casos');
-    expect(svg).toContain('Meta: 900');
-  });
 });

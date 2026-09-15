@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
 import { defaultIdentity } from '@app/design-tokens';
+import { Emergentes } from '../src/components/Emergentes';
 import { Header } from '../src/components/Header';
 import { LocaleProvider } from '../src/components/Locale';
 import { sessionGet } from '../src/server/session';
@@ -76,6 +77,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <LocaleProvider locale={locale}>
           {sesion && !incrustada ? <Header sesion={sesion} /> : null}
           {children}
+          {/*
+            La pila de mensajes emergentes se dibuja UNA vez, aqui, y no dentro de cada pantalla.
+            Dentro de una pantalla, navegar a otra desmontaria el mensaje justo cuando se acaba
+            de provocar —publicar y volver a la lista, por ejemplo— y el resultado se perderia.
+          */}
+          {incrustada ? null : <Emergentes />}
         </LocaleProvider>
       </body>
     </html>

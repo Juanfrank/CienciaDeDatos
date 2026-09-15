@@ -1,7 +1,7 @@
 import type { ThemeTokens } from '@app/design-tokens';
 import { aExcel, aPdf } from './binarios';
 import { buildDocument } from './document';
-import { aCsv, aSvg } from './formats';
+import { aCsv } from './formats';
 import type { IExportQueue } from './queue';
 import { MIME_KINDS, fileName } from './types';
 import type { ExportJob, ExportRequest, ExportableObject } from './types';
@@ -56,11 +56,6 @@ export async function generarArtefacto(
       break;
     case 'pdf':
       contenido = await aPdf(document);
-      break;
-    case 'svg':
-      // Un SVG es UNA imagen. `documento.grafico` ya eligio cual: el primer objeto marcado como
-      // grafico, no el primero a secas.
-      contenido = Buffer.from(aSvg(document), 'utf8');
       break;
   }
 

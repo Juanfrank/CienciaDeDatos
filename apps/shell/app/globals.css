@@ -86,7 +86,7 @@ h1, h2, h3, h4 { margin: 0; }
 .md-headline-small,
 .admin__header h1,
 .avisos h1,
-.login__card h1 {
+.pantalla__tarjeta h1 {
   font-size: var(--md-sys-typescale-headline-small-size);
   line-height: var(--md-sys-typescale-headline-small-line-height);
   font-weight: var(--md-sys-typescale-headline-small-weight);
@@ -653,7 +653,6 @@ input[type='radio'] {
 .editor__object,
 .editor__palette,
 .editor__create,
-.login__card,
 .bookmarks__panel {
   background: var(--md-sys-color-surface-container-lowest);
   border: 1px solid var(--md-sys-color-outline-variant);
@@ -1785,7 +1784,14 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
  * ancla que dijera en que modulo se esta sin tener que leer.
  */
 .module__header {
-  margin-bottom: var(--space-md);
+  /*
+   * Poco hueco hasta la barra de abajo, y a proposito.
+   *
+   * El nombre del modulo, su fecha de datos y la fila de insignias son UNA cosa —el encabezado de
+   * lo que se esta mirando—, y separarlos con el mismo aire que hay entre bloques distintos los
+   * hacia leerse como dos. La divisoria de la barra ya marca donde acaba.
+   */
+  margin-bottom: var(--space-xs);
   padding-left: var(--space-md);
   border-left: 4px solid var(--md-sys-color-primary);
   border-radius: var(--md-sys-shape-corner-extra-small);
@@ -1803,6 +1809,68 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
   gap: var(--space-md);
   flex-wrap: wrap;
   margin-bottom: var(--space-md);
+}
+
+/*
+ * Mensajes emergentes: arriba, centrados y por encima de todo.
+ *
+ * Fijos a la ventana y no dentro de la pantalla, porque lo que informan —«objeto subido a
+ * v1.4.0»— tiene que leerse sin importar por donde ande el desplazamiento. `pointer-events: none`
+ * en la pila y `auto` en cada mensaje: la franja vacia no puede robar clics a lo que tape.
+ */
+.emergentes {
+  position: fixed;
+  top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
+  left: 50%;
+  translate: -50% 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  width: min(32rem, calc(100vw - 2 * var(--space-md)));
+  pointer-events: none;
+}
+.emergente {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--md-sys-shape-corner-medium);
+  box-shadow: var(--md-sys-elevation-3);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  pointer-events: auto;
+}
+/*
+ * El color NO es lo unico que distingue un fallo de un acierto.
+ *
+ * El texto de cada mensaje dice ya lo que paso; el color solo lo subraya. Es el criterio de 4.9:
+ * quien no distinga los dos tonos sigue leyendo cual es cual.
+ */
+.emergente[data-clase='exito'] {
+  background: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
+}
+.emergente[data-clase='fallo'] {
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
+.emergente__texto { flex: 1; }
+.emergente__cerrar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  color: inherit;
+  cursor: pointer;
+}
+.emergente__cerrar:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
 }
 
 /*
@@ -1829,6 +1897,21 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
   padding-left: var(--space-sm);
   border-left: 1px solid var(--md-sys-color-outline-variant);
 }
+/*
+ * Lo de administrar el modulo, tras su propia divisoria.
+ *
+ * A la izquierda lo que se hace con los DATOS —personalizar, marcar, exportar, vigilar,
+ * incrustar—; a la derecha lo que se hace con el MODULO. Sin la raya son ocho iconos seguidos y
+ * hay que abrirlos uno a uno para saber cual es cual.
+ */
+.module-bar__gestion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-left: var(--space-xs);
+  padding-left: var(--space-xs);
+  border-left: 1px solid var(--md-sys-color-outline-variant);
+}
 .module-bar__clear { margin-left: auto; }
 
 /*
@@ -1853,6 +1936,8 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
   cursor: pointer;
   position: relative;
   isolation: isolate;
+  /* Lo usa tambien un `<a>` —los accesos a administrar el modulo—, y un enlace trae subrayado. */
+  text-decoration: none;
 }
 .icon-button::before {
   content: '';
@@ -3821,7 +3906,14 @@ th[aria-sort='descending'] .table__flecha {
   line-height: var(--md-sys-typescale-body-small-line-height);
 }
 
-.exportar { display: inline-flex; align-items: center; gap: var(--space-sm); position: relative; }
+/*
+ * `display: inline-flex` SIN hueco entre hijos, porque el unico hijo en linea es el boton.
+ *
+ * Llevaba `gap`, y con el una region de estado vacia al lado abria un hueco entre el icono de
+ * exportar y el siguiente de la barra: un espacio que nadie habia decidido y que descuadraba la
+ * fila. El panel va absoluto, asi que no cuenta para el hueco.
+ */
+.exportar { display: inline-flex; align-items: center; position: relative; }
 .exportar__panel {
   position: absolute;
   top: calc(100% + var(--space-xs));
@@ -3829,7 +3921,10 @@ th[aria-sort='descending'] .table__flecha {
   z-index: 30;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-sm);
+  width: max-content;
+  max-width: 22rem;
   padding: var(--space-md);
   background: var(--md-sys-color-surface-container-high);
   border-radius: var(--md-sys-shape-corner-medium);
@@ -3837,7 +3932,12 @@ th[aria-sort='descending'] .table__flecha {
 }
 .exportar__label { font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface-variant); }
 .exportar__format { min-height: 40px; }
-.exportar__status { font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface-variant); }
+.exportar__status {
+  flex-basis: 100%;
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.exportar__status:empty { display: none; }
 
 .preguntar { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-md); }
 .ask__field { flex: 1 1 320px; min-width: 0; }
@@ -4074,19 +4174,32 @@ th[aria-sort='descending'] .table__flecha {
 }
 
 /*
- * La tarjeta de las OTRAS pantallas que se dibujan sobre `.acceso` — hoy, restablecer contrasena.
+ * Una pantalla suelta, con su tarjeta: restablecer la contrasena, hoy.
  *
- * Comparten el fondo pero no el membrete: alli ya se sabe a donde se ha llegado, porque se llega
- * desde dentro. Se queda con la caja de siempre.
+ * NO comparte el aspecto de la de acceso, y es deliberado. Aquella es la puerta de la
+ * institucion y por eso lleva membrete y fondo propio; a esta se llega desde dentro, con un
+ * codigo que alguien ya te dio, asi que se ve como el resto de la aplicacion. Un degradado
+ * oscuro en mitad de un tramite hace dudar de si uno sigue en el mismo sitio.
  */
-.login__card {
+.pantalla {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  overflow-y: auto;
+  padding: var(--space-lg);
+  background: var(--md-sys-color-surface);
+}
+.pantalla__tarjeta {
+  margin: auto;
   width: min(28rem, 100%);
   padding: var(--space-xl);
-  background: var(--md-sys-color-surface-container-low);
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-extra-large);
+  box-shadow: var(--md-sys-elevation-1);
 }
-.login__card h1 { margin-bottom: var(--space-lg); }
-.login__card > .muted-text:last-child { margin-top: var(--space-md); }
+.pantalla__tarjeta h1 { margin-bottom: var(--space-lg); }
+.pantalla .pastilla { width: 100%; margin-top: var(--space-sm); }
 
 /*
  * El aviso de error de un formulario, en cualquier pantalla.
@@ -4094,7 +4207,7 @@ th[aria-sort='descending'] .table__flecha {
  * Reserva su alto aunque este vacio: sin la reserva, el mensaje aparece y empuja el boton hacia
  * abajo justo cuando la mano va a pulsarlo otra vez.
  */
-.login__error {
+.aviso-error {
   min-height: 1.25rem;
   margin: 0 0 var(--space-sm);
   font-size: var(--md-sys-typescale-body-medium-size);

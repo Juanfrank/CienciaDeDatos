@@ -1,25 +1,26 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useUrlFilters } from '../hooks/useUrlFilters';
 import { IconButton } from './icons/IconButton';
+import { emergente } from './emergentes';
 import { exportTracker, type ExportStatus } from './exportJob';
 
 /** Exportar — seccion 4.9, encolado como exige 5.3. */
 
+/*
+ * Tres formatos, y ninguno es una imagen.
+ *
+ * El SVG estaba y se retira: lo que se exporta aqui son los DATOS de un modulo, y una imagen no
+ * se abre en una hoja de calculo, no se adjunta a un expediente y no se puede comprobar. Quien
+ * queria una figura para una presentacion tiene la captura del navegador, que ademas sale igual a
+ * lo que estaba viendo.
+ */
 const FORMATS = [
   { valor: 'csv', etiqueta: 'CSV' },
   { valor: 'xlsx', etiqueta: 'Excel' },
   { valor: 'pdf', etiqueta: 'PDF' },
-  { valor: 'svg', etiqueta: 'Imagen (SVG)' },
 ] as const;
-
-const TEXT: Record<ExportStatus['estado'], string> = {
-  encolada: 'En cola…',
-  procesando: 'Generando…',
-  lista: 'Lista',
-  fallida: 'No se pudo generar',
-};
 
 export function Export({
   moduleSlug,
@@ -44,6 +45,50 @@ export function Export({
 
   // Sin esto, salir de la pagina con una exportacion en curso deja el intervalo corriendo.
   useEffect(() => seguidor.detener, [seguidor]);
+
+  /*
+   * Lo ya descargado, para no bajarlo dos veces.
+   *
+   * El sondeo sigue devolviendo «lista» mientras nadie lo pare, asi que sin esta memoria cada
+   * vuelta dispararia otra descarga del mismo archivo.
+   */
+  const bajado = useRef<string | null>(null);
+
+  /*
+   * En cuanto el archivo esta, SE DESCARGA. No se ofrece un enlace.
+   *
+   * Quien pulso «Generar» ya dijo lo que queria; pedirle un segundo clic sobre un enlace que
+   * ademas aparece dentro de la barra de iconos es hacerle repetir la misma decision, y deja el
+   * archivo esperando a que alguien se acuerde. El aviso de que se genero va al emergente de
+   * arriba, que se lee sin buscar y se va solo.
+   */
+  useEffect(() => {
+    const archivo = trabajo?.archivo;
+    if (!archivo || bajado.current === archivo.descargarEn) return;
+    bajado.current = archivo.descargarEn;
+
+    const enlace = document.createElement('a');
+    enlace.href = archivo.descargarEn;
+    enlace.download = archivo.nombre;
+    enlace.rel = 'noopener';
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+
+    emergente(
+      `${archivo.nombre} (${Math.max(1, Math.round(archivo.bytes / 1024))} KB) se esta descargando.`,
+    );
+  }, [trabajo?.archivo]);
+
+  // Un fallo tambien se dice arriba, y con el motivo: dentro de la barra se quedaba en «No se
+  // pudo generar», que no da nada con lo que hacer algo.
+  useEffect(() => {
+    if (trabajo?.estado !== 'fallida') return;
+    emergente(trabajo.error ?? 'No se pudo generar la exportacion.', 'fallo');
+  }, [trabajo?.estado, trabajo?.error]);
+
+  /** Encolada o generandose: el boton no admite un segundo encargo del mismo. */
+  const enCurso = trabajo?.estado === 'encolada' || trabajo?.estado === 'procesando';
 
   const exportar = () => {
     const filtros: Record<string, string[]> = {};
@@ -85,33 +130,28 @@ export function Export({
               </option>
             ))}
           </select>
-          <button type="button" className="pastilla" data-testid="exportar" onClick={exportar}>
-            Generar
+          <button
+            type="button"
+            className="pastilla"
+            data-testid="exportar"
+            disabled={enCurso}
+            onClick={exportar}
+          >
+            {enCurso ? 'Generando…' : 'Generar'}
           </button>
+
+          {/*
+            Lo que esta pasando se dice DENTRO del panel, junto al boton que lo provoco.
+
+            Fuera, en la barra de iconos, este mismo texto era un hueco vacio entre el icono de
+            descargar y el siguiente mientras no hubiera nada que decir — un espacio que nadie
+            habia puesto y que descuadraba la fila. El resultado final va al emergente de arriba,
+            que sobrevive a cerrar el panel.
+          */}
+          <span className="exportar__status" role="status" data-testid="export-status">
+            {enCurso ? 'La exportacion se descargara sola al terminar.' : ''}
+          </span>
         </div>
-      ) : null}
-
-      {/*
-        La region viva vive FUERA del panel.
-
-        Si estuviera dentro, cerrar el panel la desmontaria y el anuncio de "lista" se perderia
-        justo para quien depende de el. Una exportacion tarda, y lo normal es cerrar el panel
-        mientras tanto.
-      */}
-      <span className="exportar__status" role="status" aria-live="polite" data-testid="export-status">
-        {trabajo ? TEXT[trabajo.estado] : ''}
-        {trabajo?.error ? ` — ${trabajo.error}` : ''}
-      </span>
-
-      {trabajo?.archivo ? (
-        <a
-          className="button-link"
-          href={trabajo.archivo.descargarEn}
-          download={trabajo.archivo.nombre}
-          data-testid="descargar-exportacion"
-        >
-          Descargar {trabajo.archivo.nombre} ({Math.max(1, Math.round(trabajo.archivo.bytes / 1024))} KB)
-        </a>
       ) : null}
     </div>
   );

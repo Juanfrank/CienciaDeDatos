@@ -2,15 +2,22 @@ import type { QueryResult } from '@app/data-contracts';
 
 /** Exportacion — seccion 4.9, con la restriccion arquitectonica de 5.3. */
 
-export type ExportFormat = 'csv' | 'xlsx' | 'pdf' | 'svg';
+/*
+ * Tres formatos, y ninguno es una imagen.
+ *
+ * Hubo un cuarto, `svg`. Lo que se exporta de un modulo son sus DATOS, y una imagen no se abre en
+ * una hoja de calculo, no se adjunta a un expediente y no se puede comprobar contra nada: es una
+ * captura de pantalla con mas pasos. Se retira del tipo y no solo del desplegable, para que no
+ * quede una ruta que siga aceptandolo por la puerta de atras.
+ */
+export type ExportFormat = 'csv' | 'xlsx' | 'pdf';
 
-export const FORMATS: readonly ExportFormat[] = ['csv', 'xlsx', 'pdf', 'svg'];
+export const FORMATS: readonly ExportFormat[] = ['csv', 'xlsx', 'pdf'];
 
 export const MIME_KINDS: Record<ExportFormat, string> = {
   csv: 'text/csv; charset=utf-8',
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   pdf: 'application/pdf',
-  svg: 'image/svg+xml',
 };
 
 export type ExportStatus = 'encolada' | 'procesando' | 'lista' | 'fallida';

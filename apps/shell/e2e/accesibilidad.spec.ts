@@ -68,13 +68,19 @@ test.describe('paginas de modulo', () => {
     expect(dentro).toBe(true);
   });
 
-  test('el estado de una exportacion en curso es accesible', async ({ page }) => {
+  test('el aviso de una exportacion terminada es accesible', async ({ page }) => {
     await asLogin(page, 'u-ana');
     await page.goto('/m/casos-pendientes');
     await page.getByTestId('open-export').click();
-    await page.getByTestId('exportar').click();
-    await expect(page.getByTestId('export-status')).toHaveText(/Lista/, { timeout: 15_000 });
 
+    await Promise.all([
+      page.waitForEvent('download', { timeout: 20_000 }),
+      page.getByTestId('exportar').click(),
+    ]);
+    await expect(page.getByTestId('emergente')).toBeVisible();
+
+    // El emergente se dibuja encima de todo: si su contraste o su boton de cerrar estuvieran
+    // mal, seria justo el aviso que no se puede leer ni descartar.
     expect(await infracciones(page)).toEqual([]);
   });
 });
