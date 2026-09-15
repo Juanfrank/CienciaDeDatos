@@ -97,6 +97,7 @@ export const INSTITUTIONAL_STYLE: ThemeStyle = {
   shape: SHAPE,
   shadowShape: 'material',
   shadowTint: TINTE_NEUTRO,
+  tones: {},
 };
 
 export const lightTheme: MaterialTheme = materialTheme(

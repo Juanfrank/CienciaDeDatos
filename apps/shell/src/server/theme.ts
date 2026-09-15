@@ -3,6 +3,7 @@ import {
   CONTRAST_PAIRS,
   INSTITUTIONAL_THEME,
   SEMANTIC_ROLES,
+  OUTLINE_SCALES,
   SHADOW_SHAPES,
   SHAPE_SCALES,
   SOURCE_ROLES,
@@ -185,7 +186,7 @@ export async function saveTheme(
     },
     ...(definicion.description?.trim() ? { description: definicion.description.trim() } : {}),
     /*
-     * Los cinco ejes de estilo se conservan al guardar.
+     * Los seis ejes de estilo se conservan al guardar.
      *
      * Sin esto, copiar un tema y cambiarle el nombre devolvia un tema con sus colores y la letra
      * de otro: el campo se perdia en el saneado, que es la clase de fallo que no da error y solo
@@ -196,6 +197,7 @@ export async function saveTheme(
     ...enConjunto('typeface', definicion.typeface, TYPEFACES),
     ...enConjunto('typeScale', definicion.typeScale, TYPE_SCALES),
     ...enConjunto('cornerRadius', definicion.cornerRadius, SHAPE_SCALES),
+    ...enConjunto('borderTone', definicion.borderTone, OUTLINE_SCALES),
     ...enConjunto('shadowShape', definicion.shadowShape, SHADOW_SHAPES),
     ...enConjunto('shadowTint', definicion.shadowTint, { neutra: 1, 'de-marca': 1 }),
   };

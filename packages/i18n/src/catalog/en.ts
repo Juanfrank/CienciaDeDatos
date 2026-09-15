@@ -711,7 +711,7 @@ export const en: Record<MessageKey, string> = {
   'admin.resources.other.noGeometries': 'None loaded. The catalog map object needs one to draw the judicial districts, which is why it is still unimplemented: it is missing data, not missing code.',
 
   'admin.themes.title': 'Themes',
-  'admin.themes.intro': 'The whole visual identity: color, typeface, scale, radii and shadow. Color comes from three sources —primary, accent and neutral— that Material Design 3 derives the palettes from; the rest is picked from closed sets, because a typeface is a file that has to be served and a scale is sixty numbers that keep proportion with one another.',
+  'admin.themes.intro': 'The whole visual identity: color, typeface, scale, radii, border and shadow. Color comes from three sources —primary, accent and neutral— that Material Design 3 derives the palettes from; the rest is picked from closed sets, because a typeface is a file that has to be served and a scale is sixty numbers that keep proportion with one another.',
   'admin.themes.source': 'Source colors',
   'admin.themes.semantic': 'Semantic colors',
   'admin.themes.semantic.intro': 'Error, success and warning. They can be left blank: error comes from the accent and the other two from a shared green and amber, because "good" and "careful" are not brand decisions. You state them when the accent will not do as a red —a theme with a purple accent would show purple errors— or when your own sit better with the palette.',
@@ -720,6 +720,7 @@ export const en: Record<MessageKey, string> = {
   'admin.themes.style.typeface': 'Typeface',
   'admin.themes.style.typeScale': 'Type scale',
   'admin.themes.style.cornerRadius': 'Corner radius',
+  'admin.themes.style.borderTone': 'Card border',
   'admin.themes.style.shadowShape': 'Shadow shape',
   'admin.themes.style.shadowTint': 'Shadow tint',
   'admin.themes.shadowTint.neutra': 'Neutral: the black from the spec',

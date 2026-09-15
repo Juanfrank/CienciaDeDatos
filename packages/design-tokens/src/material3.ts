@@ -200,7 +200,20 @@ const TONOS: Record<keyof MaterialScheme, { palette: keyof TonalPalettes; light:
   scrim: { palette: 'neutral', light: 0, dark: 0 },
 };
 
-export function schemeFor(source: ThemeSource, mode: ColorMode): MaterialScheme {
+/**
+ * Que tono le toca a un rol, cuando un tema quiere otro distinto del de la especificacion.
+ *
+ * La PALETA no se puede cambiar por aqui a proposito: mover `outlineVariant` dos tonos mas arriba
+ * lo aclara y sigue siendo el mismo color de la familia; sacarlo de otra paleta lo convierte en
+ * otro color, y entonces no es un ajuste de estilo, es otro sistema de color.
+ */
+export type RoleTones = Partial<Record<keyof MaterialScheme, { light: number; dark: number }>>;
+
+export function schemeFor(
+  source: ThemeSource,
+  mode: ColorMode,
+  ajustes: RoleTones = {},
+): MaterialScheme {
   const palettes = palettesFor(source);
   const scheme = {} as MaterialScheme;
 
@@ -208,7 +221,8 @@ export function schemeFor(source: ThemeSource, mode: ColorMode): MaterialScheme 
     keyof MaterialScheme,
     (typeof TONOS)[keyof MaterialScheme],
   ][]) {
-    scheme[role] = hexFromArgb(palettes[palette].tone(mode === 'light' ? light : dark));
+    const tono = ajustes[role] ?? { light, dark };
+    scheme[role] = hexFromArgb(palettes[palette].tone(mode === 'light' ? tono.light : tono.dark));
   }
 
   return scheme;

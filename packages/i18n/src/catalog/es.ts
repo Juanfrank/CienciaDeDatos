@@ -711,7 +711,7 @@ export const es = {
   'admin.resources.other.noGeometries': 'Ninguna cargada. El objeto mapa del catalogo la necesita para dibujar los distritos judiciales, y por eso sigue sin implementar: es un dato que falta, no codigo que falta.',
 
   'admin.themes.title': 'Temas',
-  'admin.themes.intro': 'La identidad visual completa: color, letra, escala, radios y sombra. El color sale de tres origenes —primario, acento y neutro— de los que Material Design 3 deriva las paletas; el resto se elige de conjuntos cerrados, porque una letra es un archivo que hay que servir y una escala son sesenta numeros que guardan proporcion entre si.',
+  'admin.themes.intro': 'La identidad visual completa: color, letra, escala, radios, borde y sombra. El color sale de tres origenes —primario, acento y neutro— de los que Material Design 3 deriva las paletas; el resto se elige de conjuntos cerrados, porque una letra es un archivo que hay que servir y una escala son sesenta numeros que guardan proporcion entre si.',
   'admin.themes.source': 'Colores de origen',
   'admin.themes.semantic': 'Colores semanticos',
   'admin.themes.semantic.intro': 'Error, exito y advertencia. Se pueden dejar en blanco: el error sale del acento y los otros dos de un verde y un ambar comunes, porque «bien» y «cuidado» no son decisiones de marca. Se dicen cuando el acento no sirve de rojo —un tema de acento morado tendria los errores morados— o cuando los propios conviven mejor con la paleta.',
@@ -720,6 +720,7 @@ export const es = {
   'admin.themes.style.typeface': 'Letra',
   'admin.themes.style.typeScale': 'Escala tipografica',
   'admin.themes.style.cornerRadius': 'Radio de esquina',
+  'admin.themes.style.borderTone': 'Borde de las tarjetas',
   'admin.themes.style.shadowShape': 'Forma de la sombra',
   'admin.themes.style.shadowTint': 'Tinte de la sombra',
   'admin.themes.shadowTint.neutra': 'Neutra: el negro de la especificacion',

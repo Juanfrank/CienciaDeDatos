@@ -1,5 +1,6 @@
 import {
   SEMANTICA_POR_DEFECTO,
+  OUTLINE_SCALE_NAMES,
   SEMANTIC_ROLES,
   SHADOW_SHAPE_NAMES,
   SHAPE_SCALE_NAMES,
@@ -61,7 +62,7 @@ export default async function TemasPage() {
       <h2>{t('admin.themes.title')}</h2>
       <p className="muted-text">{t('admin.themes.intro')}</p>
 
-      <ThemeForm base={INSTITUTIONAL_THEME.source} />
+      <ThemeForm base={INSTITUTIONAL_THEME} />
 
       {temas.map((tema) => (
         <Tema key={tema.id} tema={tema} t={t} activo={tema.id === activo} />
@@ -167,6 +168,7 @@ function Tema({
             ['typeface', TYPEFACE_NAMES[tema.typeface ?? 'institucional']],
             ['typeScale', TYPE_SCALE_NAMES[tema.typeScale ?? 'material']],
             ['cornerRadius', SHAPE_SCALE_NAMES[tema.cornerRadius ?? 'material']],
+            ['borderTone', OUTLINE_SCALE_NAMES[tema.borderTone ?? 'material']],
             ['shadowShape', SHADOW_SHAPE_NAMES[tema.shadowShape ?? 'material']],
             ['shadowTint', t(`admin.themes.shadowTint.${tema.shadowTint ?? 'neutra'}` as never)],
           ] as const

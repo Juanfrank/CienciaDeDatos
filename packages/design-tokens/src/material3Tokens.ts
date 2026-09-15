@@ -2,6 +2,7 @@ import { hexFromArgb } from '@material/material-color-utilities';
 import {
   type MaterialScheme,
   type ColorMode,
+  type RoleTones,
   type ThemeSource,
   schemeFor,
   palettesFor,
@@ -123,6 +124,10 @@ export type ShapeScale = Record<keyof typeof SHAPE, string>;
  * Los nombres SIGUEN siendo los siete de Material —lo que cambia es que varios valen lo mismo—
  * porque son los que las hojas de estilo ya nombran. Un tema no puede obligar a reescribir el CSS
  * de la aplicacion: si pudiera, no seria un tema.
+ *
+ * Los usan los DOS temas de fabrica. Que la escala de Material siga existiendo no es inercia: es
+ * el valor de quien no dice nada, y borrarla haria que un tema sin `cornerRadius` se pintara con
+ * una decision de marca que nunca tomo.
  */
 const TRES_RADIOS: ShapeScale = {
   none: '0',
@@ -140,6 +145,31 @@ export type ShapeScaleId = keyof typeof SHAPE_SCALES;
 export const SHAPE_SCALE_NAMES: Record<ShapeScaleId, string> = {
   material: 'Material: siete radios por tamano',
   'tres-radios': 'Tres radios: 8, 12 y pastilla',
+};
+
+/**
+ * Cuanto pesa el borde que separa una tarjeta de su fondo.
+ *
+ * Solo mueve `outlineVariant`, que es el borde DECORATIVO: el que dibuja el contorno de una
+ * tarjeta, la divisoria de una tabla y el separador de una seccion. `outline` —el de los campos,
+ * los selects y los botones— no se toca, porque ahi el borde no adorna, dice donde se puede
+ * escribir; aclararlo seria quitarle el contorno a un control, que es lo que 1.4.11 no permite.
+ *
+ * `tenue` lo sube al tono 92 en claro. No es un numero elegido a ojo: da 1,23 de contraste sobre
+ * la superficie blanca, que es exactamente el que tiene el `--line` de la linea grafica sobre su
+ * propia superficie. En oscuro BAJA al 20 en vez de subir, porque ahi el borde se separa del
+ * fondo por ser mas claro, y «tenue» quiere decir menos separado, no mas claro.
+ */
+export const OUTLINE_SCALES = {
+  material: {},
+  tenue: { outlineVariant: { light: 92, dark: 20 } },
+} as const satisfies Record<string, RoleTones>;
+
+export type OutlineScaleId = keyof typeof OUTLINE_SCALES;
+
+export const OUTLINE_SCALE_NAMES: Record<OutlineScaleId, string> = {
+  material: 'Material: borde marcado',
+  tenue: 'Tenue: apenas separa la tarjeta del fondo',
 };
 
 /**
@@ -270,6 +300,8 @@ export interface ThemeStyle {
   shadowShape: ShadowShapeId;
   /** Componentes `r,g,b` del color de la sombra. */
   shadowTint: string;
+  /** Tonos que este tema mueve respecto de la especificacion. Ver `OUTLINE_SCALES`. */
+  tones: RoleTones;
 }
 
 export function materialTheme(
@@ -279,7 +311,7 @@ export function materialTheme(
 ): MaterialTheme {
   return {
     mode,
-    color: schemeFor(source, mode),
+    color: schemeFor(source, mode, estilo.tones),
     categorical: categoricalFor(source, mode),
     typography: estilo.typography,
     shape: estilo.shape,

@@ -13,7 +13,7 @@ import {
 /**
  * El tema de la linea grafica — seccion 4.3.
  *
- * Es un tema y nada mas: color, letra, escala, radios y sombra. Lo que se comprueba aqui es que
+ * Es un tema y nada mas: color, letra, escala, radios, borde y sombra. Lo que se comprueba aqui es que
  * trae lo que su linea grafica dice, que sigue cumpliendo la promesa de contraste de 4.9 en sus
  * DOS modos, y —sobre todo— que lo que cambia del tema institucional al entrar es exactamente lo
  * que se quiso cambiar y nada mas.
@@ -76,15 +76,33 @@ describe('la linea grafica como tema', () => {
   /*
    * El caso que obliga a que `error` se pueda decir aparte.
    *
-   * El acento de este tema es morado, y el error sale del acento salvo que se diga otra cosa. Sin
-   * el rojo declarado, un mensaje de error saldria morado — y un error que no se lee como un error
-   * es lo unico que un color tiene que evitar aqui.
+   * Ya no lo protagoniza ningun tema de fabrica —el acento de los dos es el rojo de la norma—,
+   * asi que el sujeto se construye aqui: un tema cualquiera con acento morado. El error sale del
+   * acento salvo que se diga otra cosa, y sin el rojo declarado ese tema pintaria los errores de
+   * morado, que es lo unico que un color tiene que evitar.
    */
-  it('el error es ROJO aunque el acento sea morado', () => {
-    const { error, tertiary } = themeVersion(GRAPHIC_LINE_THEME, 'light').color;
+  it('un tema de acento morado puede declarar su rojo, y entonces el error es rojo', () => {
+    const morado = { primario: '#0050dd', acento: '#7c5cfc', neutro: '#5c6580' };
+    const callado = themeVersion({ id: 'x', name: 'x', source: morado }, 'light').color;
+    const declarado = themeVersion(
+      { id: 'x', name: 'x', source: { ...morado, error: '#ef3340' } },
+      'light',
+    ).color;
 
-    expect(rojizo(error)).toBe(true);
-    expect(rojizo(tertiary)).toBe(false);
+    expect(rojizo(callado.error)).toBe(false);
+    expect(rojizo(declarado.error)).toBe(true);
+    // Y el acento sigue siendo morado en los dos: declarar el rojo no repinta la marca.
+    expect(rojizo(declarado.tertiary)).toBe(false);
+  });
+
+  it('el acento de la linea grafica es el ROJO de la norma, como el institucional', () => {
+    /*
+     * La guia pone un morado en «Acento secundario», pero lo describe como «series alternas en
+     * graficos». El rol de acento aqui hace otro trabajo —tine avisos, formas y la segunda serie
+     * de todo grafico—, y con el morado ahi la aplicacion perdia el rojo donde el rojo es la marca.
+     */
+    expect(GRAPHIC_LINE_THEME.source.acento).toBe(INSTITUTIONAL_THEME.source.acento);
+    expect(rojizo(themeVersion(GRAPHIC_LINE_THEME, 'light').color.tertiary)).toBe(true);
   });
 
   it('el tema institucional sigue sacando su error del acento', () => {
@@ -118,16 +136,74 @@ describe('la linea grafica como tema', () => {
   });
 
   /*
-   * «Tres radios: rounded-lg 8px, rounded-xl 12px y rounded-full», dice la guia.
+   * «Tres radios: rounded-lg 8px, rounded-xl 12px y rounded-full», dice la guia — y es la norma
+   * de los DOS temas de fabrica, no solo de este: es como redondean los tableros que la
+   * institucion ya tiene en pantalla.
    */
-  it('redondea con tres radios, y el institucional sigue con los siete de Material', () => {
-    const linea = themeVersion(GRAPHIC_LINE_THEME, 'light').shape;
-    const institucional = themeVersion(INSTITUTIONAL_THEME, 'light').shape;
+  it('los dos temas de fabrica redondean con los tres radios de la norma', () => {
+    for (const tema of BUILT_IN_THEMES) {
+      const forma = themeVersion(tema, 'light').shape;
 
-    expect(new Set(Object.values(linea))).toEqual(new Set(['0', '8px', '12px', '999px']));
-    // Lo que se pierde a proposito: en Material, `large` y `extra-large` se distinguen.
-    expect(linea.large).toBe(linea['extra-large']);
-    expect(institucional.large).not.toBe(institucional['extra-large']);
+      expect({ id: tema.id, radios: new Set(Object.values(forma)) }).toEqual({
+        id: tema.id,
+        radios: new Set(['0', '8px', '12px', '999px']),
+      });
+      // Lo que se pierde a proposito: en Material, `large` y `extra-large` se distinguen.
+      expect(forma.large).toBe(forma['extra-large']);
+    }
+  });
+
+  it('la escala de Material sigue existiendo, y es la de quien no dice nada', () => {
+    /*
+     * No es inercia: es el valor por omision. Borrarla haria que un tema sin `cornerRadius` se
+     * pintara con una decision de marca que nunca tomo.
+     */
+    const callado = themeVersion(
+      { id: 'x', name: 'x', source: INSTITUTIONAL_THEME.source },
+      'light',
+    ).shape;
+
+    expect(callado['extra-large']).toBe('28px');
+    expect(callado.large).not.toBe(callado['extra-large']);
+  });
+
+  /*
+   * El borde. `--line: #E3E8F3` sobre `--surface: #FFFFFF` da 1,23 de contraste en la guia, y la
+   * derivacion de Material a tono 80 daba 1,70: casi medio punto de mas, que es la diferencia
+   * entre una tarjeta perfilada y una tarjeta enmarcada.
+   *
+   * Se compara por CONTRASTE y no por hexadecimal a proposito. El color exacto sale de la paleta
+   * tonal del neutro del tema y no tiene por que ser el de la guia; lo que se copia de aquella
+   * linea es cuanto se nota el borde, que es lo que se ve.
+   */
+  it('el borde de la tarjeta se separa de su superficie lo mismo que en la guia', () => {
+    const { color } = themeVersion(GRAPHIC_LINE_THEME, 'light');
+    const suyo = contrastRatio(color.outlineVariant, color.surfaceContainerLowest) ?? 0;
+    const guia = contrastRatio('#e3e8f3', '#ffffff') ?? 0;
+
+    expect(suyo).toBeCloseTo(guia, 1);
+  });
+
+  it('el borde institucional sigue siendo el de Material, mas marcado', () => {
+    const { color } = themeVersion(INSTITUTIONAL_THEME, 'light');
+    const institucional = contrastRatio(color.outlineVariant, color.surfaceContainerLowest) ?? 0;
+    const linea = (() => {
+      const c = themeVersion(GRAPHIC_LINE_THEME, 'light').color;
+      return contrastRatio(c.outlineVariant, c.surfaceContainerLowest) ?? 0;
+    })();
+
+    expect(institucional).toBeGreaterThan(linea);
+  });
+
+  it('el borde de los CONTROLES no lo mueve ningun tema', () => {
+    /*
+     * `outline` es el contorno de un campo, un select o un boton: ahi el borde no adorna, dice
+     * donde se puede escribir. 1.4.11 pide 3:1 para eso, y aclararlo por gusto lo incumpliria.
+     */
+    for (const modo of MODOS) {
+      const linea = themeVersion(GRAPHIC_LINE_THEME, modo).color;
+      expect(contrastRatio(linea.outline, linea.surfaceContainerLowest) ?? 0).toBeGreaterThanOrEqual(3);
+    }
   });
 
   it('la sombra tiene la forma difusa de la guia: halo ancho y opacidad baja', () => {
@@ -171,7 +247,7 @@ describe('la linea grafica como tema', () => {
     expect(ambar(warning)).toBe(true);
   });
 
-  it('los dos temas de fabrica declaran sus cinco ejes de estilo', () => {
+  it('los dos temas de fabrica declaran sus seis ejes de estilo', () => {
     /*
      * No es celo: un tema de fabrica es la referencia que se copia. Lo que no diga, quien lo copie
      * tampoco lo dira, y la aplicacion se pinta con un valor que nadie escribio en ninguna parte.
@@ -183,6 +259,7 @@ describe('la linea grafica como tema', () => {
           tema.typeface,
           tema.typeScale,
           tema.cornerRadius,
+          tema.borderTone,
           tema.shadowShape,
           tema.shadowTint,
         ].filter((v) => v === undefined).length,

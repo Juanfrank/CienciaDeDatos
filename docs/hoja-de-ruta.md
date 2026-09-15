@@ -166,8 +166,9 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
   eran tres colores de origen y punto: la letra, los tamanos, los radios y la sombra eran
   constantes globales que compartian todos, asi que lo que se servia como «tema institucional» era
   en realidad «esos tres colores mas lo que quedara en cuatro constantes». Ahora un tema declara
-  seis colores —los tres de marca y los tres semanticos— y cinco ejes de estilo, cada uno sobre un
-  conjunto CERRADO (`typeface`, `typeScale`, `cornerRadius`, `shadowShape`, `shadowTint`). Cerrado
+  seis colores —los tres de marca y los tres semanticos— y seis ejes de estilo, cada uno sobre un
+  conjunto CERRADO (`typeface`, `typeScale`, `cornerRadius`, `borderTone`, `shadowShape`,
+  `shadowTint`). Cerrado
   por dos razones que valen para todos: una letra es un archivo que hay que servir desde el propio
   origen —el principio 1 no admite pedirsela a un dominio ajeno— y el valor termina en una
   variable CSS, donde una cadena libre es superficie de inyeccion.
@@ -176,22 +177,38 @@ Se anota con DONDE esta la prueba, que es lo unico que distingue "hecho" de "cre
     bien» salia azul y «ojo con esto» salia igual que un error. Ahora son roles propios de la
     paleta MD3, con sus ocho tokens y sus parejas de contraste, y lo consumen `.notice-ok`,
     `.notice-atencion` y el delta de un indicador.
-  - **El tema institucional, escrito entero.** Declara sus cinco ejes aunque todos sean el valor
-    por omision: un tema de fabrica es la referencia que se copia, y lo que no diga no se hereda,
-    se adivina. Lo unico que cambia de como se veia es el verde y el ambar, que antes no eran ni
-    verde ni ambar.
+  - **El tema institucional, escrito entero.** Declara sus seis ejes aunque casi todos sean el
+    valor por omision: un tema de fabrica es la referencia que se copia, y lo que no diga no se
+    hereda, se adivina. Cambian dos cosas de como se veia: el verde y el ambar —que antes no eran
+    ni verde ni ambar— y los radios, que pasan a los tres de la norma (8, 12 y pastilla). Lo
+    segundo es lo unico de este tema que NO sale de la especificacion, y sale de lo que la
+    institucion ya tiene en pantalla: sus tableros no llegan a los 28 px que Material reserva para
+    un dialogo, y un dialogo mucho mas redondeado que la tarjeta que lo abre no se lee como
+    jerarquia, se lee como otra aplicacion.
   - **«Linea grafica», el segundo.** La capa visual de la linea grafica del tablero de casos
-    penales, entera: azul de accion, morado de series, gris azulado, su verde y su ambar, Poppins
-    en escala compacta —que jerarquiza por peso y no por tamano—, tres radios en vez de siete y su
-    sombra difusa con tinte de marca. Lo que aquella guia llama componentes y reglas de maqueta no
-    entra: un tema decide como se VE la aplicacion, no que objetos existen.
-  - **Lo comprueba** `packages/design-tokens/src/graphicLineTheme.spec.ts` — veinte pruebas: AA en
-    los dos modos por las dos listas, la letra, que la escala no se cruce, los tres radios, la
-    forma de la sombra, que en oscuro pierda el tinte, que el error sea rojo pese al acento
-    morado, que el exito sea verde en los DOS temas, y que ninguno de los dos deje un eje sin
-    declarar.
+    penales: azul de accion, el rojo de la norma como acento, gris azulado, su verde y su ambar,
+    Poppins en escala compacta —que jerarquiza por peso y no por tamano—, tres radios, borde tenue
+    y sombra difusa con tinte de marca. Dos apartes deliberados de la guia. Su «Acento secundario»
+    es un morado descrito como «series alternas en graficos», y el rol de acento aqui hace otro
+    trabajo —tine avisos, formas y la segunda serie de todo grafico—, asi que con el morado ahi la
+    aplicacion perdia el rojo donde el rojo es la marca. Y sus componentes y reglas de maqueta no
+    entran: un tema decide como se VE la aplicacion, no que objetos existen.
+  - **El borde se copio por CONTRASTE, no por hexadecimal.** `--line: #e3e8f3` sobre blanco da
+    1,23; la derivacion de Material a tono 80 daba 1,70, que es la diferencia entre una tarjeta
+    perfilada y una enmarcada. El eje `borderTone` mueve el tono de `outlineVariant` al 92, que da
+    1,23 exacto. Solo toca el borde DECORATIVO: el de los campos y los botones (`outline`) no lo
+    mueve ningun tema, porque ahi el borde no adorna —dice donde se puede escribir— y 1.4.11 le
+    exige 3:1.
+  - **Lo comprueba** `packages/design-tokens/src/graphicLineTheme.spec.ts` — veinticinco pruebas:
+    AA en los dos modos por las dos listas, la letra, que la escala no se cruce, los tres radios
+    en los dos temas, que la escala de Material siga siendo la de quien no dice nada, el borde por
+    contraste, que el de los controles no se mueva, la forma de la sombra, que en oscuro pierda el
+    tinte, que un tema de acento morado pueda declarar su rojo, que el exito sea verde en los DOS
+    temas, y que ninguno deje un eje sin declarar.
   - **Y lo puede expresar la pantalla.** El dialogo de crear tema ofrece los tres semanticos y los
-    cinco ejes; el panel ensena la especificacion completa de cada tema. Un tema que solo se
+    seis ejes, y parte del tema institucional REAL en vez de una copia escrita en el componente
+    —que ya se habria quedado vieja hoy mismo, ofreciendo los siete radios de Material como «lo
+    que ya hay»—. El panel ensena la especificacion completa de cada tema. Un tema que solo se
     pudiera escribir tocando el codigo convertiria el panel en la forma facil de administrar en
     vez de en la forma de administrar.
 

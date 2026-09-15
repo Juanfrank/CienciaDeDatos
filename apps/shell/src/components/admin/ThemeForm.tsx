@@ -3,12 +3,14 @@
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  OUTLINE_SCALE_NAMES,
   SEMANTIC_ROLES,
   SHADOW_SHAPE_NAMES,
   SHAPE_SCALE_NAMES,
   SOURCE_ROLES,
   TYPEFACE_NAMES,
   TYPE_SCALE_NAMES,
+  type OutlineScaleId,
   type ShadowShapeId,
   type ShapeScaleId,
   type ThemeDefinition,
@@ -19,22 +21,34 @@ import {
 import { useTranslator } from '../Locale';
 import { pedir, motivoDeFallo } from '../pedir';
 
-/** Los cinco ejes de estilo, tal como se guardan. */
+/** Los seis ejes de estilo, tal como se guardan. */
 interface Estilo {
   typeface: TypefaceId;
   typeScale: TypeScaleId;
   cornerRadius: ShapeScaleId;
+  borderTone: OutlineScaleId;
   shadowShape: ShadowShapeId;
   shadowTint: 'neutra' | 'de-marca';
 }
 
-const ESTILO_INSTITUCIONAL: Estilo = {
-  typeface: 'institucional',
-  typeScale: 'material',
-  cornerRadius: 'material',
-  shadowShape: 'material',
-  shadowTint: 'neutra',
-};
+/**
+ * De donde parte un tema nuevo: del tema que se le pase, no de una copia escrita aqui.
+ *
+ * Tenia esos seis valores escritos a mano en este archivo, y eso es una copia del tema
+ * institucional que nadie mantiene. Hoy mismo se habria quedado vieja: el institucional paso a
+ * los tres radios y esta pantalla habria seguido ofreciendo los siete de Material como «lo que ya
+ * hay», sin que nada fallara.
+ */
+function estiloDe(tema: ThemeDefinition): Estilo {
+  return {
+    typeface: tema.typeface ?? 'institucional',
+    typeScale: tema.typeScale ?? 'material',
+    cornerRadius: tema.cornerRadius ?? 'material',
+    borderTone: tema.borderTone ?? 'material',
+    shadowShape: tema.shadowShape ?? 'material',
+    shadowTint: tema.shadowTint ?? 'neutra',
+  };
+}
 
 /**
  * Crear un tema, activarlo y borrarlo — seccion 4.3.
@@ -43,8 +57,8 @@ const ESTILO_INSTITUCIONAL: Estilo = {
  * modo, y editar un token suelto rompe la relacion de contraste que 4.9 exige. Por eso hay tres
  * campos de color obligatorios y no cuarenta.
  *
- * Del resto —la letra, la escala, los radios y la sombra— se elige de listas CERRADAS y no se
- * escribe nada. Cada una de esas listas existe por su propia razon, escritas donde se declaran,
+ * Del resto —la letra, la escala, los radios, el borde y la sombra— se elige de listas CERRADAS
+ * y no se escribe nada. Cada lista existe por su propia razon, escrita donde se declara,
  * y todas terminan en la misma: el valor acaba en una variable CSS, y un campo libre ahi es una
  * superficie de inyeccion abierta para poder elegir entre dos opciones.
  *
@@ -56,15 +70,15 @@ const ESTILO_INSTITUCIONAL: Estilo = {
  * solo avisara dejaria el tema entrar igual, y a partir de ahi la aplicacion entera incumpliria AA
  * hasta que alguien volviera a mirar aqui.
  */
-export function ThemeForm({ base }: { base: ThemeSource }) {
+export function ThemeForm({ base }: { base: ThemeDefinition }) {
   const t = useTranslator();
   const router = useRouter();
   const dialogo = useRef<HTMLDialogElement>(null);
 
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [origen, setOrigen] = useState<ThemeSource>(base);
-  const [estilo, setEstilo] = useState<Estilo>(ESTILO_INSTITUCIONAL);
+  const [origen, setOrigen] = useState<ThemeSource>(base.source);
+  const [estilo, setEstilo] = useState<Estilo>(estiloDe(base));
   const [enCurso, setEnCurso] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -106,8 +120,8 @@ export function ThemeForm({ base }: { base: ThemeSource }) {
             // Se parte del origen del tema de fabrica: tres campos en blanco obligan a inventarse
             // tres colores antes de poder ver nada, y casi siempre lo que se quiere es una
             // variante de lo que ya hay.
-            setOrigen(base);
-            setEstilo(ESTILO_INSTITUCIONAL);
+            setOrigen(base.source);
+            setEstilo(estiloDe(base));
             dialogo.current?.showModal();
           }}
         >
@@ -221,6 +235,12 @@ export function ThemeForm({ base }: { base: ThemeSource }) {
           alElegir={(v) => setEstilo((previo) => ({ ...previo, cornerRadius: v }))}
         />
         <EjeDeEstilo
+          eje="borderTone"
+          opciones={OUTLINE_SCALE_NAMES}
+          valor={estilo.borderTone}
+          alElegir={(v) => setEstilo((previo) => ({ ...previo, borderTone: v }))}
+        />
+        <EjeDeEstilo
           eje="shadowShape"
           opciones={SHADOW_SHAPE_NAMES}
           valor={estilo.shadowShape}
@@ -262,7 +282,7 @@ function EjeDeEstilo<V extends string>({
   valor,
   alElegir,
 }: {
-  eje: 'typeface' | 'typeScale' | 'cornerRadius' | 'shadowShape' | 'shadowTint';
+  eje: 'typeface' | 'typeScale' | 'cornerRadius' | 'borderTone' | 'shadowShape' | 'shadowTint';
   opciones: Record<V, string>;
   valor: V;
   alElegir: (valor: V) => void;

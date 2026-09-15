@@ -1,10 +1,12 @@
 import { type ColorMode, type ThemeSource } from './material3';
 import {
   type MaterialTheme,
+  type OutlineScaleId,
   type ShadowShapeId,
   type ShapeScaleId,
   type ThemeStyle,
   type TypeScaleId,
+  OUTLINE_SCALES,
   SHAPE_SCALES,
   TINTE_NEUTRO,
   TYPE_SCALES,
@@ -62,6 +64,13 @@ export interface ThemeDefinition {
   /** Con que radios se redondean las esquinas. Ausente: los siete de Material. Ver `SHAPE_SCALES`. */
   cornerRadius?: ShapeScaleId;
   /**
+   * Cuanto se nota el borde que separa una tarjeta de su fondo. Ausente: el de la especificacion.
+   *
+   * Afecta SOLO al borde decorativo. El de los campos y los botones no lo toca ningun tema: ahi
+   * el borde no adorna, dice donde se puede escribir. Ver `OUTLINE_SCALES`.
+   */
+  borderTone?: OutlineScaleId;
+  /**
    * Que FORMA tiene la sombra: cuantas capas, con que desenfoque y con que opacidad.
    *
    * Ausente: la de la especificacion. Ver `SHADOW_SHAPES`.
@@ -80,7 +89,7 @@ export interface ThemeDefinition {
 /**
  * El tema institucional, el que viene de fabrica.
  *
- * Dice sus cinco ejes de estilo aunque todos sean el valor por omision, y eso es lo que cambio:
+ * Dice sus seis ejes de estilo aunque todos sean el valor por omision, y eso es lo que cambio:
  * antes no los decia porque no existian —eran constantes globales que compartian todos los temas—
  * y lo que servia de tema institucional era «lo que quedara en esas constantes». Escritos, este
  * tema es una declaracion completa y no el residuo de otras; y el dia que alguien toque un valor
@@ -91,11 +100,20 @@ export const INSTITUTIONAL_THEME: ThemeDefinition = {
   name: 'Institucional',
   description:
     'La norma de marca del Poder Judicial: azul, rojo de acento y el gris de la portada, ' +
-    'en Montserrat y con la escala, los radios y la sombra de Material.',
+    'en Montserrat, con la escala, el borde y la sombra de Material y los tres radios de la norma.',
   source: INSTITUTIONAL_SOURCE,
   typeface: 'institucional',
   typeScale: 'material',
-  cornerRadius: 'material',
+  /*
+   * Los tres radios, no los siete de Material.
+   *
+   * Es la unica cosa de este tema que NO sale de la especificacion, y sale de lo que la
+   * institucion ya tiene en pantalla: sus tableros redondean a 8 px lo pequeno y a 12 px lo
+   * grande, y nada llega a los 28 px que Material reserva para un dialogo. Un dialogo mucho mas
+   * redondeado que la tarjeta que lo abre no se lee como jerarquia, se lee como otra aplicacion.
+   */
+  cornerRadius: 'tres-radios',
+  borderTone: 'material',
   shadowShape: 'material',
   shadowTint: 'neutra',
   builtIn: true,
@@ -112,24 +130,26 @@ export const INSTITUTIONAL_THEME: ThemeDefinition = {
  * Los tres origenes salen de sus tokens:
  *
  * - `primario`, el azul de accion, que es el mismo de la norma institucional.
- * - `acento`, el morado con el que esa linea dibuja las series alternas de un grafico.
+ * - `acento`, el rojo, que es el mismo de la norma institucional.
  * - `neutro`, su gris azulado, del que salen el fondo de pagina y los bordes.
  *
- * Y los tres semanticos se dicen aparte porque los tres hacen falta. El rojo, porque atado al
- * acento los errores saldrian morados. El verde y el ambar, porque son los de su seccion
- * «Semantico» y no se parecen a los de respaldo por casualidad: la guia los eligio para convivir
- * con este azul y este morado sin competir con ellos.
+ * El acento es ROJO y no el morado que aquella guia pone en «Acento secundario». El morado que
+ * documenta esta descrito como «series alternas en graficos», que aqui no es el trabajo del
+ * acento: el rol de acento tine los avisos, las formas y la segunda serie de todo grafico, y con
+ * el morado ahi la aplicacion perdia el rojo en sitios donde el rojo es la marca. Las series son
+ * otra cosa, y hoy salen de las paletas tonales; darle a un tema su propia paleta de series es
+ * una decision aparte y no se toma aqui de rebote.
  */
 export const GRAPHIC_LINE_THEME: ThemeDefinition = {
   id: 'linea-grafica',
   name: 'Linea grafica',
   description:
-    'La linea grafica del tablero de casos penales: azul de accion, morado de series, gris ' +
-    'azulado, verde y ambar semanticos, Poppins en escala compacta, tres radios y sombra difusa ' +
-    'con tinte de marca.',
+    'La linea grafica del tablero de casos penales: azul de accion, rojo de acento, gris ' +
+    'azulado, verde y ambar semanticos, Poppins en escala compacta, tres radios, borde tenue y ' +
+    'sombra difusa con tinte de marca.',
   source: {
     primario: '#0050dd',
-    acento: '#7c5cfc',
+    acento: '#ef3340',
     neutro: '#5c6580',
     error: '#ef3340',
     exito: '#128a5e',
@@ -138,6 +158,7 @@ export const GRAPHIC_LINE_THEME: ThemeDefinition = {
   typeface: 'poppins',
   typeScale: 'compacta',
   cornerRadius: 'tres-radios',
+  borderTone: 'tenue',
   shadowShape: 'difusa',
   shadowTint: 'de-marca',
   builtIn: true,
@@ -163,6 +184,7 @@ export function themeStyle(definicion: ThemeDefinition, mode: ColorMode): ThemeS
     fonts: TYPEFACES[definicion.typeface ?? 'institucional'],
     typography: TYPE_SCALES[definicion.typeScale ?? 'material'],
     shape: SHAPE_SCALES[definicion.cornerRadius ?? 'material'],
+    tones: OUTLINE_SCALES[definicion.borderTone ?? 'material'],
     shadowShape: definicion.shadowShape ?? 'material',
     shadowTint:
       definicion.shadowTint === 'de-marca' ? tintOf(definicion.source, mode) : TINTE_NEUTRO,
