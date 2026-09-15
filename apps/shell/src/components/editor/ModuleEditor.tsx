@@ -202,6 +202,35 @@ export function ModuleEditor({
   };
 
   /*
+   * Duplicar un objeto: la copia va al primer hueco libre, no encima del original.
+   *
+   * Identificadores nuevos —el del bloque y el de la instancia—: dos objetos con el mismo id son
+   * el mismo objeto para la rejilla, para el panel y para los complementos, asi que la copia
+   * heredaria los cambios del original y al quitar uno desaparecerian los dos.
+   *
+   * Lo que NO se copia son los saltos ni nada que apunte fuera: eso si se hereda, porque apuntar
+   * al mismo sitio desde una copia es lo que se espera al duplicar.
+   */
+  const duplicar = (itemId: string) => {
+    const original = items.find((i) => i.id === itemId);
+    if (!original) return;
+    const id = `obj-${crypto.randomUUID().slice(0, 8)}`;
+    const { w, h } = original.position;
+    editar(
+      conItems([
+        ...items,
+        {
+          ...original,
+          id,
+          position: findFreeSlot(items, w, h),
+          instance: { ...original.instance, instanceId: id },
+        },
+      ]),
+    );
+    setSeleccion(id);
+  };
+
+  /*
    * La barra se ensena si hay entre que elegir, o si se puede crear.
    *
    * En una constante con nombre y no dentro del JSX: el trinquete de cadenas sueltas busca prosa
@@ -701,6 +730,7 @@ export function ModuleEditor({
           onColocar={(itemId, position) =>
             void cambiar(itemId, (i) => ({ ...i, position }))
           }
+          {...(editable ? { onDuplicar: duplicar, onQuitar: (id) => void remove(id) } : {})}
         />
       </div>
 

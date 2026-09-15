@@ -1,11 +1,19 @@
 'use client';
 
-import { useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { GRID_COLUMNS, type GridItem, type GridPosition } from '@app/module-model';
 import { ModuleObject } from '../ModuleObject';
 import type { SerializedObject } from '../../server/serialize';
 import { Icon } from '../icons/Icon';
 import { useDrag } from './useDrag';
+import { useTranslator } from '../Locale';
+import {
+  ObjectMenu,
+  useContextMenu,
+  useContextMenuOn,
+  useMenuKey,
+  type AccionDeObjeto,
+} from '../ObjectMenu';
 
 /** El lienzo del editor: el modulo DE VERDAD, con su rejilla a la vista. */
 export function Canvas({
@@ -15,6 +23,8 @@ export function Canvas({
   editable,
   onSeleccionar,
   onColocar,
+  onDuplicar,
+  onQuitar,
 }: {
   items: GridItem[];
   objetos: SerializedObject[];
@@ -23,8 +33,61 @@ export function Canvas({
   editable: boolean;
   onSeleccionar: (itemId: string | null) => void;
   onColocar: (itemId: string, position: GridPosition) => void;
+  /** Las dos del menu contextual. Las decide el editor; el lienzo solo las ofrece. */
+  onDuplicar?: (itemId: string) => void;
+  onQuitar?: (itemId: string) => void;
 }) {
   const id = new Map(objetos.map((o) => [o.itemId, o]));
+
+  /*
+   * El menu contextual del bloque.
+   *
+   * Uno para el lienzo entero y no uno por bloque: solo puede haber un menu abierto a la vez, y
+   * con uno por bloque habria que apagarlos todos al abrir cualquiera — el estado seria el mismo
+   * repetido n veces, que es como se acaba con dos menus abiertos.
+   */
+  const t = useTranslator();
+  const lienzo = useRef<HTMLDivElement>(null);
+  const [sobre, setSobre] = useState<string | null>(null);
+  const { punto, abrir, abrirEnElFoco, cerrar } = useContextMenu();
+  useMenuKey(lienzo, abrirEnElFoco);
+  /*
+   * El boton derecho se captura en el LIENZO y se averigua sobre que bloque cayo.
+   *
+   * Por captura y no por burbujeo: el contenido de cada bloque lleva un objeto de verdad, con su
+   * grafico, y el lienzo de ECharts atiende el evento sin dejarlo subir — justo encima del dato, que
+   * es donde cualquiera pulsa, no pasaria nada.
+   */
+  const abrirSobreElBloque = useCallback(
+    (e: { clientX: number; clientY: number; preventDefault: () => void }) => {
+      const destino = (e as unknown as MouseEvent).target;
+      const bloque =
+        destino instanceof Element ? destino.closest<HTMLElement>('[data-testid^="block-"]') : null;
+      const id = bloque?.dataset['testid']?.replace('block-', '') ?? null;
+      if (!id) return;
+      setSobre(id);
+      abrir(e);
+    },
+    [abrir],
+  );
+  useContextMenuOn(lienzo, abrirSobreElBloque, editable);
+
+  const accionesDe = (itemId: string): AccionDeObjeto[] => [
+    { id: 'configurar', etiqueta: t('menu.object.configure'), onElegir: () => onSeleccionar(itemId) },
+    ...(onDuplicar
+      ? [{ id: 'duplicar', etiqueta: t('menu.object.duplicate'), onElegir: () => onDuplicar(itemId) }]
+      : []),
+    ...(onQuitar
+      ? [
+          {
+            id: 'quitar',
+            etiqueta: t('menu.object.remove'),
+            peligrosa: true,
+            onElegir: () => onQuitar(itemId),
+          },
+        ]
+      : []),
+  ];
 
   /*
    * Dos filas de mas, siempre.
@@ -47,6 +110,7 @@ export function Canvas({
       // boton a proposito: no es una accion que haga falta alcanzar con el tabulador —Escape ya
       // deselecciona— y envolver el lienzo entero en un boton anidaria botones dentro de botones.
       onClick={() => onSeleccionar(null)}
+      ref={lienzo}
     >
       <div
         ref={rejilla}
@@ -194,6 +258,18 @@ export function Canvas({
           Este modulo esta vacio. Elija una visualizacion en el panel de la derecha.
         </p>
       ) : null}
+
+      {/*
+        UN menu para el lienzo, con las acciones del bloque sobre el que se abrio.
+        Abierto con el teclado no hay bloque bajo el puntero: se toma el elegido, que es lo que el
+        foco esta recorriendo.
+      */}
+      <ObjectMenu
+        punto={punto}
+        acciones={accionesDe(sobre ?? selection ?? '')}
+        titulo={items.find((i) => i.id === (sobre ?? selection))?.instance.title ?? 'Objeto'}
+        onCerrar={cerrar}
+      />
     </div>
   );
 }

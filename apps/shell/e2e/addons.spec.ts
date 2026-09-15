@@ -189,3 +189,52 @@ test.describe('donde se coloca el tooltip', () => {
     await expect(page.getByRole('tooltip')).toHaveCount(0);
   });
 });
+
+test.describe('menu contextual de un objeto (visor)', () => {
+  test('el boton derecho ofrece lo que ese objeto sabe hacer, y lo hace', async ({ page }) => {
+    /*
+     * El menu no inventa acciones: ofrece las que el objeto YA tiene en su cabecera. Es la
+     * diferencia entre un menu util y uno decorativo — quien lo abre espera encontrar lo que puede
+     * hacer aqui, no una segunda lista de cosas distintas.
+     *
+     * Y abre EL MISMO dialogo que el icono, no otro parecido: por eso lo que se comprueba tras
+     * elegir «Ver los datos» es el dialogo de siempre, con su testid de siempre.
+     */
+    await page.goto('/m/casos-pendientes');
+    const tarjeta = page.locator('.objeto', { hasText: 'Pendientes por distrito' }).first();
+    await tarjeta.click({ button: 'right' });
+
+    await expect(page.locator('.menu-objeto')).toBeVisible();
+    await expect(page.getByTestId('menu-opcion-datos')).toBeVisible();
+    // El salto declarado en la semilla tambien esta, porque es una accion de ESTE objeto.
+    await expect(page.getByTestId('menu-opcion-salto-audiencias')).toBeVisible();
+
+    await page.getByTestId('menu-opcion-datos').click();
+    await expect(page.getByTestId('data-table-Pendientes por distrito')).toBeVisible();
+  });
+
+  test('se abre tambien con el teclado, y se cierra con Escape (4.9)', async ({ page }) => {
+    /*
+     * Un menu que solo responde al boton derecho no existe para quien navega con teclado.
+     *
+     * Se prueba con la tecla de menu contextual, que es la principal. Shift+F10 hace lo mismo en el
+     * codigo y no se prueba aqui: el propio navegador se la queda para abrir SU menu, asi que desde
+     * una prueba no llega a la pagina — comprobarla aqui solo mediria al navegador.
+     */
+    await page.goto('/m/casos-pendientes');
+    await page.getByTestId('icon-tooltip-Pendientes por distrito').focus();
+    await page.keyboard.press('ContextMenu');
+
+    await expect(page.locator('.menu-objeto')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.menu-objeto')).toHaveCount(0);
+  });
+
+  test('un objeto sin acciones propias no abre un menu vacio', async ({ page }) => {
+    // Un menu que se abre sin nada dentro dice que hay algo que hacer y no lo hay.
+    await page.goto('/m/composicion');
+    const suelto = page.locator('.objeto').filter({ hasNot: page.locator('.addon__icon') }).first();
+    await suelto.click({ button: 'right' });
+    await expect(page.locator('.menu-objeto')).toHaveCount(0);
+  });
+});

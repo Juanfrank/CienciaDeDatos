@@ -1,7 +1,9 @@
 'use client';
 
+import { useRef } from 'react';
 import type { Aggregation, QueryResult } from '@app/data-contracts';
 import {
+  attachmentOf,
   type BindingProblem,
   type IconName,
   type MultiplePanel,
@@ -33,6 +35,13 @@ import type { ObjectInstance } from '@app/ui-components';
 import { useOverflows } from '../hooks/useOverflows';
 import { Addons, DrillThrough, Pagination, VisualFilter } from './Addons';
 import { useObjectChrome } from './ObjectView';
+import {
+  ObjectMenu,
+  useContextMenu,
+  useContextMenuOn,
+  useMenuKey,
+  type AccionDeObjeto,
+} from './ObjectMenu';
 import { MatrixTable } from './MatrixTable';
 import { SortableTable } from './SortableTable';
 import { Chart } from './Chart';
@@ -206,9 +215,51 @@ export function Frame({
    * se nota. Por contexto, un objeto nuevo los hereda por usar el marco.
    */
   const chrome = useObjectChrome();
+  const t = useTranslator();
+
+  /*
+   * El menu contextual del objeto — clic derecho, tecla de menu o Shift+F10.
+   *
+   * No inventa acciones: ofrece las que el objeto YA tiene en su cabecera, mas las que solo caben
+   * en un menu. Es la diferencia entre un menu util y uno decorativo — quien lo abre espera
+   * encontrar lo que puede hacer aqui, no una segunda lista de cosas distintas.
+   *
+   * Los dos dialogos se abren por referencia, no se vuelven a dibujar: el menu ensena LA MISMA
+   * tabla y EL MISMO filtro que los iconos, y dos copias del mismo dialogo acabarian divergiendo
+   * en cual respeta el ambito.
+   */
+  const tarjeta = useRef<HTMLDivElement>(null);
+  const abrirTabla = useRef<(() => void) | null>(null);
+  const abrirFiltro = useRef<(() => void) | null>(null);
+  const { punto, abrir, abrirEnElFoco, cerrar } = useContextMenu();
+  useMenuKey(tarjeta, abrirEnElFoco);
+
+  /*
+   * Que acciones hay se decide por lo que el objeto DECLARA, no por si la referencia ya se poblo.
+   *
+   * Leer `abrirTabla.current` durante el dibujo daba null la primera vez —una referencia no vuelve
+   * a dibujar al llenarse—, asi que el menu salia sin la opcion hasta que algo mas lo redibujara.
+   * El complemento se declara en la instancia; la referencia solo sirve para pulsarlo.
+   */
+  const acciones: AccionDeObjeto[] = [
+    ...(instance && attachmentOf(instance, 'tabla-de-datos')
+      ? [{ id: 'datos', etiqueta: t('menu.object.data'), onElegir: () => abrirTabla.current?.() }]
+      : []),
+    ...(chrome.filtro
+      ? [{ id: 'filtrar', etiqueta: t('menu.object.filter'), onElegir: () => abrirFiltro.current?.() }]
+      : []),
+    ...(chrome.saltos ?? []).map((salto) => ({
+      id: `salto-${salto.moduleSlug}`,
+      etiqueta: salto.etiqueta,
+      href: salto.href,
+    })),
+  ];
+
+  useContextMenuOn(tarjeta, abrir, acciones.length > 0);
 
   return (
     <div
+      ref={tarjeta}
       className="objeto"
       data-accent={acento}
       data-highlight={presentacion?.resaltado ? 'si' : undefined}
@@ -254,9 +305,12 @@ export function Frame({
             result={result}
             titulo={titulo}
             aggregations={aggregations ?? []}
+            mandoDeTabla={abrirTabla}
           />
         ) : null}
-        {chrome.filtro ? <VisualFilter titulo={titulo} filtro={chrome.filtro} /> : null}
+        {chrome.filtro ? (
+          <VisualFilter titulo={titulo} filtro={chrome.filtro} mando={abrirFiltro} />
+        ) : null}
         {chrome.saltos ? <DrillThrough titulo={titulo} saltos={chrome.saltos} /> : null}
         {accion}
       </div>
@@ -293,6 +347,8 @@ export function Frame({
           {chrome.pie}
         </p>
       ) : null}
+
+      <ObjectMenu punto={punto} acciones={acciones} titulo={titulo} onCerrar={cerrar} />
     </div>
   );
 }

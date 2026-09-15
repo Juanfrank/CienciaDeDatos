@@ -144,16 +144,32 @@ export function DataTable({
   titulo,
   scope,
   aggregations,
+  mando,
 }: {
   instance: ObjectInstance;
   result: QueryResult;
   titulo: string;
   scope: 'objeto' | 'subobjeto';
   aggregations: Aggregation[];
+  /*
+   * Con que abrirlo desde fuera — el menu contextual.
+   *
+   * Una referencia y no un segundo dialogo: el menu ofrece LA MISMA tabla que el icono, no otra
+   * parecida. Dos dialogos con el mismo contenido acaban divergiendo en cual respeta el ambito.
+   */
+  mando?: React.MutableRefObject<(() => void) | null>;
 }) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [abierto, setAbierto] = useState(false);
   const [selection, setSeleccion] = useState<Record<string, string> | null>(null);
+
+  useEffect(() => {
+    if (!mando) return;
+    mando.current = () => setAbierto(true);
+    return () => {
+      mando.current = null;
+    };
+  }, [mando]);
 
   useEffect(() => {
     const el = dialogo.current;
@@ -323,12 +339,22 @@ export function DataTable({
 export function VisualFilter({
   titulo,
   filtro,
+  mando,
 }: {
   titulo: string;
   filtro: NonNullable<ObjectViewChrome['filtro']>;
+  /** Con que abrirlo desde el menu contextual, por lo mismo que la tabla. */
+  mando?: React.MutableRefObject<(() => void) | null>;
 }) {
   const t = useTranslator();
   const dialogo = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (!mando) return;
+    mando.current = () => dialogo.current?.showModal();
+    return () => {
+      mando.current = null;
+    };
+  }, [mando]);
   const { aplicar } = useUrlFilters();
   const puesto = !sinNada(filtro.estado);
 
@@ -547,11 +573,14 @@ export function Addons({
   result,
   titulo,
   aggregations,
+  mandoDeTabla,
 }: {
   instance: ObjectInstance;
   result: QueryResult;
   titulo: string;
   aggregations: Aggregation[];
+  /** Se pasa de largo hasta la tabla: `Frame` la necesita para el menu contextual. */
+  mandoDeTabla?: React.MutableRefObject<(() => void) | null>;
 }) {
   const tooltip = attachmentOf(instance, 'tooltip-explicativo');
   const tabla = attachmentOf(instance, 'tabla-de-datos');
@@ -568,6 +597,7 @@ export function Addons({
           titulo={titulo}
           scope={tabla.scope}
           aggregations={aggregations}
+          {...(mandoDeTabla ? { mando: mandoDeTabla } : {})}
         />
       ) : null}
     </span>

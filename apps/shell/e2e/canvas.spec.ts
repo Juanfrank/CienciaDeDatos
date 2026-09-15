@@ -1149,3 +1149,55 @@ test.describe('la paleta se elige por la pregunta, no por el nombre', () => {
     await expect(page.getByTestId('add-embudo')).toBeVisible();
   });
 });
+
+test.describe('menu contextual de un objeto (editor)', () => {
+  test('duplicar deja una copia INDEPENDIENTE, en un hueco libre', async ({ page }) => {
+    /*
+     * Lo que importa de duplicar no es que aparezcan dos bloques: es que sean dos objetos. Con el
+     * mismo identificador serian el mismo para la rejilla, para el panel y para los complementos —
+     * la copia heredaria los cambios del original y quitar uno se llevaria los dos—, y eso no se
+     * ve mirando el lienzo hasta que alguien toca uno.
+     */
+    await newModule(page, `menu-dup-${Date.now()}`);
+    await page.getByTestId('add-tarjeta-kpi').click();
+    await alDia(page);
+    const original = await blockId(page);
+
+    await page.getByTestId(`block-${original}`).click({ button: 'right' });
+    await expect(page.locator('.menu-objeto')).toBeVisible();
+    await page.getByTestId('menu-opcion-duplicar').click();
+    await alDia(page);
+
+    await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(2);
+    const copia = (await page.locator('[data-testid^="block-obj-"]').nth(1).getAttribute('data-testid'))
+      ?.replace('block-', '');
+    expect(copia).not.toBe(original);
+
+    // No se pisan: la copia va al primer hueco libre, no encima del original.
+    const a = await page.getByTestId(`block-${original}`).boundingBox();
+    const b = await page.getByTestId(`block-${copia}`).boundingBox();
+    expect(a && b && (a.x !== b.x || a.y !== b.y)).toBe(true);
+
+    // Y quitar la copia deja el original: son dos objetos, no dos vistas de uno.
+    await page.getByTestId(`block-${copia}`).click({ button: 'right' });
+    await page.getByTestId('menu-opcion-quitar').click();
+    await alDia(page);
+    await expect(page.getByTestId(`block-${original}`)).toBeVisible();
+    await expect(page.locator('[data-testid^="block-obj-"]')).toHaveCount(1);
+  });
+
+  test('configurar desde el menu elige el objeto y abre su panel', async ({ page }) => {
+    await newModule(page, `menu-cfg-${Date.now()}`);
+    await page.getByTestId('add-tarjeta-kpi').click();
+    await alDia(page);
+    const id = await blockId(page);
+
+    // Se deselecciona pulsando el fondo, para que elegirlo desde el menu signifique algo.
+    await page.locator('.lienzo').click({ position: { x: 5, y: 5 } });
+    await expect(page.getByTestId(`block-${id}`)).toHaveAttribute('data-chosen', 'no');
+
+    await page.getByTestId(`block-${id}`).click({ button: 'right' });
+    await page.getByTestId('menu-opcion-configurar').click();
+    await expect(page.getByTestId(`block-${id}`)).toHaveAttribute('data-chosen', 'si');
+  });
+});

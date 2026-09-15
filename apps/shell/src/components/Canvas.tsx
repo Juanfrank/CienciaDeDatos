@@ -113,7 +113,17 @@ export default function Canvas({
         grafico.current?.dispose();
         const objectInstance = echarts.init(node, null, { renderer });
         objectInstance.setOption(activeOptions.current);
-        objectInstance.on('click', (evento: { name?: string }) => {
+        /*
+         * Solo el boton PRIMARIO filtra.
+         *
+         * ECharts emite su `click` con cualquier boton, asi que el boton derecho sobre una barra
+         * filtraba el modulo: la URL cambiaba, la pagina se redibujaba y el menu contextual que
+         * acababa de abrirse desaparecia antes de que nadie lo viera. Y filtrar con el boton
+         * derecho no es lo que nadie espera en ninguna aplicacion.
+         */
+        objectInstance.on('click', (evento) => {
+          const boton = (evento.event as { button?: number } | undefined)?.button;
+          if (boton !== undefined && boton !== 0) return;
           if (evento.name) select.current?.(evento.name);
         });
         grafico.current = objectInstance;

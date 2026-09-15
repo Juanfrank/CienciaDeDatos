@@ -5881,3 +5881,49 @@ th[aria-sort='descending'] .table__flecha {
   max-width: 24ch;
   padding: var(--space-xs) var(--space-sm);
 }
+
+/*
+ * El menu contextual de un objeto.
+ *
+ * `position: fixed` porque se ancla al puntero, que es una coordenada de la ventana y no del
+ * documento: dentro de un contenedor desplazado, absoluto lo dibujaria en otro sitio.
+ */
+.menu-objeto {
+  position: fixed;
+  z-index: 40;
+  margin: 0;
+  padding: var(--space-xs);
+  min-width: 14rem;
+  list-style: none;
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  border-radius: var(--md-sys-shape-corner-small);
+  box-shadow: var(--md-sys-elevation-3);
+}
+.menu-objeto li { margin: 0; }
+.menu-objeto [data-opcion] {
+  display: block;
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.menu-objeto [data-opcion]:hover:not(:disabled),
+.menu-objeto [data-opcion]:focus-visible {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+.menu-objeto [data-opcion]:disabled { cursor: not-allowed; opacity: 0.5; }
+/* Lo destructivo se separa y se pinta como advertencia: no se pulsa por inercia. */
+.menu-objeto [data-peligrosa='si'] {
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  margin-top: var(--space-xs);
+  padding-top: var(--space-xs);
+}
+.menu-objeto [data-peligrosa='si'] [data-opcion] { color: var(--md-sys-color-error); }
