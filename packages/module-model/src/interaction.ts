@@ -169,6 +169,38 @@ export function drillThroughUrl(
   });
 }
 
+/** Un salto ya resuelto: a donde va y como se lee. */
+export interface DrillLink {
+  href: string;
+  etiqueta: string;
+  moduleSlug: string;
+}
+
+/**
+ * Los saltos de un objeto que quien mira puede seguir de verdad, ya convertidos en direcciones.
+ *
+ * `alcanzables` son los modulos concedidos a SU equipo, de slug a nombre. Lo que no este ahi no
+ * se ofrece, y esa es la mitad visible de la regla de 4.4: el contexto se interseca con el ambito
+ * de quien LLEGA, no con el de quien navego. La otra mitad la pone `/m/{slug}`, que rechaza el
+ * modulo no concedido aunque la direccion se escriba a mano — ocultar el enlace no es proteger.
+ *
+ * El rotulo cae al nombre del modulo destino cuando nadie escribio uno: «Ir a Audiencias» dice
+ * mas que «Ir al destino», y ahorra tener que rellenar un campo para que el menu se lea.
+ */
+export function drillLinks(
+  instance: Pick<ObjectInstance, 'drillThrough'>,
+  currentFilters: Record<string, string[]>,
+  alcanzables: Record<string, string>,
+): DrillLink[] {
+  return (instance.drillThrough ?? [])
+    .filter((destino) => destino.moduleSlug in alcanzables)
+    .map((destino) => ({
+      href: drillThroughUrl(destino, currentFilters),
+      etiqueta: destino.label ?? alcanzables[destino.moduleSlug] ?? destino.moduleSlug,
+      moduleSlug: destino.moduleSlug,
+    }));
+}
+
 /**
  * Lo que impide que un salto declarado lleve a alguna parte.
  *

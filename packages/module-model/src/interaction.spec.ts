@@ -4,6 +4,8 @@ import {
   INTERACTION_PATTERNS,
   bookmarkToUrl,
   captureBookmark,
+  drillLinks,
+  drillProblems,
   drillThroughUrl,
 } from './interaction';
 
@@ -137,5 +139,94 @@ describe('drill-through (4.4)', () => {
     const url = drillThroughUrl({ moduleSlug: 'audiencias' }, currentFilters);
     const params = new URLSearchParams(url.split('?')[1] ?? '');
     expect(params.getAll('DimTribunal.Distrito')).toEqual(['Distrito Norte']);
+  });
+});
+
+describe('solo se ofrece el salto que quien mira puede seguir (4.4)', () => {
+  const objeto = {
+    drillThrough: [
+      { moduleSlug: 'audiencias' },
+      { moduleSlug: 'presupuesto', label: 'Ver el gasto' },
+    ],
+  };
+
+  it('el destino que no esta concedido al equipo NO se ofrece', () => {
+    /*
+     * La otra mitad de la regla la pone `/m/{slug}`, que rechaza el modulo no concedido aunque
+     * la direccion se escriba a mano: esto es lo que evita ofrecer un camino que va a dar un 404.
+     */
+    const enlaces = drillLinks(objeto, {}, { audiencias: 'Audiencias' });
+    expect(enlaces.map((e) => e.moduleSlug)).toEqual(['audiencias']);
+  });
+
+  it('sin ningun destino concedido no queda ningun enlace, y el objeto no ofrece el control', () => {
+    expect(drillLinks(objeto, {}, {})).toEqual([]);
+  });
+
+  it('el rotulo cae al NOMBRE del modulo cuando nadie escribio uno', () => {
+    // «Ir a Audiencias» dice mas que «Ir al destino», y ahorra rellenar un campo para que el
+    // menu se lea.
+    const enlaces = drillLinks(objeto, {}, { audiencias: 'Audiencias', presupuesto: 'Presupuesto' });
+    expect(enlaces.map((e) => e.etiqueta)).toEqual(['Audiencias', 'Ver el gasto']);
+  });
+
+  it('cada enlace lleva el contexto de filtros de donde se pulso', () => {
+    const enlaces = drillLinks(objeto, { 'DimTribunal.Materia': ['Penal'] }, { audiencias: 'A' });
+    expect(enlaces[0]?.href).toContain('DimTribunal.Materia=Penal');
+  });
+
+  it('un objeto sin saltos declarados no ofrece ninguno', () => {
+    expect(drillLinks({}, {}, { audiencias: 'Audiencias' })).toEqual([]);
+  });
+});
+
+describe('un salto que no lleva a ninguna parte se dice, no se descarta en silencio', () => {
+  const existen = ['casos-pendientes', 'audiencias'];
+  const contexto = { moduleSlug: 'casos-pendientes', slugsExistentes: existen };
+
+  it('sin saltos declarados no hay nada que decir', () => {
+    expect(drillProblems({}, contexto)).toEqual([]);
+  });
+
+  it('un destino correcto no se queja', () => {
+    expect(drillProblems({ drillThrough: [{ moduleSlug: 'audiencias' }] }, contexto)).toEqual([]);
+  });
+
+  it('un modulo que no existe se nombra, para poder arreglarlo', () => {
+    const problemas = drillProblems({ drillThrough: [{ moduleSlug: 'borrado' }] }, contexto);
+    expect(problemas).toHaveLength(1);
+    expect(problemas[0]).toContain('borrado');
+  });
+
+  it('un salto al modulo en el que ya se esta no lleva a ningun lado', () => {
+    const problemas = drillProblems(
+      { drillThrough: [{ moduleSlug: 'casos-pendientes' }] },
+      contexto,
+    );
+    expect(problemas).toHaveLength(1);
+    expect(problemas[0]).toContain('en el que ya se esta');
+  });
+
+  it('pero a OTRA PAGINA del mismo modulo si, porque ahi si se va a alguna parte', () => {
+    expect(
+      drillProblems(
+        { drillThrough: [{ moduleSlug: 'casos-pendientes', pageSlug: 'detalle' }] },
+        contexto,
+      ),
+    ).toEqual([]);
+  });
+
+  it('el mismo destino dos veces es una entrada repetida en el menu', () => {
+    const problemas = drillProblems(
+      { drillThrough: [{ moduleSlug: 'audiencias' }, { moduleSlug: 'audiencias' }] },
+      contexto,
+    );
+    expect(problemas).toHaveLength(1);
+    expect(problemas[0]).toContain('dos veces');
+  });
+
+  it('un salto sin modulo destino se dice una sola vez, y no se sigue comprobando', () => {
+    const problemas = drillProblems({ drillThrough: [{ moduleSlug: '  ' }] }, contexto);
+    expect(problemas).toEqual(['Hay un salto sin modulo destino: asi no lleva a ninguna parte.']);
   });
 });
