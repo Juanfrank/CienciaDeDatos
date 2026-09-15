@@ -11,6 +11,11 @@ import { descartarEmergente, useEmergentes } from './emergentes';
  * `alert` corta lo que el lector de pantalla este diciendo, y para «objeto subido a v1.4.0» eso
  * es mas molesto que util.
  *
+ * La clase es `aviso-emergente` y no `emergente`: esa ya era la del dialogo de datos de origen,
+ * y compartir el nombre aplicaba a esos dialogos el `display: flex` de la pila de mensajes. Un
+ * `<dialog>` cerrado con `display` puesto deja de estarlo: se quedaban tendidos sobre la pagina,
+ * invisibles pero interceptando cada clic.
+ *
  * Se dibuja una sola vez, en la disposicion raiz, y cualquiera puede poner un mensaje llamando a
  * `emergente()`. Uno por cosa que paso: tres objetos subidos de version son tres mensajes, porque
  * «se subieron 3 objetos» no dice CUALES y es justo lo que hay que poder comprobar.
@@ -20,13 +25,13 @@ export function Emergentes() {
   const mensajes = useEmergentes();
 
   return (
-    <div className="emergentes" role="status" aria-live="polite" data-testid="emergentes">
+    <div className="avisos-emergentes" role="status" aria-live="polite" data-testid="emergentes">
       {mensajes.map((m) => (
-        <div key={m.id} className="emergente" data-clase={m.clase} data-testid="emergente">
-          <span className="emergente__texto">{m.texto}</span>
+        <div key={m.id} className="aviso-emergente" data-clase={m.clase} data-testid="emergente">
+          <span className="aviso-emergente__texto">{m.texto}</span>
           <button
             type="button"
-            className="emergente__cerrar"
+            className="aviso-emergente__cerrar"
             aria-label={t('action.close')}
             data-testid={`emergente-cerrar-${m.id}`}
             onClick={() => descartarEmergente(m.id)}

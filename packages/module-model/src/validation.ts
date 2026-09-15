@@ -216,7 +216,7 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
          */
         ...validateSlots(instance, contractSlots(contrato)).map((p) => ({
           slot: `ranura.${p.ranura}`,
-          kind: 'contrato-incumplido' as const,
+          kind: p.kind,
           problem: p.issue,
         })),
         ...validatePresentation(instance.presentacion, version.presentation).map((p) => ({

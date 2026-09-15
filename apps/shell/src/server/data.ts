@@ -218,7 +218,7 @@ async function readObjects(
       ...validateBinding(instance, contrato, gridColumns),
       ...validateSlots(instance, contractSlots(contrato)).map((p) => ({
         slot: `ranura.${p.ranura}`,
-        kind: 'contrato-incumplido' as const,
+        kind: p.kind,
         problem: p.issue,
       })),
       /*

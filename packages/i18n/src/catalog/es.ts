@@ -209,6 +209,7 @@ export const es = {
   'pres.pickers.order.alphabetical': "Alfabetico",
   'pres.pickers.order.frequency': "Por frecuencia",
   'pres.pickers.modes': "Formas de acotar que ofrece",
+  'pres.pickers.level': 'Nivel',
   'pres.pickers.count': "Mostrar cuantas filas hay detras de cada valor",
   'pres.pickers.selectAll': "Botones de «Todos» y «Ninguno»",
   'pres.pickers.collapsed': "Empieza plegado",

@@ -176,15 +176,6 @@ export function FieldPicker({
   const [busqueda, setBusqueda] = useState("");
   const inicial = modoInicial(estado, picker.modos);
   const [modo, setModo] = useState<FilterMode>(inicial);
-  /*
-   * Basico por defecto, salvo que lo que YA esta puesto sea avanzado.
-   *
-   * Abrir en basico un campo que llega con un «contiene» de la URL escondería el filtro que esta
-   * acotando lo que se ve: la lista de valores diria «ninguno elegido» sobre unos datos
-   * recortados, y quien mira no tendria de donde deducirlo. Un enlace compartido no puede mentir
-   * sobre lo que ensena.
-   */
-  const [avanzado, setAvanzado] = useState(() => isAdvancedMode(inicial));
   const [abierto, setAbierto] = useState(!picker.plegado);
   const prueba = `filter-${picker.fieldName}`;
 
@@ -199,21 +190,20 @@ export function FieldPicker({
     : ordenadas;
 
   /*
-   * El modo EFECTIVO: en basico siempre «valores», se haya elegido lo que se haya elegido antes.
+   * El nivel lo decide QUIEN CONFIGURA el objeto, no quien lo mira.
    *
-   * Se deriva en vez de guardarse para que volver a basico no pueda dejar un modo avanzado vivo
-   * por debajo: el estado del campo se limpia al cambiar de modo, pero el modo en si se recuerda
-   * para que volver a «Avanzado» devuelva donde se estaba.
+   * Habia aqui un interruptor Basico/Avanzado, y eso lo convertia en una preferencia de quien
+   * miraba: un campo configurado para ofrecer solo una lista de valores se podia pasar a
+   * avanzado desde la pantalla, que es exactamente lo que configurarlo tenia que impedir. Ahora
+   * el nivel llega con el selector y no se puede cambiar desde la vista.
+   *
+   * En basico el modo efectivo es siempre «valores», aunque la URL traiga otra cosa: lo que un
+   * enlace no puede hacer es ensenar en un campo basico un control que su configuracion no da.
+   * Lo que si se conserva es el filtro puesto, que sigue acotando y sigue contandose en la
+   * linea de filtros aplicados.
    */
-  /*
-   * El interruptor exige que haya las DOS cosas: algo avanzado que ensenar y un basico al que
-   * volver. Un campo configurado solo con formas avanzadas —«texto» y nada mas, por ejemplo— no
-   * tiene basico: ofrecerle el interruptor llevaria a una lista de valores que quien lo configuro
-   * decidio no dar. Ahi se queda en avanzado, que es lo unico que se pidio.
-   */
-  const hayBasico = picker.modos.includes("valores");
-  const puedeAvanzar = hayBasico && picker.modos.some(isAdvancedMode);
-  const modoEfectivo: FilterMode = avanzado || !hayBasico ? modo : "valores";
+  const basico = picker.nivel === "basico" || !picker.modos.some(isAdvancedMode);
+  const modoEfectivo: FilterMode = basico ? "valores" : modo;
 
   const puesto = !sinNada(estado);
   const elegidos = modoEfectivo === "excluir" ? estado.excluye : estado.incluye;
@@ -238,7 +228,7 @@ export function FieldPicker({
       className="filters-panel__field"
       data-kind={picker.tipo}
       data-modo={modoEfectivo}
-      data-avanzado={avanzado ? "si" : "no"}
+      data-nivel={basico ? "basico" : "avanzado"}
       data-abierto={abierto ? "si" : "no"}
       data-testid={prueba}
     >
@@ -272,27 +262,6 @@ export function FieldPicker({
             {t("action.remove")}
           </button>
         ) : null}
-        {/*
-          El interruptor Basico/Avanzado, y solo si hay algo avanzado que ensenar.
-          Un campo configurado unicamente con «valores» no tiene segundo modo: el interruptor
-          seria un control que no cambia nada.
-        */}
-        {puedeAvanzar ? (
-          <button
-            type="button"
-            className="button-link filters-panel__avanzado"
-            aria-pressed={avanzado}
-            data-testid={`${prueba}-avanzado`}
-            onClick={() => {
-              // Cambiar de nivel LIMPIA lo puesto, por lo mismo que cambiar de modo: volver a
-              // basico con un rango vivo deja la lista diciendo «ninguno» sobre datos acotados.
-              setAvanzado((v) => !v);
-              if (puesto) onCambiar(SIN_NADA);
-            }}
-          >
-            {avanzado ? t("filters.basic") : t("filters.advanced")}
-          </button>
-        ) : null}
       </legend>
 
       {abierto ? (
@@ -302,7 +271,7 @@ export function FieldPicker({
             Con una sola, el desplegable seria un control que nunca cambia nada — ruido con aspecto
             de opcion.
           */}
-          {avanzado && picker.modos.length > 1 ? (
+          {!basico && picker.modos.length > 1 ? (
             <label className="filters-panel__modo">
               <span className="visualmente-oculto">
                 Como filtrar {picker.etiqueta}

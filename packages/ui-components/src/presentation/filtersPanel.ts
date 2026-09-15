@@ -55,6 +55,9 @@ export const VALUE_ORDERS = ['alfabetico', 'frecuencia', 'origen'] as const;
 
 export type ValueOrder = (typeof VALUE_ORDERS)[number];
 
+export const PICKER_LEVELS = ['basico', 'avanzado'] as const;
+export type PickerLevel = (typeof PICKER_LEVELS)[number];
+
 export interface DimensionPicker {
   /** Clave de la dimension, `Tabla.Campo`. Tiene que ser una de las mapeadas en el binding. */
   fieldName: string;
@@ -68,6 +71,19 @@ export interface DimensionPicker {
    * una materia no significa nada, y un «empieza por» sobre un año tampoco.
    */
   modos?: FilterMode[];
+  /**
+   * Basico o avanzado. Lo decide QUIEN CONFIGURA el objeto, no quien lo mira.
+   *
+   * Basico ensena una lista de valores y nada mas; avanzado deja elegir entre las formas de
+   * acotar declaradas en `modos`. Estaba como un interruptor en el propio panel, y eso lo
+   * convertia en una preferencia de quien miraba: un campo que se configuro para ofrecer solo
+   * una lista podia pasarse a avanzado desde la pantalla, que es exactamente lo que configurarlo
+   * tenia que impedir.
+   *
+   * Sin decirlo se deduce de `modos`: un campo con algo mas que «valores» es avanzado. Asi los
+   * modulos que ya existen siguen ofreciendo lo que ofrecian sin tener que reconfigurarlos.
+   */
+  nivel?: PickerLevel;
   /** Como se ordenan los valores. Sin decirlo, como vengan del dataset. */
   orden?: ValueOrder;
   /** Cuantas filas hay detras de cada valor, junto a el. */
@@ -204,12 +220,23 @@ export function modesByDefault(columnKind: string): FilterMode[] {
   ];
 }
 
+/**
+ * Los modos que AVANZAN, es decir, todos menos elegir valores.
+ *
+ * Elegir de una lista es lo que hace casi todo el mundo casi siempre; excluir, buscar por texto,
+ * acotar un rango o pedir los vacios son casos de uno de cada veinte.
+ */
+const AVANZADOS: readonly FilterMode[] = ['excluir', 'texto', 'rango', 'vacios'];
+
+export const isAdvanced = (modo: FilterMode): boolean => AVANZADOS.includes(modo);
+
 /** Los selectores efectivos: los configurados, mas uno por defecto para cada dimension sin el. */
 export interface SelectorEfectivo {
   fieldName: string;
   tipo: PickerKind;
   etiqueta: string;
   modos: FilterMode[];
+  nivel: PickerLevel;
   orden: ValueOrder;
   recuento: boolean;
   todos: boolean;
@@ -233,6 +260,16 @@ export function effectivePickers(
       // Una lista vacia se trata como «no se dijo»: un campo sin ningun modo no se podria usar,
       // y guardarlo asi seria dejar un filtro que no filtra.
       modos: modos.length > 0 ? modos : modesByDefault(columnKind),
+      /*
+       * Sin decirlo, BASICO — salvo que alguien declarara modos avanzados a proposito.
+       *
+       * Basico es lo que hace casi todo el mundo casi siempre, y `modos` sin declarar no es una
+       * eleccion: son «los que su tipo admite», que incluyen los avanzados. Tomar eso por una
+       * decision habria puesto un desplegable de cinco formas delante de la lista en todos los
+       * campos que nadie configuro. Lo que si es una decision es escribir `modos` con algo
+       * avanzado dentro, y esa se respeta.
+       */
+      nivel: configurado?.nivel ?? (modos.some(isAdvanced) ? 'avanzado' : 'basico'),
       orden: configurado?.orden ?? 'origen',
       recuento: configurado?.recuento === true,
       todos: configurado?.todos === true,

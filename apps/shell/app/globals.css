@@ -1896,11 +1896,16 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
 /*
  * Mensajes emergentes: arriba, centrados y por encima de todo.
  *
+ * La clase es `aviso-emergente` y NO `emergente`, que ya era la del dialogo de datos de origen.
+ * Con el nombre repetido, la regla `display: flex` de aqui se aplicaba tambien a esos dialogos y
+ * los sacaba de su estado cerrado: quedaban tendidos sobre la pagina, invisibles pero
+ * interceptando cada clic. Lo descubrio la suite de navegador entera, no una captura.
+ *
  * Fijos a la ventana y no dentro de la pantalla, porque lo que informan —«objeto subido a
  * v1.4.0»— tiene que leerse sin importar por donde ande el desplazamiento. `pointer-events: none`
  * en la pila y `auto` en cada mensaje: la franja vacia no puede robar clics a lo que tape.
  */
-.emergentes {
+.avisos-emergentes {
   position: fixed;
   top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
   left: 50%;
@@ -1912,7 +1917,7 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
   width: min(32rem, calc(100vw - 2 * var(--space-md)));
   pointer-events: none;
 }
-.emergente {
+.aviso-emergente {
   display: flex;
   align-items: flex-start;
   gap: var(--space-sm);
@@ -1928,16 +1933,16 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
  * El texto de cada mensaje dice ya lo que paso; el color solo lo subraya. Es el criterio de 4.9:
  * quien no distinga los dos tonos sigue leyendo cual es cual.
  */
-.emergente[data-clase='exito'] {
+.aviso-emergente[data-clase='exito'] {
   background: var(--md-sys-color-inverse-surface);
   color: var(--md-sys-color-inverse-on-surface);
 }
-.emergente[data-clase='fallo'] {
+.aviso-emergente[data-clase='fallo'] {
   background: var(--md-sys-color-error-container);
   color: var(--md-sys-color-on-error-container);
 }
-.emergente__texto { flex: 1; }
-.emergente__cerrar {
+.aviso-emergente__texto { flex: 1; }
+.aviso-emergente__cerrar {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -1951,7 +1956,7 @@ body[data-sidebar='oculto'] .sidebar__plegar { justify-content: center; padding-
   color: inherit;
   cursor: pointer;
 }
-.emergente__cerrar:hover {
+.aviso-emergente__cerrar:hover {
   background: color-mix(in srgb, currentColor 12%, transparent);
 }
 

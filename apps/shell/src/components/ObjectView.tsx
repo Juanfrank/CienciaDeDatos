@@ -108,6 +108,9 @@ export function useObjectView(objeto: SerializedObject): {
           etiqueta: filtro.fieldName.split('.').slice(-1)[0] ?? filtro.fieldName,
           // Las mismas formas de acotar que en el panel, decididas por el tipo de la columna.
           modos: modesByDefault(columnKind),
+          // El filtro de visualizacion es un complemento de UN objeto y no se configura campo a
+          // campo, asi que ofrece lo que su tipo admite: avanzado.
+          nivel: 'avanzado' as const,
           orden: 'origen',
           recuento: false,
           todos: false,

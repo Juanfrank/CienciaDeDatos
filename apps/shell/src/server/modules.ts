@@ -108,6 +108,10 @@ export const demoModules: ModuleDefinition[] = [
                     fieldName: 'DimTribunal.Materia',
                     tipo: 'pastillas',
                     etiqueta: 'Materia',
+                    // AVANZADO: este campo ofrece las cinco formas de acotar. El nivel lo decide
+                    // quien configura el objeto, no quien lo mira — «Distrito», aqui al lado, se
+                    // queda en basico y ensena solo su lista.
+                    nivel: 'avanzado',
                     // Con cuantos expedientes hay detras de cada materia: sin el recuento, elegir
                     // una y encontrarla vacia es la unica forma de saber que no habia nada.
                     recuento: true,

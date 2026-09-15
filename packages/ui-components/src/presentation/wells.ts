@@ -135,6 +135,15 @@ export function slotField(
 export interface SlotProblem {
   ranura: string;
   issue: string;
+  /**
+   * FALTAR no es lo mismo que SOBRAR, igual que en el contrato global.
+   *
+   * Una ranura obligatoria vacia es un objeto a medio configurar —lo normal nada mas colocarlo—,
+   * y la pantalla lo dibuja como un marcador de posicion que dice que falta. Sin esta distincion
+   * el marcador no llegaba a salir nunca: el problema del contrato venia marcado como «falta»,
+   * el de la ranura no, y basta con que UNO no lo sea para volver a la tarjeta de error en rojo.
+   */
+  kind: 'sin-mapear' | 'contrato-incumplido';
 }
 
 /** Valida la asignacion contra lo que las ranuras declaran. */
@@ -152,6 +161,7 @@ export function validateSlots(
     if (campos.length < minimo) {
       problems.push({
         ranura: ranura.id,
+        kind: 'sin-mapear',
         issue:
           `'${ranura.etiqueta}' necesita ${minimo} ${minimo === 1 ? 'campo' : 'campos'} y ` +
           `tiene ${campos.length}.`,
@@ -160,12 +170,14 @@ export function validateSlots(
     if (campos.length > ranura.max) {
       problems.push({
         ranura: ranura.id,
+        kind: 'contrato-incumplido',
         issue: `'${ranura.etiqueta}' admite ${ranura.max} y tiene ${campos.length}.`,
       });
     }
     if (new Set(campos).size !== campos.length) {
       problems.push({
         ranura: ranura.id,
+        kind: 'contrato-incumplido',
         issue: `'${ranura.etiqueta}' tiene el mismo campo dos veces.`,
       });
     }
@@ -177,6 +189,7 @@ export function validateSlots(
     if (!slots.some((r) => r.id === id) && (instance.binding.slots?.[id]?.length ?? 0) > 0) {
       problems.push({
         ranura: id,
+        kind: 'contrato-incumplido',
         issue: `Este objeto ya no tiene la ranura '${id}', y quedan campos asignados a ella.`,
       });
     }

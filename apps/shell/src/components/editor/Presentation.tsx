@@ -17,6 +17,7 @@ import {
   FORMAT_KINDS,
   AXIS_SCALES,
   PICKER_KINDS,
+  PICKER_LEVELS,
   VALUE_ORDERS,
   patternProblem,
   defaultPicker,
@@ -36,6 +37,7 @@ import {
   type IconName,
   type ObjectPresentation,
   type PickerKind,
+  type PickerLevel,
   type AxisScale,
   type DimensionPicker,
   type FilterMode,
@@ -1166,6 +1168,9 @@ function PanelPickers({
         ...(anterior && "orden" in anterior && anterior.orden
           ? { orden: anterior.orden }
           : {}),
+        ...(anterior && "nivel" in anterior && anterior.nivel
+          ? { nivel: anterior.nivel }
+          : {}),
         ...(anterior && "modos" in anterior && anterior.modos
           ? { modos: anterior.modos }
           : {}),
@@ -1241,12 +1246,37 @@ function PanelPickers({
             </label>
 
             {/*
+              Basico o avanzado. Lo decide AQUI quien configura el objeto.
+              Era un interruptor dentro del propio panel, y eso lo convertia en una preferencia de
+              quien miraba: un campo que se configuro para dar solo una lista de valores se podia
+              pasar a avanzado desde la pantalla.
+            */}
+            <label className="form__field">
+              <span>{t('pres.pickers.level')}</span>
+              <select
+                value={s.nivel}
+                disabled={saving}
+                data-testid={`${prueba}-${s.fieldName}-nivel`}
+                onChange={(e) =>
+                  pickerSet(s.fieldName, { nivel: e.target.value as PickerLevel })
+                }
+              >
+                {PICKER_LEVELS.map((nivel) => (
+                  <option key={nivel} value={nivel}>
+                    {t(NIVEL[nivel])}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {/*
               Las formas de acotar que ofrece ESTE campo.
               Se ofrecen solo las que tienen sentido por el tipo de la columna —un «entre» sobre
               una materia no significa nada— y la validacion rechaza las demas: aqui ni siquiera
               se ensenan, para no proponer algo que despues bloquea la publicacion.
             */}
-            <div className="editor__modos">
+            {/* En basico no se ofrece ninguna forma de acotar: solo hay una, la lista. */}
+            <div className="editor__modos" hidden={s.nivel === 'basico'}>
               <span className="filters-panel__label">{t('pres.pickers.modes')}</span>
               {posibles.map((modo) => {
                 const puestos = s.modos;
@@ -1324,6 +1354,12 @@ const ORDEN: Record<ValueOrder, MessageKey> = {
   origen: 'pres.pickers.order.source',
   alfabetico: 'pres.pickers.order.alphabetical',
   frecuencia: 'pres.pickers.order.frequency',
+};
+
+/** Basico o avanzado, en la lengua de quien configura. */
+const NIVEL: Record<PickerLevel, MessageKey> = {
+  basico: 'filters.basic',
+  avanzado: 'filters.advanced',
 };
 
 const MODO_ROTULO: Record<FilterMode, MessageKey> = {

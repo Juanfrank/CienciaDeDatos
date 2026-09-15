@@ -17,23 +17,109 @@ test.beforeEach(async ({ page }) => {
   await asLogin(page, 'u-admin');
 });
 
+/**
+ * Un modulo con UN objeto ya mapeado, puesto por la API, y el editor abierto encima.
+ *
+ * Colocar desde la paleta ya no mapea nada: el editor elegia la primera medida y la primera
+ * dimension del dataset y las ponia solas, asi que el objeto nacia ensenando una cifra que nadie
+ * habia pedido. Las pruebas que necesitan un objeto YA mapeado —casi todas las del panel— parten
+ * de aqui.
+ *
+ * Se escribe por la API y no a golpe de clic en los pozos. Encadenar «anadir» y «elegir» por cada
+ * campo deja abierta la lista de opciones del ultimo pozo tocado, que se cierra al abrir la del
+ * siguiente: el panel se encoge DESPUES de que el editor diga que no queda nada pendiente, y el
+ * clic que venga a continuacion cae en el hueco que el boton acaba de dejar. Ademas, lo que esas
+ * pruebas miran no es como se mapea, sino que pasa con un objeto ya mapeado.
+ */
+const conObjeto = async (
+  page: Page,
+  slug: string,
+  instancia: Record<string, unknown>,
+): Promise<string> => {
+  const creado = await page.request.post('/api/modules', {
+    data: { nombre: `Modulo ${slug}`, slug },
+  });
+  expect(creado.ok(), await creado.text()).toBe(true);
+  const { modulo } = (await creado.json()) as { modulo: { pages: { pageId: string }[] } };
+
+  const id = 'obj-fijo';
+  const guardado = await page.request.put(`/api/modules/${slug}/edit`, {
+    data: {
+      paginas: [
+        {
+          ...modulo.pages[0],
+          slug: 'general',
+          name: 'General',
+          items: [{ id, position: { x: 0, y: 0, w: 6, h: 4 }, instance: { instanceId: id, ...instancia } }],
+        },
+      ],
+    },
+  });
+  expect(guardado.ok(), await guardado.text()).toBe(true);
+
+  await page.goto(`/editor/${slug}`);
+  // Seleccionado, que es de donde cuelga el panel lateral entero.
+  await page.getByTestId(`select-${id}`).click();
+  await alDia(page);
+  return id;
+};
+
+/** Una tarjeta KPI con su medida puesta, que es lo que casi toda prueba del lienzo necesita. */
+const conMedida = (page: Page, slug: string, medida: string): Promise<string> =>
+  conObjeto(page, slug, {
+    objectId: 'tarjeta-kpi',
+    version: '1.0.0',
+    title: 'Tarjeta KPI',
+    binding: { datasetId: DATASET, dimensions: [], measures: [medida], slots: { valor: [medida] } },
+  });
+
+/** Un grafico de columnas con eje y cifra, como nacia antes. */
+const conBarras = (page: Page, slug: string): Promise<string> =>
+  conObjeto(page, slug, {
+    objectId: 'barras',
+    version: '1.0.0',
+    title: 'Grafico de columnas',
+    binding: {
+      datasetId: DATASET,
+      dimensions: [DISTRITO],
+      measures: ['CasosIngresados'],
+      slots: { 'eje-x': ['DimTribunal.Distrito'], serie: [], 'eje-y': ['CasosIngresados'], multiplo: [] },
+    },
+  });
+
+/** El dataset y la dimension que usan los fixtures. Los mismos que la semilla. */
+const DATASET = 'casos-por-distrito-trimestre';
+const DISTRITO = { table: 'DimTribunal', field: 'Distrito' };
+
 test.describe('se edita el modulo, no un formulario', () => {
-  test('un objeto recien colocado DIBUJA datos reales', async ({ page }) => {
+  test('un objeto recien colocado ESPERA sus campos, y luego dibuja datos reales', async ({ page }) => {
+    /*
+     * Colocar ya no mapea nada por su cuenta.
+     *
+     * El editor elegia la primera medida del dataset y la ponia sola, asi que el objeto nacia
+     * ensenando una cifra que nadie habia pedido: quien lo colocaba veia un numero plausible y
+     * no tenia por que sospechar que no era el suyo. Ahora nace vacio y lo dice — un marcador de
+     * posicion que nombra lo que falta, no una tarjeta de error en rojo.
+     */
     await newModule(page, 'lienzo-vivo');
     await page.getByTestId('add-tarjeta-kpi').click();
+    await alDia(page);
+    const id = await blockId(page);
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-placeholder')).toBeVisible();
+    // Y no se puede publicar mientras le falten campos: el marcador no es solo un dibujo.
+    await expect(page.getByTestId('locks-editor')).toBeVisible();
+
+    await page.getByTestId(`well-${id}-valor-anadir`).click();
+    await page.getByTestId(`well-${id}-valor-opcion-CasosIngresados`).click();
     await alDia(page);
 
     // La cifra sale del cache, ya recortada por el ambito de quien edita. Sin esto, el editor
     // volveria a ser una lista de desplegables y habria que publicar para ver el resultado.
-    const id = await blockId(page);
     await expect(page.getByTestId(`block-${id}`).getByTestId('value-kpi')).not.toHaveText('0');
   });
 
   test('cambiar el mapeo cambia lo dibujado, sin recargar', async ({ page }) => {
-    await newModule(page, 'lienzo-mapeo');
-    await page.getByTestId('add-tarjeta-kpi').click();
-    await alDia(page);
-    const id = await blockId(page);
+    const id = await conMedida(page, 'lienzo-mapeo', 'CasosIngresados');
 
     const valor = page.getByTestId(`block-${id}`).getByTestId('value-kpi');
     const before = await valor.innerText();
@@ -53,23 +139,29 @@ test.describe('se edita el modulo, no un formulario', () => {
     await expect(valor).not.toHaveText('—');
   });
 
-  test('un objeto roto se marca EN EL LIENZO y el resto se sigue editando', async ({ page }) => {
-    await newModule(page, 'lienzo-roto');
-    await page.getByTestId('add-tarjeta-kpi').click();
-    await alDia(page);
-    const id = await blockId(page);
+  test('quitar la unica medida devuelve el marcador, y el resto se sigue editando', async ({ page }) => {
+    /*
+     * Faltar no es romperse, y se dibujan distinto.
+     *
+     * Un objeto al que le quitan su unica medida esta a medio configurar, igual que cuando se
+     * acaba de colocar: sale el marcador de posicion. La tarjeta de error en rojo se reserva
+     * para lo que de verdad se rompio —un campo que desaparecio del esquema—. Lo que NO cambia
+     * es que en los dos casos no se puede publicar.
+     */
+    const id = await conMedida(page, 'lienzo-roto', 'CasosIngresados');
 
-    // Se quita la unica medida: el contrato exige al menos una.
     await page.getByTestId(`well-${id}-valor-quitar-CasosIngresados`).click();
     await alDia(page);
 
-    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toBeVisible();
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-placeholder')).toBeVisible();
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toHaveCount(0);
     await expect(page.getByTestId('locks-editor')).toBeVisible();
+
     // El panel sigue operativo: se puede deshacer sin recargar ni perder la seleccion.
     await page.getByTestId(`well-${id}-valor-anadir`).click();
     await page.getByTestId(`well-${id}-valor-opcion-CasosIngresados`).click();
     await alDia(page);
-    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toHaveCount(0);
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-placeholder')).toHaveCount(0);
   });
 });
 
@@ -276,10 +368,7 @@ test.describe('los pozos de campos', () => {
      * campo puesto en «Eje X» acabaria detras del de «Serie» y el grafico agruparia por lo que
      * deberia repartir.
      */
-    await newModule(page, 'pozos-orden');
-    await page.getByTestId('add-barras').click();
-    await alDia(page);
-    const id = await blockId(page);
+    const id = await conBarras(page, 'pozos-orden');
 
     // El eje X viene con una dimension; se anade otra a «Serie».
     await page.getByTestId(`well-${id}-serie-anadir`).click();
@@ -337,17 +426,15 @@ test.describe('los pozos de campos', () => {
   });
 
   test('quitar un chiclet quita el campo del mapeo', async ({ page }) => {
-    await newModule(page, 'pozos-quitar');
-    await page.getByTestId('add-barras').click();
-    await alDia(page);
-    const id = await blockId(page);
+    const id = await conBarras(page, 'pozos-quitar');
 
     await page.getByTestId(`well-${id}-eje-x-quitar-DimTribunal.Distrito`).click();
     await alDia(page);
 
     await expect(page.getByTestId(`well-${id}-eje-x`)).toContainText('0/1');
-    // Sin dimension, el objeto incumple su contrato y se marca roto: se ve en el acto.
-    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toBeVisible();
+    // Sin dimension le FALTA un campo, que no es lo mismo que estar roto: sale el marcador de
+    // posicion, que nombra lo que falta, y no la tarjeta de error en rojo.
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-placeholder')).toBeVisible();
   });
 });
 
@@ -383,10 +470,7 @@ test.describe('secciones, complementos y pestanas', () => {
      * y sus pruebas, y no habia forma de anadir uno desde el editor: los del seed se escribieron a
      * mano.
      */
-    await newModule(page, 'sec-adjunto');
-    await page.getByTestId('add-barras').click();
-    await alDia(page);
-    const id = await blockId(page);
+    const id = await conBarras(page, 'sec-adjunto');
 
     await page.getByTestId('tab-complementos').click();
     await expect(page.getByTestId(`without-addons-${id}`)).toBeVisible();
@@ -539,27 +623,22 @@ test.describe('las ranuras mandan, no el orden', () => {
   test('se puede llenar el Eje Y sin llenar el Eje X', async ({ page }) => {
     /*
      * El caso que el reparto posicional no podia expresar: el primer campo caia siempre en la
-     * primera ranura. Aqui la medida va a su sitio y el eje X se queda vacio — y el objeto se
-     * marca roto, que es lo correcto: un grafico de barras sin eje no se puede dibujar.
+     * primera ranura. Aqui la medida va a su sitio y el eje X se queda vacio — y el objeto sale
+     * como marcador de posicion, que es lo correcto: un grafico sin eje no se puede dibujar, pero
+     * tampoco esta roto. Le falta un campo, y eso lo dice el marcador.
      */
-    await newModule(page, 'ranura-solo-y');
-    await page.getByTestId('add-barras').click();
-    await alDia(page);
-    const id = await blockId(page);
+    const id = await conBarras(page, 'ranura-solo-y');
 
     await page.getByTestId(`well-${id}-eje-x-quitar-DimTribunal.Distrito`).click();
     await alDia(page);
 
     await expect(page.getByTestId(`well-${id}-eje-x`)).toContainText('0/1');
     await expect(page.getByTestId(`well-${id}-eje-y`)).toContainText('CasosIngresados');
-    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toBeVisible();
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-placeholder')).toBeVisible();
   });
 
   test('se puede llenar SOLO la serie, y el editor dice que falta el eje', async ({ page }) => {
-    await newModule(page, 'ranura-solo-serie');
-    await page.getByTestId('add-barras').click();
-    await alDia(page);
-    const id = await blockId(page);
+    const id = await conBarras(page, 'ranura-solo-serie');
 
     await page.getByTestId(`well-${id}-eje-x-quitar-DimTribunal.Distrito`).click();
     await alDia(page);
@@ -572,16 +651,14 @@ test.describe('las ranuras mandan, no el orden', () => {
     await expect(page.getByTestId('locks-editor')).toContainText('Eje X');
 
     /*
-     * Y el bloque se marca ROTO en el lienzo, no se dibuja con la serie haciendo de eje.
+     * Y el bloque NO se dibuja con la serie haciendo de eje: sale el marcador de posicion, que
+     * dice que falta el eje X. El grafico no se inventa un eje con lo primero que encuentre.
      */
-    await expect(page.getByTestId(`block-${id}`).getByTestId('object-broken')).toBeVisible();
+    await expect(page.getByTestId(`block-${id}`).getByTestId('object-placeholder')).toBeVisible();
   });
 
   test('el campo vuelve a SU ranura, no a la primera libre', async ({ page }) => {
-    await newModule(page, 'ranura-vuelve');
-    await page.getByTestId('add-barras').click();
-    await alDia(page);
-    const id = await blockId(page);
+    const id = await conBarras(page, 'ranura-vuelve');
 
     await page.getByTestId(`well-${id}-eje-x-quitar-DimTribunal.Distrito`).click();
     await alDia(page);
@@ -702,10 +779,7 @@ test.describe('como se resume cada medida', () => {
      * suma de los promedios— donde el promedio real eran 165,5. La capa de presentacion sumaba
      * siempre porque sumar era lo unico que sabia hacer.
      */
-    await newModule(page, 'agr-declarada');
-    await page.getByTestId('add-tarjeta-kpi').click();
-    await alDia(page);
-    const id = await blockId(page);
+    const id = await conMedida(page, 'agr-declarada', 'CasosIngresados');
 
     // La medida que trae por defecto es aditiva, y el esquema la declara suma.
     await expect(page.getByTestId(`well-${id}-valor-agregacion-CasosIngresados`)).toHaveValue(
@@ -759,10 +833,7 @@ test.describe('como se resume cada medida', () => {
      * cuando el editor ya lo sabe. Es el mismo criterio por el que los botones de borde del
      * lienzo se apagan en el borde en vez de guardar algo invalido y avisar despues.
      */
-    await newModule(page, 'agr-opciones');
-    await page.getByTestId('add-tarjeta-kpi').click();
-    await alDia(page);
-    const id = await blockId(page);
+    const id = await conMedida(page, 'agr-opciones', 'CasosIngresados');
 
     const opciones = () =>
       page
@@ -792,10 +863,7 @@ test.describe('como se resume cada medida', () => {
   test('un pozo lleno no ensena el boton de anadir', async ({ page }) => {
     // Un boton apagado es una promesa que no se cumple: ocupa sitio, invita a pulsarlo y no
     // explica que hay que quitar algo antes. El hueco desaparece y vuelve al quitar un campo.
-    await newModule(page, 'pozo-lleno');
-    await page.getByTestId('add-barras').click();
-    await alDia(page);
-    const id = await blockId(page);
+    const id = await conBarras(page, 'pozo-lleno');
 
     // El eje X admite uno y ya lo trae: no hay `+`.
     await expect(page.getByTestId(`well-${id}-eje-x-anadir`)).toHaveCount(0);
@@ -814,12 +882,9 @@ test.describe('como se resume cada medida', () => {
      * filas ya agrupadas un promedio de promedios solo coincide con el real si todos los grupos
      * pesan igual — y no hay forma de saber si pesan igual desde el resultado.
      */
-    await newModule(page, 'agr-imposible');
-    await page.getByTestId('add-tarjeta-kpi').click();
-    // `alDia` incluye `data-dirty`, asi que aqui el objeto ya esta en el almacen: sin esa espera
-    // la API de mas abajo leeria un modulo vacio y el PUT escribiria la pagina sin el objeto.
-    await alDia(page);
-    const id = await blockId(page);
+    // El fixture escribe el objeto por la API, asi que aqui ya esta en el almacen: la llamada de
+    // mas abajo leeria un modulo vacio y el PUT escribiria la pagina sin el objeto.
+    const id = await conMedida(page, 'agr-imposible', 'CasosIngresados');
 
     /*
      * El desplegable ya no ofrece 'promedio' aqui, asi que la combinacion se fuerza por la API —
@@ -876,10 +941,7 @@ test.describe('como se resume cada medida', () => {
 
 test.describe('estilo de texto y paleta', () => {
   test('negrita, cursiva y color se aplican al titulo, en vivo', async ({ page }) => {
-    await newModule(page, 'text-style');
-    await page.getByTestId('add-tarjeta-kpi').click();
-    await alDia(page);
-    const id = await blockId(page);
+    const id = await conMedida(page, 'text-style', 'CasosIngresados');
     const pres = `pres-obj-${id.replace('obj-', '')}`;
 
     await page.getByTestId('tab-formato').click();

@@ -208,6 +208,7 @@ export const en: Record<MessageKey, string> = {
   'pres.pickers.order.alphabetical': "Alphabetical",
   'pres.pickers.order.frequency': "By frequency",
   'pres.pickers.modes': "Ways of narrowing it offers",
+  'pres.pickers.level': 'Level',
   'pres.pickers.count': "Show how many rows are behind each value",
   'pres.pickers.selectAll': "«All» and «None» buttons",
   'pres.pickers.collapsed': "Starts collapsed",

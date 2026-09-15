@@ -185,7 +185,21 @@ export function ModuleEditor({
           objetos: SerializedObject[];
         };
         setModulo(body.modulo);
-        setPaginas(body.modulo.pages);
+        /*
+         * Lo guardado se adopta SOLO si nadie escribio mientras la peticion viajaba.
+         *
+         * `setPaginas(body.modulo.pages)` a secas pisaba lo que se hubiera hecho entre el envio y
+         * la respuesta: quitar un campo justo despues de anadir otro deshacia el quitado sin
+         * decir nada, porque llegaba la foto de antes y se ponia encima. Con el autoguardado de
+         * por medio, esa ventana es de un segundo largo — basta con dos gestos seguidos.
+         *
+         * Se compara contra lo que se ENVIO, que es de lo que esta respuesta habla. Si no
+         * coincide, lo local es mas nuevo y manda: `modulo` ya lleva la referencia guardada, asi
+         * que `sucio` vuelve a ser cierto y el autoguardado se rearma solo con lo que hay ahora.
+         */
+        setPaginas((actuales) =>
+          JSON.stringify(actuales) === JSON.stringify(cuales) ? body.modulo.pages : actuales,
+        );
         setDiag(body.diagnosticos);
         setBloq(body.locks);
         setObjetos(body.objetos);
