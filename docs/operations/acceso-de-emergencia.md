@@ -30,6 +30,10 @@ Ocurre de tres formas realistas:
 - **No hay un endpoint de rescate.** Cualquier ruta que conceda permisos sin autenticar es la
   puerta que se buscara primero al atacar la aplicacion.
 
+La situacion inversa —un despliegue nuevo, donde todavia no hay ninguna cuenta local que pueda
+entrar— no es una emergencia y no se resuelve por aqui: tiene su propio procedimiento en
+`primer-administrador.md`.
+
 El acceso de emergencia pasa por donde ya pasa el resto de la configuracion: **el almacen de
 gobierno**. Quien tenga acceso a esa base de datos puede nombrar a un Administrador, y ese
 acceso ya esta gobernado por Azure —con sus propios controles, su propia auditoria y su propio

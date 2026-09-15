@@ -400,23 +400,31 @@ Antes de la guarda hace falta un extractor que entienda las plantillas, porque u
 falsos positivos termina con alguien relajandola. Con eso, las dos mitades de 2.14 se cierran a la
 vez: la regla sin TSX es CSS muerto, y el TSX sin regla es un estilo que no se aplica.
 
-### 2.15 No hay forma de crear el PRIMER Administrador en un despliegue real
+### 2.15 No hay forma de crear el PRIMER Administrador en un despliegue real — HECHO
 
-Lo abre el arreglo anterior, y hay que decirlo claro: cerrar la siembra de demostracion deja un
-despliegue sin la variable **sin ninguna cuenta local**. Era lo correcto —lo que sembraba era una
-clave publica para toda la institucion— pero ahora falta la otra mitad.
+Lo abrio el arreglo anterior: cerrar la siembra de demostracion dejaba un despliegue sin la
+variable **sin ninguna cuenta local**. Era lo correcto —lo que sembraba era una clave publica para
+toda la institucion— pero faltaba la otra mitad.
 
-Lo que hace falta es un **comando de operacion**, no una ruta HTTP: una ruta de arranque es una
-puerta que queda abierta para siempre y que hay que acordarse de cerrar. El comando crea una sola
-cuenta de Administrador, con contrasena aleatoria impresa UNA vez y su propio secreto TOTP, y se
-niega a ejecutarse si ya existe alguna credencial local.
+Resuelto con un **comando de operacion** y no con una ruta HTTP, que es el punto entero: una ruta
+de arranque es una puerta que queda abierta para siempre y que hay que acordarse de cerrar, y
+basta con que se pierda el estado que la deshabilita para que vuelva a estar abierta.
 
-Va junto al procedimiento de `docs/operations/acceso-de-emergencia.md`, que describe la situacion
-inversa —quedarse sin Administradores— y comparte con este la pregunta de fondo: quien puede
-crear el acceso cuando no hay acceso.
+`npm run crear-administrador -- <userId>` (`tools/crear-administrador.mts` sobre
+`apps/shell/src/server/primerAdministrador.ts`) crea una sola cuenta local, con contrasena
+aleatoria impresa UNA vez y su propio secreto TOTP, y se niega en tres casos: si ya existe alguna
+credencial local, si el gobierno no conoce al usuario, y si ese usuario no es Administrador en
+ningun equipo —concede el ACCESO, no el rol—. La creacion consta en la auditoria con `sistema`
+como actor.
 
-Mientras tanto, `npm run dev` y las pruebas de navegador siguen funcionando con la bandera, asi
-que esto no bloquea el desarrollo: bloquea el despliegue, que ya estaba bloqueado por 1.4.
+La negativa central esta probada por su mensaje y no por la clase del error, y con el mismo
+`userId` en los dos intentos: con otro, el gobierno sembrado solo tiene un Administrador y la
+comprobacion de rol taparia la negativa, de modo que la prueba pasaria igual con la negativa
+desactivada. Se comprobo enrojeciendo.
+
+El procedimiento esta en `docs/operations/primer-administrador.md`, junto al de
+`acceso-de-emergencia.md`, que describe la situacion inversa —quedarse sin Administradores— y
+comparte con este la pregunta de fondo: quien puede crear el acceso cuando no hay acceso.
 
 ### 2.16 La incorporacion en otros portales no funciona fuera del propio dominio
 
