@@ -110,13 +110,13 @@ export interface MaterialTheme {
   elevation: typeof ELEVATION;
   state: typeof STATUS;
   motion: typeof MOVIMIENTO;
-  font: { sans: string; mono: string };
+  font: { sans: string; mono: string; serif: string };
 }
 
 export function materialTheme(
   source: ThemeSource,
   mode: ColorMode,
-  fonts: { sans: string; mono: string },
+  fonts: { sans: string; mono: string; serif: string },
 ): MaterialTheme {
   return {
     mode,
@@ -170,6 +170,8 @@ export function materialVariables(theme: MaterialTheme): Record<string, string> 
 
   vars['--md-ref-typeface-plain'] = theme.font.sans;
   vars['--md-ref-typeface-mono'] = theme.font.mono;
+  // `brand` es el nombre que le da Material a la tipografia de display frente a la de lectura.
+  vars['--md-ref-typeface-brand'] = theme.font.serif;
 
   return vars;
 }

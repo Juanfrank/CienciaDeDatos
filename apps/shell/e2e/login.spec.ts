@@ -208,7 +208,10 @@ test.describe('Azure AD se declara, no se simula', () => {
     await page.goto('/sign-in');
     const button = page.getByTestId('login-azure');
     await expect(button).toBeVisible();
-    await expect(button).toContainText('Azure AD');
+    // El rotulo nombra al proveedor como lo conoce quien entra —Microsoft—, y el aviso de que
+    // aqui no esta habilitado va FUERA del boton: dentro, el rotulo deja de ser una accion.
+    await expect(button).toContainText('Microsoft');
+    await expect(page.getByTestId('azure-no-habilitado')).toContainText('no está habilitado');
 
     await button.click();
     // Se explica, no se finge un inicio de sesion que pareceria funcionar — el mismo criterio

@@ -7,13 +7,35 @@ import {
   asThemeTokens,
   findContrastFailures,
   institutionalContrastChecks,
+  materialVariables,
   sourceColorIs,
+  themeVersion,
   themeVersions,
+  toCssVariables,
 } from '@app/design-tokens';
 import { type Actor, assertCan } from '@app/access-control';
 import { governance } from './governance';
 import { AdminError } from './admin';
 import { changeRecord } from './audit';
+
+/**
+ * El tema de un modo, como variables CSS.
+ *
+ * El tema ACTIVO y el modo son dos cosas distintas: el tema es la decision de la institucion
+ * —cual de los suyos se sirve— y el modo es la preferencia de quien mira. De ahi que la version
+ * se pida con los dos: todo tema tiene su claro y su oscuro, derivados del mismo origen.
+ *
+ * Vive aqui y no en la disposicion raiz porque hay una pantalla que NO sigue la preferencia de
+ * quien mira —la de acceso, que se dibuja siempre en oscuro—, y para pedir sus variables hacia
+ * falta la misma funcion desde dos sitios.
+ */
+export function themeVariables(
+  definicion: ThemeDefinition,
+  mode: ColorMode,
+): Record<string, string> {
+  const theme = themeVersion(definicion, mode);
+  return { ...materialVariables(theme), ...toCssVariables(asThemeTokens(theme)) };
+}
 
 /** En que modo de color se dibuja la aplicacion — seccion 4.3. */
 export const THEME_COOKIE = 'tema';

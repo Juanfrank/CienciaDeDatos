@@ -100,6 +100,22 @@ test.describe('panel de administracion (4.10.8)', () => {
   }
 });
 
+test.describe('pantalla de acceso (4.7)', () => {
+  test('es accesible, que es la unica pantalla que ve quien aun no ha entrado', async ({ page }) => {
+    /*
+     * Faltaba, y es la que menos podia faltar: todas las demas se comprueban con una sesion
+     * abierta, asi que quien no consiga entrar por esta no llega a ninguna de ellas.
+     */
+    // Sin sesion, a mano: el `beforeEach` de arriba abre una, y con sesion esta pantalla
+    // redirige a la aplicacion — que es precisamente lo que hace que se le olvide a uno probarla.
+    await page.context().clearCookies();
+    await page.goto('/sign-in');
+    await expect(page.getByTestId('login-login')).toBeVisible();
+
+    expect(await infracciones(page)).toEqual([]);
+  });
+});
+
 test.describe('restablecimiento de contrasena (4.7.2)', () => {
   test('la pantalla de restablecimiento es accesible, sin sesion', async ({ page }) => {
     await page.goto('/reset');

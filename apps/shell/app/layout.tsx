@@ -1,19 +1,11 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
-import {
-  asThemeTokens,
-  defaultIdentity,
-  themeVersion,
-  toCssVariables,
-  materialVariables,
-  type ColorMode,
-  type ThemeDefinition,
-} from '@app/design-tokens';
+import { defaultIdentity } from '@app/design-tokens';
 import { Header } from '../src/components/Header';
 import { LocaleProvider } from '../src/components/Locale';
 import { sessionGet } from '../src/server/session';
 import { idioma } from '../src/server/locale';
-import { activeTheme, colorMode } from '../src/server/theme';
+import { activeTheme, colorMode, themeVariables } from '../src/server/theme';
 import { PATH_HEADER } from '../src/server/csp';
 import { isEmbeddablePath } from '../src/server/embedding';
 import { headers } from 'next/headers';
@@ -42,18 +34,6 @@ const montserrat = Montserrat({
   // La pila de alternativas la fija el tema; aqui solo se declara que variable la lleva.
   variable: '--font-montserrat',
 });
-
-/**
- * El tema organizacional (4.3) se inyecta como variables CSS en la raiz del documento.
- *
- * El tema ACTIVO y el modo son dos cosas distintas: el tema es la decision de la institucion —cual
- * de los suyos se sirve— y el modo es la preferencia de quien mira. De ahi que la version se pida
- * con los dos: todo tema tiene su claro y su oscuro, derivados del mismo origen.
- */
-function themeVariables(definicion: ThemeDefinition, mode: ColorMode): Record<string, string> {
-  const theme = themeVersion(definicion, mode);
-  return { ...materialVariables(theme), ...toCssVariables(asThemeTokens(theme)) };
-}
 
 /** Cromo comun a toda la aplicacion: documento, tema y cabecera. */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

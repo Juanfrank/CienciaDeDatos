@@ -19,6 +19,15 @@ export const INSTITUTIONAL_SOURCE: ThemeSource = {
 export const FONTS = {
   sans: "var(--font-montserrat), Montserrat, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
   mono: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+  /*
+   * La serif del cromo institucional: la pantalla de acceso, y nada mas por ahora.
+   *
+   * Una pila del SISTEMA y no una fuente descargada, porque el principio 1 no admite una peticion
+   * a un dominio ajeno y una fuente propia mas serviria un archivo mas antes de que nadie haya
+   * entrado. Un nombre de institucion en serif se lee como un membrete; en la misma sans que todo
+   * lo demas se lee como un titulo mas de la aplicacion, que es justo lo que no es.
+   */
+  serif: "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif",
 };
 
 export const lightTheme: MaterialTheme = materialTheme(INSTITUTIONAL_SOURCE, 'light', FONTS);

@@ -256,8 +256,7 @@ code {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
 }
-.md-boton--contorno,
-.login__azure {
+.md-boton--contorno {
   background: transparent;
   color: var(--md-sys-color-primary);
   border: 1px solid var(--md-sys-color-outline);
@@ -268,8 +267,7 @@ code {
   padding: 0 12px;
 }
 
-.pastilla,
-.login__azure {
+.pastilla {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -287,10 +285,8 @@ code {
   isolation: isolate;
   overflow: hidden;
 }
-.login__azure { border: 1px solid var(--md-sys-color-outline); }
 
 .pastilla::before,
-.login__azure::before,
 .button-link::before {
   content: '';
   position: absolute;
@@ -302,14 +298,11 @@ code {
   z-index: -1;
 }
 .pastilla:hover:not(:disabled)::before,
-.login__azure:hover::before,
 .button-link:hover:not(:disabled)::before { opacity: var(--md-sys-state-hover-opacity); }
 .pastilla:active:not(:disabled)::before,
-.login__azure:active::before,
 .button-link:active:not(:disabled)::before { opacity: var(--md-sys-state-pressed-opacity); }
 
-.pastilla:disabled,
-.login__azure:disabled {
+.pastilla:disabled {
   cursor: not-allowed;
   background: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
   color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
@@ -3871,45 +3864,242 @@ th[aria-sort='descending'] .table__flecha {
  * ese es justo el aspecto que tiene una pagina de robo de credenciales.
  */
 .acceso {
+  /*
+   * `margin: auto` sobre la tarjeta y no `align-items: center`.
+   *
+   * Centrando con flex, una tarjeta mas alta que la ventana se recorta por ARRIBA y lo que se
+   * pierde es el emblema y el nombre — justo lo que la pantalla existe para ensenar—, y ademas
+   * no hay forma de desplazarse hasta ello. Con el margen automatico se centra mientras quepa y
+   * se desplaza cuando no.
+   */
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  overflow-y: auto;
+  padding: var(--space-lg);
+  /*
+   * El fondo es un degradado de la MARCA, no un gris de sistema.
+   *
+   * Los dos extremos salen de roles del tema —el azul del contenedor primario y la superficie— y
+   * se mezclan con `color-mix`: asi sigue al tema institucional que este activo en vez de fijar
+   * un azul a mano, que es lo que la puerta de contraste existe para impedir. El punto de luz va
+   * arriba, donde esta el emblema, para que la mirada empiece por el.
+   */
+  background:
+    radial-gradient(
+      120% 90% at 50% 0%,
+      color-mix(in srgb, var(--md-sys-color-primary-container) 55%, var(--md-sys-color-surface)),
+      var(--md-sys-color-surface) 70%
+    );
+  color: var(--md-sys-color-on-surface);
+}
+
+/*
+ * La tarjeta se posa sobre el degradado, no lo tapa.
+ *
+ * Translucida y con el borde apenas marcado: opaca, el degradado se corta en seco y la tarjeta
+ * parece pegada encima. `backdrop-filter` es un extra — donde no exista, el color de fondo ya
+ * lleva su propia opacidad y la tarjeta se lee igual.
+ */
+.acceso__tarjeta {
+  margin: auto;
+  width: min(28rem, 100%);
+  padding: var(--space-xl) var(--space-lg);
+  text-align: center;
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 70%, transparent);
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  box-shadow: var(--md-sys-elevation-3);
+  backdrop-filter: blur(16px);
+}
+
+.acceso__marca {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-lg);
-  min-height: 100vh;
-  padding: var(--space-lg);
-  background: var(--md-sys-color-surface);
+  gap: var(--space-sm);
 }
-.login__mark { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); text-align: center; }
-.login__mark img { height: 72px; width: auto; }
-.login__institucion { color: var(--md-sys-color-on-surface-variant); margin: 0; }
-.acceso .pastilla { margin-top: var(--space-sm); }
-.login__card > .muted-text:last-child { margin-top: var(--space-md); }
+
+/*
+ * El emblema, en un medallon con halo.
+ *
+ * El halo es lo que lo separa del degradado sin ponerle un borde duro: un emblema recortado sobre
+ * un fondo del mismo color se lee como una mancha. El `box-shadow` exterior hace de resplandor y
+ * el interior de filo.
+ */
+.acceso__medallon {
+  display: grid;
+  place-items: center;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: var(--space-sm);
+  border-radius: var(--md-sys-shape-corner-full);
+  /*
+   * Claro, no azul: el emblema lleva sus propios colores —azul y rojo oscuros— y sobre el azul
+   * del contenedor primario se convierte en una mancha. El par inverso del tema es el mismo que
+   * usa el boton principal, asi que la pantalla tiene un solo acento claro y no dos.
+   */
+  background: var(--md-sys-color-inverse-surface);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--md-sys-color-primary) 35%, transparent),
+    0 0 2.5rem color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent);
+}
+.acceso__medallon img { height: 2.5rem; width: auto; }
+
+/*
+ * El nombre del sistema, en la serif institucional.
+ *
+ * Es lo unico de la aplicacion que no va en la sans: en la misma tipografia que todo lo demas se
+ * lee como un titulo mas de pantalla, y esto no es una pantalla mas — es el membrete.
+ */
+.acceso__sistema {
+  margin: 0;
+  font-family: var(--md-ref-typeface-brand);
+  font-size: var(--md-sys-typescale-headline-medium-size);
+  font-weight: 400;
+  line-height: 1.2;
+  text-wrap: balance;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* La institucion, en versalitas: dice de quien es sin competir con el nombre del sistema. */
+.acceso__institucion {
+  margin: 0;
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.acceso__regla {
+  height: 0;
+  margin: var(--space-md) auto var(--space-lg);
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 80%, transparent);
+}
+
+.acceso__lema {
+  margin: 0 0 var(--space-lg);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: 1.5;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/*
+ * El boton institucional es el camino PRINCIPAL, y se ve como tal.
+ *
+ * Claro sobre oscuro —el par inverso del tema, que ya tiene su contraste comprobado— para que sea
+ * lo unico brillante de la tarjeta. Lo que va debajo es la alternativa, y se lee como alternativa.
+ */
+.acceso__microsoft {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  background: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-medium);
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.acceso__microsoft::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  z-index: -1;
+}
+.acceso__microsoft:hover::before { opacity: var(--md-sys-state-hover-opacity); }
+.acceso__microsoft:active::before { opacity: var(--md-sys-state-pressed-opacity); }
+/* El logotipo no se encoge cuando el rotulo se parte en dos lineas. */
+.acceso__logotipo { flex: none; }
+
+.acceso__aviso {
+  margin: var(--space-sm) 0 0;
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.acceso__separador {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: var(--space-lg) 0 var(--space-md);
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+.acceso__separador::before,
+.acceso__separador::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 80%, transparent);
+}
+
+/* El formulario se alinea a la izquierda: un rotulo centrado sobre su campo no se lee como suyo. */
+.acceso__formulario { text-align: start; }
+.acceso .pastilla { width: 100%; margin-top: var(--space-sm); }
+
+.acceso__error {
+  min-height: 1.25rem;
+  margin: 0 0 var(--space-sm);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-error);
+}
+
+.acceso__nota {
+  margin: var(--space-md) 0 0;
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: 1.5;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.acceso__pie {
+  margin: var(--space-md) 0 0;
+  font-size: var(--md-sys-typescale-label-small-size);
+  letter-spacing: 0.04em;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/*
+ * La tarjeta de las OTRAS pantallas que se dibujan sobre `.acceso` — hoy, restablecer contrasena.
+ *
+ * Comparten el fondo pero no el membrete: alli ya se sabe a donde se ha llegado, porque se llega
+ * desde dentro. Se queda con la caja de siempre.
+ */
 .login__card {
-  width: min(420px, 100%);
+  width: min(28rem, 100%);
   padding: var(--space-xl);
   background: var(--md-sys-color-surface-container-low);
   border-radius: var(--md-sys-shape-corner-extra-large);
 }
 .login__card h1 { margin-bottom: var(--space-lg); }
-.login__azure { width: 100%; }
-.login__separador {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  margin: var(--space-lg) 0;
-  font-size: var(--md-sys-typescale-body-small-size);
-  color: var(--md-sys-color-on-surface-variant);
-}
-.login__separador::before,
-.login__separador::after { content: ''; flex: 1; border-top: 1px solid var(--md-sys-color-outline-variant); }
+.login__card > .muted-text:last-child { margin-top: var(--space-md); }
+
+/*
+ * El aviso de error de un formulario, en cualquier pantalla.
+ *
+ * Reserva su alto aunque este vacio: sin la reserva, el mensaje aparece y empuja el boton hacia
+ * abajo justo cuando la mano va a pulsarlo otra vez.
+ */
 .login__error {
   min-height: 1.25rem;
   margin: 0 0 var(--space-sm);
   font-size: var(--md-sys-typescale-body-medium-size);
   color: var(--md-sys-color-error);
 }
-.acceso .pastilla { width: 100%; }
 
 .incrustado { display: flex; flex-direction: column; min-height: 100vh; }
 .embedded__header {

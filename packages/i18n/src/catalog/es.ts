@@ -13,6 +13,22 @@ export const es = {
   'app.name': 'Gestión de Datos y Conocimiento',
   'app.institution': 'Poder Judicial de la República Dominicana',
 
+  /* Pantalla de acceso (4.7). */
+  'access.tagline': 'Acceso exclusivo para funcionarios autorizados.',
+  'access.instruction': 'Ingrese con sus credenciales institucionales.',
+  'access.microsoft': 'Iniciar sesión con Microsoft',
+  'access.microsoftOff': 'El acceso institucional no está habilitado en este entorno.',
+  'access.orCredentials': 'o entre con una cuenta local',
+  'access.mail': 'Correo institucional',
+  'access.password': 'Contraseña',
+  'access.code': 'Código de verificación',
+  'access.submit': 'Entrar',
+  'access.checking': 'Comprobando…',
+  'access.mfaNote': 'Las cuentas locales exigen un segundo factor. Si olvidó su contraseña, un Administrador inicia el restablecimiento y le entrega un código de un solo uso.',
+  'access.reset': 'Restablecer contraseña',
+  'access.restricted': 'Acceso restringido',
+  'access.rights': '© {year} {institution}',
+
   'chrome.notices': 'Avisos',
   'chrome.editor': 'Editor de módulos',
   'chrome.admin': 'Administración',

@@ -12,6 +12,22 @@ export const en: Record<MessageKey, string> = {
   'app.name': 'Data and Knowledge Management',
   'app.institution': 'Judiciary of the Dominican Republic',
 
+  /* Sign-in screen (4.7). */
+  'access.tagline': 'Restricted to authorized court personnel.',
+  'access.instruction': 'Sign in with your institutional credentials.',
+  'access.microsoft': 'Sign in with Microsoft',
+  'access.microsoftOff': 'Institutional sign-in is not enabled in this environment.',
+  'access.orCredentials': 'or sign in with a local account',
+  'access.mail': 'Institutional e-mail',
+  'access.password': 'Password',
+  'access.code': 'Verification code',
+  'access.submit': 'Sign in',
+  'access.checking': 'Checking…',
+  'access.mfaNote': 'Local accounts require a second factor. If you forgot your password, an Administrator starts the reset and hands you a single-use code.',
+  'access.reset': 'Reset password',
+  'access.restricted': 'Restricted access',
+  'access.rights': '© {year} {institution}',
+
   'chrome.notices': 'Notices',
   'chrome.editor': 'Module editor',
   'chrome.admin': 'Administration',
