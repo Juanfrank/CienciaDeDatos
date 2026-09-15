@@ -521,51 +521,47 @@ Dos detalles que la primera pasada enseno, y que valen para las siguientes:
   tambien: es el nombre del campo dicho a quien edita, y dejarlo en espanol seria senalar un campo
   que ya no se llama asi.
 
-### 2.14 Clases de CSS que nadie escribe, y nada lo comprueba
+### 2.14 Clases de CSS que nadie escribe, y nada lo comprueba — GUARDA PUESTA, deuda medida
 
 Las guardas de `tools/coherence` atan los atributos `data-*`, los identificadores de prueba, las
-rutas y los campos del cable. Falta la que ata **los nombres de clase**: el TSX escribe uno y la
-hoja de estilo define otro, y no se entera nadie —el navegador aplica un selector que no encuentra
-nada y se queda mudo—.
+rutas y los campos del cable. Faltaba la de los nombres de CLASE, y faltaba justo donde mas duele:
+un selector que no casa no protesta. No lo caza el tipo, ni el lint, ni el navegador.
 
-Medido hoy: **26 clases definidas en `globals.css` que ningun componente escribe** (`editor__*`
-del editor anterior, las utilidades `md-*`, `palette__*`) y una docena escritas sin ninguna regla,
-la mayoria envoltorios de BEM sin estilo propio, que es legitimo.
+El fallo que lo motivo: los botones de publicar y devolver salieron con `button-primario` y
+`button-secundario`, que no existen —las de verdad son `pastilla` y `boton-contorno`—, y la pagina
+se dibujo con los botones grises del navegador sin que nada fallara.
 
-La guarda util es la del sentido que no tiene falsos positivos: una regla cuyo nombre no aparece
-en ningun componente es CSS muerto. Hace falta antes limpiar las 26, porque un trinquete que nace
-rojo no lo mira nadie.
+**Lo que bloqueaba era el extractor, y ya esta.** `tools/coherence/clases.mts` entiende una
+plantilla, que es lo que un extractor ingenuo no hace: de
+`className={`x ${cond ? 'a' : 'b'}`}` sacaba `cond`, `a` y `b` como si las tres fueran clases, y
+una guarda con falsos positivos termina con alguien relajandola hasta que no comprueba nada.
+Resuelve cuatro casos que se vieron de verdad al medir, y cada uno tiene su prueba:
 
-**Media hecha.** El otro sentido —la clase que una PRUEBA usa como selector— ya esta atado en
-`tools/coherence/interfaz.spec.ts`, y no nacia rojo. Queda la mitad del CSS muerto, que si lo
-hace.
+1. **Plantillas ANIDADAS.** `` `tree__link ${activo ? `es-${modo}` : ''}` `` lleva una plantilla
+   dentro del hueco de otra, y cualquier `[^`]*` se corta en la comilla de dentro. Se recorta
+   contando llaves. Sin esto, la guarda acusaba de CSS muerto a `tree__link`, que esta viva.
+2. **El literal con el que se COMPARA.** `typeof cell === 'number' ? 'is-number' : ''` tiene dos
+   literales y solo uno es una clase. Daba `number` y `ok` como clases inexistentes.
+3. **El prefijo armado a trozos.** `navegador--${tipo}` no se puede resolver, y contar
+   `navegador--` era acusar a una clase que si existe.
+4. **Del CSS, solo los SELECTORES**: dentro de un bloque, un `.` es el decimal de una medida.
 
-Aun asi no habria bastado para el fallo que lo motivo, y conviene decirlo: la prueba del registro
-de auditoria seleccionaba `.log__row`, que EXISTE —en el resumen de `/admin`— mientras la prueba
-abria `/admin/audit`, donde la tabla es otra. Clase correcta, pagina equivocada, cero filas, y la
-unica asercion metida dentro de un `if (filas.count() > 0)` que nunca se cumplia. La prueba salia
-verde desde que se escribio sin mirar nada, y con eso tapaba que las dos pantallas mostraban
-`u-admin` en la columna «quien», que es justo lo que decia comprobar que no pasaba. Las dos
-pantallas muestran ya el nombre de la persona.
+**La guarda nace VERDE, con la deuda medida.** `tools/coherence/clases.spec.ts` es un trinquete
+por los dos sentidos: 19 clases que el TSX escribe sin regla y 34 reglas que ningun componente
+escribe. Un trinquete que nace rojo no lo mira nadie —se salta la primera vez y se borra la
+segunda—, y los numeros solo pueden bajar: quien limpie una baja el tope en el mismo commit, que
+es como 2.10 llego a cero. Verificado enrojeciendo: `button-primario` en un componente la rompe, y
+el mensaje nombra la clase y el archivo.
 
-Lo que de verdad falta para esa clase de fallo es una guarda sobre la asercion condicional: un
+**Once reglas muertas se fueron ya**, de 43 a 34: los alias `md-*` de la escala tipografica, que
+encabezaban una lista de selectores sin aportar nada —`.md-display-small, .vacio h1, .kpi__value
+{ … }`—. Quitar el alias no cambia un pixel porque el estilo lo llevan los otros selectores, y por
+eso se podian quitar de golpe. Las que quedan tienen bloque propio y hay que mirarlas una a una.
+
+Y lo que sigue faltando, que es otra cosa: una guarda sobre la **asercion condicional**. Un
 `expect` dentro de un `if` puede no ejecutarse nunca, y una prueba que no se ejecuta no se
-distingue de una que pasa.
-
-**El otro sentido esta medido y duele mas: una clase que el TSX escribe y que NINGUNA regla
-estiliza.** Paso durante la cola de revision: los botones de publicar y devolver salieron con
-`button-primario` y `button-secundario`, que no existen —las de verdad son `pastilla` y
-`boton-contorno`—, y la pagina se dibujo con botones grises del navegador sin que nada fallara.
-No lo caza el tipo, ni el lint, ni el navegador: un selector que no casa no protesta.
-
-Medido hoy: **36 candidatos en 17 archivos**, pero la mayoria son falsos positivos del extractor
-—un `className={\`x ${cond ? 'a' : 'b'}\`}` arrastra `cond`, `a` y `b` como si fueran clases—.
-Los que parecen reales son una docena: `modulo`, `tree__folder`, `admin-home`, `admin-home__log`,
-`alerta`, `latido`, `scope-editor`, `ampliaciones`, `pestana`, `opcion`, `valores`, `activo`.
-
-Antes de la guarda hace falta un extractor que entienda las plantillas, porque una guarda con
-falsos positivos termina con alguien relajandola. Con eso, las dos mitades de 2.14 se cierran a la
-vez: la regla sin TSX es CSS muerto, y el TSX sin regla es un estilo que no se aplica.
+distingue de una que pasa. Fue lo que dejo la del registro de auditoria en verde desde el primer
+dia sin comprobar nada.
 
 ### 2.15 No hay forma de crear el PRIMER Administrador en un despliegue real — HECHO
 

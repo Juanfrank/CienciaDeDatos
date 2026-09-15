@@ -73,7 +73,6 @@ h1, h2, h3, h4 { margin: 0; }
  * Escala tipografica                                                  *
  * ------------------------------------------------------------------ */
 
-.md-display-small,
 .vacio h1,
 .kpi__value,
 .card__value {
@@ -83,7 +82,6 @@ h1, h2, h3, h4 { margin: 0; }
   letter-spacing: var(--md-sys-typescale-display-small-tracking);
 }
 
-.md-headline-small,
 .admin__header h1,
 .avisos h1,
 .pantalla__tarjeta h1 {
@@ -93,7 +91,6 @@ h1, h2, h3, h4 { margin: 0; }
   letter-spacing: var(--md-sys-typescale-headline-small-tracking);
 }
 
-.md-title-large,
 .header__title,
 .avisos h2,
 .editor__body h2,
@@ -105,7 +102,6 @@ h1, h2, h3, h4 { margin: 0; }
   letter-spacing: var(--md-sys-typescale-title-large-tracking);
 }
 
-.md-title-medium,
 .admin__principal h3,
 .editor__palette h3,
 .editor__object h4,
@@ -116,7 +112,6 @@ h1, h2, h3, h4 { margin: 0; }
   letter-spacing: var(--md-sys-typescale-title-medium-tracking);
 }
 
-.md-title-small,
 .object__header h3,
 .admin__principal h4 {
   font-size: var(--md-sys-typescale-title-small-size);
@@ -125,7 +120,6 @@ h1, h2, h3, h4 { margin: 0; }
   letter-spacing: var(--md-sys-typescale-title-small-tracking);
 }
 
-.md-body-medium,
 .muted-text,
 .admin__nav-label {
   font-size: var(--md-sys-typescale-body-medium-size);
@@ -133,7 +127,6 @@ h1, h2, h3, h4 { margin: 0; }
   letter-spacing: var(--md-sys-typescale-body-medium-tracking);
 }
 
-.md-body-small,
 .admin__nav-desc,
 .card__label,
 .problems-list,
@@ -247,7 +240,6 @@ code {
   border-color: transparent;
 }
 
-.md-boton--relleno,
 .pastilla {
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
@@ -553,7 +545,6 @@ code {
  * desaparece cuando el campo tiene contenido, y con ella la unica pista de que dato es. En un
  * formulario de configuracion eso se paga caro.
  */
-.md-campo,
 .campo,
 .form__field,
 .team-picker__field {
@@ -644,7 +635,6 @@ input[type='radio'] {
  * el fondo de un documento institucional— y hace que el color que SI hay (el azul de la
  * cabecera, el de un KPI, el de una serie) se vea.
  */
-.md-tarjeta,
 /*
  * La tarjeta: superficie clara, contorno fino y UNA sombra.
  *
