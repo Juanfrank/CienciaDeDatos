@@ -39,8 +39,8 @@ npm run verify     # typecheck, lint, pruebas unitarias, limites, esquema y nave
 Mientras se trabaja, lo normal es correr SOLO lo que el cambio toca:
 
 ```bash
-npm run afectado          # lint y pruebas de los proyectos afectados
-npm run verify:afectado   # lo mismo, mas typecheck, navegador y las dos verificaciones globales
+npm run affected          # lint y pruebas de los proyectos afectados
+npm run verify:affected   # lo mismo, mas typecheck, navegador y las dos verificaciones globales
 ```
 
 Por partes: `npm run typecheck`, `npm run lint`, `npm run test`, `npm run e2e`,

@@ -162,9 +162,38 @@ describe('cada carpeta declara sus reglas', () => {
 
   it('la especificacion general enumera los cuatro principios y como correr en local', () => {
     const general = readFileSync(join(raiz, 'AGENTS.md'), 'utf8');
-    for (const cacheKey of ['principio', 'npm run verify', 'npm run poblar', 'Limites de dependencia']) {
+    for (const cacheKey of ['principio', 'npm run verify', 'Limites de dependencia']) {
       expect(general.toLowerCase(), cacheKey).toContain(cacheKey.toLowerCase());
     }
+  });
+
+  /*
+   * Todo `npm run X` de un `.md` tiene que ser un script que exista.
+   *
+   * Esta comprobacion pedia antes UN nombre concreto —`npm run poblar`— y por eso el renombrado
+   * al ingles la dejo pasar: el script paso a llamarse `populate` y la guia siguio diciendo
+   * `poblar`, que es la PRIMERA orden que ejecuta quien clona el repositorio. Un guardia que
+   * comprueba un nombre escrito a mano envejece igual que la documentacion que vigila; este lee
+   * los nombres de `package.json`, asi que renombrar un script y no tocar la guia falla aqui.
+   */
+  it('cada `npm run` citado en un .md existe en package.json', () => {
+    const scripts = new Set(
+      Object.keys(
+        (JSON.parse(readFileSync(join(raiz, 'package.json'), 'utf8')) as {
+          scripts: Record<string, string>;
+        }).scripts,
+      ),
+    );
+
+    const rotos: string[] = [];
+    for (const doc of listar("'*.md'")) {
+      const texto = readFileSync(join(raiz, doc), 'utf8');
+      for (const [, nombre] of texto.matchAll(/npm run ([a-z][a-z0-9:-]*)/g)) {
+        if (!scripts.has(nombre!)) rotos.push(`${doc}: npm run ${nombre}`);
+      }
+    }
+
+    expect(rotos).toEqual([]);
   });
 });
 

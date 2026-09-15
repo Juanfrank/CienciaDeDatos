@@ -21,7 +21,7 @@ Scripts que no forman parte de la aplicacion. `project.json` los declara como el
   ignora en silencio, y eso ya paso una vez.
 - **Cada target declara sus entradas y salidas.** Sin salidas declaradas, un acierto de cache
   deja el directorio sin construir y la verificacion siguiente mide algo viejo.
-- **Lo afectado es la via normal.** `npm run afectado` en local y `nx affected` en los PR. Lo
+- **Lo afectado es la via normal.** `npm run affected` en local y `nx affected` en los PR. Lo
   que decide si una tarea corre de verdad son los `inputs` de `nx.json`, no `affected`: el input
   `pruebas` excluye los `.md`, asi que tocar una especificacion marca el proyecto como afectado
   pero la tarea sale de cache.
