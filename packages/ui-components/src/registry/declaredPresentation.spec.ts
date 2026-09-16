@@ -58,6 +58,7 @@ const VALUES: Partial<Record<PresentationKey, unknown[]>> = {
   ],
   histogram: [{ bins: 2 }, { cumulative: true, relative: true }],
   boxplot: [{ whiskers: 'extremos' }, { mean: true, outliers: false }],
+  heatmap: [{ showValue: false }, { scale: 'divergente', mid: 10 }],
 };
 
 /** Claves que NO decide el constructor de opciones, y que por tanto esta sonda no puede ver. */
@@ -81,6 +82,7 @@ const OBJECT_KIND: Record<string, ChartKind> = {
   'mapa-de-arbol': 'mapa-de-arbol',
   histograma: 'histograma',
   'diagrama-de-caja': 'diagrama-de-caja',
+  'mapa-de-calor': 'mapa-de-calor',
 };
 
 /** Lo que el dibujo lee pero el objeto NO declara, a proposito. */

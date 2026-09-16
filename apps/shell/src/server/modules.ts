@@ -1279,6 +1279,25 @@ export const demoModules: ModuleDefinition[] = [
             },
           },
           {
+            id: 'dis-calor',
+            position: { x: 0, y: 11, w: 12, h: 5 },
+            instance: {
+              instanceId: 'dis-calor',
+              objectId: 'mapa-de-calor',
+              version: '1.0.0',
+              title: 'Pendientes por materia y trimestre',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [MATERIA, TRIMESTRE],
+                measures: ['CasosPendientes'],
+              },
+              presentation: {
+                subtitulo: 'El color ensena el patron; la cifra, dentro, lo dice',
+                axes: { yTitle: 'Materia' },
+              },
+            },
+          },
+          {
             id: 'dis-caja',
             position: { x: 0, y: 6, w: 12, h: 5 },
             instance: {

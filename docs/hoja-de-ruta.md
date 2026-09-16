@@ -444,6 +444,31 @@ mensajes.
 - El separador con el que `toCategorical` compone «Penal / caso-12» estaba escrito en dos sitios
   —quien une y quien parte—. Ahora es `LABEL_SEPARATOR`, uno solo.
 
+#### Mapa de calor — HECHO
+
+Materia por trimestre, con la intensidad diciendo donde se concentra la carga. Hasta ahora eso solo
+se podia leer como una matriz de numeros, que sirve para consultar un dato y no para ver un patron.
+
+**Y es el unico objeto del catalogo que comunica por el COLOR**, que es justo lo que el principio 4
+no admite como unico portador. De ahi que dos cosas no sean opcionales:
+
+1. **La cifra va DENTRO de la celda** por omision. Se puede apagar —con cuarenta columnas no cabe—,
+   y apagarla no deja el objeto sin lectura alternativa.
+2. **El respaldo no es un extra de accesibilidad: es la otra mitad del objeto.** La tabla lleva
+   TODOS los cruces, tambien los que no tienen dato, y es lo que hace legitimo el degradado.
+
+Lo demas que decide:
+
+- **Un cruce que no existe es `null`, no un cero.** Un cero pintaria la celda del color mas frio y
+  diria «aqui no hay pendientes», cuando lo que pasa es que esa combinacion no esta en el dataset.
+- **La escala divergente se hace SIMETRICA alrededor del punto medio.** Sin simetria, el mismo
+  alejamiento a un lado y al otro se pintaria con intensidades distintas, y el degradado diria que
+  una desviacion es mayor que la otra siendo iguales.
+- **El degradado sale del hueco de la paleta que se elija**, no de un color fijo: si no, el control
+  de color estaria en el panel y no responderia.
+- **Ni referencias ni ejes de valor:** los dos ejes son de categorias, asi que una raya en «180
+  dias» no cruzaria ningun eje que mida dias.
+
 ### 2.8 Comprobar que el ultimo Administrador puede AUTENTICARSE, no solo que existe — HECHO
 
 `wouldLeaveNoAdministrator` comprueba el gobierno: que alguien conserva el rol. No comprueba que

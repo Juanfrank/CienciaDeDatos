@@ -11,6 +11,7 @@ import {
   type GaugeSettings,
   type HistogramSettings,
   type BoxplotSettings,
+  type HeatmapSettings,
   type ReferenceStyle,
   type LabelSettings,
   type TooltipSettings,
@@ -24,6 +25,7 @@ import { conditionalColor, type ConditionalFormat } from '../presentation/condit
 import type { CategoricalViewModel } from '../registry/viewModel';
 import { binLabel, binPosition, histogramOf, type Histogram } from './histogram';
 import { boxesOf } from './boxplot';
+import { gridOf } from './heatmap';
 
 /**
  * Construccion de las opciones de Apache ECharts (4.2).
@@ -66,6 +68,7 @@ export interface ChartOptions {
   medidor?: GaugeSettings;
   histogram?: HistogramSettings;
   boxplot?: BoxplotSettings;
+  heatmap?: HeatmapSettings;
   /**
    * Como se llaman las capas que un grafico dibuja por su cuenta.
    *
@@ -1592,6 +1595,127 @@ export function boxplotOptions(o: ChartOptions): Record<string, unknown> {
   };
 }
 
+/* ── Mapa de calor ─────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Mapa de calor — dos dimensiones cruzadas, con la intensidad diciendo cuanto.
+ *
+ * Es el unico objeto del catalogo que comunica por el COLOR, y el principio 4 no lo admite como
+ * unico portador. De ahi dos cosas que no son opcionales: la cifra va DENTRO de la celda por
+ * omision, y el respaldo en DOM es una tabla con todos los valores. El degradado es una ayuda para
+ * ver el patron de un vistazo, no el dato.
+ *
+ * Los dos ejes son de categorias, asi que ni `valueAxis` ni las lineas de referencia tienen donde
+ * anclarse: una raya en «180 dias» no cruza ningun eje que mida dias.
+ */
+export function heatmapOptions(o: ChartOptions): Record<string, unknown> {
+  const settings = o.heatmap ?? {};
+  const grid = gridOf(o.vm);
+  const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
+
+  const divergente = settings.scale === 'divergente';
+  const medio = settings.mid ?? 0;
+  /*
+   * En divergente la escala se hace SIMETRICA alrededor del punto medio. Sin simetria, el mismo
+   * alejamiento a un lado y al otro se pintaria con intensidades distintas, y el degradado diria
+   * que una desviacion es mayor que la otra cuando son iguales.
+   */
+  const alcance = Math.max(
+    Math.abs((grid.max ?? medio) - medio),
+    Math.abs(medio - (grid.min ?? medio)),
+  );
+
+  const { apilado: _apilado, tooltip: _tooltip, references: _references, ...resto } = o;
+  const ejeX: ChartOptions = {
+    ...resto,
+    vm: { series: o.vm.series, aggregated: o.vm.aggregated, points: grid.columns.map((label) => ({ label, values: [] })) },
+  };
+
+  const colores = paletteOf(ejeX);
+
+  return {
+    ...core(ejeX, false),
+    grid: { left: 8, right: 8, top: 8, bottom: 8, containLabel: true },
+    tooltip: {
+      trigger: 'item' as const,
+      backgroundColor: o.palette.superficieElevada,
+      borderWidth: 0,
+      textStyle: { color: o.palette.content },
+      extraCssText: 'box-shadow: none;',
+      formatter: (p: { data: [number, number, number | null] }) => {
+        const [x, y, valor] = p.data;
+        return [
+          `${grid.rows[y] ?? ''} · ${grid.columns[x] ?? ''}`,
+          valor === null ? '—' : formatear(valor),
+        ].join('<br/>');
+      },
+    },
+    xAxis: { ...axisCategory(ejeX), splitArea: { show: true }, axisTick: { show: false } },
+    yAxis: {
+      type: 'category' as const,
+      show: o.axes?.showY !== false,
+      data: grid.rows,
+      axisLabel: { color: o.palette.mutedText },
+      axisLine: { lineStyle: { color: o.palette.line } },
+      axisTick: { show: false },
+      splitArea: { show: true },
+      ...(o.axes?.yTitle
+        ? {
+            name: o.axes.yTitle,
+            nameLocation: 'middle' as const,
+            nameRotate: 90,
+            nameGap: 64,
+            nameTextStyle: { color: o.palette.mutedText },
+          }
+        : {}),
+    },
+    visualMap: {
+      type: 'continuous' as const,
+      min: divergente ? medio - alcance : (grid.min ?? 0),
+      max: divergente ? medio + alcance : (grid.max ?? 0),
+      calculable: false,
+      orient: 'horizontal' as const,
+      left: 'center',
+      bottom: 0,
+      textStyle: { color: o.palette.mutedText },
+      formatter: (valor: number) => formatear(valor),
+      /*
+       * El degradado sale de la paleta del tema, no de colores escritos aqui. En divergente son
+       * dos acentos con la superficie en medio, para que el punto medio se lea como «ninguno» y no
+       * como un tono mas del mismo lado.
+       */
+      inRange: {
+        // Del hueco de la paleta que se haya elegido, no del primero fijo: si no, el control de
+        // color estaria puesto y no responderia.
+        color: divergente
+          ? [colores[1] ?? o.palette.content, o.palette.superficie, colores[0] ?? o.palette.content]
+          : [o.palette.superficie, colores[0] ?? o.palette.content],
+      },
+    },
+    series: [
+      {
+        name: o.vm.series[0] ?? o.titulo,
+        type: 'heatmap',
+        data: grid.cells.map((celda) => [
+          grid.columns.indexOf(celda.column),
+          grid.rows.indexOf(celda.row),
+          celda.value,
+        ]),
+        label: {
+          // La cifra dentro de la celda: sin ella, el color seria el unico portador (4.9).
+          show: settings.showValue !== false,
+          color: o.palette.content,
+          fontSize: 11,
+          formatter: (p: { data: [number, number, number | null] }) =>
+            p.data[2] === null ? '' : formatear(p.data[2]),
+        },
+        itemStyle: { borderColor: o.palette.superficie, borderWidth: 1 },
+        emphasis: { itemStyle: { borderColor: o.palette.content, borderWidth: 2 } },
+      },
+    ],
+  };
+}
+
 export type ChartKind =
   | 'barras'
   | 'lineas'
@@ -1605,7 +1729,8 @@ export type ChartKind =
   | 'mapa-de-arbol'
   | 'medidor'
   | 'histograma'
-  | 'diagrama-de-caja';
+  | 'diagrama-de-caja'
+  | 'mapa-de-calor';
 
 const CONSTRUCTORES: Record<ChartKind, (o: ChartOptions) => Record<string, unknown>> = {
   barras: barOptions,
@@ -1621,6 +1746,7 @@ const CONSTRUCTORES: Record<ChartKind, (o: ChartOptions) => Record<string, unkno
   medidor: gaugeOptions,
   histograma: histogramOptions,
   'diagrama-de-caja': boxplotOptions,
+  'mapa-de-calor': heatmapOptions,
 };
 
 /**

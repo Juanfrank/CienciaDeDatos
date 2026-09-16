@@ -25,6 +25,7 @@ import {
   Waterfall,
   Histogram,
   BoxPlot,
+  HeatMap,
   Pie,
   Combo,
   Scatter,
@@ -217,6 +218,8 @@ function ObjectBody({
       return <Histogram {...props} />;
     case 'diagrama-de-caja':
       return <BoxPlot {...props} />;
+    case 'mapa-de-calor':
+      return <HeatMap {...props} />;
     case 'mapa-de-arbol':
       return <TreeMap {...props} />;
     case 'combinado':

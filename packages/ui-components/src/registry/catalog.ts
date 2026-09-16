@@ -771,6 +771,57 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     /*
+     * Mapa de calor — donde se concentra, cruzando dos dimensiones.
+     */
+    objectId: 'mapa-de-calor',
+    family: 'distribution',
+    icono: 'mapa-de-calor',
+    name: 'Mapa de calor',
+    description: 'Dos dimensiones cruzadas, con la intensidad diciendo donde se concentra.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: escala secuencial o divergente, con la cifra dentro de la celda.',
+        {
+          dimensions: { min: 2, max: 2 },
+          measures: { min: 1, max: 1 },
+          notes:
+            'La primera dimension son las filas y la segunda las columnas. El color es una ayuda ' +
+            'para ver el patron: la cifra va dentro de la celda y la tabla del respaldo las lleva ' +
+            'todas, porque el color no puede ser el unico portador (4.9).',
+          wells: [
+            {
+              id: 'filas',
+              etiqueta: 'Filas',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              help: 'La dimension que reparte las filas.',
+            },
+            {
+              id: 'columnas',
+              etiqueta: 'Columnas',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              help: 'La dimension que reparte las columnas.',
+            },
+            {
+              id: 'valor',
+              etiqueta: 'Valor',
+              tipo: 'medida',
+              max: 1,
+              min: 1,
+              help: 'La cifra de cada cruce. Es la que tine la celda.',
+            },
+          ],
+        },
+        presenta('formato', 'formatos', 'axes', 'seriesColors', 'heatmap'),
+      ),
+    ],
+  },
+  {
+    /*
      * Embudo — etapas de un proceso, en SU orden.
      */
     objectId: 'embudo',

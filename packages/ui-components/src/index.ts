@@ -46,6 +46,7 @@ export {
   MAX_UNIT,
   SORT_CRITERIA,
   STACKING_MODES,
+  HEAT_SCALES,
   LEGEND_MODES,
   MIN_PRESENTATION,
   formatterOf,
@@ -68,8 +69,10 @@ export {
   type AxisSettings,
   type AxisScale,
   type GaugeSettings,
+  type HeatScale,
   type HistogramSettings,
   type BoxplotSettings,
+  type HeatmapSettings,
   type SortCriterion,
   type PieLabel,
   type StackingMode,
@@ -315,6 +318,7 @@ export {
   type WhiskerRule,
 } from './charts/statistics';
 export { boxesOf, groupsOf, type Box } from './charts/boxplot';
+export { gridOf, valueAt, type HeatCell, type HeatGrid } from './charts/heatmap';
 export {
   ELEMENT_THRESHOLD,
   elementsOf,
@@ -327,6 +331,7 @@ export {
   gaugeOptions,
   histogramOptions,
   boxplotOptions,
+  heatmapOptions,
   type ChartOptions,
   type ChartPalette,
   type ChartKind,

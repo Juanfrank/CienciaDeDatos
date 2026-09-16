@@ -5,6 +5,7 @@ import {
   FUNNEL_COMPARISONS,
   CIRCULAR_LABELS,
   MAX_BINS,
+  HEAT_SCALES,
   WHISKER_RULES,
   MAX_RADIO_INTERIOR,
   STACKING_MODES,
@@ -39,6 +40,7 @@ import {
   type IconName,
   type HistogramSettings,
   type WhiskerRule,
+  type HeatScale,
   type ObjectPresentation,
   type PickerKind,
   type PickerLevel,
@@ -864,6 +866,58 @@ export function Presentation({
               {t('pres.stages.sort')}
             </span>
           </label>
+        </Section>
+      ) : null}
+
+      {admite("heatmap") ? (
+        <Section
+          keys={['calor', 'mapa de calor', 'intensidad', 'divergente', 'degradado']}
+          titulo={t('pres.heat')} nivel={2} prueba={`${prueba}-calor`}>
+          <label className="form__field">
+            <span>{t('pres.heat.scale')}</span>
+            <select
+              value={p.heatmap?.scale ?? "secuencial"}
+              disabled={saving}
+              data-testid={`${prueba}-escala-calor`}
+              onChange={(e) =>
+                set({ heatmap: { ...p.heatmap, scale: e.target.value as HeatScale } })
+              }
+            >
+              {HEAT_SCALES.map((escala) => (
+                <option key={escala} value={escala}>
+                  {t(`pres.heat.scale.${escala}` as MessageKey)}
+                </option>
+              ))}
+            </select>
+          </label>
+          {p.heatmap?.scale === "divergente" ? (
+            <label className="form__field">
+              <span>{t('pres.heat.mid')}</span>
+              <input
+                type="number"
+                value={p.heatmap?.mid ?? 0}
+                disabled={saving}
+                data-testid={`${prueba}-medio-calor`}
+                onChange={(e) =>
+                  set({ heatmap: { ...p.heatmap, mid: Number(e.target.value) } })
+                }
+              />
+              <span className="field__pista">{t('pres.heat.mid.hint')}</span>
+            </label>
+          ) : null}
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.heatmap?.showValue !== false}
+              disabled={saving}
+              data-testid={`${prueba}-cifra-calor`}
+              onChange={(e) =>
+                set({ heatmap: { ...p.heatmap, showValue: e.target.checked } })
+              }
+            />{" "}
+            {t('pres.heat.showValue')}
+          </label>
+          <span className="field__pista">{t('pres.heat.showValue.hint')}</span>
         </Section>
       ) : null}
 

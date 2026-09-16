@@ -514,6 +514,40 @@ test.describe('el filtrado cruzado llega a TODOS los objetos (4.4)', () => {
     expect(cinco).toEqual([...cinco].sort((a, b) => a - b));
   });
 
+  test('el mapa de calor lleva la cifra en la celda Y en el respaldo', async ({ page }) => {
+    /*
+     * Es el unico objeto que comunica por el color, y el principio 4 no lo admite como unico
+     * portador. La tabla del respaldo no es un extra de accesibilidad: es lo que hace legitimo el
+     * degradado, y por eso lleva TODOS los cruces, tambien los que no tienen dato.
+     */
+    await page.goto('/m/composicion/distribucion');
+
+    const tabla = page.getByTestId('mapa-de-calor').first();
+    await expect(tabla).toBeAttached();
+
+    const filas = tabla.locator('tbody tr');
+    const columnas = tabla.locator('thead th');
+    const celdas = tabla.locator('tbody td');
+
+    // Una celda por cruce: filas por (columnas - 1), que es el encabezado de la fila.
+    const cuantasFilas = await filas.count();
+    const cuantasColumnas = await columnas.count();
+    expect(cuantasFilas).toBeGreaterThan(1);
+    await expect(celdas).toHaveCount(cuantasFilas * (cuantasColumnas - 1));
+  });
+
+  test('y su encabezado de fila filtra: una materia es un valor de una dimension', async ({
+    page,
+  }) => {
+    await page.goto('/m/composicion/distribucion');
+
+    const boton = page.getByTestId('mapa-de-calor').first().getByTestId('filter-Penal').first();
+    await boton.focus();
+    await boton.press('Enter');
+
+    await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
+  });
+
   test('un medidor NO ofrece el gesto: no tiene dimension por la que filtrar', async ({ page }) => {
     // Ofrecerlo y que no hiciera nada seria peor que no ofrecerlo, que es justo lo que pasaba en
     // la dispersion: el punto se resaltaba al pulsarlo y no ocurria nada.

@@ -33,6 +33,11 @@ como adiciones y jamas como rupturas.
 - El panel lateral no se plegaba: el selector del CSS esperaba un atributo con otro nombre.
 
 ### Anadido
+- **Mapa de calor.** Dos dimensiones cruzadas —materia por trimestre— con la intensidad diciendo
+  donde se concentra la carga. La cifra va dentro de la celda y la tabla alternativa las lleva
+  todas: el color esta para ver el patron de un vistazo, no en lugar del dato. Admite escala
+  divergente para las medidas que tienen un punto medio con sentido, como una variacion contra el
+  objetivo.
 - **Diagrama de caja.** Compara la forma de una medida entre grupos: los dias de resolucion
   materia a materia, cada una con su mediana, sus cuartiles y los expedientes que se salen del
   resto. Los atipicos se pueden apagar, los bigotes se pueden llevar hasta el minimo y el maximo, y

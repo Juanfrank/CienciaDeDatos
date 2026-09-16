@@ -33,6 +33,7 @@ export const KEY_CONTROL: Record<PresentationKey, string> = {
   medidor: 'medidor',
   histogram: 'histograma',
   boxplot: 'caja',
+  heatmap: 'calor',
 };
 
 /** Controles que solo aparecen despues de encender otro. */

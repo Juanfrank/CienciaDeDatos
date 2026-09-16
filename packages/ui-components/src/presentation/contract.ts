@@ -158,6 +158,32 @@ export interface BoxplotSettings {
   mean?: boolean;
 }
 
+/** ---- Mapa de calor ---- */
+export const HEAT_SCALES = ['secuencial', 'divergente'] as const;
+export type HeatScale = (typeof HEAT_SCALES)[number];
+
+export interface HeatmapSettings {
+  /**
+   * Como se reparte el color.
+   *
+   * Secuencial va de menos a mas y sirve para una carga. Divergente separa por encima y por debajo
+   * de un punto medio, y es la que hace falta cuando la medida tiene un cero con sentido —una
+   * variacion contra el objetivo—: con una escala secuencial, «un 2 % por debajo» y «un 40 % por
+   * encima» quedan en el mismo lado del degradado.
+   */
+  scale?: HeatScale;
+  /** El punto medio de la escala divergente. Sin valor, el cero. */
+  mid?: number;
+  /**
+   * La cifra dentro de cada celda.
+   *
+   * Encendida por defecto: es lo que impide que el color sea el unico portador (4.9) EN PANTALLA.
+   * Apagarla no deja el objeto sin lectura alternativa —la tabla del respaldo lleva siempre las
+   * cifras—, pero con pocas celdas no hay motivo para hacerlo.
+   */
+  showValue?: boolean;
+}
+
 export interface GaugeSettings {
   minimo?: number;
   maximo?: number;
@@ -346,6 +372,7 @@ export interface ObjectPresentation {
    */
   histogram?: HistogramSettings;
   boxplot?: BoxplotSettings;
+  heatmap?: HeatmapSettings;
   /** Peso, estilo, alineacion y color de los textos del objeto. */
   textos?: ObjectTexts;
 }
@@ -380,6 +407,7 @@ export const PRESENTATION_KEYS = [
   'medidor',
   'histogram',
   'boxplot',
+  'heatmap',
 ] as const satisfies readonly (keyof ObjectPresentation)[];
 
 export type PresentationKey = keyof ObjectPresentation;

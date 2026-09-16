@@ -31,6 +31,8 @@ import {
   histogramOf,
   binLabel,
   boxesOf,
+  gridOf,
+  valueAt,
   toKpi,
   toSlicerOptions,
 } from '@app/ui-components';
@@ -1346,6 +1348,98 @@ export function BoxPlot({
                     <td className="is-number">{caja.outliers.length}</td>
                   ) : null}
                   <td className="is-number">{caja.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </FallbackTable>
+      </Chart>
+    </Frame>
+  );
+}
+
+/**
+ * Mapa de calor — dos dimensiones cruzadas.
+ *
+ * El respaldo NO es un extra de accesibilidad: es la otra mitad del objeto. Un mapa de calor
+ * comunica por el color, y el principio 4 no lo admite como unico portador, asi que la tabla con
+ * todas las cifras es lo que hace legitimo el degradado. Sus dos encabezados filtran, porque los
+ * dos son valores de una dimension.
+ */
+export function HeatMap({
+  titulo,
+  result,
+  instance,
+  slots,
+  aggregations,
+  onFiltrar,
+  objectIcon,
+}: PropsObject) {
+  const t = useTranslator();
+  const r = porRanura(instance, slots);
+  const fila = r ? r.one('filas') : fieldKeyDe(instance.binding.dimensions[0]);
+  const columna = r ? r.one('columnas') : fieldKeyDe(instance.binding.dimensions[1]);
+  const medidas = r ? r.varios('valor') : instance.binding.measures;
+
+  // El ORDEN importa: la primera dimension son las filas, y es lo que `gridOf` deshace.
+  const dimensiones = [fila, columna].filter((d): d is string => Boolean(d)).map(aFieldRef);
+
+  const vm = toCategorical(
+    result,
+    dimensiones,
+    medidas,
+    aggregationsFor(medidas, instance.binding.measures, aggregations),
+  );
+  const formatear = measureFormatter(instance.presentation, medidas[0] ?? '');
+  const grid = gridOf(vm);
+
+  return (
+    <Frame
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      aggregations={aggregations}
+      objectIcon={objectIcon}
+    >
+      <Chart
+        instanceId={instance.instanceId}
+        tipo="mapa-de-calor"
+        vm={vm}
+        titulo={titulo}
+        presentation={instance.presentation}
+        formatear={(valor) => formatear(valor)}
+        {...(fila ? { dimension: fila } : {})}
+        {...(fila && onFiltrar ? { onSeleccionar: (c: string) => onFiltrar(fila, c) } : {})}
+      >
+        <FallbackTable nombre={titulo}>
+          <table className="tabla" data-testid="mapa-de-calor">
+            <caption className="tabla__caption">{t('chart.heat.convention')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{fila ?? t('chart.heat.row')}</th>
+                {grid.columns.map((nombre) => (
+                  <th key={nombre} scope="col" className="is-number">
+                    {nombre}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {grid.rows.map((nombre) => (
+                <tr key={nombre}>
+                  <CategoryCell
+                    etiqueta={nombre}
+                    {...(fila ? { fieldName: fila } : {})}
+                    {...(onFiltrar ? { onFiltrar } : {})}
+                  />
+                  {grid.columns.map((col) => {
+                    const valor = valueAt(grid, nombre, col);
+                    return (
+                      <td key={col} className="is-number">
+                        {valor === null ? t('chart.heat.empty') : formatear(valor)}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
