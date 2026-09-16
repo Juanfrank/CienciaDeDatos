@@ -201,3 +201,146 @@ describe('breakdownOf', () => {
     expect(desglose.rows).toHaveLength(4);
   });
 });
+
+describe('los objetos que transforman antes de dibujar exportan lo TRANSFORMADO', () => {
+  const CASO = { table: 'FactCasos', field: 'CasoId' };
+
+  /** Grano atomico: una fila por caso, con sus dias. */
+  const casos: QueryResult = {
+    columns: [
+      { name: 'FactCasos.CasoId', type: 'string' },
+      { name: 'DimTribunal.Materia', type: 'string' },
+      { name: 'DiasResolucion', type: 'number' },
+    ],
+    rows: [
+      ['c1', 'Penal', 10],
+      ['c2', 'Penal', 20],
+      ['c3', 'Penal', 30],
+      ['c4', 'Civil', 40],
+    ],
+    source: 'mock',
+    generatedAt: '2026-03-01T10:00:00.000Z',
+  };
+
+  it('el histograma exporta INTERVALOS, no las observaciones', () => {
+    /*
+     * Es el mismo principio que la tarjeta KPI: volcar las filas del dataset seria exportar algo
+     * que el objeto no muestra. Aqui pesa mas, porque el reparto en intervalos es justamente lo
+     * que el objeto aporta.
+     */
+    const proyeccion = projectObject(
+      objectInstance({
+        objectId: 'histograma',
+        binding: { datasetId: 'casos', dimensions: [CASO], measures: ['DiasResolucion'] },
+        presentation: { histogram: { bins: 2 } },
+      }),
+      casos,
+      ['ninguna'],
+    );
+
+    expect(proyeccion.columns.map((c) => c.name)).toEqual(['Intervalo', 'Observaciones']);
+    expect(proyeccion.rows).toHaveLength(2);
+    // Las cuatro observaciones repartidas, no las cuatro filas volcadas.
+    expect(proyeccion.rows.reduce((suma, fila) => suma + Number(fila[1]), 0)).toBe(4);
+  });
+
+  it('y anade la columna de lo dibujado cuando acumula', () => {
+    const proyeccion = projectObject(
+      objectInstance({
+        objectId: 'histograma',
+        binding: { datasetId: 'casos', dimensions: [CASO], measures: ['DiasResolucion'] },
+        presentation: { histogram: { bins: 2, cumulative: true } },
+      }),
+      casos,
+      ['ninguna'],
+    );
+
+    expect(proyeccion.columns.map((c) => c.name)).toContain('Acumulado');
+    expect(proyeccion.rows[proyeccion.rows.length - 1]?.[2]).toBe(4);
+  });
+
+  it('el diagrama de caja exporta los CINCO NUMEROS, uno por grupo', () => {
+    const proyeccion = projectObject(
+      objectInstance({
+        objectId: 'diagrama-de-caja',
+        binding: { datasetId: 'casos', dimensions: [MATERIA, CASO], measures: ['DiasResolucion'] },
+      }),
+      casos,
+      ['ninguna'],
+    );
+
+    expect(proyeccion.columns.map((c) => c.name)).toEqual([
+      'DimTribunal.Materia',
+      'Minimo',
+      'Q1',
+      'Mediana',
+      'Q3',
+      'Maximo',
+      'Atipicos',
+      'Casos',
+    ]);
+    expect(proyeccion.rows).toHaveLength(2);
+    expect(proyeccion.rows[0]).toEqual(['Penal', 10, 15, 20, 25, 30, 0, 3]);
+  });
+
+  it('el mapa de calor exporta la REJILLA, con una columna por cruce', () => {
+    const proyeccion = projectObject(
+      objectInstance({
+        objectId: 'mapa-de-calor',
+        binding: {
+          datasetId: 'casos',
+          dimensions: [MATERIA, { table: 'DimTiempo', field: 'Trimestre' }],
+          measures: ['CasosPendientes'],
+        },
+      }),
+      datos,
+      ['suma'],
+    );
+
+    expect(proyeccion.columns.map((c) => c.name)).toEqual(['DimTribunal.Materia', 'Q1', 'Q2']);
+    // Un cruce que no existe viaja como null, no como cero: en una hoja, un cero es un dato.
+    expect(proyeccion.rows).toEqual([
+      ['Penal', 40, 5],
+      ['Civil', 20, null],
+    ]);
+  });
+
+  it('el diagrama de flujo exporta TAMBIEN lo que el lienzo no traza', () => {
+    /*
+     * Un ciclo es parte del proceso; lo unico que le pasa es que no se puede trazar. Dejarlo fuera
+     * de la exportacion convertiria una limitacion del dibujo en un dato que desaparece.
+     */
+    const conCiclo: QueryResult = {
+      columns: [
+        { name: 'Proceso.Origen', type: 'string' },
+        { name: 'Proceso.Destino', type: 'string' },
+        { name: 'Casos', type: 'number' },
+      ],
+      rows: [
+        ['Primera', 'Apelacion', 40],
+        ['Apelacion', 'Primera', 10],
+      ],
+      source: 'mock',
+      generatedAt: '2026-03-01T10:00:00.000Z',
+    };
+
+    const proyeccion = projectObject(
+      objectInstance({
+        objectId: 'diagrama-de-flujo',
+        binding: {
+          datasetId: 'casos',
+          dimensions: [
+            { table: 'Proceso', field: 'Origen' },
+            { table: 'Proceso', field: 'Destino' },
+          ],
+          measures: ['Casos'],
+        },
+      }),
+      conCiclo,
+      ['suma'],
+    );
+
+    expect(proyeccion.rows).toHaveLength(2);
+    expect(proyeccion.rows[1]).toEqual(['Apelacion', 'Primera', 10, 'ciclo']);
+  });
+});

@@ -33,6 +33,10 @@ como adiciones y jamas como rupturas.
 - El panel lateral no se plegaba: el selector del CSS esperaba un atributo con otro nombre.
 
 ### Anadido
+- **Lo que se exporta de los objetos nuevos es lo que ensenan.** Un histograma exporta sus
+  intervalos y no los mil doscientos casos que hay detras; un diagrama de caja, sus cinco numeros
+  por grupo. Un diagrama de flujo exporta ademas los pasos que el dibujo no puede trazar, para que
+  una limitacion del lienzo no se lleve por delante un dato del proceso.
 - **Diagrama de flujo.** Cuanto pasa de cada etapa a la siguiente, con el grosor diciendo cuanto.
   El embudo dice cuanto queda en cada paso; esto dice a donde fue. Un paso que cierra un ciclo —una
   apelacion que devuelve el expediente— no se puede trazar, asi que no se dibuja y la tabla

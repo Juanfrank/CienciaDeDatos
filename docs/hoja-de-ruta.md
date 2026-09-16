@@ -491,6 +491,23 @@ una linea que no lleva a nadie, que no es lo mismo que un paso por el que no pas
 **No hereda `axes` ni `references`:** no hay ejes donde anclar una raya, y el grosor del enlace ya
 ES la cifra.
 
+#### Y lo exportado es lo que el objeto ENSENA — HECHO
+
+Los cuatro caian en la rama por defecto de `projectObject`, que vuelca una fila por categoria del
+dataset. Para el histograma eso son mil doscientos casos crudos donde el objeto ensena doce
+intervalos; para el diagrama de caja, las observaciones en vez de los cinco numeros.
+
+El principio ya estaba escrito en el codigo, sobre la tarjeta KPI: *volcar aqui las filas del
+dataset seria exportar algo que la tarjeta no muestra*. Aqui pesa mas, porque la transformacion es
+justamente lo que estos objetos aportan. Ahora cada uno tiene su caso:
+
+- El **histograma**, sus intervalos con el recuento, y la columna de lo dibujado cuando acumula.
+- El **diagrama de caja**, una fila por grupo con los cinco numeros, los atipicos y el recuento.
+- El **mapa de calor**, la rejilla como se ve, con un cruce inexistente viajando como vacio y no
+  como cero — en una hoja de calculo, un cero es un dato.
+- El **diagrama de flujo**, TAMBIEN los pasos que el lienzo no traza. Un ciclo es parte del proceso;
+  dejarlo fuera de la exportacion convertiria una limitacion del dibujo en un dato que desaparece.
+
 ---
 
 **Lo que queda de 2.7.** `mapa` sigue esperando la geometria de los distritos. Y de la lista que

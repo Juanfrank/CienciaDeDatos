@@ -2,7 +2,11 @@ import type { Aggregation, QueryResult } from '@app/data-contracts';
 import type { ObjectInstance } from './types';
 import { buildMatrix, visibleRows, leaves } from './matrix';
 import { aFieldRef } from '../presentation/wells';
-import { aggregateBy, fieldKey, toSlicerOptions } from './viewModel';
+import { aggregateBy, fieldKey, toCategorical, toSlicerOptions } from './viewModel';
+import { binLabel, histogramOf } from '../charts/histogram';
+import { boxesOf } from '../charts/boxplot';
+import { gridOf, valueAt } from '../charts/heatmap';
+import { flowsOf } from '../charts/sankey';
 
 /** Proyeccion tabular de un objeto — la forma de tabla de LO QUE EL OBJETO MUESTRA. */
 
@@ -108,6 +112,101 @@ export function projectObject(
         result,
         columns,
         rows.map((f) => [...f.labels, ...f.values]),
+      );
+    }
+
+    /*
+     * Los cuatro que TRANSFORMAN antes de dibujar.
+     *
+     * La rama por defecto vuelca una fila por categoria del dataset, que para estos es una fila por
+     * observacion: mil doscientos casos donde el objeto ensena doce intervalos. Es el mismo motivo
+     * por el que la tarjeta KPI tiene su caso — lo exportado es lo que el objeto ENSENA— y aqui
+     * pesa mas, porque la transformacion es justamente lo que el objeto aporta.
+     */
+    case 'histograma': {
+      const vm = toCategorical(result, dimensions, measures, aggregations);
+      const settings = instance.presentation?.histogram ?? {};
+      const { bins, displayed } = histogramOf(
+        vm.points.map((p) => p.values[0]),
+        settings,
+      );
+      const acumulaORelativiza = settings.cumulative === true || settings.relative === true;
+
+      return sameProvenance(
+        result,
+        [
+          columnText('Intervalo'),
+          columnNumber('Observaciones'),
+          ...(acumulaORelativiza ? [columnNumber(settings.cumulative ? 'Acumulado' : 'Parte')] : []),
+        ],
+        bins.map((bin, i) => [
+          binLabel(bin, String),
+          bin.count,
+          ...(acumulaORelativiza ? [displayed[i] ?? 0] : []),
+        ]),
+      );
+    }
+
+    case 'diagrama-de-caja': {
+      const vm = toCategorical(result, dimensions, measures, aggregations);
+      const settings = instance.presentation?.boxplot ?? {};
+
+      return sameProvenance(
+        result,
+        [
+          columnText(fieldKey(dimensions[0] ?? { table: '', field: 'Grupo' })),
+          columnNumber('Minimo'),
+          columnNumber('Q1'),
+          columnNumber('Mediana'),
+          columnNumber('Q3'),
+          columnNumber('Maximo'),
+          columnNumber('Atipicos'),
+          columnNumber('Casos'),
+        ],
+        boxesOf(vm, settings).map((caja) => [
+          caja.label,
+          caja.low,
+          caja.q1,
+          caja.median,
+          caja.q3,
+          caja.high,
+          caja.outliers.length,
+          caja.count,
+        ]),
+      );
+    }
+
+    case 'mapa-de-calor': {
+      // La rejilla, como se ve: una columna por valor de la segunda dimension.
+      const grid = gridOf(toCategorical(result, dimensions, measures, aggregations));
+
+      return sameProvenance(
+        result,
+        [
+          columnText(fieldKey(dimensions[0] ?? { table: '', field: 'Fila' })),
+          ...grid.columns.map(columnNumber),
+        ],
+        grid.rows.map((fila) => [fila, ...grid.columns.map((col) => valueAt(grid, fila, col))]),
+      );
+    }
+
+    case 'diagrama-de-flujo': {
+      const graph = flowsOf(toCategorical(result, dimensions, measures, aggregations));
+
+      return sameProvenance(
+        result,
+        [
+          columnText(fieldKey(dimensions[0] ?? { table: '', field: 'Origen' })),
+          columnText(fieldKey(dimensions[1] ?? { table: '', field: 'Destino' })),
+          columnNumber(measures[0] ?? 'Valor'),
+          columnText('Sin dibujar'),
+        ],
+        [
+          ...graph.links.map((f) => [f.source, f.target, f.value, '']),
+          // Los apartados VAN en la exportacion: son parte del proceso, y lo unico que les pasa es
+          // que el lienzo no sabe trazarlos.
+          ...graph.dropped.map((f) => [f.source, f.target, f.value, f.why]),
+        ],
       );
     }
 
