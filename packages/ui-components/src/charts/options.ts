@@ -10,6 +10,7 @@ import {
   type AxisSettings,
   type GaugeSettings,
   type HistogramSettings,
+  type BoxplotSettings,
   type ReferenceStyle,
   type LabelSettings,
   type TooltipSettings,
@@ -22,6 +23,7 @@ import {
 import { conditionalColor, type ConditionalFormat } from '../presentation/conditional';
 import type { CategoricalViewModel } from '../registry/viewModel';
 import { binLabel, binPosition, histogramOf, type Histogram } from './histogram';
+import { boxesOf } from './boxplot';
 
 /**
  * Construccion de las opciones de Apache ECharts (4.2).
@@ -63,6 +65,15 @@ export interface ChartOptions {
   cascada?: WaterfallSettings;
   medidor?: GaugeSettings;
   histogram?: HistogramSettings;
+  boxplot?: BoxplotSettings;
+  /**
+   * Como se llaman las capas que un grafico dibuja por su cuenta.
+   *
+   * El diagrama de caja anade dos series que no salen del mapeo —los atipicos y la media— y la
+   * leyenda tiene que nombrarlas. El texto visible sale del catalogo de mensajes y este paquete no
+   * lo lee: llega ya traducido, igual que la paleta llega ya resuelta.
+   */
+  layerLabels?: { outliers: string; mean: string };
   /** Cuantas series iniciales son columnas, en un combinado. */
   columnSeries?: number;
 }
@@ -1493,6 +1504,94 @@ export function histogramOptions(o: ChartOptions): Record<string, unknown> {
   };
 }
 
+/* ── Diagrama de caja ──────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Diagrama de caja — la forma de una medida, comparada entre grupos.
+ *
+ * A diferencia del histograma, aqui el eje de valores SI mide la medida, asi que las lineas de
+ * referencia van donde van siempre: un plazo de 180 dias cruza todas las cajas a su altura, que es
+ * exactamente lo que se quiere ver.
+ *
+ * No hereda `apilado` ni `tooltip`: no hay nada que apilar con una caja, y las dos opciones del
+ * tooltip suman y ordenan series entre si, que sobre cinco numeros de un mismo grupo no significa
+ * nada. `conditional` y `datumLabels` no llegan a leerse — la caja no es una barra con un valor.
+ */
+export function boxplotOptions(o: ChartOptions): Record<string, unknown> {
+  const settings = o.boxplot ?? {};
+  const cajas = boxesOf(o.vm, settings);
+  const medida = o.vm.series[0] ?? o.titulo;
+
+  const conAtipicos = (settings.whiskers ?? 'tukey') !== 'extremos' && settings.outliers !== false;
+  const conMedia = settings.mean === true;
+
+  const { apilado: _apilado, tooltip: _tooltip, ...resto } = o;
+
+  /*
+   * El modelo derivado lleva una serie por CAPA dibujada, no por medida: es lo que hace que la
+   * leyenda las nombre —«Atipicos», «Media»— en vez de repetir el titulo.
+   */
+  const rotulo = o.layerLabels ?? { outliers: 'outliers', mean: 'mean' };
+  const capas = [
+    medida,
+    ...(conAtipicos ? [rotulo.outliers] : []),
+    ...(conMedia ? [rotulo.mean] : []),
+  ];
+  const grouped: ChartOptions = {
+    ...resto,
+    vm: {
+      series: capas,
+      aggregated: o.vm.aggregated,
+      points: cajas.map((caja) => ({ label: caja.label, values: [caja.median] })),
+    },
+  };
+
+  const colores = paletteOf(grouped);
+
+  return {
+    ...base(grouped),
+    xAxis: axisCategory(grouped),
+    yAxis: valueAxis(grouped),
+    series: [
+      {
+        name: medida,
+        type: 'boxplot',
+        data: cajas.map((c) => [c.low, c.q1, c.median, c.q3, c.high]),
+        itemStyle: { color: o.palette.superficie, borderColor: colores[0], borderWidth: 2 },
+        // La mediana no puede distinguirse solo por el color: es la raya de dentro de la caja.
+        boxWidth: [10, 48],
+        ...referencesOf(o),
+      },
+      ...(conAtipicos
+        ? [
+            {
+              name: rotulo.outliers,
+              type: 'scatter',
+              // Un atipico se distingue por su FORMA —un punto suelto fuera del bigote— y no solo
+              // por el color, que 4.9 no admite como unico portador.
+              symbolSize: 6,
+              itemStyle: { color: colores[1] ?? colores[0] },
+              data: cajas.flatMap((caja, i) => caja.outliers.map((valor) => [i, valor])),
+            },
+          ]
+        : []),
+      ...(conMedia
+        ? [
+            {
+              name: rotulo.mean,
+              type: 'scatter',
+              // Rombo, para que no se confunda con un atipico.
+              symbol: 'diamond',
+              symbolSize: 10,
+              itemStyle: { color: colores[2] ?? o.palette.content },
+              data: cajas.map((caja, i) => [i, caja.mean]),
+            },
+          ]
+        : []),
+    ],
+  };
+}
+
 export type ChartKind =
   | 'barras'
   | 'lineas'
@@ -1505,7 +1604,8 @@ export type ChartKind =
   | 'cascada'
   | 'mapa-de-arbol'
   | 'medidor'
-  | 'histograma';
+  | 'histograma'
+  | 'diagrama-de-caja';
 
 const CONSTRUCTORES: Record<ChartKind, (o: ChartOptions) => Record<string, unknown>> = {
   barras: barOptions,
@@ -1520,6 +1620,7 @@ const CONSTRUCTORES: Record<ChartKind, (o: ChartOptions) => Record<string, unkno
   'mapa-de-arbol': treeMapOptions,
   medidor: gaugeOptions,
   histograma: histogramOptions,
+  'diagrama-de-caja': boxplotOptions,
 };
 
 /**

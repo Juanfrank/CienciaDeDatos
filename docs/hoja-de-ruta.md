@@ -411,6 +411,39 @@ Verificado enrojeciendo cuatro: un ultimo intervalo que deja de cerrar por la de
 referencia devuelta al eje de los recuentos, el catalogo que deja de declarar la clave que el dibujo
 lee, y el formateador de la medida aplicado al recuento.
 
+#### Diagrama de caja — HECHO
+
+Lo que el histograma ensena de una distribucion, esto lo compara entre muchas: los dias de
+resolucion materia a materia, cada una con su mediana, sus cuartiles y lo que se le sale. Es la
+forma estandar de comparar rendimiento entre jurisdicciones.
+
+1. **Los bigotes llegan al dato, no al limite calculado.** Tukey dice «vez y media el recorrido
+   intercuartilico», pero el bigote se para en la observacion mas lejana que TODAVIA esta dentro:
+   uno que terminara en el limite dibujaria un alcance que nadie midio.
+2. **Los atipicos se nombran, no se quitan.** Un expediente que se sale del resto es lo que se
+   busca. Van en su propia capa, como puntos sueltos —otra FORMA, no otro color, que 4.9 no admite
+   como unico portador— y con su nombre en la leyenda.
+3. **Un grupo sin observaciones no da una caja plana en cero.** Se queda fuera: dibujarla diria que
+   esa materia resuelve todo en cero dias, que es lo contrario de «no se sabe».
+4. **La referencia va al eje de valores**, al reves que en el histograma, porque aqui ese eje SI
+   mide la medida: el plazo cruza todas las cajas a su altura.
+5. **El respaldo lleva los cinco numeros**, que son el dibujo, y **su celda de grupo SI filtra** —a
+   diferencia del histograma—: una materia es un valor de una dimension.
+
+**Y el paquete de objetos sigue sin escribir texto visible.** Este grafico anade dos series que no
+salen del mapeo, y la leyenda tiene que nombrarlas. Los rotulos llegan por `layerLabels`, ya
+traducidos, igual que la paleta llega ya resuelta: el paquete es puro y no lee el catalogo de
+mensajes.
+
+**Dos limpiezas que el objeto obligo a hacer, y las dos eran duplicaciones a punto de divergir:**
+
+- `quantile` y `numbersOf` vivian dentro del histograma y ahora las necesitaban dos. Estan en
+  `packages/ui-components/src/charts/statistics.ts`, que no es de ninguno de los dos: dejarlas en
+  uno habria terminado con el otro escribiendo su propia copia, que es como dos objetos discrepan
+  sobre la mediana del mismo dato.
+- El separador con el que `toCategorical` compone «Penal / caso-12» estaba escrito en dos sitios
+  —quien une y quien parte—. Ahora es `LABEL_SEPARATOR`, uno solo.
+
 ### 2.8 Comprobar que el ultimo Administrador puede AUTENTICARSE, no solo que existe — HECHO
 
 `wouldLeaveNoAdministrator` comprueba el gobierno: que alguien conserva el rol. No comprueba que

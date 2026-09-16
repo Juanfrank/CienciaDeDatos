@@ -69,6 +69,7 @@ export {
   type AxisScale,
   type GaugeSettings,
   type HistogramSettings,
+  type BoxplotSettings,
   type SortCriterion,
   type PieLabel,
   type StackingMode,
@@ -301,11 +302,19 @@ export {
   binLabel,
   binPosition,
   histogramOf,
-  quantile,
   suggestedBins,
   type Bin,
   type Histogram,
 } from './charts/histogram';
+export {
+  WHISKER_RULES,
+  fiveNumberOf,
+  numbersOf,
+  quantile,
+  type FiveNumber,
+  type WhiskerRule,
+} from './charts/statistics';
+export { boxesOf, groupsOf, type Box } from './charts/boxplot';
 export {
   ELEMENT_THRESHOLD,
   elementsOf,
@@ -317,6 +326,7 @@ export {
   lineOptions,
   gaugeOptions,
   histogramOptions,
+  boxplotOptions,
   type ChartOptions,
   type ChartPalette,
   type ChartKind,

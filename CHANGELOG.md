@@ -33,6 +33,11 @@ como adiciones y jamas como rupturas.
 - El panel lateral no se plegaba: el selector del CSS esperaba un atributo con otro nombre.
 
 ### Anadido
+- **Diagrama de caja.** Compara la forma de una medida entre grupos: los dias de resolucion
+  materia a materia, cada una con su mediana, sus cuartiles y los expedientes que se salen del
+  resto. Los atipicos se pueden apagar, los bigotes se pueden llevar hasta el minimo y el maximo, y
+  la media se puede marcar junto a la mediana — que se separen es lo que dice que la distribucion
+  esta sesgada.
 - **Histograma.** Un objeto nuevo para la pregunta que el catalogo no sabia contestar: no cuanto
   tarda de media un expediente, sino cuanto tarda cada uno. Reparte las observaciones de una medida
   en intervalos —automaticos o los que se pidan—, y puede leerse como acumulado, que es lo que

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
+import { useTranslator } from './Locale';
 import type { CategoricalViewModel } from '@app/ui-components';
 import {
   ELEMENT_THRESHOLD,
@@ -42,6 +43,7 @@ export default function Canvas({
   onSeleccionar,
   onMontado,
 }: PropsCanvas) {
+  const t = useTranslator();
   const contenedor = useRef<HTMLDivElement>(null);
   const grafico = useRef<import('echarts').ECharts | null>(null);
 
@@ -96,6 +98,10 @@ export default function Canvas({
         ...comun('embudo'),
         ...comun('cascada'),
         ...comun('histogram'),
+        ...comun('boxplot'),
+        // Los rotulos de las capas que el grafico anade por su cuenta. El paquete de objetos es
+        // puro y no lee el catalogo de mensajes: le llegan ya traducidos, como la paleta.
+        layerLabels: { outliers: t('chart.layer.outliers'), mean: t('chart.layer.mean') },
         ...comun('references'),
         ...comun('seriesColors'),
         ...comun('conditional'),
@@ -104,7 +110,7 @@ export default function Canvas({
       }),
     // `formatear` se redefine en cada render del padre, asi que NO entra en las dependencias: lo
     // que de verdad decide como se formatea es la presentacion, y esa si esta.
-    [tipo, vm, palette, titulo, dimension, presentation, columnSeries],
+    [tipo, vm, palette, titulo, dimension, presentation, columnSeries, t],
   );
   const clave = useMemo(() => JSON.stringify(opciones), [opciones]);
   const porDefecto: 'canvas' | 'svg' = elementsOf(vm) >= ELEMENT_THRESHOLD ? 'canvas' : 'svg';

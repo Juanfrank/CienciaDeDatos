@@ -477,6 +477,43 @@ test.describe('el filtrado cruzado llega a TODOS los objetos (4.4)', () => {
     await expect(ultima.locator('td').last()).toHaveText('100.0 %');
   });
 
+  test('el diagrama de caja SI lo ofrece: un grupo es un valor de una dimension', async ({
+    page,
+  }) => {
+    /*
+     * Es la diferencia con el histograma, y no es un matiz de implementacion: un intervalo es un
+     * tramo de una medida y no hay filtro que aplicarle; una materia si, y pulsarla acota el resto
+     * del modulo igual que una barra.
+     */
+    await page.goto('/m/composicion/distribucion');
+
+    const boton = page
+      .getByTestId('diagrama-de-caja')
+      .first()
+      .getByTestId('filter-Penal')
+      .first();
+    await boton.focus();
+    await boton.press('Enter');
+
+    await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
+  });
+
+  test('el respaldo de la caja lleva los cinco numeros, en orden', async ({ page }) => {
+    /*
+     * Los cinco numeros SON el dibujo. Un respaldo que solo diera la mediana perderia justo lo que
+     * distingue un diagrama de caja de una barra.
+     */
+    await page.goto('/m/composicion/distribucion');
+
+    const fila = page.getByTestId('diagrama-de-caja').first().locator('tbody tr').first();
+    const celdas = await fila.locator('td.is-number').allInnerTexts();
+
+    // Minimo, Q1, mediana, Q3, maximo, atipicos y el recuento.
+    expect(celdas).toHaveLength(7);
+    const cinco = celdas.slice(0, 5).map(Number);
+    expect(cinco).toEqual([...cinco].sort((a, b) => a - b));
+  });
+
   test('un medidor NO ofrece el gesto: no tiene dimension por la que filtrar', async ({ page }) => {
     // Ofrecerlo y que no hiciera nada seria peor que no ofrecerlo, que es justo lo que pasaba en
     // la dispersion: el punto se resaltaba al pulsarlo y no ocurria nada.

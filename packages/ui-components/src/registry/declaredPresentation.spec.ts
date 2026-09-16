@@ -57,6 +57,7 @@ const VALUES: Partial<Record<PresentationKey, unknown[]>> = {
     { rules: [{ medida: 'Dias', comparator: 'menor', valor: 5, color: 'peligro' }] },
   ],
   histogram: [{ bins: 2 }, { cumulative: true, relative: true }],
+  boxplot: [{ whiskers: 'extremos' }, { mean: true, outliers: false }],
 };
 
 /** Claves que NO decide el constructor de opciones, y que por tanto esta sonda no puede ver. */
@@ -79,6 +80,7 @@ const OBJECT_KIND: Record<string, ChartKind> = {
   cascada: 'cascada',
   'mapa-de-arbol': 'mapa-de-arbol',
   histograma: 'histograma',
+  'diagrama-de-caja': 'diagrama-de-caja',
 };
 
 /** Lo que el dibujo lee pero el objeto NO declara, a proposito. */

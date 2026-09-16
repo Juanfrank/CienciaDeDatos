@@ -5,6 +5,7 @@ import {
   FUNNEL_COMPARISONS,
   CIRCULAR_LABELS,
   MAX_BINS,
+  WHISKER_RULES,
   MAX_RADIO_INTERIOR,
   STACKING_MODES,
   LEGEND_MODES,
@@ -37,6 +38,7 @@ import {
   type ObjectInstance,
   type IconName,
   type HistogramSettings,
+  type WhiskerRule,
   type ObjectPresentation,
   type PickerKind,
   type PickerLevel,
@@ -862,6 +864,58 @@ export function Presentation({
               {t('pres.stages.sort')}
             </span>
           </label>
+        </Section>
+      ) : null}
+
+      {admite("boxplot") ? (
+        <Section
+          keys={['caja', 'bigotes', 'cuartiles', 'atipicos', 'mediana']}
+          titulo={t('pres.box')} nivel={2} prueba={`${prueba}-caja`}>
+          <label className="form__field">
+            <span>{t('pres.box.whiskers')}</span>
+            <select
+              value={p.boxplot?.whiskers ?? "tukey"}
+              disabled={saving}
+              data-testid={`${prueba}-bigotes`}
+              onChange={(e) =>
+                set({ boxplot: { ...p.boxplot, whiskers: e.target.value as WhiskerRule } })
+              }
+            >
+              {WHISKER_RULES.map((regla) => (
+                <option key={regla} value={regla}>
+                  {t(`pres.box.whiskers.${regla}` as MessageKey)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.boxplot?.outliers !== false}
+              disabled={saving || p.boxplot?.whiskers === "extremos"}
+              data-testid={`${prueba}-atipicos`}
+              onChange={(e) =>
+                set({ boxplot: { ...p.boxplot, outliers: e.target.checked } })
+              }
+            />{" "}
+            {t('pres.box.outliers')}
+          </label>
+          {/*
+            Con los bigotes en los extremos no queda nada fuera, asi que el interruptor se
+            deshabilita en vez de quedarse encendido sin efecto.
+          */}
+          <span className="field__pista">{t('pres.box.outliers.hint')}</span>
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.boxplot?.mean === true}
+              disabled={saving}
+              data-testid={`${prueba}-media`}
+              onChange={(e) => set({ boxplot: { ...p.boxplot, mean: e.target.checked } })}
+            />{" "}
+            {t('pres.box.mean')}
+          </label>
+          <span className="field__pista">{t('pres.box.mean.hint')}</span>
         </Section>
       ) : null}
 

@@ -180,6 +180,15 @@ export function aggregateBy(
 }
 
 /** Vista categorica: lo mismo que `aggregateBy`, con las etiquetas ya compuestas para un eje. */
+/**
+ * Con que se componen las etiquetas de varias dimensiones.
+ *
+ * Se exporta porque quien COMPONE y quien PARTE tienen que usar el mismo: los pequenos multiplos y
+ * el diagrama de caja deshacen esta union para recuperar el grupo, y con dos constantes distintas
+ * dejarian de encontrarlo sin que nada fallara.
+ */
+export const LABEL_SEPARATOR = ' / ';
+
 export function toCategorical(
   result: QueryResult,
   dimensions: { table: string; field: string }[],
@@ -190,7 +199,7 @@ export function toCategorical(
 
   return {
     series: measures,
-    points: rows.map((f) => ({ label: f.labels.join(' / '), values: f.values })),
+    points: rows.map((f) => ({ label: f.labels.join(LABEL_SEPARATOR), values: f.values })),
     aggregated,
   };
 }

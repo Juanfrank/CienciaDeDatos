@@ -1279,6 +1279,29 @@ export const demoModules: ModuleDefinition[] = [
             },
           },
           {
+            id: 'dis-caja',
+            position: { x: 0, y: 6, w: 12, h: 5 },
+            instance: {
+              instanceId: 'dis-caja',
+              objectId: 'diagrama-de-caja',
+              version: '1.0.0',
+              title: 'Dias hasta la resolucion, por materia',
+              binding: {
+                datasetId: ATOMIC,
+                dimensions: [MATERIA, CASO],
+                measures: ['DiasResolucion'],
+              },
+              presentation: {
+                subtitulo: 'La misma forma, materia a materia: donde esta la mediana y que se sale',
+                axes: { yTitle: 'Dias' },
+                boxplot: { mean: true },
+                references: [
+                  { valor: 180, etiqueta: 'Plazo', style: 'discontinua', color: 'error' },
+                ],
+              },
+            },
+          },
+          {
             id: 'dis-acumulado',
             position: { x: 6, y: 1, w: 6, h: 5 },
             instance: {

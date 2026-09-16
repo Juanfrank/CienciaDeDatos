@@ -30,6 +30,7 @@ import {
   toCategorical,
   histogramOf,
   binLabel,
+  boxesOf,
   toKpi,
   toSlicerOptions,
 } from '@app/ui-components';
@@ -1247,6 +1248,104 @@ export function Histogram({
                         : String(distribucion.displayed[i] ?? 0)}
                     </td>
                   ) : null}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </FallbackTable>
+      </Chart>
+    </Frame>
+  );
+}
+
+/**
+ * Diagrama de caja — la forma de una medida, comparada entre grupos.
+ *
+ * El respaldo es una tabla con el resumen de cinco numeros por grupo, que ES lo que la caja dibuja.
+ * Y aqui la celda del grupo SI filtra, al reves que en el histograma: un grupo es un valor de una
+ * dimension, asi que pulsarlo acota el resto del modulo igual que una barra.
+ */
+export function BoxPlot({
+  titulo,
+  result,
+  instance,
+  slots,
+  aggregations,
+  onFiltrar,
+  objectIcon,
+}: PropsObject) {
+  const t = useTranslator();
+  const r = porRanura(instance, slots);
+  const grupo = r ? r.one('grupo') : fieldKeyDe(instance.binding.dimensions[0]);
+  const observacion = r ? r.one('observacion') : fieldKeyDe(instance.binding.dimensions[1]);
+  const medidas = r ? r.varios('valor') : instance.binding.measures;
+
+  // El ORDEN importa: la primera dimension es la que agrupa, y es lo que `boxesOf` deshace.
+  const dimensiones = [grupo, observacion].filter((d): d is string => Boolean(d)).map(aFieldRef);
+
+  const vm = toCategorical(
+    result,
+    dimensiones,
+    medidas,
+    aggregationsFor(medidas, instance.binding.measures, aggregations),
+  );
+  const formatear = measureFormatter(instance.presentation, medidas[0] ?? '');
+  const settings = instance.presentation?.boxplot ?? {};
+  const cajas = boxesOf(vm, settings);
+  const conAtipicos = (settings.whiskers ?? 'tukey') !== 'extremos';
+
+  return (
+    <Frame
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      aggregations={aggregations}
+      objectIcon={objectIcon}
+    >
+      <Chart
+        instanceId={instance.instanceId}
+        tipo="diagrama-de-caja"
+        vm={vm}
+        titulo={titulo}
+        presentation={instance.presentation}
+        formatear={(valor) => formatear(valor)}
+        {...(grupo ? { dimension: grupo } : {})}
+        {...(grupo && onFiltrar ? { onSeleccionar: (c: string) => onFiltrar(grupo, c) } : {})}
+      >
+        <FallbackTable nombre={titulo}>
+          <table className="tabla" data-testid="diagrama-de-caja">
+            <caption className="tabla__caption">{t('chart.box.convention')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{grupo ?? t('chart.box.group')}</th>
+                <th scope="col" className="is-number">{t('chart.box.min')}</th>
+                <th scope="col" className="is-number">{t('chart.box.q1')}</th>
+                <th scope="col" className="is-number">{t('chart.box.median')}</th>
+                <th scope="col" className="is-number">{t('chart.box.q3')}</th>
+                <th scope="col" className="is-number">{t('chart.box.max')}</th>
+                {conAtipicos ? (
+                  <th scope="col" className="is-number">{t('chart.box.outliers')}</th>
+                ) : null}
+                <th scope="col" className="is-number">{t('chart.box.count')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cajas.map((caja) => (
+                <tr key={caja.label}>
+                  <CategoryCell
+                    etiqueta={caja.label}
+                    {...(grupo ? { fieldName: grupo } : {})}
+                    {...(onFiltrar ? { onFiltrar } : {})}
+                  />
+                  <td className="is-number">{formatear(caja.low)}</td>
+                  <td className="is-number">{formatear(caja.q1)}</td>
+                  <td className="is-number">{formatear(caja.median)}</td>
+                  <td className="is-number">{formatear(caja.q3)}</td>
+                  <td className="is-number">{formatear(caja.high)}</td>
+                  {conAtipicos ? (
+                    <td className="is-number">{caja.outliers.length}</td>
+                  ) : null}
+                  <td className="is-number">{caja.count}</td>
                 </tr>
               ))}
             </tbody>

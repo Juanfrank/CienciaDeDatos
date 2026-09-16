@@ -1,9 +1,6 @@
-import type { CategoricalViewModel } from '../registry/viewModel';
+import { LABEL_SEPARATOR, type CategoricalViewModel } from '../registry/viewModel';
 
 /** Pequenos multiplos — el mismo grafico, una vez por cada valor de una dimension. */
-
-/** Separador con el que `toCategorical` compone las etiquetas de varias dimensiones. */
-const SEPARADOR = ' / ';
 
 /** Cuantos paneles se dibujan como maximo. */
 export const MAX_PANELS = 12;
@@ -25,10 +22,10 @@ export function splitMultiples(vm: CategoricalViewModel): MultiplePartition {
   const panels = new Map<string, CategoricalViewModel>();
 
   for (const punto of vm.points) {
-    const corte = punto.label.indexOf(SEPARADOR);
+    const corte = punto.label.indexOf(LABEL_SEPARATOR);
     if (corte < 0) continue;
     const titulo = punto.label.slice(0, corte);
-    const categoria = punto.label.slice(corte + SEPARADOR.length);
+    const categoria = punto.label.slice(corte + LABEL_SEPARATOR.length);
 
     const panel = panels.get(titulo) ?? { series: vm.series, points: [], aggregated: vm.aggregated };
     panel.points.push({ label: categoria, values: punto.values });

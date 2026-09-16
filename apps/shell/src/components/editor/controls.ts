@@ -32,6 +32,7 @@ export const KEY_CONTROL: Record<PresentationKey, string> = {
   cascada: 'cascada',
   medidor: 'medidor',
   histogram: 'histograma',
+  boxplot: 'caja',
 };
 
 /** Controles que solo aparecen despues de encender otro. */

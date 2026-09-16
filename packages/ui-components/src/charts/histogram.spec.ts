@@ -1,13 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  MAX_BINS,
-  binLabel,
-  binPosition,
-  histogramOf,
-  numbersOf,
-  quantile,
-  suggestedBins,
-} from './histogram';
+import { MAX_BINS, binLabel, binPosition, histogramOf, suggestedBins } from './histogram';
 
 /** El reparto en intervalos — la pieza que comparten el dibujo y el respaldo. */
 
@@ -124,19 +116,6 @@ describe('lo que se dibuja de cada intervalo', () => {
   });
 });
 
-describe('el cuantil', () => {
-  it('interpola entre los dos vecinos', () => {
-    // La mediana de un numero par de observaciones es el promedio de las dos centrales.
-    expect(quantile([1, 2, 3, 4], 0.5)).toBe(2.5);
-    expect(quantile([1, 2, 3], 0.5)).toBe(2);
-  });
-
-  it('en los extremos da el minimo y el maximo', () => {
-    expect(quantile([4, 8, 15], 0)).toBe(4);
-    expect(quantile([4, 8, 15], 1)).toBe(15);
-  });
-});
-
 describe('donde cae una referencia sobre el eje de intervalos', () => {
   const bins = histogramOf(CIEN, { bins: 4 }).bins;
 
@@ -170,11 +149,5 @@ describe('el rotulo de un intervalo', () => {
 
   it('un intervalo de un solo valor se dice una vez', () => {
     expect(binLabel({ from: 7, to: 7, count: 3 }, (n) => String(n))).toBe('7');
-  });
-});
-
-describe('numbersOf', () => {
-  it('descarta lo que no es un numero finito', () => {
-    expect(numbersOf([1, null, undefined, 2, Number.NaN, Number.POSITIVE_INFINITY])).toEqual([1, 2]);
   });
 });

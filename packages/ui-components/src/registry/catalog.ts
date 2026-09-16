@@ -712,6 +712,65 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     /*
+     * Diagrama de caja — la misma forma, comparada entre grupos.
+     */
+    objectId: 'diagrama-de-caja',
+    family: 'distribution',
+    icono: 'caja',
+    name: 'Diagrama de caja',
+    description: 'La mediana, los cuartiles y los atipicos de una medida, grupo a grupo.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: bigotes de Tukey o extremos, atipicos y media opcional.',
+        {
+          dimensions: { min: 2, max: 2 },
+          measures: { min: 1, max: 1 },
+          notes:
+            'La primera dimension agrupa —una caja por valor— y la segunda identifica cada ' +
+            'observacion. Pide grano ATOMICO: sobre un dataset preagregado los cuartiles saldrian ' +
+            'de los grupos y no de los casos.',
+          wells: [
+            {
+              id: 'grupo',
+              etiqueta: 'Grupo',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              help: 'Una caja por cada valor de esta dimension.',
+            },
+            {
+              id: 'observacion',
+              etiqueta: 'Observacion',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              help: 'Que identifica cada fila. Con la clave del dataset, cada punto es un caso.',
+            },
+            {
+              id: 'valor',
+              etiqueta: 'Valor',
+              tipo: 'medida',
+              max: 1,
+              min: 1,
+              help: 'La medida cuya forma se compara entre grupos.',
+            },
+          ],
+        },
+        presenta(
+          'formato',
+          'formatos',
+          'legend',
+          'axes',
+          'references',
+          'seriesColors',
+          'boxplot',
+        ),
+      ),
+    ],
+  },
+  {
+    /*
      * Embudo — etapas de un proceso, en SU orden.
      */
     objectId: 'embudo',

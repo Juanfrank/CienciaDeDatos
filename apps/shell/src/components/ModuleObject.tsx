@@ -24,6 +24,7 @@ import {
   HorizontalBars,
   Waterfall,
   Histogram,
+  BoxPlot,
   Pie,
   Combo,
   Scatter,
@@ -214,6 +215,8 @@ function ObjectBody({
       return <Waterfall {...props} />;
     case 'histograma':
       return <Histogram {...props} />;
+    case 'diagrama-de-caja':
+      return <BoxPlot {...props} />;
     case 'mapa-de-arbol':
       return <TreeMap {...props} />;
     case 'combinado':

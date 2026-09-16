@@ -1,5 +1,6 @@
 import { COMPARATORS, MAX_RULES, type ConditionalFormat } from './conditional';
 import { iconNameIs, type IconName } from './icons';
+import type { WhiskerRule } from '../charts/statistics';
 import {
   FORMAT_KINDS,
   type NumberFormat,
@@ -139,6 +140,22 @@ export interface HistogramSettings {
   cumulative?: boolean;
   /** En porcentaje del total en vez de en recuento. */
   relative?: boolean;
+}
+
+/** ---- Diagrama de caja ---- */
+export interface BoxplotSettings {
+  /**
+   * Hasta donde llegan los bigotes.
+   *
+   * Con Tukey se detienen en vez y media el recorrido intercuartilico y lo que queda fuera se
+   * dibuja como atipico. Con los extremos llegan al minimo y al maximo, y no hay atipicos: es la
+   * lectura que interesa cuando lo que se quiere ver es el recorrido completo.
+   */
+  whiskers?: WhiskerRule;
+  /** Dibujar los atipicos como puntos. Solo tiene sentido con la regla de Tukey. */
+  outliers?: boolean;
+  /** La media, junto a la mediana. Que se separen es lo que dice que la distribucion esta sesgada. */
+  mean?: boolean;
 }
 
 export interface GaugeSettings {
@@ -328,6 +345,7 @@ export interface ObjectPresentation {
    * del apartado 2.11, donde renombrar la clave arrastraba el valor de la union guardada.
    */
   histogram?: HistogramSettings;
+  boxplot?: BoxplotSettings;
   /** Peso, estilo, alineacion y color de los textos del objeto. */
   textos?: ObjectTexts;
 }
@@ -361,6 +379,7 @@ export const PRESENTATION_KEYS = [
   'cascada',
   'medidor',
   'histogram',
+  'boxplot',
 ] as const satisfies readonly (keyof ObjectPresentation)[];
 
 export type PresentationKey = keyof ObjectPresentation;

@@ -1,4 +1,5 @@
 import type { HistogramSettings } from '../presentation/contract';
+import { numbersOf, quantile } from './statistics';
 
 /**
  * Histograma — como se reparten las observaciones de una medida.
@@ -54,27 +55,6 @@ export function suggestedBins(sorted: number[]): number {
 
 const clamp = (n: number) => Math.min(MAX_BINS, Math.max(MIN_BINS, n));
 
-/**
- * El cuantil por interpolacion lineal entre los dos vecinos.
- *
- * Es el metodo que usan R por defecto y las hojas de calculo, y el que hace que la mediana de un
- * numero par de observaciones sea el promedio de las dos centrales en vez de una de ellas.
- */
-export function quantile(sorted: number[], q: number): number {
-  if (sorted.length === 0) return 0;
-  if (sorted.length === 1) return sorted[0] as number;
-
-  const posicion = (sorted.length - 1) * q;
-  const bajo = Math.floor(posicion);
-  const alto = Math.ceil(posicion);
-  const valorBajo = sorted[bajo] as number;
-  if (bajo === alto) return valorBajo;
-  return valorBajo + (posicion - bajo) * ((sorted[alto] as number) - valorBajo);
-}
-
-/** Solo los numeros. Un hueco no es un cero: no tiene sitio en ningun intervalo. */
-export const numbersOf = (values: (number | null | undefined)[]): number[] =>
-  values.filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
 
 export function histogramOf(
   values: (number | null | undefined)[],
