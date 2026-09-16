@@ -508,6 +508,20 @@ justamente lo que estos objetos aportan. Ahora cada uno tiene su caso:
 - El **diagrama de flujo**, TAMBIEN los pasos que el lienzo no traza. Un ciclo es parte del proceso;
   dejarlo fuera de la exportacion convertiria una limitacion del dibujo en un dato que desaparece.
 
+#### Y el grano que un objeto NECESITA deja de ser una nota — HECHO
+
+El histograma y el diagrama de caja decian en sus `notes` «pide grano atomico», y **nada lo
+comprobaba**. Una regla que nadie mantiene es lo que este repositorio no admite en ningun otro
+sitio, y aqui el fallo es de los peores: sobre un dataset preagregado el objeto dibuja la forma de
+los GRUPOS y ninguna cifra es falsa, asi que no hay nada raro que mirar.
+
+`ObjectDataContract` gana `grain`, y la validacion lo compara con el del registro de datasets. No es
+la comprobacion de agregaciones que ya existia —esa mira si una CIFRA saldria mal—: aqui lo que sale
+mal es el objeto entero. El modulo queda marcado ROTO, con el motivo escrito.
+
+Lo declaran dos objetos y solo dos. Ausente significa que da igual, que es el caso de casi todos:
+una barra con la suma de un grupo es la misma suma venga de donde venga.
+
 ---
 
 **Lo que queda de 2.7.** `mapa` sigue esperando la geometria de los distritos. Y de la lista que

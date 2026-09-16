@@ -2,6 +2,7 @@ import type { Aggregation, DatasetGrain } from '@app/data-contracts';
 import {
   type BindingProblem,
   type ObjectInstance,
+  type ObjectDataContract,
   type ObjectRegistry,
   aggregationsOf,
   fieldKey,
@@ -99,6 +100,34 @@ export interface ValidateModuleInput {
    * una prueba que no monta el catalogo marcaria todos sus saltos como rotos.
    */
   moduleSlugs?: readonly string[];
+}
+
+/**
+ * El grano que el objeto pide contra el que el dataset tiene.
+ *
+ * No es lo mismo que la comprobacion de agregaciones de aqui abajo, que mira si una CIFRA saldria
+ * mal. Aqui lo que sale mal es el objeto entero: un histograma sobre un dataset preagregado
+ * reparte grupos y dibuja la forma de los grupos, sin que ninguna cifra sea falsa.
+ */
+function grainProblems(
+  instance: ObjectInstance,
+  contrato: ObjectDataContract,
+  input: ValidateModuleInput,
+): BindingProblem[] {
+  const info = input.datasets?.[instance.binding.datasetId];
+  if (!contrato.grain || !info || info.grain === contrato.grain) return [];
+
+  return [
+    {
+      slot: instance.binding.datasetId,
+      kind: 'contrato-incumplido' as const,
+      problem:
+        `Este objeto reparte OBSERVACIONES y '${instance.binding.datasetId}' viene ya agrupado: ` +
+        `cada fila es un grupo, no un hecho. Lo que dibujaria seria la forma de los grupos, sin ` +
+        `que ninguna cifra fuera falsa — que es lo que lo hace dificil de ver. Use un dataset de ` +
+        `grano atomico.`,
+    },
+  ];
 }
 
 function aggregationProblems(
@@ -237,6 +266,7 @@ export function validateModule(input: ValidateModuleInput): ModuleDiagnostics {
         /*
          * Y como se resume cada medida.
          */
+        ...grainProblems(instance, contrato, input),
         ...aggregationProblems(instance, input),
       ];
       diagnostico.broken = diagnostico.bindingProblems.length > 0;

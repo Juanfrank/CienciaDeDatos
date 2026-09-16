@@ -33,6 +33,10 @@ como adiciones y jamas como rupturas.
 - El panel lateral no se plegaba: el selector del CSS esperaba un atributo con otro nombre.
 
 ### Anadido
+- **Un objeto que reparte observaciones avisa si el dataset viene ya agrupado.** El histograma y el
+  diagrama de caja necesitan una fila por caso; sobre datos agrupados dibujarian la forma de los
+  grupos sin que ninguna cifra fuera falsa, que es lo que lo hacia dificil de ver. Ahora el editor
+  lo marca antes de guardar.
 - **Lo que se exporta de los objetos nuevos es lo que ensenan.** Un histograma exporta sus
   intervalos y no los mil doscientos casos que hay detras; un diagrama de caja, sus cinco numeros
   por grupo. Un diagrama de flujo exporta ademas los pasos que el dibujo no puede trazar, para que

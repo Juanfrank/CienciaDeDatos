@@ -367,3 +367,93 @@ describe('utilidades de modulo', () => {
     expect(findPage(m, 'inexistente')).toBeUndefined();
   });
 });
+
+describe('el grano que un objeto NECESITA', () => {
+  const histograma = (datasetId: string): ModuleDefinition => ({
+    moduleId: 'm',
+    slug: 'm',
+    name: 'M',
+    status: 'publicado' as const,
+    version: 1,
+    createdAt: '2026-09-16T00:00:00.000Z',
+    updatedAt: '2026-09-16T00:00:00.000Z',
+    pages: [
+      {
+        pageId: 'p',
+        slug: 'p',
+        name: 'P',
+        items: [
+          {
+            id: 'i1',
+            position: { x: 0, y: 0, w: 4, h: 4 },
+            instance: {
+              instanceId: 'i1',
+              objectId: 'histograma',
+              version: '1.0.0',
+              binding: {
+                datasetId,
+                dimensions: [{ table: 'FactCasos', field: 'CasoId' }],
+                measures: ['DiasResolucion'],
+              },
+            },
+          },
+        ],
+      },
+    ],
+  });
+
+  const columnas = {
+    atomico: ['FactCasos.CasoId', 'DiasResolucion'],
+    agrupado: ['FactCasos.CasoId', 'DiasResolucion'],
+  };
+
+  const datasets = {
+    atomico: { grain: 'atomico' as const, dimensions: ['FactCasos.CasoId'] },
+    agrupado: { grain: 'preagregado' as const, dimensions: ['FactCasos.CasoId'] },
+  };
+
+  it('sobre un dataset atomico no se queja', () => {
+    const d = validateModule({
+      module: histograma('atomico'),
+      registry: new ObjectRegistry(initialCatalog),
+      columnsByDataset: columnas,
+      datasets,
+    });
+
+    expect(d.items[0]?.bindingProblems).toEqual([]);
+  });
+
+  it('sobre uno preagregado lo marca ROTO, y dice por que', () => {
+    /*
+     * No es la comprobacion de agregaciones, que mira si una CIFRA saldria mal. Aqui ninguna cifra
+     * es falsa: lo que pasa es que el objeto entero dibuja la forma de los grupos en vez de la de
+     * los casos, y eso no se ve mirando los numeros.
+     */
+    const d = validateModule({
+      module: histograma('agrupado'),
+      registry: new ObjectRegistry(initialCatalog),
+      columnsByDataset: columnas,
+      datasets,
+    });
+
+    const problema = d.items[0]?.bindingProblems.find((p) => p.slot === 'agrupado');
+    expect(problema?.problem).toContain('viene ya agrupado');
+    expect(d.items[0]?.broken).toBe(true);
+  });
+
+  it('un objeto que no declara grano no se comprueba', () => {
+    // Una barra con la suma de un grupo es la misma suma venga de donde venga.
+    const barras = histograma('agrupado');
+    const item = barras.pages[0]?.items[0];
+    if (item) item.instance = { ...item.instance, objectId: 'barras', version: '1.2.0' };
+
+    const d = validateModule({
+      module: barras,
+      registry: new ObjectRegistry(initialCatalog),
+      columnsByDataset: columnas,
+      datasets,
+    });
+
+    expect(d.items[0]?.bindingProblems.filter((p) => p.problem.includes('viene ya agrupado'))).toEqual([]);
+  });
+});

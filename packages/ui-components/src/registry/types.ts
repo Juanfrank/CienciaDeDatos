@@ -1,4 +1,4 @@
-import type { Aggregation, FieldRef } from '@app/data-contracts';
+import type { Aggregation, DatasetGrain, FieldRef } from '@app/data-contracts';
 import type { PresentationKey, ObjectPresentation } from '../presentation/contract';
 import type { IconName } from '../presentation/icons';
 import type { ContainerSettings, ContainerId } from '../presentation/containers';
@@ -60,6 +60,17 @@ export type ObjectFamily = (typeof OBJECT_FAMILIES)[number];
 export interface ObjectDataContract {
   dimensions: { min: number; max: number };
   measures: { min: number; max: number };
+  /**
+   * El grano que el objeto NECESITA del dataset.
+   *
+   * Solo lo declaran los que reparten OBSERVACIONES —un histograma, un diagrama de caja—: sobre un
+   * dataset preagregado repartirian grupos, y la forma que dibujarian seria la de los grupos. No es
+   * un matiz de precision como el de las agregaciones: el objeto entero diria otra cosa.
+   *
+   * Ausente significa que da igual, que es el caso de casi todos: una barra con la suma de un
+   * grupo es la misma suma venga de donde venga.
+   */
+  grain?: DatasetGrain;
   /** Descripcion legible de que representa cada ranura, para la interfaz del editor. */
   notes?: string;
   /**

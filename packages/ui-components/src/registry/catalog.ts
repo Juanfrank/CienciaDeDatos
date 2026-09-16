@@ -675,6 +675,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         {
           dimensions: { min: 1, max: 1 },
           measures: { min: 1, max: 1 },
+          grain: 'atomico',
           notes:
             'Cada fila es una observacion y su valor entra en un intervalo. Pide un dataset de ' +
             'grano ATOMICO: sobre uno preagregado repartiria grupos y no casos, y la forma que ' +
@@ -726,6 +727,7 @@ export const initialCatalog: VisualObjectDefinition[] = [
         {
           dimensions: { min: 2, max: 2 },
           measures: { min: 1, max: 1 },
+          grain: 'atomico',
           notes:
             'La primera dimension agrupa —una caja por valor— y la segunda identifica cada ' +
             'observacion. Pide grano ATOMICO: sobre un dataset preagregado los cuartiles saldrian ' +
