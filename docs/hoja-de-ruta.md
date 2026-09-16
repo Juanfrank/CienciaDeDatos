@@ -469,6 +469,38 @@ Lo demas que decide:
 - **Ni referencias ni ejes de valor:** los dos ejes son de categorias, asi que una raya en «180
   dias» no cruzaria ningun eje que mida dias.
 
+#### Diagrama de flujo — HECHO
+
+El embudo ensena etapas que solo menguan. Esto ensena a DONDE va lo que sale de cada una, que es la
+pregunta en cuanto el proceso se ramifica: de las audiencias celebradas, cuantas acaban en sentencia
+y cuantas se archivan.
+
+**Lo que este objeto obliga a resolver es el CICLO.** Un diagrama de flujo es un grafo dirigido
+aciclico, y en un proceso judicial los ciclos existen de verdad: una apelacion devuelve el
+expediente a primera instancia. Con el ciclo puesto, el trazado de ECharts se queda dando vueltas.
+
+La salida no es dibujarlo ni quitarlo: es **apartarlo con nombre**. `flowsOf` detecta el ciclo
+—recorriendo el grafo, no mirando solo el paso de vuelta—, lo deja fuera del lienzo y lo devuelve en
+`dropped` con su motivo. **El respaldo lista TODOS los flujos**, los dibujados y los apartados, con
+una columna que dice por que. Quitarlo en silencio dibujaria un proceso que no es el que hay, y
+quien leyera el grafico creeria que esa devolucion no ocurre.
+
+Lo mismo con una etapa que va a si misma, y con un flujo sin cifra: un enlace de grosor nulo dibuja
+una linea que no lleva a nadie, que no es lo mismo que un paso por el que no pasa nadie.
+
+**No hereda `axes` ni `references`:** no hay ejes donde anclar una raya, y el grosor del enlace ya
+ES la cifra.
+
+---
+
+**Lo que queda de 2.7.** `mapa` sigue esperando la geometria de los distritos. Y de la lista que
+salio de la investigacion, los candidatos con menos fuerza —radar, sunburst, calendario— no se
+hicieron a proposito: ninguno contesta una pregunta que el catalogo no sepa ya contestar. Un radar
+compara varios indicadores por grupo, que es lo que hace una matriz sin el problema de que el area
+de un poligono exagere; un sunburst es un mapa de arbol en redondo; y un calendario es un mapa de
+calor con las celdas puestas en forma de mes. Anadirlos seria crecer en numero de objetos y no en
+preguntas que se puedan contestar.
+
 ### 2.8 Comprobar que el ultimo Administrador puede AUTENTICARSE, no solo que existe — HECHO
 
 `wouldLeaveNoAdministrator` comprueba el gobierno: que alguien conserva el rol. No comprueba que

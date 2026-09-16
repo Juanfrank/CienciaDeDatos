@@ -33,6 +33,7 @@ import {
   boxesOf,
   gridOf,
   valueAt,
+  flowsOf,
   toKpi,
   toSlicerOptions,
 } from '@app/ui-components';
@@ -1440,6 +1441,101 @@ export function HeatMap({
                       </td>
                     );
                   })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </FallbackTable>
+      </Chart>
+    </Frame>
+  );
+}
+
+/**
+ * Diagrama de flujo — a donde va lo que sale de cada etapa.
+ *
+ * El respaldo lista TODOS los flujos, incluidos los que el dibujo no puede trazar. Un ciclo deja el
+ * trazado dando vueltas, asi que se aparta; apartarlo sin decirlo dibujaria un proceso que no es el
+ * que hay, y quien lea el grafico creeria que esa devolucion no ocurre.
+ */
+export function FlowDiagram({
+  titulo,
+  result,
+  instance,
+  slots,
+  aggregations,
+  onFiltrar,
+  objectIcon,
+}: PropsObject) {
+  const t = useTranslator();
+  const r = porRanura(instance, slots);
+  const origen = r ? r.one('origen') : fieldKeyDe(instance.binding.dimensions[0]);
+  const destino = r ? r.one('destino') : fieldKeyDe(instance.binding.dimensions[1]);
+  const medidas = r ? r.varios('valor') : instance.binding.measures;
+
+  // El ORDEN importa: la primera dimension es de donde sale, y es lo que `flowsOf` deshace.
+  const dimensiones = [origen, destino].filter((d): d is string => Boolean(d)).map(aFieldRef);
+
+  const vm = toCategorical(
+    result,
+    dimensiones,
+    medidas,
+    aggregationsFor(medidas, instance.binding.measures, aggregations),
+  );
+  const formatear = measureFormatter(instance.presentation, medidas[0] ?? '');
+  const graph = flowsOf(vm);
+
+  const porQue: Record<'ciclo' | 'a-si-mismo', string> = {
+    ciclo: t('chart.flow.cycle'),
+    'a-si-mismo': t('chart.flow.self'),
+  };
+  const todos = [
+    ...graph.links.map((flujo) => ({ ...flujo, why: '' })),
+    ...graph.dropped.map((flujo) => ({ ...flujo, why: porQue[flujo.why] })),
+  ];
+
+  return (
+    <Frame
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      aggregations={aggregations}
+      objectIcon={objectIcon}
+    >
+      <Chart
+        instanceId={instance.instanceId}
+        tipo="diagrama-de-flujo"
+        vm={vm}
+        titulo={titulo}
+        presentation={instance.presentation}
+        formatear={(valor) => formatear(valor)}
+        {...(origen ? { dimension: origen } : {})}
+        {...(origen && onFiltrar ? { onSeleccionar: (c: string) => onFiltrar(origen, c) } : {})}
+      >
+        <FallbackTable nombre={titulo}>
+          <table className="tabla" data-testid="diagrama-de-flujo">
+            <caption className="tabla__caption">{t('chart.flow.convention')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{origen ?? t('chart.flow.source')}</th>
+                <th scope="col">{destino ?? t('chart.flow.target')}</th>
+                <th scope="col" className="is-number">
+                  {t('chart.flow.value')}
+                </th>
+                <th scope="col">{t('chart.flow.dropped')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {todos.map((flujo) => (
+                <tr key={`${flujo.source}-${flujo.target}`}>
+                  <CategoryCell
+                    etiqueta={flujo.source}
+                    {...(origen ? { fieldName: origen } : {})}
+                    {...(onFiltrar ? { onFiltrar } : {})}
+                  />
+                  <td>{flujo.target}</td>
+                  <td className="is-number">{formatear(flujo.value)}</td>
+                  <td>{flujo.why}</td>
                 </tr>
               ))}
             </tbody>

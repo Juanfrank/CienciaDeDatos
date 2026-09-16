@@ -100,6 +100,7 @@ export default function Canvas({
         ...comun('histogram'),
         ...comun('boxplot'),
         ...comun('heatmap'),
+        ...comun('sankey'),
         // Los rotulos de las capas que el grafico anade por su cuenta. El paquete de objetos es
         // puro y no lee el catalogo de mensajes: le llegan ya traducidos, como la paleta.
         layerLabels: { outliers: t('chart.layer.outliers'), mean: t('chart.layer.mean') },

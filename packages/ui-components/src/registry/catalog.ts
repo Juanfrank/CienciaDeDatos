@@ -822,6 +822,57 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     /*
+     * Diagrama de flujo — a donde va lo que sale de cada etapa.
+     */
+    objectId: 'diagrama-de-flujo',
+    family: 'proportion',
+    icono: 'flujo',
+    name: 'Diagrama de flujo',
+    description: 'Cuanto pasa de cada etapa a la siguiente, con el grosor diciendo cuanto.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: orientacion, alineacion de etapas y cifra junto al nombre.',
+        {
+          dimensions: { min: 2, max: 2 },
+          measures: { min: 1, max: 1 },
+          notes:
+            'La primera dimension es de donde sale y la segunda a donde va. Un flujo que cerrara ' +
+            'un ciclo no se puede dibujar —el trazado se queda dando vueltas—: se aparta y el ' +
+            'respaldo lo lista con su motivo.',
+          wells: [
+            {
+              id: 'origen',
+              etiqueta: 'Origen',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              help: 'La etapa de la que sale.',
+            },
+            {
+              id: 'destino',
+              etiqueta: 'Destino',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              help: 'La etapa a la que llega.',
+            },
+            {
+              id: 'valor',
+              etiqueta: 'Valor',
+              tipo: 'medida',
+              max: 1,
+              min: 1,
+              help: 'Cuanto pasa. Es el grosor del enlace.',
+            },
+          ],
+        },
+        presenta('formato', 'formatos', 'seriesColors', 'sankey'),
+      ),
+    ],
+  },
+  {
+    /*
      * Embudo — etapas de un proceso, en SU orden.
      */
     objectId: 'embudo',

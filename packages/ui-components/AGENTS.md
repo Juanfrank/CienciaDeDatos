@@ -7,7 +7,7 @@ deprecacion, modelo de vista y construccion de las opciones de ECharts.
 |---|---|
 | `src/registry/` | Catalogo, tipos, semver, proyeccion, modelo de vista y agregacion |
 | `src/presentation/` | Claves de presentacion, pozos, elementos, contenedores, iconos, formato |
-| `src/charts/` | Opciones de ECharts, orden, pequenos multiplos y reparto en intervalos |
+| `src/charts/` | Opciones de ECharts, orden, pequenos multiplos y los modelos que transforman antes de dibujar: intervalos, cuartiles, rejilla y grafo |
 
 ## Las tres listas que no pueden discrepar
 

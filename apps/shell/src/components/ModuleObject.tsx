@@ -26,6 +26,7 @@ import {
   Histogram,
   BoxPlot,
   HeatMap,
+  FlowDiagram,
   Pie,
   Combo,
   Scatter,
@@ -220,6 +221,8 @@ function ObjectBody({
       return <BoxPlot {...props} />;
     case 'mapa-de-calor':
       return <HeatMap {...props} />;
+    case 'diagrama-de-flujo':
+      return <FlowDiagram {...props} />;
     case 'mapa-de-arbol':
       return <TreeMap {...props} />;
     case 'combinado':

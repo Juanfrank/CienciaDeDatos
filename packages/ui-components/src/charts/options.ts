@@ -12,6 +12,8 @@ import {
   type HistogramSettings,
   type BoxplotSettings,
   type HeatmapSettings,
+  type SankeySettings,
+  type NodeAlignment,
   type ReferenceStyle,
   type LabelSettings,
   type TooltipSettings,
@@ -26,6 +28,7 @@ import type { CategoricalViewModel } from '../registry/viewModel';
 import { binLabel, binPosition, histogramOf, type Histogram } from './histogram';
 import { boxesOf } from './boxplot';
 import { gridOf } from './heatmap';
+import { flowsOf } from './sankey';
 
 /**
  * Construccion de las opciones de Apache ECharts (4.2).
@@ -69,6 +72,7 @@ export interface ChartOptions {
   histogram?: HistogramSettings;
   boxplot?: BoxplotSettings;
   heatmap?: HeatmapSettings;
+  sankey?: SankeySettings;
   /**
    * Como se llaman las capas que un grafico dibuja por su cuenta.
    *
@@ -1716,6 +1720,72 @@ export function heatmapOptions(o: ChartOptions): Record<string, unknown> {
   };
 }
 
+/* ── Diagrama de flujo ─────────────────────────────────────────────────────────────────────── */
+
+const ECHARTS_ALIGN: Record<NodeAlignment, 'justify' | 'left' | 'right'> = {
+  justificado: 'justify',
+  izquierda: 'left',
+  derecha: 'right',
+};
+
+/**
+ * Diagrama de flujo — a donde va lo que sale de cada etapa.
+ *
+ * No tiene ejes, asi que ni `axes` ni las referencias tienen donde anclarse, y el grosor de cada
+ * enlace ya ES la cifra: apilarlo o etiquetar puntos no significa nada aqui.
+ *
+ * Los flujos que no se pueden dibujar —un ciclo, una etapa que va a si misma— los aparta `flowsOf`
+ * y los lista el respaldo. Dibujar un ciclo deja el trazado dando vueltas; quitarlo en silencio
+ * dibuja un proceso que no es el que hay.
+ */
+export function sankeyOptions(o: ChartOptions): Record<string, unknown> {
+  const settings = o.sankey ?? {};
+  const graph = flowsOf(o.vm);
+  const formatear = (n: number) => o.formatear?.(n, 0) ?? String(n);
+  const colores = paletteOf(o);
+
+  return {
+    ...core(o, false),
+    tooltip: {
+      trigger: 'item' as const,
+      backgroundColor: o.palette.superficieElevada,
+      borderWidth: 0,
+      textStyle: { color: o.palette.content },
+      extraCssText: 'box-shadow: none;',
+      formatter: (p: { dataType: string; name: string; value: number }) =>
+        p.dataType === 'edge'
+          ? `${p.name.replace(' > ', ' → ')}<br/>${formatear(p.value)}`
+          : `${p.name}<br/>${formatear(p.value)}`,
+    },
+    series: [
+      {
+        type: 'sankey',
+        orient: settings.orient ?? 'horizontal',
+        nodeAlign: ECHARTS_ALIGN[settings.nodeAlign ?? 'justificado'],
+        left: 8,
+        right: settings.orient === 'vertical' ? 8 : 80,
+        top: 8,
+        bottom: 8,
+        emphasis: { focus: 'adjacency' },
+        data: graph.nodes.map((name, i) => ({
+          name,
+          itemStyle: { color: colores[i % colores.length] },
+        })),
+        links: graph.links.map((l) => ({ source: l.source, target: l.target, value: l.value })),
+        label: {
+          color: o.palette.content,
+          fontSize: 11,
+          formatter:
+            settings.showValue === true
+              ? (p: { name: string; value: number }) => `${p.name}: ${formatear(p.value)}`
+              : (p: { name: string }) => p.name,
+        },
+        lineStyle: { color: 'gradient', opacity: 0.35, curveness: 0.5 },
+      },
+    ],
+  };
+}
+
 export type ChartKind =
   | 'barras'
   | 'lineas'
@@ -1730,7 +1800,8 @@ export type ChartKind =
   | 'medidor'
   | 'histograma'
   | 'diagrama-de-caja'
-  | 'mapa-de-calor';
+  | 'mapa-de-calor'
+  | 'diagrama-de-flujo';
 
 const CONSTRUCTORES: Record<ChartKind, (o: ChartOptions) => Record<string, unknown>> = {
   barras: barOptions,
@@ -1747,6 +1818,7 @@ const CONSTRUCTORES: Record<ChartKind, (o: ChartOptions) => Record<string, unkno
   histograma: histogramOptions,
   'diagrama-de-caja': boxplotOptions,
   'mapa-de-calor': heatmapOptions,
+  'diagrama-de-flujo': sankeyOptions,
 };
 
 /**

@@ -33,6 +33,11 @@ como adiciones y jamas como rupturas.
 - El panel lateral no se plegaba: el selector del CSS esperaba un atributo con otro nombre.
 
 ### Anadido
+- **Diagrama de flujo.** Cuanto pasa de cada etapa a la siguiente, con el grosor diciendo cuanto.
+  El embudo dice cuanto queda en cada paso; esto dice a donde fue. Un paso que cierra un ciclo —una
+  apelacion que devuelve el expediente— no se puede trazar, asi que no se dibuja y la tabla
+  alternativa lo lista diciendo por que: apartarlo en silencio ensenaria un proceso que no es el
+  que hay.
 - **Mapa de calor.** Dos dimensiones cruzadas —materia por trimestre— con la intensidad diciendo
   donde se concentra la carga. La cifra va dentro de la celda y la tabla alternativa las lleva
   todas: el color esta para ver el patron de un vistazo, no en lugar del dato. Admite escala

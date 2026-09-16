@@ -34,6 +34,7 @@ export const KEY_CONTROL: Record<PresentationKey, string> = {
   histogram: 'histograma',
   boxplot: 'caja',
   heatmap: 'calor',
+  sankey: 'flujo',
 };
 
 /** Controles que solo aparecen despues de encender otro. */

@@ -331,7 +331,7 @@ test.describe('los objetos anadidos en los ultimos lotes @catalogo', () => {
     ['familia', 'columnas, barras y area'],
     ['proporcion', 'pastel, dona y medidor'],
     ['relacion', 'combinado y dispersion'],
-    ['flujo', 'embudo, cascada y mapa de arbol'],
+    ['flujo', 'embudo, cascada, sankey y mapa de arbol'],
     ['distribucion', 'histograma, caja y mapa de calor'],
     ['referencia', 'metas, escalas y colores de serie'],
     ['detalle', 'etiquetas, tooltip y rotulos girados'],

@@ -46,7 +46,9 @@ export {
   MAX_UNIT,
   SORT_CRITERIA,
   STACKING_MODES,
+  FLOW_ORIENTATIONS,
   HEAT_SCALES,
+  NODE_ALIGNMENTS,
   LEGEND_MODES,
   MIN_PRESENTATION,
   formatterOf,
@@ -70,6 +72,9 @@ export {
   type AxisScale,
   type GaugeSettings,
   type HeatScale,
+  type FlowOrientation,
+  type NodeAlignment,
+  type SankeySettings,
   type HistogramSettings,
   type BoxplotSettings,
   type HeatmapSettings,
@@ -319,6 +324,7 @@ export {
 } from './charts/statistics';
 export { boxesOf, groupsOf, type Box } from './charts/boxplot';
 export { gridOf, valueAt, type HeatCell, type HeatGrid } from './charts/heatmap';
+export { flowsOf, outgoingOf, type Flow, type FlowGraph } from './charts/sankey';
 export {
   ELEMENT_THRESHOLD,
   elementsOf,
@@ -332,6 +338,7 @@ export {
   histogramOptions,
   boxplotOptions,
   heatmapOptions,
+  sankeyOptions,
   type ChartOptions,
   type ChartPalette,
   type ChartKind,

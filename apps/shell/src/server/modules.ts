@@ -1200,6 +1200,25 @@ export const demoModules: ModuleDefinition[] = [
             },
           },
           {
+            id: 'flu-sankey',
+            position: { x: 0, y: 9, w: 12, h: 5 },
+            instance: {
+              instanceId: 'flu-sankey',
+              objectId: 'diagrama-de-flujo',
+              version: '1.0.0',
+              title: 'De cada materia a cada trimestre',
+              binding: {
+                datasetId: DATASET,
+                dimensions: [MATERIA, TRIMESTRE],
+                measures: ['CasosResueltos'],
+              },
+              presentation: {
+                subtitulo: 'El embudo dice cuanto queda; esto dice a donde fue',
+                sankey: { showValue: true },
+              },
+            },
+          },
+          {
             id: 'flu-cascada',
             position: { x: 0, y: 5, w: 8, h: 4 },
             instance: {

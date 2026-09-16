@@ -5,7 +5,9 @@ import {
   FUNNEL_COMPARISONS,
   CIRCULAR_LABELS,
   MAX_BINS,
+  FLOW_ORIENTATIONS,
   HEAT_SCALES,
+  NODE_ALIGNMENTS,
   WHISKER_RULES,
   MAX_RADIO_INTERIOR,
   STACKING_MODES,
@@ -41,6 +43,8 @@ import {
   type HistogramSettings,
   type WhiskerRule,
   type HeatScale,
+  type FlowOrientation,
+  type NodeAlignment,
   type ObjectPresentation,
   type PickerKind,
   type PickerLevel,
@@ -865,6 +869,57 @@ export function Presentation({
             <span className="field__pista">
               {t('pres.stages.sort')}
             </span>
+          </label>
+        </Section>
+      ) : null}
+
+      {admite("sankey") ? (
+        <Section
+          keys={['flujo', 'sankey', 'etapas', 'orientacion', 'ramas']}
+          titulo={t('pres.flow')} nivel={2} prueba={`${prueba}-flujo`}>
+          <label className="form__field">
+            <span>{t('pres.flow.orient')}</span>
+            <select
+              value={p.sankey?.orient ?? "horizontal"}
+              disabled={saving}
+              data-testid={`${prueba}-orientacion-flujo`}
+              onChange={(e) =>
+                set({ sankey: { ...p.sankey, orient: e.target.value as FlowOrientation } })
+              }
+            >
+              {FLOW_ORIENTATIONS.map((valor) => (
+                <option key={valor} value={valor}>
+                  {t(`pres.flow.orient.${valor}` as MessageKey)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="form__field">
+            <span>{t('pres.flow.align')}</span>
+            <select
+              value={p.sankey?.nodeAlign ?? "justificado"}
+              disabled={saving}
+              data-testid={`${prueba}-alineacion-flujo`}
+              onChange={(e) =>
+                set({ sankey: { ...p.sankey, nodeAlign: e.target.value as NodeAlignment } })
+              }
+            >
+              {NODE_ALIGNMENTS.map((valor) => (
+                <option key={valor} value={valor}>
+                  {t(`pres.flow.align.${valor}` as MessageKey)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.sankey?.showValue === true}
+              disabled={saving}
+              data-testid={`${prueba}-cifra-flujo`}
+              onChange={(e) => set({ sankey: { ...p.sankey, showValue: e.target.checked } })}
+            />{" "}
+            {t('pres.flow.showValue')}
           </label>
         </Section>
       ) : null}

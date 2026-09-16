@@ -73,7 +73,7 @@ test.describe('paginas de modulo en tema oscuro @catalogo', () => {
     ['familia', 'columnas, barras y area'],
     ['proporcion', 'pastel, dona y medidor'],
     ['relacion', 'combinado y dispersion'],
-    ['flujo', 'embudo, cascada y mapa de arbol'],
+    ['flujo', 'embudo, cascada, sankey y mapa de arbol'],
     ['distribucion', 'histograma, caja y mapa de calor'],
     ['referencia', 'metas, escalas y colores de serie'],
     ['detalle', 'etiquetas, tooltip y rotulos girados'],

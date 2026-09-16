@@ -184,6 +184,27 @@ export interface HeatmapSettings {
   showValue?: boolean;
 }
 
+/** ---- Diagrama de flujo ---- */
+export const FLOW_ORIENTATIONS = ['horizontal', 'vertical'] as const;
+export type FlowOrientation = (typeof FLOW_ORIENTATIONS)[number];
+
+export const NODE_ALIGNMENTS = ['justificado', 'izquierda', 'derecha'] as const;
+export type NodeAlignment = (typeof NODE_ALIGNMENTS)[number];
+
+export interface SankeySettings {
+  /** En vertical cabe mas texto por etapa cuando los nombres son largos. */
+  orient?: FlowOrientation;
+  /**
+   * Donde se alinean los nodos que no tienen salida.
+   *
+   * Justificado los reparte a lo ancho; a la izquierda los deja donde les toca por su profundidad,
+   * que es lo que hace comparables dos etapas del mismo momento del proceso.
+   */
+  nodeAlign?: NodeAlignment;
+  /** La cifra junto al nombre de cada etapa. */
+  showValue?: boolean;
+}
+
 export interface GaugeSettings {
   minimo?: number;
   maximo?: number;
@@ -373,6 +394,7 @@ export interface ObjectPresentation {
   histogram?: HistogramSettings;
   boxplot?: BoxplotSettings;
   heatmap?: HeatmapSettings;
+  sankey?: SankeySettings;
   /** Peso, estilo, alineacion y color de los textos del objeto. */
   textos?: ObjectTexts;
 }
@@ -408,6 +430,7 @@ export const PRESENTATION_KEYS = [
   'histogram',
   'boxplot',
   'heatmap',
+  'sankey',
 ] as const satisfies readonly (keyof ObjectPresentation)[];
 
 export type PresentationKey = keyof ObjectPresentation;

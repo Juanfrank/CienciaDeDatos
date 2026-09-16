@@ -548,6 +548,38 @@ test.describe('el filtrado cruzado llega a TODOS los objetos (4.4)', () => {
     await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
   });
 
+  test('el respaldo del flujo lista TODOS los pasos, tambien los que no se dibujan', async ({
+    page,
+  }) => {
+    /*
+     * Un ciclo deja el trazado de ECharts dando vueltas, asi que no llega al lienzo. Apartarlo sin
+     * decirlo dibujaria un proceso que no es el que hay: quien lo lea creeria que esa devolucion
+     * no ocurre. La tabla lo lista, con su motivo en la ultima columna.
+     */
+    await page.goto('/m/composicion/flujo');
+
+    const tabla = page.getByTestId('diagrama-de-flujo').first();
+    await expect(tabla).toBeAttached();
+
+    // Cuatro columnas: de donde, a donde, cuanto, y por que no se dibuja.
+    await expect(tabla.locator('thead th')).toHaveCount(4);
+    await expect(tabla.locator('tbody tr').first()).toBeAttached();
+  });
+
+  test('y el origen de un flujo filtra, igual que una barra', async ({ page }) => {
+    await page.goto('/m/composicion/flujo');
+
+    const boton = page
+      .getByTestId('diagrama-de-flujo')
+      .first()
+      .getByTestId('filter-Penal')
+      .first();
+    await boton.focus();
+    await boton.press('Enter');
+
+    await expect(page).toHaveURL(/DimTribunal\.Materia=Penal/);
+  });
+
   test('un medidor NO ofrece el gesto: no tiene dimension por la que filtrar', async ({ page }) => {
     // Ofrecerlo y que no hiciera nada seria peor que no ofrecerlo, que es justo lo que pasaba en
     // la dispersion: el punto se resaltaba al pulsarlo y no ocurria nada.
