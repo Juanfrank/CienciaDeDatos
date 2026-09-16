@@ -8,6 +8,15 @@ const MATERIA = { table: 'DimTribunal', field: 'Materia' };
 const TRIMESTRE = { table: 'DimTiempo', field: 'Trimestre' };
 const DATASET = 'casos-por-distrito-trimestre';
 
+/*
+ * El dataset de grano ATOMICO: una fila por caso, con sus dias de resolucion.
+ *
+ * Los objetos que reparten observaciones lo necesitan. Sobre el preagregado repartirian grupos y
+ * dibujarian la forma de los grupos, que no es la de los casos.
+ */
+const ATOMIC = 'casos-detalle';
+const CASO = { table: 'FactCasos', field: 'CasoId' };
+
 /** El enlace de un objeto que no lee datos. */
 const WITHOUT_DATA = { datasetId: '', dimensions: [], measures: [] };
 
@@ -1215,6 +1224,78 @@ export const demoModules: ModuleDefinition[] = [
               title: 'Un solo nivel',
               binding: { datasetId: DATASET, dimensions: [TRIMESTRE], measures: ['CasosIngresados'] },
               presentation: { subtitulo: 'Sin jerarquia, el area es la medida', datumLabels: true },
+            },
+          },
+        ],
+      },
+      {
+        pageId: 'p-distribucion',
+        slug: 'distribucion',
+        name: 'Como se reparten',
+        icon: 'histograma',
+        items: [
+          {
+            id: 'dis-titulo',
+            position: { x: 0, y: 0, w: 12, h: 1 },
+            instance: {
+              instanceId: 'dis-titulo',
+              objectId: 'titulo-de-seccion',
+              version: '1.0.0',
+              title: 'Titulo',
+              binding: WITHOUT_DATA,
+              settings: {
+                objectId: 'titulo-de-seccion',
+                sectionTitle: {
+                  content: 'No cuanto tarda de media: cuanto tarda cada uno',
+                  textPosition: 'izquierda',
+                  line: 'derecha',
+                  estiloDeLinea: { style: 'solida', thickness: 1, color: 'primario' },
+                },
+              },
+            },
+          },
+          {
+            id: 'dis-histograma',
+            position: { x: 0, y: 1, w: 6, h: 5 },
+            instance: {
+              instanceId: 'dis-histograma',
+              objectId: 'histograma',
+              version: '1.0.0',
+              title: 'Dias hasta la resolucion',
+              binding: {
+                datasetId: ATOMIC,
+                dimensions: [CASO],
+                measures: ['DiasResolucion'],
+              },
+              presentation: {
+                subtitulo: 'Un promedio esconde la cola; la forma no',
+                axes: { xTitle: 'Dias', yTitle: 'Casos' },
+                references: [
+                  // El plazo, sobre el eje de los DIAS. Es lo que separa «tarda mucho de media»
+                  // de «cuantos se pasan del plazo», que es la pregunta que se hace de verdad.
+                  { valor: 180, etiqueta: 'Plazo', style: 'discontinua', color: 'error' },
+                ],
+              },
+            },
+          },
+          {
+            id: 'dis-acumulado',
+            position: { x: 6, y: 1, w: 6, h: 5 },
+            instance: {
+              instanceId: 'dis-acumulado',
+              objectId: 'histograma',
+              version: '1.0.0',
+              title: 'Que parte se resuelve antes de N dias',
+              binding: {
+                datasetId: ATOMIC,
+                dimensions: [CASO],
+                measures: ['DiasResolucion'],
+              },
+              presentation: {
+                subtitulo: 'El mismo dato leido como plazo, no como forma',
+                histogram: { bins: 12, cumulative: true, relative: true },
+                axes: { xTitle: 'Dias', yTitle: 'Acumulado' },
+              },
             },
           },
         ],

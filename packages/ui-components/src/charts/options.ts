@@ -9,6 +9,7 @@ import {
   type FunnelSettings,
   type AxisSettings,
   type GaugeSettings,
+  type HistogramSettings,
   type ReferenceStyle,
   type LabelSettings,
   type TooltipSettings,
@@ -20,6 +21,7 @@ import {
 } from '../presentation/contract';
 import { conditionalColor, type ConditionalFormat } from '../presentation/conditional';
 import type { CategoricalViewModel } from '../registry/viewModel';
+import { binLabel, binPosition, histogramOf, type Histogram } from './histogram';
 
 /**
  * Construccion de las opciones de Apache ECharts (4.2).
@@ -60,6 +62,7 @@ export interface ChartOptions {
   embudo?: FunnelSettings;
   cascada?: WaterfallSettings;
   medidor?: GaugeSettings;
+  histogram?: HistogramSettings;
   /** Cuantas series iniciales son columnas, en un combinado. */
   columnSeries?: number;
 }
@@ -1388,6 +1391,108 @@ export function treeMapOptions(o: ChartOptions): Record<string, unknown> {
   };
 }
 
+/* ── Histograma ────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Las lineas de referencia de un histograma, ancladas al eje de la MEDIDA.
+ *
+ * `referencesOf` las cuelga del eje de valores, que aqui es el recuento de observaciones: una
+ * referencia escrita como «180 dias» apareceria a la altura de 180 CASOS. Se traducen al eje de
+ * intervalos con `binPosition`, que es el que habla de dias.
+ */
+function referencesOnBins(o: ChartOptions, h: Histogram) {
+  const lineas = (o.references ?? []).slice(0, MAX_REFERENCES);
+  if (lineas.length === 0 || h.bins.length === 0) return {};
+
+  return {
+    markLine: {
+      silent: true,
+      symbol: 'none' as const,
+      emphasis: { disabled: true },
+      data: lineas.map((line) => ({
+        xAxis: binPosition(h.bins, line.valor),
+        lineStyle: {
+          color: roleColor(o, line.color),
+          type: REFERENCE_STROKE[line.style ?? 'discontinua'],
+          width: 2,
+        },
+        label: {
+          show: line.etiqueta !== undefined && line.etiqueta !== '',
+          formatter: line.etiqueta ?? '',
+          position: 'insideEndTop' as const,
+          color: roleColor(o, line.color),
+          fontSize: 11,
+        },
+      })),
+    },
+  };
+}
+
+/**
+ * Histograma — como se reparten las observaciones de una medida.
+ *
+ * Se dibuja como barras sobre los intervalos que calcula `histogramOf`, y por eso reutiliza el
+ * eje, la serie y las etiquetas de las barras: un histograma que no se pareciera a las barras de
+ * al lado seria otro lenguaje visual para la misma idea.
+ *
+ * Lo que NO se hereda son cinco claves, y ninguna por comodidad:
+ *
+ * - `legend`, porque hay UNA serie: la leyenda repetiria bajo el grafico el nombre de la medida
+ *   que el titulo ya dice.
+ * - `apilado`, porque aqui hay una sola serie y lo unico que llegaria a hacer es imponerle al eje
+ *   la escala de 0 a 100 del porcentaje.
+ * - `conditional`, porque sus reglas comparan el valor de la barra con un umbral, y la barra de un
+ *   histograma es un RECUENTO: una regla escrita sobre «dias de resolucion» se evaluaria contra
+ *   «cuantos casos» y colorearia por un numero que no es el que la regla nombra.
+ * - `tooltip`, cuyas dos opciones suman las series y las ordenan entre si: con una sola, «total»
+ *   repite la cifra que ya esta encima y «ordenar por valor» no tiene nada que ordenar.
+ * - `references` tal cual, que se sustituye por la version anclada al eje de la medida.
+ */
+export function histogramOptions(o: ChartOptions): Record<string, unknown> {
+  const settings = o.histogram ?? {};
+  const medida = (n: number) => o.formatear?.(n, 0) ?? String(n);
+  const h = histogramOf(
+    o.vm.points.map((p) => p.values[0]),
+    settings,
+  );
+
+  const {
+    apilado: _apilado,
+    conditional: _conditional,
+    references: _references,
+    tooltip: _tooltip,
+    legend: _legend,
+    ...resto
+  } = o;
+
+  /*
+   * El alto de la barra NO es la medida: es cuantas observaciones caen dentro. Con el formateador
+   * de la medida, doce CASOS se dibujarian como «12 dias».
+   */
+  const binned: ChartOptions = {
+    ...resto,
+    vm: {
+      series: [o.vm.series[0] ?? o.titulo],
+      aggregated: o.vm.aggregated,
+      points: h.bins.map((bin, i) => ({
+        label: binLabel(bin, medida),
+        values: [h.displayed[i] ?? 0],
+      })),
+    },
+    formatear: (valor: number) =>
+      settings.relative ? `${valor.toFixed(1)} %` : String(Math.round(valor)),
+  };
+
+  const [serie] = barSeries(binned, false);
+
+  return {
+    ...base(binned),
+    xAxis: axisCategory(binned),
+    yAxis: valueAxis(binned),
+    series: [{ ...serie, ...referencesOnBins(o, h) }],
+  };
+}
+
 export type ChartKind =
   | 'barras'
   | 'lineas'
@@ -1399,7 +1504,8 @@ export type ChartKind =
   | 'embudo'
   | 'cascada'
   | 'mapa-de-arbol'
-  | 'medidor';
+  | 'medidor'
+  | 'histograma';
 
 const CONSTRUCTORES: Record<ChartKind, (o: ChartOptions) => Record<string, unknown>> = {
   barras: barOptions,
@@ -1413,6 +1519,7 @@ const CONSTRUCTORES: Record<ChartKind, (o: ChartOptions) => Record<string, unkno
   cascada: waterfallOptions,
   'mapa-de-arbol': treeMapOptions,
   medidor: gaugeOptions,
+  histograma: histogramOptions,
 };
 
 /**

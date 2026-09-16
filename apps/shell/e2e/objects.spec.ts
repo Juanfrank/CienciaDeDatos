@@ -375,16 +375,16 @@ test.describe('contenedor expandible: se abre EN SU SITIO y empuja lo de abajo',
 test.describe('navegador de pagina: las paginas dejan de ser invisibles (4.2)', () => {
   test('el panel lista TODAS las paginas y llevan a ellas', async ({ page }) => {
     /*
-     * `composicion` tiene doce paginas y hasta ahora solo se llegaba a once de ellas escribiendo
-     * la URL a mano. Es el caso que el navegador viene a cerrar, asi que la prueba no mira que el
-     * panel exista: cuenta las paginas y sigue una.
+     * Antes del navegador solo se llegaba a la primera pagina sin escribir la URL a mano. Es el
+     * caso que viene a cerrar, asi que la prueba no mira que el panel exista: cuenta las paginas
+     * y sigue una.
      */
     await page.goto('/m/composicion');
 
     const navegador = page.getByTestId('navegador-de-pagina');
     await expect(navegador).toBeVisible();
     await expect(navegador).toHaveAttribute('data-tipo', 'panel-izquierdo');
-    await expect(navegador.locator('[data-testid^="nav-pagina-"]')).toHaveCount(12);
+    await expect(navegador.locator('[data-testid^="nav-pagina-"]')).toHaveCount(13);
 
     // La abierta se marca, y no solo con color: `aria-current` es lo que lo dice sin verlo.
     await expect(page.getByTestId('nav-pagina-elementos')).toHaveAttribute('aria-current', 'page');
@@ -444,16 +444,22 @@ test.describe('navegador de pagina: las paginas dejan de ser invisibles (4.2)', 
     await page.goto('/m/composicion');
 
     const navegador = page.getByTestId('navegador-de-pagina');
+    const enlaces = navegador.locator('[data-testid^="nav-pagina-"]');
     const ancho = async () => (await navegador.boundingBox())?.width ?? 0;
     const abierto = await ancho();
     expect(abierto).toBeGreaterThan(0);
+
+    // Cuantos hay ANTES, en vez del numero escrito a mano: lo que esta prueba afirma es que
+    // plegar no se lleva ninguno, no cuantas paginas tiene hoy el modulo de ejemplo.
+    const antes = await enlaces.count();
+    expect(antes).toBeGreaterThan(0);
 
     await page.getByTestId('navegador-plegar').click();
     await expect(navegador).toHaveAttribute('data-abierto', 'no');
     await expect.poll(ancho).toBeLessThan(abierto);
 
-    // Y lo que queda sigue navegando: los doce enlaces, con su nombre para quien no ve el icono.
-    await expect(navegador.locator('[data-testid^="nav-pagina-"]')).toHaveCount(12);
+    // Y lo que queda sigue navegando, con su nombre para quien no ve el icono.
+    await expect(enlaces).toHaveCount(antes);
     await expect(page.getByTestId('nav-pagina-graficos')).toHaveAttribute('title', 'Graficos');
 
     await page.getByTestId('navegador-plegar').click();

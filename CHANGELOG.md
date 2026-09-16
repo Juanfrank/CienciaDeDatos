@@ -33,6 +33,11 @@ como adiciones y jamas como rupturas.
 - El panel lateral no se plegaba: el selector del CSS esperaba un atributo con otro nombre.
 
 ### Anadido
+- **Histograma.** Un objeto nuevo para la pregunta que el catalogo no sabia contestar: no cuanto
+  tarda de media un expediente, sino cuanto tarda cada uno. Reparte las observaciones de una medida
+  en intervalos —automaticos o los que se pidan—, y puede leerse como acumulado, que es lo que
+  contesta «que parte se resolvio en menos de N dias». Admite una linea de referencia sobre el
+  plazo, anclada al eje de los dias. Necesita un dataset con una fila por caso, y lo dice.
 - **Contingencia contra desastres del estado de gobierno.** `npm run respaldo` vuelca a un archivo
   todo lo que no se puede reconstruir —organizacion, equipos, ambitos, paquetes, modulos y su
   historial, auditoria, marcadores, personalizacion, incrustaciones y alertas— y `npm run restaurar`

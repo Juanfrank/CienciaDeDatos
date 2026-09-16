@@ -121,6 +121,26 @@ export interface WaterfallSettings {
   showTotal?: boolean;
 }
 
+/** ---- Histograma ---- */
+export interface HistogramSettings {
+  /**
+   * Cuantos intervalos. Sin valor, los elige Freedman-Diaconis sobre los datos vigentes.
+   *
+   * Es el unico mando que cambia lo que un histograma DICE: con tres intervalos toda distribucion
+   * parece una campana, y con sesenta toda parece ruido. Por eso se ofrece, y por eso el automatico
+   * es un metodo resistente a los atipicos y no una constante.
+   */
+  bins?: number;
+  /**
+   * Cuanto se acumula hasta cada intervalo, en vez de cuanto cae dentro.
+   *
+   * Es lo que contesta «que parte se resolvio en menos de N dias», que es como se lee un plazo.
+   */
+  cumulative?: boolean;
+  /** En porcentaje del total en vez de en recuento. */
+  relative?: boolean;
+}
+
 export interface GaugeSettings {
   minimo?: number;
   maximo?: number;
@@ -301,6 +321,13 @@ export interface ObjectPresentation {
   embudo?: FunnelSettings;
   cascada?: WaterfallSettings;
   medidor?: GaugeSettings;
+  /*
+   * La clave va en ingles y el tipo de grafico se sigue llamando `histograma`, que es el
+   * identificador del objeto en el catalogo. Son dos contratos distintos —uno se guarda dentro de
+   * la presentacion, el otro dentro del mapeo— y tenerlos con nombres distintos evita la trampa
+   * del apartado 2.11, donde renombrar la clave arrastraba el valor de la union guardada.
+   */
+  histogram?: HistogramSettings;
   /** Peso, estilo, alineacion y color de los textos del objeto. */
   textos?: ObjectTexts;
 }
@@ -333,6 +360,7 @@ export const PRESENTATION_KEYS = [
   'embudo',
   'cascada',
   'medidor',
+  'histogram',
 ] as const satisfies readonly (keyof ObjectPresentation)[];
 
 export type PresentationKey = keyof ObjectPresentation;

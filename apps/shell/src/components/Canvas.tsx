@@ -95,6 +95,7 @@ export default function Canvas({
         ...comun('combinado'),
         ...comun('embudo'),
         ...comun('cascada'),
+        ...comun('histogram'),
         ...comun('references'),
         ...comun('seriesColors'),
         ...comun('conditional'),

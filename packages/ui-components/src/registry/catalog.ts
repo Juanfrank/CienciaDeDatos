@@ -661,6 +661,57 @@ export const initialCatalog: VisualObjectDefinition[] = [
   },
   {
     /*
+     * Histograma — que forma tiene una medida.
+     */
+    objectId: 'histograma',
+    family: 'distribution',
+    icono: 'histograma',
+    name: 'Histograma',
+    description: 'Como se reparten las observaciones de una medida, en intervalos.',
+    category: 'grafico',
+    versions: [
+      v1(
+        'Version inicial: intervalos automaticos o fijados, con acumulado y porcentaje.',
+        {
+          dimensions: { min: 1, max: 1 },
+          measures: { min: 1, max: 1 },
+          notes:
+            'Cada fila es una observacion y su valor entra en un intervalo. Pide un dataset de ' +
+            'grano ATOMICO: sobre uno preagregado repartiria grupos y no casos, y la forma que ' +
+            'dibujaria seria la de los grupos.',
+          wells: [
+            {
+              id: 'observacion',
+              etiqueta: 'Observacion',
+              tipo: 'dimension',
+              max: 1,
+              min: 1,
+              help: 'Que identifica cada fila. Con la clave del dataset, cada punto es un caso.',
+            },
+            {
+              id: 'valor',
+              etiqueta: 'Valor',
+              tipo: 'medida',
+              max: 1,
+              min: 1,
+              help: 'La medida que se reparte en intervalos.',
+            },
+          ],
+        },
+        presenta(
+          'formato',
+          'formatos',
+          'datumLabels',
+          'axes',
+          'references',
+          'seriesColors',
+          'histogram',
+        ),
+      ),
+    ],
+  },
+  {
+    /*
      * Embudo — etapas de un proceso, en SU orden.
      */
     objectId: 'embudo',

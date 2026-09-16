@@ -31,6 +31,7 @@ export const KEY_CONTROL: Record<PresentationKey, string> = {
   embudo: 'embudo',
   cascada: 'cascada',
   medidor: 'medidor',
+  histogram: 'histograma',
 };
 
 /** Controles que solo aparecen despues de encender otro. */

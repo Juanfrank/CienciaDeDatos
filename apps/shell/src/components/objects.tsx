@@ -28,6 +28,8 @@ import {
   projectObject,
   buildMatrix,
   toCategorical,
+  histogramOf,
+  binLabel,
   toKpi,
   toSlicerOptions,
 } from '@app/ui-components';
@@ -1151,6 +1153,107 @@ export function Waterfall(props: PropsObject) {
         },
       }}
     />
+  );
+}
+
+/**
+ * Histograma — que forma tiene una medida.
+ *
+ * El respaldo es una TABLA de intervalos y no botones, a diferencia de las barras: un intervalo no
+ * es un valor de una dimension, asi que no hay filtro que aplicar al pulsarlo. Los intervalos
+ * salen de `histogramOf`, el mismo que usa el dibujo, para que la tabla y el grafico no puedan
+ * discrepar sobre donde cae cada observacion.
+ */
+export function Histogram({
+  titulo,
+  result,
+  instance,
+  slots,
+  aggregations,
+  objectIcon,
+}: PropsObject) {
+  const t = useTranslator();
+  const r = porRanura(instance, slots);
+  const dim = r ? r.one('observacion') : fieldKeyDe(instance.binding.dimensions[0]);
+  const medidas = r ? r.varios('valor') : instance.binding.measures;
+  const dimension = dim ? aFieldRef(dim) : undefined;
+
+  const vm = toCategorical(
+    result,
+    dimension ? [dimension] : [],
+    medidas,
+    aggregationsFor(medidas, instance.binding.measures, aggregations),
+  );
+  const formatear = measureFormatter(instance.presentation, medidas[0] ?? '');
+  const settings = instance.presentation?.histogram ?? {};
+  const distribucion = histogramOf(
+    vm.points.map((punto) => punto.values[0]),
+    settings,
+  );
+
+  /*
+   * La columna de lo dibujado solo aparece cuando NO es el recuento: sin acumulado ni porcentaje
+   * seria la misma cifra repetida al lado.
+   */
+  const dibujado = settings.cumulative === true || settings.relative === true;
+  const encabezadoDibujado = settings.cumulative
+    ? settings.relative
+      ? t('chart.histogram.cumulativeShare')
+      : t('chart.histogram.cumulative')
+    : t('chart.histogram.share');
+
+  return (
+    <Frame
+      titulo={titulo}
+      instance={instance}
+      result={result}
+      aggregations={aggregations}
+      objectIcon={objectIcon}
+    >
+      <Chart
+        instanceId={instance.instanceId}
+        tipo="histograma"
+        vm={vm}
+        titulo={titulo}
+        presentation={instance.presentation}
+        formatear={(valor) => formatear(valor)}
+        {...(medidas[0] ? { dimension: medidas[0] } : {})}
+      >
+        <FallbackTable nombre={titulo}>
+          <table className="tabla" data-testid="histograma">
+            <caption className="tabla__caption">{t('chart.histogram.convention')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t('chart.histogram.interval')}</th>
+                <th scope="col" className="is-number">
+                  {t('chart.histogram.observations')}
+                </th>
+                {dibujado ? (
+                  <th scope="col" className="is-number">
+                    {encabezadoDibujado}
+                  </th>
+                ) : null}
+              </tr>
+            </thead>
+            <tbody>
+              {distribucion.bins.map((bin, i) => (
+                <tr key={`${bin.from}-${bin.to}`}>
+                  <th scope="row">{binLabel(bin, (n) => formatear(n))}</th>
+                  <td className="is-number">{bin.count}</td>
+                  {dibujado ? (
+                    <td className="is-number">
+                      {settings.relative
+                        ? `${(distribucion.displayed[i] ?? 0).toFixed(1)} %`
+                        : String(distribucion.displayed[i] ?? 0)}
+                    </td>
+                  ) : null}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </FallbackTable>
+      </Chart>
+    </Frame>
   );
 }
 

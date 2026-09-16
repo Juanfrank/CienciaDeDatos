@@ -7,7 +7,7 @@ deprecacion, modelo de vista y construccion de las opciones de ECharts.
 |---|---|
 | `src/registry/` | Catalogo, tipos, semver, proyeccion, modelo de vista y agregacion |
 | `src/presentation/` | Claves de presentacion, pozos, elementos, contenedores, iconos, formato |
-| `src/charts/` | Opciones de ECharts, orden y pequenos multiplos |
+| `src/charts/` | Opciones de ECharts, orden, pequenos multiplos y reparto en intervalos |
 
 ## Las tres listas que no pueden discrepar
 
@@ -28,6 +28,13 @@ la instancia a mano.
 - **Toda version vigente de un objeto de datos declara `pozos` y `notes`.**
 - **Todo objeto declara `icono`**, y los que consumen datos declaran ademas `familia`.
 - **`presentation` incluye `MIN_PRESENTATION` entera.**
+
+## Lo que el dibujo calcula, lo calcula UNA vez
+
+Un objeto que transforma sus datos antes de dibujarlos —repartirlos en intervalos, sacarles los
+cuartiles— pone esa transformacion en su propio modulo de `src/charts/`, y de ahi leen el dibujo Y
+el respaldo en DOM. Con dos implementaciones, la tabla y el grafico acaban diciendo cosas distintas
+del mismo dato, y nada falla al hacerlo.
 
 ## Las funciones de grafico son puras
 

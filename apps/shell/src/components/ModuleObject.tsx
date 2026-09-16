@@ -23,6 +23,7 @@ import {
   Bars,
   HorizontalBars,
   Waterfall,
+  Histogram,
   Pie,
   Combo,
   Scatter,
@@ -211,6 +212,8 @@ function ObjectBody({
       return <Funnel {...props} />;
     case 'cascada':
       return <Waterfall {...props} />;
+    case 'histograma':
+      return <Histogram {...props} />;
     case 'mapa-de-arbol':
       return <TreeMap {...props} />;
     case 'combinado':

@@ -349,16 +349,67 @@ primera y los bloques de las demas salian vacios.
 
 ---
 
-### 2.7 Mas tipos de visualizacion sobre ECharts
+### 2.7 Mas tipos de visualizacion sobre ECharts — EN CURSO
 
-`barras` y `lineas` estan sobre ECharts. `mapa` sigue sin implementar —necesita la geometria de
-los distritos judiciales, que no esta en el repositorio— y la arquitectura para anadir tipos ya
-esta: una funcion pura que construye las opciones, un `tipo` mas en el despachador, y el
-respaldo en DOM que corresponda a esa lectura.
+`mapa` sigue sin implementar —necesita la geometria de los distritos judiciales, que no esta en el
+repositorio—. La arquitectura para anadir tipos esta: una funcion pura que construye las opciones,
+un `tipo` mas en el despachador, y el respaldo en DOM que corresponda a esa lectura.
 
 Al anadir uno, la pregunta que hay que contestar es **cual es su respaldo accesible**: para las
 barras son botones, para las lineas una tabla. No es un detalle de implementacion, es parte de
 decidir que significa el objeto.
+
+**Que tipos faltaban, y de donde sale la lista.** No de un catalogo de graficos bonitos: de lo que
+los sistemas judiciales publican. Las cuatro metricas que el National Center for State Courts y los
+paneles de Maryland, Carolina del Norte y Ohio ensenan son tasa de resolucion, **tiempo hasta la
+resolucion**, **edad de los casos pendientes** y certeza de la fecha de audiencia. Tres de las
+cuatro son DISTRIBUCIONES, y este catalogo solo sabia dibujar promedios.
+
+**Familia nueva: `distribution`.** Las familias agrupan por la PREGUNTA que contesta un objeto, y
+«que forma tiene esta medida» no era ninguna de las ocho. La paleta del editor ya agrupa por
+familia, asi que el objeto aparece donde se le busca.
+
+#### Histograma — HECHO
+
+`DiasResolucion` solo se podia ensenar como promedio, y un promedio esconde exactamente lo que
+importa de un plazo: la cola. El histograma reparte las observaciones en intervalos y ensena donde
+se acumulan.
+
+1. **Pide grano ATOMICO, y se dice.** Sobre un dataset preagregado repartiria grupos y no casos, y
+   dibujaria la forma de los grupos. Lo declara en sus `notes`, con la misma logica que
+   `possibleAggregations`: el dato que no se puede calcular aqui no se calcula a medias.
+   `casos-detalle` ya existia y es de grano atomico — una fila por caso.
+2. **Los intervalos los calcula UNA funcion**, `packages/ui-components/src/charts/histogram.ts`, y de ella leen el dibujo Y el
+   respaldo. Calculandolos dos veces, la tabla y el grafico terminan diciendo que el mismo caso cae
+   en tramos distintos, sin que nada falle.
+3. **El automatico es Freedman-Diaconis**, que toma la amplitud del recorrido intercuartilico y por
+   tanto no se deja arrastrar por un atipico: un solo expediente de diez anos pondria a todos los
+   demas en el primer intervalo. Con recorrido intercuartilico cero cae a Sturges.
+4. **Tres mandos, y el primero cambia lo que el grafico DICE:** cuantos intervalos —con tres, toda
+   distribucion parece una campana; con sesenta, ruido—, el acumulado —que es lo que contesta «que
+   parte se resolvio en menos de N dias»— y el porcentaje.
+5. **La linea de referencia se ancla al eje de la MEDIDA.** `referencesOf` las cuelga del eje de
+   valores, que aqui cuenta casos: un plazo de «180 dias» apareceria a la altura de 180 CASOS.
+   `binPosition` la traduce a la posicion que le toca dentro de su intervalo.
+6. **El respaldo es una tabla de intervalos, no botones.** Una barra filtra porque ES un valor de
+   una dimension; un intervalo es un tramo de una medida y no hay filtro que aplicar. Ofrecer el
+   boton seria prometer un gesto que no lleva a ninguna parte — el fallo que ya se corrigio en la
+   dispersion.
+
+**Cinco claves que el histograma NO hereda de las barras**, cada una por su motivo y todas escritas
+en `histogramOptions`: `apilado` (una sola serie, y solo llegaria a imponerle al eje la escala de 0
+a 100), `legend` (repetiria el nombre de la medida que el titulo ya dice), `tooltip` (sus dos
+opciones suman y ordenan series entre si), `conditional` —el importante: sus reglas comparan el
+valor de la barra con un umbral, y **la barra de un histograma es un recuento**, asi que una regla
+escrita sobre «dias» se evaluaria contra «cuantos casos»— y `references` tal cual, sustituida por la
+version anclada.
+
+Y **el alto de la barra no se formatea como la medida**: es la otra cara de lo mismo. Con el
+formateador que llega, cincuenta CASOS se dibujarian como «50 d».
+
+Verificado enrojeciendo cuatro: un ultimo intervalo que deja de cerrar por la derecha, la
+referencia devuelta al eje de los recuentos, el catalogo que deja de declarar la clave que el dibujo
+lee, y el formateador de la medida aplicado al recuento.
 
 ### 2.8 Comprobar que el ultimo Administrador puede AUTENTICARSE, no solo que existe — HECHO
 

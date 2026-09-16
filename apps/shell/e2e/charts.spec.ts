@@ -429,6 +429,54 @@ test.describe('el filtrado cruzado llega a TODOS los objetos (4.4)', () => {
     await expect(page).not.toHaveURL(/DimTribunal\.Materia=/);
   });
 
+  test('un histograma tampoco: un intervalo no es un valor por el que filtrar', async ({ page }) => {
+    /*
+     * Las barras filtran porque cada una ES un valor de una dimension. Un intervalo es un tramo de
+     * una MEDIDA, y no hay filtro que aplicar al pulsarlo: ofrecer el boton seria prometer un
+     * gesto que no lleva a ninguna parte.
+     */
+    await page.goto('/m/composicion/distribucion');
+
+    const histograma = page.getByTestId('histograma').first();
+    await expect(histograma).toBeAttached();
+    await expect(histograma.locator('button')).toHaveCount(0);
+  });
+
+  test('los intervalos reparten las observaciones sin perder ni duplicar ninguna', async ({
+    page,
+  }) => {
+    /*
+     * La pagina lleva la MISMA medida cortada de dos formas: una con los intervalos automaticos y
+     * otra con doce. Cortar distinto no puede cambiar cuantos casos hay, asi que las dos tablas
+     * tienen que sumar lo mismo — y eso se comprueba sin escribir el total a mano, que ademas
+     * depende del ambito de quien mira.
+     */
+    await page.goto('/m/composicion/distribucion');
+
+    const sumaDe = async (i: number) => {
+      const filas = page.getByTestId('histograma').nth(i).locator('tbody tr');
+      await expect(filas.first()).toBeAttached();
+      const cuentas = await filas.locator('td:first-of-type').allInnerTexts();
+      return cuentas.reduce((total, texto) => total + Number(texto), 0);
+    };
+
+    const automaticos = await sumaDe(0);
+    const doce = await sumaDe(1);
+
+    expect(automaticos).toBeGreaterThan(0);
+    expect(doce).toBe(automaticos);
+  });
+
+  test('el acumulado del histograma termina en el cien por cien', async ({ page }) => {
+    await page.goto('/m/composicion/distribucion');
+
+    // La segunda instancia de la pagina es la misma distribucion leida como plazo.
+    const acumulado = page.getByTestId('histograma').nth(1);
+    const ultima = acumulado.locator('tbody tr').last();
+
+    await expect(ultima.locator('td').last()).toHaveText('100.0 %');
+  });
+
   test('un medidor NO ofrece el gesto: no tiene dimension por la que filtrar', async ({ page }) => {
     // Ofrecerlo y que no hiciera nada seria peor que no ofrecerlo, que es justo lo que pasaba en
     // la dispersion: el punto se resaltaba al pulsarlo y no ocurria nada.

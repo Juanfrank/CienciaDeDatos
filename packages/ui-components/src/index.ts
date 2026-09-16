@@ -68,6 +68,7 @@ export {
   type AxisSettings,
   type AxisScale,
   type GaugeSettings,
+  type HistogramSettings,
   type SortCriterion,
   type PieLabel,
   type StackingMode,
@@ -296,6 +297,16 @@ export {
   type MultiplePanel,
 } from './charts/multiples';
 export {
+  MAX_BINS,
+  binLabel,
+  binPosition,
+  histogramOf,
+  quantile,
+  suggestedBins,
+  type Bin,
+  type Histogram,
+} from './charts/histogram';
+export {
   ELEMENT_THRESHOLD,
   elementsOf,
   niceScale,
@@ -305,6 +316,7 @@ export {
   pieOptions,
   lineOptions,
   gaugeOptions,
+  histogramOptions,
   type ChartOptions,
   type ChartPalette,
   type ChartKind,

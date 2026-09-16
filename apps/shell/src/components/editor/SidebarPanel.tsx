@@ -305,6 +305,10 @@ const FAMILIES: { family: ObjectFamily; que: string }[] = [
     family: "relation",
     que: "Si dos cifras se mueven juntas, o cada una en su escala.",
   },
+  {
+    family: "distribution",
+    que: "Que forma tiene una medida: donde se acumula y cuanta cola deja.",
+  },
   { family: "detail", que: "Cuando hace falta la cifra exacta." },
   { family: "location", que: "La dimension geografica." },
   { family: "control", que: "No dibujan datos: eligen cuales se ven." },

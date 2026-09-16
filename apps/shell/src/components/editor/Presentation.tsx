@@ -4,6 +4,7 @@ import {
   ACCENTS,
   FUNNEL_COMPARISONS,
   CIRCULAR_LABELS,
+  MAX_BINS,
   MAX_RADIO_INTERIOR,
   STACKING_MODES,
   LEGEND_MODES,
@@ -35,6 +36,7 @@ import {
   type FormatKind,
   type ObjectInstance,
   type IconName,
+  type HistogramSettings,
   type ObjectPresentation,
   type PickerKind,
   type PickerLevel,
@@ -51,6 +53,18 @@ import { ReferenceLines } from "./ReferenceLines";
 import { ColorRules } from "./ColorRules";
 import { Section } from "./Section";
 import { useTranslator } from '../Locale';
+
+/**
+ * Los intervalos que se piden, con el campo vacio como «automatico».
+ *
+ * Vaciarlo QUITA la clave en vez de ponerla a cero: cero intervalos no es un histograma, y
+ * guardar un cero convertiria «que los elija el sistema» en «que no haya ninguno».
+ */
+function binsOf(actual: HistogramSettings | undefined, escrito: string): HistogramSettings {
+  const { bins: _bins, ...resto } = actual ?? {};
+  const pedidos = Number(escrito);
+  return escrito === "" || !Number.isFinite(pedidos) ? resto : { ...resto, bins: pedidos };
+}
 
 /** Personalizacion de un objeto DESDE el editor — secciones 4.2 y 4.3. */
 export function Presentation({
@@ -847,6 +861,60 @@ export function Presentation({
             <span className="field__pista">
               {t('pres.stages.sort')}
             </span>
+          </label>
+        </Section>
+      ) : null}
+
+      {admite("histogram") ? (
+        <Section
+          keys={['histograma', 'intervalos', 'distribucion', 'acumulado', 'frecuencia']}
+          titulo={t('pres.bins')} nivel={2} prueba={`${prueba}-histograma`}>
+          <label className="form__field">
+            <span>{t('pres.bins.count')}</span>
+            <input
+              type="number"
+              min={1}
+              max={MAX_BINS}
+              value={p.histogram?.bins ?? ""}
+              placeholder={t('pres.bins.auto')}
+              disabled={saving}
+              data-testid={`${prueba}-intervalos`}
+              onChange={(e) =>
+                set({
+                  histogram: binsOf(p.histogram, e.target.value),
+                })
+              }
+            />
+            {/*
+              Es el unico mando que cambia lo que un histograma DICE, y por eso se explica: la
+              forma que se ve depende de en cuantos trozos se corte.
+            */}
+            <span className="field__pista">{t('pres.bins.hint')}</span>
+          </label>
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.histogram?.cumulative === true}
+              disabled={saving}
+              data-testid={`${prueba}-acumulado`}
+              onChange={(e) =>
+                set({ histogram: { ...p.histogram, cumulative: e.target.checked } })
+              }
+            />{" "}
+            {t('pres.bins.cumulative')}
+          </label>
+          <span className="field__pista">{t('pres.bins.cumulative.hint')}</span>
+          <label className="editor__interruptor">
+            <input
+              type="checkbox"
+              checked={p.histogram?.relative === true}
+              disabled={saving}
+              data-testid={`${prueba}-relativo`}
+              onChange={(e) =>
+                set({ histogram: { ...p.histogram, relative: e.target.checked } })
+              }
+            />{" "}
+            {t('pres.bins.relative')}
           </label>
         </Section>
       ) : null}

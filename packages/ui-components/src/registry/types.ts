@@ -44,6 +44,7 @@ export const OBJECT_FAMILIES = [
   'trend',
   'proportion',
   'relation',
+  'distribution',
   'value',
   'detail',
   'location',
